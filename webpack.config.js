@@ -24,7 +24,10 @@ module.exports = (env, args) => {
       filename: "[name].bundle.js"
     },
     resolve: {
-      extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"]
+      extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
+      alias: {
+        assets: path.resolve(__dirname, "public/assets")
+      }
     },
     module: {
       rules: [
@@ -49,7 +52,20 @@ module.exports = (env, args) => {
             }
           ]
         },
-        { test: /\.tsx?$/, loader: "ts-loader" }
+        { test: /\.tsx?$/, loader: "ts-loader" },
+        {
+          test: /\.(svg|png|jpe?g|gif)$/i,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[ext]",
+                publicPath: "assets",
+                outputPath: "assets"
+              }
+            }
+          ]
+        }
       ]
     },
     plugins: [
@@ -58,7 +74,7 @@ module.exports = (env, args) => {
       new CleanWebpackPlugin(),
       new ForkTsCheckerWebpackPlugin(),
       new CopyWebpackPlugin(
-        [{ from: "./public", to: "./", ignore: "*.html" }],
+        [{ from: "./public", to: "./", ignore: ["*.html", "assets/**/*"] }],
         { copyUnmodified: true }
       ),
       new HtmlWebpackPlugin({
