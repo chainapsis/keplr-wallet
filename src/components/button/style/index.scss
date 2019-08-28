@@ -1,4 +1,45 @@
-button {
-  padding: 14px;
-  width: 200px;
+@import "../../../styles/var";
+
+:global {
+  .button,
+  .button[disabled] {
+    color: black;
+    font-size: 22px;
+    border-radius: 12px;
+
+    border-style: solid;
+    border-width: 1px;
+    border-color: grey;
+    background: white;
+
+    &:hover,
+    &:focus{
+      background-image: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05));
+    }
+
+    &.xsmall {
+      font-size: 14px;
+    }
+
+    &.small {
+      font-size: 18px;
+    }
+
+    &.large {
+      font-size: 26px;
+    }
+
+    &.xlarge {
+      font-size: 30px;
+    }
+
+    @for $i from 1 through length($color-names) {
+      &.#{nth($color-names, $i)} {
+        background: nth($colors, $i);
+
+        color: white;
+        border-style: none;
+      }
+    }
+  }
 }
