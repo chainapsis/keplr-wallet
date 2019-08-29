@@ -1,8 +1,13 @@
-$primary-color: #1890ff;
-$link-color: #1890ff;
-$success-color: #52c41a;
-$warning-color: #faad14;
-$error-color: #f5222d;
+$popup-size-width: 360px;
+$popup-size-height: 580px;
+
+$header-height: 54px;
+
+$primary-color: #12a7e4;
+$link-color: #6360c5;
+$success-color: #35e84a;
+$warning-color: #f9cb19;
+$error-color: #f71457;
 
 $colors: $primary-color, $link-color, $success-color, $warning-color,
   $error-color;

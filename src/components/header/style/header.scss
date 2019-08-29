@@ -1,0 +1,40 @@
+@import "../../../styles/var";
+
+:global {
+  .header {
+    width: 100%;
+    height: $header-height;
+
+    position: relative;
+
+    border-bottom-style: solid;
+    border-width: 1px;
+    border-bottom-color: gray;
+
+    &.fixed {
+      position: fixed;
+    }
+  }
+
+  .header-menu-left {
+    position: absolute;
+    height: 100%;
+    top: 0;
+  }
+
+  .header-section {
+    flex: 1;
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .header-menu-right {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    right: 0;
+  }
+}

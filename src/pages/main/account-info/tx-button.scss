@@ -1,0 +1,20 @@
+.container-tx-button {
+  display: flex;
+  flex-direction: row;
+
+  margin-top: 8px;
+
+  :global(.button) {
+    flex: 2;
+
+    margin-right: 8px;
+
+    &:first-child {
+      flex: 5;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}

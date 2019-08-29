@@ -1,0 +1,28 @@
+.container-account {
+  display: flex;
+  flex-direction: row;
+}
+
+.inner-container-account {
+  display: flex;
+  flex-direction: column;
+
+  .my-account {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .address {
+    font-size: 20px;
+  }
+}
+
+.inner-container-account-button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.flex-empty {
+  flex: 1;
+}

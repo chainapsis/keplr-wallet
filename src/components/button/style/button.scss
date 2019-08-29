@@ -4,33 +4,33 @@
   .button,
   .button[disabled] {
     color: black;
-    font-size: 22px;
+    font-size: 20px;
+    padding: 12px 24px;
     border-radius: 12px;
-
-    border-style: solid;
-    border-width: 1px;
-    border-color: grey;
-    background: white;
+    background: #e0e2e4;
 
     &:hover,
-    &:focus{
-      background-image: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05));
+    &:focus {
+      background-image: linear-gradient(
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15)
+      );
     }
 
     &.xsmall {
-      font-size: 14px;
+      font-size: 12px;
     }
 
     &.small {
-      font-size: 18px;
+      font-size: 16px;
     }
 
     &.large {
-      font-size: 26px;
+      font-size: 24px;
     }
 
     &.xlarge {
-      font-size: 30px;
+      font-size: 28px;
     }
 
     @for $i from 1 through length($color-names) {
@@ -38,7 +38,6 @@
         background: nth($colors, $i);
 
         color: white;
-        border-style: none;
       }
     }
   }
