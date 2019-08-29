@@ -46,7 +46,15 @@ module.exports = (env, args) => {
             {
               use: [
                 "style-loader",
-                { loader: "css-loader", options: { modules: true } },
+                {
+                  loader: "css-loader",
+                  options: {
+                    modules: {
+                      localIdentName: "[local]-[hash:base64]"
+                    },
+                    localsConvention: "camelCase"
+                  }
+                },
                 "sass-loader"
               ]
             }
