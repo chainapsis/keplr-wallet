@@ -70,7 +70,10 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
         <div
           ref={this.tooltipRef}
           className="popper"
-          style={{ visibility: this.state.show ? "visible" : "hidden" }}
+          style={{
+            visibility: this.state.show ? "visible" : "hidden",
+            opacity: this.state.show ? 1 : 0
+          }}
         >
           <div x-arrow="" />
           {tooltip}

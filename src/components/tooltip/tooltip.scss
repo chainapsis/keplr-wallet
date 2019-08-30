@@ -14,6 +14,8 @@ $bright: rgba(255, 255, 255, 0.65);
     padding: 4px;
     border-radius: 6px;
     color: white;
+
+    transition: opacity 0.45s;
   }
 
   .popper[x-placement="bottom"] [x-arrow] {
