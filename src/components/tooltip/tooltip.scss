@@ -1,0 +1,49 @@
+$arrow-size: 6px;
+$dark: rgba(0, 0, 0, 0.35);
+$bright: rgba(255, 255, 255, 0.65);
+
+:global {
+  [x-arrow] {
+    position: absolute;
+  }
+
+  .popper {
+    margin-top: $arrow-size;
+    margin-bottom: $arrow-size;
+    background-color: $dark;
+    padding: 4px;
+    border-radius: 6px;
+    color: white;
+  }
+
+  .popper[x-placement="bottom"] [x-arrow] {
+    top: -$arrow-size;
+    border-bottom: $arrow-size solid $dark;
+    border-right: $arrow-size solid transparent;
+    border-left: $arrow-size solid transparent;
+  }
+
+  .popper[x-placement="top"] [x-arrow] {
+    bottom: -$arrow-size;
+    border-top: $arrow-size solid $dark;
+    border-right: $arrow-size solid transparent;
+    border-left: $arrow-size solid transparent;
+  }
+}
+
+.bright {
+  :global {
+    .popper {
+      background-color: $bright;
+      color: black;
+    }
+
+    .popper[x-placement="bottom"] [x-arrow] {
+      border-bottom: $arrow-size solid $bright;
+    }
+
+    .popper[x-placement="top"] [x-arrow] {
+      border-top: $arrow-size solid $bright;
+    }
+  }
+}

@@ -17,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "classnames": "^2.2.6",
+    "popper.js": "^1.15.0",
     "purecss": "^1.0.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0"
