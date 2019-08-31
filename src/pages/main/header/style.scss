@@ -1,0 +1,60 @@
+@import "../../../styles/var";
+
+.menu-container {
+  height: $header-height;
+}
+
+$menu-icon-margin: $layout-margin + 4px;
+$menu-icon-size: $header-height - ($menu-icon-margin * 2);
+
+.menu-img {
+  width: $menu-icon-size;
+  height: $menu-icon-size;
+
+  margin-top: $menu-icon-margin;
+  margin-left: $menu-icon-margin;
+
+  cursor: pointer;
+
+  transition: fill 0.3s;
+
+  &:hover {
+    fill: $primary-color;
+  }
+}
+
+.title-container {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  .title {
+    font-size: 24px;
+  }
+
+  .title-icon-container {
+    width: 0;
+    height: 24px;
+
+    margin-left: 6px;
+
+    .title-icon {
+      width: 24px;
+      height: 24px;
+
+      margin-top: 2px;
+    }
+  }
+
+  &:hover {
+    .title {
+      color: $primary-color;
+    }
+
+    .title-icon {
+      fill: $primary-color;
+    }
+  }
+}

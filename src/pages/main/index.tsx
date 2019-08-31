@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Header } from "../../components/header";
+import { Header } from "./header";
 
 import { AccountInfo } from "./account-info";
 
@@ -10,14 +10,7 @@ class MainPage extends React.Component {
   public render() {
     return (
       <div className={style.container}>
-        <Header
-          left={
-            <img
-              className={style["menu-img"]}
-              src={require("assets/_ionicons_svg_md-menu.svg")}
-            />
-          }
-        />
+        <Header />
         <div className={style.containerAccount}>
           <AccountInfo />
         </div>
