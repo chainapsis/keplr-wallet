@@ -7,11 +7,17 @@ export interface AddressProps {
   children: string;
   tooltipFontSize?: string;
   tooltipAddress?: string;
+
+  lineBreakBeforePrefix?: boolean;
 }
 
 export class Address extends React.Component<AddressProps> {
   render() {
-    const { tooltipFontSize, tooltipAddress, children } = this.props;
+    const { tooltipFontSize, lineBreakBeforePrefix, children } = this.props;
+
+    const tooltipAddress = this.props.tooltipAddress
+      ? this.props.tooltipAddress
+      : children;
 
     return (
       <ToolTip
@@ -21,7 +27,14 @@ export class Address extends React.Component<AddressProps> {
             className="address-tooltip"
             style={{ fontSize: tooltipFontSize }}
           >
-            {tooltipAddress ? tooltipAddress : children}
+            {lineBreakBeforePrefix
+              ? tooltipAddress.split("1").map((item, i) => {
+                  if (i === 0) {
+                    return <div key={i}>{item + "1"}</div>;
+                  }
+                  return <div key={i}>{item}</div>;
+                })
+              : tooltipAddress}
           </div>
         }
       >

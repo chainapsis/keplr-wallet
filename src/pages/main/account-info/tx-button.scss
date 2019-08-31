@@ -1,13 +1,15 @@
+@import "../../../styles/var";
+
 .container-tx-button {
   display: flex;
   flex-direction: row;
 
-  margin-top: 8px;
+  margin-top: 16px;
 
   :global(.button) {
     flex: 2;
 
-    margin-right: 8px;
+    margin-right: $layout-margin;
 
     &:first-child {
       flex: 5;

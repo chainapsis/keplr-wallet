@@ -7,7 +7,7 @@ export const TxButtonView: FunctionComponent = () => {
   return (
     <div className={styleTxButton.containerTxButton}>
       <Button color="primary">Send</Button>
-      <Button>More</Button>
+      <Button color="link">More</Button>
     </div>
   );
 };

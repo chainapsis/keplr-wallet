@@ -1,6 +1,5 @@
 import React from "react";
 
-import { Button } from "../../components/button";
 import { Header } from "../../components/header";
 
 import { AccountInfo } from "./account-info";
@@ -22,9 +21,7 @@ class MainPage extends React.Component {
         <div className={style.containerAccount}>
           <AccountInfo />
         </div>
-        <div className={style.containerTxs}>
-          <Button color="error">Hello, popup!</Button>
-        </div>
+        <div className={style.containerTxs} />
       </div>
     );
   }

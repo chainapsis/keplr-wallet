@@ -1,3 +1,5 @@
+@import "../../styles/var";
+
 .container {
   height: 100%;
   display: flex;
@@ -6,16 +8,17 @@
 
 .container-account {
   flex: 5;
-  padding: 8px;
+  padding: $layout-margin;
+
+  background-color: white;
+  box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.1);
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
 }
 
 .container-txs {
   flex: 4;
-  padding: 8px;
-
-  border-top-style: solid;
-  border-top-width: 1px;
-  border-top-color: black;
+  padding: $layout-margin;
 }
 
 .menu-img {
