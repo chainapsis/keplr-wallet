@@ -21,6 +21,7 @@ export class Address extends React.Component<AddressProps> {
 
     return (
       <ToolTip
+        trigger="hover"
         options={{ placement: "top" }}
         tooltip={
           <div
