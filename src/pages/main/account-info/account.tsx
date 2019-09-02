@@ -4,14 +4,19 @@ import { Address } from "../../../components/address";
 
 import styleAccount from "./account.scss";
 
-export const AccountView: FunctionComponent = () => {
+import { observer } from "mobx-react";
+import { useStore } from "../../../stores";
+
+export const AccountView: FunctionComponent = observer(() => {
+  const { chainStore } = useStore();
+
   return (
     <div className={styleAccount.containerAccount}>
       <div className={styleAccount.innerContainerAccount}>
         <div className={styleAccount.myAccount}>My acccount</div>
         <div className={styleAccount.address}>
           <Address maxCharacters={22} lineBreakBeforePrefix={true}>
-            cosmos17arhk35ch59txp727ljuxgp9xqwnjz7lmmnmzh
+            {chainStore.bech32Address}
           </Address>
         </div>
       </div>
@@ -19,4 +24,4 @@ export const AccountView: FunctionComponent = () => {
       <div className={styleAccount.innerContainerAccountButton}>test</div>
     </div>
   );
-};
+});

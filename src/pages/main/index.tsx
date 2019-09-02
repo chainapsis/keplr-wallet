@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Header } from "./header";
-
 import { AccountInfo } from "./account-info";
 
 import style from "./style.scss";

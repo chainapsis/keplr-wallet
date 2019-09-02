@@ -23,7 +23,7 @@ $menu-icon-size: $header-height - ($menu-icon-margin * 2);
   }
 }
 
-.title-container {
+.chain-list-container {
   cursor: pointer;
   display: flex;
   flex-direction: row;
@@ -49,6 +49,18 @@ $menu-icon-size: $header-height - ($menu-icon-margin * 2);
   }
 
   &:hover {
+    .title {
+      color: $primary-color;
+    }
+
+    .title-icon {
+      fill: $primary-color;
+    }
+  }
+}
+
+:global(.show) {
+  .chain-list-container {
     .title {
       color: $primary-color;
     }

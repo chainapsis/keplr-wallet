@@ -1,27 +1,36 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 
 import { Header as CompHeader } from "../../../components/header";
 
-import style from "./style.scss";
+import { observer } from "mobx-react";
+import { useStore } from "../../../stores";
 
-export class Header extends React.Component {
-  render() {
-    return (
-      <CompHeader
-        left={
-          <div className={style.menuContainer}>
-            <svg
-              className={style["menu-img"]}
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 512 512"
-            >
-              <path d="M432 176H80c-8.8 0-16-7.2-16-16s7.2-16 16-16h352c8.8 0 16 7.2 16 16s-7.2 16-16 16zM432 272H80c-8.8 0-16-7.2-16-16s7.2-16 16-16h352c8.8 0 16 7.2 16 16s-7.2 16-16 16zM432 368H80c-8.8 0-16-7.2-16-16s7.2-16 16-16h352c8.8 0 16 7.2 16 16s-7.2 16-16 16z" />
-            </svg>
-          </div>
-        }
-      >
-        <div className={style.titleContainer}>
-          <div className={style.title}>Cosmos</div>
+import style from "./style.scss";
+import { ToolTip } from "../../../components/tooltip";
+
+import { ChainList } from "./chain-list";
+
+export const Header: FunctionComponent = observer(() => {
+  const { chainStore } = useStore();
+
+  return (
+    <CompHeader
+      left={
+        <div className={style.menuContainer}>
+          <svg
+            className={style["menu-img"]}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+          >
+            <path d="M432 176H80c-8.8 0-16-7.2-16-16s7.2-16 16-16h352c8.8 0 16 7.2 16 16s-7.2 16-16 16zM432 272H80c-8.8 0-16-7.2-16-16s7.2-16 16-16h352c8.8 0 16 7.2 16 16s-7.2 16-16 16zM432 368H80c-8.8 0-16-7.2-16-16s7.2-16 16-16h352c8.8 0 16 7.2 16 16s-7.2 16-16 16z" />
+          </svg>
+        </div>
+      }
+    >
+      <ToolTip trigger="click" tooltip={<ChainList />}>
+        <div className={style.chainListContainer}>
+          <div className={style.title}>{chainStore.chainInfo.chainName}</div>
+
           <div className={style.titleIconContainer}>
             <svg
               className={style.titleIcon}
@@ -32,7 +41,7 @@ export class Header extends React.Component {
             </svg>
           </div>
         </div>
-      </CompHeader>
-    );
-  }
-}
+      </ToolTip>
+    </CompHeader>
+  );
+});
