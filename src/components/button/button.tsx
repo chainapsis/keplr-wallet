@@ -15,13 +15,13 @@ export const Button: FunctionComponent<ButtonProps> = props => {
 
   return (
     <button
-      className={classnames([
+      {...props}
+      className={classnames(props.className, [
         "pure-button",
         "button",
         getSizeClass(size),
         getColorClass(color)
       ])}
-      {...props}
     >
       {props.children}
     </button>
