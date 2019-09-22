@@ -1,0 +1,24 @@
+@import "../../styles/var";
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+
+  .mnemonic {
+    font-size: 26px;
+
+    padding: 24px;
+    margin: $layout-margin;
+
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+    border-radius: 16px;
+  }
+
+  .btn-next {
+    margin: $layout-margin;
+  }
+}

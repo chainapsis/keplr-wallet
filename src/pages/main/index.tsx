@@ -5,7 +5,7 @@ import { AccountInfo } from "./account-info";
 
 import style from "./style.scss";
 
-class MainPage extends React.Component {
+export class MainPage extends React.Component {
   public render() {
     return (
       <div className={style.container}>
@@ -18,5 +18,3 @@ class MainPage extends React.Component {
     );
   }
 }
-
-export default MainPage;

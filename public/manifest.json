@@ -10,5 +10,6 @@
     "default_title": "Open the popup"
   },
   "permissions": [
+    "storage"
   ]
 }

@@ -4,7 +4,10 @@ import ReactDOM from "react-dom";
 import "./styles/global.scss";
 import "purecss/build/pure.css";
 
-import MainPage from "./pages/main";
+import { HashRouter, Route } from "react-router-dom";
+import { LockPage } from "./pages/lock";
+import { RegisterPage } from "./pages/register";
+import { MainPage } from "./pages/main";
 
 import { configure } from "mobx";
 
@@ -15,13 +18,16 @@ configure({
   enforceActions: "always" // Make mobx to strict mode.
 });
 
-const keyRing = new KeyRing(
-  "sugar drill peanut defy impose dune damage someone mimic volcano sorry arrow exotic ostrich blush train person pizza bundle elegant also attend clinic fiscal"
-);
+const keyRing = new KeyRing("");
+keyRing.restore();
 
 ReactDOM.render(
   <StoreProvider keyRing={keyRing}>
-    <MainPage />
+    <HashRouter>
+      <Route exact path="/" component={LockPage} />
+      <Route path="/main" component={MainPage} />
+      <Route path="/register" component={RegisterPage} />
+    </HashRouter>
   </StoreProvider>,
   document.getElementById("app")
 );
