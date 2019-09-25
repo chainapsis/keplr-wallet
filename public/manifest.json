@@ -9,6 +9,10 @@
     "default_popup": "popup.html",
     "default_title": "Open the popup"
   },
+  "background": {
+    "scripts": ["background.bundle.js"],
+    "persistent": true
+  },
   "permissions": [
     "storage"
   ]
