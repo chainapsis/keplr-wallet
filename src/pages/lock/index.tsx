@@ -1,28 +1,33 @@
-import React, { FunctionComponent, useEffect } from "react";
-
-import { KeyRingStatus } from "../../stores/keyring";
-
-import { RouteComponentProps } from "react-router-dom";
+import React, { FunctionComponent, useState } from "react";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
-export const LockPage: FunctionComponent<RouteComponentProps> = observer(
-  ({ history }) => {
-    const { keyRing } = useStore();
+export const LockPage: FunctionComponent = observer(() => {
+  const { keyRing } = useStore();
 
-    useEffect(() => {
-      if (keyRing.status === KeyRingStatus.EMPTY) {
-        history.replace("/register");
-      } else if (keyRing.status === KeyRingStatus.UNLOCKED) {
-        history.replace("/main");
-      } else if (keyRing.status === KeyRingStatus.LOCKED) {
-        keyRing.unlock("test").then(() => {
-          history.replace("/main");
-        });
-      }
-    }, [keyRing.status]);
+  const [password, setPassword] = useState("");
 
-    return <div>{keyRing.status}</div>;
-  }
-);
+  return (
+    <form
+      className="pure-form"
+      onSubmit={async e => {
+        e.preventDefault();
+        await keyRing.unlock(password);
+        await keyRing.save();
+      }}
+    >
+      <label>
+        Password
+        <input
+          type="password"
+          value={password}
+          onChange={e => {
+            setPassword(e.target.value);
+          }}
+        />
+        <input type="submit" value="Submit" />
+      </label>
+    </form>
+  );
+});
