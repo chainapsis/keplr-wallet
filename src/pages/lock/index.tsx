@@ -16,9 +16,13 @@ export const LockPage: FunctionComponent<RouteComponentProps> = observer(
         history.replace("/register");
       } else if (keyRing.status === KeyRingStatus.UNLOCKED) {
         history.replace("/main");
+      } else if (keyRing.status === KeyRingStatus.LOCKED) {
+        keyRing.unlock("test").then(() => {
+          history.replace("/main");
+        });
       }
     }, [keyRing.status]);
 
-    return <div>Lock</div>;
+    return <div>{keyRing.status}</div>;
   }
 );
