@@ -3,6 +3,7 @@ import { KeyRing } from "../keyring";
 import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
 
 export interface ChainInfo {
+  readonly rpc: string;
   readonly chainId: string;
   readonly chainName: string;
   readonly coinDenom: string;
@@ -21,6 +22,7 @@ export class ChainStore {
   constructor(private keyRing: KeyRing) {
     this.setChainList([
       {
+        rpc: "http://localhost",
         chainId: "cosmoshub-2",
         chainName: "Cosmos",
         coinDenom: "ATOM",
@@ -30,6 +32,7 @@ export class ChainStore {
         bech32AddrPrefix: "cosmos"
       },
       {
+        rpc: "null",
         chainId: "columbus-2",
         chainName: "Terra",
         coinDenom: "LUNA",
