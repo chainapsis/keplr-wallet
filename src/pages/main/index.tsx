@@ -3,7 +3,7 @@ import React from "react";
 import { Header } from "./header";
 import { AccountInfo } from "./account-info";
 
-import style from "./style.scss";
+import style from "./style.module.scss";
 
 export class MainPage extends React.Component {
   public render() {

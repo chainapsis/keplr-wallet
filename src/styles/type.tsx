@@ -1,29 +1,24 @@
-export type Size =
-  | "xsmall"
-  | "small"
-  | "default"
-  | "large"
-  | "large"
-  | "xlarge";
+export type Size = "small" | "default" | "normal" | "medium" | "large";
 
 export function getSizeClass(size?: Size): string {
   if (size === undefined || size === "default") {
     return "";
   }
-  return size;
+  return "is-" + size;
 }
 
 export type Color =
   | "primary"
-  | "secondary"
+  | "default"
   | "link"
+  | "info"
   | "success"
   | "warning"
-  | "error";
+  | "danger";
 
 export function getColorClass(color?: Color): string {
-  if (color === undefined || color === "secondary") {
+  if (color === undefined || color === "default") {
     return "";
   }
-  return color;
+  return "is-" + color;
 }

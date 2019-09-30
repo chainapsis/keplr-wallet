@@ -19,7 +19,7 @@ $menu-icon-size: $header-height - ($menu-icon-margin * 2);
   transition: fill 0.3s;
 
   &:hover {
-    fill: $primary-color;
+    // fill: $primary-color;
   }
 }
 
@@ -50,11 +50,11 @@ $menu-icon-size: $header-height - ($menu-icon-margin * 2);
 
   &:hover {
     .title {
-      color: $primary-color;
+      // color: $primary-color;
     }
 
     .title-icon {
-      fill: $primary-color;
+      // fill: $primary-color;
     }
   }
 }
@@ -62,11 +62,11 @@ $menu-icon-size: $header-height - ($menu-icon-margin * 2);
 :global(.show) {
   .chain-list-container {
     .title {
-      color: $primary-color;
+      // color: $primary-color;
     }
 
     .title-icon {
-      fill: $primary-color;
+      // fill: $primary-color;
     }
   }
 }

@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
 
-import style from "./chain-list.scss";
+import style from "./chain-list.module.scss";
 
 export const ChainList: FunctionComponent = observer(() => {
   const { chainStore } = useStore();

@@ -1,13 +1,17 @@
 import React, { FunctionComponent } from "react";
 
-import styleTxButton from "./tx-button.scss";
+import styleTxButton from "./tx-button.module.scss";
 import { Button } from "../../../components/button";
 
 export const TxButtonView: FunctionComponent = () => {
   return (
     <div className={styleTxButton.containerTxButton}>
-      <Button color="primary">Send</Button>
-      <Button color="link">More</Button>
+      <Button color="primary" size="medium">
+        Send
+      </Button>
+      <Button color="link" size="medium">
+        More
+      </Button>
     </div>
   );
 };

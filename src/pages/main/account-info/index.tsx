@@ -3,8 +3,8 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { AccountView } from "./account";
 import { TxButtonView } from "./tx-button";
 
-import style from "./style.scss";
-import styleAsset from "./asset.scss";
+import style from "./style.module.scss";
+import styleAsset from "./asset.module.scss";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";

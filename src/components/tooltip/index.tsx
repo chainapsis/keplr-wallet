@@ -3,7 +3,7 @@ import React from "react";
 import Popper, { PopperOptions } from "popper.js";
 import classNames from "classnames";
 
-import style from "./tooltip.scss";
+import style from "./tooltip.module.scss";
 
 export interface ToolTipProps {
   tooltip: React.ReactNode;

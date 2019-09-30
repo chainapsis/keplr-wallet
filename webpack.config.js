@@ -33,18 +33,11 @@ module.exports = (env, args) => {
     module: {
       rules: [
         {
-          test: /\.s?css$/,
+          test: /(\.s?css)|(\.sass)$/,
           oneOf: [
-            // Ignore css modules if css in node_modules
+            // if ext includes module as prefix, it perform by css loader.
             {
-              include: /node_modules/,
-              use: [
-                "style-loader",
-                { loader: "css-loader", options: { modules: false } },
-                "sass-loader"
-              ]
-            },
-            {
+              test: /.module(\.s?css)|(\.sass)$/,
               use: [
                 "style-loader",
                 {
@@ -56,6 +49,13 @@ module.exports = (env, args) => {
                     localsConvention: "camelCase"
                   }
                 },
+                "sass-loader"
+              ]
+            },
+            {
+              use: [
+                "style-loader",
+                { loader: "css-loader", options: { modules: false } },
                 "sass-loader"
               ]
             }

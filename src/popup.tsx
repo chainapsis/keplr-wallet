@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
 
 import "./styles/global.scss";
-import "purecss/build/pure.css";
+
 import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";

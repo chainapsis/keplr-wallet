@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 
 import { Address } from "../../../components/address";
 
-import styleAccount from "./account.scss";
+import styleAccount from "./account.module.scss";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
