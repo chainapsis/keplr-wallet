@@ -18,7 +18,7 @@ module.exports = (env, args) => {
     watch: isEnvDevelopment,
     entry: {
       popup: ["./src/popup/popup.tsx"],
-      background: ["./src/background.ts"]
+      background: ["./src/background/background.ts"]
     },
     output: {
       path: path.resolve(__dirname, "dist"),

@@ -6,6 +6,7 @@ import { KeyRing } from "../../stores/keyring";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
+
 import style from "./style.scss";
 
 export const RegisterPage: FunctionComponent = observer(() => {
@@ -20,6 +21,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
   const onClickNextButton = async () => {
     keyRing.setMnemonic(words);
     await keyRing.lock(password);
+    keyRing.setMnemonic(words);
     await keyRing.save();
   };
 
