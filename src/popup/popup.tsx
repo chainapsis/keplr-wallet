@@ -11,7 +11,7 @@ import { configure } from "mobx";
 import { observer } from "mobx-react";
 
 import { StoreProvider, useStore } from "./stores";
-import { KeyRingStore, KeyRingStatus } from "./stores/keyring";
+import { KeyRingStatus, KeyRingStore } from "./stores/keyring";
 
 configure({
   enforceActions: "always" // Make mobx to strict mode.
@@ -29,6 +29,8 @@ const StateRenderer: FunctionComponent = observer(() => {
     return <MainPage />;
   } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
     return <LockPage />;
+  } else if (keyRingStore.status === KeyRingStatus.NOTLOADED) {
+    return <div>Not yet loaded</div>;
   } else {
     return <div>Unknown status</div>;
   }
