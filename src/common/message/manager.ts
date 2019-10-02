@@ -95,11 +95,26 @@ export class MessageManager {
       }
 
       try {
-        const result = handler(msg);
-        sendResponse({
-          return: result
-        });
-        return;
+        const promise = Promise.resolve(handler(msg));
+        promise
+          .then(result => {
+            sendResponse({
+              return: result
+            });
+          })
+          .catch(e => {
+            if (e) {
+              sendResponse({
+                error: e.toString()
+              });
+            } else {
+              sendResponse({
+                error: "Unknown error, and error is null"
+              });
+            }
+          });
+
+        return true;
       } catch (e) {
         sendResponse({
           error: e.toString()
