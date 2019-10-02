@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState, useEffect } from "react";
 
 import { Button } from "../../components/button";
 
-import { KeyRing } from "../../stores/keyring";
+import { KeyRingStore } from "../../stores/keyring";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
@@ -10,19 +10,17 @@ import { useStore } from "../../stores";
 import style from "./style.scss";
 
 export const RegisterPage: FunctionComponent = observer(() => {
-  const { keyRing } = useStore();
+  const { keyRingStore } = useStore();
   const [words, setWords] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    setWords(KeyRing.GenereateMnemonic());
+    setWords(KeyRingStore.GenereateMnemonic());
   }, []);
 
   const onClickNextButton = async () => {
-    keyRing.setMnemonic(words);
-    await keyRing.lock(password);
-    keyRing.setMnemonic(words);
-    await keyRing.save();
+    await keyRingStore.createKey(words, password);
+    await keyRingStore.save();
   };
 
   return (

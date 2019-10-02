@@ -1,5 +1,5 @@
-import { observable, action, computed } from "mobx";
-import { KeyRing } from "../keyring";
+import { observable, action } from "mobx";
+import { KeyRingStore } from "../keyring";
 import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
 
 export interface ChainInfo {
@@ -19,7 +19,7 @@ export class ChainStore {
   @observable
   public chainInfo!: ChainInfo;
 
-  constructor(private keyRing: KeyRing) {
+  constructor(private keyRingStore: KeyRingStore) {
     this.setChainList([
       {
         rpc: "http://localhost",
@@ -66,9 +66,8 @@ export class ChainStore {
     this.chainList = chainList;
   }
 
-  @computed
-  public get bech32Address(): string {
-    return this.keyRing.bech32Address(
+  public async bech32Address(): Promise<string> {
+    return await this.keyRingStore.bech32Address(
       this.chainInfo.bip44,
       this.chainInfo.bech32AddrPrefix
     );

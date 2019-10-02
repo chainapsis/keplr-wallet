@@ -18,11 +18,15 @@ export const AccountInfo: FunctionComponent = observer(() => {
   const [asset, setAsset] = useState("0");
 
   useEffect(() => {
-    getAccount(
-      chainStore.chainInfo.rpc,
-      defaultBech32Config(chainStore.chainInfo.bech32AddrPrefix),
-      chainStore.bech32Address
-    )
+    chainStore
+      .bech32Address()
+      .then(bech32Address => {
+        return getAccount(
+          chainStore.chainInfo.rpc,
+          defaultBech32Config(chainStore.chainInfo.bech32AddrPrefix),
+          bech32Address
+        );
+      })
       .then(account => {
         const coins = account.getCoins();
         if (coins.length > 0) {
@@ -33,6 +37,7 @@ export const AccountInfo: FunctionComponent = observer(() => {
         setAsset("0");
       });
   }, [
+    chainStore,
     chainStore.chainInfo,
     chainStore.chainInfo.bech32AddrPrefix,
     chainStore.bech32Address

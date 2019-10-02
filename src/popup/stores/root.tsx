@@ -1,10 +1,13 @@
 import { ChainStore } from "./chain";
-import { KeyRing } from "./keyring";
+import { KeyRingStore } from "./keyring";
 
 export class RootStore {
-  constructor(public chainStore: ChainStore, public keyRing: KeyRing) {}
+  constructor(
+    public chainStore: ChainStore,
+    public keyRingStore: KeyRingStore
+  ) {}
 }
 
-export function createRootStore(keyRing: KeyRing) {
-  return new RootStore(new ChainStore(keyRing), keyRing);
+export function createRootStore(keyRingStore: KeyRingStore) {
+  return new RootStore(new ChainStore(keyRingStore), keyRingStore);
 }

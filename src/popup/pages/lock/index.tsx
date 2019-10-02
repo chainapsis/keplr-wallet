@@ -6,7 +6,7 @@ import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
 export const LockPage: FunctionComponent = observer(() => {
-  const { keyRing } = useStore();
+  const { keyRingStore } = useStore();
 
   const [password, setPassword] = useState("");
 
@@ -14,8 +14,8 @@ export const LockPage: FunctionComponent = observer(() => {
     <Form
       onSubmit={async e => {
         e.preventDefault();
-        await keyRing.unlock(password);
-        await keyRing.save();
+        await keyRingStore.unlock(password);
+        await keyRingStore.save();
       }}
     >
       <Label>Password</Label>

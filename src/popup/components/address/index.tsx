@@ -28,7 +28,7 @@ export class Address extends React.Component<AddressProps> {
             className="address-tooltip"
             style={{ fontSize: tooltipFontSize }}
           >
-            {lineBreakBeforePrefix
+            {lineBreakBeforePrefix && tooltipAddress.length > 0
               ? tooltipAddress.split("1").map((item, i) => {
                   if (i === 0) {
                     return <div key={i}>{item + "1"}</div>;
