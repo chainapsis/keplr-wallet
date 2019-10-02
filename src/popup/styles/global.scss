@@ -2,9 +2,13 @@
 
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400&display=swap");
 
+$radius-small: 6px;
+$radius: 10px;
+$radius-large: 14px;
+
 @import "~bulma/bulma";
 
-@import "./var";
+@import "var";
 
 html {
   width: $popup-size-width;

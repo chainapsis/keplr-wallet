@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import classNames from "classnames";
+import classnames from "classnames";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
@@ -14,7 +14,7 @@ export const ChainList: FunctionComponent = observer(() => {
       {chainStore.chainList.map((chainInfo, i) => (
         <div
           key={i}
-          className={classNames({
+          className={classnames({
             [style.chainName]: true,
             selected: chainInfo.chainId === chainStore.chainInfo.chainId
           })}

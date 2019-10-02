@@ -1,5 +1,5 @@
 import React from "react";
-import classnames from "classNames";
+import classnames from "classnames";
 
 import "./style";
 

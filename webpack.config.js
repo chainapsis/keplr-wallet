@@ -17,7 +17,7 @@ module.exports = (env, args) => {
     // In development environment, webpack watch the file changes, and recompile
     watch: isEnvDevelopment,
     entry: {
-      popup: ["./src/popup.tsx"],
+      popup: ["./src/popup/popup.tsx"],
       background: ["./src/background.ts"]
     },
     output: {
