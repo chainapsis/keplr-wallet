@@ -33,7 +33,6 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
   private hover = false;
   private bodyClicked = false;
 
-  // TODO: When props related to popper are changed, reinitialize popper.
   componentDidMount(): void {
     const tooltip = this.tooltipRef.current;
     const component = this.componentRef.current;
@@ -51,6 +50,12 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
       }
 
       this.popper = new Popper(component, tooltip, options);
+    }
+  }
+
+  componentDidUpdate(): void {
+    if (this.popper) {
+      this.popper.update();
     }
   }
 
