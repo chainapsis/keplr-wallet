@@ -33,7 +33,6 @@ export class Crypto {
     const key = Buffer.from(digestPassword, "hex");
     const aesCtr = new AES.ModeOfOperation.ctr(key);
 
-    console.log(cipher, cipher.length);
     const buf = Buffer.from(cipher, "hex");
     const actualCipher = buf.slice(0, buf.length - 32);
     const mac = buf.slice(buf.length - 32);

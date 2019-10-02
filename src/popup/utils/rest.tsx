@@ -33,7 +33,6 @@ export async function getAccount(
     const r = result.data;
     if (r.result && r.result.response) {
       const response = r.result.response;
-      console.log(response);
 
       if (response.code !== undefined && response.code !== 0) {
         throw new Error(response.log);
@@ -42,7 +41,6 @@ export async function getAccount(
       const value = JSON.parse(
         Buffer.from(response.value, "base64").toString()
       );
-      console.log(value);
 
       // eslint-disable-next-line react-hooks/rules-of-hooks
       return useBech32Config(bech32, () => {
