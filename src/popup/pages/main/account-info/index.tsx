@@ -13,35 +13,28 @@ import { getAccount } from "../../../utils/rest";
 import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
 
 export const AccountInfo: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
+  const { chainStore, accountStore } = useStore();
 
   const [asset, setAsset] = useState("0");
 
   useEffect(() => {
-    chainStore
-      .bech32Address()
-      .then(bech32Address => {
-        return getAccount(
-          chainStore.chainInfo.rpc,
-          defaultBech32Config(chainStore.chainInfo.bech32AddrPrefix),
-          bech32Address
-        );
-      })
-      .then(account => {
-        const coins = account.getCoins();
-        if (coins.length > 0) {
-          setAsset(coins[0].amount.toString());
-        }
-      })
-      .catch(() => {
-        setAsset("0");
-      });
-  }, [
-    chainStore,
-    chainStore.chainInfo,
-    chainStore.chainInfo.bech32AddrPrefix,
-    chainStore.bech32Address
-  ]);
+    if (!accountStore.isAccountFetching) {
+      getAccount(
+        chainStore.chainInfo.rpc,
+        defaultBech32Config(chainStore.chainInfo.bech32AddrPrefix),
+        accountStore.bech32Address
+      )
+        .then(account => {
+          const coins = account.getCoins();
+          if (coins.length > 0) {
+            setAsset(coins[0].amount.toString());
+          }
+        })
+        .catch(() => {
+          setAsset("0");
+        });
+    }
+  }, [accountStore.isAccountFetching, accountStore.bech32Address]);
 
   return (
     <div className={style.container}>

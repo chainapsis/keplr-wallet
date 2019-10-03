@@ -8,15 +8,15 @@ import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
 
 export const AccountView: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
+  const { accountStore } = useStore();
 
   const [bech32Address, setBech32Address] = useState("");
 
   useEffect(() => {
-    chainStore.bech32Address().then(bech32Address => {
-      setBech32Address(bech32Address);
-    });
-  }, [chainStore, chainStore.chainInfo]);
+    if (!accountStore.isAccountFetching) {
+      setBech32Address(accountStore.bech32Address);
+    }
+  }, [accountStore.isAccountFetching, accountStore.bech32Address]);
 
   return (
     <div className={styleAccount.containerAccount}>

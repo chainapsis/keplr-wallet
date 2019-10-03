@@ -1,18 +1,23 @@
 import { generateSeed } from "@everett-protocol/cosmosjs/utils/key";
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
+
+import { ChainInfo } from "../chain";
 
 import { sendMessage } from "../../../common/message";
 import {
   KeyRingStatus,
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
-  GetBech32AddressMsg,
   CreateKeyMsg,
   UnlockKeyRingMsg
 } from "../../../background/keyring/export";
 
 import { action, observable, flow } from "mobx";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
+
+/*
+ Actual key ring logic is managed in persistent background. Refer "src/common/message" and "src/background/keyring"
+ This store only interact with key ring in persistent background.
+ */
 
 export class KeyRingStore {
   public static GenereateMnemonic(): string {
@@ -22,10 +27,22 @@ export class KeyRingStore {
   }
 
   @observable
+  // disable never read error temporarily.
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  private chainInfo!: ChainInfo;
+
+  @observable
   public status!: KeyRingStatus;
 
   constructor() {
     this.setStatus(KeyRingStatus.NOTLOADED);
+  }
+
+  // This will be called by chain store.
+  @action
+  public setChainInfo(info: ChainInfo) {
+    this.chainInfo = info;
   }
 
   @action
@@ -63,11 +80,4 @@ export class KeyRingStore {
     const msg = SaveKeyRingMsg.create();
     yield sendMessage(BACKGROUND_PORT, msg);
   });
-
-  public async bech32Address(bip44: BIP44, prefix: string): Promise<string> {
-    const path = bip44.pathString(0, 0);
-    const msg = GetBech32AddressMsg.create(path, prefix);
-    const result = await sendMessage(BACKGROUND_PORT, msg);
-    return result.bech32Address as string;
-  }
 }
