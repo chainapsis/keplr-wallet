@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 
 import { AccountView } from "./account";
 import { TxButtonView } from "./tx-button";
@@ -9,32 +9,8 @@ import styleAsset from "./asset.module.scss";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
 
-import { getAccount } from "../../../utils/rest";
-import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
-
 export const AccountInfo: FunctionComponent = observer(() => {
   const { chainStore, accountStore } = useStore();
-
-  const [asset, setAsset] = useState("0");
-
-  useEffect(() => {
-    if (!accountStore.isAccountFetching) {
-      getAccount(
-        chainStore.chainInfo.rpc,
-        defaultBech32Config(chainStore.chainInfo.bech32AddrPrefix),
-        accountStore.bech32Address
-      )
-        .then(account => {
-          const coins = account.getCoins();
-          if (coins.length > 0) {
-            setAsset(coins[0].amount.toString());
-          }
-        })
-        .catch(() => {
-          setAsset("0");
-        });
-    }
-  }, [accountStore.isAccountFetching, accountStore.bech32Address]);
 
   return (
     <div className={style.container}>
@@ -46,7 +22,10 @@ export const AccountInfo: FunctionComponent = observer(() => {
           />
         </div>
         <div className={styleAsset.amount}>
-          {asset} {chainStore.chainInfo.coinDenom}
+          {!accountStore.isAssetFetching && accountStore.assets.length > 0
+            ? accountStore.assets[0].amount.toString()
+            : "0"}{" "}
+          {chainStore.chainInfo.coinDenom}
         </div>
       </div>
       <AccountView />

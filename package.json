@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@everett-protocol/cosmosjs": "0.0.2-alpha.1",
+    "@everett-protocol/cosmosjs": "file:../everett-protocol-cosmosjs-0.0.2-alpha.1.tgz",
     "aes-js": "^3.1.2",
     "axios": "^0.19.0",
     "buffer": "^5.4.3",
