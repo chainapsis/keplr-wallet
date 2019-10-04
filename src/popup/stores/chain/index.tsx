@@ -1,7 +1,12 @@
 import { observable, action } from "mobx";
 import { KeyRingStore } from "../keyring";
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
 import { AccountStore } from "../account";
+
+import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
+import {
+  Bech32Config,
+  defaultBech32Config
+} from "@everett-protocol/cosmosjs/core/bech32Config";
 
 export interface ChainInfo {
   readonly rpc: string;
@@ -11,7 +16,7 @@ export interface ChainInfo {
   readonly coinMinimalDenom: string;
   readonly coinDecimals: number;
   readonly bip44: BIP44;
-  readonly bech32AddrPrefix: string;
+  readonly bech32Config: Bech32Config;
 }
 
 export class ChainStore {
@@ -33,7 +38,7 @@ export class ChainStore {
         coinMinimalDenom: "uATOM",
         coinDecimals: 6,
         bip44: new BIP44(44, 118, 0),
-        bech32AddrPrefix: "cosmos"
+        bech32Config: defaultBech32Config("cosmos")
       },
       {
         rpc: "null",
@@ -43,7 +48,7 @@ export class ChainStore {
         coinMinimalDenom: "uLUNA",
         coinDecimals: 6,
         bip44: new BIP44(44, 330, 0),
-        bech32AddrPrefix: "terra"
+        bech32Config: defaultBech32Config("terra")
       }
     ]);
 

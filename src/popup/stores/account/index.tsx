@@ -6,7 +6,6 @@ import { GetBech32AddressMsg } from "../../../background/keyring/export";
 import { action, observable, flow } from "mobx";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
 
 import { getAccount } from "../../utils/rest";
 
@@ -71,7 +70,7 @@ export class AccountStore {
   @action
   private fetchBech32Address = flow(function*(this: AccountStore) {
     const bip44 = this.chainInfo.bip44;
-    const prefix = this.chainInfo.bech32AddrPrefix;
+    const prefix = this.chainInfo.bech32Config.bech32PrefixAccAddr;
 
     this.isAddressFetching = true;
 
@@ -96,7 +95,7 @@ export class AccountStore {
     try {
       const account = yield getAccount(
         this.chainInfo.rpc,
-        defaultBech32Config(this.chainInfo.bech32AddrPrefix),
+        this.chainInfo.bech32Config,
         this.bech32Address
       );
 
