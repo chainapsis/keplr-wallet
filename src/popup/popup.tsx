@@ -3,9 +3,12 @@ import ReactDOM from "react-dom";
 
 import "./styles/global.scss";
 
+import { HashRouter, Route } from "react-router-dom";
+
 import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
+import { SendPage } from "./pages/send";
 
 import { configure } from "mobx";
 import { observer } from "mobx-react";
@@ -41,7 +44,10 @@ const StateRenderer: FunctionComponent = observer(() => {
 
 ReactDOM.render(
   <StoreProvider keyRingStore={keyRingStore} accountStore={accountStore}>
-    <StateRenderer />
+    <HashRouter>
+      <Route exact path="/" component={StateRenderer} />
+      <Route path="/send" component={SendPage} />
+    </HashRouter>
   </StoreProvider>,
   document.getElementById("app")
 );
