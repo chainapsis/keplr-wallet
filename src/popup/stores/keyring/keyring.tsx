@@ -9,7 +9,7 @@ import {
   SaveKeyRingMsg,
   CreateKeyMsg,
   UnlockKeyRingMsg
-} from "../../../background/keyring/export";
+} from "../../../background/keyring";
 
 import { action, observable, flow } from "mobx";
 import { BACKGROUND_PORT } from "../../../common/message/constant";

@@ -1,7 +1,7 @@
 import { ChainInfo } from "../chain";
 
 import { sendMessage } from "../../../common/message";
-import { GetBech32AddressMsg } from "../../../background/keyring/export";
+import { GetBech32AddressMsg } from "../../../background/keyring";
 
 import { action, observable, flow } from "mobx";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
