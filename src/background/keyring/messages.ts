@@ -58,8 +58,15 @@ export class CreateKeyMsg extends Message {
   public mnemonic = "";
   public password = "";
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  validateBasic(): void {}
+  validateBasic(): void {
+    if (!this.mnemonic) {
+      throw new Error("mnemonic not set");
+    }
+
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
 
   route(): string {
     return ROUTE;
@@ -83,8 +90,11 @@ export class UnlockKeyRingMsg extends Message {
 
   public password = "";
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  validateBasic(): void {}
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
 
   route(): string {
     return ROUTE;
@@ -95,29 +105,58 @@ export class UnlockKeyRingMsg extends Message {
   }
 }
 
-export class GetBech32AddressMsg extends Message {
+export class SetPathMsg extends Message {
   public static type() {
-    return "get-bech32-address";
+    return "set-path";
   }
 
-  public static create(path: string, prefix: string): GetBech32AddressMsg {
-    const msg = new GetBech32AddressMsg();
+  public static create(path: string): SetPathMsg {
+    const msg = new SetPathMsg();
     msg.path = path;
-    msg.prefix = prefix;
     return msg;
   }
 
   public path = "";
-  public prefix = "";
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  validateBasic(): void {}
+  validateBasic(): void {
+    if (!this.path) {
+      throw new Error("path not set");
+    }
+  }
 
   route(): string {
     return ROUTE;
   }
 
   type(): string {
-    return GetBech32AddressMsg.type();
+    return SetPathMsg.type();
+  }
+}
+
+export class GetKeyMsg extends Message {
+  public static type() {
+    return "get-key";
+  }
+
+  public static create(prefix: string): GetKeyMsg {
+    const msg = new GetKeyMsg();
+    msg.prefix = prefix;
+    return msg;
+  }
+
+  public prefix = "";
+
+  validateBasic(): void {
+    if (!this.prefix) {
+      throw new Error("prefix not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetKeyMsg.type();
   }
 }

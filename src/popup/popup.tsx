@@ -21,10 +21,10 @@ configure({
   enforceActions: "always" // Make mobx to strict mode.
 });
 
-const keyRingStore = new KeyRingStore();
-keyRingStore.restore();
-
 const accountStore = new AccountStore();
+
+const keyRingStore = new KeyRingStore(accountStore);
+keyRingStore.restore();
 
 const StateRenderer: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();

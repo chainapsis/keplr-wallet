@@ -3,13 +3,17 @@ import {
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
   CreateKeyMsg,
-  GetBech32AddressMsg,
-  UnlockKeyRingMsg
+  GetKeyMsg,
+  UnlockKeyRingMsg,
+  SetPathMsg
 } from "./messages";
 import { KeyRing } from "./keyring";
+import { Key } from "@everett-protocol/cosmosjs/core/walletProvider";
+import { Address } from "@everett-protocol/cosmosjs/crypto";
 
 export const getHandler: () => Handler = () => {
   const keyRing = new KeyRing();
+  let path = "";
 
   return async (msg: Message) => {
     switch (msg.constructor) {
@@ -35,15 +39,27 @@ export const getHandler: () => Handler = () => {
         return {
           status: keyRing.status
         };
-      case GetBech32AddressMsg:
-        const getBech32AddressMsg = msg as GetBech32AddressMsg;
-        const bech32Address = keyRing.bech32Address(
-          getBech32AddressMsg.path,
-          getBech32AddressMsg.prefix
-        );
+      case SetPathMsg:
+        const setPathMsg = msg as SetPathMsg;
+        path = setPathMsg.path;
         return {
-          bech32Address
+          success: true
         };
+      case GetKeyMsg:
+        if (!path) {
+          throw new Error("path not set");
+        }
+
+        const getKeyMsg = msg as GetKeyMsg;
+        const key = keyRing.getKey(path);
+
+        const result: Key = {
+          algo: "secp256k1",
+          pubKey: key.pubKey,
+          address: key.address,
+          bech32Address: new Address(key.address).toBech32(getKeyMsg.prefix)
+        };
+        return result;
       default:
         throw new Error("Unknown msg type");
     }

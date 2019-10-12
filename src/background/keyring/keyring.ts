@@ -1,4 +1,3 @@
-import { Key } from "./key";
 import { Crypto } from "./crypto";
 import { generateWalletFromMnemonic } from "@everett-protocol/cosmosjs/utils/key";
 
@@ -11,6 +10,12 @@ export enum KeyRingStatus {
 
 export interface KeyRingData {
   chiper: string;
+}
+
+export interface Key {
+  algo: string;
+  pubKey: Uint8Array;
+  address: Uint8Array;
 }
 
 /*
@@ -55,8 +60,8 @@ export class KeyRing {
     }
   }
 
-  public bech32Address(path: string, prefix: string): string {
-    return this.loadKey(path).bech32Address(prefix);
+  public getKey(path: string): Key {
+    return this.loadKey(path);
   }
 
   public async createKey(mnemonic: string, password: string) {
@@ -124,8 +129,13 @@ export class KeyRing {
     }
 
     const privKey = generateWalletFromMnemonic(this.mnemonic, path);
+    const pubKey = privKey.toPubKey();
 
-    const key = new Key(privKey);
+    const key: Key = {
+      algo: "secp256k1",
+      pubKey: pubKey.serialize(),
+      address: pubKey.toAddress().toBytes()
+    };
     this.cached.set(path, key);
     return key;
   }

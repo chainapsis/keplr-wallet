@@ -1,9 +1,13 @@
 import { ChainInfo } from "../chain";
 
 import { sendMessage } from "../../../common/message";
-import { GetBech32AddressMsg } from "../../../background/keyring";
+import {
+  GetKeyMsg,
+  KeyRingStatus,
+  SetPathMsg
+} from "../../../background/keyring";
 
-import { action, observable, flow } from "mobx";
+import { action, flow, observable } from "mobx";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
@@ -31,6 +35,9 @@ export class AccountStore {
   @observable
   public bip44Index!: number;
 
+  @observable
+  public keyRingStatus!: KeyRingStatus;
+
   constructor() {
     this.init();
   }
@@ -45,27 +52,50 @@ export class AccountStore {
 
     this.bip44Account = 0;
     this.bip44Index = 0;
+
+    this.keyRingStatus = KeyRingStatus.NOTLOADED;
   }
 
   // This will be called by chain store.
   @action
-  public setChainInfo(info: ChainInfo) {
+  public setChainInfo = flow(function*(this: AccountStore, info: ChainInfo) {
     this.chainInfo = info;
 
-    this.fetchBech32Address().then(() => {
-      this.fetchAssets();
-    });
-  }
+    if (this.keyRingStatus === KeyRingStatus.UNLOCKED) {
+      yield this.fetchAccount();
+    }
+  });
+
+  // This will be called by keyring store.
+  @action
+  public setKeyRingStatus = flow(function*(
+    this: AccountStore,
+    status: KeyRingStatus
+  ) {
+    this.keyRingStatus = status;
+
+    if (status === KeyRingStatus.UNLOCKED) {
+      yield this.fetchAccount();
+    }
+  });
 
   @action
-  public setBIP44Account(account: number, index: number) {
+  public setBIP44Account = flow(function*(
+    this: AccountStore,
+    account: number,
+    index: number
+  ) {
     this.bip44Account = account;
     this.bip44Index = index;
 
-    this.fetchBech32Address().then(() => {
-      this.fetchAssets();
-    });
-  }
+    yield this.fetchAccount();
+  });
+
+  @action
+  public fetchAccount = flow(function*(this: AccountStore) {
+    yield this.fetchBech32Address();
+    yield this.fetchAssets();
+  });
 
   @action
   private fetchBech32Address = flow(function*(this: AccountStore) {
@@ -75,8 +105,11 @@ export class AccountStore {
     this.isAddressFetching = true;
 
     const path = bip44.pathString(this.bip44Account, this.bip44Index);
-    const msg = GetBech32AddressMsg.create(path, prefix);
-    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    const setPathMsg = SetPathMsg.create(path);
+    yield sendMessage(BACKGROUND_PORT, setPathMsg);
+
+    const getKeyMsg = GetKeyMsg.create(prefix);
+    const result = yield sendMessage(BACKGROUND_PORT, getKeyMsg);
     this.bech32Address = result.bech32Address as string;
     this.isAddressFetching = false;
   });
@@ -85,7 +118,7 @@ export class AccountStore {
    This should be called when isAddressFetching is false.
    */
   @action
-  public fetchAssets = flow(function*(this: AccountStore) {
+  private fetchAssets = flow(function*(this: AccountStore) {
     if (this.isAddressFetching) {
       throw new Error("Address is fetching");
     }

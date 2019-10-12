@@ -7,9 +7,7 @@ module.exports = {
     "prettier/react",
     "prettier/standard"
   ],
-  plugins: [
-    "react-hooks"
-  ],
+  plugins: ["react-hooks"],
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: "module",
@@ -22,6 +20,7 @@ module.exports = {
     "react/prop-types": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-inferrable-types": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn"
   },

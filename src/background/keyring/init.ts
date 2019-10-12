@@ -3,7 +3,8 @@ import {
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
   CreateKeyMsg,
-  GetBech32AddressMsg,
+  SetPathMsg,
+  GetKeyMsg,
   UnlockKeyRingMsg
 } from "./messages";
 import { ROUTE } from "./constants";
@@ -14,7 +15,8 @@ export function init(messageManager: MessageManager) {
   messageManager.registerMessage(SaveKeyRingMsg);
   messageManager.registerMessage(CreateKeyMsg);
   messageManager.registerMessage(UnlockKeyRingMsg);
-  messageManager.registerMessage(GetBech32AddressMsg);
+  messageManager.registerMessage(SetPathMsg);
+  messageManager.registerMessage(GetKeyMsg);
 
   messageManager.addHandler(ROUTE, getHandler());
 }
