@@ -12,6 +12,7 @@ import { BACKGROUND_PORT } from "../../../common/message/constant";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
 import { getAccount } from "../../utils/rest";
+import { RootStore } from "../root";
 
 export class AccountStore {
   @observable
@@ -38,7 +39,9 @@ export class AccountStore {
   @observable
   public keyRingStatus!: KeyRingStatus;
 
-  constructor() {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  constructor(private readonly rootStore: RootStore) {
     this.init();
   }
 

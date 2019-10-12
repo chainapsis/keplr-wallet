@@ -13,7 +13,7 @@ import {
 
 import { action, observable, flow } from "mobx";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
-import { AccountStore } from "../account";
+import { RootStore } from "../root";
 
 /*
  Actual key ring logic is managed in persistent background. Refer "src/common/message" and "src/background/keyring"
@@ -36,7 +36,7 @@ export class KeyRingStore {
   @observable
   public status!: KeyRingStatus;
 
-  constructor(private accountStore: AccountStore) {
+  constructor(private rootStore: RootStore) {
     this.setStatus(KeyRingStatus.NOTLOADED);
   }
 
@@ -49,7 +49,7 @@ export class KeyRingStore {
   @action
   private setStatus(status: KeyRingStatus) {
     this.status = status;
-    this.accountStore.setKeyRingStatus(status);
+    this.rootStore.accountStore.setKeyRingStatus(status);
   }
 
   @action

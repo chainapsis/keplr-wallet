@@ -14,17 +14,11 @@ import { configure } from "mobx";
 import { observer } from "mobx-react";
 
 import { StoreProvider, useStore } from "./stores";
-import { KeyRingStatus, KeyRingStore } from "./stores/keyring";
-import { AccountStore } from "./stores/account";
+import { KeyRingStatus } from "./stores/keyring";
 
 configure({
   enforceActions: "always" // Make mobx to strict mode.
 });
-
-const accountStore = new AccountStore();
-
-const keyRingStore = new KeyRingStore(accountStore);
-keyRingStore.restore();
 
 const StateRenderer: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
@@ -43,7 +37,7 @@ const StateRenderer: FunctionComponent = observer(() => {
 });
 
 ReactDOM.render(
-  <StoreProvider keyRingStore={keyRingStore} accountStore={accountStore}>
+  <StoreProvider>
     <HashRouter>
       <Route exact path="/" component={StateRenderer} />
       <Route path="/send" component={SendPage} />

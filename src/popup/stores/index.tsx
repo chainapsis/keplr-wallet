@@ -2,16 +2,11 @@ import React, { FunctionComponent } from "react";
 import { Observer } from "mobx-react";
 
 import { createRootStore, RootStore } from "./root";
-import { KeyRingStore } from "./keyring";
-import { AccountStore } from "./account";
 
 const storeContext = React.createContext<RootStore | null>(null);
 
-export const StoreProvider: FunctionComponent<{
-  keyRingStore: KeyRingStore;
-  accountStore: AccountStore;
-}> = ({ keyRingStore, accountStore, children }) => (
-  <storeContext.Provider value={createRootStore(keyRingStore, accountStore)}>
+export const StoreProvider: FunctionComponent<{}> = ({ children }) => (
+  <storeContext.Provider value={createRootStore()}>
     {children}
   </storeContext.Provider>
 );

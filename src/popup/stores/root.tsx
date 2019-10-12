@@ -3,20 +3,20 @@ import { KeyRingStore } from "./keyring";
 import { AccountStore } from "./account";
 
 export class RootStore {
-  constructor(
-    public chainStore: ChainStore,
-    public keyRingStore: KeyRingStore,
-    public accountStore: AccountStore
-  ) {}
+  public chainStore: ChainStore;
+  public keyRingStore: KeyRingStore;
+  public accountStore: AccountStore;
+
+  constructor() {
+    // Order is important.
+    this.accountStore = new AccountStore(this);
+    this.keyRingStore = new KeyRingStore(this);
+    this.chainStore = new ChainStore(this);
+
+    this.keyRingStore.restore();
+  }
 }
 
-export function createRootStore(
-  keyRingStore: KeyRingStore,
-  accountStore: AccountStore
-) {
-  return new RootStore(
-    new ChainStore(keyRingStore, accountStore),
-    keyRingStore,
-    accountStore
-  );
+export function createRootStore() {
+  return new RootStore();
 }

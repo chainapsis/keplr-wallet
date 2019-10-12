@@ -1,12 +1,11 @@
 import { observable, action } from "mobx";
-import { KeyRingStore } from "../keyring";
-import { AccountStore } from "../account";
 
 import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
 import {
   Bech32Config,
   defaultBech32Config
 } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { RootStore } from "../root";
 
 export interface ChainInfo {
   readonly rpc: string;
@@ -25,10 +24,7 @@ export class ChainStore {
   @observable
   public chainInfo!: ChainInfo;
 
-  constructor(
-    private keyRingStore: KeyRingStore,
-    private accountStore: AccountStore
-  ) {
+  constructor(private rootStore: RootStore) {
     this.setChainList([
       {
         rpc: "http://localhost",
@@ -69,8 +65,8 @@ export class ChainStore {
 
     this.chainInfo = chainInfo;
 
-    this.keyRingStore.setChainInfo(chainInfo);
-    this.accountStore.setChainInfo(chainInfo);
+    this.rootStore.keyRingStore.setChainInfo(chainInfo);
+    this.rootStore.accountStore.setChainInfo(chainInfo);
   }
 
   @action
