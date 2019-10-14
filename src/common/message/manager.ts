@@ -36,7 +36,7 @@ export class MessageManager {
 
   private onMessage = (
     message: any,
-    _: MessageSender,
+    sender: MessageSender,
     sendResponse: (response: Result) => void
   ) => {
     if (message.port !== this.port) {
@@ -62,6 +62,26 @@ export class MessageManager {
         message.msg,
         msgCls.prototype
       ) as Message;
+
+      try {
+        if (!msg.approveExternal(sender)) {
+          sendResponse({
+            error: "Permission rejected"
+          });
+          return;
+        }
+      } catch (e) {
+        if (e) {
+          sendResponse({
+            error: `Permission rejected: ${e.toString()}`
+          });
+        } else {
+          sendResponse({
+            error: "Permission rejected, and error is null"
+          });
+        }
+        return;
+      }
 
       try {
         // Can happen throw

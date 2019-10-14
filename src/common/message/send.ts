@@ -1,10 +1,12 @@
 import { Message } from "./message";
 import { Result } from "./interfaces";
+import { InitInfo } from "../../initializer";
 
 export function sendMessage<T = any>(port: string, msg: Message): Promise<T> {
   // TODO: handle reject.
   return new Promise(resolve => {
     chrome.runtime.sendMessage(
+      InitInfo.extensionId,
       {
         port,
         type: msg.type(),

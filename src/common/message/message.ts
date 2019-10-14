@@ -11,4 +11,10 @@ export abstract class Message {
   abstract validateBasic(): void;
   abstract route(): string;
   abstract type(): string;
+  /*
+   Ask for approval if message is sent externally.
+   */
+  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+    return sender.id === chrome.runtime.id;
+  }
 }
