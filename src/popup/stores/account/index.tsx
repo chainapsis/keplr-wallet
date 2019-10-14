@@ -11,8 +11,10 @@ import { action, flow, observable } from "mobx";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
-import { getAccount } from "../../utils/rest";
+import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
 import { RootStore } from "../root";
+import Axios from "axios";
+import { KeyHex } from "../../../background/keyring/handler";
 
 export class AccountStore {
   @observable
@@ -112,8 +114,8 @@ export class AccountStore {
     yield sendMessage(BACKGROUND_PORT, setPathMsg);
 
     const getKeyMsg = GetKeyMsg.create(prefix);
-    const result = yield sendMessage(BACKGROUND_PORT, getKeyMsg);
-    this.bech32Address = result.bech32Address as string;
+    const result: KeyHex = yield sendMessage(BACKGROUND_PORT, getKeyMsg);
+    this.bech32Address = result.bech32Address;
     this.isAddressFetching = false;
   });
 
@@ -129,9 +131,9 @@ export class AccountStore {
     this.isAssetFetching = true;
 
     try {
-      const account = yield getAccount(
-        this.chainInfo.rpc,
+      const account = yield queryAccount(
         this.chainInfo.bech32Config,
+        Axios.create({ baseURL: this.chainInfo.rpc }),
         this.bech32Address
       );
 

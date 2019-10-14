@@ -1,5 +1,6 @@
 import { Crypto } from "./crypto";
 import { generateWalletFromMnemonic } from "@everett-protocol/cosmosjs/utils/key";
+import { PrivKey } from "@everett-protocol/cosmosjs/crypto";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -23,7 +24,7 @@ export interface Key {
  And, this manages the state, crypto, address, signing and so on...
  */
 export class KeyRing {
-  private cached: Map<string, Key> = new Map();
+  private cached: Map<string, PrivKey> = new Map();
 
   private loaded: boolean;
 
@@ -123,20 +124,38 @@ export class KeyRing {
       throw new Error("Key ring is not unlocked");
     }
 
+    const privKey = this.loadPrivKey(path);
+    const pubKey = privKey.toPubKey();
+
+    return {
+      algo: "secp256k1",
+      pubKey: pubKey.serialize(),
+      address: pubKey.toAddress().toBytes()
+    };
+  }
+
+  private loadPrivKey(path: string): PrivKey {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
     const cachedKey = this.cached.get(path);
     if (cachedKey) {
       return cachedKey;
     }
 
     const privKey = generateWalletFromMnemonic(this.mnemonic, path);
-    const pubKey = privKey.toPubKey();
 
-    const key: Key = {
-      algo: "secp256k1",
-      pubKey: pubKey.serialize(),
-      address: pubKey.toAddress().toBytes()
-    };
-    this.cached.set(path, key);
-    return key;
+    this.cached.set(path, privKey);
+    return privKey;
+  }
+
+  public sign(path: string, message: Uint8Array): Uint8Array {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
+    const privKey = this.loadPrivKey(path);
+    return privKey.sign(message);
   }
 }

@@ -15,6 +15,7 @@ import { observer } from "mobx-react";
 
 import { StoreProvider, useStore } from "./stores";
 import { KeyRingStatus } from "./stores/keyring";
+import { SignPage } from "./pages/sign";
 
 configure({
   enforceActions: "always" // Make mobx to strict mode.
@@ -41,6 +42,7 @@ ReactDOM.render(
     <HashRouter>
       <Route exact path="/" component={StateRenderer} />
       <Route path="/send" component={SendPage} />
+      <Route path="/sign/:index" component={SignPage} />
     </HashRouter>
   </StoreProvider>,
   document.getElementById("app")

@@ -160,3 +160,160 @@ export class GetKeyMsg extends Message {
     return GetKeyMsg.type();
   }
 }
+
+export class RequestSignMsg extends Message {
+  public static type() {
+    return "request-sign";
+  }
+
+  public static create(
+    index: string,
+    messageHex: string,
+    internal: boolean = false
+  ): RequestSignMsg {
+    const msg = new RequestSignMsg();
+    msg.index = index;
+    msg.messageHex = messageHex;
+    msg.internal = internal;
+    return msg;
+  }
+
+  public index: string = "";
+  // Hex encoded message.
+  public messageHex: string = "";
+  public internal: boolean = false;
+
+  validateBasic(): void {
+    if (!this.messageHex) {
+      throw new Error("message is empty");
+    }
+
+    if (!this.index) {
+      throw new Error("index is empty");
+    }
+    if (this.index.length < 4) {
+      throw new Error("index is too short");
+    }
+    if (this.index.length > 8) {
+      throw new Error("index is too long");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignMsg.type();
+  }
+
+  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+    if (this.internal) {
+      return super.approveExternal(sender);
+    } else {
+      // TODO
+    }
+    return false;
+  }
+}
+
+export class GetRequestedMessage extends Message {
+  public static type() {
+    return "get-request-message";
+  }
+
+  public static create(index: string): GetRequestedMessage {
+    const msg = new GetRequestedMessage();
+    msg.index = index;
+    return msg;
+  }
+
+  public index: string = "";
+
+  validateBasic(): void {
+    if (!this.index) {
+      throw new Error("index is empty");
+    }
+    if (this.index.length < 4) {
+      throw new Error("index is too short");
+    }
+    if (this.index.length > 8) {
+      throw new Error("index is too long");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetRequestedMessage.type();
+  }
+}
+export class ApproveSignMsg extends Message {
+  public static type() {
+    return "approve-sign";
+  }
+
+  public static create(index: string): ApproveSignMsg {
+    const msg = new ApproveSignMsg();
+    msg.index = index;
+    return msg;
+  }
+
+  public index: string = "";
+
+  validateBasic(): void {
+    if (!this.index) {
+      throw new Error("index is empty");
+    }
+    if (this.index.length < 4) {
+      throw new Error("index is too short");
+    }
+    if (this.index.length > 8) {
+      throw new Error("index is too long");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ApproveSignMsg.type();
+  }
+}
+
+export class RejectSignMsg extends Message {
+  public static type() {
+    return "reject-sign";
+  }
+
+  public static create(index: string): RejectSignMsg {
+    const msg = new RejectSignMsg();
+    msg.index = index;
+    return msg;
+  }
+
+  public index: string = "";
+
+  validateBasic(): void {
+    if (!this.index) {
+      throw new Error("index is empty");
+    }
+    if (this.index.length < 4) {
+      throw new Error("index is too short");
+    }
+    if (this.index.length > 8) {
+      throw new Error("index is too long");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RejectSignMsg.type();
+  }
+}

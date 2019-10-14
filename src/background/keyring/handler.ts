@@ -5,15 +5,36 @@ import {
   CreateKeyMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
-  SetPathMsg
+  SetPathMsg,
+  RequestSignMsg,
+  ApproveSignMsg,
+  RejectSignMsg,
+  GetRequestedMessage
 } from "./messages";
 import { KeyRing } from "./keyring";
-import { Key } from "@everett-protocol/cosmosjs/core/walletProvider";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
+
+const Buffer = require("buffer/").Buffer;
+
+export interface KeyHex {
+  algo: string;
+  pubKeyHex: string;
+  addressHex: string;
+  bech32Address: string;
+}
 
 export const getHandler: () => Handler = () => {
   const keyRing = new KeyRing();
   let path = "";
+
+  interface SignApproval {
+    approve: boolean;
+  }
+  const signRequests: Map<
+    string,
+    { resolve: (value: SignApproval) => void; reject: (reason?: any) => void }
+  > = new Map();
+  const signMessages: Map<string, string> = new Map();
 
   return async (msg: Message) => {
     switch (msg.constructor) {
@@ -53,13 +74,75 @@ export const getHandler: () => Handler = () => {
         const getKeyMsg = msg as GetKeyMsg;
         const key = keyRing.getKey(path);
 
-        const result: Key = {
+        const result: KeyHex = {
           algo: "secp256k1",
-          pubKey: key.pubKey,
-          address: key.address,
+          pubKeyHex: Buffer.from(key.pubKey).toString("hex"),
+          addressHex: Buffer.from(key.address).toString("hex"),
           bech32Address: new Address(key.address).toBech32(getKeyMsg.prefix)
         };
         return result;
+      case RequestSignMsg:
+        const requestSignMsg = msg as RequestSignMsg;
+
+        if (
+          signRequests.has(requestSignMsg.index) ||
+          signMessages.has(requestSignMsg.index)
+        ) {
+          throw new Error("index exists");
+        }
+
+        const promise = new Promise<SignApproval>((resolve, reject) => {
+          signRequests.set(requestSignMsg.index, {
+            resolve,
+            reject
+          });
+        });
+        signMessages.set(requestSignMsg.index, requestSignMsg.messageHex);
+
+        const tempSignIndex = requestSignMsg.index;
+
+        const approval = await promise;
+        if (approval.approve) {
+          signRequests.delete(tempSignIndex);
+          signMessages.delete(tempSignIndex);
+          return {
+            signatureHex: Buffer.from(
+              keyRing.sign(path, Buffer.from(requestSignMsg.messageHex, "hex"))
+            ).toString("hex")
+          };
+        } else {
+          signRequests.delete(tempSignIndex);
+          signMessages.delete(tempSignIndex);
+          throw new Error("Signature rejected");
+        }
+      case GetRequestedMessage:
+        const getRequestedMessageMsg = msg as GetRequestedMessage;
+        const messageHex = signMessages.get(getRequestedMessageMsg.index);
+        if (!messageHex) {
+          throw new Error("Unknown sign request index");
+        }
+
+        return {
+          messageHex
+        };
+      case ApproveSignMsg:
+        const approveSignMsg = msg as ApproveSignMsg;
+        const resolver = signRequests.get(approveSignMsg.index);
+        if (!resolver) {
+          throw new Error("Unknown sign request index");
+        }
+
+        resolver.resolve({ approve: true });
+        return;
+      case RejectSignMsg:
+        const rejectSignMsg = msg as RejectSignMsg;
+        const resolverReject = signRequests.get(rejectSignMsg.index);
+        if (!resolverReject) {
+          throw new Error("Unknown sign request index");
+        }
+
+        resolverReject.resolve({ approve: false });
+        return;
       default:
         throw new Error("Unknown msg type");
     }
