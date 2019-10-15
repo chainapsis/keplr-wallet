@@ -5,6 +5,7 @@ $bright: rgba(255, 255, 255, 0.75);
 :global {
   [x-arrow] {
     position: absolute;
+    z-index: 1000;
   }
 
   .popper {
@@ -15,6 +16,7 @@ $bright: rgba(255, 255, 255, 0.75);
     border-radius: 6px;
     color: white;
 
+    z-index: 1000;
     transition: opacity 0.45s;
   }
 
