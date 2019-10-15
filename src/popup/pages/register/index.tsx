@@ -13,19 +13,28 @@ export const RegisterPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
   const [words, setWords] = useState("");
   const [password, setPassword] = useState("");
+  const [isRecover, setIsRecover] = useState(false);
 
   useEffect(() => {
     setWords(KeyRingStore.GenereateMnemonic());
   }, []);
 
   const onClickNextButton = async () => {
+    // TODO: Check mnemonic checksum.
     await keyRingStore.createKey(words, password);
     await keyRingStore.save();
   };
 
   return (
     <div className={style.container}>
-      <div className={style.mnemonic}>{words}</div>
+      <textarea
+        className="textarea"
+        disabled={!isRecover}
+        value={words}
+        onChange={e => {
+          setWords(e.target.value);
+        }}
+      />
       <form className="pure-form">
         <label>
           Password
@@ -45,6 +54,14 @@ export const RegisterPage: FunctionComponent = observer(() => {
         onClick={onClickNextButton}
       >
         Next
+      </Button>
+      <Button
+        className={style.btnNext}
+        onClick={() => {
+          setIsRecover(!isRecover);
+        }}
+      >
+        Recover
       </Button>
     </div>
   );
