@@ -63,7 +63,7 @@ module.exports = (env, args) => {
         },
         { test: /\.tsx?$/, loader: "ts-loader" },
         {
-          test: /\.(svg|png|jpe?g|gif)$/i,
+          test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
           use: [
             {
               loader: "file-loader",

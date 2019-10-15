@@ -1,5 +1,9 @@
 @charset "utf-8";
 
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+@import "~@fortawesome/fontawesome-free/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free/scss/solid";
+
 $radius-small: 6px;
 $radius: 10px;
 $radius-large: 14px;
