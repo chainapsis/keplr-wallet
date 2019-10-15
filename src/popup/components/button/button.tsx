@@ -8,10 +8,28 @@ export interface ButtonProps extends ButtonHTMLAttributes<any> {
   size?: Size;
   color?: Color;
   to?: string;
+  fullWidth?: boolean;
+  outline?: boolean;
+  inverted?: boolean;
+  rounded?: boolean;
+  focused?: boolean;
+  active?: boolean;
+  loading?: boolean;
 }
 
 export const Button: FunctionComponent<ButtonProps> = props => {
-  const { size, color, to } = props;
+  const {
+    size,
+    color,
+    to,
+    fullWidth,
+    outline,
+    inverted,
+    rounded,
+    focused,
+    active,
+    loading
+  } = props;
 
   return (
     <>
@@ -21,7 +39,14 @@ export const Button: FunctionComponent<ButtonProps> = props => {
           className={classnames(props.className, [
             "button",
             getSizeClass(size),
-            getColorClass(color)
+            getColorClass(color),
+            { "is-fullwidth": fullWidth },
+            { "is-outline": outline },
+            { "is-inverted": inverted },
+            { "is-rounded": rounded },
+            { "is-focused": focused },
+            { "is-active": active },
+            { "is-loading": loading }
           ])}
           to={to}
         >
