@@ -6,9 +6,15 @@ import styleAccount from "./account.module.scss";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
+import { Button } from "../../../components/button";
 
 export const AccountView: FunctionComponent = observer(() => {
   const { accountStore } = useStore();
+
+  const copyAddress = async () => {
+    await navigator.clipboard.writeText(accountStore.bech32Address);
+    // TODO: Show success tooltip.
+  };
 
   return (
     <div className={styleAccount.containerAccount}>
@@ -21,7 +27,13 @@ export const AccountView: FunctionComponent = observer(() => {
         </div>
       </div>
       <div className={styleAccount.flexEmpty} />
-      <div className={styleAccount.innerContainerAccountButton}>test</div>
+      <div className={styleAccount.innerContainerAccountButton}>
+        <Button onClick={copyAddress}>
+          <span className="icon is-small">
+            <i className="fas fa-paste" />
+          </span>
+        </Button>
+      </div>
     </div>
   );
 });
