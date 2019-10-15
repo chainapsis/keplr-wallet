@@ -6,7 +6,7 @@ import { Context } from "@everett-protocol/cosmosjs/core/context";
 import { GetKeyMsg, RequestSignMsg } from "../background/keyring";
 import { sendMessage } from "../common/message";
 import { BACKGROUND_PORT } from "../common/message/constant";
-import { KeyHex } from "../background/keyring/handler";
+import { KeyHex } from "../background/keyring";
 
 const Buffer = require("buffer/").Buffer;
 

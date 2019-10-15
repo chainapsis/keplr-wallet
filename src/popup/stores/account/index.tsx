@@ -14,7 +14,7 @@ import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
 import { RootStore } from "../root";
 import Axios from "axios";
-import { KeyHex } from "../../../background/keyring/handler";
+import { KeyHex } from "../../../background/keyring";
 
 export class AccountStore {
   @observable
