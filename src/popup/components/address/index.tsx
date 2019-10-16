@@ -12,6 +12,20 @@ export interface AddressProps {
 }
 
 export class Address extends React.Component<AddressProps> {
+  copyRef = React.createRef<HTMLDivElement>();
+
+  componentDidMount(): void {
+    if (this.copyRef.current) {
+      this.copyRef.current.addEventListener("copy", this.onCopy);
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (this.copyRef.current) {
+      this.copyRef.current.removeEventListener("copy", this.onCopy);
+    }
+  }
+
   render() {
     const { tooltipFontSize, lineBreakBeforePrefix, children } = this.props;
 
@@ -25,6 +39,7 @@ export class Address extends React.Component<AddressProps> {
         options={{ placement: "top" }}
         tooltip={
           <div
+            ref={this.copyRef}
             className="address-tooltip"
             style={{ fontSize: tooltipFontSize }}
           >
@@ -43,6 +58,14 @@ export class Address extends React.Component<AddressProps> {
       </ToolTip>
     );
   }
+
+  onCopy = async (e: ClipboardEvent) => {
+    if (e.clipboardData) {
+      // Remove line breaks.
+      const pre = await navigator.clipboard.readText();
+      await navigator.clipboard.writeText(pre.replace(/(\r\n|\n|\r)/gm, ""));
+    }
+  };
 
   shortenAddress(bech32: string): string {
     let { maxCharacters } = this.props;
