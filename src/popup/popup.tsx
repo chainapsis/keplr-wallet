@@ -10,6 +10,11 @@ import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
 import { SendPage } from "./pages/send";
 
+import {
+  NotificationProvider,
+  NotificationStoreProvider
+} from "./components/notification";
+
 import { configure } from "mobx";
 import { observer } from "mobx-react";
 
@@ -39,11 +44,15 @@ const StateRenderer: FunctionComponent = observer(() => {
 
 ReactDOM.render(
   <StoreProvider>
-    <HashRouter>
-      <Route exact path="/" component={StateRenderer} />
-      <Route path="/send" component={SendPage} />
-      <Route path="/sign/:index" component={SignPage} />
-    </HashRouter>
+    <NotificationStoreProvider>
+      <NotificationProvider>
+        <HashRouter>
+          <Route exact path="/" component={StateRenderer} />
+          <Route path="/send" component={SendPage} />
+          <Route path="/sign/:index" component={SignPage} />
+        </HashRouter>
+      </NotificationProvider>
+    </NotificationStoreProvider>
   </StoreProvider>,
   document.getElementById("app")
 );
