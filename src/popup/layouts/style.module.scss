@@ -1,0 +1,12 @@
+@import "../styles/var";
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+}
+
+.inner-container {
+  padding: 0 $layout-margin;
+}

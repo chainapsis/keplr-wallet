@@ -1,26 +1,24 @@
-@import "../../../styles/var";
+@import "../../styles/var";
 
 .menu-container {
   height: $header-height;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  padding-left: $layout-margin;
 }
 
-$menu-icon-margin: $layout-margin + 4px;
-$menu-icon-size: $header-height - ($menu-icon-margin * 2);
+$menu-icon-size: 28px;
+$menu-icon-gap: 14px;
 
 .menu-img {
   width: $menu-icon-size;
   height: $menu-icon-size;
 
-  margin-top: $menu-icon-margin;
-  margin-left: $menu-icon-margin;
+  margin-left: $menu-icon-gap;
 
   cursor: pointer;
-
-  transition: fill 0.3s;
-
-  &:hover {
-    // fill: $primary-color;
-  }
 }
 
 .chain-list-container {
@@ -32,13 +30,13 @@ $menu-icon-size: $header-height - ($menu-icon-margin * 2);
 
   .title {
     font-size: 24px;
+
+    margin-right: 6px;
   }
 
   .title-icon-container {
     width: 0;
     height: 24px;
-
-    margin-left: 6px;
 
     .title-icon {
       width: 24px;

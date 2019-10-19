@@ -9,6 +9,8 @@ import { RouteComponentProps } from "react-router";
 import { sendMessage } from "../../../common/message";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
 
+import { HeaderLayout } from "../../layouts/HeaderLayout";
+
 const Buffer = require("buffer/").Buffer;
 
 const approve = (index: string) => {
@@ -23,7 +25,7 @@ const reject = (index: string) => {
 
 export const SignPage: FunctionComponent<
   RouteComponentProps<{ index: string }>
-> = ({ match }) => {
+> = ({ history, match }) => {
   const index = match.params.index;
 
   const [message, setMessage] = useState("");
@@ -47,10 +49,18 @@ export const SignPage: FunctionComponent<
   }, []);
 
   return (
-    <div>
-      <pre>{message}</pre>
-      <Button onClick={() => approve(index)}>Approve</Button>
-      <Button onClick={() => reject(index)}>Reject</Button>
-    </div>
+    <HeaderLayout
+      showChainName
+      canChangeChainInfo={false}
+      onBackButton={() => {
+        history.goBack();
+      }}
+    >
+      <div>
+        <pre style={{ height: "300px", overflow: "scroll" }}>{message}</pre>
+        <Button onClick={() => approve(index)}>Approve</Button>
+        <Button onClick={() => reject(index)}>Reject</Button>
+      </div>
+    </HeaderLayout>
   );
 };

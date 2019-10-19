@@ -1,14 +1,9 @@
 @import "../../styles/var";
 
-.container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
 .container-account {
   flex: 5;
   padding: $layout-margin;
+  margin: 0 (-$layout-margin);
 
   background-color: white;
   box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.1);
@@ -19,4 +14,5 @@
 .container-txs {
   flex: 4;
   padding: $layout-margin;
+  margin: 0 (-$layout-margin);
 }
