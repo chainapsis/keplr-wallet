@@ -18,7 +18,7 @@ export const NotificationElement: FunctionComponent<
       onDelete();
     }, duration * 1000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [duration, onDelete]);
 
   return (
     <div className={classnames("notification", `is-${type}`)}>

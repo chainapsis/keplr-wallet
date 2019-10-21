@@ -13,7 +13,5 @@
     "scripts": ["background.bundle.js"],
     "persistent": true
   },
-  "permissions": [
-    "storage"
-  ]
+  "permissions": ["storage"]
 }

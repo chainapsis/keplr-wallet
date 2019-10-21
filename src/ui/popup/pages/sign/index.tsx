@@ -46,7 +46,7 @@ export const SignPage: FunctionComponent<
         setMessage(message);
       }
     })();
-  }, []);
+  }, [index]);
 
   return (
     <HeaderLayout

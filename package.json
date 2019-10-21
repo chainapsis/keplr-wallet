@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
-    "dev": "cross-env NODE_ENV=development webpack",
+    "build:extension": "cross-env NODE_ENV=production webpack --config-name extension",
+    "build:web": "cross-env NODE_ENV=production webpack --config-name web",
+    "dev:extension": "cross-env NODE_ENV=development webpack --config-name extension",
+    "dev:web": "cross-env NODE_ENV=development webpack-dev-server --config-name web",
     "lint-test": "eslint \"src/**/*\" webpack.config.js && prettier --check \"src/**/*\" webpack.config.js",
     "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js"
   },
@@ -68,6 +71,7 @@
     "typescript": "^3.5.3",
     "webpack": "^4.39.2",
     "webpack-cli": "^3.3.7",
+    "webpack-dev-server": "^3.8.2",
     "write-file-webpack-plugin": "^4.5.1"
   }
 }

@@ -8,9 +8,59 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WriteFilePlugin = require("write-file-webpack-plugin");
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
+const commonResolve = dir => ({
+  extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
+  alias: {
+    assets: path.resolve(__dirname, dir)
+  }
+});
+const sassRule = {
+  test: /(\.s?css)|(\.sass)$/,
+  oneOf: [
+    // if ext includes module as prefix, it perform by css loader.
+    {
+      test: /.module(\.s?css)|(\.sass)$/,
+      use: [
+        "style-loader",
+        {
+          loader: "css-loader",
+          options: {
+            modules: {
+              localIdentName: "[local]-[hash:base64]"
+            },
+            localsConvention: "camelCase"
+          }
+        },
+        "sass-loader"
+      ]
+    },
+    {
+      use: [
+        "style-loader",
+        { loader: "css-loader", options: { modules: false } },
+        "sass-loader"
+      ]
+    }
+  ]
+};
+const tsRule = { test: /\.tsx?$/, loader: "ts-loader" };
+const fileRule = {
+  test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
+  use: [
+    {
+      loader: "file-loader",
+      options: {
+        name: "[name].[ext]",
+        publicPath: "assets",
+        outputPath: "assets"
+      }
+    }
+  ]
+};
 
-module.exports = (env, args) => {
+const extensionConfig = (env, args) => {
   return {
+    name: "extension",
     mode: isEnvDevelopment ? "development" : "production",
     // In development environment, turn on source map.
     devtool: isEnvDevelopment ? "inline-source-map" : false,
@@ -21,61 +71,12 @@ module.exports = (env, args) => {
       background: ["./src/background/background.ts"]
     },
     output: {
-      path: path.resolve(__dirname, "dist"),
+      path: path.resolve(__dirname, "dist/extension"),
       filename: "[name].bundle.js"
     },
-    resolve: {
-      extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
-      alias: {
-        assets: path.resolve(__dirname, "public/assets")
-      }
-    },
+    resolve: commonResolve("src/ui/popup/public/assets"),
     module: {
-      rules: [
-        {
-          test: /(\.s?css)|(\.sass)$/,
-          oneOf: [
-            // if ext includes module as prefix, it perform by css loader.
-            {
-              test: /.module(\.s?css)|(\.sass)$/,
-              use: [
-                "style-loader",
-                {
-                  loader: "css-loader",
-                  options: {
-                    modules: {
-                      localIdentName: "[local]-[hash:base64]"
-                    },
-                    localsConvention: "camelCase"
-                  }
-                },
-                "sass-loader"
-              ]
-            },
-            {
-              use: [
-                "style-loader",
-                { loader: "css-loader", options: { modules: false } },
-                "sass-loader"
-              ]
-            }
-          ]
-        },
-        { test: /\.tsx?$/, loader: "ts-loader" },
-        {
-          test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
-          use: [
-            {
-              loader: "file-loader",
-              options: {
-                name: "[name].[ext]",
-                publicPath: "assets",
-                outputPath: "assets"
-              }
-            }
-          ]
-        }
-      ]
+      rules: [sassRule, tsRule, fileRule]
     },
     plugins: [
       // Remove all and write anyway
@@ -83,11 +84,16 @@ module.exports = (env, args) => {
       new CleanWebpackPlugin(),
       new ForkTsCheckerWebpackPlugin(),
       new CopyWebpackPlugin(
-        [{ from: "./public", to: "./", ignore: ["*.html", "assets/**/*"] }],
+        [
+          {
+            from: "./src/manifest.json",
+            to: "./"
+          }
+        ],
         { copyUnmodified: true }
       ),
       new HtmlWebpackPlugin({
-        template: "./public/popup.html",
+        template: "./src/popup.html",
         filename: "popup.html",
         chunks: ["popup"]
       }),
@@ -96,3 +102,36 @@ module.exports = (env, args) => {
     ]
   };
 };
+
+const webConfig = (env, args) => {
+  return {
+    name: "web",
+    mode: isEnvDevelopment ? "development" : "production",
+    // In development environment, turn on source map.
+    devtool: isEnvDevelopment ? "inline-source-map" : false,
+    // In development environment, webpack watch the file changes, and recompile
+    watch: isEnvDevelopment,
+    entry: {
+      main: ["./src/ui/web/web.tsx"]
+    },
+    output: {
+      path: path.resolve(__dirname, "dist/web"),
+      filename: "[name].bundle.js"
+    },
+    resolve: commonResolve("src/ui/web/public/assets"),
+    module: {
+      rules: [sassRule, tsRule, fileRule]
+    },
+    plugins: [
+      new ForkTsCheckerWebpackPlugin(),
+      new HtmlWebpackPlugin({
+        template: "./src/web.html",
+        filename: "index.html",
+        chunks: ["main"]
+      }),
+      new webpack.EnvironmentPlugin(["NODE_ENV"])
+    ]
+  };
+};
+
+module.exports = [extensionConfig, webConfig];

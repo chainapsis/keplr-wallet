@@ -1,3 +1,1 @@
-export const InitInfo = {
-  extensionId: "adpjebkidmjanaapkmbinealkpaconlb"
-};
+export const ExtensionId = "mnadddeglllbfhoacnmlimlbdkliekeb";
