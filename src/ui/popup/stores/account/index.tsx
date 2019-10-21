@@ -1,4 +1,4 @@
-import { ChainInfo } from "../chain";
+import { ChainInfo } from "../../../../chain-info";
 
 import { sendMessage } from "../../../../common/message";
 import {

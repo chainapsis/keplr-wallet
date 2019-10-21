@@ -1,6 +1,6 @@
 import { generateSeed } from "@everett-protocol/cosmosjs/utils/key";
 
-import { ChainInfo } from "../chain";
+import { ChainInfo } from "../../../../chain-info";
 
 import { sendMessage } from "../../../../common/message";
 import {
