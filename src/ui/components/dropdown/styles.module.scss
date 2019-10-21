@@ -1,0 +1,5 @@
+.dropdown {
+  :global(.button:focus:not(:active)) {
+    box-shadow: none;
+  }
+}
