@@ -14,6 +14,7 @@ export interface ChainInfo {
   readonly coinDenom: string;
   readonly coinMinimalDenom: string;
   readonly coinDecimals: number;
+  readonly coinIconUrl: string;
   readonly bip44: BIP44;
   readonly bech32Config: Bech32Config;
 }
@@ -33,6 +34,7 @@ export class ChainStore {
         coinDenom: "ATOM",
         coinMinimalDenom: "uATOM",
         coinDecimals: 6,
+        coinIconUrl: require("assets/atom-icon.png"),
         bip44: new BIP44(44, 118, 0),
         bech32Config: defaultBech32Config("cosmos")
       },
@@ -43,6 +45,7 @@ export class ChainStore {
         coinDenom: "LUNA",
         coinMinimalDenom: "uLUNA",
         coinDecimals: 6,
+        coinIconUrl: require("assets/luna-icon.svg"),
         bip44: new BIP44(44, 330, 0),
         bech32Config: defaultBech32Config("terra")
       }

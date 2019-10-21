@@ -18,7 +18,7 @@ export const AccountInfo: FunctionComponent = observer(() => {
         <div className={styleAsset.containerSymbol}>
           <img
             className={styleAsset.symbol}
-            src={require("assets/atom-icon.png")}
+            src={chainStore.chainInfo.coinIconUrl}
           />
         </div>
         <div className={styleAsset.amount}>
