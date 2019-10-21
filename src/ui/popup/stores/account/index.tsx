@@ -1,20 +1,20 @@
 import { ChainInfo } from "../chain";
 
-import { sendMessage } from "../../../common/message";
+import { sendMessage } from "../../../../common/message";
 import {
   GetKeyMsg,
   KeyRingStatus,
   SetPathMsg
-} from "../../../background/keyring";
+} from "../../../../background/keyring";
 
 import { action, flow, observable } from "mobx";
-import { BACKGROUND_PORT } from "../../../common/message/constant";
+import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
 import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
 import { RootStore } from "../root";
 import Axios from "axios";
-import { KeyHex } from "../../../background/keyring";
+import { KeyHex } from "../../../../background/keyring";
 
 export class AccountStore {
   @observable

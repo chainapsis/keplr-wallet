@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 
-import { Form, Input, Label } from "../../components/form";
+import { Form, Input, Label } from "../../../components/form";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";

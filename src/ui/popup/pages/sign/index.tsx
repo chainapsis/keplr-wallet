@@ -1,13 +1,13 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { Button } from "../../components/button";
+import { Button } from "../../../components/button";
 import {
   ApproveSignMsg,
   GetRequestedMessage,
   RejectSignMsg
-} from "../../../background/keyring";
+} from "../../../../background/keyring";
 import { RouteComponentProps } from "react-router";
-import { sendMessage } from "../../../common/message";
-import { BACKGROUND_PORT } from "../../../common/message/constant";
+import { sendMessage } from "../../../../common/message";
+import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 

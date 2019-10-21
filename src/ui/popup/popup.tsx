@@ -13,7 +13,7 @@ import { SendPage } from "./pages/send";
 import {
   NotificationProvider,
   NotificationStoreProvider
-} from "./components/notification";
+} from "../components/notification";
 
 import { configure } from "mobx";
 import { observer } from "mobx-react";

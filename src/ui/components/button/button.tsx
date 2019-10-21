@@ -1,7 +1,12 @@
 import React, { FunctionComponent, ButtonHTMLAttributes } from "react";
 import classnames from "classnames";
 
-import { Size, Color, getSizeClass, getColorClass } from "../../styles/type";
+import {
+  Size,
+  Color,
+  getSizeClass,
+  getColorClass
+} from "../../popup/styles/type";
 import { Link } from "react-router-dom";
 
 export interface ButtonProps extends ButtonHTMLAttributes<any> {

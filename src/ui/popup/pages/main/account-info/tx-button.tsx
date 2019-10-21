@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 import styleTxButton from "./tx-button.module.scss";
-import { Button } from "../../../components/button";
+import { Button } from "../../../../components/button";
 
 export const TxButtonView: FunctionComponent = () => {
   return (

@@ -6,7 +6,7 @@ import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
-import { ToolTip } from "../../components/tooltip";
+import { ToolTip } from "../../../components/tooltip";
 
 import { ChainList } from "./chain-list";
 import { Menu, useMenu, MenuButton } from "../menu";

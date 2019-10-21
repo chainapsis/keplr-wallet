@@ -2,17 +2,17 @@ import { generateSeed } from "@everett-protocol/cosmosjs/utils/key";
 
 import { ChainInfo } from "../chain";
 
-import { sendMessage } from "../../../common/message";
+import { sendMessage } from "../../../../common/message";
 import {
   KeyRingStatus,
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
   CreateKeyMsg,
   UnlockKeyRingMsg
-} from "../../../background/keyring";
+} from "../../../../background/keyring";
 
 import { action, observable, flow } from "mobx";
-import { BACKGROUND_PORT } from "../../../common/message/constant";
+import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RootStore } from "../root";
 
 /*

@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState, useEffect } from "react";
 
-import { Button } from "../../components/button";
+import { Button } from "../../../components/button";
 
 import { KeyRingStore } from "../../stores/keyring";
 

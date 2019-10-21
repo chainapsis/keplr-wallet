@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
-import { Form, Input, Label } from "../../components/form";
+import { Form, Input, Label } from "../../../components/form";
 import { RouteComponentProps } from "react-router-dom";
 import { useStore } from "../../stores";
 
