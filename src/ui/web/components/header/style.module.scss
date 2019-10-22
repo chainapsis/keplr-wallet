@@ -13,7 +13,7 @@
 
 .fake {
   z-index: -1000;
-  position: fixed;
+  position: absolute;
   width: 100%;
   height: $header-height;
   background-color: white;
