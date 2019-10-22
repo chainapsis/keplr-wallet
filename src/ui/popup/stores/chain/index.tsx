@@ -24,8 +24,9 @@ export class ChainStore {
         chainInfo = ci;
       }
     }
+    // If no match chain id, throw error.
     if (chainInfo === null) {
-      chainInfo = this.chainList[0];
+      throw new Error("Invalid chain id");
     }
 
     this.chainInfo = chainInfo;
