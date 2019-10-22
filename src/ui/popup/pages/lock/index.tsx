@@ -1,44 +1,52 @@
 import React, { FunctionComponent, useState } from "react";
 
-import { Form, Input, Label } from "../../../components/form";
+import { Input } from "../../../components/form";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
+import { Button } from "../../../components/button";
+import useForm from "react-hook-form";
+
+interface FormData {
+  password: string;
+}
 
 export const LockPage: FunctionComponent = observer(() => {
+  const { register, handleSubmit, errors } = useForm<FormData>({
+    defaultValues: {
+      password: ""
+    }
+  });
+
   const { keyRingStore } = useStore();
 
-  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   return (
-    <Form
-      onSubmit={async e => {
-        e.preventDefault();
-        await keyRingStore.unlock(password);
+    <form
+      onSubmit={handleSubmit(async data => {
+        setLoading(true);
+        await keyRingStore.unlock(data.password);
         await keyRingStore.save();
-      }}
+      })}
     >
-      <Label>Password</Label>
       <Input
-        type="text"
-        required
-        value={password}
-        onChange={e => {
-          setPassword(e.target.value);
-        }}
+        type="password"
+        label="Passward"
+        name="password"
+        error={errors.password && errors.password.message}
+        ref={register({ required: "Password is empty" })}
       />
 
-      <Input type="submit" value="Submit" />
-
-      <Label>Test</Label>
-      <Input
-        type="text"
-        required
-        value={password}
-        onChange={e => {
-          setPassword(e.target.value);
-        }}
-      />
-    </Form>
+      <Button
+        type="submit"
+        color="primary"
+        size="medium"
+        fullwidth
+        loading={loading}
+      >
+        Unlock
+      </Button>
+    </form>
   );
 });
