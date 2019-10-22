@@ -1,0 +1,19 @@
+.input {
+  box-shadow: none !important;
+}
+
+:global(.field) {
+  margin-bottom: 1rem !important;
+}
+
+:global(.field:last-of-type) {
+  margin-bottom: 1.5rem !important;
+}
+
+:global {
+  .help {
+    position: absolute !important;
+    font-size: 1rem !important;
+    margin-top: -0.25rem !important;
+  }
+}
