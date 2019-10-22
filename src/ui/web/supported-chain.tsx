@@ -1,8 +1,11 @@
 import { NativeChainInfos } from "../../chain-info";
 import React, { FunctionComponent } from "react";
-import { UnderConstructionSection } from "./sections/under-construction";
+
 import { Link } from "react-router-dom";
 import classnames from "classnames";
+
+import { UnderConstructionSection } from "./sections/under-construction";
+import { SendSection } from "./sections/cosmos/send";
 
 export interface Menu {
   /**
@@ -44,7 +47,7 @@ export const SupportedChainWalletUIs: WalletUI[] = [
             Send
           </Link>
         ),
-        sectionRender: () => <UnderConstructionSection />
+        sectionRender: () => <SendSection />
       },
       {
         path: "stake",
@@ -88,7 +91,7 @@ export const SupportedChainWalletUIs: WalletUI[] = [
             Send
           </Link>
         ),
-        sectionRender: () => <UnderConstructionSection />
+        sectionRender: () => <SendSection />
       },
       {
         path: "stake",

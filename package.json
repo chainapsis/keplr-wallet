@@ -33,6 +33,7 @@
     "query-string": "^6.8.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
+    "react-hook-form": "^3.24.1",
     "react-router-dom": "^5.0.1",
     "scrypt-js": "^2.0.4",
     "scryptsy": "^2.1.0",

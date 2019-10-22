@@ -1,0 +1,23 @@
+@import "~bulma/sass/utilities/all";
+
+$column-padding: 16px;
+
+.send-form-column {
+  padding: $column-padding $column-padding / 2 $column-padding $column-padding;
+
+  @include mobile {
+    padding: $column-padding;
+  }
+}
+
+.asset-column {
+  padding: $column-padding $column-padding $column-padding $column-padding / 2;
+
+  @include mobile {
+    padding: $column-padding;
+  }
+}
+
+.card {
+  padding: 24px;
+}

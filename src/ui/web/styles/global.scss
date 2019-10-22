@@ -4,9 +4,9 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "../../../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
 @import "../../../../node_modules/@fortawesome/fontawesome-free/scss/solid";
 
-$radius-small: 6px;
-$radius: 10px;
-$radius-large: 14px;
+$radius-small: 2px;
+$radius: 6px;
+$radius-large: 10px;
 
 @import "../../../../node_modules/bulma/bulma";
 
@@ -22,4 +22,10 @@ body,
 
 html {
   background-color: #ecf0f8;
+}
+
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: none;
 }
