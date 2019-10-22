@@ -9,7 +9,12 @@ export const TxButtonView: FunctionComponent = () => {
       <Button color="primary" size="medium" to="/send">
         Send
       </Button>
-      <Button color="link" size="medium">
+      <Button
+        color="link"
+        size="medium"
+        href="http://localhost:8081"
+        target="_blank"
+      >
         More
       </Button>
     </div>

@@ -1,6 +1,6 @@
 import { Message } from "./message";
 import { Result } from "./interfaces";
-import { ExtensionId } from "../../initializer";
+import { ExtensionId } from "../../extension-id";
 
 export function sendMessage<T = any>(port: string, msg: Message): Promise<T> {
   // TODO: handle reject.

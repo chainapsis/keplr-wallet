@@ -1,0 +1,20 @@
+@import "../../styles/var";
+
+.header {
+  height: $header-height;
+  margin-bottom: 0 !important;
+
+  background-color: white;
+
+  .chain-icon {
+    height: 30px;
+  }
+}
+
+.fake {
+  z-index: -1000;
+  position: fixed;
+  width: 100%;
+  height: $header-height;
+  background-color: white;
+}

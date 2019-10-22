@@ -1,0 +1,25 @@
+@charset "utf-8";
+
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/solid";
+
+$radius-small: 6px;
+$radius: 10px;
+$radius-large: 14px;
+
+@import "../../../../node_modules/bulma/bulma";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+html {
+  background-color: #ecf0f8;
+}

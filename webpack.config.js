@@ -111,6 +111,9 @@ const webConfig = (env, args) => {
     devtool: isEnvDevelopment ? "inline-source-map" : false,
     // In development environment, webpack watch the file changes, and recompile
     watch: isEnvDevelopment,
+    devServer: {
+      port: 8081
+    },
     entry: {
       main: ["./src/ui/web/web.tsx"]
     },

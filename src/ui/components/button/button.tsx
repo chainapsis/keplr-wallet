@@ -13,6 +13,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<any> {
   size?: Size;
   color?: Color;
   to?: string;
+  href?: string;
+  target?: string;
   fullWidth?: boolean;
   outline?: boolean;
   inverted?: boolean;
@@ -27,6 +29,8 @@ export const Button: FunctionComponent<ButtonProps> = props => {
     size,
     color,
     to,
+    href,
+    target,
     fullWidth,
     outline,
     inverted,
@@ -54,6 +58,8 @@ export const Button: FunctionComponent<ButtonProps> = props => {
             { "is-loading": loading }
           ])}
           to={to}
+          target={target}
+          href={href}
         >
           {props.children}
         </Link>
