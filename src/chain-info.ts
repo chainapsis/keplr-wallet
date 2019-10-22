@@ -12,6 +12,7 @@ export interface ChainInfo {
   readonly coinMinimalDenom: string;
   readonly coinDecimals: number;
   readonly coinIconUrl: string;
+  readonly walletUrl: string;
   readonly bip44: BIP44;
   readonly bech32Config: Bech32Config;
 }
@@ -25,6 +26,10 @@ export const NativeChainInfos: ChainInfo[] = [
     coinMinimalDenom: "uATOM",
     coinDecimals: 6,
     coinIconUrl: require("assets/atom-icon.png"),
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? ""
+        : "http://localhost:8081/#/cosmoshub-2",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos")
   },
@@ -36,6 +41,10 @@ export const NativeChainInfos: ChainInfo[] = [
     coinMinimalDenom: "uLUNA",
     coinDecimals: 6,
     coinIconUrl: require("assets/luna-icon.svg"),
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? ""
+        : "http://localhost:8081/#/columbus-2",
     bip44: new BIP44(44, 330, 0),
     bech32Config: defaultBech32Config("terra")
   }
