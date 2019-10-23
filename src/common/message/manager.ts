@@ -32,6 +32,7 @@ export class MessageManager {
 
     this.port = port;
     chrome.runtime.onMessage.addListener(this.onMessage);
+    chrome.runtime.onMessageExternal.addListener(this.onMessage);
   }
 
   private onMessage = (

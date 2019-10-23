@@ -13,5 +13,18 @@
     "scripts": ["background.bundle.js"],
     "persistent": true
   },
-  "permissions": ["storage"]
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScripts.bundle.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "externally_connectable": {
+    "matches": ["http://localhost:8081/*"],
+    "ids": ["*"]
+  },
+  "web_accessible_resources": ["injectedScript.bundle.js"]
 }

@@ -68,7 +68,9 @@ const extensionConfig = (env, args) => {
     watch: isEnvDevelopment,
     entry: {
       popup: ["./src/ui/popup/popup.tsx"],
-      background: ["./src/background/background.ts"]
+      background: ["./src/background/background.ts"],
+      contentScripts: ["./src/content-scripts/content-scripts.ts"],
+      injectedScript: ["./src/content-scripts/inject/injected-script.ts"]
     },
     output: {
       path: path.resolve(__dirname, "dist/extension"),
