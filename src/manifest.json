@@ -23,7 +23,6 @@
     }
   ],
   "externally_connectable": {
-    "matches": ["http://localhost:8081/*"],
     "ids": ["*"]
   },
   "web_accessible_resources": ["injectedScript.bundle.js"]

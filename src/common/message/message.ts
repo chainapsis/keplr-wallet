@@ -15,6 +15,13 @@ export abstract class Message {
    Ask for approval if message is sent externally.
    */
   approveExternal(sender: chrome.runtime.MessageSender): boolean {
+    if (!sender.url) {
+      return false;
+    }
+    const url = new URL(sender.url);
+    if (url.origin !== `chrome-extension://${chrome.runtime.id}`) {
+      return false;
+    }
     return sender.id === chrome.runtime.id;
   }
 }
