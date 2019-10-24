@@ -67,7 +67,7 @@ export function postMessage<T>(port: string, msg: Message): Promise<T> {
     })
     .join("");
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const receiveResult = (e: any) => {
       const proxyMsgResult: ProxyMessageResult = e.data;
 
@@ -84,11 +84,13 @@ export function postMessage<T>(port: string, msg: Message): Promise<T> {
       const result = proxyMsgResult.result;
 
       if (!result) {
-        throw new Error("Result is null");
+        reject(new Error("Result is null"));
+        return;
       }
 
       if (result.error) {
-        throw new Error(result.error);
+        reject(new Error(result.error));
+        return;
       }
 
       resolve(result.return);
