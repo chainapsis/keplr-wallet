@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 
 import { Input } from "../../../../components/form";
 
@@ -10,7 +10,8 @@ import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
 import {
   AccAddress,
-  useBech32Config
+  useBech32Config,
+  useBech32ConfigPromise
 } from "@everett-protocol/cosmosjs/common/address";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { Api } from "@everett-protocol/cosmosjs/core/api";
@@ -28,6 +29,7 @@ import * as Bank from "@everett-protocol/cosmosjs/x/bank";
 import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
 import bigInteger from "big-integer";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { useNotification } from "../../../../components/notification";
 
 interface FormData {
   readonly recipient: string;
@@ -36,7 +38,7 @@ interface FormData {
 }
 
 export const SendSection: FunctionComponent = observer(() => {
-  const { register, handleSubmit, errors } = useForm<FormData>({
+  const { register, handleSubmit, setValue, errors } = useForm<FormData>({
     defaultValues: {
       recipient: "",
       amount: "",
@@ -45,6 +47,16 @@ export const SendSection: FunctionComponent = observer(() => {
   });
 
   const { chainStore } = useStore();
+
+  const [loading, setLoading] = useState(false);
+
+  const notification = useNotification();
+
+  const clearForm = () => {
+    setValue("recipient", "");
+    setValue("amount", "");
+    setValue("memo", "");
+  };
 
   return (
     <div className="columns is-gapless">
@@ -93,22 +105,75 @@ export const SendSection: FunctionComponent = observer(() => {
 
                 await cosmosjs.enable();
 
+                setLoading(true);
+
                 const keys = await cosmosjs.getKeys();
 
                 // This is not react hook.
                 // eslint-disable-next-line react-hooks/rules-of-hooks
-                useBech32Config(chainStore.chainInfo.bech32Config, () => {
-                  const msg = new MsgSend(
-                    new AccAddress(keys[0].address),
-                    AccAddress.fromBech32(data.recipient),
-                    [Coin.parse(data.amount)]
-                  );
-                  cosmosjs.sendMsgs([msg], {
-                    gas: bigInteger(60000),
-                    memo: data.memo,
-                    fee: new Coin("uatom", new Int("111"))
-                  });
-                });
+                useBech32ConfigPromise(
+                  chainStore.chainInfo.bech32Config,
+                  async () => {
+                    const msg = new MsgSend(
+                      new AccAddress(keys[0].address),
+                      AccAddress.fromBech32(data.recipient),
+                      [Coin.parse(data.amount)]
+                    );
+
+                    try {
+                      // TODO: change mode to commit.
+                      const result = await cosmosjs.sendMsgs(
+                        [msg],
+                        {
+                          gas: bigInteger(60000),
+                          memo: data.memo,
+                          fee: new Coin("uatom", new Int("111"))
+                        },
+                        "sync"
+                      );
+
+                      if (result.mode === "sync") {
+                        if (result.code !== 0) {
+                          notification.push({
+                            type: "danger",
+                            content: result.log,
+                            duration: 5,
+                            canDelete: true,
+                            placement: "top-right",
+                            transition: {
+                              duration: 0.25
+                            }
+                          });
+                        } else {
+                          notification.push({
+                            type: "success",
+                            content: "Wait a second. Tx will be commited soon.",
+                            duration: 5,
+                            canDelete: true,
+                            placement: "top-right",
+                            transition: {
+                              duration: 0.25
+                            }
+                          });
+                        }
+                      }
+                    } catch (e) {
+                      notification.push({
+                        type: "danger",
+                        content: e.toString(),
+                        duration: 5,
+                        canDelete: true,
+                        placement: "top-right",
+                        transition: {
+                          duration: 0.25
+                        }
+                      });
+                    } finally {
+                      clearForm();
+                      setLoading(false);
+                    }
+                  }
+                );
               })}
             >
               <Input
@@ -157,7 +222,13 @@ export const SendSection: FunctionComponent = observer(() => {
                 error={errors.memo && errors.memo.message}
                 ref={register({ required: false })}
               />
-              <Button type="submit" color="primary" size="medium" fullwidth>
+              <Button
+                type="submit"
+                color="primary"
+                size="medium"
+                fullwidth
+                loading={loading}
+              >
                 Send
               </Button>
             </form>

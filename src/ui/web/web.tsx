@@ -11,6 +11,10 @@ import "./styles/global.scss";
 import { Header } from "./components/header";
 import { observer } from "mobx-react";
 import { configure } from "mobx";
+import {
+  NotificationProvider,
+  NotificationStoreProvider
+} from "../components/notification";
 
 configure({
   enforceActions: "always" // Make mobx to strict mode.
@@ -70,7 +74,11 @@ const Router: FunctionComponent = () => {
 
 ReactDOM.render(
   <StoreProvider>
-    <Router />
+    <NotificationStoreProvider>
+      <NotificationProvider>
+        <Router />
+      </NotificationProvider>
+    </NotificationStoreProvider>
   </StoreProvider>,
   document.getElementById("app")
 );
