@@ -35,7 +35,10 @@ const Wallet: FunctionComponent<
   const Section = walletUIStore.currentMenu.sectionRender;
 
   return (
-    <div className="columns is-gapless" style={{ height: "100%" }}>
+    <div
+      className="columns is-gapless"
+      style={{ height: "100%", marginBottom: 0 }}
+    >
       <div className="column is-2-widescreen is-3">
         <Sidebar>
           {walletUIStore.walletUI.menus.map((menu, i) => {
