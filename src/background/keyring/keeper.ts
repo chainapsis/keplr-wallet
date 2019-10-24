@@ -139,7 +139,8 @@ export class KeyRingKeeper {
       window.open(
         `chrome-extension://${chrome.runtime.id}/popup.html#/sign/${index}`,
         "sign",
-        "width=360px,height=600px"
+        "width=360px,height=600px",
+        true
       );
     }
 

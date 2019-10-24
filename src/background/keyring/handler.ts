@@ -21,7 +21,6 @@ export const getHandler: () => Handler = () => {
   const keeper = new KeyRingKeeper();
 
   return async (msg: Message) => {
-    console.log(msg);
     switch (msg.constructor) {
       case GetRegisteredChainMsg:
         return {
@@ -79,7 +78,6 @@ export const getHandler: () => Handler = () => {
         return result;
       case RequestSignMsg:
         const requestSignMsg = msg as RequestSignMsg;
-        console.log(requestSignMsg.origin);
         if (requestSignMsg.origin) {
           keeper.checkAccessOrigin(
             requestSignMsg.chainId,
