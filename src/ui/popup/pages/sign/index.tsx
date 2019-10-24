@@ -11,23 +11,31 @@ import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 
+import style from "./styles.module.scss";
+
+import queryString from "query-string";
+
 const Buffer = require("buffer/").Buffer;
 
-const approve = (index: string) => {
+const approve = async (index: string) => {
   const msg = ApproveSignMsg.create(index);
-  sendMessage(BACKGROUND_PORT, msg);
+  await sendMessage(BACKGROUND_PORT, msg);
 };
 
-const reject = (index: string) => {
+const reject = async (index: string) => {
   const msg = RejectSignMsg.create(index);
-  sendMessage(BACKGROUND_PORT, msg);
+  await sendMessage(BACKGROUND_PORT, msg);
 };
 
 export const SignPage: FunctionComponent<
   RouteComponentProps<{ index: string }>
-> = ({ history, match }) => {
+> = ({ history, match, location }) => {
+  const query = queryString.parse(location.search);
+  const inPopup = query.inPopup as boolean | undefined;
+
   const index = match.params.index;
 
+  const [selected, setSelected] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -46,6 +54,23 @@ export const SignPage: FunctionComponent<
         setMessage(message);
       }
     })();
+
+    // Force reject when closing window.
+    const beforeunload = () => {
+      if (!selected) {
+        reject(index);
+      }
+    };
+
+    addEventListener("beforeunload", beforeunload);
+    return () => {
+      removeEventListener("beforeunload", beforeunload);
+
+      // If this is called by injected wallet provider, it will reject signing when unmount
+      if (!inPopup && !selected) {
+        reject(index);
+      }
+    };
   }, [index]);
 
   return (
@@ -53,7 +78,7 @@ export const SignPage: FunctionComponent<
       showChainName
       canChangeChainInfo={false}
       onBackButton={
-        history.length > 1
+        inPopup
           ? () => {
               history.goBack();
             }
@@ -61,9 +86,43 @@ export const SignPage: FunctionComponent<
       }
     >
       <div>
-        <pre style={{ height: "300px", overflow: "scroll" }}>{message}</pre>
-        <Button onClick={() => approve(index)}>Approve</Button>
-        <Button onClick={() => reject(index)}>Reject</Button>
+        <pre className={style.message}>{message}</pre>
+        <div className={style.buttons}>
+          <Button
+            className={style.button}
+            size="medium"
+            color="primary"
+            disabled={selected}
+            onClick={async () => {
+              setSelected(true);
+              await approve(index);
+
+              // If this is called by injected wallet provider. Just close.
+              if (!inPopup) {
+                window.close();
+              }
+            }}
+          >
+            Approve
+          </Button>
+          <Button
+            className={style.button}
+            size="medium"
+            color="danger"
+            disabled={selected}
+            onClick={async () => {
+              setSelected(true);
+              await reject(index);
+
+              // If this is called by injected wallet provider. Just close.
+              if (!inPopup) {
+                window.close();
+              }
+            }}
+          >
+            Reject
+          </Button>
+        </div>
       </div>
     </HeaderLayout>
   );

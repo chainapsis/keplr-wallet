@@ -1,0 +1,22 @@
+.message {
+  height: 300px;
+  overflow: scroll;
+
+  margin-bottom: 16px;
+}
+
+.buttons {
+  display: flex;
+}
+
+.button {
+  flex: 1;
+
+  &:first-child {
+    margin-right: 8px;
+  }
+
+  &:last-child {
+    margin-left: 8px;
+  }
+}
