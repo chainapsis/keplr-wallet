@@ -8,6 +8,24 @@ import styleAsset from "./asset.module.scss";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
+import { Int } from "@everett-protocol/cosmosjs/common/int";
+
+function decimalStrAmount(amount: Int, decimals: number): string {
+  const decimalPoint = new Int(
+    "1" +
+      Array.from(new Array(decimals))
+        .map(() => "0")
+        .join("")
+  );
+  const integerPart = amount.div(decimalPoint);
+  const fractionalPart = amount.mod(decimalPoint);
+
+  const fractionalStr =
+    Array.from(new Array(decimals - fractionalPart.toString().length))
+      .map(() => "0")
+      .join("") + fractionalPart.toString();
+  return integerPart.toString() + "." + fractionalStr;
+}
 
 export const AccountInfo: FunctionComponent = observer(() => {
   const { chainStore, accountStore } = useStore();
@@ -23,7 +41,10 @@ export const AccountInfo: FunctionComponent = observer(() => {
         </div>
         <div className={styleAsset.amount}>
           {!accountStore.isAssetFetching && accountStore.assets.length > 0
-            ? accountStore.assets[0].amount.toString()
+            ? decimalStrAmount(
+                accountStore.assets[0].amount,
+                chainStore.chainInfo.coinDecimals
+              )
             : "0"}{" "}
           {chainStore.chainInfo.coinDenom}
         </div>
