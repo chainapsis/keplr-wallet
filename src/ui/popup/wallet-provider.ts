@@ -66,10 +66,14 @@ export class PopupWalletProvider implements WalletProvider {
       // There is no need to set origin because this wallet provider is used in internal.
       ""
     );
-    return new Promise<Uint8Array>(resolve => {
-      sendMessage(BACKGROUND_PORT, requestSignMsg).then(({ signatureHex }) => {
-        resolve(new Uint8Array(Buffer.from(signatureHex, "hex")));
-      });
+    return new Promise<Uint8Array>((resolve, reject) => {
+      sendMessage(BACKGROUND_PORT, requestSignMsg)
+        .then(({ signatureHex }) => {
+          resolve(new Uint8Array(Buffer.from(signatureHex, "hex")));
+        })
+        .catch(e => {
+          reject(e);
+        });
 
       this.accessApprover.onRequestSignature(index);
     });
