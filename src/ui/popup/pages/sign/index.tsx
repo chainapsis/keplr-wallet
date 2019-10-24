@@ -52,9 +52,13 @@ export const SignPage: FunctionComponent<
     <HeaderLayout
       showChainName
       canChangeChainInfo={false}
-      onBackButton={() => {
-        history.goBack();
-      }}
+      onBackButton={
+        history.length > 1
+          ? () => {
+              history.goBack();
+            }
+          : undefined
+      }
     >
       <div>
         <pre style={{ height: "300px", overflow: "scroll" }}>{message}</pre>

@@ -104,16 +104,17 @@ export class AccountStore {
 
   @action
   private fetchBech32Address = flow(function*(this: AccountStore) {
-    const bip44 = this.chainInfo.bip44;
-    const prefix = this.chainInfo.bech32Config.bech32PrefixAccAddr;
-
     this.isAddressFetching = true;
 
-    const path = bip44.pathString(this.bip44Account, this.bip44Index);
-    const setPathMsg = SetPathMsg.create(path);
+    const setPathMsg = SetPathMsg.create(
+      this.chainInfo.chainId,
+      this.bip44Account,
+      this.bip44Index
+    );
     yield sendMessage(BACKGROUND_PORT, setPathMsg);
 
-    const getKeyMsg = GetKeyMsg.create(prefix);
+    // No need to set origin, because this is internal.
+    const getKeyMsg = GetKeyMsg.create(this.chainInfo.chainId, "");
     const result: KeyHex = yield sendMessage(BACKGROUND_PORT, getKeyMsg);
     this.bech32Address = result.bech32Address;
     this.isAddressFetching = false;

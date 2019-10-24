@@ -9,7 +9,8 @@ import {
   RequestSignMsg,
   ApproveSignMsg,
   RejectSignMsg,
-  GetRequestedMessage
+  GetRequestedMessage,
+  GetRegisteredChainMsg
 } from "./messages";
 import { KeyHex, KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
@@ -20,7 +21,12 @@ export const getHandler: () => Handler = () => {
   const keeper = new KeyRingKeeper();
 
   return async (msg: Message) => {
+    console.log(msg);
     switch (msg.constructor) {
+      case GetRegisteredChainMsg:
+        return {
+          chainInfos: keeper.getRegisteredChains()
+        };
       case RestoreKeyRingMsg:
         return {
           status: await keeper.restore()
@@ -45,29 +51,53 @@ export const getHandler: () => Handler = () => {
         };
       case SetPathMsg:
         const setPathMsg = msg as SetPathMsg;
-        keeper.setPath(setPathMsg.path);
+        keeper.setPath(
+          setPathMsg.chainId,
+          setPathMsg.account,
+          setPathMsg.index
+        );
         return {
           success: true
         };
       case GetKeyMsg:
         const getKeyMsg = msg as GetKeyMsg;
+        if (getKeyMsg.origin) {
+          keeper.checkAccessOrigin(getKeyMsg.chainId, getKeyMsg.origin);
+        }
+
         const key = await keeper.getKey();
 
         const result: KeyHex = {
           algo: "secp256k1",
           pubKeyHex: Buffer.from(key.pubKey).toString("hex"),
           addressHex: Buffer.from(key.address).toString("hex"),
-          bech32Address: new Address(key.address).toBech32(getKeyMsg.prefix)
+          bech32Address: new Address(key.address).toBech32(
+            keeper.getChainInfo(getKeyMsg.chainId).bech32Config
+              .bech32PrefixAccAddr
+          )
         };
         return result;
       case RequestSignMsg:
         const requestSignMsg = msg as RequestSignMsg;
+        console.log(requestSignMsg.origin);
+        if (requestSignMsg.origin) {
+          keeper.checkAccessOrigin(
+            requestSignMsg.chainId,
+            requestSignMsg.origin
+          );
+        }
+
+        await keeper.checkBech32Address(
+          requestSignMsg.chainId,
+          requestSignMsg.bech32Address
+        );
 
         return {
           signatureHex: Buffer.from(
             await keeper.requestSign(
               new Uint8Array(Buffer.from(requestSignMsg.messageHex, "hex")),
-              requestSignMsg.index
+              requestSignMsg.index,
+              requestSignMsg.openPopup
             )
           ).toString("hex")
         };

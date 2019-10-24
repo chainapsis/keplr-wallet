@@ -30,7 +30,9 @@ export class PopupWalletProvider implements WalletProvider {
    */
   async getKeys(context: Context): Promise<Key[]> {
     const msg = GetKeyMsg.create(
-      context.get("bech32Config").bech32PrefixAccAddr
+      context.get("chainId"),
+      // There is no need to set origin because this wallet provider is used in internal.
+      ""
     );
     const key: KeyHex = await sendMessage(BACKGROUND_PORT, msg);
     return Promise.resolve([
@@ -46,17 +48,23 @@ export class PopupWalletProvider implements WalletProvider {
   /**
    * Request signature from matched address if user have approved the access.
    */
-  sign(_: Context, __: string, message: Uint8Array): Promise<Uint8Array> {
-    // TODO: Check bech32Address is valid
-
+  sign(
+    context: Context,
+    bech32Address: string,
+    message: Uint8Array
+  ): Promise<Uint8Array> {
     const random = new Uint8Array(4);
     crypto.getRandomValues(random);
     const index = Buffer.from(random).toString("hex");
 
     const requestSignMsg = RequestSignMsg.create(
+      context.get("chainId"),
       index,
+      bech32Address,
       Buffer.from(message).toString("hex"),
-      true
+      false,
+      // There is no need to set origin because this wallet provider is used in internal.
+      ""
     );
     return new Promise<Uint8Array>(resolve => {
       sendMessage(BACKGROUND_PORT, requestSignMsg).then(({ signatureHex }) => {

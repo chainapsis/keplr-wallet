@@ -49,3 +49,22 @@ export const NativeChainInfos: ChainInfo[] = [
     bech32Config: defaultBech32Config("terra")
   }
 ];
+
+export interface AccessOrigin {
+  chainId: string;
+  origins: string[];
+}
+
+/**
+ * This declares which origins can access extension without explicit approval.
+ */
+export const ExtensionAccessOrigins: AccessOrigin[] = [
+  {
+    chainId: "cosmoshub-2",
+    origins: ["http://localhost:8081"]
+  },
+  {
+    chainId: "columbus-2",
+    origins: ["http://localhost:8081"]
+  }
+];

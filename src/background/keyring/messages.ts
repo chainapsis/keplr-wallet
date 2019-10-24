@@ -1,6 +1,27 @@
 import { Message } from "../../common/message";
 import { ROUTE } from "./constants";
 
+export class GetRegisteredChainMsg extends Message {
+  public static type() {
+    return "get-registered-chain-infos";
+  }
+
+  public static create(): GetRegisteredChainMsg {
+    return new GetRegisteredChainMsg();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  validateBasic(): void {}
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetRegisteredChainMsg.type();
+  }
+}
+
 export class RestoreKeyRingMsg extends Message {
   public static type() {
     return "restore-keyring";
@@ -110,17 +131,33 @@ export class SetPathMsg extends Message {
     return "set-path";
   }
 
-  public static create(path: string): SetPathMsg {
+  public static create(
+    chainId: string,
+    account: number,
+    index: number
+  ): SetPathMsg {
     const msg = new SetPathMsg();
-    msg.path = path;
+    msg.chainId = chainId;
+    msg.account = account;
+    msg.index = index;
     return msg;
   }
 
-  public path = "";
+  public chainId: string = "";
+  public account: number = -1;
+  public index: number = -1;
 
   validateBasic(): void {
-    if (!this.path) {
-      throw new Error("path not set");
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (this.account < 0) {
+      throw new Error("Invalid account");
+    }
+
+    if (this.index < 0) {
+      throw new Error("Invalid index");
     }
   }
 
@@ -138,18 +175,37 @@ export class GetKeyMsg extends Message {
     return "get-key";
   }
 
-  public static create(prefix: string): GetKeyMsg {
+  public static create(chainId: string, origin: string): GetKeyMsg {
     const msg = new GetKeyMsg();
-    msg.prefix = prefix;
+    msg.chainId = chainId;
+    msg.origin = origin;
     return msg;
   }
 
-  public prefix = "";
+  public chainId = "";
+  public origin: string | undefined;
 
   validateBasic(): void {
-    if (!this.prefix) {
-      throw new Error("prefix not set");
+    if (!this.chainId) {
+      throw new Error("chain id not set");
     }
+  }
+
+  // Approve external approves sending message if they submit their origin correctly.
+  // Keeper or handler must check that this origin has right permission.
+  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+    const isInternal = super.approveExternal(sender);
+    if (isInternal) {
+      return true;
+    }
+
+    // TODO: When is a url undefined?
+    if (!sender.url) {
+      throw new Error("url is empty");
+    }
+
+    const url = new URL(sender.url);
+    return url.origin === this.origin;
   }
 
   route(): string {
@@ -167,23 +223,40 @@ export class RequestSignMsg extends Message {
   }
 
   public static create(
+    chainId: string,
     index: string,
+    bech32Address: string,
     messageHex: string,
-    internal: boolean = false
+    openPopup: boolean,
+    origin: string
   ): RequestSignMsg {
     const msg = new RequestSignMsg();
+    msg.chainId = chainId;
     msg.index = index;
+    msg.bech32Address = bech32Address;
     msg.messageHex = messageHex;
-    msg.internal = internal;
+    msg.openPopup = openPopup;
+    msg.origin = origin;
     return msg;
   }
 
+  public chainId: string = "";
   public index: string = "";
+  public bech32Address: string = "";
   // Hex encoded message.
   public messageHex: string = "";
-  public internal: boolean = false;
+  public openPopup: boolean = false;
+  public origin: string = "";
 
   validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.bech32Address) {
+      throw new Error("bech32 address not set");
+    }
+
     if (!this.messageHex) {
       throw new Error("message is empty");
     }
@@ -199,21 +272,29 @@ export class RequestSignMsg extends Message {
     }
   }
 
+  // Approve external approves sending message if they submit their origin correctly.
+  // Keeper or handler must check that this origin has right permission.
+  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+    const isInternal = super.approveExternal(sender);
+    if (isInternal) {
+      return true;
+    }
+
+    // TODO: When is a url undefined?
+    if (!sender.url) {
+      throw new Error("url is empty");
+    }
+
+    const url = new URL(sender.url);
+    return url.origin === this.origin;
+  }
+
   route(): string {
     return ROUTE;
   }
 
   type(): string {
     return RequestSignMsg.type();
-  }
-
-  approveExternal(sender: chrome.runtime.MessageSender): boolean {
-    if (this.internal) {
-      return super.approveExternal(sender);
-    } else {
-      // TODO
-    }
-    return false;
   }
 }
 

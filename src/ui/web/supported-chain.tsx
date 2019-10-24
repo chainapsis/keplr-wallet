@@ -64,7 +64,7 @@ export const SupportedChainWalletUIs: WalletUI[] = [
         menuItemRender: ({ active, to }) => (
           <Link className={classnames({ "is-active": active })} to={to}>
             <i className="fas fa-vote-yea" />
-            Gorvernance
+            Governance
           </Link>
         ),
         sectionRender: () => <UnderConstructionSection />

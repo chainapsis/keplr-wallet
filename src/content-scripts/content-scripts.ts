@@ -1,3 +1,7 @@
+import { proxyMessage } from "../common/message";
+
+proxyMessage();
+
 const container = document.head || document.documentElement;
 const scriptElement = document.createElement("script");
 
