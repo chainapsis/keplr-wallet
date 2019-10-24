@@ -21,6 +21,7 @@ export const ChainList: FunctionComponent = observer(() => {
           onClick={() => {
             if (chainInfo.chainId !== chainStore.chainInfo.chainId) {
               chainStore.setChain(chainInfo.chainId);
+              chainStore.saveLastViewChainId();
             }
           }}
         >

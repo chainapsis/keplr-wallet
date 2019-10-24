@@ -13,7 +13,7 @@ export class RootStore {
     this.keyRingStore = new KeyRingStore(this);
     this.chainStore = new ChainStore(this);
 
-    this.chainStore.getChainInfosFromBackground();
+    this.chainStore.init();
     this.keyRingStore.restore();
   }
 }

@@ -3,6 +3,10 @@ import { observable, action, flow } from "mobx";
 import { RootStore } from "../root";
 
 import { ChainInfo, NativeChainInfos } from "../../../../chain-info";
+import {
+  SetPersistentMemoryMsg,
+  GetPersistentMemoryMsg
+} from "../../../../background/persistent-memory";
 import { GetRegisteredChainMsg } from "../../../../background/keyring";
 import { sendMessage } from "../../../../common/message";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
@@ -43,7 +47,28 @@ export class ChainStore {
   }
 
   @action
-  public getChainInfosFromBackground = flow(function*(this: ChainStore) {
+  public saveLastViewChainId = flow(function*(this: ChainStore) {
+    // Save last view chain id to persistent background
+    const msg = SetPersistentMemoryMsg.create({
+      lastViewChainId: this.chainInfo.chainId
+    });
+    yield sendMessage(BACKGROUND_PORT, msg);
+  });
+
+  @action
+  public init = flow(function*(this: ChainStore) {
+    yield this.getChainInfosFromBackground();
+
+    // Get last view chain id to persistent background
+    const msg = GetPersistentMemoryMsg.create();
+    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    if (result && result.lastViewChainId) {
+      this.setChain(result.lastViewChainId);
+    }
+  });
+
+  @action
+  private getChainInfosFromBackground = flow(function*(this: ChainStore) {
     const msg = GetRegisteredChainMsg.create();
     const result = yield sendMessage(BACKGROUND_PORT, msg);
     const chainInfos: ChainInfo[] = result.chainInfos.map(
