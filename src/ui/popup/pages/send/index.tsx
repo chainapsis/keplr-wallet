@@ -127,7 +127,10 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                     {
                       gas: bigInteger(60000),
                       memo: data.memo,
-                      fee: new Coin("uatom", new Int("111"))
+                      fee: new Coin(
+                        chainStore.chainInfo.coinMinimalDenom.toLowerCase(),
+                        new Int("1000")
+                      )
                     },
                     "sync"
                   );
