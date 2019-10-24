@@ -8,7 +8,7 @@ import { HashRouter, Route } from "react-router-dom";
 import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
-import { SendPage } from "./pages/send";
+import { SendPage, SendResultPage } from "./pages/send";
 
 import {
   NotificationProvider,
@@ -48,7 +48,8 @@ ReactDOM.render(
       <NotificationProvider>
         <HashRouter>
           <Route exact path="/" component={StateRenderer} />
-          <Route path="/send" component={SendPage} />
+          <Route exact path="/send" component={SendPage} />
+          <Route path="/send/result" component={SendResultPage} />
           <Route path="/sign/:index" component={SignPage} />
         </HashRouter>
       </NotificationProvider>
