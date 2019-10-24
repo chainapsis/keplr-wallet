@@ -74,7 +74,7 @@ export class MessageManager {
       } catch (e) {
         if (e) {
           sendResponse({
-            error: `Permission rejected: ${e.toString()}`
+            error: `Permission rejected: ${e.message || e.toString()}`
           });
         } else {
           sendResponse({
@@ -90,7 +90,7 @@ export class MessageManager {
       } catch (e) {
         if (e) {
           sendResponse({
-            error: e.toString()
+            error: e.message || e.toString()
           });
         } else {
           sendResponse({
@@ -126,7 +126,7 @@ export class MessageManager {
           .catch(e => {
             if (e) {
               sendResponse({
-                error: e.toString()
+                error: e.message || e.toString()
               });
             } else {
               sendResponse({
@@ -138,14 +138,14 @@ export class MessageManager {
         return true;
       } catch (e) {
         sendResponse({
-          error: e.toString()
+          error: e.message || e.toString()
         });
         return;
       }
     } catch (e) {
       if (e) {
         sendResponse({
-          error: e.toString()
+          error: e.message || e.toString()
         });
       } else {
         sendResponse({
