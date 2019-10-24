@@ -19,6 +19,11 @@ interface SignApproval {
   approve: boolean;
 }
 
+interface SignMessage {
+  chainId: string;
+  message: Uint8Array;
+}
+
 export class KeyRingKeeper {
   private readonly keyRing = new KeyRing();
   private path = "";
@@ -27,7 +32,7 @@ export class KeyRingKeeper {
     string,
     { resolve: (value: SignApproval) => void; reject: (reason?: any) => void }
   > = new Map();
-  private readonly signMessages: Map<string, Uint8Array> = new Map();
+  private readonly signMessages: Map<string, SignMessage> = new Map();
 
   getRegisteredChains(): ChainInfo[] {
     return NativeChainInfos;
@@ -117,6 +122,7 @@ export class KeyRingKeeper {
   }
 
   async requestSign(
+    chainId: string,
     message: Uint8Array,
     index: string,
     openPopup: boolean
@@ -133,7 +139,7 @@ export class KeyRingKeeper {
         reject
       });
     });
-    this.signMessages.set(index, message);
+    this.signMessages.set(index, { chainId, message });
 
     if (openPopup) {
       window.open(
@@ -158,7 +164,7 @@ export class KeyRingKeeper {
     }
   }
 
-  getRequestedMessage(index: string): Uint8Array {
+  getRequestedMessage(index: string): SignMessage {
     const message = this.signMessages.get(index);
     if (!message) {
       throw new Error("Unknown sign request index");

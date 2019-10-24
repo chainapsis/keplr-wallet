@@ -14,6 +14,7 @@ import { HeaderLayout } from "../../layouts/HeaderLayout";
 import style from "./styles.module.scss";
 
 import queryString from "query-string";
+import { useStore } from "../../stores";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -38,14 +39,17 @@ export const SignPage: FunctionComponent<
   const [selected, setSelected] = useState(false);
   const [message, setMessage] = useState("");
 
+  const { chainStore } = useStore();
+
   useEffect(() => {
     (async () => {
       const msg = GetRequestedMessage.create(index);
-      const result: { messageHex: string } = await sendMessage(
+      const result: { chainId: string; messageHex: string } = await sendMessage(
         BACKGROUND_PORT,
         msg
       );
 
+      chainStore.setChain(result.chainId);
       const message = Buffer.from(result.messageHex, "hex").toString();
 
       try {

@@ -93,6 +93,7 @@ export const getHandler: () => Handler = () => {
         return {
           signatureHex: Buffer.from(
             await keeper.requestSign(
+              requestSignMsg.chainId,
               new Uint8Array(Buffer.from(requestSignMsg.messageHex, "hex")),
               requestSignMsg.index,
               requestSignMsg.openPopup
@@ -102,10 +103,13 @@ export const getHandler: () => Handler = () => {
       case GetRequestedMessage:
         const getRequestedMessageMsg = msg as GetRequestedMessage;
 
+        const message = keeper.getRequestedMessage(
+          getRequestedMessageMsg.index
+        );
+
         return {
-          messageHex: Buffer.from(
-            keeper.getRequestedMessage(getRequestedMessageMsg.index)
-          ).toString("hex")
+          chainId: message.chainId,
+          messageHex: Buffer.from(message.message).toString("hex")
         };
       case ApproveSignMsg:
         const approveSignMsg = msg as ApproveSignMsg;
