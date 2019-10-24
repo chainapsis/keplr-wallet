@@ -34,7 +34,7 @@ export const NativeChainInfos: ChainInfo[] = [
     bech32Config: defaultBech32Config("cosmos")
   },
   {
-    rpc: "null",
+    rpc: "http://localhost:81",
     chainId: "columbus-2",
     chainName: "Terra",
     coinDenom: "LUNA",
