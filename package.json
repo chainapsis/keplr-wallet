@@ -1,7 +1,7 @@
 {
-  "name": "test-extension",
-  "version": "0.0.1",
-  "description": "",
+  "name": "kepler",
+  "version": "0.0.1-alpha.1",
+  "description": "Kepler is a browser extension wallet for the Inter blockchain ecosystem.",
   "main": "index.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
@@ -16,8 +16,8 @@
     "lint-test"
   ],
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "everett-protocol",
+  "license": "Apache-2.0",
   "dependencies": {
     "@everett-protocol/cosmosjs": "file:../everett-protocol-cosmosjs-0.0.2-alpha.1.tgz",
     "@fortawesome/fontawesome-free": "^5.11.2",

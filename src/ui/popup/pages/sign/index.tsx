@@ -75,7 +75,8 @@ export const SignPage: FunctionComponent<
         reject(index);
       }
     };
-  }, [index]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <HeaderLayout
