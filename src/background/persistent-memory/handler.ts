@@ -1,21 +1,31 @@
-import { Handler, Message } from "../../common/message";
+import { Handler, InternalHandler, Message } from "../../common/message";
 import { SetPersistentMemoryMsg, GetPersistentMemoryMsg } from "./messages";
+import { PersistentMemoryKeeper } from "./keeper";
 
 export const getHandler: () => Handler = () => {
-  let data = {};
+  const keeper = new PersistentMemoryKeeper();
 
-  return (msg: Message) => {
+  return (msg: Message<unknown>) => {
     switch (msg.constructor) {
       case SetPersistentMemoryMsg:
-        const setPersistentMemoryMsg = msg as SetPersistentMemoryMsg;
-        data = { ...data, ...setPersistentMemoryMsg.data };
-        return {
-          success: true
-        };
+        return handleSetPersistentMemoryMsg(keeper)(
+          msg as SetPersistentMemoryMsg
+        );
       case GetPersistentMemoryMsg:
-        return data;
+        return keeper.get();
       default:
         throw new Error("Unknown msg type");
     }
+  };
+};
+
+const handleSetPersistentMemoryMsg: (
+  keeper: PersistentMemoryKeeper
+) => InternalHandler<SetPersistentMemoryMsg> = (
+  keeper: PersistentMemoryKeeper
+) => msg => {
+  keeper.set(msg.data);
+  return {
+    success: true
   };
 };

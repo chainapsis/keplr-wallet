@@ -1,7 +1,7 @@
 import { Message } from "../../common/message";
 import { ROUTE } from "./constants";
 
-export class SetPersistentMemoryMsg extends Message {
+export class SetPersistentMemoryMsg extends Message<{ success: boolean }> {
   public static type() {
     return "set-persistent-memory";
   }
@@ -26,14 +26,13 @@ export class SetPersistentMemoryMsg extends Message {
   }
 }
 
-export class GetPersistentMemoryMsg extends Message {
+export class GetPersistentMemoryMsg extends Message<any> {
   public static type() {
     return "get-persistent-memory";
   }
 
   public static create(): GetPersistentMemoryMsg {
-    const msg = new GetPersistentMemoryMsg();
-    return msg;
+    return new GetPersistentMemoryMsg();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
