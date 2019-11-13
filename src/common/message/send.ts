@@ -30,11 +30,28 @@ function _sendMessage(
  * And if it is not, it executes not sending but posting automatically.
  * @param port Port that this sends to
  * @param msg Message to send
+ * @param opts If disablePostMessage is true, this doesn't check if the process that sends message is extension process.
  */
 export async function sendMessage<M extends Message<unknown>>(
   port: string,
-  msg: M
+  msg: M,
+  opts: {
+    disablePostMessage: boolean;
+  } = {
+    disablePostMessage: false
+  }
 ): Promise<M extends Message<infer R> ? R : never> {
+  let posting: boolean = false;
+
+  if (!opts || !opts.disablePostMessage) {
+    posting = chrome.runtime.id == null;
+  }
+
+  if (posting) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    return (await postMessage(port, msg)) as any;
+  }
+
   const result = await _sendMessage(port, msg);
 
   if (!result) {
