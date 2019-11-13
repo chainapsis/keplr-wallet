@@ -3,7 +3,7 @@ import { Result } from "./interfaces";
 
 function _sendMessage(
   port: string,
-  msg: Message,
+  msg: Message<unknown>,
   opts: { msgType?: string } = {}
 ): Promise<any> {
   return new Promise(resolve => {
@@ -24,10 +24,17 @@ function _sendMessage(
   });
 }
 
-export async function sendMessage<T = any>(
+/**
+ * Send message to other process and receive result.
+ * This checks if the process that sends message is extension process.
+ * And if it is not, it executes not sending but posting automatically.
+ * @param port Port that this sends to
+ * @param msg Message to send
+ */
+export async function sendMessage<M extends Message<unknown>>(
   port: string,
-  msg: Message
-): Promise<T> {
+  msg: M
+): Promise<M extends Message<infer R> ? R : never> {
   const result = await _sendMessage(port, msg);
 
   if (!result) {
@@ -46,7 +53,7 @@ export interface ProxyMessage {
   msgType: string;
   index: string;
   port: string;
-  msg: Message;
+  msg: Message<unknown>;
 }
 
 export interface ProxyMessageResult {
@@ -59,7 +66,10 @@ export interface ProxyMessageResult {
  * This sends and recieve returns by proxy.
  * This is mainly used in inpage script for communicating background process via proxy.
  */
-export function postMessage<T>(port: string, msg: Message): Promise<T> {
+export function postMessage<M extends Message<unknown>>(
+  port: string,
+  msg: M
+): Promise<M extends Message<infer R> ? R : never> {
   const bytes = new Uint8Array(8);
   const index: string = Array.from(crypto.getRandomValues(bytes))
     .map(value => {
@@ -113,7 +123,7 @@ export function postMessage<T>(port: string, msg: Message): Promise<T> {
 /**
  * Proxy posted message for the pages that are not able to communicate background proccess directly.
  */
-export function proxyMessage(): void {
+export function listenAndProxyMessages(): void {
   window.addEventListener("message", (e: any) => {
     const message: ProxyMessage = e.data;
     if (!message || message.type !== "proxy-message") {
