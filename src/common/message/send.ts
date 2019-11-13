@@ -48,7 +48,6 @@ export async function sendMessage<M extends Message<unknown>>(
   }
 
   if (posting) {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return (await postMessage(port, msg)) as any;
   }
 

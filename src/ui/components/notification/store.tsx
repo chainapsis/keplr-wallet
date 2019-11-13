@@ -9,7 +9,6 @@ export const NotificationStoreContext = React.createContext<NotificationStore | 
 export const NotificationStoreProvider: FunctionComponent<{}> = ({
   children
 }) => (
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   <NotificationStoreContext.Provider value={new NotificationStore()}>
     {children}
   </NotificationStoreContext.Provider>
