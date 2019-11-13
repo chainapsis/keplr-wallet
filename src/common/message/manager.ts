@@ -4,12 +4,17 @@ import MessageSender = chrome.runtime.MessageSender;
 import { Result } from "./interfaces";
 
 export class MessageManager {
-  private registeredMsgType: Map<string, typeof Message> = new Map();
+  private registeredMsgType: Map<
+    string,
+    { new (): Message<unknown> }
+  > = new Map();
   private registeredHandler: Map<string, Handler> = new Map();
 
   private port = "";
 
-  public registerMessage(msgCls: typeof Message & { type(): string }): void {
+  public registerMessage(
+    msgCls: { new (): Message<unknown> } & { type(): string }
+  ): void {
     if (this.registeredMsgType.has(msgCls.type())) {
       throw new Error(`Already registered type ${msgCls.type()}`);
     }
@@ -62,7 +67,7 @@ export class MessageManager {
       const msg = Object.setPrototypeOf(
         message.msg,
         msgCls.prototype
-      ) as Message;
+      ) as Message<unknown>;
 
       try {
         if (!msg.approveExternal(sender)) {
