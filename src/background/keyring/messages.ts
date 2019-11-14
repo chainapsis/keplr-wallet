@@ -1,7 +1,13 @@
 import { Message } from "../../common/message";
 import { ROUTE } from "./constants";
+import { ChainInfo } from "../../chain-info";
+import { KeyRingStatus } from "./keyring";
+import { KeyHex } from "./keeper";
 
-export class GetRegisteredChainMsg extends Message {
+export class GetRegisteredChainMsg extends Message<{
+  // Need to set prototype for elements of array manually.
+  chainInfos: ChainInfo[];
+}> {
   public static type() {
     return "get-registered-chain-infos";
   }
@@ -22,7 +28,7 @@ export class GetRegisteredChainMsg extends Message {
   }
 }
 
-export class RestoreKeyRingMsg extends Message {
+export class RestoreKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
     return "restore-keyring";
   }
@@ -43,7 +49,7 @@ export class RestoreKeyRingMsg extends Message {
   }
 }
 
-export class SaveKeyRingMsg extends Message {
+export class SaveKeyRingMsg extends Message<{ success: boolean }> {
   public static type() {
     return "save-keyring";
   }
@@ -64,7 +70,7 @@ export class SaveKeyRingMsg extends Message {
   }
 }
 
-export class CreateKeyMsg extends Message {
+export class CreateKeyMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
     return "create-key";
   }
@@ -98,7 +104,7 @@ export class CreateKeyMsg extends Message {
   }
 }
 
-export class UnlockKeyRingMsg extends Message {
+export class UnlockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
     return "unlock-keyring";
   }
@@ -126,7 +132,7 @@ export class UnlockKeyRingMsg extends Message {
   }
 }
 
-export class SetPathMsg extends Message {
+export class SetPathMsg extends Message<{ success: boolean }> {
   public static type() {
     return "set-path";
   }
@@ -170,7 +176,7 @@ export class SetPathMsg extends Message {
   }
 }
 
-export class GetKeyMsg extends Message {
+export class GetKeyMsg extends Message<KeyHex> {
   public static type() {
     return "get-key";
   }
@@ -217,7 +223,7 @@ export class GetKeyMsg extends Message {
   }
 }
 
-export class RequestSignMsg extends Message {
+export class RequestSignMsg extends Message<{ signatureHex: string }> {
   public static type() {
     return "request-sign";
   }
@@ -298,7 +304,10 @@ export class RequestSignMsg extends Message {
   }
 }
 
-export class GetRequestedMessage extends Message {
+export class GetRequestedMessage extends Message<{
+  chainId: string;
+  messageHex: string;
+}> {
   public static type() {
     return "get-request-message";
   }
@@ -331,7 +340,7 @@ export class GetRequestedMessage extends Message {
     return GetRequestedMessage.type();
   }
 }
-export class ApproveSignMsg extends Message {
+export class ApproveSignMsg extends Message<void> {
   public static type() {
     return "approve-sign";
   }
@@ -365,7 +374,7 @@ export class ApproveSignMsg extends Message {
   }
 }
 
-export class RejectSignMsg extends Message {
+export class RejectSignMsg extends Message<void> {
   public static type() {
     return "reject-sign";
   }

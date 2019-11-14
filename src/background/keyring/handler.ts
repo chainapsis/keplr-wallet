@@ -1,4 +1,4 @@
-import { Handler, Message } from "../../common/message";
+import { Handler, InternalHandler, Message } from "../../common/message";
 import {
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
@@ -12,7 +12,7 @@ import {
   GetRequestedMessage,
   GetRegisteredChainMsg
 } from "./messages";
-import { KeyHex, KeyRingKeeper } from "./keeper";
+import { KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
 
 const Buffer = require("buffer/").Buffer;
@@ -20,107 +20,172 @@ const Buffer = require("buffer/").Buffer;
 export const getHandler: () => Handler = () => {
   const keeper = new KeyRingKeeper();
 
-  return async (msg: Message) => {
+  return (msg: Message<unknown>) => {
     switch (msg.constructor) {
       case GetRegisteredChainMsg:
-        return {
-          chainInfos: keeper.getRegisteredChains()
-        };
+        return handleGetRegisteredChainMsg(keeper)(
+          msg as GetRegisteredChainMsg
+        );
       case RestoreKeyRingMsg:
-        return {
-          status: await keeper.restore()
-        };
+        return handleRestoreKeyRingMsg(keeper)(msg as RestoreKeyRingMsg);
       case SaveKeyRingMsg:
-        await keeper.save();
-        return {
-          success: true
-        };
+        return handleSaveKeyRingMsg(keeper)(msg as SaveKeyRingMsg);
       case CreateKeyMsg:
-        const createKeyMsg = msg as CreateKeyMsg;
-        return {
-          status: await keeper.createKey(
-            createKeyMsg.mnemonic,
-            createKeyMsg.password
-          )
-        };
+        return handleCreateKeyMsg(keeper)(msg as CreateKeyMsg);
       case UnlockKeyRingMsg:
-        const unlockKeyRingMsg = msg as UnlockKeyRingMsg;
-        return {
-          status: await keeper.unlock(unlockKeyRingMsg.password)
-        };
+        return handleUnlockKeyRingMsg(keeper)(msg as UnlockKeyRingMsg);
       case SetPathMsg:
-        const setPathMsg = msg as SetPathMsg;
-        keeper.setPath(
-          setPathMsg.chainId,
-          setPathMsg.account,
-          setPathMsg.index
-        );
-        return {
-          success: true
-        };
+        return handleSetPathMsg(keeper)(msg as SetPathMsg);
       case GetKeyMsg:
-        const getKeyMsg = msg as GetKeyMsg;
-        if (getKeyMsg.origin) {
-          keeper.checkAccessOrigin(getKeyMsg.chainId, getKeyMsg.origin);
-        }
-
-        const key = await keeper.getKey();
-
-        const result: KeyHex = {
-          algo: "secp256k1",
-          pubKeyHex: Buffer.from(key.pubKey).toString("hex"),
-          addressHex: Buffer.from(key.address).toString("hex"),
-          bech32Address: new Address(key.address).toBech32(
-            keeper.getChainInfo(getKeyMsg.chainId).bech32Config
-              .bech32PrefixAccAddr
-          )
-        };
-        return result;
+        return handleGetKeyMsg(keeper)(msg as GetKeyMsg);
       case RequestSignMsg:
-        const requestSignMsg = msg as RequestSignMsg;
-        if (requestSignMsg.origin) {
-          keeper.checkAccessOrigin(
-            requestSignMsg.chainId,
-            requestSignMsg.origin
-          );
-        }
-
-        await keeper.checkBech32Address(
-          requestSignMsg.chainId,
-          requestSignMsg.bech32Address
-        );
-
-        return {
-          signatureHex: Buffer.from(
-            await keeper.requestSign(
-              requestSignMsg.chainId,
-              new Uint8Array(Buffer.from(requestSignMsg.messageHex, "hex")),
-              requestSignMsg.index,
-              requestSignMsg.openPopup
-            )
-          ).toString("hex")
-        };
+        return handleRequestSignMsg(keeper)(msg as RequestSignMsg);
       case GetRequestedMessage:
-        const getRequestedMessageMsg = msg as GetRequestedMessage;
-
-        const message = keeper.getRequestedMessage(
-          getRequestedMessageMsg.index
-        );
-
-        return {
-          chainId: message.chainId,
-          messageHex: Buffer.from(message.message).toString("hex")
-        };
+        return handleGetRequestedMessage(keeper)(msg as GetRequestedMessage);
       case ApproveSignMsg:
-        const approveSignMsg = msg as ApproveSignMsg;
-        keeper.approveSign(approveSignMsg.index);
-        return;
+        return handleApproveSignMsg(keeper)(msg as ApproveSignMsg);
       case RejectSignMsg:
-        const rejectSignMsg = msg as RejectSignMsg;
-        keeper.rejectSign(rejectSignMsg.index);
-        return;
+        return handleRejectSignMsg(keeper)(msg as RejectSignMsg);
       default:
         throw new Error("Unknown msg type");
     }
+  };
+};
+
+const handleGetRegisteredChainMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<GetRegisteredChainMsg> = keeper => {
+  return () => {
+    return {
+      chainInfos: keeper.getRegisteredChains()
+    };
+  };
+};
+
+const handleRestoreKeyRingMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<RestoreKeyRingMsg> = keeper => {
+  return async () => {
+    return {
+      status: await keeper.restore()
+    };
+  };
+};
+
+const handleSaveKeyRingMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<SaveKeyRingMsg> = keeper => {
+  return async () => {
+    await keeper.save();
+    return {
+      success: true
+    };
+  };
+};
+
+const handleCreateKeyMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<CreateKeyMsg> = keeper => {
+  return async msg => {
+    return {
+      status: await keeper.createKey(msg.mnemonic, msg.password)
+    };
+  };
+};
+
+const handleUnlockKeyRingMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<UnlockKeyRingMsg> = keeper => {
+  return async msg => {
+    return {
+      status: await keeper.unlock(msg.password)
+    };
+  };
+};
+
+const handleSetPathMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<SetPathMsg> = keeper => {
+  return async msg => {
+    keeper.setPath(msg.chainId, msg.account, msg.index);
+    return {
+      success: true
+    };
+  };
+};
+
+const handleGetKeyMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<GetKeyMsg> = keeper => {
+  return async msg => {
+    const getKeyMsg = msg as GetKeyMsg;
+    if (getKeyMsg.origin) {
+      keeper.checkAccessOrigin(getKeyMsg.chainId, getKeyMsg.origin);
+    }
+
+    const key = await keeper.getKey();
+
+    return {
+      algo: "secp256k1",
+      pubKeyHex: Buffer.from(key.pubKey).toString("hex"),
+      addressHex: Buffer.from(key.address).toString("hex"),
+      bech32Address: new Address(key.address).toBech32(
+        keeper.getChainInfo(getKeyMsg.chainId).bech32Config.bech32PrefixAccAddr
+      )
+    };
+  };
+};
+
+const handleRequestSignMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<RequestSignMsg> = keeper => {
+  return async msg => {
+    if (msg.origin) {
+      keeper.checkAccessOrigin(msg.chainId, msg.origin);
+    }
+
+    await keeper.checkBech32Address(msg.chainId, msg.bech32Address);
+
+    return {
+      signatureHex: Buffer.from(
+        await keeper.requestSign(
+          msg.chainId,
+          new Uint8Array(Buffer.from(msg.messageHex, "hex")),
+          msg.index,
+          msg.openPopup
+        )
+      ).toString("hex")
+    };
+  };
+};
+
+const handleGetRequestedMessage: (
+  keeper: KeyRingKeeper
+) => InternalHandler<GetRequestedMessage> = keeper => {
+  return msg => {
+    const message = keeper.getRequestedMessage(msg.index);
+
+    return {
+      chainId: message.chainId,
+      messageHex: Buffer.from(message.message).toString("hex")
+    };
+  };
+};
+
+const handleApproveSignMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<ApproveSignMsg> = keeper => {
+  return msg => {
+    keeper.approveSign(msg.index);
+    return;
+  };
+};
+
+const handleRejectSignMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<RejectSignMsg> = keeper => {
+  return msg => {
+    keeper.rejectSign(msg.index);
+    return;
   };
 };
