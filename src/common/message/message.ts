@@ -18,6 +18,11 @@ export abstract class Message<R> {
   // @ts-ignore
   private resultType: R;
 
+  /**
+   * ValidateBasic does a simple validation check that
+   * doesn't require access to any other information.
+   * You can throw error in this when msg is invalid.
+   */
   abstract validateBasic(): void;
   abstract route(): string;
   abstract type(): string;
