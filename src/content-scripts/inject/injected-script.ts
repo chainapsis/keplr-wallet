@@ -4,9 +4,8 @@ import {
 } from "@everett-protocol/cosmosjs/core/walletProvider";
 import { Context } from "@everett-protocol/cosmosjs/core/context";
 import { GetKeyMsg, RequestSignMsg } from "../../background/keyring";
-import { postMessage } from "../../common/message";
+import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
-import { KeyHex } from "../../background/keyring";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -27,7 +26,7 @@ export class InjectedWalletProvider implements WalletProvider {
       context.get("chainId"),
       window.location.origin
     );
-    const key: KeyHex = await postMessage(BACKGROUND_PORT, msg);
+    const key = await sendMessage(BACKGROUND_PORT, msg);
     return Promise.resolve([
       {
         algo: key.algo,
@@ -60,9 +59,7 @@ export class InjectedWalletProvider implements WalletProvider {
       window.location.origin
     );
 
-    const result: {
-      signatureHex: string;
-    } = await postMessage(BACKGROUND_PORT, requestSignMsg);
+    const result = await sendMessage(BACKGROUND_PORT, requestSignMsg);
 
     return new Uint8Array(Buffer.from(result.signatureHex, "hex"));
   }

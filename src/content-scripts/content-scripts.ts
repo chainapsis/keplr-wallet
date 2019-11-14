@@ -1,6 +1,6 @@
-import { proxyMessage } from "../common/message";
+import { listenAndProxyMessages } from "../common/message";
 
-proxyMessage();
+listenAndProxyMessages();
 
 const container = document.head || document.documentElement;
 const scriptElement = document.createElement("script");
