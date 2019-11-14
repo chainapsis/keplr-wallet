@@ -14,7 +14,6 @@ import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
 import { RootStore } from "../root";
 import Axios from "axios";
-import { KeyHex } from "../../../../background/keyring";
 
 export class AccountStore {
   @observable
@@ -115,7 +114,7 @@ export class AccountStore {
 
     // No need to set origin, because this is internal.
     const getKeyMsg = GetKeyMsg.create(this.chainInfo.chainId, "");
-    const result: KeyHex = yield sendMessage(BACKGROUND_PORT, getKeyMsg);
+    const result = yield sendMessage(BACKGROUND_PORT, getKeyMsg);
     this.bech32Address = result.bech32Address;
     this.isAddressFetching = false;
   });

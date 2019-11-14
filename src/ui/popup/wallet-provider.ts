@@ -6,7 +6,6 @@ import { Context } from "@everett-protocol/cosmosjs/core/context";
 import { GetKeyMsg, RequestSignMsg } from "../../background/keyring";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
-import { KeyHex } from "../../background/keyring";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -34,7 +33,7 @@ export class PopupWalletProvider implements WalletProvider {
       // There is no need to set origin because this wallet provider is used in internal.
       ""
     );
-    const key: KeyHex = await sendMessage(BACKGROUND_PORT, msg);
+    const key = await sendMessage(BACKGROUND_PORT, msg);
     return Promise.resolve([
       {
         algo: key.algo,

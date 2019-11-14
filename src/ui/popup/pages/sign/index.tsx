@@ -44,10 +44,7 @@ export const SignPage: FunctionComponent<
   useEffect(() => {
     (async () => {
       const msg = GetRequestedMessage.create(index);
-      const result: { chainId: string; messageHex: string } = await sendMessage(
-        BACKGROUND_PORT,
-        msg
-      );
+      const result = await sendMessage(BACKGROUND_PORT, msg);
 
       chainStore.setChain(result.chainId);
       const message = Buffer.from(result.messageHex, "hex").toString();
