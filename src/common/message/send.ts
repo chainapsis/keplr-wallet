@@ -6,6 +6,7 @@ function _sendMessage(
   msg: Message<unknown>,
   opts: { msgType?: string } = {}
 ): Promise<any> {
+  msg.validateBasic();
   return new Promise(resolve => {
     chrome.runtime.sendMessage(
       {
