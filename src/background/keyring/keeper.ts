@@ -7,16 +7,13 @@ import {
   AccessOrigin
 } from "../../chain-info";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
+import { AsyncApprover } from "../../common/async-approver";
 
 export interface KeyHex {
   algo: string;
   pubKeyHex: string;
   addressHex: string;
   bech32Address: string;
-}
-
-interface SignApproval {
-  approve: boolean;
 }
 
 interface SignMessage {
@@ -28,10 +25,7 @@ export class KeyRingKeeper {
   private readonly keyRing = new KeyRing();
   private path = "";
 
-  private readonly signRequests: Map<
-    string,
-    { resolve: (value: SignApproval) => void; reject: (reason?: any) => void }
-  > = new Map();
+  private readonly signApprover = new AsyncApprover();
   private readonly signMessages: Map<string, SignMessage> = new Map();
 
   getRegisteredChains(): ChainInfo[] {
@@ -127,18 +121,6 @@ export class KeyRingKeeper {
     index: string,
     openPopup: boolean
   ): Promise<Uint8Array> {
-    KeyRingKeeper.isValidIndex(index);
-
-    if (this.signRequests.has(index) || this.signMessages.has(index)) {
-      throw new Error("index exists");
-    }
-
-    const promise = new Promise<SignApproval>((resolve, reject) => {
-      this.signRequests.set(index, {
-        resolve,
-        reject
-      });
-    });
     this.signMessages.set(index, { chainId, message });
 
     if (openPopup) {
@@ -150,18 +132,9 @@ export class KeyRingKeeper {
       );
     }
 
-    const tempSignIndex = index;
-
-    const approval = await promise;
-    if (approval.approve) {
-      this.signRequests.delete(tempSignIndex);
-      this.signMessages.delete(tempSignIndex);
-      return this.keyRing.sign(this.path, message);
-    } else {
-      this.signRequests.delete(tempSignIndex);
-      this.signMessages.delete(tempSignIndex);
-      throw new Error("Signature rejected");
-    }
+    await this.signApprover.reject(index);
+    this.signMessages.delete(index);
+    return this.keyRing.sign(this.path, message);
   }
 
   getRequestedMessage(index: string): SignMessage {
@@ -174,30 +147,10 @@ export class KeyRingKeeper {
   }
 
   approveSign(index: string): void {
-    const resolver = this.signRequests.get(index);
-    if (!resolver) {
-      throw new Error("Unknown sign request index");
-    }
-
-    resolver.resolve({ approve: true });
+    this.signApprover.approve(index);
   }
 
   rejectSign(index: string): void {
-    const resolver = this.signRequests.get(index);
-    if (!resolver) {
-      throw new Error("Unknown sign request index");
-    }
-
-    resolver.resolve({ approve: false });
-  }
-
-  private static isValidIndex(index: string) {
-    if (!index || index.length < 4) {
-      throw new Error("Too short index");
-    }
-
-    if (index.length > 8) {
-      throw new Error("Too long index");
-    }
+    this.signApprover.reject(index);
   }
 }
