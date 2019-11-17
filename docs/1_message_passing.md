@@ -49,4 +49,7 @@ Message is excuted by this process `deserialize message -> approve external -> v
 Deserializing will be described in next part of this document.
 Deserialized message will check approving. `approveExternal` message will get sender information by the parameter and you can use it for knowing where this message is sent from.
 
-// TODO
+`Message Manager` is responsible for deserializing and routing message to handler when message is sent from other component of extension.
+`Message Manager` can implement weak polymorphism. If registered message is sent, it can be decoded and transformed to registered prototype.
+However, if message includes non-primitive types or array of non-primitive types, it can't be transformed and just remains as object.
+If message is decoded successfully, it is routed to registered handler and handler processes a message and returns result.
