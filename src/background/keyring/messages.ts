@@ -104,6 +104,28 @@ export class CreateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
+export class LockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
+  public static type() {
+    return "lock-keyring";
+  }
+
+  public static create(): LockKeyRingMsg {
+    return new LockKeyRingMsg();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return LockKeyRingMsg.type();
+  }
+}
+
 export class UnlockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
     return "unlock-keyring";

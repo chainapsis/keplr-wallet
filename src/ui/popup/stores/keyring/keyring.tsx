@@ -8,7 +8,8 @@ import {
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
   CreateKeyMsg,
-  UnlockKeyRingMsg
+  UnlockKeyRingMsg,
+  LockKeyRingMsg
 } from "../../../../background/keyring";
 
 import { action, observable, flow } from "mobx";
@@ -59,6 +60,13 @@ export class KeyRingStore {
     password: string
   ) {
     const msg = CreateKeyMsg.create(mnemonic, password);
+    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    this.setStatus(result.status);
+  });
+
+  @action
+  public lock = flow(function*(this: KeyRingStore) {
+    const msg = LockKeyRingMsg.create();
     const result = yield sendMessage(BACKGROUND_PORT, msg);
     this.setStatus(result.status);
   });

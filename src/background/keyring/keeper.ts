@@ -98,6 +98,11 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
+  lock(): KeyRingStatus {
+    this.keyRing.lock();
+    return this.keyRing.status;
+  }
+
   async unlock(password: string): Promise<KeyRingStatus> {
     await this.keyRing.unlock(password);
     return this.keyRing.status;

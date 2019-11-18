@@ -10,7 +10,8 @@ import {
   ApproveSignMsg,
   RejectSignMsg,
   GetRequestedMessage,
-  GetRegisteredChainMsg
+  GetRegisteredChainMsg,
+  LockKeyRingMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
@@ -32,6 +33,8 @@ export const getHandler: () => Handler = () => {
         return handleSaveKeyRingMsg(keeper)(msg as SaveKeyRingMsg);
       case CreateKeyMsg:
         return handleCreateKeyMsg(keeper)(msg as CreateKeyMsg);
+      case LockKeyRingMsg:
+        return handleLockKeyRingMsg(keeper)(msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
         return handleUnlockKeyRingMsg(keeper)(msg as UnlockKeyRingMsg);
       case SetPathMsg:
@@ -89,6 +92,16 @@ const handleCreateKeyMsg: (
   return async msg => {
     return {
       status: await keeper.createKey(msg.mnemonic, msg.password)
+    };
+  };
+};
+
+const handleLockKeyRingMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<LockKeyRingMsg> = keeper => {
+  return () => {
+    return {
+      status: keeper.lock()
     };
   };
 };
