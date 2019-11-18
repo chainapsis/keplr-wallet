@@ -1,10 +1,11 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 
-import { AccountInfo } from "./account-info";
-
 import style from "./style.module.scss";
+import { AccountView } from "./account";
+import { TxButtonView } from "./tx-button";
+import { AssetView } from "./asset";
 
 const Test: React.FunctionComponent = () => {
   return (
@@ -19,15 +20,17 @@ const Test: React.FunctionComponent = () => {
   );
 };
 
-export class MainPage extends React.Component {
-  public render() {
-    return (
-      <HeaderLayout showChainName canChangeChainInfo menuRenderer={<Test />}>
-        <div className={style.containerAccount}>
-          <AccountInfo />
+export const MainPage: FunctionComponent = () => {
+  return (
+    <HeaderLayout showChainName canChangeChainInfo menuRenderer={<Test />}>
+      <div className={style.containerAccount}>
+        <div className={style.containerAccountInner}>
+          <AssetView />
+          <AccountView />
+          <TxButtonView />
         </div>
-        <div className={style.containerTxs} />
-      </HeaderLayout>
-    );
-  }
-}
+      </div>
+      <div className={style.containerTxs} />
+    </HeaderLayout>
+  );
+};

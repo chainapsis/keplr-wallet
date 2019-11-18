@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from "react";
 
 import styleTxButton from "./tx-button.module.scss";
-import { Button } from "../../../../components/button";
+import { Button } from "../../../components/button";
 import { observer } from "mobx-react";
-import { useStore } from "../../../stores";
+import { useStore } from "../../stores";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
