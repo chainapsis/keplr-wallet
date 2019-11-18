@@ -38,6 +38,9 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
 
     const menuRef = useRef<SVGSVGElement>(null);
 
+    const chainInfoChangable =
+      canChangeChainInfo && chainStore.chainList.length > 1;
+
     return (
       <CompHeader
         left={
@@ -84,18 +87,18 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
       >
         {showChainName ? (
           <ToolTip
-            trigger={canChangeChainInfo ? "click" : "static"}
+            trigger={chainInfoChangable ? "click" : "static"}
             tooltip={<ChainList />}
           >
             <div
               className={style.chainListContainer}
-              style={{ cursor: canChangeChainInfo ? undefined : "default" }}
+              style={{ cursor: chainInfoChangable ? undefined : "default" }}
             >
               <div className={style.title}>
                 {chainStore.chainInfo.chainName}
               </div>
 
-              {canChangeChainInfo ? (
+              {chainInfoChangable ? (
                 <div className={style.titleIconContainer}>
                   <svg
                     className={style.titleIcon}
