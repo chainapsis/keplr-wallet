@@ -29,21 +29,21 @@ export const useMenu = (): MenuContext => {
 };
 
 const sidebar = {
-  open: (height = 1000) => ({
-    clipPath: `circle(${height + 100}px at 40px 40px)`,
+  open: (option = { height: 1000, x: "0px", y: "0px" }) => ({
+    clipPath: `circle(${option.height + 100}px at ${option.x} ${option.y})`,
     transition: {
       type: "tween",
       ease: "easeOut",
       duration: 0.3
     }
   }),
-  closed: {
-    clipPath: "circle(0px at 40px 40px)",
+  closed: (option = { height: 1000, x: "0px", y: "0px" }) => ({
+    clipPath: `circle(0px at ${option.x} ${option.y})`,
     transition: {
       type: "tween",
       duration: 0.15
     }
-  }
+  })
 };
 
 const background = {
@@ -67,11 +67,17 @@ const background = {
 
 export interface Props {
   isOpen: boolean;
+  menuRef?: React.RefObject<unknown>;
 }
 
-export const Menu: FunctionComponent<Props> = ({ isOpen, children }) => {
+export const Menu: FunctionComponent<Props> = ({
+  isOpen,
+  menuRef,
+  children
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [animHeight, setAnimHeight] = useState(0);
+  const [at, setAt] = useState<{ x: string; y: string } | null>(null);
 
   const menu = useMenu();
 
@@ -80,6 +86,24 @@ export const Menu: FunctionComponent<Props> = ({ isOpen, children }) => {
       setAnimHeight(containerRef.current.offsetHeight);
     }
   }, []);
+
+  const menuRefCurrent = menuRef ? menuRef.current : null;
+  useEffect(() => {
+    if (menuRef && menuRef.current) {
+      const el = menuRef.current as HTMLElement;
+      if (el) {
+        const rect = el.getBoundingClientRect();
+
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        setAt({ x: x + "px", y: y + "px" });
+      }
+    }
+    if (menuRef === undefined) {
+      setAt({ x: "0px", y: "0px" });
+    }
+  }, [menuRef, menuRefCurrent]);
 
   return (
     <>
@@ -99,10 +123,11 @@ export const Menu: FunctionComponent<Props> = ({ isOpen, children }) => {
       </AnimatePresence>
       <motion.nav
         className={style.menuNav}
-        animate={isOpen ? "open" : "closed"}
-        custom={animHeight}
         ref={containerRef}
-        variants={sidebar}
+        style={{ clipPath: `circle(0px at 0% 0%})` }}
+        custom={at ? { height: animHeight, x: at.x, y: at.y } : undefined}
+        animate={at ? (isOpen ? "open" : "closed") : undefined}
+        variants={at ? sidebar : undefined}
       >
         {children}
       </motion.nav>

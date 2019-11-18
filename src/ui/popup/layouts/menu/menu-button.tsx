@@ -12,9 +12,10 @@ const Path: FunctionComponent<MotionProps | { d: string }> = props => (
   />
 );
 
-export const MenuButton: FunctionComponent = () => {
+// eslint-disable-next-line react/display-name
+export const MenuButton = React.forwardRef<SVGSVGElement>((_, ref) => {
   return (
-    <motion.svg viewBox="0 0 20 20">
+    <motion.svg viewBox="0 0 20 20" ref={ref}>
       <Path
         variants={{
           closed: { d: "M 3 4 L 17 4" },
@@ -46,4 +47,4 @@ export const MenuButton: FunctionComponent = () => {
       />
     </motion.svg>
   );
-};
+});
