@@ -1,0 +1,24 @@
+@import "~bulma/sass/utilities/_all";
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 8px;
+
+  .text {
+    font-size: 24px;
+  }
+
+  &:hover {
+    color: $primary;
+  }
+}
