@@ -26,6 +26,7 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
     show: false
   };
 
+  private ref = React.createRef<HTMLDivElement>();
   private popper: Popper | null = null;
   private tooltipRef = React.createRef<HTMLDivElement>();
   private componentRef = React.createRef<HTMLDivElement>();
@@ -51,7 +52,21 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
 
       this.popper = new Popper(component, tooltip, options);
     }
+
+    document.addEventListener("click", this.handleClickOutside);
   }
+
+  handleClickOutside = (e: any) => {
+    if (
+      this.props.trigger === "click" &&
+      this.state.show &&
+      this.ref &&
+      this.ref.current &&
+      !this.ref.current.contains(e.target)
+    ) {
+      this.setState({ show: false });
+    }
+  };
 
   componentDidUpdate(): void {
     if (this.popper) {
@@ -63,6 +78,8 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
     if (this.popper) {
       this.popper.destroy();
     }
+
+    document.removeEventListener("click", this.handleClickOutside);
   }
 
   render() {
@@ -73,6 +90,7 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
 
     return (
       <div
+        ref={this.ref}
         className={classNames({
           [style.bright]: theme === "bright",
           show: show
