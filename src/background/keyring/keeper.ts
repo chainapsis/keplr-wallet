@@ -137,7 +137,7 @@ export class KeyRingKeeper {
       );
     }
 
-    await this.signApprover.reject(index);
+    await this.signApprover.request(index);
     this.signMessages.delete(index);
     return this.keyRing.sign(this.path, message);
   }

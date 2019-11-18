@@ -6,7 +6,6 @@ function _sendMessage(
   msg: Message<unknown>,
   opts: { msgType?: string } = {}
 ): Promise<any> {
-  msg.validateBasic();
   return new Promise(resolve => {
     chrome.runtime.sendMessage(
       {
@@ -42,6 +41,7 @@ export async function sendMessage<M extends Message<unknown>>(
     disablePostMessage: false
   }
 ): Promise<M extends Message<infer R> ? R : never> {
+  msg.validateBasic();
   let posting: boolean = false;
 
   if (!opts || !opts.disablePostMessage) {
@@ -87,6 +87,7 @@ export function postMessage<M extends Message<unknown>>(
   port: string,
   msg: M
 ): Promise<M extends Message<infer R> ? R : never> {
+  msg.validateBasic();
   const bytes = new Uint8Array(8);
   const index: string = Array.from(crypto.getRandomValues(bytes))
     .map(value => {
