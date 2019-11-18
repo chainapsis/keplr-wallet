@@ -23,7 +23,7 @@ export const NativeChainInfos: ChainInfo[] = [
     chainId: "cosmoshub-2",
     chainName: "Cosmos",
     coinDenom: "ATOM",
-    coinMinimalDenom: "uATOM",
+    coinMinimalDenom: "uatom",
     coinDecimals: 6,
     coinIconUrl: require("assets/atom-icon.png"),
     walletUrl:
@@ -38,7 +38,7 @@ export const NativeChainInfos: ChainInfo[] = [
     chainId: "columbus-2",
     chainName: "Terra",
     coinDenom: "LUNA",
-    coinMinimalDenom: "uLUNA",
+    coinMinimalDenom: "uluna",
     coinDecimals: 6,
     coinIconUrl: require("assets/luna-icon.svg"),
     walletUrl:
