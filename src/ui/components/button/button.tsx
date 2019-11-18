@@ -65,7 +65,7 @@ export const Button: FunctionComponent<ButtonProps> = props => {
     getSizeClass(size),
     getColorClass(color),
     { "is-fullwidth": fullwidth },
-    { "is-outline": outline },
+    { "is-outlined": outline },
     { "is-inverted": inverted },
     { "is-rounded": rounded },
     { "is-focused": focused },
