@@ -9,6 +9,7 @@ import styleAsset from "./asset.module.scss";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { CoinUtils } from "../../../../../common/coin-utils";
 
 function decimalStrAmount(amount: Int, decimals: number): string {
   const decimalPoint = new Int(
@@ -30,6 +31,11 @@ function decimalStrAmount(amount: Int, decimals: number): string {
 export const AccountInfo: FunctionComponent = observer(() => {
   const { chainStore, accountStore } = useStore();
 
+  const coinAmount = CoinUtils.amountOf(
+    accountStore.assets,
+    chainStore.chainInfo.coinMinimalDenom
+  );
+
   return (
     <div className={style.container}>
       <div className={styleAsset.containerAsset}>
@@ -40,11 +46,8 @@ export const AccountInfo: FunctionComponent = observer(() => {
           />
         </div>
         <div className={styleAsset.amount}>
-          {!accountStore.isAssetFetching && accountStore.assets.length > 0
-            ? decimalStrAmount(
-                accountStore.assets[0].amount,
-                chainStore.chainInfo.coinDecimals
-              )
+          {!accountStore.isAssetFetching
+            ? decimalStrAmount(coinAmount, chainStore.chainInfo.coinDecimals)
             : "0"}{" "}
           {chainStore.chainInfo.coinDenom}
         </div>
