@@ -4,11 +4,14 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "../../../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
 @import "../../../../node_modules/@fortawesome/fontawesome-free/scss/solid";
 
+@import "../../../palette";
+
 $radius-small: 2px;
 $radius: 6px;
 $radius-large: 10px;
+$dropdown-item-active-background-color: $primary;
 
-@import "../../../../node_modules/bulma/bulma";
+@import "~bulma/bulma";
 
 * {
   box-sizing: border-box;
