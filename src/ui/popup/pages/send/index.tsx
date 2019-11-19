@@ -9,18 +9,8 @@ import { Result } from "../../../components/result";
 
 import { PopupWalletProvider } from "../../wallet-provider";
 
-import { Api } from "@everett-protocol/cosmosjs/core/api";
-import { Rest } from "@everett-protocol/cosmosjs/core/rest";
-import { Account } from "@everett-protocol/cosmosjs/core/account";
-import { defaultTxEncoder } from "@everett-protocol/cosmosjs/common/stdTx";
-import { stdTxBuilder } from "@everett-protocol/cosmosjs/common/stdTxBuilder";
-import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
 import { GaiaRest } from "@everett-protocol/cosmosjs/gaia/rest";
 import { Context } from "@everett-protocol/cosmosjs/core/context";
-import { Codec } from "@node-a-team/ts-amino";
-import * as CmnCdc from "@everett-protocol/cosmosjs/common/codec";
-import * as Bank from "@everett-protocol/cosmosjs/x/bank";
-import * as Crypto from "@everett-protocol/cosmosjs/crypto";
 import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
 import {
   AccAddress,
@@ -35,6 +25,7 @@ import useForm from "react-hook-form";
 import { observer } from "mobx-react";
 
 import queryString from "query-string";
+import { CosmosJS } from "../../../../common/cosmosjs";
 
 interface FormData {
   recipient: string;
@@ -68,43 +59,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
           onSubmit={handleSubmit(async (data: FormData) => {
             setLoading(true);
 
-            const cosmosjs = new Api<Rest>(
-              {
-                chainId: chainStore.chainInfo.chainId,
-                walletProvider: new PopupWalletProvider({
-                  onRequestSignature: (index: string) => {
-                    history.push(`/sign/${index}?inPopup=true`);
-                  }
-                }),
-                rpc: chainStore.chainInfo.rpc,
-                // No need.
-                rest: "",
-                disableGlobalBech32Config: true
-              },
-              {
-                txEncoder: defaultTxEncoder,
-                txBuilder: stdTxBuilder,
-                restFactory: (context: Context) => {
-                  return new GaiaRest(context);
-                },
-                queryAccount: (
-                  context: Context,
-                  address: string | Uint8Array
-                ): Promise<Account> => {
-                  return queryAccount(
-                    context.get("bech32Config"),
-                    context.get("rpcInstance"),
-                    address
-                  );
-                },
-                bech32Config: chainStore.chainInfo.bech32Config,
-                bip44: chainStore.chainInfo.bip44,
-                registerCodec: (codec: Codec) => {
-                  CmnCdc.registerCodec(codec);
-                  Crypto.registerCodec(codec);
-                  // XXX: If cosmos-sdk/MsgSend has disambiguation bytes, it will not work
-                  Bank.registerCodec(codec);
+            const cosmosjs = CosmosJS.fromChainInfo(
+              chainStore.chainInfo,
+              new PopupWalletProvider({
+                onRequestSignature: (index: string) => {
+                  history.push(`/sign/${index}?inPopup=true`);
                 }
+              }),
+              (context: Context) => {
+                return new GaiaRest(context);
               }
             );
 
