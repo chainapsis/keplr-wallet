@@ -6,6 +6,7 @@ import {
 
 export interface ChainInfo {
   readonly rpc: string;
+  readonly rest: string;
   readonly chainId: string;
   readonly chainName: string;
   readonly coinDenom: string;
@@ -20,6 +21,7 @@ export interface ChainInfo {
 export const NativeChainInfos: ChainInfo[] = [
   {
     rpc: "http://localhost",
+    rest: "http://localhost:1317",
     chainId: "cosmoshub-2",
     chainName: "Cosmos",
     coinDenom: "ATOM",
@@ -35,6 +37,7 @@ export const NativeChainInfos: ChainInfo[] = [
   },
   {
     rpc: "http://localhost:81",
+    rest: "null",
     chainId: "columbus-2",
     chainName: "Terra",
     coinDenom: "LUNA",
