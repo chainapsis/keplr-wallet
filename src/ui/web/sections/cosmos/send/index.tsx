@@ -2,9 +2,9 @@ import React, { FunctionComponent, useState } from "react";
 
 import { Input } from "../../../../components/form";
 
-import classames from "classnames";
 import style from "./styles.module.scss";
 import { Button } from "../../../../components/button";
+import { Card } from "../../../components/card";
 import useForm from "react-hook-form";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
@@ -62,7 +62,7 @@ export const SendSection: FunctionComponent = observer(() => {
     <div className="columns is-gapless">
       <div className="column is-6-widescreen is-7-tablet">
         <div className={style.sendFormColumn}>
-          <div className={classames("card", style.card)}>
+          <Card>
             <form
               onSubmit={handleSubmit(async data => {
                 const cosmosjs = new Api<Rest>(
@@ -235,12 +235,12 @@ export const SendSection: FunctionComponent = observer(() => {
                 Send
               </Button>
             </form>
-          </div>
+          </Card>
         </div>
       </div>
       <div className="column is-6-widescreen is-5-tablet">
         <div className={style.assetColumn}>
-          <div className={classames("card")}>
+          <Card style={{ padding: "0" }}>
             <div className="notification is-warning">
               Primar lorem ipsum dolor sit amet, consectetur adipiscing elit
               lorem ipsum dolor. <strong>Pellentesque risus mi</strong>, tempus
@@ -249,7 +249,7 @@ export const SendSection: FunctionComponent = observer(() => {
               <a>felis venenatis</a> efficitur. Sit amet, consectetur adipiscing
               elit
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

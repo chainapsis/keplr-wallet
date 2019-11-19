@@ -16,6 +16,10 @@ import {
   NotificationStoreProvider
 } from "../components/notification";
 
+import classnames from "classnames";
+
+import style from "./style.module.scss";
+
 configure({
   enforceActions: "always" // Make mobx to strict mode.
 });
@@ -39,7 +43,14 @@ const Wallet: FunctionComponent<
       className="columns is-gapless"
       style={{ height: "100%", marginBottom: 0 }}
     >
-      <div className="column is-2-widescreen is-3">
+      <div
+        className={classnames(
+          "column",
+          "is-2-widescreen",
+          "is-3",
+          style.sidebar
+        )}
+      >
         <Sidebar>
           {walletUIStore.walletUI.menus.map((menu, i) => {
             const MenuItem = menu.menuItemRender;
@@ -56,6 +67,11 @@ const Wallet: FunctionComponent<
           })}
         </Sidebar>
       </div>
+      {/* This is just fake column.
+       This is needed because `sidebar` has fixed position when not mobile screen.
+       So, it can't occupy the width of column.
+       This will take the place of the sidebar. */}
+      <div className="column is-2-widescreen is-3" />
       <div className="column is-8-widescreen is-9">
         <Header />
         <div>

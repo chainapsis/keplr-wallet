@@ -1,0 +1,11 @@
+@import "~bulma/sass/utilities/all";
+
+.sidebar {
+  position: fixed;
+  height: 100%;
+
+  @include mobile {
+    position: static;
+    height: initial;
+  }
+}

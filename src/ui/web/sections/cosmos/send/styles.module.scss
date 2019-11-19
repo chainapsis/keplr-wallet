@@ -1,6 +1,7 @@
 @import "~bulma/sass/utilities/all";
+@import "../../../styles/var";
 
-$column-padding: 16px;
+$column-padding: $base-section-padding;
 
 .send-form-column {
   padding: $column-padding $column-padding / 2 $column-padding $column-padding;
@@ -16,8 +17,4 @@ $column-padding: 16px;
   @include mobile {
     padding: $column-padding;
   }
-}
-
-.card {
-  padding: 24px;
 }
