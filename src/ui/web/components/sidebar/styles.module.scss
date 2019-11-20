@@ -15,7 +15,7 @@
 
 .middle-container {
   flex: 1 1 auto;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   :global(.menu) {
     li {
