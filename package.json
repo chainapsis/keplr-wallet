@@ -20,7 +20,7 @@
   "author": "everett-protocol",
   "license": "Apache-2.0",
   "dependencies": {
-    "@everett-protocol/cosmosjs": "^0.0.3-alpha.1",
+    "@everett-protocol/cosmosjs": "file:../everett-protocol-cosmosjs-0.0.3-alpha.2.tgz",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "aes-js": "^3.1.2",
     "axios": "^0.19.0",
