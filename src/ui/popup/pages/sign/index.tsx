@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 import { Button } from "../../../components/button";
 import {
   ApproveSignMsg,
@@ -20,12 +25,24 @@ const Buffer = require("buffer/").Buffer;
 
 const approve = async (index: string) => {
   const msg = ApproveSignMsg.create(index);
-  await sendMessage(BACKGROUND_PORT, msg);
+  try {
+    await sendMessage(BACKGROUND_PORT, msg);
+  } catch (e) {
+    if (e.toString() !== "Error: Unknown request index") {
+      throw e;
+    }
+  }
 };
 
 const reject = async (index: string) => {
   const msg = RejectSignMsg.create(index);
-  await sendMessage(BACKGROUND_PORT, msg);
+  try {
+    await sendMessage(BACKGROUND_PORT, msg);
+  } catch (e) {
+    if (e.toString() !== "Error: Unknown request index") {
+      throw e;
+    }
+  }
 };
 
 export const SignPage: FunctionComponent<
@@ -78,13 +95,32 @@ export const SignPage: FunctionComponent<
 
     // When index is changed, reject a prior request index.
     return () => {
-      if (index) {
-        const msg = RejectSignMsg.create(index);
+      if (index && !selected) {
         // Ignore result.
-        sendMessage(BACKGROUND_PORT, msg);
+        reject(index);
       }
     };
   }, [index]);
+
+  const onApproveClick = useCallback(async () => {
+    setSelected(true);
+    await approve(index);
+
+    // If this is called by injected wallet provider. Just close.
+    if (!inPopup) {
+      window.close();
+    }
+  }, [index, inPopup]);
+
+  const onRejectClick = useCallback(async () => {
+    setSelected(true);
+    await reject(index);
+
+    // If this is called by injected wallet provider. Just close.
+    if (!inPopup) {
+      window.close();
+    }
+  }, [index, inPopup]);
 
   return (
     <HeaderLayout
@@ -106,15 +142,7 @@ export const SignPage: FunctionComponent<
             size="medium"
             color="primary"
             disabled={selected}
-            onClick={async () => {
-              setSelected(true);
-              await approve(index);
-
-              // If this is called by injected wallet provider. Just close.
-              if (!inPopup) {
-                window.close();
-              }
-            }}
+            onClick={onApproveClick}
           >
             Approve
           </Button>
@@ -123,15 +151,7 @@ export const SignPage: FunctionComponent<
             size="medium"
             color="danger"
             disabled={selected}
-            onClick={async () => {
-              setSelected(true);
-              await reject(index);
-
-              // If this is called by injected wallet provider. Just close.
-              if (!inPopup) {
-                window.close();
-              }
-            }}
+            onClick={onRejectClick}
           >
             Reject
           </Button>
