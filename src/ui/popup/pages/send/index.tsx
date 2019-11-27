@@ -9,8 +9,6 @@ import { Result } from "../../../components/result";
 
 import { PopupWalletProvider } from "../../wallet-provider";
 
-import { GaiaRest } from "@everett-protocol/cosmosjs/gaia/rest";
-import { Context } from "@everett-protocol/cosmosjs/core/context";
 import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
 import {
   AccAddress,
@@ -25,7 +23,8 @@ import useForm from "react-hook-form";
 import { observer } from "mobx-react";
 
 import queryString from "query-string";
-import { CosmosJS } from "../../../../common/cosmosjs";
+import { useCosmosJS } from "../../../hooks";
+import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 
 interface FormData {
   recipient: string;
@@ -45,7 +44,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     });
 
     const { chainStore, accountStore } = useStore();
-    const [loading, setLoading] = useState(false);
+    const [walletProvider] = useState(
+      new PopupWalletProvider({
+        onRequestSignature: (index: string) => {
+          history.push(`/sign/${index}?inPopup=true`);
+        }
+      })
+    );
+    const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider);
+    console.log(cosmosJS);
 
     return (
       <HeaderLayout
@@ -57,24 +64,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       >
         <form
           onSubmit={handleSubmit(async (data: FormData) => {
-            setLoading(true);
-
-            const cosmosjs = CosmosJS.fromChainInfo(
-              chainStore.chainInfo,
-              new PopupWalletProvider({
-                onRequestSignature: (index: string) => {
-                  history.push(`/sign/${index}?inPopup=true`);
-                }
-              }),
-              (context: Context) => {
-                return new GaiaRest(context);
-              }
-            );
-
-            await cosmosjs.enable();
-
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            useBech32ConfigPromise(
+            await useBech32ConfigPromise(
               chainStore.chainInfo.bech32Config,
               async () => {
                 const msg = new MsgSend(
@@ -83,32 +73,27 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   [Coin.parse(data.amount)]
                 );
 
-                try {
-                  // TODO: change mode to commit.
-                  const result = await cosmosjs.sendMsgs(
-                    [msg],
-                    {
-                      gas: bigInteger(60000),
-                      memo: data.memo,
-                      fee: new Coin(
-                        chainStore.chainInfo.coinMinimalDenom.toLowerCase(),
-                        new Int("1000")
-                      )
+                const config: TxBuilderConfig = {
+                  gas: bigInteger(60000),
+                  memo: data.memo,
+                  fee: new Coin(
+                    chainStore.chainInfo.coinMinimalDenom.toLowerCase(),
+                    new Int("1000")
+                  )
+                };
+
+                if (cosmosJS.sendMsgs) {
+                  await cosmosJS.sendMsgs(
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    [msg!],
+                    config,
+                    () => {
+                      history.replace("/send/result");
                     },
-                    "sync"
-                  );
-
-                  if (result.mode === "sync") {
-                    if (result.code !== 0) {
-                      history.replace(`/send/result?error=${result.log}`);
-                      return;
+                    e => {
+                      history.replace(`/send/result?error=${e.toString()}`);
                     }
-                  }
-
-                  history.replace("/send/result");
-                } catch (e) {
-                  history.replace(`/send/result?error=${e.toString()}`);
-                  return;
+                  );
                 }
               }
             );
@@ -165,7 +150,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             color="primary"
             size="medium"
             fullwidth
-            loading={loading}
+            loading={cosmosJS.loading}
+            active={cosmosJS.sendMsgs != null}
           >
             Send
           </Button>
