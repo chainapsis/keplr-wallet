@@ -42,20 +42,6 @@ export const SignPage: FunctionComponent<
   const { chainStore } = useStore();
 
   useEffect(() => {
-    (async () => {
-      const msg = GetRequestedMessage.create(index);
-      const result = await sendMessage(BACKGROUND_PORT, msg);
-
-      chainStore.setChain(result.chainId);
-      const message = Buffer.from(result.messageHex, "hex").toString();
-
-      try {
-        setMessage(JSON.stringify(JSON.parse(message), undefined, 2));
-      } catch (e) {
-        setMessage(message);
-      }
-    })();
-
     // Force reject when closing window.
     const beforeunload = () => {
       if (!selected) {
@@ -74,6 +60,31 @@ export const SignPage: FunctionComponent<
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      const msg = GetRequestedMessage.create(index);
+      const result = await sendMessage(BACKGROUND_PORT, msg);
+
+      chainStore.setChain(result.chainId);
+      const message = Buffer.from(result.messageHex, "hex").toString();
+
+      try {
+        setMessage(JSON.stringify(JSON.parse(message), undefined, 2));
+      } catch (e) {
+        setMessage(message);
+      }
+    })();
+
+    // When index is changed, reject a prior request index.
+    return () => {
+      if (index) {
+        const msg = RejectSignMsg.create(index);
+        // Ignore result.
+        sendMessage(BACKGROUND_PORT, msg);
+      }
+    };
+  }, [index]);
 
   return (
     <HeaderLayout
