@@ -9,7 +9,8 @@ import {
   SaveKeyRingMsg,
   CreateKeyMsg,
   UnlockKeyRingMsg,
-  LockKeyRingMsg
+  LockKeyRingMsg,
+  ClearKeyRingMsg
 } from "../../../../background/keyring";
 
 import { action, observable, flow } from "mobx";
@@ -89,5 +90,22 @@ export class KeyRingStore {
   public save = flow(function*(this: KeyRingStore) {
     const msg = SaveKeyRingMsg.create();
     yield sendMessage(BACKGROUND_PORT, msg);
+  });
+
+  /**
+   * Clear key ring data.
+   * This will throw unless you are in a development env.
+   */
+  @action
+  public clear = flow(function*(this: KeyRingStore) {
+    if (process.env.NODE_ENV !== "development") {
+      throw new Error(
+        "do not use the clear function unless you are in a development environment"
+      );
+    }
+
+    const msg = ClearKeyRingMsg.create();
+    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    this.setStatus(result.status);
   });
 }

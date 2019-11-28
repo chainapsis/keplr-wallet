@@ -11,6 +11,20 @@ export const Menu: FunctionComponent = observer(() => {
     <div className={styleMenu.container}>
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
+      {/* If development env, show clear button for test. */
+      process.env.NODE_ENV === "development" ? (
+        <div
+          className={styleMenu.item}
+          onClick={() => {
+            keyRingStore.clear();
+          }}
+        >
+          <span className="icon is-large">
+            <i className="fas fa-2x fa-eraser" />
+          </span>
+          <div className={styleMenu.text}>Clear</div>
+        </div>
+      ) : null}
       <div
         className={styleMenu.item}
         onClick={() => {

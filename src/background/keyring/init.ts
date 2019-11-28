@@ -11,7 +11,8 @@ import {
   ApproveSignMsg,
   RejectSignMsg,
   GetRegisteredChainMsg,
-  LockKeyRingMsg
+  LockKeyRingMsg,
+  ClearKeyRingMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -20,6 +21,7 @@ export function init(messageManager: MessageManager) {
   messageManager.registerMessage(GetRegisteredChainMsg);
   messageManager.registerMessage(RestoreKeyRingMsg);
   messageManager.registerMessage(SaveKeyRingMsg);
+  messageManager.registerMessage(ClearKeyRingMsg);
   messageManager.registerMessage(CreateKeyMsg);
   messageManager.registerMessage(LockKeyRingMsg);
   messageManager.registerMessage(UnlockKeyRingMsg);

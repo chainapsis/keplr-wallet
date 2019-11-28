@@ -70,6 +70,27 @@ export class SaveKeyRingMsg extends Message<{ success: boolean }> {
   }
 }
 
+export class ClearKeyRingMsg extends Message<{ status: KeyRingStatus }> {
+  public static type() {
+    return "clear-keyring";
+  }
+
+  public static create(): ClearKeyRingMsg {
+    return new ClearKeyRingMsg();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  validateBasic(): void {}
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearKeyRingMsg.type();
+  }
+}
+
 export class CreateKeyMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
     return "create-key";

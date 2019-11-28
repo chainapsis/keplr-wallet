@@ -92,6 +92,15 @@ export class KeyRingKeeper {
     await this.keyRing.save();
   }
 
+  /**
+   * This will clear all key ring data.
+   * Make sure to use this only in development env for testing.
+   */
+  async clear(): Promise<KeyRingStatus> {
+    await this.keyRing.clear();
+    return this.keyRing.status;
+  }
+
   async createKey(mnemonic: string, password: string): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
     await this.keyRing.createKey(mnemonic, password);

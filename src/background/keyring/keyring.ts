@@ -119,6 +119,18 @@ export class KeyRing {
     this.loaded = true;
   }
 
+  /**
+   * This will clear all key ring data.
+   * Make sure to use this only in development env for testing.
+   */
+  public async clear() {
+    this.cipher = "";
+    this.mnemonic = "";
+    this.cached = new Map();
+
+    await this.save();
+  }
+
   private loadKey(path: string): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
