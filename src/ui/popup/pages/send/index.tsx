@@ -3,7 +3,7 @@ import { Input } from "../../../components/form";
 import { RouteComponentProps } from "react-router-dom";
 import { useStore } from "../../stores";
 
-import { HeaderLayout } from "../../layouts/HeaderLayout";
+import { HeaderLayout } from "../../layouts";
 import { Button } from "../../../components/button";
 import { Result } from "../../../components/result";
 

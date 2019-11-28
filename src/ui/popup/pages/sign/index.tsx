@@ -14,7 +14,7 @@ import { RouteComponentProps } from "react-router";
 import { sendMessage } from "../../../../common/message";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
-import { HeaderLayout } from "../../layouts/HeaderLayout";
+import { HeaderLayout } from "../../layouts";
 
 import style from "./styles.module.scss";
 

@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 
-import { HeaderLayout } from "../../layouts/HeaderLayout";
+import { HeaderLayout } from "../../layouts";
 
 import style from "./style.module.scss";
 import { Menu } from "./menu";

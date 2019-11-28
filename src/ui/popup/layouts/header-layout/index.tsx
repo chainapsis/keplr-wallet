@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useState } from "react";
 
-import { MenuProvider, MenuContext } from "./menu";
+import { MenuProvider, MenuContext } from "../menu";
 
-import { Header, Props as HeaderProps } from "./header";
+import { Header, Props as HeaderProps } from "../header";
 
 import style from "./style.module.scss";
 
