@@ -32,7 +32,6 @@ interface FormData {
   memo: string;
 }
 
-// Don't need to be observer
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
   ({ history }) => {
     const { register, handleSubmit, errors } = useForm<FormData>({
@@ -52,7 +51,6 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       })
     );
     const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider);
-    console.log(cosmosJS);
 
     return (
       <HeaderLayout
