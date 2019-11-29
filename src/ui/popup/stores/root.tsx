@@ -1,6 +1,7 @@
 import { ChainStore } from "./chain";
-import { KeyRingStore } from "./keyring";
+import { KeyRingStatus, KeyRingStore } from "./keyring";
 import { AccountStore } from "./account";
+import { ChainInfo } from "../../../chain-info";
 
 export class RootStore {
   public chainStore: ChainStore;
@@ -15,6 +16,15 @@ export class RootStore {
 
     this.chainStore.init();
     this.keyRingStore.restore();
+  }
+
+  public setChainInfo(info: ChainInfo) {
+    this.accountStore.setChainInfo(info);
+    this.keyRingStore.setChainInfo(info);
+  }
+
+  public setKeyRingStatus(status: KeyRingStatus) {
+    this.accountStore.setKeyRingStatus(status);
   }
 }
 

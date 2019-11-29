@@ -51,7 +51,7 @@ export class KeyRingStore {
   @action
   private setStatus(status: KeyRingStatus) {
     this.status = status;
-    this.rootStore.accountStore.setKeyRingStatus(status);
+    this.rootStore.setKeyRingStatus(status);
   }
 
   @action

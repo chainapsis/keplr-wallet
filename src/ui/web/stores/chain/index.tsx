@@ -34,7 +34,7 @@ export class ChainStore {
     }
 
     this.chainInfo = chainInfo;
-    this.rootStore.walletUIStore.setChainInfo(chainInfo);
+    this.rootStore.setChainInfo(chainInfo);
   }
 
   @action

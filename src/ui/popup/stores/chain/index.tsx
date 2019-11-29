@@ -42,8 +42,7 @@ export class ChainStore {
 
     this.chainInfo = chainInfo;
 
-    this.rootStore.keyRingStore.setChainInfo(chainInfo);
-    this.rootStore.accountStore.setChainInfo(chainInfo);
+    this.rootStore.setChainInfo(chainInfo);
   }
 
   @action
