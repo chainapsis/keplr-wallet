@@ -7,6 +7,8 @@ import { KeyRingStore } from "../../stores/keyring";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
+import { EmptyLayout } from "../../layouts/empty-layout";
+
 import style from "./style.scss";
 
 export const RegisterPage: FunctionComponent = observer(() => {
@@ -26,43 +28,45 @@ export const RegisterPage: FunctionComponent = observer(() => {
   };
 
   return (
-    <div className={style.container}>
-      <textarea
-        className="textarea"
-        disabled={!isRecover}
-        value={words}
-        onChange={e => {
-          setWords(e.target.value);
-        }}
-      />
-      <form className="pure-form">
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={e => {
-              setPassword(e.target.value);
-            }}
-          />
-        </label>
-      </form>
-      <div style={{ flex: 1 }} />
-      <Button
-        className={style.btnNext}
-        color="primary"
-        onClick={onClickNextButton}
-      >
-        Next
-      </Button>
-      <Button
-        className={style.btnNext}
-        onClick={() => {
-          setIsRecover(!isRecover);
-        }}
-      >
-        Recover
-      </Button>
-    </div>
+    <EmptyLayout>
+      <div className={style.container}>
+        <textarea
+          className="textarea"
+          disabled={!isRecover}
+          value={words}
+          onChange={e => {
+            setWords(e.target.value);
+          }}
+        />
+        <form className="pure-form">
+          <label>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={e => {
+                setPassword(e.target.value);
+              }}
+            />
+          </label>
+        </form>
+        <div style={{ flex: 1 }} />
+        <Button
+          className={style.btnNext}
+          color="primary"
+          onClick={onClickNextButton}
+        >
+          Next
+        </Button>
+        <Button
+          className={style.btnNext}
+          onClick={() => {
+            setIsRecover(!isRecover);
+          }}
+        >
+          Recover
+        </Button>
+      </div>
+    </EmptyLayout>
   );
 });
