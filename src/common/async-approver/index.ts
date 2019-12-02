@@ -7,6 +7,7 @@ export class AsyncApprover {
     { resolve: () => void; reject: (reason?: any) => void }
   > = new Map();
 
+  // TODO: Add timeout.
   async request(index: string): Promise<void> {
     AsyncApprover.isValidIndex(index);
 
