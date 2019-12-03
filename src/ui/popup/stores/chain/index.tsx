@@ -1,4 +1,5 @@
-import { observable, action, flow } from "mobx";
+import { observable, action } from "mobx";
+import { actionAsync, task } from "mobx-utils";
 
 import { RootStore } from "../root";
 
@@ -45,31 +46,31 @@ export class ChainStore {
     this.rootStore.setChainInfo(chainInfo);
   }
 
-  @action
-  public saveLastViewChainId = flow(function*(this: ChainStore) {
+  @actionAsync
+  public async saveLastViewChainId() {
     // Save last view chain id to persistent background
     const msg = SetPersistentMemoryMsg.create({
       lastViewChainId: this.chainInfo.chainId
     });
-    yield sendMessage(BACKGROUND_PORT, msg);
-  });
+    await task(sendMessage(BACKGROUND_PORT, msg));
+  }
 
-  @action
-  public init = flow(function*(this: ChainStore) {
-    yield this.getChainInfosFromBackground();
+  @actionAsync
+  public async init() {
+    await task(this.getChainInfosFromBackground());
 
     // Get last view chain id to persistent background
     const msg = GetPersistentMemoryMsg.create();
-    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
     if (result && result.lastViewChainId) {
       this.setChain(result.lastViewChainId);
     }
-  });
+  }
 
-  @action
-  private getChainInfosFromBackground = flow(function*(this: ChainStore) {
+  @actionAsync
+  private async getChainInfosFromBackground() {
     const msg = GetRegisteredChainMsg.create();
-    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
     const chainInfos: ChainInfo[] = result.chainInfos.map(
       (chainInfo: Writeable<ChainInfo>) => {
         chainInfo.bip44 = Object.setPrototypeOf(
@@ -80,7 +81,7 @@ export class ChainStore {
       }
     );
     this.setChainList(chainInfos);
-  });
+  }
 
   @action
   public setChainList(chainList: ChainInfo[]) {

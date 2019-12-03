@@ -13,7 +13,9 @@ import {
   ClearKeyRingMsg
 } from "../../../../background/keyring";
 
-import { action, observable, flow } from "mobx";
+import { action, observable } from "mobx";
+import { actionAsync, task } from "mobx-utils";
+
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RootStore } from "../root";
 
@@ -54,50 +56,46 @@ export class KeyRingStore {
     this.rootStore.setKeyRingStatus(status);
   }
 
-  @action
-  public createKey = flow(function*(
-    this: KeyRingStore,
-    mnemonic: string,
-    password: string
-  ) {
+  @actionAsync
+  public async createKey(mnemonic: string, password: string) {
     const msg = CreateKeyMsg.create(mnemonic, password);
-    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
-  });
+  }
 
-  @action
-  public lock = flow(function*(this: KeyRingStore) {
+  @actionAsync
+  public async lock() {
     const msg = LockKeyRingMsg.create();
-    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
-  });
+  }
 
-  @action
-  public unlock = flow(function*(this: KeyRingStore, password: string) {
+  @actionAsync
+  public async unlock(password: string) {
     const msg = UnlockKeyRingMsg.create(password);
-    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
-  });
+  }
 
-  @action
-  public restore = flow(function*(this: KeyRingStore) {
+  @actionAsync
+  public async restore() {
     const msg = RestoreKeyRingMsg.create();
-    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
-  });
+  }
 
-  @action
-  public save = flow(function*(this: KeyRingStore) {
+  @actionAsync
+  public async save() {
     const msg = SaveKeyRingMsg.create();
-    yield sendMessage(BACKGROUND_PORT, msg);
-  });
+    await task(sendMessage(BACKGROUND_PORT, msg));
+  }
 
   /**
    * Clear key ring data.
    * This will throw unless you are in a development env.
    */
-  @action
-  public clear = flow(function*(this: KeyRingStore) {
+  @actionAsync
+  public async clear() {
     if (process.env.NODE_ENV !== "development") {
       throw new Error(
         "do not use the clear function unless you are in a development environment"
@@ -105,7 +103,7 @@ export class KeyRingStore {
     }
 
     const msg = ClearKeyRingMsg.create();
-    const result = yield sendMessage(BACKGROUND_PORT, msg);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
-  });
+  }
 }

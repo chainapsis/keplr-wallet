@@ -1,4 +1,6 @@
-import { action, flow, observable } from "mobx";
+import { action, observable } from "mobx";
+import { actionAsync, task } from "mobx-utils";
+
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 
 import Axios, { CancelTokenSource } from "axios";
@@ -55,8 +57,8 @@ export class PriceStore {
   }
 
   // This will be called by chain store.
-  @action
-  public setChainInfo = flow(function*(this: PriceStore, info: ChainInfo) {
+  @actionAsync
+  public async setChainInfo(info: ChainInfo) {
     const lastChainInfo = this.chainInfo;
     this.chainInfo = info;
 
@@ -72,22 +74,18 @@ export class PriceStore {
             this.fetchValue("usd", this.chainInfo.coinGeckoId);
           }
         }, AutoFetchingFiatValueInterval);
-        yield this.fetchValue("usd", this.chainInfo.coinGeckoId);
+        await task(this.fetchValue("usd", this.chainInfo.coinGeckoId));
       }
     }
-  });
+  }
 
   /**
    * Fetch value from coingecko.
    * @param currency Fiat currency. ex) usd, krw
    * @param id Coingecko id for pair.
    */
-  @action
-  public fetchValue = flow(function*(
-    this: PriceStore,
-    currency: string,
-    id: string
-  ) {
+  @actionAsync
+  public async fetchValue(currency: string, id: string) {
     // If fetching is in progess, abort it.
     if (this.lastFetchingCancleToken) {
       this.lastFetchingCancleToken.cancel();
@@ -100,9 +98,8 @@ export class PriceStore {
 
     this.lastFetchingCancleToken = Axios.CancelToken.source();
     try {
-      const result: any = yield Axios.get(
-        CoinGeckoAPIEndPoint + CoinGeckoGetPrice,
-        {
+      const result = await task(
+        Axios.get(CoinGeckoAPIEndPoint + CoinGeckoGetPrice, {
           method: "GET",
           params: {
             ids: id,
@@ -110,7 +107,7 @@ export class PriceStore {
             vs_currencies: currency
           },
           cancelToken: this.lastFetchingCancleToken.token
-        }
+        })
       );
 
       if (result.status === 200) {
@@ -136,7 +133,7 @@ export class PriceStore {
         isFetching: false
       });
     }
-  });
+  }
 
   @action
   private setValue(currency: string, id: string, price: Partial<Price>) {
