@@ -5,4 +5,4 @@ export type InternalHandler<M extends Message<unknown>> = (
   msg: M
 ) =>
   | (M extends Message<infer R> ? R : never)
-  | (Promise<M extends Message<infer R> ? R : never>);
+  | Promise<M extends Message<infer R> ? R : never>;

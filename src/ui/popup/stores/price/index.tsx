@@ -100,7 +100,7 @@ export class PriceStore {
 
     this.lastFetchingCancleToken = Axios.CancelToken.source();
     try {
-      const result = yield Axios.get<CoinGeckoPriceResult>(
+      const result: any = yield Axios.get(
         CoinGeckoAPIEndPoint + CoinGeckoGetPrice,
         {
           method: "GET",

@@ -8,11 +8,9 @@ export interface NotificationElementProps {
   canDelete?: boolean;
 }
 
-export const NotificationElement: FunctionComponent<
-  NotificationElementProps & {
-    onDelete: () => void;
-  }
-> = ({ type, content, duration, canDelete, onDelete }) => {
+export const NotificationElement: FunctionComponent<NotificationElementProps & {
+  onDelete: () => void;
+}> = ({ type, content, duration, canDelete, onDelete }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onDelete();

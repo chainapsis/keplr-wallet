@@ -45,9 +45,9 @@ const reject = async (index: string) => {
   }
 };
 
-export const SignPage: FunctionComponent<
-  RouteComponentProps<{ index: string }>
-> = ({ history, match, location }) => {
+export const SignPage: FunctionComponent<RouteComponentProps<{
+  index: string;
+}>> = ({ history, match, location }) => {
   const query = queryString.parse(location.search);
   const inPopup = query.inPopup as boolean | undefined;
 

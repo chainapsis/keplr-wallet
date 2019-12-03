@@ -24,9 +24,10 @@ configure({
   enforceActions: "always" // Make mobx to strict mode.
 });
 
-const Wallet: FunctionComponent<
-  RouteComponentProps<{ chainId: string; path?: string }>
-> = observer(props => {
+const Wallet: FunctionComponent<RouteComponentProps<{
+  chainId: string;
+  path?: string;
+}>> = observer(props => {
   const { chainStore, walletUIStore } = useStore();
   const { match } = props;
   chainStore.setChain(match.params.chainId);
