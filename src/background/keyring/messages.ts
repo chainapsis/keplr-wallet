@@ -232,7 +232,7 @@ export class GetKeyMsg extends Message<KeyHex> {
   }
 
   public chainId = "";
-  public origin: string | undefined;
+  public origin: string = "";
 
   validateBasic(): void {
     if (!this.chainId) {
@@ -251,6 +251,10 @@ export class GetKeyMsg extends Message<KeyHex> {
     // TODO: When is a url undefined?
     if (!sender.url) {
       throw new Error("url is empty");
+    }
+
+    if (!this.origin) {
+      throw new Error("origin is empty");
     }
 
     const url = new URL(sender.url);
@@ -310,15 +314,7 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
       throw new Error("message is empty");
     }
 
-    if (!this.index) {
-      throw new Error("index is empty");
-    }
-    if (this.index.length < 4) {
-      throw new Error("index is too short");
-    }
-    if (this.index.length > 8) {
-      throw new Error("index is too long");
-    }
+    AsyncApprover.isValidIndex(this.index);
   }
 
   // Approve external approves sending message if they submit their origin correctly.
@@ -332,6 +328,10 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     // TODO: When is a url undefined?
     if (!sender.url) {
       throw new Error("url is empty");
+    }
+
+    if (!this.origin) {
+      throw new Error("origin is empty");
     }
 
     const url = new URL(sender.url);
@@ -367,12 +367,8 @@ export class GetRequestedMessage extends Message<{
     if (!this.index) {
       throw new Error("index is empty");
     }
-    if (this.index.length < 4) {
-      throw new Error("index is too short");
-    }
-    if (this.index.length > 8) {
-      throw new Error("index is too long");
-    }
+
+    AsyncApprover.isValidIndex(this.index);
   }
 
   route(): string {
@@ -397,15 +393,7 @@ export class ApproveSignMsg extends Message<void> {
   public index: string = "";
 
   validateBasic(): void {
-    if (!this.index) {
-      throw new Error("index is empty");
-    }
-    if (this.index.length < 4) {
-      throw new Error("index is too short");
-    }
-    if (this.index.length > 8) {
-      throw new Error("index is too long");
-    }
+    AsyncApprover.isValidIndex(this.index);
   }
 
   route(): string {
@@ -431,15 +419,7 @@ export class RejectSignMsg extends Message<void> {
   public index: string = "";
 
   validateBasic(): void {
-    if (!this.index) {
-      throw new Error("index is empty");
-    }
-    if (this.index.length < 4) {
-      throw new Error("index is too short");
-    }
-    if (this.index.length > 8) {
-      throw new Error("index is too long");
-    }
+    AsyncApprover.isValidIndex(this.index);
   }
 
   route(): string {
