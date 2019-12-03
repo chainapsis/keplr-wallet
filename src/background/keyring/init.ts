@@ -12,7 +12,10 @@ import {
   RejectSignMsg,
   GetRegisteredChainMsg,
   LockKeyRingMsg,
-  ClearKeyRingMsg
+  ClearKeyRingMsg,
+  RequestTxBuilderConfigMsg,
+  GetRequestedTxBuilderConfigMsg,
+  ApproveTxBuilderConfigMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -27,6 +30,9 @@ export function init(messageManager: MessageManager) {
   messageManager.registerMessage(UnlockKeyRingMsg);
   messageManager.registerMessage(SetPathMsg);
   messageManager.registerMessage(GetKeyMsg);
+  messageManager.registerMessage(RequestTxBuilderConfigMsg);
+  messageManager.registerMessage(GetRequestedTxBuilderConfigMsg);
+  messageManager.registerMessage(ApproveTxBuilderConfigMsg);
   messageManager.registerMessage(RequestSignMsg);
   messageManager.registerMessage(GetRequestedMessage);
   messageManager.registerMessage(ApproveSignMsg);

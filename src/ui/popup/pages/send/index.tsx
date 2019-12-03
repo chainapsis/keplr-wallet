@@ -44,11 +44,18 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
 
     const { chainStore, accountStore } = useStore();
     const [walletProvider] = useState(
-      new PopupWalletProvider({
-        onRequestSignature: (index: string) => {
-          history.push(`/sign/${index}?inPopup=true`);
+      new PopupWalletProvider(
+        {
+          onRequestTxBuilderConfig: (chainId: string) => {
+            history.push(`/fee/${chainId}`);
+          }
+        },
+        {
+          onRequestSignature: (index: string) => {
+            history.push(`/sign/${index}?inPopup=true`);
+          }
         }
-      })
+      )
     );
     const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider);
 

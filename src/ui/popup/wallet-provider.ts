@@ -3,18 +3,34 @@ import {
   WalletProvider
 } from "@everett-protocol/cosmosjs/core/walletProvider";
 import { Context } from "@everett-protocol/cosmosjs/core/context";
-import { GetKeyMsg, RequestSignMsg } from "../../background/keyring";
+import {
+  GetKeyMsg,
+  RequestSignMsg,
+  RequestTxBuilderConfigMsg
+} from "../../background/keyring";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
+import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import {
+  txBuilderConfigFromPrimitive,
+  txBuilderConfigToPrimitive
+} from "../../background/keyring/utils";
 
 const Buffer = require("buffer/").Buffer;
+
+export interface FeeApprover {
+  onRequestTxBuilderConfig: (chainId: string) => void;
+}
 
 export interface AccessApprover {
   onRequestSignature: (index: string) => void;
 }
 
 export class PopupWalletProvider implements WalletProvider {
-  constructor(private accessApprover: AccessApprover) {}
+  constructor(
+    private feeApprover: FeeApprover,
+    private accessApprover: AccessApprover
+  ) {}
 
   /**
    * Request access to the user's accounts. Wallet can ask the user to approve or deny access. If user deny access, it will throw error.
@@ -42,6 +58,39 @@ export class PopupWalletProvider implements WalletProvider {
         address: new Uint8Array(Buffer.from(key.addressHex, "hex"))
       }
     ]);
+  }
+
+  /**
+   * Request tx builder config from provider.
+   * This is optional method.
+   * If provider supports this method, tx builder will request tx config with prefered tx config that is defined by developer who uses cosmosjs.
+   * Received tx builder config can be changed in the client. The wallet provider must verify that it is the same as the tx builder config sent earlier or warn the user before signing.
+   */
+  getTxBuilderConfig(
+    context: Context,
+    config: TxBuilderConfig
+  ): Promise<TxBuilderConfig> {
+    const requestTxBuilderConfig = RequestTxBuilderConfigMsg.create(
+      {
+        chainId: context.get("chainId"),
+        ...txBuilderConfigToPrimitive(config)
+      },
+      false,
+      // There is no need to set origin because this wallet provider is used in internal.
+      ""
+    );
+
+    return new Promise<TxBuilderConfig>((resolve, reject) => {
+      sendMessage(BACKGROUND_PORT, requestTxBuilderConfig)
+        .then(({ config }) => {
+          resolve(txBuilderConfigFromPrimitive(config));
+        })
+        .catch(e => {
+          reject(e);
+        });
+
+      this.feeApprover.onRequestTxBuilderConfig(context.get("chainId"));
+    });
   }
 
   /**

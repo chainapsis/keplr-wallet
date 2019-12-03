@@ -1,13 +1,17 @@
 import { Key, KeyRing, KeyRingStatus } from "./keyring";
 
 import {
-  NativeChainInfos,
+  AccessOrigin,
   ChainInfo,
   ExtensionAccessOrigins,
-  AccessOrigin
+  NativeChainInfos
 } from "../../chain-info";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
 import { AsyncApprover } from "../../common/async-approver";
+import {
+  TxBuilderConfigPrimitive,
+  TxBuilderConfigPrimitiveWithChainId
+} from "./types";
 
 export interface KeyHex {
   algo: string;
@@ -24,6 +28,14 @@ interface SignMessage {
 export class KeyRingKeeper {
   private readonly keyRing = new KeyRing();
   private path = "";
+
+  private readonly txBuilderApprover = new AsyncApprover<
+    TxBuilderConfigPrimitive
+  >(() => {}, true);
+  private readonly txBuilerConfigs: Map<
+    string,
+    TxBuilderConfigPrimitiveWithChainId
+  > = new Map();
 
   private readonly signApprover = new AsyncApprover();
   private readonly signMessages: Map<string, SignMessage> = new Map();
@@ -127,6 +139,44 @@ export class KeyRingKeeper {
     }
 
     return this.keyRing.getKey(this.path);
+  }
+
+  async requestTxBuilderConfig(
+    config: TxBuilderConfigPrimitiveWithChainId,
+    openPopup: boolean
+  ): Promise<TxBuilderConfigPrimitive> {
+    const index = config.chainId;
+
+    this.txBuilerConfigs.set(index, config);
+
+    if (openPopup) {
+      window.open(
+        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}`,
+        "sign",
+        "width=360px,height=600px",
+        true
+      );
+    }
+
+    const result = await this.txBuilderApprover.request(index);
+    this.txBuilerConfigs.delete(index);
+    if (!result) {
+      throw new Error("config is approved, but result config is null");
+    }
+    return result;
+  }
+
+  getRequestedTxConfig(chainId: string): TxBuilderConfigPrimitiveWithChainId {
+    const config = this.txBuilerConfigs.get(chainId);
+    if (!config) {
+      throw new Error("Unknown config request index");
+    }
+
+    return config;
+  }
+
+  approveTxBuilderConfig(chainId: string, config: TxBuilderConfigPrimitive) {
+    this.txBuilderApprover.approve(chainId, config);
   }
 
   async requestSign(

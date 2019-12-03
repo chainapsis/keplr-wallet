@@ -21,6 +21,7 @@ import { observer } from "mobx-react";
 import { StoreProvider, useStore } from "./stores";
 import { KeyRingStatus } from "./stores/keyring";
 import { SignPage } from "./pages/sign";
+import { FeePage } from "./pages/fee";
 
 configure({
   enforceActions: "always" // Make mobx to strict mode.
@@ -49,6 +50,7 @@ ReactDOM.render(
         <HashRouter>
           <Route exact path="/" component={StateRenderer} />
           <Route exact path="/send" component={SendPage} />
+          <Route exact path="/fee/:chainId" component={FeePage} />
           <Route path="/send/result" component={SendResultPage} />
           <Route path="/sign/:index" component={SignPage} />
         </HashRouter>

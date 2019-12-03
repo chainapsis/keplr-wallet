@@ -3,6 +3,11 @@ import { ROUTE } from "./constants";
 import { ChainInfo } from "../../chain-info";
 import { KeyRingStatus } from "./keyring";
 import { KeyHex } from "./keeper";
+import {
+  TxBuilderConfigPrimitive,
+  TxBuilderConfigPrimitiveWithChainId
+} from "./types";
+import { AsyncApprover } from "../../common/async-approver";
 
 export class GetRegisteredChainMsg extends Message<{
   // Need to set prototype for elements of array manually.
@@ -267,6 +272,125 @@ export class GetKeyMsg extends Message<KeyHex> {
 
   type(): string {
     return GetKeyMsg.type();
+  }
+}
+
+export class RequestTxBuilderConfigMsg extends Message<{
+  config: TxBuilderConfigPrimitive;
+}> {
+  public static type() {
+    return "request-tx-builder-config";
+  }
+
+  public static create(
+    config: TxBuilderConfigPrimitiveWithChainId,
+    openPopup: boolean,
+    origin: string
+  ): RequestTxBuilderConfigMsg {
+    const msg = new RequestTxBuilderConfigMsg();
+    msg.config = config;
+    msg.openPopup = openPopup;
+    msg.origin = origin;
+    return msg;
+  }
+
+  public config?: TxBuilderConfigPrimitiveWithChainId;
+  public openPopup: boolean = false;
+  public origin: string = "";
+
+  validateBasic(): void {
+    if (!this.config) {
+      throw new Error("config is null");
+    }
+  }
+
+  // Approve external approves sending message if they submit their origin correctly.
+  // Keeper or handler must check that this origin has right permission.
+  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+    const isInternal = super.approveExternal(sender);
+    if (isInternal) {
+      return true;
+    }
+
+    // TODO: When is a url undefined?
+    if (!sender.url) {
+      throw new Error("url is empty");
+    }
+
+    if (!this.origin) {
+      throw new Error("origin is empty");
+    }
+
+    const url = new URL(sender.url);
+    return url.origin === this.origin;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestTxBuilderConfigMsg.type();
+  }
+}
+
+export class GetRequestedTxBuilderConfigMsg extends Message<{
+  config: TxBuilderConfigPrimitiveWithChainId;
+}> {
+  public static type() {
+    return "get-requested-tx-builder-config";
+  }
+
+  public static create(chainId: string): GetRequestedTxBuilderConfigMsg {
+    const msg = new GetRequestedTxBuilderConfigMsg();
+    msg.chainId = chainId;
+    return msg;
+  }
+
+  public chainId: string = "";
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetRequestedTxBuilderConfigMsg.type();
+  }
+}
+
+export class ApproveTxBuilderConfigMsg extends Message<{}> {
+  public static type() {
+    return "approve-tx-builder-config";
+  }
+
+  public static create(
+    config: TxBuilderConfigPrimitiveWithChainId
+  ): ApproveTxBuilderConfigMsg {
+    const msg = new ApproveTxBuilderConfigMsg();
+    msg.config = config;
+    return msg;
+  }
+
+  public config?: TxBuilderConfigPrimitiveWithChainId;
+
+  validateBasic(): void {
+    if (!this.config) {
+      throw new Error("config is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ApproveTxBuilderConfigMsg.type();
   }
 }
 

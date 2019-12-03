@@ -12,7 +12,10 @@ import {
   GetRequestedMessage,
   GetRegisteredChainMsg,
   LockKeyRingMsg,
-  ClearKeyRingMsg
+  ClearKeyRingMsg,
+  RequestTxBuilderConfigMsg,
+  GetRequestedTxBuilderConfigMsg,
+  ApproveTxBuilderConfigMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
@@ -44,6 +47,18 @@ export const getHandler: () => Handler = () => {
         return handleSetPathMsg(keeper)(msg as SetPathMsg);
       case GetKeyMsg:
         return handleGetKeyMsg(keeper)(msg as GetKeyMsg);
+      case RequestTxBuilderConfigMsg:
+        return handleRequestTxBuilderConfigMsg(keeper)(
+          msg as RequestTxBuilderConfigMsg
+        );
+      case GetRequestedTxBuilderConfigMsg:
+        return handleGetRequestedTxBuilderConfig(keeper)(
+          msg as GetRequestedTxBuilderConfigMsg
+        );
+      case ApproveTxBuilderConfigMsg:
+        return handleApproveTxBuilderConfigMsg(keeper)(
+          msg as ApproveTxBuilderConfigMsg
+        );
       case RequestSignMsg:
         return handleRequestSignMsg(keeper)(msg as RequestSignMsg);
       case GetRequestedMessage:
@@ -159,6 +174,52 @@ const handleGetKeyMsg: (
         keeper.getChainInfo(getKeyMsg.chainId).bech32Config.bech32PrefixAccAddr
       )
     };
+  };
+};
+
+const handleRequestTxBuilderConfigMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<RequestTxBuilderConfigMsg> = keeper => {
+  return async msg => {
+    if (msg.origin) {
+      // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      keeper.checkAccessOrigin(msg.config!.chainId, msg.origin);
+    }
+
+    const config = await keeper.requestTxBuilderConfig(
+      // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      msg.config!,
+      msg.openPopup
+    );
+    return {
+      config
+    };
+  };
+};
+
+const handleGetRequestedTxBuilderConfig: (
+  keeper: KeyRingKeeper
+) => InternalHandler<GetRequestedTxBuilderConfigMsg> = keeper => {
+  return async msg => {
+    const config = keeper.getRequestedTxConfig(msg.chainId);
+
+    return {
+      config
+    };
+  };
+};
+
+const handleApproveTxBuilderConfigMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<ApproveTxBuilderConfigMsg> = keeper => {
+  return async msg => {
+    // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    keeper.approveTxBuilderConfig(msg.config!.chainId, msg.config!);
+
+    return {};
   };
 };
 
