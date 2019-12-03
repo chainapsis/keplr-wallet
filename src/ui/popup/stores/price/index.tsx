@@ -153,7 +153,11 @@ export class PriceStore {
     );
   }
 
-  public getValue(currency: string, id: string): Price | undefined {
+  public getValue(currency: string, id: string | undefined): Price | undefined {
+    if (!id) {
+      return undefined;
+    }
+
     if (this.prices[currency]) {
       return this.prices[currency][id];
     }
