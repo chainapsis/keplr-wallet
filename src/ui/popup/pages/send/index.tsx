@@ -47,12 +47,12 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       new PopupWalletProvider(
         {
           onRequestTxBuilderConfig: (chainId: string) => {
-            history.push(`/fee/${chainId}`);
+            history.push(`/fee/${chainId}?inPopup=true`);
           }
         },
         {
           onRequestSignature: (index: string) => {
-            history.push(`/sign/${index}?inPopup=true`);
+            history.replace(`/sign/${index}?inPopup=true`);
           }
         }
       )

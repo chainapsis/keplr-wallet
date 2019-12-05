@@ -16,6 +16,7 @@ import {
 } from "../../../../background/keyring/utils";
 
 import bigInteger from "big-integer";
+import queryString from "query-string";
 
 interface FormData {
   gas: string;
@@ -25,7 +26,10 @@ interface FormData {
 
 export const FeePage: FunctionComponent<RouteComponentProps<{
   chainId: string;
-}>> = ({ match }) => {
+}>> = ({ match, location, history }) => {
+  const query = queryString.parse(location.search);
+  const inPopup = query.inPopup ?? false;
+
   const chainId = match.params.chainId;
 
   const { register, handleSubmit, setValue, errors } = useForm<FormData>({
@@ -52,7 +56,17 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
   const txBuilder = useTxBuilderConfig(chainId, onConfigInit, onApprove);
 
   return (
-    <HeaderLayout showChainName canChangeChainInfo={false}>
+    <HeaderLayout
+      showChainName
+      canChangeChainInfo={false}
+      onBackButton={
+        inPopup
+          ? () => {
+              history.goBack();
+            }
+          : undefined
+      }
+    >
       <form
         onSubmit={handleSubmit(async (data: FormData) => {
           if (!txBuilder.approve) {
