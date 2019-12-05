@@ -3,9 +3,18 @@ import {
   WalletProvider
 } from "@everett-protocol/cosmosjs/core/walletProvider";
 import { Context } from "@everett-protocol/cosmosjs/core/context";
-import { GetKeyMsg, RequestSignMsg } from "../../background/keyring";
+import {
+  GetKeyMsg,
+  RequestSignMsg,
+  RequestTxBuilderConfigMsg
+} from "../../background/keyring";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
+import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import {
+  txBuilderConfigFromPrimitive,
+  txBuilderConfigToPrimitive
+} from "../../background/keyring/utils";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -38,6 +47,33 @@ export class InjectedWalletProvider implements WalletProvider {
   }
 
   /**
+   * Request tx builder config from provider.
+   * This is optional method.
+   * If provider supports this method, tx builder will request tx config with prefered tx config that is defined by developer who uses cosmosjs.
+   * Received tx builder config can be changed in the client. The wallet provider must verify that it is the same as the tx builder config sent earlier or warn the user before signing.
+   */
+  async getTxBuilderConfig(
+    context: Context,
+    config: TxBuilderConfig
+  ): Promise<TxBuilderConfig> {
+    const requestTxBuilderConfigMsg = RequestTxBuilderConfigMsg.create(
+      {
+        chainId: context.get("chainId"),
+        ...txBuilderConfigToPrimitive(config)
+      },
+      true,
+      window.location.origin
+    );
+
+    const result = await sendMessage(
+      BACKGROUND_PORT,
+      requestTxBuilderConfigMsg
+    );
+
+    return txBuilderConfigFromPrimitive(result.config);
+  }
+
+  /**
    * Request signature from matched address if user have approved the access.
    */
   async sign(
@@ -55,7 +91,6 @@ export class InjectedWalletProvider implements WalletProvider {
       bech32Address,
       Buffer.from(message).toString("hex"),
       true,
-      // There is no need to set origin because this wallet provider is used in internal.
       window.location.origin
     );
 

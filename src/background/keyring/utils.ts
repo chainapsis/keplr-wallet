@@ -5,7 +5,7 @@ import bigInteger from "big-integer";
 
 export function feeToString(fee: Coin | Coin[]) {
   let feeStr = "";
-  if (fee instanceof Coin) {
+  if (!Array.isArray(fee)) {
     feeStr = fee.toString();
   } else {
     const coinStrs: string[] = [];
