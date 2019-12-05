@@ -12,7 +12,7 @@ export class AsyncApprover<R = void> {
 
   /**
    * @param validateIndex Function that validates index. If this is not set, it will validate the index by using `AsyncApprover.isValidIndex(index)`.
-   * @param override If override is true, reject the prior request and override when the new reqeust has the same index with prior one.
+   * @param override If override is true, override the prior request when the new reqeust has the same index with prior one.
    */
   constructor(
     private readonly validateIndex: (index: string) => void = (
@@ -30,8 +30,6 @@ export class AsyncApprover<R = void> {
     if (this.requests.has(index)) {
       if (!this.override) {
         throw new Error("index exists");
-      } else {
-        this.reject(index);
       }
     }
 
