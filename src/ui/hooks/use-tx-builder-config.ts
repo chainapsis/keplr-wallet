@@ -14,7 +14,7 @@ import {
 } from "../../background/keyring/utils";
 
 /**
- * useSignature hook returns the object related to cosmosjs's tx builder config
+ * useTxBuilderConfig hook returns the object related to cosmosjs's tx builder config
  * This will not make a state transaction after unmounted.
  * `initiailizing` means if requested config is initializing.
  * `config` is the initialized config.
@@ -69,7 +69,7 @@ export const useTxBuilderConfig = (
     return () => {
       isMounted = false;
     };
-    // Make sure that onMessageInit should not make re-render every time by using useCallback.
+    // Make sure that onConfigInit should not make re-render every time by using useCallback.
   }, [chainId, onConfigInit]);
 
   const [approve, setApprove] = useState<
