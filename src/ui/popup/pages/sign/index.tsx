@@ -1,18 +1,6 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useState
-} from "react";
+import React, { FunctionComponent, useCallback, useEffect } from "react";
 import { Button } from "../../../components/button";
-import {
-  ApproveSignMsg,
-  GetRequestedMessage,
-  RejectSignMsg
-} from "../../../../background/keyring";
 import { RouteComponentProps } from "react-router";
-import { sendMessage } from "../../../../common/message";
-import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
 import { HeaderLayout } from "../../layouts";
 
@@ -20,107 +8,82 @@ import style from "./styles.module.scss";
 
 import queryString from "query-string";
 import { useStore } from "../../stores";
-
-const Buffer = require("buffer/").Buffer;
-
-const approve = async (index: string) => {
-  const msg = ApproveSignMsg.create(index);
-  try {
-    await sendMessage(BACKGROUND_PORT, msg);
-  } catch (e) {
-    if (e.toString() !== "Error: Unknown request index") {
-      throw e;
-    }
-  }
-};
-
-const reject = async (index: string) => {
-  const msg = RejectSignMsg.create(index);
-  try {
-    await sendMessage(BACKGROUND_PORT, msg);
-  } catch (e) {
-    if (e.toString() !== "Error: Unknown request index") {
-      throw e;
-    }
-  }
-};
+import { useSignature } from "../../../hooks";
 
 export const SignPage: FunctionComponent<RouteComponentProps<{
   index: string;
 }>> = ({ history, match, location }) => {
   const query = queryString.parse(location.search);
-  const inPopup = query.inPopup as boolean | undefined;
+  const inPopup = query.inPopup ?? false;
 
   const index = match.params.index;
 
-  const [selected, setSelected] = useState(false);
-  const [message, setMessage] = useState("");
-
   const { chainStore } = useStore();
+
+  const signing = useSignature(
+    index,
+    useCallback(
+      chainId => {
+        chainStore.setChain(chainId);
+      },
+      [chainStore]
+    )
+  );
 
   useEffect(() => {
     // Force reject when closing window.
-    const beforeunload = () => {
-      if (!selected) {
-        reject(index);
+    const beforeunload = async () => {
+      if (!signing.loading && !inPopup && signing.reject) {
+        await signing.reject();
       }
     };
 
     addEventListener("beforeunload", beforeunload);
     return () => {
       removeEventListener("beforeunload", beforeunload);
+    };
+  }, [signing, inPopup]);
 
-      // If this is called by injected wallet provider, it will reject signing when unmount
-      if (!inPopup && !selected) {
-        reject(index);
+  useEffect(() => {
+    return () => {
+      // If index is changed, just reject the prior one.
+      if (!inPopup && signing.reject) {
+        signing.reject();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const msg = GetRequestedMessage.create(index);
-      const result = await sendMessage(BACKGROUND_PORT, msg);
-
-      chainStore.setChain(result.chainId);
-      const message = Buffer.from(result.messageHex, "hex").toString();
-
-      try {
-        setMessage(JSON.stringify(JSON.parse(message), undefined, 2));
-      } catch (e) {
-        setMessage(message);
-      }
-    })();
-
-    // When index is changed, reject a prior request index.
-    return () => {
-      if (index && !selected) {
-        // Ignore result.
-        reject(index);
-      }
-    };
-  }, [index]);
+  }, [signing.reject, signing.index, inPopup]);
 
   const onApproveClick = useCallback(async () => {
-    setSelected(true);
-    await approve(index);
+    if (signing.approve) {
+      await signing.approve();
+    }
 
     // If this is called by injected wallet provider. Just close.
     if (!inPopup) {
       window.close();
     }
-  }, [index, inPopup]);
+  }, [signing, inPopup]);
 
   const onRejectClick = useCallback(async () => {
-    setSelected(true);
-    await reject(index);
+    if (signing.reject) {
+      await signing.reject();
+    }
 
     // If this is called by injected wallet provider. Just close.
     if (!inPopup) {
       window.close();
     }
-  }, [index, inPopup]);
+  }, [signing, inPopup]);
+
+  let prettyMessage = signing.message;
+  if (prettyMessage) {
+    try {
+      prettyMessage = JSON.stringify(JSON.parse(prettyMessage), undefined, 2);
+    } catch (e) {
+      prettyMessage = signing.message;
+    }
+  }
 
   return (
     <HeaderLayout
@@ -135,13 +98,18 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
       }
     >
       <div>
-        <pre className={style.message}>{message}</pre>
+        <pre className={style.message}>{prettyMessage}</pre>
         <div className={style.buttons}>
           <Button
             className={style.button}
             size="medium"
             color="primary"
-            disabled={selected}
+            disabled={
+              signing.message == null ||
+              signing.message === "" ||
+              signing.initializing ||
+              signing.loading
+            }
             onClick={onApproveClick}
           >
             Approve
@@ -150,7 +118,12 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
             className={style.button}
             size="medium"
             color="danger"
-            disabled={selected}
+            disabled={
+              signing.message == null ||
+              signing.message === "" ||
+              signing.initializing ||
+              signing.loading
+            }
             onClick={onRejectClick}
           >
             Reject
