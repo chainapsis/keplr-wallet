@@ -6,15 +6,20 @@ import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
 import { CoinUtils } from "../../../../common/coin-utils";
+import { Currency, getCurrency } from "../../../../chain-info";
 
 export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore } = useStore();
 
   const fiat = priceStore.getValue("usd", chainStore.chainInfo.coinGeckoId);
 
+  const nativeCurrency = getCurrency(
+    chainStore.chainInfo.nativeCurrency
+  ) as Currency;
+
   const coinAmount = CoinUtils.amountOf(
     accountStore.assets,
-    chainStore.chainInfo.coinMinimalDenom
+    nativeCurrency.coinMinimalDenom
   );
 
   return (
@@ -29,19 +34,19 @@ export const AssetView: FunctionComponent = observer(() => {
         {!accountStore.isAssetFetching
           ? CoinUtils.shrinkDecimals(
               coinAmount,
-              chainStore.chainInfo.coinDecimals,
+              nativeCurrency.coinDecimals,
               0,
               6
             )
           : "0"}{" "}
-        {chainStore.chainInfo.coinDenom}
+        {nativeCurrency.coinDenom}
       </div>
       <div className={styleAsset.fiat}>
         {fiat && !fiat.value.equals(new Dec(0))
           ? "$" +
             parseFloat(
               fiat.value
-                .mul(new Dec(coinAmount, chainStore.chainInfo.coinDecimals))
+                .mul(new Dec(coinAmount, nativeCurrency.coinDecimals))
                 .toString()
             ).toLocaleString()
           : "?"}

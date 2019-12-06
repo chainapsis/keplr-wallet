@@ -25,6 +25,7 @@ import { observer } from "mobx-react";
 import queryString from "query-string";
 import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import { getCurrency } from "../../../../chain-info";
 
 interface FormData {
   recipient: string;
@@ -82,7 +83,10 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   gas: bigInteger(60000),
                   memo: data.memo,
                   fee: new Coin(
-                    chainStore.chainInfo.coinMinimalDenom.toLowerCase(),
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    getCurrency(
+                      chainStore.chainInfo.nativeCurrency
+                    )!.coinMinimalDenom,
                     new Int("1000")
                   )
                 };

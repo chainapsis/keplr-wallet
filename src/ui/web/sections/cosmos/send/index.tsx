@@ -30,6 +30,7 @@ import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
 import bigInteger from "big-integer";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { useNotification } from "../../../../components/notification";
+import { getCurrency } from "../../../../../chain-info";
 
 interface FormData {
   readonly recipient: string;
@@ -128,7 +129,10 @@ export const SendSection: FunctionComponent = observer(() => {
                           gas: bigInteger(60000),
                           memo: data.memo,
                           fee: new Coin(
-                            chainStore.chainInfo.coinMinimalDenom.toLowerCase(),
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            getCurrency(
+                              chainStore.chainInfo.nativeCurrency
+                            )!.coinMinimalDenom,
                             new Int("1000")
                           )
                         },
