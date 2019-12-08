@@ -80,6 +80,7 @@
     "webpack": "^4.39.2",
     "webpack-cli": "^3.3.7",
     "webpack-dev-server": "^3.8.2",
-    "write-file-webpack-plugin": "^4.5.1"
+    "write-file-webpack-plugin": "^4.5.1",
+    "serialize-javascript": ">=2.1.1"
   }
 }
