@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 
 import { Input } from "../../../../components/form";
 
@@ -14,23 +14,12 @@ import {
   useBech32ConfigPromise
 } from "@everett-protocol/cosmosjs/common/address";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { Api } from "@everett-protocol/cosmosjs/core/api";
-import { Rest } from "@everett-protocol/cosmosjs/core/rest";
-import { defaultTxEncoder } from "@everett-protocol/cosmosjs/common/stdTx";
-import { stdTxBuilder } from "@everett-protocol/cosmosjs/common/stdTxBuilder";
-import { Context } from "@everett-protocol/cosmosjs/core/context";
-import { GaiaRest } from "@everett-protocol/cosmosjs/gaia/rest";
-import { Account } from "@everett-protocol/cosmosjs/core/account";
-import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
-import { Codec } from "@node-a-team/ts-amino";
-import * as CmnCdc from "@everett-protocol/cosmosjs/common/codec";
-import * as Crypto from "@everett-protocol/cosmosjs/crypto";
-import * as Bank from "@everett-protocol/cosmosjs/x/bank";
 import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
 import bigInteger from "big-integer";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { useNotification } from "../../../../components/notification";
 import { getCurrency } from "../../../../../chain-info";
+import { useCosmosJS } from "../../../../hooks";
 
 interface FormData {
   readonly recipient: string;
@@ -49,7 +38,11 @@ export const SendSection: FunctionComponent = observer(() => {
 
   const { chainStore } = useStore();
 
-  const [loading, setLoading] = useState(false);
+  const cosmosJS = useCosmosJS(
+    chainStore.chainInfo,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    window.cosmosJSWalletProvider!
+  );
 
   const notification = useNotification();
 
@@ -66,121 +59,62 @@ export const SendSection: FunctionComponent = observer(() => {
           <Card>
             <form
               onSubmit={handleSubmit(async data => {
-                const cosmosjs = new Api<Rest>(
-                  {
-                    chainId: chainStore.chainInfo.chainId,
-                    // TODO: handle null wallet provider.
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    walletProvider: window.cosmosJSWalletProvider!,
-                    rpc: chainStore.chainInfo.rpc,
-                    // No need.
-                    rest: "",
-                    disableGlobalBech32Config: true
-                  },
-                  {
-                    txEncoder: defaultTxEncoder,
-                    txBuilder: stdTxBuilder,
-                    restFactory: (context: Context) => {
-                      return new GaiaRest(context);
-                    },
-                    queryAccount: (
-                      context: Context,
-                      address: string | Uint8Array
-                    ): Promise<Account> => {
-                      return queryAccount(
-                        context.get("bech32Config"),
-                        context.get("rpcInstance"),
-                        address
-                      );
-                    },
-                    bech32Config: chainStore.chainInfo.bech32Config,
-                    bip44: chainStore.chainInfo.bip44,
-                    registerCodec: (codec: Codec) => {
-                      CmnCdc.registerCodec(codec);
-                      Crypto.registerCodec(codec);
-                      // XXX: If cosmos-sdk/MsgSend has disambiguation bytes, it will not work
-                      Bank.registerCodec(codec);
-                    }
-                  }
-                );
-
-                await cosmosjs.enable();
-
-                setLoading(true);
-
-                const keys = await cosmosjs.getKeys();
-
-                // This is not react hook.
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                useBech32ConfigPromise(
-                  chainStore.chainInfo.bech32Config,
-                  async () => {
-                    const msg = new MsgSend(
-                      new AccAddress(keys[0].address),
-                      AccAddress.fromBech32(data.recipient),
-                      [Coin.parse(data.amount)]
-                    );
-
-                    try {
-                      // TODO: change mode to commit.
-                      const result = await cosmosjs.sendMsgs(
-                        [msg],
-                        {
-                          gas: bigInteger(60000),
-                          memo: data.memo,
-                          fee: new Coin(
-                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                            getCurrency(
-                              chainStore.chainInfo.nativeCurrency
-                            )!.coinMinimalDenom,
-                            new Int("1000")
-                          )
-                        },
-                        "sync"
+                if (cosmosJS.sendMsgs && cosmosJS.addresses.length > 0) {
+                  return useBech32ConfigPromise(
+                    chainStore.chainInfo.bech32Config,
+                    async () => {
+                      const msg = new MsgSend(
+                        AccAddress.fromBech32(cosmosJS.addresses[0]),
+                        AccAddress.fromBech32(data.recipient),
+                        [Coin.parse(data.amount)]
                       );
 
-                      if (result.mode === "sync") {
-                        if (result.code !== 0) {
-                          notification.push({
-                            type: "danger",
-                            content: result.log,
-                            duration: 5,
-                            canDelete: true,
-                            placement: "top-right",
-                            transition: {
-                              duration: 0.25
-                            }
-                          });
-                        } else {
-                          notification.push({
-                            type: "success",
-                            content: "Wait a second. Tx will be commited soon.",
-                            duration: 5,
-                            canDelete: true,
-                            placement: "top-right",
-                            transition: {
-                              duration: 0.25
-                            }
-                          });
-                        }
+                      if (cosmosJS.sendMsgs) {
+                        await cosmosJS.sendMsgs(
+                          [msg],
+                          {
+                            gas: bigInteger(60000),
+                            memo: data.memo,
+                            fee: new Coin(
+                              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                              getCurrency(
+                                chainStore.chainInfo.nativeCurrency
+                              )!.coinMinimalDenom,
+                              new Int("1000")
+                            )
+                          },
+                          () => {
+                            clearForm();
+                            notification.push({
+                              type: "success",
+                              content: "Tx succeeds",
+                              duration: 5,
+                              canDelete: true,
+                              placement: "top-right",
+                              transition: {
+                                duration: 0.25
+                              }
+                            });
+                          },
+                          (e: Error) => {
+                            clearForm();
+                            notification.push({
+                              type: "danger",
+                              content: e.toString(),
+                              duration: 5,
+                              canDelete: true,
+                              placement: "top-right",
+                              transition: {
+                                duration: 0.25
+                              }
+                            });
+                          },
+                          "commit"
+                        );
                       }
-                    } catch (e) {
-                      notification.push({
-                        type: "danger",
-                        content: e.toString(),
-                        duration: 5,
-                        canDelete: true,
-                        placement: "top-right",
-                        transition: {
-                          duration: 0.25
-                        }
-                      });
-                    } finally {
-                      clearForm();
-                      setLoading(false);
                     }
-                  }
-                );
+                  );
+                }
               })}
             >
               <Input
@@ -234,7 +168,8 @@ export const SendSection: FunctionComponent = observer(() => {
                 color="primary"
                 size="medium"
                 fullwidth
-                loading={loading}
+                loading={cosmosJS.loading}
+                disabled={cosmosJS.addresses.length === 0}
               >
                 Send
               </Button>

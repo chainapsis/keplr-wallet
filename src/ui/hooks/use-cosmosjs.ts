@@ -13,7 +13,6 @@ import * as Gov from "@everett-protocol/cosmosjs/x/gov";
 import { Rest } from "@everett-protocol/cosmosjs/core/rest";
 import { useCallback, useEffect, useState } from "react";
 import { Msg } from "@everett-protocol/cosmosjs/core/tx";
-import { useBech32ConfigPromise } from "@everett-protocol/cosmosjs/common/address";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 import { Api } from "@everett-protocol/cosmosjs/core/api";
 import { defaultTxEncoder } from "@everett-protocol/cosmosjs/common/stdTx";
@@ -66,6 +65,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
     mode?: "commit" | "sync" | "async"
   ) => Promise<void>;
 
+  const [addresses, setAddresses] = useState<string[]>([]);
   const [sendMsgs, setSendMsgs] = useState<SendMsgs | undefined>(undefined);
 
   useEffect(() => {
@@ -100,6 +100,24 @@ export const useCosmosJS = <R extends Rest = Rest>(
       }
     );
 
+    if (!api.wallet) {
+      if (isSubscribed) {
+        setError(new Error("their is no wallet"));
+      }
+    } else {
+      (async () => {
+        await api.enable();
+        const keys = await api.getKeys();
+        const addresses: string[] = [];
+        for (const key of keys) {
+          addresses.push(key.bech32Address);
+        }
+        if (isSubscribed) {
+          setAddresses(addresses);
+        }
+      })();
+    }
+
     const _sendMsgs: SendMsgs = async (
       msgs: Msg[],
       config: TxBuilderConfig,
@@ -114,32 +132,26 @@ export const useCosmosJS = <R extends Rest = Rest>(
         if (api.wallet) {
           await api.enable();
 
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          await useBech32ConfigPromise(
-            api.context.get("bech32Config"),
-            async () => {
-              const result = await api.sendMsgs(msgs, config, mode);
+          const result = await api.sendMsgs(msgs, config, mode);
 
-              if (result.mode === "sync" || result.mode === "async") {
-                if (result.code !== 0) {
-                  throw new Error(result.log);
-                }
-              } else if (result.mode === "commit") {
-                if (result.checkTx.code !== 0) {
-                  throw new Error(result.checkTx.log);
-                }
-                if (result.deliverTx.code !== 0) {
-                  throw new Error(result.deliverTx.log);
-                }
-              }
+          if (result.mode === "sync" || result.mode === "async") {
+            if (result.code !== 0) {
+              throw new Error(result.log);
             }
-          );
+          } else if (result.mode === "commit") {
+            if (result.checkTx.code !== 0) {
+              throw new Error(result.checkTx.log);
+            }
+            if (result.deliverTx.code !== 0) {
+              throw new Error(result.deliverTx.log);
+            }
+          }
 
           if (onSuccess) {
             onSuccess();
           }
         } else {
-          throw Error("their is no wallet");
+          throw new Error("their is no wallet");
         }
       } catch (e) {
         if (isSubscribed) {
@@ -165,6 +177,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
   return {
     loading,
     error,
+    addresses,
     sendMsgs
   };
 };
