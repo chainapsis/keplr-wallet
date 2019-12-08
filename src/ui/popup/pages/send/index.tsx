@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
-import { Input } from "../../../components/form";
+import { CoinInput, Input } from "../../../components/form";
 import { RouteComponentProps } from "react-router-dom";
 import { useStore } from "../../stores";
 
@@ -25,7 +25,7 @@ import { observer } from "mobx-react";
 import queryString from "query-string";
 import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
-import { getCurrency } from "../../../../chain-info";
+import { getCurrencies, getCurrency } from "../../../../chain-info";
 
 interface FormData {
   recipient: string;
@@ -35,13 +35,22 @@ interface FormData {
 
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
   ({ history }) => {
-    const { register, handleSubmit, errors } = useForm<FormData>({
+    const { register, handleSubmit, setValue, setError, errors } = useForm<
+      FormData
+    >({
       defaultValues: {
         recipient: "",
         amount: "",
         memo: ""
       }
     });
+
+    register(
+      { name: "amount" },
+      {
+        required: "Amount is required"
+      }
+    );
 
     const { chainStore, accountStore } = useStore();
     const [walletProvider] = useState(
@@ -132,21 +141,13 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               }
             })}
           />
-          <Input
-            type="text"
+          <CoinInput
+            currencies={getCurrencies(chainStore.chainInfo.currencies)}
             label="Amount"
-            name="amount"
             error={errors.amount && errors.amount.message}
-            ref={register({
-              required: "Amount is required",
-              validate: (value: string) => {
-                try {
-                  Coin.parse(value);
-                } catch (e) {
-                  return "Invalid amount";
-                }
-              }
-            })}
+            setValue={setValue}
+            setError={setError}
+            name="amount"
           />
           <Input
             type="text"

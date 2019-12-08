@@ -34,6 +34,10 @@ export function getCurrency(type: string): Currency | undefined {
 
 export function getCurrencies(types: string[]): Currency[] {
   const currencies: Currency[] = [];
+  // Guard
+  if (!types) {
+    return currencies;
+  }
 
   for (const type of types) {
     const currency = getCurrency(type);
@@ -64,6 +68,7 @@ export interface ChainInfo {
    * You can get id from https://api.coingecko.com/api/v3/coins/list.
    */
   readonly coinGeckoId?: string;
+  readonly currencies: string[];
   /**
    * This indicates which coin or token can be used for fee to send transaction.
    * You can get actual currency information from Currencies.
@@ -86,6 +91,7 @@ export const NativeChainInfos: ChainInfo[] = [
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
     coinGeckoId: "cosmos",
+    currencies: ["atom"],
     feeCurrencies: ["atom"]
   },
   {
@@ -102,6 +108,7 @@ export const NativeChainInfos: ChainInfo[] = [
     bip44: new BIP44(44, 330, 0),
     bech32Config: defaultBech32Config("terra"),
     coinGeckoId: "luna",
+    currencies: ["luna"],
     feeCurrencies: ["luna"] // TODO: krw, usd, sdr, mnt
   }
 ];

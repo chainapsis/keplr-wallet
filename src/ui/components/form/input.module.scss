@@ -10,6 +10,18 @@
   margin-bottom: 1.5rem !important;
 }
 
+:global(.fields .field) {
+  margin-bottom: 0 !important;
+}
+
+:global(.fields) {
+  margin-bottom: 1rem !important;
+}
+
+:global(.field.for-label) {
+  margin-bottom: 0.5rem !important;
+}
+
 :global {
   .help {
     position: absolute !important;
