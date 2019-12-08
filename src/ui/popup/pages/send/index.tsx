@@ -101,7 +101,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                     },
                     e => {
                       history.replace(`/send/result?error=${e.toString()}`);
-                    }
+                    },
+                    "commit"
                   );
                 }
               }
@@ -179,10 +180,11 @@ export const SendResultPage: FunctionComponent<RouteComponentProps> = ({
 
   return (
     <HeaderLayout showChainName canChangeChainInfo={false}>
+      {/* TODO: change subtitle when tx succeeds */}
       <Result
         status={error ? "error" : "success"}
         title={error ? "Transaction fails" : "Transaction succeeds"}
-        subTitle={error ? error : "Wait a second. Tx will be commited soon."}
+        subTitle={error ? error : "Transaction succeeds."}
         extra={
           <Button
             size="medium"
