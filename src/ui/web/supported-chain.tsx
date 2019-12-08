@@ -6,6 +6,7 @@ import classnames from "classnames";
 
 import { UnderConstructionSection } from "./sections/under-construction";
 import { SendSection } from "./sections/cosmos/send";
+import { StakeSection } from "./sections/cosmos/stake";
 
 export interface Menu {
   /**
@@ -57,7 +58,7 @@ export const SupportedChainWalletUIs: WalletUI[] = [
             Stake
           </Link>
         ),
-        sectionRender: () => <UnderConstructionSection />
+        sectionRender: () => <StakeSection />
       },
       {
         path: "governance",

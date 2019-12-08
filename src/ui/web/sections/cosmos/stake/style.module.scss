@@ -1,0 +1,93 @@
+@import "../../../styles/var";
+
+.container {
+  padding: $base-section-padding;
+}
+
+.row-top {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 80px;
+  line-height: 80px;
+
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+.col {
+  text-align: center;
+  overflow-y: hidden;
+
+  &:global(#rank) {
+    width: 60px;
+  }
+
+  &:global(#validator) {
+    min-width: 200px;
+    margin-left: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: hidden;
+
+    .thumbnail {
+      width: 60px;
+      height: 60px;
+      margin-right: 20px;
+      border-radius: 100%;
+    }
+  }
+
+  &:global(#voting-power) {
+    width: 220px;
+  }
+
+  &:global(#commission) {
+    width: 160px;
+  }
+}
+
+.collapse {
+  max-height: 0;
+  overflow: hidden;
+
+  &:global(.open) {
+    max-height: 600px;
+  }
+}
+
+.detail {
+  padding: 16px;
+
+  .item {
+    display: flex;
+
+    .label {
+      min-width: 120px;
+      font-weight: bold;
+    }
+  }
+
+  .buttons {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
