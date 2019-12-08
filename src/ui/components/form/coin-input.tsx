@@ -6,6 +6,7 @@ import style from "./input.module.scss";
 import { FieldName, FieldValues } from "react-hook-form/dist/types";
 import { Currency } from "../../../chain-info";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
 export interface CoinInputProps<FormValues extends FieldValues = FieldValues> {
   currencies: Currency[];
@@ -28,6 +29,7 @@ export interface CoinInputProps<FormValues extends FieldValues = FieldValues> {
     ref?: any
   ) => void;
   shouldValidate?: boolean | undefined;
+  defaultValue?: string;
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = props => {
@@ -40,11 +42,12 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
     name,
     setValue,
     setError,
-    shouldValidate
+    shouldValidate,
+    defaultValue
   } = props;
 
-  const [amount, setAmount] = useState("");
-  const [currencyType, setCurrencyType] = useState("");
+  const [amount, setAmount] = useState<string | undefined>();
+  const [currencyDenom, setCurrencyDenom] = useState("");
   const [currency, setCurrency] = useState<Currency | undefined>();
 
   useEffect(() => {
@@ -70,8 +73,31 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
           // Clear error.
           setError(name, "invalid");
         }
-      } else if (amount) {
+      } else if (amount !== undefined) {
         throw new Error("Currency not set");
+      }
+
+      if (amount === undefined && defaultValue !== undefined) {
+        const coin = Coin.parse(defaultValue);
+        let find = false;
+        for (const currency of currencies) {
+          if (currency.coinMinimalDenom === coin.denom) {
+            setCurrencyDenom(currency.coinDenom);
+            let amountDec = new Dec(coin.amount);
+            let precision = new Dec(1);
+            for (let i = 0; i < currency.coinDecimals; i++) {
+              precision = precision.mul(new Dec(10));
+            }
+            amountDec = amountDec.quoTruncate(precision);
+            setAmount(amountDec.toString(currency.coinDecimals));
+            find = true;
+            break;
+          }
+        }
+
+        if (!find) {
+          throw new Error(`${defaultValue} can't be used for fee.`);
+        }
       }
 
       if (name && setError) {
@@ -88,21 +114,21 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
      * It might be the bug(?) in react-hook-form.
      * Anyway, don't add `setError` in deps until this problem can be solved.
      */
-  }, [amount, currency, name, setValue, shouldValidate]);
+  }, [amount, currency, name, setValue, shouldValidate, defaultValue]);
 
   useEffect(() => {
     let find = false;
     for (const currency of currencies) {
-      if (currency.coinDenom === currencyType) {
+      if (currency.coinDenom === currencyDenom) {
         setCurrency(currency);
         find = true;
         break;
       }
     }
     if (!find && currencies.length > 0) {
-      setCurrencyType(currencies[0].coinDenom);
+      setCurrencyDenom(currencies[0].coinDenom);
     }
-  }, [currencies, currencyType]);
+  }, [currencies, currencyDenom]);
 
   return (
     <div className="fields">
@@ -127,7 +153,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
               color ? `is-${color}` : undefined,
               !color && error ? "is-danger" : undefined
             )}
-            value={amount}
+            value={amount === undefined ? "" : amount}
             onChange={(e: any) => {
               setAmount(e.target.value);
             }}
@@ -141,9 +167,9 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
         <p className="control">
           <span className="select">
             <select
-              value={currencyType}
+              value={currencyDenom}
               onChange={(e: any) => {
-                setCurrencyType(e.target.value);
+                setCurrencyDenom(e.target.value);
               }}
             >
               {currencies.map((currency, i) => {

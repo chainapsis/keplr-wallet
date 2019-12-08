@@ -26,7 +26,7 @@ import {
  */
 export const useTxBuilderConfig = (
   chainId: string,
-  onConfigInit: (config: TxBuilderConfig) => void,
+  onConfigInit: (chainId: string, config: TxBuilderConfig) => void,
   onApprove: () => void
 ) => {
   const [initializing, setInitializing] = useState(false);
@@ -54,7 +54,7 @@ export const useTxBuilderConfig = (
         if (isMounted) {
           setConfig(config);
         }
-        onConfigInit(config);
+        onConfigInit(result.config.chainId, config);
       } catch (e) {
         if (isMounted) {
           setConfig(undefined);

@@ -1,8 +1,8 @@
-import React, { FunctionComponent, useCallback } from "react";
+import React, { FunctionComponent, useCallback, useState } from "react";
 
 import { HeaderLayout } from "../../layouts/header-layout";
 
-import { Input } from "../../../components/form";
+import { Input, CoinInput } from "../../../components/form";
 import { Button } from "../../../components/button";
 
 import { RouteComponentProps } from "react-router";
@@ -17,6 +17,9 @@ import {
 
 import bigInteger from "big-integer";
 import queryString from "query-string";
+import { getCurrencies } from "../../../../chain-info";
+import { observer } from "mobx-react";
+import { useStore } from "../../stores";
 
 interface FormData {
   gas: string;
@@ -26,13 +29,17 @@ interface FormData {
 
 export const FeePage: FunctionComponent<RouteComponentProps<{
   chainId: string;
-}>> = ({ match, location, history }) => {
+}>> = observer(({ match, location, history }) => {
   const query = queryString.parse(location.search);
   const inPopup = query.inPopup ?? false;
 
   const chainId = match.params.chainId;
 
-  const { register, handleSubmit, setValue, errors } = useForm<FormData>({
+  const { chainStore } = useStore();
+
+  const { register, handleSubmit, setValue, setError, errors } = useForm<
+    FormData
+  >({
     defaultValues: {
       gas: "",
       fee: "",
@@ -40,13 +47,24 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
     }
   });
 
+  register(
+    { name: "fee" },
+    {
+      required: "Fee is required"
+    }
+  );
+
+  const [fee, setFee] = useState<string | undefined>();
+
   const onConfigInit = useCallback(
-    (config: TxBuilderConfig) => {
+    (chainId: string, config: TxBuilderConfig) => {
+      chainStore.setChain(chainId);
+
       setValue("gas", config.gas.toString());
-      setValue("fee", feeToString(config.fee));
+      setFee(feeToString(config.fee));
       setValue("memo", config.memo);
     },
-    [setValue]
+    [chainStore, setValue]
   );
 
   const onApprove = useCallback(() => {
@@ -99,16 +117,14 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
             }
           })}
         />
-        <Input
-          type="text"
+        <CoinInput
           label="Fee"
           name="fee"
+          setValue={setValue}
+          setError={setError}
           error={errors.fee && errors.fee.message}
-          ref={register({
-            required: "Fee is required"
-            // TODO: validating
-            // validate: (value:string) => {}
-          })}
+          currencies={getCurrencies(chainStore.chainInfo.feeCurrencies)}
+          defaultValue={fee}
         />
         <Input
           type="text"
@@ -123,4 +139,4 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
       </form>
     </HeaderLayout>
   );
-};
+});
