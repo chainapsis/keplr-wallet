@@ -27,8 +27,9 @@ export const RegisterPage: FunctionComponent = observer(() => {
     setState(RegisterState.VERIFY);
   }, []);
 
-  const onVerify = useCallback(() => {
-    keyRingStore.createKey(words, password);
+  const onVerify = useCallback(async () => {
+    await keyRingStore.createKey(words, password);
+    await keyRingStore.save();
   }, [keyRingStore, password, words]);
 
   return (

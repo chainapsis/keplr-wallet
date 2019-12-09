@@ -9,6 +9,8 @@ import useForm from "react-hook-form";
 
 import { EmptyLayout } from "../../layouts/empty-layout";
 
+import style from "./style.module.scss";
+
 interface FormData {
   password: string;
 }
@@ -25,14 +27,15 @@ export const LockPage: FunctionComponent = observer(() => {
   const [loading, setLoading] = useState(false);
 
   return (
-    <EmptyLayout>
+    <EmptyLayout style={{ backgroundColor: "white", height: "100%" }}>
       <form
+        className={style.formContainer}
         onSubmit={handleSubmit(async data => {
           setLoading(true);
           await keyRingStore.unlock(data.password);
-          await keyRingStore.save();
         })}
       >
+        <div style={{ flex: 1 }} />
         <Input
           type="password"
           label="Passward"
@@ -40,7 +43,6 @@ export const LockPage: FunctionComponent = observer(() => {
           error={errors.password && errors.password.message}
           ref={register({ required: "Password is empty" })}
         />
-
         <Button
           type="submit"
           color="primary"
