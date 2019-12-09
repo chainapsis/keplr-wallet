@@ -139,10 +139,16 @@ export const useCosmosJS = <R extends Rest = Rest>(
               throw new Error(result.log);
             }
           } else if (result.mode === "commit") {
-            if (result.checkTx.code !== 0) {
+            if (
+              result.checkTx.code !== undefined &&
+              result.checkTx.code !== 0
+            ) {
               throw new Error(result.checkTx.log);
             }
-            if (result.deliverTx.code !== 0) {
+            if (
+              result.deliverTx.code !== undefined &&
+              result.deliverTx.code !== 0
+            ) {
               throw new Error(result.deliverTx.log);
             }
           }
