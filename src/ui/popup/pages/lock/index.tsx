@@ -16,14 +16,13 @@ interface FormData {
 }
 
 export const LockPage: FunctionComponent = observer(() => {
-  const { register, handleSubmit, errors } = useForm<FormData>({
+  const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {
       password: ""
     }
   });
 
   const { keyRingStore } = useStore();
-
   const [loading, setLoading] = useState(false);
 
   return (
@@ -32,7 +31,12 @@ export const LockPage: FunctionComponent = observer(() => {
         className={style.formContainer}
         onSubmit={handleSubmit(async data => {
           setLoading(true);
-          await keyRingStore.unlock(data.password);
+          try {
+            await keyRingStore.unlock(data.password);
+          } catch (e) {
+            setError("password", "invalid", "Invaid password");
+            setLoading(false);
+          }
         })}
       >
         <div style={{ flex: 1 }} />
