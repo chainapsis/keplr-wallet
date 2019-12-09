@@ -24,9 +24,9 @@ import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
  * useCosmosJS hook returns the object related to cosmosjs api.
  * sendMsgs in returned value can send msgs asynchronously safely.
  * sendMsgs will not make state transition after component unmounted.
- * Make sure to pass the wallet provider as state to avoid re-rendering every time.
+ * Make sure to pass the wallet provider as state to avoid re-rendering unnecessarily.
  * You can override rest factory or register codec.
- * Also, make sure that you pass rest factory and register codec by using useCallback to avoid re-rendering.
+ * Also, make sure that you pass rest factory and register codec by using useCallback to avoid unnecessary re-rendering.
  */
 export const useCosmosJS = <R extends Rest = Rest>(
   chainInfo: ChainInfo,

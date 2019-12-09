@@ -16,7 +16,7 @@ import { BACKGROUND_PORT } from "../../common/message/constant";
  * `loading` means if approving or rejecting is requesting.
  * `error` is the thrown error during approving or rejecting.
  * @param index Index of requested signing.
- * @param onMessageInit This will be called whenever message is initialized. Make sure that onMessageInit should not make re-render every time by using useCallback.
+ * @param onMessageInit This will be called whenever message is initialized. Make sure that onMessageInit should not make re-render unnecessarily by using useCallback.
  */
 export const useSignature = (
   index: string,
@@ -60,7 +60,7 @@ export const useSignature = (
     return () => {
       isMounted = false;
     };
-    // Make sure that onMessageInit should not make re-render every time by using useCallback.
+    // Make sure that onMessageInit should not make re-render unnecessarily by using useCallback.
   }, [index, onMessageInit]);
 
   const [approve, setApprove] = useState<(() => Promise<void>) | undefined>(

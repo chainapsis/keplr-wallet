@@ -21,8 +21,8 @@ import {
  * `loading` means if approving is requesting.
  * `error` is the thrown error during approving.
  * @param chainId Chain id of requested tx builder config.
- * @param onConfigInit Callback when config initialized. Make sure that onConfigInit should not make re-render every time by using useCallback.
- * @param onApprove Callback when approving succeeds. Make sure that onApprove should not make re-render every time by using useCallback.
+ * @param onConfigInit Callback when config initialized. Make sure that onConfigInit should not make re-render unnecessarily by using useCallback.
+ * @param onApprove Callback when approving succeeds. Make sure that onApprove should not make re-render unnecessarily by using useCallback.
  */
 export const useTxBuilderConfig = (
   chainId: string,
@@ -69,7 +69,7 @@ export const useTxBuilderConfig = (
     return () => {
       isMounted = false;
     };
-    // Make sure that onConfigInit should not make re-render every time by using useCallback.
+    // Make sure that onConfigInit should not make re-render unnecessarily by using useCallback.
   }, [chainId, onConfigInit]);
 
   const [approve, setApprove] = useState<
