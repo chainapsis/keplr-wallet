@@ -162,7 +162,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             size="medium"
             fullwidth
             loading={cosmosJS.loading}
-            active={cosmosJS.sendMsgs != null}
+            disabled={cosmosJS.sendMsgs == null}
           >
             Send
           </Button>
