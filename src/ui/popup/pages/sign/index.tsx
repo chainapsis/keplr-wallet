@@ -107,9 +107,9 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
             disabled={
               signing.message == null ||
               signing.message === "" ||
-              signing.initializing ||
-              signing.loading
+              signing.initializing
             }
+            loading={signing.requested}
             onClick={onApproveClick}
           >
             Approve
@@ -121,9 +121,9 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
             disabled={
               signing.message == null ||
               signing.message === "" ||
-              signing.initializing ||
-              signing.loading
+              signing.initializing
             }
+            loading={signing.requested}
             onClick={onRejectClick}
           >
             Reject

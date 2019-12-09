@@ -32,6 +32,7 @@ export const useTxBuilderConfig = (
   const [initializing, setInitializing] = useState(false);
   const [config, setConfig] = useState<TxBuilderConfig | undefined>(undefined);
   const [loading, setLoading] = useState(false);
+  const [requested, setRequested] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
   useEffect(() => {
@@ -77,11 +78,19 @@ export const useTxBuilderConfig = (
   >(undefined);
 
   useEffect(() => {
+    if (requested) {
+      setRequested(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId]);
+
+  useEffect(() => {
     let isMounted = true;
 
     const appove = async (config: TxBuilderConfig) => {
       if (isMounted) {
         setLoading(true);
+        setRequested(true);
       }
 
       try {
@@ -114,6 +123,7 @@ export const useTxBuilderConfig = (
     initializing,
     config,
     loading,
+    requested,
     error,
     approve
   };

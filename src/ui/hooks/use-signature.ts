@@ -25,6 +25,7 @@ export const useSignature = (
   const [initializing, setInitializing] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [requested, setRequested] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
   useEffect(() => {
@@ -72,10 +73,17 @@ export const useSignature = (
 
   useEffect(() => {
     let isMounted = true;
+    if (loading) {
+      setLoading(false);
+    }
+    if (requested) {
+      setRequested(false);
+    }
 
     const appove = async () => {
       if (isMounted) {
         setLoading(true);
+        setRequested(true);
       }
 
       try {
@@ -95,6 +103,7 @@ export const useSignature = (
     const reject = async () => {
       if (isMounted) {
         setLoading(true);
+        setRequested(true);
       }
 
       try {
@@ -117,6 +126,7 @@ export const useSignature = (
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   return {
@@ -124,6 +134,7 @@ export const useSignature = (
     initializing,
     message,
     loading,
+    requested,
     error,
     approve,
     reject

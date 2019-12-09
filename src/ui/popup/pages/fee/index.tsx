@@ -133,7 +133,14 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
           error={errors.memo && errors.memo.message}
           ref={register({})}
         />
-        <Button type="submit" color="primary" size="medium" fullwidth>
+        <Button
+          type="submit"
+          color="primary"
+          size="medium"
+          fullwidth
+          disabled={txBuilder.initializing}
+          loading={txBuilder.requested}
+        >
           Set Fee
         </Button>
       </form>
