@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { Validator } from "../../../../hooks/use-validator";
-import { Input } from "../../../../components/form";
+import { CoinInput } from "../../../../components/form";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import useForm from "react-hook-form";
 import { Button } from "../../../../components/button";
@@ -14,7 +14,7 @@ import {
 } from "@everett-protocol/cosmosjs/common/address";
 import { MsgDelegate } from "@everett-protocol/cosmosjs/x/staking";
 import bigInteger from "big-integer";
-import { getCurrency } from "../../../../../chain-info";
+import { getCurrencies, getCurrency } from "../../../../../chain-info";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { useNotification } from "../../../../components/notification";
 
@@ -26,11 +26,20 @@ export const StakeModal: FunctionComponent<{ validator: Validator }> = observer(
   ({ validator }) => {
     const { chainStore } = useStore();
 
-    const { register, handleSubmit, errors } = useForm<FormData>({
+    const { register, handleSubmit, setValue, setError, errors } = useForm<
+      FormData
+    >({
       defaultValues: {
         amount: ""
       }
     });
+
+    register(
+      { name: "amount" },
+      {
+        required: "Amount is required"
+      }
+    );
 
     const cosmosJS = useCosmosJS(
       chainStore.chainInfo,
@@ -103,21 +112,13 @@ export const StakeModal: FunctionComponent<{ validator: Validator }> = observer(
             }
           })}
         >
-          <Input
-            type="text"
+          <CoinInput
+            currencies={getCurrencies([chainStore.chainInfo.nativeCurrency])}
             label="Amount"
-            name="amount"
             error={errors.amount && errors.amount.message}
-            ref={register({
-              required: "Amount is required",
-              validate: value => {
-                try {
-                  Coin.parse(value);
-                } catch (e) {
-                  return "Invalid amount";
-                }
-              }
-            })}
+            setValue={setValue}
+            setError={setError}
+            name="amount"
           />
           <Button
             type="submit"
