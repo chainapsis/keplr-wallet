@@ -4,7 +4,7 @@ import { RouteComponentProps } from "react-router";
 
 import { HeaderLayout } from "../../layouts";
 
-import style from "./styles.module.scss";
+import style from "./style.module.scss";
 
 import queryString from "query-string";
 import { useStore } from "../../stores";
@@ -97,8 +97,9 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
           : undefined
       }
     >
-      <div>
+      <div className={style.container}>
         <pre className={style.message}>{prettyMessage}</pre>
+        <div style={{ flex: 1 }} />
         <div className={style.buttons}>
           <Button
             className={style.button}

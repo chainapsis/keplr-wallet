@@ -8,5 +8,6 @@
 }
 
 .inner-container {
-  padding: 0 $layout-margin;
+  padding: 0 $layout-margin $layout-margin;
+  flex: 1;
 }

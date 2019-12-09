@@ -27,6 +27,8 @@ import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 import { getCurrencies, getCurrency } from "../../../../chain-info";
 
+import style from "./style.module.scss";
+
 interface FormData {
   recipient: string;
   amount: string;
@@ -78,6 +80,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         }}
       >
         <form
+          className={style.formContainer}
           onSubmit={handleSubmit(async (data: FormData) => {
             await useBech32ConfigPromise(
               chainStore.chainInfo.bech32Config,
@@ -118,54 +121,59 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             );
           })}
         >
-          <Input
-            type="text"
-            label="Recipient"
-            name="recipient"
-            error={errors.recipient && errors.recipient.message}
-            ref={register({
-              required: "Recipient is required",
-              validate: (value: string) => {
-                // This is not react hook.
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                return useBech32Config(
-                  chainStore.chainInfo.bech32Config,
-                  () => {
-                    try {
-                      AccAddress.fromBech32(value);
-                    } catch (e) {
-                      return "Invalid address";
-                    }
+          <div className={style.formInnerContainer}>
+            <div>
+              <Input
+                type="text"
+                label="Recipient"
+                name="recipient"
+                error={errors.recipient && errors.recipient.message}
+                ref={register({
+                  required: "Recipient is required",
+                  validate: (value: string) => {
+                    // This is not react hook.
+                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                    return useBech32Config(
+                      chainStore.chainInfo.bech32Config,
+                      () => {
+                        try {
+                          AccAddress.fromBech32(value);
+                        } catch (e) {
+                          return "Invalid address";
+                        }
+                      }
+                    );
                   }
-                );
-              }
-            })}
-          />
-          <CoinInput
-            currencies={getCurrencies(chainStore.chainInfo.currencies)}
-            label="Amount"
-            error={errors.amount && errors.amount.message}
-            setValue={setValue}
-            setError={setError}
-            name="amount"
-          />
-          <Input
-            type="text"
-            label="Memo (Optional)"
-            name="memo"
-            error={errors.memo && errors.memo.message}
-            ref={register({ required: false })}
-          />
-          <Button
-            type="submit"
-            color="primary"
-            size="medium"
-            fullwidth
-            loading={cosmosJS.loading}
-            disabled={cosmosJS.sendMsgs == null}
-          >
-            Send
-          </Button>
+                })}
+              />
+              <CoinInput
+                currencies={getCurrencies(chainStore.chainInfo.currencies)}
+                label="Amount"
+                error={errors.amount && errors.amount.message}
+                setValue={setValue}
+                setError={setError}
+                name="amount"
+              />
+              <Input
+                type="text"
+                label="Memo (Optional)"
+                name="memo"
+                error={errors.memo && errors.memo.message}
+                ref={register({ required: false })}
+              />
+            </div>
+            <div style={{ flex: 1 }} />
+            <Button
+              type="submit"
+              color="primary"
+              size="medium"
+              fullwidth
+              loading={cosmosJS.loading}
+              disabled={cosmosJS.sendMsgs == null}
+            >
+              Send
+            </Button>
+          </div>
         </form>
       </HeaderLayout>
     );

@@ -21,6 +21,8 @@ import { getCurrencies } from "../../../../chain-info";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
+import style from "./style.module.scss";
+
 interface FormData {
   gas: string;
   fee: string;
@@ -86,6 +88,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
       }
     >
       <form
+        className={style.formContainer}
         onSubmit={handleSubmit(async (data: FormData) => {
           if (!txBuilder.approve) {
             throw new Error("tx builder is not loaded");
@@ -101,48 +104,53 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
           await txBuilder.approve(config);
         })}
       >
-        <Input
-          type="text"
-          label="Gas"
-          name="gas"
-          error={errors.gas && errors.gas.message}
-          ref={register({
-            required: "Gas is required",
-            validate: (value: string) => {
-              try {
-                bigInteger(value);
-              } catch (e) {
-                return "Gas should be number";
-              }
-            }
-          })}
-        />
-        <CoinInput
-          label="Fee"
-          name="fee"
-          setValue={setValue}
-          setError={setError}
-          error={errors.fee && errors.fee.message}
-          currencies={getCurrencies(chainStore.chainInfo.feeCurrencies)}
-          defaultValue={fee}
-        />
-        <Input
-          type="text"
-          label="Memo (Optional)"
-          name="memo"
-          error={errors.memo && errors.memo.message}
-          ref={register({})}
-        />
-        <Button
-          type="submit"
-          color="primary"
-          size="medium"
-          fullwidth
-          disabled={txBuilder.initializing}
-          loading={txBuilder.requested}
-        >
-          Set Fee
-        </Button>
+        <div className={style.formInnerContainer}>
+          <div>
+            <Input
+              type="text"
+              label="Gas"
+              name="gas"
+              error={errors.gas && errors.gas.message}
+              ref={register({
+                required: "Gas is required",
+                validate: (value: string) => {
+                  try {
+                    bigInteger(value);
+                  } catch (e) {
+                    return "Gas should be number";
+                  }
+                }
+              })}
+            />
+            <CoinInput
+              label="Fee"
+              name="fee"
+              setValue={setValue}
+              setError={setError}
+              error={errors.fee && errors.fee.message}
+              currencies={getCurrencies(chainStore.chainInfo.feeCurrencies)}
+              defaultValue={fee}
+            />
+            <Input
+              type="text"
+              label="Memo (Optional)"
+              name="memo"
+              error={errors.memo && errors.memo.message}
+              ref={register({})}
+            />
+          </div>
+          <div style={{ flex: 1 }} />
+          <Button
+            type="submit"
+            color="primary"
+            size="medium"
+            fullwidth
+            disabled={txBuilder.initializing}
+            loading={txBuilder.requested}
+          >
+            Set Fee
+          </Button>
+        </div>
       </form>
     </HeaderLayout>
   );
