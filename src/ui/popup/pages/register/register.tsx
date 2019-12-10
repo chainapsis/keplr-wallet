@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 
 import { Input } from "../../../components/form";
 import { Button } from "../../../components/button";
@@ -19,11 +19,13 @@ interface FormData {
 }
 
 export const RegisterInPage: FunctionComponent<{
-  onRegister: (words: string, password: string) => void;
+  onRegister: (words: string, password: string, recovered: boolean) => void;
 }> = props => {
   const [isRecover, setIsRecover] = useState(false);
 
-  const { register, handleSubmit, getValues, errors } = useForm<FormData>({
+  const { register, handleSubmit, setValue, getValues, errors } = useForm<
+    FormData
+  >({
     defaultValues: {
       words: KeyRingStore.GenereateMnemonic(),
       password: "",
@@ -31,13 +33,21 @@ export const RegisterInPage: FunctionComponent<{
     }
   });
 
+  useEffect(() => {
+    if (!isRecover) {
+      setValue("words", KeyRingStore.GenereateMnemonic());
+    } else {
+      setValue("words", "");
+    }
+  }, [isRecover, setValue]);
+
   return (
     <div className={style.container}>
       <div className={style.intro}>Write down your mnemonic</div>
       <form
         className={style.formContainer}
         onSubmit={handleSubmit((data: FormData) => {
-          props.onRegister(data.words, data.password);
+          props.onRegister(data.words, data.password, isRecover);
         })}
       >
         <div className="field">
@@ -48,6 +58,7 @@ export const RegisterInPage: FunctionComponent<{
                 "has-fixed-size is-medium",
                 style.mnemonic
               )}
+              placeholder="Type your mnemonic"
               disabled={!isRecover}
               name="words"
               ref={register({

@@ -21,16 +21,30 @@ export const RegisterPage: FunctionComponent = observer(() => {
 
   const { keyRingStore } = useStore();
 
-  const onRegister = useCallback((words: string, password: string): void => {
-    setWords(words);
-    setPassword(password);
-    setState(RegisterState.VERIFY);
-  }, []);
+  const register = useCallback(
+    async (words: string, password: string) => {
+      await keyRingStore.createKey(words, password);
+      await keyRingStore.save();
+    },
+    [keyRingStore]
+  );
+
+  const onRegister = useCallback(
+    (words: string, password: string, recovered: boolean): void => {
+      setWords(words);
+      setPassword(password);
+      if (!recovered) {
+        setState(RegisterState.VERIFY);
+      } else {
+        register(words, password);
+      }
+    },
+    [register]
+  );
 
   const onVerify = useCallback(async () => {
-    await keyRingStore.createKey(words, password);
-    await keyRingStore.save();
-  }, [keyRingStore, password, words]);
+    await register(words, password);
+  }, [register, password, words]);
 
   return (
     <EmptyLayout style={{ height: "100%", backgroundColor: "white" }}>
