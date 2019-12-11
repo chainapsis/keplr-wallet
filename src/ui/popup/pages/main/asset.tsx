@@ -30,8 +30,9 @@ export const AssetView: FunctionComponent = observer(() => {
           src={chainStore.chainInfo.coinIconUrl}
         />
       </div>
+      {/* TODO: Show the information that account is fetching. */}
       <div className={styleAsset.amount}>
-        {!accountStore.isAssetFetching
+        {!(accountStore.assets.length === 0)
           ? CoinUtils.shrinkDecimals(
               coinAmount,
               nativeCurrency.coinDecimals,
