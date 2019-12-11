@@ -146,7 +146,8 @@ export class AccountStore {
       }
 
       this.lastAssetFetchingError = undefined;
-      this.assets = [];
+      // Load the assets from storage.
+      this.assets = await this.loadAssetsFromStorage(this.bech32Address);
     }
   }
 
@@ -181,6 +182,8 @@ export class AccountStore {
       );
 
       this.assets = account.getCoins();
+      // Save the assets to storage.
+      this.saveAssetsToStorage(this.bech32Address, this.assets);
     } catch (e) {
       if (!Axios.isCancel(e)) {
         this.assets = [];
@@ -197,5 +200,47 @@ export class AccountStore {
       this.lastFetchingCancleToken = undefined;
       this.isAssetFetching = false;
     }
+  }
+
+  // Not action
+  private async saveAssetsToStorage(
+    bech32Address: string,
+    assets: Coin[]
+  ): Promise<void> {
+    const coinStrs: string[] = [];
+    for (const coin of assets) {
+      coinStrs.push(coin.toString());
+    }
+
+    return new Promise(resovle => {
+      chrome.storage.local.set(
+        {
+          assets: {
+            [bech32Address]: coinStrs.join(",")
+          }
+        },
+        resovle
+      );
+    });
+  }
+
+  // Not action
+  private async loadAssetsFromStorage(bech32Address: string): Promise<Coin[]> {
+    return new Promise(resolve => {
+      chrome.storage.local.get(items => {
+        const coins: Coin[] = [];
+        const assets = items?.assets;
+        if (assets) {
+          const coinsStr = assets[bech32Address];
+          if (coinsStr) {
+            const coinStrs = coinsStr.split(",");
+            for (const coinStr of coinStrs) {
+              coins.push(Coin.parse(coinStr));
+            }
+          }
+        }
+        resolve(coins);
+      });
+    });
   }
 }
