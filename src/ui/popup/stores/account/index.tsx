@@ -183,7 +183,7 @@ export class AccountStore {
 
       this.assets = account.getCoins();
       // Save the assets to storage.
-      this.saveAssetsToStorage(this.bech32Address, this.assets);
+      await this.saveAssetsToStorage(this.bech32Address, this.assets);
     } catch (e) {
       if (!Axios.isCancel(e)) {
         if (
