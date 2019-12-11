@@ -15,7 +15,8 @@ import {
   ClearKeyRingMsg,
   RequestTxBuilderConfigMsg,
   GetRequestedTxBuilderConfigMsg,
-  ApproveTxBuilderConfigMsg
+  ApproveTxBuilderConfigMsg,
+  RejectTxBuilderConfigMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
@@ -58,6 +59,10 @@ export const getHandler: () => Handler = () => {
       case ApproveTxBuilderConfigMsg:
         return handleApproveTxBuilderConfigMsg(keeper)(
           msg as ApproveTxBuilderConfigMsg
+        );
+      case RejectTxBuilderConfigMsg:
+        return handleRejectTxBuilderConfigMsg(keeper)(
+          msg as RejectTxBuilderConfigMsg
         );
       case RequestSignMsg:
         return handleRequestSignMsg(keeper)(msg as RequestSignMsg);
@@ -218,6 +223,16 @@ const handleApproveTxBuilderConfigMsg: (
     // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     keeper.approveTxBuilderConfig(msg.config!.chainId, msg.config!);
+
+    return {};
+  };
+};
+
+const handleRejectTxBuilderConfigMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<RejectTxBuilderConfigMsg> = keeper => {
+  return async msg => {
+    keeper.rejectTxBuilderConfig(msg.chainId);
 
     return {};
   };

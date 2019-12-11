@@ -13,6 +13,8 @@ import {
   TxBuilderConfigPrimitiveWithChainId
 } from "./types";
 
+const Buffer = require("buffer/").Buffer;
+
 export interface KeyHex {
   algo: string;
   pubKeyHex: string;
@@ -145,13 +147,17 @@ export class KeyRingKeeper {
     config: TxBuilderConfigPrimitiveWithChainId,
     openPopup: boolean
   ): Promise<TxBuilderConfigPrimitive> {
+    const random = new Uint8Array(4);
+    crypto.getRandomValues(random);
+    const hash = Buffer.from(random).toString("hex");
     const index = config.chainId;
 
     this.txBuilerConfigs.set(index, config);
 
     if (openPopup) {
+      // Open fee window with hash to let the fee page to know that window is requested newly.
       window.open(
-        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}`,
+        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}#${hash}`,
         "sign",
         "width=360px,height=600px",
         true
@@ -177,6 +183,10 @@ export class KeyRingKeeper {
 
   approveTxBuilderConfig(chainId: string, config: TxBuilderConfigPrimitive) {
     this.txBuilderApprover.approve(chainId, config);
+  }
+
+  rejectTxBuilderConfig(chainId: string): void {
+    this.txBuilderApprover.reject(chainId);
   }
 
   async requestSign(

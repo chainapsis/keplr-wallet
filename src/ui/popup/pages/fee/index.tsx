@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useCallback, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 
 import { HeaderLayout } from "../../layouts/header-layout";
 
@@ -74,6 +79,33 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
   }, []);
 
   const txBuilder = useTxBuilderConfig(chainId, onConfigInit, onApprove);
+
+  useEffect(() => {
+    return () => {
+      // If requested chain id is changed, just reject the prior one.
+      if (!inPopup && txBuilder.reject) {
+        txBuilder.reject();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [txBuilder.reject, chainId, inPopup]);
+
+  useEffect(() => {
+    // Force reject when closing window.
+    const beforeunload = async () => {
+      if (!txBuilder.loading && !inPopup && txBuilder.reject) {
+        await txBuilder.reject();
+      }
+    };
+
+    addEventListener("beforeunload", beforeunload);
+    // It can know that page is requested newly by catching hash changed event.
+    addEventListener("hashchange", beforeunload);
+    return () => {
+      removeEventListener("beforeunload", beforeunload);
+      removeEventListener("hashchange", beforeunload);
+    };
+  }, [txBuilder, inPopup]);
 
   return (
     <HeaderLayout

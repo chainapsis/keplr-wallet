@@ -394,6 +394,34 @@ export class ApproveTxBuilderConfigMsg extends Message<{}> {
   }
 }
 
+export class RejectTxBuilderConfigMsg extends Message<{}> {
+  public static type() {
+    return "reject-tx-builder-config";
+  }
+
+  public static create(chainId: string): RejectTxBuilderConfigMsg {
+    const msg = new RejectTxBuilderConfigMsg();
+    msg.chainId = chainId;
+    return msg;
+  }
+
+  public chainId: string = "";
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RejectTxBuilderConfigMsg.type();
+  }
+}
+
 export class RequestSignMsg extends Message<{ signatureHex: string }> {
   public static type() {
     return "request-sign";

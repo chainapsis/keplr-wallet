@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 
 import {
   ApproveTxBuilderConfigMsg,
-  GetRequestedTxBuilderConfigMsg
+  GetRequestedTxBuilderConfigMsg,
+  RejectTxBuilderConfigMsg
 } from "../../background/keyring";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
@@ -77,6 +78,8 @@ export const useTxBuilderConfig = (
     ((config: TxBuilderConfig) => Promise<void>) | undefined
   >(undefined);
 
+  const [reject, setReject] = useState<(() => Promise<void>) | undefined>();
+
   useEffect(() => {
     if (requested) {
       setRequested(false);
@@ -112,7 +115,28 @@ export const useTxBuilderConfig = (
       }
     };
 
+    const reject = async () => {
+      if (isMounted) {
+        setLoading(true);
+        setRequested(true);
+      }
+
+      try {
+        const msg = RejectTxBuilderConfigMsg.create(chainId);
+        await sendMessage(BACKGROUND_PORT, msg);
+      } catch (e) {
+        if (isMounted) {
+          setError(e);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
     setApprove(() => appove);
+    setReject(() => reject);
 
     return () => {
       isMounted = false;
@@ -125,6 +149,7 @@ export const useTxBuilderConfig = (
     loading,
     requested,
     error,
-    approve
+    approve,
+    reject
   };
 };
