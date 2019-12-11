@@ -29,7 +29,7 @@ export interface WalletUI {
 /* eslint-disable react/display-name */
 export const SupportedChainWalletUIs: WalletUI[] = [
   {
-    chainId: "cosmoshub-2",
+    chainId: "cosmoshub-3",
     menus: [
       {
         menuItemRender: ({ active, to }) => (

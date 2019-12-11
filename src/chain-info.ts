@@ -83,14 +83,14 @@ export const NativeChainInfos: ChainInfo[] = [
   {
     rpc: "http://localhost",
     rest: "http://localhost:1317",
-    chainId: "cosmoshub-2",
+    chainId: "cosmoshub-3",
     chainName: "Cosmos",
     nativeCurrency: "atom",
     coinIconUrl: require("assets/atom-icon.png"),
     walletUrl:
       process.env.NODE_ENV === "production"
         ? ""
-        : "http://localhost:8081/#/cosmoshub-2",
+        : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
     currencies: ["atom"],
