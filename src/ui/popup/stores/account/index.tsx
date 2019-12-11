@@ -186,15 +186,17 @@ export class AccountStore {
       this.saveAssetsToStorage(this.bech32Address, this.assets);
     } catch (e) {
       if (!Axios.isCancel(e)) {
-        this.assets = [];
         if (
           !e.toString().includes(`account ${this.bech32Address} does not exist`)
         ) {
           this.lastAssetFetchingError = e;
+        } else {
+          // If account doesn't exist
+          this.assets = [];
         }
         // Though error occurs, don't clear last fetched assets.
         // Show last fetched assets with warning that error occured.
-        console.log(`Error occurs during fetching price: ${e.toString()}`);
+        console.log(`Error occurs during fetching assets: ${e.toString()}`);
       }
     } finally {
       this.lastFetchingCancleToken = undefined;
