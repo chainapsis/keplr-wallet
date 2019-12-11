@@ -9,7 +9,7 @@ import {
   CoinGeckoGetPrice,
   AutoFetchingFiatValueInterval
 } from "../../../../options";
-import { ChainInfo } from "../../../../chain-info";
+import { ChainInfo, getCurrency } from "../../../../chain-info";
 
 interface CoinGeckoPriceResult {
   [id: string]: {
@@ -68,13 +68,14 @@ export class PriceStore {
         this.lastFetchingIntervalId = undefined;
       }
 
-      if (this.chainInfo.coinGeckoId) {
+      const nativeCurrency = getCurrency(this.chainInfo.nativeCurrency);
+      if (nativeCurrency && nativeCurrency.coinGeckoId) {
         this.lastFetchingIntervalId = setInterval(() => {
-          if (this.chainInfo.coinGeckoId) {
-            this.fetchValue("usd", this.chainInfo.coinGeckoId);
+          if (nativeCurrency.coinGeckoId) {
+            this.fetchValue("usd", nativeCurrency.coinGeckoId);
           }
         }, AutoFetchingFiatValueInterval);
-        await task(this.fetchValue("usd", this.chainInfo.coinGeckoId));
+        await task(this.fetchValue("usd", nativeCurrency.coinGeckoId));
       }
     }
   }

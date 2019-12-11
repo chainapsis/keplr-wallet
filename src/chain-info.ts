@@ -8,23 +8,30 @@ export interface Currency {
   coinDenom: string;
   coinMinimalDenom: string;
   coinDecimals: number;
+  /**
+   * This is used to fetch asset's fiat value from coingecko.
+   * You can get id from https://api.coingecko.com/api/v3/coins/list.
+   */
+  coinGeckoId?: string;
 }
 
 /**
  * Currencis include the currency information for matched coin.
  */
 export const Currencies: {
-  [currency: string]: Currency;
+  readonly [currency: string]: Currency;
 } = {
   atom: {
     coinDenom: "ATOM",
     coinMinimalDenom: "uatom",
-    coinDecimals: 6
+    coinDecimals: 6,
+    coinGeckoId: "cosmos"
   },
   luna: {
     coinDenom: "LUNA",
     coinMinimalDenom: "uluna",
-    coinDecimals: 6
+    coinDecimals: 6,
+    coinGeckoId: "luna"
   }
 };
 
@@ -63,11 +70,7 @@ export interface ChainInfo {
   readonly walletUrl: string;
   readonly bip44: BIP44;
   readonly bech32Config: Bech32Config;
-  /**
-   * This is used to fetch asset's fiat value from coingecko.
-   * You can get id from https://api.coingecko.com/api/v3/coins/list.
-   */
-  readonly coinGeckoId?: string;
+
   readonly currencies: string[];
   /**
    * This indicates which coin or token can be used for fee to send transaction.
@@ -90,7 +93,6 @@ export const NativeChainInfos: ChainInfo[] = [
         : "http://localhost:8081/#/cosmoshub-2",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
-    coinGeckoId: "cosmos",
     currencies: ["atom"],
     feeCurrencies: ["atom"]
   },
@@ -107,7 +109,6 @@ export const NativeChainInfos: ChainInfo[] = [
         : "http://localhost:8081/#/columbus-2",
     bip44: new BIP44(44, 330, 0),
     bech32Config: defaultBech32Config("terra"),
-    coinGeckoId: "luna",
     currencies: ["luna"],
     feeCurrencies: ["luna"] // TODO: krw, usd, sdr, mnt
   }

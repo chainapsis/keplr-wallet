@@ -11,7 +11,11 @@ import { Currency, getCurrency } from "../../../../chain-info";
 export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore } = useStore();
 
-  const fiat = priceStore.getValue("usd", chainStore.chainInfo.coinGeckoId);
+  const fiat = priceStore.getValue(
+    "usd",
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    getCurrency(chainStore.chainInfo.nativeCurrency)!.coinGeckoId
+  );
 
   const nativeCurrency = getCurrency(
     chainStore.chainInfo.nativeCurrency
