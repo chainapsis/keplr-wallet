@@ -14,7 +14,7 @@ import {
 } from "@everett-protocol/cosmosjs/common/address";
 import { MsgDelegate } from "@everett-protocol/cosmosjs/x/staking";
 import bigInteger from "big-integer";
-import { getCurrencies, getCurrency } from "../../../../../chain-info";
+import { getCurrencies, getCurrency } from "../../../../../common/currency";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { useNotification } from "../../../../components/notification";
 

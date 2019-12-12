@@ -7,7 +7,8 @@ import style from "./style.module.scss";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import { Currency, getCurrency } from "../../../../../chain-info";
+import { Currency } from "../../../../../chain-info";
+import { getCurrency } from "../../../../../common/currency";
 import { useValidator, Validator } from "../../../../hooks/use-validator";
 
 import Modal from "react-modal";

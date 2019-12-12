@@ -22,7 +22,7 @@ import {
 
 import bigInteger from "big-integer";
 import queryString from "query-string";
-import { getCurrencies } from "../../../../chain-info";
+import { getCurrencies } from "../../../../common/currency";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 

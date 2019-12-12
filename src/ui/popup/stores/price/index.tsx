@@ -9,7 +9,8 @@ import {
   CoinGeckoGetPrice,
   AutoFetchingFiatValueInterval
 } from "../../../../options";
-import { ChainInfo, getCurrency } from "../../../../chain-info";
+import { ChainInfo } from "../../../../chain-info";
+import { getCurrency } from "../../../../common/currency";
 
 interface CoinGeckoPriceResult {
   [id: string]: {

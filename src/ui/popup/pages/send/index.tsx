@@ -25,7 +25,7 @@ import { observer } from "mobx-react";
 import queryString from "query-string";
 import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
-import { getCurrencies, getCurrency } from "../../../../chain-info";
+import { getCurrencies, getCurrency } from "../../../../common/currency";
 
 import style from "./style.module.scss";
 

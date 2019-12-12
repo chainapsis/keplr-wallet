@@ -18,7 +18,7 @@ import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
 import bigInteger from "big-integer";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { useNotification } from "../../../../components/notification";
-import { getCurrencies, getCurrency } from "../../../../../chain-info";
+import { getCurrencies, getCurrency } from "../../../../../common/currency";
 import { useCosmosJS } from "../../../../hooks";
 
 interface FormData {
