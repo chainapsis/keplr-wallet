@@ -10,7 +10,7 @@ import {
   AutoFetchingFiatValueInterval
 } from "../../../../options";
 import { ChainInfo } from "../../../../chain-info";
-import { getCurrency } from "../../../../common/currency";
+import { getCurrencies } from "../../../../common/currency";
 
 interface CoinGeckoPriceResult {
   [id: string]: {
@@ -48,6 +48,12 @@ export class PriceStore {
   // If chain is changed, abort last interval and restart fetching by interval.
   private lastFetchingIntervalId!: NodeJS.Timeout | undefined;
 
+  // Not need to be observable
+  private needFetchingCurrencies: { fiats: string[]; ids: string[] } = {
+    fiats: [],
+    ids: []
+  };
+
   constructor() {
     this.init();
   }
@@ -69,61 +75,118 @@ export class PriceStore {
         this.lastFetchingIntervalId = undefined;
       }
 
-      const nativeCurrency = getCurrency(this.chainInfo.nativeCurrency);
-      if (nativeCurrency && nativeCurrency.coinGeckoId) {
+      const currencies = getCurrencies(this.chainInfo.currencies);
+      if (currencies.length > 0) {
+        const coinGeckoIds = currencies
+          .map(currency => {
+            return currency.coinGeckoId;
+          })
+          .filter(id => {
+            return typeof id === "string" && id.length > 0;
+          }) as string[];
+
         this.lastFetchingIntervalId = setInterval(() => {
-          if (nativeCurrency.coinGeckoId) {
-            this.fetchValue("usd", nativeCurrency.coinGeckoId);
-          }
+          this.fetchValue(["usd"], coinGeckoIds);
         }, AutoFetchingFiatValueInterval);
-        await task(this.fetchValue("usd", nativeCurrency.coinGeckoId));
+        await task(this.fetchValue(["usd"], coinGeckoIds));
       }
     }
   }
 
   /**
    * Fetch value from coingecko.
-   * @param currency Fiat currency. ex) usd, krw
-   * @param id Coingecko id for pair.
+   * @param fiats Fiat currency. ex) usd, krw
+   * @param ids Coingecko id for pair.
    */
   @actionAsync
-  public async fetchValue(currency: string, id: string) {
+  public async fetchValue(fiats: string[], ids: string[]) {
     // If fetching is in progess, abort it.
     if (this.lastFetchingCancleToken) {
       this.lastFetchingCancleToken.cancel();
       this.lastFetchingCancleToken = undefined;
     }
 
-    this.setValue(currency, id, {
-      isFetching: true
-    });
+    for (const fiat of fiats) {
+      const isNewFiat =
+        fiat && this.needFetchingCurrencies.fiats.indexOf(fiat) < 0;
+      if (isNewFiat) {
+        this.needFetchingCurrencies.fiats.push(fiat);
+      }
+      for (const id of ids) {
+        const isNewId = id && this.needFetchingCurrencies.ids.indexOf(id) < 0;
+        if (isNewId) {
+          this.needFetchingCurrencies.ids.push(id);
+        }
+
+        if (isNewFiat || isNewId) {
+          // If this requested is new, try loading the cached value from storage.
+          const cached = await task(this.loadValueFromStorage(fiat, id));
+          if (cached) {
+            this.setValue(fiat, id, {
+              value: cached
+            });
+          }
+        }
+      }
+    }
+
+    fiats = this.needFetchingCurrencies.fiats;
+    ids = this.needFetchingCurrencies.ids;
+
+    for (const fiat of fiats) {
+      for (const id of ids) {
+        this.setValue(fiat, id, {
+          isFetching: true
+        });
+      }
+    }
 
     this.lastFetchingCancleToken = Axios.CancelToken.source();
     try {
       const result = await task(
-        Axios.get(CoinGeckoAPIEndPoint + CoinGeckoGetPrice, {
-          method: "GET",
-          params: {
-            ids: id,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            vs_currencies: currency
-          },
-          cancelToken: this.lastFetchingCancleToken.token
-        })
+        Axios.get<CoinGeckoPriceResult>(
+          CoinGeckoAPIEndPoint + CoinGeckoGetPrice,
+          {
+            method: "GET",
+            params: {
+              ids: ids.join(","),
+              // eslint-disable-next-line @typescript-eslint/camelcase
+              vs_currencies: fiats.join(",")
+            },
+            cancelToken: this.lastFetchingCancleToken.token
+          }
+        )
       );
 
       if (result.status === 200) {
-        const data: CoinGeckoPriceResult = result.data;
-        if (data[id]) {
+        const data = result.data;
+
+        for (const id in data) {
+          if (!data.hasOwnProperty(id)) {
+            continue;
+          }
           const prices = data[id];
-          const price = prices[currency];
-          if (price) {
-            const dec = new Dec(price.toString());
-            this.setValue(currency, id, {
-              value: dec
-            });
+          if (prices) {
+            for (const currency in prices) {
+              if (!prices.hasOwnProperty(currency)) {
+                continue;
+              }
+              const price = prices[currency];
+              if (price) {
+                this.setValue(currency, id, {
+                  value: new Dec(price.toString())
+                });
+              }
+            }
           }
         }
+
+        await task(
+          this.saveResultDataToStorage({
+            ...(await this.loadResultDataFromStorage())?.priceData,
+            ...data
+          })
+        );
       }
     } catch (e) {
       if (!Axios.isCancel(e)) {
@@ -131,20 +194,24 @@ export class PriceStore {
       }
     } finally {
       this.lastFetchingCancleToken = undefined;
-      this.setValue(currency, id, {
-        isFetching: false
-      });
+      for (const fiat of fiats) {
+        for (const id of ids) {
+          this.setValue(fiat, id, {
+            isFetching: false
+          });
+        }
+      }
     }
   }
 
   @action
-  private setValue(currency: string, id: string, price: Partial<Price>) {
-    if (!this.prices[currency]) {
-      this.prices[currency] = {};
+  private setValue(fiat: string, id: string, price: Partial<Price>) {
+    if (!this.prices[fiat]) {
+      this.prices[fiat] = {};
     }
 
-    const obj = this.prices[currency][id];
-    this.prices[currency][id] = Object.assign(
+    const obj = this.prices[fiat][id];
+    this.prices[fiat][id] = Object.assign(
       obj
         ? obj
         : {
@@ -155,13 +222,50 @@ export class PriceStore {
     );
   }
 
-  public getValue(currency: string, id: string | undefined): Price | undefined {
+  public getValue(fiat: string, id: string | undefined): Price | undefined {
     if (!id) {
       return undefined;
     }
 
-    if (this.prices[currency]) {
-      return this.prices[currency][id];
+    if (this.prices[fiat]) {
+      return this.prices[fiat][id];
     }
+  }
+
+  private async saveResultDataToStorage(
+    data: CoinGeckoPriceResult
+  ): Promise<void> {
+    return new Promise(resolve => {
+      chrome.storage.local.set({ priceData: data }, resolve);
+    });
+  }
+
+  private async loadResultDataFromStorage(): Promise<
+    { priceData?: CoinGeckoPriceResult } | undefined
+  > {
+    return new Promise(resolve => {
+      chrome.storage.local.get(resolve);
+    });
+  }
+
+  private async loadValueFromStorage(
+    fiat: string,
+    id: string
+  ): Promise<Dec | undefined> {
+    const items = await this.loadResultDataFromStorage();
+
+    let result: Dec | undefined;
+
+    if (items && items.priceData) {
+      const data = items.priceData;
+
+      if (data.hasOwnProperty(id)) {
+        const prices = data[id];
+        if (prices.hasOwnProperty(fiat)) {
+          result = new Dec(prices[fiat].toString());
+        }
+      }
+    }
+    return result;
   }
 }
