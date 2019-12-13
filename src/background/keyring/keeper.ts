@@ -64,7 +64,7 @@ export class KeyRingKeeper {
   getAccessOrigin(chainId: string): string[] {
     const accessOrigins = this.getAccessOrigins();
     const accessOrigin = accessOrigins.find(accessOrigin => {
-      return (accessOrigin.chainId = chainId);
+      return accessOrigin.chainId == chainId;
     });
 
     if (!accessOrigin) {
