@@ -73,7 +73,7 @@ export const SupportedChainWalletUIs: WalletUI[] = [
     ]
   },
   {
-    chainId: "columbus-2",
+    chainId: "kava-2",
     menus: [
       {
         menuItemRender: ({ active, to }) => (
@@ -102,7 +102,7 @@ export const SupportedChainWalletUIs: WalletUI[] = [
             Stake
           </Link>
         ),
-        sectionRender: () => <UnderConstructionSection />
+        sectionRender: () => <StakeSection />
       }
     ]
   }

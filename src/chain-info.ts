@@ -27,11 +27,11 @@ export const Currencies: {
     coinDecimals: 6,
     coinGeckoId: "cosmos"
   },
-  luna: {
-    coinDenom: "LUNA",
-    coinMinimalDenom: "uluna",
+  kava: {
+    coinDenom: "KAVA",
+    coinMinimalDenom: "ukava",
     coinDecimals: 6,
-    coinGeckoId: "luna"
+    coinGeckoId: "kava"
   }
 };
 
@@ -77,19 +77,19 @@ export const NativeChainInfos: ChainInfo[] = [
   },
   {
     rpc: "http://localhost:81",
-    rest: "null",
-    chainId: "columbus-2",
-    chainName: "Terra",
-    nativeCurrency: "luna",
-    coinIconUrl: require("assets/luna-icon.svg"),
+    rest: "http://localhost:2317",
+    chainId: "kava-2",
+    chainName: "Kava",
+    nativeCurrency: "kava",
+    coinIconUrl: require("assets/kava-icon.png"),
     walletUrl:
       process.env.NODE_ENV === "production"
         ? ""
-        : "http://localhost:8081/#/columbus-2",
-    bip44: new BIP44(44, 330, 0),
-    bech32Config: defaultBech32Config("terra"),
-    currencies: ["luna"],
-    feeCurrencies: ["luna"] // TODO: krw, usd, sdr, mnt
+        : "http://localhost:8081/#/kava-2",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("kava"),
+    currencies: ["kava"],
+    feeCurrencies: ["kava"]
   }
 ];
 
@@ -103,11 +103,11 @@ export interface AccessOrigin {
  */
 export const ExtensionAccessOrigins: AccessOrigin[] = [
   {
-    chainId: "cosmoshub-2",
+    chainId: "cosmoshub-3",
     origins: ["http://localhost:8081"]
   },
   {
-    chainId: "columbus-2",
+    chainId: "kava-2",
     origins: ["http://localhost:8081"]
   }
 ];
