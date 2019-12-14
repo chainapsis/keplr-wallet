@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactNode, useRef } from "react";
+import React, { FunctionComponent, ReactNode } from "react";
 
 import { Header as CompHeader } from "../../components/header";
 
@@ -36,8 +36,6 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
     const { chainStore } = useStore();
     const menu = useMenu();
 
-    const menuRef = useRef<SVGSVGElement>(null);
-
     const chainInfoChangable =
       canChangeChainInfo && chainStore.chainList.length > 1;
 
@@ -47,9 +45,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
           <div className={style.menuContainer}>
             {menuRenderer ? (
               <>
-                <Menu isOpen={isMenuOpen} menuRef={menuRef}>
-                  {menuRenderer}
-                </Menu>
+                <Menu isOpen={isMenuOpen}>{menuRenderer}</Menu>
                 <motion.div
                   className={style["menu-img"]}
                   style={{ zIndex: 901 }}
@@ -58,7 +54,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
                     menu.toggle();
                   }}
                 >
-                  <MenuButton ref={menuRef} />
+                  <MenuButton />
                 </motion.div>
               </>
             ) : null}
