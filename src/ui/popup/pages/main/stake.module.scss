@@ -1,0 +1,51 @@
+@import "../../styles/var";
+
+.container-inner {
+  display: flex;
+  flex-direction: row;
+
+  height: 56px;
+  justify-content: center;
+  align-items: center;
+
+  &.reward {
+    .title {
+      font-size: 14px;
+      letter-spacing: -0.31px;
+      color: #4a4a4a;
+    }
+
+    .content {
+      font-size: 21px;
+      line-height: 24px;
+      letter-spacing: -0.47px;
+      color: black;
+    }
+  }
+
+  &.stake {
+    .title {
+      font-size: 21px;
+      line-height: 24px;
+      letter-spacing: -0.47px;
+      color: black;
+    }
+
+    .content {
+      font-size: 14px;
+      letter-spacing: -0.31px;
+      color: #4a4a4a;
+    }
+  }
+
+  .vertical {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.hr {
+  margin: $main-card-padding 0;
+  background-color: #979797;
+  height: 1px;
+}

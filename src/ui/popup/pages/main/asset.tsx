@@ -29,11 +29,16 @@ export const AssetView: FunctionComponent = observer(() => {
 
   return (
     <div className={styleAsset.containerAsset}>
-      <div className={styleAsset.containerSymbol}>
-        <img
-          className={styleAsset.symbol}
-          src={chainStore.chainInfo.coinIconUrl}
-        />
+      <div className={styleAsset.title}>Available Balance</div>
+      <div className={styleAsset.fiat}>
+        {fiat && !fiat.value.equals(new Dec(0))
+          ? "$" +
+            parseFloat(
+              fiat.value
+                .mul(new Dec(coinAmount, nativeCurrency.coinDecimals))
+                .toString()
+            ).toLocaleString()
+          : "?"}
       </div>
       {/* TODO: Show the information that account is fetching. */}
       <div className={styleAsset.amount}>
@@ -46,16 +51,6 @@ export const AssetView: FunctionComponent = observer(() => {
             )
           : "0"}{" "}
         {nativeCurrency.coinDenom}
-      </div>
-      <div className={styleAsset.fiat}>
-        {fiat && !fiat.value.equals(new Dec(0))
-          ? "$" +
-            parseFloat(
-              fiat.value
-                .mul(new Dec(coinAmount, nativeCurrency.coinDecimals))
-                .toString()
-            ).toLocaleString()
-          : "?"}
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   return (
     <div className={styleTxButton.containerTxButton}>
-      <Button color="primary" size="medium" to="/send">
+      <Button color="primary" size="medium" to="/send" outline>
         Send
       </Button>
       <Button
@@ -18,6 +18,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         size="medium"
         href={chainStore.chainInfo.walletUrl}
         target="_blank"
+        outline
       >
         More
       </Button>

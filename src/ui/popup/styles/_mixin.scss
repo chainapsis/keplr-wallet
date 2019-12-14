@@ -1,0 +1,9 @@
+@import "var";
+
+@mixin main-card {
+  padding: $main-card-padding;
+  margin-bottom: $layout-padding;
+  box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.03), 0 2px 15px 0 rgba(0, 0, 0, 0.08);
+  background-color: white;
+  border-radius: 16px;
+}

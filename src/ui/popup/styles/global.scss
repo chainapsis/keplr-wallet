@@ -6,9 +6,14 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 
 @import "../../../palette";
 
-$radius-small: 6px;
-$radius: 10px;
-$radius-large: 14px;
+$radius-small: 4px;
+$radius: 6px;
+$radius-large: 10px;
+
+@import url("https://fonts.googleapis.com/css?family=Kanit|Noto+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Noto+Sans&display=swap");
+
+$family-sans-serif: "Noto Sans", sans-serif;
 
 @import "~bulma/bulma";
 
@@ -18,7 +23,7 @@ html {
   width: $popup-size-width;
   height: $popup-size-height;
 
-  background-color: rgb(240, 240, 240);
+  background-color: $background-color;
 }
 
 body {

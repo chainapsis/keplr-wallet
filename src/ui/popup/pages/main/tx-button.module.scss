@@ -4,16 +4,10 @@
   display: flex;
   flex-direction: row;
 
-  margin-top: 16px;
-
   :global(.button) {
-    flex: 2;
+    flex: 1;
 
     margin-right: $layout-margin;
-
-    &:first-child {
-      flex: 5;
-    }
 
     &:last-child {
       margin-right: 0;

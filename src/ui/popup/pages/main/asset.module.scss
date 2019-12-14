@@ -7,34 +7,28 @@
   justify-content: space-around;
   align-items: center;
 
-  padding-bottom: $layout-margin;
+  padding: 20px 0;
 
-  .container-symbol {
-    width: 62px;
-    height: 62px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    border-radius: 50%;
-    border-style: solid;
-    border-width: 1px;
-    border-color: black;
-
-    .symbol {
-      width: auto;
-      height: 54px;
-    }
-  }
-
-  .amount {
-    font-size: 30px;
+  .title {
+    font-size: 14px;
+    letter-spacing: -0.31px;
     text-align: center;
+    color: #4a4a4a;
   }
 
   .fiat {
-    font-size: 16px;
+    font-size: 36px;
     text-align: center;
+
+    letter-spacing: -0.8px;
+    color: black;
+  }
+
+  .amount {
+    font-size: 18px;
+    text-align: center;
+
+    letter-spacing: -0.4px;
+    color: #8f8f8f;
   }
 }

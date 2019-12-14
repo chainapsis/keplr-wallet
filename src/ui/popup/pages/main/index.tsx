@@ -7,18 +7,21 @@ import { Menu } from "./menu";
 import { AccountView } from "./account";
 import { TxButtonView } from "./tx-button";
 import { AssetView } from "./asset";
+import { StakeView } from "./stake";
 
 export const MainPage: FunctionComponent = () => {
   return (
     <HeaderLayout showChainName canChangeChainInfo menuRenderer={<Menu />}>
-      <div className={style.containerAccount}>
+      <div className={style.containerCard}>
         <div className={style.containerAccountInner}>
-          <AssetView />
           <AccountView />
+          <AssetView />
           <TxButtonView />
         </div>
       </div>
-      <div className={style.containerTxs} />
+      <div className={style.containerCard}>
+        <StakeView />
+      </div>
     </HeaderLayout>
   );
 };

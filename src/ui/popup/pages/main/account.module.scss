@@ -3,32 +3,13 @@
   flex-direction: row;
 }
 
-.inner-container-account {
-  display: flex;
-  flex-direction: column;
+.address {
+  border: solid 1px #e6e6e6;
+  border-radius: 100px;
+  padding: 0 16px;
 
-  .my-account {
-    font-size: 18px;
-    font-weight: bold;
-  }
+  font-size: 12px;
+  color: #474747;
 
-  .address {
-    min-height: 30px;
-    font-size: 20px;
-
-    :global(.address-tooltip) {
-      font-size: 16px;
-      text-align: center;
-    }
-  }
-}
-
-.inner-container-account-button {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.flex-empty {
-  flex: 1;
+  cursor: pointer;
 }
