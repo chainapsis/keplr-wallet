@@ -193,7 +193,12 @@ export const StakeView: FunctionComponent = observer(() => {
           <div className={styleStake.content}>Earn up to 7-11% per year</div>
         </div>
         <div style={{ flex: 1 }} />
-        <Button color="primary" outline={isRewardExist}>
+        <Button
+          color="primary"
+          outline={isRewardExist}
+          href={chainStore.chainInfo.walletUrlForStaking}
+          target="_blank"
+        >
           Stake
         </Button>
       </div>

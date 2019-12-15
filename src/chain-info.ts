@@ -47,6 +47,7 @@ export interface ChainInfo {
   readonly nativeCurrency: string;
   readonly coinIconUrl: string;
   readonly walletUrl: string;
+  readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;
   readonly bech32Config: Bech32Config;
 
@@ -70,6 +71,10 @@ export const NativeChainInfos: ChainInfo[] = [
       process.env.NODE_ENV === "production"
         ? ""
         : "http://localhost:8081/#/cosmoshub-3",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? ""
+        : "http://localhost:8081/#/cosmoshub-3/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
     currencies: ["atom"],
@@ -86,6 +91,10 @@ export const NativeChainInfos: ChainInfo[] = [
       process.env.NODE_ENV === "production"
         ? ""
         : "http://localhost:8081/#/kava-2",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? ""
+        : "http://localhost:8081/#/kava-2/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("kava"),
     currencies: ["kava"],
