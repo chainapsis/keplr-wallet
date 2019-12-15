@@ -14,6 +14,11 @@ export const useFetch = <R = any>(
   useEffect(() => {
     let isMounted = true;
     const refresh = async () => {
+      // If url is empty, do nothing.
+      if (!url) {
+        return;
+      }
+
       if (isMounted) {
         setFetching(true);
       }
