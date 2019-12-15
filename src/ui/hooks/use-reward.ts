@@ -9,7 +9,7 @@ interface CoinPrimitive {
 interface Result {
   height: string;
   result: {
-    rewards: DelegatorReward[];
+    rewards?: DelegatorReward[];
     total: CoinPrimitive[];
   };
 }
