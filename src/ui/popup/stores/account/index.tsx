@@ -147,7 +147,7 @@ export class AccountStore {
 
       this.lastAssetFetchingError = undefined;
       // Load the assets from storage.
-      this.assets = await this.loadAssetsFromStorage(this.bech32Address);
+      this.assets = await task(this.loadAssetsFromStorage(this.bech32Address));
     }
   }
 
@@ -183,7 +183,7 @@ export class AccountStore {
 
       this.assets = account.getCoins();
       // Save the assets to storage.
-      await this.saveAssetsToStorage(this.bech32Address, this.assets);
+      await task(this.saveAssetsToStorage(this.bech32Address, this.assets));
     } catch (e) {
       if (!Axios.isCancel(e)) {
         if (

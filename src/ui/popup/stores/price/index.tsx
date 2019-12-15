@@ -183,7 +183,7 @@ export class PriceStore {
 
         await task(
           this.saveResultDataToStorage({
-            ...(await this.loadResultDataFromStorage())?.priceData,
+            ...(await task(this.loadResultDataFromStorage()))?.priceData,
             ...data
           })
         );
