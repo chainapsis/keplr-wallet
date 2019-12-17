@@ -133,7 +133,7 @@ export const StakeSection: FunctionComponent = observer(() => {
                 ).toLocaleString()}
               </div>
               <div className={style.col} id="commission">
-                {new Dec(validator.commission.rate)
+                {new Dec(validator.commission.commission_rates.rate)
                   .mulTruncate(new Dec(100))
                   .truncate()
                   .toString() + "%"}
