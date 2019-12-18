@@ -164,6 +164,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
               label="Memo (Optional)"
               name="memo"
               rows={2}
+              style={{ resize: "none" }}
               error={errors.memo && errors.memo.message}
               ref={register({})}
             />

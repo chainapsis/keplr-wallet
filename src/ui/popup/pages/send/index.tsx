@@ -181,6 +181,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 label="Memo (Optional)"
                 name="memo"
                 rows={2}
+                style={{ resize: "none" }}
                 error={errors.memo && errors.memo.message}
                 ref={register({ required: false })}
               />
