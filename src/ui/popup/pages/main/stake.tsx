@@ -10,7 +10,10 @@ import { observer } from "mobx-react";
 import styleStake from "./stake.module.scss";
 import classnames from "classnames";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import { getCurrency, getCurrencyFromDenom } from "../../../../common/currency";
+import {
+  getCurrency,
+  getCurrencyFromMinimalDenom
+} from "../../../../common/currency";
 import { Currency } from "../../../../chain-info";
 import { Msg } from "@everett-protocol/cosmosjs/core/tx";
 import { MsgWithdrawDelegatorReward } from "@everett-protocol/cosmosjs/x/distribution";
@@ -145,7 +148,7 @@ export const StakeView: FunctionComponent = observer(() => {
   let isRewardExist = false;
   let rewardCurrency: Currency | undefined;
   if (reward.totalReward && reward.totalReward.length > 0) {
-    rewardCurrency = getCurrencyFromDenom(reward.totalReward[0].denom);
+    rewardCurrency = getCurrencyFromMinimalDenom(reward.totalReward[0].denom);
     isRewardExist = rewardCurrency != null;
   }
 
