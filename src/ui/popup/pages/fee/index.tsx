@@ -1,30 +1,35 @@
-import React, { FunctionComponent, useCallback, useEffect } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useMemo
+} from "react";
 
 import { HeaderLayout } from "../../layouts/header-layout";
 
-import { CoinInput, Input } from "../../../components/form";
+import { FeeButtons, Input } from "../../../components/form";
 import { Button } from "../../../components/button";
 
 import { RouteComponentProps } from "react-router";
 
 import { useTxBuilderConfig } from "../../../hooks";
-import useForm from "react-hook-form";
+import useForm, { FormContext } from "react-hook-form";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 
 import bigInteger from "big-integer";
 import queryString from "query-string";
-import { getCurrencies } from "../../../../common/currency";
+import { getCurrency } from "../../../../common/currency";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
-import { CoinUtils } from "../../../../common/coin-utils";
+
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 
 interface FormData {
   gas: string;
-  feeAmount: string;
-  feeDenom: string;
+  fee: Coin | undefined;
   memo: string;
 }
 
@@ -36,16 +41,27 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
 
   const chainId = match.params.chainId;
 
-  const { chainStore } = useStore();
+  const { chainStore, priceStore } = useStore();
 
-  const { register, handleSubmit, setValue, errors } = useForm<FormData>({
+  const formMethods = useForm<FormData>({
     defaultValues: {
       gas: "",
-      feeAmount: "",
-      feeDenom: "",
       memo: ""
     }
   });
+  const { register, handleSubmit, setValue, errors } = formMethods;
+
+  register({ name: "fee" }, { required: "Fee is required" });
+
+  const feeCurrency = useMemo(() => {
+    return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
+  }, [chainStore.chainInfo.feeCurrencies]);
+
+  const feePrice = priceStore.getValue("usd", feeCurrency?.coinGeckoId);
+
+  const feeValue = useMemo(() => {
+    return feePrice ? feePrice.value : new Dec(0);
+  }, [feePrice]);
 
   const onConfigInit = useCallback(
     (chainId: string, config: TxBuilderConfig) => {
@@ -53,11 +69,10 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
 
       setValue("gas", config.gas.toString());
 
-      if (config.fee instanceof Coin) {
-        const feeDec = CoinUtils.parseDecAndDenomFromCoin(config.fee);
-        setValue("feeAmount", feeDec.amount);
-        setValue("feeDenom", feeDec.denom);
-      }
+      // Always returns the fee by fee buttons.
+      /*if (config.fee instanceof Coin) {
+        setValue("fee", config.fee);
+      }*/
       // TODO: handle multiple fees.
 
       setValue("memo", config.memo);
@@ -122,10 +137,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
             throw new Error("config is not loaded");
           }
           config.gas = bigInteger(data.gas);
-          config.fee = CoinUtils.getCoinFromDecimals(
-            data.feeAmount,
-            data.feeDenom
-          );
+          config.fee = data.fee as Coin;
           config.memo = data.memo;
           await txBuilder.approve(config);
         })}
@@ -148,28 +160,6 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
                 }
               })}
             />
-            <CoinInput
-              label="Fee"
-              input={{
-                name: "feeAmount",
-                ref: register({
-                  required: "Amount is required"
-                })
-              }}
-              select={{
-                name: "feeDenom",
-                ref: register({
-                  required: "Denom is required"
-                })
-              }}
-              error={
-                errors.feeAmount &&
-                errors.feeAmount.message &&
-                errors.feeDenom &&
-                errors.feeDenom.message
-              }
-              currencies={getCurrencies(chainStore.chainInfo.feeCurrencies)}
-            />
             <Input
               type="text"
               label="Memo (Optional)"
@@ -177,6 +167,15 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
               error={errors.memo && errors.memo.message}
               ref={register({})}
             />
+            <FormContext {...formMethods}>
+              <FeeButtons
+                label="Fee"
+                name="fee"
+                error={errors.fee && errors.fee.message}
+                currency={feeCurrency!}
+                price={feeValue}
+              />
+            </FormContext>
           </div>
           <div style={{ flex: 1 }} />
           <Button

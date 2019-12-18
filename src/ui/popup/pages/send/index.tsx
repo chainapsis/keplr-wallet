@@ -1,5 +1,5 @@
-import React, { FunctionComponent, useState } from "react";
-import { CoinInput, Input } from "../../../components/form";
+import React, { FunctionComponent, useMemo, useState } from "react";
+import { FeeButtons, CoinInput, Input } from "../../../components/form";
 import { RouteComponentProps } from "react-router-dom";
 import { useStore } from "../../stores";
 
@@ -16,10 +16,9 @@ import {
   useBech32ConfigPromise
 } from "@everett-protocol/cosmosjs/common/address";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 import bigInteger from "big-integer";
-import useForm from "react-hook-form";
+import useForm, { FormContext } from "react-hook-form";
 import { observer } from "mobx-react";
 
 import queryString from "query-string";
@@ -29,17 +28,19 @@ import { getCurrencies, getCurrency } from "../../../../common/currency";
 
 import style from "./style.module.scss";
 import { CoinUtils } from "../../../../common/coin-utils";
+import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 
 interface FormData {
   recipient: string;
   amount: string;
   denom: string;
   memo: string;
+  fee: Coin | undefined;
 }
 
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
   ({ history }) => {
-    const { register, handleSubmit, errors } = useForm<FormData>({
+    const formMethods = useForm<FormData>({
       defaultValues: {
         recipient: "",
         amount: "",
@@ -47,8 +48,11 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         memo: ""
       }
     });
+    const { register, handleSubmit, errors } = formMethods;
 
-    const { chainStore, accountStore } = useStore();
+    register({ name: "fee" }, { required: "Fee is required" });
+
+    const { chainStore, accountStore, priceStore } = useStore();
     const [walletProvider] = useState(
       new PopupWalletProvider(
         {
@@ -64,6 +68,16 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       )
     );
     const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider);
+
+    const feeCurrency = useMemo(() => {
+      return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
+    }, [chainStore.chainInfo.feeCurrencies]);
+
+    const feePrice = priceStore.getValue("usd", feeCurrency?.coinGeckoId);
+
+    const feeValue = useMemo(() => {
+      return feePrice ? feePrice.value : new Dec(0);
+    }, [feePrice]);
 
     return (
       <HeaderLayout
@@ -90,13 +104,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 const config: TxBuilderConfig = {
                   gas: bigInteger(60000),
                   memo: data.memo,
-                  fee: new Coin(
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    getCurrency(
-                      chainStore.chainInfo.nativeCurrency
-                    )!.coinMinimalDenom,
-                    new Int("1000")
-                  )
+                  fee: data.fee as Coin
                 };
 
                 if (cosmosJS.sendMsgs) {
@@ -171,6 +179,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 error={errors.memo && errors.memo.message}
                 ref={register({ required: false })}
               />
+              <FormContext {...formMethods}>
+                <FeeButtons
+                  label="Fee"
+                  name="fee"
+                  error={errors.fee && errors.fee.message}
+                  currency={feeCurrency!}
+                  price={feeValue}
+                />
+              </FormContext>
             </div>
             <div style={{ flex: 1 }} />
             <Button
