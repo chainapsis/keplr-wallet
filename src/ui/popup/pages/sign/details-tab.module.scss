@@ -1,0 +1,82 @@
+.hr {
+  background-color: gray;
+  margin: 0;
+  height: 1px;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+
+  &.messages {
+    flex: 1;
+    overflow: auto;
+  }
+
+  .title {
+    font-weight: bold;
+    font-size: 14px;
+    margin: 8px 0;
+    color: gray;
+  }
+
+  .fee {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+
+    .fiat {
+      font-size: 12px;
+      margin-bottom: 2px;
+      margin-left: 4px;
+    }
+  }
+
+  .memo {
+    min-height: 30px;
+  }
+
+  hr {
+    margin: 8px 0;
+  }
+}
+
+.msg {
+  display: flex;
+  flex-direction: row;
+
+  .icon {
+    display: flex;
+    flex-direction: column;
+    margin: 0 10px 0 8px;
+    width: 24px;
+    text-align: center;
+
+    i {
+      font-size: 20px;
+      line-height: 20px;
+    }
+  }
+
+  .content-container {
+    display: flex;
+    flex-direction: column;
+
+    .content-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .content {
+      font-size: 12px;
+      color: gray;
+    }
+  }
+}

@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useCallback, useEffect } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 import { Button } from "../../../components/button";
 import { RouteComponentProps } from "react-router";
 
@@ -10,6 +15,15 @@ import queryString from "query-string";
 import { useStore } from "../../stores";
 import { useSignature } from "../../../hooks";
 
+import classnames from "classnames";
+import { DataTab } from "./data-tab";
+import { DetailsTab } from "./details-tab";
+
+enum Tab {
+  Details,
+  Data
+}
+
 export const SignPage: FunctionComponent<RouteComponentProps<{
   index: string;
 }>> = ({ history, match, location }) => {
@@ -17,6 +31,8 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
   const inPopup = query.inPopup ?? false;
 
   const index = match.params.index;
+
+  const [tab, setTab] = useState<Tab>(Tab.Details);
 
   const { chainStore } = useStore();
 
@@ -76,15 +92,6 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
     }
   }, [signing, inPopup]);
 
-  let prettyMessage = signing.message;
-  if (prettyMessage) {
-    try {
-      prettyMessage = JSON.stringify(JSON.parse(prettyMessage), undefined, 2);
-    } catch (e) {
-      prettyMessage = signing.message;
-    }
-  }
-
   return (
     <HeaderLayout
       showChainName
@@ -96,9 +103,37 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
             }
           : undefined
       }
+      style={{ background: "white" }}
     >
       <div className={style.container}>
-        <pre className={style.message}>{prettyMessage}</pre>
+        <div className="tabs is-fullwidth" style={{ marginBottom: 0 }}>
+          <ul>
+            <li className={classnames({ "is-active": tab === Tab.Details })}>
+              <a
+                onClick={() => {
+                  setTab(Tab.Details);
+                }}
+              >
+                Details
+              </a>
+            </li>
+            <li className={classnames({ "is-active": tab === Tab.Data })}>
+              <a
+                onClick={() => {
+                  setTab(Tab.Data);
+                }}
+              >
+                Data
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div className={style.tabContainer}>
+          {tab === Tab.Data ? <DataTab message={signing.message} /> : null}
+          {tab === Tab.Details ? (
+            <DetailsTab message={signing.message} />
+          ) : null}
+        </div>
         <div style={{ flex: 1 }} />
         <div className={style.buttons}>
           <Button
