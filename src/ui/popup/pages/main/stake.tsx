@@ -93,7 +93,7 @@ export const StakeView: FunctionComponent = observer(() => {
       if (msgs.length > 0) {
         if (cosmosJS.sendMsgs) {
           const config: TxBuilderConfig = {
-            gas: bigInteger(110000 * msgs.length),
+            gas: bigInteger(140000 * msgs.length),
             memo: "",
             fee: new Coin(
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -167,7 +167,7 @@ export const StakeView: FunctionComponent = observer(() => {
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   rewardCurrency!.coinDecimals,
                   0,
-                  3
+                  6
                 )} ${
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   rewardCurrency!.coinDenom
