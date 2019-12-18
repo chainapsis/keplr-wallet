@@ -4,6 +4,7 @@ import {
 } from "@everett-protocol/cosmosjs/core/walletProvider";
 import { Context } from "@everett-protocol/cosmosjs/core/context";
 import {
+  ApproveSignMsg,
   GetKeyMsg,
   RequestSignMsg,
   RequestTxBuilderConfigMsg
@@ -27,9 +28,13 @@ export interface AccessApprover {
 }
 
 export class PopupWalletProvider implements WalletProvider {
+  /**
+   * @param feeApprover If this field is null, skip fee approving.
+   * @param accessApprover If this field is null, skip sign approving.
+   */
   constructor(
-    private feeApprover: FeeApprover,
-    private accessApprover: AccessApprover
+    private feeApprover?: FeeApprover,
+    private accessApprover?: AccessApprover
   ) {}
 
   /**
@@ -70,6 +75,10 @@ export class PopupWalletProvider implements WalletProvider {
     context: Context,
     config: TxBuilderConfig
   ): Promise<TxBuilderConfig> {
+    if (!this.feeApprover) {
+      return Promise.resolve(config);
+    }
+
     const requestTxBuilderConfig = RequestTxBuilderConfigMsg.create(
       {
         chainId: context.get("chainId"),
@@ -89,7 +98,8 @@ export class PopupWalletProvider implements WalletProvider {
           reject(e);
         });
 
-      this.feeApprover.onRequestTxBuilderConfig(context.get("chainId"));
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.feeApprover!.onRequestTxBuilderConfig(context.get("chainId"));
     });
   }
 
@@ -123,7 +133,11 @@ export class PopupWalletProvider implements WalletProvider {
           reject(e);
         });
 
-      this.accessApprover.onRequestSignature(index);
+      if (this.accessApprover) {
+        this.accessApprover.onRequestSignature(index);
+      } else {
+        sendMessage(BACKGROUND_PORT, ApproveSignMsg.create(index));
+      }
     });
   }
 }

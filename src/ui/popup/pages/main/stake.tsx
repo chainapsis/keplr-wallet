@@ -29,13 +29,7 @@ import bigInteger from "big-integer";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { CoinUtils } from "../../../../common/coin-utils";
-import { sendMessage } from "../../../../common/message";
-import {
-  ApproveSignMsg,
-  ApproveTxBuilderConfigMsg,
-  GetRequestedTxBuilderConfigMsg
-} from "../../../../background/keyring";
-import { BACKGROUND_PORT } from "../../../../common/message/constant";
+
 import { useNotification } from "../../../components/notification";
 
 export const StakeView: FunctionComponent = observer(() => {
@@ -43,26 +37,7 @@ export const StakeView: FunctionComponent = observer(() => {
 
   const [walletProvider] = useState(
     // Skip the approving for withdrawing rewards.
-    new PopupWalletProvider(
-      {
-        onRequestTxBuilderConfig: async (chainId: string) => {
-          const msg = GetRequestedTxBuilderConfigMsg.create(chainId);
-          const result = await sendMessage(BACKGROUND_PORT, msg);
-          await sendMessage(
-            BACKGROUND_PORT,
-            ApproveTxBuilderConfigMsg.create({
-              chainId,
-              ...result.config
-            })
-          );
-        }
-      },
-      {
-        onRequestSignature: async (index: string) => {
-          await sendMessage(BACKGROUND_PORT, ApproveSignMsg.create(index));
-        }
-      }
-    )
+    new PopupWalletProvider()
   );
   const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider);
 
