@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { CSSProperties, FunctionComponent, useState } from "react";
 
 import { MenuProvider, MenuContext } from "../menu";
 
@@ -7,7 +7,9 @@ import { Header, Props as HeaderProps } from "../header";
 import style from "./style.module.scss";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Props extends HeaderProps {}
+export interface Props extends HeaderProps {
+  style?: CSSProperties;
+}
 
 export const HeaderLayout: FunctionComponent<Props> = props => {
   const { children } = props;
@@ -28,7 +30,7 @@ export const HeaderLayout: FunctionComponent<Props> = props => {
 
   return (
     <MenuProvider value={menuContext}>
-      <div className={style.container}>
+      <div className={style.container} style={props.style}>
         <Header {...props} isMenuOpen={isMenuOpen} />
         <div className={style.innerContainer}>{children}</div>
       </div>
