@@ -3,8 +3,7 @@ import React, { FunctionComponent, forwardRef } from "react";
 import classnames from "classnames";
 import style from "./input.module.scss";
 
-export interface InputProps {
-  type: "text" | "password" | "email" | "tel";
+export interface TextareaProps {
   color?: "primary" | "info" | "success" | "warning" | "danger";
   label?: string;
   leftIconRender?: FunctionComponent;
@@ -13,18 +12,17 @@ export interface InputProps {
 }
 
 // eslint-disable-next-line react/display-name
-export const Input = forwardRef<
-  HTMLInputElement,
-  InputProps &
+export const TextArea = forwardRef<
+  HTMLTextAreaElement,
+  TextareaProps &
     React.DetailedHTMLProps<
-      React.InputHTMLAttributes<HTMLInputElement>,
-      HTMLInputElement
+      React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+      HTMLTextAreaElement
     >
 >((props, ref) => {
-  const { type, color, label, leftIconRender, rightIconRender, error } = props;
+  const { color, label, leftIconRender, rightIconRender, error } = props;
 
   const attributes = { ...props };
-  delete attributes.type;
   delete attributes.color;
   delete attributes.label;
   delete attributes.leftIconRender;
@@ -41,13 +39,12 @@ export const Input = forwardRef<
           "has-icons-right": rightIconRender !== undefined || error
         })}
       >
-        <input
+        <textarea
           {...attributes}
           ref={ref}
-          type={type}
           className={classnames(
             props.className,
-            "input",
+            "textarea",
             style.input,
             color ? `is-${color}` : undefined,
             !color && error ? "is-danger" : undefined

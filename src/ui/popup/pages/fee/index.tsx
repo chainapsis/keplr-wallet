@@ -7,7 +7,7 @@ import React, {
 
 import { HeaderLayout } from "../../layouts/header-layout";
 
-import { FeeButtons, Input } from "../../../components/form";
+import { FeeButtons, Input, TextArea } from "../../../components/form";
 import { Button } from "../../../components/button";
 
 import { RouteComponentProps } from "react-router";
@@ -160,10 +160,10 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
                 }
               })}
             />
-            <Input
-              type="text"
+            <TextArea
               label="Memo (Optional)"
               name="memo"
+              rows={2}
               error={errors.memo && errors.memo.message}
               ref={register({})}
             />

@@ -1,5 +1,10 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
-import { FeeButtons, CoinInput, Input } from "../../../components/form";
+import {
+  FeeButtons,
+  CoinInput,
+  Input,
+  TextArea
+} from "../../../components/form";
 import { RouteComponentProps } from "react-router-dom";
 import { useStore } from "../../stores";
 
@@ -172,10 +177,10 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   })
                 }}
               />
-              <Input
-                type="text"
+              <TextArea
                 label="Memo (Optional)"
                 name="memo"
+                rows={2}
                 error={errors.memo && errors.memo.message}
                 ref={register({ required: false })}
               />
