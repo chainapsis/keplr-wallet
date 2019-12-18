@@ -1,13 +1,8 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useState
-} from "react";
+import React, { FunctionComponent, useCallback, useEffect } from "react";
 
 import { HeaderLayout } from "../../layouts/header-layout";
 
-import { Input, CoinInput } from "../../../components/form";
+import { CoinInput, Input } from "../../../components/form";
 import { Button } from "../../../components/button";
 
 import { RouteComponentProps } from "react-router";
@@ -15,10 +10,6 @@ import { RouteComponentProps } from "react-router";
 import { useTxBuilderConfig } from "../../../hooks";
 import useForm from "react-hook-form";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
-import {
-  feeFromString,
-  feeToString
-} from "../../../../background/keyring/utils";
 
 import bigInteger from "big-integer";
 import queryString from "query-string";
@@ -27,10 +18,13 @@ import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
+import { CoinUtils } from "../../../../common/coin-utils";
+import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
 interface FormData {
   gas: string;
-  fee: string;
+  feeAmount: string;
+  feeDenom: string;
   memo: string;
 }
 
@@ -44,31 +38,28 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
 
   const { chainStore } = useStore();
 
-  const { register, handleSubmit, setValue, setError, errors } = useForm<
-    FormData
-  >({
+  const { register, handleSubmit, setValue, errors } = useForm<FormData>({
     defaultValues: {
       gas: "",
-      fee: "",
+      feeAmount: "",
+      feeDenom: "",
       memo: ""
     }
   });
-
-  register(
-    { name: "fee" },
-    {
-      required: "Fee is required"
-    }
-  );
-
-  const [fee, setFee] = useState<string | undefined>();
 
   const onConfigInit = useCallback(
     (chainId: string, config: TxBuilderConfig) => {
       chainStore.setChain(chainId);
 
       setValue("gas", config.gas.toString());
-      setFee(feeToString(config.fee));
+
+      if (config.fee instanceof Coin) {
+        const feeDec = CoinUtils.parseDecAndDenomFromCoin(config.fee);
+        setValue("feeAmount", feeDec.amount);
+        setValue("feeDenom", feeDec.denom);
+      }
+      // TODO: handle multiple fees.
+
       setValue("memo", config.memo);
     },
     [chainStore, setValue]
@@ -131,7 +122,10 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
             throw new Error("config is not loaded");
           }
           config.gas = bigInteger(data.gas);
-          config.fee = feeFromString(data.fee);
+          config.fee = CoinUtils.getCoinFromDecimals(
+            data.feeAmount,
+            data.feeDenom
+          );
           config.memo = data.memo;
           await txBuilder.approve(config);
         })}
@@ -156,12 +150,25 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
             />
             <CoinInput
               label="Fee"
-              name="fee"
-              setValue={setValue}
-              setError={setError}
-              error={errors.fee && errors.fee.message}
+              input={{
+                name: "feeAmount",
+                ref: register({
+                  required: "Amount is required"
+                })
+              }}
+              select={{
+                name: "feeDenom",
+                ref: register({
+                  required: "Denom is required"
+                })
+              }}
+              error={
+                errors.feeAmount &&
+                errors.feeAmount.message &&
+                errors.feeDenom &&
+                errors.feeDenom.message
+              }
               currencies={getCurrencies(chainStore.chainInfo.feeCurrencies)}
-              defaultValue={fee}
             />
             <Input
               type="text"

@@ -28,31 +28,25 @@ import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 import { getCurrencies, getCurrency } from "../../../../common/currency";
 
 import style from "./style.module.scss";
+import { CoinUtils } from "../../../../common/coin-utils";
 
 interface FormData {
   recipient: string;
   amount: string;
+  denom: string;
   memo: string;
 }
 
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
   ({ history }) => {
-    const { register, handleSubmit, setValue, setError, errors } = useForm<
-      FormData
-    >({
+    const { register, handleSubmit, errors } = useForm<FormData>({
       defaultValues: {
         recipient: "",
         amount: "",
+        denom: "",
         memo: ""
       }
     });
-
-    register(
-      { name: "amount" },
-      {
-        required: "Amount is required"
-      }
-    );
 
     const { chainStore, accountStore } = useStore();
     const [walletProvider] = useState(
@@ -82,13 +76,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         <form
           className={style.formContainer}
           onSubmit={handleSubmit(async (data: FormData) => {
+            const coin = CoinUtils.getCoinFromDecimals(data.amount, data.denom);
+
             await useBech32ConfigPromise(
               chainStore.chainInfo.bech32Config,
               async () => {
                 const msg = new MsgSend(
                   AccAddress.fromBech32(accountStore.bech32Address),
                   AccAddress.fromBech32(data.recipient),
-                  [Coin.parse(data.amount)]
+                  [coin]
                 );
 
                 const config: TxBuilderConfig = {
@@ -149,10 +145,24 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               <CoinInput
                 currencies={getCurrencies(chainStore.chainInfo.currencies)}
                 label="Amount"
-                error={errors.amount && errors.amount.message}
-                setValue={setValue}
-                setError={setError}
-                name="amount"
+                error={
+                  errors.amount &&
+                  errors.amount.message &&
+                  errors.denom &&
+                  errors.denom.message
+                }
+                input={{
+                  name: "amount",
+                  ref: register({
+                    required: "Amount is required"
+                  })
+                }}
+                select={{
+                  name: "denom",
+                  ref: register({
+                    required: "Denom is required"
+                  })
+                }}
               />
               <Input
                 type="text"

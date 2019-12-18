@@ -1,6 +1,7 @@
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { getCurrencyFromDenom, getCurrencyFromMinimalDenom } from "../currency";
 
 export class CoinUtils {
   static amountOf(coins: Coin[], denom: string): Int {
@@ -19,6 +20,47 @@ export class CoinUtils {
     return coins.filter(coin => {
       return demons.indexOf(coin.denom) === 0;
     });
+  }
+
+  static getCoinFromDecimals(decAmountStr: string, denom: string): Coin {
+    const currency = getCurrencyFromDenom(denom);
+    if (!currency) {
+      throw new Error("Invalid currency");
+    }
+
+    let precision = new Dec(1);
+    for (let i = 0; i < currency.coinDecimals; i++) {
+      precision = precision.mul(new Dec(10));
+    }
+
+    let decAmount = new Dec(decAmountStr);
+    decAmount = decAmount.mul(precision);
+
+    if (!new Dec(decAmount.truncate()).equals(decAmount)) {
+      throw new Error("Can't divide anymore");
+    }
+
+    return new Coin(currency.coinMinimalDenom, decAmount.truncate());
+  }
+
+  static parseDecAndDenomFromCoin(
+    coin: Coin
+  ): { amount: string; denom: string } {
+    const currency = getCurrencyFromMinimalDenom(coin.denom);
+    if (!currency) {
+      throw new Error("Invalid currency");
+    }
+
+    let precision = new Dec(1);
+    for (let i = 0; i < currency.coinDecimals; i++) {
+      precision = precision.mul(new Dec(10));
+    }
+
+    const decAmount = new Dec(coin.amount).quoTruncate(precision);
+    return {
+      amount: decAmount.toString(currency.coinDecimals),
+      denom: currency.coinDenom
+    };
   }
 
   static shrinkDecimals(

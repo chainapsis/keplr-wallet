@@ -1,14 +1,15 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 
-import classnames from "classnames";
-
-import style from "./input.module.scss";
-import { FieldName, FieldValues } from "react-hook-form/dist/types";
 import { Currency } from "../../../chain-info";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
-export interface CoinInputProps<FormValues extends FieldValues = FieldValues> {
+import classnames from "classnames";
+import style from "./input.module.scss";
+
+import { getCurrencyFromDenom } from "../../../common/currency";
+import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { ElementLike } from "react-hook-form/dist/types";
+
+export interface CoinInputProps {
   currencies: Currency[];
 
   className?: string;
@@ -16,119 +17,41 @@ export interface CoinInputProps<FormValues extends FieldValues = FieldValues> {
   label?: string;
   error?: string;
 
-  name?: string;
-  setValue?: <Name extends FieldName<FormValues>>(
-    name: Name,
-    value: FormValues[Name],
-    shouldValidate?: boolean | undefined
-  ) => void | Promise<boolean>;
-  setError?: (
-    name: FieldName<FormValues>,
-    type: string,
-    message?: string | undefined,
-    ref?: any
-  ) => void;
-  shouldValidate?: boolean | undefined;
-  defaultValue?: string;
+  input: {
+    name: string;
+    ref: React.RefObject<HTMLInputElement> | ElementLike | null;
+  };
+
+  select: {
+    name: string;
+    ref: React.RefObject<HTMLSelectElement> | ElementLike | null;
+  };
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = props => {
-  const {
-    currencies,
-    className,
-    color,
-    label,
-    error,
-    name,
-    setValue,
-    setError,
-    shouldValidate,
-    defaultValue
-  } = props;
+  const { currencies, className, color, label, error, input, select } = props;
 
-  const [amount, setAmount] = useState<string | undefined>();
-  const [currencyDenom, setCurrencyDenom] = useState("");
   const [currency, setCurrency] = useState<Currency | undefined>();
+  const [step, setStep] = useState<string | undefined>();
 
   useEffect(() => {
-    try {
-      if (currency) {
-        if (amount) {
-          let amountDec = new Dec(amount);
-          let precision = new Dec(1);
-          for (let i = 0; i < currency.coinDecimals; i++) {
-            precision = precision.mul(new Dec(10));
-          }
-          amountDec = amountDec.mul(precision);
-          if (!amountDec.equals(new Dec(amountDec.roundUp()))) {
-            throw new Error("Can't divide anymore");
-          }
-
-          if (name && setValue) {
-            setValue(name, amountDec.truncate() + currency.coinMinimalDenom);
-          }
-        }
-
-        if (name && setError) {
-          // Clear error.
-          setError(name, "invalid");
-        }
-      } else if (amount !== undefined) {
-        throw new Error("Currency not set");
-      }
-
-      if (amount === undefined && defaultValue !== undefined) {
-        const coin = Coin.parse(defaultValue);
-        let find = false;
-        for (const currency of currencies) {
-          if (currency.coinMinimalDenom === coin.denom) {
-            setCurrencyDenom(currency.coinDenom);
-            let amountDec = new Dec(coin.amount);
-            let precision = new Dec(1);
-            for (let i = 0; i < currency.coinDecimals; i++) {
-              precision = precision.mul(new Dec(10));
-            }
-            amountDec = amountDec.quoTruncate(precision);
-            setAmount(amountDec.toString(currency.coinDecimals));
-            find = true;
-            break;
-          }
-        }
-
-        if (!find) {
-          throw new Error(`${defaultValue} can't be used for fee.`);
-        }
-      }
-
-      if (name && setError) {
-        setError(name, "invalid");
-      }
-    } catch (e) {
-      if (name && setError) {
-        setError(name, "invalid", e.message);
-      }
+    if (currencies.length > 0) {
+      setCurrency(currencies[0]);
     }
-    /**
-     * XXX: Adding setError in deps will make re-render every time.
-     * I don't know why this happens. It seems to be not memorized function or new setError is delivered whenever using setError.
-     * It might be the bug(?) in react-hook-form.
-     * Anyway, don't add `setError` in deps until this problem can be solved.
-     */
-  }, [amount, currency, name, setValue, shouldValidate, defaultValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    let find = false;
-    for (const currency of currencies) {
-      if (currency.coinDenom === currencyDenom) {
-        setCurrency(currency);
-        find = true;
-        break;
+    if (currency) {
+      let dec = new Dec(1);
+      for (let i = 0; i < currency.coinDecimals; i++) {
+        dec = dec.quoTruncate(new Dec(10));
       }
+      setStep(dec.toString(currency.coinDecimals));
+    } else {
+      setStep(undefined);
     }
-    if (!find && currencies.length > 0) {
-      setCurrencyDenom(currencies[0].coinDenom);
-    }
-  }, [currencies, currencyDenom]);
+  }, [currency]);
 
   return (
     <div className="fields">
@@ -145,7 +68,8 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
           })}
         >
           <input
-            type="text"
+            type="number"
+            step={step}
             className={classnames(
               className,
               "input",
@@ -153,10 +77,8 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
               color ? `is-${color}` : undefined,
               !color && error ? "is-danger" : undefined
             )}
-            value={amount === undefined ? "" : amount}
-            onChange={(e: any) => {
-              setAmount(e.target.value);
-            }}
+            name={input.name}
+            ref={input.ref as any}
           />
           {error ? (
             <span className="icon is-small is-right">
@@ -167,13 +89,22 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
         <p className="control">
           <span className="select">
             <select
-              value={currencyDenom}
-              onChange={(e: any) => {
-                setCurrencyDenom(e.target.value);
+              value={currency ? currency.coinDenom : ""}
+              onChange={e => {
+                const currency = getCurrencyFromDenom(e.target.value);
+                if (currency) {
+                  setCurrency(currency);
+                }
               }}
+              name={select.name}
+              ref={select.ref as any}
             >
               {currencies.map((currency, i) => {
-                return <option key={i.toString()}>{currency.coinDenom}</option>;
+                return (
+                  <option key={i.toString()} value={currency.coinDenom}>
+                    {currency.coinDenom}
+                  </option>
+                );
               })}
             </select>
           </span>

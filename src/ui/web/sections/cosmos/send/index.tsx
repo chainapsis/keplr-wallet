@@ -20,30 +20,24 @@ import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { useNotification } from "../../../../components/notification";
 import { getCurrencies, getCurrency } from "../../../../../common/currency";
 import { useCosmosJS } from "../../../../hooks";
+import { CoinUtils } from "../../../../../common/coin-utils";
 
 interface FormData {
   readonly recipient: string;
   readonly amount: string;
+  readonly denom: string;
   readonly memo: string;
 }
 
 export const SendSection: FunctionComponent = observer(() => {
-  const { register, handleSubmit, setValue, setError, errors } = useForm<
-    FormData
-  >({
+  const { register, handleSubmit, setValue, errors } = useForm<FormData>({
     defaultValues: {
       recipient: "",
       amount: "",
+      denom: "",
       memo: ""
     }
   });
-
-  register(
-    { name: "amount" },
-    {
-      required: "Amount is required"
-    }
-  );
 
   const { chainStore } = useStore();
 
@@ -69,13 +63,18 @@ export const SendSection: FunctionComponent = observer(() => {
             <form
               onSubmit={handleSubmit(async data => {
                 if (cosmosJS.sendMsgs && cosmosJS.addresses.length > 0) {
+                  const coin = CoinUtils.getCoinFromDecimals(
+                    data.amount,
+                    data.denom
+                  );
+
                   return useBech32ConfigPromise(
                     chainStore.chainInfo.bech32Config,
                     async () => {
                       const msg = new MsgSend(
                         AccAddress.fromBech32(cosmosJS.addresses[0]),
                         AccAddress.fromBech32(data.recipient),
-                        [Coin.parse(data.amount)]
+                        [coin]
                       );
 
                       if (cosmosJS.sendMsgs) {
@@ -152,10 +151,24 @@ export const SendSection: FunctionComponent = observer(() => {
               <CoinInput
                 currencies={getCurrencies(chainStore.chainInfo.currencies)}
                 label="Amount"
-                error={errors.amount && errors.amount.message}
-                setValue={setValue}
-                setError={setError}
-                name="amount"
+                error={
+                  errors.amount &&
+                  errors.amount.message &&
+                  errors.denom &&
+                  errors.denom.message
+                }
+                input={{
+                  name: "amount",
+                  ref: register({
+                    required: "Amount is required"
+                  })
+                }}
+                select={{
+                  name: "denom",
+                  ref: register({
+                    required: "Denom is required"
+                  })
+                }}
               />
               <Input
                 type="text"
