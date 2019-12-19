@@ -13,6 +13,8 @@ import {
   TxBuilderConfigPrimitiveWithChainId
 } from "./types";
 
+import { openWindow } from "../../common/window";
+
 const Buffer = require("buffer/").Buffer;
 
 export interface KeyHex {
@@ -156,11 +158,8 @@ export class KeyRingKeeper {
 
     if (openPopup) {
       // Open fee window with hash to let the fee page to know that window is requested newly.
-      window.open(
-        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}#${hash}`,
-        "sign",
-        "width=360px,height=600px",
-        true
+      openWindow(
+        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}#${hash}`
       );
     }
 
@@ -198,11 +197,8 @@ export class KeyRingKeeper {
     this.signMessages.set(index, { chainId, message });
 
     if (openPopup) {
-      window.open(
-        `chrome-extension://${chrome.runtime.id}/popup.html#/sign/${index}`,
-        "sign",
-        "width=360px,height=600px",
-        true
+      openWindow(
+        `chrome-extension://${chrome.runtime.id}/popup.html#/sign/${index}`
       );
     }
 
