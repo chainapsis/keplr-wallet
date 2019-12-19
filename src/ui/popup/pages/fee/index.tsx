@@ -37,7 +37,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
   chainId: string;
 }>> = observer(({ match, location, history }) => {
   const query = queryString.parse(location.search);
-  const inPopup = query.inPopup ?? false;
+  const external = query.external ?? false;
 
   const chainId = match.params.chainId;
 
@@ -89,17 +89,17 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
   useEffect(() => {
     return () => {
       // If requested chain id is changed, just reject the prior one.
-      if (!inPopup && txBuilder.reject) {
+      if (external && txBuilder.reject) {
         txBuilder.reject();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [txBuilder.reject, chainId, inPopup]);
+  }, [txBuilder.reject, chainId, external]);
 
   useEffect(() => {
     // Force reject when closing window.
     const beforeunload = async () => {
-      if (!txBuilder.loading && !inPopup && txBuilder.reject) {
+      if (!txBuilder.loading && external && txBuilder.reject) {
         await txBuilder.reject();
       }
     };
@@ -111,14 +111,14 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
       removeEventListener("beforeunload", beforeunload);
       removeEventListener("hashchange", beforeunload);
     };
-  }, [txBuilder, inPopup]);
+  }, [txBuilder, external]);
 
   return (
     <HeaderLayout
       showChainName
       canChangeChainInfo={false}
       onBackButton={
-        inPopup
+        !external
           ? () => {
               history.goBack();
             }

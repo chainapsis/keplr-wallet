@@ -159,7 +159,7 @@ export class KeyRingKeeper {
     if (openPopup) {
       // Open fee window with hash to let the fee page to know that window is requested newly.
       openWindow(
-        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}#${hash}`
+        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}?external=true#${hash}`
       );
     }
 
@@ -198,7 +198,7 @@ export class KeyRingKeeper {
 
     if (openPopup) {
       openWindow(
-        `chrome-extension://${chrome.runtime.id}/popup.html#/sign/${index}`
+        `chrome-extension://${chrome.runtime.id}/popup.html#/sign/${index}?external=true`
       );
     }
 

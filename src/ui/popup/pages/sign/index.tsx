@@ -28,7 +28,7 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
   index: string;
 }>> = ({ history, match, location }) => {
   const query = queryString.parse(location.search);
-  const inPopup = query.inPopup ?? false;
+  const external = query.external ?? false;
 
   const index = match.params.index;
 
@@ -49,7 +49,7 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
   useEffect(() => {
     // Force reject when closing window.
     const beforeunload = async () => {
-      if (!signing.loading && !inPopup && signing.reject) {
+      if (!signing.loading && external && signing.reject) {
         await signing.reject();
       }
     };
@@ -58,17 +58,17 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
     return () => {
       removeEventListener("beforeunload", beforeunload);
     };
-  }, [signing, inPopup]);
+  }, [signing, external]);
 
   useEffect(() => {
     return () => {
       // If index is changed, just reject the prior one.
-      if (!inPopup && signing.reject) {
+      if (external && signing.reject) {
         signing.reject();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signing.reject, signing.index, inPopup]);
+  }, [signing.reject, signing.index, external]);
 
   const onApproveClick = useCallback(async () => {
     if (signing.approve) {
@@ -76,10 +76,10 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
     }
 
     // If this is called by injected wallet provider. Just close.
-    if (!inPopup) {
+    if (external) {
       window.close();
     }
-  }, [signing, inPopup]);
+  }, [signing, external]);
 
   const onRejectClick = useCallback(async () => {
     if (signing.reject) {
@@ -87,17 +87,17 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
     }
 
     // If this is called by injected wallet provider. Just close.
-    if (!inPopup) {
+    if (external) {
       window.close();
     }
-  }, [signing, inPopup]);
+  }, [signing, external]);
 
   return (
     <HeaderLayout
       showChainName
       canChangeChainInfo={false}
       onBackButton={
-        inPopup
+        !external
           ? () => {
               history.goBack();
             }

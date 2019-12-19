@@ -43,7 +43,7 @@ export const StakeView: FunctionComponent<Pick<
     // Skip the approving for withdrawing rewards.
     new PopupWalletProvider({
       onRequestTxBuilderConfig: (chainId: string) => {
-        history.push(`/fee/${chainId}?inPopup=true`);
+        history.push(`/fee/${chainId}`);
       }
     })
   );
