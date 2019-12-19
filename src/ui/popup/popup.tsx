@@ -28,7 +28,7 @@ configure({
 });
 
 const StateRenderer: FunctionComponent<RouteComponentProps> = observer(
-  ({ history }) => {
+  ({ history, location }) => {
     const { keyRingStore } = useStore();
 
     if (keyRingStore.status === KeyRingStatus.EMPTY) {
@@ -36,7 +36,7 @@ const StateRenderer: FunctionComponent<RouteComponentProps> = observer(
     } else if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
       return <MainPage history={history} />;
     } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
-      return <LockPage />;
+      return <LockPage location={location} />;
     } else if (keyRingStore.status === KeyRingStatus.NOTLOADED) {
       return <div>Not yet loaded</div>;
     } else {
