@@ -19,6 +19,11 @@ import { defaultTxEncoder } from "@everett-protocol/cosmosjs/common/stdTx";
 import { stdTxBuilder } from "@everett-protocol/cosmosjs/common/stdTxBuilder";
 import { Account } from "@everett-protocol/cosmosjs/core/account";
 import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
+import { RequestBackgroundTxMsg } from "../../background/tx";
+import { sendMessage } from "../../common/message";
+import { BACKGROUND_PORT } from "../../common/message/constant";
+
+const Buffer = require("buffer/").Buffer;
 
 /**
  * useCosmosJS hook returns the object related to cosmosjs api.
@@ -31,20 +36,23 @@ import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
 export const useCosmosJS = <R extends Rest = Rest>(
   chainInfo: ChainInfo,
   walletProvider: WalletProvider,
-  restFactory?: (context: Context) => R,
-  registerCodec?: (codec: Codec) => void
+  opts: {
+    restFactory?: (context: Context) => R;
+    registerCodec?: (codec: Codec) => void;
+    useBackgroundTx?: boolean;
+  } = {}
 ) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
   const memorizedRestFactory = useCallback<(context: Context) => R>(
-    restFactory ||
+    opts?.restFactory ||
       ((context: Context) => (new GaiaRest(context) as unknown) as R),
-    [restFactory]
+    [opts?.restFactory]
   );
 
   const memorizedRegisterCodec = useCallback<(codec: Codec) => void>(
-    registerCodec ||
+    opts?.registerCodec ||
       ((codec: Codec) => {
         CmnCdc.registerCodec(codec);
         Crypto.registerCodec(codec);
@@ -54,7 +62,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
         Slashing.registerCodec(codec);
         Gov.registerCodec(codec);
       }),
-    [registerCodec]
+    [opts?.registerCodec]
   );
 
   type SendMsgs = (
@@ -132,25 +140,41 @@ export const useCosmosJS = <R extends Rest = Rest>(
         if (api.wallet) {
           await api.enable();
 
-          const result = await api.sendMsgs(msgs, config, mode);
+          if (!opts?.useBackgroundTx) {
+            const result = await api.sendMsgs(msgs, config, mode);
 
-          if (result.mode === "sync" || result.mode === "async") {
-            if (result.code !== 0) {
-              throw new Error(result.log);
+            if (result.mode === "sync" || result.mode === "async") {
+              if (result.code !== 0) {
+                throw new Error(result.log);
+              }
+            } else if (result.mode === "commit") {
+              if (
+                result.checkTx.code !== undefined &&
+                result.checkTx.code !== 0
+              ) {
+                throw new Error(result.checkTx.log);
+              }
+              if (
+                result.deliverTx.code !== undefined &&
+                result.deliverTx.code !== 0
+              ) {
+                throw new Error(result.deliverTx.log);
+              }
             }
-          } else if (result.mode === "commit") {
-            if (
-              result.checkTx.code !== undefined &&
-              result.checkTx.code !== 0
-            ) {
-              throw new Error(result.checkTx.log);
-            }
-            if (
-              result.deliverTx.code !== undefined &&
-              result.deliverTx.code !== 0
-            ) {
-              throw new Error(result.deliverTx.log);
-            }
+          } else {
+            const tx = await api.context.get("txBuilder")(
+              api.context,
+              msgs,
+              config
+            );
+            const bz = api.context.get("txEncoder")(api.context, tx);
+
+            const msg = RequestBackgroundTxMsg.create(
+              api.context.get("chainId"),
+              Buffer.from(bz).toString("hex"),
+              mode
+            );
+            await sendMessage(BACKGROUND_PORT, msg);
           }
 
           if (onSuccess) {

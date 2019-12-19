@@ -9,7 +9,12 @@ import { TxButtonView } from "./tx-button";
 import { AssetView } from "./asset";
 import { StakeView } from "./stake";
 
-export const MainPage: FunctionComponent = () => {
+import { RouteComponentProps } from "react-router";
+
+export const MainPage: FunctionComponent<Pick<
+  RouteComponentProps,
+  "history"
+>> = ({ history }) => {
   return (
     <HeaderLayout showChainName canChangeChainInfo menuRenderer={<Menu />}>
       <div className={style.containerCard}>
@@ -20,7 +25,7 @@ export const MainPage: FunctionComponent = () => {
         </div>
       </div>
       <div className={style.containerCard}>
-        <StakeView />
+        <StakeView history={history} />
       </div>
     </HeaderLayout>
   );

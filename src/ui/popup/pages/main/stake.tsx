@@ -31,15 +31,25 @@ import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { CoinUtils } from "../../../../common/coin-utils";
 
 import { useNotification } from "../../../components/notification";
+import { RouteComponentProps } from "react-router";
 
-export const StakeView: FunctionComponent = observer(() => {
+export const StakeView: FunctionComponent<Pick<
+  RouteComponentProps,
+  "history"
+>> = observer(({ history }) => {
   const { chainStore, accountStore } = useStore();
 
   const [walletProvider] = useState(
     // Skip the approving for withdrawing rewards.
-    new PopupWalletProvider()
+    new PopupWalletProvider({
+      onRequestTxBuilderConfig: (chainId: string) => {
+        history.push(`/fee/${chainId}?inPopup=true`);
+      }
+    })
   );
-  const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider);
+  const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider, {
+    useBackgroundTx: true
+  });
 
   const notification = useNotification();
 
@@ -83,22 +93,14 @@ export const StakeView: FunctionComponent = observer(() => {
             msgs,
             config,
             () => {
-              notification.push({
-                placement: "top-center",
-                type: "success",
-                duration: 2,
-                content: "Reward withdrawn!",
-                canDelete: true,
-                transition: {
-                  duration: 0.25
-                }
-              });
+              history.replace("/");
             },
             e => {
+              history.replace("/");
               notification.push({
                 placement: "top-center",
                 type: "warning",
-                duration: 2,
+                duration: 5,
                 content: `Fail to withdraw rewards: ${e.message}`,
                 canDelete: true,
                 transition: {

@@ -23,9 +23,9 @@ import { Address } from "@everett-protocol/cosmosjs/crypto";
 
 const Buffer = require("buffer/").Buffer;
 
-export const getHandler: () => Handler = () => {
-  const keeper = new KeyRingKeeper();
-
+export const getHandler: (keeper: KeyRingKeeper) => Handler = (
+  keeper: KeyRingKeeper
+) => {
   return (msg: Message<unknown>) => {
     switch (msg.constructor) {
       case GetRegisteredChainMsg:

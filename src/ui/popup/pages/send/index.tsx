@@ -10,7 +10,6 @@ import { useStore } from "../../stores";
 
 import { HeaderLayout } from "../../layouts";
 import { Button } from "../../../components/button";
-import { Result } from "../../../components/result";
 
 import { PopupWalletProvider } from "../../wallet-provider";
 
@@ -26,7 +25,6 @@ import bigInteger from "big-integer";
 import useForm, { FormContext } from "react-hook-form";
 import { observer } from "mobx-react";
 
-import queryString from "query-string";
 import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 import { getCurrencies, getCurrency } from "../../../../common/currency";
@@ -34,6 +32,7 @@ import { getCurrencies, getCurrency } from "../../../../common/currency";
 import style from "./style.module.scss";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { useNotification } from "../../../components/notification";
 
 interface FormData {
   recipient: string;
@@ -57,6 +56,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
 
     register({ name: "fee" }, { required: "Fee is required" });
 
+    const notification = useNotification();
+
     const { chainStore, accountStore, priceStore } = useStore();
     const [walletProvider] = useState(
       new PopupWalletProvider(undefined, {
@@ -65,7 +66,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         }
       })
     );
-    const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider);
+    const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider, {
+      useBackgroundTx: true
+    });
 
     const feeCurrency = useMemo(() => {
       return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
@@ -111,10 +114,20 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                     [msg!],
                     config,
                     () => {
-                      history.replace("/send/result");
+                      history.replace("/");
                     },
                     e => {
-                      history.replace(`/send/result?error=${e.toString()}`);
+                      history.replace("/");
+                      notification.push({
+                        type: "danger",
+                        content: e.toString(),
+                        duration: 5,
+                        canDelete: true,
+                        placement: "top-center",
+                        transition: {
+                          duration: 0.25
+                        }
+                      });
                     },
                     "commit"
                   );
@@ -205,32 +218,3 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     );
   }
 );
-
-export const SendResultPage: FunctionComponent<RouteComponentProps> = ({
-  location,
-  history
-}) => {
-  const query = queryString.parse(location.search);
-  const error = query.error as string | undefined;
-
-  return (
-    <HeaderLayout showChainName canChangeChainInfo={false}>
-      {/* TODO: change subtitle when tx succeeds */}
-      <Result
-        status={error ? "error" : "success"}
-        title={error ? "Transaction fails" : "Transaction succeeds"}
-        subTitle={error ? error : "Transaction succeeds."}
-        extra={
-          <Button
-            size="medium"
-            onClick={() => {
-              history.replace("/");
-            }}
-          >
-            Go to main
-          </Button>
-        }
-      />
-    </HeaderLayout>
-  );
-};
