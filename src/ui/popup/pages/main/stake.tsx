@@ -63,16 +63,29 @@ export const StakeView: FunctionComponent<Pick<
       const msgs: Msg[] = [];
 
       for (const r of reward.rewards) {
-        // This is not react hooks.
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        useBech32Config(chainStore.chainInfo.bech32Config, () => {
-          const msg = new MsgWithdrawDelegatorReward(
-            AccAddress.fromBech32(accountStore.bech32Address),
-            ValAddress.fromBech32(r.validator_address)
-          );
+        let rewardExist = false;
+        if (r.reward) {
+          for (const reward of r.reward) {
+            const dec = new Dec(reward.amount);
+            if (dec.truncate().gt(new Int(0))) {
+              rewardExist = true;
+              break;
+            }
+          }
+        }
 
-          msgs.push(msg);
-        });
+        if (rewardExist) {
+          // This is not react hooks.
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          useBech32Config(chainStore.chainInfo.bech32Config, () => {
+            const msg = new MsgWithdrawDelegatorReward(
+              AccAddress.fromBech32(accountStore.bech32Address),
+              ValAddress.fromBech32(r.validator_address)
+            );
+
+            msgs.push(msg);
+          });
+        }
       }
 
       if (msgs.length > 0) {

@@ -16,7 +16,7 @@ interface Result {
 
 interface DelegatorReward {
   validator_address: string;
-  reward: CoinPrimitive[];
+  reward?: CoinPrimitive[];
 }
 
 /**
