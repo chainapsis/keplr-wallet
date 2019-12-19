@@ -43,6 +43,8 @@ export class BackgroundTxKeeper {
     let result: ResultBroadcastTx | ResultBroadcastTxCommit | undefined;
 
     try {
+      new Notification("Tx is pending...");
+
       if (mode === "commit") {
         result = await rpc.broadcastTxCommit(Buffer.from(txBytes, "hex"));
       } else {
