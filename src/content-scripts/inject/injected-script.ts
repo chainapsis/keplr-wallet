@@ -4,6 +4,7 @@ import {
 } from "@everett-protocol/cosmosjs/core/walletProvider";
 import { Context } from "@everett-protocol/cosmosjs/core/context";
 import {
+  EnableKeyRingMsg,
   GetKeyMsg,
   RequestSignMsg,
   RequestTxBuilderConfigMsg
@@ -22,9 +23,12 @@ export class InjectedWalletProvider implements WalletProvider {
   /**
    * Request access to the user's accounts. Wallet can ask the user to approve or deny access. If user deny access, it will throw error.
    */
-  enable(_: Context): Promise<void> {
-    // TODO
-    return Promise.resolve();
+  async enable(context: Context): Promise<void> {
+    const msg = EnableKeyRingMsg.create(
+      context.get("chainId"),
+      window.location.origin
+    );
+    await sendMessage(BACKGROUND_PORT, msg);
   }
 
   /**

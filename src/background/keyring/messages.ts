@@ -9,6 +9,59 @@ import {
 } from "./types";
 import { AsyncApprover } from "../../common/async-approver";
 
+export class EnableKeyRingMsg extends Message<{
+  status: KeyRingStatus;
+}> {
+  public static type() {
+    return "enable-keyring";
+  }
+
+  public static create(chainId: string, origin: string): EnableKeyRingMsg {
+    const msg = new EnableKeyRingMsg();
+    msg.chainId = chainId;
+    msg.origin = origin;
+    return msg;
+  }
+
+  public chainId: string = "";
+  public origin: string = "";
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id is empty");
+    }
+  }
+
+  // Approve external approves sending message if they submit their origin correctly.
+  // Keeper or handler must check that this origin has right permission.
+  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+    const isInternal = super.approveExternal(sender);
+    if (isInternal) {
+      return true;
+    }
+
+    // TODO: When is a url undefined?
+    if (!sender.url) {
+      throw new Error("url is empty");
+    }
+
+    if (!this.origin) {
+      throw new Error("origin is empty");
+    }
+
+    const url = new URL(sender.url);
+    return url.origin === this.origin;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return EnableKeyRingMsg.type();
+  }
+}
+
 export class GetRegisteredChainMsg extends Message<{
   // Need to set prototype for elements of array manually.
   chainInfos: ChainInfo[];

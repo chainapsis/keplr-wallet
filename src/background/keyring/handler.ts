@@ -1,5 +1,6 @@
 import { Handler, InternalHandler, Message } from "../../common/message";
 import {
+  EnableKeyRingMsg,
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
   CreateKeyMsg,
@@ -28,6 +29,8 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
 ) => {
   return (msg: Message<unknown>) => {
     switch (msg.constructor) {
+      case EnableKeyRingMsg:
+        return handleEnableKeyRingMsg(keeper)(msg as EnableKeyRingMsg);
       case GetRegisteredChainMsg:
         return handleGetRegisteredChainMsg(keeper)(
           msg as GetRegisteredChainMsg
@@ -75,6 +78,20 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
       default:
         throw new Error("Unknown msg type");
     }
+  };
+};
+
+const handleEnableKeyRingMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<EnableKeyRingMsg> = keeper => {
+  return async msg => {
+    if (msg.origin) {
+      keeper.checkAccessOrigin(msg.chainId, msg.origin);
+    }
+
+    return {
+      status: await keeper.enable()
+    };
   };
 };
 

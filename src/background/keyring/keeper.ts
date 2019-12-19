@@ -33,6 +33,8 @@ export class KeyRingKeeper {
   private readonly keyRing = new KeyRing();
   private path = "";
 
+  private readonly unlockApprover = new AsyncApprover();
+
   private readonly txBuilderApprover = new AsyncApprover<
     TxBuilderConfigPrimitive
   >(() => {}, true);
@@ -43,6 +45,26 @@ export class KeyRingKeeper {
 
   private readonly signApprover = new AsyncApprover();
   private readonly signMessages: Map<string, SignMessage> = new Map();
+
+  async enable(): Promise<KeyRingStatus> {
+    if (this.keyRing.status === KeyRingStatus.EMPTY) {
+      throw new Error("key doesn't exist");
+    }
+
+    if (this.keyRing.status === KeyRingStatus.NOTLOADED) {
+      await this.keyRing.restore();
+    }
+
+    if (this.keyRing.status === KeyRingStatus.LOCKED) {
+      openWindow(
+        `chrome-extension://${chrome.runtime.id}/popup.html#/?external=true`
+      );
+      await this.unlockApprover.request("unlock");
+      return this.keyRing.status;
+    }
+
+    return this.keyRing.status;
+  }
 
   getRegisteredChains(): ChainInfo[] {
     return NativeChainInfos;
@@ -130,6 +152,11 @@ export class KeyRingKeeper {
 
   async unlock(password: string): Promise<KeyRingStatus> {
     await this.keyRing.unlock(password);
+    try {
+      this.unlockApprover.approve("unlock");
+    } catch {
+      // noop
+    }
     return this.keyRing.status;
   }
 
@@ -159,7 +186,7 @@ export class KeyRingKeeper {
     if (openPopup) {
       // Open fee window with hash to let the fee page to know that window is requested newly.
       openWindow(
-        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}?external=true#${hash}`
+        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}?external=true&hash=${hash}`
       );
     }
 

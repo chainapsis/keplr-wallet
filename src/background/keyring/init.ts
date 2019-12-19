@@ -1,5 +1,6 @@
 import { MessageManager } from "../../common/message";
 import {
+  EnableKeyRingMsg,
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
   CreateKeyMsg,
@@ -23,6 +24,7 @@ import { getHandler } from "./handler";
 import { KeyRingKeeper } from "./keeper";
 
 export function init(messageManager: MessageManager): KeyRingKeeper {
+  messageManager.registerMessage(EnableKeyRingMsg);
   messageManager.registerMessage(GetRegisteredChainMsg);
   messageManager.registerMessage(RestoreKeyRingMsg);
   messageManager.registerMessage(SaveKeyRingMsg);
