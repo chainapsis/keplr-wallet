@@ -337,17 +337,20 @@ export class RequestTxBuilderConfigMsg extends Message<{
 
   public static create(
     config: TxBuilderConfigPrimitiveWithChainId,
+    index: string,
     openPopup: boolean,
     origin: string
   ): RequestTxBuilderConfigMsg {
     const msg = new RequestTxBuilderConfigMsg();
     msg.config = config;
+    msg.index = index;
     msg.openPopup = openPopup;
     msg.origin = origin;
     return msg;
   }
 
   public config?: TxBuilderConfigPrimitiveWithChainId;
+  public index: string = "";
   public openPopup: boolean = false;
   public origin: string = "";
 
@@ -355,6 +358,8 @@ export class RequestTxBuilderConfigMsg extends Message<{
     if (!this.config) {
       throw new Error("config is null");
     }
+
+    AsyncApprover.isValidIndex(this.index);
   }
 
   // Approve external approves sending message if they submit their origin correctly.
@@ -394,18 +399,16 @@ export class GetRequestedTxBuilderConfigMsg extends Message<{
     return "get-requested-tx-builder-config";
   }
 
-  public static create(chainId: string): GetRequestedTxBuilderConfigMsg {
+  public static create(index: string): GetRequestedTxBuilderConfigMsg {
     const msg = new GetRequestedTxBuilderConfigMsg();
-    msg.chainId = chainId;
+    msg.index = index;
     return msg;
   }
 
-  public chainId: string = "";
+  public index: string = "";
 
   validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id is empty");
-    }
+    AsyncApprover.isValidIndex(this.index);
   }
 
   route(): string {
@@ -423,19 +426,24 @@ export class ApproveTxBuilderConfigMsg extends Message<{}> {
   }
 
   public static create(
-    config: TxBuilderConfigPrimitiveWithChainId
+    index: string,
+    config: TxBuilderConfigPrimitive
   ): ApproveTxBuilderConfigMsg {
     const msg = new ApproveTxBuilderConfigMsg();
+    msg.index = index;
     msg.config = config;
     return msg;
   }
 
-  public config?: TxBuilderConfigPrimitiveWithChainId;
+  public index: string = "";
+  public config?: TxBuilderConfigPrimitive;
 
   validateBasic(): void {
     if (!this.config) {
       throw new Error("config is empty");
     }
+
+    AsyncApprover.isValidIndex(this.index);
   }
 
   route(): string {
@@ -452,18 +460,16 @@ export class RejectTxBuilderConfigMsg extends Message<{}> {
     return "reject-tx-builder-config";
   }
 
-  public static create(chainId: string): RejectTxBuilderConfigMsg {
+  public static create(index: string): RejectTxBuilderConfigMsg {
     const msg = new RejectTxBuilderConfigMsg();
-    msg.chainId = chainId;
+    msg.index = index;
     return msg;
   }
 
-  public chainId: string = "";
+  public index: string = "";
 
   validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id is empty");
-    }
+    AsyncApprover.isValidIndex(this.index);
   }
 
   route(): string {

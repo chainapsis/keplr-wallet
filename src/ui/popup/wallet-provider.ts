@@ -20,7 +20,7 @@ import {
 const Buffer = require("buffer/").Buffer;
 
 export interface FeeApprover {
-  onRequestTxBuilderConfig: (chainId: string) => void;
+  onRequestTxBuilderConfig: (index: string) => void;
 }
 
 export interface AccessApprover {
@@ -79,11 +79,16 @@ export class PopupWalletProvider implements WalletProvider {
       return Promise.resolve(config);
     }
 
+    const random = new Uint8Array(4);
+    crypto.getRandomValues(random);
+    const index = Buffer.from(random).toString("hex");
+
     const requestTxBuilderConfig = RequestTxBuilderConfigMsg.create(
       {
         chainId: context.get("chainId"),
         ...txBuilderConfigToPrimitive(config)
       },
+      index,
       false,
       // There is no need to set origin because this wallet provider is used in internal.
       ""
@@ -99,7 +104,7 @@ export class PopupWalletProvider implements WalletProvider {
         });
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.feeApprover!.onRequestTxBuilderConfig(context.get("chainId"));
+      this.feeApprover!.onRequestTxBuilderConfig(index);
     });
   }
 

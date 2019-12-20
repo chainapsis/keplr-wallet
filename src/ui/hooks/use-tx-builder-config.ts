@@ -21,12 +21,12 @@ import {
  * `config` is the initialized config.
  * `loading` means if approving is requesting.
  * `error` is the thrown error during approving.
- * @param chainId Chain id of requested tx builder config.
+ * @param index Index of requested tx builder config.
  * @param onConfigInit Callback when config initialized. Make sure that onConfigInit should not make re-render unnecessarily by using useCallback.
  * @param onApprove Callback when approving succeeds. Make sure that onApprove should not make re-render unnecessarily by using useCallback.
  */
 export const useTxBuilderConfig = (
-  chainId: string,
+  index: string,
   onConfigInit: (chainId: string, config: TxBuilderConfig) => void,
   onApprove: () => void
 ) => {
@@ -39,8 +39,8 @@ export const useTxBuilderConfig = (
   useEffect(() => {
     let isMounted = true;
     (async () => {
-      // If chain id is empty, do nothing.
-      if (!chainId) {
+      // If index is empty, do nothing.
+      if (!index) {
         return;
       }
 
@@ -48,7 +48,7 @@ export const useTxBuilderConfig = (
         setInitializing(true);
       }
 
-      const msg = GetRequestedTxBuilderConfigMsg.create(chainId);
+      const msg = GetRequestedTxBuilderConfigMsg.create(index);
       try {
         const result = await sendMessage(BACKGROUND_PORT, msg);
 
@@ -72,7 +72,7 @@ export const useTxBuilderConfig = (
       isMounted = false;
     };
     // Make sure that onConfigInit should not make re-render unnecessarily by using useCallback.
-  }, [chainId, onConfigInit]);
+  }, [index, onConfigInit]);
 
   const [approve, setApprove] = useState<
     ((config: TxBuilderConfig) => Promise<void>) | undefined
@@ -85,7 +85,7 @@ export const useTxBuilderConfig = (
       setRequested(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId]);
+  }, [index]);
 
   useEffect(() => {
     let isMounted = true;
@@ -98,10 +98,7 @@ export const useTxBuilderConfig = (
 
       try {
         const configPrimitive = txBuilderConfigToPrimitive(config);
-        const msg = ApproveTxBuilderConfigMsg.create({
-          chainId,
-          ...configPrimitive
-        });
+        const msg = ApproveTxBuilderConfigMsg.create(index, configPrimitive);
         await sendMessage(BACKGROUND_PORT, msg);
         onApprove();
       } catch (e) {
@@ -122,7 +119,7 @@ export const useTxBuilderConfig = (
       }
 
       try {
-        const msg = RejectTxBuilderConfigMsg.create(chainId);
+        const msg = RejectTxBuilderConfigMsg.create(index);
         await sendMessage(BACKGROUND_PORT, msg);
       } catch (e) {
         if (isMounted) {
@@ -141,7 +138,7 @@ export const useTxBuilderConfig = (
     return () => {
       isMounted = false;
     };
-  }, [chainId, onApprove]);
+  }, [index, onApprove]);
 
   return {
     initializing,

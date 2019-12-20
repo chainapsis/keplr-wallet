@@ -34,12 +34,12 @@ interface FormData {
 }
 
 export const FeePage: FunctionComponent<RouteComponentProps<{
-  chainId: string;
+  index: string;
 }>> = observer(({ match, location, history }) => {
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
 
-  const chainId = match.params.chainId;
+  const index = match.params.index;
 
   const { chainStore, priceStore } = useStore();
 
@@ -84,17 +84,17 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
     // Don't do anything. Wallet provider will redirect to signing page.
   }, []);
 
-  const txBuilder = useTxBuilderConfig(chainId, onConfigInit, onApprove);
+  const txBuilder = useTxBuilderConfig(index, onConfigInit, onApprove);
 
   useEffect(() => {
     return () => {
-      // If requested chain id is changed, just reject the prior one.
+      // If requested index is changed, just reject the prior one.
       if (external && txBuilder.reject) {
         txBuilder.reject();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [txBuilder.reject, chainId, external]);
+  }, [txBuilder.reject, index, external]);
 
   useEffect(() => {
     // Force reject when closing window.
@@ -105,11 +105,8 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
     };
 
     addEventListener("beforeunload", beforeunload);
-    // It can know that page is requested newly by catching hash changed event.
-    addEventListener("hashchange", beforeunload);
     return () => {
       removeEventListener("beforeunload", beforeunload);
-      removeEventListener("hashchange", beforeunload);
     };
   }, [txBuilder, external]);
 

@@ -213,6 +213,7 @@ const handleRequestTxBuilderConfigMsg: (
       // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       msg.config!,
+      msg.index,
       msg.openPopup
     );
     return {
@@ -225,7 +226,7 @@ const handleGetRequestedTxBuilderConfig: (
   keeper: KeyRingKeeper
 ) => InternalHandler<GetRequestedTxBuilderConfigMsg> = keeper => {
   return async msg => {
-    const config = keeper.getRequestedTxConfig(msg.chainId);
+    const config = keeper.getRequestedTxConfig(msg.index);
 
     return {
       config
@@ -239,7 +240,7 @@ const handleApproveTxBuilderConfigMsg: (
   return async msg => {
     // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    keeper.approveTxBuilderConfig(msg.config!.chainId, msg.config!);
+    keeper.approveTxBuilderConfig(msg.index, msg.config!);
 
     return {};
   };
@@ -249,7 +250,7 @@ const handleRejectTxBuilderConfigMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<RejectTxBuilderConfigMsg> = keeper => {
   return async msg => {
-    keeper.rejectTxBuilderConfig(msg.chainId);
+    keeper.rejectTxBuilderConfig(msg.index);
 
     return {};
   };

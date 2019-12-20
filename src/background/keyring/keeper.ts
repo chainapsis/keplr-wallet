@@ -15,8 +15,6 @@ import {
 
 import { openWindow } from "../../common/window";
 
-const Buffer = require("buffer/").Buffer;
-
 export interface KeyHex {
   algo: string;
   pubKeyHex: string;
@@ -41,12 +39,6 @@ export class KeyRingKeeper {
     TxBuilderConfigPrimitiveWithChainId,
     TxBuilderConfigPrimitive
   >({
-    validateIndex: () =>
-      void (
-        {
-          // noop
-        }
-      ),
     defaultTimeout: 3 * 60 * 1000
   });
 
@@ -182,17 +174,13 @@ export class KeyRingKeeper {
 
   async requestTxBuilderConfig(
     config: TxBuilderConfigPrimitiveWithChainId,
+    index: string,
     openPopup: boolean
   ): Promise<TxBuilderConfigPrimitive> {
-    const random = new Uint8Array(4);
-    crypto.getRandomValues(random);
-    const hash = Buffer.from(random).toString("hex");
-    const index = config.chainId;
-
     if (openPopup) {
       // Open fee window with hash to let the fee page to know that window is requested newly.
       openWindow(
-        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}?external=true&hash=${hash}`
+        `chrome-extension://${chrome.runtime.id}/popup.html#/fee/${index}?external=true&hash`
       );
     }
 
@@ -203,8 +191,8 @@ export class KeyRingKeeper {
     return result;
   }
 
-  getRequestedTxConfig(chainId: string): TxBuilderConfigPrimitiveWithChainId {
-    const config = this.txBuilderApprover.getData(chainId);
+  getRequestedTxConfig(index: string): TxBuilderConfigPrimitiveWithChainId {
+    const config = this.txBuilderApprover.getData(index);
     if (!config) {
       throw new Error("Unknown config request index");
     }
@@ -212,12 +200,12 @@ export class KeyRingKeeper {
     return config;
   }
 
-  approveTxBuilderConfig(chainId: string, config: TxBuilderConfigPrimitive) {
-    this.txBuilderApprover.approve(chainId, config);
+  approveTxBuilderConfig(index: string, config: TxBuilderConfigPrimitive) {
+    this.txBuilderApprover.approve(index, config);
   }
 
-  rejectTxBuilderConfig(chainId: string): void {
-    this.txBuilderApprover.reject(chainId);
+  rejectTxBuilderConfig(index: string): void {
+    this.txBuilderApprover.reject(index);
   }
 
   async requestSign(

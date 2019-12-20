@@ -60,11 +60,16 @@ export class InjectedWalletProvider implements WalletProvider {
     context: Context,
     config: TxBuilderConfig
   ): Promise<TxBuilderConfig> {
+    const random = new Uint8Array(4);
+    crypto.getRandomValues(random);
+    const index = Buffer.from(random).toString("hex");
+
     const requestTxBuilderConfigMsg = RequestTxBuilderConfigMsg.create(
       {
         chainId: context.get("chainId"),
         ...txBuilderConfigToPrimitive(config)
       },
+      index,
       true,
       window.location.origin
     );

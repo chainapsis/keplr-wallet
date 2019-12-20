@@ -52,7 +52,7 @@ ReactDOM.render(
         <HashRouter>
           <Route exact path="/" component={StateRenderer} />
           <Route exact path="/send" component={SendPage} />
-          <Route exact path="/fee/:chainId" component={FeePage} />
+          <Route exact path="/fee/:index" component={FeePage} />
           <Route path="/sign/:index" component={SignPage} />
         </HashRouter>
       </NotificationProvider>
