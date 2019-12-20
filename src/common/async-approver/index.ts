@@ -1,40 +1,58 @@
 /**
  * AsyncApprover approves or rejects some requests asynchronously
  */
-export class AsyncApprover<R = void> {
+export class AsyncApprover<T = unknown, R = void> {
   private requests: Map<
     string,
     {
+      data: T | undefined;
       resolve: (value?: R | PromiseLike<R>) => void;
       reject: (reason?: any) => void;
     }
   > = new Map();
 
-  /**
-   * @param validateIndex Function that validates index. If this is not set, it will validate the index by using `AsyncApprover.isValidIndex(index)`.
-   * @param override If override is true, override the prior request when the new reqeust has the same index with prior one.
-   */
-  constructor(
-    private readonly validateIndex: (index: string) => void = (
-      index: string
-    ) => {
-      AsyncApprover.isValidIndex(index);
-    },
-    private readonly override: boolean = false
-  ) {}
+  private readonly validateIndex: (index: string) => void;
+  private readonly defaultTimeout: number = 0;
 
-  // TODO: Add timeout.
-  async request(index: string): Promise<R | undefined> {
+  constructor(
+    opts: {
+      validateIndex?: (index: string) => void;
+      defaultTimeout?: number;
+    } = {}
+  ) {
+    if (!opts?.validateIndex) {
+      this.validateIndex = (index: string): void => {
+        AsyncApprover.isValidIndex(index);
+      };
+    } else {
+      this.validateIndex = opts.validateIndex;
+    }
+
+    if (opts?.defaultTimeout) {
+      this.defaultTimeout = opts.defaultTimeout;
+    }
+  }
+
+  async request(
+    index: string,
+    data?: T,
+    timeout: number = this.defaultTimeout
+  ): Promise<R | undefined> {
     this.validateIndex(index);
 
-    if (this.requests.has(index)) {
-      if (!this.override) {
-        throw new Error("index exists");
-      }
+    if (timeout) {
+      setTimeout(() => {
+        try {
+          this.reject(index);
+        } catch {
+          // noop
+        }
+      }, timeout);
     }
 
     return new Promise<R>((resolve, reject) => {
       this.requests.set(index, {
+        data,
         resolve,
         reject
       });
@@ -63,6 +81,15 @@ export class AsyncApprover<R = void> {
 
     this.requests.delete(index);
     resolver.reject(new Error("Request rejected"));
+  }
+
+  getData(index: string): T | undefined {
+    const resolver = this.requests.get(index);
+    if (!resolver) {
+      throw new Error("Unknown request index");
+    }
+
+    return resolver.data;
   }
 
   public static isValidIndex(index: string) {

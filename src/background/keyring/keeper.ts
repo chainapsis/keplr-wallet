@@ -33,18 +33,26 @@ export class KeyRingKeeper {
   private readonly keyRing = new KeyRing();
   private path = "";
 
-  private readonly unlockApprover = new AsyncApprover();
+  private readonly unlockApprover = new AsyncApprover({
+    defaultTimeout: 3 * 60 * 1000
+  });
 
   private readonly txBuilderApprover = new AsyncApprover<
+    TxBuilderConfigPrimitiveWithChainId,
     TxBuilderConfigPrimitive
-  >(() => {}, true);
-  private readonly txBuilerConfigs: Map<
-    string,
-    TxBuilderConfigPrimitiveWithChainId
-  > = new Map();
+  >({
+    validateIndex: () =>
+      void (
+        {
+          // noop
+        }
+      ),
+    defaultTimeout: 3 * 60 * 1000
+  });
 
-  private readonly signApprover = new AsyncApprover();
-  private readonly signMessages: Map<string, SignMessage> = new Map();
+  private readonly signApprover = new AsyncApprover<SignMessage>({
+    defaultTimeout: 3 * 60 * 1000
+  });
 
   async enable(): Promise<KeyRingStatus> {
     if (this.keyRing.status === KeyRingStatus.EMPTY) {
@@ -181,8 +189,6 @@ export class KeyRingKeeper {
     const hash = Buffer.from(random).toString("hex");
     const index = config.chainId;
 
-    this.txBuilerConfigs.set(index, config);
-
     if (openPopup) {
       // Open fee window with hash to let the fee page to know that window is requested newly.
       openWindow(
@@ -190,8 +196,7 @@ export class KeyRingKeeper {
       );
     }
 
-    const result = await this.txBuilderApprover.request(index);
-    this.txBuilerConfigs.delete(index);
+    const result = await this.txBuilderApprover.request(index, config);
     if (!result) {
       throw new Error("config is approved, but result config is null");
     }
@@ -199,7 +204,7 @@ export class KeyRingKeeper {
   }
 
   getRequestedTxConfig(chainId: string): TxBuilderConfigPrimitiveWithChainId {
-    const config = this.txBuilerConfigs.get(chainId);
+    const config = this.txBuilderApprover.getData(chainId);
     if (!config) {
       throw new Error("Unknown config request index");
     }
@@ -221,21 +226,18 @@ export class KeyRingKeeper {
     index: string,
     openPopup: boolean
   ): Promise<Uint8Array> {
-    this.signMessages.set(index, { chainId, message });
-
     if (openPopup) {
       openWindow(
         `chrome-extension://${chrome.runtime.id}/popup.html#/sign/${index}?external=true`
       );
     }
 
-    await this.signApprover.request(index);
-    this.signMessages.delete(index);
+    await this.signApprover.request(index, { chainId, message });
     return this.keyRing.sign(this.path, message);
   }
 
   getRequestedMessage(index: string): SignMessage {
-    const message = this.signMessages.get(index);
+    const message = this.signApprover.getData(index);
     if (!message) {
       throw new Error("Unknown sign request index");
     }
