@@ -59,10 +59,6 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
 
   const feePrice = priceStore.getValue("usd", feeCurrency?.coinGeckoId);
 
-  const feeValue = useMemo(() => {
-    return feePrice ? feePrice.value : new Dec(0);
-  }, [feePrice]);
-
   const onConfigInit = useCallback(
     (chainId: string, config: TxBuilderConfig) => {
       chainStore.setChain(chainId);
@@ -171,7 +167,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
                 name="fee"
                 error={errors.fee && errors.fee.message}
                 currency={feeCurrency!}
-                price={feeValue}
+                price={feePrice ? feePrice.value : new Dec(0)}
               />
             </FormContext>
           </div>
