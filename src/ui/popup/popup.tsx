@@ -22,10 +22,31 @@ import { StoreProvider, useStore } from "./stores";
 import { KeyRingStatus } from "./stores/keyring";
 import { SignPage } from "./pages/sign";
 import { FeePage } from "./pages/fee";
+import Modal from "react-modal";
 
 configure({
   enforceActions: "always" // Make mobx to strict mode.
 });
+
+Modal.setAppElement("#app");
+Modal.defaultStyles = {
+  content: {
+    ...Modal.defaultStyles.content,
+    minWidth: "300px",
+    maxWidth: "600px",
+    minHeight: "250px",
+    maxHeight: "500px",
+    left: "50%",
+    right: "auto",
+    top: "50%",
+    bottom: "auto",
+    transform: "translate(-50%, -50%)"
+  },
+  overlay: {
+    zIndex: 1000,
+    ...Modal.defaultStyles.overlay
+  }
+};
 
 const StateRenderer: FunctionComponent<RouteComponentProps> = observer(
   ({ history, location }) => {
