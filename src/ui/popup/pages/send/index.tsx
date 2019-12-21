@@ -63,7 +63,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         memo: ""
       }
     });
-    const { register, handleSubmit, errors, setValue, watch } = formMethods;
+    const {
+      register,
+      handleSubmit,
+      errors,
+      setValue,
+      watch,
+      setError,
+      clearError
+    } = formMethods;
 
     register({ name: "fee" }, { required: "Fee is required" });
 
@@ -98,6 +106,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     }, []);
 
     const fee = watch("fee");
+    const amount = watch("amount");
     const denom = watch("denom");
 
     useEffect(() => {
@@ -131,6 +140,40 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         }
       }
     }, [fee, accountStore.assets, allBalance, setValue, denom]);
+
+    useEffect(() => {
+      const feeAmount = fee ? fee.amount : new Int(0);
+      const currency = getCurrencyFromDenom(denom);
+      try {
+        if (currency && amount) {
+          let find = false;
+          for (const balacne of accountStore.assets) {
+            if (balacne.denom === currency.coinMinimalDenom) {
+              let precision = new Dec(1);
+              for (let i = 0; i < currency.coinDecimals; i++) {
+                precision = precision.mul(new Dec(10));
+              }
+
+              const amountInt = new Dec(amount).mul(precision).truncate();
+              if (amountInt.add(feeAmount).gt(balacne.amount)) {
+                setError("amount", "not-enough-fund", "Not enough fund");
+              } else {
+                clearError("amount");
+              }
+              find = true;
+              break;
+            }
+          }
+          if (!find) {
+            clearError("amount");
+          }
+        } else {
+          clearError("amount");
+        }
+      } catch {
+        clearError("amount");
+      }
+    }, [accountStore.assets, amount, clearError, denom, fee, setError]);
 
     return (
       <HeaderLayout
