@@ -1,5 +1,12 @@
 .input {
   box-shadow: none !important;
+
+  // Disable [disabled] effect.
+  &[disabled] {
+    background-color: white;
+    border-color: #dbdbdb;
+    color: #363636;
+  }
 }
 
 :global(.field) {

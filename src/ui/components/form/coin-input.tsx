@@ -4,13 +4,16 @@ import { Currency } from "../../../chain-info";
 
 import classnames from "classnames";
 import style from "./input.module.scss";
+import styleCoinInput from "./coin-input.module.scss";
 
 import { getCurrencyFromDenom } from "../../../common/currency";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { ElementLike } from "react-hook-form/dist/types";
+import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
 export interface CoinInputProps {
   currencies: Currency[];
+  balances?: Coin[];
 
   className?: string;
   color?: "primary" | "info" | "success" | "warning" | "danger";
@@ -26,13 +29,34 @@ export interface CoinInputProps {
     name: string;
     ref: React.RefObject<HTMLSelectElement> | ElementLike | null;
   };
+
+  onChangeAllBanace?: (allBalance: boolean) => void;
+}
+
+interface DecCoin {
+  dec: Dec;
+  decimals: number;
+  denom: string;
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = props => {
-  const { currencies, className, color, label, error, input, select } = props;
+  const {
+    currencies,
+    balances,
+    className,
+    color,
+    label,
+    error,
+    input,
+    select,
+    onChangeAllBanace
+  } = props;
 
   const [currency, setCurrency] = useState<Currency | undefined>();
   const [step, setStep] = useState<string | undefined>();
+  const [balance, setBalance] = useState<DecCoin | undefined>();
+
+  const [allBalance, setAllBalance] = useState(false);
 
   useEffect(() => {
     if (currencies.length > 0) {
@@ -40,6 +64,33 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (balances && currency) {
+      const decCoin: DecCoin = {
+        dec: new Dec(0),
+        decimals: currency.coinDecimals,
+        denom: currency.coinDenom
+      };
+
+      for (const coin of balances) {
+        if (coin.denom === currency.coinMinimalDenom) {
+          let precision = new Dec(1);
+          for (let i = 0; i < currency.coinDecimals; i++) {
+            precision = precision.mul(new Dec(10));
+          }
+
+          let dec = new Dec(coin.amount);
+          dec = dec.quoTruncate(precision);
+
+          decCoin.dec = dec;
+          break;
+        }
+      }
+
+      setBalance(decCoin);
+    }
+  }, [currency, balances]);
 
   useEffect(() => {
     if (currency) {
@@ -53,11 +104,37 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
     }
   }, [currency]);
 
+  const canAllBalance =
+    onChangeAllBanace && balance && balance.dec.gt(new Dec(0));
+
   return (
     <div className="fields">
       {label ? (
         <div className="field for-label">
-          <label className="label">{label}</label>
+          <label className="label">
+            {label}
+            {balances ? (
+              <div
+                className={classnames(styleCoinInput.balance, {
+                  [styleCoinInput.clickable]: canAllBalance,
+                  [styleCoinInput.clicked]: allBalance
+                })}
+                onClick={() => {
+                  if (canAllBalance && onChangeAllBanace) {
+                    const prev = allBalance;
+                    setAllBalance(!prev);
+                    onChangeAllBanace(!prev);
+                  }
+                }}
+              >
+                {balance
+                  ? `Balance: ${balance.dec.toString(balance.decimals)} ${
+                      balance.denom
+                    }`
+                  : "?"}
+              </div>
+            ) : null}
+          </label>
         </div>
       ) : null}
 
@@ -79,6 +156,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
             )}
             name={input.name}
             ref={input.ref as any}
+            disabled={allBalance}
           />
           {error ? (
             <span className="icon is-small is-right">
@@ -89,6 +167,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
         <p className="control">
           <span className="select">
             <select
+              className={styleCoinInput.select}
               value={currency ? currency.coinDenom : ""}
               onChange={e => {
                 const currency = getCurrencyFromDenom(e.target.value);
@@ -98,6 +177,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
               }}
               name={select.name}
               ref={select.ref as any}
+              disabled={allBalance}
             >
               {currencies.map((currency, i) => {
                 return (

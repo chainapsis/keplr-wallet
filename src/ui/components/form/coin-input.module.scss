@@ -1,0 +1,30 @@
+@import "../../../palette";
+
+.balance {
+  float: right;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 26px;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      color: $primary;
+    }
+
+    &.clicked {
+      color: $primary;
+      font-weight: bold;
+    }
+  }
+}
+
+.select {
+  // Disable [disabled] effect.
+  &[disabled] {
+    background-color: white !important;
+    border-color: #dbdbdb !important;
+    color: #363636 !important;
+  }
+}

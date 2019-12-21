@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import {
   FeeButtons,
   CoinInput,
@@ -27,12 +33,17 @@ import { observer } from "mobx-react";
 
 import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
-import { getCurrencies, getCurrency } from "../../../../common/currency";
+import {
+  getCurrencies,
+  getCurrency,
+  getCurrencyFromDenom
+} from "../../../../common/currency";
 
 import style from "./style.module.scss";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { useNotification } from "../../../components/notification";
+import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 interface FormData {
   recipient: string;
@@ -52,7 +63,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         memo: ""
       }
     });
-    const { register, handleSubmit, errors } = formMethods;
+    const { register, handleSubmit, errors, setValue, watch } = formMethods;
 
     register({ name: "fee" }, { required: "Fee is required" });
 
@@ -79,6 +90,47 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     const feeValue = useMemo(() => {
       return feePrice ? feePrice.value : new Dec(0);
     }, [feePrice]);
+
+    const [allBalance, setAllBalance] = useState(false);
+
+    const onChangeAllBalance = useCallback((allBalance: boolean) => {
+      setAllBalance(allBalance);
+    }, []);
+
+    const fee = watch("fee");
+    const denom = watch("denom");
+
+    useEffect(() => {
+      if (allBalance) {
+        setValue("amount", "");
+
+        const currency = getCurrencyFromDenom(denom);
+        if (fee && denom && currency) {
+          let allAmount = new Int(0);
+          for (const balacne of accountStore.assets) {
+            if (balacne.denom === currency.coinMinimalDenom) {
+              allAmount = balacne.amount;
+              break;
+            }
+          }
+
+          if (allAmount.gte(fee.amount)) {
+            allAmount = allAmount.sub(fee.amount);
+
+            const dec = new Dec(allAmount);
+            let precision = new Dec(1);
+            for (let i = 0; i < currency.coinDecimals; i++) {
+              precision = precision.mul(new Dec(10));
+            }
+
+            setValue(
+              "amount",
+              dec.quoTruncate(precision).toString(currency.coinDecimals)
+            );
+          }
+        }
+      }
+    }, [fee, accountStore.assets, allBalance, setValue, denom]);
 
     return (
       <HeaderLayout
@@ -164,6 +216,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               <CoinInput
                 currencies={getCurrencies(chainStore.chainInfo.currencies)}
                 label="Amount"
+                balances={accountStore.assets}
+                onChangeAllBanace={onChangeAllBalance}
                 error={
                   errors.amount &&
                   errors.amount.message &&
