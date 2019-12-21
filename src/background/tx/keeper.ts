@@ -75,4 +75,8 @@ export class BackgroundTxKeeper {
       });
     }
   }
+
+  checkAccessOrigin(chainId: string, origin: string) {
+    this.keyRingKeeper.checkAccessOrigin(chainId, origin);
+  }
 }

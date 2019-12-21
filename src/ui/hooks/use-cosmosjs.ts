@@ -172,7 +172,8 @@ export const useCosmosJS = <R extends Rest = Rest>(
             const msg = RequestBackgroundTxMsg.create(
               api.context.get("chainId"),
               Buffer.from(bz).toString("hex"),
-              mode
+              mode,
+              window.location.origin
             );
             await sendMessage(BACKGROUND_PORT, msg);
           }
