@@ -219,10 +219,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 balances={accountStore.assets}
                 onChangeAllBanace={onChangeAllBalance}
                 error={
-                  errors.amount &&
-                  errors.amount.message &&
-                  errors.denom &&
-                  errors.denom.message
+                  (errors.amount && errors.amount.message) ||
+                  (errors.denom && errors.denom.message)
                 }
                 input={{
                   name: "amount",
