@@ -59,11 +59,24 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
   const [allBalance, setAllBalance] = useState(false);
 
   useEffect(() => {
-    if (currencies.length > 0) {
-      setCurrency(currencies[0]);
+    // If curreny currency is undefined, or new currencies don't have the matched current currency,
+    // set currency as the first of new currencies.
+    if (!currency) {
+      if (currencies.length > 0) {
+        setCurrency(currencies[0]);
+      }
+    } else {
+      const find = currencies.find(c => {
+        return c.coinMinimalDenom === currency.coinMinimalDenom;
+      });
+      if (!find) {
+        if (currencies.length > 0) {
+          setCurrency(currencies[0]);
+        }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currencies]);
 
   useEffect(() => {
     if (balances && currency) {
