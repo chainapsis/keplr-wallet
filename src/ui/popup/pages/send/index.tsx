@@ -185,51 +185,62 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       >
         <form
           className={style.formContainer}
-          onSubmit={handleSubmit(async (data: FormData) => {
-            const coin = CoinUtils.getCoinFromDecimals(data.amount, data.denom);
+          onSubmit={e => {
+            // React form hook doesn't block submitting when error is delivered outside.
+            // So, jsut check if errors exists manually, and if it exists, do nothing.
+            if (errors.amount && errors.amount.message) {
+              e.preventDefault();
+              return;
+            }
+            handleSubmit(async (data: FormData) => {
+              const coin = CoinUtils.getCoinFromDecimals(
+                data.amount,
+                data.denom
+              );
 
-            await useBech32ConfigPromise(
-              chainStore.chainInfo.bech32Config,
-              async () => {
-                const msg = new MsgSend(
-                  AccAddress.fromBech32(accountStore.bech32Address),
-                  AccAddress.fromBech32(data.recipient),
-                  [coin]
-                );
-
-                const config: TxBuilderConfig = {
-                  gas: bigInteger(60000),
-                  memo: data.memo,
-                  fee: data.fee as Coin
-                };
-
-                if (cosmosJS.sendMsgs) {
-                  await cosmosJS.sendMsgs(
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    [msg!],
-                    config,
-                    () => {
-                      history.replace("/");
-                    },
-                    e => {
-                      history.replace("/");
-                      notification.push({
-                        type: "danger",
-                        content: e.toString(),
-                        duration: 5,
-                        canDelete: true,
-                        placement: "top-center",
-                        transition: {
-                          duration: 0.25
-                        }
-                      });
-                    },
-                    "commit"
+              await useBech32ConfigPromise(
+                chainStore.chainInfo.bech32Config,
+                async () => {
+                  const msg = new MsgSend(
+                    AccAddress.fromBech32(accountStore.bech32Address),
+                    AccAddress.fromBech32(data.recipient),
+                    [coin]
                   );
+
+                  const config: TxBuilderConfig = {
+                    gas: bigInteger(60000),
+                    memo: data.memo,
+                    fee: data.fee as Coin
+                  };
+
+                  if (cosmosJS.sendMsgs) {
+                    await cosmosJS.sendMsgs(
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      [msg!],
+                      config,
+                      () => {
+                        history.replace("/");
+                      },
+                      e => {
+                        history.replace("/");
+                        notification.push({
+                          type: "danger",
+                          content: e.toString(),
+                          duration: 5,
+                          canDelete: true,
+                          placement: "top-center",
+                          transition: {
+                            duration: 0.25
+                          }
+                        });
+                      },
+                      "commit"
+                    );
+                  }
                 }
-              }
-            );
-          })}
+              );
+            })(e);
+          }}
         >
           <div className={style.formInnerContainer}>
             <div>
