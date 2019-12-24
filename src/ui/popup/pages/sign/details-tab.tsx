@@ -16,8 +16,6 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
   ({ message }) => {
     const { priceStore } = useStore();
 
-    console.log(priceStore.getValue("usd", "cosmos")?.value.toString());
-
     const [fee, setFee] = useState<Coin[]>([]);
     const [feeFiat, setFeeFiat] = useState(new Dec(0));
     const [memo, setMemo] = useState("");
