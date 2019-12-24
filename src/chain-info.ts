@@ -45,7 +45,6 @@ export interface ChainInfo {
    * You can get actual currency information from Currencies.
    */
   readonly nativeCurrency: string;
-  readonly coinIconUrl: string;
   readonly walletUrl: string;
   readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;
@@ -66,7 +65,6 @@ export const NativeChainInfos: ChainInfo[] = [
     chainId: "cosmoshub-3",
     chainName: "Cosmos",
     nativeCurrency: "atom",
-    coinIconUrl: require("assets/atom-icon.png"),
     walletUrl:
       process.env.NODE_ENV === "production"
         ? ""
@@ -86,7 +84,6 @@ export const NativeChainInfos: ChainInfo[] = [
     chainId: "kava-2",
     chainName: "Kava",
     nativeCurrency: "kava",
-    coinIconUrl: require("assets/kava-icon.png"),
     walletUrl:
       process.env.NODE_ENV === "production"
         ? ""
