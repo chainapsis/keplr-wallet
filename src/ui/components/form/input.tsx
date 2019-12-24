@@ -4,7 +4,7 @@ import classnames from "classnames";
 import style from "./input.module.scss";
 
 export interface InputProps {
-  type: "text" | "password" | "email" | "tel";
+  type: "text" | "password" | "email" | "tel" | "number";
   color?: "primary" | "info" | "success" | "warning" | "danger";
   label?: string;
   leftIconRender?: FunctionComponent;

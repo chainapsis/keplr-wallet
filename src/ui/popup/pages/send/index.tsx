@@ -9,7 +9,8 @@ import {
   FeeButtons,
   CoinInput,
   Input,
-  TextArea
+  TextArea,
+  DefaultGasPriceStep
 } from "../../../components/form";
 import { RouteComponentProps } from "react-router-dom";
 import { useStore } from "../../stores";
@@ -88,6 +89,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider, {
       useBackgroundTx: true
     });
+
+    const [gasForSendMsg] = useState(60000);
 
     const feeCurrency = useMemo(() => {
       return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
@@ -208,7 +211,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   );
 
                   const config: TxBuilderConfig = {
-                    gas: bigInteger(60000),
+                    gas: bigInteger(gasForSendMsg),
                     memo: data.memo,
                     fee: data.fee as Coin
                   };
@@ -304,6 +307,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   error={errors.fee && errors.fee.message}
                   currency={feeCurrency!}
                   price={feeValue}
+                  gasPriceStep={DefaultGasPriceStep}
+                  gas={gasForSendMsg}
                 />
               </FormContext>
             </div>

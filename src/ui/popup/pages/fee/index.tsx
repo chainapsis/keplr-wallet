@@ -7,7 +7,12 @@ import React, {
 
 import { HeaderLayout } from "../../layouts/header-layout";
 
-import { FeeButtons, Input, TextArea } from "../../../components/form";
+import {
+  DefaultGasPriceStep,
+  FeeButtons,
+  Input,
+  TextArea
+} from "../../../components/form";
 import { Button } from "../../../components/button";
 
 import { RouteComponentProps } from "react-router";
@@ -49,9 +54,15 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
       memo: ""
     }
   });
-  const { register, handleSubmit, setValue, errors } = formMethods;
+  const { register, handleSubmit, setValue, errors, watch } = formMethods;
 
   register({ name: "fee" }, { required: "Fee is required" });
+
+  const gas = watch("gas");
+  let gasInt = parseInt(gas);
+  if (Number.isNaN(gasInt)) {
+    gasInt = 0;
+  }
 
   const feeCurrency = useMemo(() => {
     return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
@@ -138,7 +149,8 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
         <div className={style.formInnerContainer}>
           <div>
             <Input
-              type="text"
+              type="number"
+              step="1"
               label="Gas"
               name="gas"
               error={errors.gas && errors.gas.message}
@@ -168,6 +180,8 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
                 error={errors.fee && errors.fee.message}
                 currency={feeCurrency!}
                 price={feePrice ? feePrice.value : new Dec(0)}
+                gasPriceStep={DefaultGasPriceStep}
+                gas={gasInt}
               />
             </FormContext>
           </div>

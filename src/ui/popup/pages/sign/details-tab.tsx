@@ -11,6 +11,7 @@ import styleDetailsTab from "./details-tab.module.scss";
 import classnames from "classnames";
 
 import { MessageObj, renderMessage } from "./messages";
+import { DecUtils } from "../../../../common/dec-utils";
 
 export const DetailsTab: FunctionComponent<{ message: string }> = observer(
   ({ message }) => {
@@ -57,14 +58,6 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
         }
       }
 
-      let precision = new Dec(1);
-      for (let i = 0; i < 4; i++) {
-        precision = precision.mul(new Dec(10));
-      }
-      price = price.mul(precision);
-      price = new Dec(price.roundUp());
-      price = price.quoTruncate(precision);
-
       setFeeFiat(price);
     }, [fee, priceStore]);
 
@@ -96,13 +89,15 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
               {fee
                 .map(fee => {
                   const parsed = CoinUtils.parseDecAndDenomFromCoin(fee);
-                  return `${parsed.amount} ${parsed.denom}`;
+                  return `${DecUtils.removeTrailingZerosFromDecStr(
+                    parsed.amount
+                  )} ${parsed.denom}`;
                 })
                 .join(",")}
             </div>
-            <div className={styleDetailsTab.fiat}>{`$${feeFiat.toString(
-              4
-            )}`}</div>
+            <div
+              className={styleDetailsTab.fiat}
+            >{`$${DecUtils.decToStrWithoutTrailingZeros(feeFiat)}`}</div>
           </div>
         </div>
         {memo ? (
