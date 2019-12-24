@@ -17,10 +17,11 @@ describe("Test shrink decimals", () => {
     shrinked = CoinUtils.shrinkDecimals(new Int(12345678), 6, 2, 4);
     assert.strictEqual(shrinked, "12.345");
 
+    // TODO: Things below fail in European form. Test format should be changed from country to country.
     shrinked = CoinUtils.shrinkDecimals(new Int(123456789123), 6, 2, 4);
-    assert.strictEqual(shrinked, "123456.78");
+    assert.strictEqual(shrinked, "123,456.78");
 
     shrinked = CoinUtils.shrinkDecimals(new Int(123456789123), 6, 0, 4);
-    assert.strictEqual(shrinked, "123456");
+    assert.strictEqual(shrinked, "123,456");
   });
 });

@@ -85,8 +85,13 @@ export class CoinUtils {
 
     const fractionStr = fraction.toString(decimals).replace("0.", "");
 
+    // Get dot from locale
+    const dot = (1.1).toLocaleString()[1];
+
     return (
-      integer.toString() + (fractionStr.length > 0 ? "." : "") + fractionStr
+      parseInt(integer.toString()).toLocaleString() +
+      (fractionStr.length > 0 ? dot : "") +
+      fractionStr
     );
   }
 }
