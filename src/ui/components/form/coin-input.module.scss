@@ -5,17 +5,18 @@
   font-size: 14px;
   font-weight: normal;
   line-height: 26px;
+  color: #555555;
 
   &.clickable {
     cursor: pointer;
+    text-decoration: underline;
 
     &:hover {
-      color: $primary;
+      color: black;
     }
 
     &.clicked {
-      color: $primary;
-      font-weight: bold;
+      color: black;
     }
   }
 }
