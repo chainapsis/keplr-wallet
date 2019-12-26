@@ -11,6 +11,10 @@ $radius: 6px;
 $radius-large: 10px;
 $dropdown-item-active-background-color: $primary;
 
+@import url("https://fonts.googleapis.com/css?family=Noto+Sans&display=swap");
+
+$family-sans-serif: "Noto Sans", sans-serif;
+
 @import "~bulma/bulma";
 
 * {
@@ -29,9 +33,14 @@ html {
 }
 
 .card {
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: none;
+  color: black;
+
+  &:not(:first-of-type) {
+    margin-top: 14px;
+  }
 }
 
 input:-webkit-autofill,

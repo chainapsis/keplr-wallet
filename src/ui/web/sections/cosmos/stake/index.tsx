@@ -1,156 +1,70 @@
-import React, { FunctionComponent, useCallback, useState } from "react";
+import React, { FunctionComponent } from "react";
 
 import { Card } from "../../../components/card";
-import { Button } from "../../../../components/button";
 
 import style from "./style.module.scss";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { Currency } from "../../../../../chain-info";
 import { getCurrency } from "../../../../../common/currency";
-import { useValidator, Validator } from "../../../../hooks/use-validator";
+import { useValidator } from "../../../../hooks/use-validator";
 
-import Modal from "react-modal";
-
-import classnames from "classnames";
-import { StakeModal } from "./modal";
-
-export const ValidatorDetail: FunctionComponent<{
-  validator: Validator;
-  onStakeRequest: (validator: Validator) => void;
-}> = ({ validator, onStakeRequest }) => {
-  return (
-    <div className={style.detail}>
-      <div className={style.item}>
-        <div className={style.label}>Website</div>
-        <div>
-          <a
-            href={
-              validator.description.website.indexOf("http") !== 0
-                ? "https://" + validator.description.website
-                : validator.description.website
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {validator.description.website}
-          </a>
-        </div>
-      </div>
-      <div className={style.item}>
-        <div className={style.label}>Details</div>
-        <div>{validator.description.details}</div>
-      </div>
-      <div className={style.buttons}>
-        <Button
-          size="medium"
-          color="primary"
-          onClick={() => onStakeRequest(validator)}
-        >
-          Stake
-        </Button>
-      </div>
-    </div>
-  );
-};
+import { useDelegatingInfos } from "../../../../hooks/use-delegating-info";
+import { useCosmosJS } from "../../../../hooks";
+import { TopValidators } from "./top-validators";
+import { Delegations } from "./delegations";
+import { useUnbondingInfos } from "../../../../hooks/use-unbonding-info";
+import { useReward } from "../../../../hooks/use-reward";
 
 export const StakeSection: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
 
-  const [detailOpened, setDetailOpened] = useState(-1);
-  const [requestStake, setRequestStake] = useState<Validator | undefined>();
+  const cosmosJS = useCosmosJS(
+    chainStore.chainInfo,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    window.cosmosJSWalletProvider!
+  );
+
   const validator = useValidator(chainStore.chainInfo.rest);
+  const { delegateInfos } = useDelegatingInfos(
+    chainStore.chainInfo.rest,
+    cosmosJS.addresses.length > 0 ? cosmosJS.addresses[0] : ""
+  );
+  const { unbondInfos } = useUnbondingInfos(
+    chainStore.chainInfo.rest,
+    cosmosJS.addresses.length > 0 ? cosmosJS.addresses[0] : ""
+  );
+  const { rewards } = useReward(
+    chainStore.chainInfo.rest,
+    cosmosJS.addresses.length > 0 ? cosmosJS.addresses[0] : ""
+  );
 
   const nativeCurrency = getCurrency(
     chainStore.chainInfo.nativeCurrency
   ) as Currency;
-  let precision = new Dec(1);
-  for (let i = 0; i < nativeCurrency.coinDecimals; i++) {
-    precision = precision.mul(new Dec(10));
-  }
-
-  const onStakeRequest = useCallback<(validator: Validator) => void>(
-    validator => {
-      setRequestStake(validator);
-    },
-    []
-  );
 
   return (
     <div className={style.container}>
-      <Modal
-        isOpen={requestStake !== undefined}
-        onRequestClose={() => {
-          setRequestStake(undefined);
-        }}
-      >
-        {requestStake ? <StakeModal validator={requestStake} /> : null}
-      </Modal>
-      <Card style={{ overflowX: "auto" }}>
-        <div className={style.rowTop}>
-          <div className={style.col} id="rank">
-            Rank
-          </div>
-          <div className={style.col} id="validator">
-            Validator
-          </div>
-          <div className={style.col} id="voting-power">
-            Voting Power
-          </div>
-          <div className={style.col} id="commission">
-            Commission
-          </div>
-        </div>
-        {validator.validators.map((validator, i) => (
-          <div key={i.toString()}>
-            <div
-              className={style.row}
-              onClick={() => {
-                if (i === detailOpened) {
-                  setDetailOpened(-1);
-                } else {
-                  setDetailOpened(i);
-                }
-              }}
-            >
-              <div className={style.col} id="rank">
-                {(i + 1).toString()}
-              </div>
-              <div className={style.col} id="validator">
-                <img
-                  src={validator.thumbnail ? validator.thumbnail : ""}
-                  className={style.thumbnail}
-                />
-                <div>{validator.description.moniker}</div>
-              </div>
-              <div className={style.col} id="voting-power">
-                {parseInt(
-                  new Dec(validator.delegator_shares)
-                    .quoTruncate(precision)
-                    .truncate()
-                    .toString()
-                ).toLocaleString()}
-              </div>
-              <div className={style.col} id="commission">
-                {new Dec(validator.commission.commission_rates.rate)
-                  .mulTruncate(new Dec(100))
-                  .truncate()
-                  .toString() + "%"}
-              </div>
-            </div>
-            <div
-              className={classnames(style.collapse, {
-                open: i === detailOpened
-              })}
-            >
-              <ValidatorDetail
-                validator={validator}
-                onStakeRequest={onStakeRequest}
-              />
-            </div>
-          </div>
-        ))}
+      {delegateInfos.length > 0 ? (
+        <Card>
+          <div className={style.title}>My validators</div>
+          <Delegations
+            validators={validator.validators}
+            delegations={delegateInfos}
+            unbondingDelegations={unbondInfos}
+            rewards={rewards}
+            currency={nativeCurrency}
+            cosmosJS={cosmosJS}
+          />
+        </Card>
+      ) : null}
+      <Card>
+        <div className={style.title}>Validators</div>
+        <TopValidators
+          validators={validator.validators}
+          currency={nativeCurrency}
+          cosmosJS={cosmosJS}
+        />
       </Card>
     </div>
   );

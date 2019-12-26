@@ -25,6 +25,21 @@ import { BACKGROUND_PORT } from "../../common/message/constant";
 
 const Buffer = require("buffer/").Buffer;
 
+export type SendMsgs = (
+  msgs: Msg[],
+  config: TxBuilderConfig,
+  onSuccess?: () => void,
+  onFail?: (e: Error) => void,
+  mode?: "commit" | "sync" | "async"
+) => Promise<void>;
+
+export interface CosmosJsHook {
+  loading: boolean;
+  error?: Error;
+  addresses: string[];
+  sendMsgs?: SendMsgs;
+}
+
 /**
  * useCosmosJS hook returns the object related to cosmosjs api.
  * sendMsgs in returned value can send msgs asynchronously safely.
@@ -41,7 +56,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
     registerCodec?: (codec: Codec) => void;
     useBackgroundTx?: boolean;
   } = {}
-) => {
+): CosmosJsHook => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
@@ -64,14 +79,6 @@ export const useCosmosJS = <R extends Rest = Rest>(
       }),
     [opts?.registerCodec]
   );
-
-  type SendMsgs = (
-    msgs: Msg[],
-    config: TxBuilderConfig,
-    onSuccess?: () => void,
-    onFail?: (e: Error) => void,
-    mode?: "commit" | "sync" | "async"
-  ) => Promise<void>;
 
   const [addresses, setAddresses] = useState<string[]>([]);
   const [sendMsgs, setSendMsgs] = useState<SendMsgs | undefined>(undefined);

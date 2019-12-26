@@ -39,6 +39,7 @@
     "react-dom": "^16.9.0",
     "react-hook-form": "^3.29.3",
     "react-modal": "^3.11.1",
+    "react-moment": "^0.9.7",
     "react-router-dom": "^5.0.1",
     "scrypt-js": "^2.0.4",
     "scryptsy": "^2.1.0",

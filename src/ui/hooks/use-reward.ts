@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useFetch } from "./use-fetch";
 
-interface CoinPrimitive {
+export interface CoinPrimitive {
   denom: string;
   amount: string;
 }
@@ -14,7 +14,7 @@ interface Result {
   };
 }
 
-interface DelegatorReward {
+export interface DelegatorReward {
   validator_address: string;
   reward?: CoinPrimitive[];
 }
