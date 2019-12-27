@@ -4,8 +4,6 @@ import React, { FunctionComponent } from "react";
 import { Link } from "react-router-dom";
 import classnames from "classnames";
 
-import { UnderConstructionSection } from "./sections/under-construction";
-import { SendSection } from "./sections/cosmos/send";
 import { StakeSection } from "./sections/cosmos/stake";
 
 export interface Menu {
@@ -34,41 +32,11 @@ export const SupportedChainWalletUIs: WalletUI[] = [
       {
         menuItemRender: ({ active, to }) => (
           <Link className={classnames({ "is-active": active })} to={to}>
-            <i className="fas fa-tachometer-alt" />
-            Dashboard
-          </Link>
-        ),
-        sectionRender: () => <UnderConstructionSection />
-      },
-      {
-        path: "send",
-        menuItemRender: ({ active, to }) => (
-          <Link className={classnames({ "is-active": active })} to={to}>
-            <i className="fas fa-exchange-alt" />
-            Send
-          </Link>
-        ),
-        sectionRender: () => <SendSection />
-      },
-      {
-        path: "stake",
-        menuItemRender: ({ active, to }) => (
-          <Link className={classnames({ "is-active": active })} to={to}>
             <i className="fas fa-layer-group" />
             Stake
           </Link>
         ),
         sectionRender: () => <StakeSection />
-      },
-      {
-        path: "governance",
-        menuItemRender: ({ active, to }) => (
-          <Link className={classnames({ "is-active": active })} to={to}>
-            <i className="fas fa-vote-yea" />
-            Governance
-          </Link>
-        ),
-        sectionRender: () => <UnderConstructionSection />
       }
     ]
   },
@@ -76,26 +44,6 @@ export const SupportedChainWalletUIs: WalletUI[] = [
     chainId: "kava-2",
     menus: [
       {
-        menuItemRender: ({ active, to }) => (
-          <Link className={classnames({ "is-active": active })} to={to}>
-            <i className="fas fa-tachometer-alt" />
-            Dashboard
-          </Link>
-        ),
-        sectionRender: () => <UnderConstructionSection />
-      },
-      {
-        path: "send",
-        menuItemRender: ({ active, to }) => (
-          <Link className={classnames({ "is-active": active })} to={to}>
-            <i className="fas fa-exchange-alt" />
-            Send
-          </Link>
-        ),
-        sectionRender: () => <SendSection />
-      },
-      {
-        path: "stake",
         menuItemRender: ({ active, to }) => (
           <Link className={classnames({ "is-active": active })} to={to}>
             <i className="fas fa-layer-group" />
