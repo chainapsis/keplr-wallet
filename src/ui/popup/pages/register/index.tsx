@@ -18,6 +18,7 @@ enum RegisterState {
 
 export const RegisterPage: FunctionComponent = observer(() => {
   const [state, setState] = useState<RegisterState>(RegisterState.INIT);
+  const [accountIsCreating, setAccountIsCreating] = useState(false);
   const [words, setWords] = useState("");
   const [password, setPassword] = useState("");
 
@@ -25,8 +26,13 @@ export const RegisterPage: FunctionComponent = observer(() => {
 
   const register = useCallback(
     async (words: string, password: string) => {
-      await keyRingStore.createKey(words, password);
-      await keyRingStore.save();
+      setAccountIsCreating(true);
+      try {
+        await keyRingStore.createKey(words, password);
+        await keyRingStore.save();
+      } finally {
+        setAccountIsCreating(false);
+      }
     },
     [keyRingStore]
   );
@@ -61,13 +67,25 @@ export const RegisterPage: FunctionComponent = observer(() => {
         />
       ) : null}
       {state === RegisterState.REGISTER ? (
-        <RegisterInPage onRegister={onRegister} isRecover={false} />
+        <RegisterInPage
+          onRegister={onRegister}
+          isRecover={false}
+          isLoading={accountIsCreating}
+        />
       ) : null}
       {state === RegisterState.RECOVER ? (
-        <RegisterInPage onRegister={onRegister} isRecover={true} />
+        <RegisterInPage
+          onRegister={onRegister}
+          isRecover={true}
+          isLoading={accountIsCreating}
+        />
       ) : null}
       {state === RegisterState.VERIFY ? (
-        <VerifyInPage words={words} onVerify={onVerify} />
+        <VerifyInPage
+          words={words}
+          onVerify={onVerify}
+          isLoading={accountIsCreating}
+        />
       ) : null}
     </EmptyLayout>
   );

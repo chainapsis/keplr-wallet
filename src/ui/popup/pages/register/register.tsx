@@ -21,6 +21,7 @@ interface FormData {
 export const RegisterInPage: FunctionComponent<{
   onRegister: (words: string, password: string, recovered: boolean) => void;
   isRecover: boolean;
+  isLoading: boolean;
 }> = props => {
   const { isRecover } = props;
   const { register, handleSubmit, setValue, getValues, errors } = useForm<
@@ -117,6 +118,7 @@ export const RegisterInPage: FunctionComponent<{
           color="primary"
           type="submit"
           size="medium"
+          loading={props.isLoading}
         >
           Next
         </Button>

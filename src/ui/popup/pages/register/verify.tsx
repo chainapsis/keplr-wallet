@@ -6,6 +6,7 @@ import { Button } from "../../../components/button";
 export const VerifyInPage: FunctionComponent<{
   words: string;
   onVerify: () => void;
+  isLoading: boolean;
 }> = props => {
   const wordsSlice = useMemo(() => {
     const words = props.words.split(" ");
@@ -90,6 +91,7 @@ export const VerifyInPage: FunctionComponent<{
         onClick={() => {
           props.onVerify();
         }}
+        loading={props.isLoading}
       >
         Register
       </Button>
