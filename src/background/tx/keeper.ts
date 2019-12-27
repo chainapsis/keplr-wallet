@@ -10,6 +10,19 @@ import {
 
 const Buffer = require("buffer/").Buffer;
 
+interface CosmosSdkError {
+  codespace: string;
+  code: number;
+  message: string;
+}
+
+interface ABCIMessageLog {
+  msg_index: number;
+  success: boolean;
+  log: string;
+  // Events StringEvents
+}
+
 export class BackgroundTxKeeper {
   constructor(private keyRingKeeper: KeyRingKeeper) {}
 
@@ -70,8 +83,47 @@ export class BackgroundTxKeeper {
       new Notification("Tx succeeds");
     } catch (e) {
       console.log(e);
+      let message = e.message;
+
+      // Tendermint rpc error.
+      const regResult = /code:\s*(-?\d+),\s*message:\s*(.+),\sdata:\s(.+)/g.exec(
+        e.message
+      );
+      if (regResult && regResult.length === 4) {
+        // If error is from tendermint
+        message = regResult[3];
+      }
+
+      try {
+        // Cosmos-sdk error in ante handler
+        const sdkErr: CosmosSdkError = JSON.parse(e.message);
+        if (sdkErr?.message) {
+          message = sdkErr.message;
+        }
+      } catch {
+        // noop
+      }
+
+      try {
+        // Cosmos-sdk error in processing message
+        const abciMessageLogs: ABCIMessageLog[] = JSON.parse(e.message);
+        if (abciMessageLogs && abciMessageLogs.length > 0) {
+          for (const abciMessageLog of abciMessageLogs) {
+            if (!abciMessageLog.success) {
+              const sdkErr: CosmosSdkError = JSON.parse(abciMessageLog.log);
+              if (sdkErr?.message) {
+                message = sdkErr.message;
+                break;
+              }
+            }
+          }
+        }
+      } catch {
+        // noop
+      }
+
       new Notification("Tx failed", {
-        body: e.message
+        body: message
       });
     }
   }
