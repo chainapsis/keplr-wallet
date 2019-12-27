@@ -138,7 +138,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
       config: TxBuilderConfig,
       onSuccess?: () => void,
       onFail?: (e: Error) => void,
-      mode: "commit" | "sync" | "async" = "sync"
+      mode: "commit" | "sync" | "async" = "commit"
     ) => {
       if (isSubscribed) {
         setLoading(true);
@@ -210,7 +210,13 @@ export const useCosmosJS = <R extends Rest = Rest>(
     return () => {
       isSubscribed = false;
     };
-  }, [chainInfo, walletProvider, memorizedRestFactory, memorizedRegisterCodec]);
+  }, [
+    chainInfo,
+    walletProvider,
+    memorizedRestFactory,
+    memorizedRegisterCodec,
+    opts.useBackgroundTx
+  ]);
 
   return {
     loading,
