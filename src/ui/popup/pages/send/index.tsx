@@ -167,8 +167,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               break;
             }
           }
+
           if (!find) {
-            clearError("amount");
+            setError("amount", "not-enough-fund", "Not enough fund");
           }
         } else {
           clearError("amount");
