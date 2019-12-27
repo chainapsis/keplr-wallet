@@ -17,6 +17,7 @@ import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
 import bigInteger from "big-integer";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { useNotification } from "../../../../components/notification";
 import { getCurrencies, getCurrency } from "../../../../../common/currency";
 import { useCosmosJS } from "../../../../hooks";
 import { CoinUtils } from "../../../../../common/coin-utils";
@@ -45,6 +46,8 @@ export const SendSection: FunctionComponent = observer(() => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     window.cosmosJSWalletProvider!
   );
+
+  const notification = useNotification();
 
   const clearForm = () => {
     setValue("recipient", "");
@@ -91,8 +94,18 @@ export const SendSection: FunctionComponent = observer(() => {
                           () => {
                             clearForm();
                           },
-                          () => {
+                          (e: Error) => {
                             clearForm();
+                            notification.push({
+                              type: "danger",
+                              content: e.toString(),
+                              duration: 5,
+                              canDelete: true,
+                              placement: "top-right",
+                              transition: {
+                                duration: 0.25
+                              }
+                            });
                           },
                           "commit"
                         );

@@ -16,6 +16,7 @@ import { MsgDelegate } from "@everett-protocol/cosmosjs/x/staking";
 import bigInteger from "big-integer";
 import { getCurrencies, getCurrency } from "../../../../../common/currency";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { useNotification } from "../../../../components/notification";
 import { CoinUtils } from "../../../../../common/coin-utils";
 
 interface FormData {
@@ -36,6 +37,8 @@ export const StakeModal: FunctionComponent<{
     }
   });
 
+  const notification = useNotification();
+
   const cosmosJSInited = cosmosJS.sendMsgs && cosmosJS.addresses.length > 0;
 
   return (
@@ -55,17 +58,34 @@ export const StakeModal: FunctionComponent<{
                 );
 
                 if (cosmosJS.sendMsgs) {
-                  await cosmosJS.sendMsgs([msg], {
-                    gas: bigInteger(200000),
-                    memo: "",
-                    fee: new Coin(
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      getCurrency(
-                        chainStore.chainInfo.nativeCurrency
-                      )!.coinMinimalDenom,
-                      new Int("1000")
-                    )
-                  });
+                  await cosmosJS.sendMsgs(
+                    [msg],
+                    {
+                      gas: bigInteger(200000),
+                      memo: "",
+                      fee: new Coin(
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        getCurrency(
+                          chainStore.chainInfo.nativeCurrency
+                        )!.coinMinimalDenom,
+                        new Int("1000")
+                      )
+                    },
+                    () => {},
+                    (e: Error) => {
+                      notification.push({
+                        type: "danger",
+                        content: e.toString(),
+                        duration: 5,
+                        canDelete: true,
+                        placement: "top-right",
+                        transition: {
+                          duration: 0.25
+                        }
+                      });
+                    },
+                    "commit"
+                  );
                 }
               }
             );

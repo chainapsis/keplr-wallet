@@ -28,6 +28,7 @@ import { MsgWithdrawDelegatorReward } from "@everett-protocol/cosmosjs/x/distrib
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 import bigInteger from "big-integer";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { useNotification } from "../../../../components/notification";
 
 export const StakeSection: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -58,6 +59,8 @@ export const StakeSection: FunctionComponent = observer(() => {
   const nativeCurrency = getCurrency(
     chainStore.chainInfo.nativeCurrency
   ) as Currency;
+
+  const notification = useNotification();
 
   const withdrawAllRewards = useCallback(() => {
     if (rewards.length > 0 && cosmosJS.addresses.length > 0) {
@@ -97,7 +100,24 @@ export const StakeSection: FunctionComponent = observer(() => {
             fee: new Coin(nativeCurrency.coinMinimalDenom, new Int("1000"))
           };
 
-          cosmosJS.sendMsgs(msgs, config);
+          cosmosJS.sendMsgs(
+            msgs,
+            config,
+            () => {},
+            (e: Error) => {
+              notification.push({
+                type: "danger",
+                content: e.toString(),
+                duration: 5,
+                canDelete: true,
+                placement: "top-right",
+                transition: {
+                  duration: 0.25
+                }
+              });
+            },
+            "commit"
+          );
         }
       }
     }
@@ -105,6 +125,7 @@ export const StakeSection: FunctionComponent = observer(() => {
     chainStore.chainInfo.bech32Config,
     cosmosJS,
     nativeCurrency.coinMinimalDenom,
+    notification,
     rewards
   ]);
 
