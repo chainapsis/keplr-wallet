@@ -14,3 +14,18 @@
     }
   }
 }
+
+.deposit-modal {
+  .address {
+    text-align: center;
+    font-size: 16px;
+
+    border: solid 1px #e6e6e6;
+    border-radius: 100px;
+    padding: 0 8px;
+
+    color: #474747;
+
+    cursor: pointer;
+  }
+}
