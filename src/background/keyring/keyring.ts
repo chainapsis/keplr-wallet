@@ -1,6 +1,8 @@
-import { Crypto } from "./crypto";
+import { Crypto, KeyStore } from "./crypto";
 import { generateWalletFromMnemonic } from "@everett-protocol/cosmosjs/utils/key";
 import { PrivKey } from "@everett-protocol/cosmosjs/crypto";
+
+const Buffer = require("buffer/").Buffer;
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -10,7 +12,7 @@ export enum KeyRingStatus {
 }
 
 export interface KeyRingData {
-  chiper: string;
+  keyStore?: KeyStore;
 }
 
 export interface Key {
@@ -30,12 +32,12 @@ export class KeyRing {
 
   private _mnemonic: string;
 
-  private cipher: string;
+  private keyStore: KeyStore | undefined;
 
   constructor() {
     this.loaded = false;
     this._mnemonic = "";
-    this.cipher = "";
+    this.keyStore = undefined;
   }
 
   private get mnemonic(): string {
@@ -52,7 +54,7 @@ export class KeyRing {
       return KeyRingStatus.NOTLOADED;
     }
 
-    if (this.cipher === "") {
+    if (this.keyStore === undefined) {
       return KeyRingStatus.EMPTY;
     } else if (this.mnemonic) {
       return KeyRingStatus.UNLOCKED;
@@ -67,7 +69,7 @@ export class KeyRing {
 
   public async createKey(mnemonic: string, password: string) {
     this.mnemonic = mnemonic;
-    this.cipher = await Crypto.encrypt(this.mnemonic, password);
+    this.keyStore = await Crypto.encrypt(this.mnemonic, password);
   }
 
   public lock() {
@@ -79,13 +81,18 @@ export class KeyRing {
   }
 
   public async unlock(password: string) {
+    if (!this.keyStore) {
+      throw new Error("Key ring not initialized");
+    }
     // If password is invalid, error will be thrown.
-    this.mnemonic = await Crypto.decrypt(this.cipher, password);
+    this.mnemonic = Buffer.from(
+      await Crypto.decrypt(this.keyStore, password)
+    ).toString();
   }
 
   public async save() {
     const data: KeyRingData = {
-      chiper: this.cipher
+      keyStore: this.keyStore
     };
     await new Promise((resolve, reject) => {
       chrome.storage.local.set(data, () => {
@@ -113,8 +120,8 @@ export class KeyRing {
 
     const data = await get();
 
-    if (data.chiper) {
-      this.cipher = data.chiper;
+    if (data.keyStore) {
+      this.keyStore = data.keyStore;
     }
     this.loaded = true;
   }
@@ -124,7 +131,7 @@ export class KeyRing {
    * Make sure to use this only in development env for testing.
    */
   public async clear() {
-    this.cipher = "";
+    this.keyStore = undefined;
     this.mnemonic = "";
     this.cached = new Map();
 

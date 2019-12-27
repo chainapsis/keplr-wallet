@@ -45,6 +45,7 @@ export const LockPage: FunctionComponent<Pick<
               window.close();
             }
           } catch (e) {
+            console.log("Fail to decrypt: " + e.message);
             setError("password", "invalid", "Invaid password");
             setLoading(false);
           }

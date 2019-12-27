@@ -1,64 +1,129 @@
 import scrypt from "scrypt-js";
-import AES from "aes-js";
+import AES, { Counter } from "aes-js";
 import { sha256 } from "sha.js";
 
 const Buffer = require("buffer/").Buffer;
 
+interface ScryptParams {
+  dklen: number;
+  salt: string;
+  n: number;
+  r: number;
+  p: number;
+}
+
+/**
+ * This is similar to ethereum's key store.
+ * But, the encryped data is not the private key, but the mnemonic words.
+ */
+export interface KeyStore {
+  version: "1";
+  crypto: {
+    cipher: "aes-128-ctr";
+    cipherparams: {
+      iv: string;
+    };
+    ciphertext: string;
+    kdf: "scrypt";
+    kdfparams: ScryptParams;
+    mac: string;
+  };
+}
+
 export class Crypto {
-  public static async encrypt(text: string, password: string): Promise<string> {
-    const digestPassword = await Crypto.scrpyt(
-      password,
-      Crypto.sha256(Buffer.from(password))
-    );
-    const key = Buffer.from(digestPassword, "hex");
+  public static async encrypt(
+    text: string,
+    password: string
+  ): Promise<KeyStore> {
+    let random = new Uint8Array(32);
+    crypto.getRandomValues(random);
+    const salt = Buffer.from(random).toString("hex");
+
+    const scryptParams: ScryptParams = {
+      salt,
+      dklen: 32,
+      n: 131072,
+      r: 8,
+      p: 1
+    };
+    const derivedKey = await Crypto.scrpyt(password, scryptParams);
     const buf = Buffer.from(text);
 
-    const aesCtr = new AES.ModeOfOperation.ctr(key);
-    const cipher = Buffer.from(aesCtr.encrypt(buf));
-    // Mac is sha256(last 16 bytes of hashed password + cipher), and it is concatenated to result cipher.
+    random = new Uint8Array(16);
+    crypto.getRandomValues(random);
+    const iv = Buffer.from(random);
+
+    const counter = new Counter(0);
+    counter.setBytes(iv);
+    const aesCtr = new AES.ModeOfOperation.ctr(derivedKey, counter);
+    const ciphertext = Buffer.from(aesCtr.encrypt(buf));
+    // Mac is sha256(last 16 bytes of derived key + ciphertext)
     const mac = Crypto.sha256(
-      Buffer.concat([key.slice(key.length / 2), cipher])
+      Buffer.concat([derivedKey.slice(derivedKey.length / 2), ciphertext])
     );
-    return Buffer.concat([cipher, mac]).toString("hex");
+    return {
+      version: "1",
+      crypto: {
+        cipher: "aes-128-ctr",
+        cipherparams: {
+          iv: iv.toString("hex")
+        },
+        ciphertext: ciphertext.toString("hex"),
+        kdf: "scrypt",
+        kdfparams: scryptParams,
+        mac: mac.toString("hex")
+      }
+    };
   }
 
   public static async decrypt(
-    cipher: string,
+    keyStore: KeyStore,
     password: string
-  ): Promise<string> {
-    const digestPassword = await Crypto.scrpyt(
-      password,
-      Crypto.sha256(Buffer.from(password))
-    );
-    const key = Buffer.from(digestPassword, "hex");
-    const aesCtr = new AES.ModeOfOperation.ctr(key);
+  ): Promise<Uint8Array> {
+    const derivedKey = await Crypto.scrpyt(password, keyStore.crypto.kdfparams);
 
-    const buf = Buffer.from(cipher, "hex");
-    const actualCipher = buf.slice(0, buf.length - 32);
-    const mac = buf.slice(buf.length - 32);
+    const counter = new Counter(0);
+    counter.setBytes(Buffer.from(keyStore.crypto.cipherparams.iv, "hex"));
+    const aesCtr = new AES.ModeOfOperation.ctr(derivedKey, counter);
 
-    const expectedMac = Crypto.sha256(
-      Buffer.concat([key.slice(key.length / 2), actualCipher])
+    const mac = Crypto.sha256(
+      Buffer.concat([
+        derivedKey.slice(derivedKey.length / 2),
+        Buffer.from(keyStore.crypto.ciphertext, "hex")
+      ])
     );
-    if (mac.toString("hex") !== expectedMac.toString("hex")) {
+    if (!mac.equals(Buffer.from(keyStore.crypto.mac, "hex"))) {
       throw new Error("Unmatched mac");
     }
 
-    return Buffer.from(aesCtr.decrypt(actualCipher)).toString();
+    return Buffer.from(
+      aesCtr.decrypt(Buffer.from(keyStore.crypto.ciphertext, "hex"))
+    ).toString();
   }
 
-  private static async scrpyt(text: string, salt: Buffer): Promise<string> {
+  private static async scrpyt(
+    text: string,
+    params: ScryptParams
+  ): Promise<Uint8Array> {
     return new Promise((resolve, reject) => {
       const buf = Buffer.from(text);
 
-      scrypt(buf, salt, 1024, 8, 1, 32, (error, _, key) => {
-        if (error) {
-          reject(error);
-          return;
-        } else if (key) {
-          resolve(Buffer.from(key).toString("hex"));
+      scrypt(
+        buf,
+        Buffer.from(params.salt, "hex"),
+        params.n,
+        params.r,
+        params.p,
+        params.dklen,
+        (error, _, key) => {
+          if (error) {
+            reject(error);
+            return;
+          } else if (key) {
+            resolve(Buffer.from(key));
+          }
         }
-      });
+      );
     });
   }
 
