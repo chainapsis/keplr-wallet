@@ -35,7 +35,7 @@ export const VerifyInPage: FunctionComponent<{
   return (
     <div className={style.container}>
       <div className={style.intro}>Verify your mnemonic</div>
-      <div style={{ minHeight: "8.25rem" }}>
+      <div style={{ minHeight: "11rem" }}>
         <div className="buttons">
           {suggestedWords.map((word, i) => {
             return (

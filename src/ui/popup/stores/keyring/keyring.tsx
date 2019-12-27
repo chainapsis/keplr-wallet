@@ -25,10 +25,10 @@ import { RootStore } from "../root";
  */
 
 export class KeyRingStore {
-  public static GenereateMnemonic(): string {
+  public static GenereateMnemonic(strenth: number = 128): string {
     return generateSeed(array => {
       return crypto.getRandomValues(array);
-    }, 128);
+    }, strenth);
   }
 
   @observable

@@ -7,7 +7,19 @@
   background-color: white;
 
   .mnemonic {
+    font-family: "Courier Prime", serif;
+    font-size: 18px;
+    letter-spacing: -0.36px;
+
+    padding: 20px 30px;
     box-shadow: none;
+    text-align: center;
+
+    &[disabled] {
+      background-color: white;
+      border-color: #dbdbdb;
+      color: #363636;
+    }
   }
 
   .button:not(:last-child) {
@@ -24,6 +36,11 @@
 .intro {
   font-weight: bold;
   text-align: center;
-  font-size: 20px;
+  font-size: 28px;
   margin-bottom: 12px;
+
+  .sub-intro {
+    font-weight: normal;
+    font-size: 18px;
+  }
 }

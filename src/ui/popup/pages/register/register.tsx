@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 
 import { Input } from "../../../components/form";
 import { Button } from "../../../components/button";
@@ -20,14 +20,14 @@ interface FormData {
 
 export const RegisterInPage: FunctionComponent<{
   onRegister: (words: string, password: string, recovered: boolean) => void;
+  isRecover: boolean;
 }> = props => {
-  const [isRecover, setIsRecover] = useState(false);
-
+  const { isRecover } = props;
   const { register, handleSubmit, setValue, getValues, errors } = useForm<
     FormData
   >({
     defaultValues: {
-      words: KeyRingStore.GenereateMnemonic(),
+      words: "",
       password: "",
       confirmPassword: ""
     }
@@ -35,7 +35,7 @@ export const RegisterInPage: FunctionComponent<{
 
   useEffect(() => {
     if (!isRecover) {
-      setValue("words", KeyRingStore.GenereateMnemonic());
+      setValue("words", KeyRingStore.GenereateMnemonic(160));
     } else {
       setValue("words", "");
     }
@@ -43,7 +43,10 @@ export const RegisterInPage: FunctionComponent<{
 
   return (
     <div className={style.container}>
-      <div className={style.intro}>Write down your mnemonic</div>
+      <div className={style.intro}>
+        Create Account
+        <div className={style.subIntro}>Please safely store your mnemonic.</div>
+      </div>
       <form
         className={style.formContainer}
         onSubmit={handleSubmit((data: FormData) => {
@@ -61,9 +64,14 @@ export const RegisterInPage: FunctionComponent<{
               placeholder="Type your mnemonic"
               disabled={!isRecover}
               name="words"
+              rows={4}
               ref={register({
                 required: "Mnemonic is required",
                 validate: (value: string): string | undefined => {
+                  if (value.split(" ").length < 8) {
+                    return "Too short mnemonic";
+                  }
+
                   if (!bip39.validateMnemonic(value)) {
                     return "Invalid mnemonic";
                   }
@@ -104,16 +112,6 @@ export const RegisterInPage: FunctionComponent<{
           error={errors.confirmPassword && errors.confirmPassword.message}
         />
         <div style={{ flex: 1 }} />
-        <Button
-          className={style.button}
-          onClick={() => {
-            setIsRecover(!isRecover);
-          }}
-          size="medium"
-          type="button"
-        >
-          Recover
-        </Button>
         <Button
           className={style.button}
           color="primary"
