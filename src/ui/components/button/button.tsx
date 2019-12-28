@@ -75,7 +75,7 @@ export const Button: FunctionComponent<ButtonProps> = props => {
 
   return (
     <>
-      {to ? (
+      {!props.disabled && to ? (
         <Link
           {...attributes}
           className={className}
@@ -86,7 +86,12 @@ export const Button: FunctionComponent<ButtonProps> = props => {
           {props.children}
         </Link>
       ) : href ? (
-        <a {...attributes} className={className} href={href} target={target}>
+        <a
+          {...attributes}
+          className={className}
+          href={props.disabled ? undefined : href}
+          target={target}
+        >
           {props.children}
         </a>
       ) : (
