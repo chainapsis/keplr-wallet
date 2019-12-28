@@ -38,6 +38,7 @@
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-hook-form": "^3.29.3",
+    "react-intl": "^3.9.3",
     "react-modal": "^3.11.1",
     "react-moment": "^0.9.7",
     "react-router-dom": "^5.0.1",

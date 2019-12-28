@@ -1,0 +1,34 @@
+{
+  "main.account.message.available-balance": "Available Balance",
+  "main.account.button.deposit": "Deposit",
+  "main.account.button.send": "Send",
+
+  "main.stake.message.pending-staking-reward": "Pending Staking Reward",
+  "main.stake.message.stake": "Stake",
+  "main.stake.message.earning": "Earn up to 7-11% per year",
+  "main.stake.button.claim-rewards": "Claim",
+  "main.stake.button.stake": "Stake",
+
+  "main.menu.sign-out": "Sign out",
+
+  "register.intro.button.new-account": "New Account",
+  "register.intro.button.import-account": "Import Account",
+
+  "register.create.message.title": "Create Account",
+  "register.create.message.sub-title": "Please safely store your mnemonic.",
+  "register.create.input.password": "Password",
+  "register.create.input.password.error.required": "Password is required",
+  "register.create.input.password.error.too-short": "Too short password",
+  "register.create.input.confirm-password": "Confirm password",
+  "register.create.input.confirm-password.error.required": "Confirm password is required",
+  "register.create.input.confirm-password.error.unmatched": "Password should match",
+  "register.create.textarea.mnemonic.place-holder": "Type your mnemonic",
+  "register.create.textarea.mnemonic.error.invalid": "Invalid mnemonic",
+  "register.create.textarea.mnemonic.error.too-short": "Too short mnemonic",
+  "register.create.button.next": "Next",
+
+  "lock.input.password": "Password",
+  "lock.input.password.error.required": "Empty password",
+  "lock.input.password.error.invalid": "Invaid password",
+  "lock.button.unlock": "Unlock"
+}

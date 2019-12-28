@@ -1,6 +1,8 @@
 import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
 
+import { AppIntlProvider } from "./language";
+
 import "./styles/global.scss";
 
 import { HashRouter, Route, RouteComponentProps } from "react-router-dom";
@@ -67,17 +69,19 @@ const StateRenderer: FunctionComponent<RouteComponentProps> = observer(
 );
 
 ReactDOM.render(
-  <StoreProvider>
-    <NotificationStoreProvider>
-      <NotificationProvider>
-        <HashRouter>
-          <Route exact path="/" component={StateRenderer} />
-          <Route exact path="/send" component={SendPage} />
-          <Route exact path="/fee/:index" component={FeePage} />
-          <Route path="/sign/:index" component={SignPage} />
-        </HashRouter>
-      </NotificationProvider>
-    </NotificationStoreProvider>
-  </StoreProvider>,
+  <AppIntlProvider>
+    <StoreProvider>
+      <NotificationStoreProvider>
+        <NotificationProvider>
+          <HashRouter>
+            <Route exact path="/" component={StateRenderer} />
+            <Route exact path="/send" component={SendPage} />
+            <Route exact path="/fee/:index" component={FeePage} />
+            <Route path="/sign/:index" component={SignPage} />
+          </HashRouter>
+        </NotificationProvider>
+      </NotificationStoreProvider>
+    </StoreProvider>
+  </AppIntlProvider>,
   document.getElementById("app")
 );

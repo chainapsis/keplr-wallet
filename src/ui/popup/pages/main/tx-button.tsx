@@ -18,6 +18,8 @@ import { useStore } from "../../stores";
 import Modal from "react-modal";
 import { useNotification } from "../../../components/notification";
 
+import { FormattedMessage } from "react-intl";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");
 
@@ -101,7 +103,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         outline
         onClick={toggleDepositModal}
       >
-        Deposit
+        <FormattedMessage id="main.account.button.deposit" />
       </Button>
       <Button
         color="primary"
@@ -110,7 +112,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         outline
         disabled={accountStore.assets.length === 0}
       >
-        Send
+        <FormattedMessage id="main.account.button.send" />
       </Button>
     </div>
   );

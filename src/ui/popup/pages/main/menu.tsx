@@ -4,6 +4,8 @@ import styleMenu from "./menu.module.scss";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
+import { FormattedMessage } from "react-intl";
+
 export const Menu: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
@@ -34,7 +36,9 @@ export const Menu: FunctionComponent = observer(() => {
         <span className="icon is-large">
           <i className="fas fa-2x fa-sign-out-alt" />
         </span>
-        <div className={styleMenu.text}>Sign out</div>
+        <div className={styleMenu.text}>
+          <FormattedMessage id="main.menu.sign-out" />
+        </div>
       </div>
     </div>
   );

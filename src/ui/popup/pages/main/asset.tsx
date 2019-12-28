@@ -9,6 +9,8 @@ import { CoinUtils } from "../../../../common/coin-utils";
 import { Currency } from "../../../../chain-info";
 import { getCurrency } from "../../../../common/currency";
 
+import { FormattedMessage } from "react-intl";
+
 export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore } = useStore();
 
@@ -29,7 +31,9 @@ export const AssetView: FunctionComponent = observer(() => {
 
   return (
     <div className={styleAsset.containerAsset}>
-      <div className={styleAsset.title}>Available Balance</div>
+      <div className={styleAsset.title}>
+        <FormattedMessage id="main.account.message.available-balance" />
+      </div>
       <div className={styleAsset.fiat}>
         {fiat && !fiat.value.equals(new Dec(0))
           ? "$" +

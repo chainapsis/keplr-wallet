@@ -4,6 +4,8 @@ import { Button } from "../../../components/button";
 
 import style from "./style.module.scss";
 
+import { FormattedMessage } from "react-intl";
+
 export const IntroInPage: FunctionComponent<{
   onRequestNewAccount: () => void;
   onRequestRecoverAccount: () => void;
@@ -17,7 +19,7 @@ export const IntroInPage: FunctionComponent<{
         size="medium"
         type="button"
       >
-        New Account
+        <FormattedMessage id="register.intro.button.new-account" />
       </Button>
       <Button
         className={style.button}
@@ -25,7 +27,7 @@ export const IntroInPage: FunctionComponent<{
         color="primary"
         size="medium"
       >
-        Import Account
+        <FormattedMessage id="register.intro.button.import-account" />
       </Button>
     </div>
   );

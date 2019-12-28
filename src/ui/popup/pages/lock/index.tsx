@@ -13,6 +13,8 @@ import style from "./style.module.scss";
 import queryString from "query-string";
 import { RouteComponentProps } from "react-router";
 
+import { FormattedMessage, useIntl } from "react-intl";
+
 interface FormData {
   password: string;
 }
@@ -21,6 +23,8 @@ export const LockPage: FunctionComponent<Pick<
   RouteComponentProps,
   "location"
 >> = observer(({ location }) => {
+  const intl = useIntl();
+
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
 
@@ -46,7 +50,13 @@ export const LockPage: FunctionComponent<Pick<
             }
           } catch (e) {
             console.log("Fail to decrypt: " + e.message);
-            setError("password", "invalid", "Invaid password");
+            setError(
+              "password",
+              "invalid",
+              intl.formatMessage({
+                id: "lock.input.password.error.invalid"
+              })
+            );
             setLoading(false);
           }
         })}
@@ -57,7 +67,11 @@ export const LockPage: FunctionComponent<Pick<
           label="Passward"
           name="password"
           error={errors.password && errors.password.message}
-          ref={register({ required: "Password is empty" })}
+          ref={register({
+            required: intl.formatMessage({
+              id: "lock.input.password.error.required"
+            })
+          })}
         />
         <Button
           type="submit"
@@ -66,7 +80,7 @@ export const LockPage: FunctionComponent<Pick<
           fullwidth
           loading={loading}
         >
-          Unlock
+          <FormattedMessage id="lock.button.unlock" />
         </Button>
       </form>
     </EmptyLayout>

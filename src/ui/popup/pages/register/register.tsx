@@ -9,6 +9,8 @@ import { KeyRingStore } from "../../stores/keyring";
 import style from "./style.module.scss";
 import classnames from "classnames";
 
+import { FormattedMessage, useIntl } from "react-intl";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
@@ -23,6 +25,8 @@ export const RegisterInPage: FunctionComponent<{
   isRecover: boolean;
   isLoading: boolean;
 }> = props => {
+  const intl = useIntl();
+
   const { isRecover } = props;
   const { register, handleSubmit, setValue, getValues, errors } = useForm<
     FormData
@@ -45,8 +49,10 @@ export const RegisterInPage: FunctionComponent<{
   return (
     <div className={style.container}>
       <div className={style.intro}>
-        Create Account
-        <div className={style.subIntro}>Please safely store your mnemonic.</div>
+        <FormattedMessage id="register.create.message.title" />
+        <div className={style.subIntro}>
+          <FormattedMessage id="register.create.message.sub-title" />
+        </div>
       </div>
       <form
         className={style.formContainer}
@@ -62,7 +68,9 @@ export const RegisterInPage: FunctionComponent<{
                 "has-fixed-size is-medium",
                 style.mnemonic
               )}
-              placeholder="Type your mnemonic"
+              placeholder={intl.formatMessage({
+                id: "register.create.textarea.mnemonic.place-holder"
+              })}
               disabled={!isRecover}
               name="words"
               rows={4}
@@ -70,11 +78,15 @@ export const RegisterInPage: FunctionComponent<{
                 required: "Mnemonic is required",
                 validate: (value: string): string | undefined => {
                   if (value.split(" ").length < 8) {
-                    return "Too short mnemonic";
+                    return intl.formatMessage({
+                      id: "register.create.textarea.mnemonic.error.too-short"
+                    });
                   }
 
                   if (!bip39.validateMnemonic(value)) {
-                    return "Invalid mnemonic";
+                    return intl.formatMessage({
+                      id: "register.create.textarea.mnemonic.error.invalid"
+                    });
                   }
                 }
               })}
@@ -85,28 +97,38 @@ export const RegisterInPage: FunctionComponent<{
           ) : null}
         </div>
         <Input
-          label="Password"
+          label={intl.formatMessage({ id: "register.create.input.password" })}
           type="password"
           name="password"
           ref={register({
-            required: "Password is required",
+            required: intl.formatMessage({
+              id: "register.create.input.password.error.required"
+            }),
             validate: (password: string): string | undefined => {
               if (password.length < 8) {
-                return "Too short password";
+                return intl.formatMessage({
+                  id: "register.create.input.password.error.too-short"
+                });
               }
             }
           })}
           error={errors.password && errors.password.message}
         />
         <Input
-          label="Confirm password"
+          label={intl.formatMessage({
+            id: "register.create.input.confirm-password"
+          })}
           type="password"
           name="confirmPassword"
           ref={register({
-            required: "Confirm password is required",
+            required: intl.formatMessage({
+              id: "register.create.input.confirm-password.error.required"
+            }),
             validate: (confirmPassword: string): string | undefined => {
               if (confirmPassword !== getValues()["password"]) {
-                return "Password should match";
+                return intl.formatMessage({
+                  id: "register.create.input.confirm-password.error.unmatched"
+                });
               }
             }
           })}
@@ -120,7 +142,7 @@ export const RegisterInPage: FunctionComponent<{
           size="medium"
           loading={props.isLoading}
         >
-          Next
+          <FormattedMessage id="register.create.button.next" />
         </Button>
       </form>
     </div>

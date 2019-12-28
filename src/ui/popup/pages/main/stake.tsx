@@ -33,6 +33,8 @@ import { CoinUtils } from "../../../../common/coin-utils";
 import { useNotification } from "../../../components/notification";
 import { RouteComponentProps } from "react-router";
 
+import { FormattedMessage } from "react-intl";
+
 export const StakeView: FunctionComponent<Pick<
   RouteComponentProps,
   "history"
@@ -150,7 +152,9 @@ export const StakeView: FunctionComponent<Pick<
             className={classnames(styleStake.containerInner, styleStake.reward)}
           >
             <div className={styleStake.vertical}>
-              <div className={styleStake.title}>Pending Staking Reward</div>
+              <div className={styleStake.title}>
+                <FormattedMessage id="main.stake.message.pending-staking-reward" />
+              </div>
               <div className={styleStake.content}>
                 {`${CoinUtils.shrinkDecimals(
                   new Dec(reward.totalReward[0].amount).truncate(),
@@ -171,7 +175,7 @@ export const StakeView: FunctionComponent<Pick<
               loading={cosmosJS.loading}
               onClick={withdrawAllRewards}
             >
-              Claim
+              <FormattedMessage id="main.stake.button.claim-rewards" />
             </Button>
           </div>
           <hr className={styleStake.hr} />
@@ -180,8 +184,12 @@ export const StakeView: FunctionComponent<Pick<
 
       <div className={classnames(styleStake.containerInner, styleStake.stake)}>
         <div className={styleStake.vertical}>
-          <div className={styleStake.title}>Stake</div>
-          <div className={styleStake.content}>Earn up to 7-11% per year</div>
+          <div className={styleStake.title}>
+            <FormattedMessage id="main.stake.message.stake" />
+          </div>
+          <div className={styleStake.content}>
+            <FormattedMessage id="main.stake.message.earning" />
+          </div>
         </div>
         <div style={{ flex: 1 }} />
         <Button
@@ -191,7 +199,7 @@ export const StakeView: FunctionComponent<Pick<
           target="_blank"
           disabled={accountStore.assets.length === 0}
         >
-          Stake
+          <FormattedMessage id="main.stake.button.stake" />
         </Button>
       </div>
     </div>
