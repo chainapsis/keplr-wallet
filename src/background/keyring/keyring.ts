@@ -1,6 +1,7 @@
 import { Crypto, KeyStore } from "./crypto";
 import { generateWalletFromMnemonic } from "@everett-protocol/cosmosjs/utils/key";
 import { PrivKey } from "@everett-protocol/cosmosjs/crypto";
+import { KVStore } from "../../common/kvstore";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -11,15 +12,13 @@ export enum KeyRingStatus {
   UNLOCKED
 }
 
-export interface KeyRingData {
-  keyStore: KeyStore | null;
-}
-
 export interface Key {
   algo: string;
   pubKey: Uint8Array;
   address: Uint8Array;
 }
+
+const KeyStoreKey = "key-store";
 
 /*
  Keyring stores keys in persistent backround.
@@ -34,7 +33,7 @@ export class KeyRing {
 
   private keyStore: KeyStore | null;
 
-  constructor() {
+  constructor(private readonly kvStore: KVStore) {
     this.loaded = false;
     this._mnemonic = "";
     this.keyStore = null;
@@ -91,37 +90,15 @@ export class KeyRing {
   }
 
   public async save() {
-    const data: KeyRingData = {
-      keyStore: this.keyStore
-    };
-    await new Promise((resolve, reject) => {
-      chrome.storage.local.set(data, () => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-          return;
-        }
-        resolve();
-      });
-    });
+    await this.kvStore.set<KeyStore>(KeyStoreKey, this.keyStore);
   }
 
   public async restore() {
-    const get = () => {
-      return new Promise<KeyRingData>((resolve, reject) => {
-        chrome.storage.local.get(data => {
-          if (chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError);
-            return;
-          }
-          resolve(data as KeyRingData);
-        });
-      });
-    };
-
-    const data = await get();
-
-    if (data.keyStore) {
-      this.keyStore = data.keyStore;
+    const keyStore = await this.kvStore.get<KeyStore>(KeyStoreKey);
+    if (!keyStore) {
+      this.keyStore = null;
+    } else {
+      this.keyStore = keyStore;
     }
     this.loaded = true;
   }

@@ -23,7 +23,10 @@ import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
 import { KeyRingKeeper } from "./keeper";
 
-export function init(messageManager: MessageManager): KeyRingKeeper {
+export function init(
+  messageManager: MessageManager,
+  keeper: KeyRingKeeper
+): void {
   messageManager.registerMessage(EnableKeyRingMsg);
   messageManager.registerMessage(GetRegisteredChainMsg);
   messageManager.registerMessage(RestoreKeyRingMsg);
@@ -43,7 +46,5 @@ export function init(messageManager: MessageManager): KeyRingKeeper {
   messageManager.registerMessage(ApproveSignMsg);
   messageManager.registerMessage(RejectSignMsg);
 
-  const keyRingKeeper = new KeyRingKeeper();
-  messageManager.addHandler(ROUTE, getHandler(keyRingKeeper));
-  return keyRingKeeper;
+  messageManager.addHandler(ROUTE, getHandler(keeper));
 }

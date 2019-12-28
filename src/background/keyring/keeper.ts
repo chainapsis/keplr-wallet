@@ -13,6 +13,8 @@ import {
   TxBuilderConfigPrimitiveWithChainId
 } from "./types";
 
+import { KVStore } from "../../common/kvstore";
+
 import { openWindow } from "../../common/window";
 
 export interface KeyHex {
@@ -28,7 +30,7 @@ interface SignMessage {
 }
 
 export class KeyRingKeeper {
-  private readonly keyRing = new KeyRing();
+  private readonly keyRing: KeyRing;
   private path = "";
 
   private readonly unlockApprover = new AsyncApprover({
@@ -45,6 +47,10 @@ export class KeyRingKeeper {
   private readonly signApprover = new AsyncApprover<SignMessage>({
     defaultTimeout: 3 * 60 * 1000
   });
+
+  constructor(kvStore: KVStore) {
+    this.keyRing = new KeyRing(kvStore);
+  }
 
   async enable(): Promise<KeyRingStatus> {
     if (this.keyRing.status === KeyRingStatus.EMPTY) {
