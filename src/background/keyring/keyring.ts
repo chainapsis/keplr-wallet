@@ -12,7 +12,7 @@ export enum KeyRingStatus {
 }
 
 export interface KeyRingData {
-  keyStore?: KeyStore;
+  keyStore: KeyStore | null;
 }
 
 export interface Key {
@@ -32,12 +32,12 @@ export class KeyRing {
 
   private _mnemonic: string;
 
-  private keyStore: KeyStore | undefined;
+  private keyStore: KeyStore | null;
 
   constructor() {
     this.loaded = false;
     this._mnemonic = "";
-    this.keyStore = undefined;
+    this.keyStore = null;
   }
 
   private get mnemonic(): string {
@@ -54,7 +54,7 @@ export class KeyRing {
       return KeyRingStatus.NOTLOADED;
     }
 
-    if (this.keyStore === undefined) {
+    if (!this.keyStore) {
       return KeyRingStatus.EMPTY;
     } else if (this.mnemonic) {
       return KeyRingStatus.UNLOCKED;
@@ -131,7 +131,7 @@ export class KeyRing {
    * Make sure to use this only in development env for testing.
    */
   public async clear() {
-    this.keyStore = undefined;
+    this.keyStore = null;
     this.mnemonic = "";
     this.cached = new Map();
 
