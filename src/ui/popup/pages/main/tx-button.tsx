@@ -103,7 +103,13 @@ export const TxButtonView: FunctionComponent = observer(() => {
       >
         Deposit
       </Button>
-      <Button color="primary" size="medium" to="/send" outline>
+      <Button
+        color="primary"
+        size="medium"
+        to="/send"
+        outline
+        disabled={accountStore.assets.length === 0}
+      >
         Send
       </Button>
     </div>

@@ -189,6 +189,7 @@ export const StakeView: FunctionComponent<Pick<
           outline={isRewardExist}
           href={chainStore.chainInfo.walletUrlForStaking}
           target="_blank"
+          disabled={accountStore.assets.length === 0}
         >
           Stake
         </Button>
