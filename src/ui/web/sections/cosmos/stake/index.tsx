@@ -143,9 +143,7 @@ export const StakeSection: FunctionComponent = observer(() => {
                 color="primary"
                 loading={cosmosJS.loading}
                 disabled={!cosmosJSInited}
-                onClick={() => {
-                  withdrawAllRewards();
-                }}
+                onClick={withdrawAllRewards}
               >
                 CLAIM ALL REWARD
               </Button>

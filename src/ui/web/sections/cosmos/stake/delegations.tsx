@@ -287,7 +287,9 @@ const DelegationDetail: FunctionComponent<{
           className={style.button}
           size="medium"
           color="primary"
-          onClick={() => onUnbondRequest(validator)}
+          onClick={useCallback(() => {
+            onUnbondRequest(validator);
+          }, [onUnbondRequest, validator])}
           style={{ marginRight: "12px" }}
         >
           UNSTAKE
@@ -296,7 +298,10 @@ const DelegationDetail: FunctionComponent<{
           className={style.button}
           size="medium"
           color="primary"
-          onClick={() => onStakeRequest(validator)}
+          onClick={useCallback(() => onStakeRequest(validator), [
+            onStakeRequest,
+            validator
+          ])}
         >
           STAKE
         </Button>

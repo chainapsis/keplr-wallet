@@ -50,9 +50,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
                   className={style["menu-img"]}
                   style={{ zIndex: 901 }}
                   animate={isMenuOpen ? "open" : "closed"}
-                  onClick={() => {
-                    menu.toggle();
-                  }}
+                  onClick={menu.toggle}
                 >
                   <MenuButton />
                 </motion.div>

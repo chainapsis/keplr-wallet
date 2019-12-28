@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useContext, useRef } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useRef
+} from "react";
 
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -69,6 +74,10 @@ export const Menu: FunctionComponent<Props> = ({ isOpen, children }) => {
 
   const menu = useMenu();
 
+  const menuOnClick = useCallback(() => {
+    menu.close;
+  }, [menu]);
+
   return (
     <>
       <AnimatePresence>
@@ -79,9 +88,7 @@ export const Menu: FunctionComponent<Props> = ({ isOpen, children }) => {
             variants={background}
             exit="closed"
             initial={{ opacity: 0 }}
-            onClick={() => {
-              menu.close();
-            }}
+            onClick={menuOnClick}
           />
         ) : null}
       </AnimatePresence>

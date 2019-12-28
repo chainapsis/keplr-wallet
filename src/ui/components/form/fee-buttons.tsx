@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 
 import classnames from "classnames";
 import styleFeeButtons from "./fee-buttons.module.scss";
@@ -128,9 +133,9 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             [getColorClass(color)]: feeSelect === FeeSelect.LOW
           })}
           type="button"
-          onClick={() => {
+          onClick={useCallback(() => {
             setFeeSelect(FeeSelect.LOW);
-          }}
+          }, [])}
         >
           <div className={styleFeeButtons.title}>Low</div>
           <div className={styleFeeButtons.fiat}>
@@ -157,9 +162,9 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             [getColorClass(color)]: feeSelect === FeeSelect.AVERAGE
           })}
           type="button"
-          onClick={() => {
+          onClick={useCallback(() => {
             setFeeSelect(FeeSelect.AVERAGE);
-          }}
+          }, [])}
         >
           <div className={styleFeeButtons.title}>Average</div>
           <div className={styleFeeButtons.fiat}>
@@ -186,9 +191,9 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             [getColorClass(color)]: feeSelect === FeeSelect.HIGH
           })}
           type="button"
-          onClick={() => {
+          onClick={useCallback(() => {
             setFeeSelect(FeeSelect.HIGH);
-          }}
+          }, [])}
         >
           <div className={styleFeeButtons.title}>High</div>
           <div className={styleFeeButtons.fiat}>

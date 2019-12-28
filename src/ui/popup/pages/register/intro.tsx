@@ -13,9 +13,7 @@ export const IntroInPage: FunctionComponent<{
       <div style={{ flex: 1 }} />
       <Button
         className={style.button}
-        onClick={() => {
-          props.onRequestNewAccount();
-        }}
+        onClick={props.onRequestNewAccount}
         size="medium"
         type="button"
       >
@@ -23,9 +21,7 @@ export const IntroInPage: FunctionComponent<{
       </Button>
       <Button
         className={style.button}
-        onClick={() => {
-          props.onRequestRecoverAccount();
-        }}
+        onClick={props.onRequestRecoverAccount}
         color="primary"
         size="medium"
       >

@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from "react";
 
 import classnames from "classnames";
 
@@ -31,6 +37,10 @@ export const Dropdown: FunctionComponent<Props> = ({
     };
   }, []);
 
+  const dropdownOnClick = useCallback(() => {
+    setShowSelect(!showSelect);
+  }, [showSelect]);
+
   return (
     <div
       className={classnames(
@@ -47,9 +57,7 @@ export const Dropdown: FunctionComponent<Props> = ({
           className="button"
           aria-haspopup="true"
           aria-controls="dropdown-menu"
-          onClick={() => {
-            setShowSelect(!showSelect);
-          }}
+          onClick={dropdownOnClick}
           ref={ref}
         >
           <span>{title}</span>

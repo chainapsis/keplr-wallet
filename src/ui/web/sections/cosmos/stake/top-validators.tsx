@@ -142,6 +142,10 @@ export const ValidatorStakeDetail: FunctionComponent<{
   validator: Validator;
   onStakeRequest: (validator: Validator) => void;
 }> = ({ validator, onStakeRequest }) => {
+  const stakeOnClick = useCallback(() => {
+    onStakeRequest(validator);
+  }, [validator, onStakeRequest]);
+
   return (
     <div className={style.detail}>
       <div className={style.item}>
@@ -169,7 +173,7 @@ export const ValidatorStakeDetail: FunctionComponent<{
           className={style.button}
           size="medium"
           color="primary"
-          onClick={() => onStakeRequest(validator)}
+          onClick={stakeOnClick}
         >
           STAKE
         </Button>

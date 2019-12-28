@@ -60,12 +60,7 @@ const DepositModal: FunctionComponent<{
         <canvas id="qrcode" ref={qrCodeRef} />
         <div style={{ flex: 1 }} />
       </div>
-      <div
-        className={styleTxButton.address}
-        onClick={() => {
-          copyAddress();
-        }}
-      >
+      <div className={styleTxButton.address} onClick={copyAddress}>
         <Address
           maxCharacters={28}
           lineBreakBeforePrefix={false}
@@ -84,6 +79,10 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   const [isDepositOpen, setIsDepositOpen] = useState(false);
 
+  const toggleDepositModal = useCallback(() => {
+    setIsDepositOpen(!isDepositOpen);
+  }, [isDepositOpen]);
+
   return (
     <div className={styleTxButton.containerTxButton}>
       <Modal
@@ -100,7 +99,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         color="link"
         size="medium"
         outline
-        onClick={() => setIsDepositOpen(!isDepositOpen)}
+        onClick={toggleDepositModal}
       >
         Deposit
       </Button>

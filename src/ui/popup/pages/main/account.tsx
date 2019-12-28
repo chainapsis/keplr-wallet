@@ -31,12 +31,7 @@ export const AccountView: FunctionComponent = observer(() => {
   return (
     <div className={styleAccount.containerAccount}>
       <div style={{ flex: 1 }} />
-      <div
-        className={styleAccount.address}
-        onClick={async () => {
-          await copyAddress();
-        }}
-      >
+      <div className={styleAccount.address} onClick={copyAddress}>
         <Address maxCharacters={22} lineBreakBeforePrefix={false}>
           {accountStore.isAddressFetching ? "..." : accountStore.bech32Address}
         </Address>

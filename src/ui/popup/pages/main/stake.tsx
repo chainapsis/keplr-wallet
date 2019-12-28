@@ -169,9 +169,7 @@ export const StakeView: FunctionComponent<Pick<
               color="primary"
               disabled={cosmosJS == null || cosmosJS.sendMsgs == null}
               loading={cosmosJS.loading}
-              onClick={() => {
-                withdrawAllRewards();
-              }}
+              onClick={withdrawAllRewards}
             >
               Claim
             </Button>
