@@ -75,7 +75,7 @@ export const Menu: FunctionComponent<Props> = ({ isOpen, children }) => {
   const menu = useMenu();
 
   const menuOnClick = useCallback(() => {
-    menu.close;
+    menu.close();
   }, [menu]);
 
   return (
