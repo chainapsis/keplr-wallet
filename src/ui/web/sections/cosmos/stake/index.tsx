@@ -133,7 +133,9 @@ export const StakeSection: FunctionComponent = observer(() => {
 
   return (
     <div className={style.container}>
-      {delegateInfos.length > 0 ? (
+      {delegateInfos.length > 0 ||
+      unbondInfos.length > 0 ||
+      rewards.length > 0 ? (
         <Card>
           <div className={style.title}>
             My validators
