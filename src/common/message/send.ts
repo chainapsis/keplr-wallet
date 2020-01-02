@@ -45,7 +45,7 @@ export async function sendMessage<M extends Message<unknown>>(
   let posting: boolean = false;
 
   if (!opts || !opts.disablePostMessage) {
-    posting = chrome.runtime.id == null;
+    posting = chrome?.runtime?.id == null;
   }
 
   if (posting) {
