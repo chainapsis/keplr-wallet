@@ -1,7 +1,12 @@
 import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
 
-import { HashRouter, Route, RouteComponentProps } from "react-router-dom";
+import {
+  HashRouter,
+  Route,
+  RouteComponentProps,
+  Redirect
+} from "react-router-dom";
 
 import { Sidebar } from "./components/sidebar";
 
@@ -19,6 +24,8 @@ import {
 import Modal from "react-modal";
 
 import classnames from "classnames";
+
+import { SupportedChainWalletUIs } from "./supported-chain";
 
 import style from "./style.module.scss";
 
@@ -85,11 +92,16 @@ const Wallet: FunctionComponent<RouteComponentProps<{
   );
 });
 
+const RedirectRoute: FunctionComponent = () => {
+  return <Redirect to={`/${SupportedChainWalletUIs[0].chainId}`} />;
+};
+
 const Router: FunctionComponent = () => {
   return (
     <HashRouter>
       <Route path="/:chainId/:path" component={Wallet} />
       <Route path="/:chainId" exact component={Wallet} />
+      <Route path="/" exact component={RedirectRoute} />
     </HashRouter>
   );
 };
