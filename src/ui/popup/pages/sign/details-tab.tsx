@@ -12,10 +12,13 @@ import classnames from "classnames";
 
 import { MessageObj, renderMessage } from "./messages";
 import { DecUtils } from "../../../../common/dec-utils";
+import { useIntl } from "react-intl";
 
 export const DetailsTab: FunctionComponent<{ message: string }> = observer(
   ({ message }) => {
     const { priceStore } = useStore();
+
+    const intl = useIntl();
 
     const [fee, setFee] = useState<Coin[]>([]);
     const [feeFiat, setFeeFiat] = useState(new Dec(0));
@@ -69,9 +72,13 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
             styleDetailsTab.messages
           )}
         >
-          <div className={styleDetailsTab.title}>Messages</div>
+          <div className={styleDetailsTab.title}>
+            {intl.formatMessage({
+              id: "sign.list.messages.label"
+            })}
+          </div>
           {msgs.map((msg, i) => {
-            const msgContent = renderMessage(msg);
+            const msgContent = renderMessage(msg, intl);
             return (
               <React.Fragment key={i.toString()}>
                 <Msg icon={msgContent.icon} title={msgContent.title}>
@@ -83,7 +90,11 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
           })}
         </div>
         <div className={styleDetailsTab.section}>
-          <div className={styleDetailsTab.title}>Fee</div>
+          <div className={styleDetailsTab.title}>
+            {intl.formatMessage({
+              id: "sign.info.fee"
+            })}
+          </div>
           <div className={styleDetailsTab.fee}>
             <div>
               {fee
@@ -102,7 +113,11 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
         </div>
         {memo ? (
           <div className={styleDetailsTab.section}>
-            <div className={styleDetailsTab.title}>Memo</div>
+            <div className={styleDetailsTab.title}>
+              {intl.formatMessage({
+                id: "sign.info.memo"
+              })}
+            </div>
             <div className={styleDetailsTab.memo}>{memo}</div>
           </div>
         ) : null}

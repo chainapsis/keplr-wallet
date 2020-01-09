@@ -2,6 +2,7 @@ import React from "react";
 import { shortenAddress } from "../../../../common/address";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { IntlShape, FormattedMessage } from "react-intl";
 
 export interface MessageObj {
   type: string;
@@ -44,8 +45,10 @@ function MessageType<T extends Messages>(
   return msg.type === type;
 }
 
+/* eslint-disable react/display-name */
 export function renderMessage(
-  msg: MessageObj
+  msg: MessageObj,
+  intl: IntlShape
 ): {
   icon: string | undefined;
   title: string;
@@ -65,18 +68,22 @@ export function renderMessage(
 
     return {
       icon: "fas fa-paper-plane",
-      title: "Send",
+      title: intl.formatMessage({
+        id: "sign.list.message.cosmos-sdk/MsgSend.title"
+      }),
       content: (
-        <>
-          <b>{shortenAddress(msg.value.to_address, 20)}</b> will receive{" "}
-          <b>
-            {receives
+        <FormattedMessage
+          id="sign.list.message.cosmos-sdk/MsgSend.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            recipient: shortenAddress(msg.value.to_address, 20),
+            amount: receives
               .map(coin => {
                 return `${coin.amount} ${coin.denom}`;
               })
-              .join(",")}
-          </b>
-        </>
+              .join(",")
+          }}
+        />
       )
     };
   }
@@ -88,12 +95,18 @@ export function renderMessage(
 
     return {
       icon: "fas fa-layer-group",
-      title: "Delegate",
+      title: intl.formatMessage({
+        id: "sign.list.message.cosmos-sdk/MsgDelegate.title"
+      }),
       content: (
-        <>
-          <b>{shortenAddress(msg.value.validator_address, 28)}</b> will be
-          delegated <b>{`${clearDecimals(parsed.amount)} ${parsed.denom}`}</b>
-        </>
+        <FormattedMessage
+          id="sign.list.message.cosmos-sdk/MsgDelegate.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            validator: shortenAddress(msg.value.validator_address, 28),
+            amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`
+          }}
+        />
       )
     };
   }
@@ -104,6 +117,7 @@ export function renderMessage(
     content: <b>Check data tab</b>
   };
 }
+/* eslint-enable react/display-name */
 
 function clearDecimals(dec: string): string {
   for (let i = dec.length - 1; i >= 0; i--) {

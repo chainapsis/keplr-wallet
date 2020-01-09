@@ -18,6 +18,7 @@ import { useSignature } from "../../../hooks";
 import classnames from "classnames";
 import { DataTab } from "./data-tab";
 import { DetailsTab } from "./details-tab";
+import { useIntl } from "react-intl";
 
 enum Tab {
   Details,
@@ -33,6 +34,8 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
   const index = match.params.index;
 
   const [tab, setTab] = useState<Tab>(Tab.Details);
+
+  const intl = useIntl();
 
   const { chainStore } = useStore();
 
@@ -114,7 +117,9 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
                   setTab(Tab.Details);
                 }}
               >
-                Details
+                {intl.formatMessage({
+                  id: "sign.tab.details"
+                })}
               </a>
             </li>
             <li className={classnames({ "is-active": tab === Tab.Data })}>
@@ -123,7 +128,9 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
                   setTab(Tab.Data);
                 }}
               >
-                Data
+                {intl.formatMessage({
+                  id: "sign.tab.data"
+                })}
               </a>
             </li>
           </ul>
@@ -148,7 +155,9 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
             loading={signing.requested}
             onClick={onApproveClick}
           >
-            Approve
+            {intl.formatMessage({
+              id: "sign.button.approve"
+            })}
           </Button>
           <Button
             className={style.button}
@@ -162,7 +171,9 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
             loading={signing.requested}
             onClick={onRejectClick}
           >
-            Reject
+            {intl.formatMessage({
+              id: "sign.button.reject"
+            })}
           </Button>
         </div>
       </div>
