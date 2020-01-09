@@ -14,6 +14,7 @@ import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 export interface CoinInputProps {
   currencies: Currency[];
   balances?: Coin[];
+  balanceText?: string;
 
   className?: string;
   color?: "primary" | "info" | "success" | "warning" | "danger";
@@ -43,6 +44,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
   const {
     currencies,
     balances,
+    balanceText,
     className,
     color,
     label,
@@ -141,9 +143,15 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
                 }}
               >
                 {balance
-                  ? `Balance: ${balance.dec.toString(balance.decimals)} ${
-                      balance.denom
-                    }`
+                  ? balanceText
+                    ? // TODO: Can use api in react-intl?
+                      `${balanceText}: 
+                        ${balance.dec.toString(balance.decimals)} ${
+                        balance.denom
+                      }`
+                    : `Balance: ${balance.dec.toString(balance.decimals)} ${
+                        balance.denom
+                      }`
                   : "?"}
               </div>
             ) : null}

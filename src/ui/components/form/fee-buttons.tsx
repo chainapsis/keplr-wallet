@@ -32,6 +32,11 @@ export interface FeeButtonsProps {
   className?: string;
   color?: "primary" | "info" | "success" | "warning" | "danger";
   label?: string;
+  feeSelectLabels?: {
+    low: string;
+    average: string;
+    high: string;
+  };
   error?: string;
 
   // TODO: handle muliple fees.
@@ -52,6 +57,7 @@ enum FeeSelect {
 export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
   color = "primary",
   label,
+  feeSelectLabels = { low: "Low", average: "Average", high: "High" },
   error,
   currency,
   price,
@@ -137,7 +143,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             setFeeSelect(FeeSelect.LOW);
           }, [])}
         >
-          <div className={styleFeeButtons.title}>Low</div>
+          <div className={styleFeeButtons.title}>{feeSelectLabels.low}</div>
           <div className={styleFeeButtons.fiat}>
             {price.gt(new Dec(0)) && feeLow
               ? `$${DecUtils.decToStrWithoutTrailingZeros(
@@ -166,7 +172,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             setFeeSelect(FeeSelect.AVERAGE);
           }, [])}
         >
-          <div className={styleFeeButtons.title}>Average</div>
+          <div className={styleFeeButtons.title}>{feeSelectLabels.average}</div>
           <div className={styleFeeButtons.fiat}>
             {price.gt(new Dec(0)) && feeAverage
               ? `$${DecUtils.decToStrWithoutTrailingZeros(
@@ -195,7 +201,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             setFeeSelect(FeeSelect.HIGH);
           }, [])}
         >
-          <div className={styleFeeButtons.title}>High</div>
+          <div className={styleFeeButtons.title}>{feeSelectLabels.high}</div>
           <div className={styleFeeButtons.fiat}>
             {price.gt(new Dec(0)) && feeHigh
               ? `$${DecUtils.decToStrWithoutTrailingZeros(

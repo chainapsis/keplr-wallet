@@ -30,5 +30,21 @@
   "lock.input.password": "Password",
   "lock.input.password.error.required": "Empty password",
   "lock.input.password.error.invalid": "Invaid password",
-  "lock.button.unlock": "Unlock"
+  "lock.button.unlock": "Unlock",
+
+  "send.input.recipient": "Recipient",
+  "send.input.recipient.error.required": "Recipient is required",
+  "send.input.recipient.error.invalid": "Invalid address",
+  "send.input.amount": "Amount",
+  "send.input.amount.error.required": "Amount is required",
+  "send.input.amount.error.insufficient": "Insufficient asset",
+  "send.input.memo": "Memo (Optionnal)",
+  "send.input.fee": "Fee",
+  "send.input.fee.error.required": "Fee is required",
+  "send.input-button.balance": "Balance",
+  "send.button.send": "Send",
+
+  "fee-buttons.select.low": "Low",
+  "fee-buttons.select.average": "Avergage",
+  "fee-buttons.select.high": "High"
 }

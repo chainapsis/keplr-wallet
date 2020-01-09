@@ -110,6 +110,7 @@ export class KeyRingKeeper {
     }
 
     const accessOrigin = this.getAccessOrigin(chainId);
+    console.log(origin);
     if (accessOrigin.indexOf(origin) <= -1) {
       throw new Error("This origin is not approved");
     }

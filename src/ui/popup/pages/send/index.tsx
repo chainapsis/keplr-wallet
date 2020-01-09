@@ -46,6 +46,8 @@ import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { useNotification } from "../../../components/notification";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 
+import { useIntl } from "react-intl";
+
 interface FormData {
   recipient: string;
   amount: string;
@@ -56,6 +58,8 @@ interface FormData {
 
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
   ({ history }) => {
+    const intl = useIntl();
+
     const formMethods = useForm<FormData>({
       defaultValues: {
         recipient: "",
@@ -74,7 +78,14 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       clearError
     } = formMethods;
 
-    register({ name: "fee" }, { required: "Fee is required" });
+    register(
+      { name: "fee" },
+      {
+        required: intl.formatMessage({
+          id: "send.input.fee.error.required"
+        })
+      }
+    );
 
     const notification = useNotification();
 
@@ -159,7 +170,13 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
 
               const amountInt = new Dec(amount).mul(precision).truncate();
               if (amountInt.add(feeAmount).gt(balacne.amount)) {
-                setError("amount", "not-enough-fund", "Not enough fund");
+                setError(
+                  "amount",
+                  "not-enough-fund",
+                  intl.formatMessage({
+                    id: "send.input.amount.error.insufficient"
+                  })
+                );
               } else {
                 clearError("amount");
               }
@@ -169,7 +186,13 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
           }
 
           if (!find) {
-            setError("amount", "not-enough-fund", "Not enough fund");
+            setError(
+              "amount",
+              "not-enough-fund",
+              intl.formatMessage({
+                id: "send.input.amount.error.insufficient"
+              })
+            );
           }
         } else {
           clearError("amount");
@@ -177,7 +200,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       } catch {
         clearError("amount");
       }
-    }, [accountStore.assets, amount, clearError, denom, fee, setError]);
+    }, [accountStore.assets, amount, clearError, denom, fee, intl, setError]);
 
     return (
       <HeaderLayout
@@ -250,11 +273,13 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             <div>
               <Input
                 type="text"
-                label="Recipient"
+                label={intl.formatMessage({ id: "send.input.recipient" })}
                 name="recipient"
                 error={errors.recipient && errors.recipient.message}
                 ref={register({
-                  required: "Recipient is required",
+                  required: intl.formatMessage({
+                    id: "send.input.recipient.error.required"
+                  }),
                   validate: (value: string) => {
                     // This is not react hook.
                     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -264,7 +289,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                         try {
                           AccAddress.fromBech32(value);
                         } catch (e) {
-                          return "Invalid address";
+                          return intl.formatMessage({
+                            id: "send.input.recipient.error.invalid"
+                          });
                         }
                       }
                     );
@@ -273,8 +300,11 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               />
               <CoinInput
                 currencies={getCurrencies(chainStore.chainInfo.currencies)}
-                label="Amount"
+                label={intl.formatMessage({ id: "send.input.amount" })}
                 balances={accountStore.assets}
+                balanceText={intl.formatMessage({
+                  id: "send.input-button.balance"
+                })}
                 onChangeAllBanace={onChangeAllBalance}
                 error={
                   (errors.amount && errors.amount.message) ||
@@ -283,18 +313,22 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 input={{
                   name: "amount",
                   ref: register({
-                    required: "Amount is required"
+                    required: intl.formatMessage({
+                      id: "send.input.amount.error.required"
+                    })
                   })
                 }}
                 select={{
                   name: "denom",
                   ref: register({
-                    required: "Denom is required"
+                    required: intl.formatMessage({
+                      id: "send.input.amount.error.required"
+                    })
                   })
                 }}
               />
               <TextArea
-                label="Memo (Optional)"
+                label={intl.formatMessage({ id: "send.input.memo" })}
                 name="memo"
                 rows={2}
                 style={{ resize: "none" }}
@@ -303,7 +337,14 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               />
               <FormContext {...formMethods}>
                 <FeeButtons
-                  label="Fee"
+                  label={intl.formatMessage({ id: "send.input.fee" })}
+                  feeSelectLabels={{
+                    low: intl.formatMessage({ id: "fee-buttons.select.low" }),
+                    average: intl.formatMessage({
+                      id: "fee-buttons.select.average"
+                    }),
+                    high: intl.formatMessage({ id: "fee-buttons.select.high" })
+                  }}
                   name="fee"
                   error={errors.fee && errors.fee.message}
                   currency={feeCurrency!}
@@ -322,7 +363,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               loading={cosmosJS.loading}
               disabled={cosmosJS.sendMsgs == null}
             >
-              Send
+              {intl.formatMessage({
+                id: "send.button.send"
+              })}
             </Button>
           </div>
         </form>
