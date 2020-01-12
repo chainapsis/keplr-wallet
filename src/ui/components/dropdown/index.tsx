@@ -8,16 +8,18 @@ import React, {
 
 import classnames from "classnames";
 
-import style from "./styles.module.scss";
-
 export interface Props {
+  className?: string;
   title: string;
   isUp?: boolean;
+  isRight?: boolean;
 }
 
 export const Dropdown: FunctionComponent<Props> = ({
+  className,
   title,
   isUp,
+  isRight,
   children
 }) => {
   const [showSelect, setShowSelect] = useState(false);
@@ -45,8 +47,11 @@ export const Dropdown: FunctionComponent<Props> = ({
     <div
       className={classnames(
         "dropdown",
-        style.dropdown,
+        className,
         { "is-up": isUp },
+        {
+          "is-right": isRight
+        },
         {
           "is-active": showSelect
         }
@@ -54,7 +59,7 @@ export const Dropdown: FunctionComponent<Props> = ({
     >
       <div className="dropdown-trigger">
         <button
-          className="button"
+          className={classnames("button", className)}
           aria-haspopup="true"
           aria-controls="dropdown-menu"
           onClick={dropdownOnClick}
