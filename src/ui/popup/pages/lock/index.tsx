@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 
 import { Input } from "../../../components/form";
 
@@ -14,6 +14,7 @@ import queryString from "query-string";
 import { RouteComponentProps } from "react-router";
 
 import { FormattedMessage, useIntl } from "react-intl";
+import { disableScroll, enableScroll } from "../../../../common/window";
 
 interface FormData {
   password: string;
@@ -27,6 +28,14 @@ export const LockPage: FunctionComponent<Pick<
 
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
+
+  useEffect(() => {
+    if (external) {
+      disableScroll();
+    } else {
+      enableScroll();
+    }
+  }, [external]);
 
   const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {

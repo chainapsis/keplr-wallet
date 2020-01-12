@@ -19,6 +19,7 @@ import classnames from "classnames";
 import { DataTab } from "./data-tab";
 import { DetailsTab } from "./details-tab";
 import { useIntl } from "react-intl";
+import { disableScroll, enableScroll } from "../../../../common/window";
 
 enum Tab {
   Details,
@@ -30,6 +31,14 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
 }>> = ({ history, match, location }) => {
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
+
+  useEffect(() => {
+    if (external) {
+      disableScroll();
+    } else {
+      enableScroll();
+    }
+  }, [external]);
 
   const index = match.params.index;
 

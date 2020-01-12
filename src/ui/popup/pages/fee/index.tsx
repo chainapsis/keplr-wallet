@@ -31,6 +31,7 @@ import style from "./style.module.scss";
 
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { disableScroll, enableScroll } from "../../../../common/window";
 
 interface FormData {
   gas: string;
@@ -43,6 +44,14 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
 }>> = observer(({ match, location, history }) => {
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
+
+  useEffect(() => {
+    if (external) {
+      disableScroll();
+    } else {
+      enableScroll();
+    }
+  }, [external]);
 
   const index = match.params.index;
 
