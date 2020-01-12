@@ -16,7 +16,12 @@ export const Header: FunctionComponent = observer(() => {
       {/* Fake is needed because section may not fill all remaining screen.
           Fake make sure that header always fill screen. */}
       <div className={style.fake} />
-      <div className="level-left">{chainStore.chainInfo.chainId}</div>
+      <div className="level-left">
+        <img
+          src={require("../../public/assets/logo-temp.png")}
+          style={{ height: "30px", marginTop: "6px" }}
+        />
+      </div>
 
       <div className="level-right">
         <Dropdown
