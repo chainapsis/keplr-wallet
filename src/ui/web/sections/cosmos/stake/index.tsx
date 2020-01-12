@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback } from "react";
+import React, { FunctionComponent, useCallback, useMemo } from "react";
 
 import { Card } from "../../../components/card";
 
@@ -61,6 +61,23 @@ export const StakeSection: FunctionComponent = observer(() => {
   ) as Currency;
 
   const notification = useNotification();
+
+  const rewardExist = useMemo(() => {
+    if (rewards.length > 0 && cosmosJS.addresses.length > 0) {
+      for (const r of rewards) {
+        if (r.reward) {
+          for (const reward of r.reward) {
+            const dec = new Dec(reward.amount);
+            if (dec.truncate().gt(new Int(0))) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }, [cosmosJS.addresses.length, rewards]);
 
   const withdrawAllRewards = useCallback(() => {
     if (rewards.length > 0 && cosmosJS.addresses.length > 0) {
@@ -144,7 +161,7 @@ export const StakeSection: FunctionComponent = observer(() => {
                 className={style.button}
                 color="primary"
                 loading={cosmosJS.loading}
-                disabled={!cosmosJSInited}
+                disabled={!cosmosJSInited || !rewardExist}
                 onClick={withdrawAllRewards}
               >
                 CLAIM ALL REWARD
