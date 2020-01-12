@@ -8,8 +8,6 @@ import {
   Redirect
 } from "react-router-dom";
 
-import { Sidebar } from "./components/sidebar";
-
 import { StoreProvider, useStore } from "./stores";
 
 import "./styles/global.scss";
@@ -23,11 +21,7 @@ import {
 
 import Modal from "react-modal";
 
-import classnames from "classnames";
-
 import { SupportedChainWalletUIs } from "./supported-chain";
-
-import style from "./style.module.scss";
 
 configure({
   enforceActions: "always" // Make mobx to strict mode.
@@ -53,7 +47,7 @@ const Wallet: FunctionComponent<RouteComponentProps<{
       className="columns is-gapless"
       style={{ height: "100%", marginBottom: 0 }}
     >
-      <div
+      {/*<div
         className={classnames(
           "column",
           "is-2-widescreen",
@@ -76,13 +70,13 @@ const Wallet: FunctionComponent<RouteComponentProps<{
             );
           })}
         </Sidebar>
-      </div>
+      </div>*/}
       {/* This is just fake column.
        This is needed because `sidebar` has fixed position when not mobile screen.
        So, it can't occupy the width of column.
        This will take the place of the sidebar. */}
-      <div className="column is-2-widescreen is-3" />
-      <div className="column is-8-widescreen is-9">
+      <div className="column is-2-widescreen is-0" />
+      <div className="column is-8-widescreen is-12">
         <Header />
         <div>
           <Section />

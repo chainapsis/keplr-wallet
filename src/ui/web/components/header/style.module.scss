@@ -2,8 +2,7 @@
 
 .header {
   height: $header-height;
-  margin-bottom: 0 !important;
-
+  margin: 0 $base-section-padding !important;
   background-color: white;
 
   .chain-icon {
@@ -14,7 +13,12 @@
 .fake {
   z-index: -1000;
   position: absolute;
+  right: 0;
   width: 100%;
   height: $header-height;
   background-color: white;
+}
+
+.dropdown {
+  min-width: 160px;
 }
