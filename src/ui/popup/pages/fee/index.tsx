@@ -31,7 +31,11 @@ import style from "./style.module.scss";
 
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import { disableScroll, enableScroll } from "../../../../common/window";
+import {
+  disableScroll,
+  enableScroll,
+  fitWindow
+} from "../../../../common/window";
 
 interface FormData {
   gas: string;
@@ -47,6 +51,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
 
   useEffect(() => {
     if (external) {
+      fitWindow();
       disableScroll();
     } else {
       enableScroll();

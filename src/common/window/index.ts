@@ -1,5 +1,29 @@
+const PopupSize = {
+  width: 360,
+  height: 580
+};
+
 export function openWindow(url: string) {
-  window.open(url, "Kepler", "width=360px,height=600px,scrollbars=0", true);
+  window.open(
+    url,
+    "Kepler",
+    `width=${PopupSize.width}px,height=${PopupSize.height}px,scrollbars=0`,
+    true
+  );
+}
+
+/**
+ * window.open() has many options for sizing, but they require different ways to do this per web browser.
+ * So, to avoid this problem, just manually set sizing if new window popup is opened.
+ */
+export function fitWindow() {
+  // Get the gap size like title bar or menu bar, etc...
+  const gap = {
+    width: window.outerWidth - window.innerWidth,
+    height: window.outerHeight - window.innerHeight
+  };
+
+  window.resizeTo(PopupSize.width + gap.width, PopupSize.height + gap.height);
 }
 
 /**

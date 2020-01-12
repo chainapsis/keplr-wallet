@@ -19,7 +19,11 @@ import classnames from "classnames";
 import { DataTab } from "./data-tab";
 import { DetailsTab } from "./details-tab";
 import { useIntl } from "react-intl";
-import { disableScroll, enableScroll } from "../../../../common/window";
+import {
+  disableScroll,
+  enableScroll,
+  fitWindow
+} from "../../../../common/window";
 
 enum Tab {
   Details,
@@ -34,6 +38,7 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
 
   useEffect(() => {
     if (external) {
+      fitWindow();
       disableScroll();
     } else {
       enableScroll();

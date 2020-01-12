@@ -14,7 +14,11 @@ import queryString from "query-string";
 import { RouteComponentProps } from "react-router";
 
 import { FormattedMessage, useIntl } from "react-intl";
-import { disableScroll, enableScroll } from "../../../../common/window";
+import {
+  disableScroll,
+  enableScroll,
+  fitWindow
+} from "../../../../common/window";
 
 interface FormData {
   password: string;
@@ -31,6 +35,7 @@ export const LockPage: FunctionComponent<Pick<
 
   useEffect(() => {
     if (external) {
+      fitWindow();
       disableScroll();
     } else {
       enableScroll();
