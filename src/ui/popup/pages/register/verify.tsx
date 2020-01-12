@@ -41,7 +41,7 @@ export const VerifyInPage: FunctionComponent<{
           {suggestedWords.map((word, i) => {
             return (
               <Button
-                key={word}
+                key={word + i.toString()}
                 onClick={() => {
                   const word = suggestedWords[i];
                   setSuggestedWords(
@@ -64,7 +64,7 @@ export const VerifyInPage: FunctionComponent<{
         {randomizedWords.map((word, i) => {
           return (
             <Button
-              key={word}
+              key={word + i.toString()}
               onClick={() => {
                 const word = randomizedWords[i];
                 setRandomizedWords(
