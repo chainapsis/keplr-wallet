@@ -60,18 +60,18 @@ export interface ChainInfo {
 
 export const NativeChainInfos: ChainInfo[] = [
   {
-    rpc: "https://node-cosmoshub-3.get-kepler.com/rpc",
-    rest: "https://node-cosmoshub-3.get-kepler.com/rest",
+    rpc: "https://node-cosmoshub-3.keplr.app/rpc",
+    rest: "https://node-cosmoshub-3.keplr.app/rest",
     chainId: "cosmoshub-3",
     chainName: "Cosmos",
     nativeCurrency: "atom",
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.get-kepler.com/#/cosmoshub-3"
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
         : "http://localhost:8081/#/cosmoshub-3",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.get-kepler.com/#/cosmoshub-3"
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
         : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
@@ -79,18 +79,18 @@ export const NativeChainInfos: ChainInfo[] = [
     feeCurrencies: ["atom"]
   },
   {
-    rpc: "https://node-kava-2.get-kepler.com/rpc",
-    rest: "https://node-kava-2.get-kepler.com/rest",
+    rpc: "https://node-kava-2.keplr.app/rpc",
+    rest: "https://node-kava-2.keplr.app/rest",
     chainId: "kava-2",
     chainName: "Kava",
     nativeCurrency: "kava",
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.get-kepler.com/#/kava-2"
+        ? "https://wallet.keplr.app/#/kava-2"
         : "http://localhost:8081/#/kava-2",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.get-kepler.com/#/kava-2"
+        ? "https://wallet.keplr.app/#/kava-2"
         : "http://localhost:8081/#/kava-2",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("kava"),
@@ -110,10 +110,16 @@ export interface AccessOrigin {
 export const ExtensionAccessOrigins: AccessOrigin[] = [
   {
     chainId: "cosmoshub-3",
-    origins: ["http://localhost:8081", "https://wallet.get-kepler.com"]
+    origins:
+      process.env.NODE_ENV === "production"
+        ? ["https://wallet.keplr.app"]
+        : ["http://localhost:8081"]
   },
   {
     chainId: "kava-2",
-    origins: ["http://localhost:8081", "https://wallet.get-kepler.com"]
+    origins:
+      process.env.NODE_ENV === "production"
+        ? ["https://wallet.keplr.app"]
+        : ["http://localhost:8081"]
   }
 ];
