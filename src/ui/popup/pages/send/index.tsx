@@ -315,7 +315,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   ref: register({
                     required: intl.formatMessage({
                       id: "send.input.amount.error.required"
-                    })
+                    }),
+                    validate: () => {
+                      // Without this, react-form-hooks clears the errors added manually when validating.
+                      // So, re-validation per onChange will clear the errors related to amount.
+                      // To avoid this problem, jsut return the previous error when validating.
+                      // This is not good solution.
+                      // TODO: Make the process that checks that a user has enough assets be better.
+                      return errors?.amount?.message;
+                    }
                   })
                 }}
                 select={{
