@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useCallback, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useMemo,
+  useState
+} from "react";
 
 import { Button } from "../../../components/button";
 
@@ -59,6 +64,24 @@ export const StakeView: FunctionComponent<Pick<
     chainStore.chainInfo.rest,
     accountStore.bech32Address
   );
+
+  const rewardExist = useMemo(() => {
+    const rewards = reward.rewards;
+    if (rewards.length > 0 && cosmosJS.addresses.length > 0) {
+      for (const r of rewards) {
+        if (r.reward) {
+          for (const reward of r.reward) {
+            const dec = new Dec(reward.amount);
+            if (dec.truncate().gt(new Int(0))) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }, [cosmosJS.addresses.length, reward.rewards]);
 
   const withdrawAllRewards = useCallback(() => {
     if (reward.rewards.length > 0 && accountStore.bech32Address) {
@@ -171,7 +194,9 @@ export const StakeView: FunctionComponent<Pick<
             <div style={{ flex: 1 }} />
             <Button
               color="primary"
-              disabled={cosmosJS == null || cosmosJS.sendMsgs == null}
+              disabled={
+                cosmosJS == null || cosmosJS.sendMsgs == null || !rewardExist
+              }
               loading={cosmosJS.loading}
               onClick={withdrawAllRewards}
             >
