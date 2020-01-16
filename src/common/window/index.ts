@@ -6,7 +6,7 @@ const PopupSize = {
 export function openWindow(url: string) {
   window.open(
     url,
-    "Kepler",
+    "Keplr",
     `width=${PopupSize.width}px,height=${PopupSize.height}px,scrollbars=0`,
     true
   );

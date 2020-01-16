@@ -1,7 +1,7 @@
 {
-  "name": "kepler",
-  "version": "0.0.1-alpha.1",
-  "description": "Kepler is a browser extension wallet for the Inter blockchain ecosystem.",
+  "name": "keplr",
+  "version": "0.0.1",
+  "description": "Keplr is a browser extension wallet for the Inter blockchain ecosystem.",
   "main": "index.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
