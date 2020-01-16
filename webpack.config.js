@@ -73,7 +73,10 @@ const extensionConfig = (env, args) => {
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"]
     },
     output: {
-      path: path.resolve(__dirname, "dist/extension"),
+      path: path.resolve(
+        __dirname,
+        isEnvDevelopment ? "dist/extension" : "prod/extension"
+      ),
       filename: "[name].bundle.js"
     },
     resolve: commonResolve("src/ui/popup/public/assets"),
@@ -120,7 +123,7 @@ const webConfig = (env, args) => {
       main: ["./src/ui/web/web.tsx"]
     },
     output: {
-      path: path.resolve(__dirname, "dist/web"),
+      path: path.resolve(__dirname, isEnvDevelopment ? "dist/web" : "prod/web"),
       filename: "[name].bundle.js"
     },
     resolve: commonResolve("src/ui/web/public/assets"),
