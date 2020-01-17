@@ -86,6 +86,10 @@ export class MessageManager {
           sendResponse({
             error: `Permission rejected: ${e.message || e.toString()}`
           });
+
+          console.log(
+            `${msg.type()} is rejected: ${e.message || e.toString()}`
+          );
         } else {
           sendResponse({
             error: "Permission rejected, and error is null"
@@ -102,6 +106,10 @@ export class MessageManager {
           sendResponse({
             error: e.message || e.toString()
           });
+
+          console.log(
+            `${msg.type()} is not valid: ${e.message || e.toString()}`
+          );
         } else {
           sendResponse({
             error: "Fail to validate msg, and error is null"
@@ -138,6 +146,10 @@ export class MessageManager {
               sendResponse({
                 error: e.message || e.toString()
               });
+
+              console.log(
+                `${msg.type()} occurs error: ${e.message || e.toString()}`
+              );
             } else {
               sendResponse({
                 error: "Unknown error, and error is null"
@@ -150,6 +162,8 @@ export class MessageManager {
         sendResponse({
           error: e.message || e.toString()
         });
+
+        console.log(`${msg.type()} occurs error: ${e.message || e.toString()}`);
         return;
       }
     } catch (e) {
