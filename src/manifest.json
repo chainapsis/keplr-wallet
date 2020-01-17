@@ -22,8 +22,5 @@
       "all_frames": true
     }
   ],
-  "externally_connectable": {
-    "ids": ["*"]
-  },
   "web_accessible_resources": ["injectedScript.bundle.js"]
 }
