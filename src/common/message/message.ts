@@ -1,3 +1,5 @@
+import { MessageSender } from "./types";
+
 /**
  * This messaging system is influenced by cosmos-sdk.
  * The messages are processed in the following order:
@@ -29,14 +31,25 @@ export abstract class Message<R> {
   /**
    * Ask for approval if message is sent externally.
    */
-  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+  approveExternal(sender: MessageSender): boolean {
     if (!sender.url) {
       return false;
     }
     const url = new URL(sender.url);
-    if (url.origin !== `chrome-extension://${chrome.runtime.id}`) {
-      return false;
+    if (typeof chrome === "undefined") {
+      if (url.origin !== new URL(browser.runtime.getURL("/")).origin) {
+        return false;
+      }
+    } else {
+      if (url.origin !== new URL(chrome.runtime.getURL("/")).origin) {
+        return false;
+      }
     }
-    return sender.id === chrome.runtime.id;
+
+    if (typeof chrome !== "undefined") {
+      return sender.id === chrome.runtime.id;
+    } else {
+      return sender.id === browser.runtime.id;
+    }
   }
 }

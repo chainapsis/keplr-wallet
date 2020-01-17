@@ -1,4 +1,4 @@
-import { Message } from "../../common/message";
+import { Message, MessageSender } from "../../common/message";
 import { ROUTE } from "./constants";
 import { ChainInfo } from "../../chain-info";
 import { KeyRingStatus } from "./keyring";
@@ -34,7 +34,7 @@ export class EnableKeyRingMsg extends Message<{
 
   // Approve external approves sending message if they submit their origin correctly.
   // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+  approveExternal(sender: MessageSender): boolean {
     const isInternal = super.approveExternal(sender);
     if (isInternal) {
       return true;
@@ -300,7 +300,7 @@ export class GetKeyMsg extends Message<KeyHex> {
 
   // Approve external approves sending message if they submit their origin correctly.
   // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+  approveExternal(sender: MessageSender): boolean {
     const isInternal = super.approveExternal(sender);
     if (isInternal) {
       return true;
@@ -364,7 +364,7 @@ export class RequestTxBuilderConfigMsg extends Message<{
 
   // Approve external approves sending message if they submit their origin correctly.
   // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+  approveExternal(sender: MessageSender): boolean {
     const isInternal = super.approveExternal(sender);
     if (isInternal) {
       return true;
@@ -530,7 +530,7 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
 
   // Approve external approves sending message if they submit their origin correctly.
   // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: chrome.runtime.MessageSender): boolean {
+  approveExternal(sender: MessageSender): boolean {
     const isInternal = super.approveExternal(sender);
     if (isInternal) {
       return true;

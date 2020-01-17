@@ -1,7 +1,7 @@
 import { Message } from "./message";
 import { Handler } from "./handler";
-import MessageSender = chrome.runtime.MessageSender;
 import { Result } from "./interfaces";
+import { MessageSender } from "./types";
 
 export class MessageManager {
   private registeredMsgType: Map<
@@ -36,8 +36,13 @@ export class MessageManager {
     }
 
     this.port = port;
-    chrome.runtime.onMessage.addListener(this.onMessage);
-    chrome.runtime.onMessageExternal.addListener(this.onMessage);
+    if (typeof chrome === "undefined") {
+      browser.runtime.onMessage.addListener(this.onMessage);
+      browser.runtime.onMessageExternal.addListener(this.onMessage);
+    } else {
+      chrome.runtime.onMessage.addListener(this.onMessage);
+      chrome.runtime.onMessageExternal.addListener(this.onMessage);
+    }
   }
 
   private onMessage = (
