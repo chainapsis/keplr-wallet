@@ -19,10 +19,22 @@ export function openWindow(url: string) {
     type: "popup" as "popup"
   };
 
-  if (typeof chrome === "undefined") {
+  /*
+   If it runs on chrome, window is opened and replaced by using window.open().
+   But if it runs on not chrome, window is opened by web extension api.
+   This approach make some difference related to setting fee and signing process.
+   In the prior case, setting fee window will not be closed and will be replaced by signing page.
+   But, in the latter case, setting fee window will be closed and new signing page window will be opened.
+   */
+  if (typeof browser !== "undefined") {
     browser.windows.create({ allowScriptsToClose: true, ...option });
   } else {
-    chrome.windows.create(option);
+    window.open(
+      url,
+      "Keplr",
+      `width=${option.width}px,height=${option.height}px,scrollbars=0`,
+      true
+    );
   }
 }
 
