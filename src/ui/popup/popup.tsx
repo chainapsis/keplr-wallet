@@ -26,6 +26,9 @@ import { SignPage } from "./pages/sign";
 import { FeePage } from "./pages/fee";
 import Modal from "react-modal";
 
+// Make sure that icon file will be included in bundle
+require("./public/assets/temp-icon.svg");
+
 configure({
   enforceActions: "always" // Make mobx to strict mode.
 });

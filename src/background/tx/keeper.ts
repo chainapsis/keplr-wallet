@@ -8,6 +8,9 @@ import {
   ResultBroadcastTxCommit
 } from "@everett-protocol/cosmosjs/rpc/tx";
 
+import { Notification } from "../../common/notification";
+import { getExtensionURL } from "../../common/window";
+
 const Buffer = require("buffer/").Buffer;
 
 interface CosmosSdkError {
@@ -56,7 +59,12 @@ export class BackgroundTxKeeper {
     let result: ResultBroadcastTx | ResultBroadcastTxCommit | undefined;
 
     try {
-      new Notification("Tx is pending...");
+      Notification.create({
+        type: "basic",
+        iconUrl: getExtensionURL("assets/temp-icon.svg"),
+        title: "Tx is pending...",
+        message: "Wait a second"
+      });
 
       if (mode === "commit") {
         result = await rpc.broadcastTxCommit(Buffer.from(txBytes, "hex"));
@@ -80,7 +88,13 @@ export class BackgroundTxKeeper {
         }
       }
 
-      new Notification("Tx succeeds");
+      Notification.create({
+        type: "basic",
+        iconUrl: getExtensionURL("assets/temp-icon.svg"),
+        title: "Tx succeeds",
+        // TODO: Let users know the tx id?
+        message: "Congratulations!"
+      });
     } catch (e) {
       console.log(e);
       let message = e.message;
@@ -122,8 +136,11 @@ export class BackgroundTxKeeper {
         // noop
       }
 
-      new Notification("Tx failed", {
-        body: message
+      Notification.create({
+        type: "basic",
+        iconUrl: getExtensionURL("assets/temp-icon.svg"),
+        title: "Tx failed",
+        message
       });
     }
   }

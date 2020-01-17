@@ -1,7 +1,7 @@
 import { Message } from "./message";
 import { Handler } from "./handler";
-import MessageSender = chrome.runtime.MessageSender;
 import { Result } from "./interfaces";
+import { MessageSender } from "./types";
 
 export class MessageManager {
   private registeredMsgType: Map<
@@ -36,8 +36,13 @@ export class MessageManager {
     }
 
     this.port = port;
-    chrome.runtime.onMessage.addListener(this.onMessage);
-    chrome.runtime.onMessageExternal.addListener(this.onMessage);
+    if (typeof chrome === "undefined") {
+      browser.runtime.onMessage.addListener(this.onMessage);
+      browser.runtime.onMessageExternal.addListener(this.onMessage);
+    } else {
+      chrome.runtime.onMessage.addListener(this.onMessage);
+      chrome.runtime.onMessageExternal.addListener(this.onMessage);
+    }
   }
 
   private onMessage = (
@@ -81,6 +86,10 @@ export class MessageManager {
           sendResponse({
             error: `Permission rejected: ${e.message || e.toString()}`
           });
+
+          console.log(
+            `${msg.type()} is rejected: ${e.message || e.toString()}`
+          );
         } else {
           sendResponse({
             error: "Permission rejected, and error is null"
@@ -97,6 +106,10 @@ export class MessageManager {
           sendResponse({
             error: e.message || e.toString()
           });
+
+          console.log(
+            `${msg.type()} is not valid: ${e.message || e.toString()}`
+          );
         } else {
           sendResponse({
             error: "Fail to validate msg, and error is null"
@@ -133,6 +146,10 @@ export class MessageManager {
               sendResponse({
                 error: e.message || e.toString()
               });
+
+              console.log(
+                `${msg.type()} occurs error: ${e.message || e.toString()}`
+              );
             } else {
               sendResponse({
                 error: "Unknown error, and error is null"
@@ -145,6 +162,8 @@ export class MessageManager {
         sendResponse({
           error: e.message || e.toString()
         });
+
+        console.log(`${msg.type()} occurs error: ${e.message || e.toString()}`);
         return;
       }
     } catch (e) {

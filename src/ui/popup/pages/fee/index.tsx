@@ -102,8 +102,14 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
   );
 
   const onApprove = useCallback(() => {
-    // Don't do anything. Wallet provider will redirect to signing page.
-  }, []);
+    if (external) {
+      // If it runs on not chrome, setting fee page will be closed and siging page will be opened by wallet provider.
+      // But, if it runs on chrome, wallet provider will replace window with signing page, so we don't have to close this page.
+      if (typeof browser !== "undefined") {
+        window.close();
+      }
+    }
+  }, [external]);
 
   const txBuilder = useTxBuilderConfig(index, onConfigInit, onApprove);
 
