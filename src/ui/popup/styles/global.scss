@@ -24,6 +24,8 @@ html {
   height: $popup-size-height;
 
   background-color: $background-color;
+
+  overflow: auto;
 }
 
 body {
