@@ -1,27 +1,49 @@
-import { Message } from "./message";
-import { Result } from "./interfaces";
+import { Message } from "../message";
+import { Result } from "../interfaces";
+
+/**
+ * Make polyfill of runtime.sendMessage.
+ * If it runs in chrome, it use the native chrome API.
+ * If it runs in not chrome, it use the standard web extension API.
+ */
+const runtime: {
+  sendMessage: (
+    message: any,
+    options: chrome.runtime.MessageOptions
+  ) => Promise<any>;
+} = (() => {
+  if (typeof chrome === "undefined") {
+    return { sendMessage: browser.runtime.sendMessage };
+  } else {
+    return {
+      sendMessage: (message: any, options: chrome.runtime.MessageOptions) => {
+        return new Promise(resolve => {
+          chrome.runtime.sendMessage(message, options, (result?: Result) => {
+            if (chrome.runtime.lastError) {
+              throw new Error(chrome.runtime.lastError.message);
+            }
+
+            resolve(result);
+          });
+        });
+      }
+    };
+  }
+})();
 
 function _sendMessage(
   port: string,
   msg: Message<unknown>,
   opts: { msgType?: string } = {}
 ): Promise<any> {
-  return new Promise(resolve => {
-    chrome.runtime.sendMessage(
-      {
-        port,
-        type: opts.msgType || msg.type(),
-        msg
-      },
-      (result?: Result) => {
-        if (chrome.runtime.lastError) {
-          throw new Error(chrome.runtime.lastError.message);
-        }
-
-        resolve(result);
-      }
-    );
-  });
+  return runtime.sendMessage(
+    {
+      port,
+      type: opts.msgType || msg.type(),
+      msg
+    },
+    {}
+  );
 }
 
 /**
