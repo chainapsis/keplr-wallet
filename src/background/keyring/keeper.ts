@@ -103,12 +103,17 @@ export class KeyRingKeeper {
   }
 
   checkAccessOrigin(chainId: string, origin: string) {
-    if (origin === `chrome-extension://${chrome.runtime.id}`) {
-      return;
+    if (typeof chrome === "undefined") {
+      if (origin === new URL(browser.runtime.getURL("/")).origin) {
+        return;
+      }
+    } else {
+      if (origin === new URL(chrome.runtime.getURL("/")).origin) {
+        return;
+      }
     }
 
     const accessOrigin = this.getAccessOrigin(chainId);
-    console.log(origin);
     if (accessOrigin.indexOf(origin) <= -1) {
       throw new Error("This origin is not approved");
     }
