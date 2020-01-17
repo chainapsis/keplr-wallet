@@ -9,14 +9,31 @@ import { Result } from "../interfaces";
 const runtime: {
   sendMessage: (
     message: any,
-    options: chrome.runtime.MessageOptions
+    options: {
+      includeTlsChannelId?: boolean;
+    }
   ) => Promise<any>;
 } = (() => {
   if (typeof chrome === "undefined") {
-    return { sendMessage: browser.runtime.sendMessage };
+    if (typeof browser === "undefined") {
+      return {
+        sendMessage: () => {
+          throw new Error(
+            "This browser doesn't support the messaging system for extension"
+          );
+        }
+      };
+    } else {
+      return { sendMessage: browser.runtime.sendMessage };
+    }
   } else {
     return {
-      sendMessage: (message: any, options: chrome.runtime.MessageOptions) => {
+      sendMessage: (
+        message: any,
+        options: {
+          includeTlsChannelId?: boolean;
+        }
+      ) => {
         return new Promise(resolve => {
           chrome.runtime.sendMessage(message, options, (result?: Result) => {
             if (chrome.runtime.lastError) {
@@ -67,7 +84,15 @@ export async function sendMessage<M extends Message<unknown>>(
   let posting: boolean = false;
 
   if (!opts || !opts.disablePostMessage) {
-    posting = chrome?.runtime?.id == null;
+    if (typeof chrome === "undefined") {
+      if (typeof browser === "undefined") {
+        posting = true;
+      } else {
+        posting = browser?.runtime?.id == null;
+      }
+    } else {
+      posting = chrome?.runtime?.id == null;
+    }
   }
 
   if (posting) {
