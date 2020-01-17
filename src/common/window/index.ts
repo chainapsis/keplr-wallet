@@ -3,13 +3,27 @@ const PopupSize = {
   height: 580
 };
 
+export function getExtensionURL(path: string): string {
+  if (typeof chrome === "undefined") {
+    return browser.runtime.getURL(path);
+  } else {
+    return chrome.runtime.getURL(path);
+  }
+}
+
 export function openWindow(url: string) {
-  window.open(
-    url,
-    "Keplr",
-    `width=${PopupSize.width}px,height=${PopupSize.height}px,scrollbars=0`,
-    true
-  );
+  const option = {
+    width: PopupSize.width,
+    height: PopupSize.height,
+    url: url,
+    type: "popup" as "popup"
+  };
+
+  if (typeof chrome === "undefined") {
+    browser.windows.create({ allowScriptsToClose: true, ...option });
+  } else {
+    chrome.windows.create(option);
+  }
 }
 
 /**
@@ -22,6 +36,34 @@ export function fitWindow() {
     width: window.outerWidth - window.innerWidth,
     height: window.outerHeight - window.innerHeight
   };
+
+  if (typeof chrome !== "undefined") {
+    if (chrome.windows) {
+      chrome.windows.getCurrent(window => {
+        if (window?.id != null) {
+          chrome.windows.update(window.id, {
+            width: PopupSize.width + gap.width,
+            height: PopupSize.height + gap.height
+          });
+        }
+      });
+      return;
+    }
+  }
+
+  if (typeof browser !== "undefined") {
+    if (browser.windows) {
+      browser.windows.getCurrent().then(window => {
+        if (window?.id != null) {
+          browser.windows.update(window.id, {
+            width: PopupSize.width + gap.width,
+            height: PopupSize.height + gap.height
+          });
+        }
+      });
+      return;
+    }
+  }
 
   window.resizeTo(PopupSize.width + gap.width, PopupSize.height + gap.height);
 }
