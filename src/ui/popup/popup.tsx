@@ -30,6 +30,9 @@ import Modal from "react-modal";
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");
+require("./public/assets/icon/icon-16.png");
+require("./public/assets/icon/icon-48.png");
+require("./public/assets/icon/icon-128.png");
 
 configure({
   enforceActions: "always" // Make mobx to strict mode.
