@@ -12,6 +12,8 @@ import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
 import { SendPage } from "./pages/send";
 
+import { Banner } from "./components/banner";
+
 import {
   NotificationProvider,
   NotificationStoreProvider
@@ -64,7 +66,15 @@ const StateRenderer: FunctionComponent<RouteComponentProps> = observer(
     } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
       return <LockPage location={location} />;
     } else if (keyRingStore.status === KeyRingStatus.NOTLOADED) {
-      return <div>Not yet loaded</div>;
+      return (
+        <div>
+          <Banner
+            icon={require("./public/assets/temp-icon.svg")}
+            logo={require("./public/assets/logo-temp.png")}
+            subtitle="Wallet for the Interchain"
+          />
+        </div>
+      );
     } else {
       return <div>Unknown status</div>;
     }

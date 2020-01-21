@@ -1,0 +1,35 @@
+.container {
+  height: 100%;
+}
+
+.flex-vertical {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-horizontal {
+  display: flex;
+  flex-direction: row;
+}
+
+.empty {
+  flex: 1;
+}
+
+.icon {
+  object-fit: contain;
+  height: 64px;
+
+  margin-bottom: 4px;
+}
+
+.logo {
+  object-fit: contain;
+  height: 40px;
+
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 18px;
+}

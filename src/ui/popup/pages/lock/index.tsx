@@ -5,6 +5,7 @@ import { Input } from "../../../components/form";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import { Button } from "../../../components/button";
+import { Banner } from "../../components/banner";
 import useForm from "react-hook-form";
 
 import { EmptyLayout } from "../../layouts/empty-layout";
@@ -75,7 +76,11 @@ export const LockPage: FunctionComponent<Pick<
           }
         })}
       >
-        <div style={{ flex: 1 }} />
+        <Banner
+          icon={require("../../public/assets/temp-icon.svg")}
+          logo={require("../../public/assets/logo-temp.png")}
+          subtitle="Wallet for the Interchain"
+        />
         <Input
           type="password"
           label="Passward"

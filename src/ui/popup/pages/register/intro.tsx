@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 import { Button } from "../../../components/button";
+import { Banner } from "../../components/banner";
 
 import style from "./style.module.scss";
 
@@ -12,7 +13,11 @@ export const IntroInPage: FunctionComponent<{
 }> = props => {
   return (
     <div className={style.container}>
-      <div style={{ flex: 1 }} />
+      <Banner
+        icon={require("../../public/assets/temp-icon.svg")}
+        logo={require("../../public/assets/logo-temp.png")}
+        subtitle="Wallet for the Interchain"
+      />
       <Button
         className={style.button}
         onClick={props.onRequestNewAccount}
