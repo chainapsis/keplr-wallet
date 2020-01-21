@@ -37,6 +37,8 @@ import {
   fitWindow
 } from "../../../../common/window";
 
+import { FormattedMessage, useIntl } from "react-intl";
+
 interface FormData {
   gas: string;
   fee: Coin | undefined;
@@ -48,6 +50,8 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
 }>> = observer(({ match, location, history }) => {
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
+
+  const intl = useIntl();
 
   useEffect(() => {
     if (external) {
@@ -171,22 +175,30 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
             <Input
               type="number"
               step="1"
-              label="Gas"
+              label={intl.formatMessage({
+                id: "fee.input.gas"
+              })}
               name="gas"
               error={errors.gas && errors.gas.message}
               ref={register({
-                required: "Gas is required",
+                required: intl.formatMessage({
+                  id: "fee.input.gas.required"
+                }),
                 validate: (value: string) => {
                   try {
                     bigInteger(value);
                   } catch (e) {
-                    return "Gas should be number";
+                    return intl.formatMessage({
+                      id: "fee.input.gas.invalid"
+                    });
                   }
                 }
               })}
             />
             <TextArea
-              label="Memo (Optional)"
+              label={intl.formatMessage({
+                id: "fee.input.memo"
+              })}
               name="memo"
               rows={2}
               style={{ resize: "none" }}
@@ -195,7 +207,16 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
             />
             <FormContext {...formMethods}>
               <FeeButtons
-                label="Fee"
+                label={intl.formatMessage({
+                  id: "fee.input.fee"
+                })}
+                feeSelectLabels={{
+                  low: intl.formatMessage({ id: "fee-buttons.select.low" }),
+                  average: intl.formatMessage({
+                    id: "fee-buttons.select.average"
+                  }),
+                  high: intl.formatMessage({ id: "fee-buttons.select.high" })
+                }}
                 name="fee"
                 error={errors.fee && errors.fee.message}
                 currency={feeCurrency!}
@@ -214,7 +235,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
             disabled={txBuilder.initializing}
             loading={txBuilder.requested}
           >
-            Set Fee
+            <FormattedMessage id="fee.button.set" />
           </Button>
         </div>
       </form>

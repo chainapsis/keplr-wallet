@@ -44,6 +44,13 @@
   "send.input-button.balance": "Balance",
   "send.button.send": "Send",
 
+  "fee.input.gas": "Gas",
+  "fee.input.gas.required": "Gas is required",
+  "fee.input.gas.invalid": "Gas should be number",
+  "fee.input.memo": "Memo (Optional)",
+  "fee.input.fee": "Fee",
+  "fee.button.set": "Set Fee",
+
   "sign.tab.details": "Details",
   "sign.tab.data": "Data",
   "sign.list.messages.label": "Messages",
@@ -56,6 +63,10 @@
   "sign.list.message.cosmos-sdk/MsgSend.content": "<b>{recipient}</b> will receive <b>{amount}</b>",
   "sign.list.message.cosmos-sdk/MsgDelegate.title": "Delegate",
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "<b>{validator}</b> will be delegated <b>{amount}</b>",
+  "sign.list.message.cosmos-sdk/MsgUndelegate.title": "TODO",
+  "sign.list.message.cosmos-sdk/MsgUndelegate.content": "TODO",
+  "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "TODO",
+  "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "TODO",
 
   "fee-buttons.select.low": "Low",
   "fee-buttons.select.average": "Avergage",
