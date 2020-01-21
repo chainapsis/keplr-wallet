@@ -40,7 +40,7 @@ export const RegisterInPage: FunctionComponent<{
 
   useEffect(() => {
     if (!isRecover) {
-      setValue("words", KeyRingStore.GenereateMnemonic(160));
+      setValue("words", KeyRingStore.GenereateMnemonic(128));
     } else {
       setValue("words", "");
     }
