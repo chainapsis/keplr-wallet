@@ -6,7 +6,7 @@
   "version": "0.4.0",
   "applications": {
     "gecko": {
-      "id": "keplr@keplr.app",
+      "id": "keplr-extension@keplr.app",
       "strict_min_version": "56.0"
     }
   },
