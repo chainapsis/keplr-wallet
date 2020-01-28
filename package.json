@@ -9,7 +9,7 @@
     "build:web": "cross-env NODE_ENV=production webpack --config-name web",
     "dev:extension": "cross-env NODE_ENV=development webpack --config-name extension",
     "dev:web": "cross-env NODE_ENV=development webpack-dev-server --config-name web",
-    "test": "mocha -r ts-node/register src/**/**/*.spec.ts src/**/*.spec.ts src/*.spec.ts",
+    "test": "mocha -r ts-node/register 'src/**/*.spec.ts'",
     "lint-test": "eslint \"src/**/*\" webpack.config.js && prettier --check \"src/**/*\" webpack.config.js",
     "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js"
   },
