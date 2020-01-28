@@ -1,66 +1,16 @@
 import { Message } from "../message";
 import { Result } from "../interfaces";
 
-/**
- * Make polyfill of runtime.sendMessage.
- * If it runs in chrome, it use the native chrome API.
- * If it runs in not chrome, it use the standard web extension API.
- */
-const runtime: {
-  sendMessage: (
-    message: any,
-    options: {
-      includeTlsChannelId?: boolean;
-    }
-  ) => Promise<any>;
-} = (() => {
-  if (typeof chrome === "undefined") {
-    if (typeof browser === "undefined") {
-      return {
-        sendMessage: () => {
-          throw new Error(
-            "This browser doesn't support the messaging system for extension"
-          );
-        }
-      };
-    } else {
-      return { sendMessage: browser.runtime.sendMessage };
-    }
-  } else {
-    return {
-      sendMessage: (
-        message: any,
-        options: {
-          includeTlsChannelId?: boolean;
-        }
-      ) => {
-        return new Promise(resolve => {
-          chrome.runtime.sendMessage(message, options, (result?: Result) => {
-            if (chrome.runtime.lastError) {
-              throw new Error(chrome.runtime.lastError.message);
-            }
-
-            resolve(result);
-          });
-        });
-      }
-    };
-  }
-})();
-
 function _sendMessage(
   port: string,
   msg: Message<unknown>,
   opts: { msgType?: string } = {}
 ): Promise<any> {
-  return runtime.sendMessage(
-    {
-      port,
-      type: opts.msgType || msg.type(),
-      msg
-    },
-    {}
-  );
+  return browser.runtime.sendMessage({
+    port,
+    type: opts.msgType || msg.type(),
+    msg
+  });
 }
 
 /**
@@ -84,14 +34,10 @@ export async function sendMessage<M extends Message<unknown>>(
   let posting: boolean = false;
 
   if (!opts || !opts.disablePostMessage) {
-    if (typeof chrome === "undefined") {
-      if (typeof browser === "undefined") {
-        posting = true;
-      } else {
-        posting = browser?.runtime?.id == null;
-      }
+    if (typeof browser === "undefined") {
+      posting = true;
     } else {
-      posting = chrome?.runtime?.id == null;
+      posting = browser?.runtime?.id == null;
     }
   }
 

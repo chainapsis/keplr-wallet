@@ -36,20 +36,10 @@ export abstract class Message<R> {
       return false;
     }
     const url = new URL(sender.url);
-    if (typeof chrome === "undefined") {
-      if (url.origin !== new URL(browser.runtime.getURL("/")).origin) {
-        return false;
-      }
-    } else {
-      if (url.origin !== new URL(chrome.runtime.getURL("/")).origin) {
-        return false;
-      }
+    if (url.origin !== new URL(browser.runtime.getURL("/")).origin) {
+      return false;
     }
 
-    if (typeof chrome !== "undefined") {
-      return sender.id === chrome.runtime.id;
-    } else {
-      return sender.id === browser.runtime.id;
-    }
+    return sender.id === browser.runtime.id;
   }
 }

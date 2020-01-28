@@ -93,6 +93,9 @@ const extensionConfig = (env, args) => {
           {
             from: "./src/manifest.json",
             to: "./"
+          },
+          {
+            from: "node_modules/webextension-polyfill/dist/browser-polyfill.js"
           }
         ],
         { copyUnmodified: true }

@@ -15,7 +15,7 @@ import {
 
 import { KVStore } from "../../common/kvstore";
 
-import { openWindow, getExtensionURL } from "../../common/window";
+import { openWindow } from "../../common/window";
 
 export interface KeyHex {
   algo: string;
@@ -62,7 +62,7 @@ export class KeyRingKeeper {
     }
 
     if (this.keyRing.status === KeyRingStatus.LOCKED) {
-      openWindow(getExtensionURL("popup.html#/?external=true"));
+      openWindow(browser.runtime.getURL("popup.html#/?external=true"));
       await this.unlockApprover.request("unlock");
       return this.keyRing.status;
     }
@@ -103,14 +103,8 @@ export class KeyRingKeeper {
   }
 
   checkAccessOrigin(chainId: string, origin: string) {
-    if (typeof chrome === "undefined") {
-      if (origin === new URL(browser.runtime.getURL("/")).origin) {
-        return;
-      }
-    } else {
-      if (origin === new URL(chrome.runtime.getURL("/")).origin) {
-        return;
-      }
+    if (origin === new URL(browser.runtime.getURL("/")).origin) {
+      return;
     }
 
     const accessOrigin = this.getAccessOrigin(chainId);
@@ -189,7 +183,9 @@ export class KeyRingKeeper {
   ): Promise<TxBuilderConfigPrimitive> {
     if (openPopup) {
       // Open fee window with hash to let the fee page to know that window is requested newly.
-      openWindow(getExtensionURL(`popup.html#/fee/${index}?external=true`));
+      openWindow(
+        browser.runtime.getURL(`popup.html#/fee/${index}?external=true`)
+      );
     }
 
     const result = await this.txBuilderApprover.request(index, config);
@@ -223,7 +219,9 @@ export class KeyRingKeeper {
     openPopup: boolean
   ): Promise<Uint8Array> {
     if (openPopup) {
-      openWindow(getExtensionURL(`popup.html#/sign/${index}?external=true`));
+      openWindow(
+        browser.runtime.getURL(`popup.html#/sign/${index}?external=true`)
+      );
     }
 
     await this.signApprover.request(index, { chainId, message });

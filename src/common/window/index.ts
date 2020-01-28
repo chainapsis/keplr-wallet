@@ -3,12 +3,8 @@ const PopupSize = {
   height: 580
 };
 
-export function getExtensionURL(path: string): string {
-  if (typeof chrome === "undefined") {
-    return browser.runtime.getURL(path);
-  } else {
-    return chrome.runtime.getURL(path);
-  }
+export function isChrome(): boolean {
+  return navigator.userAgent.toLowerCase().indexOf("chrome") > -1;
 }
 
 export function openWindow(url: string) {
@@ -26,8 +22,8 @@ export function openWindow(url: string) {
    In the prior case, setting fee window will not be closed and will be replaced by signing page.
    But, in the latter case, setting fee window will be closed and new signing page window will be opened.
    */
-  if (typeof browser !== "undefined") {
-    browser.windows.create({ allowScriptsToClose: true, ...option });
+  if (typeof browser !== "undefined" && !isChrome()) {
+    browser.windows.create(option);
   } else {
     window.open(
       url,
@@ -49,32 +45,16 @@ export function fitWindow() {
     height: window.outerHeight - window.innerHeight
   };
 
-  if (typeof chrome !== "undefined") {
-    if (chrome.windows) {
-      chrome.windows.getCurrent(window => {
-        if (window?.id != null) {
-          chrome.windows.update(window.id, {
-            width: PopupSize.width + gap.width,
-            height: PopupSize.height + gap.height
-          });
-        }
-      });
-      return;
-    }
-  }
-
-  if (typeof browser !== "undefined") {
-    if (browser.windows) {
-      browser.windows.getCurrent().then(window => {
-        if (window?.id != null) {
-          browser.windows.update(window.id, {
-            width: PopupSize.width + gap.width,
-            height: PopupSize.height + gap.height
-          });
-        }
-      });
-      return;
-    }
+  if (browser.windows) {
+    browser.windows.getCurrent().then(window => {
+      if (window?.id != null) {
+        browser.windows.update(window.id, {
+          width: PopupSize.width + gap.width,
+          height: PopupSize.height + gap.height
+        });
+      }
+    });
+    return;
   }
 
   window.resizeTo(PopupSize.width + gap.width, PopupSize.height + gap.height);

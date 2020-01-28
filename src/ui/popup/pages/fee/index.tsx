@@ -34,7 +34,8 @@ import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import {
   disableScroll,
   enableScroll,
-  fitWindow
+  fitWindow,
+  isChrome
 } from "../../../../common/window";
 
 import { FormattedMessage, useIntl } from "react-intl";
@@ -109,7 +110,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
     if (external) {
       // If it runs on not chrome, setting fee page will be closed and siging page will be opened by wallet provider.
       // But, if it runs on chrome, wallet provider will replace window with signing page, so we don't have to close this page.
-      if (typeof browser !== "undefined") {
+      if (!isChrome()) {
         window.close();
       }
     }

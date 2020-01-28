@@ -21,14 +21,14 @@
     "default_title": "Keplr"
   },
   "background": {
-    "scripts": ["background.bundle.js"],
+    "scripts": ["browser-polyfill.js", "background.bundle.js"],
     "persistent": true
   },
   "permissions": ["storage", "notifications"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["contentScripts.bundle.js"],
+      "js": ["browser-polyfill.js", "contentScripts.bundle.js"],
       "run_at": "document_start",
       "all_frames": true
     }

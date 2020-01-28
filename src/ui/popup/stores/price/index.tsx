@@ -235,17 +235,13 @@ export class PriceStore {
   private async saveResultDataToStorage(
     data: CoinGeckoPriceResult
   ): Promise<void> {
-    return new Promise(resolve => {
-      chrome.storage.local.set({ priceData: data }, resolve);
-    });
+    await browser.storage.local.set({ priceData: data });
   }
 
   private async loadResultDataFromStorage(): Promise<
     { priceData?: CoinGeckoPriceResult } | undefined
   > {
-    return new Promise(resolve => {
-      chrome.storage.local.get(resolve);
-    });
+    return await browser.storage.local.get();
   }
 
   private async loadValueFromStorage(

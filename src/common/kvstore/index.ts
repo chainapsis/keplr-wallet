@@ -1,2 +1,2 @@
 export * from "./interface";
-export * from "./chrome";
+export * from "./browser";

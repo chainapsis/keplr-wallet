@@ -214,35 +214,29 @@ export class AccountStore {
       coinStrs.push(coin.toString());
     }
 
-    return new Promise(resovle => {
-      chrome.storage.local.set(
-        {
-          assets: {
-            [bech32Address]: coinStrs.join(",")
-          }
-        },
-        resovle
-      );
+    await browser.storage.local.set({
+      assets: {
+        [bech32Address]: coinStrs.join(",")
+      }
     });
   }
 
   // Not action
   private async loadAssetsFromStorage(bech32Address: string): Promise<Coin[]> {
-    return new Promise(resolve => {
-      chrome.storage.local.get(items => {
-        const coins: Coin[] = [];
-        const assets = items?.assets;
-        if (assets) {
-          const coinsStr = assets[bech32Address];
-          if (coinsStr) {
-            const coinStrs = coinsStr.split(",");
-            for (const coinStr of coinStrs) {
-              coins.push(Coin.parse(coinStr));
-            }
-          }
+    const items = await browser.storage.local.get();
+
+    const coins: Coin[] = [];
+    const assets = items?.assets;
+    if (assets) {
+      const coinsStr = assets[bech32Address];
+      if (coinsStr) {
+        const coinStrs = coinsStr.split(",");
+        for (const coinStr of coinStrs) {
+          coins.push(Coin.parse(coinStr));
         }
-        resolve(coins);
-      });
-    });
+      }
+    }
+
+    return coins;
   }
 }
