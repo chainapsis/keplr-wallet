@@ -1,23 +1,11 @@
 import assert from "assert";
 import "mocha";
-import { BaseKVStore } from "./base";
-import { KVStoreProvider } from "./interface";
-
-let store: { [key: string]: any } = {};
-const MemoryKVStoreProvider: KVStoreProvider = {
-  get: () => {
-    return Promise.resolve(store);
-  },
-  set: items => {
-    store = { ...store, ...items };
-    return Promise.resolve();
-  }
-};
+import { MemoryKVStore } from "./memory";
 
 describe("Test kvstore", () => {
   it("kvstore should not conflict", async () => {
-    const test1KVStore = new BaseKVStore(MemoryKVStoreProvider, "test1");
-    const test2KVStore = new BaseKVStore(MemoryKVStoreProvider, "test2");
+    const test1KVStore = new MemoryKVStore("test1");
+    const test2KVStore = new MemoryKVStore("test2");
 
     const key = "key";
     await test1KVStore.set(key, "test1");
