@@ -36,7 +36,16 @@ export abstract class Message<R> {
       return false;
     }
     const url = new URL(sender.url);
-    if (url.origin !== new URL(browser.runtime.getURL("/")).origin) {
+    if (!url.origin || url.origin === "null") {
+      throw new Error("Invalid sender url");
+    }
+
+    const browserURL = new URL(browser.runtime.getURL("/"));
+    if (!browserURL.origin || browserURL.origin === "null") {
+      throw new Error("Invalid browser url");
+    }
+
+    if (url.origin !== browserURL.origin) {
       return false;
     }
 

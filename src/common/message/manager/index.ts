@@ -1,7 +1,7 @@
-import { Message } from "./message";
-import { Handler } from "./handler";
-import { Result } from "./interfaces";
-import { MessageSender } from "./types";
+import { Message } from "../message";
+import { Handler } from "../handler";
+import { Result } from "../interfaces";
+import { MessageSender } from "../types";
 
 export class MessageManager {
   private registeredMsgType: Map<
@@ -10,7 +10,7 @@ export class MessageManager {
   > = new Map();
   private registeredHandler: Map<string, Handler> = new Map();
 
-  private port = "";
+  protected port = "";
 
   public registerMessage(
     msgCls: { new (): Message<unknown> } & { type(): string }
@@ -40,7 +40,7 @@ export class MessageManager {
     browser.runtime.onMessageExternal.addListener(this.onMessage);
   }
 
-  private onMessage = (
+  protected onMessage = (
     message: any,
     sender: MessageSender,
     sendResponse: (response: Result) => void
