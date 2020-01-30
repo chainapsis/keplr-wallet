@@ -22,10 +22,14 @@ export class ChainStore {
   @observable
   public chainInfo!: ChainInfo;
 
+  // Indicate whether the chain info is set.
+  private isChainSet = false;
+
   constructor(private rootStore: RootStore) {
     this.setChainList(NativeChainInfos);
 
     this.setChain(this.chainList[0].chainId);
+    this.isChainSet = false;
   }
 
   @action
@@ -42,6 +46,7 @@ export class ChainStore {
     }
 
     this.chainInfo = chainInfo;
+    this.isChainSet = true;
 
     this.rootStore.setChainInfo(chainInfo);
   }
@@ -63,7 +68,10 @@ export class ChainStore {
     const msg = GetPersistentMemoryMsg.create();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     if (result && result.lastViewChainId) {
-      this.setChain(result.lastViewChainId);
+      // If chain info is already set, skip setting the last used chain info.
+      if (!this.isChainSet) {
+        this.setChain(result.lastViewChainId);
+      }
     }
   }
 
