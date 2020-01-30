@@ -12,10 +12,6 @@ import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { Validator } from "../../../../hooks/use-validator";
 
 import { Button } from "../../../../components/button";
-import { UnbondModal } from "./unbond-modal";
-import Modal from "react-modal";
-
-import { CosmosJsHook } from "../../../../hooks";
 
 import style from "./style.module.scss";
 import styleDelegations from "./delegations.module.scss";
@@ -24,7 +20,9 @@ import { DelegatorReward } from "../../../../hooks/use-reward";
 import { UnbondInfo } from "../../../../hooks/use-unbonding-info";
 import { DecUtils } from "../../../../../common/dec-utils";
 import Moment from "react-moment";
-import { StakeModal } from "./stake-modal";
+
+import { useHistory, useLocation } from "react-router-dom";
+import queryString from "query-string";
 
 interface ValidatorDelegationInfo {
   validator: Validator;
@@ -40,22 +38,12 @@ export const Delegations: FunctionComponent<{
   unbondingDelegations: UnbondInfo[];
   rewards: DelegatorReward[];
   currency: Currency;
-  cosmosJS: CosmosJsHook;
-}> = ({
-  validators,
-  delegations,
-  unbondingDelegations,
-  rewards,
-  currency,
-  cosmosJS
-}) => {
+}> = ({ validators, delegations, unbondingDelegations, rewards, currency }) => {
   const [detailOpened, setDetailOpened] = useState(-1);
 
   const [validatorDelegations, setValidatorDelegations] = useState<
     ValidatorDelegationInfo[]
   >([]);
-  const [requestStake, setRequestStake] = useState<Validator | undefined>();
-  const [requestUnbond, setRequestUnbond] = useState<Validator | undefined>();
 
   const precision = useMemo(() => {
     return DecUtils.getPrecisionDec(currency.coinDecimals);
@@ -139,35 +127,39 @@ export const Delegations: FunctionComponent<{
     setValidatorDelegations(validatorDelegations);
   }, [delegations, precision, rewards, unbondingDelegations, validators]);
 
+  const history = useHistory();
+  const location = useLocation();
+
   const onStakeRequest = useCallback<(validator: Validator) => void>(
     validator => {
-      setRequestStake(validator);
+      history.push(
+        location.pathname +
+          "?" +
+          queryString.stringify({
+            dialog: "stake",
+            validator: validator.operator_address
+          })
+      );
     },
-    []
+    [history, location.pathname]
   );
 
   const onUnbondRequest = useCallback<(validator: Validator) => void>(
     validator => {
-      setRequestUnbond(validator);
+      history.push(
+        location.pathname +
+          "?" +
+          queryString.stringify({
+            dialog: "unbond",
+            validator: validator.operator_address
+          })
+      );
     },
-    []
+    [history, location.pathname]
   );
 
   return (
     <div>
-      <Modal
-        isOpen={requestStake !== undefined || requestUnbond !== undefined}
-        onRequestClose={() => {
-          setRequestStake(undefined);
-          setRequestUnbond(undefined);
-        }}
-      >
-        {requestStake ? (
-          <StakeModal validator={requestStake} cosmosJS={cosmosJS} />
-        ) : requestUnbond ? (
-          <UnbondModal validator={requestUnbond} cosmosJS={cosmosJS} />
-        ) : null}
-      </Modal>
       <div className={style.rowTop}>
         <div className={classnames(style.col, style.validator)}>Validator</div>
         <div className={classnames(style.col, styleDelegations.delegated)}>

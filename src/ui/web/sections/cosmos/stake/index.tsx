@@ -2,6 +2,8 @@ import React, { FunctionComponent, useCallback, useMemo } from "react";
 
 import { Card } from "../../../components/card";
 
+import Modal from "react-modal";
+
 import style from "./style.module.scss";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
@@ -30,7 +32,27 @@ import bigInteger from "big-integer";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { useNotification } from "../../../../components/notification";
 
+import { useHistory, useLocation } from "react-router-dom";
+import queryString from "query-string";
+import { StakeModal } from "./stake-modal";
+import { UnbondModal } from "./unbond-modal";
+
 export const StakeSection: FunctionComponent = observer(() => {
+  const history = useHistory();
+  const location = useLocation();
+  const query = queryString.parse(location?.search ?? "");
+
+  const dialog = query.dialog;
+  const isModal =
+    (dialog === "stake" || dialog === "unbond") &&
+    query.validator != null &&
+    query.validator !== "";
+
+  const onRequestCloseModal = useCallback(() => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    history.push(location.pathname);
+  }, [history, location.pathname]);
+
   const { chainStore } = useStore();
 
   const cosmosJS = useCosmosJS(
@@ -43,6 +65,16 @@ export const StakeSection: FunctionComponent = observer(() => {
   );
 
   const validator = useValidator(chainStore.chainInfo.rest);
+
+  const queryValidator = useMemo(() => {
+    for (const val of validator.validators) {
+      if (val.operator_address === query.validator) {
+        return val;
+      }
+    }
+    return undefined;
+  }, [query.validator, validator.validators]);
+
   const { delegateInfos } = useDelegatingInfos(
     chainStore.chainInfo.rest,
     cosmosJS.addresses.length > 0 ? cosmosJS.addresses[0] : ""
@@ -150,6 +182,17 @@ export const StakeSection: FunctionComponent = observer(() => {
 
   return (
     <div className={style.container}>
+      <Modal isOpen={isModal} onRequestClose={onRequestCloseModal}>
+        {cosmosJS && cosmosJSInited && queryValidator ? (
+          dialog === "stake" ? (
+            <StakeModal cosmosJS={cosmosJS} validator={queryValidator} />
+          ) : (
+            <UnbondModal cosmosJS={cosmosJS} validator={queryValidator} />
+          )
+        ) : (
+          <div>Loading...</div>
+        )}
+      </Modal>
       {delegateInfos.length > 0 ||
       unbondInfos.length > 0 ||
       rewards.length > 0 ? (
@@ -174,7 +217,6 @@ export const StakeSection: FunctionComponent = observer(() => {
             unbondingDelegations={unbondInfos}
             rewards={rewards}
             currency={nativeCurrency}
-            cosmosJS={cosmosJS}
           />
         </Card>
       ) : null}
@@ -183,7 +225,6 @@ export const StakeSection: FunctionComponent = observer(() => {
         <TopValidators
           validators={validator.validators}
           currency={nativeCurrency}
-          cosmosJS={cosmosJS}
         />
       </Card>
     </div>

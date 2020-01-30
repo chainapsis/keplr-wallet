@@ -5,8 +5,6 @@ import React, {
   useState
 } from "react";
 
-import { StakeModal } from "./stake-modal";
-
 import { Validator } from "../../../../hooks/use-validator";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { Currency } from "../../../../../chain-info";
@@ -16,18 +14,16 @@ import style from "./style.module.scss";
 import styleTopValidators from "./top-validators.module.scss";
 import classnames from "classnames";
 
-import Modal from "react-modal";
-import { CosmosJsHook } from "../../../../hooks";
 import { DecUtils } from "../../../../../common/dec-utils";
+
+import { useHistory, useLocation } from "react-router-dom";
+import queryString from "query-string";
 
 export const TopValidators: FunctionComponent<{
   validators: Validator[];
   currency: Currency;
-  cosmosJS: CosmosJsHook;
-}> = ({ validators, currency, cosmosJS }) => {
+}> = ({ validators, currency }) => {
   const [detailOpened, setDetailOpened] = useState(-1);
-
-  const [requestStake, setRequestStake] = useState<Validator | undefined>();
 
   const precision = useMemo(() => {
     let precision = new Dec(1);
@@ -37,25 +33,25 @@ export const TopValidators: FunctionComponent<{
     return precision;
   }, [currency.coinDecimals]);
 
+  const history = useHistory();
+  const location = useLocation();
+
   const onStakeRequest = useCallback<(validator: Validator) => void>(
     validator => {
-      setRequestStake(validator);
+      history.push(
+        location.pathname +
+          "?" +
+          queryString.stringify({
+            dialog: "stake",
+            validator: validator.operator_address
+          })
+      );
     },
-    []
+    [history, location.pathname]
   );
 
   return (
     <div>
-      <Modal
-        isOpen={requestStake !== undefined}
-        onRequestClose={() => {
-          setRequestStake(undefined);
-        }}
-      >
-        {requestStake ? (
-          <StakeModal validator={requestStake} cosmosJS={cosmosJS} />
-        ) : null}
-      </Modal>
       <div className={style.rowTop}>
         <div className={classnames(style.col, style.validator)}>Validator</div>
         <div className={classnames(style.col, styleTopValidators.votingPower)}>
