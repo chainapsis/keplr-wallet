@@ -71,7 +71,7 @@ export const RegisterInPage: FunctionComponent<{
               placeholder={intl.formatMessage({
                 id: "register.create.textarea.mnemonic.place-holder"
               })}
-              disabled={!isRecover}
+              readOnly={!isRecover}
               name="words"
               rows={4}
               ref={register({
