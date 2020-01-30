@@ -101,7 +101,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       useBackgroundTx: true
     });
 
-    const [gasForSendMsg] = useState(60000);
+    const [gasForSendMsg] = useState(80000);
 
     const feeCurrency = useMemo(() => {
       return getCurrency(chainStore.chainInfo.feeCurrencies[0]);

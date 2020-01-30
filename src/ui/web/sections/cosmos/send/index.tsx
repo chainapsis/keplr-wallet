@@ -81,7 +81,7 @@ export const SendSection: FunctionComponent = observer(() => {
                         await cosmosJS.sendMsgs(
                           [msg],
                           {
-                            gas: bigInteger(60000),
+                            gas: bigInteger(80000),
                             memo: data.memo,
                             fee: new Coin(
                               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
