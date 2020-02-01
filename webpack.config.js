@@ -73,10 +73,7 @@ const extensionConfig = (env, args) => {
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"]
     },
     output: {
-      path: path.resolve(
-        __dirname,
-        isEnvDevelopment ? "dist/extension" : "prod/extension"
-      ),
+      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "prod"),
       filename: "[name].bundle.js"
     },
     resolve: commonResolve("src/ui/popup/public/assets"),
@@ -111,38 +108,4 @@ const extensionConfig = (env, args) => {
   };
 };
 
-const webConfig = (env, args) => {
-  return {
-    name: "web",
-    mode: isEnvDevelopment ? "development" : "production",
-    // In development environment, turn on source map.
-    devtool: isEnvDevelopment ? "inline-source-map" : false,
-    // In development environment, webpack watch the file changes, and recompile
-    watch: isEnvDevelopment,
-    devServer: {
-      port: 8081
-    },
-    entry: {
-      main: ["./src/ui/web/web.tsx"]
-    },
-    output: {
-      path: path.resolve(__dirname, isEnvDevelopment ? "dist/web" : "prod/web"),
-      filename: "[name].bundle.js"
-    },
-    resolve: commonResolve("src/ui/web/public/assets"),
-    module: {
-      rules: [sassRule, tsRule, fileRule]
-    },
-    plugins: [
-      new ForkTsCheckerWebpackPlugin(),
-      new HtmlWebpackPlugin({
-        template: "./src/web.html",
-        filename: "index.html",
-        chunks: ["main"]
-      }),
-      new webpack.EnvironmentPlugin(["NODE_ENV"])
-    ]
-  };
-};
-
-module.exports = [extensionConfig, webConfig];
+module.exports = extensionConfig;

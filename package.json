@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
-    "build:extension": "cross-env NODE_ENV=production webpack --config-name extension",
-    "build:web": "cross-env NODE_ENV=production webpack --config-name web",
-    "dev:extension": "cross-env NODE_ENV=development webpack --config-name extension",
-    "dev:web": "cross-env NODE_ENV=development webpack-dev-server --config-name web",
+    "dev": "cross-env NODE_ENV=development webpack",
     "test": "mocha -r ts-node/register 'src/**/*.spec.ts'",
     "lint-test": "eslint \"src/**/*\" webpack.config.js && prettier --check \"src/**/*\" webpack.config.js",
     "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js"
@@ -40,7 +37,6 @@
     "react-hook-form": "^3.29.3",
     "react-intl": "^3.9.3",
     "react-modal": "^3.11.1",
-    "react-moment": "^0.9.7",
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
     "scrypt-js": "^2.0.4",
