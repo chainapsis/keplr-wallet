@@ -22,8 +22,8 @@ $family-sans-serif: "Noto Sans", sans-serif;
 html {
   width: $popup-size-width;
   height: $popup-size-height;
-
-  background-color: $background-color;
+  margin: auto;
+  background-color: white;
 
   overflow: auto;
 }
@@ -31,6 +31,8 @@ html {
 body {
   width: $popup-size-width;
   height: $popup-size-height;
+
+  background-color: $background-color;
 }
 
 * {

@@ -4,7 +4,6 @@ import { Input } from "../../../components/form";
 import { Button } from "../../../components/button";
 
 import useForm from "react-hook-form";
-import { KeyRingStore } from "../../stores/keyring";
 
 import style from "./style.module.scss";
 import classnames from "classnames";
@@ -24,6 +23,7 @@ export const RegisterInPage: FunctionComponent<{
   onRegister: (words: string, password: string, recovered: boolean) => void;
   isRecover: boolean;
   isLoading: boolean;
+  words: string;
 }> = props => {
   const intl = useIntl();
 
@@ -40,19 +40,22 @@ export const RegisterInPage: FunctionComponent<{
 
   useEffect(() => {
     if (!isRecover) {
-      setValue("words", KeyRingStore.GenereateMnemonic(128));
+      setValue("words", props.words);
     } else {
       setValue("words", "");
     }
   }, [isRecover, setValue]);
 
   return (
-    <div className={style.container}>
-      <div className={style.intro}>
-        <FormattedMessage id="register.create.message.title" />
-        <div className={style.subIntro}>
-          <FormattedMessage id="register.create.message.sub-title" />
-        </div>
+    <div>
+      <div className={style.title}>
+        {isRecover
+          ? intl.formatMessage({
+              id: "register.recover.title"
+            })
+          : intl.formatMessage({
+              id: "register.create.title"
+            })}
       </div>
       <form
         className={style.formContainer}
@@ -73,7 +76,7 @@ export const RegisterInPage: FunctionComponent<{
               })}
               readOnly={!isRecover}
               name="words"
-              rows={4}
+              rows={3}
               ref={register({
                 required: "Mnemonic is required",
                 validate: (value: string): string | undefined => {
@@ -134,13 +137,12 @@ export const RegisterInPage: FunctionComponent<{
           })}
           error={errors.confirmPassword && errors.confirmPassword.message}
         />
-        <div style={{ flex: 1 }} />
         <Button
-          className={style.button}
           color="primary"
           type="submit"
           size="medium"
           loading={props.isLoading}
+          fullwidth
         >
           <FormattedMessage id="register.create.button.next" />
         </Button>

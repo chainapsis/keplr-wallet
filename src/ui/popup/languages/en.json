@@ -11,12 +11,17 @@
 
   "main.menu.sign-out": "Sign out",
 
-  "register.intro.button.new-account": "New Account",
-  "register.intro.button.import-account": "Import Account",
+  "register.button.back": "Back",
+  "register.intro.button.new-account.title": "Create new account",
+  "register.intro.button.new-account.content": "Create a new wallet using a new seed",
+  "register.intro.button.import-account.title": "Import existing account",
+  "register.intro.button.import-account.content": "Use a 12/24 word seed to import an existing wallet",
+  "register.intro.sub-content": "All sensitive information is stored only on your device. \nThis process does not require an internet connection.",
 
-  "register.create.message.title": "Create Account",
-  "register.create.message.sub-title": "Please safely store your mnemonic.",
-  "register.create.input.password": "Password",
+  "register.recover.title": "Input yout seed",
+
+  "register.create.title": "Mnemonic Seed",
+  "register.create.input.password": "New Password (minimum 8 characters)",
   "register.create.input.password.error.required": "Password is required",
   "register.create.input.password.error.too-short": "Too short password",
   "register.create.input.confirm-password": "Confirm password",

@@ -1,11 +1,10 @@
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 
-import style from "./style.module.scss";
 import { Button } from "../../../components/button";
 
 export const VerifyInPage: FunctionComponent<{
   words: string;
-  onVerify: () => void;
+  onVerify: (words: string) => void;
   isLoading: boolean;
 }> = props => {
   const wordsSlice = useMemo(() => {
@@ -34,9 +33,8 @@ export const VerifyInPage: FunctionComponent<{
   }, [props.words]);
 
   return (
-    <div className={style.container}>
-      <div className={style.intro}>Verify your mnemonic</div>
-      <div style={{ minHeight: "11rem" }}>
+    <div>
+      <div style={{ minHeight: "8.25rem" }}>
         <div className="buttons">
           {suggestedWords.map((word, i) => {
             return (
@@ -60,38 +58,42 @@ export const VerifyInPage: FunctionComponent<{
         </div>
       </div>
       <hr />
-      <div className="buttons">
-        {randomizedWords.map((word, i) => {
-          return (
-            <Button
-              key={word + i.toString()}
-              onClick={() => {
-                const word = randomizedWords[i];
-                setRandomizedWords(
-                  randomizedWords
-                    .slice(0, i)
-                    .concat(randomizedWords.slice(i + 1))
-                );
-                suggestedWords.push(word);
-                setSuggestedWords(suggestedWords.slice());
-              }}
-            >
-              {word}
-            </Button>
-          );
-        })}
+      <div style={{ minHeight: "8.25rem" }}>
+        <div className="buttons">
+          {randomizedWords.map((word, i) => {
+            return (
+              <Button
+                key={word + i.toString()}
+                onClick={() => {
+                  const word = randomizedWords[i];
+                  setRandomizedWords(
+                    randomizedWords
+                      .slice(0, i)
+                      .concat(randomizedWords.slice(i + 1))
+                  );
+                  suggestedWords.push(word);
+                  setSuggestedWords(suggestedWords.slice());
+                }}
+              >
+                {word}
+              </Button>
+            );
+          })}
+        </div>
       </div>
-      <div style={{ flex: 1 }} />
       <Button
-        className={style.button}
         color="primary"
         type="submit"
         size="medium"
         disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
         onClick={() => {
-          props.onVerify();
+          props.onVerify(suggestedWords.join(" "));
         }}
         loading={props.isLoading}
+        fullwidth
+        style={{
+          marginTop: "30px"
+        }}
       >
         Register
       </Button>

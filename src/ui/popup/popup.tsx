@@ -62,15 +62,27 @@ const StateRenderer: FunctionComponent<RouteComponentProps> = observer(
   ({ history, location }) => {
     const { keyRingStore } = useStore();
 
-    if (keyRingStore.status === KeyRingStatus.EMPTY) {
-      return <RegisterPage />;
-    } else if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
+    if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
       return <MainPage history={history} />;
     } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
       return <LockPage location={location} />;
+    } else if (keyRingStore.status === KeyRingStatus.EMPTY) {
+      browser.tabs.create({
+        url: "/popup.html#/register"
+      });
+      window.close();
+      return (
+        <div style={{ height: "100%" }}>
+          <Banner
+            icon={require("./public/assets/temp-icon.svg")}
+            logo={require("./public/assets/logo-temp.png")}
+            subtitle="Wallet for the Interchain"
+          />
+        </div>
+      );
     } else if (keyRingStore.status === KeyRingStatus.NOTLOADED) {
       return (
-        <div>
+        <div style={{ height: "100%" }}>
           <Banner
             icon={require("./public/assets/temp-icon.svg")}
             logo={require("./public/assets/logo-temp.png")}
@@ -91,6 +103,7 @@ ReactDOM.render(
         <NotificationProvider>
           <HashRouter>
             <Route exact path="/" component={StateRenderer} />
+            <Route exact path="/register" component={RegisterPage} />
             <Route exact path="/send" component={SendPage} />
             <Route exact path="/fee/:index" component={FeePage} />
             <Route path="/sign/:index" component={SignPage} />
