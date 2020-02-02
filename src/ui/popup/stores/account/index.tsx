@@ -81,16 +81,20 @@ export class AccountStore {
     if (this.keyRingStatus === KeyRingStatus.UNLOCKED) {
       await task(this.fetchAccount());
 
-      if (this.lastFetchingIntervalId) {
-        clearInterval(this.lastFetchingIntervalId);
-        this.lastFetchingIntervalId = undefined;
-      }
-
-      // Fetch the assets by interval.
-      this.lastFetchingIntervalId = setInterval(() => {
-        this.fetchAssets();
-      }, AutoFetchingAssetsInterval);
+      this.fetchAssetsByInterval();
     }
+  }
+
+  private fetchAssetsByInterval() {
+    if (this.lastFetchingIntervalId) {
+      clearInterval(this.lastFetchingIntervalId);
+      this.lastFetchingIntervalId = undefined;
+    }
+
+    // Fetch the assets by interval.
+    this.lastFetchingIntervalId = setInterval(() => {
+      this.fetchAssets();
+    }, AutoFetchingAssetsInterval);
   }
 
   // This will be called by keyring store.
@@ -100,6 +104,8 @@ export class AccountStore {
 
     if (status === KeyRingStatus.UNLOCKED) {
       await task(this.fetchAccount());
+
+      this.fetchAssetsByInterval();
     }
   }
 
@@ -109,6 +115,8 @@ export class AccountStore {
     this.bip44Index = index;
 
     await task(this.fetchAccount());
+
+    this.fetchAssetsByInterval();
   }
 
   @actionAsync
