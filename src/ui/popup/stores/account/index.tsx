@@ -190,6 +190,7 @@ export class AccountStore {
       );
 
       this.assets = account.getCoins();
+      this.lastAssetFetchingError = undefined;
       // Save the assets to storage.
       await task(this.saveAssetsToStorage(this.bech32Address, this.assets));
     } catch (e) {

@@ -10,6 +10,7 @@ import { Currency } from "../../../../chain-info";
 import { getCurrency } from "../../../../common/currency";
 
 import { FormattedMessage } from "react-intl";
+import { ToolTip } from "../../../components/tooltip";
 
 export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore } = useStore();
@@ -46,15 +47,40 @@ export const AssetView: FunctionComponent = observer(() => {
       </div>
       {/* TODO: Show the information that account is fetching. */}
       <div className={styleAsset.amount}>
-        {!(accountStore.assets.length === 0)
-          ? CoinUtils.shrinkDecimals(
-              coinAmount,
-              nativeCurrency.coinDecimals,
-              0,
-              6
-            )
-          : "0"}{" "}
-        {nativeCurrency.coinDenom}
+        <div>
+          {!(accountStore.assets.length === 0)
+            ? CoinUtils.shrinkDecimals(
+                coinAmount,
+                nativeCurrency.coinDecimals,
+                0,
+                6
+              )
+            : "0"}{" "}
+          {nativeCurrency.coinDenom}
+        </div>
+        <div className={styleAsset.indicatorIcon}>
+          {accountStore.isAssetFetching ? (
+            <span className={"icon"}>
+              <i className="fas fa-spinner fa-spin" />
+            </span>
+          ) : accountStore.lastAssetFetchingError ? (
+            <ToolTip
+              tooltip={
+                accountStore.lastAssetFetchingError.message ??
+                accountStore.lastAssetFetchingError.toString()
+              }
+              theme="dark"
+              trigger="hover"
+              options={{
+                placement: "top"
+              }}
+            >
+              <span className={"icon has-text-danger"}>
+                <i className="fas fa-exclamation-triangle" />
+              </span>
+            </ToolTip>
+          ) : null}
+        </div>
       </div>
     </div>
   );

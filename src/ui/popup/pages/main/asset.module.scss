@@ -25,10 +25,23 @@
   }
 
   .amount {
+    position: relative;
+    display: flex;
+
     font-size: 18px;
     text-align: center;
 
     letter-spacing: -0.4px;
     color: #8f8f8f;
+  }
+
+  .indicator-icon {
+    position: absolute;
+    right: -26px;
+  }
+
+  :global(.popper) {
+    font-size: 14px;
+    min-width: 140px;
   }
 }
