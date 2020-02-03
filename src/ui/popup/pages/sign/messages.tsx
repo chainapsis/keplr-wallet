@@ -35,7 +35,31 @@ interface MsgDelegate {
   };
 }
 
-type Messages = MsgSend | MsgDelegate;
+interface MsgUndelegate {
+  type: "cosmos-sdk/MsgUndelegate";
+  value: {
+    amount: {
+      amount: string;
+      denom: string;
+    };
+    delegator_address: string;
+    validator_address: string;
+  };
+}
+
+interface MsgWithdrawDelegatorReward {
+  type: "cosmos-sdk/MsgWithdrawDelegationReward";
+  value: {
+    delegator_address: string;
+    validator_address: string;
+  };
+}
+
+type Messages =
+  | MsgSend
+  | MsgDelegate
+  | MsgUndelegate
+  | MsgWithdrawDelegatorReward;
 
 // Type guard for messages.
 function MessageType<T extends Messages>(
@@ -103,8 +127,55 @@ export function renderMessage(
           id="sign.list.message.cosmos-sdk/MsgDelegate.content"
           values={{
             b: (...chunks: any[]) => <b>{chunks}</b>,
-            validator: shortenAddress(msg.value.validator_address, 28),
+            validator: shortenAddress(msg.value.validator_address, 24),
             amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`
+          }}
+        />
+      )
+    };
+  }
+
+  if (MessageType<MsgUndelegate>(msg, "cosmos-sdk/MsgUndelegate")) {
+    const parsed = CoinUtils.parseDecAndDenomFromCoin(
+      new Coin(msg.value.amount.denom, msg.value.amount.amount)
+    );
+
+    return {
+      icon: "fas fa-layer-group",
+      title: intl.formatMessage({
+        id: "sign.list.message.cosmos-sdk/MsgUndelegate.title"
+      }),
+      content: (
+        <FormattedMessage
+          id="sign.list.message.cosmos-sdk/MsgUndelegate.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            br: <br />,
+            validator: shortenAddress(msg.value.validator_address, 24),
+            amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`
+          }}
+        />
+      )
+    };
+  }
+
+  if (
+    MessageType<MsgWithdrawDelegatorReward>(
+      msg,
+      "cosmos-sdk/MsgWithdrawDelegationReward"
+    )
+  ) {
+    return {
+      icon: "fas fa-money-bill",
+      title: intl.formatMessage({
+        id: "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title"
+      }),
+      content: (
+        <FormattedMessage
+          id="sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            validator: shortenAddress(msg.value.validator_address, 34)
           }}
         />
       )
