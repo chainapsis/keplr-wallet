@@ -32,6 +32,10 @@
   "register.create.textarea.mnemonic.error.too-short": "Too short mnemonic",
   "register.create.button.next": "Next",
 
+  "register.welcome.title": "You’re all set!",
+  "register.welcome.content": "Open the extension and sign in to begin your interchain journey.",
+  "register.welcome.button.done": "Done",
+
   "lock.input.password": "Password",
   "lock.input.password.error.required": "Empty password",
   "lock.input.password.error.invalid": "Invaid password",

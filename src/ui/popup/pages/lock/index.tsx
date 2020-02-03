@@ -83,7 +83,9 @@ export const LockPage: FunctionComponent<Pick<
         />
         <Input
           type="password"
-          label="Passward"
+          label={intl.formatMessage({
+            id: "lock.input.password"
+          })}
           name="password"
           error={errors.password && errors.password.message}
           ref={register({

@@ -3,12 +3,22 @@ import React, { FunctionComponent } from "react";
 import styleWelcome from "./welcome.module.scss";
 import { Button } from "../../../components/button";
 
+import { useIntl } from "react-intl";
+
 export const WelcomeInPage: FunctionComponent = () => {
+  const intl = useIntl();
+
   return (
     <div style={{ paddingTop: "60px" }}>
-      <div className={styleWelcome.title}>You’re all set!</div>
+      <div className={styleWelcome.title}>
+        {intl.formatMessage({
+          id: "register.welcome.title"
+        })}
+      </div>
       <div className={styleWelcome.content}>
-        Open the extension and sign in to begin your interchain journey.
+        {intl.formatMessage({
+          id: "register.welcome.content"
+        })}
       </div>
       <Button
         color="primary"
@@ -22,7 +32,9 @@ export const WelcomeInPage: FunctionComponent = () => {
           marginTop: "60px"
         }}
       >
-        Done
+        {intl.formatMessage({
+          id: "register.welcome.button.done"
+        })}
       </Button>
     </div>
   );
