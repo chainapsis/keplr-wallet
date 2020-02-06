@@ -38,7 +38,7 @@
 
   "lock.input.password": "Password",
   "lock.input.password.error.required": "Empty password",
-  "lock.input.password.error.invalid": "Invaid password",
+  "lock.input.password.error.invalid": "Invalid password",
   "lock.button.unlock": "Unlock",
 
   "send.input.recipient": "Recipient",
