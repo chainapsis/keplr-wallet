@@ -17,7 +17,7 @@ import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
 import { RootStore } from "../root";
 
 import Axios, { CancelTokenSource } from "axios";
-import { AutoFetchingAssetsInterval } from "../../../../options";
+import { AutoFetchingAssetsInterval } from "../../../../config";
 
 export class AccountStore {
   @observable

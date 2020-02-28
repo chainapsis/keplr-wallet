@@ -8,7 +8,7 @@ import {
   CoinGeckoAPIEndPoint,
   CoinGeckoGetPrice,
   AutoFetchingFiatValueInterval
-} from "../../../../options";
+} from "../../../../config";
 import { ChainInfo } from "../../../../chain-info";
 import { getCurrencies } from "../../../../common/currency";
 
