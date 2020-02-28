@@ -62,14 +62,14 @@ export class InjectedWalletProvider implements WalletProvider {
   ): Promise<TxBuilderConfig> {
     const random = new Uint8Array(4);
     crypto.getRandomValues(random);
-    const index = Buffer.from(random).toString("hex");
+    const id = Buffer.from(random).toString("hex");
 
     const requestTxBuilderConfigMsg = RequestTxBuilderConfigMsg.create(
       {
         chainId: context.get("chainId"),
         ...txBuilderConfigToPrimitive(config)
       },
-      index,
+      id,
       true,
       window.location.origin
     );
@@ -92,11 +92,11 @@ export class InjectedWalletProvider implements WalletProvider {
   ): Promise<Uint8Array> {
     const random = new Uint8Array(4);
     crypto.getRandomValues(random);
-    const index = Buffer.from(random).toString("hex");
+    const id = Buffer.from(random).toString("hex");
 
     const requestSignMsg = RequestSignMsg.create(
       context.get("chainId"),
-      index,
+      id,
       bech32Address,
       Buffer.from(message).toString("hex"),
       true,
