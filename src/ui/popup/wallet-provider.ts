@@ -81,14 +81,14 @@ export class PopupWalletProvider implements WalletProvider {
 
     const random = new Uint8Array(4);
     crypto.getRandomValues(random);
-    const index = Buffer.from(random).toString("hex");
+    const id = Buffer.from(random).toString("hex");
 
     const requestTxBuilderConfig = RequestTxBuilderConfigMsg.create(
       {
         chainId: context.get("chainId"),
         ...txBuilderConfigToPrimitive(config)
       },
-      index,
+      id,
       false,
       // There is no need to set origin because this wallet provider is used in internal.
       ""
@@ -104,7 +104,7 @@ export class PopupWalletProvider implements WalletProvider {
         });
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.feeApprover!.onRequestTxBuilderConfig(index);
+      this.feeApprover!.onRequestTxBuilderConfig(id);
     });
   }
 
@@ -118,11 +118,11 @@ export class PopupWalletProvider implements WalletProvider {
   ): Promise<Uint8Array> {
     const random = new Uint8Array(4);
     crypto.getRandomValues(random);
-    const index = Buffer.from(random).toString("hex");
+    const id = Buffer.from(random).toString("hex");
 
     const requestSignMsg = RequestSignMsg.create(
       context.get("chainId"),
-      index,
+      id,
       bech32Address,
       Buffer.from(message).toString("hex"),
       false,
@@ -139,9 +139,9 @@ export class PopupWalletProvider implements WalletProvider {
         });
 
       if (this.accessApprover) {
-        this.accessApprover.onRequestSignature(index);
+        this.accessApprover.onRequestSignature(id);
       } else {
-        sendMessage(BACKGROUND_PORT, ApproveSignMsg.create(index));
+        sendMessage(BACKGROUND_PORT, ApproveSignMsg.create(id));
       }
     });
   }

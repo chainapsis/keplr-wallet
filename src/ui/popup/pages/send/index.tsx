@@ -92,8 +92,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     const { chainStore, accountStore, priceStore } = useStore();
     const [walletProvider] = useState(
       new PopupWalletProvider(undefined, {
-        onRequestSignature: (index: string) => {
-          history.push(`/sign/${index}`);
+        onRequestSignature: (id: string) => {
+          history.push(`/sign/${id}`);
         }
       })
     );

@@ -213,7 +213,7 @@ const handleRequestTxBuilderConfigMsg: (
       // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       msg.config!,
-      msg.index,
+      msg.id,
       msg.openPopup
     );
     return {
@@ -226,7 +226,7 @@ const handleGetRequestedTxBuilderConfig: (
   keeper: KeyRingKeeper
 ) => InternalHandler<GetRequestedTxBuilderConfigMsg> = keeper => {
   return async msg => {
-    const config = keeper.getRequestedTxConfig(msg.index);
+    const config = keeper.getRequestedTxConfig(msg.id);
 
     return {
       config
@@ -240,7 +240,7 @@ const handleApproveTxBuilderConfigMsg: (
   return async msg => {
     // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    keeper.approveTxBuilderConfig(msg.index, msg.config!);
+    keeper.approveTxBuilderConfig(msg.id, msg.config!);
 
     return {};
   };
@@ -250,7 +250,7 @@ const handleRejectTxBuilderConfigMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<RejectTxBuilderConfigMsg> = keeper => {
   return async msg => {
-    keeper.rejectTxBuilderConfig(msg.index);
+    keeper.rejectTxBuilderConfig(msg.id);
 
     return {};
   };
@@ -271,7 +271,7 @@ const handleRequestSignMsg: (
         await keeper.requestSign(
           msg.chainId,
           new Uint8Array(Buffer.from(msg.messageHex, "hex")),
-          msg.index,
+          msg.id,
           msg.openPopup
         )
       ).toString("hex")
@@ -283,7 +283,7 @@ const handleGetRequestedMessage: (
   keeper: KeyRingKeeper
 ) => InternalHandler<GetRequestedMessage> = keeper => {
   return msg => {
-    const message = keeper.getRequestedMessage(msg.index);
+    const message = keeper.getRequestedMessage(msg.id);
 
     return {
       chainId: message.chainId,
@@ -296,7 +296,7 @@ const handleApproveSignMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<ApproveSignMsg> = keeper => {
   return msg => {
-    keeper.approveSign(msg.index);
+    keeper.approveSign(msg.id);
     return;
   };
 };
@@ -305,7 +305,7 @@ const handleRejectSignMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<RejectSignMsg> = keeper => {
   return msg => {
-    keeper.rejectSign(msg.index);
+    keeper.rejectSign(msg.id);
     return;
   };
 };

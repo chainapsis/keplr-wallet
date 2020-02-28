@@ -105,8 +105,8 @@ ReactDOM.render(
             <Route exact path="/" component={StateRenderer} />
             <Route exact path="/register" component={RegisterPage} />
             <Route exact path="/send" component={SendPage} />
-            <Route exact path="/fee/:index" component={FeePage} />
-            <Route path="/sign/:index" component={SignPage} />
+            <Route exact path="/fee/:id" component={FeePage} />
+            <Route path="/sign/:id" component={SignPage} />
           </HashRouter>
         </NotificationProvider>
       </NotificationStoreProvider>

@@ -15,11 +15,11 @@ import { BACKGROUND_PORT } from "../../common/message/constant";
  * `message` is the initialized message.
  * `loading` means if approving or rejecting is requesting.
  * `error` is the thrown error during approving or rejecting.
- * @param index Index of requested signing.
+ * @param id Id of requested signing.
  * @param onMessageInit This will be called whenever message is initialized. Make sure that onMessageInit should not make re-render unnecessarily by using useCallback.
  */
 export const useSignature = (
-  index: string,
+  id: string,
   onMessageInit: (chainId: string, message: string) => void
 ) => {
   const [initializing, setInitializing] = useState(false);
@@ -35,7 +35,7 @@ export const useSignature = (
         setInitializing(true);
       }
 
-      const msg = GetRequestedMessage.create(index);
+      const msg = GetRequestedMessage.create(id);
       try {
         const result = await sendMessage(BACKGROUND_PORT, msg);
 
@@ -62,7 +62,7 @@ export const useSignature = (
       isMounted = false;
     };
     // Make sure that onMessageInit should not make re-render unnecessarily by using useCallback.
-  }, [index, onMessageInit]);
+  }, [id, onMessageInit]);
 
   const [approve, setApprove] = useState<(() => Promise<void>) | undefined>(
     undefined
@@ -87,7 +87,7 @@ export const useSignature = (
       }
 
       try {
-        const msg = ApproveSignMsg.create(index);
+        const msg = ApproveSignMsg.create(id);
         await sendMessage(BACKGROUND_PORT, msg);
       } catch (e) {
         if (isMounted) {
@@ -107,7 +107,7 @@ export const useSignature = (
       }
 
       try {
-        const msg = RejectSignMsg.create(index);
+        const msg = RejectSignMsg.create(id);
         await sendMessage(BACKGROUND_PORT, msg);
       } catch (e) {
         if (isMounted) {
@@ -127,10 +127,10 @@ export const useSignature = (
       isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
+  }, [id]);
 
   return {
-    index,
+    id,
     initializing,
     message,
     loading,

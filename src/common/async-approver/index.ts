@@ -11,21 +11,21 @@ export class AsyncApprover<T = unknown, R = void> {
     }
   > = new Map();
 
-  private readonly validateIndex: (index: string) => void;
+  private readonly validateId: (id: string) => void;
   private readonly defaultTimeout: number = 0;
 
   constructor(
     opts: {
-      validateIndex?: (index: string) => void;
+      validateId?: (id: string) => void;
       defaultTimeout?: number;
     } = {}
   ) {
-    if (!opts?.validateIndex) {
-      this.validateIndex = (index: string): void => {
-        AsyncApprover.isValidIndex(index);
+    if (!opts?.validateId) {
+      this.validateId = (id: string): void => {
+        AsyncApprover.isValidId(id);
       };
     } else {
-      this.validateIndex = opts.validateIndex;
+      this.validateId = opts.validateId;
     }
 
     if (opts?.defaultTimeout) {
@@ -34,16 +34,16 @@ export class AsyncApprover<T = unknown, R = void> {
   }
 
   async request(
-    index: string,
+    id: string,
     data?: T,
     timeout: number = this.defaultTimeout
   ): Promise<R | undefined> {
-    this.validateIndex(index);
+    this.validateId(id);
 
     if (timeout) {
       setTimeout(() => {
         try {
-          this.reject(index);
+          this.reject(id);
         } catch {
           // noop
         }
@@ -51,7 +51,7 @@ export class AsyncApprover<T = unknown, R = void> {
     }
 
     return new Promise<R>((resolve, reject) => {
-      this.requests.set(index, {
+      this.requests.set(id, {
         data,
         resolve,
         reject
@@ -59,46 +59,46 @@ export class AsyncApprover<T = unknown, R = void> {
     });
   }
 
-  approve(index: string, result?: R): void {
-    this.validateIndex(index);
+  approve(id: string, result?: R): void {
+    this.validateId(id);
 
-    const resolver = this.requests.get(index);
+    const resolver = this.requests.get(id);
     if (!resolver) {
-      throw new Error("Unknown request index");
+      throw new Error("Unknown request id");
     }
 
-    this.requests.delete(index);
+    this.requests.delete(id);
     resolver.resolve(result);
   }
 
-  reject(index: string): void {
-    this.validateIndex(index);
+  reject(id: string): void {
+    this.validateId(id);
 
-    const resolver = this.requests.get(index);
+    const resolver = this.requests.get(id);
     if (!resolver) {
-      throw new Error("Unknown request index");
+      throw new Error("Unknown request id");
     }
 
-    this.requests.delete(index);
+    this.requests.delete(id);
     resolver.reject(new Error("Request rejected"));
   }
 
-  getData(index: string): T | undefined {
-    const resolver = this.requests.get(index);
+  getData(id: string): T | undefined {
+    const resolver = this.requests.get(id);
     if (!resolver) {
-      throw new Error("Unknown request index");
+      throw new Error("Unknown request id");
     }
 
     return resolver.data;
   }
 
-  public static isValidIndex(index: string) {
-    if (!index || index.length < 4) {
-      throw new Error("Too short index");
+  public static isValidId(id: string) {
+    if (!id || id.length < 4) {
+      throw new Error("Too short id");
     }
 
-    if (index.length > 8) {
-      throw new Error("Too long index");
+    if (id.length > 8) {
+      throw new Error("Too long id");
     }
   }
 }

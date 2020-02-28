@@ -47,7 +47,7 @@ interface FormData {
 }
 
 export const FeePage: FunctionComponent<RouteComponentProps<{
-  index: string;
+  id: string;
 }>> = observer(({ match, location, history }) => {
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
@@ -63,7 +63,7 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
     }
   }, [external]);
 
-  const index = match.params.index;
+  const id = match.params.id;
 
   const { chainStore, priceStore } = useStore();
 
@@ -116,17 +116,17 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
     }
   }, [external]);
 
-  const txBuilder = useTxBuilderConfig(index, onConfigInit, onApprove);
+  const txBuilder = useTxBuilderConfig(id, onConfigInit, onApprove);
 
   useEffect(() => {
     return () => {
-      // If requested index is changed, just reject the prior one.
+      // If requested id is changed, just reject the prior one.
       if (external && txBuilder.reject) {
         txBuilder.reject();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [txBuilder.reject, index, external]);
+  }, [txBuilder.reject, id, external]);
 
   useEffect(() => {
     // Force reject when closing window.

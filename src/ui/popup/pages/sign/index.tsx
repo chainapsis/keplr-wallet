@@ -31,7 +31,7 @@ enum Tab {
 }
 
 export const SignPage: FunctionComponent<RouteComponentProps<{
-  index: string;
+  id: string;
 }>> = ({ history, match, location }) => {
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
@@ -45,7 +45,7 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
     }
   }, [external]);
 
-  const index = match.params.index;
+  const id = match.params.id;
 
   const [tab, setTab] = useState<Tab>(Tab.Details);
 
@@ -54,7 +54,7 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
   const { chainStore } = useStore();
 
   const signing = useSignature(
-    index,
+    id,
     useCallback(
       chainId => {
         chainStore.setChain(chainId);
@@ -79,13 +79,13 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
 
   useEffect(() => {
     return () => {
-      // If index is changed, just reject the prior one.
+      // If id is changed, just reject the prior one.
       if (external && signing.reject) {
         signing.reject();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signing.reject, signing.index, external]);
+  }, [signing.reject, signing.id, external]);
 
   const onApproveClick = useCallback(async () => {
     if (signing.approve) {

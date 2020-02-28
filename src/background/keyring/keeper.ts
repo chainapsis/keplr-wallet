@@ -178,70 +178,68 @@ export class KeyRingKeeper {
 
   async requestTxBuilderConfig(
     config: TxBuilderConfigPrimitiveWithChainId,
-    index: string,
+    id: string,
     openPopup: boolean
   ): Promise<TxBuilderConfigPrimitive> {
     if (openPopup) {
       // Open fee window with hash to let the fee page to know that window is requested newly.
-      openWindow(
-        browser.runtime.getURL(`popup.html#/fee/${index}?external=true`)
-      );
+      openWindow(browser.runtime.getURL(`popup.html#/fee/${id}?external=true`));
     }
 
-    const result = await this.txBuilderApprover.request(index, config);
+    const result = await this.txBuilderApprover.request(id, config);
     if (!result) {
       throw new Error("config is approved, but result config is null");
     }
     return result;
   }
 
-  getRequestedTxConfig(index: string): TxBuilderConfigPrimitiveWithChainId {
-    const config = this.txBuilderApprover.getData(index);
+  getRequestedTxConfig(id: string): TxBuilderConfigPrimitiveWithChainId {
+    const config = this.txBuilderApprover.getData(id);
     if (!config) {
-      throw new Error("Unknown config request index");
+      throw new Error("Unknown config request id");
     }
 
     return config;
   }
 
-  approveTxBuilderConfig(index: string, config: TxBuilderConfigPrimitive) {
-    this.txBuilderApprover.approve(index, config);
+  approveTxBuilderConfig(id: string, config: TxBuilderConfigPrimitive) {
+    this.txBuilderApprover.approve(id, config);
   }
 
-  rejectTxBuilderConfig(index: string): void {
-    this.txBuilderApprover.reject(index);
+  rejectTxBuilderConfig(id: string): void {
+    this.txBuilderApprover.reject(id);
   }
 
   async requestSign(
     chainId: string,
     message: Uint8Array,
-    index: string,
+    id: string,
     openPopup: boolean
   ): Promise<Uint8Array> {
     if (openPopup) {
       openWindow(
-        browser.runtime.getURL(`popup.html#/sign/${index}?external=true`)
+        browser.runtime.getURL(`popup.html#/sign/${id}?external=true`)
       );
     }
 
-    await this.signApprover.request(index, { chainId, message });
+    await this.signApprover.request(id, { chainId, message });
     return this.keyRing.sign(this.path, message);
   }
 
-  getRequestedMessage(index: string): SignMessage {
-    const message = this.signApprover.getData(index);
+  getRequestedMessage(id: string): SignMessage {
+    const message = this.signApprover.getData(id);
     if (!message) {
-      throw new Error("Unknown sign request index");
+      throw new Error("Unknown sign request id");
     }
 
     return message;
   }
 
-  approveSign(index: string): void {
-    this.signApprover.approve(index);
+  approveSign(id: string): void {
+    this.signApprover.approve(id);
   }
 
-  rejectSign(index: string): void {
-    this.signApprover.reject(index);
+  rejectSign(id: string): void {
+    this.signApprover.reject(id);
   }
 }

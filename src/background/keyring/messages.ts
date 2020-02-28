@@ -337,20 +337,20 @@ export class RequestTxBuilderConfigMsg extends Message<{
 
   public static create(
     config: TxBuilderConfigPrimitiveWithChainId,
-    index: string,
+    id: string,
     openPopup: boolean,
     origin: string
   ): RequestTxBuilderConfigMsg {
     const msg = new RequestTxBuilderConfigMsg();
     msg.config = config;
-    msg.index = index;
+    msg.id = id;
     msg.openPopup = openPopup;
     msg.origin = origin;
     return msg;
   }
 
   public config?: TxBuilderConfigPrimitiveWithChainId;
-  public index: string = "";
+  public id: string = "";
   public openPopup: boolean = false;
   public origin: string = "";
 
@@ -359,7 +359,7 @@ export class RequestTxBuilderConfigMsg extends Message<{
       throw new Error("config is null");
     }
 
-    AsyncApprover.isValidIndex(this.index);
+    AsyncApprover.isValidId(this.id);
   }
 
   // Approve external approves sending message if they submit their origin correctly.
@@ -399,16 +399,16 @@ export class GetRequestedTxBuilderConfigMsg extends Message<{
     return "get-requested-tx-builder-config";
   }
 
-  public static create(index: string): GetRequestedTxBuilderConfigMsg {
+  public static create(id: string): GetRequestedTxBuilderConfigMsg {
     const msg = new GetRequestedTxBuilderConfigMsg();
-    msg.index = index;
+    msg.id = id;
     return msg;
   }
 
-  public index: string = "";
+  public id: string = "";
 
   validateBasic(): void {
-    AsyncApprover.isValidIndex(this.index);
+    AsyncApprover.isValidId(this.id);
   }
 
   route(): string {
@@ -426,16 +426,16 @@ export class ApproveTxBuilderConfigMsg extends Message<{}> {
   }
 
   public static create(
-    index: string,
+    id: string,
     config: TxBuilderConfigPrimitive
   ): ApproveTxBuilderConfigMsg {
     const msg = new ApproveTxBuilderConfigMsg();
-    msg.index = index;
+    msg.id = id;
     msg.config = config;
     return msg;
   }
 
-  public index: string = "";
+  public id: string = "";
   public config?: TxBuilderConfigPrimitive;
 
   validateBasic(): void {
@@ -443,7 +443,7 @@ export class ApproveTxBuilderConfigMsg extends Message<{}> {
       throw new Error("config is empty");
     }
 
-    AsyncApprover.isValidIndex(this.index);
+    AsyncApprover.isValidId(this.id);
   }
 
   route(): string {
@@ -460,16 +460,16 @@ export class RejectTxBuilderConfigMsg extends Message<{}> {
     return "reject-tx-builder-config";
   }
 
-  public static create(index: string): RejectTxBuilderConfigMsg {
+  public static create(id: string): RejectTxBuilderConfigMsg {
     const msg = new RejectTxBuilderConfigMsg();
-    msg.index = index;
+    msg.id = id;
     return msg;
   }
 
-  public index: string = "";
+  public id: string = "";
 
   validateBasic(): void {
-    AsyncApprover.isValidIndex(this.index);
+    AsyncApprover.isValidId(this.id);
   }
 
   route(): string {
@@ -488,7 +488,7 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
 
   public static create(
     chainId: string,
-    index: string,
+    id: string,
     bech32Address: string,
     messageHex: string,
     openPopup: boolean,
@@ -496,7 +496,7 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
   ): RequestSignMsg {
     const msg = new RequestSignMsg();
     msg.chainId = chainId;
-    msg.index = index;
+    msg.id = id;
     msg.bech32Address = bech32Address;
     msg.messageHex = messageHex;
     msg.openPopup = openPopup;
@@ -505,7 +505,7 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
   }
 
   public chainId: string = "";
-  public index: string = "";
+  public id: string = "";
   public bech32Address: string = "";
   // Hex encoded message.
   public messageHex: string = "";
@@ -525,7 +525,7 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
       throw new Error("message is empty");
     }
 
-    AsyncApprover.isValidIndex(this.index);
+    AsyncApprover.isValidId(this.id);
   }
 
   // Approve external approves sending message if they submit their origin correctly.
@@ -566,20 +566,20 @@ export class GetRequestedMessage extends Message<{
     return "get-request-message";
   }
 
-  public static create(index: string): GetRequestedMessage {
+  public static create(id: string): GetRequestedMessage {
     const msg = new GetRequestedMessage();
-    msg.index = index;
+    msg.id = id;
     return msg;
   }
 
-  public index: string = "";
+  public id: string = "";
 
   validateBasic(): void {
-    if (!this.index) {
-      throw new Error("index is empty");
+    if (!this.id) {
+      throw new Error("id is empty");
     }
 
-    AsyncApprover.isValidIndex(this.index);
+    AsyncApprover.isValidId(this.id);
   }
 
   route(): string {
@@ -595,16 +595,16 @@ export class ApproveSignMsg extends Message<void> {
     return "approve-sign";
   }
 
-  public static create(index: string): ApproveSignMsg {
+  public static create(id: string): ApproveSignMsg {
     const msg = new ApproveSignMsg();
-    msg.index = index;
+    msg.id = id;
     return msg;
   }
 
-  public index: string = "";
+  public id: string = "";
 
   validateBasic(): void {
-    AsyncApprover.isValidIndex(this.index);
+    AsyncApprover.isValidId(this.id);
   }
 
   route(): string {
@@ -621,16 +621,16 @@ export class RejectSignMsg extends Message<void> {
     return "reject-sign";
   }
 
-  public static create(index: string): RejectSignMsg {
+  public static create(id: string): RejectSignMsg {
     const msg = new RejectSignMsg();
-    msg.index = index;
+    msg.id = id;
     return msg;
   }
 
-  public index: string = "";
+  public id: string = "";
 
   validateBasic(): void {
-    AsyncApprover.isValidIndex(this.index);
+    AsyncApprover.isValidId(this.id);
   }
 
   route(): string {
