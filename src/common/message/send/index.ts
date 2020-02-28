@@ -61,14 +61,14 @@ export async function sendMessage<M extends Message<unknown>>(
 export interface ProxyMessage {
   type: "proxy-message";
   msgType: string;
-  index: string;
+  id: string;
   port: string;
   msg: Message<unknown>;
 }
 
 export interface ProxyMessageResult {
   type: "proxy-message-result";
-  index: string;
+  id: string;
   result: Result | undefined;
 }
 
@@ -82,7 +82,7 @@ export function postMessage<M extends Message<unknown>>(
 ): Promise<M extends Message<infer R> ? R : never> {
   msg.validateBasic();
   const bytes = new Uint8Array(8);
-  const index: string = Array.from(crypto.getRandomValues(bytes))
+  const id: string = Array.from(crypto.getRandomValues(bytes))
     .map(value => {
       return value.toString(16);
     })
@@ -96,7 +96,7 @@ export function postMessage<M extends Message<unknown>>(
         return;
       }
 
-      if (proxyMsgResult.index !== index) {
+      if (proxyMsgResult.id !== id) {
         return;
       }
 
@@ -122,7 +122,7 @@ export function postMessage<M extends Message<unknown>>(
     const proxyMsg: ProxyMessage = {
       type: "proxy-message",
       msgType: msg.type(),
-      index,
+      id,
       port,
       msg
     };
@@ -141,8 +141,8 @@ export function listenAndProxyMessages(): void {
       return;
     }
 
-    if (!message.index) {
-      throw new Error("Empty index");
+    if (!message.id) {
+      throw new Error("Empty id");
     }
 
     _sendMessage(message.port, message.msg, {
@@ -150,7 +150,7 @@ export function listenAndProxyMessages(): void {
     }).then(result => {
       const proxyMsgResult: ProxyMessageResult = {
         type: "proxy-message-result",
-        index: message.index,
+        id: message.id,
         result
       };
 
