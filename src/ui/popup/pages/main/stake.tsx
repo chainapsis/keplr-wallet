@@ -214,6 +214,7 @@ export const StakeView: FunctionComponent = observer(() => {
                 cosmosJS == null || cosmosJS.sendMsgs == null || !rewardExist
               }
               onClick={withdrawAllRewards}
+              data-loading={cosmosJS.loading}
             >
               <FormattedMessage id="main.stake.button.claim-rewards" />
             </Button>
