@@ -60,9 +60,7 @@ export const AssetView: FunctionComponent = observer(() => {
         </div>
         <div className={styleAsset.indicatorIcon}>
           {accountStore.isAssetFetching ? (
-            <span className={"icon"}>
-              <i className="fas fa-spinner fa-spin" />
-            </span>
+            <i className="fas fa-spinner fa-spin" />
           ) : accountStore.lastAssetFetchingError ? (
             <ToolTip
               tooltip={
@@ -75,9 +73,7 @@ export const AssetView: FunctionComponent = observer(() => {
                 placement: "top"
               }}
             >
-              <span className={"icon has-text-danger"}>
-                <i className="fas fa-exclamation-triangle" />
-              </span>
+              <i className="fas fa-exclamation-triangle text-danger" />
             </ToolTip>
           ) : null}
         </div>

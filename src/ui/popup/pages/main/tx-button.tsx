@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  MouseEvent,
   useCallback,
   useEffect,
   useRef,
@@ -8,7 +9,7 @@ import React, {
 
 import styleTxButton from "./tx-button.module.scss";
 
-import { Button } from "../../../components/button";
+import { Button } from "reactstrap";
 import { Address } from "../../../components/address";
 
 import { observer } from "mobx-react";
@@ -19,6 +20,7 @@ import Modal from "react-modal";
 import { useNotification } from "../../../components/notification";
 
 import { FormattedMessage } from "react-intl";
+import { useHistory } from "react-router";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");
@@ -36,20 +38,25 @@ const DepositModal: FunctionComponent<{
 
   const notification = useNotification();
 
-  const copyAddress = useCallback(async () => {
-    await navigator.clipboard.writeText(bech32Address);
-    // TODO: Show success tooltip.
-    notification.push({
-      placement: "top-center",
-      type: "success",
-      duration: 2,
-      content: "Address copied!",
-      canDelete: true,
-      transition: {
-        duration: 0.25
-      }
-    });
-  }, [notification, bech32Address]);
+  const copyAddress = useCallback(
+    async (e: MouseEvent) => {
+      await navigator.clipboard.writeText(bech32Address);
+      // TODO: Show success tooltip.
+      notification.push({
+        placement: "top-center",
+        type: "success",
+        duration: 2,
+        content: "Address copied!",
+        canDelete: true,
+        transition: {
+          duration: 0.25
+        }
+      });
+
+      e.preventDefault();
+    },
+    [notification, bech32Address]
+  );
 
   return (
     <div
@@ -85,6 +92,17 @@ export const TxButtonView: FunctionComponent = observer(() => {
     setIsDepositOpen(!isDepositOpen);
   }, [isDepositOpen]);
 
+  const history = useHistory();
+
+  const onSendButton = useCallback(
+    (e: MouseEvent) => {
+      history.push("/send");
+
+      e.preventDefault();
+    },
+    [history]
+  );
+
   return (
     <div className={styleTxButton.containerTxButton}>
       <Modal
@@ -97,20 +115,19 @@ export const TxButtonView: FunctionComponent = observer(() => {
         <DepositModal bech32Address={accountStore.bech32Address} />
       </Modal>
       <Button
-        type="button"
-        color="link"
-        size="medium"
+        className={styleTxButton.button}
+        color="primary"
         outline
         onClick={toggleDepositModal}
       >
         <FormattedMessage id="main.account.button.deposit" />
       </Button>
       <Button
+        className={styleTxButton.button}
         color="primary"
-        size="medium"
-        to="/send"
         outline
         disabled={accountStore.assets.length === 0}
+        onClick={onSendButton}
       >
         <FormattedMessage id="main.account.button.send" />
       </Button>

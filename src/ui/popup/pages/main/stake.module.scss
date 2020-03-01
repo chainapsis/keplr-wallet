@@ -4,48 +4,29 @@
   display: flex;
   flex-direction: row;
 
-  height: 56px;
+  height: 48px;
   justify-content: center;
   align-items: center;
 
-  &.reward {
-    .title {
-      font-size: 14px;
-      letter-spacing: -0.31px;
-      color: #4a4a4a;
-    }
-
-    .content {
-      font-size: 21px;
-      line-height: 24px;
-      letter-spacing: -0.47px;
-      color: black;
-    }
+  .paragraph-main {
+    line-height: 1.35;
   }
 
-  &.stake {
-    .title {
-      font-size: 21px;
-      line-height: 24px;
-      letter-spacing: -0.47px;
-      color: black;
-    }
-
-    .content {
-      font-size: 14px;
-      letter-spacing: -0.31px;
-      color: #4a4a4a;
-    }
+  .paragraph-sub {
+    line-height: 1.35;
+    color: #8898aa;
   }
 
   .vertical {
     display: flex;
     flex-direction: column;
   }
+
+  .button {
+    padding: 6px 20px 4px;
+  }
 }
 
 .hr {
   margin: $main-card-padding 0;
-  background-color: #979797;
-  height: 1px;
 }
