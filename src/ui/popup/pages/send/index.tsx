@@ -16,7 +16,6 @@ import { RouteComponentProps } from "react-router-dom";
 import { useStore } from "../../stores";
 
 import { HeaderLayout } from "../../layouts";
-import { Button } from "../../../components/button";
 
 import { PopupWalletProvider } from "../../wallet-provider";
 
@@ -47,6 +46,7 @@ import { useNotification } from "../../../components/notification";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 import { useIntl } from "react-intl";
+import { Button } from "reactstrap";
 
 interface FormData {
   recipient: string;
@@ -220,6 +220,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               return;
             }
             handleSubmit(async (data: FormData) => {
+              console.log(data);
               const coin = CoinUtils.getCoinFromDecimals(
                 data.amount,
                 data.denom
@@ -366,9 +367,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             <Button
               type="submit"
               color="primary"
-              size="medium"
-              fullwidth
-              loading={cosmosJS.loading}
+              block
+              data-loading={cosmosJS.loading}
               disabled={cosmosJS.sendMsgs == null}
             >
               {intl.formatMessage({

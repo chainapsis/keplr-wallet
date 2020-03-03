@@ -41,6 +41,10 @@ body {
   }
 }
 
+.invalid-feedback {
+  position: absolute;
+}
+
 button[data-loading="true"] {
   color: transparent !important;
   pointer-events: none;
