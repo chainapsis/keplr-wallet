@@ -45,6 +45,14 @@ body {
   position: absolute;
 }
 
+.form-control {
+  color: black;
+
+  &:focus {
+    color: black;
+  }
+}
+
 button[data-loading="true"] {
   color: transparent !important;
   pointer-events: none;
