@@ -13,7 +13,7 @@ import {
   Input,
   TextArea
 } from "../../../components/form";
-import { Button } from "../../../components/button";
+import { Button } from "reactstrap";
 
 import { RouteComponentProps } from "react-router";
 
@@ -231,10 +231,9 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
           <Button
             type="submit"
             color="primary"
-            size="medium"
-            fullwidth
+            block
             disabled={txBuilder.initializing}
-            loading={txBuilder.requested}
+            data-loading={txBuilder.requested}
           >
             <FormattedMessage id="fee.button.set" />
           </Button>
