@@ -18,7 +18,7 @@
   "register.intro.button.new-account.content": "Create a new wallet using a new seed",
   "register.intro.button.import-account.title": "Import existing account",
   "register.intro.button.import-account.content": "Use a 12/24 word seed to import an existing wallet",
-  "register.intro.sub-content": "All sensitive information is stored only on your device. \nThis process does not require an internet connection.",
+  "register.intro.sub-content": "All sensitive information is stored only on your device.{br}This process does not require an internet connection.",
 
   "register.recover.title": "Input yout seed",
 

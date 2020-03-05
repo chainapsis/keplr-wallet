@@ -33,7 +33,12 @@ export const IntroInPage: FunctionComponent<{
         onClick={props.onRequestRecoverAccount}
       />
       <div className={styleIntro.subContent}>
-        <FormattedMessage id="register.intro.sub-content" />
+        <FormattedMessage
+          id="register.intro.sub-content"
+          values={{
+            br: <br />
+          }}
+        />
       </div>
     </div>
   );
