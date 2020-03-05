@@ -18,6 +18,7 @@ export interface Props {
   canChangeChainInfo: boolean;
 
   menuRenderer?: ReactNode;
+  rightRenderer?: ReactNode;
   onBackButton?: () => void;
 }
 
@@ -30,6 +31,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
     showChainName,
     canChangeChainInfo,
     menuRenderer,
+    rightRenderer,
     isMenuOpen,
     onBackButton
   }) => {
@@ -78,6 +80,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
             ) : null}
           </div>
         }
+        right={rightRenderer}
       >
         {showChainName ? (
           <ToolTip
