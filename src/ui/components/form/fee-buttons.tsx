@@ -1,20 +1,28 @@
 import React, {
   FunctionComponent,
+  MouseEvent,
   useCallback,
   useEffect,
   useState
 } from "react";
 
-import classnames from "classnames";
 import styleFeeButtons from "./fee-buttons.module.scss";
-import "./input.module.scss";
-import { getColorClass } from "../../popup/styles/type";
+
 import { Currency } from "../../../chain-info";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { CoinUtils } from "../../../common/coin-utils";
 import { useFormContext } from "react-hook-form";
 import { DecUtils } from "../../../common/dec-utils";
+import {
+  Button,
+  ButtonGroup,
+  FormFeedback,
+  FormGroup,
+  Label
+} from "reactstrap";
+
+import classnames from "classnames";
 
 export type GasPriceStep = {
   low: Dec;
@@ -30,7 +38,6 @@ export const DefaultGasPriceStep: GasPriceStep = {
 
 export interface FeeButtonsProps {
   className?: string;
-  color?: "primary" | "info" | "success" | "warning" | "danger";
   label?: string;
   feeSelectLabels?: {
     low: string;
@@ -55,7 +62,6 @@ enum FeeSelect {
 }
 
 export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
-  color = "primary",
   label,
   feeSelectLabels = { low: "Low", average: "Average", high: "High" },
   error,
@@ -123,28 +129,35 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
     }
   }, [feeAverage, feeHigh, feeLow, feeSelect, name, setValue]);
 
-  return (
-    <div className="fields">
-      {label ? (
-        <div className="field for-label">
-          <label className="label">{label}</label>
-        </div>
-      ) : null}
+  const [inputId] = useState(() => {
+    const bytes = new Uint8Array(4);
+    crypto.getRandomValues(bytes);
+    return `input-${Buffer.from(bytes).toString("hex")}`;
+  });
 
-      <div
-        className={classnames("buttons", "has-addons", styleFeeButtons.buttons)}
-      >
-        <button
-          className={classnames("button", styleFeeButtons.button, {
-            [getColorClass(color)]: feeSelect === FeeSelect.LOW
-          })}
+  return (
+    <FormGroup>
+      {label ? (
+        <Label for={inputId} className="form-control-label">
+          {label}
+        </Label>
+      ) : null}
+      <ButtonGroup id={inputId} className={styleFeeButtons.buttons}>
+        <Button
           type="button"
-          onClick={useCallback(() => {
+          className={styleFeeButtons.button}
+          color={feeSelect === FeeSelect.LOW ? "primary" : undefined}
+          onClick={useCallback((e: MouseEvent) => {
             setFeeSelect(FeeSelect.LOW);
+            e.preventDefault();
           }, [])}
         >
           <div className={styleFeeButtons.title}>{feeSelectLabels.low}</div>
-          <div className={styleFeeButtons.fiat}>
+          <div
+            className={classnames(styleFeeButtons.fiat, {
+              "text-muted": feeSelect !== FeeSelect.LOW
+            })}
+          >
             {price.gt(new Dec(0)) && feeLow
               ? `$${DecUtils.decToStrWithoutTrailingZeros(
                   new Dec(feeLow.amount)
@@ -155,25 +168,33 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
                 )}`
               : "?"}
           </div>
-          <div className={styleFeeButtons.coin}>
+          <div
+            className={classnames(styleFeeButtons.coin, {
+              "text-muted": feeSelect !== FeeSelect.LOW
+            })}
+          >
             {feeLow
               ? `${DecUtils.removeTrailingZerosFromDecStr(
                   CoinUtils.parseDecAndDenomFromCoin(feeLow).amount
                 )}${currency.coinDenom}`
               : "loading"}
           </div>
-        </button>
-        <button
-          className={classnames("button", styleFeeButtons.button, {
-            [getColorClass(color)]: feeSelect === FeeSelect.AVERAGE
-          })}
+        </Button>
+        <Button
           type="button"
-          onClick={useCallback(() => {
+          className={styleFeeButtons.button}
+          color={feeSelect === FeeSelect.AVERAGE ? "primary" : undefined}
+          onClick={useCallback((e: MouseEvent) => {
             setFeeSelect(FeeSelect.AVERAGE);
+            e.preventDefault();
           }, [])}
         >
           <div className={styleFeeButtons.title}>{feeSelectLabels.average}</div>
-          <div className={styleFeeButtons.fiat}>
+          <div
+            className={classnames(styleFeeButtons.fiat, {
+              "text-muted": feeSelect !== FeeSelect.AVERAGE
+            })}
+          >
             {price.gt(new Dec(0)) && feeAverage
               ? `$${DecUtils.decToStrWithoutTrailingZeros(
                   new Dec(feeAverage.amount)
@@ -184,25 +205,33 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
                 )}`
               : "?"}
           </div>
-          <div className={styleFeeButtons.coin}>
+          <div
+            className={classnames(styleFeeButtons.coin, {
+              "text-muted": feeSelect !== FeeSelect.AVERAGE
+            })}
+          >
             {feeAverage
               ? `${DecUtils.removeTrailingZerosFromDecStr(
                   CoinUtils.parseDecAndDenomFromCoin(feeAverage).amount
                 )}${currency.coinDenom}`
               : "loading"}
           </div>
-        </button>
-        <button
-          className={classnames("button", styleFeeButtons.button, {
-            [getColorClass(color)]: feeSelect === FeeSelect.HIGH
-          })}
+        </Button>
+        <Button
           type="button"
-          onClick={useCallback(() => {
+          className={styleFeeButtons.button}
+          color={feeSelect === FeeSelect.HIGH ? "primary" : undefined}
+          onClick={useCallback((e: MouseEvent) => {
             setFeeSelect(FeeSelect.HIGH);
+            e.preventDefault();
           }, [])}
         >
           <div className={styleFeeButtons.title}>{feeSelectLabels.high}</div>
-          <div className={styleFeeButtons.fiat}>
+          <div
+            className={classnames(styleFeeButtons.fiat, {
+              "text-muted": feeSelect !== FeeSelect.HIGH
+            })}
+          >
             {price.gt(new Dec(0)) && feeHigh
               ? `$${DecUtils.decToStrWithoutTrailingZeros(
                   new Dec(feeHigh.amount)
@@ -213,21 +242,22 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
                 )}`
               : "?"}
           </div>
-          <div className={styleFeeButtons.coin}>
+          <div
+            className={classnames(styleFeeButtons.coin, {
+              "text-muted": feeSelect !== FeeSelect.HIGH
+            })}
+          >
             {feeHigh
               ? `${DecUtils.removeTrailingZerosFromDecStr(
                   CoinUtils.parseDecAndDenomFromCoin(feeHigh).amount
                 )}${currency.coinDenom}`
               : "loading"}
           </div>
-        </button>
-      </div>
-
+        </Button>
+      </ButtonGroup>
       {error ? (
-        <div className="field for-label">
-          <p className="help is-danger">{error}</p>
-        </div>
+        <FormFeedback style={{ display: "block" }}>{error}</FormFeedback>
       ) : null}
-    </div>
+    </FormGroup>
   );
 };

@@ -59,11 +59,11 @@ Modal.defaultStyles = {
 };
 
 const StateRenderer: FunctionComponent<RouteComponentProps> = observer(
-  ({ history, location }) => {
+  ({ location }) => {
     const { keyRingStore } = useStore();
 
     if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
-      return <MainPage history={history} />;
+      return <MainPage />;
     } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
       return <LockPage location={location} />;
     } else if (keyRingStore.status === KeyRingStatus.EMPTY) {

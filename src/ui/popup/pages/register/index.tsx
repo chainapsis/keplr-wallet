@@ -11,7 +11,9 @@ import { IntroInPage } from "./intro";
 
 import style from "./style.module.scss";
 import { KeyRingStatus } from "../../../../background/keyring";
-import { Button } from "../../../components/button";
+
+import { Button } from "reactstrap";
+
 import { KeyRingStore } from "../../stores/keyring";
 import { WelcomeInPage } from "./welcome";
 import { FormattedMessage } from "react-intl";
@@ -22,6 +24,19 @@ enum RegisterState {
   RECOVER,
   VERIFY
 }
+
+const BackButton: FunctionComponent<{ onClick: () => void }> = ({
+  onClick
+}) => {
+  return (
+    <div className={style.backButton}>
+      <Button color="link" onClick={onClick}>
+        <i className="fas fa-angle-left" style={{ marginRight: "8px" }} />
+        <FormattedMessage id="register.button.back" />
+      </Button>
+    </div>
+  );
+};
 
 export const RegisterPage: FunctionComponent = observer(() => {
   const [state, setState] = useState<RegisterState>(RegisterState.INIT);
@@ -117,16 +132,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
             isRecover={false}
             isLoading={accountIsCreating}
           />
-          <div className={style.backButton}>
-            <Button className="is-white" onClick={onBackToInit}>
-              <span className="icon">
-                <i className="fas fa-angle-left" />
-              </span>
-              <span>
-                <FormattedMessage id="register.button.back" />
-              </span>
-            </Button>
-          </div>
+          <BackButton onClick={onBackToInit} />
         </>
       ) : null}
       {keyRingStore.status === KeyRingStatus.EMPTY &&
@@ -138,14 +144,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
             isRecover={true}
             isLoading={accountIsCreating}
           />
-          <div className={style.backButton}>
-            <Button className="is-white" onClick={onBackToInit}>
-              <span className="icon">
-                <i className="fas fa-angle-left" />
-              </span>
-              <FormattedMessage id="register.button.back" />
-            </Button>
-          </div>
+          <BackButton onClick={onBackToInit} />
         </>
       ) : null}
       {keyRingStore.status === KeyRingStatus.EMPTY &&
@@ -156,14 +155,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
             onVerify={onVerify}
             isLoading={accountIsCreating}
           />
-          <div className={style.backButton}>
-            <Button className="is-white" onClick={onBackToRegister}>
-              <span className="icon">
-                <i className="fas fa-angle-left" />
-              </span>
-              <FormattedMessage id="register.button.back" />
-            </Button>
-          </div>
+          <BackButton onClick={onBackToRegister} />
         </>
       ) : null}
     </EmptyLayout>

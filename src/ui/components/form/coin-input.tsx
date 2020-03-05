@@ -3,13 +3,13 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { Currency } from "../../../chain-info";
 
 import classnames from "classnames";
-import style from "./input.module.scss";
 import styleCoinInput from "./coin-input.module.scss";
 
 import { getCurrencyFromDenom } from "../../../common/currency";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { ElementLike } from "react-hook-form/dist/types";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { FormFeedback, FormGroup, Input, InputGroup, Label } from "reactstrap";
 
 export interface CoinInputProps {
   currencies: Currency[];
@@ -17,7 +17,6 @@ export interface CoinInputProps {
   balanceText?: string;
 
   className?: string;
-  color?: "primary" | "info" | "success" | "warning" | "danger";
   label?: string;
   error?: string;
 
@@ -46,7 +45,6 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
     balances,
     balanceText,
     className,
-    color,
     label,
     error,
     input,
@@ -122,101 +120,97 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
   const canAllBalance =
     onChangeAllBanace && balance && balance.dec.gt(new Dec(0));
 
-  return (
-    <div className="fields">
-      {label ? (
-        <div className="field for-label">
-          <label className="label">
-            {label}
-            {balances ? (
-              <div
-                className={classnames(styleCoinInput.balance, {
-                  [styleCoinInput.clickable]: canAllBalance,
-                  [styleCoinInput.clicked]: allBalance
-                })}
-                onClick={() => {
-                  if (canAllBalance && onChangeAllBanace) {
-                    const prev = allBalance;
-                    setAllBalance(!prev);
-                    onChangeAllBanace(!prev);
-                  }
-                }}
-              >
-                {balance
-                  ? balanceText
-                    ? // TODO: Can use api in react-intl?
-                      `${balanceText}: 
-                        ${balance.dec.toString(balance.decimals)} ${
-                        balance.denom
-                      }`
-                    : `Balance: ${balance.dec.toString(balance.decimals)} ${
-                        balance.denom
-                      }`
-                  : "?"}
-              </div>
-            ) : null}
-          </label>
-        </div>
-      ) : null}
+  const [inputId] = useState(() => {
+    const bytes = new Uint8Array(4);
+    crypto.getRandomValues(bytes);
+    return `input-${Buffer.from(bytes).toString("hex")}`;
+  });
 
-      <div className="field has-addons">
-        <p
-          className={classnames("control", "is-expanded", {
-            "has-icons-right": error != null
-          })}
+  return (
+    <FormGroup className={className}>
+      {label ? (
+        <Label
+          for={inputId}
+          className="form-control-label"
+          style={{ width: "100%" }}
         >
-          <input
-            type="number"
-            step={step}
-            className={classnames(
-              className,
-              "input",
-              style.input,
-              color ? `is-${color}` : undefined,
-              !color && error ? "is-danger" : undefined
-            )}
-            name={input.name}
-            ref={input.ref as any}
-            disabled={allBalance}
-          />
-          {error ? (
-            <span className="icon is-small is-right">
-              <i className="fas fa-exclamation-triangle has-text-danger" />
-            </span>
-          ) : null}
-        </p>
-        <p className="control">
-          <span className="select">
-            <select
-              className={styleCoinInput.select}
-              value={currency ? currency.coinDenom : ""}
-              onChange={e => {
-                const currency = getCurrencyFromDenom(e.target.value);
-                if (currency) {
-                  setCurrency(currency);
+          {label}
+          {balances ? (
+            <div
+              className={classnames(styleCoinInput.balance, {
+                [styleCoinInput.clickable]: canAllBalance,
+                [styleCoinInput.clicked]: allBalance
+              })}
+              onClick={() => {
+                if (canAllBalance && onChangeAllBanace) {
+                  const prev = allBalance;
+                  setAllBalance(!prev);
+                  onChangeAllBanace(!prev);
                 }
               }}
-              name={select.name}
-              ref={select.ref as any}
-              disabled={allBalance}
             >
-              {currencies.map((currency, i) => {
-                return (
-                  <option key={i.toString()} value={currency.coinDenom}>
-                    {currency.coinDenom}
-                  </option>
-                );
-              })}
-            </select>
-          </span>
-        </p>
-      </div>
-
-      {error ? (
-        <div className="field for-label">
-          <p className="help is-danger">{error}</p>
-        </div>
+              {balance
+                ? balanceText
+                  ? // TODO: Can use api in react-intl?
+                    `${balanceText}: 
+                        ${balance.dec.toString(balance.decimals)} ${
+                      balance.denom
+                    }`
+                  : `Balance: ${balance.dec.toString(balance.decimals)} ${
+                      balance.denom
+                    }`
+                : "?"}
+            </div>
+          ) : null}
+        </Label>
       ) : null}
-    </div>
+      <InputGroup
+        id={inputId}
+        className={classnames(styleCoinInput.selectContainer, {
+          disabled: allBalance
+        })}
+      >
+        <Input
+          className={classnames(
+            "form-control-alternative",
+            styleCoinInput.input
+          )}
+          type="number"
+          step={step}
+          name={input.name}
+          innerRef={input.ref as any}
+          disabled={allBalance}
+        />
+        <Input
+          type="select"
+          className={classnames(
+            "form-control-alternative",
+            styleCoinInput.select
+          )}
+          value={currency ? currency.coinDenom : ""}
+          onChange={e => {
+            const currency = getCurrencyFromDenom(e.target.value);
+            if (currency) {
+              setCurrency(currency);
+            }
+            e.preventDefault();
+          }}
+          name={select.name}
+          innerRef={select.ref as any}
+          disabled={allBalance}
+        >
+          {currencies.map((currency, i) => {
+            return (
+              <option key={i.toString()} value={currency.coinDenom}>
+                {currency.coinDenom}
+              </option>
+            );
+          })}
+        </Input>
+      </InputGroup>
+      {error ? (
+        <FormFeedback style={{ display: "block" }}>{error}</FormFeedback>
+      ) : null}
+    </FormGroup>
   );
 };

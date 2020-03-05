@@ -1,13 +1,20 @@
 @import "../../styles/var";
-@import "../../styles/mixin";
-
-.container-card {
-  @include main-card;
-}
 
 .container-account-inner {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 250px - 2 * $main-card-padding;
+}
+
+.card {
+  margin-bottom: $layout-margin;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  :global(.card-body) {
+    padding: $main-card-padding;
+  }
 }

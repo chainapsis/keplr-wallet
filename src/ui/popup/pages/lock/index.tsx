@@ -2,9 +2,10 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 
 import { Input } from "../../../components/form";
 
+import { Button, Form } from "reactstrap";
+
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
-import { Button } from "../../../components/button";
 import { Banner } from "../../components/banner";
 import useForm from "react-hook-form";
 
@@ -54,7 +55,7 @@ export const LockPage: FunctionComponent<Pick<
 
   return (
     <EmptyLayout style={{ backgroundColor: "white", height: "100%" }}>
-      <form
+      <Form
         className={style.formContainer}
         onSubmit={handleSubmit(async data => {
           setLoading(true);
@@ -94,16 +95,10 @@ export const LockPage: FunctionComponent<Pick<
             })
           })}
         />
-        <Button
-          type="submit"
-          color="primary"
-          size="medium"
-          fullwidth
-          loading={loading}
-        >
+        <Button type="submit" color="primary" block data-loading={loading}>
           <FormattedMessage id="lock.button.unlock" />
         </Button>
-      </form>
+      </Form>
     </EmptyLayout>
   );
 });

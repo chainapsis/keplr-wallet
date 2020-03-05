@@ -1,12 +1,12 @@
 import React, { FunctionComponent, useEffect } from "react";
 
-import { Input } from "../../../components/form";
-import { Button } from "../../../components/button";
+import { Button, Form } from "reactstrap";
+
+import { Input, TextArea } from "../../../components/form";
 
 import useForm from "react-hook-form";
 
 import style from "./style.module.scss";
-import classnames from "classnames";
 
 import { FormattedMessage, useIntl } from "react-intl";
 
@@ -57,48 +57,38 @@ export const RegisterInPage: FunctionComponent<{
               id: "register.create.title"
             })}
       </div>
-      <form
+      <Form
         className={style.formContainer}
         onSubmit={handleSubmit((data: FormData) => {
           props.onRegister(data.words, data.password, isRecover);
         })}
       >
-        <div className="field">
-          <div className="control">
-            <textarea
-              className={classnames(
-                "textarea",
-                "has-fixed-size is-medium",
-                style.mnemonic
-              )}
-              placeholder={intl.formatMessage({
-                id: "register.create.textarea.mnemonic.place-holder"
-              })}
-              readOnly={!isRecover}
-              name="words"
-              rows={3}
-              ref={register({
-                required: "Mnemonic is required",
-                validate: (value: string): string | undefined => {
-                  if (value.split(" ").length < 8) {
-                    return intl.formatMessage({
-                      id: "register.create.textarea.mnemonic.error.too-short"
-                    });
-                  }
+        <TextArea
+          className={style.mnemonic}
+          placeholder={intl.formatMessage({
+            id: "register.create.textarea.mnemonic.place-holder"
+          })}
+          readOnly={!isRecover}
+          name="words"
+          rows={3}
+          ref={register({
+            required: "Mnemonic is required",
+            validate: (value: string): string | undefined => {
+              if (value.split(" ").length < 8) {
+                return intl.formatMessage({
+                  id: "register.create.textarea.mnemonic.error.too-short"
+                });
+              }
 
-                  if (!bip39.validateMnemonic(value)) {
-                    return intl.formatMessage({
-                      id: "register.create.textarea.mnemonic.error.invalid"
-                    });
-                  }
-                }
-              })}
-            />
-          </div>
-          {errors.words && errors.words.message ? (
-            <p className="help is-danger">{errors.words.message}</p>
-          ) : null}
-        </div>
+              if (!bip39.validateMnemonic(value)) {
+                return intl.formatMessage({
+                  id: "register.create.textarea.mnemonic.error.invalid"
+                });
+              }
+            }
+          })}
+          error={errors.words && errors.words.message}
+        />
         <Input
           label={intl.formatMessage({ id: "register.create.input.password" })}
           type="password"
@@ -140,13 +130,12 @@ export const RegisterInPage: FunctionComponent<{
         <Button
           color="primary"
           type="submit"
-          size="medium"
-          loading={props.isLoading}
-          fullwidth
+          data-loading={props.isLoading}
+          block
         >
           <FormattedMessage id="register.create.button.next" />
         </Button>
-      </form>
+      </Form>
     </div>
   );
 };

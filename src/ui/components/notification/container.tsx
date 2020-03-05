@@ -19,7 +19,7 @@ export const NotificationContainer: FunctionComponent<Props> = ({
   const notification = useNotification();
 
   return (
-    <motion.ul id={id}>
+    <motion.ul id={id} style={{ listStyle: "none" }}>
       <AnimatePresence>
         {properties.map(property => {
           return (

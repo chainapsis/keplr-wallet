@@ -28,8 +28,11 @@ $container-width: 420px;
     letter-spacing: -0.36px;
 
     padding: 20px 30px;
-    box-shadow: none;
     text-align: center;
+
+    &:read-only {
+      background-color: white;
+    }
   }
 }
 
@@ -38,6 +41,17 @@ $container-width: 420px;
   flex-direction: column;
 }
 
-.back-button {
-  margin-top: 8px;
+.buttons {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+
+  button:not(:last-child) {
+    margin-right: 8px;
+  }
+  button {
+    margin-bottom: 8px;
+    margin-left: 0 !important;
+  }
 }

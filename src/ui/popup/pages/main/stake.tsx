@@ -5,7 +5,7 @@ import React, {
   useState
 } from "react";
 
-import { Button } from "../../../components/button";
+import { Button } from "reactstrap";
 
 import { useStore } from "../../stores";
 import { useReward } from "../../../hooks/use-reward";
@@ -36,14 +36,13 @@ import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { CoinUtils } from "../../../../common/coin-utils";
 
 import { useNotification } from "../../../components/notification";
-import { RouteComponentProps } from "react-router";
+
+import { useHistory } from "react-router";
 
 import { FormattedMessage } from "react-intl";
 
-export const StakeView: FunctionComponent<Pick<
-  RouteComponentProps,
-  "history"
->> = observer(({ history }) => {
+export const StakeView: FunctionComponent = observer(() => {
+  const history = useHistory();
   const { chainStore, accountStore } = useStore();
 
   const [walletProvider] = useState(
@@ -157,6 +156,7 @@ export const StakeView: FunctionComponent<Pick<
     chainStore.chainInfo.bech32Config,
     chainStore.chainInfo.nativeCurrency,
     cosmosJS,
+    history,
     notification
   ]);
 
@@ -175,10 +175,24 @@ export const StakeView: FunctionComponent<Pick<
             className={classnames(styleStake.containerInner, styleStake.reward)}
           >
             <div className={styleStake.vertical}>
-              <div className={styleStake.title}>
+              <p
+                className={classnames(
+                  "h4",
+                  "my-0",
+                  "font-weight-normal",
+                  styleStake.paragraphSub
+                )}
+              >
                 <FormattedMessage id="main.stake.message.pending-staking-reward" />
-              </div>
-              <div className={styleStake.content}>
+              </p>
+              <p
+                className={classnames(
+                  "h2",
+                  "my-0",
+                  "font-weight-normal",
+                  styleStake.paragraphMain
+                )}
+              >
                 {`${CoinUtils.shrinkDecimals(
                   new Dec(reward.totalReward[0].amount).truncate(),
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -189,16 +203,18 @@ export const StakeView: FunctionComponent<Pick<
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   rewardCurrency!.coinDenom
                 }`}
-              </div>
+              </p>
             </div>
             <div style={{ flex: 1 }} />
             <Button
+              className={styleStake.button}
               color="primary"
+              size="sm"
               disabled={
                 cosmosJS == null || cosmosJS.sendMsgs == null || !rewardExist
               }
-              loading={cosmosJS.loading}
               onClick={withdrawAllRewards}
+              data-loading={cosmosJS.loading}
             >
               <FormattedMessage id="main.stake.button.claim-rewards" />
             </Button>
@@ -209,23 +225,43 @@ export const StakeView: FunctionComponent<Pick<
 
       <div className={classnames(styleStake.containerInner, styleStake.stake)}>
         <div className={styleStake.vertical}>
-          <div className={styleStake.title}>
+          <p
+            className={classnames(
+              "h2",
+              "my-0",
+              "font-weight-normal",
+              styleStake.paragraphMain
+            )}
+          >
             <FormattedMessage id="main.stake.message.stake" />
-          </div>
-          <div className={styleStake.content}>
+          </p>
+          <p
+            className={classnames(
+              "h4",
+              "my-0",
+              "font-weight-normal",
+              styleStake.paragraphSub
+            )}
+          >
             <FormattedMessage id="main.stake.message.earning" />
-          </div>
+          </p>
         </div>
         <div style={{ flex: 1 }} />
-        <Button
-          color="primary"
-          outline={isRewardExist}
+        <a
           href={chainStore.chainInfo.walletUrlForStaking}
           target="_blank"
-          disabled={accountStore.assets.length === 0}
+          rel="noopener noreferrer"
         >
-          <FormattedMessage id="main.stake.button.stake" />
-        </Button>
+          <Button
+            className={styleStake.button}
+            color="primary"
+            size="sm"
+            outline={isRewardExist}
+            disabled={accountStore.assets.length === 0}
+          >
+            <FormattedMessage id="main.stake.button.stake" />
+          </Button>
+        </a>
       </div>
     </div>
   );

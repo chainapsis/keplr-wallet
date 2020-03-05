@@ -13,6 +13,11 @@
   li:first-child {
     margin-top: 0;
   }
+
+  .alert-dismissible .close {
+    top: 50% !important;
+    right: 1rem !important;
+  }
 }
 
 #notification-top-right {
