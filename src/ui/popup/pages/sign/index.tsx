@@ -161,6 +161,22 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
         <div className={style.buttons}>
           <Button
             className={style.button}
+            color="danger"
+            disabled={
+              signing.message == null ||
+              signing.message === "" ||
+              signing.initializing
+            }
+            data-loading={signing.requested}
+            onClick={onRejectClick}
+            outline
+          >
+            {intl.formatMessage({
+              id: "sign.button.reject"
+            })}
+          </Button>
+          <Button
+            className={style.button}
             color="primary"
             disabled={
               signing.message == null ||
@@ -172,21 +188,6 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
           >
             {intl.formatMessage({
               id: "sign.button.approve"
-            })}
-          </Button>
-          <Button
-            className={style.button}
-            color="danger"
-            disabled={
-              signing.message == null ||
-              signing.message === "" ||
-              signing.initializing
-            }
-            data-loading={signing.requested}
-            onClick={onRejectClick}
-          >
-            {intl.formatMessage({
-              id: "sign.button.reject"
             })}
           </Button>
         </div>
