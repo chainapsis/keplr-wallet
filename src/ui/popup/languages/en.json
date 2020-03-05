@@ -47,7 +47,7 @@
   "send.input.amount": "Amount",
   "send.input.amount.error.required": "Amount is required",
   "send.input.amount.error.insufficient": "Insufficient asset",
-  "send.input.memo": "Memo (Optionnal)",
+  "send.input.memo": "Memo (Optional)",
   "send.input.fee": "Fee",
   "send.input.fee.error.required": "Fee is required",
   "send.input-button.balance": "Balance",
@@ -78,6 +78,6 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
 
   "fee-buttons.select.low": "Low",
-  "fee-buttons.select.average": "Avergage",
+  "fee-buttons.select.average": "Average",
   "fee-buttons.select.high": "High"
 }
