@@ -1,6 +1,8 @@
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 
-import { Button } from "../../../components/button";
+import { Button } from "reactstrap";
+
+import style from "./style.module.scss";
 
 export const VerifyInPage: FunctionComponent<{
   words: string;
@@ -34,8 +36,8 @@ export const VerifyInPage: FunctionComponent<{
 
   return (
     <div>
-      <div style={{ minHeight: "8.25rem" }}>
-        <div className="buttons">
+      <div style={{ minHeight: "153px" }}>
+        <div className={style.buttons}>
           {suggestedWords.map((word, i) => {
             return (
               <Button
@@ -58,8 +60,8 @@ export const VerifyInPage: FunctionComponent<{
         </div>
       </div>
       <hr />
-      <div style={{ minHeight: "8.25rem" }}>
-        <div className="buttons">
+      <div style={{ minHeight: "153px" }}>
+        <div className={style.buttons}>
           {randomizedWords.map((word, i) => {
             return (
               <Button
@@ -84,13 +86,12 @@ export const VerifyInPage: FunctionComponent<{
       <Button
         color="primary"
         type="submit"
-        size="medium"
         disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
         onClick={() => {
           props.onVerify(suggestedWords.join(" "));
         }}
-        loading={props.isLoading}
-        fullwidth
+        data-loading={props.isLoading}
+        block
         style={{
           marginTop: "30px"
         }}

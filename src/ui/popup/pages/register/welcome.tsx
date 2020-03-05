@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 import styleWelcome from "./welcome.module.scss";
-import { Button } from "../../../components/button";
+import { Button } from "reactstrap";
 
 import { useIntl } from "react-intl";
 
@@ -23,11 +23,10 @@ export const WelcomeInPage: FunctionComponent = () => {
       <Button
         color="primary"
         type="submit"
-        size="medium"
         onClick={() => {
           window.close();
         }}
-        fullwidth
+        block
         style={{
           marginTop: "60px"
         }}
