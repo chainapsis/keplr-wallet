@@ -1,9 +1,12 @@
 @charset "utf-8";
 
 @import "~argon-dashboard-react/src/assets/plugins/nucleo/css/nucleo.css";
+
 $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "~@fortawesome/fontawesome-free/scss/fontawesome";
 @import "~@fortawesome/fontawesome-free/scss/solid";
+
+$body-color: black;
 @import "~argon-dashboard-react/src/assets/scss/argon-dashboard-react";
 
 @import "../../../palette";
