@@ -36,13 +36,14 @@ $menu-icon-gap: 14px;
 
   .title-icon-container {
     width: 0;
-    height: 24px;
+    height: 16px;
 
     .title-icon {
-      width: 24px;
-      height: 24px;
+      width: 16px;
+      height: 16px;
 
-      margin-top: 2px;
+      margin-top: -6px;
+      fill: #8f8f8f;
     }
   }
 
