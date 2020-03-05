@@ -9,7 +9,7 @@ import React, {
 
 import styleTxButton from "./tx-button.module.scss";
 
-import { Button } from "reactstrap";
+import { Button, Tooltip } from "reactstrap";
 import { Address } from "../../../components/address";
 
 import { observer } from "mobx-react";
@@ -21,6 +21,8 @@ import { useNotification } from "../../../components/notification";
 
 import { FormattedMessage } from "react-intl";
 import { useHistory } from "react-router";
+
+import classnames from "classnames";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");
@@ -92,15 +94,22 @@ export const TxButtonView: FunctionComponent = observer(() => {
     setIsDepositOpen(!isDepositOpen);
   }, [isDepositOpen]);
 
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const toogleTooltip = useCallback(() => {
+    setTooltipOpen(!tooltipOpen);
+  }, [tooltipOpen]);
+
   const history = useHistory();
 
   const onSendButton = useCallback(
     (e: MouseEvent) => {
-      history.push("/send");
+      if (accountStore.assets.length !== 0) {
+        history.push("/send");
+      }
 
       e.preventDefault();
     },
-    [history]
+    [accountStore.assets.length, history]
   );
 
   return (
@@ -122,15 +131,33 @@ export const TxButtonView: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.account.button.deposit" />
       </Button>
+      {/*
+        "Disabled" property in button tag will block the mouse enter/leave events.
+        So, tooltip will not work as expected.
+        To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
+       */}
       <Button
-        className={styleTxButton.button}
+        id="btn-send"
+        className={classnames(styleTxButton.button, {
+          disabled: accountStore.assets.length === 0
+        })}
         color="primary"
         outline
-        disabled={accountStore.assets.length === 0}
         onClick={onSendButton}
       >
         <FormattedMessage id="main.account.button.send" />
       </Button>
+      {accountStore.assets.length === 0 ? (
+        <Tooltip
+          placement="bottom"
+          isOpen={tooltipOpen}
+          target="btn-send"
+          toggle={toogleTooltip}
+          fade
+        >
+          <FormattedMessage id="main.account.tooltip.no-asset" />
+        </Tooltip>
+      ) : null}
     </div>
   );
 });

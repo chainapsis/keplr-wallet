@@ -5,7 +5,7 @@ import React, {
   useState
 } from "react";
 
-import { Button } from "reactstrap";
+import { Button, Tooltip } from "reactstrap";
 
 import { useStore } from "../../stores";
 import { useReward } from "../../../hooks/use-reward";
@@ -167,6 +167,11 @@ export const StakeView: FunctionComponent = observer(() => {
     isRewardExist = rewardCurrency != null;
   }
 
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const toogleTooltip = useCallback(() => {
+    setTooltipOpen(!tooltipOpen);
+  }, [tooltipOpen]);
+
   return (
     <div>
       {isRewardExist ? (
@@ -251,16 +256,39 @@ export const StakeView: FunctionComponent = observer(() => {
           href={chainStore.chainInfo.walletUrlForStaking}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={e => {
+            if (accountStore.assets.length === 0) {
+              e.preventDefault();
+            }
+          }}
         >
+          {/*
+            "Disabled" property in button tag will block the mouse enter/leave events.
+            So, tooltip will not work as expected.
+            To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
+          */}
           <Button
-            className={styleStake.button}
+            id="btn-stake"
+            className={classnames(styleStake.button, {
+              disabled: accountStore.assets.length === 0
+            })}
             color="primary"
             size="sm"
             outline={isRewardExist}
-            disabled={accountStore.assets.length === 0}
           >
             <FormattedMessage id="main.stake.button.stake" />
           </Button>
+          {accountStore.assets.length === 0 ? (
+            <Tooltip
+              placement="bottom"
+              isOpen={tooltipOpen}
+              target="btn-stake"
+              toggle={toogleTooltip}
+              fade
+            >
+              <FormattedMessage id="main.stake.tooltip.no-asset" />
+            </Tooltip>
+          ) : null}
         </a>
       </div>
     </div>
