@@ -5,6 +5,14 @@
 
 .input {
   box-shadow: $input-alternative-box-shadow !important;
+
+  &:focus {
+    box-shadow: $input-focus-alternative-box-shadow !important;
+
+    & + .select {
+      box-shadow: $input-focus-alternative-box-shadow !important;
+    }
+  }
 }
 
 .select-container {
