@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState
 } from "react";
-import { Button } from "../../../components/button";
+import { Button } from "reactstrap";
 import { RouteComponentProps } from "react-router";
 
 import { HeaderLayout } from "../../layouts";
@@ -123,10 +123,11 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
       style={{ background: "white" }}
     >
       <div className={style.container}>
-        <div className="tabs is-fullwidth" style={{ marginBottom: 0 }}>
+        <div className={classnames(style.tabs)}>
           <ul>
-            <li className={classnames({ "is-active": tab === Tab.Details })}>
+            <li className={classnames({ active: tab === Tab.Details })}>
               <a
+                className={style.tab}
                 onClick={() => {
                   setTab(Tab.Details);
                 }}
@@ -136,8 +137,9 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
                 })}
               </a>
             </li>
-            <li className={classnames({ "is-active": tab === Tab.Data })}>
+            <li className={classnames({ active: tab === Tab.Data })}>
               <a
+                className={style.tab}
                 onClick={() => {
                   setTab(Tab.Data);
                 }}
@@ -159,14 +161,13 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
         <div className={style.buttons}>
           <Button
             className={style.button}
-            size="medium"
             color="primary"
             disabled={
               signing.message == null ||
               signing.message === "" ||
               signing.initializing
             }
-            loading={signing.requested}
+            data-loading={signing.requested}
             onClick={onApproveClick}
           >
             {intl.formatMessage({
@@ -175,14 +176,13 @@ export const SignPage: FunctionComponent<RouteComponentProps<{
           </Button>
           <Button
             className={style.button}
-            size="medium"
             color="danger"
             disabled={
               signing.message == null ||
               signing.message === "" ||
               signing.initializing
             }
-            loading={signing.requested}
+            data-loading={signing.requested}
             onClick={onRejectClick}
           >
             {intl.formatMessage({

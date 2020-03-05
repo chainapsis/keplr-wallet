@@ -1,19 +1,38 @@
 @import "../../styles/var";
 
+.tabs {
+  ul {
+    list-style: none;
+    display: flex;
+    flex: 1;
+    padding: 0;
+
+    li {
+      flex: 1;
+      text-align: center;
+      border-bottom-color: #dbdbdb;
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+
+      &:global(.active) {
+        border-bottom-color: #5e72e4;
+        color: #5e72e4;
+      }
+    }
+  }
+
+  .tab {
+    cursor: pointer;
+    text-decoration: none;
+  }
+}
+
 .buttons {
   display: flex;
 }
 
 .button {
   flex: 1;
-
-  &:first-child {
-    margin-right: 8px;
-  }
-
-  &:last-child {
-    margin-left: 8px;
-  }
 }
 
 .container {
