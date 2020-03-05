@@ -24,7 +24,17 @@ export const WelcomeInPage: FunctionComponent = () => {
         color="primary"
         type="submit"
         onClick={() => {
-          window.close();
+          if (typeof browser !== "undefined") {
+            browser.tabs.getCurrent().then(tab => {
+              if (tab.id) {
+                browser.tabs.remove(tab.id);
+              } else {
+                window.close();
+              }
+            });
+          } else {
+            window.close();
+          }
         }}
         block
         style={{
