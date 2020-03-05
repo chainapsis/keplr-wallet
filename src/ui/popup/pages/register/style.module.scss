@@ -33,6 +33,10 @@ $container-width: 420px;
     &:read-only {
       background-color: white;
     }
+
+    &[readonly] {
+      background-color: white;
+    }
   }
 }
 
