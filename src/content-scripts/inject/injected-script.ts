@@ -17,9 +17,15 @@ import {
   txBuilderConfigToPrimitive
 } from "../../background/keyring/utils";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Manifest = require("../../manifest.json");
+
 const Buffer = require("buffer/").Buffer;
 
 export class InjectedWalletProvider implements WalletProvider {
+  public readonly identifier: string = "keplr-extension";
+  public readonly version: string = Manifest.version;
+
   /**
    * Request access to the user's accounts. Wallet can ask the user to approve or deny access. If user deny access, it will throw error.
    */
