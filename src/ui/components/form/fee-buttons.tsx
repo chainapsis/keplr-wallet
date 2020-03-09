@@ -159,12 +159,13 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             })}
           >
             {price.gt(new Dec(0)) && feeLow
-              ? `$${DecUtils.decToStrWithoutTrailingZeros(
+              ? `$${DecUtils.removeTrailingZerosFromDecStr(
                   new Dec(feeLow.amount)
                     .quoTruncate(
                       DecUtils.getPrecisionDec(currency.coinDecimals)
                     )
                     .mul(price)
+                    .toString(4)
                 )}`
               : "?"}
           </div>
@@ -196,12 +197,13 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             })}
           >
             {price.gt(new Dec(0)) && feeAverage
-              ? `$${DecUtils.decToStrWithoutTrailingZeros(
+              ? `$${DecUtils.removeTrailingZerosFromDecStr(
                   new Dec(feeAverage.amount)
                     .quoTruncate(
                       DecUtils.getPrecisionDec(currency.coinDecimals)
                     )
                     .mul(price)
+                    .toString(4)
                 )}`
               : "?"}
           </div>
@@ -233,12 +235,13 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             })}
           >
             {price.gt(new Dec(0)) && feeHigh
-              ? `$${DecUtils.decToStrWithoutTrailingZeros(
+              ? `$${DecUtils.removeTrailingZerosFromDecStr(
                   new Dec(feeHigh.amount)
                     .quoTruncate(
                       DecUtils.getPrecisionDec(currency.coinDecimals)
                     )
                     .mul(price)
+                    .toString(4)
                 )}`
               : "?"}
           </div>
