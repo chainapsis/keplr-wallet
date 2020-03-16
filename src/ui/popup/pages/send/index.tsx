@@ -230,6 +230,14 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               e.preventDefault();
               return;
             }
+
+            // If recipient is ENS name and ENS is loading,
+            // don't send the assets before ENS is fully loaded.
+            if (isValidENS(recipient) && ens.loading) {
+              e.preventDefault();
+              return;
+            }
+
             handleSubmit(async (data: FormData) => {
               const coin = CoinUtils.getCoinFromDecimals(
                 data.amount,
