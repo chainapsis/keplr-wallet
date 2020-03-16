@@ -58,7 +58,7 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
 
         if (!isValidENS(name)) {
           throw new InvalidENSNameError();
-        } else if (error && error instanceof InvalidENSNameError) {
+        } else if (error?.message === "Invalid ENS name") {
           // If ens name is valid and prior error is InvalidEnsNameError,
           // Clear error.
           setError(undefined);
@@ -113,7 +113,7 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
   }, [
     chainInfo.bech32Config.bech32PrefixAccAddr,
     chainInfo.coinType,
-    error,
+    error?.message,
     name
   ]);
 
