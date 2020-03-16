@@ -76,7 +76,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       setValue,
       watch,
       setError,
-      clearError
+      clearError,
+      triggerValidation
     } = formMethods;
 
     register(
@@ -206,6 +207,12 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     const recipient = watch("recipient");
     const ens = useENS(chainStore.chainInfo, recipient);
 
+    useEffect(() => {
+      if (isValidENS(recipient)) {
+        triggerValidation({ name: "recipient" });
+      }
+    }, [ens, recipient, triggerValidation]);
+
     return (
       <HeaderLayout
         showChainName
@@ -311,8 +318,6 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                         }
                       );
                     } else {
-                      await ens.loadingMutex.lock();
-                      ens.loadingMutex.unlock();
                       if (ens.error) {
                         return ens.error.message;
                       }

@@ -10,7 +10,6 @@ const { Resolver } = require("@ensdomains/resolver");
 import Web3 from "web3";
 import { EthereumEndpoint } from "../../config";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
-import { AsyncMutex } from "../../common/async-mutex";
 
 // In this case, web3 doesn't make a transaction.
 // And, it is used for just fetching a registered address from ENS.
@@ -39,10 +38,6 @@ export const isValidENS = (name: string): boolean => {
 
 export const useENS = (chainInfo: ChainInfo, name: string) => {
   const [loading, setLoading] = useState(false);
-  // In javascript, mutex is not needed because there are no problems such as race condition.
-  // But, this mutex is used to manage the flow of the async promise.
-  // When loading is completed, this mutex is unlocked.
-  const [loadingMutex] = useState<AsyncMutex>(new AsyncMutex());
   const [error, setError] = useState<Error | undefined>();
 
   const [address, setAddress] = useState<Uint8Array | undefined>();
@@ -59,10 +54,6 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
 
     const fetch = async () => {
       try {
-        if (loadingMutex.isLocked) {
-          loadingMutex.unlock();
-        }
-        await loadingMutex.lock();
         setLoading(true);
 
         if (!isValidENS(name)) {
@@ -111,9 +102,6 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
         if (isMounted) {
           setLoading(false);
         }
-        process.nextTick(() => {
-          loadingMutex.unlock();
-        });
       }
     };
 
@@ -125,7 +113,7 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
   }, [
     chainInfo.bech32Config.bech32PrefixAccAddr,
     chainInfo.coinType,
-    loadingMutex,
+    error,
     name
   ]);
 
@@ -135,9 +123,8 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
       address,
       bech32Address,
       loading,
-      loadingMutex,
       error
     }),
-    [address, bech32Address, error, loading, loadingMutex, name]
+    [address, bech32Address, error, loading, name]
   );
 };
