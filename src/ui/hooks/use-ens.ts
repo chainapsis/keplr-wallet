@@ -1,5 +1,5 @@
 import { ChainInfo } from "../../chain-info";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // TODO: Add definition for ethereum-ens.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -129,12 +129,15 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
     name
   ]);
 
-  return {
-    name,
-    address,
-    bech32Address,
-    loading,
-    loadingMutex,
-    error
-  };
+  return useMemo(
+    () => ({
+      name,
+      address,
+      bech32Address,
+      loading,
+      loadingMutex,
+      error
+    }),
+    [address, bech32Address, error, loading, loadingMutex, name]
+  );
 };
