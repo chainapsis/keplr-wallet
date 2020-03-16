@@ -18,6 +18,14 @@ import { AsyncMutex } from "../../common/async-mutex";
 const provider = new Web3.providers.HttpProvider(EthereumEndpoint);
 const ens = new ENS(provider);
 
+export class InvalidENSNameError extends Error {
+  constructor() {
+    super("Invalid ENS name");
+
+    Object.setPrototypeOf(this, InvalidENSNameError.prototype);
+  }
+}
+
 export const isValidENS = (name: string): boolean => {
   const strs = name.split(".");
   if (strs.length <= 1) {
@@ -58,7 +66,11 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
         setLoading(true);
 
         if (!isValidENS(name)) {
-          throw new Error("Invalid ENS name");
+          throw new InvalidENSNameError();
+        } else if (error && error instanceof InvalidENSNameError) {
+          // If ens name is valid and prior error is InvalidEnsNameError,
+          // Clear error.
+          setError(undefined);
         }
 
         // It seems that ethereum ens doesn't support the abi of recent public resolver yet.
