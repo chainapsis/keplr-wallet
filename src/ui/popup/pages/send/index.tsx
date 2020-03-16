@@ -286,7 +286,10 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 label={intl.formatMessage({ id: "send.input.recipient" })}
                 name="recipient"
                 feedback={ens.bech32Address}
-                error={errors.recipient && errors.recipient.message}
+                error={
+                  (isValidENS(recipient) && ens.error && ens.error.message) ||
+                  (errors.recipient && errors.recipient.message)
+                }
                 ref={register({
                   required: intl.formatMessage({
                     id: "send.input.recipient.error.required"
