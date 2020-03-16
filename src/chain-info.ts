@@ -56,6 +56,11 @@ export interface ChainInfo {
    * You can get actual currency information from Currencies.
    */
   readonly feeCurrencies: string[];
+  /**
+   * This is the coin type in slip-044.
+   * This is used for fetching address from ENS if this field is set.
+   */
+  readonly coinType?: number;
 }
 
 export const NativeChainInfos: ChainInfo[] = [
@@ -76,7 +81,8 @@ export const NativeChainInfos: ChainInfo[] = [
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
     currencies: ["atom"],
-    feeCurrencies: ["atom"]
+    feeCurrencies: ["atom"],
+    coinType: 118
   },
   {
     rpc: "https://node-kava-2.keplr.app/rpc",
@@ -95,7 +101,8 @@ export const NativeChainInfos: ChainInfo[] = [
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("kava"),
     currencies: ["kava"],
-    feeCurrencies: ["kava"]
+    feeCurrencies: ["kava"],
+    coinType: 459
   }
 ];
 

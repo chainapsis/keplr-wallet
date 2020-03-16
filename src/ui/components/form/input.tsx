@@ -15,6 +15,7 @@ const Buffer = require("buffer/").Buffer;
 export interface InputProps {
   type: Exclude<InputType, "textarea">;
   label?: string;
+  feedback?: string;
   error?: string;
 }
 
@@ -23,7 +24,7 @@ export const Input = forwardRef<
   HTMLInputElement,
   InputProps & React.InputHTMLAttributes<HTMLInputElement>
 >((props, ref) => {
-  const { type, label, error } = props;
+  const { type, label, feedback, error } = props;
 
   const attributes = { ...props };
   delete attributes.className;
@@ -51,10 +52,13 @@ export const Input = forwardRef<
         className={classnames("form-control-alternative", props.className)}
         type={type}
         innerRef={ref}
+        valid={error == null}
         invalid={error != null}
         {...attributes}
       />
-      {error ? <FormFeedback>{error}</FormFeedback> : null}
+      {error || feedback ? (
+        <FormFeedback valid={error == null}>{error || feedback}</FormFeedback>
+      ) : null}
     </FormGroup>
   );
 });

@@ -47,6 +47,7 @@ import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 import { useIntl } from "react-intl";
 import { Button } from "reactstrap";
+import { isValidENS, useENS } from "../../../hooks/use-ens";
 
 interface FormData {
   recipient: string;
@@ -202,6 +203,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       }
     }, [accountStore.assets, amount, clearError, denom, fee, intl, setError]);
 
+    const recipient = watch("recipient");
+    const ens = useENS(chainStore.chainInfo, recipient);
+
     return (
       <HeaderLayout
         showChainName
@@ -220,7 +224,6 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               return;
             }
             handleSubmit(async (data: FormData) => {
-              console.log(data);
               const coin = CoinUtils.getCoinFromDecimals(
                 data.amount,
                 data.denom
@@ -229,9 +232,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               await useBech32ConfigPromise(
                 chainStore.chainInfo.bech32Config,
                 async () => {
+                  const recipient = isValidENS(data.recipient)
+                    ? ens.bech32Address
+                    : data.recipient;
+                  if (!recipient) {
+                    throw new Error("Fail to fetch address from ENS");
+                  }
                   const msg = new MsgSend(
                     AccAddress.fromBech32(accountStore.bech32Address),
-                    AccAddress.fromBech32(data.recipient),
+                    AccAddress.fromBech32(recipient),
                     [coin]
                   );
 
@@ -276,26 +285,35 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 type="text"
                 label={intl.formatMessage({ id: "send.input.recipient" })}
                 name="recipient"
+                feedback={ens.bech32Address}
                 error={errors.recipient && errors.recipient.message}
                 ref={register({
                   required: intl.formatMessage({
                     id: "send.input.recipient.error.required"
                   }),
-                  validate: (value: string) => {
-                    // This is not react hook.
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    return useBech32Config(
-                      chainStore.chainInfo.bech32Config,
-                      () => {
-                        try {
-                          AccAddress.fromBech32(value);
-                        } catch (e) {
-                          return intl.formatMessage({
-                            id: "send.input.recipient.error.invalid"
-                          });
+                  validate: async (value: string) => {
+                    if (!isValidENS(value)) {
+                      // This is not react hook.
+                      // eslint-disable-next-line react-hooks/rules-of-hooks
+                      return useBech32Config(
+                        chainStore.chainInfo.bech32Config,
+                        () => {
+                          try {
+                            AccAddress.fromBech32(value);
+                          } catch (e) {
+                            return intl.formatMessage({
+                              id: "send.input.recipient.error.invalid"
+                            });
+                          }
                         }
+                      );
+                    } else {
+                      await ens.loadingMutex.lock();
+                      ens.loadingMutex.unlock();
+                      if (ens.error) {
+                        return ens.error.message;
                       }
-                    );
+                    }
                   }
                 })}
               />
