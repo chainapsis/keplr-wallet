@@ -76,7 +76,7 @@ export const RegisterInPage: FunctionComponent<{
                   }
                 }}
               >
-                12 words
+                <FormattedMessage id="register.create.toggle.word12" />
               </Button>
               <Button
                 type="button"
@@ -92,7 +92,7 @@ export const RegisterInPage: FunctionComponent<{
                   }
                 }}
               >
-                24 words
+                <FormattedMessage id="register.create.toggle.word24" />
               </Button>
             </ButtonGroup>
           </div>
