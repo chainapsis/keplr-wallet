@@ -1,6 +1,6 @@
 {
   "name": "keplr",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Keplr is a browser extension wallet for the Inter blockchain ecosystem.",
   "main": "index.js",
   "scripts": {
