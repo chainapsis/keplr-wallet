@@ -25,6 +25,14 @@ export class InvalidENSNameError extends Error {
   }
 }
 
+export class ENSUnsupportedError extends Error {
+  constructor() {
+    super("This chain doesn't support ENS");
+
+    Object.setPrototypeOf(this, ENSUnsupportedError.prototype);
+  }
+}
+
 export const isValidENS = (name: string): boolean => {
   const strs = name.split(".");
   if (strs.length <= 1) {
@@ -45,8 +53,10 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
 
   useEffect(() => {
     if (chainInfo.coinType === undefined || chainInfo.coinType < 0) {
-      setError(new Error("This chain doesn't support ENS"));
+      setError(new ENSUnsupportedError());
       setLoading(false);
+      setAddress(undefined);
+      setBech32Address(undefined);
       return;
     }
 

@@ -47,7 +47,13 @@ import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 import { useIntl } from "react-intl";
 import { Button } from "reactstrap";
-import { isValidENS, useENS } from "../../../hooks/use-ens";
+
+import {
+  ENSUnsupportedError,
+  InvalidENSNameError,
+  isValidENS,
+  useENS
+} from "../../../hooks/use-ens";
 
 interface FormData {
   recipient: string;
@@ -213,6 +219,26 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       }
     }, [ens, recipient, triggerValidation]);
 
+    const switchENSErrorToIntl = (e: Error) => {
+      if (e instanceof InvalidENSNameError) {
+        return intl.formatMessage({
+          id: "send.input.recipient.error.ens-invalid-name"
+        });
+      } else if (e.message.includes("ENS name not found")) {
+        return intl.formatMessage({
+          id: "send.input.recipient.error.ens-not-found"
+        });
+      } else if (e instanceof ENSUnsupportedError) {
+        return intl.formatMessage({
+          id: "send.input.recipient.error.ens-not-supported"
+        });
+      } else {
+        return intl.formatMessage({
+          id: "sned.input.recipient.error.ens-unknown-error"
+        });
+      }
+    };
+
     return (
       <HeaderLayout
         showChainName
@@ -312,7 +338,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   )
                 }
                 error={
-                  (isValidENS(recipient) && ens.error && ens.error.message) ||
+                  (isValidENS(recipient) &&
+                    ens.error &&
+                    switchENSErrorToIntl(ens.error)) ||
                   (errors.recipient && errors.recipient.message)
                 }
                 ref={register({
