@@ -56,12 +56,12 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
       try {
         setLoading(true);
 
+        setAddress(undefined);
+        setBech32Address(undefined);
+        setError(undefined);
+
         if (!isValidENS(name)) {
           throw new InvalidENSNameError();
-        } else if (error?.message === "Invalid ENS name") {
-          // If ens name is valid and prior error is InvalidEnsNameError,
-          // Clear error.
-          setError(undefined);
         }
 
         // It seems that ethereum ens doesn't support the abi of recent public resolver yet.
@@ -110,12 +110,7 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
     return () => {
       isMounted = false;
     };
-  }, [
-    chainInfo.bech32Config.bech32PrefixAccAddr,
-    chainInfo.coinType,
-    error?.message,
-    name
-  ]);
+  }, [chainInfo.bech32Config.bech32PrefixAccAddr, chainInfo.coinType, name]);
 
   return useMemo(
     () => ({
