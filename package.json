@@ -17,6 +17,7 @@
   "author": "everett-protocol",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ensdomains/resolver": "^0.2.4",
     "@everett-protocol/cosmosjs": "git+https://github.com/everett-protocol/cosmosjs-dist.git#a35bd13",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "aes-js": "^3.1.2",
@@ -25,6 +26,7 @@
     "bip39": "^3.0.2",
     "buffer": "^5.4.3",
     "classnames": "^2.2.6",
+    "ethereum-ens": "^0.8.0",
     "framer-motion": "^1.6.14",
     "mobx": "^5.15.0",
     "mobx-react": "^6.1.3",
@@ -43,6 +45,7 @@
     "scrypt-js": "^2.0.4",
     "scryptsy": "^2.1.0",
     "sha.js": "^2.4.11",
+    "web3": "^1.2.6",
     "webextension-polyfill": "^0.6.0"
   },
   "devDependencies": {

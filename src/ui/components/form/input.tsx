@@ -5,6 +5,7 @@ import classnames from "classnames";
 import {
   FormFeedback,
   FormGroup,
+  FormText,
   Input as ReactStrapInput,
   Label
 } from "reactstrap";
@@ -15,6 +16,7 @@ const Buffer = require("buffer/").Buffer;
 export interface InputProps {
   type: Exclude<InputType, "textarea">;
   label?: string;
+  text?: string | React.ReactElement;
   error?: string;
 }
 
@@ -23,13 +25,14 @@ export const Input = forwardRef<
   HTMLInputElement,
   InputProps & React.InputHTMLAttributes<HTMLInputElement>
 >((props, ref) => {
-  const { type, label, error } = props;
+  const { type, label, text, error } = props;
 
   const attributes = { ...props };
   delete attributes.className;
   delete attributes.type;
   delete attributes.color;
   delete attributes.label;
+  delete attributes.text;
   delete attributes.error;
   delete attributes.children;
 
@@ -54,7 +57,11 @@ export const Input = forwardRef<
         invalid={error != null}
         {...attributes}
       />
-      {error ? <FormFeedback>{error}</FormFeedback> : null}
+      {error ? (
+        <FormFeedback>{error}</FormFeedback>
+      ) : text ? (
+        <FormText>{text}</FormText>
+      ) : null}
     </FormGroup>
   );
 });

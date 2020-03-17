@@ -48,6 +48,13 @@ import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { useIntl } from "react-intl";
 import { Button } from "reactstrap";
 
+import {
+  ENSUnsupportedError,
+  InvalidENSNameError,
+  isValidENS,
+  useENS
+} from "../../../hooks/use-ens";
+
 interface FormData {
   recipient: string;
   amount: string;
@@ -75,7 +82,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       setValue,
       watch,
       setError,
-      clearError
+      clearError,
+      triggerValidation
     } = formMethods;
 
     register(
@@ -202,6 +210,35 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       }
     }, [accountStore.assets, amount, clearError, denom, fee, intl, setError]);
 
+    const recipient = watch("recipient");
+    const ens = useENS(chainStore.chainInfo, recipient);
+
+    useEffect(() => {
+      if (isValidENS(recipient)) {
+        triggerValidation({ name: "recipient" });
+      }
+    }, [ens, recipient, triggerValidation]);
+
+    const switchENSErrorToIntl = (e: Error) => {
+      if (e instanceof InvalidENSNameError) {
+        return intl.formatMessage({
+          id: "send.input.recipient.error.ens-invalid-name"
+        });
+      } else if (e.message.includes("ENS name not found")) {
+        return intl.formatMessage({
+          id: "send.input.recipient.error.ens-not-found"
+        });
+      } else if (e instanceof ENSUnsupportedError) {
+        return intl.formatMessage({
+          id: "send.input.recipient.error.ens-not-supported"
+        });
+      } else {
+        return intl.formatMessage({
+          id: "sned.input.recipient.error.ens-unknown-error"
+        });
+      }
+    };
+
     return (
       <HeaderLayout
         showChainName
@@ -219,8 +256,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               e.preventDefault();
               return;
             }
+
+            // If recipient is ENS name and ENS is loading,
+            // don't send the assets before ENS is fully loaded.
+            if (isValidENS(recipient) && ens.loading) {
+              e.preventDefault();
+              return;
+            }
+
             handleSubmit(async (data: FormData) => {
-              console.log(data);
               const coin = CoinUtils.getCoinFromDecimals(
                 data.amount,
                 data.denom
@@ -229,9 +273,15 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               await useBech32ConfigPromise(
                 chainStore.chainInfo.bech32Config,
                 async () => {
+                  const recipient = isValidENS(data.recipient)
+                    ? ens.bech32Address
+                    : data.recipient;
+                  if (!recipient) {
+                    throw new Error("Fail to fetch address from ENS");
+                  }
                   const msg = new MsgSend(
                     AccAddress.fromBech32(accountStore.bech32Address),
-                    AccAddress.fromBech32(data.recipient),
+                    AccAddress.fromBech32(recipient),
                     [coin]
                   );
 
@@ -276,26 +326,48 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 type="text"
                 label={intl.formatMessage({ id: "send.input.recipient" })}
                 name="recipient"
-                error={errors.recipient && errors.recipient.message}
+                text={
+                  isValidENS(recipient) ? (
+                    ens.loading ? (
+                      <i className="fas fa-spinner fa-spin" />
+                    ) : (
+                      ens.bech32Address
+                    )
+                  ) : (
+                    undefined
+                  )
+                }
+                error={
+                  (isValidENS(recipient) &&
+                    ens.error &&
+                    switchENSErrorToIntl(ens.error)) ||
+                  (errors.recipient && errors.recipient.message)
+                }
                 ref={register({
                   required: intl.formatMessage({
                     id: "send.input.recipient.error.required"
                   }),
-                  validate: (value: string) => {
-                    // This is not react hook.
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    return useBech32Config(
-                      chainStore.chainInfo.bech32Config,
-                      () => {
-                        try {
-                          AccAddress.fromBech32(value);
-                        } catch (e) {
-                          return intl.formatMessage({
-                            id: "send.input.recipient.error.invalid"
-                          });
+                  validate: async (value: string) => {
+                    if (!isValidENS(value)) {
+                      // This is not react hook.
+                      // eslint-disable-next-line react-hooks/rules-of-hooks
+                      return useBech32Config(
+                        chainStore.chainInfo.bech32Config,
+                        () => {
+                          try {
+                            AccAddress.fromBech32(value);
+                          } catch (e) {
+                            return intl.formatMessage({
+                              id: "send.input.recipient.error.invalid"
+                            });
+                          }
                         }
+                      );
+                    } else {
+                      if (ens.error) {
+                        return ens.error.message;
                       }
-                    );
+                    }
                   }
                 })}
               />
