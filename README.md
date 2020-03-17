@@ -9,11 +9,10 @@ This repository is still under development
 ## Dev
 ```sh
 npm run dev
-```
-There are two build processes for keplr. One is browser extension, and another is a web page for providing dashboard for chains and sending more complex transactions.  
-Extension's build output is placed in `/dist/extension`, and you can check out [this page](https://developer.chrome.com/extensions/getstarted) for installing the developing extension.  
+``` 
+Extension's build output is placed in `/dist`, and you can check out [this page](https://developer.chrome.com/extensions/getstarted) for installing the developing extension.  
 
-You can add your chain by adding the chain infomation into `chain-info.ts`. And to add that chain into web page, you should add ui infomation to `ui/supported-chain.tsx`. 
+You can add your chain by adding the chain infomation into `chain-info.ts`. 
 
 ## Author
 
