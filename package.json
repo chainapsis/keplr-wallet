@@ -23,6 +23,7 @@
     "aes-js": "^3.1.2",
     "argon-dashboard-react": "^1.1.0",
     "axios": "^0.19.0",
+    "bignumber.js": "^9.0.0",
     "bip39": "^3.0.2",
     "buffer": "^5.4.3",
     "classnames": "^2.2.6",
