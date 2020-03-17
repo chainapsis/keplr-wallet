@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect } from "react";
 
-import { Button, Form } from "reactstrap";
+import { Button, ButtonGroup, Form } from "reactstrap";
 
 import { Input, TextArea } from "../../../components/form";
 
@@ -9,6 +9,7 @@ import useForm from "react-hook-form";
 import style from "./style.module.scss";
 
 import { FormattedMessage, useIntl } from "react-intl";
+import { NunWords } from "./index";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -21,6 +22,8 @@ interface FormData {
 
 export const RegisterInPage: FunctionComponent<{
   onRegister: (words: string, password: string, recovered: boolean) => void;
+  requestChaneNumWords?: (numWords: NunWords) => void;
+  numWords?: NunWords;
   isRecover: boolean;
   isLoading: boolean;
   words: string;
@@ -44,7 +47,7 @@ export const RegisterInPage: FunctionComponent<{
     } else {
       setValue("words", "");
     }
-  }, [isRecover, setValue]);
+  }, [isRecover, props.words, setValue]);
 
   return (
     <div>
@@ -56,6 +59,44 @@ export const RegisterInPage: FunctionComponent<{
           : intl.formatMessage({
               id: "register.create.title"
             })}
+        {!isRecover ? (
+          <div style={{ float: "right" }}>
+            <ButtonGroup size="sm" style={{ marginBottom: "4px" }}>
+              <Button
+                type="button"
+                color={
+                  props.numWords === NunWords.WORDS12 ? "primary" : "secondary"
+                }
+                onClick={() => {
+                  if (
+                    props.requestChaneNumWords &&
+                    props.numWords !== NunWords.WORDS12
+                  ) {
+                    props.requestChaneNumWords(NunWords.WORDS12);
+                  }
+                }}
+              >
+                12 words
+              </Button>
+              <Button
+                type="button"
+                color={
+                  props.numWords === NunWords.WORDS24 ? "primary" : "secondary"
+                }
+                onClick={() => {
+                  if (
+                    props.requestChaneNumWords &&
+                    props.numWords !== NunWords.WORDS24
+                  ) {
+                    props.requestChaneNumWords(NunWords.WORDS24);
+                  }
+                }}
+              >
+                24 words
+              </Button>
+            </ButtonGroup>
+          </div>
+        ) : null}
       </div>
       <Form
         className={style.formContainer}
@@ -70,7 +111,7 @@ export const RegisterInPage: FunctionComponent<{
           })}
           readOnly={!isRecover}
           name="words"
-          rows={3}
+          rows={props.numWords === NunWords.WORDS24 ? 5 : 3}
           ref={register({
             required: "Mnemonic is required",
             validate: (value: string): string | undefined => {

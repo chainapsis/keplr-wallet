@@ -25,6 +25,11 @@ enum RegisterState {
   VERIFY
 }
 
+export enum NunWords {
+  WORDS12,
+  WORDS24
+}
+
 const BackButton: FunctionComponent<{ onClick: () => void }> = ({
   onClick
 }) => {
@@ -42,6 +47,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
   const [state, setState] = useState<RegisterState>(RegisterState.INIT);
   const [accountIsCreating, setAccountIsCreating] = useState(false);
   const [words, setWords] = useState("");
+  const [numWords, setNumWords] = useState<NunWords>(NunWords.WORDS12);
   const [password, setPassword] = useState("");
 
   const { keyRingStore } = useStore();
@@ -74,8 +80,17 @@ export const RegisterPage: FunctionComponent = observer(() => {
     [register, words]
   );
 
-  const generateMnemonic = useCallback(() => {
-    setWords(KeyRingStore.GenereateMnemonic(128));
+  const generateMnemonic = useCallback((numWords: NunWords) => {
+    switch (numWords) {
+      case NunWords.WORDS12:
+        setWords(KeyRingStore.GenereateMnemonic(128));
+        break;
+      case NunWords.WORDS24:
+        setWords(KeyRingStore.GenereateMnemonic(256));
+        break;
+      default:
+        throw new Error("Invalid num words");
+    }
   }, []);
 
   const onVerify = useCallback(
@@ -105,6 +120,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
         <img
           className={style.logo}
           src={require("../../public/assets/logo-temp.png")}
+          alt="logo"
         />
       </div>
       {keyRingStore.status !== KeyRingStatus.NOTLOADED &&
@@ -115,7 +131,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
       state === RegisterState.INIT ? (
         <IntroInPage
           onRequestNewAccount={() => {
-            generateMnemonic();
+            generateMnemonic(numWords);
             setState(RegisterState.REGISTER);
           }}
           onRequestRecoverAccount={() => {
@@ -128,6 +144,11 @@ export const RegisterPage: FunctionComponent = observer(() => {
         <>
           <RegisterInPage
             onRegister={onRegister}
+            requestChaneNumWords={numWords => {
+              setNumWords(numWords);
+              generateMnemonic(numWords);
+            }}
+            numWords={numWords}
             words={words}
             isRecover={false}
             isLoading={accountIsCreating}
