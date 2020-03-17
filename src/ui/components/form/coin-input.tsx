@@ -180,6 +180,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
           name={input.name}
           innerRef={input.ref as any}
           disabled={allBalance}
+          autoComplete="off"
         />
         <Input
           type="select"
