@@ -17,10 +17,13 @@ PersistentMemory.init(messageManager, persistentMemory);
 const chainsKeeper = new Chains.ChainsKeeper(new BrowserKVStore("chains"));
 Chains.init(messageManager, chainsKeeper);
 
-const keyRingKeeper = new KeyRing.KeyRingKeeper(new BrowserKVStore("keyring"));
+const keyRingKeeper = new KeyRing.KeyRingKeeper(
+  new BrowserKVStore("keyring"),
+  chainsKeeper
+);
 KeyRing.init(messageManager, keyRingKeeper);
 
-const backgroundTxKeeper = new BackgroundTx.BackgroundTxKeeper(keyRingKeeper);
+const backgroundTxKeeper = new BackgroundTx.BackgroundTxKeeper(chainsKeeper);
 BackgroundTx.init(messageManager, backgroundTxKeeper);
 
 messageManager.listen(BACKGROUND_PORT);

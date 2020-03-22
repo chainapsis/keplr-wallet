@@ -11,7 +11,6 @@ import {
   ApproveSignMsg,
   RejectSignMsg,
   GetRequestedMessage,
-  GetRegisteredChainMsg,
   LockKeyRingMsg,
   ClearKeyRingMsg,
   RequestTxBuilderConfigMsg,
@@ -31,10 +30,6 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
     switch (msg.constructor) {
       case EnableKeyRingMsg:
         return handleEnableKeyRingMsg(keeper)(msg as EnableKeyRingMsg);
-      case GetRegisteredChainMsg:
-        return handleGetRegisteredChainMsg(keeper)(
-          msg as GetRegisteredChainMsg
-        );
       case RestoreKeyRingMsg:
         return handleRestoreKeyRingMsg(keeper)(msg as RestoreKeyRingMsg);
       case SaveKeyRingMsg:
@@ -86,21 +81,11 @@ const handleEnableKeyRingMsg: (
 ) => InternalHandler<EnableKeyRingMsg> = keeper => {
   return async msg => {
     if (msg.origin) {
-      keeper.checkAccessOrigin(msg.chainId, msg.origin);
+      await keeper.checkAccessOrigin(msg.chainId, msg.origin);
     }
 
     return {
       status: await keeper.enable()
-    };
-  };
-};
-
-const handleGetRegisteredChainMsg: (
-  keeper: KeyRingKeeper
-) => InternalHandler<GetRegisteredChainMsg> = keeper => {
-  return () => {
-    return {
-      chainInfos: keeper.getRegisteredChains()
     };
   };
 };
@@ -170,7 +155,7 @@ const handleSetPathMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<SetPathMsg> = keeper => {
   return async msg => {
-    keeper.setPath(msg.chainId, msg.account, msg.index);
+    await keeper.setPath(msg.chainId, msg.account, msg.index);
     return {
       success: true
     };
@@ -183,7 +168,7 @@ const handleGetKeyMsg: (
   return async msg => {
     const getKeyMsg = msg as GetKeyMsg;
     if (getKeyMsg.origin) {
-      keeper.checkAccessOrigin(getKeyMsg.chainId, getKeyMsg.origin);
+      await keeper.checkAccessOrigin(getKeyMsg.chainId, getKeyMsg.origin);
     }
 
     const key = await keeper.getKey();
@@ -193,7 +178,8 @@ const handleGetKeyMsg: (
       pubKeyHex: Buffer.from(key.pubKey).toString("hex"),
       addressHex: Buffer.from(key.address).toString("hex"),
       bech32Address: new Address(key.address).toBech32(
-        keeper.getChainInfo(getKeyMsg.chainId).bech32Config.bech32PrefixAccAddr
+        (await keeper.chainsKeeper.getChainInfo(getKeyMsg.chainId)).bech32Config
+          .bech32PrefixAccAddr
       )
     };
   };
@@ -206,7 +192,7 @@ const handleRequestTxBuilderConfigMsg: (
     if (msg.origin) {
       // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      keeper.checkAccessOrigin(msg.config!.chainId, msg.origin);
+      await keeper.checkAccessOrigin(msg.config!.chainId, msg.origin);
     }
 
     const config = await keeper.requestTxBuilderConfig(
@@ -261,7 +247,7 @@ const handleRequestSignMsg: (
 ) => InternalHandler<RequestSignMsg> = keeper => {
   return async msg => {
     if (msg.origin) {
-      keeper.checkAccessOrigin(msg.chainId, msg.origin);
+      await keeper.checkAccessOrigin(msg.chainId, msg.origin);
     }
 
     await keeper.checkBech32Address(msg.chainId, msg.bech32Address);

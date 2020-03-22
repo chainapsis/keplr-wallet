@@ -13,7 +13,6 @@ import {
   RejectTxBuilderConfigMsg,
   ApproveSignMsg,
   RejectSignMsg,
-  GetRegisteredChainMsg,
   LockKeyRingMsg,
   ClearKeyRingMsg,
   RequestTxBuilderConfigMsg,
@@ -28,7 +27,6 @@ export function init(
   keeper: KeyRingKeeper
 ): void {
   messageManager.registerMessage(EnableKeyRingMsg);
-  messageManager.registerMessage(GetRegisteredChainMsg);
   messageManager.registerMessage(RestoreKeyRingMsg);
   messageManager.registerMessage(SaveKeyRingMsg);
   messageManager.registerMessage(ClearKeyRingMsg);

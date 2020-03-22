@@ -1,6 +1,5 @@
 import { Message, MessageSender } from "../../common/message";
 import { ROUTE } from "./constants";
-import { ChainInfo } from "../../chain-info";
 import { KeyRingStatus } from "./keyring";
 import { KeyHex } from "./keeper";
 import {
@@ -59,30 +58,6 @@ export class EnableKeyRingMsg extends Message<{
 
   type(): string {
     return EnableKeyRingMsg.type();
-  }
-}
-
-export class GetRegisteredChainMsg extends Message<{
-  // Need to set prototype for elements of array manually.
-  chainInfos: ChainInfo[];
-}> {
-  public static type() {
-    return "get-registered-chain-infos";
-  }
-
-  public static create(): GetRegisteredChainMsg {
-    return new GetRegisteredChainMsg();
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  validateBasic(): void {}
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return GetRegisteredChainMsg.type();
   }
 }
 
