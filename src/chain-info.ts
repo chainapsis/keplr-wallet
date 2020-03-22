@@ -118,15 +118,11 @@ export const ExtensionAccessOrigins: AccessOrigin[] = [
   {
     chainId: "cosmoshub-3",
     origins:
-      process.env.NODE_ENV === "production"
-        ? ["https://wallet.keplr.app"]
-        : ["http://localhost:8081"]
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   },
   {
     chainId: "kava-2",
     origins:
-      process.env.NODE_ENV === "production"
-        ? ["https://wallet.keplr.app"]
-        : ["http://localhost:8081"]
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
 ];

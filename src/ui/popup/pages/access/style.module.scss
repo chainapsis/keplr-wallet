@@ -1,0 +1,13 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .buttons {
+    display: flex;
+  }
+
+  .button {
+    flex: 1;
+  }
+}
