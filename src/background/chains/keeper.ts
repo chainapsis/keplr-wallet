@@ -21,6 +21,17 @@ export class ChainsKeeper {
     }
   }
 
+  async getChainInfo(chainId: string): Promise<ChainInfo> {
+    const chainInfo = (await this.getChainInfos()).find(chainInfo => {
+      return chainInfo.chainId === chainId;
+    });
+
+    if (!chainInfo) {
+      throw new Error(`There is no chain info for ${chainId}`);
+    }
+    return chainInfo;
+  }
+
   async requestAccess(
     id: string,
     chainId: string,
