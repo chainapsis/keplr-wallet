@@ -2,7 +2,8 @@ import React, {
   FunctionComponent,
   MouseEvent,
   useCallback,
-  useEffect
+  useEffect,
+  useState
 } from "react";
 
 import { Button } from "reactstrap";
@@ -16,7 +17,7 @@ import { RouteComponentProps } from "react-router";
 
 import { disableScroll, fitWindow } from "../../../../common/window";
 import { useRequestAccess } from "../../../hooks/use-request-access";
-import { HeaderLayout } from "../../layouts/header-layout";
+import { EmptyLayout } from "../../layouts/empty-layout";
 
 export const AccessPage: FunctionComponent<Pick<
   RouteComponentProps,
@@ -83,11 +84,38 @@ export const AccessPage: FunctionComponent<Pick<
     [access]
   );
 
+  const [host, setHost] = useState("");
+  useEffect(() => {
+    if (access.accessOrigin?.origins) {
+      const hosts: string[] = [];
+      for (const origin of access.accessOrigin.origins) {
+        const url = new URL(origin);
+        hosts.push(url.host);
+      }
+      setHost(hosts.join(","));
+    }
+  }, [access.accessOrigin?.origins]);
+
   return (
-    <HeaderLayout showChainName canChangeChainInfo={false}>
+    <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
       <div className={style.container}>
-        {access.accessOrigin?.chainId}
-        {access.accessOrigin?.origins}
+        <img
+          src={require("../../public/assets/temp-icon.svg")}
+          alt="logo"
+          style={{ height: "92px" }}
+        />
+        <h1 className={style.header}>Requesting Connection</h1>
+        <p className={style.paragraph}>
+          {host} is requesting to connect to your Keplr account on{" "}
+          <b>{access.accessOrigin?.chainId}</b>.
+        </p>
+        <div className={style.permission}>
+          By approving this request, the website will:
+        </div>
+        <ul>
+          <li>Know your wallet address</li>
+          <li>Be able to send transaction requests</li>
+        </ul>
         <div style={{ flex: 1 }} />
         <div className={style.buttons}>
           <Button
@@ -109,6 +137,6 @@ export const AccessPage: FunctionComponent<Pick<
           </Button>
         </div>
       </div>
-    </HeaderLayout>
+    </EmptyLayout>
   );
 });
