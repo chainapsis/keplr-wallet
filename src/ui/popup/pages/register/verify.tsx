@@ -3,6 +3,7 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { Button } from "reactstrap";
 
 import style from "./style.module.scss";
+import { FormattedMessage } from "react-intl";
 
 export const VerifyInPage: FunctionComponent<{
   words: string;
@@ -96,7 +97,7 @@ export const VerifyInPage: FunctionComponent<{
           marginTop: "30px"
         }}
       >
-        Register
+        <FormattedMessage id="register.verify.button.register" />
       </Button>
     </div>
   );

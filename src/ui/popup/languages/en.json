@@ -36,6 +36,8 @@
   "register.create.textarea.mnemonic.error.too-short": "Too short mnemonic",
   "register.create.button.next": "Next",
 
+  "register.verify.button.register": "Register",
+
   "register.welcome.title": "You’re all set!",
   "register.welcome.content": "Open the extension and sign in to begin your interchain journey.",
   "register.welcome.button.done": "Done",
