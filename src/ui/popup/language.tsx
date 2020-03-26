@@ -2,9 +2,11 @@ import React, { FunctionComponent } from "react";
 import { IntlProvider } from "react-intl";
 
 import MessagesEn from "./languages/en.json";
+import MessagesKo from "./languages/ko.json";
 
 const messages: { [lang: string]: Record<string, string> } = {
-  en: MessagesEn
+  en: MessagesEn,
+  ko: MessagesKo
 };
 
 function getMessages(): { language: string; messages: Record<string, string> } {
