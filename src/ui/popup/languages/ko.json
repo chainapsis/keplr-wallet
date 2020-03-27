@@ -11,6 +11,8 @@
   "main.stake.button.stake": "스테이킹",
   "main.stake.tooltip.no-asset": "계정에 자산이 없습니다. 자산을 입금해주세요.",
 
+  "main.address.copied": "주소가 복사되었습니다",
+
   "main.menu.sign-out": "로그아웃",
 
   "register.button.back": "뒤로",
