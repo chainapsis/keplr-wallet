@@ -36,7 +36,8 @@ import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 import {
   getCurrencies,
   getCurrency,
-  getCurrencyFromDenom
+  getCurrencyFromDenom,
+  getFiatCurrencyFromLanguage
 } from "../../../../common/currency";
 
 import style from "./style.module.scss";
@@ -54,6 +55,7 @@ import {
   isValidENS,
   useENS
 } from "../../../hooks/use-ens";
+import { useLanguage } from "../../language";
 
 interface FormData {
   recipient: string;
@@ -115,7 +117,22 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
     }, [chainStore.chainInfo.feeCurrencies]);
 
-    const feePrice = priceStore.getValue("usd", feeCurrency?.coinGeckoId);
+    const language = useLanguage();
+
+    useEffect(() => {
+      const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
+
+      const coinGeckoId = feeCurrency?.coinGeckoId;
+
+      if (coinGeckoId && !priceStore.hasFiat(fiatCurrency.currency)) {
+        priceStore.fetchValue([fiatCurrency.currency], [coinGeckoId]);
+      }
+    }, [feeCurrency?.coinGeckoId, language.language, priceStore]);
+
+    const feePrice = priceStore.getValue(
+      getFiatCurrencyFromLanguage(language.language).currency,
+      feeCurrency?.coinGeckoId
+    );
 
     const feeValue = useMemo(() => {
       return feePrice ? feePrice.value : new Dec(0);
@@ -430,6 +447,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   error={errors.fee && errors.fee.message}
                   currency={feeCurrency!}
                   price={feeValue}
+                  fiatSymbol={
+                    getFiatCurrencyFromLanguage(language.language).symbol
+                  }
                   gasPriceStep={DefaultGasPriceStep}
                   gas={gasForSendMsg}
                 />

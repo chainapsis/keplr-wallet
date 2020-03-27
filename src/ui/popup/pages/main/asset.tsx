@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 
@@ -7,16 +7,32 @@ import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Currency } from "../../../../chain-info";
-import { getCurrency } from "../../../../common/currency";
+import {
+  getCurrency,
+  getFiatCurrencyFromLanguage
+} from "../../../../common/currency";
 
 import { FormattedMessage } from "react-intl";
 import { ToolTip } from "../../../components/tooltip";
+import { useLanguage } from "../../language";
 
 export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore } = useStore();
+  const language = useLanguage();
+
+  useEffect(() => {
+    const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
+
+    const coinGeckoId = getCurrency(chainStore.chainInfo.nativeCurrency)
+      ?.coinGeckoId;
+
+    if (coinGeckoId != null && !priceStore.hasFiat(fiatCurrency.currency)) {
+      priceStore.fetchValue([fiatCurrency.currency], [coinGeckoId]);
+    }
+  }, [chainStore.chainInfo.nativeCurrency, language.language, priceStore]);
 
   const fiat = priceStore.getValue(
-    "usd",
+    getFiatCurrencyFromLanguage(language.language).currency,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     getCurrency(chainStore.chainInfo.nativeCurrency)!.coinGeckoId
   );
@@ -37,7 +53,7 @@ export const AssetView: FunctionComponent = observer(() => {
       </div>
       <div className={styleAsset.fiat}>
         {fiat && !fiat.value.equals(new Dec(0))
-          ? "$" +
+          ? getFiatCurrencyFromLanguage(language.language).symbol +
             parseFloat(
               fiat.value
                 .mul(new Dec(coinAmount, nativeCurrency.coinDecimals))

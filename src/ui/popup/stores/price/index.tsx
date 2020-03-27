@@ -10,7 +10,10 @@ import {
   AutoFetchingFiatValueInterval
 } from "../../../../config";
 import { ChainInfo } from "../../../../chain-info";
-import { getCurrencies } from "../../../../common/currency";
+import {
+  getCurrencies,
+  getFiatCurrencyFromLanguage
+} from "../../../../common/currency";
 
 interface CoinGeckoPriceResult {
   [id: string]: {
@@ -86,9 +89,17 @@ export class PriceStore {
           }) as string[];
 
         this.lastFetchingIntervalId = setInterval(() => {
-          this.fetchValue(["usd"], coinGeckoIds);
+          this.fetchValue(
+            [getFiatCurrencyFromLanguage("default").currency],
+            coinGeckoIds
+          );
         }, AutoFetchingFiatValueInterval);
-        await task(this.fetchValue(["usd"], coinGeckoIds));
+        await task(
+          this.fetchValue(
+            [getFiatCurrencyFromLanguage("default").currency],
+            coinGeckoIds
+          )
+        );
       }
     }
   }
@@ -230,6 +241,10 @@ export class PriceStore {
     if (this.prices[fiat]) {
       return this.prices[fiat][id];
     }
+  }
+
+  public hasFiat(fiat: string): boolean {
+    return this.needFetchingCurrencies.fiats.indexOf(fiat) >= 0;
   }
 
   private async saveResultDataToStorage(

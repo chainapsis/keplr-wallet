@@ -49,6 +49,7 @@ export interface FeeButtonsProps {
   // TODO: handle muliple fees.
   currency: Currency;
   price: Dec;
+  fiatSymbol: string;
   gas: number;
   gasPriceStep: GasPriceStep;
 
@@ -67,6 +68,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
   error,
   currency,
   price,
+  fiatSymbol,
   gas,
   gasPriceStep,
   name
@@ -159,7 +161,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             })}
           >
             {price.gt(new Dec(0)) && feeLow
-              ? `$${DecUtils.removeTrailingZerosFromDecStr(
+              ? `${fiatSymbol}${DecUtils.removeTrailingZerosFromDecStr(
                   new Dec(feeLow.amount)
                     .quoTruncate(
                       DecUtils.getPrecisionDec(currency.coinDecimals)
@@ -197,7 +199,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             })}
           >
             {price.gt(new Dec(0)) && feeAverage
-              ? `$${DecUtils.removeTrailingZerosFromDecStr(
+              ? `${fiatSymbol}${DecUtils.removeTrailingZerosFromDecStr(
                   new Dec(feeAverage.amount)
                     .quoTruncate(
                       DecUtils.getPrecisionDec(currency.coinDecimals)
@@ -235,7 +237,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = ({
             })}
           >
             {price.gt(new Dec(0)) && feeHigh
-              ? `$${DecUtils.removeTrailingZerosFromDecStr(
+              ? `${fiatSymbol}${DecUtils.removeTrailingZerosFromDecStr(
                   new Dec(feeHigh.amount)
                     .quoTruncate(
                       DecUtils.getPrecisionDec(currency.coinDecimals)
