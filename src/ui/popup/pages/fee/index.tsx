@@ -33,7 +33,6 @@ import { useStore } from "../../stores";
 import style from "./style.module.scss";
 
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import {
   disableScroll,
   enableScroll,
@@ -102,11 +101,6 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
       priceStore.fetchValue([fiatCurrency.currency], [coinGeckoId]);
     }
   }, [feeCurrency?.coinGeckoId, language.language, priceStore]);
-
-  const feePrice = priceStore.getValue(
-    getFiatCurrencyFromLanguage(language.language).currency,
-    feeCurrency?.coinGeckoId
-  );
 
   const onConfigInit = useCallback(
     (chainId: string, config: TxBuilderConfig) => {
@@ -240,10 +234,6 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
                 name="fee"
                 error={errors.fee && errors.fee.message}
                 currency={feeCurrency!}
-                price={feePrice ? feePrice.value : new Dec(0)}
-                fiatSymbol={
-                  getFiatCurrencyFromLanguage(language.language).symbol
-                }
                 gasPriceStep={DefaultGasPriceStep}
                 gas={gasInt}
               />

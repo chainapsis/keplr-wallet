@@ -129,15 +129,6 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       }
     }, [feeCurrency?.coinGeckoId, language.language, priceStore]);
 
-    const feePrice = priceStore.getValue(
-      getFiatCurrencyFromLanguage(language.language).currency,
-      feeCurrency?.coinGeckoId
-    );
-
-    const feeValue = useMemo(() => {
-      return feePrice ? feePrice.value : new Dec(0);
-    }, [feePrice]);
-
     const [allBalance, setAllBalance] = useState(false);
 
     const onChangeAllBalance = useCallback((allBalance: boolean) => {
@@ -446,10 +437,6 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   name="fee"
                   error={errors.fee && errors.fee.message}
                   currency={feeCurrency!}
-                  price={feeValue}
-                  fiatSymbol={
-                    getFiatCurrencyFromLanguage(language.language).symbol
-                  }
                   gasPriceStep={DefaultGasPriceStep}
                   gas={gasForSendMsg}
                 />
