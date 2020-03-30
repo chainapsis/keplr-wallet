@@ -51,4 +51,18 @@ export abstract class Message<R> {
 
     return sender.id === browser.runtime.id;
   }
+
+  static checkOriginIsValid(origin: string, sender: MessageSender): boolean {
+    // TODO: When is a url undefined?
+    if (!sender.url) {
+      throw new Error("url is empty");
+    }
+
+    if (!origin) {
+      throw new Error("origin is empty");
+    }
+
+    const url = new URL(sender.url);
+    return url.origin === origin;
+  }
 }

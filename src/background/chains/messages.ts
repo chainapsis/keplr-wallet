@@ -64,17 +64,7 @@ export class ReqeustAccessMsg extends Message<void> {
       return true;
     }
 
-    // TODO: When is a url undefined?
-    if (!sender.url) {
-      throw new Error("url is empty");
-    }
-
-    if (!this.origin) {
-      throw new Error("origin is empty");
-    }
-
-    const url = new URL(sender.url);
-    return url.origin === this.origin;
+    return Message.checkOriginIsValid(this.origin, sender);
   }
 
   route(): string {

@@ -39,17 +39,7 @@ export class EnableKeyRingMsg extends Message<{
       return true;
     }
 
-    // TODO: When is a url undefined?
-    if (!sender.url) {
-      throw new Error("url is empty");
-    }
-
-    if (!this.origin) {
-      throw new Error("origin is empty");
-    }
-
-    const url = new URL(sender.url);
-    return url.origin === this.origin;
+    return Message.checkOriginIsValid(this.origin, sender);
   }
 
   route(): string {
@@ -281,17 +271,7 @@ export class GetKeyMsg extends Message<KeyHex> {
       return true;
     }
 
-    // TODO: When is a url undefined?
-    if (!sender.url) {
-      throw new Error("url is empty");
-    }
-
-    if (!this.origin) {
-      throw new Error("origin is empty");
-    }
-
-    const url = new URL(sender.url);
-    return url.origin === this.origin;
+    return Message.checkOriginIsValid(this.origin, sender);
   }
 
   route(): string {
@@ -345,17 +325,7 @@ export class RequestTxBuilderConfigMsg extends Message<{
       return true;
     }
 
-    // TODO: When is a url undefined?
-    if (!sender.url) {
-      throw new Error("url is empty");
-    }
-
-    if (!this.origin) {
-      throw new Error("origin is empty");
-    }
-
-    const url = new URL(sender.url);
-    return url.origin === this.origin;
+    return Message.checkOriginIsValid(this.origin, sender);
   }
 
   route(): string {
@@ -511,17 +481,7 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
       return true;
     }
 
-    // TODO: When is a url undefined?
-    if (!sender.url) {
-      throw new Error("url is empty");
-    }
-
-    if (!this.origin) {
-      throw new Error("origin is empty");
-    }
-
-    const url = new URL(sender.url);
-    return url.origin === this.origin;
+    return Message.checkOriginIsValid(this.origin, sender);
   }
 
   route(): string {
