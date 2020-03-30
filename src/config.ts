@@ -16,10 +16,28 @@ export const LanguageToFiatCurrency: {
 } = {
   default: {
     currency: "usd",
-    symbol: "$"
+    symbol: "$",
+    parse: (value: number) => {
+      let fractionDigits = 2;
+      if (value < 0.01) {
+        fractionDigits = 4;
+      }
+      return value.toLocaleString("en-US", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
   },
   ko: {
     currency: "krw",
-    symbol: "￦"
+    symbol: "￦",
+    parse: (value: number) => {
+      let fractionDigits = 0;
+      if (value < 1) {
+        fractionDigits = 1;
+      }
+      return value.toLocaleString("ko-KR", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
   }
 };

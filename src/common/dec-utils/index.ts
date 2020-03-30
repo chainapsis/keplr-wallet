@@ -6,6 +6,10 @@ export class DecUtils {
   }
 
   static removeTrailingZerosFromDecStr(decStr: string): string {
+    if (decStr.indexOf(".") < 0) {
+      return decStr;
+    }
+
     for (let i = decStr.length - 1; i >= 0; i--) {
       if (decStr[i] === "0") {
         decStr = decStr.slice(0, i);

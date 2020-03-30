@@ -178,12 +178,16 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 ? `${
                     fiatCurrency.symbol
                   }${DecUtils.removeTrailingZerosFromDecStr(
-                    new Dec(feeLow.amount)
-                      .quoTruncate(
-                        DecUtils.getPrecisionDec(currency.coinDecimals)
+                    fiatCurrency.parse(
+                      parseFloat(
+                        new Dec(feeLow.amount)
+                          .quoTruncate(
+                            DecUtils.getPrecisionDec(currency.coinDecimals)
+                          )
+                          .mul(price)
+                          .toString()
                       )
-                      .mul(price)
-                      .toString(4)
+                    )
                   )}`
                 : "?"}
             </div>
@@ -220,12 +224,16 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 ? `${
                     fiatCurrency.symbol
                   }${DecUtils.removeTrailingZerosFromDecStr(
-                    new Dec(feeAverage.amount)
-                      .quoTruncate(
-                        DecUtils.getPrecisionDec(currency.coinDecimals)
+                    fiatCurrency.parse(
+                      parseFloat(
+                        new Dec(feeAverage.amount)
+                          .quoTruncate(
+                            DecUtils.getPrecisionDec(currency.coinDecimals)
+                          )
+                          .mul(price)
+                          .toString()
                       )
-                      .mul(price)
-                      .toString(4)
+                    )
                   )}`
                 : "?"}
             </div>
@@ -260,12 +268,16 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 ? `${
                     fiatCurrency.symbol
                   }${DecUtils.removeTrailingZerosFromDecStr(
-                    new Dec(feeHigh.amount)
-                      .quoTruncate(
-                        DecUtils.getPrecisionDec(currency.coinDecimals)
+                    fiatCurrency.parse(
+                      parseFloat(
+                        new Dec(feeHigh.amount)
+                          .quoTruncate(
+                            DecUtils.getPrecisionDec(currency.coinDecimals)
+                          )
+                          .mul(price)
+                          .toString()
                       )
-                      .mul(price)
-                      .toString(4)
+                    )
                   )}`
                 : "?"}
             </div>
