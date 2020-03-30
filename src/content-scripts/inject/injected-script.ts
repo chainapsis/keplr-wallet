@@ -6,6 +6,7 @@ import { Context } from "@everett-protocol/cosmosjs/core/context";
 import {
   EnableKeyRingMsg,
   GetKeyMsg,
+  KeyRingStatus,
   RequestSignMsg,
   RequestTxBuilderConfigMsg
 } from "../../background/keyring";
@@ -16,6 +17,7 @@ import {
   txBuilderConfigFromPrimitive,
   txBuilderConfigToPrimitive
 } from "../../background/keyring/utils";
+import { ReqeustAccessMsg } from "../../background/chains/messages";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Manifest = require("../../manifest.json");
@@ -30,11 +32,27 @@ export class InjectedWalletProvider implements WalletProvider {
    * Request access to the user's accounts. Wallet can ask the user to approve or deny access. If user deny access, it will throw error.
    */
   async enable(context: Context): Promise<void> {
+    const random = new Uint8Array(4);
+    crypto.getRandomValues(random);
+    const id = Buffer.from(random).toString("hex");
+
+    await sendMessage(
+      BACKGROUND_PORT,
+      ReqeustAccessMsg.create(
+        id,
+        context.get("chainId"),
+        window.location.origin
+      )
+    );
+
     const msg = EnableKeyRingMsg.create(
       context.get("chainId"),
       window.location.origin
     );
-    await sendMessage(BACKGROUND_PORT, msg);
+    const result = await sendMessage(BACKGROUND_PORT, msg);
+    if (result.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Keyring not unlocked");
+    }
   }
 
   /**

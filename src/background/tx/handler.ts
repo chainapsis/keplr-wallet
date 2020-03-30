@@ -21,7 +21,7 @@ const handleRequestBackgroundTxMsg: (
   keeper: BackgroundTxKeeper
 ) => InternalHandler<RequestBackgroundTxMsg> = keeper => {
   return async msg => {
-    keeper.checkAccessOrigin(msg.chainId, msg.origin);
+    await keeper.checkAccessOrigin(msg.chainId, msg.origin);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await keeper.requestTx(msg.chainId, msg.txBytes, msg.mode!);
     return {};

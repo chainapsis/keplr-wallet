@@ -1,4 +1,3 @@
-import { KeyRingKeeper } from "../keyring/keeper";
 import Axios, { AxiosInstance } from "axios";
 
 import { Context, IContext } from "@everett-protocol/cosmosjs/core/context";
@@ -7,6 +6,7 @@ import {
   ResultBroadcastTx,
   ResultBroadcastTxCommit
 } from "@everett-protocol/cosmosjs/rpc/tx";
+import { ChainsKeeper } from "../chains/keeper";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -24,14 +24,14 @@ interface ABCIMessageLog {
 }
 
 export class BackgroundTxKeeper {
-  constructor(private keyRingKeeper: KeyRingKeeper) {}
+  constructor(private chainsKeeper: ChainsKeeper) {}
 
   async requestTx(
     chainId: string,
     txBytes: string,
     mode: "sync" | "async" | "commit"
   ) {
-    const info = this.keyRingKeeper.getChainInfo(chainId);
+    const info = await this.chainsKeeper.getChainInfo(chainId);
     const instance = Axios.create({
       baseURL: info.rpc
     });
@@ -142,7 +142,7 @@ export class BackgroundTxKeeper {
     }
   }
 
-  checkAccessOrigin(chainId: string, origin: string) {
-    this.keyRingKeeper.checkAccessOrigin(chainId, origin);
+  async checkAccessOrigin(chainId: string, origin: string) {
+    await this.chainsKeeper.checkAccessOrigin(chainId, origin);
   }
 }

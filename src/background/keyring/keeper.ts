@@ -1,11 +1,5 @@
 import { Key, KeyRing, KeyRingStatus } from "./keyring";
 
-import {
-  AccessOrigin,
-  ChainInfo,
-  ExtensionAccessOrigins,
-  NativeChainInfos
-} from "../../chain-info";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
 import { AsyncApprover } from "../../common/async-approver";
 import {
@@ -16,6 +10,7 @@ import {
 import { KVStore } from "../../common/kvstore";
 
 import { openWindow } from "../../common/window";
+import { ChainsKeeper } from "../chains/keeper";
 
 export interface KeyHex {
   algo: string;
@@ -48,7 +43,7 @@ export class KeyRingKeeper {
     defaultTimeout: 3 * 60 * 1000
   });
 
-  constructor(kvStore: KVStore) {
+  constructor(kvStore: KVStore, public readonly chainsKeeper: ChainsKeeper) {
     this.keyRing = new KeyRing(kvStore);
   }
 
@@ -70,47 +65,8 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
-  getRegisteredChains(): ChainInfo[] {
-    return NativeChainInfos;
-  }
-
-  getChainInfo(chainId: string): ChainInfo {
-    const chainInfo = this.getRegisteredChains().find(chainInfo => {
-      return chainInfo.chainId === chainId;
-    });
-
-    if (!chainInfo) {
-      throw new Error(`There is no chain info for ${chainId}`);
-    }
-    return chainInfo;
-  }
-
-  getAccessOrigins(): AccessOrigin[] {
-    return ExtensionAccessOrigins;
-  }
-
-  getAccessOrigin(chainId: string): string[] {
-    const accessOrigins = this.getAccessOrigins();
-    const accessOrigin = accessOrigins.find(accessOrigin => {
-      return accessOrigin.chainId == chainId;
-    });
-
-    if (!accessOrigin) {
-      throw new Error(`There is no access origins for ${chainId}`);
-    }
-
-    return accessOrigin.origins;
-  }
-
-  checkAccessOrigin(chainId: string, origin: string) {
-    if (origin === new URL(browser.runtime.getURL("/")).origin) {
-      return;
-    }
-
-    const accessOrigin = this.getAccessOrigin(chainId);
-    if (accessOrigin.indexOf(origin) <= -1) {
-      throw new Error("This origin is not approved");
-    }
+  async checkAccessOrigin(chainId: string, origin: string) {
+    await this.chainsKeeper.checkAccessOrigin(chainId, origin);
   }
 
   async checkBech32Address(chainId: string, bech32Address: string) {
@@ -118,7 +74,8 @@ export class KeyRingKeeper {
     if (
       bech32Address !==
       new Address(key.address).toBech32(
-        this.getChainInfo(chainId).bech32Config.bech32PrefixAccAddr
+        (await this.chainsKeeper.getChainInfo(chainId)).bech32Config
+          .bech32PrefixAccAddr
       )
     ) {
       throw new Error("Invalid bech32 address");
@@ -164,8 +121,10 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
-  setPath(chainId: string, account: number, index: number) {
-    this.path = this.getChainInfo(chainId).bip44.pathString(account, index);
+  async setPath(chainId: string, account: number, index: number) {
+    this.path = (
+      await this.chainsKeeper.getChainInfo(chainId)
+    ).bip44.pathString(account, index);
   }
 
   async getKey(): Promise<Key> {

@@ -8,7 +8,7 @@ import {
   SetPersistentMemoryMsg,
   GetPersistentMemoryMsg
 } from "../../../../background/persistent-memory";
-import { GetRegisteredChainMsg } from "../../../../background/keyring";
+import { GetChainInfosMsg } from "../../../../background/chains/messages";
 import { sendMessage } from "../../../../common/message";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
@@ -77,7 +77,7 @@ export class ChainStore {
 
   @actionAsync
   private async getChainInfosFromBackground() {
-    const msg = GetRegisteredChainMsg.create();
+    const msg = GetChainInfosMsg.create();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     const chainInfos: ChainInfo[] = result.chainInfos.map(
       (chainInfo: Writeable<ChainInfo>) => {
