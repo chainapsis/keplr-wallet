@@ -44,6 +44,14 @@
   "register.welcome.content": "확장 프로그램을 열고 로그인하여 인터 체인 여행을 시작하세요.",
   "register.welcome.button.done": "완료",
 
+  "access.title": "접근 요청",
+  "access.paragraph": "{host}가 <b>{chainId}</b>에 접근을 요청합니다.",
+  "access.permission.title": "이 웹사이트는 다음과 같은 권한을 가질 수 있습니다",
+  "access.permission.account": "계정의 주소를 알 수 있습니다",
+  "access.permission.tx-request": "트랜잭션 서명을 요청할 수 있습니다",
+  "access.button.approve": "허락",
+  "access.button.reject": "거부",
+
   "lock.input.password": "비밀번호",
   "lock.input.password.error.required": "빈 비밀번호",
   "lock.input.password.error.invalid": "잘못된 비밀번호",

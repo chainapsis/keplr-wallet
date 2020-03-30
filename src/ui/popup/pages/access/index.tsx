@@ -18,6 +18,7 @@ import { RouteComponentProps } from "react-router";
 import { disableScroll, fitWindow } from "../../../../common/window";
 import { useRequestAccess } from "../../../hooks/use-request-access";
 import { EmptyLayout } from "../../layouts/empty-layout";
+import { FormattedMessage } from "react-intl";
 
 export const AccessPage: FunctionComponent<Pick<
   RouteComponentProps,
@@ -104,17 +105,30 @@ export const AccessPage: FunctionComponent<Pick<
           alt="logo"
           style={{ height: "92px" }}
         />
-        <h1 className={style.header}>Requesting Connection</h1>
+        <h1 className={style.header}>
+          <FormattedMessage id="access.title" />
+        </h1>
         <p className={style.paragraph}>
-          {host} is requesting to connect to your Keplr account on{" "}
-          <b>{access.accessOrigin?.chainId}</b>.
+          <FormattedMessage
+            id="access.paragraph"
+            values={{
+              host,
+              chainId: access.accessOrigin?.chainId,
+              // eslint-disable-next-line react/display-name
+              b: (...chunks: any) => <b>{chunks}</b>
+            }}
+          />
         </p>
         <div className={style.permission}>
-          By approving this request, the website will:
+          <FormattedMessage id="access.permission.title" />
         </div>
         <ul>
-          <li>Know your wallet address</li>
-          <li>Be able to send transaction requests</li>
+          <li>
+            <FormattedMessage id="access.permission.account" />
+          </li>
+          <li>
+            <FormattedMessage id="access.permission.tx-request" />
+          </li>
         </ul>
         <div style={{ flex: 1 }} />
         <div className={style.buttons}>
@@ -125,7 +139,7 @@ export const AccessPage: FunctionComponent<Pick<
             onClick={reject}
             data-loading={access.loading}
           >
-            Reject
+            <FormattedMessage id="access.button.reject" />
           </Button>
           <Button
             className={style.button}
@@ -133,7 +147,7 @@ export const AccessPage: FunctionComponent<Pick<
             onClick={approve}
             data-loading={access.loading}
           >
-            Approve
+            <FormattedMessage id="access.button.approve" />
           </Button>
         </div>
       </div>

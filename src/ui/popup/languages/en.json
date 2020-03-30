@@ -44,6 +44,14 @@
   "register.welcome.content": "Open the extension and sign in to begin your interchain journey.",
   "register.welcome.button.done": "Done",
 
+  "access.title": "Requesting Connection",
+  "access.paragraph": "{host} is requesting to connect to your Keplr account on <b>{chainId}</b>.",
+  "access.permission.title": "By approving this request, the website will:",
+  "access.permission.account": "Know your wallet address",
+  "access.permission.tx-request": "Be able to send transaction requests",
+  "access.button.approve": "Approve",
+  "access.button.reject": "Reject",
+
   "lock.input.password": "Password",
   "lock.input.password.error.required": "Empty password",
   "lock.input.password.error.invalid": "Invalid password",
