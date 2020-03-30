@@ -7,9 +7,11 @@ import styleAccount from "./account.module.scss";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import { useNotification } from "../../../components/notification";
+import { useIntl } from "react-intl";
 
 export const AccountView: FunctionComponent = observer(() => {
   const { accountStore } = useStore();
+  const intl = useIntl();
 
   const notification = useNotification();
 
@@ -20,7 +22,9 @@ export const AccountView: FunctionComponent = observer(() => {
       placement: "top-center",
       type: "success",
       duration: 2,
-      content: "Address copied!",
+      content: intl.formatMessage({
+        id: "main.address.copied"
+      }),
       canDelete: true,
       transition: {
         duration: 0.25

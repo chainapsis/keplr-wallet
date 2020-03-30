@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 
@@ -7,16 +7,38 @@ import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Currency } from "../../../../chain-info";
-import { getCurrency } from "../../../../common/currency";
+import {
+  getCurrency,
+  getFiatCurrencyFromLanguage
+} from "../../../../common/currency";
 
 import { FormattedMessage } from "react-intl";
 import { ToolTip } from "../../../components/tooltip";
+import { useLanguage } from "../../language";
+import { DecUtils } from "../../../../common/dec-utils";
 
 export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore } = useStore();
+  const language = useLanguage();
+
+  const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
+
+  useEffect(() => {
+    const coinGeckoId = getCurrency(chainStore.chainInfo.nativeCurrency)
+      ?.coinGeckoId;
+
+    if (coinGeckoId != null && !priceStore.hasFiat(fiatCurrency.currency)) {
+      priceStore.fetchValue([fiatCurrency.currency], [coinGeckoId]);
+    }
+  }, [
+    chainStore.chainInfo.nativeCurrency,
+    fiatCurrency.currency,
+    language.language,
+    priceStore
+  ]);
 
   const fiat = priceStore.getValue(
-    "usd",
+    fiatCurrency.currency,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     getCurrency(chainStore.chainInfo.nativeCurrency)!.coinGeckoId
   );
@@ -37,12 +59,16 @@ export const AssetView: FunctionComponent = observer(() => {
       </div>
       <div className={styleAsset.fiat}>
         {fiat && !fiat.value.equals(new Dec(0))
-          ? "$" +
-            parseFloat(
-              fiat.value
-                .mul(new Dec(coinAmount, nativeCurrency.coinDecimals))
-                .toString()
-            ).toLocaleString()
+          ? fiatCurrency.symbol +
+            DecUtils.removeTrailingZerosFromDecStr(
+              fiatCurrency.parse(
+                parseFloat(
+                  fiat.value
+                    .mul(new Dec(coinAmount, nativeCurrency.coinDecimals))
+                    .toString()
+                )
+              )
+            )
           : "?"}
       </div>
       {/* TODO: Show the information that account is fetching. */}

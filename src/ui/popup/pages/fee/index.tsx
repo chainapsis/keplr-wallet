@@ -23,14 +23,16 @@ import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 
 import bigInteger from "big-integer";
 import queryString from "query-string";
-import { getCurrency } from "../../../../common/currency";
+import {
+  getCurrency,
+  getFiatCurrencyFromLanguage
+} from "../../../../common/currency";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
 
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import {
   disableScroll,
   enableScroll,
@@ -39,6 +41,7 @@ import {
 } from "../../../../common/window";
 
 import { FormattedMessage, useIntl } from "react-intl";
+import { useLanguage } from "../../language";
 
 interface FormData {
   gas: string;
@@ -87,7 +90,17 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
     return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
   }, [chainStore.chainInfo.feeCurrencies]);
 
-  const feePrice = priceStore.getValue("usd", feeCurrency?.coinGeckoId);
+  const language = useLanguage();
+
+  useEffect(() => {
+    const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
+
+    const coinGeckoId = feeCurrency?.coinGeckoId;
+
+    if (coinGeckoId && !priceStore.hasFiat(fiatCurrency.currency)) {
+      priceStore.fetchValue([fiatCurrency.currency], [coinGeckoId]);
+    }
+  }, [feeCurrency?.coinGeckoId, language.language, priceStore]);
 
   const onConfigInit = useCallback(
     (chainId: string, config: TxBuilderConfig) => {
@@ -221,7 +234,6 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
                 name="fee"
                 error={errors.fee && errors.fee.message}
                 currency={feeCurrency!}
-                price={feePrice ? feePrice.value : new Dec(0)}
                 gasPriceStep={DefaultGasPriceStep}
                 gas={gasInt}
               />

@@ -11,6 +11,8 @@
   "main.stake.button.stake": "Stake",
   "main.stake.tooltip.no-asset": "No token in your account. Deposit some tokens to stake.",
 
+  "main.address.copied": "Address copied!",
+
   "main.menu.sign-out": "Sign out",
 
   "register.button.back": "Back",

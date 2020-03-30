@@ -32,6 +32,11 @@ body {
   height: $popup-size-height;
 
   background-color: $background-color;
+
+  &[data-lang="ko"] {
+    word-break: keep-all;
+    word-wrap: break-word;
+  }
 }
 
 #app {

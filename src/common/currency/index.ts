@@ -1,4 +1,6 @@
 import { Currencies, Currency } from "../../chain-info";
+import { FiatCurrency } from "./types";
+import { LanguageToFiatCurrency } from "../../config";
 
 export function getCurrency(type: string): Currency | undefined {
   return Currencies[type];
@@ -79,4 +81,15 @@ export function getCurrenciesFromMinimalDenoms(denoms: string[]): Currency[] {
   }
 
   return currencies;
+}
+
+export function getFiatCurrencyFromLanguage(language: string): FiatCurrency {
+  let currency = LanguageToFiatCurrency[language];
+  if (!currency) {
+    currency = LanguageToFiatCurrency["default"];
+  }
+  if (!currency) {
+    throw new Error("Invalid fiat currency");
+  }
+  return currency;
 }
