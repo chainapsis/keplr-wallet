@@ -6,14 +6,26 @@
 }
 
 .item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
-  padding: 8px;
 
-  .text {
-    font-size: 24px;
+  padding: 8px 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #32325d;
+}
+
+.footer {
+  padding: 20px 30px;
+  font-size: 14px;
+
+  .inner {
+    display: flex;
+    cursor: pointer;
+    color: #8898aa;
+
+    i {
+      margin-right: 6px;
+      font-size: 20px;
+    }
   }
-
 }

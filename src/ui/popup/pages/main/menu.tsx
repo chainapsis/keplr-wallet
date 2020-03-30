@@ -1,44 +1,63 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useCallback } from "react";
 
 import styleMenu from "./menu.module.scss";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
 import { FormattedMessage } from "react-intl";
+import { useHistory } from "react-router";
 
 export const Menu: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
+  const history = useHistory();
+
   return (
     <div className={styleMenu.container}>
+      <div
+        className={styleMenu.item}
+        onClick={useCallback(() => {
+          history.push({
+            pathname: "/setting"
+          });
+        }, [history])}
+      >
+        Settings
+      </div>
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
       {/* If development env, show clear button for test. */
       process.env.NODE_ENV === "development" ? (
         <div
           className={styleMenu.item}
-          onClick={() => {
+          onClick={useCallback(() => {
             keyRingStore.clear();
-          }}
+          }, [keyRingStore])}
         >
-          <span className="icon is-large">
-            <i className="fas fa-2x fa-eraser" />
-          </span>
-          <div className={styleMenu.text}>Clear</div>
+          Clear
         </div>
       ) : null}
       <div
         className={styleMenu.item}
-        onClick={() => {
+        onClick={useCallback(() => {
           keyRingStore.lock();
-        }}
+        }, [keyRingStore])}
       >
-        <span className="icon is-large">
-          <i className="fas fa-2x fa-sign-out-alt" />
-        </span>
-        <div className={styleMenu.text}>
-          <FormattedMessage id="main.menu.sign-out" />
-        </div>
+        <FormattedMessage id="main.menu.sign-out" />
+      </div>
+      <div>
+        <hr className="mx-4 my-1" />
+      </div>
+      <div className={styleMenu.footer}>
+        <a
+          className={styleMenu.inner}
+          href="https://github.com/everett-protocol/keplr-extension"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i className="fab fa-github" />
+          Check it out on GitHub
+        </a>
       </div>
     </div>
   );
