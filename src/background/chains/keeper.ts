@@ -157,6 +157,23 @@ export class ChainsKeeper {
     }
   }
 
+  async getAccessOriginWithoutEmbeded(chainId: string): Promise<AccessOrigin> {
+    const accessOrigin = await this.kvStore.get<AccessOrigin>(
+      ChainsKeeper.getAccessOriginKey(chainId)
+    );
+    if (accessOrigin) {
+      return {
+        chainId: accessOrigin.chainId,
+        origins: accessOrigin.origins
+      };
+    } else {
+      return {
+        chainId,
+        origins: []
+      };
+    }
+  }
+
   private static getAccessOriginKey(chainId: string): string {
     return `access-origin-${chainId}`;
   }
