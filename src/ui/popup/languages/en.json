@@ -15,15 +15,16 @@
 
   "main.menu.settings": "Settings",
   "main.menu.sign-out": "Sign out",
+  "main.menu.footer.github": "Check it out on GitHub",
 
   "setting.language": "Language",
-  "setting.language.automatic": "Automatic",
+  "setting.language.automatic": "Automatic (Browser default)",
   "setting.language.automatic-with-language": "Automatic ({language})",
   "setting.language.en": "English",
   "setting.language.ko": "Korean",
 
   "setting.connections": "Manage Connections",
-  "setting.connections.paragraph": "??",
+  "setting.connections.paragraph": "Manage websites connected to your wallet",
 
   "register.button.back": "Back",
   "register.intro.button.new-account.title": "Create new account",
@@ -58,7 +59,7 @@
   "access.paragraph": "{host} is requesting to connect to your Keplr account on <b>{chainId}</b>.",
   "access.permission.title": "By approving this request, the website will:",
   "access.permission.account": "Know your wallet address",
-  "access.permission.tx-request": "Be able to send transaction requests",
+  "access.permission.tx-request": "Be able to request signatures for txs",
   "access.button.approve": "Approve",
   "access.button.reject": "Reject",
 
