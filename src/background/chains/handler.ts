@@ -2,9 +2,11 @@ import { Handler, InternalHandler, Message } from "../../common/message";
 import { ChainsKeeper } from "./keeper";
 import {
   ApproveAccessMsg,
+  GetAccessOriginMsg,
   GetChainInfosMsg,
   GetReqeustAccessDataMsg,
   RejectAccessMsg,
+  RemoveAccessOriginMsg,
   ReqeustAccessMsg
 } from "./messages";
 
@@ -22,6 +24,12 @@ export const getHandler: (keeper: ChainsKeeper) => Handler = keeper => {
       case GetReqeustAccessDataMsg:
         return handleGetRequestAccessDataMsg(keeper)(
           msg as GetReqeustAccessDataMsg
+        );
+      case GetAccessOriginMsg:
+        return handleGetAccessOriginsMsg(keeper)(msg as GetAccessOriginMsg);
+      case RemoveAccessOriginMsg:
+        return handleRemoveAccessOriginMsg(keeper)(
+          msg as RemoveAccessOriginMsg
         );
       default:
         throw new Error("Unknown msg type");
@@ -69,5 +77,21 @@ const handleGetRequestAccessDataMsg: (
 ) => InternalHandler<GetReqeustAccessDataMsg> = keeper => {
   return msg => {
     return keeper.getRequestAccessData(msg.id);
+  };
+};
+
+const handleGetAccessOriginsMsg: (
+  keeper: ChainsKeeper
+) => InternalHandler<GetAccessOriginMsg> = keeper => {
+  return async msg => {
+    return await keeper.getAccessOriginWithoutEmbeded(msg.chainId);
+  };
+};
+
+const handleRemoveAccessOriginMsg: (
+  keeper: ChainsKeeper
+) => InternalHandler<RemoveAccessOriginMsg> = keeper => {
+  return async msg => {
+    await keeper.removeAccessOrigin(msg.chainId, msg.origin);
   };
 };

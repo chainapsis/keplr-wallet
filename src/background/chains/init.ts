@@ -4,7 +4,9 @@ import {
   ReqeustAccessMsg,
   ApproveAccessMsg,
   RejectAccessMsg,
-  GetReqeustAccessDataMsg
+  GetReqeustAccessDataMsg,
+  GetAccessOriginMsg,
+  RemoveAccessOriginMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -19,6 +21,8 @@ export function init(
   messageManager.registerMessage(ApproveAccessMsg);
   messageManager.registerMessage(RejectAccessMsg);
   messageManager.registerMessage(GetReqeustAccessDataMsg);
+  messageManager.registerMessage(GetAccessOriginMsg);
+  messageManager.registerMessage(RemoveAccessOriginMsg);
 
   messageManager.addHandler(ROUTE, getHandler(keeper));
 }

@@ -153,3 +153,65 @@ export class RejectAccessMsg extends Message<void> {
     return RejectAccessMsg.type();
   }
 }
+
+export class GetAccessOriginMsg extends Message<AccessOrigin> {
+  public static type() {
+    return "get-access-origin";
+  }
+
+  public static create(chainId: string): GetAccessOriginMsg {
+    const msg = new GetAccessOriginMsg();
+    msg.chainId = chainId;
+    return msg;
+  }
+
+  public chainId: string = "";
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Empty chain id");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetAccessOriginMsg.type();
+  }
+}
+
+export class RemoveAccessOriginMsg extends Message<void> {
+  public static type() {
+    return "remove-access-origin";
+  }
+
+  public static create(chainId: string, origin: string): RemoveAccessOriginMsg {
+    const msg = new RemoveAccessOriginMsg();
+    msg.chainId = chainId;
+    msg.origin = origin;
+    return msg;
+  }
+
+  public chainId: string = "";
+  public origin: string = "";
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Empty chain id");
+    }
+
+    if (!this.origin) {
+      throw new Error("Empty origin");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RemoveAccessOriginMsg.type();
+  }
+}

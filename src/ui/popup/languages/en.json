@@ -13,7 +13,17 @@
 
   "main.address.copied": "Address copied!",
 
+  "main.menu.settings": "Settings",
   "main.menu.sign-out": "Sign out",
+
+  "setting.language": "Language",
+  "setting.language.automatic": "Automatic",
+  "setting.language.automatic-with-language": "Automatic ({language})",
+  "setting.language.en": "English",
+  "setting.language.ko": "Korean",
+
+  "setting.connections": "Manage Connections",
+  "setting.connections.paragraph": "??",
 
   "register.button.back": "Back",
   "register.intro.button.new-account.title": "Create new account",

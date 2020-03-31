@@ -7,13 +7,23 @@
   "main.stake.message.pending-staking-reward": "스테이킹 보상",
   "main.stake.message.stake": "스테이킹",
   "main.stake.message.earning": "연간 7~11%의 이자를 받으세요",
-  "main.stake.button.claim-rewards": "보상 요청",
+  "main.stake.button.claim-rewards": "보상 받기",
   "main.stake.button.stake": "스테이킹",
   "main.stake.tooltip.no-asset": "계정에 자산이 없습니다. 자산을 입금해주세요.",
 
   "main.address.copied": "주소가 복사되었습니다",
 
+  "main.menu.settings": "설정",
   "main.menu.sign-out": "로그아웃",
+
+  "setting.language": "언어",
+  "setting.language.automatic": "자동",
+  "setting.language.automatic-with-language": "자동 ({language})",
+  "setting.language.en": "영어",
+  "setting.language.ko": "한국어",
+
+  "setting.connections": "연결 관리",
+  "setting.connections.paragraph": "??",
 
   "register.button.back": "뒤로",
   "register.intro.button.new-account.title": "계정 생성",

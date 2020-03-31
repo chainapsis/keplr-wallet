@@ -17,6 +17,7 @@ export interface Props {
   showChainName: boolean;
   canChangeChainInfo: boolean;
 
+  alternativeTitle?: string;
   menuRenderer?: ReactNode;
   rightRenderer?: ReactNode;
   onBackButton?: () => void;
@@ -30,6 +31,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
   ({
     showChainName,
     canChangeChainInfo,
+    alternativeTitle,
     menuRenderer,
     rightRenderer,
     isMenuOpen,
@@ -39,7 +41,9 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
     const menu = useMenu();
 
     const chainInfoChangable =
-      canChangeChainInfo && chainStore.chainList.length > 1;
+      canChangeChainInfo &&
+      chainStore.chainList.length > 1 &&
+      alternativeTitle == null;
 
     return (
       <CompHeader
@@ -82,7 +86,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
         }
         right={rightRenderer}
       >
-        {showChainName ? (
+        {showChainName || alternativeTitle ? (
           <ToolTip
             trigger={chainInfoChangable ? "click" : "static"}
             tooltip={<ChainList />}
@@ -92,7 +96,9 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
               style={{ cursor: chainInfoChangable ? undefined : "default" }}
             >
               <div className={style.title}>
-                {chainStore.chainInfo.chainName}
+                {showChainName
+                  ? chainStore.chainInfo.chainName
+                  : alternativeTitle}
               </div>
 
               {chainInfoChangable ? (
