@@ -27,6 +27,8 @@ import {
   DropdownToggle
 } from "reactstrap";
 
+import styleConnections from "./style.module.scss";
+
 export const SettingConnectionsPage: FunctionComponent = observer(() => {
   const history = useHistory();
 
@@ -80,7 +82,11 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
       }, [history])}
     >
       <div className={style.container}>
-        <ButtonDropdown isOpen={dropdownOpen} toggle={toggle}>
+        <ButtonDropdown
+          isOpen={dropdownOpen}
+          toggle={toggle}
+          className={styleConnections.dropdown}
+        >
           <DropdownToggle caret style={{ boxShadow: "none" }}>
             {chainStore.chainInfo.chainName}
           </DropdownToggle>

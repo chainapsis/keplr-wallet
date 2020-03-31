@@ -5,10 +5,12 @@ import { PageButton } from "../page-button";
 import style from "../style.module.scss";
 import { useLanguage } from "../../../language";
 import { useHistory } from "react-router";
+import { useIntl } from "react-intl";
 
 export const SettingLanguagePage: FunctionComponent = () => {
   const language = useLanguage();
   const history = useHistory();
+  const intl = useIntl();
 
   const selectedIcon = useMemo(() => <i className="fas fa-check" />, []);
 
@@ -16,14 +18,18 @@ export const SettingLanguagePage: FunctionComponent = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle="Language"
+      alternativeTitle={intl.formatMessage({
+        id: "setting.language"
+      })}
       onBackButton={useCallback(() => {
         history.goBack();
       }, [history])}
     >
       <div className={style.container}>
         <PageButton
-          title="Automatic"
+          title={intl.formatMessage({
+            id: "setting.language.automatic"
+          })}
           onClick={useCallback(() => {
             language.clearLanguage();
             history.push({
@@ -33,7 +39,9 @@ export const SettingLanguagePage: FunctionComponent = () => {
           icon={language.automatic ? selectedIcon : undefined}
         />
         <PageButton
-          title="English"
+          title={intl.formatMessage({
+            id: "setting.language.en"
+          })}
           onClick={useCallback(() => {
             language.setLanguage("en");
             history.push({
@@ -47,7 +55,9 @@ export const SettingLanguagePage: FunctionComponent = () => {
           }
         />
         <PageButton
-          title="Korean"
+          title={intl.formatMessage({
+            id: "setting.language.ko"
+          })}
           onClick={useCallback(() => {
             language.setLanguage("ko");
             history.push({

@@ -22,7 +22,7 @@ export const Menu: FunctionComponent = observer(() => {
           });
         }, [history])}
       >
-        Settings
+        <FormattedMessage id="main.menu.settings" />
       </div>
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
