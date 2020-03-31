@@ -29,6 +29,7 @@ import { SignPage } from "./pages/sign";
 import { FeePage } from "./pages/fee";
 import Modal from "react-modal";
 import { SettingPage } from "./pages/setting";
+import { SettingLanguagePage } from "./pages/setting/language";
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");
@@ -110,6 +111,11 @@ ReactDOM.render(
             <Route exact path="/send" component={SendPage} />
             <Route exact path="/fee/:id" component={FeePage} />
             <Route exact path="/setting" component={SettingPage} />
+            <Route
+              exact
+              path="/setting/language"
+              component={SettingLanguagePage}
+            />
             <Route path="/sign/:id" component={SignPage} />
           </HashRouter>
         </NotificationProvider>

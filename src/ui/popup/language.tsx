@@ -15,7 +15,7 @@ const messages: { [lang: string]: Record<string, string> } = {
 };
 
 function getMessages(language: string): Record<string, string> {
-  return Object.assign(MessagesEn, messages[language]);
+  return Object.assign({}, MessagesEn, messages[language]);
 }
 
 function initLanguage(): string {
@@ -31,7 +31,9 @@ function initLanguage(): string {
 
 interface Language {
   language: string;
+  automatic: boolean;
   setLanguage: (language: string) => void;
+  clearLanguage: () => void;
 }
 
 const LanguageContext = React.createContext<Language | null>(null);
@@ -46,6 +48,9 @@ export const useLanguage = (): Language => {
 
 export const AppIntlProvider: FunctionComponent = props => {
   const [language, setLanguage] = useState(initLanguage());
+  const [automatic, setAutomatic] = useState(
+    localStorage.getItem("language") == null
+  );
   const [messages, setMessages] = useState(getMessages(language));
 
   useEffect(() => {
@@ -59,13 +64,29 @@ export const AppIntlProvider: FunctionComponent = props => {
   const setLanguageCallback = useCallback((language: string) => {
     localStorage.setItem("language", language);
     setLanguage(language);
+    setAutomatic(false);
+  }, []);
+
+  const clearLanguageCallback = useCallback(() => {
+    localStorage.removeItem("language");
+    setLanguage(initLanguage());
+    setAutomatic(true);
   }, []);
 
   return (
     <LanguageContext.Provider
-      value={{ language: language, setLanguage: setLanguageCallback }}
+      value={{
+        language: language,
+        automatic: automatic,
+        setLanguage: setLanguageCallback,
+        clearLanguage: clearLanguageCallback
+      }}
     >
-      <IntlProvider locale={language} messages={messages}>
+      <IntlProvider
+        locale={language}
+        messages={messages}
+        key={`${language}${automatic ? "-auto" : ""}`}
+      >
         {props.children}
       </IntlProvider>
     </LanguageContext.Provider>
