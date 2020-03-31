@@ -3,4 +3,5 @@
 **/*.json
 **/*.png
 **/*.svg
+**/*.ttf
 .DS_Store

@@ -8,6 +8,26 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "~@fortawesome/fontawesome-free/scss/brands";
 
 @import url("https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,700,800&display=swap");
+@font-face {
+  font-family: Nanum Square;
+  src: url(../public/assets/font/NanumSquareRegular.ttf);
+  font-weight: normal;
+}
+@font-face {
+  font-family: Nanum Square;
+  src: url(../public/assets/font/NanumSquareRegular.ttf);
+  font-weight: 300;
+}
+@font-face {
+  font-family: Nanum Square;
+  src: url(../public/assets/font/NanumSquareBold.ttf);
+  font-weight: bold;
+}
+@font-face {
+  font-family: Nanum Square;
+  src: url(../public/assets/font/NanumSquareExtraBold.ttf);
+  font-weight: 900;
+}
 
 $font-family-base: "Nunito Sans", sans-serif;
 $body-color: black;
@@ -35,6 +55,8 @@ body {
   &[data-lang="ko"] {
     word-break: keep-all;
     word-wrap: break-word;
+
+    font-family: "Nanum Square", sans-serif !important;
   }
 }
 
