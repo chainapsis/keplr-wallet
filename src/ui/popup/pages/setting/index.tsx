@@ -57,8 +57,12 @@ export const SettingPage: FunctionComponent = () => {
           )}
         />
         <PageButton
-          title="Manage Connections"
-          paragraph="2 websites has permissions"
+          title={intl.formatMessage({
+            id: "setting.connections"
+          })}
+          paragraph={intl.formatMessage({
+            id: "setting.connections.paragraph"
+          })}
           onClick={useCallback(() => {
             history.push({
               pathname: "/setting/connections"

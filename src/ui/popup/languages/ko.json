@@ -22,6 +22,9 @@
   "setting.language.en": "영어",
   "setting.language.ko": "한국어",
 
+  "setting.connections": "연결 관리",
+  "setting.connections.paragraph": "??",
+
   "register.button.back": "뒤로",
   "register.intro.button.new-account.title": "계정 생성",
   "register.intro.button.new-account.content": "새로운 니모닉 시드로 계정을 생성하세요",

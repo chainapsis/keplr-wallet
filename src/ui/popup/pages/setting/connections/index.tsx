@@ -28,9 +28,11 @@ import {
 } from "reactstrap";
 
 import styleConnections from "./style.module.scss";
+import { useIntl } from "react-intl";
 
 export const SettingConnectionsPage: FunctionComponent = observer(() => {
   const history = useHistory();
+  const intl = useIntl();
 
   const { chainStore } = useStore();
 
@@ -76,7 +78,9 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle="Manage Connections"
+      alternativeTitle={intl.formatMessage({
+        id: "setting.connections"
+      })}
       onBackButton={useCallback(() => {
         history.goBack();
       }, [history])}
