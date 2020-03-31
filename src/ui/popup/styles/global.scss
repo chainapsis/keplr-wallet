@@ -57,6 +57,12 @@ body {
     word-wrap: break-word;
 
     font-family: "Nanum Square", sans-serif !important;
+
+    // Nanum Square doesn't work properly if input type is password.
+    // So to solve this problem, just use default font if input type is password.
+    input[type="password"] {
+      font-family: $font-family-base !important;
+    }
   }
 }
 
