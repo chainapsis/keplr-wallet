@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback } from "react";
+import React, { FunctionComponent, useCallback, useMemo } from "react";
 import { HeaderLayout } from "../../layouts/header-layout";
 import { useHistory } from "react-router";
 import { PageButton } from "./page-button";
@@ -32,6 +32,12 @@ export const SettingPage: FunctionComponent = () => {
               pathname: "/setting/language"
             });
           }, [history])}
+          icon={useMemo(
+            () => (
+              <i className="fas fa-chevron-right" />
+            ),
+            []
+          )}
         />
         <PageButton
           title="Manage Connections"
@@ -41,6 +47,12 @@ export const SettingPage: FunctionComponent = () => {
               pathname: "/setting/connections"
             });
           }, [history])}
+          icon={useMemo(
+            () => (
+              <i className="fas fa-chevron-right" />
+            ),
+            []
+          )}
         />
       </div>
     </HeaderLayout>

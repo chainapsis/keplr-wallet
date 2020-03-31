@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback } from "react";
+import React, { FunctionComponent, useCallback, useMemo } from "react";
 import { HeaderLayout } from "../../../layouts/header-layout";
 import { PageButton } from "../page-button";
 
@@ -9,6 +9,8 @@ import { useHistory } from "react-router";
 export const SettingLanguagePage: FunctionComponent = () => {
   const language = useLanguage();
   const history = useHistory();
+
+  const selectedIcon = useMemo(() => <i className="fas fa-check" />, []);
 
   return (
     <HeaderLayout
@@ -28,6 +30,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
               pathname: "/"
             });
           }, [history, language])}
+          icon={language.automatic ? selectedIcon : undefined}
         />
         <PageButton
           title="English"
@@ -37,6 +40,11 @@ export const SettingLanguagePage: FunctionComponent = () => {
               pathname: "/"
             });
           }, [history, language])}
+          icon={
+            !language.automatic && language.language == "en"
+              ? selectedIcon
+              : undefined
+          }
         />
         <PageButton
           title="Korean"
@@ -46,6 +54,11 @@ export const SettingLanguagePage: FunctionComponent = () => {
               pathname: "/"
             });
           }, [history, language])}
+          icon={
+            !language.automatic && language.language == "ko"
+              ? selectedIcon
+              : undefined
+          }
         />
       </div>
     </HeaderLayout>

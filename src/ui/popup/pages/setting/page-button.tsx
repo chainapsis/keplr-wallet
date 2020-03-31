@@ -1,22 +1,31 @@
-import React, { FunctionComponent, MouseEvent } from "react";
+import React, { FunctionComponent } from "react";
 
 import stylePageButton from "./page-button.module.scss";
 
 export const PageButton: FunctionComponent<{
   title: string;
   paragraph?: string;
-  onClick?: (e: MouseEvent) => void;
+  icon?: React.ReactElement;
 } & React.HTMLAttributes<HTMLDivElement>> = props => {
-  const { title, paragraph } = props;
+  const { title, paragraph, icon } = props;
 
   const attributes = { ...props };
   delete attributes.title;
   delete attributes.paragraph;
+  delete attributes.icon;
 
   return (
     <div className={stylePageButton.container} {...attributes}>
-      <h1>{title}</h1>
-      {paragraph ? <p>{paragraph}</p> : null}
+      <div className={stylePageButton.innerContainer}>
+        <h1>{title}</h1>
+        {paragraph ? <p>{paragraph}</p> : null}
+      </div>
+      <div style={{ flex: 1 }} />
+      <div className={stylePageButton.iconContainer}>
+        <div style={{ flex: 1 }} />
+        {icon}
+        <div style={{ flex: 1 }} />
+      </div>
     </div>
   );
 };

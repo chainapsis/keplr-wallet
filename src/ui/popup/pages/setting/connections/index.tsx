@@ -3,6 +3,7 @@ import React, {
   MouseEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState
 } from "react";
 import { HeaderLayout } from "../../../layouts/header-layout";
@@ -67,6 +68,8 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
     [forceRefreshAccessOrigin]
   );
 
+  const xIcon = useMemo(() => <i className="fas fa-times" />, []);
+
   return (
     <HeaderLayout
       showChainName={false}
@@ -105,6 +108,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
                   data-chain-id={accessOrigin?.chainId}
                   data-origin={origin}
                   onClick={removeAccessOriginCallback}
+                  icon={xIcon}
                 />
               );
             })

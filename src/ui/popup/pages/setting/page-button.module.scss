@@ -12,18 +12,28 @@
   }
 
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
 
-  h1 {
-    font-size: 14px;
-    color: #525f7f;
-    margin: 0;
+  .inner-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    h1 {
+      font-size: 14px;
+      color: #525f7f;
+      margin: 0;
+    }
+
+    p {
+      font-size: 14px;
+      color: #8898aa;
+      margin: 0;
+    }
   }
 
-  p {
-    font-size: 14px;
-    color: #8898aa;
-    margin: 0;
+  .icon-container {
+    display: flex;
+    flex-direction: column;
   }
 }
