@@ -15,6 +15,7 @@
 
   "main.menu.settings": "설정",
   "main.menu.sign-out": "로그아웃",
+  "main.menu.footer.github": "깃허브에서 확인하세요",
 
   "setting.language": "언어",
   "setting.language.automatic": "자동 (브라우져 언어)",

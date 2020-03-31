@@ -56,7 +56,7 @@ export const Menu: FunctionComponent = observer(() => {
           rel="noopener noreferrer"
         >
           <i className="fab fa-github" />
-          Check it out on GitHub
+          <FormattedMessage id="main.menu.footer.github" />
         </a>
       </div>
     </div>
