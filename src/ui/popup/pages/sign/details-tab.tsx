@@ -5,7 +5,10 @@ import { CoinUtils } from "../../../../common/coin-utils";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
-import { getCurrencyFromMinimalDenom } from "../../../../common/currency";
+import {
+  getCurrencyFromMinimalDenom,
+  getFiatCurrencyFromLanguage
+} from "../../../../common/currency";
 
 import styleDetailsTab from "./details-tab.module.scss";
 import classnames from "classnames";
@@ -13,6 +16,7 @@ import classnames from "classnames";
 import { MessageObj, renderMessage } from "./messages";
 import { DecUtils } from "../../../../common/dec-utils";
 import { useIntl } from "react-intl";
+import { useLanguage } from "../../language";
 
 export const DetailsTab: FunctionComponent<{ message: string }> = observer(
   ({ message }) => {
@@ -48,12 +52,27 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
       }
     }, [message]);
 
+    const language = useLanguage();
+    const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
+
     useEffect(() => {
       let price = new Dec(0);
       for (const coin of fee) {
         const currency = getCurrencyFromMinimalDenom(coin.denom);
         if (currency) {
-          const value = priceStore.getValue("usd", currency.coinGeckoId);
+          if (
+            !priceStore.hasFiat(fiatCurrency.currency) &&
+            currency.coinGeckoId
+          ) {
+            priceStore.fetchValue(
+              [fiatCurrency.currency],
+              [currency.coinGeckoId]
+            );
+          }
+          const value = priceStore.getValue(
+            fiatCurrency.currency,
+            currency.coinGeckoId
+          );
           const parsed = CoinUtils.parseDecAndDenomFromCoin(coin);
           if (value) {
             price = price.add(new Dec(parsed.amount).mul(value.value));
@@ -62,7 +81,7 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
       }
 
       setFeeFiat(price);
-    }, [fee, priceStore]);
+    }, [fee, fiatCurrency.currency, priceStore]);
 
     return (
       <div className={styleDetailsTab.container}>
@@ -106,9 +125,14 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
                 })
                 .join(",")}
             </div>
-            <div
-              className={styleDetailsTab.fiat}
-            >{`$${DecUtils.decToStrWithoutTrailingZeros(feeFiat)}`}</div>
+            <div className={styleDetailsTab.fiat}>
+              {!feeFiat.equals(new Dec(0))
+                ? fiatCurrency.symbol +
+                  DecUtils.removeTrailingZerosFromDecStr(
+                    fiatCurrency.parse(parseFloat(feeFiat.toString()))
+                  )
+                : "?"}
+            </div>
           </div>
         </div>
         {memo ? (
