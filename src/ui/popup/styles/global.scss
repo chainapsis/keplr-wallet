@@ -9,24 +9,19 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 
 @import url("https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,700,800&display=swap");
 @font-face {
-  font-family: Nanum Square;
-  src: url(../public/assets/font/NanumSquareRegular.ttf);
+  font-family: Nanum Barun Gothic;
+  src: url(../public/assets/font/NanumBarunGothic.ttf);
   font-weight: normal;
 }
 @font-face {
-  font-family: Nanum Square;
-  src: url(../public/assets/font/NanumSquareRegular.ttf);
+  font-family: Nanum Barun Gothic;
+  src: url(../public/assets/font/NanumBarunGothicLight.ttf);
   font-weight: 300;
 }
 @font-face {
-  font-family: Nanum Square;
-  src: url(../public/assets/font/NanumSquareBold.ttf);
+  font-family: Nanum Barun Gothic;
+  src: url(../public/assets/font/NanumBarunGothicBold.ttf);
   font-weight: bold;
-}
-@font-face {
-  font-family: Nanum Square;
-  src: url(../public/assets/font/NanumSquareExtraBold.ttf);
-  font-weight: 900;
 }
 
 $font-family-base: "Nunito Sans", sans-serif;
@@ -56,13 +51,7 @@ body {
     word-break: keep-all;
     word-wrap: break-word;
 
-    font-family: "Nanum Square", sans-serif !important;
-
-    // Nanum Square doesn't work properly if input type is password.
-    // So to solve this problem, just use default font if input type is password.
-    input[type="password"] {
-      font-family: $font-family-base !important;
-    }
+    font-family: "Nanum Barun Gothic", sans-serif !important;
   }
 }
 
