@@ -1,5 +1,4 @@
 import { AccessOrigin, ChainInfo } from "./types";
-import { ExtensionAccessOrigins, NativeChainInfos } from "../../config";
 import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
 import { openWindow } from "../../common/window";
@@ -9,10 +8,14 @@ export class ChainsKeeper {
     defaultTimeout: 3 * 60 * 1000
   });
 
-  constructor(private kvStore: KVStore) {}
+  constructor(
+    private kvStore: KVStore,
+    private readonly embedChainInfos: ChainInfo[],
+    private readonly embedAccessOrigins: AccessOrigin[]
+  ) {}
 
   async getChainInfos(): Promise<ChainInfo[]> {
-    const chainInfos = NativeChainInfos.slice();
+    const chainInfos = this.embedChainInfos.slice();
     const savedChainInfos = await this.kvStore.get<ChainInfo[]>("chain-infos");
     if (savedChainInfos) {
       return chainInfos.concat(savedChainInfos);
@@ -134,7 +137,7 @@ export class ChainsKeeper {
 
   async getAccessOrigin(chainId: string): Promise<AccessOrigin> {
     let nativeAccessOrigins: string[] = [];
-    for (const access of ExtensionAccessOrigins) {
+    for (const access of this.embedAccessOrigins) {
       if (access.chainId === chainId) {
         nativeAccessOrigins = access.origins.slice();
         break;
@@ -157,7 +160,7 @@ export class ChainsKeeper {
     }
   }
 
-  async getAccessOriginWithoutEmbeded(chainId: string): Promise<AccessOrigin> {
+  async getAccessOriginWithoutEmbed(chainId: string): Promise<AccessOrigin> {
     const accessOrigin = await this.kvStore.get<AccessOrigin>(
       ChainsKeeper.getAccessOriginKey(chainId)
     );

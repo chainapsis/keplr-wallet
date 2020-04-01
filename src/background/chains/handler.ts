@@ -84,7 +84,7 @@ const handleGetAccessOriginsMsg: (
   keeper: ChainsKeeper
 ) => InternalHandler<GetAccessOriginMsg> = keeper => {
   return async msg => {
-    return await keeper.getAccessOriginWithoutEmbeded(msg.chainId);
+    return await keeper.getAccessOriginWithoutEmbed(msg.chainId);
   };
 };
 
