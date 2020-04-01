@@ -8,7 +8,7 @@ import React, {
 
 import styleFeeButtons from "./fee-buttons.module.scss";
 
-import { Currency } from "../../../chain-info";
+import { Currency } from "../../../common/currency";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { CoinUtils } from "../../../common/coin-utils";

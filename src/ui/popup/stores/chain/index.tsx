@@ -3,7 +3,8 @@ import { actionAsync, task } from "mobx-utils";
 
 import { RootStore } from "../root";
 
-import { ChainInfo, NativeChainInfos } from "../../../../chain-info";
+import { ChainInfo } from "../../../../background/chains";
+import { NativeChainInfos } from "../../../../config";
 import {
   SetPersistentMemoryMsg,
   GetPersistentMemoryMsg

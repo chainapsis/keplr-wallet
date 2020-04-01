@@ -1,7 +1,7 @@
 import { ChainStore } from "./chain";
 import { KeyRingStatus, KeyRingStore } from "./keyring";
 import { AccountStore } from "./account";
-import { ChainInfo } from "../../../chain-info";
+import { ChainInfo } from "../../../background/chains";
 import { PriceStore } from "./price";
 
 export class RootStore {

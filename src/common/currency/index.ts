@@ -1,6 +1,5 @@
-import { Currencies, Currency } from "../../chain-info";
-import { FiatCurrency } from "./types";
-import { LanguageToFiatCurrency } from "../../config";
+import { Currency, FiatCurrency } from "./types";
+import { Currencies, LanguageToFiatCurrency } from "../../config";
 
 export function getCurrency(type: string): Currency | undefined {
   return Currencies[type];
@@ -93,3 +92,5 @@ export function getFiatCurrencyFromLanguage(language: string): FiatCurrency {
   }
   return currency;
 }
+
+export * from "./types";

@@ -1,11 +1,9 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 
-import { Currency } from "../../../chain-info";
-
 import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
 
-import { getCurrencyFromDenom } from "../../../common/currency";
+import { Currency, getCurrencyFromDenom } from "../../../common/currency";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { ElementLike } from "react-hook-form/dist/types";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";

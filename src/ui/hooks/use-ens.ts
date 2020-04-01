@@ -1,4 +1,4 @@
-import { ChainInfo } from "../../chain-info";
+import { ChainInfo } from "../../background/chains";
 import { useEffect, useMemo, useState } from "react";
 
 // TODO: Add definition for ethereum-ens.

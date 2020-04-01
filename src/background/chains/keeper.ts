@@ -1,5 +1,5 @@
 import { AccessOrigin, ChainInfo } from "./types";
-import { ExtensionAccessOrigins, NativeChainInfos } from "../../chain-info";
+import { ExtensionAccessOrigins, NativeChainInfos } from "../../config";
 import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
 import { openWindow } from "../../common/window";

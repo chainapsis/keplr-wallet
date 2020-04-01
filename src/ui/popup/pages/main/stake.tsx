@@ -19,7 +19,7 @@ import {
   getCurrency,
   getCurrencyFromMinimalDenom
 } from "../../../../common/currency";
-import { Currency } from "../../../../chain-info";
+import { Currency } from "../../../../common/currency";
 import { Msg } from "@everett-protocol/cosmosjs/core/tx";
 import { MsgWithdrawDelegatorReward } from "@everett-protocol/cosmosjs/x/distribution";
 import {

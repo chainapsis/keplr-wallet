@@ -6,7 +6,7 @@ import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
 import { CoinUtils } from "../../../../common/coin-utils";
-import { Currency } from "../../../../chain-info";
+import { Currency } from "../../../../common/currency";
 import {
   getCurrency,
   getFiatCurrencyFromLanguage
