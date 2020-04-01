@@ -4,7 +4,6 @@ import { actionAsync, task } from "mobx-utils";
 import { RootStore } from "../root";
 
 import { ChainInfo } from "../../../../background/chains";
-import { NativeChainInfos } from "../../../../config";
 import {
   SetPersistentMemoryMsg,
   GetPersistentMemoryMsg
@@ -26,8 +25,11 @@ export class ChainStore {
   // Indicate whether the chain info is set.
   private isChainSet = false;
 
-  constructor(private rootStore: RootStore) {
-    this.setChainList(NativeChainInfos);
+  constructor(
+    private rootStore: RootStore,
+    private readonly embedChainInfos: ChainInfo[]
+  ) {
+    this.setChainList(this.embedChainInfos);
 
     this.setChain(this.chainList[0].chainId);
     this.isChainSet = false;
