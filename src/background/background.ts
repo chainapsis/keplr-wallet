@@ -8,7 +8,7 @@ import * as BackgroundTx from "./tx/internal";
 import { BrowserKVStore } from "../common/kvstore";
 
 import { BACKGROUND_PORT } from "../common/message/constant";
-import { ExtensionAccessOrigins, NativeChainInfos } from "../config";
+import { EmbedAccessOrigins, EmbedChainInfos } from "../config";
 
 const messageManager = new MessageManager();
 
@@ -17,8 +17,8 @@ PersistentMemory.init(messageManager, persistentMemory);
 
 const chainsKeeper = new Chains.ChainsKeeper(
   new BrowserKVStore("chains"),
-  NativeChainInfos,
-  ExtensionAccessOrigins
+  EmbedChainInfos,
+  EmbedAccessOrigins
 );
 Chains.init(messageManager, chainsKeeper);
 

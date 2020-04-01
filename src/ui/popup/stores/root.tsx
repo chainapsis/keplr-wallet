@@ -3,7 +3,7 @@ import { KeyRingStatus, KeyRingStore } from "./keyring";
 import { AccountStore } from "./account";
 import { ChainInfo } from "../../../background/chains";
 import { PriceStore } from "./price";
-import { NativeChainInfos } from "../../../config";
+import { EmbedChainInfos } from "../../../config";
 
 export class RootStore {
   public chainStore: ChainStore;
@@ -16,7 +16,7 @@ export class RootStore {
     this.accountStore = new AccountStore(this);
     this.keyRingStore = new KeyRingStore(this);
     this.priceStore = new PriceStore();
-    this.chainStore = new ChainStore(this, NativeChainInfos);
+    this.chainStore = new ChainStore(this, EmbedChainInfos);
 
     this.chainStore.init();
     this.keyRingStore.restore();

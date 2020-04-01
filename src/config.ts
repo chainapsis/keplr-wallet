@@ -14,7 +14,7 @@ export const AutoFetchingAssetsInterval = 15 * 1000; // 15sec
 export const EthereumEndpoint =
   "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";
 
-export const NativeChainInfos: ChainInfo[] = [
+export const EmbedChainInfos: ChainInfo[] = [
   {
     rpc: "https://node-cosmoshub-3.keplr.app/rpc",
     rest: "https://node-cosmoshub-3.keplr.app/rest",
@@ -60,7 +60,7 @@ export const NativeChainInfos: ChainInfo[] = [
 /**
  * This declares which origins can access extension without explicit approval.
  */
-export const ExtensionAccessOrigins: AccessOrigin[] = [
+export const EmbedAccessOrigins: AccessOrigin[] = [
   {
     chainId: "cosmoshub-3",
     origins:
