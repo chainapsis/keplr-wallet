@@ -3,35 +3,56 @@ const PopupSize = {
   height: 580
 };
 
-export function isChrome(): boolean {
-  return navigator.userAgent.toLowerCase().indexOf("chrome") > -1;
-}
+let lastWindowId: number | undefined = undefined;
 
+/**
+ * Try open window if no previous window exists.
+ * If, previous window exists, try to change the location of this window.
+ * Finally, try to recover focusing for opened window.
+ * @param url
+ */
 export function openWindow(url: string) {
   const option = {
     width: PopupSize.width,
     height: PopupSize.height,
     url: url,
-    type: "popup" as "popup"
+    type: "popup" as "popup",
+    focused: true
   };
 
-  /*
-   If it runs on chrome, window is opened and replaced by using window.open().
-   But if it runs on not chrome, window is opened by web extension api.
-   This approach make some difference related to setting fee and signing process.
-   In the prior case, setting fee window will not be closed and will be replaced by signing page.
-   But, in the latter case, setting fee window will be closed and new signing page window will be opened.
-   */
-  if (typeof browser !== "undefined" && !isChrome()) {
-    browser.windows.create(option);
-  } else {
-    window.open(
-      url,
-      "Keplr",
-      `width=${option.width}px,height=${option.height}px,scrollbars=0`,
-      true
-    );
-  }
+  (async () => {
+    if (lastWindowId !== undefined) {
+      try {
+        const window = await browser.windows.get(lastWindowId, {
+          populate: true
+        });
+        if (window?.tabs?.length) {
+          const tab = window.tabs[0];
+          if (tab?.id) {
+            await browser.tabs.update(tab.id, { active: true, url });
+          } else {
+            throw new Error("Null window or tabs");
+          }
+        } else {
+          throw new Error("Null window or tabs");
+        }
+      } catch {
+        lastWindowId = (await browser.windows.create(option)).id;
+      }
+    } else {
+      lastWindowId = (await browser.windows.create(option)).id;
+    }
+
+    if (lastWindowId) {
+      try {
+        await browser.windows.update(lastWindowId, {
+          focused: true
+        });
+      } catch (e) {
+        console.log(`Failed to update window focus: ${e.message}`);
+      }
+    }
+  })();
 }
 
 /**
