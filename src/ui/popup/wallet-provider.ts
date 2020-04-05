@@ -141,7 +141,9 @@ export class PopupWalletProvider implements WalletProvider {
       if (this.accessApprover) {
         this.accessApprover.onRequestSignature(id);
       } else {
-        sendMessage(BACKGROUND_PORT, ApproveSignMsg.create(id));
+        setTimeout(() => {
+          sendMessage(BACKGROUND_PORT, ApproveSignMsg.create(id));
+        }, 100);
       }
     });
   }
