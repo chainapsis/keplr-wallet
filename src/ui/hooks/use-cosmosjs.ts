@@ -92,8 +92,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
         chainId: chainInfo.chainId,
         walletProvider: walletProvider,
         rpc: chainInfo.rpc,
-        rest: chainInfo.rest,
-        disableGlobalBech32Config: true
+        rest: chainInfo.rest
       },
       {
         txEncoder: defaultTxEncoder,
@@ -104,9 +103,9 @@ export const useCosmosJS = <R extends Rest = Rest>(
           address: string | Uint8Array
         ): Promise<Account> => {
           return queryAccount(
-            context.get("bech32Config"),
             context.get("rpcInstance"),
-            address
+            address,
+            chainInfo.bech32Config.bech32PrefixAccAddr
           );
         },
         bech32Config: chainInfo.bech32Config,

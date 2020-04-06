@@ -180,12 +180,12 @@ export class AccountStore {
     try {
       const account = await task(
         queryAccount(
-          this.chainInfo.bech32Config,
           Axios.create({
             baseURL: this.chainInfo.rpc,
             cancelToken: this.lastFetchingCancleToken.token
           }),
-          this.bech32Address
+          this.bech32Address,
+          this.chainInfo.bech32Config.bech32PrefixAccAddr
         )
       );
 

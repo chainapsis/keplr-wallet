@@ -24,7 +24,6 @@ import { Msg } from "@everett-protocol/cosmosjs/core/tx";
 import { MsgWithdrawDelegatorReward } from "@everett-protocol/cosmosjs/x/distribution";
 import {
   AccAddress,
-  useBech32Config,
   ValAddress
 } from "@everett-protocol/cosmosjs/common/address";
 import { useCosmosJS } from "../../../hooks";
@@ -99,16 +98,18 @@ export const StakeView: FunctionComponent = observer(() => {
         }
 
         if (rewardExist) {
-          // This is not react hooks.
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          useBech32Config(chainStore.chainInfo.bech32Config, () => {
-            const msg = new MsgWithdrawDelegatorReward(
-              AccAddress.fromBech32(accountStore.bech32Address),
-              ValAddress.fromBech32(r.validator_address)
-            );
+          const msg = new MsgWithdrawDelegatorReward(
+            AccAddress.fromBech32(
+              accountStore.bech32Address,
+              chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+            ),
+            ValAddress.fromBech32(
+              r.validator_address,
+              chainStore.chainInfo.bech32Config.bech32PrefixValAddr
+            )
+          );
 
-            msgs.push(msg);
-          });
+          msgs.push(msg);
         }
       }
 

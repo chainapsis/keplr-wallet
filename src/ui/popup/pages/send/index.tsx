@@ -20,11 +20,7 @@ import { HeaderLayout } from "../../layouts";
 import { PopupWalletProvider } from "../../wallet-provider";
 
 import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
-import {
-  AccAddress,
-  useBech32Config,
-  useBech32ConfigPromise
-} from "@everett-protocol/cosmosjs/common/address";
+import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
 import bigInteger from "big-integer";
@@ -278,53 +274,54 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 data.denom
               );
 
-              await useBech32ConfigPromise(
-                chainStore.chainInfo.bech32Config,
-                async () => {
-                  const recipient = isValidENS(data.recipient)
-                    ? ens.bech32Address
-                    : data.recipient;
-                  if (!recipient) {
-                    throw new Error("Fail to fetch address from ENS");
-                  }
-                  const msg = new MsgSend(
-                    AccAddress.fromBech32(accountStore.bech32Address),
-                    AccAddress.fromBech32(recipient),
-                    [coin]
-                  );
-
-                  const config: TxBuilderConfig = {
-                    gas: bigInteger(gasForSendMsg),
-                    memo: data.memo,
-                    fee: data.fee as Coin
-                  };
-
-                  if (cosmosJS.sendMsgs) {
-                    await cosmosJS.sendMsgs(
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      [msg!],
-                      config,
-                      () => {
-                        history.replace("/");
-                      },
-                      e => {
-                        history.replace("/");
-                        notification.push({
-                          type: "danger",
-                          content: e.toString(),
-                          duration: 5,
-                          canDelete: true,
-                          placement: "top-center",
-                          transition: {
-                            duration: 0.25
-                          }
-                        });
-                      },
-                      "commit"
-                    );
-                  }
-                }
+              const recipient = isValidENS(data.recipient)
+                ? ens.bech32Address
+                : data.recipient;
+              if (!recipient) {
+                throw new Error("Fail to fetch address from ENS");
+              }
+              const msg = new MsgSend(
+                AccAddress.fromBech32(
+                  accountStore.bech32Address,
+                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                ),
+                AccAddress.fromBech32(
+                  recipient,
+                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                ),
+                [coin]
               );
+
+              const config: TxBuilderConfig = {
+                gas: bigInteger(gasForSendMsg),
+                memo: data.memo,
+                fee: data.fee as Coin
+              };
+
+              if (cosmosJS.sendMsgs) {
+                await cosmosJS.sendMsgs(
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  [msg!],
+                  config,
+                  () => {
+                    history.replace("/");
+                  },
+                  e => {
+                    history.replace("/");
+                    notification.push({
+                      type: "danger",
+                      content: e.toString(),
+                      duration: 5,
+                      canDelete: true,
+                      placement: "top-center",
+                      transition: {
+                        duration: 0.25
+                      }
+                    });
+                  },
+                  "commit"
+                );
+              }
             })(e);
           }}
         >
@@ -357,20 +354,16 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   }),
                   validate: async (value: string) => {
                     if (!isValidENS(value)) {
-                      // This is not react hook.
-                      // eslint-disable-next-line react-hooks/rules-of-hooks
-                      return useBech32Config(
-                        chainStore.chainInfo.bech32Config,
-                        () => {
-                          try {
-                            AccAddress.fromBech32(value);
-                          } catch (e) {
-                            return intl.formatMessage({
-                              id: "send.input.recipient.error.invalid"
-                            });
-                          }
-                        }
-                      );
+                      try {
+                        AccAddress.fromBech32(
+                          value,
+                          chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                        );
+                      } catch (e) {
+                        return intl.formatMessage({
+                          id: "send.input.recipient.error.invalid"
+                        });
+                      }
                     } else {
                       if (ens.error) {
                         return ens.error.message;
