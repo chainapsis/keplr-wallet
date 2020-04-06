@@ -16,8 +16,7 @@ export function openWindow(url: string) {
     width: PopupSize.width,
     height: PopupSize.height,
     url: url,
-    type: "popup" as "popup",
-    focused: true
+    type: "popup" as "popup"
   };
 
   (async () => {
