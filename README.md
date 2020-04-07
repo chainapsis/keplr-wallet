@@ -7,6 +7,7 @@
 This repository is still under development
 
 ## Dev
+Keplr extension repo uses git-secret to encrypt the endpoints and the api keys. So, you can't build this without creating your own config file. You should create your own `config.var.ts` file inside the `src` folder. Refer to the `config.var.example.ts` sample file to create your own configuration.
 ```sh
 npm run dev
 ``` 
