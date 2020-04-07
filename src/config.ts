@@ -3,6 +3,18 @@ import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
 import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
 import { ChainInfo, AccessOrigin } from "./background/chains";
 
+import {
+  COSMOS_REST_CONFIG,
+  COSMOS_REST_ENDPOINT,
+  COSMOS_RPC_CONFIG,
+  COSMOS_RPC_ENDPOINT,
+  ETHEREUM_ENDPOINT,
+  KAVA_REST_CONFIG,
+  KAVA_REST_ENDPOINT,
+  KAVA_RPC_CONFIG,
+  KAVA_RPC_ENDPOINT
+} from "./config.var";
+
 export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
 export const CoinGeckoGetPrice = "/simple/price";
 export const AutoFetchingFiatValueInterval = 300 * 1000; // 5min
@@ -11,13 +23,14 @@ export const AutoFetchingAssetsInterval = 15 * 1000; // 15sec
 
 // Endpoint for Ethereum node.
 // This is used for ENS.
-export const EthereumEndpoint =
-  "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";
+export const EthereumEndpoint = ETHEREUM_ENDPOINT;
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
-    rpc: "https://node-cosmoshub-3.keplr.app/rpc",
-    rest: "https://node-cosmoshub-3.keplr.app/rest",
+    rpc: COSMOS_RPC_ENDPOINT,
+    rpcConfig: COSMOS_RPC_CONFIG,
+    rest: COSMOS_REST_ENDPOINT,
+    restConfig: COSMOS_REST_CONFIG,
     chainId: "cosmoshub-3",
     chainName: "Cosmos",
     nativeCurrency: "atom",
@@ -36,8 +49,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     coinType: 118
   },
   {
-    rpc: "https://node-kava-2.keplr.app/rpc",
-    rest: "https://node-kava-2.keplr.app/rest",
+    rpc: KAVA_RPC_ENDPOINT,
+    rpcConfig: KAVA_RPC_CONFIG,
+    rest: KAVA_REST_ENDPOINT,
+    restConfig: KAVA_REST_CONFIG,
     chainId: "kava-2",
     chainName: "Kava",
     nativeCurrency: "kava",
