@@ -22,6 +22,7 @@ import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
 import { RequestBackgroundTxMsg } from "../../background/tx";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
+import Axios from "axios";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -97,6 +98,26 @@ export const useCosmosJS = <R extends Rest = Rest>(
       {
         txEncoder: defaultTxEncoder,
         txBuilder: stdTxBuilder,
+        rpcInstanceFactory: chainInfo.rpcConfig
+          ? (rpc: string) => {
+              return Axios.create({
+                ...{
+                  baseURL: rpc
+                },
+                ...chainInfo.rpcConfig
+              });
+            }
+          : undefined,
+        restInstanceFactory: chainInfo.restConfig
+          ? (rest: string) => {
+              return Axios.create({
+                ...{
+                  baseURL: rest
+                },
+                ...chainInfo.restConfig
+              });
+            }
+          : undefined,
         restFactory: memorizedRestFactory,
         queryAccount: (
           context: Context,

@@ -33,7 +33,10 @@ export class BackgroundTxKeeper {
   ) {
     const info = await this.chainsKeeper.getChainInfo(chainId);
     const instance = Axios.create({
-      baseURL: info.rpc
+      ...{
+        baseURL: info.rpc
+      },
+      ...info.rpcConfig
     });
 
     // Do not await.

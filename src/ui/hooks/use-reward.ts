@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useFetch } from "./use-fetch";
+import { AxiosRequestConfig } from "axios";
 
 export interface CoinPrimitive {
   denom: string;
@@ -22,13 +23,17 @@ export interface DelegatorReward {
 /**
  * @param baseUrl Url of rest endpoint
  */
-export const useReward = (baseUrl: string, bech32Address: string) => {
+export const useReward = (
+  baseUrl: string,
+  bech32Address: string,
+  config?: AxiosRequestConfig
+) => {
   const [url, setUrl] = useState("");
 
   const [rewards, setRewards] = useState<DelegatorReward[]>([]);
   const [totalReward, setTotalReward] = useState<CoinPrimitive[]>([]);
 
-  const fetch = useFetch<Result>(url, "get");
+  const fetch = useFetch<Result>(url, "get", config);
 
   useEffect(() => {
     // Clear the informations of reward if address is changed.

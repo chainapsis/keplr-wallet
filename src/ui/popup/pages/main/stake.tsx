@@ -60,7 +60,8 @@ export const StakeView: FunctionComponent = observer(() => {
 
   const reward = useReward(
     chainStore.chainInfo.rest,
-    accountStore.bech32Address
+    accountStore.bech32Address,
+    chainStore.chainInfo.restConfig
   );
 
   const rewardExist = useMemo(() => {

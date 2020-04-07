@@ -1,9 +1,13 @@
 import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
 import { Bech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
 
+import { AxiosRequestConfig } from "axios";
+
 export interface ChainInfo {
   readonly rpc: string;
+  readonly rpcConfig?: AxiosRequestConfig;
   readonly rest: string;
+  readonly restConfig?: AxiosRequestConfig;
   readonly chainId: string;
   readonly chainName: string;
   /**
