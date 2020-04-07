@@ -1,4 +1,5 @@
 **/*.png
 **/*.svg
 **/*.ttf
+**/*.secret
 .DS_Store
