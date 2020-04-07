@@ -15,6 +15,13 @@ jobs:
     steps:
       - checkout
       - run: sudo apt-get install libusb-1.0-0-dev
+      - run: echo "deb https://dl.bintray.com/sobolevn/deb git-secret main" | sudo tee -a /etc/apt/sources.list
+      - run: wget -qO - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | sudo apt-key add -
+      - run: sudo apt-get install apt-transport-https
+      - run: sudo apt-get update && sudo apt-get install git-secret
+      - run: echo $GPG_KEY | base64 --decode > private.asc
+      - run: echo $GPG_PASSPHRASE | gpg --batch --yes --passphrase-fd 0 --import ./private.asc
+      - run: git-secret reveal -f -p $GPG_PASSPHRASE
       - run: npm install
       - run: npm run lint-test
       - run: npm run test
