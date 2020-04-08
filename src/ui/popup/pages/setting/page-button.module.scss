@@ -5,6 +5,20 @@
   padding: 16px;
   cursor: pointer;
 
+  &.with-sub-paragraph {
+    height: 84px;
+
+    .inner-container {
+      h1 {
+        line-height: 1.25;
+      }
+
+      p {
+        line-height: 1.25;
+      }
+    }
+  }
+
   border-top: #e9ecef solid 1px;
 
   &:last-of-type {
@@ -23,17 +37,29 @@
       font-size: 14px;
       color: #525f7f;
       margin: 0;
+
+      max-width: 240px;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     p {
       font-size: 14px;
       color: #8898aa;
       margin: 0;
+
+      max-width: 280px;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
   }
 
   .icon-container {
     display: flex;
     flex-direction: column;
+
+    &:not(:last-of-type) {
+      margin-right: 8px;
+    }
   }
 }
