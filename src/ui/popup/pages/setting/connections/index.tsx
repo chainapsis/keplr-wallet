@@ -12,7 +12,7 @@ import style from "../style.module.scss";
 import { useHistory } from "react-router";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
-import { AccessOrigin } from "../../../../../background/chains/types";
+import { AccessOrigin } from "../../../../../background/chains";
 import { PageButton } from "../page-button";
 import {
   GetAccessOriginMsg,
