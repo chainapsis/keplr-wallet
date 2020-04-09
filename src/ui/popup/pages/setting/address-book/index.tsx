@@ -140,6 +140,27 @@ export const AddressBookPage: FunctionComponent<{
     [removeAddressBook]
   );
 
+  const selectAddressBookClick = useCallback(
+    async (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const indexStr = e.currentTarget.getAttribute("data-index");
+      if (onSelect && indexStr) {
+        const index = parseInt(indexStr);
+
+        if (index != null && !Number.isNaN(index) && index >= 0) {
+          onSelect(
+            await addressBookKVStore.getAddressBookAt(
+              chainStore.chainInfo,
+              index
+            )
+          );
+        }
+      }
+    },
+    [addressBookKVStore, chainStore.chainInfo, onSelect]
+  );
+
   const addressBookIcons = useCallback(
     (index: number) => {
       return [
@@ -247,11 +268,8 @@ export const AddressBookPage: FunctionComponent<{
                 }
                 subParagraph={data.memo}
                 icons={addressBookIcons(i)}
-                onClick={() => {
-                  if (onSelect) {
-                    onSelect(data);
-                  }
-                }}
+                data-index={i}
+                onClick={selectAddressBookClick}
                 style={{ cursor: onSelect ? undefined : "auto" }}
               />
             );
