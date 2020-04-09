@@ -410,6 +410,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 append={
                   <Button
                     className={style.addressBookButton}
+                    color="primary"
                     type="button"
                     outline
                     onClick={openAddressBook}
