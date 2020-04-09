@@ -147,12 +147,14 @@ export const AddressBookPage: FunctionComponent<{
           key="edit"
           className="fas fa-pen"
           data-index={index}
+          style={{ cursor: "pointer" }}
           onClick={editAddressBookClick}
         />,
         <i
           key="remove"
           className="fas fa-trash"
           data-index={index}
+          style={{ cursor: "pointer" }}
           onClick={removeAddressBookClick}
         />
       ];
@@ -250,6 +252,7 @@ export const AddressBookPage: FunctionComponent<{
                     onSelect(data);
                   }
                 }}
+                style={{ cursor: onSelect ? undefined : "auto" }}
               />
             );
           })}
