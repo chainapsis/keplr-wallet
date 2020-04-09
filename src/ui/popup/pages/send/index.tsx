@@ -405,6 +405,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                     }
                   }
                 })}
+                autoComplete="off"
                 append={
                   <Button
                     className={style.addressBookButton}
