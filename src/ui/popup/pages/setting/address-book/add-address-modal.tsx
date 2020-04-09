@@ -6,6 +6,7 @@ import useForm from "react-hook-form";
 import { AddressBookData } from "./types";
 import { AddressBookKVStore } from "./kvStore";
 import { ChainInfo } from "../../../../../background/chains";
+import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
 
 /**
  *
@@ -72,7 +73,19 @@ export const AddAddressModal: FunctionComponent<{
           label="Address"
           name="address"
           error={errors.address?.message}
-          ref={register({ required: "Address is required" })}
+          ref={register({
+            required: "Address is required",
+            validate: (value: string) => {
+              try {
+                AccAddress.fromBech32(
+                  value,
+                  chainInfo.bech32Config.bech32PrefixAccAddr
+                );
+              } catch (e) {
+                return "Invalid address";
+              }
+            }
+          })}
           autoComplete="off"
         />
         <TextArea
