@@ -7,6 +7,13 @@ import { AddressBookData } from "./types";
 import { AddressBookKVStore } from "./kvStore";
 import { ChainInfo } from "../../../../../background/chains";
 import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
+import {
+  ENSUnsupportedError,
+  InvalidENSNameError,
+  isValidENS,
+  useENS
+} from "../../../../hooks/use-ens";
+import { useIntl } from "react-intl";
 
 /**
  *
@@ -24,6 +31,7 @@ export const AddAddressModal: FunctionComponent<{
   index: number;
   addressBookKVStore: AddressBookKVStore;
 }> = ({ closeModal, addAddressBook, chainInfo, index, addressBookKVStore }) => {
+  const intl = useIntl();
   const form = useForm<AddressBookData>({
     defaultValues: {
       name: "",
@@ -32,7 +40,43 @@ export const AddAddressModal: FunctionComponent<{
     }
   });
 
-  const { register, handleSubmit, errors, setValue } = form;
+  const {
+    register,
+    handleSubmit,
+    errors,
+    setValue,
+    watch,
+    triggerValidation
+  } = form;
+
+  const address = watch("address");
+  const ens = useENS(chainInfo, address);
+
+  useEffect(() => {
+    if (isValidENS(address)) {
+      triggerValidation({ name: "address" });
+    }
+  }, [ens, address, triggerValidation]);
+
+  const switchENSErrorToIntl = (e: Error) => {
+    if (e instanceof InvalidENSNameError) {
+      return intl.formatMessage({
+        id: "send.input.recipient.error.ens-invalid-name"
+      });
+    } else if (e.message.includes("ENS name not found")) {
+      return intl.formatMessage({
+        id: "send.input.recipient.error.ens-not-found"
+      });
+    } else if (e instanceof ENSUnsupportedError) {
+      return intl.formatMessage({
+        id: "send.input.recipient.error.ens-not-supported"
+      });
+    } else {
+      return intl.formatMessage({
+        id: "sned.input.recipient.error.ens-unknown-error"
+      });
+    }
+  };
 
   useEffect(() => {
     if (index >= 0) {
@@ -55,6 +99,13 @@ export const AddAddressModal: FunctionComponent<{
       <form
         style={{ display: "flex", flexDirection: "column", height: "100%" }}
         onSubmit={e => {
+          // If recipient is ENS name and ENS is loading,
+          // don't send the assets before ENS is fully loaded.
+          if (isValidENS(address) && ens.loading) {
+            e.preventDefault();
+            return;
+          }
+
           return handleSubmit(data => {
             addAddressBook(data);
           })(e);
@@ -72,17 +123,39 @@ export const AddAddressModal: FunctionComponent<{
           type="text"
           label="Address"
           name="address"
-          error={errors.address?.message}
+          text={
+            isValidENS(address) ? (
+              ens.loading ? (
+                <i className="fas fa-spinner fa-spin" />
+              ) : (
+                ens.bech32Address
+              )
+            ) : (
+              undefined
+            )
+          }
+          error={
+            (isValidENS(address) &&
+              ens.error &&
+              switchENSErrorToIntl(ens.error)) ||
+            (errors.address && errors.address.message)
+          }
           ref={register({
             required: "Address is required",
             validate: (value: string) => {
-              try {
-                AccAddress.fromBech32(
-                  value,
-                  chainInfo.bech32Config.bech32PrefixAccAddr
-                );
-              } catch (e) {
-                return "Invalid address";
+              if (!isValidENS(value)) {
+                try {
+                  AccAddress.fromBech32(
+                    value,
+                    chainInfo.bech32Config.bech32PrefixAccAddr
+                  );
+                } catch (e) {
+                  return "Invalid address";
+                }
+              } else {
+                if (ens.error) {
+                  return ens.error.message;
+                }
               }
             }
           })}
