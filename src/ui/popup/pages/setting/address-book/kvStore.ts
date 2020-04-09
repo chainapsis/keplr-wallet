@@ -35,6 +35,34 @@ export class AddressBookKVStore {
     return addressBook;
   }
 
+  async getAddressBookAt(
+    chainInfo: ChainInfo,
+    index: number
+  ): Promise<AddressBookData> {
+    const addressBook = await this.getAddressBook(chainInfo);
+    if (index < 0 || index >= addressBook.length) {
+      throw new Error("Invalid index");
+    }
+    return addressBook[index];
+  }
+
+  async editAddressBookAt(
+    chainInfo: ChainInfo,
+    index: number,
+    data: AddressBookData
+  ) {
+    const addressBook = await this.getAddressBook(chainInfo);
+    if (index < 0 || index >= addressBook.length) {
+      throw new Error("Invalid index");
+    }
+    addressBook[index] = data;
+
+    await this.kvStore.set(
+      AddressBookKVStore.keyForChainInfo(chainInfo),
+      addressBook
+    );
+  }
+
   static keyForChainInfo(chainInfo: ChainInfo): string {
     return `${chainInfo.chainName}`;
   }

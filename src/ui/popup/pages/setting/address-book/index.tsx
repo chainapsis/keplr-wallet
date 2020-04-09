@@ -55,6 +55,7 @@ export const AddressBookPage: FunctionComponent = observer(() => {
   const toggle = () => setOpen(!dropdownOpen);
 
   const [addAddressModalOpen, setAddressModalOpen] = useState(false);
+  const [addAddressModalIndex, setAddAddressModalIndex] = useState(-1);
 
   const openAddAddressModal = useCallback(() => {
     setAddressModalOpen(true);
@@ -62,15 +63,25 @@ export const AddressBookPage: FunctionComponent = observer(() => {
 
   const closeAddAddressModal = useCallback(() => {
     setAddressModalOpen(false);
+    setAddAddressModalIndex(-1);
   }, []);
 
   const addAddressBook = useCallback(
     async (data: AddressBookData) => {
       closeAddAddressModal();
-      await addressBookKVStore.addAddressBook(chainStore.chainInfo, data);
+      if (addAddressModalIndex < 0) {
+        await addressBookKVStore.addAddressBook(chainStore.chainInfo, data);
+      } else {
+        await addressBookKVStore.editAddressBookAt(
+          chainStore.chainInfo,
+          addAddressModalIndex,
+          data
+        );
+      }
       await refreshAddressBook(chainStore.chainInfo);
     },
     [
+      addAddressModalIndex,
       addressBookKVStore,
       chainStore.chainInfo,
       closeAddAddressModal,
@@ -92,6 +103,21 @@ export const AddressBookPage: FunctionComponent = observer(() => {
     ]
   );
 
+  const editAddressBookClick = useCallback(
+    async (e: MouseEvent) => {
+      const indexStr = e.currentTarget.getAttribute("data-index");
+      if (indexStr) {
+        const index = parseInt(indexStr);
+
+        if (index != null && !Number.isNaN(index) && index >= 0) {
+          openAddAddressModal();
+          setAddAddressModalIndex(index);
+        }
+      }
+    },
+    [openAddAddressModal]
+  );
+
   const removeAddressBookClick = useCallback(
     async (e: MouseEvent) => {
       const indexStr = e.currentTarget.getAttribute("data-index");
@@ -109,17 +135,21 @@ export const AddressBookPage: FunctionComponent = observer(() => {
   const addressBookIcons = useCallback(
     (index: number) => {
       return [
-        <i key="edit" className="fas fa-pen" data-index={index} />,
+        <i
+          key="edit"
+          className="fas fa-pen"
+          data-index={index}
+          onClick={editAddressBookClick}
+        />,
         <i
           key="remove"
-          className="fas fa-times"
-          style={{ fontSize: "20px" }}
+          className="fas fa-trash"
           data-index={index}
           onClick={removeAddressBookClick}
         />
       ];
     },
-    [removeAddressBookClick]
+    [editAddressBookClick, removeAddressBookClick]
   );
 
   return (
@@ -144,6 +174,9 @@ export const AddressBookPage: FunctionComponent = observer(() => {
           <AddAddressModal
             closeModal={closeAddAddressModal}
             addAddressBook={addAddressBook}
+            chainInfo={chainStore.chainInfo}
+            addressBookKVStore={addressBookKVStore}
+            index={addAddressModalIndex}
           />
         </ModalBody>
       </Modal>
