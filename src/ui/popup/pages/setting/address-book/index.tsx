@@ -29,7 +29,10 @@ import { BrowserKVStore } from "../../../../../common/kvstore";
 import { ChainInfo } from "../../../../../background/chains";
 import { shortenAddress } from "../../../../../common/address";
 
-export const AddressBookPage: FunctionComponent = observer(() => {
+export const AddressBookPage: FunctionComponent<{
+  onBackButton?: () => void;
+  onSelect?: (data: AddressBookData) => void;
+}> = observer(({ onBackButton, onSelect }) => {
   const intl = useIntl();
   const history = useHistory();
   const { chainStore } = useStore();
@@ -105,6 +108,8 @@ export const AddressBookPage: FunctionComponent = observer(() => {
 
   const editAddressBookClick = useCallback(
     async (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
       const indexStr = e.currentTarget.getAttribute("data-index");
       if (indexStr) {
         const index = parseInt(indexStr);
@@ -120,6 +125,8 @@ export const AddressBookPage: FunctionComponent = observer(() => {
 
   const removeAddressBookClick = useCallback(
     async (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
       const indexStr = e.currentTarget.getAttribute("data-index");
       if (indexStr) {
         const index = parseInt(indexStr);
@@ -152,6 +159,10 @@ export const AddressBookPage: FunctionComponent = observer(() => {
     [editAddressBookClick, removeAddressBookClick]
   );
 
+  const defaultOnBackButton = useCallback(() => {
+    history.goBack();
+  }, [history]);
+
   return (
     <HeaderLayout
       showChainName={false}
@@ -159,9 +170,7 @@ export const AddressBookPage: FunctionComponent = observer(() => {
       alternativeTitle={intl.formatMessage({
         id: "main.menu.address-book"
       })}
-      onBackButton={useCallback(() => {
-        history.goBack();
-      }, [history])}
+      onBackButton={onBackButton ? onBackButton : defaultOnBackButton}
     >
       <Modal
         isOpen={addAddressModalOpen}
@@ -233,6 +242,11 @@ export const AddressBookPage: FunctionComponent = observer(() => {
                 }
                 subParagraph={data.memo}
                 icons={addressBookIcons(i)}
+                onClick={() => {
+                  if (onSelect) {
+                    onSelect(data);
+                  }
+                }}
               />
             );
           })}
