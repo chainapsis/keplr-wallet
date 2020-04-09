@@ -32,7 +32,8 @@ import { shortenAddress } from "../../../../../common/address";
 export const AddressBookPage: FunctionComponent<{
   onBackButton?: () => void;
   onSelect?: (data: AddressBookData) => void;
-}> = observer(({ onBackButton, onSelect }) => {
+  hideChainDropdown?: boolean;
+}> = observer(({ onBackButton, onSelect, hideChainDropdown }) => {
   const intl = useIntl();
   const history = useHistory();
   const { chainStore } = useStore();
@@ -191,25 +192,27 @@ export const AddressBookPage: FunctionComponent<{
       </Modal>
       <div className={style.container}>
         <div className={styleAddressBook.innerTopContainer}>
-          <ButtonDropdown isOpen={dropdownOpen} toggle={toggle}>
-            <DropdownToggle caret style={{ boxShadow: "none" }}>
-              {chainStore.chainInfo.chainName}
-            </DropdownToggle>
-            <DropdownMenu>
-              {chainStore.chainList.map(chainInfo => {
-                return (
-                  <DropdownItem
-                    key={chainInfo.chainId}
-                    onClick={useCallback(() => {
-                      chainStore.setChain(chainInfo.chainId);
-                    }, [chainInfo.chainId])}
-                  >
-                    {chainInfo.chainName}
-                  </DropdownItem>
-                );
-              })}
-            </DropdownMenu>
-          </ButtonDropdown>
+          {hideChainDropdown ? null : (
+            <ButtonDropdown isOpen={dropdownOpen} toggle={toggle}>
+              <DropdownToggle caret style={{ boxShadow: "none" }}>
+                {chainStore.chainInfo.chainName}
+              </DropdownToggle>
+              <DropdownMenu>
+                {chainStore.chainList.map(chainInfo => {
+                  return (
+                    <DropdownItem
+                      key={chainInfo.chainId}
+                      onClick={useCallback(() => {
+                        chainStore.setChain(chainInfo.chainId);
+                      }, [chainInfo.chainId])}
+                    >
+                      {chainInfo.chainName}
+                    </DropdownItem>
+                  );
+                })}
+              </DropdownMenu>
+            </ButtonDropdown>
+          )}
           <div style={{ flex: 1 }} />
           <div
             style={{

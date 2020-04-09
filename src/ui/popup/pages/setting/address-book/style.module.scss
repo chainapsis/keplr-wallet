@@ -3,6 +3,8 @@
 .inner-top-container {
   display: flex;
   margin: 0 $layout-padding;
+
+  min-height: 43px;
 }
 
 .full-modal {

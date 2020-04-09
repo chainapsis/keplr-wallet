@@ -282,6 +282,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             <AddressBookPage
               onBackButton={closeAddressBook}
               onSelect={onSelectAddressBook}
+              hideChainDropdown={true}
             />
           </ModalBody>
         </Modal>
