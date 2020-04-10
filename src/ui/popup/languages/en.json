@@ -14,6 +14,7 @@
   "main.address.copied": "Address copied!",
 
   "main.menu.settings": "Settings",
+  "main.menu.address-book": "Address Book",
   "main.menu.sign-out": "Sign out",
   "main.menu.footer.github": "Check it out on GitHub",
 
@@ -25,6 +26,17 @@
 
   "setting.connections": "Manage Connections",
   "setting.connections.paragraph": "Manage websites connected to your wallet",
+
+  "setting.address-book.button.add": "Add New",
+  "setting.address-book.add-address.title": "Add Address",
+  "setting.address-book.edit-address.title": "Edit Address",
+  "setting.address-book.name": "Name",
+  "setting.address-book.name.error.required": "Name is required",
+  "setting.address-book.address": "Address",
+  "setting.address-book.address.error.required": "Address is required",
+  "setting.address-book.address.error.invalid": "Invalid address",
+  "setting.address-book.memo": "Default Memo (Optional)",
+  "setting.address-book.button.save": "Save",
 
   "register.button.back": "Back",
   "register.intro.button.new-account.title": "Create new account",

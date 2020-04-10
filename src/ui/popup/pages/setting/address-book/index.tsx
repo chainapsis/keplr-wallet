@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { observer } from "mobx-react";
 import { HeaderLayout } from "../../../layouts/header-layout";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useHistory } from "react-router";
 import style from "../style.module.scss";
 import {
@@ -249,7 +249,7 @@ export const AddressBookPage: FunctionComponent<{
                 className="fas fa-plus"
                 style={{ marginRight: "4px", fontSize: "8px" }}
               />
-              Add New
+              <FormattedMessage id="setting.address-book.button.add" />
             </Button>
           </div>
         </div>

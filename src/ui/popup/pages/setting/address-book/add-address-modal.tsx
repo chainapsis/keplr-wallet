@@ -13,7 +13,7 @@ import {
   isValidENS,
   useENS
 } from "../../../../hooks/use-ens";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 /**
  *
@@ -93,7 +93,15 @@ export const AddAddressModal: FunctionComponent<{
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle={index >= 0 ? "Edit Address" : "Add Address"}
+      alternativeTitle={
+        index >= 0
+          ? intl.formatMessage({
+              id: "setting.address-book.edit-address.title"
+            })
+          : intl.formatMessage({
+              id: "setting.address-book.add-address.title"
+            })
+      }
       onBackButton={closeModal}
     >
       <form
@@ -113,15 +121,19 @@ export const AddAddressModal: FunctionComponent<{
       >
         <Input
           type="text"
-          label="Name"
+          label={intl.formatMessage({ id: "setting.address-book.name" })}
           name="name"
           error={errors.name?.message}
-          ref={register({ required: "Name is required" })}
+          ref={register({
+            required: intl.formatMessage({
+              id: "setting.address-book.name.error.required"
+            })
+          })}
           autoComplete="off"
         />
         <Input
           type="text"
-          label="Address"
+          label={intl.formatMessage({ id: "setting.address-book.address" })}
           name="address"
           text={
             isValidENS(address) ? (
@@ -141,7 +153,9 @@ export const AddAddressModal: FunctionComponent<{
             (errors.address && errors.address.message)
           }
           ref={register({
-            required: "Address is required",
+            required: intl.formatMessage({
+              id: "setting.address-book.address.error.required"
+            }),
             validate: (value: string) => {
               if (!isValidENS(value)) {
                 try {
@@ -150,7 +164,9 @@ export const AddAddressModal: FunctionComponent<{
                     chainInfo.bech32Config.bech32PrefixAccAddr
                   );
                 } catch (e) {
-                  return "Invalid address";
+                  return intl.formatMessage({
+                    id: "setting.address-book.address.error.invalid"
+                  });
                 }
               } else {
                 if (ens.error) {
@@ -162,7 +178,7 @@ export const AddAddressModal: FunctionComponent<{
           autoComplete="off"
         />
         <TextArea
-          label="Default Memo (Optional)"
+          label={intl.formatMessage({ id: "setting.address-book.memo" })}
           name="memo"
           error={errors.memo?.message}
           ref={register({ required: false })}
@@ -170,7 +186,7 @@ export const AddAddressModal: FunctionComponent<{
         />
         <div style={{ flex: 1 }} />
         <Button type="submit" color="primary">
-          Save
+          <FormattedMessage id={"setting.address-book.button.save"} />
         </Button>
       </form>
     </HeaderLayout>
