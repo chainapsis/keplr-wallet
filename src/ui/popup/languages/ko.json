@@ -14,6 +14,7 @@
   "main.address.copied": "주소가 복사되었습니다",
 
   "main.menu.settings": "설정",
+  "main.menu.address-book": "주소록",
   "main.menu.sign-out": "로그아웃",
   "main.menu.footer.github": "깃허브를 확인하세요",
 
@@ -25,6 +26,17 @@
 
   "setting.connections": "연결 관리",
   "setting.connections.paragraph": "지갑에 연결을 허용한 웹사이트를 관리합니다",
+
+  "setting.address-book.button.add": "주소 추가",
+  "setting.address-book.add-address.title": "주소 추가",
+  "setting.address-book.edit-address.title": "주소 편집",
+  "setting.address-book.name": "이름",
+  "setting.address-book.name.error.required": "이름을 입력하세요",
+  "setting.address-book.address": "주소",
+  "setting.address-book.address.error.required": "주소를 입력하세요",
+  "setting.address-book.address.error.invalid": "잘못된 주소입니다",
+  "setting.address-book.memo": "기본 메모 (선택사항)",
+  "setting.address-book.button.save": "저장",
 
   "register.button.back": "뒤로",
   "register.intro.button.new-account.title": "계정 생성",

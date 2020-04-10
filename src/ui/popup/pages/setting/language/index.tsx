@@ -12,7 +12,10 @@ export const SettingLanguagePage: FunctionComponent = () => {
   const history = useHistory();
   const intl = useIntl();
 
-  const selectedIcon = useMemo(() => <i className="fas fa-check" />, []);
+  const selectedIcon = useMemo(
+    () => [<i key="selected" className="fas fa-check" />],
+    []
+  );
 
   return (
     <HeaderLayout
@@ -36,7 +39,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
               pathname: "/"
             });
           }, [history, language])}
-          icon={language.automatic ? selectedIcon : undefined}
+          icons={language.automatic ? selectedIcon : undefined}
         />
         <PageButton
           title={intl.formatMessage({
@@ -48,7 +51,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
               pathname: "/"
             });
           }, [history, language])}
-          icon={
+          icons={
             !language.automatic && language.language == "en"
               ? selectedIcon
               : undefined
@@ -64,7 +67,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
               pathname: "/"
             });
           }, [history, language])}
-          icon={
+          icons={
             !language.automatic && language.language == "ko"
               ? selectedIcon
               : undefined

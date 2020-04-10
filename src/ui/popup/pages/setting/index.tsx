@@ -49,10 +49,8 @@ export const SettingPage: FunctionComponent = () => {
               pathname: "/setting/language"
             });
           }, [history])}
-          icon={useMemo(
-            () => (
-              <i className="fas fa-chevron-right" />
-            ),
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
             []
           )}
         />
@@ -68,10 +66,8 @@ export const SettingPage: FunctionComponent = () => {
               pathname: "/setting/connections"
             });
           }, [history])}
-          icon={useMemo(
-            () => (
-              <i className="fas fa-chevron-right" />
-            ),
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
             []
           )}
         />
