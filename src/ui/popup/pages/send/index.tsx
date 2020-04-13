@@ -43,7 +43,7 @@ import { useNotification } from "../../../components/notification";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 import { useIntl } from "react-intl";
-import { Button } from "reactstrap";
+import { Button, Modal, ModalBody } from "reactstrap";
 
 import {
   ENSUnsupportedError,
@@ -52,6 +52,7 @@ import {
   useENS
 } from "../../../hooks/use-ens";
 import { useLanguage } from "../../language";
+import { AddressBookData, AddressBookPage } from "../setting/address-book";
 
 interface FormData {
   recipient: string;
@@ -243,6 +244,25 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       }
     };
 
+    const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
+
+    const openAddressBook = useCallback(() => {
+      setIsAddressBookOpen(true);
+    }, []);
+
+    const closeAddressBook = useCallback(() => {
+      setIsAddressBookOpen(false);
+    }, []);
+
+    const onSelectAddressBook = useCallback(
+      (data: AddressBookData) => {
+        closeAddressBook();
+        setValue("recipient", data.address);
+        setValue("memo", data.memo);
+      },
+      [closeAddressBook, setValue]
+    );
+
     return (
       <HeaderLayout
         showChainName
@@ -251,6 +271,21 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
           history.goBack();
         }}
       >
+        <Modal
+          isOpen={isAddressBookOpen}
+          backdrop={false}
+          className={style.fullModal}
+          wrapClassName={style.fullModal}
+          contentClassName={style.fullModal}
+        >
+          <ModalBody className={style.fullModal}>
+            <AddressBookPage
+              onBackButton={closeAddressBook}
+              onSelect={onSelectAddressBook}
+              hideChainDropdown={true}
+            />
+          </ModalBody>
+        </Modal>
         <form
           className={style.formContainer}
           onSubmit={e => {
@@ -371,6 +406,18 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                     }
                   }
                 })}
+                autoComplete="off"
+                append={
+                  <Button
+                    className={style.addressBookButton}
+                    color="primary"
+                    type="button"
+                    outline
+                    onClick={openAddressBook}
+                  >
+                    <i className="fas fa-address-book" />
+                  </Button>
+                }
               />
               <CoinInput
                 currencies={getCurrencies(chainStore.chainInfo.currencies)}

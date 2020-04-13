@@ -31,6 +31,7 @@ import Modal from "react-modal";
 import { SettingPage } from "./pages/setting";
 import { SettingLanguagePage } from "./pages/setting/language";
 import { SettingConnectionsPage } from "./pages/setting/connections";
+import { AddressBookPage } from "./pages/setting/address-book";
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");
@@ -121,6 +122,11 @@ ReactDOM.render(
               exact
               path="/setting/connections"
               component={SettingConnectionsPage}
+            />
+            <Route
+              exact
+              path="/setting/address-book"
+              component={AddressBookPage}
             />
             <Route path="/sign/:id" component={SignPage} />
           </HashRouter>

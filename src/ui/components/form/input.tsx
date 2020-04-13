@@ -6,10 +6,13 @@ import {
   FormFeedback,
   FormGroup,
   FormText,
+  InputGroup,
   Input as ReactStrapInput,
   Label
 } from "reactstrap";
 import { InputType } from "reactstrap/lib/Input";
+
+import styleInput from "./input.module.scss";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -18,6 +21,8 @@ export interface InputProps {
   label?: string;
   text?: string | React.ReactElement;
   error?: string;
+
+  append?: React.ReactElement;
 }
 
 // eslint-disable-next-line react/display-name
@@ -25,7 +30,7 @@ export const Input = forwardRef<
   HTMLInputElement,
   InputProps & React.InputHTMLAttributes<HTMLInputElement>
 >((props, ref) => {
-  const { type, label, text, error } = props;
+  const { type, label, text, error, append } = props;
 
   const attributes = { ...props };
   delete attributes.className;
@@ -35,6 +40,7 @@ export const Input = forwardRef<
   delete attributes.text;
   delete attributes.error;
   delete attributes.children;
+  delete attributes.append;
 
   const [inputId] = useState(() => {
     const bytes = new Uint8Array(4);
@@ -49,16 +55,22 @@ export const Input = forwardRef<
           {label}
         </Label>
       ) : null}
-      <ReactStrapInput
-        id={inputId}
-        className={classnames("form-control-alternative", props.className)}
-        type={type}
-        innerRef={ref}
-        invalid={error != null}
-        {...attributes}
-      />
+      <InputGroup>
+        <ReactStrapInput
+          id={inputId}
+          className={classnames(
+            "form-control-alternative",
+            props.className,
+            styleInput.input
+          )}
+          type={type}
+          innerRef={ref}
+          {...attributes}
+        />
+        {append}
+      </InputGroup>
       {error ? (
-        <FormFeedback>{error}</FormFeedback>
+        <FormFeedback style={{ display: "block" }}>{error}</FormFeedback>
       ) : text ? (
         <FormText>{text}</FormText>
       ) : null}

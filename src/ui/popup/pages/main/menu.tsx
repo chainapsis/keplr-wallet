@@ -24,6 +24,16 @@ export const Menu: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.menu.settings" />
       </div>
+      <div
+        className={styleMenu.item}
+        onClick={useCallback(() => {
+          history.push({
+            pathname: "/setting/address-book"
+          });
+        }, [history])}
+      >
+        <FormattedMessage id="main.menu.address-book" />
+      </div>
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
       {/* If development env, show clear button for test. */

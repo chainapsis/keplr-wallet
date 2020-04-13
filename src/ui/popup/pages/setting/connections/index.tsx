@@ -12,7 +12,7 @@ import style from "../style.module.scss";
 import { useHistory } from "react-router";
 import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
-import { AccessOrigin } from "../../../../../background/chains/types";
+import { AccessOrigin } from "../../../../../background/chains";
 import { PageButton } from "../page-button";
 import {
   GetAccessOriginMsg,
@@ -72,7 +72,10 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
     [forceRefreshAccessOrigin]
   );
 
-  const xIcon = useMemo(() => <i className="fas fa-times" />, []);
+  const xIcon = useMemo(
+    () => [<i key="remove" className="fas fa-times" />],
+    []
+  );
 
   return (
     <HeaderLayout
@@ -118,7 +121,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
                   data-chain-id={accessOrigin?.chainId}
                   data-origin={origin}
                   onClick={removeAccessOriginCallback}
-                  icon={xIcon}
+                  icons={xIcon}
                 />
               );
             })
