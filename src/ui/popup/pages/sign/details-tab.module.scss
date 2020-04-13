@@ -23,6 +23,10 @@
   &.messages {
     flex: 1;
     overflow: auto;
+
+    .title {
+      margin-bottom: 8px;
+    }
   }
 
   .title {
