@@ -139,7 +139,10 @@ export class PopupWalletProvider implements WalletProvider {
         });
 
       if (this.accessApprover) {
-        this.accessApprover.onRequestSignature(id);
+        setTimeout(() => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          this.accessApprover!.onRequestSignature(id);
+        }, 100);
       } else {
         setTimeout(() => {
           sendMessage(BACKGROUND_PORT, ApproveSignMsg.create(id));
