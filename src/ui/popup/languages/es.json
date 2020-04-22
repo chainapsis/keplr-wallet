@@ -21,11 +21,12 @@
   "setting.language.automatic": "Automático (Predeterminado del Browser)",
   "setting.language.automatic-with-language": "Automático ({language})",
   "setting.language.en": "English",
-  "setting.language.ko": "Korean",
+  "setting.language.ko": "한국어",
   "setting.language.it": "Italiano",
   "setting.language.fr": "Français",
   "setting.language.ru": "Русский",
   "setting.language.es": "Español",
+  "setting.language.jp": "日本語",
 
   "setting.connections": "Gestión de los enlaces",
   "setting.connections.paragraph": "Gestión de sitios web conectados a su wallet",
@@ -108,7 +109,7 @@
   "sign.list.message.cosmos-sdk/MsgDelegate.title": "Delegar",
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "Delegar <b>{amount}</b> a <b>{validator}</b>",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "Anular la Delegación",
-  "sign.list.message.cosmos-sdk/MsgUndelegate.content": "Anular la Delegación <b>{amount}</b> de <b>{validator}</b>{br}Asset estará libre después del período de "unbond"",
+  "sign.list.message.cosmos-sdk/MsgUndelegate.content": "Anular la Delegación <b>{amount}</b> de <b>{validator}</b>{br}Asset estará libre después del período de \"unbond\"",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Reclamar la recompensa",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Reclamar la participación pendiente de <b>{validator}</b>",
 

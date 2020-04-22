@@ -73,6 +73,86 @@ export const SettingLanguagePage: FunctionComponent = () => {
               : undefined
           }
         />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.language.it"
+          })}
+          onClick={useCallback(() => {
+            language.setLanguage("it");
+            history.push({
+              pathname: "/"
+            });
+          }, [history, language])}
+          icons={
+            !language.automatic && language.language == "it"
+              ? selectedIcon
+              : undefined
+          }
+        />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.language.fr"
+          })}
+          onClick={useCallback(() => {
+            language.setLanguage("fr");
+            history.push({
+              pathname: "/"
+            });
+          }, [history, language])}
+          icons={
+            !language.automatic && language.language == "fr"
+              ? selectedIcon
+              : undefined
+          }
+        />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.language.ru"
+          })}
+          onClick={useCallback(() => {
+            language.setLanguage("ru");
+            history.push({
+              pathname: "/"
+            });
+          }, [history, language])}
+          icons={
+            !language.automatic && language.language == "ru"
+              ? selectedIcon
+              : undefined
+          }
+        />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.language.es"
+          })}
+          onClick={useCallback(() => {
+            language.setLanguage("es");
+            history.push({
+              pathname: "/"
+            });
+          }, [history, language])}
+          icons={
+            !language.automatic && language.language == "es"
+              ? selectedIcon
+              : undefined
+          }
+        />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.language.jp"
+          })}
+          onClick={useCallback(() => {
+            language.setLanguage("jp");
+            history.push({
+              pathname: "/"
+            });
+          }, [history, language])}
+          icons={
+            !language.automatic && language.language == "jp"
+              ? selectedIcon
+              : undefined
+          }
+        />
       </div>
     </HeaderLayout>
   );

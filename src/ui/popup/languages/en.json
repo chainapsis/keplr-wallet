@@ -22,7 +22,12 @@
   "setting.language.automatic": "Automatic (Browser default)",
   "setting.language.automatic-with-language": "Automatic ({language})",
   "setting.language.en": "English",
-  "setting.language.ko": "Korean",
+  "setting.language.ko": "한국어",
+  "setting.language.it": "Italiano",
+  "setting.language.fr": "Français",
+  "setting.language.ru": "Русский",
+  "setting.language.es": "Español",
+  "setting.language.jp": "日本語",
 
   "setting.connections": "Manage Connections",
   "setting.connections.paragraph": "Manage websites connected to your wallet",

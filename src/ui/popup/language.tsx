@@ -8,10 +8,20 @@ import { IntlProvider } from "react-intl";
 
 import MessagesEn from "./languages/en.json";
 import MessagesKo from "./languages/ko.json";
+import MessagesIt from "./languages/it.json";
+import MessagesFr from "./languages/fr.json";
+import MessagesRu from "./languages/ru.json";
+import MessagesEs from "./languages/es.json";
+import MessagesJp from "./languages/jp.json";
 
 const messages: { [lang: string]: Record<string, string> } = {
   en: MessagesEn,
-  ko: MessagesKo
+  ko: MessagesKo,
+  it: MessagesIt,
+  fr: MessagesFr,
+  ru: MessagesRu,
+  es: MessagesEs,
+  jp: MessagesJp
 };
 
 function getMessages(language: string): Record<string, string> {
