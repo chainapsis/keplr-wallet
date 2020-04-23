@@ -95,42 +95,35 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     }, [currency.coinGeckoId, fiatCurrency.currency, priceStore]);
 
     useEffect(() => {
-      if (price.gt(new Dec(0))) {
-        let precision = new Dec(1);
-        for (let i = 0; i < currency.coinDecimals; i++) {
-          precision = precision.mul(new Dec(10));
-        }
-
-        const feeLow = new Coin(
-          currency.coinMinimalDenom,
-          gasPriceStep.low.mul(new Dec(gas.toString())).truncate()
-        );
-        setFeeLow(feeLow);
-
-        const feeAverage = new Coin(
-          currency.coinMinimalDenom,
-          gasPriceStep.average.mul(new Dec(gas.toString())).truncate()
-        );
-        setFeeAverage(feeAverage);
-
-        const feeHigh = new Coin(
-          currency.coinMinimalDenom,
-          gasPriceStep.high.mul(new Dec(gas.toString())).truncate()
-        );
-        setFeeHigh(feeHigh);
-      } else {
-        setFeeLow(undefined);
-        setFeeAverage(undefined);
-        setFeeHigh(undefined);
+      let precision = new Dec(1);
+      for (let i = 0; i < currency.coinDecimals; i++) {
+        precision = precision.mul(new Dec(10));
       }
+
+      const feeLow = new Coin(
+        currency.coinMinimalDenom,
+        gasPriceStep.low.mul(new Dec(gas.toString())).truncate()
+      );
+      setFeeLow(feeLow);
+
+      const feeAverage = new Coin(
+        currency.coinMinimalDenom,
+        gasPriceStep.average.mul(new Dec(gas.toString())).truncate()
+      );
+      setFeeAverage(feeAverage);
+
+      const feeHigh = new Coin(
+        currency.coinMinimalDenom,
+        gasPriceStep.high.mul(new Dec(gas.toString())).truncate()
+      );
+      setFeeHigh(feeHigh);
     }, [
       currency.coinDecimals,
       currency.coinMinimalDenom,
       gas,
       gasPriceStep.average,
       gasPriceStep.high,
-      gasPriceStep.low,
-      price
+      gasPriceStep.low
     ]);
 
     useEffect(() => {
