@@ -108,7 +108,7 @@
   "sign.list.message.cosmos-sdk/MsgDelegate.title": "Delegar",
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "Delegar <b>{amount}</b> a <b>{validator}</b>",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "Anular la Delegación",
-  "sign.list.message.cosmos-sdk/MsgUndelegate.content": "Anular la Delegación <b>{amount}</b> de <b>{validator}</b>{br}Asset estará libre después del período de "unbond"",
+  "sign.list.message.cosmos-sdk/MsgUndelegate.content": "Anular la Delegación <b>{amount}</b> de <b>{validator}</b>{br}Asset estará libre después del período de \"unbond\"",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Reclamar la recompensa",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Reclamar la participación pendiente de <b>{validator}</b>",
 
