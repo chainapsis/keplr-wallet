@@ -43,7 +43,15 @@ import { useNotification } from "../../../components/notification";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 import { useIntl } from "react-intl";
-import { Button, Modal, ModalBody } from "reactstrap";
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Modal,
+  ModalBody
+} from "reactstrap";
 
 import {
   ENSUnsupportedError,
@@ -53,6 +61,9 @@ import {
 } from "../../../hooks/use-ens";
 import { useLanguage } from "../../language";
 import { AddressBookData, AddressBookPage } from "../setting/address-book";
+import { EmbedIBCPathInfo } from "../../../../config";
+import { ChainInfo } from "../../../../background/chains";
+import { MsgTransfer } from "@everett-protocol/cosmosjs/x/ibc";
 
 interface FormData {
   recipient: string;
@@ -61,6 +72,89 @@ interface FormData {
   memo: string;
   fee: Coin | undefined;
 }
+
+const CounterpartyChainSelector: FunctionComponent<{
+  onSelect: (chainInfo: ChainInfo | undefined) => void;
+}> = observer(({ onSelect }) => {
+  const { chainStore } = useStore();
+
+  const [selectedChain, setSelectedChain] = useState<ChainInfo | undefined>(
+    undefined
+  );
+
+  const couterpartyChainInfos: ChainInfo[] = useMemo(() => {
+    const ibcPathInfo = EmbedIBCPathInfo[chainStore.chainInfo.chainId];
+    if (ibcPathInfo) {
+      const chainInfos: ChainInfo[] = [];
+      for (const chainId of Object.keys(ibcPathInfo)) {
+        const chainInfo = chainStore.chainList.find(info => {
+          return info.chainId === chainId;
+        });
+
+        if (chainInfo) {
+          chainInfos.push(chainInfo);
+        }
+      }
+
+      return chainInfos;
+    } else {
+      return [];
+    }
+  }, [chainStore.chainInfo.chainId, chainStore.chainList]);
+
+  const selectChainCallback = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.currentTarget) {
+        const chainId = e.currentTarget.getAttribute("data-chain-id");
+        const chainInfo = chainStore.chainList.find(chainInfo => {
+          return chainInfo.chainId === chainId;
+        });
+
+        setSelectedChain(chainInfo);
+        onSelect(chainInfo);
+      } else {
+        setSelectedChain(undefined);
+        onSelect(undefined);
+      }
+    },
+    [chainStore.chainList, onSelect]
+  );
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggle = () => setDropdownOpen(prevState => !prevState);
+
+  return (
+    <Dropdown
+      size="sm"
+      style={{
+        position: "absolute",
+        right: 0,
+        top: 0
+      }}
+      isOpen={dropdownOpen}
+      toggle={toggle}
+    >
+      <DropdownToggle caret style={{ boxShadow: "none" }}>
+        {selectedChain ? selectedChain.chainName : "Internal"}
+      </DropdownToggle>
+      <DropdownMenu right={true}>
+        <DropdownItem onClick={selectChainCallback}>Internal</DropdownItem>
+        {couterpartyChainInfos.map(chainInfo => {
+          return (
+            <DropdownItem
+              key={chainInfo.chainId}
+              data-chain-id={chainInfo.chainId}
+              onClick={selectChainCallback}
+            >
+              {chainInfo.chainName}
+            </DropdownItem>
+          );
+        })}
+      </DropdownMenu>
+    </Dropdown>
+  );
+});
 
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
   ({ history }) => {
@@ -107,6 +201,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider, {
       useBackgroundTx: true
     });
+    const [counterpartyChainInfo, setCounterpartyChainInfo] = useState<
+      ChainInfo | undefined
+    >(undefined);
 
     const [gasForSendMsg] = useState(80000);
 
@@ -216,7 +313,10 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     }, [accountStore.assets, amount, clearError, denom, fee, intl, setError]);
 
     const recipient = watch("recipient");
-    const ens = useENS(chainStore.chainInfo, recipient);
+    const ens = useENS(
+      counterpartyChainInfo ? counterpartyChainInfo : chainStore.chainInfo,
+      recipient
+    );
 
     useEffect(() => {
       if (isValidENS(recipient)) {
@@ -315,17 +415,45 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               if (!recipient) {
                 throw new Error("Fail to fetch address from ENS");
               }
-              const msg = new MsgSend(
-                AccAddress.fromBech32(
-                  accountStore.bech32Address,
-                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                ),
-                AccAddress.fromBech32(
-                  recipient,
-                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                ),
-                [coin]
-              );
+              const msg = (() => {
+                if (counterpartyChainInfo) {
+                  const ibcPathInfo =
+                    EmbedIBCPathInfo[chainStore.chainInfo.chainId][
+                      counterpartyChainInfo.chainId
+                    ];
+                  if (!ibcPathInfo) {
+                    throw new Error("Can't find ibc path info");
+                  }
+
+                  const prefixedCoin = new Coin(
+                    `${ibcPathInfo.dst.portId}/${ibcPathInfo.dst.channelId}/${coin.denom}`,
+                    coin.amount
+                  );
+                  return new MsgTransfer(
+                    ibcPathInfo.src.portId,
+                    ibcPathInfo.src.channelId,
+                    10000000,
+                    [prefixedCoin],
+                    AccAddress.fromBech32(
+                      accountStore.bech32Address,
+                      chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                    ),
+                    recipient
+                  );
+                } else {
+                  return new MsgSend(
+                    AccAddress.fromBech32(
+                      accountStore.bech32Address,
+                      chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                    ),
+                    AccAddress.fromBech32(
+                      recipient,
+                      chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                    ),
+                    [coin]
+                  );
+                }
+              })();
 
               const config: TxBuilderConfig = {
                 gas: bigInteger(gasForSendMsg),
@@ -364,7 +492,13 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             <div>
               <Input
                 type="text"
+                style={{ position: "relative" }}
                 label={intl.formatMessage({ id: "send.input.recipient" })}
+                labeldeco={
+                  <CounterpartyChainSelector
+                    onSelect={setCounterpartyChainInfo}
+                  />
+                }
                 name="recipient"
                 text={
                   isValidENS(recipient) ? (
@@ -390,9 +524,13 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   validate: async (value: string) => {
                     if (!isValidENS(value)) {
                       try {
+                        const chainInfo = counterpartyChainInfo
+                          ? counterpartyChainInfo
+                          : chainStore.chainInfo;
+
                         AccAddress.fromBech32(
                           value,
-                          chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                          chainInfo.bech32Config.bech32PrefixAccAddr
                         );
                       } catch (e) {
                         return intl.formatMessage({

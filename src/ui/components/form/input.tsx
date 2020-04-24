@@ -18,7 +18,9 @@ const Buffer = require("buffer/").Buffer;
 
 export interface InputProps {
   type: Exclude<InputType, "textarea">;
+  style?: React.CSSProperties;
   label?: string;
+  labeldeco?: React.ReactElement;
   text?: string | React.ReactElement;
   error?: string;
 
@@ -30,7 +32,7 @@ export const Input = forwardRef<
   HTMLInputElement,
   InputProps & React.InputHTMLAttributes<HTMLInputElement>
 >((props, ref) => {
-  const { type, label, text, error, append } = props;
+  const { type, style, label, labeldeco, text, error, append } = props;
 
   const attributes = { ...props };
   delete attributes.className;
@@ -49,10 +51,11 @@ export const Input = forwardRef<
   });
 
   return (
-    <FormGroup>
+    <FormGroup style={style}>
       {label ? (
         <Label for={inputId} className="form-control-label">
           {label}
+          {labeldeco ? labeldeco : null}
         </Label>
       ) : null}
       <InputGroup>

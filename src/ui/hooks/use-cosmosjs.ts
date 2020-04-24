@@ -10,6 +10,7 @@ import * as Distr from "@everett-protocol/cosmosjs/x/distribution";
 import * as Staking from "@everett-protocol/cosmosjs/x/staking";
 import * as Slashing from "@everett-protocol/cosmosjs/x/slashing";
 import * as Gov from "@everett-protocol/cosmosjs/x/gov";
+import * as IBC from "@everett-protocol/cosmosjs/x/ibc";
 import { Rest } from "@everett-protocol/cosmosjs/core/rest";
 import { useCallback, useEffect, useState } from "react";
 import { Msg } from "@everett-protocol/cosmosjs/core/tx";
@@ -77,6 +78,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
         Staking.registerCodec(codec);
         Slashing.registerCodec(codec);
         Gov.registerCodec(codec);
+        IBC.registerCodec(codec);
       }),
     [opts?.registerCodec]
   );

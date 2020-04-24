@@ -3,17 +3,7 @@ import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
 import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
 import { ChainInfo, AccessOrigin } from "./background/chains";
 
-import {
-  COSMOS_REST_CONFIG,
-  COSMOS_REST_ENDPOINT,
-  COSMOS_RPC_CONFIG,
-  COSMOS_RPC_ENDPOINT,
-  ETHEREUM_ENDPOINT,
-  KAVA_REST_CONFIG,
-  KAVA_REST_ENDPOINT,
-  KAVA_RPC_CONFIG,
-  KAVA_RPC_ENDPOINT
-} from "./config.var";
+import { ETHEREUM_ENDPOINT } from "./config.var";
 
 export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
 export const CoinGeckoGetPrice = "/simple/price";
@@ -27,13 +17,11 @@ export const EthereumEndpoint = ETHEREUM_ENDPOINT;
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
-    rpc: COSMOS_RPC_ENDPOINT,
-    rpcConfig: COSMOS_RPC_CONFIG,
-    rest: COSMOS_REST_ENDPOINT,
-    restConfig: COSMOS_REST_CONFIG,
-    chainId: "cosmoshub-3",
-    chainName: "Cosmos",
-    nativeCurrency: "atom",
+    rpc: "http://127.0.0.1:26657",
+    rest: "http://127.0.0.1:1337",
+    chainId: "ibc0",
+    chainName: "IBC Hub",
+    nativeCurrency: "stake",
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/cosmoshub-3"
@@ -44,18 +32,15 @@ export const EmbedChainInfos: ChainInfo[] = [
         : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
-    currencies: ["atom"],
-    feeCurrencies: ["atom"],
-    coinType: 118
+    currencies: ["stake"],
+    feeCurrencies: ["stake"]
   },
   {
-    rpc: KAVA_RPC_ENDPOINT,
-    rpcConfig: KAVA_RPC_CONFIG,
-    rest: KAVA_REST_ENDPOINT,
-    restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-2",
-    chainName: "Kava",
-    nativeCurrency: "kava",
+    rpc: "http://127.0.0.1:26557",
+    rest: "http://127.0.0.1:2337",
+    chainId: "ibc1",
+    chainName: "IBC Zone",
+    nativeCurrency: "stake",
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/kava-2"
@@ -65,10 +50,9 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/#/kava-2"
         : "http://localhost:8081/#/kava-2",
     bip44: new BIP44(44, 118, 0),
-    bech32Config: defaultBech32Config("kava"),
-    currencies: ["kava"],
-    feeCurrencies: ["kava"],
-    coinType: 459
+    bech32Config: defaultBech32Config("cosmos"),
+    currencies: ["stake"],
+    feeCurrencies: ["stake"]
   }
 ];
 
@@ -77,12 +61,12 @@ export const EmbedChainInfos: ChainInfo[] = [
  */
 export const EmbedAccessOrigins: AccessOrigin[] = [
   {
-    chainId: "cosmoshub-3",
+    chainId: "ibc0",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   },
   {
-    chainId: "kava-2",
+    chainId: "ibc1",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
@@ -94,6 +78,11 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
 export const Currencies: {
   readonly [currency: string]: Currency;
 } = {
+  stake: {
+    coinDenom: "STAKE",
+    coinMinimalDenom: "stake",
+    coinDecimals: 6
+  },
   atom: {
     coinDenom: "ATOM",
     coinMinimalDenom: "uatom",
@@ -135,6 +124,37 @@ export const LanguageToFiatCurrency: {
       return value.toLocaleString("ko-KR", {
         maximumFractionDigits: fractionDigits
       });
+    }
+  }
+};
+
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+export interface IBCPathInfo {
+  [chainId: string]: {
+    [chainId: string]: {
+      src: {
+        channelId: string;
+        portId: string;
+      };
+      dst: {
+        channelId: string;
+        portId: string;
+      };
+    };
+  };
+}
+
+export const EmbedIBCPathInfo: IBCPathInfo = {
+  ["ibc0"]: {
+    ["ibc1"]: {
+      src: {
+        channelId: "ibconexfer",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "ibczeroxfer",
+        portId: "transfer"
+      }
     }
   }
 };
