@@ -1,7 +1,5 @@
 import React, { FunctionComponent, useEffect } from "react";
 
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
@@ -37,12 +35,6 @@ export const AssetView: FunctionComponent = observer(() => {
     priceStore
   ]);
 
-  const fiat = priceStore.getValue(
-    fiatCurrency.currency,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    getCurrency(chainStore.chainInfo.nativeCurrency)!.coinGeckoId
-  );
-
   const nativeCurrency = getCurrency(
     chainStore.chainInfo.nativeCurrency
   ) as Currency;
@@ -57,29 +49,17 @@ export const AssetView: FunctionComponent = observer(() => {
       <div className={styleAsset.title}>
         <FormattedMessage id="main.account.message.available-balance" />
       </div>
-      <div className={styleAsset.fiat}>
-        {fiat && !fiat.value.equals(new Dec(0))
-          ? fiatCurrency.symbol +
-            DecUtils.removeTrailingZerosFromDecStr(
-              fiatCurrency.parse(
-                parseFloat(
-                  fiat.value
-                    .mul(new Dec(coinAmount, nativeCurrency.coinDecimals))
-                    .toString()
-                )
-              )
-            )
-          : "?"}
-      </div>
       {/* TODO: Show the information that account is fetching. */}
       <div className={styleAsset.amount}>
         <div>
           {!(accountStore.assets.length === 0)
-            ? CoinUtils.shrinkDecimals(
-                coinAmount,
-                nativeCurrency.coinDecimals,
-                0,
-                6
+            ? DecUtils.removeTrailingZerosFromDecStr(
+                CoinUtils.shrinkDecimals(
+                  coinAmount,
+                  nativeCurrency.coinDecimals,
+                  0,
+                  6
+                )
               )
             : "0"}{" "}
           {nativeCurrency.coinDenom}

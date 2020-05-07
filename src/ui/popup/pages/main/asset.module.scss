@@ -28,16 +28,16 @@
     position: relative;
     display: flex;
 
-    font-size: 18px;
+    font-size: 32px;
     text-align: center;
 
     letter-spacing: -0.4px;
-    color: #8f8f8f;
+    color: #32325d;
   }
 
   .indicator-icon {
     position: absolute;
-    right: -26px;
+    right: -34px;
   }
 
   :global(.popper) {
