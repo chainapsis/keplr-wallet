@@ -31,6 +31,8 @@ export interface ChainInfo {
    * This is used for fetching address from ENS if this field is set.
    */
   readonly coinType?: number;
+
+  readonly faucetUrl?: string;
 }
 
 export interface AccessOrigin {

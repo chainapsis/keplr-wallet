@@ -17,60 +17,44 @@ export const EthereumEndpoint = ETHEREUM_ENDPOINT;
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
-    rpc: "http://127.0.0.1:26657",
-    rest: "http://127.0.0.1:1337",
-    chainId: "ibc0",
-    chainName: "IBC Hub",
-    nativeCurrency: "stake",
+    rpc: "http://goz.chainapsis.com:80",
+    // Will not work.
+    rest: "http://goz.chainapsis.com:80/rest",
+    chainId: "chainapsis-1a",
+    chainName: "ChainApsis",
+    nativeCurrency: "apsis",
     walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub-3"
-        : "http://localhost:8081/#/cosmoshub-3",
-    walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/cosmoshub-3"
         : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
-    currencies: ["stake"],
-    feeCurrencies: ["stake"]
+    currencies: ["apsis"],
+    feeCurrencies: ["apsis"],
+    faucetUrl: "http://goz.chainapsis.com:8000"
   },
   {
-    rpc: "http://127.0.0.1:26557",
-    rest: "http://127.0.0.1:2337",
-    chainId: "ibc1",
-    chainName: "IBC Zone",
-    nativeCurrency: "stake",
+    rpc: "http://goz.desmos.network:80",
+    // will not work.
+    rest: "http://goz.desmos.network:80/rest",
+    chainId: "morpheus-goz-1a",
+    chainName: "Morpheus",
+    nativeCurrency: "daric",
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava-2"
-        : "http://localhost:8081/#/kava-2",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava-2"
-        : "http://localhost:8081/#/kava-2",
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
+        : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
-    bech32Config: defaultBech32Config("cosmos"),
-    currencies: ["stake"],
-    feeCurrencies: ["stake"]
+    bech32Config: defaultBech32Config("desmos"),
+    currencies: ["daric"],
+    feeCurrencies: ["daric"]
   }
 ];
 
 /**
  * This declares which origins can access extension without explicit approval.
  */
-export const EmbedAccessOrigins: AccessOrigin[] = [
-  {
-    chainId: "ibc0",
-    origins:
-      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
-  },
-  {
-    chainId: "ibc1",
-    origins:
-      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
-  }
-];
+export const EmbedAccessOrigins: AccessOrigin[] = [];
 
 /**
  * Currencis include the currency information for matched coin.
@@ -78,22 +62,15 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
 export const Currencies: {
   readonly [currency: string]: Currency;
 } = {
-  stake: {
-    coinDenom: "STAKE",
-    coinMinimalDenom: "stake",
+  apsis: {
+    coinDenom: "APSIS",
+    coinMinimalDenom: "uapsis",
     coinDecimals: 6
   },
-  atom: {
-    coinDenom: "ATOM",
-    coinMinimalDenom: "uatom",
-    coinDecimals: 6,
-    coinGeckoId: "cosmos"
-  },
-  kava: {
-    coinDenom: "KAVA",
-    coinMinimalDenom: "ukava",
-    coinDecimals: 6,
-    coinGeckoId: "kava"
+  daric: {
+    coinDenom: "DARIC",
+    coinMinimalDenom: "udaric",
+    coinDecimals: 6
   }
 };
 
@@ -145,14 +122,14 @@ export interface IBCPathInfo {
 }
 
 export const EmbedIBCPathInfo: IBCPathInfo = {
-  ["ibc0"]: {
-    ["ibc1"]: {
+  ["chainapsis"]: {
+    ["westaking"]: {
       src: {
-        channelId: "ibconexfer",
+        channelId: "bsqijgkmgg",
         portId: "transfer"
       },
       dst: {
-        channelId: "ibczeroxfer",
+        channelId: "cveilenyam",
         portId: "transfer"
       }
     }
