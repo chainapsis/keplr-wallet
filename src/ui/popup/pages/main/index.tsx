@@ -9,7 +9,6 @@ import { Menu } from "./menu";
 import { AccountView } from "./account";
 import { TxButtonView } from "./tx-button";
 import { AssetView } from "./asset";
-import { StakeView } from "./stake";
 
 import classnames from "classnames";
 
@@ -23,11 +22,6 @@ export const MainPage: FunctionComponent = () => {
             <AssetView />
             <TxButtonView />
           </div>
-        </CardBody>
-      </Card>
-      <Card className={classnames(style.card, "shadow")}>
-        <CardBody>
-          <StakeView />
         </CardBody>
       </Card>
     </HeaderLayout>
