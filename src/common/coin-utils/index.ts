@@ -18,7 +18,7 @@ export class CoinUtils {
 
   static exclude(coins: Coin[], demons: string[]): Coin[] {
     return coins.filter(coin => {
-      return demons.indexOf(coin.denom) === 0;
+      return demons.indexOf(coin.denom) === -1;
     });
   }
 
