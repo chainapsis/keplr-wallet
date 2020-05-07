@@ -26,6 +26,7 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 
 $font-family-base: "Nunito Sans", sans-serif;
 $body-color: black;
+@import "palette";
 @import "~argon-dashboard-react/src/assets/scss/argon-dashboard-react";
 
 @import url("https://fonts.googleapis.com/css?family=Courier+Prime&display=swap");
