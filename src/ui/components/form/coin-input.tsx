@@ -3,7 +3,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
 
-import { Currency, getCurrencyFromDenom } from "../../../common/currency";
+import { Currency } from "../../../common/currency";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { ElementLike } from "react-hook-form/dist/types";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
@@ -28,6 +28,9 @@ export interface CoinInputProps {
     ref: React.RefObject<HTMLSelectElement> | ElementLike | null;
   };
 
+  denom: string;
+  setDenom: (denom: string) => void;
+
   onChangeAllBanace?: (allBalance: boolean) => void;
 }
 
@@ -47,6 +50,8 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
     error,
     input,
     select,
+    denom,
+    setDenom,
     onChangeAllBanace
   } = props;
 
@@ -62,6 +67,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
     if (!currency) {
       if (currencies.length > 0) {
         setCurrency(currencies[0]);
+        setDenom(currencies[0].coinMinimalDenom);
       }
     } else {
       const find = currencies.find(c => {
@@ -70,11 +76,19 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
       if (!find) {
         if (currencies.length > 0) {
           setCurrency(currencies[0]);
+          setDenom(currencies[0].coinMinimalDenom);
         }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currencies]);
+
+  useEffect(() => {
+    const currency = currencies.find(
+      currency => currency.coinMinimalDenom === denom
+    );
+    setCurrency(currency);
+  }, [currencies, denom]);
 
   useEffect(() => {
     if (balances && currency) {
@@ -186,21 +200,13 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
             "form-control-alternative",
             styleCoinInput.select
           )}
-          value={currency ? currency.coinDenom : ""}
-          onChange={e => {
-            const currency = getCurrencyFromDenom(e.target.value);
-            if (currency) {
-              setCurrency(currency);
-            }
-            e.preventDefault();
-          }}
           name={select.name}
           innerRef={select.ref as any}
           disabled={allBalance}
         >
           {currencies.map((currency, i) => {
             return (
-              <option key={i.toString()} value={currency.coinDenom}>
+              <option key={i.toString()} value={currency.coinMinimalDenom}>
                 {currency.coinDenom}
               </option>
             );

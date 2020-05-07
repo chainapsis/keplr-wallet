@@ -30,9 +30,10 @@ import { observer } from "mobx-react";
 import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 import {
+  Currency,
   getCurrencies,
   getCurrency,
-  getCurrencyFromDenom,
+  getCurrencyFromMinimalDenom,
   getFiatCurrencyFromLanguage
 } from "../../../../common/currency";
 
@@ -63,6 +64,7 @@ import { AddressBookData, AddressBookPage } from "../setting/address-book";
 import { EmbedIBCPathInfo } from "../../../../config";
 import { ChainInfo } from "../../../../background/chains";
 import { MsgTransfer } from "@everett-protocol/cosmosjs/x/ibc";
+import { DecUtils } from "../../../../common/dec-utils";
 
 interface FormData {
   recipient: string;
@@ -269,15 +271,61 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       setAllBalance(allBalance);
     }, []);
 
+    const tokens = useMemo(
+      () =>
+        CoinUtils.exclude(
+          accountStore.assets,
+          getCurrencies(chainStore.chainInfo.currencies).map(
+            currency => currency.coinMinimalDenom
+          )
+        ),
+      [accountStore.assets, chainStore.chainInfo.currencies]
+    );
+    const tokenCurrencies: Currency[] = useMemo(() => {
+      const tokenCurrencies: Currency[] = [];
+
+      for (const token of tokens) {
+        const i = token.denom.lastIndexOf("/");
+        if (i < 0) {
+          continue;
+        }
+        const actualDenom = token.denom.slice(i + 1);
+
+        const currency = getCurrencyFromMinimalDenom(actualDenom);
+        if (currency) {
+          tokenCurrencies.push({
+            coinDenom: currency.coinDenom,
+            coinMinimalDenom: token.denom,
+            coinDecimals: currency.coinDecimals,
+            coinGeckoId: currency.coinGeckoId
+          });
+        } else {
+          tokenCurrencies.push({
+            coinDenom: token.denom,
+            coinMinimalDenom: token.denom,
+            coinDecimals: 1
+          });
+        }
+      }
+
+      return tokenCurrencies;
+    }, [tokens]);
+
     const fee = watch("fee");
     const amount = watch("amount");
     const denom = watch("denom");
+    console.log("!", denom);
 
     useEffect(() => {
       if (allBalance) {
         setValue("amount", "");
 
-        const currency = getCurrencyFromDenom(denom);
+        let currency = getCurrencyFromMinimalDenom(denom);
+        if (!currency) {
+          currency = tokenCurrencies.find(
+            currency => currency.coinMinimalDenom === denom
+          );
+        }
         if (fee && denom && currency) {
           let allAmount = new Int(0);
           for (const balacne of accountStore.assets) {
@@ -287,8 +335,13 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             }
           }
 
-          if (allAmount.gte(fee.amount)) {
-            allAmount = allAmount.sub(fee.amount);
+          if (
+            allAmount.gte(fee.amount) ||
+            fee.denom !== currency.coinMinimalDenom
+          ) {
+            if (fee.denom === currency.coinMinimalDenom) {
+              allAmount = allAmount.sub(fee.amount);
+            }
 
             const dec = new Dec(allAmount);
             let precision = new Dec(1);
@@ -303,11 +356,18 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
           }
         }
       }
-    }, [fee, accountStore.assets, allBalance, setValue, denom]);
+    }, [
+      fee,
+      accountStore.assets,
+      allBalance,
+      setValue,
+      denom,
+      tokenCurrencies
+    ]);
 
     useEffect(() => {
       const feeAmount = fee ? fee.amount : new Int(0);
-      const currency = getCurrencyFromDenom(denom);
+      const currency = getCurrencyFromMinimalDenom(denom);
       try {
         if (currency && amount) {
           let find = false;
@@ -444,9 +504,21 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             }
 
             handleSubmit(async (data: FormData) => {
-              const coin = CoinUtils.getCoinFromDecimals(
-                data.amount,
-                data.denom
+              let currency = getCurrencyFromMinimalDenom(data.denom);
+              if (!currency) {
+                currency = tokenCurrencies.find(
+                  currency => currency.coinMinimalDenom === data.denom
+                );
+              }
+              if (!currency) {
+                throw new Error("Unknown currency");
+              }
+
+              const coin = new Coin(
+                data.denom,
+                new Dec(data.amount)
+                  .mul(DecUtils.getPrecisionDec(currency.coinDecimals))
+                  .truncate()
               );
 
               const recipient = isValidENS(data.recipient)
@@ -594,7 +666,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 }
               />
               <CoinInput
-                currencies={getCurrencies(chainStore.chainInfo.currencies)}
+                currencies={getCurrencies(
+                  chainStore.chainInfo.currencies
+                ).concat(tokenCurrencies)}
                 label={intl.formatMessage({ id: "send.input.amount" })}
                 balances={accountStore.assets}
                 balanceText={intl.formatMessage({
@@ -605,6 +679,13 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   (errors.amount && errors.amount.message) ||
                   (errors.denom && errors.denom.message)
                 }
+                denom={denom}
+                setDenom={useCallback(
+                  (denom: string) => {
+                    setValue("denom", denom);
+                  },
+                  [setValue]
+                )}
                 input={{
                   name: "amount",
                   ref: register({
