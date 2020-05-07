@@ -122,14 +122,26 @@ export interface IBCPathInfo {
 }
 
 export const EmbedIBCPathInfo: IBCPathInfo = {
-  ["chainapsis"]: {
-    ["westaking"]: {
+  ["chainapsis-1a"]: {
+    ["morpheus-goz-1a"]: {
       src: {
-        channelId: "bsqijgkmgg",
+        channelId: "fiocxrsnjz",
         portId: "transfer"
       },
       dst: {
-        channelId: "cveilenyam",
+        channelId: "sgxgjsihiq",
+        portId: "transfer"
+      }
+    }
+  },
+  ["morpheus-goz-1a"]: {
+    ["chainapsis-1a"]: {
+      src: {
+        channelId: "sgxgjsihiq",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "fiocxrsnjz",
         portId: "transfer"
       }
     }
