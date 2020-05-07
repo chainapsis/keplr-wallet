@@ -32,7 +32,16 @@ export const Input = forwardRef<
   HTMLInputElement,
   InputProps & React.InputHTMLAttributes<HTMLInputElement>
 >((props, ref) => {
-  const { type, style, label, labeldeco, text, error, append } = props;
+  const {
+    type,
+    style,
+    label,
+    labeldeco,
+    text,
+    error,
+    append,
+    children
+  } = props;
 
   const attributes = { ...props };
   delete attributes.className;
@@ -69,7 +78,9 @@ export const Input = forwardRef<
           type={type}
           innerRef={ref}
           {...attributes}
-        />
+        >
+          {children}
+        </ReactStrapInput>
         {append}
       </InputGroup>
       {error ? (

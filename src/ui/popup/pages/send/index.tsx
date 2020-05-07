@@ -45,10 +45,9 @@ import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { useIntl } from "react-intl";
 import {
   Button,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
+  ButtonGroup,
+  FormGroup,
+  Label,
   Modal,
   ModalBody
 } from "reactstrap";
@@ -73,14 +72,15 @@ interface FormData {
   fee: Coin | undefined;
 }
 
+enum TxType {
+  internal,
+  ibc
+}
+
 const CounterpartyChainSelector: FunctionComponent<{
   onSelect: (chainInfo: ChainInfo | undefined) => void;
 }> = observer(({ onSelect }) => {
   const { chainStore } = useStore();
-
-  const [selectedChain, setSelectedChain] = useState<ChainInfo | undefined>(
-    undefined
-  );
 
   const couterpartyChainInfos: ChainInfo[] = useMemo(() => {
     const ibcPathInfo = EmbedIBCPathInfo[chainStore.chainInfo.chainId];
@@ -102,57 +102,97 @@ const CounterpartyChainSelector: FunctionComponent<{
     }
   }, [chainStore.chainInfo.chainId, chainStore.chainList]);
 
+  const [txType, setTxType] = useState<TxType>(TxType.internal);
+  const setTxTypeInternal = useCallback(() => {
+    setTxType(TxType.internal);
+    setSelectedChain(undefined);
+    onSelect(undefined);
+  }, [onSelect]);
+  const setTxTypeIBC = useCallback(() => {
+    if (couterpartyChainInfos.length > 0) {
+      setTxType(TxType.ibc);
+      setSelectedChain(couterpartyChainInfos[0]);
+      onSelect(couterpartyChainInfos[0]);
+    }
+  }, [couterpartyChainInfos, onSelect]);
+
+  const [selectedChain, setSelectedChain] = useState<ChainInfo | undefined>();
+
   const selectChainCallback = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.currentTarget) {
-        const chainId = e.currentTarget.getAttribute("data-chain-id");
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target?.value) {
+        const chainId = e.target.value;
         const chainInfo = chainStore.chainList.find(chainInfo => {
           return chainInfo.chainId === chainId;
         });
 
         setSelectedChain(chainInfo);
         onSelect(chainInfo);
-      } else {
-        setSelectedChain(undefined);
-        onSelect(undefined);
       }
     },
     [chainStore.chainList, onSelect]
   );
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  const toggle = () => setDropdownOpen(prevState => !prevState);
-
   return (
-    <Dropdown
-      size="sm"
-      style={{
-        position: "absolute",
-        right: 0,
-        top: 0
-      }}
-      isOpen={dropdownOpen}
-      toggle={toggle}
-    >
-      <DropdownToggle caret style={{ boxShadow: "none" }}>
-        {selectedChain ? selectedChain.chainName : "Internal"}
-      </DropdownToggle>
-      <DropdownMenu right={true}>
-        <DropdownItem onClick={selectChainCallback}>Internal</DropdownItem>
-        {couterpartyChainInfos.map(chainInfo => {
-          return (
-            <DropdownItem
-              key={chainInfo.chainId}
-              data-chain-id={chainInfo.chainId}
-              onClick={selectChainCallback}
-            >
-              {chainInfo.chainName}
-            </DropdownItem>
-          );
-        })}
-      </DropdownMenu>
-    </Dropdown>
+    <React.Fragment>
+      <FormGroup>
+        <Label for="tx-type" className="form-control-label">
+          Transaction Type
+        </Label>
+        <ButtonGroup id="tx-type" style={{ display: "flex" }}>
+          <Button
+            style={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+            type="button"
+            onClick={setTxTypeInternal}
+            color="primary"
+            outline={txType !== TxType.internal}
+          >
+            <div style={{ fontSize: "20px", lineHeight: 1 }}>😪</div>
+            Internal
+            <div style={{ fontSize: "20px", lineHeight: 1 }}>😪</div>
+          </Button>
+          <Button
+            style={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+            type="button"
+            onClick={setTxTypeIBC}
+            color="primary"
+            outline={txType !== TxType.ibc}
+          >
+            <div style={{ fontSize: "20px", lineHeight: 1 }}>🚀</div>
+            IBC
+            <div style={{ fontSize: "20px", lineHeight: 1 }}>🚀</div>
+          </Button>
+        </ButtonGroup>
+      </FormGroup>
+      {txType === TxType.ibc ? (
+        <FormGroup>
+          <Input
+            type="select"
+            label="Destination Chain"
+            value={selectedChain?.chainId}
+            onChange={selectChainCallback}
+          >
+            {couterpartyChainInfos.map(chainInfo => {
+              return (
+                <option key={chainInfo.chainId} value={chainInfo.chainId}>
+                  {chainInfo.chainName}
+                </option>
+              );
+            })}
+          </Input>
+        </FormGroup>
+      ) : null}
+    </React.Fragment>
   );
 });
 
@@ -490,15 +530,11 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         >
           <div className={style.formInnerContainer}>
             <div>
+              <CounterpartyChainSelector onSelect={setCounterpartyChainInfo} />
               <Input
                 type="text"
                 style={{ position: "relative" }}
                 label={intl.formatMessage({ id: "send.input.recipient" })}
-                labeldeco={
-                  <CounterpartyChainSelector
-                    onSelect={setCounterpartyChainInfo}
-                  />
-                }
                 name="recipient"
                 text={
                   isValidENS(recipient) ? (
