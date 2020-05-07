@@ -18,7 +18,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ensdomains/resolver": "^0.2.4",
-    "@everett-protocol/cosmosjs": "git+https://github.com/everett-protocol/cosmosjs-dist.git#c911b18",
+    "@everett-protocol/cosmosjs": "git+https://github.com/everett-protocol/cosmosjs-dist.git#5b212c7",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "aes-js": "^3.1.2",
     "argon-dashboard-react": "^1.1.0",
