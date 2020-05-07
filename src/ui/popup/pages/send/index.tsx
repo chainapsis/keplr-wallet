@@ -247,7 +247,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       ChainInfo | undefined
     >(undefined);
 
-    const [gasForSendMsg] = useState(80000);
+    const [gasForSendMsg] = useState(100000);
 
     const feeCurrency = useMemo(() => {
       return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
@@ -314,7 +314,6 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
     const fee = watch("fee");
     const amount = watch("amount");
     const denom = watch("denom");
-    console.log("!", denom);
 
     useEffect(() => {
       if (allBalance) {
@@ -537,8 +536,23 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                     throw new Error("Can't find ibc path info");
                   }
 
+                  const isSource = (() => {
+                    const i = data.denom.lastIndexOf("/");
+                    if (i >= 0) {
+                      const path = data.denom.slice(0, i);
+                      return (
+                        path !==
+                        `${ibcPathInfo.src.portId}/${ibcPathInfo.src.channelId}`
+                      );
+                    } else {
+                      return true;
+                    }
+                  })();
+
                   const prefixedCoin = new Coin(
-                    `${ibcPathInfo.dst.portId}/${ibcPathInfo.dst.channelId}/${coin.denom}`,
+                    isSource
+                      ? `${ibcPathInfo.dst.portId}/${ibcPathInfo.dst.channelId}/${coin.denom}`
+                      : data.denom,
                     coin.amount
                   );
                   return new MsgTransfer(
