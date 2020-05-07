@@ -10,6 +10,7 @@ import { AccountView } from "./account";
 import { TxButtonView } from "./tx-button";
 import { AssetView } from "./asset";
 import { FaucetView } from "./faucet";
+import { TokensView } from "./tokens";
 
 import classnames from "classnames";
 import { observer } from "mobx-react";
@@ -27,6 +28,11 @@ export const MainPage: FunctionComponent = observer(() => {
             <AssetView />
             <TxButtonView />
           </div>
+        </CardBody>
+      </Card>
+      <Card className={classnames(style.card, "shadow")}>
+        <CardBody>
+          <TokensView />
         </CardBody>
       </Card>
       {chainStore.chainInfo.faucetUrl ? (
