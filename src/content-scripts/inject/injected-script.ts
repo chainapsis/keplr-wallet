@@ -133,4 +133,11 @@ export class InjectedWalletProvider implements WalletProvider {
   }
 }
 
-window.cosmosJSWalletProvider = new InjectedWalletProvider();
+// Give a priority to production build.
+if (process.env.NODE_ENV !== "production") {
+  if (!window.cosmosJSWalletProvider) {
+    window.cosmosJSWalletProvider = new InjectedWalletProvider();
+  }
+} else {
+  window.cosmosJSWalletProvider = new InjectedWalletProvider();
+}
