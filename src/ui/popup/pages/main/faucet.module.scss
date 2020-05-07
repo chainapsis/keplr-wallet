@@ -1,0 +1,32 @@
+@import "../../styles/var";
+
+.container-inner {
+  display: flex;
+  flex-direction: row;
+
+  height: 48px;
+  justify-content: center;
+  align-items: center;
+
+  .paragraph-main {
+    line-height: 1.35;
+  }
+
+  .paragraph-sub {
+    line-height: 1.35;
+    color: #8898aa;
+  }
+
+  .vertical {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .button {
+    padding: 6px 20px 4px;
+  }
+}
+
+.hr {
+  margin: $main-card-padding 0;
+}
