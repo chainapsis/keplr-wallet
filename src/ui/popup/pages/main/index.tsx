@@ -13,12 +13,8 @@ import { FaucetView } from "./faucet";
 import { TokensView } from "./tokens";
 
 import classnames from "classnames";
-import { observer } from "mobx-react";
-import { useStore } from "../../stores";
 
-export const MainPage: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
-
+export const MainPage: FunctionComponent = () => {
   return (
     <HeaderLayout showChainName canChangeChainInfo menuRenderer={<Menu />}>
       <Card className={classnames(style.card, "shadow")}>
@@ -35,13 +31,11 @@ export const MainPage: FunctionComponent = observer(() => {
           <TokensView />
         </CardBody>
       </Card>
-      {chainStore.chainInfo.faucetUrl ? (
-        <Card className={classnames(style.card, "shadow")}>
-          <CardBody>
-            <FaucetView />
-          </CardBody>
-        </Card>
-      ) : null}
+      <Card className={classnames(style.card, "shadow")}>
+        <CardBody>
+          <FaucetView />
+        </CardBody>
+      </Card>
     </HeaderLayout>
   );
-});
+};

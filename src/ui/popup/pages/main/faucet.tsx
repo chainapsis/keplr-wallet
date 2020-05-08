@@ -60,6 +60,51 @@ export const FaucetView: FunctionComponent = observer(() => {
 
   return (
     <div>
+      {chainStore.chainInfo.faucetUrl ? (
+        <div className={classnames(styleFaucet.containerInner)}>
+          <div className={styleFaucet.vertical}>
+            <p
+              className={classnames(
+                "h2",
+                "my-0",
+                "font-weight-normal",
+                styleFaucet.paragraphMain
+              )}
+            >
+              Token Faucet
+            </p>
+            <p
+              className={classnames(
+                "h4",
+                "my-0",
+                "font-weight-normal",
+                styleFaucet.paragraphSub
+              )}
+            >
+              Receive test tokens
+            </p>
+          </div>
+          <div style={{ flex: 1 }} />
+          <a
+            onClick={e => {
+              e.preventDefault();
+              requestFaucet();
+            }}
+          >
+            <Button
+              className={styleFaucet.button}
+              color="primary"
+              size="sm"
+              data-loading={isRequesting}
+            >
+              Claim
+            </Button>
+          </a>
+        </div>
+      ) : null}
+      {chainStore.chainInfo.faucetUrl ? (
+        <hr className={styleFaucet.hr} />
+      ) : null}
       <div className={classnames(styleFaucet.containerInner)}>
         <div className={styleFaucet.vertical}>
           <p
@@ -70,7 +115,7 @@ export const FaucetView: FunctionComponent = observer(() => {
               styleFaucet.paragraphMain
             )}
           >
-            Token Faucet
+            Install Keplr
           </p>
           <p
             className={classnames(
@@ -80,23 +125,26 @@ export const FaucetView: FunctionComponent = observer(() => {
               styleFaucet.paragraphSub
             )}
           >
-            Receive test tokens
+            Try Keplr for Cosmos Hub
           </p>
         </div>
         <div style={{ flex: 1 }} />
         <a
-          onClick={e => {
-            e.preventDefault();
-            requestFaucet();
-          }}
+          href={
+            navigator.userAgent.toLowerCase().indexOf("firefox") > -1
+              ? "https://addons.mozilla.org/ko/firefox/addon/keplr/?src=search"
+              : "https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap"
+          }
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <Button
-            className={styleFaucet.button}
+            className={classnames(styleFaucet.button, "px-1")}
             color="primary"
             size="sm"
-            data-loading={isRequesting}
+            outline
           >
-            Claim
+            Go to Store
           </Button>
         </a>
       </div>
