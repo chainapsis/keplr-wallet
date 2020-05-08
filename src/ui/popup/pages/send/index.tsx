@@ -247,7 +247,18 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       ChainInfo | undefined
     >(undefined);
 
-    const [gasForSendMsg] = useState(100000);
+    const [gasForSendMsg, setGasForSendMsg] = useState(100000);
+    // If chain is GoZ hub, and it tries to send via IBC, increase gas limit.
+    useEffect(() => {
+      if (
+        chainStore.chainInfo.chainId === "gameofzoneshub-1a" &&
+        counterpartyChainInfo
+      ) {
+        setGasForSendMsg(200000);
+      } else {
+        setGasForSendMsg(100000);
+      }
+    }, [chainStore.chainInfo.chainId, counterpartyChainInfo]);
 
     const feeCurrency = useMemo(() => {
       return getCurrency(chainStore.chainInfo.feeCurrencies[0]);

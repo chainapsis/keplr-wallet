@@ -34,6 +34,22 @@ export const EmbedChainInfos: ChainInfo[] = [
     faucetUrl: "http://goz.chainapsis.com:8000"
   },
   {
+    rpc: "http://34.83.0.237:26657",
+    // Will not work.
+    rest: "http://34.83.0.237:26657/rest",
+    chainId: "gameofzoneshub-1a",
+    chainName: "GoZ Hub",
+    nativeCurrency: "doubloons",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
+        : "http://localhost:8081/#/cosmoshub-3",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("cosmos"),
+    currencies: ["doubloons"],
+    feeCurrencies: ["doubloons"]
+  },
+  {
     rpc: "http://goz.desmos.network:80",
     // will not work.
     rest: "http://goz.desmos.network:80/rest",
@@ -65,6 +81,11 @@ export const Currencies: {
   apsis: {
     coinDenom: "APSIS",
     coinMinimalDenom: "uapsis",
+    coinDecimals: 6
+  },
+  doubloons: {
+    coinDenom: "DBL",
+    coinMinimalDenom: "doubloons",
     coinDecimals: 6
   },
   daric: {
@@ -123,6 +144,16 @@ export interface IBCPathInfo {
 
 export const EmbedIBCPathInfo: IBCPathInfo = {
   ["chainapsis-1a"]: {
+    ["gameofzoneshub-1a"]: {
+      src: {
+        channelId: "keplrgozsrc",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "keplrgozdst",
+        portId: "transfer"
+      }
+    },
     ["morpheus-goz-1a"]: {
       src: {
         channelId: "fiocxrsnjz",
@@ -142,6 +173,18 @@ export const EmbedIBCPathInfo: IBCPathInfo = {
       },
       dst: {
         channelId: "fiocxrsnjz",
+        portId: "transfer"
+      }
+    }
+  },
+  ["gameofzoneshub-1a"]: {
+    ["chainapsis-1a"]: {
+      src: {
+        channelId: "keplrgozdst",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "keplrgozsrc",
         portId: "transfer"
       }
     }
