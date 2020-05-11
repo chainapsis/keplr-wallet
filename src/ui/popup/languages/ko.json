@@ -80,8 +80,8 @@
   "lock.input.password.error.invalid": "잘못된 비밀번호입니다",
   "lock.button.unlock": "잠금 해제",
 
-  "send.input.recipient": "출금 주소",
-  "send.input.recipient.error.required": "출금 주소를 입력하세요",
+  "send.input.recipient": "받는 주소",
+  "send.input.recipient.error.required": "받는 주소를 입력하세요",
   "send.input.recipient.error.invalid": "잘못된 주소입니다",
   "send.input.recipient.error.ens-invalid-name": "잘못된 ENS 이름 형식입니다",
   "send.input.recipient.error.ens-not-found": "ENS 이름을 찾을 수 없습니다",
