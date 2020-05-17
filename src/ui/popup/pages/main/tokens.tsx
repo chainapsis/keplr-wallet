@@ -65,6 +65,10 @@ export const TokensView: FunctionComponent = observer(() => {
     <div>
       <h2>IBC Tokens</h2>
       {tokens.map((asset, i) => {
+        if (asset.denom.split("/").length > 3) {
+          return null;
+        }
+
         return (
           <React.Fragment key={asset.denom}>
             <TokenItem token={asset} />

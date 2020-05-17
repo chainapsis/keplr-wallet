@@ -235,7 +235,7 @@ export class AccountStore {
 
   // Not action
   private async loadAssetsFromStorage(bech32Address: string): Promise<Coin[]> {
-    const items = await browser.storage.local.get();
+    /*const items = await browser.storage.local.get();
 
     const coins: Coin[] = [];
     const assets = items?.assets;
@@ -249,6 +249,7 @@ export class AccountStore {
       }
     }
 
-    return coins;
+    return coins;*/
+    return [];
   }
 }
