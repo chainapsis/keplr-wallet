@@ -17,53 +17,36 @@ export const EthereumEndpoint = ETHEREUM_ENDPOINT;
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
-    rpc: "http://goz.chainapsis.com:80",
-    // Will not work.
-    rest: "http://goz.chainapsis.com:80/rest",
-    chainId: "chainapsis-1a",
-    chainName: "ChainApsis",
-    nativeCurrency: "apsis",
+    rpc: "https://node-astrohub-1.keplr.app/rpc",
+    rest: "https://node-astrohub-1.keplr.app/rest",
+    chainId: "astrohub-1",
+    chainName: "Astro Hub",
+    nativeCurrency: "hub",
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/cosmoshub-3"
         : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
-    bech32Config: defaultBech32Config("cosmos"),
-    currencies: ["apsis"],
-    feeCurrencies: ["apsis"],
-    faucetUrl: "http://goz.chainapsis.com:8000"
+    bech32Config: defaultBech32Config("hub"),
+    currencies: ["hub"],
+    feeCurrencies: ["hub"],
+    faucetUrl: "http://34.94.36.216:8000"
   },
   {
-    rpc: "http://34.83.0.237:26657",
-    // Will not work.
-    rest: "http://34.83.0.237:26657/rest",
-    chainId: "gameofzoneshub-1a",
-    chainName: "GoZ Hub",
-    nativeCurrency: "doubloons",
+    rpc: "https://node-astrocanvas-1.keplr.app/rpc",
+    rest: "https://node-astrocanvas-1.keplr.app/rest",
+    chainId: "astrocanvas-1",
+    chainName: "Astro Zone",
+    nativeCurrency: "astro",
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/cosmoshub-3"
         : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
-    bech32Config: defaultBech32Config("cosmos"),
-    currencies: ["doubloons"],
-    feeCurrencies: ["doubloons"]
-  },
-  {
-    rpc: "http://goz.desmos.network:80",
-    // will not work.
-    rest: "http://goz.desmos.network:80/rest",
-    chainId: "morpheus-goz-1a",
-    chainName: "Morpheus",
-    nativeCurrency: "daric",
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub-3"
-        : "http://localhost:8081/#/cosmoshub-3",
-    bip44: new BIP44(44, 118, 0),
-    bech32Config: defaultBech32Config("desmos"),
-    currencies: ["daric"],
-    feeCurrencies: ["daric"]
+    bech32Config: defaultBech32Config("astro"),
+    currencies: ["astro"],
+    feeCurrencies: ["astro"],
+    faucetUrl: "http://35.235.73.59:8000"
   }
 ];
 
@@ -78,19 +61,14 @@ export const EmbedAccessOrigins: AccessOrigin[] = [];
 export const Currencies: {
   readonly [currency: string]: Currency;
 } = {
-  apsis: {
-    coinDenom: "APSIS",
-    coinMinimalDenom: "uapsis",
+  astro: {
+    coinDenom: "ASTRO",
+    coinMinimalDenom: "uastro",
     coinDecimals: 6
   },
-  doubloons: {
-    coinDenom: "DBL",
-    coinMinimalDenom: "doubloons",
-    coinDecimals: 6
-  },
-  daric: {
-    coinDenom: "DARIC",
-    coinMinimalDenom: "udaric",
+  hub: {
+    coinDenom: "HUB",
+    coinMinimalDenom: "uhub",
     coinDecimals: 6
   }
 };
@@ -143,48 +121,26 @@ export interface IBCPathInfo {
 }
 
 export const EmbedIBCPathInfo: IBCPathInfo = {
-  ["chainapsis-1a"]: {
-    ["gameofzoneshub-1a"]: {
+  ["astrohub-1"]: {
+    ["astrocanvas-1"]: {
       src: {
-        channelId: "keplrgozsrc",
+        channelId: "amqggnvske",
         portId: "transfer"
       },
       dst: {
-        channelId: "keplrgozdst",
-        portId: "transfer"
-      }
-    },
-    ["morpheus-goz-1a"]: {
-      src: {
-        channelId: "fiocxrsnjz",
-        portId: "transfer"
-      },
-      dst: {
-        channelId: "sgxgjsihiq",
+        channelId: "cljcoxvqrm",
         portId: "transfer"
       }
     }
   },
-  ["morpheus-goz-1a"]: {
-    ["chainapsis-1a"]: {
+  ["astrocanvas-1"]: {
+    ["astrohub-1"]: {
       src: {
-        channelId: "sgxgjsihiq",
+        channelId: "cljcoxvqrm",
         portId: "transfer"
       },
       dst: {
-        channelId: "fiocxrsnjz",
-        portId: "transfer"
-      }
-    }
-  },
-  ["gameofzoneshub-1a"]: {
-    ["chainapsis-1a"]: {
-      src: {
-        channelId: "keplrgozdst",
-        portId: "transfer"
-      },
-      dst: {
-        channelId: "keplrgozsrc",
+        channelId: "amqggnvske",
         portId: "transfer"
       }
     }
