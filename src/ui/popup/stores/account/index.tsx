@@ -234,6 +234,8 @@ export class AccountStore {
   }
 
   // Not action
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   private async loadAssetsFromStorage(bech32Address: string): Promise<Coin[]> {
     /*const items = await browser.storage.local.get();
 
