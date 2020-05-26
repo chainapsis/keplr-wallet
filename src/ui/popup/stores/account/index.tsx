@@ -76,7 +76,13 @@ export class AccountStore {
   // This will be called by chain store.
   @actionAsync
   public async setChainInfo(info: ChainInfo) {
+    const prevChainId = this.chainInfo?.chainId;
     this.chainInfo = info;
+
+    // Clear assets if chain is changed
+    if (prevChainId !== this.chainInfo.chainId) {
+      this.assets = [];
+    }
 
     if (this.keyRingStatus === KeyRingStatus.UNLOCKED) {
       await task(this.fetchAccount());
@@ -234,8 +240,9 @@ export class AccountStore {
   }
 
   // Not action
-  private async loadAssetsFromStorage(bech32Address: string): Promise<Coin[]> {
-    const items = await browser.storage.local.get();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async loadAssetsFromStorage(_: string): Promise<Coin[]> {
+    /*const items = await browser.storage.local.get();
 
     const coins: Coin[] = [];
     const assets = items?.assets;
@@ -249,6 +256,7 @@ export class AccountStore {
       }
     }
 
-    return coins;
+    return coins;*/
+    return [];
   }
 }
