@@ -551,9 +551,12 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                     const i = data.denom.lastIndexOf("/");
                     if (i >= 0) {
                       const path = data.denom.slice(0, i);
-                      return (
-                        path !==
-                        `${ibcPathInfo.src.portId}/${ibcPathInfo.src.channelId}`
+                      return !(
+                        path ===
+                          `${ibcPathInfo.src.portId}/${ibcPathInfo.src.channelId}` ||
+                        path.startsWith(
+                          `${ibcPathInfo.src.portId}/${ibcPathInfo.src.channelId}/`
+                        )
                       );
                     } else {
                       return true;
@@ -569,7 +572,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   return new MsgTransfer(
                     ibcPathInfo.src.portId,
                     ibcPathInfo.src.channelId,
-                    10000000,
+                    // Ignore timeout
+                    1000000000,
                     [prefixedCoin],
                     AccAddress.fromBech32(
                       accountStore.bech32Address,
