@@ -247,7 +247,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       ChainInfo | undefined
     >(undefined);
 
-    const [gasForSendMsg, setGasForSendMsg] = useState(100000);
+    const [gasForSendMsg, setGasForSendMsg] = useState(200000);
     // If chain is GoZ hub, and it tries to send via IBC, increase gas limit.
     useEffect(() => {
       if (
@@ -256,7 +256,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       ) {
         setGasForSendMsg(200000);
       } else {
-        setGasForSendMsg(100000);
+        setGasForSendMsg(200000);
       }
     }, [chainStore.chainInfo.chainId, counterpartyChainInfo]);
 
