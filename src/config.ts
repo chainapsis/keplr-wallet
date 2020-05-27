@@ -20,7 +20,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpc: "http://goz.chainapsis.com:80",
     // Will not work.
     rest: "http://goz.chainapsis.com:80/rest",
-    chainId: "chainapsis-1a",
+    chainId: "chainapsis-2",
     chainName: "ChainApsis",
     nativeCurrency: "apsis",
     walletUrl:
@@ -34,26 +34,44 @@ export const EmbedChainInfos: ChainInfo[] = [
     faucetUrl: "http://goz.chainapsis.com:8000"
   },
   {
-    rpc: "http://34.83.0.237:26657",
+    rpc: "http://ibc.bharvest.io:26657",
     // Will not work.
-    rest: "http://34.83.0.237:26657/rest",
-    chainId: "gameofzoneshub-1a",
-    chainName: "GoZ Hub",
-    nativeCurrency: "doubloons",
+    rest: "http://ibc.bharvest.io:26657/rest",
+    chainId: "B-Harvest-2",
+    chainName: "B-Harvest",
+    nativeCurrency: "bhcoin",
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/cosmoshub-3"
         : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
-    currencies: ["doubloons"],
-    feeCurrencies: ["doubloons"]
+    currencies: ["bhcoin"],
+    feeCurrencies: ["bhcoin"],
+    faucetUrl: "http://34.64.105.250:8000"
+  },
+  {
+    rpc: "http://95.217.180.90:26657",
+    // Will not work.
+    rest: "http://95.217.180.90:26657/rest",
+    chainId: "p2p-org-2",
+    chainName: "P2P",
+    nativeCurrency: "ptp",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
+        : "http://localhost:8081/#/cosmoshub-3",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("cosmos"),
+    currencies: ["ptp"],
+    feeCurrencies: ["ptp"],
+    faucetUrl: "http://95.217.180.90:8000"
   },
   {
     rpc: "http://goz.desmos.network:80",
-    // will not work.
+    // Will not work.
     rest: "http://goz.desmos.network:80/rest",
-    chainId: "morpheus-goz-1a",
+    chainId: "morpheus-goz-2",
     chainName: "Morpheus",
     nativeCurrency: "daric",
     walletUrl:
@@ -61,9 +79,44 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/#/cosmoshub-3"
         : "http://localhost:8081/#/cosmoshub-3",
     bip44: new BIP44(44, 118, 0),
-    bech32Config: defaultBech32Config("desmos"),
+    bech32Config: defaultBech32Config("cosmos"),
     currencies: ["daric"],
-    feeCurrencies: ["daric"]
+    feeCurrencies: ["daric"],
+    faucetUrl: "http://34.64.105.250:8001"
+  },
+  {
+    rpc: "http://goz.val.network:26657",
+    // Will not work.
+    rest: "http://goz.val.network:26657/rest",
+    chainId: "Compass-2",
+    chainName: "Compass",
+    nativeCurrency: "compass",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
+        : "http://localhost:8081/#/cosmoshub-3",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("cosmos"),
+    currencies: ["compass"],
+    feeCurrencies: ["compass"],
+    faucetUrl: "http://goz.val.network:8000"
+  },
+  {
+    rpc: "http://3.112.29.150:26657",
+    // Will not work.
+    rest: "http://3.112.29.150:26657/rest",
+    chainId: "okchain-2",
+    chainName: "OKchain",
+    nativeCurrency: "okt",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
+        : "http://localhost:8081/#/cosmoshub-3",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("cosmos"),
+    currencies: ["okt"],
+    feeCurrencies: ["okt"],
+    faucetUrl: "http://3.112.29.150:8000"
   }
 ];
 
@@ -83,14 +136,29 @@ export const Currencies: {
     coinMinimalDenom: "uapsis",
     coinDecimals: 6
   },
-  doubloons: {
-    coinDenom: "DBL",
-    coinMinimalDenom: "doubloons",
+  bhcoin: {
+    coinDenom: "BHCOIN",
+    coinMinimalDenom: "bhcoin",
     coinDecimals: 6
   },
   daric: {
     coinDenom: "DARIC",
     coinMinimalDenom: "udaric",
+    coinDecimals: 6
+  },
+  compass: {
+    coinDenom: "COMPASS",
+    coinMinimalDenom: "compass",
+    coinDecimals: 6
+  },
+  ptp: {
+    coinDenom: "PTP",
+    coinMinimalDenom: "ptp",
+    coinDecimals: 6
+  },
+  okt: {
+    coinDenom: "OKT",
+    coinMinimalDenom: "okt",
     coinDecimals: 6
   }
 };
@@ -143,48 +211,114 @@ export interface IBCPathInfo {
 }
 
 export const EmbedIBCPathInfo: IBCPathInfo = {
-  ["chainapsis-1a"]: {
-    ["gameofzoneshub-1a"]: {
+  ["chainapsis-2"]: {
+    ["B-Harvest-2"]: {
       src: {
-        channelId: "keplrgozsrc",
+        channelId: "keplrchanbhdst",
         portId: "transfer"
       },
       dst: {
-        channelId: "keplrgozdst",
+        channelId: "keplrchanbhsrc",
         portId: "transfer"
       }
     },
-    ["morpheus-goz-1a"]: {
+    ["p2p-org-2"]: {
       src: {
-        channelId: "fiocxrsnjz",
+        channelId: "keplrchanptpdst",
         portId: "transfer"
       },
       dst: {
-        channelId: "sgxgjsihiq",
+        channelId: "keplrchanptpsrc",
+        portId: "transfer"
+      }
+    },
+    ["morpheus-goz-2"]: {
+      src: {
+        channelId: "keplrchanmordst",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "keplrchanmorsrc",
+        portId: "transfer"
+      }
+    },
+    ["Compass-2"]: {
+      src: {
+        channelId: "keplrchancomdst",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "keplrchancomsrc",
+        portId: "transfer"
+      }
+    },
+    ["okchain-2"]: {
+      src: {
+        channelId: "keplrchanokdst",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "keplrchanoksrc",
         portId: "transfer"
       }
     }
   },
-  ["morpheus-goz-1a"]: {
-    ["chainapsis-1a"]: {
+  ["B-Harvest-2"]: {
+    ["chainapsis-2"]: {
       src: {
-        channelId: "sgxgjsihiq",
+        channelId: "keplrchanbhsrc",
         portId: "transfer"
       },
       dst: {
-        channelId: "fiocxrsnjz",
+        channelId: "keplrchanbhdst",
         portId: "transfer"
       }
     }
   },
-  ["gameofzoneshub-1a"]: {
-    ["chainapsis-1a"]: {
+  ["p2p-org-2"]: {
+    ["chainapsis-2"]: {
       src: {
-        channelId: "keplrgozdst",
+        channelId: "keplrchanptpsrc",
         portId: "transfer"
       },
       dst: {
-        channelId: "keplrgozsrc",
+        channelId: "keplrchanptpdst",
+        portId: "transfer"
+      }
+    }
+  },
+  ["morpheus-goz-2"]: {
+    ["chainapsis-2"]: {
+      src: {
+        channelId: "keplrchanmorsrc",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "keplrchanmordst",
+        portId: "transfer"
+      }
+    }
+  },
+  ["Compass-2"]: {
+    ["chainapsis-2"]: {
+      src: {
+        channelId: "keplrchancomsrc",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "keplrchancomdst",
+        portId: "transfer"
+      }
+    }
+  },
+  ["okchain-2"]: {
+    ["chainapsis-2"]: {
+      src: {
+        channelId: "keplrchanoksrc",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "keplrchanokdst",
         portId: "transfer"
       }
     }
