@@ -389,7 +389,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               }
 
               const amountInt = new Dec(amount).mul(precision).truncate();
-              if (amountInt.add(feeAmount).gt(balacne.amount)) {
+              if (amountInt.gt(balacne.amount)) {
                 setError(
                   "amount",
                   "not-enough-fund",
