@@ -117,6 +117,40 @@ export const EmbedChainInfos: ChainInfo[] = [
     currencies: ["okt"],
     feeCurrencies: ["okt"],
     faucetUrl: "http://3.112.29.150:8000"
+  },
+  {
+    rpc: "http://tamagotchi.cosmos.fish:26657",
+    // Will not work.
+    rest: "http://tamagotchi.cosmos.fish:26657/rest",
+    chainId: "tamagotchi",
+    chainName: "Tamagotchi",
+    nativeCurrency: "tamago",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
+        : "http://localhost:8081/#/cosmoshub-3",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("cosmos"),
+    currencies: ["tamago"],
+    feeCurrencies: ["tamago"],
+    faucetUrl: "http://tamagotchi.cosmos.fish:8001"
+  },
+  {
+    rpc: "http://tamagotchi.cosmos.fish:46657",
+    // Will not work.
+    rest: "http://tamagotchi.cosmos.fish:46657/rest",
+    chainId: "tamagotchi-resources",
+    chainName: "Tamagotchi Resources",
+    nativeCurrency: "gas",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/cosmoshub-3"
+        : "http://localhost:8081/#/cosmoshub-3",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("cosmos"),
+    currencies: ["play", "feed", "clean"],
+    feeCurrencies: ["gas"],
+    faucetUrl: "http://tamagotchi.cosmos.fish:8000"
   }
 ];
 
@@ -160,6 +194,36 @@ export const Currencies: {
     coinDenom: "OKT",
     coinMinimalDenom: "okt",
     coinDecimals: 6
+  },
+  gas: {
+    coinDenom: "GAS",
+    coinMinimalDenom: "gas",
+    coinDecimals: 0
+  },
+  tamago: {
+    coinDenom: "TAMAGO",
+    coinMinimalDenom: "tamago",
+    coinDecimals: 0
+  },
+  play: {
+    coinDenom: "PLAY",
+    coinMinimalDenom: "play",
+    coinDecimals: 0
+  },
+  feed: {
+    coinDenom: "FEED",
+    coinMinimalDenom: "feed",
+    coinDecimals: 0
+  },
+  clean: {
+    coinDenom: "CLEAN",
+    coinMinimalDenom: "clean",
+    coinDecimals: 0
+  },
+  stake: {
+    coinDenom: "STAKE",
+    coinMinimalDenom: "stake",
+    coinDecimals: 0
   }
 };
 
@@ -319,6 +383,30 @@ export const EmbedIBCPathInfo: IBCPathInfo = {
       },
       dst: {
         channelId: "keplrchanokdst",
+        portId: "transfer"
+      }
+    }
+  },
+  ["tamagotchi-resources"]: {
+    ["tamagotchi"]: {
+      src: {
+        channelId: "icmvwvsmee",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "wzgulzlnll",
+        portId: "transfer"
+      }
+    }
+  },
+  ["tamagotchi"]: {
+    ["tamagotchi-resources"]: {
+      src: {
+        channelId: "wzgulzlnll",
+        portId: "transfer"
+      },
+      dst: {
+        channelId: "icmvwvsmee",
         portId: "transfer"
       }
     }
