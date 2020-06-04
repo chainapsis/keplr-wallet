@@ -15,9 +15,13 @@ Extension's build output is placed in `/dist`, and you can check out [this page]
 
 You can add your chain by adding the chain infomation into `chain-info.ts`. 
 
+## Example Files
+
+Refer to the [Keplr Example repository](https://github.com/chainapsis/keplr-example) for examples of how to integrate Keplr signing support for your web interface/application.
+
 ## Author
 
-👤 **everett-protocol**
+👤 **Chainapsis**
 
-* Twitter: [@everettprotocol](https://twitter.com/everettprotocol)
-* Github: [@everett-protocol](https://github.com/everett-protocol)
+* Twitter: [@chainapsis](https://twitter.com/chainapsis)
+* Github: [@chainapsis](https://github.com/chainapsis)
