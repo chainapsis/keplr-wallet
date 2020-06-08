@@ -1,7 +1,12 @@
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import { getCurrencyFromDenom, getCurrencyFromMinimalDenom } from "../currency";
+import {
+  Currency,
+  getCurrencyFromDenom,
+  getCurrencyFromMinimalDenom
+} from "../currency";
+import { DecUtils } from "../dec-utils";
 
 export class CoinUtils {
   static amountOf(coins: Coin[], denom: string): Int {
@@ -93,5 +98,19 @@ export class CoinUtils {
       (fractionStr.length > 0 ? dot : "") +
       fractionStr
     );
+  }
+
+  static coinToTrimmedString(
+    coin: Coin,
+    currency: Currency,
+    separator: string = " "
+  ): string {
+    const dec = new Dec(coin.amount).quoTruncate(
+      DecUtils.getPrecisionDec(currency.coinDecimals)
+    );
+
+    return `${DecUtils.decToStrWithoutTrailingZeros(dec)}${separator}${
+      currency.coinDenom
+    }`;
   }
 }

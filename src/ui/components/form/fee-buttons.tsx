@@ -12,7 +12,6 @@ import { Currency } from "../../../common/currency";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { CoinUtils } from "../../../common/coin-utils";
-import { useFormContext } from "react-hook-form";
 import { DecUtils } from "../../../common/dec-utils";
 import {
   Button,
@@ -27,6 +26,7 @@ import { useLanguage } from "../../popup/language";
 import { useStore } from "../../popup/stores";
 import { getFiatCurrencyFromLanguage } from "../../../common/currency";
 import { observer } from "mobx-react";
+import { useTxState } from "../../popup/contexts/tx";
 
 export type GasPriceStep = {
   low: Dec;
@@ -50,12 +50,7 @@ export interface FeeButtonsProps {
   };
   error?: string;
 
-  // TODO: handle muliple fees.
-  currency: Currency;
-  gas: number;
   gasPriceStep: GasPriceStep;
-
-  name: string;
 }
 
 enum FeeSelect {
@@ -69,14 +64,23 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     label,
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
     error,
-    currency,
-    gas,
-    gasPriceStep,
-    name
+    gasPriceStep
   }) => {
     const { priceStore } = useStore();
     const language = useLanguage();
-    const { setValue } = useFormContext();
+    const txState = useTxState();
+
+    const [currency, setCurrency] = useState<Currency | undefined>(undefined);
+
+    // Set current currency.
+    useEffect(() => {
+      // Set currency as the first of new fee currencies. Multiple fee currencies are not supported yet.
+      if (txState.feeCurrencies.length > 0) {
+        setCurrency(txState.feeCurrencies[0]);
+      } else {
+        setCurrency(undefined);
+      }
+    }, [currency, txState.feeCurrencies]);
 
     const [feeSelect, setFeeSelect] = useState(FeeSelect.AVERAGE);
     const [feeLow, setFeeLow] = useState<Coin | undefined>();
@@ -85,58 +89,69 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
 
     const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
     const price =
-      priceStore.getValue(fiatCurrency.currency, currency.coinGeckoId)?.value ||
-      new Dec(0);
+      priceStore.getValue(fiatCurrency.currency, currency?.coinGeckoId)
+        ?.value || new Dec(0);
 
     useEffect(() => {
-      if (!priceStore.hasFiat(fiatCurrency.currency) && currency.coinGeckoId) {
+      if (
+        currency &&
+        !priceStore.hasFiat(fiatCurrency.currency) &&
+        currency.coinGeckoId
+      ) {
         priceStore.fetchValue([fiatCurrency.currency], [currency.coinGeckoId]);
       }
-    }, [currency.coinGeckoId, fiatCurrency.currency, priceStore]);
+    }, [currency, fiatCurrency.currency, priceStore]);
 
     useEffect(() => {
-      let precision = new Dec(1);
-      for (let i = 0; i < currency.coinDecimals; i++) {
-        precision = precision.mul(new Dec(10));
+      if (currency) {
+        let precision = new Dec(1);
+        for (let i = 0; i < currency.coinDecimals; i++) {
+          precision = precision.mul(new Dec(10));
+        }
+
+        const feeLow = new Coin(
+          currency.coinMinimalDenom,
+          gasPriceStep.low.mul(new Dec(txState.gas.toString())).truncate()
+        );
+        setFeeLow(feeLow);
+
+        const feeAverage = new Coin(
+          currency.coinMinimalDenom,
+          gasPriceStep.average.mul(new Dec(txState.gas.toString())).truncate()
+        );
+        setFeeAverage(feeAverage);
+
+        const feeHigh = new Coin(
+          currency.coinMinimalDenom,
+          gasPriceStep.high.mul(new Dec(txState.gas.toString())).truncate()
+        );
+        setFeeHigh(feeHigh);
       }
-
-      const feeLow = new Coin(
-        currency.coinMinimalDenom,
-        gasPriceStep.low.mul(new Dec(gas.toString())).truncate()
-      );
-      setFeeLow(feeLow);
-
-      const feeAverage = new Coin(
-        currency.coinMinimalDenom,
-        gasPriceStep.average.mul(new Dec(gas.toString())).truncate()
-      );
-      setFeeAverage(feeAverage);
-
-      const feeHigh = new Coin(
-        currency.coinMinimalDenom,
-        gasPriceStep.high.mul(new Dec(gas.toString())).truncate()
-      );
-      setFeeHigh(feeHigh);
     }, [
-      currency.coinDecimals,
-      currency.coinMinimalDenom,
-      gas,
+      currency,
       gasPriceStep.average,
       gasPriceStep.high,
-      gasPriceStep.low
+      gasPriceStep.low,
+      txState.gas
     ]);
 
     useEffect(() => {
       if (feeSelect === FeeSelect.LOW) {
-        setValue(name, feeLow);
+        if (feeLow) {
+          txState.setFees([feeLow]);
+        }
       } else if (feeSelect === FeeSelect.AVERAGE) {
-        setValue(name, feeAverage);
+        if (feeAverage) {
+          txState.setFees([feeAverage]);
+        }
       } else if (feeSelect === FeeSelect.HIGH) {
-        setValue(name, feeHigh);
+        if (feeHigh) {
+          txState.setFees([feeHigh]);
+        }
       } else {
         throw new Error("Invalid fee select");
       }
-    }, [feeAverage, feeHigh, feeLow, feeSelect, name, setValue]);
+    }, [feeAverage, feeHigh, feeLow, feeSelect]);
 
     const [inputId] = useState(() => {
       const bytes = new Uint8Array(4);
@@ -167,7 +182,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 "text-muted": feeSelect !== FeeSelect.LOW
               })}
             >
-              {price.gt(new Dec(0)) && feeLow
+              {currency && price.gt(new Dec(0)) && feeLow
                 ? `${
                     fiatCurrency.symbol
                   }${DecUtils.removeTrailingZerosFromDecStr(
@@ -189,7 +204,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 "text-muted": feeSelect !== FeeSelect.LOW
               })}
             >
-              {feeLow
+              {currency && feeLow
                 ? `${DecUtils.removeTrailingZerosFromDecStr(
                     CoinUtils.parseDecAndDenomFromCoin(feeLow).amount
                   )}${currency.coinDenom}`
@@ -213,7 +228,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 "text-muted": feeSelect !== FeeSelect.AVERAGE
               })}
             >
-              {price.gt(new Dec(0)) && feeAverage
+              {currency && price.gt(new Dec(0)) && feeAverage
                 ? `${
                     fiatCurrency.symbol
                   }${DecUtils.removeTrailingZerosFromDecStr(
@@ -235,7 +250,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 "text-muted": feeSelect !== FeeSelect.AVERAGE
               })}
             >
-              {feeAverage
+              {currency && feeAverage
                 ? `${DecUtils.removeTrailingZerosFromDecStr(
                     CoinUtils.parseDecAndDenomFromCoin(feeAverage).amount
                   )}${currency.coinDenom}`
@@ -257,7 +272,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 "text-muted": feeSelect !== FeeSelect.HIGH
               })}
             >
-              {price.gt(new Dec(0)) && feeHigh
+              {currency && price.gt(new Dec(0)) && feeHigh
                 ? `${
                     fiatCurrency.symbol
                   }${DecUtils.removeTrailingZerosFromDecStr(
@@ -279,7 +294,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 "text-muted": feeSelect !== FeeSelect.HIGH
               })}
             >
-              {feeHigh
+              {currency && feeHigh
                 ? `${DecUtils.removeTrailingZerosFromDecStr(
                     CoinUtils.parseDecAndDenomFromCoin(feeHigh).amount
                   )}${currency.coinDenom}`

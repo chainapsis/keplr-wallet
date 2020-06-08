@@ -53,6 +53,7 @@ import {
 } from "../../../hooks/use-ens";
 import { useLanguage } from "../../language";
 import { AddressBookData, AddressBookPage } from "../setting/address-book";
+import { useTxState, withTxStateProvider } from "../../contexts/tx";
 
 interface FormData {
   recipient: string;
@@ -63,7 +64,7 @@ interface FormData {
 }
 
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
-  ({ history }) => {
+  withTxStateProvider(({ history }) => {
     const intl = useIntl();
 
     const formMethods = useForm<FormData>({
@@ -110,6 +111,30 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
 
     const [gasForSendMsg] = useState(80000);
 
+    const txState = useTxState();
+
+    useEffect(() => {
+      txState.setBalances(accountStore.assets);
+    }, [accountStore.assets, txState]);
+
+    const memorizedCurrencies = useMemo(
+      () => getCurrencies(chainStore.chainInfo.currencies),
+      [chainStore.chainInfo.currencies]
+    );
+    const memorizedFeeCurrencies = useMemo(
+      () => getCurrencies(chainStore.chainInfo.feeCurrencies),
+      [chainStore.chainInfo.feeCurrencies]
+    );
+
+    useEffect(() => {
+      txState.setCurrencies(memorizedCurrencies);
+      txState.setFeeCurrencies(memorizedFeeCurrencies);
+    }, [memorizedCurrencies, memorizedFeeCurrencies, txState]);
+
+    useEffect(() => {
+      txState.setGas(gasForSendMsg);
+    }, [gasForSendMsg, txState]);
+
     const feeCurrency = useMemo(() => {
       return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
     }, [chainStore.chainInfo.feeCurrencies]);
@@ -126,47 +151,9 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       }
     }, [feeCurrency?.coinGeckoId, language.language, priceStore]);
 
-    const [allBalance, setAllBalance] = useState(false);
-
-    const onChangeAllBalance = useCallback((allBalance: boolean) => {
-      setAllBalance(allBalance);
-    }, []);
-
     const fee = watch("fee");
     const amount = watch("amount");
     const denom = watch("denom");
-
-    useEffect(() => {
-      if (allBalance) {
-        setValue("amount", "");
-
-        const currency = getCurrencyFromDenom(denom);
-        if (fee && denom && currency) {
-          let allAmount = new Int(0);
-          for (const balacne of accountStore.assets) {
-            if (balacne.denom === currency.coinMinimalDenom) {
-              allAmount = balacne.amount;
-              break;
-            }
-          }
-
-          if (allAmount.gte(fee.amount)) {
-            allAmount = allAmount.sub(fee.amount);
-
-            const dec = new Dec(allAmount);
-            let precision = new Dec(1);
-            for (let i = 0; i < currency.coinDecimals; i++) {
-              precision = precision.mul(new Dec(10));
-            }
-
-            setValue(
-              "amount",
-              dec.quoTruncate(precision).toString(currency.coinDecimals)
-            );
-          }
-        }
-      }
-    }, [fee, accountStore.assets, allBalance, setValue, denom]);
 
     useEffect(() => {
       const feeAmount = fee ? fee.amount : new Int(0);
@@ -420,41 +407,14 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                 }
               />
               <CoinInput
-                currencies={getCurrencies(chainStore.chainInfo.currencies)}
                 label={intl.formatMessage({ id: "send.input.amount" })}
-                balances={accountStore.assets}
                 balanceText={intl.formatMessage({
                   id: "send.input-button.balance"
                 })}
-                onChangeAllBanace={onChangeAllBalance}
                 error={
                   (errors.amount && errors.amount.message) ||
                   (errors.denom && errors.denom.message)
                 }
-                input={{
-                  name: "amount",
-                  ref: register({
-                    required: intl.formatMessage({
-                      id: "send.input.amount.error.required"
-                    }),
-                    validate: () => {
-                      // Without this, react-form-hooks clears the errors added manually when validating.
-                      // So, re-validation per onChange will clear the errors related to amount.
-                      // To avoid this problem, jsut return the previous error when validating.
-                      // This is not good solution.
-                      // TODO: Make the process that checks that a user has enough assets be better.
-                      return errors?.amount?.message;
-                    }
-                  })
-                }}
-                select={{
-                  name: "denom",
-                  ref: register({
-                    required: intl.formatMessage({
-                      id: "send.input.amount.error.required"
-                    })
-                  })
-                }}
               />
               <TextArea
                 label={intl.formatMessage({ id: "send.input.memo" })}
@@ -474,11 +434,8 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                     }),
                     high: intl.formatMessage({ id: "fee-buttons.select.high" })
                   }}
-                  name="fee"
                   error={errors.fee && errors.fee.message}
-                  currency={feeCurrency!}
                   gasPriceStep={DefaultGasPriceStep}
-                  gas={gasForSendMsg}
                 />
               </FormContext>
             </div>
@@ -498,5 +455,5 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
         </form>
       </HeaderLayout>
     );
-  }
+  })
 );

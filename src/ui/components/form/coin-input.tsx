@@ -1,128 +1,124 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 
 import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
 
 import { Currency, getCurrencyFromDenom } from "../../../common/currency";
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import { ElementLike } from "react-hook-form/dist/types";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { FormFeedback, FormGroup, Input, InputGroup, Label } from "reactstrap";
+import { useTxState } from "../../popup/contexts/tx";
+import { DecUtils } from "../../../common/dec-utils";
+import { CoinUtils } from "../../../common/coin-utils";
+import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 export interface CoinInputProps {
-  currencies: Currency[];
-  balances?: Coin[];
   balanceText?: string;
 
   className?: string;
   label?: string;
   error?: string;
 
-  input: {
-    name: string;
-    ref: React.RefObject<HTMLInputElement> | ElementLike | null;
-  };
-
-  select: {
-    name: string;
-    ref: React.RefObject<HTMLSelectElement> | ElementLike | null;
-  };
-
-  onChangeAllBanace?: (allBalance: boolean) => void;
-}
-
-interface DecCoin {
-  dec: Dec;
-  decimals: number;
-  denom: string;
+  disableAllBalance?: boolean;
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = props => {
-  const {
-    currencies,
-    balances,
-    balanceText,
-    className,
-    label,
-    error,
-    input,
-    select,
-    onChangeAllBanace
-  } = props;
+  const { balanceText, className, label, error, disableAllBalance } = props;
+
+  const txState = useTxState();
+
+  console.log(txState);
 
   const [currency, setCurrency] = useState<Currency | undefined>();
-  const [step, setStep] = useState<string | undefined>();
-  const [balance, setBalance] = useState<DecCoin | undefined>();
+  const [step] = useState<string | undefined>("");
+  const [balance, setBalance] = useState<Coin | undefined>();
 
   const [allBalance, setAllBalance] = useState(false);
 
+  const [amount, setAmount] = useState<string>("");
+
+  // Set current currency.
   useEffect(() => {
     // If curreny currency is undefined, or new currencies don't have the matched current currency,
     // set currency as the first of new currencies.
     if (!currency) {
-      if (currencies.length > 0) {
-        setCurrency(currencies[0]);
+      if (txState.currencies.length > 0) {
+        setCurrency(txState.currencies[0]);
       }
     } else {
-      const find = currencies.find(c => {
+      const find = txState.currencies.find(c => {
         return c.coinMinimalDenom === currency.coinMinimalDenom;
       });
       if (!find) {
-        if (currencies.length > 0) {
-          setCurrency(currencies[0]);
+        if (txState.currencies.length > 0) {
+          setCurrency(txState.currencies[0]);
         }
+      } else {
+        setCurrency(find);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currencies]);
+  }, [currency, txState.currencies]);
 
+  // When the amount input is changes, set the amount for the tx state.
   useEffect(() => {
-    if (balances && currency) {
-      const decCoin: DecCoin = {
-        dec: new Dec(0),
-        decimals: currency.coinDecimals,
-        denom: currency.coinDenom
-      };
+    if (currency && amount) {
+      const int = new Dec(amount)
+        .mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals))
+        .truncate();
+      const coin = new Coin(currency.coinMinimalDenom, int);
 
-      for (const coin of balances) {
-        if (coin.denom === currency.coinMinimalDenom) {
-          let precision = new Dec(1);
-          for (let i = 0; i < currency.coinDecimals; i++) {
-            precision = precision.mul(new Dec(10));
-          }
-
-          let dec = new Dec(coin.amount);
-          dec = dec.quoTruncate(precision);
-
-          decCoin.dec = dec;
-          break;
-        }
+      // Check that the amount of tx state and new coin input are different.
+      // React can't check whether prev value is same as new value because this makes the new pointer of coin instance.
+      // So, it will make infinite render loop if there is no check that old and new value are different.
+      if (txState.amount?.toString() !== coin.toString()) {
+        txState.setAmount(coin);
       }
-
-      setBalance(decCoin);
+    } else {
+      txState.setAmount(null);
     }
-  }, [currency, balances]);
+  }, [amount, currency, txState]);
 
+  // Set the current balance of selected currency.
   useEffect(() => {
     if (currency) {
-      let dec = new Dec(1);
-      for (let i = 0; i < currency.coinDecimals; i++) {
-        dec = dec.quoTruncate(new Dec(10));
-      }
-      setStep(dec.toString(currency.coinDecimals));
-    } else {
-      setStep(undefined);
+      const balance = txState.balances.find(bal => {
+        return bal.denom === currency.coinMinimalDenom;
+      });
+      setBalance(balance);
     }
-  }, [currency]);
+  }, [currency, txState.balances]);
 
-  const canAllBalance =
-    onChangeAllBanace && balance && balance.dec.gt(new Dec(0));
+  // Set the coin amount if all balance is set.
+  useEffect(() => {
+    if (allBalance && balance && currency) {
+      const fee = txState.fees.find(
+        fee => fee.denom === currency.coinMinimalDenom
+      );
+
+      const subAmount = balance.amount.sub(fee ? fee.amount : new Int(0));
+      const decSubAmount = new Dec(subAmount).quoTruncate(
+        DecUtils.getPrecisionDec(currency.coinDecimals)
+      );
+      setAmount(
+        DecUtils.removeTrailingZerosFromDecStr(decSubAmount.toString())
+      );
+    }
+  }, [allBalance, balance, currency, txState.fees, txState.gas]);
 
   const [inputId] = useState(() => {
     const bytes = new Uint8Array(4);
     crypto.getRandomValues(bytes);
     return `input-${Buffer.from(bytes).toString("hex")}`;
   });
+
+  const toggleAllBalance = useCallback(() => {
+    setAllBalance(!allBalance);
+  }, [allBalance]);
 
   return (
     <FormGroup className={className}>
@@ -133,31 +129,25 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
           style={{ width: "100%" }}
         >
           {label}
-          {balances ? (
+          {txState.balances && currency && balance && !disableAllBalance ? (
             <div
-              className={classnames(styleCoinInput.balance, {
-                [styleCoinInput.clickable]: canAllBalance,
-                [styleCoinInput.clicked]: allBalance
-              })}
-              onClick={() => {
-                if (canAllBalance && onChangeAllBanace) {
-                  const prev = allBalance;
-                  setAllBalance(!prev);
-                  onChangeAllBanace(!prev);
+              className={classnames(
+                styleCoinInput.balance,
+                styleCoinInput.clickable,
+                {
+                  [styleCoinInput.clicked]: allBalance
                 }
-              }}
+              )}
+              onClick={toggleAllBalance}
             >
-              {balance
-                ? balanceText
-                  ? // TODO: Can use api in react-intl?
-                    `${balanceText}: 
-                        ${balance.dec.toString(balance.decimals)} ${
-                      balance.denom
-                    }`
-                  : `Balance: ${balance.dec.toString(balance.decimals)} ${
-                      balance.denom
-                    }`
-                : "?"}
+              {balanceText
+                ? // TODO: Can use api in react-intl?
+                  `${balanceText}: 
+                        ${CoinUtils.coinToTrimmedString(balance, currency)}`
+                : `Balance: ${CoinUtils.coinToTrimmedString(
+                    balance,
+                    currency
+                  )}`}
             </div>
           ) : null}
         </Label>
@@ -175,8 +165,11 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
           )}
           type="number"
           step={step}
-          name={input.name}
-          innerRef={input.ref as any}
+          value={amount}
+          onChange={useCallback(e => {
+            setAmount(e.target.value);
+            e.preventDefault();
+          }, [])}
           disabled={allBalance}
           autoComplete="off"
         />
@@ -187,18 +180,14 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
             styleCoinInput.select
           )}
           value={currency ? currency.coinDenom : ""}
-          onChange={e => {
+          onChange={useCallback(e => {
             const currency = getCurrencyFromDenom(e.target.value);
-            if (currency) {
-              setCurrency(currency);
-            }
+            setCurrency(currency);
             e.preventDefault();
-          }}
-          name={select.name}
-          innerRef={select.ref as any}
-          disabled={allBalance}
+          }, [])}
+          disabled={allBalance || !currency}
         >
-          {currencies.map((currency, i) => {
+          {txState.currencies.map((currency, i) => {
             return (
               <option key={i.toString()} value={currency.coinDenom}>
                 {currency.coinDenom}
