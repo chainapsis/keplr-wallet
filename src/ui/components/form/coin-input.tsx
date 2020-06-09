@@ -195,6 +195,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
             setAmount(e.target.value);
             e.preventDefault();
           }, [])}
+          min={0}
           disabled={allBalance}
           autoComplete="off"
         />
