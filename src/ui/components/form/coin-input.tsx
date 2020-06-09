@@ -43,7 +43,6 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
   const txState = useTxState();
 
   const [currency, setCurrency] = useState<Currency | undefined>();
-  const [step] = useState<string | undefined>("");
   const [balance, setBalance] = useState<Coin | undefined>();
 
   const [allBalance, setAllBalance] = useState(false);
@@ -189,7 +188,6 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
             styleCoinInput.input
           )}
           type="number"
-          step={step}
           value={amount}
           onChange={useCallback(e => {
             setAmount(e.target.value);
