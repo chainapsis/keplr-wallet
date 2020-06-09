@@ -50,7 +50,11 @@ export const AddAddressModal: FunctionComponent<{
   } = form;
 
   const address = watch("address");
-  const ens = useENS(chainInfo, address);
+  const ens = useENS(
+    address,
+    chainInfo.coinType,
+    chainInfo.bech32Config.bech32PrefixAccAddr
+  );
 
   useEffect(() => {
     if (isValidENS(address)) {
