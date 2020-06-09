@@ -119,7 +119,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     faucetUrl: "http://3.112.29.150:8000"
   },
   {
-    rpc: "http://tamagotchi.cosmos.fish:26657",
+    rpc: "https://goz-api.cosmos.fish/tamagotchi-rpc",
     // Will not work.
     rest: "http://tamagotchi.cosmos.fish:26657/rest",
     chainId: "tamagotchi",
@@ -133,10 +133,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     bech32Config: defaultBech32Config("cosmos"),
     currencies: ["tamago"],
     feeCurrencies: ["tamago"],
-    faucetUrl: "http://tamagotchi.cosmos.fish:8001"
+    faucetUrl: "https://goz-api.cosmos.fish/tamagotchi"
   },
   {
-    rpc: "http://tamagotchi.cosmos.fish:46657",
+    rpc: "https://goz-api.cosmos.fish/tamagotchi-res-rpc",
     // Will not work.
     rest: "http://tamagotchi.cosmos.fish:46657/rest",
     chainId: "tamagotchi-resources",
@@ -150,7 +150,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     bech32Config: defaultBech32Config("cosmos"),
     currencies: ["play", "feed", "clean"],
     feeCurrencies: ["gas"],
-    faucetUrl: "http://tamagotchi.cosmos.fish:8000"
+    faucetUrl: "https://goz-api.cosmos.fish/tamagotchi-res"
   }
 ];
 
