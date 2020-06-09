@@ -113,7 +113,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
             }
             break;
           case "amount":
-            if (!amount || amount.amount.equals(new Int(0))) {
+            if (!amount || amount.amount.lte(new Int(0))) {
               return false;
             }
             break;
