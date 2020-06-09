@@ -1,4 +1,3 @@
-import { ChainInfo } from "../../background/chains";
 import { useEffect, useMemo, useState } from "react";
 
 // TODO: Add definition for ethereum-ens.
@@ -44,7 +43,11 @@ export const isValidENS = (name: string): boolean => {
   return tld === "eth" || tld === "xyz" || tld === "luxe" || tld === "kred";
 };
 
-export const useENS = (chainInfo: ChainInfo, name: string) => {
+export const useENS = (
+  name: string,
+  coinType: number | undefined,
+  bech32Prefix: string
+) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
@@ -52,7 +55,7 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
   const [bech32Address, setBech32Address] = useState<string | undefined>();
 
   useEffect(() => {
-    if (chainInfo.coinType === undefined || chainInfo.coinType < 0) {
+    if (coinType === undefined || coinType < 0) {
       setError(new ENSUnsupportedError());
       setLoading(false);
       setAddress(undefined);
@@ -77,7 +80,7 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
         // It seems that ethereum ens doesn't support the abi of recent public resolver yet.
         // So to solve this problem, inject the recent public resolver's abi manually.
         const resolver = await ens.resolver(name, Resolver.abi);
-        const addr = await resolver.addr(chainInfo.coinType);
+        const addr = await resolver.addr(coinType);
         const address = new Address(Buffer.from(addr.replace("0x", ""), "hex"));
 
         const addressBytes = address.toBytes();
@@ -97,9 +100,7 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
 
         if (isMounted) {
           setAddress(addressBytes);
-          setBech32Address(
-            address.toBech32(chainInfo.bech32Config.bech32PrefixAccAddr)
-          );
+          setBech32Address(address.toBech32(bech32Prefix));
           setError(undefined);
         }
       } catch (e) {
@@ -120,7 +121,7 @@ export const useENS = (chainInfo: ChainInfo, name: string) => {
     return () => {
       isMounted = false;
     };
-  }, [chainInfo.bech32Config.bech32PrefixAccAddr, chainInfo.coinType, name]);
+  }, [bech32Prefix, coinType, name]);
 
   return useMemo(
     () => ({
