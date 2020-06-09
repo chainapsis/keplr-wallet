@@ -94,7 +94,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
             e => {
               if (
                 cosmosJS.sendMsgs &&
-                txState.isValid("recipient", "amount", "memo", "fees")
+                txState.isValid("recipient", "amount", "memo", "fees", "gas")
               ) {
                 e.preventDefault();
 
@@ -208,7 +208,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               data-loading={cosmosJS.loading}
               disabled={
                 cosmosJS.sendMsgs == null ||
-                !txState.isValid("recipient", "amount", "memo", "fees")
+                !txState.isValid("recipient", "amount", "memo", "fees", "gas")
               }
             >
               {intl.formatMessage({

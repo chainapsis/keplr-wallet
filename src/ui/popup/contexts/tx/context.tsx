@@ -13,7 +13,7 @@ import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { Currency } from "../../../../common/currency";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 
-type TxStateErrorType = "recipient" | "amount" | "memo" | "fees";
+type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 
 // Used for collecting the information related to sending tx.
 // This doesn't use reducer/dispatch pattern because this is relatively simple
@@ -122,6 +122,11 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
             break;
           case "fees":
             if (fees.length === 0) {
+              return false;
+            }
+            break;
+          case "gas":
+            if (gas <= 0) {
               return false;
             }
             break;
