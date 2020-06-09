@@ -13,7 +13,7 @@ export interface MemoInputProps {
 }
 
 // TODO: Handle the max memo bytes length for each chain.
-export const MemeInput: FunctionComponent<MemoInputProps> = ({
+export const MemoInput: FunctionComponent<MemoInputProps> = ({
   label,
   className
 }) => {

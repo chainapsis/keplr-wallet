@@ -6,8 +6,10 @@ import React, {
   useState
 } from "react";
 import {
+  AddressInput,
   FeeButtons,
   CoinInput,
+  MemoInput,
   DefaultGasPriceStep
 } from "../../../components/form";
 import { RouteComponentProps } from "react-router-dom";
@@ -33,8 +35,6 @@ import { useIntl } from "react-intl";
 import { Button } from "reactstrap";
 
 import { useTxState, withTxStateProvider } from "../../contexts/tx";
-import { AddressInput } from "../../../components/form/address-input";
-import { MemeInput } from "../../../components/form/memo-input";
 
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
   withTxStateProvider(({ history }) => {
@@ -185,7 +185,7 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   })
                 }}
               />
-              <MemeInput
+              <MemoInput
                 label={intl.formatMessage({ id: "send.input.memo" })}
               />
               <FeeButtons
