@@ -8,8 +8,6 @@ import React, {
 import {
   FeeButtons,
   CoinInput,
-  Input,
-  TextArea,
   DefaultGasPriceStep
 } from "../../../components/form";
 import { RouteComponentProps } from "react-router-dom";
@@ -21,83 +19,30 @@ import { PopupWalletProvider } from "../../wallet-provider";
 
 import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
 import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 
-import bigInteger from "big-integer";
-import useForm, { FormContext } from "react-hook-form";
 import { observer } from "mobx-react";
 
 import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
-import {
-  getCurrencies,
-  getCurrency,
-  getCurrencyFromDenom,
-  getFiatCurrencyFromLanguage
-} from "../../../../common/currency";
+import { getCurrencies } from "../../../../common/currency";
 
 import style from "./style.module.scss";
-import { CoinUtils } from "../../../../common/coin-utils";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 import { useNotification } from "../../../components/notification";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 import { useIntl } from "react-intl";
-import { Button, Modal, ModalBody } from "reactstrap";
+import { Button } from "reactstrap";
 
-import {
-  ENSUnsupportedError,
-  InvalidENSNameError,
-  isValidENS,
-  useENS
-} from "../../../hooks/use-ens";
-import { useLanguage } from "../../language";
-import { AddressBookData, AddressBookPage } from "../setting/address-book";
 import { useTxState, withTxStateProvider } from "../../contexts/tx";
-
-interface FormData {
-  recipient: string;
-  amount: string;
-  denom: string;
-  memo: string;
-  fee: Coin | undefined;
-}
+import { AddressInput } from "../../../components/form/address-input";
+import { MemeInput } from "../../../components/form/memo-input";
 
 export const SendPage: FunctionComponent<RouteComponentProps> = observer(
   withTxStateProvider(({ history }) => {
     const intl = useIntl();
 
-    const formMethods = useForm<FormData>({
-      defaultValues: {
-        recipient: "",
-        amount: "",
-        denom: "",
-        memo: ""
-      }
-    });
-    const {
-      register,
-      handleSubmit,
-      errors,
-      setValue,
-      watch,
-      setError,
-      clearError,
-      triggerValidation
-    } = formMethods;
-
-    register(
-      { name: "fee" },
-      {
-        required: intl.formatMessage({
-          id: "send.input.fee.error.required"
-        })
-      }
-    );
-
     const notification = useNotification();
 
-    const { chainStore, accountStore, priceStore } = useStore();
+    const { chainStore, accountStore } = useStore();
     const [walletProvider] = useState(
       new PopupWalletProvider(undefined, {
         onRequestSignature: (id: string) => {
@@ -135,121 +80,6 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       txState.setGas(gasForSendMsg);
     }, [gasForSendMsg, txState]);
 
-    const feeCurrency = useMemo(() => {
-      return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
-    }, [chainStore.chainInfo.feeCurrencies]);
-
-    const language = useLanguage();
-
-    useEffect(() => {
-      const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
-
-      const coinGeckoId = feeCurrency?.coinGeckoId;
-
-      if (coinGeckoId && !priceStore.hasFiat(fiatCurrency.currency)) {
-        priceStore.fetchValue([fiatCurrency.currency], [coinGeckoId]);
-      }
-    }, [feeCurrency?.coinGeckoId, language.language, priceStore]);
-
-    const fee = watch("fee");
-    const amount = watch("amount");
-    const denom = watch("denom");
-
-    useEffect(() => {
-      const feeAmount = fee ? fee.amount : new Int(0);
-      const currency = getCurrencyFromDenom(denom);
-      try {
-        if (currency && amount) {
-          let find = false;
-          for (const balacne of accountStore.assets) {
-            if (balacne.denom === currency.coinMinimalDenom) {
-              let precision = new Dec(1);
-              for (let i = 0; i < currency.coinDecimals; i++) {
-                precision = precision.mul(new Dec(10));
-              }
-
-              const amountInt = new Dec(amount).mul(precision).truncate();
-              if (amountInt.add(feeAmount).gt(balacne.amount)) {
-                setError(
-                  "amount",
-                  "not-enough-fund",
-                  intl.formatMessage({
-                    id: "send.input.amount.error.insufficient"
-                  })
-                );
-              } else {
-                clearError("amount");
-              }
-              find = true;
-              break;
-            }
-          }
-
-          if (!find) {
-            setError(
-              "amount",
-              "not-enough-fund",
-              intl.formatMessage({
-                id: "send.input.amount.error.insufficient"
-              })
-            );
-          }
-        } else {
-          clearError("amount");
-        }
-      } catch {
-        clearError("amount");
-      }
-    }, [accountStore.assets, amount, clearError, denom, fee, intl, setError]);
-
-    const recipient = watch("recipient");
-    const ens = useENS(chainStore.chainInfo, recipient);
-
-    useEffect(() => {
-      if (isValidENS(recipient)) {
-        triggerValidation({ name: "recipient" });
-      }
-    }, [ens, recipient, triggerValidation]);
-
-    const switchENSErrorToIntl = (e: Error) => {
-      if (e instanceof InvalidENSNameError) {
-        return intl.formatMessage({
-          id: "send.input.recipient.error.ens-invalid-name"
-        });
-      } else if (e.message.includes("ENS name not found")) {
-        return intl.formatMessage({
-          id: "send.input.recipient.error.ens-not-found"
-        });
-      } else if (e instanceof ENSUnsupportedError) {
-        return intl.formatMessage({
-          id: "send.input.recipient.error.ens-not-supported"
-        });
-      } else {
-        return intl.formatMessage({
-          id: "sned.input.recipient.error.ens-unknown-error"
-        });
-      }
-    };
-
-    const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
-
-    const openAddressBook = useCallback(() => {
-      setIsAddressBookOpen(true);
-    }, []);
-
-    const closeAddressBook = useCallback(() => {
-      setIsAddressBookOpen(false);
-    }, []);
-
-    const onSelectAddressBook = useCallback(
-      (data: AddressBookData) => {
-        closeAddressBook();
-        setValue("recipient", data.address);
-        setValue("memo", data.memo);
-      },
-      [closeAddressBook, setValue]
-    );
-
     return (
       <HeaderLayout
         showChainName
@@ -258,72 +88,35 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
           history.goBack();
         }}
       >
-        <Modal
-          isOpen={isAddressBookOpen}
-          backdrop={false}
-          className={style.fullModal}
-          wrapClassName={style.fullModal}
-          contentClassName={style.fullModal}
-        >
-          <ModalBody className={style.fullModal}>
-            <AddressBookPage
-              onBackButton={closeAddressBook}
-              onSelect={onSelectAddressBook}
-              hideChainDropdown={true}
-            />
-          </ModalBody>
-        </Modal>
         <form
           className={style.formContainer}
-          onSubmit={e => {
-            // React form hook doesn't block submitting when error is delivered outside.
-            // So, jsut check if errors exists manually, and if it exists, do nothing.
-            if (errors.amount && errors.amount.message) {
-              e.preventDefault();
-              return;
-            }
+          onSubmit={useCallback(
+            e => {
+              if (
+                cosmosJS.sendMsgs &&
+                txState.isValid("recipient", "amount", "memo", "fees")
+              ) {
+                e.preventDefault();
 
-            // If recipient is ENS name and ENS is loading,
-            // don't send the assets before ENS is fully loaded.
-            if (isValidENS(recipient) && ens.loading) {
-              e.preventDefault();
-              return;
-            }
-
-            handleSubmit(async (data: FormData) => {
-              const coin = CoinUtils.getCoinFromDecimals(
-                data.amount,
-                data.denom
-              );
-
-              const recipient = isValidENS(data.recipient)
-                ? ens.bech32Address
-                : data.recipient;
-              if (!recipient) {
-                throw new Error("Fail to fetch address from ENS");
-              }
-              const msg = new MsgSend(
-                AccAddress.fromBech32(
-                  accountStore.bech32Address,
-                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                ),
-                AccAddress.fromBech32(
-                  recipient,
-                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                ),
-                [coin]
-              );
-
-              const config: TxBuilderConfig = {
-                gas: bigInteger(gasForSendMsg),
-                memo: data.memo,
-                fee: data.fee as Coin
-              };
-
-              if (cosmosJS.sendMsgs) {
-                await cosmosJS.sendMsgs(
+                const msg = new MsgSend(
+                  AccAddress.fromBech32(
+                    accountStore.bech32Address,
+                    chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                  ),
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  [msg!],
+                  txState.recipient!,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  [txState.amount!]
+                );
+
+                const config: TxBuilderConfig = {
+                  gas: txState.gas,
+                  memo: txState.memo,
+                  fee: txState.fees
+                };
+
+                cosmosJS.sendMsgs(
+                  [msg],
                   config,
                   () => {
                     history.replace("/");
@@ -344,100 +137,68 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
                   "commit"
                 );
               }
-            })(e);
-          }}
+            },
+            [
+              accountStore.bech32Address,
+              chainStore.chainInfo.bech32Config.bech32PrefixAccAddr,
+              cosmosJS,
+              history,
+              notification,
+              txState
+            ]
+          )}
         >
           <div className={style.formInnerContainer}>
             <div>
-              <Input
-                type="text"
+              <AddressInput
                 label={intl.formatMessage({ id: "send.input.recipient" })}
-                name="recipient"
-                text={
-                  isValidENS(recipient) ? (
-                    ens.loading ? (
-                      <i className="fas fa-spinner fa-spin" />
-                    ) : (
-                      ens.bech32Address
-                    )
-                  ) : (
-                    undefined
-                  )
+                bech32Prefix={
+                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
                 }
-                error={
-                  (isValidENS(recipient) &&
-                    ens.error &&
-                    switchENSErrorToIntl(ens.error)) ||
-                  (errors.recipient && errors.recipient.message)
-                }
-                ref={register({
-                  required: intl.formatMessage({
-                    id: "send.input.recipient.error.required"
+                coinType={chainStore.chainInfo.coinType}
+                errorTexts={{
+                  invalidBech32Address: intl.formatMessage({
+                    id: "send.input.recipient.error.invalid"
                   }),
-                  validate: async (value: string) => {
-                    if (!isValidENS(value)) {
-                      try {
-                        AccAddress.fromBech32(
-                          value,
-                          chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                        );
-                      } catch (e) {
-                        return intl.formatMessage({
-                          id: "send.input.recipient.error.invalid"
-                        });
-                      }
-                    } else {
-                      if (ens.error) {
-                        return ens.error.message;
-                      }
-                    }
-                  }
-                })}
-                autoComplete="off"
-                append={
-                  <Button
-                    className={style.addressBookButton}
-                    color="primary"
-                    type="button"
-                    outline
-                    onClick={openAddressBook}
-                  >
-                    <i className="fas fa-address-book" />
-                  </Button>
-                }
+                  invalidENSName: intl.formatMessage({
+                    id: "send.input.recipient.error.ens-invalid-name"
+                  }),
+                  ensNameNotFound: intl.formatMessage({
+                    id: "send.input.recipient.error.ens-not-found"
+                  }),
+                  ensUnsupported: intl.formatMessage({
+                    id: "send.input.recipient.error.ens-not-supported"
+                  }),
+                  ensUnknownError: intl.formatMessage({
+                    id: "sned.input.recipient.error.ens-unknown-error"
+                  })
+                }}
               />
               <CoinInput
                 label={intl.formatMessage({ id: "send.input.amount" })}
                 balanceText={intl.formatMessage({
                   id: "send.input-button.balance"
                 })}
-                error={
-                  (errors.amount && errors.amount.message) ||
-                  (errors.denom && errors.denom.message)
-                }
+                errorTexts={{
+                  insufficient: intl.formatMessage({
+                    id: "send.input.amount.error.insufficient"
+                  })
+                }}
               />
-              <TextArea
+              <MemeInput
                 label={intl.formatMessage({ id: "send.input.memo" })}
-                name="memo"
-                rows={2}
-                style={{ resize: "none" }}
-                error={errors.memo && errors.memo.message}
-                ref={register({ required: false })}
               />
-              <FormContext {...formMethods}>
-                <FeeButtons
-                  label={intl.formatMessage({ id: "send.input.fee" })}
-                  feeSelectLabels={{
-                    low: intl.formatMessage({ id: "fee-buttons.select.low" }),
-                    average: intl.formatMessage({
-                      id: "fee-buttons.select.average"
-                    }),
-                    high: intl.formatMessage({ id: "fee-buttons.select.high" })
-                  }}
-                  error={errors.fee && errors.fee.message}
-                  gasPriceStep={DefaultGasPriceStep}
-                />
-              </FormContext>
+              <FeeButtons
+                label={intl.formatMessage({ id: "send.input.fee" })}
+                feeSelectLabels={{
+                  low: intl.formatMessage({ id: "fee-buttons.select.low" }),
+                  average: intl.formatMessage({
+                    id: "fee-buttons.select.average"
+                  }),
+                  high: intl.formatMessage({ id: "fee-buttons.select.high" })
+                }}
+                gasPriceStep={DefaultGasPriceStep}
+              />
             </div>
             <div style={{ flex: 1 }} />
             <Button
@@ -445,7 +206,10 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
               color="primary"
               block
               data-loading={cosmosJS.loading}
-              disabled={cosmosJS.sendMsgs == null}
+              disabled={
+                cosmosJS.sendMsgs == null ||
+                !txState.isValid("recipient", "amount", "memo", "fees")
+              }
             >
               {intl.formatMessage({
                 id: "send.button.send"
