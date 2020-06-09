@@ -17,22 +17,30 @@ import { DecUtils } from "../../../common/dec-utils";
 import { CoinUtils } from "../../../common/coin-utils";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 
+const ErrorIdInsufficient = "insufficient";
+
 export interface CoinInputProps {
   balanceText?: string;
 
   className?: string;
   label?: string;
-  error?: string;
+  errorTexts: {
+    insufficient: string;
+  };
 
   disableAllBalance?: boolean;
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = props => {
-  const { balanceText, className, label, error, disableAllBalance } = props;
+  const {
+    balanceText,
+    className,
+    label,
+    errorTexts,
+    disableAllBalance
+  } = props;
 
   const txState = useTxState();
-
-  console.log(txState);
 
   const [currency, setCurrency] = useState<Currency | undefined>();
   const [step] = useState<string | undefined>("");
@@ -109,6 +117,23 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
       );
     }
   }, [allBalance, balance, currency, txState.fees, txState.gas]);
+
+  // Check that user has enough balance to send.
+  useEffect(() => {
+    if (txState.amount) {
+      const needs = CoinUtils.concat(txState.amount, ...txState.fees);
+      for (const need of needs) {
+        const balance = CoinUtils.amountOf(txState.balances, need.denom);
+        if (balance.lt(need.amount)) {
+          txState.setError("amount", ErrorIdInsufficient, "insufficient fund");
+          return;
+        }
+      }
+      txState.setError("amount", ErrorIdInsufficient, null);
+    } else {
+      txState.setError("amount", ErrorIdInsufficient, null);
+    }
+  }, [txState]);
 
   const [inputId] = useState(() => {
     const bytes = new Uint8Array(4);
@@ -196,8 +221,10 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
           })}
         </Input>
       </InputGroup>
-      {error ? (
-        <FormFeedback style={{ display: "block" }}>{error}</FormFeedback>
+      {txState.getError("amount", ErrorIdInsufficient) ? (
+        <FormFeedback style={{ display: "block" }}>
+          {errorTexts.insufficient}
+        </FormFeedback>
       ) : null}
     </FormGroup>
   );

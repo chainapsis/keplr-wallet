@@ -27,6 +27,30 @@ export class CoinUtils {
     });
   }
 
+  static concat(...coins: Coin[]): Coin[] {
+    if (coins.length === 0) {
+      return [];
+    }
+
+    const arr = coins.slice();
+    const reducer = (accumulator: Coin[], coin: Coin) => {
+      // Find the duplicated denom.
+      const find = accumulator.find(c => c.denom === coin.denom);
+      // If duplicated coin exists, add the amount to duplicated one.
+      if (find) {
+        const newCoin = new Coin(find.denom, find.amount.add(coin.amount));
+        accumulator.push(newCoin);
+      } else {
+        const newCoin = new Coin(coin.denom, coin.amount);
+        accumulator.push(newCoin);
+      }
+
+      return accumulator;
+    };
+
+    return arr.reduce(reducer, []);
+  }
+
   static getCoinFromDecimals(decAmountStr: string, denom: string): Coin {
     const currency = getCurrencyFromDenom(denom);
     if (!currency) {
