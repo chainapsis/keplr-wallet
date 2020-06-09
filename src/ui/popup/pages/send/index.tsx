@@ -381,31 +381,54 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       try {
         if (currency && amount) {
           let find = false;
-          for (const balacne of accountStore.assets) {
-            if (balacne.denom === currency.coinMinimalDenom) {
-              let precision = new Dec(1);
-              for (let i = 0; i < currency.coinDecimals; i++) {
-                precision = precision.mul(new Dec(10));
-              }
+          let gasFind = false;
 
-              const amountInt = new Dec(amount).mul(precision).truncate();
-              if (amountInt.gt(balacne.amount)) {
-                setError(
-                  "amount",
-                  "not-enough-fund",
-                  intl.formatMessage({
-                    id: "send.input.amount.error.insufficient"
-                  })
-                );
-              } else {
-                clearError("amount");
+          // Check balance of sending currency
+          const sendBalance = accountStore.assets.find(
+            e => e.denom === currency.coinMinimalDenom
+          );
+
+          if (sendBalance) {
+            let precision = new Dec(1);
+            for (let i = 0; i < currency.coinDecimals; i++) {
+              precision = precision.mul(new Dec(10));
+            }
+            const amountInt = new Dec(amount).mul(precision).truncate();
+
+            // Check same currency for gas and sending
+            if (currency.coinMinimalDenom === feeCurrency?.coinMinimalDenom) {
+              if (!amountInt.add(feeAmount).gt(sendBalance.amount)) {
+                find = true;
+                gasFind = true;
               }
-              find = true;
-              break;
+            } else {
+              // Check other case
+              if (!amountInt.gt(sendBalance.amount)) {
+                find = true;
+              }
             }
           }
 
-          if (!find) {
+          // Check balance of gas currency
+          if (!gasFind && feeCurrency) {
+            const gasBalance = accountStore.assets.find(
+              e => e.denom === feeCurrency?.coinMinimalDenom
+            );
+
+            if (gasBalance) {
+              let precision = new Dec(1);
+              for (let i = 0; i < feeCurrency.coinDecimals; i++) {
+                precision = precision.mul(new Dec(10));
+              }
+              const amountInt = new Dec(feeAmount).mul(precision).truncate();
+
+              if (!amountInt.gt(gasBalance.amount)) {
+                gasFind = true;
+              }
+            }
+          }
+
+          if (!find || !gasFind) {
             setError(
               "amount",
               "not-enough-fund",
@@ -420,7 +443,16 @@ export const SendPage: FunctionComponent<RouteComponentProps> = observer(
       } catch {
         clearError("amount");
       }
-    }, [accountStore.assets, amount, clearError, denom, fee, intl, setError]);
+    }, [
+      accountStore.assets,
+      amount,
+      clearError,
+      denom,
+      fee,
+      feeCurrency,
+      intl,
+      setError
+    ]);
 
     const recipient = watch("recipient");
     const ens = useENS(
