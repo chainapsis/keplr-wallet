@@ -10,29 +10,23 @@ import { HeaderLayout } from "../../layouts/header-layout";
 import {
   DefaultGasPriceStep,
   FeeButtons,
-  Input,
-  TextArea
+  GasInput,
+  MemoInput
 } from "../../../components/form";
 import { Button } from "reactstrap";
 
 import { RouteComponentProps } from "react-router";
 
 import { useTxBuilderConfig } from "../../../hooks";
-import useForm, { FormContext } from "react-hook-form";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 
 import bigInteger from "big-integer";
 import queryString from "query-string";
-import {
-  getCurrency,
-  getFiatCurrencyFromLanguage
-} from "../../../../common/currency";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
 
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import {
   disableScroll,
   enableScroll,
@@ -40,14 +34,9 @@ import {
 } from "../../../../common/window";
 
 import { FormattedMessage, useIntl } from "react-intl";
-import { useLanguage } from "../../language";
-import { withTxStateProvider } from "../../contexts/tx";
-
-interface FormData {
-  gas: string;
-  fee: Coin | undefined;
-  memo: string;
-}
+import { useTxState, withTxStateProvider } from "../../contexts/tx";
+import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { getCurrencies } from "../../../../common/currency";
 
 export const FeePage: FunctionComponent<RouteComponentProps<{
   id: string;
@@ -69,55 +58,33 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
 
     const id = match.params.id;
 
-    const { chainStore, priceStore } = useStore();
+    const { chainStore } = useStore();
+    const txState = useTxState();
 
-    const formMethods = useForm<FormData>({
-      defaultValues: {
-        gas: "",
-        memo: ""
-      }
-    });
-    const { register, handleSubmit, setValue, errors, watch } = formMethods;
-
-    register({ name: "fee" }, { required: "Fee is required" });
-
-    const gas = watch("gas");
-    let gasInt = parseInt(gas);
-    if (Number.isNaN(gasInt)) {
-      gasInt = 0;
-    }
-
-    const feeCurrency = useMemo(() => {
-      return getCurrency(chainStore.chainInfo.feeCurrencies[0]);
-    }, [chainStore.chainInfo.feeCurrencies]);
-
-    const language = useLanguage();
+    const memorizedFeeCurrencies = useMemo(
+      () => getCurrencies(chainStore.chainInfo.feeCurrencies),
+      [chainStore.chainInfo.feeCurrencies]
+    );
 
     useEffect(() => {
-      const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
-
-      const coinGeckoId = feeCurrency?.coinGeckoId;
-
-      if (coinGeckoId && !priceStore.hasFiat(fiatCurrency.currency)) {
-        priceStore.fetchValue([fiatCurrency.currency], [coinGeckoId]);
-      }
-    }, [feeCurrency?.coinGeckoId, language.language, priceStore]);
+      txState.setFeeCurrencies(memorizedFeeCurrencies);
+    }, [memorizedFeeCurrencies, txState]);
 
     const onConfigInit = useCallback(
       (chainId: string, config: TxBuilderConfig) => {
         chainStore.setChain(chainId);
 
-        setValue("gas", config.gas.toString());
+        txState.setGas(parseInt(new Int(config.gas).toString()));
 
         // Always returns the fee by fee buttons.
         /*if (config.fee instanceof Coin) {
-        setValue("fee", config.fee);
-      }*/
+          txState.setFees([config.fee])
+        }*/
         // TODO: handle multiple fees.
 
-        setValue("memo", config.memo);
+        txState.setMemo(config.memo);
       },
-      [chainStore, setValue]
+      [chainStore, txState]
     );
 
     const onApprove = useCallback(() => {
@@ -167,79 +134,55 @@ export const FeePage: FunctionComponent<RouteComponentProps<{
       >
         <form
           className={style.formContainer}
-          onSubmit={handleSubmit(async (data: FormData) => {
-            if (!txBuilder.approve) {
-              throw new Error("tx builder is not loaded");
-            }
+          onSubmit={useCallback(
+            e => {
+              if (txState.isValid("gas", "memo", "fees")) {
+                e.preventDefault();
 
-            const config = txBuilder.config;
-            if (!config) {
-              throw new Error("config is not loaded");
-            }
-            config.gas = bigInteger(data.gas);
-            config.fee = data.fee as Coin;
-            config.memo = data.memo;
-            await txBuilder.approve(config);
-          })}
+                if (!txBuilder.approve) {
+                  throw new Error("tx builder is not loaded");
+                }
+
+                const config = txBuilder.config;
+                if (!config) {
+                  throw new Error("config is not loaded");
+                }
+                config.gas = bigInteger(txState.gas);
+                config.fee = txState.fees;
+                config.memo = txState.memo;
+                txBuilder.approve(config);
+              }
+            },
+            [txBuilder, txState]
+          )}
         >
           <div className={style.formInnerContainer}>
             <div>
-              <Input
-                type="number"
-                step="1"
+              <GasInput label={intl.formatMessage({ id: "fee.input.gas" })} />
+              <MemoInput label={intl.formatMessage({ id: "fee.input.memo" })} />
+              <FeeButtons
                 label={intl.formatMessage({
-                  id: "fee.input.gas"
+                  id: "fee.input.fee"
                 })}
-                name="gas"
-                error={errors.gas && errors.gas.message}
-                ref={register({
-                  required: intl.formatMessage({
-                    id: "fee.input.gas.required"
+                feeSelectLabels={{
+                  low: intl.formatMessage({ id: "fee-buttons.select.low" }),
+                  average: intl.formatMessage({
+                    id: "fee-buttons.select.average"
                   }),
-                  validate: (value: string) => {
-                    try {
-                      bigInteger(value);
-                    } catch (e) {
-                      return intl.formatMessage({
-                        id: "fee.input.gas.invalid"
-                      });
-                    }
-                  }
-                })}
+                  high: intl.formatMessage({ id: "fee-buttons.select.high" })
+                }}
+                gasPriceStep={DefaultGasPriceStep}
               />
-              <TextArea
-                label={intl.formatMessage({
-                  id: "fee.input.memo"
-                })}
-                name="memo"
-                rows={2}
-                style={{ resize: "none" }}
-                error={errors.memo && errors.memo.message}
-                ref={register({})}
-              />
-              <FormContext {...formMethods}>
-                <FeeButtons
-                  label={intl.formatMessage({
-                    id: "fee.input.fee"
-                  })}
-                  feeSelectLabels={{
-                    low: intl.formatMessage({ id: "fee-buttons.select.low" }),
-                    average: intl.formatMessage({
-                      id: "fee-buttons.select.average"
-                    }),
-                    high: intl.formatMessage({ id: "fee-buttons.select.high" })
-                  }}
-                  error={errors.fee && errors.fee.message}
-                  gasPriceStep={DefaultGasPriceStep}
-                />
-              </FormContext>
             </div>
             <div style={{ flex: 1 }} />
             <Button
               type="submit"
               color="primary"
               block
-              disabled={txBuilder.initializing}
+              disabled={
+                txBuilder.initializing ||
+                !txState.isValid("gas", "memo", "fees")
+              }
               data-loading={txBuilder.requested}
             >
               <FormattedMessage id="fee.button.set" />

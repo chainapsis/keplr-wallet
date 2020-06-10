@@ -71,8 +71,8 @@ export const useTxBuilderConfig = (
     return () => {
       isMounted = false;
     };
-    // Make sure that onConfigInit should not make re-render unnecessarily by using useCallback.
-  }, [id, onConfigInit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const [approve, setApprove] = useState<
     ((config: TxBuilderConfig) => Promise<void>) | undefined
@@ -138,7 +138,8 @@ export const useTxBuilderConfig = (
     return () => {
       isMounted = false;
     };
-  }, [id, onApprove]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   return {
     initializing,
