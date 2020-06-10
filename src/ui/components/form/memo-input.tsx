@@ -1,9 +1,4 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useState
-} from "react";
+import React, { FunctionComponent, useCallback, useState } from "react";
 import { useTxState } from "../../popup/contexts/tx";
 import { FormGroup, Input, Label } from "reactstrap";
 
@@ -18,13 +13,6 @@ export const MemoInput: FunctionComponent<MemoInputProps> = ({
   className
 }) => {
   const txState = useTxState();
-
-  const [memo, setMemo] = useState<string>("");
-
-  // Set memo
-  useEffect(() => {
-    txState.setMemo(memo);
-  }, [memo, txState]);
 
   const [inputId] = useState(() => {
     const bytes = new Uint8Array(4);
@@ -45,11 +33,14 @@ export const MemoInput: FunctionComponent<MemoInputProps> = ({
         type="textarea"
         rows={2}
         style={{ resize: "none" }}
-        value={memo}
-        onChange={useCallback(e => {
-          setMemo(e.target.value);
-          e.preventDefault();
-        }, [])}
+        value={txState.memo}
+        onChange={useCallback(
+          e => {
+            txState.setMemo(e.target.value);
+            e.preventDefault();
+          },
+          [txState]
+        )}
         autoComplete="off"
       />
     </FormGroup>
