@@ -141,7 +141,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
 
       return true;
     },
-    [amount, errors, fees.length, recipient]
+    [amount, errors, fees.length, gas, recipient]
   );
 
   return (
