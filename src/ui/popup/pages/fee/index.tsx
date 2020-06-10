@@ -37,8 +37,8 @@ import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { getCurrencies } from "../../../../common/currency";
 import { useHistory, useLocation, useRouteMatch } from "react-router";
 
-export const FeePage: FunctionComponent = observer(
-  withTxStateProvider(() => {
+export const FeePage: FunctionComponent = withTxStateProvider(
+  observer(() => {
     const history = useHistory();
     const location = useLocation();
     const match = useRouteMatch<{

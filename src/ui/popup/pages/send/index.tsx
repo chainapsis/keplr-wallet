@@ -36,8 +36,8 @@ import { Button } from "reactstrap";
 import { useTxState, withTxStateProvider } from "../../contexts/tx";
 import { useHistory } from "react-router";
 
-export const SendPage: FunctionComponent = observer(
-  withTxStateProvider(() => {
+export const SendPage: FunctionComponent = withTxStateProvider(
+  observer(() => {
     const history = useHistory();
 
     const intl = useIntl();
