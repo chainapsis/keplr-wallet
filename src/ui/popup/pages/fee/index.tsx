@@ -15,8 +15,6 @@ import {
 } from "../../../components/form";
 import { Button } from "reactstrap";
 
-import { RouteComponentProps } from "react-router";
-
 import { useTxBuilderConfig } from "../../../hooks";
 import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
 
@@ -37,11 +35,16 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTxState, withTxStateProvider } from "../../contexts/tx";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { getCurrencies } from "../../../../common/currency";
+import { useHistory, useLocation, useRouteMatch } from "react-router";
 
-export const FeePage: FunctionComponent<RouteComponentProps<{
-  id: string;
-}>> = observer(
-  withTxStateProvider(({ match, location, history }) => {
+export const FeePage: FunctionComponent = observer(
+  withTxStateProvider(() => {
+    const history = useHistory();
+    const location = useLocation();
+    const match = useRouteMatch<{
+      id: string;
+    }>();
+
     const query = queryString.parse(location.search);
     const external = query.external ?? false;
 

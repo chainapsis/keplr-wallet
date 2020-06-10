@@ -12,7 +12,6 @@ import {
   MemoInput,
   DefaultGasPriceStep
 } from "../../../components/form";
-import { RouteComponentProps } from "react-router-dom";
 import { useStore } from "../../stores";
 
 import { HeaderLayout } from "../../layouts";
@@ -35,9 +34,12 @@ import { useIntl } from "react-intl";
 import { Button } from "reactstrap";
 
 import { useTxState, withTxStateProvider } from "../../contexts/tx";
+import { useHistory } from "react-router";
 
-export const SendPage: FunctionComponent<RouteComponentProps> = observer(
-  withTxStateProvider(({ history }) => {
+export const SendPage: FunctionComponent = observer(
+  withTxStateProvider(() => {
+    const history = useHistory();
+
     const intl = useIntl();
 
     const notification = useNotification();

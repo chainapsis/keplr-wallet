@@ -13,17 +13,16 @@ import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
 import queryString from "query-string";
-import { RouteComponentProps } from "react-router";
 
 import { disableScroll, fitWindow } from "../../../../common/window";
 import { useRequestAccess } from "../../../hooks/use-request-access";
 import { EmptyLayout } from "../../layouts/empty-layout";
 import { FormattedMessage } from "react-intl";
+import { useLocation } from "react-router";
 
-export const AccessPage: FunctionComponent<Pick<
-  RouteComponentProps,
-  "location"
->> = observer(({ location }) => {
+export const AccessPage: FunctionComponent = observer(() => {
+  const location = useLocation();
+
   useEffect(() => {
     fitWindow();
     disableScroll();

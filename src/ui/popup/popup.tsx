@@ -5,7 +5,7 @@ import { AppIntlProvider } from "./language";
 
 import "./styles/global.scss";
 
-import { HashRouter, Route, RouteComponentProps } from "react-router-dom";
+import { HashRouter, Route } from "react-router-dom";
 
 import { AccessPage } from "./pages/access";
 import { RegisterPage } from "./pages/register";
@@ -63,43 +63,41 @@ Modal.defaultStyles = {
   }
 };
 
-const StateRenderer: FunctionComponent<RouteComponentProps> = observer(
-  ({ location }) => {
-    const { keyRingStore } = useStore();
+const StateRenderer: FunctionComponent = observer(() => {
+  const { keyRingStore } = useStore();
 
-    if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
-      return <MainPage />;
-    } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
-      return <LockPage location={location} />;
-    } else if (keyRingStore.status === KeyRingStatus.EMPTY) {
-      browser.tabs.create({
-        url: "/popup.html#/register"
-      });
-      window.close();
-      return (
-        <div style={{ height: "100%" }}>
-          <Banner
-            icon={require("./public/assets/temp-icon.svg")}
-            logo={require("./public/assets/logo-temp.png")}
-            subtitle="Wallet for the Interchain"
-          />
-        </div>
-      );
-    } else if (keyRingStore.status === KeyRingStatus.NOTLOADED) {
-      return (
-        <div style={{ height: "100%" }}>
-          <Banner
-            icon={require("./public/assets/temp-icon.svg")}
-            logo={require("./public/assets/logo-temp.png")}
-            subtitle="Wallet for the Interchain"
-          />
-        </div>
-      );
-    } else {
-      return <div>Unknown status</div>;
-    }
+  if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
+    return <MainPage />;
+  } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
+    return <LockPage />;
+  } else if (keyRingStore.status === KeyRingStatus.EMPTY) {
+    browser.tabs.create({
+      url: "/popup.html#/register"
+    });
+    window.close();
+    return (
+      <div style={{ height: "100%" }}>
+        <Banner
+          icon={require("./public/assets/temp-icon.svg")}
+          logo={require("./public/assets/logo-temp.png")}
+          subtitle="Wallet for the Interchain"
+        />
+      </div>
+    );
+  } else if (keyRingStore.status === KeyRingStatus.NOTLOADED) {
+    return (
+      <div style={{ height: "100%" }}>
+        <Banner
+          icon={require("./public/assets/temp-icon.svg")}
+          logo={require("./public/assets/logo-temp.png")}
+          subtitle="Wallet for the Interchain"
+        />
+      </div>
+    );
+  } else {
+    return <div>Unknown status</div>;
   }
-);
+});
 
 ReactDOM.render(
   <AppIntlProvider>

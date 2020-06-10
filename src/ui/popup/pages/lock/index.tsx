@@ -13,7 +13,6 @@ import { EmptyLayout } from "../../layouts/empty-layout";
 
 import style from "./style.module.scss";
 import queryString from "query-string";
-import { RouteComponentProps } from "react-router";
 
 import { FormattedMessage, useIntl } from "react-intl";
 import {
@@ -21,15 +20,15 @@ import {
   enableScroll,
   fitWindow
 } from "../../../../common/window";
+import { useLocation } from "react-router";
 
 interface FormData {
   password: string;
 }
 
-export const LockPage: FunctionComponent<Pick<
-  RouteComponentProps,
-  "location"
->> = observer(({ location }) => {
+export const LockPage: FunctionComponent = observer(() => {
+  const location = useLocation();
+
   const intl = useIntl();
 
   const query = queryString.parse(location.search);

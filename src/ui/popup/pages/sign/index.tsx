@@ -5,7 +5,6 @@ import React, {
   useState
 } from "react";
 import { Button } from "reactstrap";
-import { RouteComponentProps } from "react-router";
 
 import { HeaderLayout } from "../../layouts";
 
@@ -24,15 +23,20 @@ import {
   enableScroll,
   fitWindow
 } from "../../../../common/window";
+import { useHistory, useLocation, useRouteMatch } from "react-router";
 
 enum Tab {
   Details,
   Data
 }
 
-export const SignPage: FunctionComponent<RouteComponentProps<{
-  id: string;
-}>> = ({ history, match, location }) => {
+export const SignPage: FunctionComponent = () => {
+  const history = useHistory();
+  const location = useLocation();
+  const match = useRouteMatch<{
+    id: string;
+  }>();
+
   const query = queryString.parse(location.search);
   const external = query.external ?? false;
 
