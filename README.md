@@ -1,6 +1,6 @@
 # Keplr Browser Extension
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Twitter: everettprotocol](https://img.shields.io/twitter/follow/everettprotocol.svg?style=social)](https://twitter.com/everettprotocol)
+[![Twitter: chainapsis](https://img.shields.io/twitter/follow/chainapsis.svg?style=social)](https://twitter.com/chainapsis)
 
 > Keplr is a browser extension wallet for the Inter blockchain ecosystem.
 >
