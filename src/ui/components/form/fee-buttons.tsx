@@ -183,9 +183,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
               })}
             >
               {currency && price.gt(new Dec(0)) && feeLow
-                ? `${
-                    fiatCurrency.symbol
-                  }${DecUtils.removeTrailingZerosFromDecStr(
+                ? `${fiatCurrency.symbol}${DecUtils.trim(
                     fiatCurrency.parse(
                       parseFloat(
                         new Dec(feeLow.amount)
@@ -205,7 +203,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
               })}
             >
               {currency && feeLow
-                ? `${DecUtils.removeTrailingZerosFromDecStr(
+                ? `${DecUtils.trim(
                     CoinUtils.parseDecAndDenomFromCoin(feeLow).amount
                   )}${currency.coinDenom}`
                 : "loading"}
@@ -229,9 +227,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
               })}
             >
               {currency && price.gt(new Dec(0)) && feeAverage
-                ? `${
-                    fiatCurrency.symbol
-                  }${DecUtils.removeTrailingZerosFromDecStr(
+                ? `${fiatCurrency.symbol}${DecUtils.trim(
                     fiatCurrency.parse(
                       parseFloat(
                         new Dec(feeAverage.amount)
@@ -251,7 +247,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
               })}
             >
               {currency && feeAverage
-                ? `${DecUtils.removeTrailingZerosFromDecStr(
+                ? `${DecUtils.trim(
                     CoinUtils.parseDecAndDenomFromCoin(feeAverage).amount
                   )}${currency.coinDenom}`
                 : "loading"}
@@ -273,9 +269,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
               })}
             >
               {currency && price.gt(new Dec(0)) && feeHigh
-                ? `${
-                    fiatCurrency.symbol
-                  }${DecUtils.removeTrailingZerosFromDecStr(
+                ? `${fiatCurrency.symbol}${DecUtils.trim(
                     fiatCurrency.parse(
                       parseFloat(
                         new Dec(feeHigh.amount)
@@ -295,7 +289,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
               })}
             >
               {currency && feeHigh
-                ? `${DecUtils.removeTrailingZerosFromDecStr(
+                ? `${DecUtils.trim(
                     CoinUtils.parseDecAndDenomFromCoin(feeHigh).amount
                   )}${currency.coinDenom}`
                 : "loading"}

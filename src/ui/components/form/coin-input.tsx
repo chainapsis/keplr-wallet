@@ -111,9 +111,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
       const decSubAmount = new Dec(subAmount).quoTruncate(
         DecUtils.getPrecisionDec(currency.coinDecimals)
       );
-      setAmount(
-        DecUtils.removeTrailingZerosFromDecStr(decSubAmount.toString())
-      );
+      setAmount(DecUtils.trim(decSubAmount.toString()));
     }
   }, [allBalance, balance, currency, txState.fees, txState.gas]);
 

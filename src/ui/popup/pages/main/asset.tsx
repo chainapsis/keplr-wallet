@@ -60,7 +60,7 @@ export const AssetView: FunctionComponent = observer(() => {
       <div className={styleAsset.fiat}>
         {fiat && !fiat.value.equals(new Dec(0))
           ? fiatCurrency.symbol +
-            DecUtils.removeTrailingZerosFromDecStr(
+            DecUtils.trim(
               fiatCurrency.parse(
                 parseFloat(
                   fiat.value

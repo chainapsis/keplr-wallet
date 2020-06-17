@@ -133,8 +133,6 @@ export class CoinUtils {
       DecUtils.getPrecisionDec(currency.coinDecimals)
     );
 
-    return `${DecUtils.decToStrWithoutTrailingZeros(dec)}${separator}${
-      currency.coinDenom
-    }`;
+    return `${DecUtils.trim(dec)}${separator}${currency.coinDenom}`;
   }
 }

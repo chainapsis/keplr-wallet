@@ -1,11 +1,9 @@
 import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
 
 export class DecUtils {
-  static decToStrWithoutTrailingZeros(dec: Dec): string {
-    return DecUtils.removeTrailingZerosFromDecStr(dec.toString());
-  }
+  static trim(dec: Dec | string): string {
+    let decStr = typeof dec === "string" ? dec : dec.toString();
 
-  static removeTrailingZerosFromDecStr(decStr: string): string {
     if (decStr.indexOf(".") < 0) {
       return decStr;
     }

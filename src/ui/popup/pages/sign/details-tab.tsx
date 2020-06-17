@@ -119,16 +119,14 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
               {fee
                 .map(fee => {
                   const parsed = CoinUtils.parseDecAndDenomFromCoin(fee);
-                  return `${DecUtils.removeTrailingZerosFromDecStr(
-                    parsed.amount
-                  )} ${parsed.denom}`;
+                  return `${DecUtils.trim(parsed.amount)} ${parsed.denom}`;
                 })
                 .join(",")}
             </div>
             <div className={styleDetailsTab.fiat}>
               {!feeFiat.equals(new Dec(0))
                 ? fiatCurrency.symbol +
-                  DecUtils.removeTrailingZerosFromDecStr(
+                  DecUtils.trim(
                     fiatCurrency.parse(parseFloat(feeFiat.toString()))
                   )
                 : "?"}
