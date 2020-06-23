@@ -4,7 +4,6 @@ import {
 } from "@everett-protocol/cosmosjs/core/walletProvider";
 import { Context } from "@everett-protocol/cosmosjs/core/context";
 import {
-  ApproveSignMsg,
   GetKeyMsg,
   RequestSignMsg,
   RequestTxBuilderConfigMsg
@@ -23,18 +22,18 @@ export interface FeeApprover {
   onRequestTxBuilderConfig: (index: string) => void;
 }
 
-export interface AccessApprover {
+export interface SignApprover {
   onRequestSignature: (index: string) => void;
 }
 
 export class PopupWalletProvider implements WalletProvider {
   /**
    * @param feeApprover If this field is null, skip fee approving.
-   * @param accessApprover If this field is null, skip sign approving.
+   * @param signApprover If this field is null, skip sign approving.
    */
   constructor(
     private feeApprover?: FeeApprover,
-    private accessApprover?: AccessApprover
+    private signApprover?: SignApprover
   ) {}
 
   /**
@@ -75,10 +74,6 @@ export class PopupWalletProvider implements WalletProvider {
     context: Context,
     config: TxBuilderConfig
   ): Promise<TxBuilderConfig> {
-    if (!this.feeApprover) {
-      return Promise.resolve(config);
-    }
-
     const random = new Uint8Array(4);
     crypto.getRandomValues(random);
     const id = Buffer.from(random).toString("hex");
@@ -91,7 +86,8 @@ export class PopupWalletProvider implements WalletProvider {
       id,
       false,
       // There is no need to set origin because this wallet provider is used in internal.
-      ""
+      "",
+      this.feeApprover == null
     );
 
     return new Promise<TxBuilderConfig>((resolve, reject) => {
@@ -103,8 +99,9 @@ export class PopupWalletProvider implements WalletProvider {
           reject(e);
         });
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.feeApprover!.onRequestTxBuilderConfig(id);
+      if (this.feeApprover) {
+        this.feeApprover.onRequestTxBuilderConfig(id);
+      }
     });
   }
 
@@ -127,7 +124,8 @@ export class PopupWalletProvider implements WalletProvider {
       Buffer.from(message).toString("hex"),
       false,
       // There is no need to set origin because this wallet provider is used in internal.
-      ""
+      "",
+      this.signApprover == null
     );
     return new Promise<Uint8Array>((resolve, reject) => {
       sendMessage(BACKGROUND_PORT, requestSignMsg)
@@ -138,14 +136,11 @@ export class PopupWalletProvider implements WalletProvider {
           reject(e);
         });
 
-      if (this.accessApprover) {
+      if (this.signApprover) {
         setTimeout(() => {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          this.accessApprover!.onRequestSignature(id);
-        }, 100);
-      } else {
-        setTimeout(() => {
-          sendMessage(BACKGROUND_PORT, ApproveSignMsg.create(id));
+          if (this.signApprover) {
+            this.signApprover.onRequestSignature(id);
+          }
         }, 100);
       }
     });

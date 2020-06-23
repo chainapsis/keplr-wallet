@@ -294,13 +294,17 @@ export class RequestTxBuilderConfigMsg extends Message<{
     config: TxBuilderConfigPrimitiveWithChainId,
     id: string,
     openPopup: boolean,
-    origin: string
+    origin: string,
+    skipApprove?: boolean
   ): RequestTxBuilderConfigMsg {
     const msg = new RequestTxBuilderConfigMsg();
     msg.config = config;
     msg.id = id;
     msg.openPopup = openPopup;
     msg.origin = origin;
+    if (skipApprove) {
+      msg.skipApprove = true;
+    }
     return msg;
   }
 
@@ -308,6 +312,7 @@ export class RequestTxBuilderConfigMsg extends Message<{
   public id: string = "";
   public openPopup: boolean = false;
   public origin: string = "";
+  public skipApprove: boolean = false;
 
   validateBasic(): void {
     if (!this.config) {
@@ -323,6 +328,11 @@ export class RequestTxBuilderConfigMsg extends Message<{
     const isInternal = super.approveExternal(sender);
     if (isInternal) {
       return true;
+    }
+
+    // Skipping approving is allowed only in internal request.
+    if (this.skipApprove && !isInternal) {
+      return false;
     }
 
     return Message.checkOriginIsValid(this.origin, sender);
@@ -437,7 +447,8 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     bech32Address: string,
     messageHex: string,
     openPopup: boolean,
-    origin: string
+    origin: string,
+    skipApprove?: boolean
   ): RequestSignMsg {
     const msg = new RequestSignMsg();
     msg.chainId = chainId;
@@ -446,6 +457,9 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     msg.messageHex = messageHex;
     msg.openPopup = openPopup;
     msg.origin = origin;
+    if (skipApprove) {
+      msg.skipApprove = true;
+    }
     return msg;
   }
 
@@ -456,6 +470,7 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
   public messageHex: string = "";
   public openPopup: boolean = false;
   public origin: string = "";
+  public skipApprove: boolean = false;
 
   validateBasic(): void {
     if (!this.chainId) {
@@ -479,6 +494,11 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     const isInternal = super.approveExternal(sender);
     if (isInternal) {
       return true;
+    }
+
+    // Skipping approving is allowed only in internal request.
+    if (this.skipApprove && !isInternal) {
+      return false;
     }
 
     return Message.checkOriginIsValid(this.origin, sender);

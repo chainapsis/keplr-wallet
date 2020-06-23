@@ -138,8 +138,13 @@ export class KeyRingKeeper {
   async requestTxBuilderConfig(
     config: TxBuilderConfigPrimitiveWithChainId,
     id: string,
-    openPopup: boolean
+    openPopup: boolean,
+    skipApprove: boolean
   ): Promise<TxBuilderConfigPrimitive> {
+    if (skipApprove) {
+      return config;
+    }
+
     if (openPopup) {
       // Open fee window with hash to let the fee page to know that window is requested newly.
       openWindow(browser.runtime.getURL(`popup.html#/fee/${id}?external=true`));
@@ -173,8 +178,13 @@ export class KeyRingKeeper {
     chainId: string,
     message: Uint8Array,
     id: string,
-    openPopup: boolean
+    openPopup: boolean,
+    skipApprove: boolean
   ): Promise<Uint8Array> {
+    if (skipApprove) {
+      return this.keyRing.sign(this.path, message);
+    }
+
     if (openPopup) {
       openWindow(
         browser.runtime.getURL(`popup.html#/sign/${id}?external=true`)

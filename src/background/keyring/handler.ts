@@ -200,7 +200,8 @@ const handleRequestTxBuilderConfigMsg: (
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       msg.config!,
       msg.id,
-      msg.openPopup
+      msg.openPopup,
+      msg.skipApprove
     );
     return {
       config
@@ -258,7 +259,8 @@ const handleRequestSignMsg: (
           msg.chainId,
           new Uint8Array(Buffer.from(msg.messageHex, "hex")),
           msg.id,
-          msg.openPopup
+          msg.openPopup,
+          msg.skipApprove
         )
       ).toString("hex")
     };
