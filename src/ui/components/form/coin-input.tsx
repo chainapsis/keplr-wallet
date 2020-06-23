@@ -207,6 +207,16 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
           type="number"
           value={amount}
           onChange={useCallback(e => {
+            if (e.target.value) {
+              // Validate dec number. If it is not valid, reject it.
+              try {
+                new Dec(e.target.value);
+              } catch {
+                e.preventDefault();
+                return;
+              }
+            }
+
             setAmount(e.target.value);
             e.preventDefault();
           }, [])}
