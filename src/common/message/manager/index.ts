@@ -13,7 +13,7 @@ export class MessageManager {
   protected port = "";
 
   public registerMessage(
-    msgCls: { new (): Message<unknown> } & { type(): string }
+    msgCls: { new (...args: any): Message<unknown> } & { type(): string }
   ): void {
     if (this.registeredMsgType.has(msgCls.type())) {
       throw new Error(`Already registered type ${msgCls.type()}`);
