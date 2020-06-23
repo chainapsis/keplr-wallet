@@ -27,6 +27,7 @@
     "bip39": "^3.0.2",
     "buffer": "^5.4.3",
     "classnames": "^2.2.6",
+    "delay": "^4.3.0",
     "ethereum-ens": "^0.8.0",
     "framer-motion": "^1.6.14",
     "mobx": "^5.15.0",

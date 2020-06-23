@@ -16,6 +16,8 @@ import {
   txBuilderConfigToPrimitive
 } from "../../background/keyring/utils";
 
+import delay from "delay";
+
 const Buffer = require("buffer/").Buffer;
 
 export interface FeeApprover {
@@ -70,7 +72,7 @@ export class PopupWalletProvider implements WalletProvider {
    * If provider supports this method, tx builder will request tx config with prefered tx config that is defined by developer who uses cosmosjs.
    * Received tx builder config can be changed in the client. The wallet provider must verify that it is the same as the tx builder config sent earlier or warn the user before signing.
    */
-  getTxBuilderConfig(
+  async getTxBuilderConfig(
     context: Context,
     config: TxBuilderConfig
   ): Promise<TxBuilderConfig> {
@@ -90,25 +92,26 @@ export class PopupWalletProvider implements WalletProvider {
       this.feeApprover == null
     );
 
-    return new Promise<TxBuilderConfig>((resolve, reject) => {
-      sendMessage(BACKGROUND_PORT, requestTxBuilderConfig)
-        .then(({ config }) => {
-          resolve(txBuilderConfigFromPrimitive(config));
-        })
-        .catch(e => {
-          reject(e);
-        });
-
-      if (this.feeApprover) {
-        this.feeApprover.onRequestTxBuilderConfig(id);
-      }
-    });
+    // Send requestTxBuilderConfig message and execute fee approver after some delay if it is set.
+    return txBuilderConfigFromPrimitive(
+      (
+        await Promise.all([
+          (async () => {
+            if (this.feeApprover) {
+              await delay(100);
+              this.feeApprover.onRequestTxBuilderConfig(id);
+            }
+          })(),
+          sendMessage(BACKGROUND_PORT, requestTxBuilderConfig)
+        ])
+      )[1].config
+    );
   }
 
   /**
    * Request signature from matched address if user have approved the access.
    */
-  sign(
+  async sign(
     context: Context,
     bech32Address: string,
     message: Uint8Array
@@ -127,22 +130,23 @@ export class PopupWalletProvider implements WalletProvider {
       "",
       this.signApprover == null
     );
-    return new Promise<Uint8Array>((resolve, reject) => {
-      sendMessage(BACKGROUND_PORT, requestSignMsg)
-        .then(({ signatureHex }) => {
-          resolve(new Uint8Array(Buffer.from(signatureHex, "hex")));
-        })
-        .catch(e => {
-          reject(e);
-        });
 
-      if (this.signApprover) {
-        setTimeout(() => {
-          if (this.signApprover) {
-            this.signApprover.onRequestSignature(id);
-          }
-        }, 100);
-      }
-    });
+    // Send requestSignMsg message and execute sign approver after some delay if it is set.
+    return new Uint8Array(
+      Buffer.from(
+        (
+          await Promise.all([
+            (async () => {
+              if (this.signApprover) {
+                await delay(100);
+                this.signApprover.onRequestSignature(id);
+              }
+            })(),
+            sendMessage(BACKGROUND_PORT, requestSignMsg)
+          ])
+        )[1].signatureHex,
+        "hex"
+      )
+    );
   }
 }
