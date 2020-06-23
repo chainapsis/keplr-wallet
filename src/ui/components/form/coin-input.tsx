@@ -48,6 +48,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
   const [allBalance, setAllBalance] = useState(false);
 
   const [amount, setAmount] = useState<string>("");
+  const [step, setStep] = useState<string>("");
 
   // Set current currency.
   useEffect(() => {
@@ -89,6 +90,24 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
       txState.setAmount(null);
     }
   }, [amount, currency, txState]);
+
+  useEffect(() => {
+    if (currency && amount) {
+      const decimals =
+        amount.indexOf(".") >= 0 ? amount.length - amount.indexOf(".") - 1 : 0;
+
+      if (decimals === 0) {
+        setStep("1");
+      } else {
+        const precision = DecUtils.getPrecisionDec(
+          Math.min(decimals, currency.coinDecimals)
+        );
+        setStep(DecUtils.trim(new Dec(1).quoTruncate(precision)));
+      }
+    } else {
+      setStep("1");
+    }
+  }, [amount, currency]);
 
   // Set the current balance of selected currency.
   useEffect(() => {
@@ -191,6 +210,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = props => {
             setAmount(e.target.value);
             e.preventDefault();
           }, [])}
+          step={step}
           min={0}
           disabled={allBalance}
           autoComplete="off"
