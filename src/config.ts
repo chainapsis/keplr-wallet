@@ -53,17 +53,17 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-2",
+    chainId: "kava-3",
     chainName: "Kava",
     nativeCurrency: "kava",
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava-2"
-        : "http://localhost:8081/#/kava-2",
+        ? "https://wallet.keplr.app/#/kava-3"
+        : "http://localhost:8081/#/kava-3",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava-2"
-        : "http://localhost:8081/#/kava-2",
+        ? "https://wallet.keplr.app/#/kava-3"
+        : "http://localhost:8081/#/kava-3",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("kava"),
     currencies: ["kava"],
@@ -82,7 +82,7 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   },
   {
-    chainId: "kava-2",
+    chainId: "kava-3",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }

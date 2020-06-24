@@ -3,7 +3,7 @@
 
   "name": "Keplr",
   "description": "Keplr is a browser extension wallet for the Inter blockchain ecosystem.",
-  "version": "0.5.5",
+  "version": "0.5.7",
   "applications": {
     "gecko": {
       "id": "keplr-extension@keplr.app",

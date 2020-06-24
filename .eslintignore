@@ -6,3 +6,6 @@
 **/*.ttf
 **/*.secret
 .DS_Store
+
+dist
+prod
