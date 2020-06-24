@@ -32,6 +32,7 @@ import { SettingPage } from "./pages/setting";
 import { SettingLanguagePage } from "./pages/setting/language";
 import { SettingConnectionsPage } from "./pages/setting/connections";
 import { AddressBookPage } from "./pages/setting/address-book";
+import { ConfirmProvider } from "../components/confirm";
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");
@@ -104,30 +105,32 @@ ReactDOM.render(
     <StoreProvider>
       <NotificationStoreProvider>
         <NotificationProvider>
-          <HashRouter>
-            <Route exact path="/" component={StateRenderer} />
-            <Route exact path="/access" component={AccessPage} />
-            <Route exact path="/register" component={RegisterPage} />
-            <Route exact path="/send" component={SendPage} />
-            <Route exact path="/fee/:id" component={FeePage} />
-            <Route exact path="/setting" component={SettingPage} />
-            <Route
-              exact
-              path="/setting/language"
-              component={SettingLanguagePage}
-            />
-            <Route
-              exact
-              path="/setting/connections"
-              component={SettingConnectionsPage}
-            />
-            <Route
-              exact
-              path="/setting/address-book"
-              component={AddressBookPage}
-            />
-            <Route path="/sign/:id" component={SignPage} />
-          </HashRouter>
+          <ConfirmProvider>
+            <HashRouter>
+              <Route exact path="/" component={StateRenderer} />
+              <Route exact path="/access" component={AccessPage} />
+              <Route exact path="/register" component={RegisterPage} />
+              <Route exact path="/send" component={SendPage} />
+              <Route exact path="/fee/:id" component={FeePage} />
+              <Route exact path="/setting" component={SettingPage} />
+              <Route
+                exact
+                path="/setting/language"
+                component={SettingLanguagePage}
+              />
+              <Route
+                exact
+                path="/setting/connections"
+                component={SettingConnectionsPage}
+              />
+              <Route
+                exact
+                path="/setting/address-book"
+                component={AddressBookPage}
+              />
+              <Route path="/sign/:id" component={SignPage} />
+            </HashRouter>
+          </ConfirmProvider>
         </NotificationProvider>
       </NotificationStoreProvider>
     </StoreProvider>
