@@ -26,6 +26,8 @@
 
   "setting.connections": "Manage Connections",
   "setting.connections.paragraph": "Manage websites connected to your wallet",
+  "setting.connections.confirm.delete-connection.title": "Disable Connection",
+  "setting.connections.confirm.delete-connection.paragraph": "Are you sure you want to disable this connection?",
 
   "setting.address-book.button.add": "Add New",
   "setting.address-book.add-address.title": "Add Address",
