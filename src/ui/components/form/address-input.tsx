@@ -4,7 +4,17 @@ import React, {
   useEffect,
   useState
 } from "react";
-import { FormGroup, Label, Input, FormText, FormFeedback } from "reactstrap";
+import {
+  FormGroup,
+  Label,
+  Input,
+  FormText,
+  FormFeedback,
+  ModalBody,
+  Modal,
+  InputGroup,
+  Button
+} from "reactstrap";
 import { useTxState } from "../../popup/contexts/tx";
 import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
 import {
@@ -13,6 +23,13 @@ import {
   isValidENS,
   useENS
 } from "../../hooks/use-ens";
+import {
+  AddressBookData,
+  AddressBookPage
+} from "../../popup/pages/setting/address-book";
+
+import styleAddressInput from "./address-input.module.scss";
+import classnames from "classnames";
 
 const ErrorIdBech32Address = "invalid-bech32-address";
 const ErrorIdENSInvalidName = "ens-name-invalid";
@@ -144,6 +161,25 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
     }
   })();
 
+  const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
+
+  const openAddressBook = useCallback(() => {
+    setIsAddressBookOpen(true);
+  }, []);
+
+  const closeAddressBook = useCallback(() => {
+    setIsAddressBookOpen(false);
+  }, []);
+
+  const onSelectAddressBook = useCallback(
+    (data: AddressBookData) => {
+      closeAddressBook();
+      setRecipient(data.address);
+      txState.setMemo(data.memo);
+    },
+    [closeAddressBook, txState]
+  );
+
   const [inputId] = useState(() => {
     const bytes = new Uint8Array(4);
     crypto.getRandomValues(bytes);
@@ -151,39 +187,70 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
   });
 
   return (
-    <FormGroup className={className}>
-      {label ? (
-        <Label for={inputId} className="form-control-label">
-          {label}
-        </Label>
-      ) : null}
-      <Input
-        id={inputId}
-        className="form-control-alternative"
-        value={recipient}
-        onChange={useCallback(e => {
-          setRecipient(e.target.value);
-          e.preventDefault();
-        }, [])}
-        autoComplete="off"
-      />
-      {isValidENS(recipient) ? (
-        ens.loading ? (
-          <FormText>
-            <i className="fas fa-spinner fa-spin" />
-          </FormText>
-        ) : ensErrorText ? (
+    <React.Fragment>
+      <Modal
+        isOpen={isAddressBookOpen}
+        backdrop={false}
+        className={styleAddressInput.fullModal}
+        wrapClassName={styleAddressInput.fullModal}
+        contentClassName={styleAddressInput.fullModal}
+      >
+        <ModalBody className={styleAddressInput.fullModal}>
+          <AddressBookPage
+            onBackButton={closeAddressBook}
+            onSelect={onSelectAddressBook}
+            hideChainDropdown={true}
+          />
+        </ModalBody>
+      </Modal>
+      <FormGroup className={className}>
+        {label ? (
+          <Label for={inputId} className="form-control-label">
+            {label}
+          </Label>
+        ) : null}
+        <InputGroup>
+          <Input
+            id={inputId}
+            className={classnames(
+              "form-control-alternative",
+              styleAddressInput.input
+            )}
+            value={recipient}
+            onChange={useCallback(e => {
+              setRecipient(e.target.value);
+              e.preventDefault();
+            }, [])}
+            autoComplete="off"
+          />
+          <Button
+            className={styleAddressInput.addressBookButton}
+            color="primary"
+            type="button"
+            outline
+            onClick={openAddressBook}
+          >
+            <i className="fas fa-address-book" />
+          </Button>
+        </InputGroup>
+        {isValidENS(recipient) ? (
+          ens.loading ? (
+            <FormText>
+              <i className="fas fa-spinner fa-spin" />
+            </FormText>
+          ) : ensErrorText ? (
+            <FormFeedback style={{ display: "block" }}>
+              {ensErrorText}
+            </FormFeedback>
+          ) : (
+            <FormText>{ens.bech32Address}</FormText>
+          )
+        ) : txState.getError("recipient", ErrorIdBech32Address) ? (
           <FormFeedback style={{ display: "block" }}>
-            {ensErrorText}
+            {errorTexts.invalidBech32Address}
           </FormFeedback>
-        ) : (
-          <FormText>{ens.bech32Address}</FormText>
-        )
-      ) : txState.getError("recipient", ErrorIdBech32Address) ? (
-        <FormFeedback style={{ display: "block" }}>
-          {errorTexts.invalidBech32Address}
-        </FormFeedback>
-      ) : null}
-    </FormGroup>
+        ) : null}
+      </FormGroup>
+    </React.Fragment>
   );
 };
