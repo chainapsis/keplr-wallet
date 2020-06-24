@@ -26,6 +26,8 @@ const ConfirmContext = createContext<
 >(undefined);
 
 export const ConfirmProvider: FunctionComponent = ({ children }) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const [currentConfirm, setCurrentConfirm] = useState<
     (ConfirmOptions & { resolve: () => void; reject: () => void }) | null
   >(null);
@@ -39,16 +41,24 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
       }
 
       return new Promise<boolean>(resolve => {
-        // Resolver resolves `true` and clear the confirm informations.
+        let resolved = false;
+
+        // Resolver resolves `true` and close the dialog.
         const resolver = () => {
+          if (resolved) return;
+
+          resolved = true;
+          setIsDialogOpen(false);
           resolve(true);
-          setCurrentConfirm(null);
         };
-        // Rejector resolves `false` and clear the confirm informations.
+        // Rejector resolves `false` and close the dialog.
         // Rejector doesn't reject promise with an error.
         const rejector = () => {
+          if (resolved) return;
+
+          resolved = true;
+          setIsDialogOpen(false);
           resolve(false);
-          setCurrentConfirm(null);
         };
 
         setCurrentConfirm(
@@ -57,10 +67,17 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
             reject: rejector
           })
         );
+        setIsDialogOpen(true);
       });
     },
     [currentConfirm]
   );
+
+  // When the dialog closing transition ends, clear the current confirm information.
+  // This is recommended because if you clear the confirm information before the closing transition ends, the confirm information is not rendered during closing.
+  const clearCurrentConfirm = useCallback(() => {
+    setCurrentConfirm(null);
+  }, []);
 
   return (
     <ConfirmContext.Provider
@@ -69,9 +86,10 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
       }, [confirm])}
     >
       <Modal
-        isOpen={currentConfirm != null}
+        isOpen={isDialogOpen}
         centered
         className={style.modalDialog}
+        onClosed={clearCurrentConfirm}
       >
         <ModalBody className={style.modal}>
           <ConfirmDialog
