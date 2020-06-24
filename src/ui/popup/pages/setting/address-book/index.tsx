@@ -28,6 +28,7 @@ import { AddressBookKVStore } from "./kvStore";
 import { BrowserKVStore } from "../../../../../common/kvstore";
 import { ChainInfo } from "../../../../../background/chains";
 import { shortenAddress } from "../../../../../common/address";
+import { useConfirm } from "../../../../components/confirm";
 
 export const AddressBookPage: FunctionComponent<{
   onBackButton?: () => void;
@@ -60,6 +61,8 @@ export const AddressBookPage: FunctionComponent<{
 
   const [addAddressModalOpen, setAddressModalOpen] = useState(false);
   const [addAddressModalIndex, setAddAddressModalIndex] = useState(-1);
+
+  const confirm = useConfirm();
 
   const openAddAddressModal = useCallback(() => {
     setAddressModalOpen(true);
@@ -95,14 +98,33 @@ export const AddressBookPage: FunctionComponent<{
 
   const removeAddressBook = useCallback(
     async (index: number) => {
-      closeAddAddressModal();
-      await addressBookKVStore.removeAddressBook(chainStore.chainInfo, index);
-      await refreshAddressBook(chainStore.chainInfo);
+      if (
+        await confirm.confirm({
+          img: (
+            <img
+              src={require("../../../public/assets/img/trash.svg")}
+              style={{ height: "80px" }}
+            />
+          ),
+          title: intl.formatMessage({
+            id: "setting.address-book.confirm.delete-address.title"
+          }),
+          paragraph: intl.formatMessage({
+            id: "setting.address-book.confirm.delete-address.paragraph"
+          })
+        })
+      ) {
+        closeAddAddressModal();
+        await addressBookKVStore.removeAddressBook(chainStore.chainInfo, index);
+        await refreshAddressBook(chainStore.chainInfo);
+      }
     },
     [
       addressBookKVStore,
       chainStore.chainInfo,
       closeAddAddressModal,
+      confirm,
+      intl,
       refreshAddressBook
     ]
   );

@@ -29,6 +29,7 @@ import {
 
 import styleConnections from "./style.module.scss";
 import { useIntl } from "react-intl";
+import { useConfirm } from "../../../../components/confirm";
 
 export const SettingConnectionsPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -54,6 +55,8 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
   const [dropdownOpen, setOpen] = useState(false);
   const toggle = () => setOpen(!dropdownOpen);
 
+  const confirm = useConfirm();
+
   const removeAccessOriginCallback = useCallback(
     (e: MouseEvent) => {
       const chainId = e.currentTarget.getAttribute("data-chain-id");
@@ -64,12 +67,29 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
       }
 
       (async () => {
-        const msg = new RemoveAccessOriginMsg(chainId, origin);
-        await sendMessage(BACKGROUND_PORT, msg);
-        forceRefreshAccessOrigin();
+        if (
+          await confirm.confirm({
+            img: (
+              <img
+                src={require("../../../public/assets/img/broken-link.svg")}
+                style={{ height: "80px" }}
+              />
+            ),
+            title: intl.formatMessage({
+              id: "setting.connections.confirm.delete-connection.title"
+            }),
+            paragraph: intl.formatMessage({
+              id: "setting.connections.confirm.delete-connection.paragraph"
+            })
+          })
+        ) {
+          const msg = new RemoveAccessOriginMsg(chainId, origin);
+          await sendMessage(BACKGROUND_PORT, msg);
+          forceRefreshAccessOrigin();
+        }
       })();
     },
-    [forceRefreshAccessOrigin]
+    [confirm, forceRefreshAccessOrigin, intl]
   );
 
   const xIcon = useMemo(
