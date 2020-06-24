@@ -36,6 +36,8 @@
   "setting.address-book.address.error.required": "Address is required",
   "setting.address-book.address.error.invalid": "Invalid address",
   "setting.address-book.memo": "Default Memo (Optional)",
+  "setting.address-book.confirm.delete-address.title": "Delete Address",
+  "setting.address-book.confirm.delete-address.paragraph": "Are you sure you want to delete this address?",
   "setting.address-book.button.save": "Save",
 
   "register.button.back": "Back",
@@ -122,5 +124,8 @@
 
   "fee-buttons.select.low": "Low",
   "fee-buttons.select.average": "Average",
-  "fee-buttons.select.high": "High"
+  "fee-buttons.select.high": "High",
+
+  "confirm.yes": "yes",
+  "confirm.no": "no"
 }

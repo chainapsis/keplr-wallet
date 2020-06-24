@@ -1,6 +1,8 @@
 import React, { FunctionComponent, useCallback } from "react";
 import { Button } from "reactstrap";
 
+import { FormattedMessage } from "react-intl";
+
 import style from "./style.module.scss";
 
 export const ConfirmDialog: FunctionComponent<{
@@ -34,7 +36,7 @@ export const ConfirmDialog: FunctionComponent<{
             [onReject]
           )}
         >
-          No
+          <FormattedMessage id="confirm.no" />
         </Button>
         <Button
           type="button"
@@ -50,7 +52,7 @@ export const ConfirmDialog: FunctionComponent<{
             [onConfirm]
           )}
         >
-          Yes
+          <FormattedMessage id="confirm.yes" />
         </Button>
       </div>
     </div>
