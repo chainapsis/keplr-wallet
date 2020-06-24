@@ -45,7 +45,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
   useEffect(() => {
     setAccessOrigin(undefined);
     (async () => {
-      const msg = GetAccessOriginMsg.create(chainStore.chainInfo.chainId);
+      const msg = new GetAccessOriginMsg(chainStore.chainInfo.chainId);
       const result = await sendMessage(BACKGROUND_PORT, msg);
       setAccessOrigin(result);
     })();
@@ -64,7 +64,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
       }
 
       (async () => {
-        const msg = RemoveAccessOriginMsg.create(chainId, origin);
+        const msg = new RemoveAccessOriginMsg(chainId, origin);
         await sendMessage(BACKGROUND_PORT, msg);
         forceRefreshAccessOrigin();
       })();

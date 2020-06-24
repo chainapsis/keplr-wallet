@@ -38,14 +38,10 @@ export class InjectedWalletProvider implements WalletProvider {
 
     await sendMessage(
       BACKGROUND_PORT,
-      ReqeustAccessMsg.create(
-        id,
-        context.get("chainId"),
-        window.location.origin
-      )
+      new ReqeustAccessMsg(id, context.get("chainId"), window.location.origin)
     );
 
-    const msg = EnableKeyRingMsg.create(
+    const msg = new EnableKeyRingMsg(
       context.get("chainId"),
       window.location.origin
     );
@@ -59,10 +55,7 @@ export class InjectedWalletProvider implements WalletProvider {
    * Get array of keys that includes bech32 address string, address bytes and public key from wallet if user have approved the access.
    */
   async getKeys(context: Context): Promise<Key[]> {
-    const msg = GetKeyMsg.create(
-      context.get("chainId"),
-      window.location.origin
-    );
+    const msg = new GetKeyMsg(context.get("chainId"), window.location.origin);
     const key = await sendMessage(BACKGROUND_PORT, msg);
     return Promise.resolve([
       {
@@ -88,7 +81,7 @@ export class InjectedWalletProvider implements WalletProvider {
     crypto.getRandomValues(random);
     const id = Buffer.from(random).toString("hex");
 
-    const requestTxBuilderConfigMsg = RequestTxBuilderConfigMsg.create(
+    const requestTxBuilderConfigMsg = new RequestTxBuilderConfigMsg(
       {
         chainId: context.get("chainId"),
         ...txBuilderConfigToPrimitive(config)
@@ -118,7 +111,7 @@ export class InjectedWalletProvider implements WalletProvider {
     crypto.getRandomValues(random);
     const id = Buffer.from(random).toString("hex");
 
-    const requestSignMsg = RequestSignMsg.create(
+    const requestSignMsg = new RequestSignMsg(
       context.get("chainId"),
       id,
       bech32Address,

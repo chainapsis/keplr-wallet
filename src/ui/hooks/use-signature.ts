@@ -35,7 +35,7 @@ export const useSignature = (
         setInitializing(true);
       }
 
-      const msg = GetRequestedMessage.create(id);
+      const msg = new GetRequestedMessage(id);
       try {
         const result = await sendMessage(BACKGROUND_PORT, msg);
 
@@ -87,7 +87,7 @@ export const useSignature = (
       }
 
       try {
-        const msg = ApproveSignMsg.create(id);
+        const msg = new ApproveSignMsg(id);
         await sendMessage(BACKGROUND_PORT, msg);
       } catch (e) {
         if (isMounted) {
@@ -107,7 +107,7 @@ export const useSignature = (
       }
 
       try {
-        const msg = RejectSignMsg.create(id);
+        const msg = new RejectSignMsg(id);
         await sendMessage(BACKGROUND_PORT, msg);
       } catch (e) {
         if (isMounted) {

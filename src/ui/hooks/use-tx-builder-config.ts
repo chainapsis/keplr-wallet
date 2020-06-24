@@ -48,7 +48,7 @@ export const useTxBuilderConfig = (
         setInitializing(true);
       }
 
-      const msg = GetRequestedTxBuilderConfigMsg.create(id);
+      const msg = new GetRequestedTxBuilderConfigMsg(id);
       try {
         const result = await sendMessage(BACKGROUND_PORT, msg);
 
@@ -98,7 +98,7 @@ export const useTxBuilderConfig = (
 
       try {
         const configPrimitive = txBuilderConfigToPrimitive(config);
-        const msg = ApproveTxBuilderConfigMsg.create(id, configPrimitive);
+        const msg = new ApproveTxBuilderConfigMsg(id, configPrimitive);
         await sendMessage(BACKGROUND_PORT, msg);
         onApprove();
       } catch (e) {
@@ -119,7 +119,7 @@ export const useTxBuilderConfig = (
       }
 
       try {
-        const msg = RejectTxBuilderConfigMsg.create(id);
+        const msg = new RejectTxBuilderConfigMsg(id);
         await sendMessage(BACKGROUND_PORT, msg);
       } catch (e) {
         if (isMounted) {

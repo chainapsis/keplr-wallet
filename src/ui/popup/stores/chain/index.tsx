@@ -57,7 +57,7 @@ export class ChainStore {
   @actionAsync
   public async saveLastViewChainId() {
     // Save last view chain id to persistent background
-    const msg = SetPersistentMemoryMsg.create({
+    const msg = new SetPersistentMemoryMsg({
       lastViewChainId: this.chainInfo.chainId
     });
     await task(sendMessage(BACKGROUND_PORT, msg));
@@ -68,7 +68,7 @@ export class ChainStore {
     await task(this.getChainInfosFromBackground());
 
     // Get last view chain id to persistent background
-    const msg = GetPersistentMemoryMsg.create();
+    const msg = new GetPersistentMemoryMsg();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     if (result && result.lastViewChainId) {
       // If chain info is already set, skip setting the last used chain info.
@@ -80,7 +80,7 @@ export class ChainStore {
 
   @actionAsync
   private async getChainInfosFromBackground() {
-    const msg = GetChainInfosMsg.create();
+    const msg = new GetChainInfosMsg();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     const chainInfos: ChainInfo[] = result.chainInfos.map(
       (chainInfo: Writeable<ChainInfo>) => {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
-import { AccessOrigin } from "../../background/chains/types";
+import { AccessOrigin } from "../../background/chains";
 import {
   ApproveAccessMsg,
   GetReqeustAccessDataMsg,
@@ -26,7 +26,7 @@ export const useRequestAccess = (
         setInitializing(true);
       }
 
-      const msg = GetReqeustAccessDataMsg.create(id);
+      const msg = new GetReqeustAccessDataMsg(id);
       try {
         const result = await sendMessage(BACKGROUND_PORT, msg);
 
@@ -77,7 +77,7 @@ export const useRequestAccess = (
       }
 
       try {
-        const msg = ApproveAccessMsg.create(id);
+        const msg = new ApproveAccessMsg(id);
         await sendMessage(BACKGROUND_PORT, msg);
       } catch (e) {
         if (isMounted) {
@@ -97,7 +97,7 @@ export const useRequestAccess = (
       }
 
       try {
-        const msg = RejectAccessMsg.create(id);
+        const msg = new RejectAccessMsg(id);
         await sendMessage(BACKGROUND_PORT, msg);
       } catch (e) {
         if (isMounted) {

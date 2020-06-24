@@ -15,15 +15,9 @@ export class EnableKeyRingMsg extends Message<{
     return "enable-keyring";
   }
 
-  public static create(chainId: string, origin: string): EnableKeyRingMsg {
-    const msg = new EnableKeyRingMsg();
-    msg.chainId = chainId;
-    msg.origin = origin;
-    return msg;
+  constructor(public readonly chainId: string, public readonly origin: string) {
+    super();
   }
-
-  public chainId: string = "";
-  public origin: string = "";
 
   validateBasic(): void {
     if (!this.chainId) {
@@ -56,8 +50,8 @@ export class RestoreKeyRingMsg extends Message<{ status: KeyRingStatus }> {
     return "restore-keyring";
   }
 
-  public static create(): RestoreKeyRingMsg {
-    return new RestoreKeyRingMsg();
+  constructor() {
+    super();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -77,8 +71,8 @@ export class SaveKeyRingMsg extends Message<{ success: boolean }> {
     return "save-keyring";
   }
 
-  public static create(): SaveKeyRingMsg {
-    return new SaveKeyRingMsg();
+  constructor() {
+    super();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -98,8 +92,8 @@ export class ClearKeyRingMsg extends Message<{ status: KeyRingStatus }> {
     return "clear-keyring";
   }
 
-  public static create(): ClearKeyRingMsg {
-    return new ClearKeyRingMsg();
+  constructor() {
+    super();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -119,15 +113,9 @@ export class CreateKeyMsg extends Message<{ status: KeyRingStatus }> {
     return "create-key";
   }
 
-  public static create(mnemonic: string, password: string): CreateKeyMsg {
-    const msg = new CreateKeyMsg();
-    msg.mnemonic = mnemonic;
-    msg.password = password;
-    return msg;
+  constructor(public readonly mnemonic = "", public readonly password = "") {
+    super();
   }
-
-  public mnemonic = "";
-  public password = "";
 
   validateBasic(): void {
     if (!this.mnemonic) {
@@ -153,8 +141,8 @@ export class LockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
     return "lock-keyring";
   }
 
-  public static create(): LockKeyRingMsg {
-    return new LockKeyRingMsg();
+  constructor() {
+    super();
   }
 
   validateBasic(): void {
@@ -175,13 +163,9 @@ export class UnlockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
     return "unlock-keyring";
   }
 
-  public static create(password: string): UnlockKeyRingMsg {
-    const msg = new UnlockKeyRingMsg();
-    msg.password = password;
-    return msg;
+  constructor(public readonly password = "") {
+    super();
   }
-
-  public password = "";
 
   validateBasic(): void {
     if (!this.password) {
@@ -203,21 +187,13 @@ export class SetPathMsg extends Message<{ success: boolean }> {
     return "set-path";
   }
 
-  public static create(
-    chainId: string,
-    account: number,
-    index: number
-  ): SetPathMsg {
-    const msg = new SetPathMsg();
-    msg.chainId = chainId;
-    msg.account = account;
-    msg.index = index;
-    return msg;
+  constructor(
+    public readonly chainId: string,
+    public readonly account: number,
+    public readonly index: number
+  ) {
+    super();
   }
-
-  public chainId: string = "";
-  public account: number = -1;
-  public index: number = -1;
 
   validateBasic(): void {
     if (!this.chainId) {
@@ -247,15 +223,9 @@ export class GetKeyMsg extends Message<KeyHex> {
     return "get-key";
   }
 
-  public static create(chainId: string, origin: string): GetKeyMsg {
-    const msg = new GetKeyMsg();
-    msg.chainId = chainId;
-    msg.origin = origin;
-    return msg;
+  constructor(public readonly chainId: string, public readonly origin: string) {
+    super();
   }
-
-  public chainId = "";
-  public origin: string = "";
 
   validateBasic(): void {
     if (!this.chainId) {
@@ -290,29 +260,15 @@ export class RequestTxBuilderConfigMsg extends Message<{
     return "request-tx-builder-config";
   }
 
-  public static create(
-    config: TxBuilderConfigPrimitiveWithChainId,
-    id: string,
-    openPopup: boolean,
-    origin: string,
-    skipApprove?: boolean
-  ): RequestTxBuilderConfigMsg {
-    const msg = new RequestTxBuilderConfigMsg();
-    msg.config = config;
-    msg.id = id;
-    msg.openPopup = openPopup;
-    msg.origin = origin;
-    if (skipApprove) {
-      msg.skipApprove = true;
-    }
-    return msg;
+  constructor(
+    public readonly config: TxBuilderConfigPrimitiveWithChainId,
+    public readonly id: string,
+    public readonly openPopup: boolean,
+    public readonly origin: string,
+    public readonly skipApprove: boolean = false
+  ) {
+    super();
   }
-
-  public config?: TxBuilderConfigPrimitiveWithChainId;
-  public id: string = "";
-  public openPopup: boolean = false;
-  public origin: string = "";
-  public skipApprove: boolean = false;
 
   validateBasic(): void {
     if (!this.config) {
@@ -354,13 +310,9 @@ export class GetRequestedTxBuilderConfigMsg extends Message<{
     return "get-requested-tx-builder-config";
   }
 
-  public static create(id: string): GetRequestedTxBuilderConfigMsg {
-    const msg = new GetRequestedTxBuilderConfigMsg();
-    msg.id = id;
-    return msg;
+  constructor(public readonly id: string) {
+    super();
   }
-
-  public id: string = "";
 
   validateBasic(): void {
     AsyncApprover.isValidId(this.id);
@@ -380,18 +332,12 @@ export class ApproveTxBuilderConfigMsg extends Message<{}> {
     return "approve-tx-builder-config";
   }
 
-  public static create(
-    id: string,
-    config: TxBuilderConfigPrimitive
-  ): ApproveTxBuilderConfigMsg {
-    const msg = new ApproveTxBuilderConfigMsg();
-    msg.id = id;
-    msg.config = config;
-    return msg;
+  constructor(
+    public readonly id: string,
+    public readonly config: TxBuilderConfigPrimitive
+  ) {
+    super();
   }
-
-  public id: string = "";
-  public config?: TxBuilderConfigPrimitive;
 
   validateBasic(): void {
     if (!this.config) {
@@ -415,13 +361,9 @@ export class RejectTxBuilderConfigMsg extends Message<{}> {
     return "reject-tx-builder-config";
   }
 
-  public static create(id: string): RejectTxBuilderConfigMsg {
-    const msg = new RejectTxBuilderConfigMsg();
-    msg.id = id;
-    return msg;
+  constructor(public readonly id: string) {
+    super();
   }
-
-  public id: string = "";
 
   validateBasic(): void {
     AsyncApprover.isValidId(this.id);
@@ -441,36 +383,18 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     return "request-sign";
   }
 
-  public static create(
-    chainId: string,
-    id: string,
-    bech32Address: string,
-    messageHex: string,
-    openPopup: boolean,
-    origin: string,
-    skipApprove?: boolean
-  ): RequestSignMsg {
-    const msg = new RequestSignMsg();
-    msg.chainId = chainId;
-    msg.id = id;
-    msg.bech32Address = bech32Address;
-    msg.messageHex = messageHex;
-    msg.openPopup = openPopup;
-    msg.origin = origin;
-    if (skipApprove) {
-      msg.skipApprove = true;
-    }
-    return msg;
+  constructor(
+    public readonly chainId: string,
+    public readonly id: string,
+    public readonly bech32Address: string,
+    // Hex encoded message.
+    public readonly messageHex: string,
+    public readonly openPopup: boolean,
+    public readonly origin: string,
+    public readonly skipApprove: boolean = false
+  ) {
+    super();
   }
-
-  public chainId: string = "";
-  public id: string = "";
-  public bech32Address: string = "";
-  // Hex encoded message.
-  public messageHex: string = "";
-  public openPopup: boolean = false;
-  public origin: string = "";
-  public skipApprove: boolean = false;
 
   validateBasic(): void {
     if (!this.chainId) {
@@ -521,13 +445,9 @@ export class GetRequestedMessage extends Message<{
     return "get-request-message";
   }
 
-  public static create(id: string): GetRequestedMessage {
-    const msg = new GetRequestedMessage();
-    msg.id = id;
-    return msg;
+  constructor(public readonly id: string) {
+    super();
   }
-
-  public id: string = "";
 
   validateBasic(): void {
     if (!this.id) {
@@ -550,13 +470,9 @@ export class ApproveSignMsg extends Message<void> {
     return "approve-sign";
   }
 
-  public static create(id: string): ApproveSignMsg {
-    const msg = new ApproveSignMsg();
-    msg.id = id;
-    return msg;
+  constructor(public readonly id: string) {
+    super();
   }
-
-  public id: string = "";
 
   validateBasic(): void {
     AsyncApprover.isValidId(this.id);
@@ -576,13 +492,9 @@ export class RejectSignMsg extends Message<void> {
     return "reject-sign";
   }
 
-  public static create(id: string): RejectSignMsg {
-    const msg = new RejectSignMsg();
-    msg.id = id;
-    return msg;
+  constructor(public readonly id: string) {
+    super();
   }
-
-  public id: string = "";
 
   validateBasic(): void {
     AsyncApprover.isValidId(this.id);

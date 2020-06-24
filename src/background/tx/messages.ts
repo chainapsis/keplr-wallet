@@ -11,24 +11,14 @@ export class RequestBackgroundTxMsg extends Message<{}> {
    * @param txBytes Hex encoded bytes for tx
    * @param mode Broadcast mode
    */
-  public static create(
-    chainId: string,
-    txBytes: string,
-    mode: "sync" | "async" | "commit" = "commit",
-    origin: string
-  ): RequestBackgroundTxMsg {
-    const msg = new RequestBackgroundTxMsg();
-    msg.chainId = chainId;
-    msg.txBytes = txBytes;
-    msg.mode = mode;
-    msg.origin = origin;
-    return msg;
+  constructor(
+    public readonly chainId: string,
+    public readonly txBytes: string,
+    public readonly mode: "sync" | "async" | "commit",
+    public readonly origin: string
+  ) {
+    super();
   }
-
-  public chainId: string = "";
-  public txBytes: string = "";
-  public mode?: "sync" | "async" | "commit";
-  public origin: string = "";
 
   validateBasic(): void {
     if (!this.chainId) {

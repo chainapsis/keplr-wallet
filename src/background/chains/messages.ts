@@ -10,10 +10,6 @@ export class GetChainInfosMsg extends Message<{
     return "get-chain-infos";
   }
 
-  public static create(): GetChainInfosMsg {
-    return new GetChainInfosMsg();
-  }
-
   validateBasic(): void {
     // noop
   }
@@ -32,21 +28,13 @@ export class ReqeustAccessMsg extends Message<void> {
     return "request-access";
   }
 
-  public static create(
-    id: string,
-    chainId: string,
-    origin: string
-  ): ReqeustAccessMsg {
-    const msg = new ReqeustAccessMsg();
-    msg.id = id;
-    msg.chainId = chainId;
-    msg.origin = origin;
-    return msg;
+  constructor(
+    public readonly id: string,
+    public readonly chainId: string,
+    public readonly origin: string
+  ) {
+    super();
   }
-
-  public id: string = "";
-  public chainId: string = "";
-  public origin: string = "";
 
   validateBasic(): void {
     if (!this.chainId) {
@@ -81,13 +69,9 @@ export class GetReqeustAccessDataMsg extends Message<AccessOrigin> {
     return "get-request-access-data";
   }
 
-  public static create(id: string): GetReqeustAccessDataMsg {
-    const msg = new GetReqeustAccessDataMsg();
-    msg.id = id;
-    return msg;
+  constructor(public readonly id: string) {
+    super();
   }
-
-  public id: string = "";
 
   validateBasic(): void {
     AsyncApprover.isValidId(this.id);
@@ -107,13 +91,9 @@ export class ApproveAccessMsg extends Message<void> {
     return "approve-access";
   }
 
-  public static create(id: string): ApproveAccessMsg {
-    const msg = new ApproveAccessMsg();
-    msg.id = id;
-    return msg;
+  constructor(public readonly id: string) {
+    super();
   }
-
-  public id: string = "";
 
   validateBasic(): void {
     AsyncApprover.isValidId(this.id);
@@ -133,13 +113,9 @@ export class RejectAccessMsg extends Message<void> {
     return "reject-access";
   }
 
-  public static create(id: string): RejectAccessMsg {
-    const msg = new RejectAccessMsg();
-    msg.id = id;
-    return msg;
+  constructor(public readonly id: string) {
+    super();
   }
-
-  public id: string = "";
 
   validateBasic(): void {
     AsyncApprover.isValidId(this.id);
@@ -159,13 +135,9 @@ export class GetAccessOriginMsg extends Message<AccessOrigin> {
     return "get-access-origin";
   }
 
-  public static create(chainId: string): GetAccessOriginMsg {
-    const msg = new GetAccessOriginMsg();
-    msg.chainId = chainId;
-    return msg;
+  constructor(public readonly chainId: string) {
+    super();
   }
-
-  public chainId: string = "";
 
   validateBasic(): void {
     if (!this.chainId) {
@@ -187,15 +159,9 @@ export class RemoveAccessOriginMsg extends Message<void> {
     return "remove-access-origin";
   }
 
-  public static create(chainId: string, origin: string): RemoveAccessOriginMsg {
-    const msg = new RemoveAccessOriginMsg();
-    msg.chainId = chainId;
-    msg.origin = origin;
-    return msg;
+  constructor(public readonly chainId: string, public readonly origin: string) {
+    super();
   }
-
-  public chainId: string = "";
-  public origin: string = "";
 
   validateBasic(): void {
     if (!this.chainId) {

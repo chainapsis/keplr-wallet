@@ -58,35 +58,35 @@ export class KeyRingStore {
 
   @actionAsync
   public async createKey(mnemonic: string, password: string) {
-    const msg = CreateKeyMsg.create(mnemonic, password);
+    const msg = new CreateKeyMsg(mnemonic, password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
 
   @actionAsync
   public async lock() {
-    const msg = LockKeyRingMsg.create();
+    const msg = new LockKeyRingMsg();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
 
   @actionAsync
   public async unlock(password: string) {
-    const msg = UnlockKeyRingMsg.create(password);
+    const msg = new UnlockKeyRingMsg(password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
 
   @actionAsync
   public async restore() {
-    const msg = RestoreKeyRingMsg.create();
+    const msg = new RestoreKeyRingMsg();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
 
   @actionAsync
   public async save() {
-    const msg = SaveKeyRingMsg.create();
+    const msg = new SaveKeyRingMsg();
     await task(sendMessage(BACKGROUND_PORT, msg));
   }
 
@@ -102,7 +102,7 @@ export class KeyRingStore {
       );
     }
 
-    const msg = ClearKeyRingMsg.create();
+    const msg = new ClearKeyRingMsg();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }

@@ -196,7 +196,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
             );
             const bz = api.context.get("txEncoder")(api.context, tx);
 
-            const msg = RequestBackgroundTxMsg.create(
+            const msg = new RequestBackgroundTxMsg(
               api.context.get("chainId"),
               Buffer.from(bz).toString("hex"),
               mode,

@@ -6,13 +6,9 @@ export class SetPersistentMemoryMsg extends Message<{ success: boolean }> {
     return "set-persistent-memory";
   }
 
-  public static create(data: any): SetPersistentMemoryMsg {
-    const msg = new SetPersistentMemoryMsg();
-    msg.data = data;
-    return msg;
+  constructor(public readonly data: any) {
+    super();
   }
-
-  public data = {};
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   validateBasic(): void {}
@@ -31,8 +27,8 @@ export class GetPersistentMemoryMsg extends Message<any> {
     return "get-persistent-memory";
   }
 
-  public static create(): GetPersistentMemoryMsg {
-    return new GetPersistentMemoryMsg();
+  constructor() {
+    super();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

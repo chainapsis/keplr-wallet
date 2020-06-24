@@ -129,7 +129,7 @@ export class AccountStore {
   private async fetchBech32Address() {
     this.isAddressFetching = true;
 
-    const setPathMsg = SetPathMsg.create(
+    const setPathMsg = new SetPathMsg(
       this.chainInfo.chainId,
       this.bip44Account,
       this.bip44Index
@@ -137,7 +137,7 @@ export class AccountStore {
     await task(sendMessage(BACKGROUND_PORT, setPathMsg));
 
     // No need to set origin, because this is internal.
-    const getKeyMsg = GetKeyMsg.create(this.chainInfo.chainId, "");
+    const getKeyMsg = new GetKeyMsg(this.chainInfo.chainId, "");
     const result = await task(sendMessage(BACKGROUND_PORT, getKeyMsg));
 
     const prevBech32Address = this.bech32Address;
