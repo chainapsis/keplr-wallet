@@ -30,17 +30,22 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
     (ConfirmOptions & { resolve: () => void; reject: () => void }) | null
   >(null);
 
+  // Confirm method returns true if user confirmed the behavior or returns false if user reject to continue the behavior asynchronously.
   const confirm = useCallback(
     (options: ConfirmOptions): Promise<boolean> => {
+      // If a previous request exists, reject the previous request.
       if (currentConfirm) {
         currentConfirm.reject();
       }
 
       return new Promise<boolean>(resolve => {
+        // Resolver resolves `true` and clear the confirm informations.
         const resolver = () => {
           resolve(true);
           setCurrentConfirm(null);
         };
+        // Rejector resolves `false` and clear the confirm informations.
+        // Rejector doesn't reject promise with an error.
         const rejector = () => {
           resolve(false);
           setCurrentConfirm(null);
@@ -87,6 +92,10 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
   );
 };
 
+/**
+ * Confirm method returns `true` or `false` asynchronously.
+ * Please note that this request does not allow nesting.
+ */
 export function useConfirm() {
   const state = useContext(ConfirmContext);
   if (!state) throw new Error("You probably forgot to use ConfirmProvider");
