@@ -3,7 +3,8 @@ import {
   EnableKeyRingMsg,
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
-  CreateKeyMsg,
+  CreateMnemonicKeyMsg,
+  CreatePrivateKeyMsg,
   SetPathMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
@@ -30,7 +31,8 @@ export function init(
   messageManager.registerMessage(RestoreKeyRingMsg);
   messageManager.registerMessage(SaveKeyRingMsg);
   messageManager.registerMessage(ClearKeyRingMsg);
-  messageManager.registerMessage(CreateKeyMsg);
+  messageManager.registerMessage(CreateMnemonicKeyMsg);
+  messageManager.registerMessage(CreatePrivateKeyMsg);
   messageManager.registerMessage(LockKeyRingMsg);
   messageManager.registerMessage(UnlockKeyRingMsg);
   messageManager.registerMessage(SetPathMsg);

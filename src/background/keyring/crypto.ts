@@ -17,7 +17,12 @@ interface ScryptParams {
  * But, the encryped data is not the private key, but the mnemonic words.
  */
 export interface KeyStore {
-  version: "1";
+  version: "1" | "1.1";
+  /**
+   * Type can be "mnemonic" or "privateKey".
+   * Below version "1", type is not defined and it is considered as "mnemonic".
+   */
+  type?: "mnemonic" | "privateKey";
   crypto: {
     cipher: "aes-128-ctr";
     cipherparams: {
@@ -32,6 +37,7 @@ export interface KeyStore {
 
 export class Crypto {
   public static async encrypt(
+    type: "mnemonic" | "privateKey",
     text: string,
     password: string
   ): Promise<KeyStore> {
@@ -62,7 +68,8 @@ export class Crypto {
       Buffer.concat([derivedKey.slice(derivedKey.length / 2), ciphertext])
     );
     return {
-      version: "1",
+      version: "1.1",
+      type,
       crypto: {
         cipher: "aes-128-ctr",
         cipherparams: {
@@ -98,7 +105,7 @@ export class Crypto {
 
     return Buffer.from(
       aesCtr.decrypt(Buffer.from(keyStore.crypto.ciphertext, "hex"))
-    ).toString();
+    );
   }
 
   private static async scrpyt(

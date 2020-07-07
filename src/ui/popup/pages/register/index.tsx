@@ -56,7 +56,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
     async (words: string, password: string) => {
       setAccountIsCreating(true);
       try {
-        await keyRingStore.createKey(words, password);
+        await keyRingStore.createMnemonicKey(words, password);
         await keyRingStore.save();
       } finally {
         setAccountIsCreating(false);

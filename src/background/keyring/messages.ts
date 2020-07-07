@@ -108,9 +108,9 @@ export class ClearKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class CreateKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
-    return "create-key";
+    return "create-mnemonic-key";
   }
 
   constructor(public readonly mnemonic = "", public readonly password = "") {
@@ -132,7 +132,38 @@ export class CreateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   type(): string {
-    return CreateKeyMsg.type();
+    return CreateMnemonicKeyMsg.type();
+  }
+}
+
+export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
+  public static type() {
+    return "create-private-key";
+  }
+
+  constructor(
+    public readonly privateKey: Uint8Array,
+    public readonly password = ""
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.privateKey || this.privateKey.length === 0) {
+      throw new Error("private not set");
+    }
+
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CreatePrivateKeyMsg.type();
   }
 }
 

@@ -100,9 +100,21 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
-  async createKey(mnemonic: string, password: string): Promise<KeyRingStatus> {
+  async createMnemonicKey(
+    mnemonic: string,
+    password: string
+  ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createKey(mnemonic, password);
+    await this.keyRing.createMnemonicKey(mnemonic, password);
+    return this.keyRing.status;
+  }
+
+  async createPrivateKey(
+    privateKey: Uint8Array,
+    password: string
+  ): Promise<KeyRingStatus> {
+    // TODO: Check mnemonic checksum.
+    await this.keyRing.createPrivateKey(privateKey, password);
     return this.keyRing.status;
   }
 
@@ -118,6 +130,7 @@ export class KeyRingKeeper {
     } catch {
       // noop
     }
+
     return this.keyRing.status;
   }
 

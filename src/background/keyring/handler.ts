@@ -3,7 +3,8 @@ import {
   EnableKeyRingMsg,
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
-  CreateKeyMsg,
+  CreateMnemonicKeyMsg,
+  CreatePrivateKeyMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
   SetPathMsg,
@@ -36,8 +37,10 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         return handleSaveKeyRingMsg(keeper)(msg as SaveKeyRingMsg);
       case ClearKeyRingMsg:
         return handleClearKeyRingMsg(keeper)(msg as ClearKeyRingMsg);
-      case CreateKeyMsg:
-        return handleCreateKeyMsg(keeper)(msg as CreateKeyMsg);
+      case CreateMnemonicKeyMsg:
+        return handleCreateMnemonicKeyMsg(keeper)(msg as CreateMnemonicKeyMsg);
+      case CreatePrivateKeyMsg:
+        return handleCreatePrivateKeyMsg(keeper)(msg as CreatePrivateKeyMsg);
       case LockKeyRingMsg:
         return handleLockKeyRingMsg(keeper)(msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
@@ -121,12 +124,22 @@ const handleClearKeyRingMsg: (
   };
 };
 
-const handleCreateKeyMsg: (
+const handleCreateMnemonicKeyMsg: (
   keeper: KeyRingKeeper
-) => InternalHandler<CreateKeyMsg> = keeper => {
+) => InternalHandler<CreateMnemonicKeyMsg> = keeper => {
   return async msg => {
     return {
-      status: await keeper.createKey(msg.mnemonic, msg.password)
+      status: await keeper.createMnemonicKey(msg.mnemonic, msg.password)
+    };
+  };
+};
+
+const handleCreatePrivateKeyMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<CreatePrivateKeyMsg> = keeper => {
+  return async msg => {
+    return {
+      status: await keeper.createPrivateKey(msg.privateKey, msg.password)
     };
   };
 };

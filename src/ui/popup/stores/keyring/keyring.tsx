@@ -7,7 +7,7 @@ import {
   KeyRingStatus,
   RestoreKeyRingMsg,
   SaveKeyRingMsg,
-  CreateKeyMsg,
+  CreateMnemonicKeyMsg,
   UnlockKeyRingMsg,
   LockKeyRingMsg,
   ClearKeyRingMsg
@@ -57,8 +57,8 @@ export class KeyRingStore {
   }
 
   @actionAsync
-  public async createKey(mnemonic: string, password: string) {
-    const msg = new CreateKeyMsg(mnemonic, password);
+  public async createMnemonicKey(mnemonic: string, password: string) {
+    const msg = new CreateMnemonicKeyMsg(mnemonic, password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
