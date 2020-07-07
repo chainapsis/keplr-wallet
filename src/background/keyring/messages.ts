@@ -142,14 +142,15 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   constructor(
-    public readonly privateKey: Uint8Array,
+    // Hex encoded bytes.
+    public readonly privateKey: string,
     public readonly password = ""
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.privateKey || this.privateKey.length === 0) {
+    if (!this.privateKey) {
       throw new Error("private not set");
     }
 

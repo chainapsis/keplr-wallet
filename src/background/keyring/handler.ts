@@ -139,7 +139,10 @@ const handleCreatePrivateKeyMsg: (
 ) => InternalHandler<CreatePrivateKeyMsg> = keeper => {
   return async msg => {
     return {
-      status: await keeper.createPrivateKey(msg.privateKey, msg.password)
+      status: await keeper.createPrivateKey(
+        Buffer.from(msg.privateKey, "hex"),
+        msg.password
+      )
     };
   };
 };

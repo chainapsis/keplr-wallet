@@ -10,7 +10,8 @@ import {
   CreateMnemonicKeyMsg,
   UnlockKeyRingMsg,
   LockKeyRingMsg,
-  ClearKeyRingMsg
+  ClearKeyRingMsg,
+  CreatePrivateKeyMsg
 } from "../../../../background/keyring";
 
 import { action, observable } from "mobx";
@@ -18,6 +19,8 @@ import { actionAsync, task } from "mobx-utils";
 
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RootStore } from "../root";
+
+const Buffer = require("buffer/").Buffer;
 
 /*
  Actual key ring logic is managed in persistent background. Refer "src/common/message" and "src/background/keyring"
@@ -59,6 +62,16 @@ export class KeyRingStore {
   @actionAsync
   public async createMnemonicKey(mnemonic: string, password: string) {
     const msg = new CreateMnemonicKeyMsg(mnemonic, password);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setStatus(result.status);
+  }
+
+  @actionAsync
+  public async createPrivateKey(privateKey: Uint8Array, password: string) {
+    const msg = new CreatePrivateKeyMsg(
+      Buffer.from(privateKey).toString("hex"),
+      password
+    );
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
