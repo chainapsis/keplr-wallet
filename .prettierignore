@@ -2,6 +2,8 @@
 **/*.svg
 **/*.ttf
 **/*.secret
+**/*.md
+
 .DS_Store
 
 dist
