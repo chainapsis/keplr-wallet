@@ -110,6 +110,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
           txState.setError("recipient", ErrorIdBech32Address, null);
         }
       } else if (!ens.loading && ens.error) {
+        txState.setRecipient(null);
         if (ens.error instanceof InvalidENSNameError) {
           txState.setError(
             "recipient",
