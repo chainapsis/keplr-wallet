@@ -40,12 +40,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     nativeCurrency: "atom",
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub-3"
-        : "http://localhost:8081/#/cosmoshub-3",
+        ? "https://wallet.keplr.app/#/cosmoshub-3/stake"
+        : "http://localhost:8081/#/cosmoshub-3/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub-3"
-        : "http://localhost:8081/#/cosmoshub-3",
+        ? "https://wallet.keplr.app/#/cosmoshub-3/stake"
+        : "http://localhost:8081/#/cosmoshub-3/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
     currencies: ["atom"],
@@ -62,12 +62,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     nativeCurrency: "kava",
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava-3"
-        : "http://localhost:8081/#/kava-3",
+        ? "https://wallet.keplr.app/#/kava-3/stake"
+        : "http://localhost:8081/#/kava-3/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava-3"
-        : "http://localhost:8081/#/kava-3",
+        ? "https://wallet.keplr.app/#/kava-3/stake"
+        : "http://localhost:8081/#/kava-3/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("kava"),
     currencies: ["kava"],
@@ -84,12 +84,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     nativeCurrency: "secret",
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava-3"
-        : "http://localhost:8081/#/kava-3",
+        ? "https://wallet.keplr.app/#/secret-1/stake"
+        : "http://localhost:8081/#/secret-1/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava-3"
-        : "http://localhost:8081/#/kava-3",
+        ? "https://wallet.keplr.app/#/secret-1/stake"
+        : "http://localhost:8081/#/secret-1/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("secret"),
     currencies: ["secret"],
