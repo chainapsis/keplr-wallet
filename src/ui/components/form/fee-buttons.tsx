@@ -162,28 +162,30 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             }, [])}
           >
             <div className={styleFeeButtons.title}>{feeSelectLabels.low}</div>
-            <div
-              className={classnames(styleFeeButtons.fiat, {
-                "text-muted": feeSelect !== FeeSelect.LOW
-              })}
-            >
-              {price.gt(new Dec(0)) && feeLow
-                ? `${
-                    fiatCurrency.symbol
-                  }${DecUtils.removeTrailingZerosFromDecStr(
-                    fiatCurrency.parse(
-                      parseFloat(
-                        new Dec(feeLow.amount)
-                          .quoTruncate(
-                            DecUtils.getPrecisionDec(currency.coinDecimals)
-                          )
-                          .mul(price)
-                          .toString()
+            {currency.coinGeckoId ? (
+              <div
+                className={classnames(styleFeeButtons.fiat, {
+                  "text-muted": feeSelect !== FeeSelect.LOW
+                })}
+              >
+                {price.gt(new Dec(0)) && feeLow
+                  ? `${
+                      fiatCurrency.symbol
+                    }${DecUtils.removeTrailingZerosFromDecStr(
+                      fiatCurrency.parse(
+                        parseFloat(
+                          new Dec(feeLow.amount)
+                            .quoTruncate(
+                              DecUtils.getPrecisionDec(currency.coinDecimals)
+                            )
+                            .mul(price)
+                            .toString()
+                        )
                       )
-                    )
-                  )}`
-                : "?"}
-            </div>
+                    )}`
+                  : "?"}
+              </div>
+            ) : null}
             <div
               className={classnames(styleFeeButtons.coin, {
                 "text-muted": feeSelect !== FeeSelect.LOW
@@ -208,28 +210,30 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             <div className={styleFeeButtons.title}>
               {feeSelectLabels.average}
             </div>
-            <div
-              className={classnames(styleFeeButtons.fiat, {
-                "text-muted": feeSelect !== FeeSelect.AVERAGE
-              })}
-            >
-              {price.gt(new Dec(0)) && feeAverage
-                ? `${
-                    fiatCurrency.symbol
-                  }${DecUtils.removeTrailingZerosFromDecStr(
-                    fiatCurrency.parse(
-                      parseFloat(
-                        new Dec(feeAverage.amount)
-                          .quoTruncate(
-                            DecUtils.getPrecisionDec(currency.coinDecimals)
-                          )
-                          .mul(price)
-                          .toString()
+            {currency.coinGeckoId ? (
+              <div
+                className={classnames(styleFeeButtons.fiat, {
+                  "text-muted": feeSelect !== FeeSelect.AVERAGE
+                })}
+              >
+                {price.gt(new Dec(0)) && feeAverage
+                  ? `${
+                      fiatCurrency.symbol
+                    }${DecUtils.removeTrailingZerosFromDecStr(
+                      fiatCurrency.parse(
+                        parseFloat(
+                          new Dec(feeAverage.amount)
+                            .quoTruncate(
+                              DecUtils.getPrecisionDec(currency.coinDecimals)
+                            )
+                            .mul(price)
+                            .toString()
+                        )
                       )
-                    )
-                  )}`
-                : "?"}
-            </div>
+                    )}`
+                  : "?"}
+              </div>
+            ) : null}
             <div
               className={classnames(styleFeeButtons.coin, {
                 "text-muted": feeSelect !== FeeSelect.AVERAGE
@@ -252,28 +256,30 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             }, [])}
           >
             <div className={styleFeeButtons.title}>{feeSelectLabels.high}</div>
-            <div
-              className={classnames(styleFeeButtons.fiat, {
-                "text-muted": feeSelect !== FeeSelect.HIGH
-              })}
-            >
-              {price.gt(new Dec(0)) && feeHigh
-                ? `${
-                    fiatCurrency.symbol
-                  }${DecUtils.removeTrailingZerosFromDecStr(
-                    fiatCurrency.parse(
-                      parseFloat(
-                        new Dec(feeHigh.amount)
-                          .quoTruncate(
-                            DecUtils.getPrecisionDec(currency.coinDecimals)
-                          )
-                          .mul(price)
-                          .toString()
+            {currency.coinGeckoId ? (
+              <div
+                className={classnames(styleFeeButtons.fiat, {
+                  "text-muted": feeSelect !== FeeSelect.HIGH
+                })}
+              >
+                {price.gt(new Dec(0)) && feeHigh
+                  ? `${
+                      fiatCurrency.symbol
+                    }${DecUtils.removeTrailingZerosFromDecStr(
+                      fiatCurrency.parse(
+                        parseFloat(
+                          new Dec(feeHigh.amount)
+                            .quoTruncate(
+                              DecUtils.getPrecisionDec(currency.coinDecimals)
+                            )
+                            .mul(price)
+                            .toString()
+                        )
                       )
-                    )
-                  )}`
-                : "?"}
-            </div>
+                    )}`
+                  : "?"}
+              </div>
+            ) : null}
             <div
               className={classnames(styleFeeButtons.coin, {
                 "text-muted": feeSelect !== FeeSelect.HIGH

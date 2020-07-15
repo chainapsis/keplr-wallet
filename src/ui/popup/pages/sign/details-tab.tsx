@@ -55,11 +55,20 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
     const language = useLanguage();
     const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
 
+    // Set true if all fees have the coingecko id.
+    const [hasCoinGeckoId, setHasCoinGeckoId] = useState(false);
+
     useEffect(() => {
       let price = new Dec(0);
+      // Set true if all fees have the coingecko id.
+      let hasCoinGeckoId = true;
+
       for (const coin of fee) {
         const currency = getCurrencyFromMinimalDenom(coin.denom);
         if (currency) {
+          if (!currency.coinGeckoId) {
+            hasCoinGeckoId = false;
+          }
           if (
             !priceStore.hasFiat(fiatCurrency.currency) &&
             currency.coinGeckoId
@@ -80,6 +89,7 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
         }
       }
 
+      setHasCoinGeckoId(hasCoinGeckoId);
       setFeeFiat(price);
     }, [fee, fiatCurrency.currency, priceStore]);
 
@@ -131,7 +141,9 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
                   DecUtils.removeTrailingZerosFromDecStr(
                     fiatCurrency.parse(parseFloat(feeFiat.toString()))
                   )
-                : "?"}
+                : hasCoinGeckoId
+                ? "?"
+                : ""}
             </div>
           </div>
         </div>
