@@ -12,7 +12,11 @@ import {
   KAVA_REST_CONFIG,
   KAVA_REST_ENDPOINT,
   KAVA_RPC_CONFIG,
-  KAVA_RPC_ENDPOINT
+  KAVA_RPC_ENDPOINT,
+  SECRET_NETWORK_REST_CONFIG,
+  SECRET_NETWORK_REST_ENDPOINT,
+  SECRET_NETWORK_RPC_CONFIG,
+  SECRET_NETWORK_RPC_ENDPOINT
 } from "./config.var";
 
 export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
@@ -69,6 +73,28 @@ export const EmbedChainInfos: ChainInfo[] = [
     currencies: ["kava"],
     feeCurrencies: ["kava"],
     coinType: 459
+  },
+  {
+    rpc: SECRET_NETWORK_RPC_ENDPOINT,
+    rpcConfig: SECRET_NETWORK_RPC_CONFIG,
+    rest: SECRET_NETWORK_REST_ENDPOINT,
+    restConfig: SECRET_NETWORK_REST_CONFIG,
+    chainId: "secret-1",
+    chainName: "Secret Network",
+    nativeCurrency: "secret",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/kava-3"
+        : "http://localhost:8081/#/kava-3",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/kava-3"
+        : "http://localhost:8081/#/kava-3",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("secret"),
+    currencies: ["secret"],
+    feeCurrencies: ["secret"],
+    coinType: 529
   }
 ];
 
@@ -83,6 +109,11 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
   },
   {
     chainId: "kava-3",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "secret-1",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
@@ -105,6 +136,11 @@ export const Currencies: {
     coinMinimalDenom: "ukava",
     coinDecimals: 6,
     coinGeckoId: "kava"
+  },
+  secret: {
+    coinDenom: "SCRT",
+    coinMinimalDenom: "uscrt",
+    coinDecimals: 6
   }
 };
 
