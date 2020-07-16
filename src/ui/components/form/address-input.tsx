@@ -53,6 +53,8 @@ export interface AddressInputProps {
   // If coin type for ENS is delivered, this can fetch the address from ENS.
   // If this prop is not delivered, ens will not work.
   coinType?: number;
+
+  disableAddressBook?: boolean;
 }
 
 export const AddressInput: FunctionComponent<AddressInputProps> = ({
@@ -60,20 +62,22 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
   className,
   label,
   errorTexts,
-  coinType
+  coinType,
+  disableAddressBook
 }) => {
   const txState = useTxState();
 
-  const [recipient, setRecipient] = useState<string>("");
-
-  const ens = useENS(recipient, coinType, bech32Prefix);
+  const ens = useENS(txState.rawAddress, coinType, bech32Prefix);
 
   // Check that the recipient is valid.
   useEffect(() => {
-    if (!isValidENS(recipient)) {
-      if (recipient) {
+    if (!isValidENS(txState.rawAddress)) {
+      if (txState.rawAddress) {
         try {
-          const accAddress = AccAddress.fromBech32(recipient, bech32Prefix);
+          const accAddress = AccAddress.fromBech32(
+            txState.rawAddress,
+            bech32Prefix
+          );
           if (txState.recipient?.toBech32() !== accAddress.toBech32()) {
             txState.setRecipient(accAddress);
             txState.setError("recipient", ErrorIdBech32Address, null);
@@ -90,7 +94,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
         txState.setError("recipient", ErrorIdBech32Address, null);
       }
     }
-  }, [bech32Prefix, recipient, txState]);
+  }, [bech32Prefix, txState.rawAddress, txState]);
 
   const clearENSError = useCallback(() => {
     txState.setError("recipient", ErrorIdENSInvalidName, null);
@@ -101,7 +105,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
 
   // Check that the address from ENS is valid.
   useEffect(() => {
-    if (isValidENS(recipient)) {
+    if (isValidENS(txState.rawAddress)) {
       if (ens.address) {
         const accAddress = new AccAddress(ens.address, bech32Prefix);
         if (txState.recipient?.toBech32() !== accAddress.toBech32()) {
@@ -146,7 +150,6 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
     ens.address,
     ens.error,
     ens.loading,
-    recipient,
     txState
   ]);
 
@@ -175,7 +178,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
   const onSelectAddressBook = useCallback(
     (data: AddressBookData) => {
       closeAddressBook();
-      setRecipient(data.address);
+      txState.setRawAddress(data.address);
       txState.setMemo(data.memo);
     },
     [closeAddressBook, txState]
@@ -217,24 +220,29 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
               "form-control-alternative",
               styleAddressInput.input
             )}
-            value={recipient}
-            onChange={useCallback(e => {
-              setRecipient(e.target.value);
-              e.preventDefault();
-            }, [])}
+            value={txState.rawAddress}
+            onChange={useCallback(
+              e => {
+                txState.setRawAddress(e.target.value);
+                e.preventDefault();
+              },
+              [txState]
+            )}
             autoComplete="off"
           />
-          <Button
-            className={styleAddressInput.addressBookButton}
-            color="primary"
-            type="button"
-            outline
-            onClick={openAddressBook}
-          >
-            <i className="fas fa-address-book" />
-          </Button>
+          {!disableAddressBook ? (
+            <Button
+              className={styleAddressInput.addressBookButton}
+              color="primary"
+              type="button"
+              outline
+              onClick={openAddressBook}
+            >
+              <i className="fas fa-address-book" />
+            </Button>
+          ) : null}
         </InputGroup>
-        {isValidENS(recipient) ? (
+        {isValidENS(txState.rawAddress) ? (
           ens.loading ? (
             <FormText>
               <i className="fas fa-spinner fa-spin" />

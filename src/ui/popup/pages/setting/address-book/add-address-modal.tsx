@@ -1,19 +1,17 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useState,
+  useEffect
+} from "react";
 import { HeaderLayout } from "../../../layouts/header-layout";
-import { Input, TextArea } from "../../../../components/form";
+import { AddressInput, Input, MemoInput } from "../../../../components/form";
 import { Button } from "reactstrap";
-import useForm from "react-hook-form";
 import { AddressBookData } from "./types";
 import { AddressBookKVStore } from "./kvStore";
 import { ChainInfo } from "../../../../../background/chains";
-import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
-import {
-  ENSUnsupportedError,
-  InvalidENSNameError,
-  isValidENS,
-  useENS
-} from "../../../../hooks/use-ens";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTxState, withTxStateProvider } from "../../../contexts/tx";
 
 /**
  *
@@ -30,169 +28,116 @@ export const AddAddressModal: FunctionComponent<{
   chainInfo: ChainInfo;
   index: number;
   addressBookKVStore: AddressBookKVStore;
-}> = ({ closeModal, addAddressBook, chainInfo, index, addressBookKVStore }) => {
-  const intl = useIntl();
-  const form = useForm<AddressBookData>({
-    defaultValues: {
-      name: "",
-      address: "",
-      memo: ""
-    }
-  });
+}> = withTxStateProvider(
+  ({ closeModal, addAddressBook, chainInfo, index, addressBookKVStore }) => {
+    const intl = useIntl();
 
-  const {
-    register,
-    handleSubmit,
-    errors,
-    setValue,
-    watch,
-    triggerValidation
-  } = form;
+    const [name, setName] = useState("");
 
-  const address = watch("address");
-  const ens = useENS(
-    address,
-    chainInfo.coinType,
-    chainInfo.bech32Config.bech32PrefixAccAddr
-  );
+    const txState = useTxState();
 
-  useEffect(() => {
-    if (isValidENS(address)) {
-      triggerValidation({ name: "address" });
-    }
-  }, [ens, address, triggerValidation]);
+    // Make sure to load the editables only once.
+    const [editingLoaded, setEditingLoaded] = useState(false);
 
-  const switchENSErrorToIntl = (e: Error) => {
-    if (e instanceof InvalidENSNameError) {
-      return intl.formatMessage({
-        id: "send.input.recipient.error.ens-invalid-name"
-      });
-    } else if (e.message.includes("ENS name not found")) {
-      return intl.formatMessage({
-        id: "send.input.recipient.error.ens-not-found"
-      });
-    } else if (e instanceof ENSUnsupportedError) {
-      return intl.formatMessage({
-        id: "send.input.recipient.error.ens-not-supported"
-      });
-    } else {
-      return intl.formatMessage({
-        id: "sned.input.recipient.error.ens-unknown-error"
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (index >= 0) {
-      addressBookKVStore.getAddressBook(chainInfo).then(datas => {
-        const data = datas[index];
-        setValue("name", data.name);
-        setValue("address", data.address);
-        setValue("memo", data.memo);
-      });
-    }
-  }, [addressBookKVStore, chainInfo, index, setValue]);
-
-  return (
-    <HeaderLayout
-      showChainName={false}
-      canChangeChainInfo={false}
-      alternativeTitle={
-        index >= 0
-          ? intl.formatMessage({
-              id: "setting.address-book.edit-address.title"
-            })
-          : intl.formatMessage({
-              id: "setting.address-book.add-address.title"
-            })
+    useEffect(() => {
+      if (!editingLoaded) {
+        if (index >= 0) {
+          addressBookKVStore.getAddressBook(chainInfo).then(datas => {
+            const data = datas[index];
+            setName(data.name);
+            txState.setRawAddress(data.address);
+            txState.setMemo(data.memo);
+          });
+          setEditingLoaded(true);
+        }
       }
-      onBackButton={closeModal}
-    >
-      <form
-        style={{ display: "flex", flexDirection: "column", height: "100%" }}
-        onSubmit={e => {
-          // If recipient is ENS name and ENS is loading,
-          // don't send the assets before ENS is fully loaded.
-          if (isValidENS(address) && ens.loading) {
-            e.preventDefault();
-            return;
-          }
+    }, [addressBookKVStore, chainInfo, editingLoaded, index, txState]);
 
-          return handleSubmit(data => {
-            addAddressBook(data);
-          })(e);
-        }}
+    return (
+      <HeaderLayout
+        showChainName={false}
+        canChangeChainInfo={false}
+        alternativeTitle={
+          index >= 0
+            ? intl.formatMessage({
+                id: "setting.address-book.edit-address.title"
+              })
+            : intl.formatMessage({
+                id: "setting.address-book.add-address.title"
+              })
+        }
+        onBackButton={closeModal}
       >
-        <Input
-          type="text"
-          label={intl.formatMessage({ id: "setting.address-book.name" })}
-          name="name"
-          error={errors.name?.message}
-          ref={register({
-            required: intl.formatMessage({
-              id: "setting.address-book.name.error.required"
-            })
-          })}
-          autoComplete="off"
-        />
-        <Input
-          type="text"
-          label={intl.formatMessage({ id: "setting.address-book.address" })}
-          name="address"
-          text={
-            isValidENS(address) ? (
-              ens.loading ? (
-                <i className="fas fa-spinner fa-spin" />
-              ) : (
-                ens.bech32Address
-              )
-            ) : (
-              undefined
-            )
-          }
-          error={
-            (isValidENS(address) &&
-              ens.error &&
-              switchENSErrorToIntl(ens.error)) ||
-            (errors.address && errors.address.message)
-          }
-          ref={register({
-            required: intl.formatMessage({
-              id: "setting.address-book.address.error.required"
-            }),
-            validate: (value: string) => {
-              if (!isValidENS(value)) {
-                try {
-                  AccAddress.fromBech32(
-                    value,
-                    chainInfo.bech32Config.bech32PrefixAccAddr
-                  );
-                } catch (e) {
-                  return intl.formatMessage({
-                    id: "setting.address-book.address.error.invalid"
-                  });
+        <form
+          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+        >
+          <Input
+            type="text"
+            label={intl.formatMessage({ id: "setting.address-book.name" })}
+            autoComplete="off"
+            value={name}
+            onChange={useCallback(e => {
+              setName(e.target.value);
+            }, [])}
+          />
+          <AddressInput
+            label={intl.formatMessage({ id: "setting.address-book.address" })}
+            bech32Prefix={chainInfo.bech32Config.bech32PrefixAccAddr}
+            coinType={chainInfo.coinType}
+            errorTexts={{
+              invalidBech32Address: intl.formatMessage({
+                id: "setting.address-book.address.error.invalid"
+              }),
+              invalidENSName: intl.formatMessage({
+                id: "send.input.recipient.error.ens-invalid-name"
+              }),
+              ensNameNotFound: intl.formatMessage({
+                id: "send.input.recipient.error.ens-not-found"
+              }),
+              ensUnsupported: intl.formatMessage({
+                id: "send.input.recipient.error.ens-not-supported"
+              }),
+              ensUnknownError: intl.formatMessage({
+                id: "sned.input.recipient.error.ens-unknown-error"
+              })
+            }}
+            disableAddressBook={true}
+          />
+          <MemoInput
+            label={intl.formatMessage({ id: "setting.address-book.memo" })}
+          />
+          <div style={{ flex: 1 }} />
+          <Button
+            type="submit"
+            color="primary"
+            disabled={!name || !txState.isValid("recipient", "memo")}
+            onClick={useCallback(
+              e => {
+                if (!txState.recipient) {
+                  throw new Error("Invalid address");
                 }
-              } else {
-                if (ens.error) {
-                  return ens.error.message;
-                }
-              }
-            }
-          })}
-          autoComplete="off"
-        />
-        <TextArea
-          label={intl.formatMessage({ id: "setting.address-book.memo" })}
-          name="memo"
-          error={errors.memo?.message}
-          ref={register({ required: false })}
-          autoComplete="off"
-        />
-        <div style={{ flex: 1 }} />
-        <Button type="submit" color="primary">
-          <FormattedMessage id={"setting.address-book.button.save"} />
-        </Button>
-      </form>
-    </HeaderLayout>
-  );
-};
+
+                addAddressBook({
+                  name,
+                  address: txState.rawAddress,
+                  memo: txState.memo
+                });
+
+                e.preventDefault();
+              },
+              [
+                addAddressBook,
+                name,
+                txState.memo,
+                txState.rawAddress,
+                txState.recipient
+              ]
+            )}
+          >
+            <FormattedMessage id={"setting.address-book.button.save"} />
+          </Button>
+        </form>
+      </HeaderLayout>
+    );
+  }
+);

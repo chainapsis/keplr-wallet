@@ -19,6 +19,7 @@ type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 // This doesn't use reducer/dispatch pattern because this is relatively simple
 // and doesn't act as global state and act as the pipeline for the components to handle the tx information.
 export interface TxState {
+  rawAddress: string;
   recipient: AccAddress | null;
   amount: Coin | null;
 
@@ -35,6 +36,7 @@ export interface TxState {
   // Balances of account to send tx
   balances: Coin[];
 
+  setRawAddress(rawAddress: string): void;
   setRecipient(recipient: AccAddress | null): void;
   setAmount(amount: Coin | null): void;
 
@@ -57,6 +59,7 @@ export interface TxState {
 const TxContext = createContext<TxState | undefined>(undefined);
 
 export const TxStateProvider: FunctionComponent = ({ children }) => {
+  const [rawAddress, setRawAddress] = useState<string>("");
   const [recipient, setRecipient] = useState<AccAddress | null>(null);
   const [amount, setAmount] = useState<Coin | null>(null);
 
@@ -148,6 +151,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
     <TxContext.Provider
       value={useMemo(
         () => ({
+          rawAddress,
           recipient,
           amount,
           gas,
@@ -156,6 +160,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           currencies,
           balances,
           feeCurrencies,
+          setRawAddress,
           setRecipient,
           setAmount,
           setGas,
@@ -169,6 +174,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           isValid
         }),
         [
+          rawAddress,
           recipient,
           amount,
           gas,
