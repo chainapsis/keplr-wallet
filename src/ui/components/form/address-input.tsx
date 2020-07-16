@@ -140,6 +140,9 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
             "ens unknown error"
           );
         }
+      } else {
+        // If ens is loading, clear the recipient in tx state context.
+        txState.setRecipient(null);
       }
     } else {
       clearENSError();
