@@ -96,12 +96,14 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
     }
   }, [bech32Prefix, txState.rawAddress, txState]);
 
-  const clearENSError = useCallback(() => {
-    txState.setError("recipient", ErrorIdENSInvalidName, null);
-    txState.setError("recipient", ErrorIdENSNotFound, null);
-    txState.setError("recipient", ErrorIdENSUnsupported, null);
-    txState.setError("recipient", ErrorIdENSUnknownError, null);
-  }, [txState]);
+  const clearENSError = useCallback(
+    (ids: string[]) => {
+      for (const id of ids) {
+        txState.setError("recipient", id, null);
+      }
+    },
+    [txState]
+  );
 
   // Check that the address from ENS is valid.
   useEffect(() => {
@@ -110,7 +112,12 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
         const accAddress = new AccAddress(ens.address, bech32Prefix);
         if (txState.recipient?.toBech32() !== accAddress.toBech32()) {
           txState.setRecipient(accAddress);
-          clearENSError();
+          clearENSError([
+            ErrorIdENSInvalidName,
+            ErrorIdENSNotFound,
+            ErrorIdENSUnsupported,
+            ErrorIdENSUnknownError
+          ]);
           txState.setError("recipient", ErrorIdBech32Address, null);
         }
       } else if (!ens.loading && ens.error) {
@@ -121,31 +128,56 @@ export const AddressInput: FunctionComponent<AddressInputProps> = ({
             ErrorIdENSInvalidName,
             "ens name invalid"
           );
+          clearENSError([
+            ErrorIdENSNotFound,
+            ErrorIdENSUnsupported,
+            ErrorIdENSUnknownError
+          ]);
         } else if (ens.error.message.includes("ENS name not found")) {
           txState.setError(
             "recipient",
             ErrorIdENSNotFound,
             "ens name not found"
           );
+          clearENSError([
+            ErrorIdENSInvalidName,
+            ErrorIdENSUnsupported,
+            ErrorIdENSUnknownError
+          ]);
         } else if (ens.error instanceof ENSUnsupportedError) {
           txState.setError(
             "recipient",
             ErrorIdENSUnsupported,
             "ens unsupported"
           );
+          clearENSError([
+            ErrorIdENSInvalidName,
+            ErrorIdENSNotFound,
+            ErrorIdENSUnknownError
+          ]);
         } else {
           txState.setError(
             "recipient",
             ErrorIdENSUnknownError,
             "ens unknown error"
           );
+          clearENSError([
+            ErrorIdENSInvalidName,
+            ErrorIdENSNotFound,
+            ErrorIdENSUnsupported
+          ]);
         }
       } else {
         // If ens is loading, clear the recipient in tx state context.
         txState.setRecipient(null);
       }
     } else {
-      clearENSError();
+      clearENSError([
+        ErrorIdENSInvalidName,
+        ErrorIdENSNotFound,
+        ErrorIdENSUnsupported,
+        ErrorIdENSUnknownError
+      ]);
     }
   }, [
     bech32Prefix,
