@@ -42,6 +42,8 @@
   "setting.address-book.confirm.delete-address.paragraph": "Are you sure you want to delete this address?",
   "setting.address-book.button.save": "Save",
 
+  "setting.credit": "Special thanks",
+
   "register.button.back": "Back",
   "register.intro.button.new-account.title": "Create new account",
   "register.intro.button.new-account.content": "Create a new wallet using a new seed",

@@ -52,6 +52,9 @@ export const AssetView: FunctionComponent = observer(() => {
     nativeCurrency.coinMinimalDenom
   );
 
+  const hasCoinGeckoId =
+    getCurrency(chainStore.chainInfo.nativeCurrency)?.coinGeckoId != null;
+
   return (
     <div className={styleAsset.containerAsset}>
       <div className={styleAsset.title}>
@@ -69,7 +72,9 @@ export const AssetView: FunctionComponent = observer(() => {
                 )
               )
             )
-          : "?"}
+          : hasCoinGeckoId
+          ? "?"
+          : "-"}
       </div>
       {/* TODO: Show the information that account is fetching. */}
       <div className={styleAsset.amount}>

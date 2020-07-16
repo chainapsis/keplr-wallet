@@ -71,6 +71,20 @@ export const SettingPage: FunctionComponent = () => {
             []
           )}
         />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.credit"
+          })}
+          onClick={useCallback(() => {
+            history.push({
+              pathname: "/setting/credit"
+            });
+          }, [history])}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
       </div>
     </HeaderLayout>
   );
