@@ -32,6 +32,7 @@ import { SettingPage } from "./pages/setting";
 import { SettingLanguagePage } from "./pages/setting/language";
 import { SettingConnectionsPage } from "./pages/setting/connections";
 import { AddressBookPage } from "./pages/setting/address-book";
+import { CreditPage } from "./pages/setting/credit";
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");
@@ -128,6 +129,7 @@ ReactDOM.render(
               path="/setting/address-book"
               component={AddressBookPage}
             />
+            <Route exact path="/setting/credit" component={CreditPage} />
             <Route path="/sign/:id" component={SignPage} />
           </HashRouter>
         </NotificationProvider>

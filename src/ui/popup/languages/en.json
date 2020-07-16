@@ -38,6 +38,8 @@
   "setting.address-book.memo": "Default Memo (Optional)",
   "setting.address-book.button.save": "Save",
 
+  "setting.credit": "Special thanks",
+
   "register.button.back": "Back",
   "register.intro.button.new-account.title": "Create new account",
   "register.intro.button.new-account.content": "Create a new wallet using a new seed",

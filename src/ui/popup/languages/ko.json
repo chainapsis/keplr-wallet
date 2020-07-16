@@ -38,6 +38,8 @@
   "setting.address-book.memo": "기본 메모 (선택사항)",
   "setting.address-book.button.save": "저장",
 
+  "setting.credit": "도움을 주신 분들",
+
   "register.button.back": "뒤로",
   "register.intro.button.new-account.title": "계정 생성",
   "register.intro.button.new-account.content": "새로운 니모닉 시드로 계정을 생성하세요",
