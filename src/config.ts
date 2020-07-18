@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Currency, FiatCurrency } from "./common/currency";
 import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
 import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
@@ -16,7 +18,8 @@ import {
   SECRET_NETWORK_REST_CONFIG,
   SECRET_NETWORK_REST_ENDPOINT,
   SECRET_NETWORK_RPC_CONFIG,
-  SECRET_NETWORK_RPC_ENDPOINT
+  SECRET_NETWORK_RPC_ENDPOINT,
+  ADDITIONAL_SIGN_IN_PREPEND
 } from "./config.var";
 
 export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
@@ -174,3 +177,7 @@ export const LanguageToFiatCurrency: {
     }
   }
 };
+
+export const AdditionalSignInPrepend:
+  | React.ReactElement
+  | undefined = ADDITIONAL_SIGN_IN_PREPEND;

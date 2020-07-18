@@ -6,4 +6,4 @@ dist
 prod
 .gitsecret/keys/random_seed
 !*.secret
-src/config.var.ts
+src/config.var.tsx

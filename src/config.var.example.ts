@@ -1,3 +1,4 @@
+import React from "react";
 import { AxiosRequestConfig } from "axios";
 
 export const ETHEREUM_ENDPOINT = "";
@@ -19,4 +20,8 @@ export const SECRET_NETWORK_RPC_CONFIG:
 export const SECRET_NETWORK_REST_ENDPOINT = "";
 export const SECRET_NETWORK_REST_CONFIG:
   | AxiosRequestConfig
+  | undefined = undefined;
+
+export const ADDITIONAL_SIGN_IN_PREPEND:
+  | React.ReactElement
   | undefined = undefined;

@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import Web3 from "web3";
+import { EthereumEndpoint } from "../../config";
+import { Address } from "@everett-protocol/cosmosjs/crypto";
 
 // TODO: Add definition for ethereum-ens.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -6,15 +9,20 @@ const ENS = require("ethereum-ens");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Resolver } = require("@ensdomains/resolver");
 
-import Web3 from "web3";
-import { EthereumEndpoint } from "../../config";
-import { Address } from "@everett-protocol/cosmosjs/crypto";
+let ensCache: any = undefined;
 
 // In this case, web3 doesn't make a transaction.
 // And, it is used for just fetching a registered address from ENS.
 // So, just using http provider is fine.
-const provider = new Web3.providers.HttpProvider(EthereumEndpoint);
-const ens = new ENS(provider);
+function ens() {
+  if (ensCache) {
+    return ensCache;
+  }
+
+  const provider = new Web3.providers.HttpProvider(EthereumEndpoint);
+  ensCache = new ENS(provider);
+  return ensCache;
+}
 
 export class InvalidENSNameError extends Error {
   constructor() {
@@ -79,7 +87,7 @@ export const useENS = (
 
         // It seems that ethereum ens doesn't support the abi of recent public resolver yet.
         // So to solve this problem, inject the recent public resolver's abi manually.
-        const resolver = await ens.resolver(name, Resolver.abi);
+        const resolver = await ens().resolver(name, Resolver.abi);
         const addr = await resolver.addr(coinType);
         const address = new Address(Buffer.from(addr.replace("0x", ""), "hex"));
 
