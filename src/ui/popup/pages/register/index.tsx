@@ -116,12 +116,20 @@ export const RegisterPage: FunctionComponent = observer(() => {
       className={style.container}
       style={{ height: "100%", backgroundColor: "white", padding: 0 }}
     >
-      <div>
+      <div className={style.logoContainer}>
         <img
-          className={style.logo}
-          src={require("../../public/assets/logo-temp.png")}
+          className={style.icon}
+          src={require("../../public/assets/temp-icon.svg")}
           alt="logo"
         />
+        <div className={style.logoInnerContainer}>
+          <img
+            className={style.logo}
+            src={require("../../public/assets/logo-temp.png")}
+            alt="logo"
+          />
+          <div className={style.paragraph}>Wallet for the Interchain</div>
+        </div>
       </div>
       {keyRingStore.status !== KeyRingStatus.NOTLOADED &&
       keyRingStore.status !== KeyRingStatus.EMPTY ? (

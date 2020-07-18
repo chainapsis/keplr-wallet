@@ -10,10 +10,34 @@ $container-width: 420px;
   flex-direction: column;
   background-color: white;
 
-  .logo {
-    height: 64px;
+  .logo-container {
     margin-top: 40px;
     margin-bottom: 24px;
+
+    display: flex;
+
+    .icon {
+      width: 80px;
+      height: 80px;
+    }
+
+    .logo-inner-container {
+      margin-left: 20px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      align-items: start;
+
+      .logo {
+        height: 50px;
+      }
+
+      .paragraph {
+        font-size: 16px;
+        line-height: 1;
+      }
+    }
   }
 
   .title {
