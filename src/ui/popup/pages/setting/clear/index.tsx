@@ -1,0 +1,79 @@
+import React, { FunctionComponent, useCallback, useState } from "react";
+import { HeaderLayout } from "../../../layouts/header-layout";
+
+import style from "../style.module.scss";
+import { useHistory } from "react-router";
+import { FormattedMessage, useIntl } from "react-intl";
+import { Input } from "../../../../components/form";
+import { Button, Form } from "reactstrap";
+import useForm from "react-hook-form";
+import { useStore } from "../../../stores";
+import { observer } from "mobx-react";
+
+interface FormData {
+  password: string;
+}
+
+export const ClearPage: FunctionComponent = observer(() => {
+  const history = useHistory();
+  const intl = useIntl();
+
+  const [loading, setLoading] = useState(false);
+
+  const { keyRingStore } = useStore();
+  const { register, handleSubmit, setError, errors } = useForm<FormData>({
+    defaultValues: {
+      password: ""
+    }
+  });
+
+  return (
+    <HeaderLayout
+      showChainName={false}
+      canChangeChainInfo={false}
+      alternativeTitle="Clear"
+      onBackButton={useCallback(() => {
+        history.goBack();
+      }, [history])}
+    >
+      <Form
+        className={style.formContainer}
+        onSubmit={handleSubmit(async data => {
+          setLoading(true);
+          try {
+            await keyRingStore.clear(data.password);
+            history.push("/");
+          } catch (e) {
+            console.log("Fail to decrypt: " + e.message);
+            setError(
+              "password",
+              "invalid",
+              intl.formatMessage({
+                id: "lock.input.password.error.invalid"
+              })
+            );
+            setLoading(false);
+          }
+        })}
+      >
+        <div>대충 경고하는 메세지</div>
+        <Input
+          type="password"
+          label={intl.formatMessage({
+            id: "lock.input.password"
+          })}
+          name="password"
+          error={errors.password && errors.password.message}
+          ref={register({
+            required: intl.formatMessage({
+              id: "lock.input.password.error.required"
+            })
+          })}
+        />
+        <Button type="submit" color="primary" block data-loading={loading}>
+          <FormattedMessage id="lock.button.unlock" />
+        </Button>
+      </Form>
+    </HeaderLayout>
+  );
+});

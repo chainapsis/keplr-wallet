@@ -36,17 +36,6 @@ export const Menu: FunctionComponent = observer(() => {
       </div>
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
-      {/* If development env, show clear button for test. */
-      process.env.NODE_ENV === "development" ? (
-        <div
-          className={styleMenu.item}
-          onClick={useCallback(() => {
-            keyRingStore.clear();
-          }, [keyRingStore])}
-        >
-          Clear
-        </div>
-      ) : null}
       <div
         className={styleMenu.item}
         onClick={useCallback(() => {

@@ -93,10 +93,9 @@ export class KeyRingKeeper {
 
   /**
    * This will clear all key ring data.
-   * Make sure to use this only in development env for testing.
    */
-  async clear(): Promise<KeyRingStatus> {
-    await this.keyRing.clear();
+  async clear(password: string): Promise<KeyRingStatus> {
+    await this.keyRing.clear(password);
     return this.keyRing.status;
   }
 

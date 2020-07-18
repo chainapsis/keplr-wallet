@@ -105,17 +105,10 @@ export class KeyRingStore {
 
   /**
    * Clear key ring data.
-   * This will throw unless you are in a development env.
    */
   @actionAsync
-  public async clear() {
-    if (process.env.NODE_ENV !== "development") {
-      throw new Error(
-        "do not use the clear function unless you are in a development environment"
-      );
-    }
-
-    const msg = new ClearKeyRingMsg();
+  public async clear(password: string) {
+    const msg = new ClearKeyRingMsg(password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }

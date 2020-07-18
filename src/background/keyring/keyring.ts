@@ -160,9 +160,15 @@ export class KeyRing {
 
   /**
    * This will clear all key ring data.
-   * Make sure to use this only in development env for testing.
    */
-  public async clear() {
+  public async clear(password: string) {
+    if (!this.keyStore) {
+      throw new Error("Key ring is not initialized");
+    }
+
+    // Make sure that password is valid.
+    await Crypto.decrypt(this.keyStore, password);
+
     this.keyStore = null;
     this.mnemonic = undefined;
     this.privateKey = undefined;
