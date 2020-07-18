@@ -64,9 +64,8 @@ export const RegisterInPage: FunctionComponent<{
             <ButtonGroup size="sm" style={{ marginBottom: "4px" }}>
               <Button
                 type="button"
-                color={
-                  props.numWords === NunWords.WORDS12 ? "primary" : "secondary"
-                }
+                color="primary"
+                outline={props.numWords !== NunWords.WORDS12}
                 onClick={() => {
                   if (
                     props.requestChaneNumWords &&
@@ -80,9 +79,8 @@ export const RegisterInPage: FunctionComponent<{
               </Button>
               <Button
                 type="button"
-                color={
-                  props.numWords === NunWords.WORDS24 ? "primary" : "secondary"
-                }
+                color="primary"
+                outline={props.numWords !== NunWords.WORDS24}
                 onClick={() => {
                   if (
                     props.requestChaneNumWords &&
