@@ -230,6 +230,26 @@ export class KeyRing {
     return privKey.sign(message);
   }
 
+  // Show private key or mnemonic key if password is valid.
+  public async showKeyRing(password: string): Promise<string> {
+    if (!this.keyStore || this.type === "none") {
+      throw new Error("Key ring not initialized");
+    }
+
+    if (this.type === "mnemonic") {
+      // If password is invalid, error will be thrown.
+      return Buffer.from(
+        await Crypto.decrypt(this.keyStore, password)
+      ).toString();
+    } else {
+      // If password is invalid, error will be thrown.
+      return Buffer.from(
+        Buffer.from(await Crypto.decrypt(this.keyStore, password)).toString(),
+        "hex"
+      );
+    }
+  }
+
   public get canSetPath(): boolean {
     return this.type === "mnemonic";
   }

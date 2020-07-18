@@ -17,7 +17,8 @@ import {
   RequestTxBuilderConfigMsg,
   GetRequestedTxBuilderConfigMsg,
   ApproveTxBuilderConfigMsg,
-  RejectTxBuilderConfigMsg
+  RejectTxBuilderConfigMsg,
+  ShowKeyRingMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
@@ -37,6 +38,8 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         return handleSaveKeyRingMsg(keeper)(msg as SaveKeyRingMsg);
       case ClearKeyRingMsg:
         return handleClearKeyRingMsg(keeper)(msg as ClearKeyRingMsg);
+      case ShowKeyRingMsg:
+        return handleShowKeyRingMsg(keeper)(msg as ShowKeyRingMsg);
       case CreateMnemonicKeyMsg:
         return handleCreateMnemonicKeyMsg(keeper)(msg as CreateMnemonicKeyMsg);
       case CreatePrivateKeyMsg:
@@ -121,6 +124,14 @@ const handleClearKeyRingMsg: (
     return {
       status: await keeper.clear()
     };
+  };
+};
+
+const handleShowKeyRingMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<ShowKeyRingMsg> = keeper => {
+  return async msg => {
+    return await keeper.showKeyRing(msg.password);
   };
 };
 
