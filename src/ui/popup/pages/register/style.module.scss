@@ -2,6 +2,21 @@
 
 $container-width: 420px;
 
+:global(body)[data-centered="true"] {
+  height: 85vh;
+  background-color: white;
+
+  :global(#app) {
+    height: 100%;
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+}
+
 .container {
   width: $container-width;
   margin-left: ($popup-size-width - $container-width) / 2;
@@ -12,7 +27,7 @@ $container-width: 420px;
 
   .logo-container {
     margin-top: 40px;
-    margin-bottom: 24px;
+    margin-bottom: 40px;
 
     display: flex;
 

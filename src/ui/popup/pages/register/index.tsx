@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useCallback, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 
 import { EmptyLayout } from "../../layouts/empty-layout";
 
@@ -51,6 +56,14 @@ export const RegisterPage: FunctionComponent = observer(() => {
   const [password, setPassword] = useState("");
 
   const { keyRingStore } = useStore();
+
+  useEffect(() => {
+    document.body.setAttribute("data-centered", "true");
+
+    return () => {
+      document.body.removeAttribute("data-centered");
+    };
+  }, []);
 
   const register = useCallback(
     async (words: string, password: string) => {
