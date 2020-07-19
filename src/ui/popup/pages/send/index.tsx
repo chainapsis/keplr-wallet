@@ -33,7 +33,7 @@ import { useNotification } from "../../../components/notification";
 import { useIntl } from "react-intl";
 import { Button } from "reactstrap";
 
-import { useTxState, withTxStateProvider } from "../../contexts/tx";
+import { useTxState, withTxStateProvider } from "../../../contexts/tx";
 import { useHistory } from "react-router";
 
 export const SendPage: FunctionComponent = withTxStateProvider(

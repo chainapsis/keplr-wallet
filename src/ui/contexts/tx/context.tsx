@@ -10,7 +10,7 @@ import React, {
 
 import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { Currency } from "../../../../common/currency";
+import { Currency } from "../../../common/currency";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 
 type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";

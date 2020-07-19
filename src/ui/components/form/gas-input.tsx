@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useCallback, useState } from "react";
-import { useTxState } from "../../popup/contexts/tx";
+import { useTxState } from "../../contexts/tx";
 import { FormGroup, Input, Label } from "reactstrap";
 
 export interface GasInputProps {

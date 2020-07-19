@@ -32,7 +32,7 @@ import {
 } from "../../../../common/window";
 
 import { FormattedMessage, useIntl } from "react-intl";
-import { useTxState, withTxStateProvider } from "../../contexts/tx";
+import { useTxState, withTxStateProvider } from "../../../contexts/tx";
 import { Int } from "@everett-protocol/cosmosjs/common/int";
 import { getCurrencies } from "../../../../common/currency";
 import { useHistory, useLocation, useRouteMatch } from "react-router";

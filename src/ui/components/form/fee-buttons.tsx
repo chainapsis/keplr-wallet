@@ -26,7 +26,7 @@ import { useLanguage } from "../../popup/language";
 import { useStore } from "../../popup/stores";
 import { getFiatCurrencyFromLanguage } from "../../../common/currency";
 import { observer } from "mobx-react";
-import { useTxState } from "../../popup/contexts/tx";
+import { useTxState } from "../../contexts/tx";
 
 export type GasPriceStep = {
   low: Dec;

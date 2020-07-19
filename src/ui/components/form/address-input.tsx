@@ -15,7 +15,7 @@ import {
   InputGroup,
   Button
 } from "reactstrap";
-import { useTxState } from "../../popup/contexts/tx";
+import { useTxState } from "../../contexts/tx";
 import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
 import {
   ENSUnsupportedError,

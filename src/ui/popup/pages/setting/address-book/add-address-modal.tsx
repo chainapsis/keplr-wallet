@@ -11,7 +11,7 @@ import { AddressBookData } from "./types";
 import { AddressBookKVStore } from "./kvStore";
 import { ChainInfo } from "../../../../../background/chains";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useTxState, withTxStateProvider } from "../../../contexts/tx";
+import { useTxState, withTxStateProvider } from "../../../../contexts/tx";
 
 /**
  *
