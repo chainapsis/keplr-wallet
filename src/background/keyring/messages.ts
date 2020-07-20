@@ -92,12 +92,15 @@ export class ClearKeyRingMsg extends Message<{ status: KeyRingStatus }> {
     return "clear-keyring";
   }
 
-  constructor() {
+  constructor(public readonly password: string) {
     super();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  validateBasic(): void {}
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
 
   route(): string {
     return ROUTE;

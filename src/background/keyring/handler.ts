@@ -120,9 +120,9 @@ const handleSaveKeyRingMsg: (
 const handleClearKeyRingMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<ClearKeyRingMsg> = keeper => {
-  return async () => {
+  return async msg => {
     return {
-      status: await keeper.clear()
+      status: await keeper.clear(msg.password)
     };
   };
 };

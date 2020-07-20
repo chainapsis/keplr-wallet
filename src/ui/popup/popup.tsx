@@ -34,6 +34,7 @@ import { SettingLanguagePage } from "./pages/setting/language";
 import { SettingConnectionsPage } from "./pages/setting/connections";
 import { AddressBookPage } from "./pages/setting/address-book";
 import { CreditPage } from "./pages/setting/credit";
+import { ClearPage } from "./pages/setting/clear";
 import { ExportPage } from "./pages/setting/export";
 
 // Make sure that icon file will be included in bundle
@@ -132,6 +133,7 @@ ReactDOM.render(
               />
               <Route exact path="/setting/credit" component={CreditPage} />
               <Route exact path="/setting/export" component={ExportPage} />
+              <Route exact path="/setting/clear" component={ClearPage} />
               <Route path="/sign/:id" component={SignPage} />
             </HashRouter>
           </ConfirmProvider>

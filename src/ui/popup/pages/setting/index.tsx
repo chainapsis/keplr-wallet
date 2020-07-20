@@ -99,6 +99,20 @@ export const SettingPage: FunctionComponent = () => {
             []
           )}
         />
+        <PageButton
+          title={intl.formatMessage({
+            id: "Clear"
+          })}
+          onClick={useCallback(() => {
+            history.push({
+              pathname: "/setting/clear"
+            });
+          }, [history])}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
       </div>
     </HeaderLayout>
   );
