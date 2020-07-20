@@ -100,6 +100,10 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
+  async showKeyRing(password: string): Promise<string> {
+    return await this.keyRing.showKeyRing(password);
+  }
+
   async createMnemonicKey(
     mnemonic: string,
     password: string

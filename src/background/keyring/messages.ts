@@ -108,6 +108,31 @@ export class ClearKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
+export class ShowKeyRingMsg extends Message<string> {
+  public static type() {
+    return "show-keyring";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ShowKeyRingMsg.type();
+  }
+}
+
 export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
     return "create-mnemonic-key";
