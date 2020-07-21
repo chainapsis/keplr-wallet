@@ -34,7 +34,9 @@ export const ExportPage: FunctionComponent = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle="Export"
+      alternativeTitle={intl.formatMessage({
+        id: "setting.export"
+      })}
       onBackButton={useCallback(() => {
         history.goBack();
       }, [history])}
@@ -57,7 +59,7 @@ export const ExportPage: FunctionComponent = () => {
                     "password",
                     "invalid",
                     intl.formatMessage({
-                      id: "lock.input.password.error.invalid"
+                      id: "setting.export.input.password.error.invalid"
                     })
                   );
                 } finally {
@@ -68,13 +70,13 @@ export const ExportPage: FunctionComponent = () => {
               <Input
                 type="password"
                 label={intl.formatMessage({
-                  id: "lock.input.password"
+                  id: "setting.export.input.password"
                 })}
                 name="password"
                 error={errors.password && errors.password.message}
                 ref={register({
                   required: intl.formatMessage({
-                    id: "lock.input.password.error.required"
+                    id: "setting.export.input.password.error.required"
                   })
                 })}
               />
@@ -84,7 +86,7 @@ export const ExportPage: FunctionComponent = () => {
                 block
                 data-loading={loading}
               >
-                <FormattedMessage id="lock.button.unlock" />
+                <FormattedMessage id="setting.export.button.confirm" />
               </Button>
             </Form>
           </React.Fragment>

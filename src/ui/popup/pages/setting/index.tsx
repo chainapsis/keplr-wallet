@@ -73,21 +73,7 @@ export const SettingPage: FunctionComponent = () => {
         />
         <PageButton
           title={intl.formatMessage({
-            id: "setting.credit"
-          })}
-          onClick={useCallback(() => {
-            history.push({
-              pathname: "/setting/credit"
-            });
-          }, [history])}
-          icons={useMemo(
-            () => [<i key="next" className="fas fa-chevron-right" />],
-            []
-          )}
-        />
-        <PageButton
-          title={intl.formatMessage({
-            id: "Export"
+            id: "setting.export"
           })}
           onClick={useCallback(() => {
             history.push({
@@ -101,11 +87,25 @@ export const SettingPage: FunctionComponent = () => {
         />
         <PageButton
           title={intl.formatMessage({
-            id: "Clear"
+            id: "setting.clear"
           })}
           onClick={useCallback(() => {
             history.push({
               pathname: "/setting/clear"
+            });
+          }, [history])}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.credit"
+          })}
+          onClick={useCallback(() => {
+            history.push({
+              pathname: "/setting/credit"
             });
           }, [history])}
           icons={useMemo(

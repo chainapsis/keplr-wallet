@@ -40,6 +40,22 @@
 
   "setting.credit": "도움을 주신 분들",
 
+  "setting.export": "니모닉 시드 보기",
+  "setting.export.warning": "니모닉 시드를 보려면 패스워드를 입력하세요",
+  "setting.export.input.password": "비밀번호",
+  "setting.export.input.password.error.required": "비밀번호를 입력하세요",
+  "setting.export.input.password.error.invalid": "잘못된 비밀번호입니다",
+  "setting.export.button.confirm": "확인",
+
+  "setting.clear": "계정 삭제",
+  "setting.clear.alert": "계정을 삭제하기 전에 니모닉 시드를 가지고 있는지 확인하세요",
+  "setting.clear.button.back-up": "니모닉 시드 보기",
+  "setting.clear.warning": "계정을 삭제하면 케플러에서 계정에 접근할 수 없습니다",
+  "setting.clear.input.password": "비밀번호",
+  "setting.clear.input.password.error.required": "비밀번호를 입력하세요",
+  "setting.clear.input.password.error.invalid": "잘못된 비밀번호입니다",
+  "setting.clear.button.confirm": "확인",
+
   "register.button.back": "뒤로",
   "register.intro.button.new-account.title": "계정 생성",
   "register.intro.button.new-account.content": "새로운 니모닉 시드로 계정을 생성하세요",

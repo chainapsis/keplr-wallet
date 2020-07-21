@@ -33,7 +33,9 @@ export const ClearPage: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle="Clear"
+      alternativeTitle={intl.formatMessage({
+        id: "setting.clear"
+      })}
       onBackButton={useCallback(() => {
         history.goBack();
       }, [history])}
@@ -52,7 +54,7 @@ export const ClearPage: FunctionComponent = observer(() => {
                 "password",
                 "invalid",
                 intl.formatMessage({
-                  id: "lock.input.password.error.invalid"
+                  id: "setting.clear.input.password.error.invalid"
                 })
               );
               setLoading(false);
@@ -62,18 +64,18 @@ export const ClearPage: FunctionComponent = observer(() => {
           <Input
             type="password"
             label={intl.formatMessage({
-              id: "lock.input.password"
+              id: "setting.clear.input.password"
             })}
             name="password"
             error={errors.password && errors.password.message}
             ref={register({
               required: intl.formatMessage({
-                id: "lock.input.password.error.required"
+                id: "setting.clear.input.password.error.required"
               })
             })}
           />
           <Button type="submit" color="primary" block data-loading={loading}>
-            <FormattedMessage id="lock.button.unlock" />
+            <FormattedMessage id="setting.clear.button.confirm" />
           </Button>
         </Form>
       </div>

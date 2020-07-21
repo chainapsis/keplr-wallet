@@ -3,6 +3,7 @@ import React, { FunctionComponent, useCallback } from "react";
 import styleWarningView from "./warning-view.module.scss";
 import { Alert, Button } from "reactstrap";
 import { useHistory } from "react-router";
+import { FormattedMessage } from "react-intl";
 
 export const WarningView: FunctionComponent = () => {
   const history = useHistory();
@@ -11,7 +12,7 @@ export const WarningView: FunctionComponent = () => {
     <div className={styleWarningView.innerContainer}>
       <Alert color="warning" fade={false}>
         <div>
-          Make sure you’ve backed up your mnemonic seed before proceeding.
+          <FormattedMessage id="setting.clear.alert" />
         </div>
         <Button
           size="sm"
@@ -27,7 +28,7 @@ export const WarningView: FunctionComponent = () => {
             [history]
           )}
         >
-          Back-up account
+          <FormattedMessage id="setting.clear.button.back-up" />
         </Button>
       </Alert>
       <div className={styleWarningView.trashContainer}>
@@ -36,8 +37,7 @@ export const WarningView: FunctionComponent = () => {
           alt="trash-can"
         />
         <div>
-          By deleting your account, you will no longer have access to your
-          wallet on Keplr.
+          <FormattedMessage id="setting.clear.warning" />
         </div>
       </div>
     </div>
