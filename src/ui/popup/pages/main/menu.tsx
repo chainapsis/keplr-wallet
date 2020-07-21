@@ -18,21 +18,21 @@ export const Menu: FunctionComponent = observer(() => {
         className={styleMenu.item}
         onClick={useCallback(() => {
           history.push({
-            pathname: "/setting"
-          });
-        }, [history])}
-      >
-        <FormattedMessage id="main.menu.settings" />
-      </div>
-      <div
-        className={styleMenu.item}
-        onClick={useCallback(() => {
-          history.push({
             pathname: "/setting/address-book"
           });
         }, [history])}
       >
         <FormattedMessage id="main.menu.address-book" />
+      </div>
+      <div
+        className={styleMenu.item}
+        onClick={useCallback(() => {
+          history.push({
+            pathname: "/setting"
+          });
+        }, [history])}
+      >
+        <FormattedMessage id="main.menu.settings" />
       </div>
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
