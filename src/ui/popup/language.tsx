@@ -9,20 +9,31 @@ import { IntlProvider } from "react-intl";
 import MessagesEn from "./languages/en.json";
 import MessagesKo from "./languages/ko.json";
 
-const messages: { [lang: string]: Record<string, string> } = {
+export type IntlMessage = Record<string, string>;
+export type IntlMessages = { [lang: string]: Record<string, string> };
+
+const messages: IntlMessages = {
   en: MessagesEn,
   ko: MessagesKo
 };
 
-function getMessages(language: string): Record<string, string> {
-  return Object.assign({}, MessagesEn, messages[language]);
+function getMessages(
+  additionalMessages: IntlMessages,
+  language: string
+): IntlMessage {
+  return Object.assign(
+    {},
+    MessagesEn,
+    messages[language],
+    additionalMessages[language]
+  );
 }
 
-function initLanguage(): string {
+function initLanguage(additionalMessages: IntlMessages): string {
   const language =
     localStorage.getItem("language") || navigator.language.split(/[-_]/)[0]; // language without region code
 
-  if (!messages[language]) {
+  if (!messages[language] && !additionalMessages[language]) {
     return "en";
   }
 
@@ -46,20 +57,24 @@ export const useLanguage = (): Language => {
   return lang;
 };
 
-export const AppIntlProvider: FunctionComponent = props => {
-  const [language, setLanguage] = useState(initLanguage());
+export const AppIntlProvider: FunctionComponent<{
+  additionalMessages: IntlMessages;
+}> = ({ additionalMessages, children }) => {
+  const [language, setLanguage] = useState(initLanguage(additionalMessages));
   const [automatic, setAutomatic] = useState(
     localStorage.getItem("language") == null
   );
-  const [messages, setMessages] = useState(getMessages(language));
+  const [messages, setMessages] = useState(
+    getMessages(additionalMessages, language)
+  );
 
   useEffect(() => {
     document.body.setAttribute("data-lang", language);
   }, [language]);
 
   useEffect(() => {
-    setMessages(getMessages(language));
-  }, [language]);
+    setMessages(getMessages(additionalMessages, language));
+  }, [additionalMessages, language]);
 
   const setLanguageCallback = useCallback((language: string) => {
     localStorage.setItem("language", language);
@@ -69,9 +84,9 @@ export const AppIntlProvider: FunctionComponent = props => {
 
   const clearLanguageCallback = useCallback(() => {
     localStorage.removeItem("language");
-    setLanguage(initLanguage());
+    setLanguage(initLanguage(additionalMessages));
     setAutomatic(true);
-  }, []);
+  }, [additionalMessages]);
 
   return (
     <LanguageContext.Provider
@@ -87,7 +102,7 @@ export const AppIntlProvider: FunctionComponent = props => {
         messages={messages}
         key={`${language}${automatic ? "-auto" : ""}`}
       >
-        {props.children}
+        {children}
       </IntlProvider>
     </LanguageContext.Provider>
   );

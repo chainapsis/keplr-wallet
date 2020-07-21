@@ -37,6 +37,8 @@ import { CreditPage } from "./pages/setting/credit";
 import { ClearPage } from "./pages/setting/clear";
 import { ExportPage } from "./pages/setting/export";
 
+import { AdditonalIntlMessages } from "../../config";
+
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");
 require("./public/assets/icon/icon-16.png");
@@ -104,7 +106,7 @@ const StateRenderer: FunctionComponent = observer(() => {
 });
 
 ReactDOM.render(
-  <AppIntlProvider>
+  <AppIntlProvider additionalMessages={AdditonalIntlMessages}>
     <StoreProvider>
       <NotificationStoreProvider>
         <NotificationProvider>

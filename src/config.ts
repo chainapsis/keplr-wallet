@@ -19,8 +19,10 @@ import {
   SECRET_NETWORK_REST_ENDPOINT,
   SECRET_NETWORK_RPC_CONFIG,
   SECRET_NETWORK_RPC_ENDPOINT,
-  ADDITIONAL_SIGN_IN_PREPEND
+  ADDITIONAL_SIGN_IN_PREPEND,
+  ADDITIONAL_INTL_MESSAGES
 } from "./config.var";
+import { IntlMessages } from "./ui/popup/language";
 
 export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
 export const CoinGeckoGetPrice = "/simple/price";
@@ -181,3 +183,5 @@ export const LanguageToFiatCurrency: {
 export const AdditionalSignInPrepend:
   | React.ReactElement
   | undefined = ADDITIONAL_SIGN_IN_PREPEND;
+
+export const AdditonalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;

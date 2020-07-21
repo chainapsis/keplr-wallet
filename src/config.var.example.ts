@@ -1,5 +1,6 @@
 import React from "react";
 import { AxiosRequestConfig } from "axios";
+import { IntlMessages } from "./ui/popup/language";
 
 export const ETHEREUM_ENDPOINT = "";
 
@@ -25,3 +26,5 @@ export const SECRET_NETWORK_REST_CONFIG:
 export const ADDITIONAL_SIGN_IN_PREPEND:
   | React.ReactElement
   | undefined = undefined;
+
+export const ADDITIONAL_INTL_MESSAGES: IntlMessages = {};
