@@ -46,7 +46,10 @@ export const ClearPage: FunctionComponent = observer(() => {
           onSubmit={handleSubmit(async data => {
             setLoading(true);
             try {
+              // Make sure that password is valid and keyring is cleared.
               await keyRingStore.clear(data.password);
+              // Delete all storage of this extension.
+              await browser.storage.local.clear();
               history.push("/");
             } catch (e) {
               console.log("Fail to decrypt: " + e.message);
