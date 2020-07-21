@@ -18,7 +18,8 @@ import {
   GetRequestedTxBuilderConfigMsg,
   ApproveTxBuilderConfigMsg,
   RejectTxBuilderConfigMsg,
-  ShowKeyRingMsg
+  ShowKeyRingMsg,
+  GetKeyRingTypeMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
@@ -76,6 +77,8 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         return handleApproveSignMsg(keeper)(msg as ApproveSignMsg);
       case RejectSignMsg:
         return handleRejectSignMsg(keeper)(msg as RejectSignMsg);
+      case GetKeyRingTypeMsg:
+        return handleGetKeyRingTypeMsg(keeper)(msg as GetKeyRingTypeMsg);
       default:
         throw new Error("Unknown msg type");
     }
@@ -322,5 +325,13 @@ const handleRejectSignMsg: (
   return msg => {
     keeper.rejectSign(msg.id);
     return;
+  };
+};
+
+const handleGetKeyRingTypeMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<GetKeyRingTypeMsg> = keeper => {
+  return () => {
+    return keeper.getKeyRingType();
   };
 };

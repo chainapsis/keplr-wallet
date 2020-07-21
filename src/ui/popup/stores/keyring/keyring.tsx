@@ -11,7 +11,8 @@ import {
   UnlockKeyRingMsg,
   LockKeyRingMsg,
   ClearKeyRingMsg,
-  CreatePrivateKeyMsg
+  CreatePrivateKeyMsg,
+  GetKeyRingTypeMsg
 } from "../../../../background/keyring";
 
 import { action, observable } from "mobx";
@@ -43,8 +44,17 @@ export class KeyRingStore {
   @observable
   public status!: KeyRingStatus;
 
+  @observable
+  public keyRingType!: string;
+
   constructor(private rootStore: RootStore) {
+    this.setKeyRingType("none");
     this.setStatus(KeyRingStatus.NOTLOADED);
+  }
+
+  @action
+  private setKeyRingType(type: string) {
+    this.keyRingType = type;
   }
 
   // This will be called by chain store.
@@ -95,12 +105,22 @@ export class KeyRingStore {
     const msg = new RestoreKeyRingMsg();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+
+    const type = await task(
+      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
+    );
+    this.setKeyRingType(type);
   }
 
   @actionAsync
   public async save() {
     const msg = new SaveKeyRingMsg();
     await task(sendMessage(BACKGROUND_PORT, msg));
+
+    const type = await task(
+      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
+    );
+    this.setKeyRingType(type);
   }
 
   /**
@@ -111,5 +131,10 @@ export class KeyRingStore {
     const msg = new ClearKeyRingMsg(password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+
+    const type = await task(
+      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
+    );
+    this.setKeyRingType(type);
   }
 }

@@ -568,3 +568,25 @@ export class RejectSignMsg extends Message<void> {
     return RejectSignMsg.type();
   }
 }
+
+export class GetKeyRingTypeMsg extends Message<string> {
+  public static type() {
+    return "get-keyring-type";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetKeyRingTypeMsg.type();
+  }
+}

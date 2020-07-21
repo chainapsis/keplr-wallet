@@ -6,11 +6,15 @@ import { PageButton } from "./page-button";
 import style from "./style.module.scss";
 import { useLanguage } from "../../language";
 import { useIntl } from "react-intl";
+import { observer } from "mobx-react";
+import { useStore } from "../../stores";
 
-export const SettingPage: FunctionComponent = () => {
+export const SettingPage: FunctionComponent = observer(() => {
   const language = useLanguage();
   const history = useHistory();
   const intl = useIntl();
+
+  const { keyRingStore } = useStore();
 
   const paragraphLang = language.automatic
     ? intl.formatMessage(
@@ -71,20 +75,22 @@ export const SettingPage: FunctionComponent = () => {
             []
           )}
         />
-        <PageButton
-          title={intl.formatMessage({
-            id: "setting.export"
-          })}
-          onClick={useCallback(() => {
-            history.push({
-              pathname: "/setting/export"
-            });
-          }, [history])}
-          icons={useMemo(
-            () => [<i key="next" className="fas fa-chevron-right" />],
-            []
-          )}
-        />
+        {keyRingStore.keyRingType === "mnemonic" ? (
+          <PageButton
+            title={intl.formatMessage({
+              id: "setting.export"
+            })}
+            onClick={useCallback(() => {
+              history.push({
+                pathname: "/setting/export"
+              });
+            }, [history])}
+            icons={useMemo(
+              () => [<i key="next" className="fas fa-chevron-right" />],
+              []
+            )}
+          />
+        ) : null}
         <PageButton
           title={intl.formatMessage({
             id: "setting.clear"
@@ -116,4 +122,4 @@ export const SettingPage: FunctionComponent = () => {
       </div>
     </HeaderLayout>
   );
-};
+});

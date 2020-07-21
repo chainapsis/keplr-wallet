@@ -18,7 +18,8 @@ import {
   ClearKeyRingMsg,
   ShowKeyRingMsg,
   RequestTxBuilderConfigMsg,
-  GetRequestedTxBuilderConfigMsg
+  GetRequestedTxBuilderConfigMsg,
+  GetKeyRingTypeMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -47,6 +48,7 @@ export function init(
   messageManager.registerMessage(GetRequestedMessage);
   messageManager.registerMessage(ApproveSignMsg);
   messageManager.registerMessage(RejectSignMsg);
+  messageManager.registerMessage(GetKeyRingTypeMsg);
 
   messageManager.addHandler(ROUTE, getHandler(keeper));
 }

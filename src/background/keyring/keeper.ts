@@ -190,6 +190,10 @@ export class KeyRingKeeper {
     this.txBuilderApprover.reject(id);
   }
 
+  getKeyRingType(): string {
+    return this.keyRing.type;
+  }
+
   async requestSign(
     chainId: string,
     message: Uint8Array,
