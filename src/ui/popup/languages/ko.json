@@ -21,8 +21,6 @@
   "setting.language": "언어",
   "setting.language.automatic": "자동 (브라우저 언어)",
   "setting.language.automatic-with-language": "자동 ({language})",
-  "setting.language.en": "영어",
-  "setting.language.ko": "한국어",
 
   "setting.connections": "연결 관리",
   "setting.connections.paragraph": "지갑에 연결을 허용한 웹사이트를 관리합니다",
