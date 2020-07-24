@@ -1,7 +1,34 @@
 import { Currency, FiatCurrency } from "./types";
-import { Currencies, LanguageToFiatCurrency } from "../../config";
+
+let Currencies:
+  | {
+      readonly [currency: string]: Currency;
+    }
+  | undefined;
+
+let LanguageToFiatCurrency:
+  | {
+      [language: string]: FiatCurrency;
+    }
+  | undefined;
+
+export function init(
+  _currencies: {
+    readonly [currency: string]: Currency;
+  },
+  _fiatCurrencies: {
+    [language: string]: FiatCurrency;
+  }
+) {
+  Currencies = _currencies;
+  LanguageToFiatCurrency = _fiatCurrencies;
+}
 
 export function getCurrency(type: string): Currency | undefined {
+  if (!Currencies) {
+    throw new Error("Not initialized");
+  }
+
   return Currencies[type];
 }
 
@@ -83,6 +110,10 @@ export function getCurrenciesFromMinimalDenoms(denoms: string[]): Currency[] {
 }
 
 export function getFiatCurrencyFromLanguage(language: string): FiatCurrency {
+  if (!LanguageToFiatCurrency) {
+    throw new Error("Not initialized");
+  }
+
   let currency = LanguageToFiatCurrency[language];
   if (!currency) {
     currency = LanguageToFiatCurrency["default"];
