@@ -6,6 +6,11 @@ function _sendMessage(
   msg: Message<unknown>,
   opts: { msgType?: string } = {}
 ): Promise<any> {
+  // Set message's origin.
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  msg["origin"] = window.location.origin;
+  console.log(msg.origin);
   return browser.runtime.sendMessage({
     port,
     type: opts.msgType || msg.type(),

@@ -52,7 +52,7 @@ const handleRequestAccessMsg: (
   keeper: ChainsKeeper
 ) => InternalHandler<ReqeustAccessMsg> = keeper => {
   return async msg => {
-    await keeper.requestAccess(msg.id, msg.chainId, [msg.origin]);
+    await keeper.requestAccess(msg.id, msg.chainId, [msg.appOrigin]);
   };
 };
 
@@ -92,6 +92,6 @@ const handleRemoveAccessOriginMsg: (
   keeper: ChainsKeeper
 ) => InternalHandler<RemoveAccessOriginMsg> = keeper => {
   return async msg => {
-    await keeper.removeAccessOrigin(msg.chainId, msg.origin);
+    await keeper.removeAccessOrigin(msg.chainId, msg.appOrigin);
   };
 };

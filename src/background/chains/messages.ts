@@ -1,4 +1,4 @@
-import { Message, MessageSender } from "../../common/message";
+import { Message } from "../../common/message";
 import { AccessOrigin, ChainInfo } from "./types";
 import { ROUTE } from "./constants";
 import { AsyncApprover } from "../../common/async-approver";
@@ -31,7 +31,7 @@ export class ReqeustAccessMsg extends Message<void> {
   constructor(
     public readonly id: string,
     public readonly chainId: string,
-    public readonly origin: string
+    public readonly appOrigin: string
   ) {
     super();
   }
@@ -41,18 +41,15 @@ export class ReqeustAccessMsg extends Message<void> {
       throw new Error("chain id is empty");
     }
 
+    if (!this.appOrigin) {
+      throw new Error("Empty origin");
+    }
+
     AsyncApprover.isValidId(this.id);
   }
 
-  // Approve external approves sending message if they submit their origin correctly.
-  // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: MessageSender): boolean {
-    const isInternal = super.approveExternal(sender);
-    if (isInternal) {
-      return true;
-    }
-
-    return Message.checkOriginIsValid(this.origin, sender);
+  approveExternal(): boolean {
+    return true;
   }
 
   route(): string {
@@ -159,7 +156,10 @@ export class RemoveAccessOriginMsg extends Message<void> {
     return "remove-access-origin";
   }
 
-  constructor(public readonly chainId: string, public readonly origin: string) {
+  constructor(
+    public readonly chainId: string,
+    public readonly appOrigin: string
+  ) {
     super();
   }
 
@@ -168,7 +168,7 @@ export class RemoveAccessOriginMsg extends Message<void> {
       throw new Error("Empty chain id");
     }
 
-    if (!this.origin) {
+    if (!this.appOrigin) {
       throw new Error("Empty origin");
     }
   }

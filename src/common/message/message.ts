@@ -1,4 +1,4 @@
-import { MessageSender } from "./types";
+import { Env, MessageSender } from "./types";
 
 /**
  * This messaging system is influenced by cosmos-sdk.
@@ -28,10 +28,17 @@ export abstract class Message<R> {
   abstract validateBasic(): void;
   abstract route(): string;
   abstract type(): string;
+
+  /**
+   * This means where the message is sent from.
+   * Sending logic should set this value.
+   * And, message manager should check that this origin is set properly.
+   */
+  public readonly origin!: string;
   /**
    * Ask for approval if message is sent externally.
    */
-  approveExternal(sender: MessageSender): boolean {
+  approveExternal(env: Env, sender: MessageSender): boolean {
     if (!sender.url) {
       return false;
     }
@@ -40,7 +47,7 @@ export abstract class Message<R> {
       throw new Error("Invalid sender url");
     }
 
-    const browserURL = new URL(browser.runtime.getURL("/"));
+    const browserURL = new URL(env.extensionBaseURL);
     if (!browserURL.origin || browserURL.origin === "null") {
       throw new Error("Invalid browser url");
     }
@@ -49,20 +56,6 @@ export abstract class Message<R> {
       return false;
     }
 
-    return sender.id === browser.runtime.id;
-  }
-
-  static checkOriginIsValid(origin: string, sender: MessageSender): boolean {
-    // TODO: When is a url undefined?
-    if (!sender.url) {
-      throw new Error("url is empty");
-    }
-
-    if (!origin) {
-      throw new Error("origin is empty");
-    }
-
-    const url = new URL(sender.url);
-    return url.origin === origin;
+    return sender.id === env.extensionId;
   }
 }
