@@ -10,7 +10,7 @@ function _sendMessage(
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   msg["origin"] = window.location.origin;
-  console.log(msg.origin);
+
   return browser.runtime.sendMessage({
     port,
     type: opts.msgType || msg.type(),
