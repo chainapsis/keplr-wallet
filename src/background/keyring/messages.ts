@@ -8,6 +8,8 @@ import {
 } from "./types";
 import { AsyncApprover } from "../../common/async-approver";
 
+import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 const Buffer = require("buffer/").Buffer;
@@ -459,6 +461,12 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     if (!this.messageHex) {
       throw new Error("message is empty");
     }
+
+    // Validate bech32 address.
+    AccAddress.fromBech32(this.bech32Address);
+
+    // Check that message is encoded as hex.
+    Buffer.from(this.messageHex, "hex");
 
     AsyncApprover.isValidId(this.id);
   }
