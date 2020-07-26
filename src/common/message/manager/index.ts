@@ -64,6 +64,27 @@ export class MessageManager {
     return url.origin === message.origin;
   }
 
+  protected checkMessageIsInternal(env: Env, sender: MessageSender): boolean {
+    if (!sender.url) {
+      return false;
+    }
+    const url = new URL(sender.url);
+    if (!url.origin || url.origin === "null") {
+      throw new Error("Invalid sender url");
+    }
+
+    const browserURL = new URL(env.extensionBaseURL);
+    if (!browserURL.origin || browserURL.origin === "null") {
+      throw new Error("Invalid browser url");
+    }
+
+    if (url.origin !== browserURL.origin) {
+      return false;
+    }
+
+    return sender.id === env.extensionId;
+  }
+
   protected onMessage = (
     message: any,
     sender: MessageSender,
@@ -122,7 +143,10 @@ export class MessageManager {
       }
 
       try {
-        if (!msg.approveExternal(this.produceEnv(), sender)) {
+        if (
+          !this.checkMessageIsInternal(this.produceEnv(), sender) &&
+          !msg.approveExternal(this.produceEnv(), sender)
+        ) {
           sendResponse({
             error: "Permission rejected"
           });

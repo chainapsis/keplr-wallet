@@ -35,27 +35,14 @@ export abstract class Message<R> {
    * And, message manager should check that this origin is set properly.
    */
   public readonly origin!: string;
+
   /**
    * Ask for approval if message is sent externally.
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   approveExternal(env: Env, sender: MessageSender): boolean {
-    if (!sender.url) {
-      return false;
-    }
-    const url = new URL(sender.url);
-    if (!url.origin || url.origin === "null") {
-      throw new Error("Invalid sender url");
-    }
-
-    const browserURL = new URL(env.extensionBaseURL);
-    if (!browserURL.origin || browserURL.origin === "null") {
-      throw new Error("Invalid browser url");
-    }
-
-    if (url.origin !== browserURL.origin) {
-      return false;
-    }
-
-    return sender.id === env.extensionId;
+    return false;
   }
 }

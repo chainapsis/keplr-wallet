@@ -88,6 +88,23 @@ describe("Test message permission", () => {
       assert.strictEqual(result, true);
     }, "internal message sending should be succeed");
 
+    await assert.rejects(
+      async () => {
+        await sendMessage(
+          {
+            emitter,
+            id: extensionId,
+            url: "http://other.com/test",
+            origin: "http://other.com"
+          },
+          port,
+          mockMsg
+        );
+      },
+      new Error("Permission rejected"),
+      "internal message sending should be failed if it is sent from external"
+    );
+
     // Message should be rejected if origin and url are not matched.
     await assert.rejects(
       async () => {
