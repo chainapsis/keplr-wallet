@@ -154,7 +154,7 @@ const handleCreatePrivateKeyMsg: (
   return async msg => {
     return {
       status: await keeper.createPrivateKey(
-        Buffer.from(msg.privateKey, "hex"),
+        Buffer.from(msg.privateKeyHex, "hex"),
         msg.password
       )
     };

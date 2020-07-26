@@ -8,6 +8,10 @@ import {
 } from "./types";
 import { AsyncApprover } from "../../common/async-approver";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bip39 = require("bip39");
+const Buffer = require("buffer/").Buffer;
+
 export class EnableKeyRingMsg extends Message<{
   status: KeyRingStatus;
 }> {
@@ -146,6 +150,17 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
     if (!this.password) {
       throw new Error("password not set");
     }
+
+    // Validate mnemonic.
+    // Checksome is not validate in this method.
+    // Keeper should handle the case of invalid checksome.
+    try {
+      bip39.mnemonicToEntropy(this.mnemonic);
+    } catch (e) {
+      if (e.message !== "Invalid mnemonic checksum") {
+        throw e;
+      }
+    }
   }
 
   route(): string {
@@ -164,20 +179,23 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
 
   constructor(
     // Hex encoded bytes.
-    public readonly privateKey: string,
+    public readonly privateKeyHex: string,
     public readonly password = ""
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.privateKey) {
-      throw new Error("private not set");
+    if (!this.privateKeyHex) {
+      throw new Error("private key not set");
     }
 
     if (!this.password) {
       throw new Error("password not set");
     }
+
+    // Check that private key is encoded as hex.
+    Buffer.from(this.privateKeyHex, "hex");
   }
 
   route(): string {
