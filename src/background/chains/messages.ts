@@ -45,6 +45,11 @@ export class ReqeustAccessMsg extends Message<void> {
       throw new Error("Empty origin");
     }
 
+    const url = new URL(this.appOrigin);
+    if (!url.origin || url.origin === "null") {
+      throw new Error("Invalid app origin");
+    }
+
     AsyncApprover.isValidId(this.id);
   }
 
@@ -170,6 +175,11 @@ export class RemoveAccessOriginMsg extends Message<void> {
 
     if (!this.appOrigin) {
       throw new Error("Empty origin");
+    }
+
+    const url = new URL(this.appOrigin);
+    if (!url.origin || url.origin === "null") {
+      throw new Error("Invalid app origin");
     }
   }
 
