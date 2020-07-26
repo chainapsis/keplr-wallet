@@ -3,12 +3,11 @@ import "mocha";
 
 import { Message } from "./message";
 import { MockMessageManager } from "./manager/mock";
-import { sendMockMessage } from "./send/mock";
-import { BACKGROUND_PORT } from "./constant";
+import { sendMessage } from "./send/mock";
 
 const EventEmitter = require("events").EventEmitter;
 
-class MockMessage extends Message<{}> {
+class MockMessage extends Message<boolean> {
   public static type() {
     return "mock";
   }
@@ -26,110 +25,226 @@ class MockMessage extends Message<{}> {
   }
 }
 
+class MockExternalMessage extends Message<boolean> {
+  public static type() {
+    return "mock-extern";
+  }
+
+  route(): string {
+    return "mock-extern";
+  }
+
+  type(): string {
+    return MockExternalMessage.type();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+}
+
 describe("Test message permission", () => {
-  it("Basic message should be allowed only if it is from internal", async () => {
-    const emitter = new EventEmitter();
-    const id = "test-mock";
+  const port = "test";
+  const emitter = new EventEmitter();
+  const extensionId = "test-mock";
+  const extensionBaseURL = "http://test-mock/test";
+  const internalOrigin = "http://test-mock";
 
+  before(() => {
     // Init message manager.
-    const messageManager = new MockMessageManager(emitter, id);
+    const messageManager = new MockMessageManager(
+      emitter,
+      extensionId,
+      extensionBaseURL
+    );
     messageManager.registerMessage(MockMessage);
+    messageManager.registerMessage(MockExternalMessage);
     messageManager.addHandler("mock", () => {
-      return {};
+      return true;
     });
-    messageManager.listen(BACKGROUND_PORT);
+    messageManager.addHandler("mock-extern", () => {
+      return true;
+    });
+    messageManager.listen(port);
+  });
 
-    // Internal message should succeed.
+  it("Basic message should be allowed only if it is from internal", async () => {
     const mockMsg = new MockMessage();
-    assert.doesNotThrow(async () => {
-      const result = await sendMockMessage(
+    await assert.doesNotReject(async () => {
+      const result = await sendMessage(
         {
           emitter,
-          id,
-          url: `http://${id}/`
+          id: extensionId,
+          url: extensionBaseURL,
+          origin: internalOrigin
         },
-        BACKGROUND_PORT,
+        port,
         mockMsg
       );
-      assert.strictEqual(JSON.stringify(result), JSON.stringify({}));
-    });
+      assert.strictEqual(result, true);
+    }, "internal message sending should be succeed");
 
-    // Test non internal message with empty id.
-    await assert.rejects(async () => {
-      await sendMockMessage(
-        {
-          emitter,
-          id: "",
-          url: `http://${id}/`
-        },
-        BACKGROUND_PORT,
-        mockMsg
-      );
-    }, /Error: Permission rejected/);
+    // Message should be rejected if origin and url are not matched.
+    await assert.rejects(
+      async () => {
+        await sendMessage(
+          {
+            emitter,
+            id: extensionId,
+            url: extensionBaseURL,
+            origin: "http://other-origin"
+          },
+          port,
+          mockMsg
+        );
+      },
+      new Error("Invalid origin"),
+      "internal message sending should be failed if origin is invalid"
+    );
 
-    // Test non internal message with different id.
-    await assert.rejects(async () => {
-      await sendMockMessage(
-        {
-          emitter,
-          id: id + "-other",
-          url: `http://${id}/`
-        },
-        BACKGROUND_PORT,
-        mockMsg
-      );
-    }, /Error: Permission rejected/);
+    // Message should be rejected if origin is empty.
+    await assert.rejects(
+      async () => {
+        await sendMessage(
+          {
+            emitter,
+            id: extensionId,
+            url: extensionBaseURL,
+            origin: ""
+          },
+          port,
+          mockMsg
+        );
+      },
+      new Error("Invalid origin: origin is empty"),
+      "internal message sending should be failed if origin is empty"
+    );
 
-    // Test non internal message with empty url.
-    await assert.rejects(async () => {
-      await sendMockMessage(
-        {
-          emitter,
-          id: id,
-          url: ""
-        },
-        BACKGROUND_PORT,
-        mockMsg
-      );
-    }, /Error: Permission rejected/);
+    // Message should be rejected if sender's id is empty.
+    await assert.rejects(
+      async () => {
+        await sendMessage(
+          {
+            emitter,
+            id: "",
+            url: extensionBaseURL,
+            origin: internalOrigin
+          },
+          port,
+          mockMsg
+        );
+      },
+      new Error("Permission rejected"),
+      "internal message sending should be failed if sender's id is empty"
+    );
 
-    // Test non internal message with different url.
-    await assert.rejects(async () => {
-      await sendMockMessage(
-        {
-          emitter,
-          id: id,
-          url: `http://${id + "-other"}/`
-        },
-        BACKGROUND_PORT,
-        mockMsg
-      );
-    }, /Error: Permission rejected/);
+    // Message should be rejected if sender's url is empty.
+    await assert.rejects(
+      async () => {
+        await sendMessage(
+          {
+            emitter,
+            id: extensionId,
+            url: "",
+            origin: internalOrigin
+          },
+          port,
+          mockMsg
+        );
+      },
+      new Error("Invalid origin: url is empty"),
+      "internal message sending should be failed if sender's url is empty"
+    );
+  });
 
-    // Test non internal message with empty id and empty url.
-    await assert.rejects(async () => {
-      await sendMockMessage(
+  it("External message should be allowed only if message approves external access and it's origin is valid", async () => {
+    // Internal message should succeed.
+    const mockMsg = new MockExternalMessage();
+    // Case of internal sending.
+    await assert.doesNotReject(async () => {
+      const result = await sendMessage(
         {
           emitter,
-          id: "",
-          url: ""
+          id: extensionId,
+          url: extensionBaseURL,
+          origin: internalOrigin
         },
-        BACKGROUND_PORT,
+        port,
         mockMsg
       );
-    }, /Error: Permission rejected/);
+      assert.strictEqual(result, true);
+    }, "external message sending should be succeed if it is sent from internal");
 
-    // Test non internal message with different id and different url.
-    await assert.rejects(async () => {
-      await sendMockMessage(
+    // Message should be rejected if origin and url are not matched.
+    await assert.rejects(
+      async () => {
+        await sendMessage(
+          {
+            emitter,
+            id: extensionId,
+            url: extensionBaseURL,
+            origin: "http://other-origin"
+          },
+          port,
+          mockMsg
+        );
+      },
+      new Error("Invalid origin"),
+      "external message sending should be failed if origin is invalid"
+    );
+
+    // Message should be rejected if origin is empty.
+    await assert.rejects(
+      async () => {
+        await sendMessage(
+          {
+            emitter,
+            id: extensionId,
+            url: extensionBaseURL,
+            origin: ""
+          },
+          port,
+          mockMsg
+        );
+      },
+      new Error("Invalid origin: origin is empty"),
+      "external message sending should be failed if origin is empty"
+    );
+
+    // Message should be rejected if sender's url is empty.
+    await assert.rejects(
+      async () => {
+        await sendMessage(
+          {
+            emitter,
+            id: extensionId,
+            url: "",
+            origin: internalOrigin
+          },
+          port,
+          mockMsg
+        );
+      },
+      new Error("Invalid origin: url is empty"),
+      "external message sending should be failed if sender's url is empty"
+    );
+
+    await assert.doesNotReject(async () => {
+      const result = await sendMessage(
         {
           emitter,
-          id: id + "-other",
-          url: `http://${id + "-other"}/`
+          id: "other-id",
+          url: "http://other-app/test",
+          origin: "http://other-app"
         },
-        BACKGROUND_PORT,
+        port,
         mockMsg
       );
-    }, /Error: Permission rejected/);
+      assert.strictEqual(result, true);
+    }, "external message sending should be succeed even if it is sent from external");
   });
 });
