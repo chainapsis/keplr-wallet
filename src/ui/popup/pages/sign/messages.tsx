@@ -1,5 +1,6 @@
 import React from "react";
 import { shortenAddress } from "../../../../common/address";
+import { truncHashPortion } from "../../../../common/hash";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Coin } from "@everett-protocol/cosmosjs/common/coin";
 import { IntlShape, FormattedMessage } from "react-intl";
@@ -55,11 +56,25 @@ interface MsgWithdrawDelegatorReward {
   };
 }
 
+interface MsgLink {
+  type: "cyber/Link";
+  value: {
+    links: [
+      {
+        from: string;
+        to: string;
+      }
+    ];
+    address: string;
+  };
+}
+
 type Messages =
   | MsgSend
   | MsgDelegate
   | MsgUndelegate
-  | MsgWithdrawDelegatorReward;
+  | MsgWithdrawDelegatorReward
+  | MsgLink;
 
 // Type guard for messages.
 function MessageType<T extends Messages>(
@@ -78,7 +93,7 @@ export function renderMessage(
   title: string;
   content: React.ReactElement;
 } {
-  if (MessageType<MsgSend>(msg, "cosmos-sdk/MsgSend")) {
+    if (MessageType<MsgSend>(msg, "cosmos-sdk/MsgSend")) {
     const receives: { amount: string; denom: string }[] = [];
     for (const coinPrimitive of msg.value.amount) {
       const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
@@ -176,6 +191,38 @@ export function renderMessage(
           values={{
             b: (...chunks: any[]) => <b>{chunks}</b>,
             validator: shortenAddress(msg.value.validator_address, 34)
+          }}
+        />
+      )
+    };
+  }
+
+  if (MessageType<MsgLink>(msg, "cyber/Link")) {
+    const cyberlinks: { from: string; to: string }[] = [];
+    for (const link of msg.value.links) {
+
+      cyberlinks.push({
+        from: link.from,
+        to: link.to
+      });
+    }
+
+    return {
+      icon: "fas fa-paper-plane",
+      title: intl.formatMessage({
+        id: "sign.list.message.cyber/Link.title"
+      }),
+      content: (
+        <FormattedMessage
+          id="sign.list.message.cyber/Link.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            address: shortenAddress(msg.value.address, 20),
+            link: cyberlinks
+              .map(link => {
+                return `${truncHashPortion(link.from, 12, 12, 3)} -> ${truncHashPortion(link.to, 12, 12, 3)}`;
+              })
+              .join(",")
           }}
         />
       )

@@ -111,6 +111,10 @@
   "sign.list.message.cosmos-sdk/MsgUndelegate.content": "разделигировать <b>{amount}</b> от <b>{validator}</b>{br}Актив станет ликвидным после периода разморозки",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "получить награду",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Забрать ожидающию награду от <b>{validator}</b>",
+
+  "sign.list.message.cyber/Link.title": "Cyberlinks",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> создать ссылку <b>{link}</b>",
+
   "fee-buttons.select.low": "Низкая",
   "fee-buttons.select.average": "Средняя",
   "fee-buttons.select.high": "высокая"

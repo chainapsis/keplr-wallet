@@ -141,6 +141,9 @@
   "sign.list.message.cosmos-sdk/MsgUndelegate.content": "Undelegate <b>{amount}</b> from <b>{validator}</b>{br}Asset will be liquid after unbonding period",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Claim Staking Reward",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
+  
+  "sign.list.message.cyber/Link.title": "Cyberlink",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> create link <b>{link}</b>",
 
   "fee-buttons.select.low": "Low",
   "fee-buttons.select.average": "Average",

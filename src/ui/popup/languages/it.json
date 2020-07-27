@@ -109,6 +109,9 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Ottieni Reward della Delega",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Ottieni Reward della Delega Disponibili da <b>{validator}</b>",
 
+  "sign.list.message.cyber/Link.title": "Cyberlink",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> creare un link <b>{link}</b>",
+
   "fee-buttons.select.low": "Bassa",
   "fee-buttons.select.average": "Media",
   "fee-buttons.select.high": "Alta"
