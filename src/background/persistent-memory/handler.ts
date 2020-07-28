@@ -1,14 +1,15 @@
-import { Handler, InternalHandler, Message } from "../../common/message";
+import { Env, Handler, InternalHandler, Message } from "../../common/message";
 import { SetPersistentMemoryMsg, GetPersistentMemoryMsg } from "./messages";
 import { PersistentMemoryKeeper } from "./keeper";
 
 export const getHandler: (
   keeper: PersistentMemoryKeeper
 ) => Handler = keeper => {
-  return (msg: Message<unknown>) => {
+  return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
       case SetPersistentMemoryMsg:
         return handleSetPersistentMemoryMsg(keeper)(
+          env,
           msg as SetPersistentMemoryMsg
         );
       case GetPersistentMemoryMsg:
@@ -23,7 +24,7 @@ const handleSetPersistentMemoryMsg: (
   keeper: PersistentMemoryKeeper
 ) => InternalHandler<SetPersistentMemoryMsg> = (
   keeper: PersistentMemoryKeeper
-) => msg => {
+) => (_, msg) => {
   keeper.set(msg.data);
   return {
     success: true

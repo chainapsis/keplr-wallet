@@ -205,7 +205,7 @@ export class MessageManager {
       }
 
       try {
-        const promise = Promise.resolve(handler(msg));
+        const promise = Promise.resolve(handler(this.produceEnv(), msg));
         promise
           .then(result => {
             sendResponse({
