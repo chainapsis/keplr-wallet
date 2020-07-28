@@ -2,53 +2,17 @@ import { GetKeyMsg, RequestSignMsg } from "../../background/keyring";
 import { sendMessage } from "../../common/message/send";
 import { BACKGROUND_PORT } from "../../common/message/constant";
 import { toBase64 } from "@cosmjs/encoding";
+import {
+  AccountData,
+  PrehashType,
+  OfflineSigner,
+  StdSignature
+} from "@cosmjs/launchpad";
 
 const Buffer = require("buffer/").Buffer;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Manifest = require("../../manifest.json");
-
-export type PrehashType = "sha256" | "sha512" | null;
-
-export type Algo = "secp256k1" | "ed25519" | "sr25519";
-
-export interface AccountData {
-  // bech32-encoded
-  readonly address: string;
-  readonly algo: Algo;
-  readonly pubkey: Uint8Array;
-}
-
-export interface StdSignature {
-  readonly pub_key: PubKey;
-  readonly signature: string;
-}
-
-export interface PubKey {
-  // type is one of the strings defined in pubkeyTypes
-  // I don't use a string literal union here as that makes trouble with json test data:
-  // https://github.com/CosmWasm/cosmjs/pull/44#pullrequestreview-353280504
-  readonly type: string;
-  // Value field is base64-encoded in all cases
-  // Note: if type is Secp256k1, this must contain a COMPRESSED pubkey - to encode from bcp/keycontrol land, you must compress it first
-  readonly value: string;
-}
-
-export interface OfflineSigner {
-  /**
-   * Get AccountData array from wallet. Rejects if not enabled.
-   */
-  readonly getAccounts: () => Promise<readonly AccountData[]>;
-
-  /**
-   * Request signature from whichever key corresponds to provided bech32-encoded address. Rejects if not enabled.
-   */
-  readonly sign: (
-    address: string,
-    message: Uint8Array,
-    prehashType?: PrehashType
-  ) => Promise<StdSignature>;
-}
 
 export class InjectedCosmJSWalletProvider implements OfflineSigner {
   public readonly identifier: string = "keplr-extension";
