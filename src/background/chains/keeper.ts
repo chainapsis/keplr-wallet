@@ -3,16 +3,19 @@ import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
 
 export class ChainsKeeper {
-  private readonly accessRequestApprover = new AsyncApprover<AccessOrigin>({
-    defaultTimeout: 3 * 60 * 1000
-  });
+  private readonly accessRequestApprover: AsyncApprover<AccessOrigin>;
 
   constructor(
     private kvStore: KVStore,
     private readonly embedChainInfos: ChainInfo[],
     private readonly embedAccessOrigins: AccessOrigin[],
-    private readonly windowOpener: (url: string) => void
-  ) {}
+    private readonly windowOpener: (url: string) => void,
+    approverTimeout: number | undefined = undefined
+  ) {
+    this.accessRequestApprover = new AsyncApprover<AccessOrigin>({
+      defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
+    });
+  }
 
   async getChainInfos(): Promise<ChainInfo[]> {
     const chainInfos = this.embedChainInfos.slice();
@@ -44,6 +47,9 @@ export class ChainsKeeper {
     if (origins.length === 0) {
       throw new Error("Empty origin");
     }
+
+    // Will throw an error if chain is unknown.
+    await this.getChainInfo(chainId);
 
     const accessOrigin = await this.getAccessOrigin(chainId);
     if (
