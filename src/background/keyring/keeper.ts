@@ -65,8 +65,16 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
-  async checkAccessOrigin(chainId: string, origin: string) {
-    await this.chainsKeeper.checkAccessOrigin(chainId, origin);
+  async checkAccessOrigin(
+    extensionBaseURL: string,
+    chainId: string,
+    origin: string
+  ) {
+    await this.chainsKeeper.checkAccessOrigin(
+      extensionBaseURL,
+      chainId,
+      origin
+    );
   }
 
   async checkBech32Address(chainId: string, bech32Address: string) {

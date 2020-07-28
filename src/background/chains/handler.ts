@@ -56,8 +56,10 @@ const handleGetChainInfosMsg: (
 const handleRequestAccessMsg: (
   keeper: ChainsKeeper
 ) => InternalHandler<ReqeustAccessMsg> = keeper => {
-  return async (_, msg) => {
-    await keeper.requestAccess(msg.id, msg.chainId, [msg.appOrigin]);
+  return async (env, msg) => {
+    await keeper.requestAccess(env.extensionBaseURL, msg.id, msg.chainId, [
+      msg.appOrigin
+    ]);
   };
 };
 

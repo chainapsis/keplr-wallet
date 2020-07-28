@@ -1,7 +1,6 @@
 import { AccessOrigin, ChainInfo } from "./types";
 import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
-import { openWindow } from "../../common/window";
 
 export class ChainsKeeper {
   private readonly accessRequestApprover = new AsyncApprover<AccessOrigin>({
@@ -11,7 +10,8 @@ export class ChainsKeeper {
   constructor(
     private kvStore: KVStore,
     private readonly embedChainInfos: ChainInfo[],
-    private readonly embedAccessOrigins: AccessOrigin[]
+    private readonly embedAccessOrigins: AccessOrigin[],
+    private readonly windowOpener: (url: string) => void
   ) {}
 
   async getChainInfos(): Promise<ChainInfo[]> {
@@ -36,6 +36,7 @@ export class ChainsKeeper {
   }
 
   async requestAccess(
+    extensionBaseURL: string,
     id: string,
     chainId: string,
     origins: string[]
@@ -53,7 +54,7 @@ export class ChainsKeeper {
       return;
     }
 
-    openWindow(browser.runtime.getURL(`popup.html#/access?id=${id}`));
+    this.windowOpener(`${extensionBaseURL}popup.html#/access?id=${id}`);
 
     await this.accessRequestApprover.request(id, {
       chainId,
@@ -81,9 +82,13 @@ export class ChainsKeeper {
     this.accessRequestApprover.reject(id);
   }
 
-  async checkAccessOrigin(chainId: string, origin: string) {
+  async checkAccessOrigin(
+    extensionBaseURL: string,
+    chainId: string,
+    origin: string
+  ) {
     // If origin is from extension, just approve it.
-    if (origin === new URL(browser.runtime.getURL("/")).origin) {
+    if (origin === new URL(extensionBaseURL).origin) {
       return;
     }
 

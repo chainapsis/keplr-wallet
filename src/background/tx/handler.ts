@@ -21,8 +21,12 @@ export const getHandler: (keeper: BackgroundTxKeeper) => Handler = (
 const handleRequestBackgroundTxMsg: (
   keeper: BackgroundTxKeeper
 ) => InternalHandler<RequestBackgroundTxMsg> = keeper => {
-  return async (_, msg) => {
-    await keeper.checkAccessOrigin(msg.chainId, msg.origin);
+  return async (env, msg) => {
+    await keeper.checkAccessOrigin(
+      env.extensionBaseURL,
+      msg.chainId,
+      msg.origin
+    );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await keeper.requestTx(msg.chainId, msg.txBytes, msg.mode!);
     return {};

@@ -101,9 +101,13 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
 const handleEnableKeyRingMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<EnableKeyRingMsg> = keeper => {
-  return async (_, msg) => {
+  return async (env, msg) => {
     if (msg.origin) {
-      await keeper.checkAccessOrigin(msg.chainId, msg.origin);
+      await keeper.checkAccessOrigin(
+        env.extensionBaseURL,
+        msg.chainId,
+        msg.origin
+      );
     }
 
     return {
@@ -208,10 +212,14 @@ const handleSetPathMsg: (
 const handleGetKeyMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<GetKeyMsg> = keeper => {
-  return async (_, msg) => {
+  return async (env, msg) => {
     const getKeyMsg = msg as GetKeyMsg;
     if (getKeyMsg.origin) {
-      await keeper.checkAccessOrigin(getKeyMsg.chainId, getKeyMsg.origin);
+      await keeper.checkAccessOrigin(
+        env.extensionBaseURL,
+        getKeyMsg.chainId,
+        getKeyMsg.origin
+      );
     }
 
     const key = await keeper.getKey();
@@ -231,11 +239,15 @@ const handleGetKeyMsg: (
 const handleRequestTxBuilderConfigMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<RequestTxBuilderConfigMsg> = keeper => {
-  return async (_, msg) => {
+  return async (env, msg) => {
     if (msg.origin) {
       // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      await keeper.checkAccessOrigin(msg.config!.chainId, msg.origin);
+      await keeper.checkAccessOrigin(
+        env.extensionBaseURL,
+        msg.config!.chainId,
+        msg.origin
+      );
     }
 
     const config = await keeper.requestTxBuilderConfig(
@@ -289,9 +301,13 @@ const handleRejectTxBuilderConfigMsg: (
 const handleRequestSignMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<RequestSignMsg> = keeper => {
-  return async (_, msg) => {
+  return async (env, msg) => {
     if (msg.origin) {
-      await keeper.checkAccessOrigin(msg.chainId, msg.origin);
+      await keeper.checkAccessOrigin(
+        env.extensionBaseURL,
+        msg.chainId,
+        msg.origin
+      );
     }
 
     await keeper.checkBech32Address(msg.chainId, msg.bech32Address);
