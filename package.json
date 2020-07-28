@@ -19,6 +19,7 @@
   "dependencies": {
     "@cosmjs/crypto": "^0.22.0-alpha.1",
     "@cosmjs/encoding": "^0.22.0-alpha.1",
+    "@cosmjs/launchpad": "^0.22.0-alpha.1",
     "@ensdomains/resolver": "^0.2.4",
     "@everett-protocol/cosmosjs": "git+https://github.com/everett-protocol/cosmosjs-dist.git#e63127f",
     "@fortawesome/fontawesome-free": "^5.11.2",
