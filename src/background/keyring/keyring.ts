@@ -250,9 +250,8 @@ export class KeyRing {
     } else {
       // If password is invalid, error will be thrown.
       return Buffer.from(
-        Buffer.from(await Crypto.decrypt(this.keyStore, password)).toString(),
-        "hex"
-      );
+        await Crypto.decrypt(this.keyStore, password)
+      ).toString();
     }
   }
 
