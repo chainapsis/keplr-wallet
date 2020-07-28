@@ -1,19 +1,21 @@
 import { BaseKVStore } from "./base";
 import { KVStoreProvider } from "./interface";
 
-let store: { [key: string]: any } = {};
-const MemoryKVStoreProvider: KVStoreProvider = {
-  get: () => {
-    return Promise.resolve(store);
-  },
-  set: items => {
-    store = { ...store, ...items };
+class MemoryKVStoreProvider implements KVStoreProvider {
+  private store: { [key: string]: any } = {};
+
+  get() {
+    return Promise.resolve(this.store);
+  }
+
+  set(items: { [key: string]: any }) {
+    this.store = { ...this.store, ...items };
     return Promise.resolve();
   }
-};
+}
 
 export class MemoryKVStore extends BaseKVStore {
   constructor(prefix: string) {
-    super(MemoryKVStoreProvider, prefix);
+    super(new MemoryKVStoreProvider(), prefix);
   }
 }
