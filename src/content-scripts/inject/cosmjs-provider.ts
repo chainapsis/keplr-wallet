@@ -1,15 +1,13 @@
 import { GetKeyMsg, RequestSignMsg } from "../../background/keyring";
 import { sendMessage } from "../../common/message/send";
 import { BACKGROUND_PORT } from "../../common/message/constant";
-import { toBase64 } from "@cosmjs/encoding";
+import { fromHex, toBase64, toHex } from "@cosmjs/encoding";
 import {
   AccountData,
   PrehashType,
   OfflineSigner,
   StdSignature
 } from "@cosmjs/launchpad";
-
-const Buffer = require("buffer/").Buffer;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Manifest = require("../../manifest.json");
@@ -36,7 +34,7 @@ export class InjectedCosmJSWalletProvider implements OfflineSigner {
       {
         algo: key.algo,
         address: key.bech32Address,
-        pubkey: new Uint8Array(Buffer.from(key.pubKeyHex, "hex"))
+        pubkey: fromHex(key.pubKeyHex)
       }
     ]);
   }
@@ -52,13 +50,13 @@ export class InjectedCosmJSWalletProvider implements OfflineSigner {
 
     const random = new Uint8Array(4);
     crypto.getRandomValues(random);
-    const id = Buffer.from(random).toString("hex");
+    const id = toHex(random);
 
     const requestSignMsg = new RequestSignMsg(
       this.chainId,
       id,
       address,
-      Buffer.from(message).toString("hex"),
+      toHex(message),
       true,
       window.location.origin
     );
@@ -72,9 +70,9 @@ export class InjectedCosmJSWalletProvider implements OfflineSigner {
       // eslint-disable-next-line @typescript-eslint/camelcase
       pub_key: {
         type: "tendermint/PubKeySecp256k1",
-        value: toBase64(Buffer.from(key.pubKeyHex, "hex"))
+        value: toBase64(fromHex(key.pubKeyHex))
       },
-      signature: toBase64(Buffer.from(result.signatureHex, "hex"))
+      signature: toBase64(fromHex(result.signatureHex))
     };
   }
 }
