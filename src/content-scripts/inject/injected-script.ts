@@ -1,5 +1,5 @@
 import { InjectedCosmosJSWalletProvider } from "./cosmosjs-provider";
-import { InjectedCosmJSWalletProvider } from "./cosmjs-provder";
+import { InjectedCosmJSWalletProvider } from "./cosmjs-provider";
 import { Keplr } from "./common";
 
 // Give a priority to production build.
