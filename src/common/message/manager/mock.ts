@@ -26,16 +26,23 @@ export class MockMessageManager extends MessageManager {
     }
 
     this.port = port;
-    this.emitter.on("message", message => {
-      const sender = message.sender;
-      delete message.sender;
-
-      const sequence = message.sequence;
-      delete message.sequence;
-
-      this.onMessage(message, sender, (result: Result) => {
-        this.emitter.emit(`message-result-${sequence}`, result);
-      });
-    });
+    this.emitter.on("message", this.onEmitMessage);
   }
+
+  public unlisten(): void {
+    this.port = "";
+    this.emitter.off("message", this.onEmitMessage);
+  }
+
+  public onEmitMessage = (message: any) => {
+    const sender = message.sender;
+    delete message.sender;
+
+    const sequence = message.sequence;
+    delete message.sequence;
+
+    this.onMessage(message, sender, (result: Result) => {
+      this.emitter.emit(`message-result-${sequence}`, result);
+    });
+  };
 }

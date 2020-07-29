@@ -40,6 +40,12 @@ export class MessageManager {
     browser.runtime.onMessageExternal.addListener(this.onMessage);
   }
 
+  public unlisten(): void {
+    this.port = "";
+    browser.runtime.onMessage.removeListener(this.onMessage);
+    browser.runtime.onMessageExternal.removeListener(this.onMessage);
+  }
+
   protected produceEnv(): Env {
     return {
       extensionId: browser.runtime.id,
