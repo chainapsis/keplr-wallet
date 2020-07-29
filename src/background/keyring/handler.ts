@@ -243,6 +243,7 @@ const handleRequestTxBuilderConfigMsg: (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await keeper.checkAccessOrigin(
       env.extensionBaseURL,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       msg.config!.chainId,
       msg.origin
     );

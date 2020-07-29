@@ -15,12 +15,18 @@ import { KeyRingKeeper } from "./keeper";
 import { init } from "./init";
 import { sendMessage } from "../../common/message/send/mock";
 import {
+  ApproveSignMsg,
+  ApproveTxBuilderConfigMsg,
   ClearKeyRingMsg,
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
   EnableKeyRingMsg,
   GetKeyMsg,
   LockKeyRingMsg,
+  RejectSignMsg,
+  RejectTxBuilderConfigMsg,
+  RequestSignMsg,
+  RequestTxBuilderConfigMsg,
   SetPathMsg,
   ShowKeyRingMsg,
   UnlockKeyRingMsg
@@ -774,5 +780,284 @@ describe("Test keyring handler", () => {
     await testShow(
       "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81"
     );
+  });
+
+  it("Test RequestTxBuilderConfigMsg permission that be able to skip approving", async () => {
+    // Only internal access can skip approving.
+    await sendMessage(
+      {
+        emitter,
+        id: extensionId,
+        url: extensionBaseURL,
+        origin: internalOrigin
+      },
+      port,
+      new RequestTxBuilderConfigMsg(
+        {
+          chainId: "test-1",
+          gas: "1",
+          memo: "",
+          fee: "1uatom"
+        },
+        "1234",
+        false,
+        true
+      )
+    );
+
+    // Only internal access can skip approving.
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://test.com/test",
+          origin: "http://test.com"
+        },
+        port,
+        new RequestTxBuilderConfigMsg(
+          {
+            chainId: "test-1",
+            gas: "1",
+            memo: "",
+            fee: "1uatom"
+          },
+          "1234",
+          false,
+          true
+        )
+      );
+    }, new Error("Permission rejected"));
+
+    // Only internal access can skip approving.
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://app.com/test",
+          origin: "http://app.com"
+        },
+        port,
+        new RequestTxBuilderConfigMsg(
+          {
+            chainId: "test-1",
+            gas: "1",
+            memo: "",
+            fee: "1uatom"
+          },
+          "1234",
+          false,
+          true
+        )
+      );
+    }, new Error("Permission rejected"));
+  });
+
+  it("Test Approve/RejectTxBuilderConfigMsg permission", async () => {
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://test.com/test",
+          origin: "http://test.com"
+        },
+        port,
+        new ApproveTxBuilderConfigMsg("1234", {} as any)
+      );
+    }, new Error("Permission rejected"));
+
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://app.com/test",
+          origin: "http://app.com"
+        },
+        port,
+        new ApproveTxBuilderConfigMsg("1234", {} as any)
+      );
+    }, new Error("Permission rejected"));
+
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://test.com/test",
+          origin: "http://test.com"
+        },
+        port,
+        new RejectTxBuilderConfigMsg("1234")
+      );
+    }, new Error("Permission rejected"));
+
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://app.com/test",
+          origin: "http://app.com"
+        },
+        port,
+        new RejectTxBuilderConfigMsg("1234")
+      );
+    }, new Error("Permission rejected"));
+  });
+
+  it("Test RequestSignMsg permission that be able to skip approving", async () => {
+    await sendMessage(
+      {
+        emitter,
+        id: extensionId,
+        url: extensionBaseURL,
+        origin: internalOrigin
+      },
+      port,
+      new EnableKeyRingMsg("test-1")
+    );
+
+    await sendMessage(
+      {
+        emitter,
+        id: extensionId,
+        url: extensionBaseURL,
+        origin: internalOrigin
+      },
+      port,
+      new CreateMnemonicKeyMsg(
+        "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
+        "password"
+      )
+    );
+
+    await sendMessage(
+      {
+        emitter,
+        id: extensionId,
+        url: extensionBaseURL,
+        origin: internalOrigin
+      },
+      port,
+      new SetPathMsg("test-1", 0, 0)
+    );
+
+    // Only internal access can skip approving.
+    await sendMessage(
+      {
+        emitter,
+        id: extensionId,
+        url: extensionBaseURL,
+        origin: internalOrigin
+      },
+      port,
+      new RequestSignMsg(
+        "test-1",
+        "1234",
+        "cosmos1jgfuw4mswjmdc6npcj5vcjjmqa2x8y63l5lq2s",
+        "ff",
+        false,
+        true
+      )
+    );
+
+    // Only internal access can skip approving.
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://app.com/test",
+          origin: "http://app.com"
+        },
+        port,
+        new RequestSignMsg(
+          "test-1",
+          "1234",
+          "cosmos1jgfuw4mswjmdc6npcj5vcjjmqa2x8y63l5lq2s",
+          "ff",
+          false,
+          true
+        )
+      );
+    }, new Error("Permission rejected"));
+
+    // Only internal access can skip approving.
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://test.com/test",
+          origin: "http://test.com"
+        },
+        port,
+        new RequestSignMsg(
+          "test-1",
+          "1234",
+          "cosmos1jgfuw4mswjmdc6npcj5vcjjmqa2x8y63l5lq2s",
+          "ff",
+          false,
+          true
+        )
+      );
+    }, new Error("Permission rejected"));
+  });
+
+  it("Test Approve/RejectSignMsg permission", async () => {
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://test.com/test",
+          origin: "http://test.com"
+        },
+        port,
+        new ApproveSignMsg("1234")
+      );
+    }, new Error("Permission rejected"));
+
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://app.com/test",
+          origin: "http://app.com"
+        },
+        port,
+        new ApproveSignMsg("1234")
+      );
+    }, new Error("Permission rejected"));
+
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://test.com/test",
+          origin: "http://test.com"
+        },
+        port,
+        new RejectSignMsg("1234")
+      );
+    }, new Error("Permission rejected"));
+
+    await assert.rejects(async () => {
+      await sendMessage(
+        {
+          emitter,
+          id: extensionId,
+          url: "http://app.com/test",
+          origin: "http://app.com"
+        },
+        port,
+        new RejectSignMsg("1234")
+      );
+    }, new Error("Permission rejected"));
   });
 });
