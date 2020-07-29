@@ -55,7 +55,7 @@ describe("Test keyring", () => {
       new AccAddress(key.address, "cosmos").toBech32(),
       "cosmos1jgfuw4mswjmdc6npcj5vcjjmqa2x8y63l5lq2s"
     );
-  }).timeout(10000);
+  });
 
   it("Keyring should return proper public key and address after creating private Key", async () => {
     await keyRing.restore();
@@ -82,7 +82,7 @@ describe("Test keyring", () => {
       new AccAddress(key.address, "cosmos").toBech32(),
       "cosmos1m3y35cl0tlxqcuzkce6ld7ww0st0j4ra846wwh"
     );
-  }).timeout(10000);
+  });
 
   it("Keyring should be unlocked only if password is valid (mnemonic)", async () => {
     await keyRing.restore();
@@ -111,7 +111,7 @@ describe("Test keyring", () => {
     await assert.doesNotReject(async () => {
       await keyRing.unlock("password");
     });
-  }).timeout(10000);
+  });
 
   it("Keyring should be unlocked only if password is valid (private key)", async () => {
     await keyRing.restore();
@@ -143,7 +143,7 @@ describe("Test keyring", () => {
     await assert.doesNotReject(async () => {
       await keyRing.unlock("password");
     });
-  }).timeout(10000);
+  });
 
   it("Keyring should show mnemonic key only if password is valid", async () => {
     await keyRing.restore();
@@ -167,7 +167,7 @@ describe("Test keyring", () => {
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main"
       );
     });
-  }).timeout(10000);
+  });
 
   it("Keyring should show private key only if password is valid", async () => {
     await keyRing.restore();
@@ -194,7 +194,7 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81"
       );
     });
-  }).timeout(10000);
+  });
 
   it("Keyring should clear mnemonic key only if password is valid", async () => {
     await keyRing.restore();
@@ -216,7 +216,7 @@ describe("Test keyring", () => {
 
     assert.strictEqual(keyRing.status, KeyRingStatus.EMPTY);
     assert.strictEqual(keyRing.type, "none");
-  }).timeout(10000);
+  });
 
   it("Keyring should clear private key only if password is valid", async () => {
     await keyRing.restore();
@@ -241,5 +241,5 @@ describe("Test keyring", () => {
 
     assert.strictEqual(keyRing.status, KeyRingStatus.EMPTY);
     assert.strictEqual(keyRing.type, "none");
-  }).timeout(10000);
+  });
 });
