@@ -9,6 +9,7 @@ import { BrowserKVStore } from "../common/kvstore";
 
 import { BACKGROUND_PORT } from "../common/message/constant";
 import { EmbedAccessOrigins, EmbedChainInfos } from "../config";
+import { openWindow } from "../common/window";
 
 const messageManager = new MessageManager();
 
@@ -18,13 +19,15 @@ PersistentMemory.init(messageManager, persistentMemory);
 const chainsKeeper = new Chains.ChainsKeeper(
   new BrowserKVStore("chains"),
   EmbedChainInfos,
-  EmbedAccessOrigins
+  EmbedAccessOrigins,
+  openWindow
 );
 Chains.init(messageManager, chainsKeeper);
 
 const keyRingKeeper = new KeyRing.KeyRingKeeper(
   new BrowserKVStore("keyring"),
-  chainsKeeper
+  chainsKeeper,
+  openWindow
 );
 KeyRing.init(messageManager, keyRingKeeper);
 

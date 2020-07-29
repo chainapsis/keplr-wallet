@@ -50,11 +50,7 @@ export class PopupWalletProvider implements WalletProvider {
    * Get array of keys that includes bech32 address string, address bytes and public key from wallet if user have approved the access.
    */
   async getKeys(context: Context): Promise<Key[]> {
-    const msg = new GetKeyMsg(
-      context.get("chainId"),
-      // There is no need to set origin because this wallet provider is used in internal.
-      ""
-    );
+    const msg = new GetKeyMsg(context.get("chainId"));
     const key = await sendMessage(BACKGROUND_PORT, msg);
     return Promise.resolve([
       {
@@ -87,8 +83,6 @@ export class PopupWalletProvider implements WalletProvider {
       },
       id,
       false,
-      // There is no need to set origin because this wallet provider is used in internal.
-      "",
       this.feeApprover == null
     );
 
@@ -126,8 +120,6 @@ export class PopupWalletProvider implements WalletProvider {
       bech32Address,
       Buffer.from(message).toString("hex"),
       false,
-      // There is no need to set origin because this wallet provider is used in internal.
-      "",
       this.signApprover == null
     );
 

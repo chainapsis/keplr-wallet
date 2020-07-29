@@ -1,4 +1,4 @@
-import { Message, MessageSender } from "../../common/message";
+import { Message } from "../../common/message";
 import { ROUTE } from "./constants";
 import { KeyRingStatus } from "./keyring";
 import { KeyHex } from "./keeper";
@@ -8,6 +8,12 @@ import {
 } from "./types";
 import { AsyncApprover } from "../../common/async-approver";
 
+import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bip39 = require("bip39");
+const Buffer = require("buffer/").Buffer;
+
 export class EnableKeyRingMsg extends Message<{
   status: KeyRingStatus;
 }> {
@@ -15,7 +21,7 @@ export class EnableKeyRingMsg extends Message<{
     return "enable-keyring";
   }
 
-  constructor(public readonly chainId: string, public readonly origin: string) {
+  constructor(public readonly chainId: string) {
     super();
   }
 
@@ -25,15 +31,8 @@ export class EnableKeyRingMsg extends Message<{
     }
   }
 
-  // Approve external approves sending message if they submit their origin correctly.
-  // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: MessageSender): boolean {
-    const isInternal = super.approveExternal(sender);
-    if (isInternal) {
-      return true;
-    }
-
-    return Message.checkOriginIsValid(this.origin, sender);
+  approveExternal(): boolean {
+    return true;
   }
 
   route(): string {
@@ -153,6 +152,17 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
     if (!this.password) {
       throw new Error("password not set");
     }
+
+    // Validate mnemonic.
+    // Checksome is not validate in this method.
+    // Keeper should handle the case of invalid checksome.
+    try {
+      bip39.mnemonicToEntropy(this.mnemonic);
+    } catch (e) {
+      if (e.message !== "Invalid mnemonic checksum") {
+        throw e;
+      }
+    }
   }
 
   route(): string {
@@ -171,20 +181,23 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
 
   constructor(
     // Hex encoded bytes.
-    public readonly privateKey: string,
+    public readonly privateKeyHex: string,
     public readonly password = ""
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.privateKey) {
-      throw new Error("private not set");
+    if (!this.privateKeyHex) {
+      throw new Error("private key not set");
     }
 
     if (!this.password) {
       throw new Error("password not set");
     }
+
+    // Check that private key is encoded as hex.
+    Buffer.from(this.privateKeyHex, "hex");
   }
 
   route(): string {
@@ -283,7 +296,7 @@ export class GetKeyMsg extends Message<KeyHex> {
     return "get-key";
   }
 
-  constructor(public readonly chainId: string, public readonly origin: string) {
+  constructor(public readonly chainId: string) {
     super();
   }
 
@@ -293,15 +306,8 @@ export class GetKeyMsg extends Message<KeyHex> {
     }
   }
 
-  // Approve external approves sending message if they submit their origin correctly.
-  // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: MessageSender): boolean {
-    const isInternal = super.approveExternal(sender);
-    if (isInternal) {
-      return true;
-    }
-
-    return Message.checkOriginIsValid(this.origin, sender);
+  approveExternal(): boolean {
+    return true;
   }
 
   route(): string {
@@ -324,7 +330,6 @@ export class RequestTxBuilderConfigMsg extends Message<{
     public readonly config: TxBuilderConfigPrimitiveWithChainId,
     public readonly id: string,
     public readonly openPopup: boolean,
-    public readonly origin: string,
     public readonly skipApprove: boolean = false
   ) {
     super();
@@ -338,20 +343,9 @@ export class RequestTxBuilderConfigMsg extends Message<{
     AsyncApprover.isValidId(this.id);
   }
 
-  // Approve external approves sending message if they submit their origin correctly.
-  // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: MessageSender): boolean {
-    const isInternal = super.approveExternal(sender);
-    if (isInternal) {
-      return true;
-    }
-
+  approveExternal(): boolean {
     // Skipping approving is allowed only in internal request.
-    if (this.skipApprove && !isInternal) {
-      return false;
-    }
-
-    return Message.checkOriginIsValid(this.origin, sender);
+    return !this.skipApprove;
   }
 
   route(): string {
@@ -450,7 +444,6 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     // Hex encoded message.
     public readonly messageHex: string,
     public readonly openPopup: boolean,
-    public readonly origin: string,
     public readonly skipApprove: boolean = false
   ) {
     super();
@@ -469,23 +462,18 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
       throw new Error("message is empty");
     }
 
+    // Validate bech32 address.
+    AccAddress.fromBech32(this.bech32Address);
+
+    // Check that message is encoded as hex.
+    Buffer.from(this.messageHex, "hex");
+
     AsyncApprover.isValidId(this.id);
   }
 
-  // Approve external approves sending message if they submit their origin correctly.
-  // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: MessageSender): boolean {
-    const isInternal = super.approveExternal(sender);
-    if (isInternal) {
-      return true;
-    }
-
+  approveExternal(): boolean {
     // Skipping approving is allowed only in internal request.
-    if (this.skipApprove && !isInternal) {
-      return false;
-    }
-
-    return Message.checkOriginIsValid(this.origin, sender);
+    return !this.skipApprove;
   }
 
   route(): string {

@@ -37,7 +37,14 @@ import { CreditPage } from "./pages/setting/credit";
 import { ClearPage } from "./pages/setting/clear";
 import { ExportPage } from "./pages/setting/export";
 
-import { AdditonalIntlMessages } from "../../config";
+import {
+  AdditonalIntlMessages,
+  Currencies,
+  LanguageToFiatCurrency
+} from "../../config";
+import { init as currencyInit } from "../../common/currency";
+
+currencyInit(Currencies, LanguageToFiatCurrency);
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");

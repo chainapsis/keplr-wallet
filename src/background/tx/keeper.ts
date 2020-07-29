@@ -145,7 +145,15 @@ export class BackgroundTxKeeper {
     }
   }
 
-  async checkAccessOrigin(chainId: string, origin: string) {
-    await this.chainsKeeper.checkAccessOrigin(chainId, origin);
+  async checkAccessOrigin(
+    extensionBaseURL: string,
+    chainId: string,
+    origin: string
+  ) {
+    await this.chainsKeeper.checkAccessOrigin(
+      extensionBaseURL,
+      chainId,
+      origin
+    );
   }
 }

@@ -9,7 +9,6 @@ import {
 
 import { KVStore } from "../../common/kvstore";
 
-import { openWindow } from "../../common/window";
 import { ChainsKeeper } from "../chains/keeper";
 
 export interface KeyHex {
@@ -28,26 +27,38 @@ export class KeyRingKeeper {
   private readonly keyRing: KeyRing;
   private path = "";
 
-  private readonly unlockApprover = new AsyncApprover({
-    defaultTimeout: 3 * 60 * 1000
-  });
+  private readonly unlockApprover: AsyncApprover;
 
-  private readonly txBuilderApprover = new AsyncApprover<
+  private readonly txBuilderApprover: AsyncApprover<
     TxBuilderConfigPrimitiveWithChainId,
     TxBuilderConfigPrimitive
-  >({
-    defaultTimeout: 3 * 60 * 1000
-  });
+  >;
 
-  private readonly signApprover = new AsyncApprover<SignMessage>({
-    defaultTimeout: 3 * 60 * 1000
-  });
+  private readonly signApprover: AsyncApprover<SignMessage>;
 
-  constructor(kvStore: KVStore, public readonly chainsKeeper: ChainsKeeper) {
+  constructor(
+    kvStore: KVStore,
+    public readonly chainsKeeper: ChainsKeeper,
+    private readonly windowOpener: (url: string) => void,
+    approverTimeout: number | undefined = undefined
+  ) {
     this.keyRing = new KeyRing(kvStore);
+
+    this.unlockApprover = new AsyncApprover({
+      defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
+    });
+    this.txBuilderApprover = new AsyncApprover<
+      TxBuilderConfigPrimitiveWithChainId,
+      TxBuilderConfigPrimitive
+    >({
+      defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
+    });
+    this.signApprover = new AsyncApprover<SignMessage>({
+      defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
+    });
   }
 
-  async enable(): Promise<KeyRingStatus> {
+  async enable(extensionBaseURL: string): Promise<KeyRingStatus> {
     if (this.keyRing.status === KeyRingStatus.EMPTY) {
       throw new Error("key doesn't exist");
     }
@@ -57,7 +68,7 @@ export class KeyRingKeeper {
     }
 
     if (this.keyRing.status === KeyRingStatus.LOCKED) {
-      openWindow(browser.runtime.getURL("popup.html#/?external=true"));
+      this.windowOpener(`${extensionBaseURL}popup.html#/?external=true`);
       await this.unlockApprover.request("unlock");
       return this.keyRing.status;
     }
@@ -65,8 +76,16 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
-  async checkAccessOrigin(chainId: string, origin: string) {
-    await this.chainsKeeper.checkAccessOrigin(chainId, origin);
+  async checkAccessOrigin(
+    extensionBaseURL: string,
+    chainId: string,
+    origin: string
+  ) {
+    await this.chainsKeeper.checkAccessOrigin(
+      extensionBaseURL,
+      chainId,
+      origin
+    );
   }
 
   async checkBech32Address(chainId: string, bech32Address: string) {
@@ -152,6 +171,7 @@ export class KeyRingKeeper {
   }
 
   async requestTxBuilderConfig(
+    extensionBaseURL: string,
     config: TxBuilderConfigPrimitiveWithChainId,
     id: string,
     openPopup: boolean,
@@ -162,8 +182,9 @@ export class KeyRingKeeper {
     }
 
     if (openPopup) {
-      // Open fee window with hash to let the fee page to know that window is requested newly.
-      openWindow(browser.runtime.getURL(`popup.html#/fee/${id}?external=true`));
+      this.windowOpener(
+        `${extensionBaseURL}popup.html#/fee/${id}?external=true`
+      );
     }
 
     const result = await this.txBuilderApprover.request(id, config);
@@ -195,6 +216,7 @@ export class KeyRingKeeper {
   }
 
   async requestSign(
+    extensionBaseURL: string,
     chainId: string,
     message: Uint8Array,
     id: string,
@@ -206,8 +228,8 @@ export class KeyRingKeeper {
     }
 
     if (openPopup) {
-      openWindow(
-        browser.runtime.getURL(`popup.html#/sign/${id}?external=true`)
+      this.windowOpener(
+        `${extensionBaseURL}popup.html#/sign/${id}?external=true`
       );
     }
 

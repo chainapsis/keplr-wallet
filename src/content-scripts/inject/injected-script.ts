@@ -41,10 +41,7 @@ export class InjectedWalletProvider implements WalletProvider {
       new ReqeustAccessMsg(id, context.get("chainId"), window.location.origin)
     );
 
-    const msg = new EnableKeyRingMsg(
-      context.get("chainId"),
-      window.location.origin
-    );
+    const msg = new EnableKeyRingMsg(context.get("chainId"));
     const result = await sendMessage(BACKGROUND_PORT, msg);
     if (result.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Keyring not unlocked");
@@ -55,7 +52,7 @@ export class InjectedWalletProvider implements WalletProvider {
    * Get array of keys that includes bech32 address string, address bytes and public key from wallet if user have approved the access.
    */
   async getKeys(context: Context): Promise<Key[]> {
-    const msg = new GetKeyMsg(context.get("chainId"), window.location.origin);
+    const msg = new GetKeyMsg(context.get("chainId"));
     const key = await sendMessage(BACKGROUND_PORT, msg);
     return Promise.resolve([
       {
@@ -87,8 +84,7 @@ export class InjectedWalletProvider implements WalletProvider {
         ...txBuilderConfigToPrimitive(config)
       },
       id,
-      true,
-      window.location.origin
+      true
     );
 
     const result = await sendMessage(
@@ -116,8 +112,7 @@ export class InjectedWalletProvider implements WalletProvider {
       id,
       bech32Address,
       Buffer.from(message).toString("hex"),
-      true,
-      window.location.origin
+      true
     );
 
     const result = await sendMessage(BACKGROUND_PORT, requestSignMsg);

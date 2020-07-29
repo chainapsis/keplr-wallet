@@ -1,18 +1,21 @@
 import { AccessOrigin, ChainInfo } from "./types";
 import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
-import { openWindow } from "../../common/window";
 
 export class ChainsKeeper {
-  private readonly accessRequestApprover = new AsyncApprover<AccessOrigin>({
-    defaultTimeout: 3 * 60 * 1000
-  });
+  private readonly accessRequestApprover: AsyncApprover<AccessOrigin>;
 
   constructor(
     private kvStore: KVStore,
     private readonly embedChainInfos: ChainInfo[],
-    private readonly embedAccessOrigins: AccessOrigin[]
-  ) {}
+    private readonly embedAccessOrigins: AccessOrigin[],
+    private readonly windowOpener: (url: string) => void,
+    approverTimeout: number | undefined = undefined
+  ) {
+    this.accessRequestApprover = new AsyncApprover<AccessOrigin>({
+      defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
+    });
+  }
 
   async getChainInfos(): Promise<ChainInfo[]> {
     const chainInfos = this.embedChainInfos.slice();
@@ -36,6 +39,7 @@ export class ChainsKeeper {
   }
 
   async requestAccess(
+    extensionBaseURL: string,
     id: string,
     chainId: string,
     origins: string[]
@@ -43,6 +47,9 @@ export class ChainsKeeper {
     if (origins.length === 0) {
       throw new Error("Empty origin");
     }
+
+    // Will throw an error if chain is unknown.
+    await this.getChainInfo(chainId);
 
     const accessOrigin = await this.getAccessOrigin(chainId);
     if (
@@ -53,7 +60,7 @@ export class ChainsKeeper {
       return;
     }
 
-    openWindow(browser.runtime.getURL(`popup.html#/access?id=${id}`));
+    this.windowOpener(`${extensionBaseURL}popup.html#/access?id=${id}`);
 
     await this.accessRequestApprover.request(id, {
       chainId,
@@ -81,9 +88,13 @@ export class ChainsKeeper {
     this.accessRequestApprover.reject(id);
   }
 
-  async checkAccessOrigin(chainId: string, origin: string) {
+  async checkAccessOrigin(
+    extensionBaseURL: string,
+    chainId: string,
+    origin: string
+  ) {
     // If origin is from extension, just approve it.
-    if (origin === new URL(browser.runtime.getURL("/")).origin) {
+    if (origin === new URL(extensionBaseURL).origin) {
       return;
     }
 
