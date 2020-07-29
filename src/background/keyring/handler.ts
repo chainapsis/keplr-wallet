@@ -102,16 +102,17 @@ const handleEnableKeyRingMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<EnableKeyRingMsg> = keeper => {
   return async (env, msg) => {
-    if (msg.origin) {
-      await keeper.checkAccessOrigin(
-        env.extensionBaseURL,
-        msg.chainId,
-        msg.origin
-      );
-    }
+    await keeper.checkAccessOrigin(
+      env.extensionBaseURL,
+      msg.chainId,
+      msg.origin
+    );
+
+    // Will throw an error if chain is unknown.
+    await keeper.chainsKeeper.getChainInfo(msg.chainId);
 
     return {
-      status: await keeper.enable()
+      status: await keeper.enable(env.extensionBaseURL)
     };
   };
 };
@@ -214,13 +215,11 @@ const handleGetKeyMsg: (
 ) => InternalHandler<GetKeyMsg> = keeper => {
   return async (env, msg) => {
     const getKeyMsg = msg as GetKeyMsg;
-    if (getKeyMsg.origin) {
-      await keeper.checkAccessOrigin(
-        env.extensionBaseURL,
-        getKeyMsg.chainId,
-        getKeyMsg.origin
-      );
-    }
+    await keeper.checkAccessOrigin(
+      env.extensionBaseURL,
+      getKeyMsg.chainId,
+      getKeyMsg.origin
+    );
 
     const key = await keeper.getKey();
 
@@ -240,17 +239,16 @@ const handleRequestTxBuilderConfigMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<RequestTxBuilderConfigMsg> = keeper => {
   return async (env, msg) => {
-    if (msg.origin) {
-      // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      await keeper.checkAccessOrigin(
-        env.extensionBaseURL,
-        msg.config!.chainId,
-        msg.origin
-      );
-    }
+    // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    await keeper.checkAccessOrigin(
+      env.extensionBaseURL,
+      msg.config!.chainId,
+      msg.origin
+    );
 
     const config = await keeper.requestTxBuilderConfig(
+      env.extensionBaseURL,
       // `config` in msg can't be null because `validateBasic` ensures that `config` is not null.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       msg.config!,
@@ -302,19 +300,18 @@ const handleRequestSignMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<RequestSignMsg> = keeper => {
   return async (env, msg) => {
-    if (msg.origin) {
-      await keeper.checkAccessOrigin(
-        env.extensionBaseURL,
-        msg.chainId,
-        msg.origin
-      );
-    }
+    await keeper.checkAccessOrigin(
+      env.extensionBaseURL,
+      msg.chainId,
+      msg.origin
+    );
 
     await keeper.checkBech32Address(msg.chainId, msg.bech32Address);
 
     return {
       signatureHex: Buffer.from(
         await keeper.requestSign(
+          env.extensionBaseURL,
           msg.chainId,
           new Uint8Array(Buffer.from(msg.messageHex, "hex")),
           msg.id,

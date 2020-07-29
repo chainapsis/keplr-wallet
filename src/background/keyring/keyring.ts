@@ -103,11 +103,19 @@ export class KeyRing {
   }
 
   public async createMnemonicKey(mnemonic: string, password: string) {
+    if (this.status !== KeyRingStatus.EMPTY) {
+      throw new Error("Key ring is not loaded or not empty");
+    }
+
     this.mnemonic = mnemonic;
     this.keyStore = await Crypto.encrypt("mnemonic", this.mnemonic, password);
   }
 
   public async createPrivateKey(privateKey: Uint8Array, password: string) {
+    if (this.status !== KeyRingStatus.EMPTY) {
+      throw new Error("Key ring is not loaded or not empty");
+    }
+
     this.privateKey = privateKey;
     this.keyStore = await Crypto.encrypt(
       "privateKey",

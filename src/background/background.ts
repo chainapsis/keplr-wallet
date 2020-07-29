@@ -26,7 +26,8 @@ Chains.init(messageManager, chainsKeeper);
 
 const keyRingKeeper = new KeyRing.KeyRingKeeper(
   new BrowserKVStore("keyring"),
-  chainsKeeper
+  chainsKeeper,
+  openWindow
 );
 KeyRing.init(messageManager, keyRingKeeper);
 
