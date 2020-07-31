@@ -143,7 +143,7 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
   
   "sign.list.message.cyber/Link.title": "Cyberlink",
-  "sign.list.message.cyber/Link.content": "<b>{address}</b> create link <b>{link}</b>",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> create link {br}<b>{link}</b>",
 
   "fee-buttons.select.low": "Low",
   "fee-buttons.select.average": "Average",

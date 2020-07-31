@@ -217,12 +217,13 @@ export function renderMessage(
           id="sign.list.message.cyber/Link.content"
           values={{
             b: (...chunks: any[]) => <b>{chunks}</b>,
+            br: <br />,
             address: shortenAddress(msg.value.address, 20),
             link: cyberlinks
               .map(link => {
-                return `${truncHashPortion(link.from, 12, 12, 3)} -> ${truncHashPortion(link.to, 12, 12, 3)}`;
+                return `${truncHashPortion(link.from, 7, 7)} → ${truncHashPortion(link.to, 7, 7)}`;
               })
-              .join(",")
+              .join(", ")
           }}
         />
       )

@@ -111,7 +111,7 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Obtenir Reward pour Staking de <b>{validator}</b>",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
-  "sign.list.message.cyber/Link.content": "<b>{address}</b> créer un lien <b>{link}</b>",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> créer un lien {br}<b>{link}</b>",
 
   "fee-buttons.select.low": "Bas",
   "fee-buttons.select.average": "Moyen",

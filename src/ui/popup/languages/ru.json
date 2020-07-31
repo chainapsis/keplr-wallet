@@ -113,7 +113,7 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Забрать ожидающию награду от <b>{validator}</b>",
 
   "sign.list.message.cyber/Link.title": "Cyberlinks",
-  "sign.list.message.cyber/Link.content": "<b>{address}</b> создать ссылку <b>{link}</b>",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> создать ссылку {br}<b>{link}</b>",
 
   "fee-buttons.select.low": "Низкая",
   "fee-buttons.select.average": "Средняя",
