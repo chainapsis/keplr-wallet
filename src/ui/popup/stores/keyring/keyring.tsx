@@ -12,7 +12,11 @@ import {
   LockKeyRingMsg,
   ClearKeyRingMsg,
   CreatePrivateKeyMsg,
-  GetKeyRingTypeMsg
+  GetKeyRingTypeMsg,
+  GetMultiKeyStoreInfoMsg,
+  ChangeKeyRingMsg,
+  AddMnemonicKeyMsg,
+  AddPrivateKeyMsg
 } from "../../../../background/keyring";
 
 import { action, observable } from "mobx";
@@ -20,6 +24,7 @@ import { actionAsync, task } from "mobx-utils";
 
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RootStore } from "../root";
+import { MultiKeyStoreInfo } from "../../../../background/keyring/keyring";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -47,9 +52,13 @@ export class KeyRingStore {
   @observable
   public keyRingType!: string;
 
+  @observable
+  public multiKeyStoreInfo!: MultiKeyStoreInfo;
+
   constructor(private rootStore: RootStore) {
     this.setKeyRingType("none");
     this.setStatus(KeyRingStatus.NOTLOADED);
+    this.setMultiKeyStoreInfo([]);
   }
 
   @action
@@ -69,6 +78,11 @@ export class KeyRingStore {
     this.rootStore.setKeyRingStatus(status);
   }
 
+  @action
+  private setMultiKeyStoreInfo(info: MultiKeyStoreInfo) {
+    this.multiKeyStoreInfo = info;
+  }
+
   @actionAsync
   public async createMnemonicKey(mnemonic: string, password: string) {
     const msg = new CreateMnemonicKeyMsg(mnemonic, password);
@@ -84,6 +98,27 @@ export class KeyRingStore {
     );
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+  }
+
+  @actionAsync
+  public async addMnemonicKey(mnemonic: string) {
+    const msg = new AddMnemonicKeyMsg(mnemonic);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+  }
+
+  @actionAsync
+  public async addPrivateKey(privateKey: Uint8Array) {
+    const msg = new AddPrivateKeyMsg(Buffer.from(privateKey).toString("hex"));
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+  }
+
+  @actionAsync
+  public async changeKeyRing(index: number) {
+    const msg = new ChangeKeyRingMsg(index);
+    await task(sendMessage(BACKGROUND_PORT, msg));
+    this.rootStore.changeKeyRing();
   }
 
   @actionAsync
@@ -110,6 +145,11 @@ export class KeyRingStore {
       sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
     );
     this.setKeyRingType(type);
+
+    const multiKeyStoreInfo = await task(
+      sendMessage(BACKGROUND_PORT, new GetMultiKeyStoreInfoMsg())
+    );
+    this.setMultiKeyStoreInfo(multiKeyStoreInfo);
   }
 
   @actionAsync

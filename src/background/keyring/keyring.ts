@@ -18,7 +18,10 @@ export interface Key {
   address: Uint8Array;
 }
 
+export type MultiKeyStoreInfo = Pick<KeyStore, "version" | "type" | "meta">[];
+
 const KeyStoreKey = "key-store";
+const KeyMultiStoreKey = "key-multi-store";
 
 /*
  Keyring stores keys in persistent backround.
@@ -38,9 +41,14 @@ export class KeyRing {
 
   private keyStore: KeyStore | null;
 
+  private multiKeyStore: KeyStore[];
+
+  private password: string = "";
+
   constructor(private readonly kvStore: KVStore) {
     this.loaded = false;
     this.keyStore = null;
+    this.multiKeyStore = [];
   }
 
   public get type(): "mnemonic" | "privateKey" | "none" {
@@ -108,7 +116,8 @@ export class KeyRing {
     }
 
     this.mnemonic = mnemonic;
-    this.keyStore = await Crypto.encrypt("mnemonic", this.mnemonic, password);
+    this.keyStore = await KeyRing.CreateMnemonicKeyStore(mnemonic, password);
+    this.multiKeyStore.push(this.keyStore);
   }
 
   public async createPrivateKey(privateKey: Uint8Array, password: string) {
@@ -117,11 +126,8 @@ export class KeyRing {
     }
 
     this.privateKey = privateKey;
-    this.keyStore = await Crypto.encrypt(
-      "privateKey",
-      Buffer.from(this.privateKey).toString("hex"),
-      password
-    );
+    this.keyStore = await KeyRing.CreatePrivateKeyStore(privateKey, password);
+    this.multiKeyStore.push(this.keyStore);
   }
 
   public lock() {
@@ -131,6 +137,7 @@ export class KeyRing {
 
     this.mnemonic = undefined;
     this.privateKey = undefined;
+    this.password = "";
   }
 
   public async unlock(password: string) {
@@ -150,10 +157,13 @@ export class KeyRing {
         "hex"
       );
     }
+
+    this.password = password;
   }
 
   public async save() {
     await this.kvStore.set<KeyStore>(KeyStoreKey, this.keyStore);
+    await this.kvStore.set<KeyStore[]>(KeyMultiStoreKey, this.multiKeyStore);
   }
 
   public async restore() {
@@ -162,6 +172,19 @@ export class KeyRing {
       this.keyStore = null;
     } else {
       this.keyStore = keyStore;
+    }
+    const multiKeyStore = await this.kvStore.get<KeyStore[]>(KeyMultiStoreKey);
+    if (!multiKeyStore) {
+      // Restore the multi keystore if key store exist but multi key store is empty.
+      // This case will occur if extension is updated from the prior version that doesn't support the multi key store.
+      // This line ensures the backward compatibility.
+      if (keyStore) {
+        this.multiKeyStore = [keyStore];
+      } else {
+        this.multiKeyStore = [];
+      }
+    } else {
+      this.multiKeyStore = multiKeyStore;
     }
     this.loaded = true;
   }
@@ -265,5 +288,82 @@ export class KeyRing {
 
   public get canSetPath(): boolean {
     return this.type === "mnemonic";
+  }
+
+  public async addMnemonicKey(mnemonic: string): Promise<MultiKeyStoreInfo> {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new Error("Key ring is locked or not initialized");
+    }
+
+    const keyStore = await KeyRing.CreateMnemonicKeyStore(
+      mnemonic,
+      this.password
+    );
+    this.multiKeyStore.push(keyStore);
+
+    return this.getMultiKeyStoreInfo();
+  }
+
+  public async addPrivateKey(
+    privateKey: Uint8Array
+  ): Promise<MultiKeyStoreInfo> {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new Error("Key ring is locked or not initialized");
+    }
+
+    const keyStore = await KeyRing.CreatePrivateKeyStore(
+      privateKey,
+      this.password
+    );
+    this.multiKeyStore.push(keyStore);
+
+    return this.getMultiKeyStoreInfo();
+  }
+
+  public async changeKeyStoreFromMultiKeyStore(index: number) {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new Error("Key ring is locked or not initialized");
+    }
+
+    const keyStore = this.multiKeyStore[index];
+    if (!keyStore) {
+      throw new Error("Invalid keystore");
+    }
+
+    this.keyStore = keyStore;
+
+    await this.unlock(this.password);
+  }
+
+  public getMultiKeyStoreInfo(): MultiKeyStoreInfo {
+    const result: MultiKeyStoreInfo = [];
+
+    for (const keyStore of this.multiKeyStore) {
+      result.push({
+        version: keyStore.version,
+        type: keyStore.type,
+        meta: keyStore.meta
+      });
+    }
+
+    return result;
+  }
+
+  private static async CreateMnemonicKeyStore(
+    mnemonic: string,
+    password: string
+  ): Promise<KeyStore> {
+    return await Crypto.encrypt("mnemonic", mnemonic, password);
+  }
+
+  private static async CreatePrivateKeyStore(
+    privateKey: Uint8Array,
+    password: string
+  ): Promise<KeyStore> {
+    return await Crypto.encrypt(
+      "privateKey",
+      Buffer.from(privateKey).toString("hex"),
+      password
+    );
   }
 }

@@ -19,7 +19,11 @@ import {
   ApproveTxBuilderConfigMsg,
   RejectTxBuilderConfigMsg,
   ShowKeyRingMsg,
-  GetKeyRingTypeMsg
+  GetKeyRingTypeMsg,
+  AddMnemonicKeyMsg,
+  AddPrivateKeyMsg,
+  GetMultiKeyStoreInfoMsg,
+  ChangeKeyRingMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
@@ -46,11 +50,15 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
           env,
           msg as CreateMnemonicKeyMsg
         );
+      case AddMnemonicKeyMsg:
+        return handleAddMnemonicKeyMsg(keeper)(env, msg as AddMnemonicKeyMsg);
       case CreatePrivateKeyMsg:
         return handleCreatePrivateKeyMsg(keeper)(
           env,
           msg as CreatePrivateKeyMsg
         );
+      case AddPrivateKeyMsg:
+        return handleAddPrivateKeyMsg(keeper)(env, msg as AddPrivateKeyMsg);
       case LockKeyRingMsg:
         return handleLockKeyRingMsg(keeper)(env, msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
@@ -92,6 +100,13 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         return handleRejectSignMsg(keeper)(env, msg as RejectSignMsg);
       case GetKeyRingTypeMsg:
         return handleGetKeyRingTypeMsg(keeper)(env, msg as GetKeyRingTypeMsg);
+      case GetMultiKeyStoreInfoMsg:
+        return handleGetMultiKeyStoreInfoMsg(keeper)(
+          env,
+          msg as GetMultiKeyStoreInfoMsg
+        );
+      case ChangeKeyRingMsg:
+        return handleChangeKeyRingMsg(keeper)(env, msg as ChangeKeyRingMsg);
       default:
         throw new Error("Unknown msg type");
     }
@@ -166,6 +181,14 @@ const handleCreateMnemonicKeyMsg: (
   };
 };
 
+const handleAddMnemonicKeyMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<AddMnemonicKeyMsg> = keeper => {
+  return async (_, msg) => {
+    return await keeper.addMnemonicKey(msg.mnemonic);
+  };
+};
+
 const handleCreatePrivateKeyMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<CreatePrivateKeyMsg> = keeper => {
@@ -176,6 +199,14 @@ const handleCreatePrivateKeyMsg: (
         msg.password
       )
     };
+  };
+};
+
+const handleAddPrivateKeyMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<AddPrivateKeyMsg> = keeper => {
+  return async (_, msg) => {
+    return await keeper.addPrivateKey(Buffer.from(msg.privateKeyHex, "hex"));
   };
 };
 
@@ -360,5 +391,21 @@ const handleGetKeyRingTypeMsg: (
 ) => InternalHandler<GetKeyRingTypeMsg> = keeper => {
   return () => {
     return keeper.getKeyRingType();
+  };
+};
+
+const handleGetMultiKeyStoreInfoMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<GetMultiKeyStoreInfoMsg> = keeper => {
+  return () => {
+    return keeper.getMultiKeyStoreInfo();
+  };
+};
+
+const handleChangeKeyRingMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<ChangeKeyRingMsg> = keeper => {
+  return (_, msg) => {
+    return keeper.changeKeyStoreFromMultiKeyStore(msg.index);
   };
 };

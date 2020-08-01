@@ -1,6 +1,6 @@
 import { Message } from "../../common/message";
 import { ROUTE } from "./constants";
-import { KeyRingStatus } from "./keyring";
+import { KeyRingStatus, MultiKeyStoreInfo } from "./keyring";
 import { KeyHex } from "./keeper";
 import {
   TxBuilderConfigPrimitive,
@@ -174,6 +174,41 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
+export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfo> {
+  public static type() {
+    return "add-mnemonic-key";
+  }
+
+  constructor(public readonly mnemonic = "") {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.mnemonic) {
+      throw new Error("mnemonic not set");
+    }
+
+    // Validate mnemonic.
+    // Checksome is not validate in this method.
+    // Keeper should handle the case of invalid checksome.
+    try {
+      bip39.mnemonicToEntropy(this.mnemonic);
+    } catch (e) {
+      if (e.message !== "Invalid mnemonic checksum") {
+        throw e;
+      }
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AddMnemonicKeyMsg.type();
+  }
+}
+
 export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
     return "create-private-key";
@@ -206,6 +241,36 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
 
   type(): string {
     return CreatePrivateKeyMsg.type();
+  }
+}
+
+export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfo> {
+  public static type() {
+    return "add-private-key";
+  }
+
+  constructor(
+    // Hex encoded bytes.
+    public readonly privateKeyHex: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.privateKeyHex) {
+      throw new Error("private key not set");
+    }
+
+    // Check that private key is encoded as hex.
+    Buffer.from(this.privateKeyHex, "hex");
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AddPrivateKeyMsg.type();
   }
 }
 
@@ -576,5 +641,55 @@ export class GetKeyRingTypeMsg extends Message<string> {
 
   type(): string {
     return GetKeyRingTypeMsg.type();
+  }
+}
+
+export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfo> {
+  public static type() {
+    return "get-multi-key-store-info";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetMultiKeyStoreInfoMsg.type();
+  }
+}
+
+export class ChangeKeyRingMsg extends Message<void> {
+  public static type() {
+    return "change-keyring";
+  }
+
+  constructor(public readonly index: number) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (this.index < 0) {
+      throw new Error("Index is negative");
+    }
+
+    if (parseInt(this.index.toString()) !== this.index) {
+      throw new Error("Invalid index");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ChangeKeyRingMsg.type();
   }
 }

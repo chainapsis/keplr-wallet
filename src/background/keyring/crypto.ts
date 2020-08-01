@@ -23,6 +23,7 @@ export interface KeyStore {
    * Below version "1", type is not defined and it is considered as "mnemonic".
    */
   type?: "mnemonic" | "privateKey";
+  meta?: Record<string, string>;
   crypto: {
     cipher: "aes-128-ctr";
     cipherparams: {

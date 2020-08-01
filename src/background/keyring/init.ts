@@ -19,7 +19,11 @@ import {
   ShowKeyRingMsg,
   RequestTxBuilderConfigMsg,
   GetRequestedTxBuilderConfigMsg,
-  GetKeyRingTypeMsg
+  GetKeyRingTypeMsg,
+  AddMnemonicKeyMsg,
+  AddPrivateKeyMsg,
+  GetMultiKeyStoreInfoMsg,
+  ChangeKeyRingMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -35,7 +39,9 @@ export function init(
   messageManager.registerMessage(ClearKeyRingMsg);
   messageManager.registerMessage(ShowKeyRingMsg);
   messageManager.registerMessage(CreateMnemonicKeyMsg);
+  messageManager.registerMessage(AddMnemonicKeyMsg);
   messageManager.registerMessage(CreatePrivateKeyMsg);
+  messageManager.registerMessage(AddPrivateKeyMsg);
   messageManager.registerMessage(LockKeyRingMsg);
   messageManager.registerMessage(UnlockKeyRingMsg);
   messageManager.registerMessage(SetPathMsg);
@@ -49,6 +55,8 @@ export function init(
   messageManager.registerMessage(ApproveSignMsg);
   messageManager.registerMessage(RejectSignMsg);
   messageManager.registerMessage(GetKeyRingTypeMsg);
+  messageManager.registerMessage(GetMultiKeyStoreInfoMsg);
+  messageManager.registerMessage(ChangeKeyRingMsg);
 
   messageManager.addHandler(ROUTE, getHandler(keeper));
 }

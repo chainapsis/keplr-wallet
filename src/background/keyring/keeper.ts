@@ -1,4 +1,4 @@
-import { Key, KeyRing, KeyRingStatus } from "./keyring";
+import { Key, KeyRing, KeyRingStatus, MultiKeyStoreInfo } from "./keyring";
 
 import { Address } from "@everett-protocol/cosmosjs/crypto";
 import { AsyncApprover } from "../../common/async-approver";
@@ -252,5 +252,21 @@ export class KeyRingKeeper {
 
   rejectSign(id: string): void {
     this.signApprover.reject(id);
+  }
+
+  async addMnemonicKey(mnemonic: string): Promise<MultiKeyStoreInfo> {
+    return this.keyRing.addMnemonicKey(mnemonic);
+  }
+
+  async addPrivateKey(privateKey: Uint8Array): Promise<MultiKeyStoreInfo> {
+    return this.keyRing.addPrivateKey(privateKey);
+  }
+
+  public async changeKeyStoreFromMultiKeyStore(index: number) {
+    return this.keyRing.changeKeyStoreFromMultiKeyStore(index);
+  }
+
+  getMultiKeyStoreInfo(): MultiKeyStoreInfo {
+    return this.keyRing.getMultiKeyStoreInfo();
   }
 }
