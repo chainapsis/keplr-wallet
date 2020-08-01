@@ -25,6 +25,11 @@ $container-width: 420px;
   flex-direction: column;
   background-color: white;
 
+  :global(.btn) {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
   .logo-container {
     margin-top: 40px;
     margin-bottom: 40px;
@@ -79,6 +84,15 @@ $container-width: 420px;
     &[readonly] {
       background-color: white;
     }
+  }
+
+  .sub-content {
+    margin-top: 34px;
+
+    font-size: 14px;
+    font-weight: 300;
+    text-align: center;
+    color: #9092b6;
   }
 }
 
