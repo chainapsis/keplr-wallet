@@ -160,7 +160,8 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -231,7 +232,8 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -317,7 +319,8 @@ describe("Test keyring handler", () => {
         port,
         new CreateMnemonicKeyMsg(
           "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-          "password"
+          "password",
+          {}
         )
       );
     }, new Error("Key ring is not loaded or not empty"));
@@ -345,7 +348,8 @@ describe("Test keyring handler", () => {
         port,
         new CreateMnemonicKeyMsg(
           "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-          "password"
+          "password",
+          {}
         )
       );
     }, new Error("Permission rejected"));
@@ -360,7 +364,8 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -448,7 +453,8 @@ describe("Test keyring handler", () => {
         port,
         new CreatePrivateKeyMsg(
           "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-          "password"
+          "password",
+          {}
         )
       );
     }, new Error("Key ring is not loaded or not empty"));
@@ -476,7 +482,8 @@ describe("Test keyring handler", () => {
         port,
         new CreatePrivateKeyMsg(
           "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-          "password"
+          "password",
+          {}
         )
       );
     }, new Error("Permission rejected"));
@@ -491,7 +498,8 @@ describe("Test keyring handler", () => {
       port,
       new CreatePrivateKeyMsg(
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -658,7 +666,8 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -674,7 +683,8 @@ describe("Test keyring handler", () => {
       port,
       new CreatePrivateKeyMsg(
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -744,7 +754,8 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -773,7 +784,8 @@ describe("Test keyring handler", () => {
       port,
       new CreatePrivateKeyMsg(
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -930,7 +942,8 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {}
       )
     );
 

@@ -41,7 +41,8 @@ describe("Test keyring", () => {
 
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-      "password"
+      "password",
+      {}
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -67,7 +68,8 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
         "hex"
       ),
-      "password"
+      "password",
+      {}
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -91,7 +93,8 @@ describe("Test keyring", () => {
 
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-      "password"
+      "password",
+      {}
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -123,7 +126,8 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
         "hex"
       ),
-      "password"
+      "password",
+      {}
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -152,7 +156,8 @@ describe("Test keyring", () => {
 
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-      "password"
+      "password",
+      {}
     );
 
     await assert.rejects(async () => {
@@ -179,7 +184,8 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
         "hex"
       ),
-      "password"
+      "password",
+      {}
     );
 
     await assert.rejects(async () => {
@@ -203,7 +209,8 @@ describe("Test keyring", () => {
 
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-      "password"
+      "password",
+      {}
     );
 
     await assert.rejects(async () => {
@@ -228,7 +235,8 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
         "hex"
       ),
-      "password"
+      "password",
+      {}
     );
 
     await assert.rejects(async () => {

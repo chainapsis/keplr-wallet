@@ -48,19 +48,20 @@ describe("Test keyring message's validate basic method", () => {
 
   it("CreateMnemonicKeyMsg should throw an error on validateBasic if field is invalid", () => {
     assert.throws(() => {
-      const msg = new Messages.CreateMnemonicKeyMsg("", "");
+      const msg = new Messages.CreateMnemonicKeyMsg("", "", {});
       msg.validateBasic();
     });
 
     assert.throws(() => {
-      const msg = new Messages.CreateMnemonicKeyMsg("", "test-password");
+      const msg = new Messages.CreateMnemonicKeyMsg("", "test-password", {});
       msg.validateBasic();
     });
 
     assert.throws(() => {
       const msg = new Messages.CreateMnemonicKeyMsg(
         "endorse derive coin acquire dizzy peace column bird only stand despair better",
-        ""
+        "",
+        {}
       );
       msg.validateBasic();
     });
@@ -69,7 +70,8 @@ describe("Test keyring message's validate basic method", () => {
       // Invalid length of mnemonic
       const msg = new Messages.CreateMnemonicKeyMsg(
         "endorse derive coin acquire dizzy peace column bird only stand despair",
-        "test-password"
+        "test-password",
+        {}
       );
       msg.validateBasic();
     });
@@ -78,7 +80,8 @@ describe("Test keyring message's validate basic method", () => {
       // Invalid checksome is not validated on validateMnemonic
       const msg = new Messages.CreateMnemonicKeyMsg(
         "endorse derive coin acquire dizzy peace column bird only stand despair endorse",
-        "test-password"
+        "test-password",
+        {}
       );
       msg.validateBasic();
     });
@@ -86,7 +89,8 @@ describe("Test keyring message's validate basic method", () => {
     assert.doesNotThrow(() => {
       const msg = new Messages.CreateMnemonicKeyMsg(
         "endorse derive coin acquire dizzy peace column bird only stand despair better",
-        "test-password"
+        "test-password",
+        {}
       );
       msg.validateBasic();
     });
@@ -94,38 +98,46 @@ describe("Test keyring message's validate basic method", () => {
 
   it("CreatePrivateKeyMsg should throw an error on validateBasic if field is invalid", () => {
     assert.throws(() => {
-      const msg = new Messages.CreatePrivateKeyMsg("", "");
+      const msg = new Messages.CreatePrivateKeyMsg("", "", {});
       msg.validateBasic();
     });
 
     assert.throws(() => {
-      const msg = new Messages.CreatePrivateKeyMsg("", "test-password");
+      const msg = new Messages.CreatePrivateKeyMsg("", "test-password", {});
       msg.validateBasic();
     });
 
     assert.throws(() => {
-      const msg = new Messages.CreatePrivateKeyMsg("FFFFFF", "");
+      const msg = new Messages.CreatePrivateKeyMsg("FFFFFF", "", {});
       msg.validateBasic();
     });
 
     assert.throws(() => {
-      const msg = new Messages.CreatePrivateKeyMsg("not-hex", "");
+      const msg = new Messages.CreatePrivateKeyMsg("not-hex", "", {});
       msg.validateBasic();
     });
 
     assert.throws(() => {
       // Invalid length of hex
-      const msg = new Messages.CreatePrivateKeyMsg("FfFff", "");
+      const msg = new Messages.CreatePrivateKeyMsg("FfFff", "", {});
       msg.validateBasic();
     });
 
     assert.doesNotThrow(() => {
-      const msg = new Messages.CreatePrivateKeyMsg("FFFFFF", "test-password");
+      const msg = new Messages.CreatePrivateKeyMsg(
+        "FFFFFF",
+        "test-password",
+        {}
+      );
       msg.validateBasic();
     });
 
     assert.doesNotThrow(() => {
-      const msg = new Messages.CreatePrivateKeyMsg("FfFFff", "test-password");
+      const msg = new Messages.CreatePrivateKeyMsg(
+        "FfFFff",
+        "test-password",
+        {}
+      );
       msg.validateBasic();
     });
   });
