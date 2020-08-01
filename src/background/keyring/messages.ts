@@ -140,7 +140,11 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
     return "create-mnemonic-key";
   }
 
-  constructor(public readonly mnemonic = "", public readonly password = "") {
+  constructor(
+    public readonly mnemonic: string,
+    public readonly password: string,
+    public readonly meta: Record<string, string>
+  ) {
     super();
   }
 
@@ -179,7 +183,10 @@ export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfo> {
     return "add-mnemonic-key";
   }
 
-  constructor(public readonly mnemonic = "") {
+  constructor(
+    public readonly mnemonic: string,
+    public readonly meta: Record<string, string>
+  ) {
     super();
   }
 
@@ -217,7 +224,8 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   constructor(
     // Hex encoded bytes.
     public readonly privateKeyHex: string,
-    public readonly password = ""
+    public readonly password: string,
+    public readonly meta: Record<string, string>
   ) {
     super();
   }
@@ -251,7 +259,8 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfo> {
 
   constructor(
     // Hex encoded bytes.
-    public readonly privateKeyHex: string
+    public readonly privateKeyHex: string,
+    public readonly meta: Record<string, string>
   ) {
     super();
   }

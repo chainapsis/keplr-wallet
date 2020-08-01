@@ -176,7 +176,11 @@ const handleCreateMnemonicKeyMsg: (
 ) => InternalHandler<CreateMnemonicKeyMsg> = keeper => {
   return async (_, msg) => {
     return {
-      status: await keeper.createMnemonicKey(msg.mnemonic, msg.password)
+      status: await keeper.createMnemonicKey(
+        msg.mnemonic,
+        msg.password,
+        msg.meta
+      )
     };
   };
 };
@@ -185,7 +189,7 @@ const handleAddMnemonicKeyMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<AddMnemonicKeyMsg> = keeper => {
   return async (_, msg) => {
-    return await keeper.addMnemonicKey(msg.mnemonic);
+    return await keeper.addMnemonicKey(msg.mnemonic, msg.meta);
   };
 };
 
@@ -196,7 +200,8 @@ const handleCreatePrivateKeyMsg: (
     return {
       status: await keeper.createPrivateKey(
         Buffer.from(msg.privateKeyHex, "hex"),
-        msg.password
+        msg.password,
+        msg.meta
       )
     };
   };
@@ -206,7 +211,10 @@ const handleAddPrivateKeyMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<AddPrivateKeyMsg> = keeper => {
   return async (_, msg) => {
-    return await keeper.addPrivateKey(Buffer.from(msg.privateKeyHex, "hex"));
+    return await keeper.addPrivateKey(
+      Buffer.from(msg.privateKeyHex, "hex"),
+      msg.meta
+    );
   };
 };
 

@@ -110,23 +110,39 @@ export class KeyRing {
     return this.loadKey(path);
   }
 
-  public async createMnemonicKey(mnemonic: string, password: string) {
+  public async createMnemonicKey(
+    mnemonic: string,
+    password: string,
+    meta: Record<string, string>
+  ) {
     if (this.status !== KeyRingStatus.EMPTY) {
       throw new Error("Key ring is not loaded or not empty");
     }
 
     this.mnemonic = mnemonic;
-    this.keyStore = await KeyRing.CreateMnemonicKeyStore(mnemonic, password);
+    this.keyStore = await KeyRing.CreateMnemonicKeyStore(
+      mnemonic,
+      password,
+      meta
+    );
     this.multiKeyStore.push(this.keyStore);
   }
 
-  public async createPrivateKey(privateKey: Uint8Array, password: string) {
+  public async createPrivateKey(
+    privateKey: Uint8Array,
+    password: string,
+    meta: Record<string, string>
+  ) {
     if (this.status !== KeyRingStatus.EMPTY) {
       throw new Error("Key ring is not loaded or not empty");
     }
 
     this.privateKey = privateKey;
-    this.keyStore = await KeyRing.CreatePrivateKeyStore(privateKey, password);
+    this.keyStore = await KeyRing.CreatePrivateKeyStore(
+      privateKey,
+      password,
+      meta
+    );
     this.multiKeyStore.push(this.keyStore);
   }
 
@@ -290,14 +306,18 @@ export class KeyRing {
     return this.type === "mnemonic";
   }
 
-  public async addMnemonicKey(mnemonic: string): Promise<MultiKeyStoreInfo> {
+  public async addMnemonicKey(
+    mnemonic: string,
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfo> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
       throw new Error("Key ring is locked or not initialized");
     }
 
     const keyStore = await KeyRing.CreateMnemonicKeyStore(
       mnemonic,
-      this.password
+      this.password,
+      meta
     );
     this.multiKeyStore.push(keyStore);
 
@@ -305,7 +325,8 @@ export class KeyRing {
   }
 
   public async addPrivateKey(
-    privateKey: Uint8Array
+    privateKey: Uint8Array,
+    meta: Record<string, string>
   ): Promise<MultiKeyStoreInfo> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
       throw new Error("Key ring is locked or not initialized");
@@ -313,7 +334,8 @@ export class KeyRing {
 
     const keyStore = await KeyRing.CreatePrivateKeyStore(
       privateKey,
-      this.password
+      this.password,
+      meta
     );
     this.multiKeyStore.push(keyStore);
 
@@ -351,19 +373,22 @@ export class KeyRing {
 
   private static async CreateMnemonicKeyStore(
     mnemonic: string,
-    password: string
+    password: string,
+    meta: Record<string, string>
   ): Promise<KeyStore> {
-    return await Crypto.encrypt("mnemonic", mnemonic, password);
+    return await Crypto.encrypt("mnemonic", mnemonic, password, meta);
   }
 
   private static async CreatePrivateKeyStore(
     privateKey: Uint8Array,
-    password: string
+    password: string,
+    meta: Record<string, string>
   ): Promise<KeyStore> {
     return await Crypto.encrypt(
       "privateKey",
       Buffer.from(privateKey).toString("hex"),
-      password
+      password,
+      meta
     );
   }
 }

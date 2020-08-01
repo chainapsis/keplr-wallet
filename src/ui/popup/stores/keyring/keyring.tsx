@@ -84,32 +84,47 @@ export class KeyRingStore {
   }
 
   @actionAsync
-  public async createMnemonicKey(mnemonic: string, password: string) {
-    const msg = new CreateMnemonicKeyMsg(mnemonic, password);
+  public async createMnemonicKey(
+    mnemonic: string,
+    password: string,
+    meta: Record<string, string>
+  ) {
+    const msg = new CreateMnemonicKeyMsg(mnemonic, password, meta);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
 
   @actionAsync
-  public async createPrivateKey(privateKey: Uint8Array, password: string) {
+  public async createPrivateKey(
+    privateKey: Uint8Array,
+    password: string,
+    meta: Record<string, string>
+  ) {
     const msg = new CreatePrivateKeyMsg(
       Buffer.from(privateKey).toString("hex"),
-      password
+      password,
+      meta
     );
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
 
   @actionAsync
-  public async addMnemonicKey(mnemonic: string) {
-    const msg = new AddMnemonicKeyMsg(mnemonic);
+  public async addMnemonicKey(mnemonic: string, meta: Record<string, string>) {
+    const msg = new AddMnemonicKeyMsg(mnemonic, meta);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setMultiKeyStoreInfo(result);
   }
 
   @actionAsync
-  public async addPrivateKey(privateKey: Uint8Array) {
-    const msg = new AddPrivateKeyMsg(Buffer.from(privateKey).toString("hex"));
+  public async addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>
+  ) {
+    const msg = new AddPrivateKeyMsg(
+      Buffer.from(privateKey).toString("hex"),
+      meta
+    );
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setMultiKeyStoreInfo(result);
   }

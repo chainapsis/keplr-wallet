@@ -124,19 +124,21 @@ export class KeyRingKeeper {
 
   async createMnemonicKey(
     mnemonic: string,
-    password: string
+    password: string,
+    meta: Record<string, string>
   ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createMnemonicKey(mnemonic, password);
+    await this.keyRing.createMnemonicKey(mnemonic, password, meta);
     return this.keyRing.status;
   }
 
   async createPrivateKey(
     privateKey: Uint8Array,
-    password: string
+    password: string,
+    meta: Record<string, string>
   ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createPrivateKey(privateKey, password);
+    await this.keyRing.createPrivateKey(privateKey, password, meta);
     return this.keyRing.status;
   }
 
@@ -254,12 +256,18 @@ export class KeyRingKeeper {
     this.signApprover.reject(id);
   }
 
-  async addMnemonicKey(mnemonic: string): Promise<MultiKeyStoreInfo> {
-    return this.keyRing.addMnemonicKey(mnemonic);
+  async addMnemonicKey(
+    mnemonic: string,
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfo> {
+    return this.keyRing.addMnemonicKey(mnemonic, meta);
   }
 
-  async addPrivateKey(privateKey: Uint8Array): Promise<MultiKeyStoreInfo> {
-    return this.keyRing.addPrivateKey(privateKey);
+  async addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfo> {
+    return this.keyRing.addPrivateKey(privateKey, meta);
   }
 
   public async changeKeyStoreFromMultiKeyStore(index: number) {

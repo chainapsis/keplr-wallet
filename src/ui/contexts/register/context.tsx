@@ -16,11 +16,13 @@ export enum RegisterStatus {
 export interface RegisterState {
   type: string;
   status: RegisterStatus;
+  name: string;
   value: string;
   password: string;
 
   setType(type: string): void;
   setStatus(status: RegisterStatus): void;
+  setName(name: string): void;
   setValue(value: string): void;
   setPassword(password: string): void;
 
@@ -32,6 +34,7 @@ const RegisterContext = createContext<RegisterState | undefined>(undefined);
 export const RegisterStateProvider: FunctionComponent = ({ children }) => {
   const [type, setType] = useState<string>("");
   const [status, setStatus] = useState<RegisterStatus>(RegisterStatus.INIT);
+  const [name, setName] = useState<string>("");
   const [value, setValue] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
@@ -47,10 +50,12 @@ export const RegisterStateProvider: FunctionComponent = ({ children }) => {
       value={{
         type,
         status,
+        name,
         value,
         password,
         setType,
         setStatus,
+        setName,
         setValue,
         setPassword,
         clear

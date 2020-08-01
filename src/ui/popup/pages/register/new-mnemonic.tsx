@@ -23,6 +23,7 @@ import { useStore } from "../../stores";
 const bip39 = require("bip39");
 
 interface FormData {
+  name: string;
   words: string;
   password: string;
   confirmPassword: string;
@@ -92,6 +93,7 @@ const NewMnemonicPageIn: FunctionComponent<{
     FormData
   >({
     defaultValues: {
+      name: "",
       words: "",
       password: "",
       confirmPassword: ""
@@ -179,6 +181,7 @@ const NewMnemonicPageIn: FunctionComponent<{
                 throw new Error("Unmatched register type");
               }
 
+              registerState.setName(data.name);
               registerState.setValue(data.words);
               registerState.setPassword(data.password);
 
@@ -189,11 +192,14 @@ const NewMnemonicPageIn: FunctionComponent<{
 
                 try {
                   if (modeAdd) {
-                    await keyRingStore.addMnemonicKey(data.words);
+                    await keyRingStore.addMnemonicKey(data.words, {
+                      name: data.name
+                    });
                   } else {
                     await keyRingStore.createMnemonicKey(
                       data.words,
-                      data.password
+                      data.password,
+                      { name: data.name }
                     );
                   }
                   await keyRingStore.save();
@@ -230,6 +236,19 @@ const NewMnemonicPageIn: FunctionComponent<{
                 }
               })}
               error={errors.words && errors.words.message}
+            />
+            <Input
+              label={intl.formatMessage({
+                id: "register.create.input.name"
+              })}
+              type="text"
+              name="name"
+              ref={register({
+                required: intl.formatMessage({
+                  id: "register.create.input.name.error.required"
+                })
+              })}
+              error={errors.name && errors.name.message}
             />
             <Input
               label={intl.formatMessage({
