@@ -1,4 +1,11 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, {
+  FunctionComponent,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 
 import { Button } from "reactstrap";
 
@@ -7,9 +14,30 @@ import { FormattedMessage } from "react-intl";
 import { RegisterStatus, useRegisterState } from "../../../contexts/register";
 import { TypeNewMnemonic } from "./new-mnemonic";
 import { BackButton } from "./index";
+import { observer } from "mobx-react";
+import { useStore } from "../../stores";
 
-export const VerifyMnemonicPage: FunctionComponent<{}> = () => {
+export const VerifyMnemonicPage: FunctionComponent<{
+  modeAdd: boolean;
+}> = ({ modeAdd }) => {
   const registerState = useRegisterState();
+
+  return (
+    <React.Fragment>
+      {registerState.status === RegisterStatus.VERIFY &&
+      registerState.type === TypeNewMnemonic ? (
+        <VerifyMnemonicPageIn modeAdd={modeAdd} />
+      ) : null}
+    </React.Fragment>
+  );
+};
+
+export const VerifyMnemonicPageIn: FunctionComponent<{
+  modeAdd: boolean;
+}> = observer(({ modeAdd }) => {
+  const registerState = useRegisterState();
+
+  const { keyRingStore } = useStore();
 
   const wordsSlice = useMemo(() => {
     if (
@@ -54,6 +82,43 @@ export const VerifyMnemonicPage: FunctionComponent<{}> = () => {
       setSuggestedWords([]);
     }
   }, [registerState]);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onBackButtonClick = useCallback(() => {
+    registerState.setStatus(RegisterStatus.REGISTER);
+  }, [registerState]);
+
+  const onCreateButtonClick = useCallback(
+    async (e: MouseEvent) => {
+      e.preventDefault();
+      if (
+        suggestedWords.join(" ") === registerState.value.split(" ").join(" ")
+      ) {
+        try {
+          setIsLoading(true);
+
+          if (modeAdd) {
+            await keyRingStore.addMnemonicKey(registerState.value);
+          } else {
+            await keyRingStore.createMnemonicKey(
+              registerState.value,
+              registerState.password
+            );
+          }
+          await keyRingStore.save();
+          registerState.setStatus(RegisterStatus.COMPLETE);
+        } catch (e) {
+          alert(e.message ? e.message : e.toString());
+          registerState.clear();
+        }
+      } else {
+        alert("Mnemonic unmatched");
+        registerState.clear();
+      }
+    },
+    [keyRingStore, modeAdd, registerState, suggestedWords]
+  );
 
   return (
     <React.Fragment>
@@ -115,16 +180,14 @@ export const VerifyMnemonicPage: FunctionComponent<{}> = () => {
             style={{
               marginTop: "30px"
             }}
+            onClick={onCreateButtonClick}
+            data-loading={isLoading}
           >
             <FormattedMessage id="register.verify.button.register" />
           </Button>
-          <BackButton
-            onClick={() => {
-              registerState.setStatus(RegisterStatus.REGISTER);
-            }}
-          />
+          <BackButton onClick={onBackButtonClick} />
         </div>
       ) : null}
     </React.Fragment>
   );
-};
+});

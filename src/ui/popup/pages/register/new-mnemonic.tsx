@@ -33,7 +33,8 @@ export const TypeRecoverMnemonic = "recover-mnemonic";
 
 export const NewMnemonicPage: FunctionComponent<{
   recover: boolean;
-}> = ({ recover }) => {
+  modeAdd: boolean;
+}> = ({ recover, modeAdd }) => {
   const registerState = useRegisterState();
 
   const isVisible =
@@ -68,14 +69,17 @@ export const NewMnemonicPage: FunctionComponent<{
           />
         </Button>
       ) : null}
-      {isVisible ? <NewMnemonicPageIn recover={recover} /> : null}
+      {isVisible ? (
+        <NewMnemonicPageIn recover={recover} modeAdd={modeAdd} />
+      ) : null}
     </React.Fragment>
   );
 };
 
 const NewMnemonicPageIn: FunctionComponent<{
   recover: boolean;
-}> = observer(({ recover }) => {
+  modeAdd: boolean;
+}> = observer(({ recover, modeAdd }) => {
   const intl = useIntl();
 
   const { keyRingStore } = useStore();
@@ -184,10 +188,14 @@ const NewMnemonicPageIn: FunctionComponent<{
                 setIsLoading(true);
 
                 try {
-                  await keyRingStore.createMnemonicKey(
-                    data.words,
-                    data.password
-                  );
+                  if (modeAdd) {
+                    await keyRingStore.addMnemonicKey(data.words);
+                  } else {
+                    await keyRingStore.createMnemonicKey(
+                      data.words,
+                      data.password
+                    );
+                  }
                   await keyRingStore.save();
                   registerState.setStatus(RegisterStatus.COMPLETE);
                 } catch (e) {

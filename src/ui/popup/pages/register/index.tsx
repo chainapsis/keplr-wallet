@@ -16,8 +16,11 @@ import {
   withRegisterStateProvider
 } from "../../../contexts/register";
 
-import { NewMnemonicPage, TypeNewMnemonic } from "./new-mnemonic";
+import { NewMnemonicPage } from "./new-mnemonic";
 import { VerifyMnemonicPage } from "./verify-mnemonic";
+
+import { useLocation } from "react-router";
+import queryString from "query-string";
 
 export enum NunWords {
   WORDS12,
@@ -49,6 +52,11 @@ export const RegisterPage: FunctionComponent = withRegisterStateProvider(
       };
     }, []);
 
+    const location = useLocation();
+    const query = queryString.parse(location.search);
+
+    const modeAdd = query.mode === "add";
+
     return (
       <EmptyLayout
         className={style.container}
@@ -72,13 +80,9 @@ export const RegisterPage: FunctionComponent = withRegisterStateProvider(
         {registerState.status === RegisterStatus.COMPLETE ? (
           <WelcomeInPage />
         ) : null}
-        <NewMnemonicPage recover={false} />
-        <NewMnemonicPage recover={true} />
-        {registerState.status === RegisterStatus.INIT ||
-        (registerState.status === RegisterStatus.VERIFY &&
-          registerState.type === TypeNewMnemonic) ? (
-          <VerifyMnemonicPage />
-        ) : null}
+        <NewMnemonicPage recover={false} modeAdd={modeAdd} />
+        <NewMnemonicPage recover={true} modeAdd={modeAdd} />
+        <VerifyMnemonicPage modeAdd={modeAdd} />
         {registerState.status === RegisterStatus.INIT ? (
           <div className={style.subContent}>
             <FormattedMessage
