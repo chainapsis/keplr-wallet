@@ -44,6 +44,7 @@ import {
   LanguageToFiatCurrency
 } from "../../config";
 import { init as currencyInit } from "../../common/currency";
+import { LoadingIndicatorProvider } from "../components/loading-indicator";
 
 currencyInit(Currencies, LanguageToFiatCurrency);
 
@@ -116,40 +117,42 @@ const StateRenderer: FunctionComponent = observer(() => {
 ReactDOM.render(
   <AppIntlProvider additionalMessages={AdditonalIntlMessages}>
     <StoreProvider>
-      <NotificationStoreProvider>
-        <NotificationProvider>
-          <ConfirmProvider>
-            <HashRouter>
-              <Route exact path="/" component={StateRenderer} />
-              <Route exact path="/access" component={AccessPage} />
-              <Route exact path="/register" component={RegisterPage} />
-              <Route exact path="/send" component={SendPage} />
-              <Route exact path="/fee/:id" component={FeePage} />
-              <Route exact path="/set-keyring" component={SetKeyRingPage} />
-              <Route exact path="/setting" component={SettingPage} />
-              <Route
-                exact
-                path="/setting/language"
-                component={SettingLanguagePage}
-              />
-              <Route
-                exact
-                path="/setting/connections"
-                component={SettingConnectionsPage}
-              />
-              <Route
-                exact
-                path="/setting/address-book"
-                component={AddressBookPage}
-              />
-              <Route exact path="/setting/credit" component={CreditPage} />
-              <Route exact path="/setting/export" component={ExportPage} />
-              <Route exact path="/setting/clear" component={ClearPage} />
-              <Route path="/sign/:id" component={SignPage} />
-            </HashRouter>
-          </ConfirmProvider>
-        </NotificationProvider>
-      </NotificationStoreProvider>
+      <LoadingIndicatorProvider>
+        <NotificationStoreProvider>
+          <NotificationProvider>
+            <ConfirmProvider>
+              <HashRouter>
+                <Route exact path="/" component={StateRenderer} />
+                <Route exact path="/access" component={AccessPage} />
+                <Route exact path="/register" component={RegisterPage} />
+                <Route exact path="/send" component={SendPage} />
+                <Route exact path="/fee/:id" component={FeePage} />
+                <Route exact path="/set-keyring" component={SetKeyRingPage} />
+                <Route exact path="/setting" component={SettingPage} />
+                <Route
+                  exact
+                  path="/setting/language"
+                  component={SettingLanguagePage}
+                />
+                <Route
+                  exact
+                  path="/setting/connections"
+                  component={SettingConnectionsPage}
+                />
+                <Route
+                  exact
+                  path="/setting/address-book"
+                  component={AddressBookPage}
+                />
+                <Route exact path="/setting/credit" component={CreditPage} />
+                <Route exact path="/setting/export" component={ExportPage} />
+                <Route exact path="/setting/clear" component={ClearPage} />
+                <Route path="/sign/:id" component={SignPage} />
+              </HashRouter>
+            </ConfirmProvider>
+          </NotificationProvider>
+        </NotificationStoreProvider>
+      </LoadingIndicatorProvider>
     </StoreProvider>
   </AppIntlProvider>,
   document.getElementById("app")

@@ -9,10 +9,13 @@ import { useHistory } from "react-router";
 import { Button } from "reactstrap";
 
 import style from "./style.module.scss";
+import { useLoadingIndicator } from "../../../components/loading-indicator";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
   const history = useHistory();
+
+  const loadingIndicator = useLoadingIndicator();
 
   return (
     <HeaderLayout
@@ -31,9 +34,14 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
               onClick={async e => {
                 e.preventDefault();
 
-                await keyRingStore.changeKeyRing(i);
-                await keyRingStore.save();
-                history.push("/");
+                loadingIndicator.setIsLoading(true);
+                try {
+                  await keyRingStore.changeKeyRing(i);
+                  await keyRingStore.save();
+                  history.push("/");
+                } finally {
+                  loadingIndicator.setIsLoading(false);
+                }
               }}
               block
             >
