@@ -119,6 +119,11 @@ export class KeyRing {
       throw new Error("Key ring is not loaded or not empty");
     }
 
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
+
     this.mnemonic = mnemonic;
     this.keyStore = await KeyRing.CreateMnemonicKeyStore(
       mnemonic,
@@ -136,6 +141,11 @@ export class KeyRing {
     if (this.status !== KeyRingStatus.EMPTY) {
       throw new Error("Key ring is not loaded or not empty");
     }
+
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
 
     this.privateKey = privateKey;
     this.keyStore = await KeyRing.CreatePrivateKeyStore(
@@ -195,10 +205,14 @@ export class KeyRing {
       // This case will occur if extension is updated from the prior version that doesn't support the multi key store.
       // This line ensures the backward compatibility.
       if (keyStore) {
+        keyStore.meta = {
+          __id__: (await this.getIncrementalNumber()).toString()
+        };
         this.multiKeyStore = [keyStore];
       } else {
         this.multiKeyStore = [];
       }
+      await this.save();
     } else {
       this.multiKeyStore = multiKeyStore;
     }
@@ -314,6 +328,11 @@ export class KeyRing {
       throw new Error("Key ring is locked or not initialized");
     }
 
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
+
     const keyStore = await KeyRing.CreateMnemonicKeyStore(
       mnemonic,
       this.password,
@@ -331,6 +350,11 @@ export class KeyRing {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
       throw new Error("Key ring is locked or not initialized");
     }
+
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
 
     const keyStore = await KeyRing.CreatePrivateKeyStore(
       privateKey,
@@ -390,5 +414,16 @@ export class KeyRing {
       password,
       meta
     );
+  }
+
+  private async getIncrementalNumber(): Promise<number> {
+    let num = await this.kvStore.get<number>("incrementalNumber");
+    if (num === undefined) {
+      num = 0;
+    }
+    num++;
+
+    await this.kvStore.set("incrementalNumber", num);
+    return num;
   }
 }
