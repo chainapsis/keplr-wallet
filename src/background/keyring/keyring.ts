@@ -18,7 +18,11 @@ export interface Key {
   address: Uint8Array;
 }
 
-export type MultiKeyStoreInfo = Pick<KeyStore, "version" | "type" | "meta">[];
+export type MultiKeyStoreInfoElem = Pick<KeyStore, "version" | "type" | "meta">;
+export type MultiKeyStoreInfo = MultiKeyStoreInfoElem[];
+export type MultiKeyStoreInfoWithSelected = (MultiKeyStoreInfoElem & {
+  selected: boolean;
+})[];
 
 const KeyStoreKey = "key-store";
 const KeyMultiStoreKey = "key-multi-store";
@@ -323,7 +327,7 @@ export class KeyRing {
   public async addMnemonicKey(
     mnemonic: string,
     meta: Record<string, string>
-  ): Promise<MultiKeyStoreInfo> {
+  ): Promise<MultiKeyStoreInfoWithSelected> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
       throw new Error("Key ring is locked or not initialized");
     }
@@ -346,7 +350,7 @@ export class KeyRing {
   public async addPrivateKey(
     privateKey: Uint8Array,
     meta: Record<string, string>
-  ): Promise<MultiKeyStoreInfo> {
+  ): Promise<MultiKeyStoreInfoWithSelected> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
       throw new Error("Key ring is locked or not initialized");
     }
@@ -366,7 +370,9 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  public async changeKeyStoreFromMultiKeyStore(index: number) {
+  public async changeKeyStoreFromMultiKeyStore(
+    index: number
+  ): Promise<MultiKeyStoreInfoWithSelected> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
       throw new Error("Key ring is locked or not initialized");
     }
@@ -379,16 +385,21 @@ export class KeyRing {
     this.keyStore = keyStore;
 
     await this.unlock(this.password);
+
+    return this.getMultiKeyStoreInfo();
   }
 
-  public getMultiKeyStoreInfo(): MultiKeyStoreInfo {
-    const result: MultiKeyStoreInfo = [];
+  public getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
+    const result: MultiKeyStoreInfoWithSelected = [];
 
     for (const keyStore of this.multiKeyStore) {
       result.push({
         version: keyStore.version,
         type: keyStore.type,
-        meta: keyStore.meta
+        meta: keyStore.meta,
+        selected: keyStore.meta?.__id__
+          ? keyStore.meta.__id__ === this.keyStore?.meta?.__id__
+          : false
       });
     }
 

@@ -43,6 +43,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                   loadingIndicator.setIsLoading(false);
                 }
               }}
+              disabled={keyStore.selected}
               block
             >
               {keyStore.meta?.name ? keyStore.meta.name : "Unnamed"}

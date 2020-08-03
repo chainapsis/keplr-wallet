@@ -1,6 +1,6 @@
 import { Message } from "../../common/message";
 import { ROUTE } from "./constants";
-import { KeyRingStatus, MultiKeyStoreInfo } from "./keyring";
+import { KeyRingStatus, MultiKeyStoreInfoWithSelected } from "./keyring";
 import { KeyHex } from "./keeper";
 import {
   TxBuilderConfigPrimitive,
@@ -178,7 +178,7 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfo> {
+export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   public static type() {
     return "add-mnemonic-key";
   }
@@ -252,7 +252,7 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfo> {
+export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   public static type() {
     return "add-private-key";
   }
@@ -653,7 +653,9 @@ export class GetKeyRingTypeMsg extends Message<string> {
   }
 }
 
-export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfo> {
+export class GetMultiKeyStoreInfoMsg extends Message<
+  MultiKeyStoreInfoWithSelected
+> {
   public static type() {
     return "get-multi-key-store-info";
   }
@@ -675,7 +677,7 @@ export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfo> {
   }
 }
 
-export class ChangeKeyRingMsg extends Message<void> {
+export class ChangeKeyRingMsg extends Message<MultiKeyStoreInfoWithSelected> {
   public static type() {
     return "change-keyring";
   }

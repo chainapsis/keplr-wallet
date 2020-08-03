@@ -24,7 +24,7 @@ import { actionAsync, task } from "mobx-utils";
 
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RootStore } from "../root";
-import { MultiKeyStoreInfo } from "../../../../background/keyring/keyring";
+import { MultiKeyStoreInfoWithSelected } from "../../../../background/keyring/keyring";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -53,7 +53,7 @@ export class KeyRingStore {
   public keyRingType!: string;
 
   @observable
-  public multiKeyStoreInfo!: MultiKeyStoreInfo;
+  public multiKeyStoreInfo!: MultiKeyStoreInfoWithSelected;
 
   constructor(private rootStore: RootStore) {
     this.setKeyRingType("none");
@@ -79,7 +79,7 @@ export class KeyRingStore {
   }
 
   @action
-  private setMultiKeyStoreInfo(info: MultiKeyStoreInfo) {
+  private setMultiKeyStoreInfo(info: MultiKeyStoreInfoWithSelected) {
     this.multiKeyStoreInfo = info;
   }
 
@@ -132,7 +132,8 @@ export class KeyRingStore {
   @actionAsync
   public async changeKeyRing(index: number) {
     const msg = new ChangeKeyRingMsg(index);
-    await task(sendMessage(BACKGROUND_PORT, msg));
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
     this.rootStore.changeKeyRing();
   }
 
