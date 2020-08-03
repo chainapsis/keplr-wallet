@@ -12,6 +12,7 @@ import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
 import { SendPage } from "./pages/send";
+import { SetKeyRingPage } from "./pages/keyring";
 
 import { Banner } from "./components/banner";
 
@@ -124,6 +125,7 @@ ReactDOM.render(
               <Route exact path="/register" component={RegisterPage} />
               <Route exact path="/send" component={SendPage} />
               <Route exact path="/fee/:id" component={FeePage} />
+              <Route exact path="/set-keyring" component={SetKeyRingPage} />
               <Route exact path="/setting" component={SettingPage} />
               <Route
                 exact
