@@ -22,26 +22,36 @@ describe("Test keyring message's validate basic method", () => {
     });
   });
 
-  it("ClearKeyRingMsg should throw an error on validateBasic if field is invalid", () => {
+  it("DeleteKeyRingMsg should throw an error on validateBasic if field is invalid", () => {
     assert.throws(() => {
-      const msg = new Messages.ClearKeyRingMsg("");
+      const msg = new Messages.DeleteKeyRingMsg(0, "");
+      msg.validateBasic();
+    });
+
+    assert.throws(() => {
+      const msg = new Messages.DeleteKeyRingMsg(0.1, "");
       msg.validateBasic();
     });
 
     assert.doesNotThrow(() => {
-      const msg = new Messages.ClearKeyRingMsg("test-password");
+      const msg = new Messages.DeleteKeyRingMsg(0, "test-password");
       msg.validateBasic();
     });
   });
 
   it("ShowKeyRingMsg should throw an error on validateBasic if field is invalid", () => {
     assert.throws(() => {
-      const msg = new Messages.ShowKeyRingMsg("");
+      const msg = new Messages.ShowKeyRingMsg(0, "");
+      msg.validateBasic();
+    });
+
+    assert.throws(() => {
+      const msg = new Messages.ShowKeyRingMsg(1.1, "test-password");
       msg.validateBasic();
     });
 
     assert.doesNotThrow(() => {
-      const msg = new Messages.ShowKeyRingMsg("test-password");
+      const msg = new Messages.ShowKeyRingMsg(0, "test-password");
       msg.validateBasic();
     });
   });

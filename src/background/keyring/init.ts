@@ -15,7 +15,7 @@ import {
   ApproveSignMsg,
   RejectSignMsg,
   LockKeyRingMsg,
-  ClearKeyRingMsg,
+  DeleteKeyRingMsg,
   ShowKeyRingMsg,
   RequestTxBuilderConfigMsg,
   GetRequestedTxBuilderConfigMsg,
@@ -36,7 +36,7 @@ export function init(
   messageManager.registerMessage(EnableKeyRingMsg);
   messageManager.registerMessage(RestoreKeyRingMsg);
   messageManager.registerMessage(SaveKeyRingMsg);
-  messageManager.registerMessage(ClearKeyRingMsg);
+  messageManager.registerMessage(DeleteKeyRingMsg);
   messageManager.registerMessage(ShowKeyRingMsg);
   messageManager.registerMessage(CreateMnemonicKeyMsg);
   messageManager.registerMessage(AddMnemonicKeyMsg);

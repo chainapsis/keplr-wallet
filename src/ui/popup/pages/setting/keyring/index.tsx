@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback } from "react";
+import React, { FunctionComponent, useCallback, useState } from "react";
 
 import { HeaderLayout } from "../../../layouts/header-layout";
 
@@ -6,10 +6,12 @@ import { observer } from "mobx-react";
 import { useStore } from "../../../stores";
 
 import { useHistory } from "react-router";
-import { Button } from "reactstrap";
+import { Button, Popover, PopoverBody } from "reactstrap";
 
 import style from "./style.module.scss";
 import { useLoadingIndicator } from "../../../../components/loading-indicator";
+import { PageButton } from "../page-button";
+import { MultiKeyStoreInfoWithSelectedElem } from "../../../../../background/keyring/keyring";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
@@ -29,8 +31,9 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
       <div className={style.container}>
         {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
           return (
-            <Button
+            <PageButton
               key={i.toString()}
+              title={keyStore.meta?.name ? keyStore.meta.name : "Unnamed"}
               onClick={async e => {
                 e.preventDefault();
 
@@ -43,11 +46,10 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                   loadingIndicator.setIsLoading(false);
                 }
               }}
-              disabled={keyStore.selected}
-              block
-            >
-              {keyStore.meta?.name ? keyStore.meta.name : "Unnamed"}
-            </Button>
+              icons={[
+                <KeyRingToolsIcon key="tools" index={i} keyStore={keyStore} />
+              ]}
+            />
           );
         })}
         <Button
@@ -67,3 +69,72 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
     </HeaderLayout>
   );
 });
+
+const KeyRingToolsIcon: FunctionComponent<{
+  index: number;
+  keyStore: MultiKeyStoreInfoWithSelectedElem;
+}> = ({ index, keyStore }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const toggleOpen = () => setIsOpen(isOpen => !isOpen);
+
+  const history = useHistory();
+
+  const [tooltipId] = useState(() => {
+    const bytes = new Uint8Array(4);
+    crypto.getRandomValues(bytes);
+    return `tools-${Buffer.from(bytes).toString("hex")}`;
+  });
+
+  return (
+    <React.Fragment>
+      <Popover
+        target={tooltipId}
+        isOpen={isOpen}
+        toggle={toggleOpen}
+        placement="bottom"
+      >
+        <PopoverBody
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            history.push("");
+          }}
+        >
+          {keyStore.type === "mnemonic" ? (
+            <div
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                history.push(`/setting/export/${index}`);
+              }}
+            >
+              View mnemonic
+            </div>
+          ) : null}
+          <div
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+
+              history.push(`/setting/clear/${index}`);
+            }}
+          >
+            Delete
+          </div>
+        </PopoverBody>
+      </Popover>
+      <i
+        id={tooltipId}
+        className="fas fa-ellipsis-h"
+        onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          setIsOpen(true);
+        }}
+      />
+    </React.Fragment>
+  );
+};

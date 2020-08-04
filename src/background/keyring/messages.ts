@@ -86,16 +86,23 @@ export class SaveKeyRingMsg extends Message<{ success: boolean }> {
   }
 }
 
-export class ClearKeyRingMsg extends Message<{ status: KeyRingStatus }> {
+export class DeleteKeyRingMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
-    return "clear-keyring";
+    return "delete-keyring";
   }
 
-  constructor(public readonly password: string) {
+  constructor(public readonly index: number, public readonly password: string) {
     super();
   }
 
   validateBasic(): void {
+    if (parseInt(this.index.toString()) !== this.index) {
+      throw new Error("Invalid index");
+    }
+
     if (!this.password) {
       throw new Error("password not set");
     }
@@ -106,7 +113,7 @@ export class ClearKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   type(): string {
-    return ClearKeyRingMsg.type();
+    return DeleteKeyRingMsg.type();
   }
 }
 
@@ -115,12 +122,15 @@ export class ShowKeyRingMsg extends Message<string> {
     return "show-keyring";
   }
 
-  constructor(public readonly password: string) {
+  constructor(public readonly index: number, public readonly password: string) {
     super();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   validateBasic(): void {
+    if (parseInt(this.index.toString()) !== this.index) {
+      throw new Error("Invalid index");
+    }
+
     if (!this.password) {
       throw new Error("password not set");
     }

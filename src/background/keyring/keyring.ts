@@ -20,9 +20,10 @@ export interface Key {
 
 export type MultiKeyStoreInfoElem = Pick<KeyStore, "version" | "type" | "meta">;
 export type MultiKeyStoreInfo = MultiKeyStoreInfoElem[];
-export type MultiKeyStoreInfoWithSelected = (MultiKeyStoreInfoElem & {
+export type MultiKeyStoreInfoWithSelectedElem = MultiKeyStoreInfoElem & {
   selected: boolean;
-})[];
+};
+export type MultiKeyStoreInfoWithSelected = MultiKeyStoreInfoWithSelectedElem[];
 
 const KeyStoreKey = "key-store";
 const KeyMultiStoreKey = "key-multi-store";
@@ -134,6 +135,7 @@ export class KeyRing {
       password,
       meta
     );
+    this.password = password;
     this.multiKeyStore.push(this.keyStore);
   }
 
@@ -157,6 +159,7 @@ export class KeyRing {
       password,
       meta
     );
+    this.password = password;
     this.multiKeyStore.push(this.keyStore);
   }
 
@@ -223,22 +226,56 @@ export class KeyRing {
     this.loaded = true;
   }
 
-  /**
-   * This will clear all key ring data.
-   */
-  public async clear(password: string) {
-    if (!this.keyStore) {
-      throw new Error("Key ring is not initialized");
+  public async deleteKeyRing(
+    index: number,
+    password: string
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
     }
 
+    if (this.password !== password) {
+      throw new Error("Invalid password");
+    }
+
+    const keyStore = this.multiKeyStore[index];
+
+    if (!keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    const multiKeyStore = this.multiKeyStore
+      .slice(0, index)
+      .concat(this.multiKeyStore.slice(index + 1));
+
     // Make sure that password is valid.
-    await Crypto.decrypt(this.keyStore, password);
+    await Crypto.decrypt(keyStore, password);
 
-    this.keyStore = null;
-    this.mnemonic = undefined;
-    this.privateKey = undefined;
+    if (this.keyStore) {
+      // If key store is currently selected key store
+      if (
+        keyStore.meta?.__id__ &&
+        this.keyStore.meta?.__id__ === keyStore.meta?.__id__
+      ) {
+        // If there is a key store left
+        if (multiKeyStore.length > 0) {
+          // Lock key store at first
+          await this.lock();
+          // Select first key store
+          this.keyStore = multiKeyStore[0];
+          // And unlock it
+          await this.unlock(password);
+        } else {
+          // Else clear keyring.
+          this.keyStore = null;
+          this.mnemonic = undefined;
+          this.privateKey = undefined;
+        }
+      }
+    }
 
-    await this.save();
+    this.multiKeyStore = multiKeyStore;
+    return this.getMultiKeyStoreInfo();
   }
 
   private loadKey(path: string): Key {
@@ -302,21 +339,27 @@ export class KeyRing {
   }
 
   // Show private key or mnemonic key if password is valid.
-  public async showKeyRing(password: string): Promise<string> {
-    if (!this.keyStore || this.type === "none") {
-      throw new Error("Key ring not initialized");
+  public async showKeyRing(index: number, password: string): Promise<string> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
     }
 
-    if (this.type === "mnemonic") {
+    if (this.password !== password) {
+      throw new Error("Invalid password");
+    }
+
+    const keyStore = this.multiKeyStore[index];
+
+    if (!keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    if (keyStore.type === "mnemonic") {
       // If password is invalid, error will be thrown.
-      return Buffer.from(
-        await Crypto.decrypt(this.keyStore, password)
-      ).toString();
+      return Buffer.from(await Crypto.decrypt(keyStore, password)).toString();
     } else {
       // If password is invalid, error will be thrown.
-      return Buffer.from(
-        await Crypto.decrypt(this.keyStore, password)
-      ).toString();
+      return Buffer.from(await Crypto.decrypt(keyStore, password)).toString();
     }
   }
 

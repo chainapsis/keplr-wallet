@@ -115,16 +115,22 @@ export class KeyRingKeeper {
     await this.keyRing.save();
   }
 
-  /**
-   * This will clear all key ring data.
-   */
-  async clear(password: string): Promise<KeyRingStatus> {
-    await this.keyRing.clear(password);
-    return this.keyRing.status;
+  async deleteKeyRing(
+    index: number,
+    password: string
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+    status: KeyRingStatus;
+  }> {
+    const multiKeyStoreInfo = await this.keyRing.deleteKeyRing(index, password);
+    return {
+      multiKeyStoreInfo,
+      status: this.keyRing.status
+    };
   }
 
-  async showKeyRing(password: string): Promise<string> {
-    return await this.keyRing.showKeyRing(password);
+  async showKeyRing(index: number, password: string): Promise<string> {
+    return await this.keyRing.showKeyRing(index, password);
   }
 
   async createMnemonicKey(

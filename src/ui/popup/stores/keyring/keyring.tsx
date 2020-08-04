@@ -10,13 +10,12 @@ import {
   CreateMnemonicKeyMsg,
   UnlockKeyRingMsg,
   LockKeyRingMsg,
-  ClearKeyRingMsg,
   CreatePrivateKeyMsg,
-  GetKeyRingTypeMsg,
   GetMultiKeyStoreInfoMsg,
   ChangeKeyRingMsg,
   AddMnemonicKeyMsg,
-  AddPrivateKeyMsg
+  AddPrivateKeyMsg,
+  DeleteKeyRingMsg
 } from "../../../../background/keyring";
 
 import { action, observable } from "mobx";
@@ -50,20 +49,11 @@ export class KeyRingStore {
   public status!: KeyRingStatus;
 
   @observable
-  public keyRingType!: string;
-
-  @observable
   public multiKeyStoreInfo!: MultiKeyStoreInfoWithSelected;
 
   constructor(private rootStore: RootStore) {
-    this.setKeyRingType("none");
     this.setStatus(KeyRingStatus.NOTLOADED);
     this.setMultiKeyStoreInfo([]);
-  }
-
-  @action
-  private setKeyRingType(type: string) {
-    this.keyRingType = type;
   }
 
   // This will be called by chain store.
@@ -157,11 +147,6 @@ export class KeyRingStore {
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
 
-    const type = await task(
-      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
-    this.setKeyRingType(type);
-
     const multiKeyStoreInfo = await task(
       sendMessage(BACKGROUND_PORT, new GetMultiKeyStoreInfoMsg())
     );
@@ -172,25 +157,16 @@ export class KeyRingStore {
   public async save() {
     const msg = new SaveKeyRingMsg();
     await task(sendMessage(BACKGROUND_PORT, msg));
-
-    const type = await task(
-      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
-    this.setKeyRingType(type);
   }
 
-  /**
-   * Clear key ring data.
-   */
   @actionAsync
-  public async clear(password: string) {
-    const msg = new ClearKeyRingMsg(password);
+  public async deleteKeyRing(index: number, password: string) {
+    const msg = new DeleteKeyRingMsg(index, password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+    this.setMultiKeyStoreInfo(result.multiKeyStoreInfo);
 
-    const type = await task(
-      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
-    this.setKeyRingType(type);
+    // Possibly, key ring can be changed if deleting key store was selected one.
+    this.rootStore.changeKeyRing();
   }
 }

@@ -17,9 +17,9 @@ import { sendMessage } from "../../common/message/send/mock";
 import {
   ApproveSignMsg,
   ApproveTxBuilderConfigMsg,
-  ClearKeyRingMsg,
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
+  DeleteKeyRingMsg,
   EnableKeyRingMsg,
   GetKeyMsg,
   LockKeyRingMsg,
@@ -605,7 +605,7 @@ describe("Test keyring handler", () => {
     }, new Error("This origin is not approved"));
   });
 
-  it("Test keyring clearing", async () => {
+  /* it("Test keyring clearing", async () => {
     const testClear = async () => {
       await assert.rejects(async () => {
         await sendMessage(
@@ -689,7 +689,7 @@ describe("Test keyring handler", () => {
     );
 
     await testClear();
-  });
+  });*/
 
   it("Test show keyring", async () => {
     const testShow = async (expected: string) => {
@@ -702,9 +702,9 @@ describe("Test keyring handler", () => {
             origin: internalOrigin
           },
           port,
-          new ShowKeyRingMsg("invalid-password")
+          new ShowKeyRingMsg(0, "invalid-password")
         );
-      }, new Error("Unmatched mac"));
+      }, new Error("Invalid password"));
 
       await assert.rejects(async () => {
         await sendMessage(
@@ -715,7 +715,7 @@ describe("Test keyring handler", () => {
             origin: "http://test.com"
           },
           port,
-          new ShowKeyRingMsg("password")
+          new ShowKeyRingMsg(0, "password")
         );
       }, new Error("Permission rejected"));
 
@@ -727,7 +727,7 @@ describe("Test keyring handler", () => {
           origin: internalOrigin
         },
         port,
-        new ShowKeyRingMsg("password")
+        new ShowKeyRingMsg(0, "password")
       );
 
       assert.strictEqual(result, expected);
@@ -771,7 +771,7 @@ describe("Test keyring handler", () => {
         origin: internalOrigin
       },
       port,
-      new ClearKeyRingMsg("password")
+      new DeleteKeyRingMsg(0, "password")
     );
 
     await sendMessage(

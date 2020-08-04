@@ -13,7 +13,7 @@ import {
   RejectSignMsg,
   GetRequestedMessage,
   LockKeyRingMsg,
-  ClearKeyRingMsg,
+  DeleteKeyRingMsg,
   RequestTxBuilderConfigMsg,
   GetRequestedTxBuilderConfigMsg,
   ApproveTxBuilderConfigMsg,
@@ -41,8 +41,8 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         return handleRestoreKeyRingMsg(keeper)(env, msg as RestoreKeyRingMsg);
       case SaveKeyRingMsg:
         return handleSaveKeyRingMsg(keeper)(env, msg as SaveKeyRingMsg);
-      case ClearKeyRingMsg:
-        return handleClearKeyRingMsg(keeper)(env, msg as ClearKeyRingMsg);
+      case DeleteKeyRingMsg:
+        return handleDeleteKeyRingMsg(keeper)(env, msg as DeleteKeyRingMsg);
       case ShowKeyRingMsg:
         return handleShowKeyRingMsg(keeper)(env, msg as ShowKeyRingMsg);
       case CreateMnemonicKeyMsg:
@@ -153,13 +153,11 @@ const handleSaveKeyRingMsg: (
   };
 };
 
-const handleClearKeyRingMsg: (
+const handleDeleteKeyRingMsg: (
   keeper: KeyRingKeeper
-) => InternalHandler<ClearKeyRingMsg> = keeper => {
+) => InternalHandler<DeleteKeyRingMsg> = keeper => {
   return async (_, msg) => {
-    return {
-      status: await keeper.clear(msg.password)
-    };
+    return await keeper.deleteKeyRing(msg.index, msg.password);
   };
 };
 
@@ -167,7 +165,7 @@ const handleShowKeyRingMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<ShowKeyRingMsg> = keeper => {
   return async (_, msg) => {
-    return await keeper.showKeyRing(msg.password);
+    return await keeper.showKeyRing(msg.index, msg.password);
   };
 };
 

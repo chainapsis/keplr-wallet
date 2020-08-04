@@ -161,11 +161,11 @@ describe("Test keyring", () => {
     );
 
     await assert.rejects(async () => {
-      await keyRing.showKeyRing("invalid-password");
+      await keyRing.showKeyRing(0, "invalid-password");
     });
 
     await assert.doesNotReject(async () => {
-      const result = await keyRing.showKeyRing("password");
+      const result = await keyRing.showKeyRing(0, "password");
 
       assert.strictEqual(
         result,
@@ -189,11 +189,11 @@ describe("Test keyring", () => {
     );
 
     await assert.rejects(async () => {
-      await keyRing.showKeyRing("invalid-password");
+      await keyRing.showKeyRing(0, "invalid-password");
     });
 
     await assert.doesNotReject(async () => {
-      const result = await keyRing.showKeyRing("password");
+      const result = await keyRing.showKeyRing(0, "password");
 
       assert.strictEqual(
         result,
@@ -214,11 +214,11 @@ describe("Test keyring", () => {
     );
 
     await assert.rejects(async () => {
-      await keyRing.clear("invalid-password");
+      await keyRing.deleteKeyRing(0, "invalid-password");
     });
 
     await assert.doesNotReject(async () => {
-      await keyRing.clear("password");
+      await keyRing.deleteKeyRing(0, "password");
     });
 
     assert.strictEqual(keyRing.status, KeyRingStatus.EMPTY);
@@ -240,11 +240,11 @@ describe("Test keyring", () => {
     );
 
     await assert.rejects(async () => {
-      await keyRing.clear("invalid-password");
+      await keyRing.deleteKeyRing(0, "invalid-password");
     });
 
     await assert.doesNotReject(async () => {
-      await keyRing.clear("password");
+      await keyRing.deleteKeyRing(0, "password");
     });
 
     assert.strictEqual(keyRing.status, KeyRingStatus.EMPTY);

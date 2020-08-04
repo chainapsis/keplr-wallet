@@ -127,7 +127,6 @@ ReactDOM.render(
                 <Route exact path="/register" component={RegisterPage} />
                 <Route exact path="/send" component={SendPage} />
                 <Route exact path="/fee/:id" component={FeePage} />
-                <Route exact path="/set-keyring" component={SetKeyRingPage} />
                 <Route exact path="/setting" component={SettingPage} />
                 <Route
                   exact
@@ -145,8 +144,21 @@ ReactDOM.render(
                   component={AddressBookPage}
                 />
                 <Route exact path="/setting/credit" component={CreditPage} />
-                <Route exact path="/setting/export" component={ExportPage} />
-                <Route exact path="/setting/clear" component={ClearPage} />
+                <Route
+                  exact
+                  path="/setting/set-keyring"
+                  component={SetKeyRingPage}
+                />
+                <Route
+                  exact
+                  path="/setting/export/:index"
+                  component={ExportPage}
+                />
+                <Route
+                  exact
+                  path="/setting/clear/:index"
+                  component={ClearPage}
+                />
                 <Route path="/sign/:id" component={SignPage} />
               </HashRouter>
             </ConfirmProvider>

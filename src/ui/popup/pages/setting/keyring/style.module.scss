@@ -1,6 +1,9 @@
+@import "../../../styles/var";
+
 .container {
-  button {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
+  margin: 0 calc(#{$layout-padding} * -1) calc(#{$layout-padding} * -1);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }

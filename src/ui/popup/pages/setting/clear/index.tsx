@@ -1,7 +1,13 @@
-import React, { FunctionComponent, useCallback, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useState,
+  useEffect,
+  useMemo
+} from "react";
 import { HeaderLayout } from "../../../layouts/header-layout";
 
-import { useHistory } from "react-router";
+import { useHistory, useRouteMatch } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Input } from "../../../../components/form";
 import { Button, Form } from "reactstrap";
@@ -18,6 +24,8 @@ interface FormData {
 
 export const ClearPage: FunctionComponent = observer(() => {
   const history = useHistory();
+  const match = useRouteMatch<{ index: string }>();
+
   const intl = useIntl();
 
   const [loading, setLoading] = useState(false);
@@ -28,6 +36,16 @@ export const ClearPage: FunctionComponent = observer(() => {
       password: ""
     }
   });
+
+  useEffect(() => {
+    if (parseInt(match.params.index).toString() !== match.params.index) {
+      throw new Error("Invalid index");
+    }
+  }, [match.params.index]);
+
+  const keyStore = useMemo(() => {
+    return keyRingStore.multiKeyStoreInfo[parseInt(match.params.index)];
+  }, [keyRingStore.multiKeyStoreInfo, match.params.index]);
 
   return (
     <HeaderLayout
@@ -41,15 +59,24 @@ export const ClearPage: FunctionComponent = observer(() => {
       }, [history])}
     >
       <div className={style.container}>
-        <WarningView />
+        {keyStore ? (
+          <WarningView
+            index={parseInt(match.params.index)}
+            keyStore={keyStore}
+          />
+        ) : null}
         <Form
           onSubmit={handleSubmit(async data => {
             setLoading(true);
             try {
               // Make sure that password is valid and keyring is cleared.
-              await keyRingStore.clear(data.password);
-              // Delete all storage of this extension.
-              await browser.storage.local.clear();
+              await keyRingStore.deleteKeyRing(
+                parseInt(match.params.index),
+                data.password
+              );
+
+              await keyRingStore.save();
+
               history.push("/");
             } catch (e) {
               console.log("Fail to decrypt: " + e.message);

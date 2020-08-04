@@ -21,7 +21,7 @@ export const MainPage: FunctionComponent = () => {
     (e: MouseEvent) => {
       e.preventDefault();
 
-      history.push("/set-keyring");
+      history.push("/setting/set-keyring");
     },
     [history]
   );
