@@ -1,15 +1,15 @@
 import React, { FunctionComponent, useCallback } from "react";
 
-import { HeaderLayout } from "../../layouts/header-layout";
+import { HeaderLayout } from "../../../layouts/header-layout";
 
 import { observer } from "mobx-react";
-import { useStore } from "../../stores";
+import { useStore } from "../../../stores";
 
 import { useHistory } from "react-router";
 import { Button } from "reactstrap";
 
 import style from "./style.module.scss";
-import { useLoadingIndicator } from "../../../components/loading-indicator";
+import { useLoadingIndicator } from "../../../../components/loading-indicator";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();

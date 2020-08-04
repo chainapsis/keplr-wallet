@@ -12,7 +12,7 @@ import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
 import { SendPage } from "./pages/send";
-import { SetKeyRingPage } from "./pages/keyring";
+import { SetKeyRingPage } from "./pages/setting/keyring";
 
 import { Banner } from "./components/banner";
 
