@@ -45,6 +45,7 @@ import {
 } from "../../config";
 import { init as currencyInit } from "../../common/currency";
 import { LoadingIndicatorProvider } from "../components/loading-indicator";
+import { LedgerGrantPage } from "./pages/ledger";
 
 currencyInit(Currencies, LanguageToFiatCurrency);
 
@@ -128,6 +129,7 @@ ReactDOM.render(
                 <Route exact path="/send" component={SendPage} />
                 <Route exact path="/fee/:id" component={FeePage} />
                 <Route exact path="/setting" component={SettingPage} />
+                <Route exact path="/ledger-grant" component={LedgerGrantPage} />
                 <Route
                   exact
                   path="/setting/language"
