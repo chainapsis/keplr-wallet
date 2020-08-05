@@ -1,4 +1,9 @@
-import { Key, KeyRing, KeyRingStatus } from "./keyring";
+import {
+  Key,
+  KeyRing,
+  KeyRingStatus,
+  MultiKeyStoreInfoWithSelected
+} from "./keyring";
 
 import { Address } from "@everett-protocol/cosmosjs/crypto";
 import { AsyncApprover } from "../../common/async-approver";
@@ -110,33 +115,41 @@ export class KeyRingKeeper {
     await this.keyRing.save();
   }
 
-  /**
-   * This will clear all key ring data.
-   */
-  async clear(password: string): Promise<KeyRingStatus> {
-    await this.keyRing.clear(password);
-    return this.keyRing.status;
+  async deleteKeyRing(
+    index: number,
+    password: string
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+    status: KeyRingStatus;
+  }> {
+    const multiKeyStoreInfo = await this.keyRing.deleteKeyRing(index, password);
+    return {
+      multiKeyStoreInfo,
+      status: this.keyRing.status
+    };
   }
 
-  async showKeyRing(password: string): Promise<string> {
-    return await this.keyRing.showKeyRing(password);
+  async showKeyRing(index: number, password: string): Promise<string> {
+    return await this.keyRing.showKeyRing(index, password);
   }
 
   async createMnemonicKey(
     mnemonic: string,
-    password: string
+    password: string,
+    meta: Record<string, string>
   ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createMnemonicKey(mnemonic, password);
+    await this.keyRing.createMnemonicKey(mnemonic, password, meta);
     return this.keyRing.status;
   }
 
   async createPrivateKey(
     privateKey: Uint8Array,
-    password: string
+    password: string,
+    meta: Record<string, string>
   ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createPrivateKey(privateKey, password);
+    await this.keyRing.createPrivateKey(privateKey, password, meta);
     return this.keyRing.status;
   }
 
@@ -252,5 +265,29 @@ export class KeyRingKeeper {
 
   rejectSign(id: string): void {
     this.signApprover.reject(id);
+  }
+
+  async addMnemonicKey(
+    mnemonic: string,
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    return this.keyRing.addMnemonicKey(mnemonic, meta);
+  }
+
+  async addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    return this.keyRing.addPrivateKey(privateKey, meta);
+  }
+
+  public async changeKeyStoreFromMultiKeyStore(
+    index: number
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    return this.keyRing.changeKeyStoreFromMultiKeyStore(index);
+  }
+
+  getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
+    return this.keyRing.getMultiKeyStoreInfo();
   }
 }

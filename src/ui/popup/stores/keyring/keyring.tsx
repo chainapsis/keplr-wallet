@@ -10,9 +10,12 @@ import {
   CreateMnemonicKeyMsg,
   UnlockKeyRingMsg,
   LockKeyRingMsg,
-  ClearKeyRingMsg,
   CreatePrivateKeyMsg,
-  GetKeyRingTypeMsg
+  GetMultiKeyStoreInfoMsg,
+  ChangeKeyRingMsg,
+  AddMnemonicKeyMsg,
+  AddPrivateKeyMsg,
+  DeleteKeyRingMsg
 } from "../../../../background/keyring";
 
 import { action, observable } from "mobx";
@@ -20,6 +23,7 @@ import { actionAsync, task } from "mobx-utils";
 
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RootStore } from "../root";
+import { MultiKeyStoreInfoWithSelected } from "../../../../background/keyring/keyring";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -45,16 +49,11 @@ export class KeyRingStore {
   public status!: KeyRingStatus;
 
   @observable
-  public keyRingType!: string;
+  public multiKeyStoreInfo!: MultiKeyStoreInfoWithSelected;
 
   constructor(private rootStore: RootStore) {
-    this.setKeyRingType("none");
     this.setStatus(KeyRingStatus.NOTLOADED);
-  }
-
-  @action
-  private setKeyRingType(type: string) {
-    this.keyRingType = type;
+    this.setMultiKeyStoreInfo([]);
   }
 
   // This will be called by chain store.
@@ -69,21 +68,63 @@ export class KeyRingStore {
     this.rootStore.setKeyRingStatus(status);
   }
 
+  @action
+  private setMultiKeyStoreInfo(info: MultiKeyStoreInfoWithSelected) {
+    this.multiKeyStoreInfo = info;
+  }
+
   @actionAsync
-  public async createMnemonicKey(mnemonic: string, password: string) {
-    const msg = new CreateMnemonicKeyMsg(mnemonic, password);
+  public async createMnemonicKey(
+    mnemonic: string,
+    password: string,
+    meta: Record<string, string>
+  ) {
+    const msg = new CreateMnemonicKeyMsg(mnemonic, password, meta);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
   }
 
   @actionAsync
-  public async createPrivateKey(privateKey: Uint8Array, password: string) {
+  public async createPrivateKey(
+    privateKey: Uint8Array,
+    password: string,
+    meta: Record<string, string>
+  ) {
     const msg = new CreatePrivateKeyMsg(
       Buffer.from(privateKey).toString("hex"),
-      password
+      password,
+      meta
     );
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+  }
+
+  @actionAsync
+  public async addMnemonicKey(mnemonic: string, meta: Record<string, string>) {
+    const msg = new AddMnemonicKeyMsg(mnemonic, meta);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+  }
+
+  @actionAsync
+  public async addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>
+  ) {
+    const msg = new AddPrivateKeyMsg(
+      Buffer.from(privateKey).toString("hex"),
+      meta
+    );
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+  }
+
+  @actionAsync
+  public async changeKeyRing(index: number) {
+    const msg = new ChangeKeyRingMsg(index);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+    this.rootStore.changeKeyRing();
   }
 
   @actionAsync
@@ -106,35 +147,26 @@ export class KeyRingStore {
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
 
-    const type = await task(
-      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
+    const multiKeyStoreInfo = await task(
+      sendMessage(BACKGROUND_PORT, new GetMultiKeyStoreInfoMsg())
     );
-    this.setKeyRingType(type);
+    this.setMultiKeyStoreInfo(multiKeyStoreInfo);
   }
 
   @actionAsync
   public async save() {
     const msg = new SaveKeyRingMsg();
     await task(sendMessage(BACKGROUND_PORT, msg));
-
-    const type = await task(
-      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
-    this.setKeyRingType(type);
   }
 
-  /**
-   * Clear key ring data.
-   */
   @actionAsync
-  public async clear(password: string) {
-    const msg = new ClearKeyRingMsg(password);
+  public async deleteKeyRing(index: number, password: string) {
+    const msg = new DeleteKeyRingMsg(index, password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+    this.setMultiKeyStoreInfo(result.multiKeyStoreInfo);
 
-    const type = await task(
-      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
-    this.setKeyRingType(type);
+    // Possibly, key ring can be changed if deleting key store was selected one.
+    this.rootStore.changeKeyRing();
   }
 }

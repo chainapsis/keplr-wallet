@@ -23,6 +23,7 @@ export interface KeyStore {
    * Below version "1", type is not defined and it is considered as "mnemonic".
    */
   type?: "mnemonic" | "privateKey";
+  meta?: Record<string, string>;
   crypto: {
     cipher: "aes-128-ctr";
     cipherparams: {
@@ -39,7 +40,8 @@ export class Crypto {
   public static async encrypt(
     type: "mnemonic" | "privateKey",
     text: string,
-    password: string
+    password: string,
+    meta: Record<string, string>
   ): Promise<KeyStore> {
     let random = new Uint8Array(32);
     crypto.getRandomValues(random);
@@ -70,6 +72,7 @@ export class Crypto {
     return {
       version: "1.1",
       type,
+      meta,
       crypto: {
         cipher: "aes-128-ctr",
         cipherparams: {

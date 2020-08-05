@@ -18,7 +18,15 @@ export interface Key {
   address: Uint8Array;
 }
 
+export type MultiKeyStoreInfoElem = Pick<KeyStore, "version" | "type" | "meta">;
+export type MultiKeyStoreInfo = MultiKeyStoreInfoElem[];
+export type MultiKeyStoreInfoWithSelectedElem = MultiKeyStoreInfoElem & {
+  selected: boolean;
+};
+export type MultiKeyStoreInfoWithSelected = MultiKeyStoreInfoWithSelectedElem[];
+
 const KeyStoreKey = "key-store";
+const KeyMultiStoreKey = "key-multi-store";
 
 /*
  Keyring stores keys in persistent backround.
@@ -38,9 +46,14 @@ export class KeyRing {
 
   private keyStore: KeyStore | null;
 
+  private multiKeyStore: KeyStore[];
+
+  private password: string = "";
+
   constructor(private readonly kvStore: KVStore) {
     this.loaded = false;
     this.keyStore = null;
+    this.multiKeyStore = [];
   }
 
   public get type(): "mnemonic" | "privateKey" | "none" {
@@ -102,26 +115,52 @@ export class KeyRing {
     return this.loadKey(path);
   }
 
-  public async createMnemonicKey(mnemonic: string, password: string) {
+  public async createMnemonicKey(
+    mnemonic: string,
+    password: string,
+    meta: Record<string, string>
+  ) {
     if (this.status !== KeyRingStatus.EMPTY) {
       throw new Error("Key ring is not loaded or not empty");
     }
+
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
 
     this.mnemonic = mnemonic;
-    this.keyStore = await Crypto.encrypt("mnemonic", this.mnemonic, password);
+    this.keyStore = await KeyRing.CreateMnemonicKeyStore(
+      mnemonic,
+      password,
+      meta
+    );
+    this.password = password;
+    this.multiKeyStore.push(this.keyStore);
   }
 
-  public async createPrivateKey(privateKey: Uint8Array, password: string) {
+  public async createPrivateKey(
+    privateKey: Uint8Array,
+    password: string,
+    meta: Record<string, string>
+  ) {
     if (this.status !== KeyRingStatus.EMPTY) {
       throw new Error("Key ring is not loaded or not empty");
     }
 
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
+
     this.privateKey = privateKey;
-    this.keyStore = await Crypto.encrypt(
-      "privateKey",
-      Buffer.from(this.privateKey).toString("hex"),
-      password
+    this.keyStore = await KeyRing.CreatePrivateKeyStore(
+      privateKey,
+      password,
+      meta
     );
+    this.password = password;
+    this.multiKeyStore.push(this.keyStore);
   }
 
   public lock() {
@@ -131,6 +170,7 @@ export class KeyRing {
 
     this.mnemonic = undefined;
     this.privateKey = undefined;
+    this.password = "";
   }
 
   public async unlock(password: string) {
@@ -150,10 +190,13 @@ export class KeyRing {
         "hex"
       );
     }
+
+    this.password = password;
   }
 
   public async save() {
     await this.kvStore.set<KeyStore>(KeyStoreKey, this.keyStore);
+    await this.kvStore.set<KeyStore[]>(KeyMultiStoreKey, this.multiKeyStore);
   }
 
   public async restore() {
@@ -163,25 +206,76 @@ export class KeyRing {
     } else {
       this.keyStore = keyStore;
     }
+    const multiKeyStore = await this.kvStore.get<KeyStore[]>(KeyMultiStoreKey);
+    if (!multiKeyStore) {
+      // Restore the multi keystore if key store exist but multi key store is empty.
+      // This case will occur if extension is updated from the prior version that doesn't support the multi key store.
+      // This line ensures the backward compatibility.
+      if (keyStore) {
+        keyStore.meta = {
+          __id__: (await this.getIncrementalNumber()).toString()
+        };
+        this.multiKeyStore = [keyStore];
+      } else {
+        this.multiKeyStore = [];
+      }
+      await this.save();
+    } else {
+      this.multiKeyStore = multiKeyStore;
+    }
     this.loaded = true;
   }
 
-  /**
-   * This will clear all key ring data.
-   */
-  public async clear(password: string) {
-    if (!this.keyStore) {
-      throw new Error("Key ring is not initialized");
+  public async deleteKeyRing(
+    index: number,
+    password: string
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
     }
 
+    if (this.password !== password) {
+      throw new Error("Invalid password");
+    }
+
+    const keyStore = this.multiKeyStore[index];
+
+    if (!keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    const multiKeyStore = this.multiKeyStore
+      .slice(0, index)
+      .concat(this.multiKeyStore.slice(index + 1));
+
     // Make sure that password is valid.
-    await Crypto.decrypt(this.keyStore, password);
+    await Crypto.decrypt(keyStore, password);
 
-    this.keyStore = null;
-    this.mnemonic = undefined;
-    this.privateKey = undefined;
+    if (this.keyStore) {
+      // If key store is currently selected key store
+      if (
+        keyStore.meta?.__id__ &&
+        this.keyStore.meta?.__id__ === keyStore.meta?.__id__
+      ) {
+        // If there is a key store left
+        if (multiKeyStore.length > 0) {
+          // Lock key store at first
+          await this.lock();
+          // Select first key store
+          this.keyStore = multiKeyStore[0];
+          // And unlock it
+          await this.unlock(password);
+        } else {
+          // Else clear keyring.
+          this.keyStore = null;
+          this.mnemonic = undefined;
+          this.privateKey = undefined;
+        }
+      }
+    }
 
-    await this.save();
+    this.multiKeyStore = multiKeyStore;
+    return this.getMultiKeyStoreInfo();
   }
 
   private loadKey(path: string): Key {
@@ -245,25 +339,145 @@ export class KeyRing {
   }
 
   // Show private key or mnemonic key if password is valid.
-  public async showKeyRing(password: string): Promise<string> {
-    if (!this.keyStore || this.type === "none") {
-      throw new Error("Key ring not initialized");
+  public async showKeyRing(index: number, password: string): Promise<string> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
     }
 
-    if (this.type === "mnemonic") {
+    if (this.password !== password) {
+      throw new Error("Invalid password");
+    }
+
+    const keyStore = this.multiKeyStore[index];
+
+    if (!keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    if (keyStore.type === "mnemonic") {
       // If password is invalid, error will be thrown.
-      return Buffer.from(
-        await Crypto.decrypt(this.keyStore, password)
-      ).toString();
+      return Buffer.from(await Crypto.decrypt(keyStore, password)).toString();
     } else {
       // If password is invalid, error will be thrown.
-      return Buffer.from(
-        await Crypto.decrypt(this.keyStore, password)
-      ).toString();
+      return Buffer.from(await Crypto.decrypt(keyStore, password)).toString();
     }
   }
 
   public get canSetPath(): boolean {
     return this.type === "mnemonic";
+  }
+
+  public async addMnemonicKey(
+    mnemonic: string,
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new Error("Key ring is locked or not initialized");
+    }
+
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
+
+    const keyStore = await KeyRing.CreateMnemonicKeyStore(
+      mnemonic,
+      this.password,
+      meta
+    );
+    this.multiKeyStore.push(keyStore);
+
+    return this.getMultiKeyStoreInfo();
+  }
+
+  public async addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new Error("Key ring is locked or not initialized");
+    }
+
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
+
+    const keyStore = await KeyRing.CreatePrivateKeyStore(
+      privateKey,
+      this.password,
+      meta
+    );
+    this.multiKeyStore.push(keyStore);
+
+    return this.getMultiKeyStoreInfo();
+  }
+
+  public async changeKeyStoreFromMultiKeyStore(
+    index: number
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new Error("Key ring is locked or not initialized");
+    }
+
+    const keyStore = this.multiKeyStore[index];
+    if (!keyStore) {
+      throw new Error("Invalid keystore");
+    }
+
+    this.keyStore = keyStore;
+
+    await this.unlock(this.password);
+
+    return this.getMultiKeyStoreInfo();
+  }
+
+  public getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
+    const result: MultiKeyStoreInfoWithSelected = [];
+
+    for (const keyStore of this.multiKeyStore) {
+      result.push({
+        version: keyStore.version,
+        type: keyStore.type,
+        meta: keyStore.meta,
+        selected: keyStore.meta?.__id__
+          ? keyStore.meta.__id__ === this.keyStore?.meta?.__id__
+          : false
+      });
+    }
+
+    return result;
+  }
+
+  private static async CreateMnemonicKeyStore(
+    mnemonic: string,
+    password: string,
+    meta: Record<string, string>
+  ): Promise<KeyStore> {
+    return await Crypto.encrypt("mnemonic", mnemonic, password, meta);
+  }
+
+  private static async CreatePrivateKeyStore(
+    privateKey: Uint8Array,
+    password: string,
+    meta: Record<string, string>
+  ): Promise<KeyStore> {
+    return await Crypto.encrypt(
+      "privateKey",
+      Buffer.from(privateKey).toString("hex"),
+      password,
+      meta
+    );
+  }
+
+  private async getIncrementalNumber(): Promise<number> {
+    let num = await this.kvStore.get<number>("incrementalNumber");
+    if (num === undefined) {
+      num = 0;
+    }
+    num++;
+
+    await this.kvStore.set("incrementalNumber", num);
+    return num;
   }
 }

@@ -97,6 +97,15 @@ export class AccountStore {
     }, AutoFetchingAssetsInterval);
   }
 
+  @actionAsync
+  public async changeKeyRing() {
+    if (this.keyRingStatus === KeyRingStatus.UNLOCKED) {
+      await task(this.fetchAccount());
+
+      this.fetchAssetsByInterval();
+    }
+  }
+
   // This will be called by keyring store.
   @actionAsync
   public async setKeyRingStatus(status: KeyRingStatus) {
