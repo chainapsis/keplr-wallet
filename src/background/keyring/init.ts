@@ -23,7 +23,8 @@ import {
   AddMnemonicKeyMsg,
   AddPrivateKeyMsg,
   GetMultiKeyStoreInfoMsg,
-  ChangeKeyRingMsg
+  ChangeKeyRingMsg,
+  AddLedgerKeyMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -42,6 +43,7 @@ export function init(
   messageManager.registerMessage(AddMnemonicKeyMsg);
   messageManager.registerMessage(CreatePrivateKeyMsg);
   messageManager.registerMessage(AddPrivateKeyMsg);
+  messageManager.registerMessage(AddLedgerKeyMsg);
   messageManager.registerMessage(LockKeyRingMsg);
   messageManager.registerMessage(UnlockKeyRingMsg);
   messageManager.registerMessage(SetPathMsg);

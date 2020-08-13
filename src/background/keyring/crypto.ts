@@ -22,7 +22,7 @@ export interface KeyStore {
    * Type can be "mnemonic" or "privateKey".
    * Below version "1", type is not defined and it is considered as "mnemonic".
    */
-  type?: "mnemonic" | "privateKey";
+  type?: "mnemonic" | "privateKey" | "ledger";
   meta?: Record<string, string>;
   crypto: {
     cipher: "aes-128-ctr";
@@ -38,7 +38,7 @@ export interface KeyStore {
 
 export class Crypto {
   public static async encrypt(
-    type: "mnemonic" | "privateKey",
+    type: "mnemonic" | "privateKey" | "ledger",
     text: string,
     password: string,
     meta: Record<string, string>

@@ -2,6 +2,7 @@ import { MessageManager } from "../common/message";
 
 import * as PersistentMemory from "./persistent-memory/internal";
 import * as Chains from "./chains/internal";
+import * as Ledger from "./ledger/internal";
 import * as KeyRing from "./keyring/internal";
 import * as BackgroundTx from "./tx/internal";
 
@@ -24,9 +25,13 @@ const chainsKeeper = new Chains.ChainsKeeper(
 );
 Chains.init(messageManager, chainsKeeper);
 
+const ledgerKeeper = new Ledger.LedgerKeeper(new BrowserKVStore("ledger"));
+Ledger.init(messageManager, ledgerKeeper);
+
 const keyRingKeeper = new KeyRing.KeyRingKeeper(
   new BrowserKVStore("keyring"),
   chainsKeeper,
+  ledgerKeeper,
   openWindow
 );
 KeyRing.init(messageManager, keyRingKeeper);

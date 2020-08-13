@@ -15,6 +15,7 @@ import {
 import { KVStore } from "../../common/kvstore";
 
 import { ChainsKeeper } from "../chains/keeper";
+import { LedgerKeeper } from "../ledger/keeper";
 
 export interface KeyHex {
   algo: string;
@@ -44,10 +45,11 @@ export class KeyRingKeeper {
   constructor(
     kvStore: KVStore,
     public readonly chainsKeeper: ChainsKeeper,
+    ledgerKeeper: LedgerKeeper,
     private readonly windowOpener: (url: string) => void,
     approverTimeout: number | undefined = undefined
   ) {
-    this.keyRing = new KeyRing(kvStore);
+    this.keyRing = new KeyRing(kvStore, ledgerKeeper);
 
     this.unlockApprover = new AsyncApprover({
       defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
@@ -180,7 +182,7 @@ export class KeyRingKeeper {
       throw new Error("path not set");
     }
 
-    return this.keyRing.getKey(this.path);
+    return await this.keyRing.getKey(this.path);
   }
 
   async requestTxBuilderConfig(
@@ -237,7 +239,7 @@ export class KeyRingKeeper {
     skipApprove: boolean
   ): Promise<Uint8Array> {
     if (skipApprove) {
-      return this.keyRing.sign(this.path, message);
+      return await this.keyRing.sign(this.path, message);
     }
 
     if (openPopup) {
@@ -247,7 +249,7 @@ export class KeyRingKeeper {
     }
 
     await this.signApprover.request(id, { chainId, message });
-    return this.keyRing.sign(this.path, message);
+    return await this.keyRing.sign(this.path, message);
   }
 
   getRequestedMessage(id: string): SignMessage {
@@ -279,6 +281,12 @@ export class KeyRingKeeper {
     meta: Record<string, string>
   ): Promise<MultiKeyStoreInfoWithSelected> {
     return this.keyRing.addPrivateKey(privateKey, meta);
+  }
+
+  async addLedgerKey(
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    return this.keyRing.addLedgerKey(meta);
   }
 
   public async changeKeyStoreFromMultiKeyStore(

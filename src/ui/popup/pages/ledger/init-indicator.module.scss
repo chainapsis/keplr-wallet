@@ -1,0 +1,14 @@
+.modal {
+  :global(.modal-dialog) {
+    transition: none !important;
+  }
+}
+
+.modal-content-empty {
+  background: transparent;
+  box-shadow: none;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

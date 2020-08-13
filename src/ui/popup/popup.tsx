@@ -21,6 +21,7 @@ import {
   NotificationStoreProvider
 } from "../components/notification";
 import { ConfirmProvider } from "../components/confirm";
+import { LoadingIndicatorProvider } from "../components/loading-indicator";
 
 import { configure } from "mobx";
 import { observer } from "mobx-react";
@@ -37,6 +38,9 @@ import { AddressBookPage } from "./pages/setting/address-book";
 import { CreditPage } from "./pages/setting/credit";
 import { ClearPage } from "./pages/setting/clear";
 import { ExportPage } from "./pages/setting/export";
+import { LedgerGrantPage, LedgerInitIndicator } from "./pages/ledger";
+
+import * as LedgerInit from "../../background/ledger/foreground";
 
 import {
   AdditonalIntlMessages,
@@ -44,7 +48,9 @@ import {
   LanguageToFiatCurrency
 } from "../../config";
 import { init as currencyInit } from "../../common/currency";
-import { LoadingIndicatorProvider } from "../components/loading-indicator";
+import { MessageManager } from "../../common/message/manager";
+import { POPUP_PORT } from "../../common/message/constant";
+import { InitLedgerNotifiyHandler } from "../../background/ledger/foreground";
 
 currencyInit(Currencies, LanguageToFiatCurrency);
 
@@ -77,6 +83,18 @@ Modal.defaultStyles = {
     ...Modal.defaultStyles.overlay
   }
 };
+
+const messageManager = new MessageManager();
+const initLedgerNotifiyHandler: InitLedgerNotifiyHandler = {
+  onInitFailed: () => {
+    throw new Error("On ledger init failed handler not initialized");
+  }
+};
+const ledgerInitNotifyKeeper = new LedgerInit.LedgerInitNotifyKeeper(
+  initLedgerNotifiyHandler
+);
+LedgerInit.init(messageManager, ledgerInitNotifyKeeper);
+messageManager.listen(POPUP_PORT);
 
 const StateRenderer: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
@@ -121,46 +139,55 @@ ReactDOM.render(
         <NotificationStoreProvider>
           <NotificationProvider>
             <ConfirmProvider>
-              <HashRouter>
-                <Route exact path="/" component={StateRenderer} />
-                <Route exact path="/access" component={AccessPage} />
-                <Route exact path="/register" component={RegisterPage} />
-                <Route exact path="/send" component={SendPage} />
-                <Route exact path="/fee/:id" component={FeePage} />
-                <Route exact path="/setting" component={SettingPage} />
-                <Route
-                  exact
-                  path="/setting/language"
-                  component={SettingLanguagePage}
-                />
-                <Route
-                  exact
-                  path="/setting/connections"
-                  component={SettingConnectionsPage}
-                />
-                <Route
-                  exact
-                  path="/setting/address-book"
-                  component={AddressBookPage}
-                />
-                <Route exact path="/setting/credit" component={CreditPage} />
-                <Route
-                  exact
-                  path="/setting/set-keyring"
-                  component={SetKeyRingPage}
-                />
-                <Route
-                  exact
-                  path="/setting/export/:index"
-                  component={ExportPage}
-                />
-                <Route
-                  exact
-                  path="/setting/clear/:index"
-                  component={ClearPage}
-                />
-                <Route path="/sign/:id" component={SignPage} />
-              </HashRouter>
+              <LedgerInitIndicator
+                initLedgerNotifiyHandler={initLedgerNotifiyHandler}
+              >
+                <HashRouter>
+                  <Route exact path="/" component={StateRenderer} />
+                  <Route exact path="/access" component={AccessPage} />
+                  <Route exact path="/register" component={RegisterPage} />
+                  <Route exact path="/send" component={SendPage} />
+                  <Route exact path="/fee/:id" component={FeePage} />
+                  <Route exact path="/setting" component={SettingPage} />
+                  <Route
+                    exact
+                    path="/ledger-grant"
+                    component={LedgerGrantPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/language"
+                    component={SettingLanguagePage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/connections"
+                    component={SettingConnectionsPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/address-book"
+                    component={AddressBookPage}
+                  />
+                  <Route exact path="/setting/credit" component={CreditPage} />
+                  <Route
+                    exact
+                    path="/setting/set-keyring"
+                    component={SetKeyRingPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/export/:index"
+                    component={ExportPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/clear/:index"
+                    component={ClearPage}
+                  />
+                  <Route path="/sign/:id" component={SignPage} />
+                </HashRouter>
+              </LedgerInitIndicator>
             </ConfirmProvider>
           </NotificationProvider>
         </NotificationStoreProvider>

@@ -293,6 +293,28 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 }
 
+export class AddLedgerKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+  public static type() {
+    return "add-ledger-key";
+  }
+
+  constructor(public readonly meta: Record<string, string>) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AddLedgerKeyMsg.type();
+  }
+}
+
 export class LockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   public static type() {
     return "lock-keyring";

@@ -3,7 +3,7 @@ const PopupSize = {
   height: 580
 };
 
-let lastWindowId: number | undefined = undefined;
+const lastWindowIds: Record<string, number | undefined> = {};
 
 /**
  * Try open window if no previous window exists.
@@ -11,7 +11,7 @@ let lastWindowId: number | undefined = undefined;
  * Finally, try to recover focusing for opened window.
  * @param url
  */
-export function openWindow(url: string) {
+export function openWindow(url: string, channel: string = "default") {
   const option = {
     width: PopupSize.width,
     height: PopupSize.height,
@@ -20,11 +20,14 @@ export function openWindow(url: string) {
   };
 
   (async () => {
-    if (lastWindowId !== undefined) {
+    if (lastWindowIds[channel] !== undefined) {
       try {
-        const window = await browser.windows.get(lastWindowId, {
-          populate: true
-        });
+        const window = await browser.windows.get(
+          lastWindowIds[channel] as number,
+          {
+            populate: true
+          }
+        );
         if (window?.tabs?.length) {
           const tab = window.tabs[0];
           if (tab?.id) {
@@ -36,20 +39,30 @@ export function openWindow(url: string) {
           throw new Error("Null window or tabs");
         }
       } catch {
-        lastWindowId = (await browser.windows.create(option)).id;
+        lastWindowIds[channel] = (await browser.windows.create(option)).id;
       }
     } else {
-      lastWindowId = (await browser.windows.create(option)).id;
+      lastWindowIds[channel] = (await browser.windows.create(option)).id;
     }
 
-    if (lastWindowId) {
+    if (lastWindowIds[channel]) {
       try {
-        await browser.windows.update(lastWindowId, {
+        await browser.windows.update(lastWindowIds[channel] as number, {
           focused: true
         });
       } catch (e) {
         console.log(`Failed to update window focus: ${e.message}`);
       }
+    }
+  })();
+}
+
+export function closeWindow(channel: string) {
+  (async () => {
+    const windowId = lastWindowIds[channel];
+
+    if (windowId) {
+      await browser.windows.remove(windowId);
     }
   })();
 }
