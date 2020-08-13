@@ -1,7 +1,12 @@
 import { Crypto, KeyStore } from "./crypto";
 import { generateWalletFromMnemonic } from "@everett-protocol/cosmosjs/utils/key";
-import { PrivKey, PrivKeySecp256k1 } from "@everett-protocol/cosmosjs/crypto";
+import {
+  PrivKey,
+  PrivKeySecp256k1,
+  PubKeySecp256k1
+} from "@everett-protocol/cosmosjs/crypto";
 import { KVStore } from "../../common/kvstore";
+import { LedgerKeeper } from "../ledger/keeper";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -50,13 +55,16 @@ export class KeyRing {
 
   private password: string = "";
 
-  constructor(private readonly kvStore: KVStore) {
+  constructor(
+    private readonly kvStore: KVStore,
+    private readonly ledgerKeeper: LedgerKeeper
+  ) {
     this.loaded = false;
     this.keyStore = null;
     this.multiKeyStore = [];
   }
 
-  public get type(): "mnemonic" | "privateKey" | "none" {
+  public get type(): "mnemonic" | "privateKey" | "ledger" | "none" {
     if (!this.keyStore) {
       return "none";
     } else {
@@ -65,7 +73,7 @@ export class KeyRing {
         return "mnemonic";
       }
 
-      if (type !== "mnemonic" && type !== "privateKey") {
+      if (type !== "mnemonic" && type !== "privateKey" && type !== "ledger") {
         throw new Error("Invalid type of key store");
       }
 
@@ -111,8 +119,8 @@ export class KeyRing {
     }
   }
 
-  public getKey(path: string): Key {
-    return this.loadKey(path);
+  public async getKey(path: string): Promise<Key> {
+    return await this.loadKey(path);
   }
 
   public async createMnemonicKey(
@@ -278,19 +286,35 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private loadKey(path: string): Key {
+  private async loadKey(path: string): Promise<Key> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
     }
 
-    const privKey = this.loadPrivKey(path);
-    const pubKey = privKey.toPubKey();
+    if (!this.keyStore) {
+      throw new Error("Key Store is empty");
+    }
 
-    return {
-      algo: "secp256k1",
-      pubKey: pubKey.serialize(),
-      address: pubKey.toAddress().toBytes()
-    };
+    if (this.keyStore.type === "ledger") {
+      const pubKey = new PubKeySecp256k1(
+        await this.ledgerKeeper.getPublicKey()
+      );
+
+      return {
+        algo: "secp256k1",
+        pubKey: pubKey.serialize(),
+        address: pubKey.toAddress().toBytes()
+      };
+    } else {
+      const privKey = this.loadPrivKey(path);
+      const pubKey = privKey.toPubKey();
+
+      return {
+        algo: "secp256k1",
+        pubKey: pubKey.serialize(),
+        address: pubKey.toAddress().toBytes()
+      };
+    }
   }
 
   private loadPrivKey(path: string): PrivKey {
@@ -329,13 +353,21 @@ export class KeyRing {
     }
   }
 
-  public sign(path: string, message: Uint8Array): Uint8Array {
+  public async sign(path: string, message: Uint8Array): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
     }
 
-    const privKey = this.loadPrivKey(path);
-    return privKey.sign(message);
+    if (!this.keyStore) {
+      throw new Error("Key Store is empty");
+    }
+
+    if (this.keyStore.type === "ledger") {
+      return await this.ledgerKeeper.sign(message);
+    } else {
+      const privKey = this.loadPrivKey(path);
+      return privKey.sign(message);
+    }
   }
 
   // Show private key or mnemonic key if password is valid.
@@ -413,6 +445,24 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
+  public async addLedgerKey(
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new Error("Key ring is locked or not initialized");
+    }
+
+    // `__id__` is used to distinguish the key store.
+    meta = Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
+
+    const keyStore = await KeyRing.CreateLedgerKeyStore(this.password, meta);
+    this.multiKeyStore.push(keyStore);
+
+    return this.getMultiKeyStoreInfo();
+  }
+
   public async changeKeyStoreFromMultiKeyStore(
     index: number
   ): Promise<MultiKeyStoreInfoWithSelected> {
@@ -468,6 +518,13 @@ export class KeyRing {
       password,
       meta
     );
+  }
+
+  private static async CreateLedgerKeyStore(
+    password: string,
+    meta: Record<string, string>
+  ): Promise<KeyStore> {
+    return await Crypto.encrypt("ledger", "", password, meta);
   }
 
   private async getIncrementalNumber(): Promise<number> {
