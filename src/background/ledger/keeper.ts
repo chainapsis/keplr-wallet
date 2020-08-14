@@ -89,7 +89,10 @@ export class LedgerKeeper {
 
   async notifyNeedInitializeLedger() {
     await sendMessage(POPUP_PORT, new LedgerInitFailedMsg());
-    openWindow(browser.runtime.getURL("popup.html#/ledger-grant"), "ledger");
+    await openWindow(
+      browser.runtime.getURL("popup.html#/ledger-grant"),
+      "ledger"
+    );
   }
 
   resumeInitLedger() {
