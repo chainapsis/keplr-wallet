@@ -9,8 +9,7 @@ import { Modal } from "reactstrap";
 import style from "./style.module.scss";
 
 export interface LoadingState {
-  isLoading: boolean;
-  setIsLoading(isLoading: boolean): void;
+  setIsLoading(type: string, isLoading: boolean): void;
 }
 
 const LoadingIndicatorContext = createContext<LoadingState | undefined>(
@@ -18,10 +17,35 @@ const LoadingIndicatorContext = createContext<LoadingState | undefined>(
 );
 
 export const LoadingIndicatorProvider: FunctionComponent = ({ children }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingList, setLoadingList] = useState<
+    {
+      type: string;
+      isLoading: boolean;
+    }[]
+  >([]);
+
+  const isLoading = loadingList.find(loading => loading.isLoading) != null;
 
   return (
-    <LoadingIndicatorContext.Provider value={{ isLoading, setIsLoading }}>
+    <LoadingIndicatorContext.Provider
+      value={{
+        setIsLoading: (type: string, isLoading: boolean) => {
+          const loading = loadingList.find(loading => loading.type === type);
+
+          if (loading) {
+            loading.isLoading = isLoading;
+            setLoadingList(loadingList.concat());
+          } else {
+            setLoadingList(
+              loadingList.concat({
+                type,
+                isLoading
+              })
+            );
+          }
+        }
+      }}
+    >
       {isLoading ? (
         <Modal
           modalClassName={style.modal}

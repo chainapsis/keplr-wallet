@@ -37,13 +37,13 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
               onClick={async e => {
                 e.preventDefault();
 
-                loadingIndicator.setIsLoading(true);
+                loadingIndicator.setIsLoading("keyring", true);
                 try {
                   await keyRingStore.changeKeyRing(i);
                   await keyRingStore.save();
                   history.push("/");
                 } finally {
-                  loadingIndicator.setIsLoading(false);
+                  loadingIndicator.setIsLoading("keyring", false);
                 }
               }}
               icons={[
