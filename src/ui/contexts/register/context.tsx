@@ -13,18 +13,25 @@ export enum RegisterStatus {
   COMPLETE
 }
 
+export enum RegisterMode {
+  CREATE,
+  ADD
+}
+
 export interface RegisterState {
   type: string;
   status: RegisterStatus;
   name: string;
   value: string;
   password: string;
+  mode: RegisterMode;
 
   setType(type: string): void;
   setStatus(status: RegisterStatus): void;
   setName(name: string): void;
   setValue(value: string): void;
   setPassword(password: string): void;
+  setMode(mode: RegisterMode): void;
 
   clear(): void;
 }
@@ -37,6 +44,7 @@ export const RegisterStateProvider: FunctionComponent = ({ children }) => {
   const [name, setName] = useState<string>("");
   const [value, setValue] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [mode, setMode] = useState<RegisterMode>(RegisterMode.CREATE);
 
   const clear = () => {
     setType("");
@@ -53,11 +61,13 @@ export const RegisterStateProvider: FunctionComponent = ({ children }) => {
         name,
         value,
         password,
+        mode,
         setType,
         setStatus,
         setName,
         setValue,
         setPassword,
+        setMode,
         clear
       }}
     >

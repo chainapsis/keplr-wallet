@@ -11,30 +11,30 @@ import { Button } from "reactstrap";
 
 import style from "./style.module.scss";
 import { FormattedMessage } from "react-intl";
-import { RegisterStatus, useRegisterState } from "../../../contexts/register";
+import {
+  RegisterMode,
+  RegisterStatus,
+  useRegisterState
+} from "../../../contexts/register";
 import { TypeNewMnemonic } from "./new-mnemonic";
 import { BackButton } from "./index";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 
-export const VerifyMnemonicPage: FunctionComponent<{
-  modeAdd: boolean;
-}> = ({ modeAdd }) => {
+export const VerifyMnemonicPage: FunctionComponent = () => {
   const registerState = useRegisterState();
 
   return (
     <React.Fragment>
       {registerState.status === RegisterStatus.VERIFY &&
       registerState.type === TypeNewMnemonic ? (
-        <VerifyMnemonicPageIn modeAdd={modeAdd} />
+        <VerifyMnemonicPageIn />
       ) : null}
     </React.Fragment>
   );
 };
 
-export const VerifyMnemonicPageIn: FunctionComponent<{
-  modeAdd: boolean;
-}> = observer(({ modeAdd }) => {
+export const VerifyMnemonicPageIn: FunctionComponent = observer(() => {
   const registerState = useRegisterState();
 
   const { keyRingStore } = useStore();
@@ -98,7 +98,7 @@ export const VerifyMnemonicPageIn: FunctionComponent<{
         try {
           setIsLoading(true);
 
-          if (modeAdd) {
+          if (registerState.mode === RegisterMode.ADD) {
             await keyRingStore.addMnemonicKey(registerState.value, {
               name: registerState.name
             });
@@ -122,7 +122,7 @@ export const VerifyMnemonicPageIn: FunctionComponent<{
         registerState.clear();
       }
     },
-    [keyRingStore, modeAdd, registerState, suggestedWords]
+    [keyRingStore, registerState, suggestedWords]
   );
 
   return (

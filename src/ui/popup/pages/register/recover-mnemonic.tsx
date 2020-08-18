@@ -1,6 +1,6 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 
-import { Button, ButtonGroup, Form } from "reactstrap";
+import { Button, Form } from "reactstrap";
 
 import {
   RegisterMode,
@@ -10,10 +10,11 @@ import {
 
 import { FormattedMessage, useIntl } from "react-intl";
 import style from "./style.module.scss";
-import { BackButton, NunWords } from "./index";
+import { BackButton } from "./index";
 import { Input, TextArea } from "../../../components/form";
 import useForm from "react-hook-form";
-import { KeyRingStore } from "../../stores/keyring";
+import { observer } from "mobx-react";
+import { useStore } from "../../stores";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -25,9 +26,9 @@ interface FormData {
   confirmPassword: string;
 }
 
-export const TypeNewMnemonic = "new-mnemonic";
+export const TypeRecoverMnemonic = "recover-mnemonic";
 
-export const NewMnemonicPage: FunctionComponent = () => {
+export const RecoverMnemonicPage: FunctionComponent = () => {
   const registerState = useRegisterState();
 
   return (
@@ -42,30 +43,28 @@ export const NewMnemonicPage: FunctionComponent = () => {
             e.stopPropagation();
 
             registerState.setStatus(RegisterStatus.REGISTER);
-            registerState.setType(TypeNewMnemonic);
+            registerState.setType(TypeRecoverMnemonic);
           }}
         >
-          <FormattedMessage id="register.intro.button.new-account.title" />
+          <FormattedMessage id="register.intro.button.import-account.title" />
         </Button>
       ) : null}
-      {registerState.status === RegisterStatus.REGISTER &&
-      registerState.type === TypeNewMnemonic ? (
+      {registerState.type === TypeRecoverMnemonic &&
+      registerState.status === RegisterStatus.REGISTER ? (
         <NewMnemonicPageIn />
       ) : null}
     </React.Fragment>
   );
 };
 
-const NewMnemonicPageIn: FunctionComponent = () => {
+const NewMnemonicPageIn: FunctionComponent = observer(() => {
   const intl = useIntl();
+
+  const { keyRingStore } = useStore();
 
   const registerState = useRegisterState();
 
-  const [numWords, setNumWords] = useState<NunWords>(NunWords.WORDS12);
-
-  const { register, handleSubmit, setValue, getValues, errors } = useForm<
-    FormData
-  >({
+  const { register, handleSubmit, getValues, errors } = useForm<FormData>({
     defaultValues: {
       name: "",
       words: "",
@@ -74,35 +73,7 @@ const NewMnemonicPageIn: FunctionComponent = () => {
     }
   });
 
-  useEffect(() => {
-    if (!registerState.value) {
-      if (numWords === NunWords.WORDS12) {
-        setValue("words", KeyRingStore.GenereateMnemonic(128));
-      } else if (numWords === NunWords.WORDS24) {
-        setValue("words", KeyRingStore.GenereateMnemonic(256));
-      } else {
-        throw new Error("Unknown num words");
-      }
-    }
-
-    // If page is returned from verifying page
-    if (registerState.value) {
-      setValue("words", registerState.value);
-
-      const numWords = registerState.value.split(" ");
-      if (numWords.length === 12) {
-        setNumWords(NunWords.WORDS12);
-      } else if (numWords.length === 24) {
-        setNumWords(NunWords.WORDS24);
-      } else {
-        throw new Error("Unknown num words");
-      }
-    }
-
-    if (registerState.name) {
-      setValue("name", registerState.name);
-    }
-  }, [numWords, registerState, setValue]);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <React.Fragment>
@@ -110,41 +81,32 @@ const NewMnemonicPageIn: FunctionComponent = () => {
         <div>
           <div className={style.title}>
             {intl.formatMessage({
-              id: "register.create.title"
+              id: "register.recover.title"
             })}
-            <div style={{ float: "right" }}>
-              <ButtonGroup size="sm" style={{ marginBottom: "4px" }}>
-                <Button
-                  type="button"
-                  color="primary"
-                  outline={numWords !== NunWords.WORDS12}
-                  onClick={() => {
-                    setNumWords(NunWords.WORDS12);
-                  }}
-                >
-                  <FormattedMessage id="register.create.toggle.word12" />
-                </Button>
-                <Button
-                  type="button"
-                  color="primary"
-                  outline={numWords !== NunWords.WORDS24}
-                  onClick={() => {
-                    setNumWords(NunWords.WORDS24);
-                  }}
-                >
-                  <FormattedMessage id="register.create.toggle.word24" />
-                </Button>
-              </ButtonGroup>
-            </div>
           </div>
           <Form
             className={style.formContainer}
             onSubmit={handleSubmit(async (data: FormData) => {
-              registerState.setName(data.name);
-              registerState.setValue(data.words);
-              registerState.setPassword(data.password);
+              setIsLoading(true);
 
-              registerState.setStatus(RegisterStatus.VERIFY);
+              try {
+                if (registerState.mode === RegisterMode.ADD) {
+                  await keyRingStore.addMnemonicKey(data.words, {
+                    name: data.name
+                  });
+                } else {
+                  await keyRingStore.createMnemonicKey(
+                    data.words,
+                    data.password,
+                    { name: data.name }
+                  );
+                }
+                await keyRingStore.save();
+                registerState.setStatus(RegisterStatus.COMPLETE);
+              } catch (e) {
+                alert(e.message ? e.message : e.toString());
+                registerState.clear();
+              }
             })}
           >
             <TextArea
@@ -153,8 +115,7 @@ const NewMnemonicPageIn: FunctionComponent = () => {
                 id: "register.create.textarea.mnemonic.place-holder"
               })}
               name="words"
-              rows={numWords === NunWords.WORDS24 ? 5 : 3}
-              readOnly={true}
+              rows={3}
               ref={register({
                 required: "Mnemonic is required",
                 validate: (value: string): string | undefined => {
@@ -234,7 +195,12 @@ const NewMnemonicPageIn: FunctionComponent = () => {
                 />
               </React.Fragment>
             ) : null}
-            <Button color="primary" type="submit" block>
+            <Button
+              color="primary"
+              type="submit"
+              block
+              data-loading={isLoading}
+            >
               <FormattedMessage id="register.create.button.next" />
             </Button>
           </Form>
@@ -243,4 +209,4 @@ const NewMnemonicPageIn: FunctionComponent = () => {
       ) : null}
     </React.Fragment>
   );
-};
+});

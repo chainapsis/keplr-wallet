@@ -11,6 +11,7 @@ import { Button } from "reactstrap";
 import { WelcomeInPage } from "./welcome";
 import { FormattedMessage } from "react-intl";
 import {
+  RegisterMode,
   RegisterStatus,
   useRegisterState,
   withRegisterStateProvider
@@ -21,6 +22,7 @@ import { VerifyMnemonicPage } from "./verify-mnemonic";
 
 import { useLocation } from "react-router";
 import queryString from "query-string";
+import { RecoverMnemonicPage } from "./recover-mnemonic";
 
 export enum NunWords {
   WORDS12,
@@ -55,7 +57,13 @@ export const RegisterPage: FunctionComponent = withRegisterStateProvider(
     const location = useLocation();
     const query = queryString.parse(location.search);
 
-    const modeAdd = query.mode === "add";
+    useEffect(() => {
+      if (query.mode === "add") {
+        registerState.setMode(RegisterMode.ADD);
+      } else {
+        registerState.setMode(RegisterMode.CREATE);
+      }
+    }, [query.mode, registerState]);
 
     return (
       <EmptyLayout
@@ -80,9 +88,9 @@ export const RegisterPage: FunctionComponent = withRegisterStateProvider(
         {registerState.status === RegisterStatus.COMPLETE ? (
           <WelcomeInPage />
         ) : null}
-        <NewMnemonicPage recover={false} modeAdd={modeAdd} />
-        <NewMnemonicPage recover={true} modeAdd={modeAdd} />
-        <VerifyMnemonicPage modeAdd={modeAdd} />
+        <NewMnemonicPage />
+        <RecoverMnemonicPage />
+        <VerifyMnemonicPage />
         {registerState.status === RegisterStatus.INIT ? (
           <div className={style.subContent}>
             <FormattedMessage
