@@ -21,8 +21,8 @@ export class LedgerKeeper {
 
   constructor(private readonly kvStore: KVStore) {}
 
-  private async getCachedPublicKey(): Promise<Uint8Array> {
-    const cached = await this.kvStore.get<string>("publicKeyHex");
+  private async getCachedPublicKey(id: string): Promise<Uint8Array> {
+    const cached = await this.kvStore.get<string>(`${id}-publicKeyHex`);
     if (cached) {
       return Buffer.from(cached, "hex");
     } else {
@@ -30,15 +30,18 @@ export class LedgerKeeper {
     }
   }
 
-  private async setCachedPublicKey(publicKey: Uint8Array): Promise<void> {
+  private async setCachedPublicKey(
+    id: string,
+    publicKey: Uint8Array
+  ): Promise<void> {
     await this.kvStore.set(
-      "publicKeyHex",
+      `${id}-publicKeyHex`,
       Buffer.from(publicKey).toString("hex")
     );
   }
 
-  async getPublicKey(): Promise<Uint8Array> {
-    const cached = await this.getCachedPublicKey();
+  async getPublicKey(id: string): Promise<Uint8Array> {
+    const cached = await this.getCachedPublicKey(id);
     if (cached.length > 0) {
       return cached;
     }
@@ -47,7 +50,7 @@ export class LedgerKeeper {
       const ledger = await this.initLedger();
 
       const publicKey = await ledger.getPublicKey([44, 118, 0, 0, 0]);
-      this.setCachedPublicKey(publicKey);
+      this.setCachedPublicKey(id, publicKey);
 
       return publicKey;
     });
@@ -56,6 +59,8 @@ export class LedgerKeeper {
   async sign(message: Uint8Array): Promise<Uint8Array> {
     return await this.pQueue.add(async () => {
       const ledger = await this.initLedger();
+
+      // TODO: Check public key is matched?
 
       return await ledger.sign([44, 118, 0, 0, 0], message);
     });

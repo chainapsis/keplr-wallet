@@ -24,7 +24,8 @@ import {
   AddPrivateKeyMsg,
   GetMultiKeyStoreInfoMsg,
   ChangeKeyRingMsg,
-  AddLedgerKeyMsg
+  AddLedgerKeyMsg,
+  CreateLedgerKeyMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@everett-protocol/cosmosjs/crypto";
@@ -60,6 +61,8 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         );
       case AddPrivateKeyMsg:
         return handleAddPrivateKeyMsg(keeper)(env, msg as AddPrivateKeyMsg);
+      case CreateLedgerKeyMsg:
+        return handleCreateLedgerKeyMsg(keeper)(env, msg as CreateLedgerKeyMsg);
       case AddLedgerKeyMsg:
         return handleAddLedgerKeyMsg(keeper)(env, msg as AddLedgerKeyMsg);
       case LockKeyRingMsg:
@@ -216,6 +219,16 @@ const handleAddPrivateKeyMsg: (
       Buffer.from(msg.privateKeyHex, "hex"),
       msg.meta
     );
+  };
+};
+
+const handleCreateLedgerKeyMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<CreateLedgerKeyMsg> = keeper => {
+  return async (_, msg) => {
+    return {
+      status: await keeper.createLedgerKey(msg.password, msg.meta)
+    };
   };
 };
 

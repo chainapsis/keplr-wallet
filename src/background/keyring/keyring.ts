@@ -132,16 +132,11 @@ export class KeyRing {
       throw new Error("Key ring is not loaded or not empty");
     }
 
-    // `__id__` is used to distinguish the key store.
-    meta = Object.assign({}, meta, {
-      __id__: (await this.getIncrementalNumber()).toString()
-    });
-
     this.mnemonic = mnemonic;
     this.keyStore = await KeyRing.CreateMnemonicKeyStore(
       mnemonic,
       password,
-      meta
+      await this.assignKeyStoreIdMeta(meta)
     );
     this.password = password;
     this.multiKeyStore.push(this.keyStore);
@@ -156,18 +151,31 @@ export class KeyRing {
       throw new Error("Key ring is not loaded or not empty");
     }
 
-    // `__id__` is used to distinguish the key store.
-    meta = Object.assign({}, meta, {
-      __id__: (await this.getIncrementalNumber()).toString()
-    });
-
     this.privateKey = privateKey;
     this.keyStore = await KeyRing.CreatePrivateKeyStore(
       privateKey,
       password,
-      meta
+      await this.assignKeyStoreIdMeta(meta)
     );
     this.password = password;
+    this.multiKeyStore.push(this.keyStore);
+  }
+
+  public async createLedgerKey(password: string, meta: Record<string, string>) {
+    if (this.status !== KeyRingStatus.EMPTY) {
+      throw new Error("Key ring is not loaded or not empty");
+    }
+
+    const keyStore = await KeyRing.CreateLedgerKeyStore(
+      password,
+      await this.assignKeyStoreIdMeta(meta)
+    );
+
+    // Make sure that public key is cached.
+    await this.ledgerKeeper.getPublicKey(KeyRing.getKeyStoreId(keyStore));
+
+    this.password = password;
+    this.keyStore = keyStore;
     this.multiKeyStore.push(this.keyStore);
   }
 
@@ -220,9 +228,7 @@ export class KeyRing {
       // This case will occur if extension is updated from the prior version that doesn't support the multi key store.
       // This line ensures the backward compatibility.
       if (keyStore) {
-        keyStore.meta = {
-          __id__: (await this.getIncrementalNumber()).toString()
-        };
+        keyStore.meta = await this.assignKeyStoreIdMeta({});
         this.multiKeyStore = [keyStore];
       } else {
         this.multiKeyStore = [];
@@ -262,8 +268,7 @@ export class KeyRing {
     if (this.keyStore) {
       // If key store is currently selected key store
       if (
-        keyStore.meta?.__id__ &&
-        this.keyStore.meta?.__id__ === keyStore.meta?.__id__
+        KeyRing.getKeyStoreId(keyStore) === KeyRing.getKeyStoreId(this.keyStore)
       ) {
         // If there is a key store left
         if (multiKeyStore.length > 0) {
@@ -297,7 +302,9 @@ export class KeyRing {
 
     if (this.keyStore.type === "ledger") {
       const pubKey = new PubKeySecp256k1(
-        await this.ledgerKeeper.getPublicKey()
+        await this.ledgerKeeper.getPublicKey(
+          KeyRing.getKeyStoreId(this.keyStore)
+        )
       );
 
       return {
@@ -407,15 +414,10 @@ export class KeyRing {
       throw new Error("Key ring is locked or not initialized");
     }
 
-    // `__id__` is used to distinguish the key store.
-    meta = Object.assign({}, meta, {
-      __id__: (await this.getIncrementalNumber()).toString()
-    });
-
     const keyStore = await KeyRing.CreateMnemonicKeyStore(
       mnemonic,
       this.password,
-      meta
+      await this.assignKeyStoreIdMeta(meta)
     );
     this.multiKeyStore.push(keyStore);
 
@@ -430,15 +432,10 @@ export class KeyRing {
       throw new Error("Key ring is locked or not initialized");
     }
 
-    // `__id__` is used to distinguish the key store.
-    meta = Object.assign({}, meta, {
-      __id__: (await this.getIncrementalNumber()).toString()
-    });
-
     const keyStore = await KeyRing.CreatePrivateKeyStore(
       privateKey,
       this.password,
-      meta
+      await this.assignKeyStoreIdMeta(meta)
     );
     this.multiKeyStore.push(keyStore);
 
@@ -452,12 +449,14 @@ export class KeyRing {
       throw new Error("Key ring is locked or not initialized");
     }
 
-    // `__id__` is used to distinguish the key store.
-    meta = Object.assign({}, meta, {
-      __id__: (await this.getIncrementalNumber()).toString()
-    });
+    const keyStore = await KeyRing.CreateLedgerKeyStore(
+      this.password,
+      await this.assignKeyStoreIdMeta(meta)
+    );
 
-    const keyStore = await KeyRing.CreateLedgerKeyStore(this.password, meta);
+    // Make sure that public key is cached.
+    await this.ledgerKeeper.getPublicKey(KeyRing.getKeyStoreId(keyStore));
+
     this.multiKeyStore.push(keyStore);
 
     return this.getMultiKeyStoreInfo();
@@ -490,8 +489,9 @@ export class KeyRing {
         version: keyStore.version,
         type: keyStore.type,
         meta: keyStore.meta,
-        selected: keyStore.meta?.__id__
-          ? keyStore.meta.__id__ === this.keyStore?.meta?.__id__
+        selected: this.keyStore
+          ? KeyRing.getKeyStoreId(keyStore) ===
+            KeyRing.getKeyStoreId(this.keyStore)
           : false
       });
     }
@@ -525,6 +525,26 @@ export class KeyRing {
     meta: Record<string, string>
   ): Promise<KeyStore> {
     return await Crypto.encrypt("ledger", "", password, meta);
+  }
+
+  private async assignKeyStoreIdMeta(meta: {
+    [key: string]: string;
+  }): Promise<{
+    [key: string]: string;
+  }> {
+    // `__id__` is used to distinguish the key store.
+    return Object.assign({}, meta, {
+      __id__: (await this.getIncrementalNumber()).toString()
+    });
+  }
+
+  private static getKeyStoreId(keyStore: KeyStore): string {
+    const id = keyStore.meta?.__id__;
+    if (!id) {
+      throw new Error("Key store's id is empty");
+    }
+
+    return id;
   }
 
   private async getIncrementalNumber(): Promise<number> {

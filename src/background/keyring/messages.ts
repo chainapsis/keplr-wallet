@@ -262,6 +262,33 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
+export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
+  public static type() {
+    return "create-ledger-key";
+  }
+
+  constructor(
+    public readonly password: string,
+    public readonly meta: Record<string, string>
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CreateLedgerKeyMsg.type();
+  }
+}
+
 export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   public static type() {
     return "add-private-key";

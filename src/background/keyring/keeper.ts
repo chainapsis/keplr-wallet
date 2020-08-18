@@ -155,6 +155,14 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
+  async createLedgerKey(
+    password: string,
+    meta: Record<string, string>
+  ): Promise<KeyRingStatus> {
+    await this.keyRing.createLedgerKey(password, meta);
+    return this.keyRing.status;
+  }
+
   lock(): KeyRingStatus {
     this.keyRing.lock();
     return this.keyRing.status;
