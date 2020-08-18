@@ -1,5 +1,5 @@
 import { MessageManager } from "../../../common/message";
-import { LedgerInitFailedMsg } from "./messages";
+import { LedgerInitFailedMsg, LedgerInitResumedMsg } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
 import { LedgerInitNotifyKeeper } from "./keeper";
@@ -9,6 +9,7 @@ export function init(
   keeper: LedgerInitNotifyKeeper
 ): void {
   messageManager.registerMessage(LedgerInitFailedMsg);
+  messageManager.registerMessage(LedgerInitResumedMsg);
 
   messageManager.addHandler(ROUTE, getHandler(keeper));
 }

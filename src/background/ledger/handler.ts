@@ -21,7 +21,7 @@ export const getHandler: (keeper: LedgerKeeper) => Handler = (
 const handleLedgerInitResumeMsg: (
   keeper: LedgerKeeper
 ) => InternalHandler<LedgerInitResumeMsg> = keeper => {
-  return (_env, _msg) => {
-    return keeper.resumeInitLedger();
+  return async (_env, _msg) => {
+    return await keeper.resumeInitLedger();
   };
 };

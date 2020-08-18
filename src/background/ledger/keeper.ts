@@ -5,7 +5,7 @@ import delay from "delay";
 
 import { sendMessage } from "../../common/message/send";
 import { POPUP_PORT } from "../../common/message/constant";
-import { LedgerInitFailedMsg } from "./foreground";
+import { LedgerInitFailedMsg, LedgerInitResumedMsg } from "./foreground";
 import { AsyncWaitGroup } from "../../common/async-wait-group";
 import { closeWindow, openWindow } from "../../common/window";
 
@@ -68,7 +68,8 @@ export class LedgerKeeper {
     );
   }
 
-  resumeInitLedger() {
+  async resumeInitLedger() {
+    await sendMessage(POPUP_PORT, new LedgerInitResumedMsg());
     closeWindow("ledger");
 
     if (this.initWG.isLocked) {

@@ -18,3 +18,21 @@ export class LedgerInitFailedMsg extends Message<void> {
     return LedgerInitFailedMsg.type();
   }
 }
+
+export class LedgerInitResumedMsg extends Message<void> {
+  public static type() {
+    return "ledger-init-resumed";
+  }
+
+  validateBasic(): void {
+    // notop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return LedgerInitResumedMsg.type();
+  }
+}

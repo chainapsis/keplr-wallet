@@ -88,6 +88,9 @@ const messageManager = new MessageManager();
 const initLedgerNotifiyHandler: InitLedgerNotifiyHandler = {
   onInitFailed: () => {
     throw new Error("On ledger init failed handler not initialized");
+  },
+  onInitResumed: () => {
+    throw new Error("On ledger init resumed handler not initialized");
   }
 };
 const ledgerInitNotifyKeeper = new LedgerInit.LedgerInitNotifyKeeper(
