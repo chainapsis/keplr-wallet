@@ -48,6 +48,7 @@ export class KeyRing {
    */
   private _privateKey?: Uint8Array;
   private _mnemonic?: string;
+  private _ledgerPublicKey?: Uint8Array;
 
   private keyStore: KeyStore | null;
 
@@ -82,7 +83,11 @@ export class KeyRing {
   }
 
   public isLocked(): boolean {
-    return this.privateKey == null && this.mnemonic == null;
+    return (
+      this.privateKey == null &&
+      this.mnemonic == null &&
+      this.ledgerPublicKey == null
+    );
   }
 
   private get privateKey(): Uint8Array | undefined {
@@ -92,6 +97,7 @@ export class KeyRing {
   private set privateKey(privateKey: Uint8Array | undefined) {
     this._privateKey = privateKey;
     this._mnemonic = undefined;
+    this._ledgerPublicKey = undefined;
     this.cached = new Map();
   }
 
@@ -102,6 +108,18 @@ export class KeyRing {
   private set mnemonic(mnemonic: string | undefined) {
     this._mnemonic = mnemonic;
     this._privateKey = undefined;
+    this._ledgerPublicKey = undefined;
+    this.cached = new Map();
+  }
+
+  private get ledgerPublicKey(): Uint8Array | undefined {
+    return this._ledgerPublicKey;
+  }
+
+  private set ledgerPublicKey(publicKey: Uint8Array | undefined) {
+    this._mnemonic = undefined;
+    this._privateKey = undefined;
+    this._ledgerPublicKey = publicKey;
     this.cached = new Map();
   }
 
@@ -166,13 +184,14 @@ export class KeyRing {
       throw new Error("Key ring is not loaded or not empty");
     }
 
+    // Get public key first
+    const publicKey = await this.ledgerKeeper.getPublicKey();
+
     const keyStore = await KeyRing.CreateLedgerKeyStore(
+      publicKey,
       password,
       await this.assignKeyStoreIdMeta(meta)
     );
-
-    // Make sure that public key is cached.
-    await this.ledgerKeeper.getPublicKey(KeyRing.getKeyStoreId(keyStore));
 
     this.password = password;
     this.keyStore = keyStore;
@@ -186,6 +205,7 @@ export class KeyRing {
 
     this.mnemonic = undefined;
     this.privateKey = undefined;
+    this.ledgerPublicKey = undefined;
     this.password = "";
   }
 
@@ -199,12 +219,19 @@ export class KeyRing {
       this.mnemonic = Buffer.from(
         await Crypto.decrypt(this.keyStore, password)
       ).toString();
-    } else {
+    } else if (this.type === "privateKey") {
       // If password is invalid, error will be thrown.
       this.privateKey = Buffer.from(
         Buffer.from(await Crypto.decrypt(this.keyStore, password)).toString(),
         "hex"
       );
+    } else if (this.type === "ledger") {
+      this.ledgerPublicKey = Buffer.from(
+        Buffer.from(await Crypto.decrypt(this.keyStore, password)).toString(),
+        "hex"
+      );
+    } else {
+      throw new Error("Unexpected type of keyring");
     }
 
     this.password = password;
@@ -301,11 +328,11 @@ export class KeyRing {
     }
 
     if (this.keyStore.type === "ledger") {
-      const pubKey = new PubKeySecp256k1(
-        await this.ledgerKeeper.getPublicKey(
-          KeyRing.getKeyStoreId(this.keyStore)
-        )
-      );
+      if (!this.ledgerPublicKey) {
+        throw new Error("Ledger public key not set");
+      }
+
+      const pubKey = new PubKeySecp256k1(this.ledgerPublicKey);
 
       return {
         algo: "secp256k1",
@@ -403,7 +430,7 @@ export class KeyRing {
   }
 
   public get canSetPath(): boolean {
-    return this.type === "mnemonic";
+    return this.type === "mnemonic" || this.type === "ledger";
   }
 
   public async addMnemonicKey(
@@ -449,13 +476,14 @@ export class KeyRing {
       throw new Error("Key ring is locked or not initialized");
     }
 
+    // Get public key first
+    const publicKey = await this.ledgerKeeper.getPublicKey();
+
     const keyStore = await KeyRing.CreateLedgerKeyStore(
+      publicKey,
       this.password,
       await this.assignKeyStoreIdMeta(meta)
     );
-
-    // Make sure that public key is cached.
-    await this.ledgerKeeper.getPublicKey(KeyRing.getKeyStoreId(keyStore));
 
     this.multiKeyStore.push(keyStore);
 
@@ -521,10 +549,16 @@ export class KeyRing {
   }
 
   private static async CreateLedgerKeyStore(
+    publicKey: Uint8Array,
     password: string,
     meta: Record<string, string>
   ): Promise<KeyStore> {
-    return await Crypto.encrypt("ledger", "", password, meta);
+    return await Crypto.encrypt(
+      "ledger",
+      Buffer.from(publicKey).toString("hex"),
+      password,
+      meta
+    );
   }
 
   private async assignKeyStoreIdMeta(meta: {

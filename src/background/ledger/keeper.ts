@@ -8,9 +8,6 @@ import { POPUP_PORT } from "../../common/message/constant";
 import { LedgerInitFailedMsg } from "./foreground";
 import { AsyncWaitGroup } from "../../common/async-wait-group";
 import { closeWindow, openWindow } from "../../common/window";
-import { KVStore } from "../../common/kvstore";
-
-const Buffer = require("buffer/").Buffer;
 
 export class LedgerKeeper {
   private readonly pQueue: PQueue = new PQueue({
@@ -19,40 +16,11 @@ export class LedgerKeeper {
 
   private readonly initWG: AsyncWaitGroup = new AsyncWaitGroup();
 
-  constructor(private readonly kvStore: KVStore) {}
-
-  private async getCachedPublicKey(id: string): Promise<Uint8Array> {
-    const cached = await this.kvStore.get<string>(`${id}-publicKeyHex`);
-    if (cached) {
-      return Buffer.from(cached, "hex");
-    } else {
-      return new Uint8Array(0);
-    }
-  }
-
-  private async setCachedPublicKey(
-    id: string,
-    publicKey: Uint8Array
-  ): Promise<void> {
-    await this.kvStore.set(
-      `${id}-publicKeyHex`,
-      Buffer.from(publicKey).toString("hex")
-    );
-  }
-
-  async getPublicKey(id: string): Promise<Uint8Array> {
-    const cached = await this.getCachedPublicKey(id);
-    if (cached.length > 0) {
-      return cached;
-    }
-
+  async getPublicKey(): Promise<Uint8Array> {
     return await this.pQueue.add(async () => {
       const ledger = await this.initLedger();
 
-      const publicKey = await ledger.getPublicKey([44, 118, 0, 0, 0]);
-      this.setCachedPublicKey(id, publicKey);
-
-      return publicKey;
+      return await ledger.getPublicKey([44, 118, 0, 0, 0]);
     });
   }
 
