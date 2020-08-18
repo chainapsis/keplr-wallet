@@ -16,7 +16,7 @@ export const LedgerInitIndicator: FunctionComponent<{
 
   const loadingIndicator = useLoadingIndicator();
   useEffect(() => {
-    loadingIndicator.setIsLoading(isLoading);
+    loadingIndicator.setIsLoading(isLoading || loadingIndicator.isLoading);
   }, [isLoading, loadingIndicator]);
 
   return <React.Fragment>{children}</React.Fragment>;
