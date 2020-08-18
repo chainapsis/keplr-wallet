@@ -15,7 +15,9 @@ import {
   ChangeKeyRingMsg,
   AddMnemonicKeyMsg,
   AddPrivateKeyMsg,
-  DeleteKeyRingMsg
+  DeleteKeyRingMsg,
+  CreateLedgerKeyMsg,
+  AddLedgerKeyMsg
 } from "../../../../background/keyring";
 
 import { action, observable } from "mobx";
@@ -100,6 +102,13 @@ export class KeyRingStore {
   }
 
   @actionAsync
+  public async createLedgerKey(password: string, meta: Record<string, string>) {
+    const msg = new CreateLedgerKeyMsg(password, meta);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setStatus(result.status);
+  }
+
+  @actionAsync
   public async addMnemonicKey(mnemonic: string, meta: Record<string, string>) {
     const msg = new AddMnemonicKeyMsg(mnemonic, meta);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
@@ -115,6 +124,13 @@ export class KeyRingStore {
       Buffer.from(privateKey).toString("hex"),
       meta
     );
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+  }
+
+  @actionAsync
+  public async addLedgerKey(meta: Record<string, string>) {
+    const msg = new AddLedgerKeyMsg(meta);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setMultiKeyStoreInfo(result);
   }

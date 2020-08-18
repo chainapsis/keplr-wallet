@@ -23,6 +23,7 @@ import { VerifyMnemonicPage } from "./verify-mnemonic";
 import { useLocation } from "react-router";
 import queryString from "query-string";
 import { RecoverMnemonicPage } from "./recover-mnemonic";
+import { AddLedgerPage } from "./add-ledger";
 
 export enum NunWords {
   WORDS12,
@@ -90,6 +91,7 @@ export const RegisterPage: FunctionComponent = withRegisterStateProvider(
         ) : null}
         <NewMnemonicPage />
         <RecoverMnemonicPage />
+        <AddLedgerPage />
         <VerifyMnemonicPage />
         {registerState.status === RegisterStatus.INIT ? (
           <div className={style.subContent}>
