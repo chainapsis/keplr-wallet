@@ -18,20 +18,27 @@ export class LedgerKeeper {
 
   async getPublicKey(): Promise<Uint8Array> {
     return await this.pQueue.add(async () => {
-      const ledger = await this.initLedger();
-
-      return await ledger.getPublicKey([44, 118, 0, 0, 0]);
+      return await this.useLedger(async ledger => {
+        return await ledger.getPublicKey([44, 118, 0, 0, 0]);
+      });
     });
   }
 
   async sign(message: Uint8Array): Promise<Uint8Array> {
     return await this.pQueue.add(async () => {
-      const ledger = await this.initLedger();
-
-      // TODO: Check public key is matched?
-
-      return await ledger.sign([44, 118, 0, 0, 0], message);
+      return await this.useLedger(async ledger => {
+        // TODO: Check public key is matched?
+        return await ledger.sign([44, 118, 0, 0, 0], message);
+      });
     });
+  }
+
+  async useLedger<T>(fn: (ledger: Ledger) => Promise<T>): Promise<T> {
+    const ledger = await this.initLedger();
+    const result = await fn(ledger);
+    await ledger.close();
+
+    return result;
   }
 
   async initLedger(): Promise<Ledger> {
@@ -70,6 +77,7 @@ export class LedgerKeeper {
 
   async resumeInitLedger() {
     await sendMessage(POPUP_PORT, new LedgerInitResumedMsg());
+    // Close ledger init window if it exists.
     closeWindow("ledger");
 
     if (this.initWG.isLocked) {

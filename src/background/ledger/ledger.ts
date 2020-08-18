@@ -70,10 +70,4 @@ export class Ledger {
   async close(): Promise<void> {
     return await this.cosmosApp.transport.close();
   }
-
-  async closeAfter<T>(fn: () => Promise<T>): Promise<T> {
-    const result = await fn();
-    await this.close();
-    return result;
-  }
 }
