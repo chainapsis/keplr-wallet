@@ -24,13 +24,14 @@ import {
   fitWindow
 } from "../../../../common/window";
 import { useHistory, useLocation, useRouteMatch } from "react-router";
+import { observer } from "mobx-react";
 
 enum Tab {
   Details,
   Data
 }
 
-export const SignPage: FunctionComponent = () => {
+export const SignPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const location = useLocation();
   const match = useRouteMatch<{
@@ -55,7 +56,7 @@ export const SignPage: FunctionComponent = () => {
 
   const intl = useIntl();
 
-  const { chainStore } = useStore();
+  const { chainStore, keyRingStore } = useStore();
 
   const signing = useSignature(
     id,
@@ -66,6 +67,27 @@ export const SignPage: FunctionComponent = () => {
       [chainStore]
     )
   );
+
+  // Approve signing automatically if key type is ledger.
+  useEffect(() => {
+    const closeWindowIfExternal = () => {
+      if (external) {
+        window.close();
+      }
+    };
+
+    if (keyRingStore.keyRingType === "ledger") {
+      window.addEventListener("ledgerSignCompleted", closeWindowIfExternal);
+
+      if (signing.approve && !signing.loading) {
+        signing.approve();
+      }
+    }
+
+    return () => {
+      window.removeEventListener("ledgerSignCompleted", closeWindowIfExternal);
+    };
+  }, [external, keyRingStore.keyRingType, signing]);
 
   useEffect(() => {
     // Force reject when closing window.
@@ -198,4 +220,4 @@ export const SignPage: FunctionComponent = () => {
       </div>
     </HeaderLayout>
   );
-};
+});

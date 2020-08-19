@@ -36,3 +36,21 @@ export class LedgerInitResumedMsg extends Message<void> {
     return LedgerInitResumedMsg.type();
   }
 }
+
+export class LedgerSignCompletedMsg extends Message<void> {
+  public static type() {
+    return "ledger-sign-completed";
+  }
+
+  validateBasic(): void {
+    // notop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return LedgerSignCompletedMsg.type();
+  }
+}

@@ -94,7 +94,12 @@ const initLedgerNotifiyHandler: InitLedgerNotifiyHandler = {
   }
 };
 const ledgerInitNotifyKeeper = new LedgerInit.LedgerInitNotifyKeeper(
-  initLedgerNotifiyHandler
+  initLedgerNotifiyHandler,
+  {
+    onSignCompleted: () => {
+      window.dispatchEvent(new Event("ledgerSignCompleted"));
+    }
+  }
 );
 LedgerInit.init(messageManager, ledgerInitNotifyKeeper);
 messageManager.listen(POPUP_PORT);

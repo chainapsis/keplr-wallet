@@ -5,7 +5,11 @@ import delay from "delay";
 
 import { sendMessage } from "../../common/message/send";
 import { POPUP_PORT } from "../../common/message/constant";
-import { LedgerInitFailedMsg, LedgerInitResumedMsg } from "./foreground";
+import {
+  LedgerInitFailedMsg,
+  LedgerInitResumedMsg,
+  LedgerSignCompletedMsg
+} from "./foreground";
 import { AsyncWaitGroup } from "../../common/async-wait-group";
 import { closeWindow, openWindow } from "../../common/window";
 
@@ -28,7 +32,12 @@ export class LedgerKeeper {
     return await this.pQueue.add(async () => {
       return await this.useLedger(async ledger => {
         // TODO: Check public key is matched?
-        return await ledger.sign([44, 118, 0, 0, 0], message);
+
+        try {
+          return await ledger.sign([44, 118, 0, 0, 0], message);
+        } finally {
+          sendMessage(POPUP_PORT, new LedgerSignCompletedMsg());
+        }
       });
     });
   }

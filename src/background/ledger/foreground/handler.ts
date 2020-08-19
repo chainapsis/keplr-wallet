@@ -4,7 +4,11 @@ import {
   InternalHandler,
   Message
 } from "../../../common/message";
-import { LedgerInitFailedMsg, LedgerInitResumedMsg } from "./messages";
+import {
+  LedgerInitFailedMsg,
+  LedgerInitResumedMsg,
+  LedgerSignCompletedMsg
+} from "./messages";
 import { LedgerInitNotifyKeeper } from "./keeper";
 
 export const getHandler: (keeper: LedgerInitNotifyKeeper) => Handler = (
@@ -19,6 +23,11 @@ export const getHandler: (keeper: LedgerInitNotifyKeeper) => Handler = (
         );
       case LedgerInitResumedMsg:
         return handleLedgerInitResumedMsg(keeper)(
+          env,
+          msg as LedgerInitResumedMsg
+        );
+      case LedgerSignCompletedMsg:
+        return handleLedgerSignCompletedMsg(keeper)(
           env,
           msg as LedgerInitResumedMsg
         );
@@ -41,5 +50,13 @@ const handleLedgerInitResumedMsg: (
 ) => InternalHandler<LedgerInitResumedMsg> = keeper => {
   return (_env, _msg) => {
     return keeper.onInitResumed();
+  };
+};
+
+const handleLedgerSignCompletedMsg: (
+  keeper: LedgerInitNotifyKeeper
+) => InternalHandler<LedgerSignCompletedMsg> = keeper => {
+  return (_env, _msg) => {
+    return keeper.onSignCompleted();
   };
 };
