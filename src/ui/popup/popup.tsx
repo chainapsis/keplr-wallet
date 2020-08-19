@@ -87,10 +87,10 @@ Modal.defaultStyles = {
 const messageManager = new MessageManager();
 const initLedgerNotifiyHandler: InitLedgerNotifiyHandler = {
   onInitFailed: () => {
-    throw new Error("On ledger init failed handler not initialized");
+    window.dispatchEvent(new Event("ledgerInitFailed"));
   },
   onInitResumed: () => {
-    throw new Error("On ledger init resumed handler not initialized");
+    window.dispatchEvent(new Event("ledgerInitResumed"));
   }
 };
 const ledgerInitNotifyKeeper = new LedgerInit.LedgerInitNotifyKeeper(
@@ -147,9 +147,7 @@ ReactDOM.render(
         <NotificationStoreProvider>
           <NotificationProvider>
             <ConfirmProvider>
-              <LedgerInitIndicator
-                initLedgerNotifiyHandler={initLedgerNotifiyHandler}
-              >
+              <LedgerInitIndicator>
                 <HashRouter>
                   <Route exact path="/" component={StateRenderer} />
                   <Route exact path="/access" component={AccessPage} />
