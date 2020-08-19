@@ -137,8 +137,8 @@ export class KeyRing {
     }
   }
 
-  public async getKey(path: string): Promise<Key> {
-    return await this.loadKey(path);
+  public getKey(path: string): Key {
+    return this.loadKey(path);
   }
 
   public async createMnemonicKey(
@@ -318,7 +318,7 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private async loadKey(path: string): Promise<Key> {
+  private loadKey(path: string): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
     }

@@ -185,12 +185,12 @@ export class KeyRingKeeper {
     ).bip44.pathString(account, index);
   }
 
-  async getKey(): Promise<Key> {
+  getKey(): Key {
     if (!this.path) {
       throw new Error("path not set");
     }
 
-    return await this.keyRing.getKey(this.path);
+    return this.keyRing.getKey(this.path);
   }
 
   async requestTxBuilderConfig(

@@ -282,7 +282,7 @@ const handleGetKeyMsg: (
       getKeyMsg.origin
     );
 
-    const key = await keeper.getKey();
+    const key = keeper.getKey();
 
     return {
       algo: "secp256k1",
