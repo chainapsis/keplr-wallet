@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 
 import { Button } from "reactstrap";
 
@@ -9,6 +9,19 @@ import { BACKGROUND_PORT } from "../../../../common/message/constant";
 const CosmosApp: any = require("ledger-cosmos-js").default;
 
 export const LedgerGrantPage: FunctionComponent = () => {
+  useEffect(() => {
+    const close = () => {
+      // Close window after 3 seconds.
+      setTimeout(window.close, 3000);
+    };
+
+    window.addEventListener("ledgerSignCompleted", close);
+
+    return () => {
+      window.removeEventListener("ledgerSignCompleted", close);
+    };
+  }, []);
+
   return (
     <Button
       onClick={async e => {

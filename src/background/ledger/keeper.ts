@@ -11,7 +11,7 @@ import {
   LedgerSignCompletedMsg
 } from "./foreground";
 import { AsyncWaitGroup } from "../../common/async-wait-group";
-import { closeWindow, openWindow } from "../../common/window";
+import { openWindow } from "../../common/window";
 
 export class LedgerKeeper {
   private readonly pQueue: PQueue = new PQueue({
@@ -86,8 +86,6 @@ export class LedgerKeeper {
 
   async resumeInitLedger() {
     await sendMessage(POPUP_PORT, new LedgerInitResumedMsg());
-    // Close ledger init window if it exists.
-    closeWindow("ledger");
 
     if (this.initWG.isLocked) {
       this.initWG.done();
