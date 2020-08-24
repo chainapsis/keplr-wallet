@@ -44,10 +44,11 @@ export class LedgerKeeper {
 
   async useLedger<T>(fn: (ledger: Ledger) => Promise<T>): Promise<T> {
     const ledger = await this.initLedger();
-    const result = await fn(ledger);
-    await ledger.close();
-
-    return result;
+    try {
+      return await fn(ledger);
+    } finally {
+      await ledger.close();
+    }
   }
 
   async initLedger(): Promise<Ledger> {

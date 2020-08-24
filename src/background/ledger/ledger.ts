@@ -3,14 +3,42 @@ import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 
 import { signatureImport } from "secp256k1";
 
+export enum LedgerInitErrorOn {
+  Transport,
+  App,
+  Unknown
+}
+
+export class LedgerInitError extends Error {
+  constructor(public readonly errorOn: LedgerInitErrorOn, message?: string) {
+    super(message);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, LedgerInitError.prototype);
+  }
+}
+
 export class Ledger {
   constructor(private readonly cosmosApp: any) {}
 
   static async init(): Promise<Ledger> {
-    const cosmosApp = new CosmosApp(await TransportWebUSB.create());
-    const ledger = new Ledger(cosmosApp);
-    await ledger.getVersion();
-    return ledger;
+    let transport: TransportWebUSB | undefined;
+    try {
+      transport = await TransportWebUSB.create();
+    } catch (e) {
+      throw new LedgerInitError(LedgerInitErrorOn.Transport, e.message);
+    }
+    try {
+      const cosmosApp = new CosmosApp(transport);
+      const ledger = new Ledger(cosmosApp);
+      await ledger.getVersion();
+      return ledger;
+    } catch (e) {
+      if (transport) {
+        await transport.close();
+      }
+      throw new LedgerInitError(LedgerInitErrorOn.App, e.message);
+    }
   }
 
   async getVersion(): Promise<{
