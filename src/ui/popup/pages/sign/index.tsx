@@ -79,7 +79,7 @@ export const SignPage: FunctionComponent = observer(() => {
     if (keyRingStore.keyRingType === "ledger") {
       window.addEventListener("ledgerSignCompleted", closeWindowIfExternal);
 
-      if (signing.approve && !signing.loading) {
+      if (signing.approve && !signing.requested && !signing.loading) {
         signing.approve();
       }
     }
