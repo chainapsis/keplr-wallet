@@ -31,12 +31,24 @@ export class Ledger {
     try {
       const cosmosApp = new CosmosApp(transport);
       const ledger = new Ledger(cosmosApp);
-      await ledger.getVersion();
+      const versionResponse = await ledger.getVersion();
+
+      // In this case, device is on screen saver.
+      // However, it is almost same as that the device is not unlocked to user-side.
+      // So, handle this case as initializing failed in `Transport`.
+      if (versionResponse.deviceLocked) {
+        throw new Error("Device is on screen saver");
+      }
+
       return ledger;
     } catch (e) {
       if (transport) {
         await transport.close();
       }
+      if (e.message === "Device is on screen saver") {
+        throw new LedgerInitError(LedgerInitErrorOn.Transport, e.message);
+      }
+
       throw new LedgerInitError(LedgerInitErrorOn.App, e.message);
     }
   }

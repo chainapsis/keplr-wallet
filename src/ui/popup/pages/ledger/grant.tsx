@@ -76,7 +76,7 @@ export const LedgerGrantPage: FunctionComponent = () => {
       {initSucceed ? (
         <ConfirmLedgerDialog />
       ) : (
-        <React.Fragment>
+        <div className={style.instructions}>
           <Instruction
             title="Step 1"
             paragraph="Connect and unlock your Ledger, then grant permission on the browser."
@@ -110,7 +110,7 @@ export const LedgerGrantPage: FunctionComponent = () => {
           >
             Next
           </Button>
-        </React.Fragment>
+        </div>
       )}
     </EmptyLayout>
   );
@@ -119,7 +119,30 @@ export const LedgerGrantPage: FunctionComponent = () => {
 const ConfirmLedgerDialog: FunctionComponent = () => {
   return (
     <div className={style.confirmLedgerDialog}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end"
+        }}
+      >
+        <img
+          src={require("../../public/assets/img/icons8-pen.svg")}
+          alt="pen"
+        />
+      </div>
       <p>Waiting for confirmation on Ledger device</p>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start"
+        }}
+      >
+        <i className="fa fa-spinner fa-spin fa-2x fa-fw" />
+      </div>
     </div>
   );
 };
