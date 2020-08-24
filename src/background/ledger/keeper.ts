@@ -70,7 +70,7 @@ export class LedgerKeeper {
             await delay(3 * 60 * 1000);
             throw new Error("Ledger init timeout");
           })(),
-          this.testExtensionUIOpened()
+          this.testLedgerGrantUIOpened()
         ]);
       } finally {
         if (this.initWG.isLocked) {
@@ -96,14 +96,18 @@ export class LedgerKeeper {
     }
   }
 
-  // Test that the exntesion's ui layer is opened.
-  async testExtensionUIOpened() {
+  // Test that the exntesion's granting ledger page is opened.
+  async testLedgerGrantUIOpened() {
+    await delay(1000);
+
     while (true) {
       const views = browser.extension.getViews();
       let find = false;
       for (const view of views) {
         if (
-          view.location.href.includes(browser.runtime.getURL("/popup.html"))
+          view.location.href.includes(
+            browser.runtime.getURL("popup.html#/ledger-grant")
+          )
         ) {
           find = true;
           break;

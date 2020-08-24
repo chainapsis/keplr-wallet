@@ -75,24 +75,41 @@
 
   color: #32325d;
 
+  display: flex;
+
+  .icon {
+    min-width: 50px;
+    display: flex;
+    justify-content: center;
+
+    margin-top: 6px;
+    margin-right: 20px;
+  }
+
   &.pass {
     h1 {
       color: #aaaaaa;
     }
+
+    p {
+      color: #aaaaaa;
+    }
   }
 
-  h1 {
-    font-size: 24px;
-    font-weight: bold;
+  .inner {
+    h1 {
+      font-size: 24px;
+      font-weight: bold;
 
-    margin-bottom: 8px;
-  }
+      margin-bottom: 8px;
+    }
 
-  p {
-    font-size: 16px;
-    line-height: 1.5;
-    letter-spacing: -0.3px;
+    p {
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: -0.3px;
 
-    margin-bottom: 10px;
+      margin-bottom: 10px;
+    }
   }
 }

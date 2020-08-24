@@ -87,6 +87,13 @@ export const LedgerGrantPage: FunctionComponent = () => {
       ) : (
         <div className={style.instructions}>
           <Instruction
+            icon={
+              <img
+                src={require(".././../public/assets/img/icons8-usb-2.svg")}
+                style={{ height: "50px" }}
+                alt="usb"
+              />
+            }
             title="Step 1"
             paragraph="Connect and unlock your Ledger, then grant permission on the browser."
             pass={initTryCount > 0 && initErrorOn === LedgerInitErrorOn.App}
@@ -103,8 +110,15 @@ export const LedgerGrantPage: FunctionComponent = () => {
             </Button>
           </Instruction>
           <Instruction
+            icon={
+              <img
+                src={require(".././../public/assets/img/atom-o.svg")}
+                style={{ height: "34px" }}
+                alt="atom"
+              />
+            }
             title="Step 2"
-            paragraph="Open Cosmos App."
+            paragraph="Open the Cosmos app on your Ledger device."
             pass={initTryCount > 0 && initErrorOn == null}
           />
           <div style={{ flex: 1 }} />
@@ -199,15 +213,27 @@ const SignCompleteDialog: FunctionComponent<{
 };
 
 const Instruction: FunctionComponent<{
+  icon: React.ReactElement;
   title: string;
   paragraph: string;
   pass: boolean;
-}> = ({ title, paragraph, children, pass }) => {
+}> = ({ icon, title, paragraph, children, pass }) => {
   return (
     <div className={classnames(style.instruction, { [style.pass]: pass })}>
-      <h1>{title}</h1>
-      <p>{paragraph}</p>
-      {children}
+      <div className={style.icon}>{icon}</div>
+      <div className={style.inner}>
+        <h1>
+          {title}
+          {pass ? (
+            <i
+              className="fas fa-check"
+              style={{ marginLeft: "10px", color: "#2dce89" }}
+            />
+          ) : null}
+        </h1>
+        <p>{paragraph}</p>
+        {children}
+      </div>
     </div>
   );
 };
