@@ -153,8 +153,8 @@ ReactDOM.render(
         <NotificationStoreProvider>
           <NotificationProvider>
             <ConfirmProvider>
-              <LedgerInitIndicator>
-                <HashRouter>
+              <HashRouter>
+                <LedgerInitIndicator>
                   <Route exact path="/" component={StateRenderer} />
                   <Route exact path="/access" component={AccessPage} />
                   <Route exact path="/register" component={RegisterPage} />
@@ -198,8 +198,8 @@ ReactDOM.render(
                     component={ClearPage}
                   />
                   <Route path="/sign/:id" component={SignPage} />
-                </HashRouter>
-              </LedgerInitIndicator>
+                </LedgerInitIndicator>
+              </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>
         </NotificationStoreProvider>

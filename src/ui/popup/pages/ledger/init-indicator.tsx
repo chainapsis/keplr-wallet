@@ -1,13 +1,19 @@
 import React, { FunctionComponent, useEffect } from "react";
 
 import { useLoadingIndicator } from "../../../components/loading-indicator";
+import { useLocation } from "react-router";
 
 export const LedgerInitIndicator: FunctionComponent = ({ children }) => {
   const loadingIndicator = useLoadingIndicator();
 
+  const location = useLocation();
+
   useEffect(() => {
     const startLoading = () => {
-      loadingIndicator.setIsLoading("ledger", true);
+      // Indicate loading only if current page is not related to the ledger.
+      if (!location.pathname.startsWith("/ledger-")) {
+        loadingIndicator.setIsLoading("ledger", true);
+      }
     };
 
     const endLoading = () => {
