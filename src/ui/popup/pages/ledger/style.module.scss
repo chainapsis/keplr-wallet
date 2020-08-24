@@ -17,6 +17,10 @@
 
   text-align: center;
 
+  img {
+    height: 100px;
+  }
+
   p {
     font-size: 20px;
     color: #32325d;
@@ -28,9 +32,33 @@
   i {
     color: #9092b6;
   }
+}
+
+.sign-complete-dialog {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 30px;
+
+  text-align: center;
 
   img {
     height: 100px;
+  }
+
+  p {
+    font-size: 20px;
+    color: #32325d;
+
+    margin: 0;
+    padding: 30px 0 50px 0;
+  }
+
+  .sub-paragraph {
+    font-size: 16px;
+    color: #32325d;
   }
 }
 

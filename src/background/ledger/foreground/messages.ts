@@ -42,6 +42,10 @@ export class LedgerSignCompletedMsg extends Message<void> {
     return "ledger-sign-completed";
   }
 
+  constructor(public readonly rejected: boolean) {
+    super();
+  }
+
   validateBasic(): void {
     // notop
   }

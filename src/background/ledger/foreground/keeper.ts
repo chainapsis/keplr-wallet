@@ -4,7 +4,7 @@ export interface InitLedgerNotifiyHandler {
 }
 
 export interface SignLedgerNotifiyHandler {
-  onSignCompleted(): void;
+  onSignCompleted(rejected: boolean): void;
 }
 
 export class LedgerInitNotifyKeeper {
@@ -21,7 +21,7 @@ export class LedgerInitNotifyKeeper {
     this.onInitNotifiyHandler.onInitResumed();
   }
 
-  onSignCompleted(): void {
-    this.onSignNotifiyHandler.onSignCompleted();
+  onSignCompleted(rejected: boolean): void {
+    this.onSignNotifiyHandler.onSignCompleted(rejected);
   }
 }

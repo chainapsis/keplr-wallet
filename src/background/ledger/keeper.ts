@@ -34,9 +34,12 @@ export class LedgerKeeper {
         // TODO: Check public key is matched?
 
         try {
-          return await ledger.sign([44, 118, 0, 0, 0], message);
-        } finally {
-          sendMessage(POPUP_PORT, new LedgerSignCompletedMsg());
+          const signature = await ledger.sign([44, 118, 0, 0, 0], message);
+          sendMessage(POPUP_PORT, new LedgerSignCompletedMsg(false));
+          return signature;
+        } catch (e) {
+          sendMessage(POPUP_PORT, new LedgerSignCompletedMsg(true));
+          throw e;
         }
       });
     });

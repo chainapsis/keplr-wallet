@@ -23,16 +23,23 @@ export const LedgerGrantPage: FunctionComponent = () => {
     fitWindow();
   }, []);
 
+  const [signCompleted, setSignCompleted] = useState(false);
+  const [signRejected, setSignRejected] = useState(false);
+
   useEffect(() => {
-    const close = () => {
+    const close = (e: CustomEvent) => {
+      setSignCompleted(true);
+      if (e.detail?.rejected) {
+        setSignRejected(true);
+      }
       // Close window after 3 seconds.
       setTimeout(window.close, 3000);
     };
 
-    window.addEventListener("ledgerSignCompleted", close);
+    window.addEventListener("ledgerSignCompleted", close as any);
 
     return () => {
-      window.removeEventListener("ledgerSignCompleted", close);
+      window.removeEventListener("ledgerSignCompleted", close as any);
     };
   }, []);
 
@@ -73,7 +80,9 @@ export const LedgerGrantPage: FunctionComponent = () => {
 
   return (
     <EmptyLayout className={style.container}>
-      {initSucceed ? (
+      {signCompleted ? (
+        <SignCompleteDialog rejected={signRejected} />
+      ) : initSucceed ? (
         <ConfirmLedgerDialog />
       ) : (
         <div className={style.instructions}>
@@ -142,6 +151,48 @@ const ConfirmLedgerDialog: FunctionComponent = () => {
         }}
       >
         <i className="fa fa-spinner fa-spin fa-2x fa-fw" />
+      </div>
+    </div>
+  );
+};
+
+const SignCompleteDialog: FunctionComponent<{
+  rejected: boolean;
+}> = ({ rejected }) => {
+  return (
+    <div className={style.signCompleteDialog}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end"
+        }}
+      >
+        {!rejected ? (
+          <img
+            src={require("../../public/assets/img/icons8-checked.svg")}
+            alt="success"
+          />
+        ) : (
+          <img
+            src={require("../../public/assets/img/icons8-cancel.svg")}
+            alt="rejected"
+          />
+        )}
+      </div>
+      <p>{!rejected ? "Success" : "Rejected by Ledger"}</p>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start"
+        }}
+      >
+        <div className={style.subParagraph}>
+          This page will automatically close in 3 seconds
+        </div>
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ export const getHandler: (keeper: LedgerInitNotifyKeeper) => Handler = (
       case LedgerSignCompletedMsg:
         return handleLedgerSignCompletedMsg(keeper)(
           env,
-          msg as LedgerInitResumedMsg
+          msg as LedgerSignCompletedMsg
         );
       default:
         throw new Error("Unknown msg type");
@@ -56,7 +56,7 @@ const handleLedgerInitResumedMsg: (
 const handleLedgerSignCompletedMsg: (
   keeper: LedgerInitNotifyKeeper
 ) => InternalHandler<LedgerSignCompletedMsg> = keeper => {
-  return (_env, _msg) => {
-    return keeper.onSignCompleted();
+  return (_env, msg) => {
+    return keeper.onSignCompleted(msg.rejected);
   };
 };
