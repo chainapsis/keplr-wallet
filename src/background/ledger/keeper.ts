@@ -1,6 +1,5 @@
 import { Ledger } from "./ledger";
 
-import PQueue from "p-queue";
 import delay from "delay";
 
 import { sendMessage } from "../../common/message/send";
@@ -14,34 +13,28 @@ import { AsyncWaitGroup } from "../../common/async-wait-group";
 import { openWindow } from "../../common/window";
 
 export class LedgerKeeper {
-  private readonly pQueue: PQueue = new PQueue({
-    concurrency: 1
-  });
+  private previousInitAborter: ((e: Error) => void) | undefined;
 
   private readonly initWG: AsyncWaitGroup = new AsyncWaitGroup();
 
   async getPublicKey(): Promise<Uint8Array> {
-    return await this.pQueue.add(async () => {
-      return await this.useLedger(async ledger => {
-        return await ledger.getPublicKey([44, 118, 0, 0, 0]);
-      });
+    return await this.useLedger(async ledger => {
+      return await ledger.getPublicKey([44, 118, 0, 0, 0]);
     });
   }
 
   async sign(message: Uint8Array): Promise<Uint8Array> {
-    return await this.pQueue.add(async () => {
-      return await this.useLedger(async ledger => {
-        // TODO: Check public key is matched?
+    return await this.useLedger(async ledger => {
+      // TODO: Check public key is matched?
 
-        try {
-          const signature = await ledger.sign([44, 118, 0, 0, 0], message);
-          sendMessage(POPUP_PORT, new LedgerSignCompletedMsg(false));
-          return signature;
-        } catch (e) {
-          sendMessage(POPUP_PORT, new LedgerSignCompletedMsg(true));
-          throw e;
-        }
-      });
+      try {
+        const signature = await ledger.sign([44, 118, 0, 0, 0], message);
+        sendMessage(POPUP_PORT, new LedgerSignCompletedMsg(false));
+        return signature;
+      } catch (e) {
+        sendMessage(POPUP_PORT, new LedgerSignCompletedMsg(true));
+        throw e;
+      }
     });
   }
 
@@ -55,10 +48,46 @@ export class LedgerKeeper {
   }
 
   async initLedger(): Promise<Ledger> {
+    if (this.previousInitAborter) {
+      this.previousInitAborter(
+        new Error(
+          "New ledger request occurred before the ledger was initialized"
+        )
+      );
+    }
+
+    // Wait until the promise rejected or 3 minutes.
+    // This ensures that the ledger connection is not executed concurrently.
+    // Without this, the prior signing request can be delivered to the ledger and possibly make a user take a mistake.
+    const aborter = (() => {
+      let _reject: (reason?: any) => void | undefined;
+
+      return {
+        wait: () => {
+          return new Promise((_, reject) => {
+            _reject = reject;
+            // 3.5 min.
+            setTimeout(() => {
+              reject("Timeout");
+            }, 3.5 * 60 * 1000);
+          });
+        },
+        abort: (e: Error) => {
+          if (_reject) {
+            _reject(e);
+          }
+        }
+      };
+    })();
+
+    this.previousInitAborter = aborter.abort;
+
     while (true) {
       try {
         this.initWG.add();
-        return await Ledger.init();
+        const ledger = await Ledger.init();
+        this.previousInitAborter = undefined;
+        return ledger;
       } catch (e) {
         console.log(e);
         await this.notifyNeedInitializeLedger();
@@ -70,6 +99,7 @@ export class LedgerKeeper {
             await delay(3 * 60 * 1000);
             throw new Error("Ledger init timeout");
           })(),
+          aborter.wait(),
           this.testLedgerGrantUIOpened()
         ]);
       } finally {
