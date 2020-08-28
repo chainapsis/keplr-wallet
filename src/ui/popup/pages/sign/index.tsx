@@ -185,37 +185,55 @@ export const SignPage: FunctionComponent = observer(() => {
         </div>
         <div style={{ flex: 1 }} />
         <div className={style.buttons}>
-          <Button
-            className={style.button}
-            color="danger"
-            disabled={
-              signing.message == null ||
-              signing.message === "" ||
-              signing.initializing
-            }
-            data-loading={signing.requested}
-            onClick={onRejectClick}
-            outline
-          >
-            {intl.formatMessage({
-              id: "sign.button.reject"
-            })}
-          </Button>
-          <Button
-            className={style.button}
-            color="primary"
-            disabled={
-              signing.message == null ||
-              signing.message === "" ||
-              signing.initializing
-            }
-            data-loading={signing.requested}
-            onClick={onApproveClick}
-          >
-            {intl.formatMessage({
-              id: "sign.button.approve"
-            })}
-          </Button>
+          {keyRingStore.keyRingType === "ledger" ? (
+            <Button
+              className={style.button}
+              color="primary"
+              disabled={
+                signing.message == null ||
+                signing.message === "" ||
+                signing.initializing
+              }
+              outline
+            >
+              Waiting for Ledger to confirm{" "}
+              <i className="fa fa-spinner fa-spin fa-fw" />
+            </Button>
+          ) : (
+            <React.Fragment>
+              <Button
+                className={style.button}
+                color="danger"
+                disabled={
+                  signing.message == null ||
+                  signing.message === "" ||
+                  signing.initializing
+                }
+                data-loading={signing.requested}
+                onClick={onRejectClick}
+                outline
+              >
+                {intl.formatMessage({
+                  id: "sign.button.reject"
+                })}
+              </Button>
+              <Button
+                className={style.button}
+                color="primary"
+                disabled={
+                  signing.message == null ||
+                  signing.message === "" ||
+                  signing.initializing
+                }
+                data-loading={signing.requested}
+                onClick={onApproveClick}
+              >
+                {intl.formatMessage({
+                  id: "sign.button.approve"
+                })}
+              </Button>
+            </React.Fragment>
+          )}
         </div>
       </div>
     </HeaderLayout>
