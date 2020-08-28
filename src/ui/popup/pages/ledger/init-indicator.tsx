@@ -27,7 +27,7 @@ export const LedgerInitIndicator: FunctionComponent = ({ children }) => {
       window.removeEventListener("ledgerInitFailed", startLoading);
       window.removeEventListener("ledgerInitResumed", endLoading);
     };
-  }, [loadingIndicator]);
+  }, [loadingIndicator, location.pathname]);
 
   return <React.Fragment>{children}</React.Fragment>;
 };
