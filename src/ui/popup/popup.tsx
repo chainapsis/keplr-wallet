@@ -96,6 +96,11 @@ const initLedgerNotifiyHandler: InitLedgerNotifiyHandler = {
 const ledgerInitNotifyKeeper = new LedgerInit.LedgerInitNotifyKeeper(
   initLedgerNotifiyHandler,
   {
+    onGetPublicKeyCompleted: () => {
+      window.dispatchEvent(new CustomEvent("ledgerGetPublickKeyCompleted"));
+    }
+  },
+  {
     onSignCompleted: rejected => {
       window.dispatchEvent(
         new CustomEvent("ledgerSignCompleted", {

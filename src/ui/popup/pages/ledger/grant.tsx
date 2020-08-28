@@ -27,7 +27,7 @@ export const LedgerGrantPage: FunctionComponent = () => {
   const [signRejected, setSignRejected] = useState(false);
 
   useEffect(() => {
-    const close = (e: CustomEvent) => {
+    const closeAfterDelay = (e: CustomEvent) => {
       setSignCompleted(true);
       if (e.detail?.rejected) {
         setSignRejected(true);
@@ -36,10 +36,14 @@ export const LedgerGrantPage: FunctionComponent = () => {
       setTimeout(window.close, 3000);
     };
 
-    window.addEventListener("ledgerSignCompleted", close as any);
+    window.addEventListener("ledgerSignCompleted", closeAfterDelay as any);
+    // Don't need to delay to close because this event probably occurs only in the register page in tab.
+    // So, don't need to consider the window refocusing.
+    window.addEventListener("ledgerGetPublickKeyCompleted", window.close);
 
     return () => {
-      window.removeEventListener("ledgerSignCompleted", close as any);
+      window.removeEventListener("ledgerSignCompleted", closeAfterDelay as any);
+      window.removeEventListener("ledgerGetPublickKeyCompleted", window.close);
     };
   }, []);
 

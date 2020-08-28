@@ -1,5 +1,6 @@
 import { MessageManager } from "../../../common/message";
 import {
+  LedgerGetPublicKeyCompletedMsg,
   LedgerInitFailedMsg,
   LedgerInitResumedMsg,
   LedgerSignCompletedMsg
@@ -14,6 +15,7 @@ export function init(
 ): void {
   messageManager.registerMessage(LedgerInitFailedMsg);
   messageManager.registerMessage(LedgerInitResumedMsg);
+  messageManager.registerMessage(LedgerGetPublicKeyCompletedMsg);
   messageManager.registerMessage(LedgerSignCompletedMsg);
 
   messageManager.addHandler(ROUTE, getHandler(keeper));

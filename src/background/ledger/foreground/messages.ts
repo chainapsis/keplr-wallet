@@ -37,6 +37,24 @@ export class LedgerInitResumedMsg extends Message<void> {
   }
 }
 
+export class LedgerGetPublicKeyCompletedMsg extends Message<void> {
+  public static type() {
+    return "ledger-get-public-key-completed";
+  }
+
+  validateBasic(): void {
+    // notop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return LedgerGetPublicKeyCompletedMsg.type();
+  }
+}
+
 export class LedgerSignCompletedMsg extends Message<void> {
   public static type() {
     return "ledger-sign-completed";

@@ -5,6 +5,7 @@ import delay from "delay";
 import { sendMessage } from "../../common/message/send";
 import { POPUP_PORT } from "../../common/message/constant";
 import {
+  LedgerGetPublicKeyCompletedMsg,
   LedgerInitFailedMsg,
   LedgerInitResumedMsg,
   LedgerSignCompletedMsg
@@ -19,7 +20,11 @@ export class LedgerKeeper {
 
   async getPublicKey(): Promise<Uint8Array> {
     return await this.useLedger(async ledger => {
-      return await ledger.getPublicKey([44, 118, 0, 0, 0]);
+      try {
+        return await ledger.getPublicKey([44, 118, 0, 0, 0]);
+      } finally {
+        sendMessage(POPUP_PORT, new LedgerGetPublicKeyCompletedMsg());
+      }
     });
   }
 
