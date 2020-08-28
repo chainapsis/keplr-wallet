@@ -6,6 +6,8 @@ $container-width: 420px;
   height: 85vh;
   background-color: white;
 
+  overflow: visible !important;
+
   :global(#app) {
     height: 100%;
 
