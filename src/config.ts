@@ -19,6 +19,10 @@ import {
   SECRET_NETWORK_REST_ENDPOINT,
   SECRET_NETWORK_RPC_CONFIG,
   SECRET_NETWORK_RPC_ENDPOINT,
+  STRAIGHTEDGE_REST_CONFIG,
+  STRAIGHTEDGE_REST_ENDPOINT,
+  STRAIGHTEDGE_RPC_CONFIG,
+  STRAIGHTEDGE_RPC_ENDPOINT,
   ADDITIONAL_SIGN_IN_PREPEND,
   ADDITIONAL_INTL_MESSAGES
 } from "./config.var";
@@ -100,6 +104,28 @@ export const EmbedChainInfos: ChainInfo[] = [
     currencies: ["secret"],
     feeCurrencies: ["secret"],
     coinType: 529
+  },
+  {
+    rpc: STRAIGHTEDGE_RPC_ENDPOINT,
+    rpcConfig: STRAIGHTEDGE_RPC_CONFIG,
+    rest: STRAIGHTEDGE_REST_ENDPOINT,
+    restConfig: STRAIGHTEDGE_REST_CONFIG,
+    chainId: "straightedge-3",
+    chainName: "Straightedge",
+    nativeCurrency: "str",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/straightedge-1/stake"
+        : "http://localhost:8081/#/straightedge-1/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/straightedge-1/stake"
+        : "http://localhost:8081/#/straightedge-1/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("str"),
+    currencies: ["str"],
+    feeCurrencies: ["str"],
+    coinType: 118 // TODO
   }
 ];
 
@@ -119,6 +145,11 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
   },
   {
     chainId: "secret-1",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "straightedge-1",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
@@ -146,6 +177,11 @@ export const Currencies: {
     coinDenom: "SCRT",
     coinMinimalDenom: "uscrt",
     coinDecimals: 6
+  },
+  str: {
+    coinDenom: "STR",
+    coinMinimalDenom: "astr",
+    coinDecimals: 18
   }
 };
 

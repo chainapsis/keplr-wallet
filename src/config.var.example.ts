@@ -23,6 +23,15 @@ export const SECRET_NETWORK_REST_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
 
+export const STRAIGHTEDGE_RPC_ENDPOINT = "";
+export const STRAIGHTEDGE_RPC_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+export const STRAIGHTEDGE_REST_ENDPOINT = "";
+export const STRAIGHTEDGE_REST_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+
 export const ADDITIONAL_SIGN_IN_PREPEND:
   | React.ReactElement
   | undefined = undefined;
