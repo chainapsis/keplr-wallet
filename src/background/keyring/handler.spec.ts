@@ -394,19 +394,6 @@ describe("Test keyring handler", () => {
       )
     );
 
-    await assert.rejects(async () => {
-      await sendMessage(
-        {
-          emitter,
-          id: extensionId,
-          url: extensionBaseURL,
-          origin: internalOrigin
-        },
-        port,
-        new GetKeyMsg("test-1")
-      );
-    });
-
     let result = await sendMessage(
       {
         emitter,
@@ -516,20 +503,6 @@ describe("Test keyring handler", () => {
         {}
       )
     );
-
-    // Will throw an error if path is not set.
-    await assert.rejects(async () => {
-      await sendMessage(
-        {
-          emitter,
-          id: extensionId,
-          url: extensionBaseURL,
-          origin: internalOrigin
-        },
-        port,
-        new GetKeyMsg("test-1")
-      );
-    });
 
     let result = await sendMessage(
       {
