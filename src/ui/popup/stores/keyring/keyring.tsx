@@ -27,6 +27,7 @@ import { actionAsync, task } from "mobx-utils";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RootStore } from "../root";
 import { MultiKeyStoreInfoWithSelected } from "../../../../background/keyring/keyring";
+import { BIP44HDPath } from "../../../../background/keyring/types";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -89,9 +90,10 @@ export class KeyRingStore {
   public async createMnemonicKey(
     mnemonic: string,
     password: string,
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
   ) {
-    const msg = new CreateMnemonicKeyMsg(mnemonic, password, meta);
+    const msg = new CreateMnemonicKeyMsg(mnemonic, password, meta, bip44HDPath);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
 
@@ -122,8 +124,12 @@ export class KeyRingStore {
   }
 
   @actionAsync
-  public async createLedgerKey(password: string, meta: Record<string, string>) {
-    const msg = new CreateLedgerKeyMsg(password, meta);
+  public async createLedgerKey(
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ) {
+    const msg = new CreateLedgerKeyMsg(password, meta, bip44HDPath);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
 
@@ -134,8 +140,12 @@ export class KeyRingStore {
   }
 
   @actionAsync
-  public async addMnemonicKey(mnemonic: string, meta: Record<string, string>) {
-    const msg = new AddMnemonicKeyMsg(mnemonic, meta);
+  public async addMnemonicKey(
+    mnemonic: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ) {
+    const msg = new AddMnemonicKeyMsg(mnemonic, meta, bip44HDPath);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setMultiKeyStoreInfo(result);
   }
@@ -154,8 +164,11 @@ export class KeyRingStore {
   }
 
   @actionAsync
-  public async addLedgerKey(meta: Record<string, string>) {
-    const msg = new AddLedgerKeyMsg(meta);
+  public async addLedgerKey(
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ) {
+    const msg = new AddLedgerKeyMsg(meta, bip44HDPath);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setMultiKeyStoreInfo(result);
   }

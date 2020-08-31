@@ -99,16 +99,21 @@ export const VerifyMnemonicPageIn: FunctionComponent = observer(() => {
           setIsLoading(true);
 
           if (registerState.mode === RegisterMode.ADD) {
-            await keyRingStore.addMnemonicKey(registerState.value, {
-              name: registerState.name
-            });
+            await keyRingStore.addMnemonicKey(
+              registerState.value,
+              {
+                name: registerState.name
+              },
+              registerState.bip44HDPath
+            );
           } else {
             await keyRingStore.createMnemonicKey(
               registerState.value,
               registerState.password,
               {
                 name: registerState.name
-              }
+              },
+              registerState.bip44HDPath
             );
           }
           await keyRingStore.save();

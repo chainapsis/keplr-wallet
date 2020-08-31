@@ -1,8 +1,13 @@
 import { Message } from "../../common/message";
 import { ROUTE } from "./constants";
-import { KeyRingStatus, MultiKeyStoreInfoWithSelected } from "./keyring";
+import {
+  KeyRing,
+  KeyRingStatus,
+  MultiKeyStoreInfoWithSelected
+} from "./keyring";
 import { KeyHex } from "./keeper";
 import {
+  BIP44HDPath,
   TxBuilderConfigPrimitive,
   TxBuilderConfigPrimitiveWithChainId
 } from "./types";
@@ -153,7 +158,8 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   constructor(
     public readonly mnemonic: string,
     public readonly password: string,
-    public readonly meta: Record<string, string>
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
   ) {
     super();
   }
@@ -177,6 +183,8 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
         throw e;
       }
     }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
   }
 
   route(): string {
@@ -195,7 +203,8 @@ export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
 
   constructor(
     public readonly mnemonic: string,
-    public readonly meta: Record<string, string>
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
   ) {
     super();
   }
@@ -215,6 +224,8 @@ export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
         throw e;
       }
     }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
   }
 
   route(): string {
@@ -269,7 +280,8 @@ export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
 
   constructor(
     public readonly password: string,
-    public readonly meta: Record<string, string>
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
   ) {
     super();
   }
@@ -278,6 +290,8 @@ export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
     if (!this.password) {
       throw new Error("password not set");
     }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
   }
 
   route(): string {
@@ -325,12 +339,15 @@ export class AddLedgerKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
     return "add-ledger-key";
   }
 
-  constructor(public readonly meta: Record<string, string>) {
+  constructor(
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
+  ) {
     super();
   }
 
   validateBasic(): void {
-    // noop
+    KeyRing.validateBIP44Path(this.bip44HDPath);
   }
 
   route(): string {
@@ -385,42 +402,6 @@ export class UnlockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
 
   type(): string {
     return UnlockKeyRingMsg.type();
-  }
-}
-
-export class SetPathMsg extends Message<{ success: boolean }> {
-  public static type() {
-    return "set-path";
-  }
-
-  constructor(
-    public readonly chainId: string,
-    public readonly account: number,
-    public readonly index: number
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id not set");
-    }
-
-    if (this.account < 0) {
-      throw new Error("Invalid account");
-    }
-
-    if (this.index < 0) {
-      throw new Error("Invalid index");
-    }
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return SetPathMsg.type();
   }
 }
 

@@ -5,7 +5,6 @@ import {
   SaveKeyRingMsg,
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
-  SetPathMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
   RequestSignMsg,
@@ -48,7 +47,6 @@ export function init(
   messageManager.registerMessage(AddLedgerKeyMsg);
   messageManager.registerMessage(LockKeyRingMsg);
   messageManager.registerMessage(UnlockKeyRingMsg);
-  messageManager.registerMessage(SetPathMsg);
   messageManager.registerMessage(GetKeyMsg);
   messageManager.registerMessage(RequestTxBuilderConfigMsg);
   messageManager.registerMessage(GetRequestedTxBuilderConfigMsg);

@@ -58,12 +58,30 @@ describe("Test keyring message's validate basic method", () => {
 
   it("CreateMnemonicKeyMsg should throw an error on validateBasic if field is invalid", () => {
     assert.throws(() => {
-      const msg = new Messages.CreateMnemonicKeyMsg("", "", {});
+      const msg = new Messages.CreateMnemonicKeyMsg(
+        "",
+        "",
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
+      );
       msg.validateBasic();
     });
 
     assert.throws(() => {
-      const msg = new Messages.CreateMnemonicKeyMsg("", "test-password", {});
+      const msg = new Messages.CreateMnemonicKeyMsg(
+        "",
+        "test-password",
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
+      );
       msg.validateBasic();
     });
 
@@ -71,7 +89,12 @@ describe("Test keyring message's validate basic method", () => {
       const msg = new Messages.CreateMnemonicKeyMsg(
         "endorse derive coin acquire dizzy peace column bird only stand despair better",
         "",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       );
       msg.validateBasic();
     });
@@ -81,7 +104,12 @@ describe("Test keyring message's validate basic method", () => {
       const msg = new Messages.CreateMnemonicKeyMsg(
         "endorse derive coin acquire dizzy peace column bird only stand despair",
         "test-password",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       );
       msg.validateBasic();
     });
@@ -91,7 +119,12 @@ describe("Test keyring message's validate basic method", () => {
       const msg = new Messages.CreateMnemonicKeyMsg(
         "endorse derive coin acquire dizzy peace column bird only stand despair endorse",
         "test-password",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       );
       msg.validateBasic();
     });
@@ -100,7 +133,12 @@ describe("Test keyring message's validate basic method", () => {
       const msg = new Messages.CreateMnemonicKeyMsg(
         "endorse derive coin acquire dizzy peace column bird only stand despair better",
         "test-password",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       );
       msg.validateBasic();
     });
@@ -160,33 +198,6 @@ describe("Test keyring message's validate basic method", () => {
 
     assert.doesNotThrow(() => {
       const msg = new Messages.UnlockKeyRingMsg("test-password");
-      msg.validateBasic();
-    });
-  });
-
-  it("SetPathMsg should throw an error on validateBasic if field is invalid", () => {
-    assert.throws(() => {
-      const msg = new Messages.SetPathMsg("", 0, 0);
-      msg.validateBasic();
-    });
-
-    assert.throws(() => {
-      const msg = new Messages.SetPathMsg("test-1", -1, 0);
-      msg.validateBasic();
-    });
-
-    assert.throws(() => {
-      const msg = new Messages.SetPathMsg("test-1", 0, -1);
-      msg.validateBasic();
-    });
-
-    assert.doesNotThrow(() => {
-      const msg = new Messages.SetPathMsg("test-1", 0, 0);
-      msg.validateBasic();
-    });
-
-    assert.doesNotThrow(() => {
-      const msg = new Messages.SetPathMsg("test-1", 10, 10);
       msg.validateBasic();
     });
   });

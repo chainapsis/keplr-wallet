@@ -42,7 +42,12 @@ describe("Test keyring", () => {
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
       "password",
-      {}
+      {},
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      }
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -50,7 +55,7 @@ describe("Test keyring", () => {
 
     assert.strictEqual(keyRing.canSetPath, true);
 
-    const key = await keyRing.getKey("m/44'/118'/0'/0/0");
+    const key = await keyRing.getKey(118);
 
     assert.strictEqual(
       new AccAddress(key.address, "cosmos").toBech32(),
@@ -78,7 +83,7 @@ describe("Test keyring", () => {
     assert.strictEqual(keyRing.canSetPath, false);
 
     // Path will be ignored if it is on private key mode.
-    const key = await keyRing.getKey("m/44'/118'/0'/0/0");
+    const key = await keyRing.getKey(118);
 
     assert.strictEqual(
       new AccAddress(key.address, "cosmos").toBech32(),
@@ -94,7 +99,12 @@ describe("Test keyring", () => {
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
       "password",
-      {}
+      {},
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      }
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -157,7 +167,12 @@ describe("Test keyring", () => {
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
       "password",
-      {}
+      {},
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      }
     );
 
     await assert.rejects(async () => {
@@ -210,7 +225,12 @@ describe("Test keyring", () => {
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
       "password",
-      {}
+      {},
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      }
     );
 
     await assert.rejects(async () => {

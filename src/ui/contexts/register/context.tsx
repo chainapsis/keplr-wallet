@@ -25,6 +25,11 @@ export interface RegisterState {
   value: string;
   password: string;
   mode: RegisterMode;
+  bip44HDPath: {
+    account: number;
+    change: number;
+    addressIndex: number;
+  };
 
   setType(type: string): void;
   setStatus(status: RegisterStatus): void;
@@ -32,6 +37,11 @@ export interface RegisterState {
   setValue(value: string): void;
   setPassword(password: string): void;
   setMode(mode: RegisterMode): void;
+  setBIP44HDPath(path: {
+    account: number;
+    change: number;
+    addressIndex: number;
+  }): void;
 
   clear(): void;
 }
@@ -45,6 +55,15 @@ export const RegisterStateProvider: FunctionComponent = ({ children }) => {
   const [value, setValue] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [mode, setMode] = useState<RegisterMode>(RegisterMode.CREATE);
+  const [bip44HDPath, setBIP44HDPath] = useState<{
+    account: number;
+    change: number;
+    addressIndex: number;
+  }>({
+    account: 0,
+    change: 0,
+    addressIndex: 0
+  });
 
   const clear = () => {
     setType("");
@@ -62,12 +81,14 @@ export const RegisterStateProvider: FunctionComponent = ({ children }) => {
         value,
         password,
         mode,
+        bip44HDPath,
         setType,
         setStatus,
         setName,
         setValue,
         setPassword,
         setMode,
+        setBIP44HDPath,
         clear
       }}
     >

@@ -7,6 +7,7 @@ import {
 } from "@everett-protocol/cosmosjs/crypto";
 import { KVStore } from "../../common/kvstore";
 import { LedgerKeeper } from "../ledger/keeper";
+import { BIP44HDPath } from "./types";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -137,14 +138,15 @@ export class KeyRing {
     }
   }
 
-  public getKey(path: string): Key {
-    return this.loadKey(path);
+  public getKey(coinType: number): Key {
+    return this.loadKey(coinType);
   }
 
   public async createMnemonicKey(
     mnemonic: string,
     password: string,
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
   ) {
     if (this.status !== KeyRingStatus.EMPTY) {
       throw new Error("Key ring is not loaded or not empty");
@@ -154,7 +156,8 @@ export class KeyRing {
     this.keyStore = await KeyRing.CreateMnemonicKeyStore(
       mnemonic,
       password,
-      await this.assignKeyStoreIdMeta(meta)
+      await this.assignKeyStoreIdMeta(meta),
+      bip44HDPath
     );
     this.password = password;
     this.multiKeyStore.push(this.keyStore);
@@ -179,7 +182,11 @@ export class KeyRing {
     this.multiKeyStore.push(this.keyStore);
   }
 
-  public async createLedgerKey(password: string, meta: Record<string, string>) {
+  public async createLedgerKey(
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ) {
     if (this.status !== KeyRingStatus.EMPTY) {
       throw new Error("Key ring is not loaded or not empty");
     }
@@ -190,7 +197,8 @@ export class KeyRing {
     const keyStore = await KeyRing.CreateLedgerKeyStore(
       publicKey,
       password,
-      await this.assignKeyStoreIdMeta(meta)
+      await this.assignKeyStoreIdMeta(meta),
+      bip44HDPath
     );
 
     this.password = password;
@@ -318,7 +326,7 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private loadKey(path: string): Key {
+  private loadKey(coinType: number): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
     }
@@ -340,7 +348,7 @@ export class KeyRing {
         address: pubKey.toAddress().toBytes()
       };
     } else {
-      const privKey = this.loadPrivKey(path);
+      const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.toPubKey();
 
       return {
@@ -351,12 +359,19 @@ export class KeyRing {
     }
   }
 
-  private loadPrivKey(path: string): PrivKey {
-    if (this.status !== KeyRingStatus.UNLOCKED || this.type === "none") {
+  private loadPrivKey(coinType: number): PrivKey {
+    if (
+      this.status !== KeyRingStatus.UNLOCKED ||
+      this.type === "none" ||
+      !this.keyStore
+    ) {
       throw new Error("Key ring is not unlocked");
     }
 
+    const bip44HDPath = KeyRing.getKeyStoreBIP44Path(this.keyStore);
+
     if (this.type === "mnemonic") {
+      const path = `m/44'/${coinType}'/${bip44HDPath.account}'/${bip44HDPath.change}/${bip44HDPath.addressIndex}`;
       const cachedKey = this.cached.get(path);
       if (cachedKey) {
         return cachedKey;
@@ -387,7 +402,10 @@ export class KeyRing {
     }
   }
 
-  public async sign(path: string, message: Uint8Array): Promise<Uint8Array> {
+  public async sign(
+    coinType: number,
+    message: Uint8Array
+  ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
     }
@@ -399,7 +417,7 @@ export class KeyRing {
     if (this.keyStore.type === "ledger") {
       return await this.ledgerKeeper.sign(message);
     } else {
-      const privKey = this.loadPrivKey(path);
+      const privKey = this.loadPrivKey(coinType);
       return privKey.sign(message);
     }
   }
@@ -435,7 +453,8 @@ export class KeyRing {
 
   public async addMnemonicKey(
     mnemonic: string,
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
   ): Promise<MultiKeyStoreInfoWithSelected> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
       throw new Error("Key ring is locked or not initialized");
@@ -444,7 +463,8 @@ export class KeyRing {
     const keyStore = await KeyRing.CreateMnemonicKeyStore(
       mnemonic,
       this.password,
-      await this.assignKeyStoreIdMeta(meta)
+      await this.assignKeyStoreIdMeta(meta),
+      bip44HDPath
     );
     this.multiKeyStore.push(keyStore);
 
@@ -470,7 +490,8 @@ export class KeyRing {
   }
 
   public async addLedgerKey(
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
   ): Promise<MultiKeyStoreInfoWithSelected> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
       throw new Error("Key ring is locked or not initialized");
@@ -482,7 +503,8 @@ export class KeyRing {
     const keyStore = await KeyRing.CreateLedgerKeyStore(
       publicKey,
       this.password,
-      await this.assignKeyStoreIdMeta(meta)
+      await this.assignKeyStoreIdMeta(meta),
+      bip44HDPath
     );
 
     this.multiKeyStore.push(keyStore);
@@ -530,9 +552,16 @@ export class KeyRing {
   private static async CreateMnemonicKeyStore(
     mnemonic: string,
     password: string,
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
   ): Promise<KeyStore> {
-    return await Crypto.encrypt("mnemonic", mnemonic, password, meta);
+    return await Crypto.encrypt(
+      "mnemonic",
+      mnemonic,
+      password,
+      meta,
+      bip44HDPath
+    );
   }
 
   private static async CreatePrivateKeyStore(
@@ -551,13 +580,15 @@ export class KeyRing {
   private static async CreateLedgerKeyStore(
     publicKey: Uint8Array,
     password: string,
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
   ): Promise<KeyStore> {
     return await Crypto.encrypt(
       "ledger",
       Buffer.from(publicKey).toString("hex"),
       password,
-      meta
+      meta,
+      bip44HDPath
     );
   }
 
@@ -579,6 +610,38 @@ export class KeyRing {
     }
 
     return id;
+  }
+
+  private static getKeyStoreBIP44Path(keyStore: KeyStore): BIP44HDPath {
+    if (!keyStore.bip44HDPath) {
+      return {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      };
+    }
+    KeyRing.validateBIP44Path(keyStore.bip44HDPath);
+    return keyStore.bip44HDPath;
+  }
+
+  public static validateBIP44Path(bip44Path: BIP44HDPath): void {
+    if (!Number.isInteger(bip44Path.account) || bip44Path.account < 0) {
+      throw new Error("Invalid account in hd path");
+    }
+
+    if (
+      !Number.isInteger(bip44Path.change) ||
+      !(bip44Path.change === 0 || bip44Path.change === 1)
+    ) {
+      throw new Error("Invalid change in hd path");
+    }
+
+    if (
+      !Number.isInteger(bip44Path.addressIndex) ||
+      bip44Path.addressIndex < 0
+    ) {
+      throw new Error("Invalid address index in hd path");
+    }
   }
 
   private async getIncrementalNumber(): Promise<number> {

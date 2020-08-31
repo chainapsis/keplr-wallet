@@ -15,6 +15,7 @@ import { Input } from "../../../components/form";
 import useForm from "react-hook-form";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
+import { AdvancedBIP44Option } from "./advanced-bip44";
 
 interface FormData {
   name: string;
@@ -86,13 +87,20 @@ const AddLedgerPageIn: FunctionComponent = observer(() => {
 
               try {
                 if (registerState.mode === RegisterMode.ADD) {
-                  await keyRingStore.addLedgerKey({
-                    name: data.name
-                  });
+                  await keyRingStore.addLedgerKey(
+                    {
+                      name: data.name
+                    },
+                    registerState.bip44HDPath
+                  );
                 } else {
-                  await keyRingStore.createLedgerKey(data.password, {
-                    name: data.name
-                  });
+                  await keyRingStore.createLedgerKey(
+                    data.password,
+                    {
+                      name: data.name
+                    },
+                    registerState.bip44HDPath
+                  );
                 }
                 await keyRingStore.save();
                 registerState.setStatus(RegisterStatus.COMPLETE);
@@ -163,6 +171,7 @@ const AddLedgerPageIn: FunctionComponent = observer(() => {
                 />
               </React.Fragment>
             ) : null}
+            <AdvancedBIP44Option />
             <Button
               color="primary"
               type="submit"

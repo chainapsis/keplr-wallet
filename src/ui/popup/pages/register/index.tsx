@@ -66,6 +66,20 @@ export const RegisterPage: FunctionComponent = withRegisterStateProvider(
       }
     }, [query.mode, registerState]);
 
+    useEffect(() => {
+      // Should clear the bip44 hd path when register status becomes `init`.
+      if (
+        registerState.status === RegisterStatus.INIT &&
+        registerState.bip44HDPath.account !== 0
+      ) {
+        registerState.setBIP44HDPath({
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        });
+      }
+    }, [registerState]);
+
     return (
       <EmptyLayout
         className={style.container}

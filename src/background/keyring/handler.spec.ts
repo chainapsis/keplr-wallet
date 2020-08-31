@@ -27,7 +27,6 @@ import {
   RejectTxBuilderConfigMsg,
   RequestSignMsg,
   RequestTxBuilderConfigMsg,
-  SetPathMsg,
   ShowKeyRingMsg,
   UnlockKeyRingMsg
 } from "./messages";
@@ -162,7 +161,12 @@ describe("Test keyring handler", () => {
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
         "password",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
     );
 
@@ -234,7 +238,12 @@ describe("Test keyring handler", () => {
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
         "password",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
     );
 
@@ -321,7 +330,12 @@ describe("Test keyring handler", () => {
         new CreateMnemonicKeyMsg(
           "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
           "password",
-          {}
+          {},
+          {
+            account: 0,
+            change: 0,
+            addressIndex: 0
+          }
         )
       );
     }, new Error("Key ring is not loaded or not empty"));
@@ -350,7 +364,12 @@ describe("Test keyring handler", () => {
         new CreateMnemonicKeyMsg(
           "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
           "password",
-          {}
+          {},
+          {
+            account: 0,
+            change: 0,
+            addressIndex: 0
+          }
         )
       );
     }, new Error("Permission rejected"));
@@ -366,7 +385,12 @@ describe("Test keyring handler", () => {
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
         "password",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
     );
 
@@ -382,17 +406,6 @@ describe("Test keyring handler", () => {
         new GetKeyMsg("test-1")
       );
     });
-
-    await sendMessage(
-      {
-        emitter,
-        id: extensionId,
-        url: extensionBaseURL,
-        origin: internalOrigin
-      },
-      port,
-      new SetPathMsg("test-1", 0, 0)
-    );
 
     let result = await sendMessage(
       {
@@ -518,19 +531,6 @@ describe("Test keyring handler", () => {
       );
     });
 
-    // Can't set path on private key mode even though it will not throw any error.
-    // But, path will be ignored.
-    await sendMessage(
-      {
-        emitter,
-        id: extensionId,
-        url: extensionBaseURL,
-        origin: internalOrigin
-      },
-      port,
-      new SetPathMsg("test-1", 0, 0)
-    );
-
     let result = await sendMessage(
       {
         emitter,
@@ -545,18 +545,6 @@ describe("Test keyring handler", () => {
     assert.strictEqual(
       result.bech32Address,
       "cosmos1m3y35cl0tlxqcuzkce6ld7ww0st0j4ra846wwh"
-    );
-
-    // Set other path.
-    await sendMessage(
-      {
-        emitter,
-        id: extensionId,
-        url: extensionBaseURL,
-        origin: internalOrigin
-      },
-      port,
-      new SetPathMsg("test-1", 50, 50)
     );
 
     result = await sendMessage(
@@ -756,7 +744,12 @@ describe("Test keyring handler", () => {
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
         "password",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
     );
 
@@ -944,19 +937,13 @@ describe("Test keyring handler", () => {
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
         "password",
-        {}
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
-    );
-
-    await sendMessage(
-      {
-        emitter,
-        id: extensionId,
-        url: extensionBaseURL,
-        origin: internalOrigin
-      },
-      port,
-      new SetPathMsg("test-1", 0, 0)
     );
 
     // Only internal access can skip approving.

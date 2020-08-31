@@ -1,11 +1,7 @@
 import { ChainInfo } from "../../../../background/chains";
 
 import { sendMessage } from "../../../../common/message";
-import {
-  GetKeyMsg,
-  KeyRingStatus,
-  SetPathMsg
-} from "../../../../background/keyring";
+import { GetKeyMsg, KeyRingStatus } from "../../../../background/keyring";
 
 import { action, observable } from "mobx";
 import { actionAsync, task } from "mobx-utils";
@@ -39,12 +35,6 @@ export class AccountStore {
   public assets!: Coin[];
 
   @observable
-  public bip44Account!: number;
-
-  @observable
-  public bip44Index!: number;
-
-  @observable
   public keyRingStatus!: KeyRingStatus;
 
   // Not need to be observable
@@ -66,9 +56,6 @@ export class AccountStore {
 
     this.isAssetFetching = true;
     this.assets = [];
-
-    this.bip44Account = 0;
-    this.bip44Index = 0;
 
     this.keyRingStatus = KeyRingStatus.NOTLOADED;
   }
@@ -119,16 +106,6 @@ export class AccountStore {
   }
 
   @actionAsync
-  public async setBIP44Account(account: number, index: number) {
-    this.bip44Account = account;
-    this.bip44Index = index;
-
-    await task(this.fetchAccount());
-
-    this.fetchAssetsByInterval();
-  }
-
-  @actionAsync
   public async fetchAccount() {
     await task(this.fetchBech32Address());
     await task(this.fetchAssets());
@@ -137,13 +114,6 @@ export class AccountStore {
   @actionAsync
   private async fetchBech32Address() {
     this.isAddressFetching = true;
-
-    const setPathMsg = new SetPathMsg(
-      this.chainInfo.chainId,
-      this.bip44Account,
-      this.bip44Index
-    );
-    await task(sendMessage(BACKGROUND_PORT, setPathMsg));
 
     const getKeyMsg = new GetKeyMsg(this.chainInfo.chainId);
     const result = await task(sendMessage(BACKGROUND_PORT, getKeyMsg));

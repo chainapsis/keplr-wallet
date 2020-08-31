@@ -7,7 +7,6 @@ import {
   CreatePrivateKeyMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
-  SetPathMsg,
   RequestSignMsg,
   ApproveSignMsg,
   RejectSignMsg,
@@ -69,8 +68,6 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         return handleLockKeyRingMsg(keeper)(env, msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
         return handleUnlockKeyRingMsg(keeper)(env, msg as UnlockKeyRingMsg);
-      case SetPathMsg:
-        return handleSetPathMsg(keeper)(env, msg as SetPathMsg);
       case GetKeyMsg:
         return handleGetKeyMsg(keeper)(env, msg as GetKeyMsg);
       case RequestTxBuilderConfigMsg:
@@ -183,7 +180,8 @@ const handleCreateMnemonicKeyMsg: (
       status: await keeper.createMnemonicKey(
         msg.mnemonic,
         msg.password,
-        msg.meta
+        msg.meta,
+        msg.bip44HDPath
       )
     };
   };
@@ -193,7 +191,7 @@ const handleAddMnemonicKeyMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<AddMnemonicKeyMsg> = keeper => {
   return async (_, msg) => {
-    return await keeper.addMnemonicKey(msg.mnemonic, msg.meta);
+    return await keeper.addMnemonicKey(msg.mnemonic, msg.meta, msg.bip44HDPath);
   };
 };
 
@@ -227,7 +225,11 @@ const handleCreateLedgerKeyMsg: (
 ) => InternalHandler<CreateLedgerKeyMsg> = keeper => {
   return async (_, msg) => {
     return {
-      status: await keeper.createLedgerKey(msg.password, msg.meta)
+      status: await keeper.createLedgerKey(
+        msg.password,
+        msg.meta,
+        msg.bip44HDPath
+      )
     };
   };
 };
@@ -236,7 +238,7 @@ const handleAddLedgerKeyMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<AddLedgerKeyMsg> = keeper => {
   return async (_, msg) => {
-    return await keeper.addLedgerKey(msg.meta);
+    return await keeper.addLedgerKey(msg.meta, msg.bip44HDPath);
   };
 };
 
@@ -260,17 +262,6 @@ const handleUnlockKeyRingMsg: (
   };
 };
 
-const handleSetPathMsg: (
-  keeper: KeyRingKeeper
-) => InternalHandler<SetPathMsg> = keeper => {
-  return async (_, msg) => {
-    await keeper.setPath(msg.chainId, msg.account, msg.index);
-    return {
-      success: true
-    };
-  };
-};
-
 const handleGetKeyMsg: (
   keeper: KeyRingKeeper
 ) => InternalHandler<GetKeyMsg> = keeper => {
@@ -282,7 +273,7 @@ const handleGetKeyMsg: (
       getKeyMsg.origin
     );
 
-    const key = keeper.getKey();
+    const key = await keeper.getKey(getKeyMsg.chainId);
 
     return {
       algo: "secp256k1",
