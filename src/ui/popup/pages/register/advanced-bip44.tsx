@@ -3,7 +3,9 @@ import { Button, FormGroup, Input, Label } from "reactstrap";
 import { useConfirm } from "../../../components/confirm";
 import { useRegisterState } from "../../../contexts/register";
 
-export const AdvancedBIP44Option: FunctionComponent = () => {
+export const AdvancedBIP44Option: FunctionComponent<{
+  coinType?: number;
+}> = ({ coinType }) => {
   const registerState = useRegisterState();
   const confirm = useConfirm();
 
@@ -56,7 +58,7 @@ export const AdvancedBIP44Option: FunctionComponent = () => {
               alignItems: "baseline"
             }}
           >
-            <div>{"m/44'/118'/"}</div>
+            <div>{`m/44'/${coinType != null ? coinType : "···"}'/`}</div>
             <Input
               type="number"
               className="form-control-alternative"

@@ -171,7 +171,7 @@ const AddLedgerPageIn: FunctionComponent = observer(() => {
                 />
               </React.Fragment>
             ) : null}
-            <AdvancedBIP44Option />
+            <AdvancedBIP44Option coinType={118} />
             <Button
               color="primary"
               type="submit"
