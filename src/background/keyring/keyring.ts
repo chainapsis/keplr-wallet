@@ -195,10 +195,10 @@ export class KeyRing {
     }
 
     // Get public key first
-    const publicKey = await this.ledgerKeeper.getPublicKey(bip44HDPath);
+    this.ledgerPublicKey = await this.ledgerKeeper.getPublicKey(bip44HDPath);
 
     const keyStore = await KeyRing.CreateLedgerKeyStore(
-      publicKey,
+      this.ledgerPublicKey,
       password,
       await this.assignKeyStoreIdMeta(meta),
       bip44HDPath
