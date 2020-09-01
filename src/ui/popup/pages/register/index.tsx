@@ -17,6 +17,8 @@ import {
   withRegisterStateProvider
 } from "../../../contexts/register";
 
+import { AdditionalSignInPrepend } from "../../../../config";
+
 import { NewMnemonicPage } from "./new-mnemonic";
 import { VerifyMnemonicPage } from "./verify-mnemonic";
 
@@ -102,6 +104,12 @@ export const RegisterPage: FunctionComponent = withRegisterStateProvider(
         </div>
         {registerState.status === RegisterStatus.COMPLETE ? (
           <WelcomeInPage />
+        ) : null}
+        {AdditionalSignInPrepend ? (
+          <React.Fragment>
+            {AdditionalSignInPrepend}
+            {registerState.status === RegisterStatus.INIT ? <hr /> : null}
+          </React.Fragment>
         ) : null}
         <NewMnemonicPage />
         <RecoverMnemonicPage />
