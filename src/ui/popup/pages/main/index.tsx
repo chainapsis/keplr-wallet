@@ -1,4 +1,4 @@
-import React, { FunctionComponent, MouseEvent, useCallback } from "react";
+import React, { FunctionComponent } from "react";
 
 import { HeaderLayout } from "../../layouts";
 
@@ -17,15 +17,6 @@ import { useHistory } from "react-router";
 export const MainPage: FunctionComponent = () => {
   const history = useHistory();
 
-  const onSelectAccountClick = useCallback(
-    (e: MouseEvent) => {
-      e.preventDefault();
-
-      history.push("/setting/set-keyring");
-    },
-    [history]
-  );
-
   return (
     <HeaderLayout
       showChainName
@@ -38,11 +29,18 @@ export const MainPage: FunctionComponent = () => {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            paddingRight: "12px",
+            paddingRight: "24px",
             cursor: "pointer"
           }}
         >
-          <i className="fas fa-user" onClick={onSelectAccountClick} />
+          <i
+            className="fas fa-user"
+            onClick={e => {
+              e.preventDefault();
+
+              history.push("/setting/set-keyring");
+            }}
+          />
         </div>
       }
     >
