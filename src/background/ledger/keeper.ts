@@ -12,28 +12,63 @@ import {
 } from "./foreground";
 import { AsyncWaitGroup } from "../../common/async-wait-group";
 import { openWindow } from "../../common/window";
+import { BIP44HDPath } from "../keyring/types";
+
+const Buffer = require("buffer/").Buffer;
 
 export class LedgerKeeper {
   private previousInitAborter: ((e: Error) => void) | undefined;
 
   private readonly initWG: AsyncWaitGroup = new AsyncWaitGroup();
 
-  async getPublicKey(): Promise<Uint8Array> {
+  async getPublicKey(bip44HDPath: BIP44HDPath): Promise<Uint8Array> {
     return await this.useLedger(async ledger => {
       try {
-        return await ledger.getPublicKey([44, 118, 0, 0, 0]);
+        // Cosmos App on Ledger doesn't support the coin type other than 118.
+        return await ledger.getPublicKey([
+          44,
+          118,
+          bip44HDPath.account,
+          bip44HDPath.change,
+          bip44HDPath.addressIndex
+        ]);
       } finally {
         sendMessage(POPUP_PORT, new LedgerGetPublicKeyCompletedMsg());
       }
     });
   }
 
-  async sign(message: Uint8Array): Promise<Uint8Array> {
+  async sign(
+    bip44HDPath: BIP44HDPath,
+    expectedPubKey: Uint8Array,
+    message: Uint8Array
+  ): Promise<Uint8Array> {
     return await this.useLedger(async ledger => {
-      // TODO: Check public key is matched?
-
       try {
-        const signature = await ledger.sign([44, 118, 0, 0, 0], message);
+        const pubKey = await ledger.getPublicKey([
+          44,
+          118,
+          bip44HDPath.account,
+          bip44HDPath.change,
+          bip44HDPath.addressIndex
+        ]);
+        if (
+          Buffer.from(expectedPubKey).toString("hex") !==
+          Buffer.from(pubKey).toString("hex")
+        ) {
+          throw new Error("Unmatched public key");
+        }
+        // Cosmos App on Ledger doesn't support the coin type other than 118.
+        const signature = await ledger.sign(
+          [
+            44,
+            118,
+            bip44HDPath.account,
+            bip44HDPath.change,
+            bip44HDPath.addressIndex
+          ],
+          message
+        );
         sendMessage(POPUP_PORT, new LedgerSignCompletedMsg(false));
         return signature;
       } catch (e) {

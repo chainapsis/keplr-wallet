@@ -192,7 +192,7 @@ export class KeyRing {
     }
 
     // Get public key first
-    const publicKey = await this.ledgerKeeper.getPublicKey();
+    const publicKey = await this.ledgerKeeper.getPublicKey(bip44HDPath);
 
     const keyStore = await KeyRing.CreateLedgerKeyStore(
       publicKey,
@@ -415,7 +415,17 @@ export class KeyRing {
     }
 
     if (this.keyStore.type === "ledger") {
-      return await this.ledgerKeeper.sign(message);
+      const pubKey = this.ledgerPublicKey;
+
+      if (!pubKey) {
+        throw new Error("Ledger public key is not initialized");
+      }
+
+      return await this.ledgerKeeper.sign(
+        KeyRing.getKeyStoreBIP44Path(this.keyStore),
+        pubKey,
+        message
+      );
     } else {
       const privKey = this.loadPrivKey(coinType);
       return privKey.sign(message);
@@ -498,7 +508,7 @@ export class KeyRing {
     }
 
     // Get public key first
-    const publicKey = await this.ledgerKeeper.getPublicKey();
+    const publicKey = await this.ledgerKeeper.getPublicKey(bip44HDPath);
 
     const keyStore = await KeyRing.CreateLedgerKeyStore(
       publicKey,
