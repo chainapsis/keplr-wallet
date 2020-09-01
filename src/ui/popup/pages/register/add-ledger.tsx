@@ -43,7 +43,7 @@ export const AddLedgerPage: FunctionComponent = () => {
             registerState.setType(TypeAddLedger);
           }}
         >
-          <FormattedMessage id="Add ledger" />
+          <FormattedMessage id="register.ledger.title" />
         </Button>
       ) : null}
       {registerState.type === TypeAddLedger &&
@@ -77,7 +77,7 @@ const AddLedgerPageIn: FunctionComponent = observer(() => {
         <div>
           <div className={style.title}>
             {intl.formatMessage({
-              id: "Add Ledger"
+              id: "register.name"
             })}
           </div>
           <Form
@@ -112,13 +112,13 @@ const AddLedgerPageIn: FunctionComponent = observer(() => {
           >
             <Input
               label={intl.formatMessage({
-                id: "register.create.input.name"
+                id: "register.name"
               })}
               type="text"
               name="name"
               ref={register({
                 required: intl.formatMessage({
-                  id: "register.create.input.name.error.required"
+                  id: "register.name.error.required"
                 })
               })}
               error={errors.name && errors.name.message}

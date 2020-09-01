@@ -12,8 +12,11 @@ import style from "./style.module.scss";
 import { useLoadingIndicator } from "../../../../components/loading-indicator";
 import { PageButton } from "../page-button";
 import { MultiKeyStoreInfoWithSelectedElem } from "../../../../../background/keyring/keyring";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
+  const intl = useIntl();
+
   const { keyRingStore } = useStore();
   const history = useHistory();
 
@@ -23,7 +26,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle="Set Account"
+      alternativeTitle={intl.formatMessage({ id: "setting.keyring" })}
       onBackButton={useCallback(() => {
         history.goBack();
       }, [history])}
@@ -53,7 +56,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                 className="fas fa-plus"
                 style={{ marginRight: "4px", fontSize: "8px" }}
               />
-              Add
+              <FormattedMessage id="setting.keyring.button.add" />
             </Button>
           </div>
         </div>
@@ -69,7 +72,13 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
           return (
             <PageButton
               key={i.toString()}
-              title={keyStore.meta?.name ? keyStore.meta.name : "Unnamed"}
+              title={
+                keyStore.meta?.name
+                  ? keyStore.meta.name
+                  : intl.formatMessage({
+                      id: "setting.keyring.unnamed-account"
+                    })
+              }
               paragraph={
                 keyStore.type === "ledger"
                   ? `Ledger - m/44'/118'/${bip44HDPath.account}'`
@@ -140,7 +149,7 @@ const KeyRingToolsIcon: FunctionComponent<{
                 history.push(`/setting/export/${index}`);
               }}
             >
-              View mnemonic
+              <FormattedMessage id="setting.export" />
             </div>
           ) : null}
           <div
@@ -151,7 +160,7 @@ const KeyRingToolsIcon: FunctionComponent<{
               history.push(`/setting/clear/${index}`);
             }}
           >
-            Delete
+            <FormattedMessage id="setting.clear" />
           </div>
         </PopoverBody>
       </Popover>

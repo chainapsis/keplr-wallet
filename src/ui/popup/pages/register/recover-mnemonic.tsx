@@ -142,13 +142,13 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
             />
             <Input
               label={intl.formatMessage({
-                id: "register.create.input.name"
+                id: "register.name"
               })}
               type="text"
               name="name"
               ref={register({
                 required: intl.formatMessage({
-                  id: "register.create.input.name.error.required"
+                  id: "register.name.error.required"
                 })
               })}
               error={errors.name && errors.name.message}

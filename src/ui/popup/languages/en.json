@@ -33,9 +33,7 @@
   "setting.address-book.add-address.title": "Add Address",
   "setting.address-book.edit-address.title": "Edit Address",
   "setting.address-book.name": "Name",
-  "setting.address-book.name.error.required": "Name is required",
   "setting.address-book.address": "Address",
-  "setting.address-book.address.error.required": "Address is required",
   "setting.address-book.address.error.invalid": "Invalid address",
   "setting.address-book.memo": "Default Memo (Optional)",
   "setting.address-book.confirm.delete-address.title": "Delete Address",
@@ -43,6 +41,10 @@
   "setting.address-book.button.save": "Save",
 
   "setting.credit": "Special thanks",
+
+  "setting.keyring": "Select Account",
+  "setting.keyring.button.add": "Add Account",
+  "setting.keyring.unnamed-account": "Keplr Account",
 
   "setting.export": "View Mnemonic Seed",
   "setting.export.warning": "Please input your password to proceed",
@@ -60,7 +62,14 @@
   "setting.clear.input.password.error.invalid": "Invalid password",
   "setting.clear.button.confirm": "Confirm",
 
+  "register.name": "Account name",
+  "register.name.error.required": "Account name is required",
   "register.button.back": "Back",
+
+  "register.bip44.button.advanced": "Advanced",
+  "register.bip44.input.hd-path": "HD Derivation Path",
+  "register.bip44.confirm.clear": "Closing this toggle will reset the HD Path. Are you sure you want to proceed?",
+
   "register.intro.button.new-account.title": "Create new account",
   "register.intro.button.new-account.content": "Create a new wallet using a new seed",
   "register.intro.button.import-account.title": "Import existing account",
@@ -83,6 +92,8 @@
   "register.create.textarea.mnemonic.error.too-short": "Too short mnemonic",
   "register.create.button.next": "Next",
 
+  "register.ledger.title": "Import ledger",
+
   "register.verify.button.register": "Register",
 
   "register.welcome.title": "You’re all set!",
@@ -103,14 +114,12 @@
   "lock.button.unlock": "Unlock",
 
   "send.input.recipient": "Recipient",
-  "send.input.recipient.error.required": "Recipient is required",
   "send.input.recipient.error.invalid": "Invalid address",
   "send.input.recipient.error.ens-invalid-name": "Invalid ENS name format",
   "send.input.recipient.error.ens-not-found": "ENS name not found",
   "sned.input.recipient.error.ens-unknown-error": "Failed to get address from ENS",
   "send.input.recipient.error.ens-not-supported": "ENS not supported for this chain",
   "send.input.amount": "Amount",
-  "send.input.amount.error.required": "Amount is required",
   "send.input.amount.error.insufficient": "Insufficient asset",
   "send.input.memo": "Memo (Optional)",
   "send.input.fee": "Fee",
@@ -119,8 +128,6 @@
   "send.button.send": "Send",
 
   "fee.input.gas": "Gas",
-  "fee.input.gas.required": "Gas is required",
-  "fee.input.gas.invalid": "Gas should be number",
   "fee.input.memo": "Memo (Optional)",
   "fee.input.fee": "Fee",
   "fee.button.set": "Set Fee",

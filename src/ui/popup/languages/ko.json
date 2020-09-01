@@ -24,19 +24,25 @@
 
   "setting.connections": "연결 관리",
   "setting.connections.paragraph": "지갑에 연결을 허용한 웹사이트를 관리합니다",
+  "setting.connections.confirm.delete-connection.title": "연결 삭제",
+  "setting.connections.confirm.delete-connection.paragraph": "이 연결을 삭제하시겠습니까?",
 
   "setting.address-book.button.add": "주소 추가",
   "setting.address-book.add-address.title": "주소 추가",
   "setting.address-book.edit-address.title": "주소 편집",
   "setting.address-book.name": "이름",
-  "setting.address-book.name.error.required": "이름을 입력하세요",
   "setting.address-book.address": "주소",
-  "setting.address-book.address.error.required": "주소를 입력하세요",
   "setting.address-book.address.error.invalid": "잘못된 주소입니다",
   "setting.address-book.memo": "기본 메모 (선택사항)",
+  "setting.address-book.confirm.delete-address.title": "주소 삭제",
+  "setting.address-book.confirm.delete-address.paragraph": "이 주소를 삭제하시겠습니까?",
   "setting.address-book.button.save": "저장",
 
   "setting.credit": "도움을 주신 분들",
+
+  "setting.keyring": "계정 선택",
+  "setting.keyring.button.add": "계정 추가",
+  "setting.keyring.unnamed-account": "케플러 계정",
 
   "setting.export": "니모닉 시드 보기",
   "setting.export.warning": "니모닉 시드를 보려면 패스워드를 입력하세요",
@@ -54,7 +60,14 @@
   "setting.clear.input.password.error.invalid": "잘못된 비밀번호입니다",
   "setting.clear.button.confirm": "확인",
 
+  "register.name": "계정 이름",
+  "register.name.error.required": "계정 이름을 입력하세요",
   "register.button.back": "뒤로",
+
+  "register.bip44.button.advanced": "고급",
+  "register.bip44.input.hd-path": "BIP44 HD 경로",
+  "register.bip44.confirm.clear": "고급 옵션을 닫으면 HD 경로가 초기화됩니다. 계속 진행하시겠습니까?",
+
   "register.intro.button.new-account.title": "계정 생성",
   "register.intro.button.new-account.content": "새로운 니모닉 시드로 계정을 생성하세요",
   "register.intro.button.import-account.title": "기존 계정 불러오기",
@@ -77,6 +90,8 @@
   "register.create.textarea.mnemonic.error.too-short": "니모닉 단어가 너무 적습니다",
   "register.create.button.next": "다음",
 
+  "register.ledger.title": "렛져 계정 불러오기",
+
   "register.verify.button.register": "등록",
 
   "register.welcome.title": "준비 완료!",
@@ -97,14 +112,12 @@
   "lock.button.unlock": "잠금 해제",
 
   "send.input.recipient": "받는 주소",
-  "send.input.recipient.error.required": "받는 주소를 입력하세요",
   "send.input.recipient.error.invalid": "잘못된 주소입니다",
   "send.input.recipient.error.ens-invalid-name": "잘못된 ENS 이름 형식입니다",
   "send.input.recipient.error.ens-not-found": "ENS 이름을 찾을 수 없습니다",
   "sned.input.recipient.error.ens-unknown-error": "ENS로부터 주소를 받는데 실패했습니다",
   "send.input.recipient.error.ens-not-supported": "이 체인에는 ENS가 지원되지 않습니다",
   "send.input.amount": "수량",
-  "send.input.amount.error.required": "수량을 입력하세요",
   "send.input.amount.error.insufficient": "자산이 부족합니다",
   "send.input.memo": "메모 (선택사항)",
   "send.input.fee": "수수료",
@@ -113,8 +126,6 @@
   "send.button.send": "보내기",
 
   "fee.input.gas": "가스",
-  "fee.input.gas.required": "가스를 입력하세요",
-  "fee.input.gas.invalid": "가스는 숫자여야 합니다",
   "fee.input.memo": "메모 (선택사항)",
   "fee.input.fee": "수수료",
   "fee.button.set": "수수료 설정",
@@ -138,5 +149,8 @@
 
   "fee-buttons.select.low": "느림",
   "fee-buttons.select.average": "평균",
-  "fee-buttons.select.high": "빠름"
+  "fee-buttons.select.high": "빠름",
+
+  "confirm.yes": "예",
+  "confirm.no": "아니요"
 }

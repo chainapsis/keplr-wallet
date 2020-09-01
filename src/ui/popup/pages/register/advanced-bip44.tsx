@@ -2,10 +2,13 @@ import React, { FunctionComponent, useState } from "react";
 import { Button, FormGroup, Input, Label } from "reactstrap";
 import { useConfirm } from "../../../components/confirm";
 import { useRegisterState } from "../../../contexts/register";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const AdvancedBIP44Option: FunctionComponent<{
   coinType?: number;
 }> = ({ coinType }) => {
+  const intl = useIntl();
+
   const registerState = useRegisterState();
   const confirm = useConfirm();
 
@@ -18,8 +21,9 @@ export const AdvancedBIP44Option: FunctionComponent<{
     if (isOpen) {
       if (
         await confirm.confirm({
-          paragraph:
-            "Closing this toggle will reset the HD Path. Are you sure you want to proceed?"
+          paragraph: intl.formatMessage({
+            id: "register.bip44.confirm.clear"
+          })
         })
       ) {
         setIsOpen(false);
@@ -44,12 +48,12 @@ export const AdvancedBIP44Option: FunctionComponent<{
           toggleOpen();
         }}
       >
-        Advanced
+        <FormattedMessage id="register.bip44.button.advanced" />
       </Button>
       {isOpen ? (
         <FormGroup>
           <Label target="bip44-path" className="form-control-label">
-            BIP44 HD Path
+            <FormattedMessage id="register.bip44.input.hd-path" />
           </Label>
           <div
             id="bip44-path"
