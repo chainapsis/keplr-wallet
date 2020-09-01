@@ -189,11 +189,7 @@ export const SignPage: FunctionComponent = observer(() => {
             <Button
               className={style.button}
               color="primary"
-              disabled={
-                signing.message == null ||
-                signing.message === "" ||
-                signing.initializing
-              }
+              disabled={true}
               outline
             >
               Waiting for Ledger to confirm{" "}
