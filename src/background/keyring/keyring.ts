@@ -24,7 +24,10 @@ export interface Key {
   address: Uint8Array;
 }
 
-export type MultiKeyStoreInfoElem = Pick<KeyStore, "version" | "type" | "meta">;
+export type MultiKeyStoreInfoElem = Pick<
+  KeyStore,
+  "version" | "type" | "meta" | "bip44HDPath"
+>;
 export type MultiKeyStoreInfo = MultiKeyStoreInfoElem[];
 export type MultiKeyStoreInfoWithSelectedElem = MultiKeyStoreInfoElem & {
   selected: boolean;
@@ -549,6 +552,7 @@ export class KeyRing {
         version: keyStore.version,
         type: keyStore.type,
         meta: keyStore.meta,
+        bip44HDPath: keyStore.bip44HDPath,
         selected: this.keyStore
           ? KeyRing.getKeyStoreId(keyStore) ===
             KeyRing.getKeyStoreId(this.keyStore)

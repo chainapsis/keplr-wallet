@@ -58,10 +58,25 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
           </div>
         </div>
         {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
+          const bip44HDPath = keyStore.bip44HDPath
+            ? keyStore.bip44HDPath
+            : {
+                account: 0,
+                change: 0,
+                addressIndex: 0
+              };
+
           return (
             <PageButton
               key={i.toString()}
               title={keyStore.meta?.name ? keyStore.meta.name : "Unnamed"}
+              paragraph={
+                keyStore.type === "ledger"
+                  ? `Ledger - m/44'/118'/${bip44HDPath.account}'`
+                  : keyStore.meta?.email
+                  ? keyStore.meta.email
+                  : undefined
+              }
               onClick={async e => {
                 e.preventDefault();
 
