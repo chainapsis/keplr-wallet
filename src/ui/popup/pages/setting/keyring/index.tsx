@@ -142,6 +142,7 @@ const KeyRingToolsIcon: FunctionComponent<{
         >
           {keyStore.type === "mnemonic" ? (
             <div
+              style={{ cursor: "pointer" }}
               onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -153,6 +154,7 @@ const KeyRingToolsIcon: FunctionComponent<{
             </div>
           ) : null}
           <div
+            style={{ cursor: "pointer" }}
             onClick={e => {
               e.preventDefault();
               e.stopPropagation();
@@ -164,16 +166,23 @@ const KeyRingToolsIcon: FunctionComponent<{
           </div>
         </PopoverBody>
       </Popover>
-      <i
+      <div
         id={tooltipId}
-        className="fas fa-ellipsis-h"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          height: "100%",
+          marginRight: "8px"
+        }}
         onClick={e => {
           e.preventDefault();
           e.stopPropagation();
 
           setIsOpen(true);
         }}
-      />
+      >
+        <i className="fas fa-ellipsis-h" />
+      </div>
     </React.Fragment>
   );
 };
