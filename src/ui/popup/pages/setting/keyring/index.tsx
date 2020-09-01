@@ -29,6 +29,34 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
       }, [history])}
     >
       <div className={style.container}>
+        <div className={style.innerTopContainer}>
+          <div style={{ flex: 1 }} />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center"
+            }}
+          >
+            <Button
+              color="primary"
+              size="sm"
+              onClick={e => {
+                e.preventDefault();
+
+                browser.tabs.create({
+                  url: "/popup.html#/register?mode=add"
+                });
+              }}
+            >
+              <i
+                className="fas fa-plus"
+                style={{ marginRight: "4px", fontSize: "8px" }}
+              />
+              Add
+            </Button>
+          </div>
+        </div>
         {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
           return (
             <PageButton
@@ -52,19 +80,6 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
             />
           );
         })}
-        <Button
-          color="primary"
-          block
-          onClick={e => {
-            e.preventDefault();
-
-            browser.tabs.create({
-              url: "/popup.html#/register?mode=add"
-            });
-          }}
-        >
-          Add Account
-        </Button>
       </div>
     </HeaderLayout>
   );
