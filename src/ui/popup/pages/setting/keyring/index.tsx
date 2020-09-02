@@ -178,12 +178,11 @@ const KeyRingToolsIcon: FunctionComponent<{
         </PopoverBody>
       </Popover>
       <div
-        id={tooltipId}
         style={{
           display: "flex",
           alignItems: "center",
           height: "100%",
-          marginRight: "8px",
+          padding: "0 8px",
           cursor: "pointer"
         }}
         onClick={e => {
@@ -193,7 +192,7 @@ const KeyRingToolsIcon: FunctionComponent<{
           setIsOpen(true);
         }}
       >
-        <i className="fas fa-ellipsis-h" />
+        <i id={tooltipId} className="fas fa-ellipsis-h" />
       </div>
     </React.Fragment>
   );
