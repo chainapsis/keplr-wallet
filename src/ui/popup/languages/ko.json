@@ -43,6 +43,7 @@
   "setting.keyring": "계정 선택",
   "setting.keyring.button.add": "계정 추가",
   "setting.keyring.unnamed-account": "케플러 계정",
+  "setting.keyring.selected-account": "(선택됨)",
 
   "setting.export": "니모닉 시드 보기",
   "setting.export.warning": "니모닉 시드를 보려면 패스워드를 입력하세요",

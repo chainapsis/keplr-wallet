@@ -72,13 +72,19 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
           return (
             <PageButton
               key={i.toString()}
-              title={
+              title={`${
                 keyStore.meta?.name
                   ? keyStore.meta.name
                   : intl.formatMessage({
                       id: "setting.keyring.unnamed-account"
                     })
-              }
+              } ${
+                keyStore.selected
+                  ? intl.formatMessage({
+                      id: "setting.keyring.selected-account"
+                    })
+                  : ""
+              }`}
               paragraph={
                 keyStore.type === "ledger"
                   ? `Ledger - m/44'/118'/${bip44HDPath.account}'`
@@ -86,18 +92,23 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                   ? keyStore.meta.email
                   : undefined
               }
-              onClick={async e => {
-                e.preventDefault();
+              onClick={
+                keyStore.selected
+                  ? undefined
+                  : async e => {
+                      e.preventDefault();
 
-                loadingIndicator.setIsLoading("keyring", true);
-                try {
-                  await keyRingStore.changeKeyRing(i);
-                  await keyRingStore.save();
-                  history.push("/");
-                } finally {
-                  loadingIndicator.setIsLoading("keyring", false);
-                }
-              }}
+                      loadingIndicator.setIsLoading("keyring", true);
+                      try {
+                        await keyRingStore.changeKeyRing(i);
+                        await keyRingStore.save();
+                        history.push("/");
+                      } finally {
+                        loadingIndicator.setIsLoading("keyring", false);
+                      }
+                    }
+              }
+              style={keyStore.selected ? { cursor: "default" } : undefined}
               icons={[
                 <KeyRingToolsIcon key="tools" index={i} keyStore={keyStore} />
               ]}
@@ -172,7 +183,8 @@ const KeyRingToolsIcon: FunctionComponent<{
           display: "flex",
           alignItems: "center",
           height: "100%",
-          marginRight: "8px"
+          marginRight: "8px",
+          cursor: "pointer"
         }}
         onClick={e => {
           e.preventDefault();

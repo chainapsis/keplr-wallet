@@ -45,6 +45,7 @@
   "setting.keyring": "Select Account",
   "setting.keyring.button.add": "Add Account",
   "setting.keyring.unnamed-account": "Keplr Account",
+  "setting.keyring.selected-account": "(Selected)",
 
   "setting.export": "View Mnemonic Seed",
   "setting.export.warning": "Please input your password to proceed",
