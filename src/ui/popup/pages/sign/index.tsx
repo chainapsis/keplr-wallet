@@ -17,7 +17,7 @@ import { useSignature } from "../../../hooks";
 import classnames from "classnames";
 import { DataTab } from "./data-tab";
 import { DetailsTab } from "./details-tab";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   disableScroll,
   enableScroll,
@@ -192,7 +192,7 @@ export const SignPage: FunctionComponent = observer(() => {
               disabled={true}
               outline
             >
-              Waiting for Ledger to confirm{" "}
+              <FormattedMessage id="sign.button.confirm-ledger" />{" "}
               <i className="fa fa-spinner fa-spin fa-fw" />
             </Button>
           ) : (

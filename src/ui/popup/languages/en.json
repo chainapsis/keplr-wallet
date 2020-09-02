@@ -139,6 +139,7 @@
   "sign.info.memo": "Memo",
   "sign.button.approve": "Approve",
   "sign.button.reject": "Reject",
+  "sign.button.confirm-ledger": "Waiting for Ledger to confirm",
 
   "sign.list.message.cosmos-sdk/MsgSend.title": "Send",
   "sign.list.message.cosmos-sdk/MsgSend.content": "<b>{recipient}</b> will receive <b>{amount}</b>",
@@ -148,6 +149,17 @@
   "sign.list.message.cosmos-sdk/MsgUndelegate.content": "Undelegate <b>{amount}</b> from <b>{validator}</b>{br}Asset will be liquid after unbonding period",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Claim Staking Reward",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
+
+  "ledger.step1": "Step 1",
+  "ledger.step1.paragraph": "Connect and unlock your Ledger.",
+  "ledger.step2": "Step 2",
+  "ledger.step2.paragraph": "Open the Cosmos app on your Ledger device.",
+  "ledger.button.next": "Next",
+  "ledger.confirm.waiting.paragraph": "Waiting for confirmation on Ledger device",
+  "ledger.confirm.success": "Success",
+  "ledger.confirm.success.paragraph": "This page will automatically close in 3 seconds",
+  "ledger.confirm.rejected": "Rejected by Ledger",
+  "ledger.confirm.rejected.paragraph": "This page will automatically close in 3 seconds",
 
   "fee-buttons.select.low": "Low",
   "fee-buttons.select.average": "Average",

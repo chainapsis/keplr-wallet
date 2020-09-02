@@ -137,6 +137,7 @@
   "sign.info.memo": "메모",
   "sign.button.approve": "허락",
   "sign.button.reject": "거부",
+  "sign.button.confirm-ledger": "렛저를 확인하세요",
 
   "sign.list.message.cosmos-sdk/MsgSend.title": "보내기",
   "sign.list.message.cosmos-sdk/MsgSend.content": "<b>{recipient}</b>가 <b>{amount}</b>를 받을 것입니다",
@@ -146,6 +147,17 @@
   "sign.list.message.cosmos-sdk/MsgUndelegate.content": "<b>{validator}</b>로부터 <b>{amount}</b>를 위임해제합니다{br}자산은 언본딩 기간 이후 지급됩니다",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "스테이킹 보상 요청",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "<b>{validator}</b>에게 위임된 스테이킹 보상을 요청합니다",
+
+  "ledger.step1": "1 단계",
+  "ledger.step1.paragraph": "렛저를 연결하고 잠금을 해제하세요",
+  "ledger.step2": "2 단계",
+  "ledger.step2.paragraph": "렛저에서 Cosmos 앱을 실행하세요",
+  "ledger.button.next": "다음",
+  "ledger.confirm.waiting.paragraph": "렛저 디바이스에서의 확인을 기다리는 중...",
+  "ledger.confirm.success": "성공",
+  "ledger.confirm.success.paragraph": "이 페이지는 3초 후 자동으로 닫힙니다",
+  "ledger.confirm.rejected": "거부됨",
+  "ledger.confirm.rejected.paragraph": "이 페이지는 3초 후 자동으로 닫힙니다",
 
   "fee-buttons.select.low": "느림",
   "fee-buttons.select.average": "평균",

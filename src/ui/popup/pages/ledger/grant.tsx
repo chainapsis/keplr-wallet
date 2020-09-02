@@ -16,12 +16,15 @@ import { EmptyLayout } from "../../layouts/empty-layout";
 import { disableScroll, fitWindow } from "../../../../common/window";
 
 import classnames from "classnames";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const LedgerGrantPage: FunctionComponent = () => {
   useEffect(() => {
     disableScroll();
     fitWindow();
   }, []);
+
+  const intl = useIntl();
 
   const [signCompleted, setSignCompleted] = useState(false);
   const [signRejected, setSignRejected] = useState(false);
@@ -98,21 +101,10 @@ export const LedgerGrantPage: FunctionComponent = () => {
                 alt="usb"
               />
             }
-            title="Step 1"
-            paragraph="Connect and unlock your Ledger, then grant permission on the browser."
+            title={intl.formatMessage({ id: "ledger.step1" })}
+            paragraph={intl.formatMessage({ id: "ledger.step1.paragraph" })}
             pass={initTryCount > 0 && initErrorOn === LedgerInitErrorOn.App}
-          >
-            <Button
-              size="sm"
-              color="primary"
-              onClick={async e => {
-                e.preventDefault();
-                await tryInit();
-              }}
-            >
-              Grant Permission
-            </Button>
-          </Instruction>
+          />
           <Instruction
             icon={
               <img
@@ -121,8 +113,8 @@ export const LedgerGrantPage: FunctionComponent = () => {
                 alt="atom"
               />
             }
-            title="Step 2"
-            paragraph="Open the Cosmos app on your Ledger device."
+            title={intl.formatMessage({ id: "ledger.step2" })}
+            paragraph={intl.formatMessage({ id: "ledger.step2.paragraph" })}
             pass={initTryCount > 0 && initErrorOn == null}
           />
           <div style={{ flex: 1 }} />
@@ -135,7 +127,7 @@ export const LedgerGrantPage: FunctionComponent = () => {
             }}
             data-loading={tryInitializing}
           >
-            Next
+            <FormattedMessage id="ledger.button.next" />
           </Button>
         </div>
       )}
@@ -159,7 +151,9 @@ const ConfirmLedgerDialog: FunctionComponent = () => {
           alt="pen"
         />
       </div>
-      <p>Waiting for confirmation on Ledger device</p>
+      <p>
+        <FormattedMessage id="ledger.confirm.waiting.paragraph" />
+      </p>
       <div
         style={{
           flex: 1,
@@ -177,6 +171,8 @@ const ConfirmLedgerDialog: FunctionComponent = () => {
 const SignCompleteDialog: FunctionComponent<{
   rejected: boolean;
 }> = ({ rejected }) => {
+  const intl = useIntl();
+
   return (
     <div className={style.signCompleteDialog}>
       <div
@@ -199,7 +195,11 @@ const SignCompleteDialog: FunctionComponent<{
           />
         )}
       </div>
-      <p>{!rejected ? "Success" : "Rejected by Ledger"}</p>
+      <p>
+        {!rejected
+          ? intl.formatMessage({ id: "ledger.confirm.success" })
+          : intl.formatMessage({ id: "ledger.confirm.rejected" })}
+      </p>
       <div
         style={{
           flex: 1,
@@ -209,7 +209,9 @@ const SignCompleteDialog: FunctionComponent<{
         }}
       >
         <div className={style.subParagraph}>
-          This page will automatically close in 3 seconds
+          {!rejected
+            ? intl.formatMessage({ id: "ledger.confirm.success.paragraph" })
+            : intl.formatMessage({ id: "ledger.confirm.rejected.paragraph" })}
         </div>
       </div>
     </div>
