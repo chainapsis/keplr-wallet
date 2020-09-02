@@ -147,6 +147,8 @@
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "Delegate <b>{amount}</b> to <b>{validator}</b>",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "Undelegate",
   "sign.list.message.cosmos-sdk/MsgUndelegate.content": "Undelegate <b>{amount}</b> from <b>{validator}</b>{br}Asset will be liquid after unbonding period",
+  "sign.list.message.cosmos-sdk/MsgBeginRedelegate.title": "Redelegate",
+  "sign.list.message.cosmos-sdk/MsgBeginRedelegate.content": "Redelegate <b>{amount}</b> from <b>{fromValidator}</b> to <b>{toValidator}</b>",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Claim Staking Reward",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
 

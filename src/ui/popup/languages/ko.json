@@ -145,6 +145,8 @@
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "<b>{validator}</b>에게 <b>{amount}</b>를 위임합니다",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "위임 해제",
   "sign.list.message.cosmos-sdk/MsgUndelegate.content": "<b>{validator}</b>로부터 <b>{amount}</b>를 위임해제합니다{br}자산은 언본딩 기간 이후 지급됩니다",
+  "sign.list.message.cosmos-sdk/MsgBeginRedelegate.title": "재위임",
+  "sign.list.message.cosmos-sdk/MsgBeginRedelegate.content": "<b>{fromValidator}</b>로부터 <b>{toValidator}</b>에게 <b>{amount}</b>를 재위임합니다",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "스테이킹 보상 요청",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "<b>{validator}</b>에게 위임된 스테이킹 보상을 요청합니다",
 

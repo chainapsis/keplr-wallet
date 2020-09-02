@@ -55,11 +55,25 @@ interface MsgWithdrawDelegatorReward {
   };
 }
 
+interface MsgBeginRedelegate {
+  type: "cosmos-sdk/MsgBeginRedelegate";
+  value: {
+    amount: {
+      amount: string;
+      denom: string;
+    };
+    delegator_address: string;
+    validator_dst_address: string;
+    validator_src_address: string;
+  };
+}
+
 type Messages =
   | MsgSend
   | MsgDelegate
   | MsgUndelegate
-  | MsgWithdrawDelegatorReward;
+  | MsgWithdrawDelegatorReward
+  | MsgBeginRedelegate;
 
 // Type guard for messages.
 function MessageType<T extends Messages>(
@@ -112,7 +126,7 @@ export function renderMessage(
     };
   }
 
-  if (MessageType<MsgDelegate>(msg, "cosmos-sdk/MsgDelegate")) {
+  if (MessageType<MsgBeginRedelegate>(msg, "cosmos-sdk/MsgBeginRedelegate")) {
     const parsed = CoinUtils.parseDecAndDenomFromCoin(
       new Coin(msg.value.amount.denom, msg.value.amount.amount)
     );
@@ -120,14 +134,15 @@ export function renderMessage(
     return {
       icon: "fas fa-layer-group",
       title: intl.formatMessage({
-        id: "sign.list.message.cosmos-sdk/MsgDelegate.title"
+        id: "sign.list.message.cosmos-sdk/MsgBeginRedelegate.title"
       }),
       content: (
         <FormattedMessage
-          id="sign.list.message.cosmos-sdk/MsgDelegate.content"
+          id="sign.list.message.cosmos-sdk/MsgBeginRedelegate.content"
           values={{
             b: (...chunks: any[]) => <b>{chunks}</b>,
-            validator: shortenAddress(msg.value.validator_address, 24),
+            fromValidator: shortenAddress(msg.value.validator_src_address, 24),
+            toValidator: shortenAddress(msg.value.validator_dst_address, 24),
             amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`
           }}
         />
@@ -151,6 +166,29 @@ export function renderMessage(
           values={{
             b: (...chunks: any[]) => <b>{chunks}</b>,
             br: <br />,
+            validator: shortenAddress(msg.value.validator_address, 24),
+            amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`
+          }}
+        />
+      )
+    };
+  }
+
+  if (MessageType<MsgDelegate>(msg, "cosmos-sdk/MsgDelegate")) {
+    const parsed = CoinUtils.parseDecAndDenomFromCoin(
+      new Coin(msg.value.amount.denom, msg.value.amount.amount)
+    );
+
+    return {
+      icon: "fas fa-layer-group",
+      title: intl.formatMessage({
+        id: "sign.list.message.cosmos-sdk/MsgDelegate.title"
+      }),
+      content: (
+        <FormattedMessage
+          id="sign.list.message.cosmos-sdk/MsgDelegate.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
             validator: shortenAddress(msg.value.validator_address, 24),
             amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`
           }}
