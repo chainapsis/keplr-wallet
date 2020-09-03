@@ -9,13 +9,13 @@ import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
 
 import { Currency, getCurrencyFromDenom } from "../../../common/currency";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { FormFeedback, FormGroup, Input, InputGroup, Label } from "reactstrap";
 import { useTxState } from "../../contexts/tx";
 import { DecUtils } from "../../../common/dec-utils";
 import { CoinUtils } from "../../../common/coin-utils";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { Int } from "@chainapsis/cosmosjs/common/int";
 
 const ErrorIdInsufficient = "insufficient";
 

@@ -1,8 +1,8 @@
 import React from "react";
 
 import { Currency, FiatCurrency } from "./common/currency";
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
-import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 import { ChainInfo, AccessOrigin } from "./background/chains";
 
 import {
@@ -20,7 +20,9 @@ import {
   SECRET_NETWORK_RPC_CONFIG,
   SECRET_NETWORK_RPC_ENDPOINT,
   ADDITIONAL_SIGN_IN_PREPEND,
-  ADDITIONAL_INTL_MESSAGES
+  ADDITIONAL_INTL_MESSAGES,
+  BETA_CYBER_NETWORK_REST_ENDPOINT,
+  BETA_CYBER_NETWORK_RPC_ENDPOINT
 } from "./config.var";
 import { IntlMessages } from "./ui/popup/language";
 
@@ -100,6 +102,26 @@ export const EmbedChainInfos: ChainInfo[] = [
     currencies: ["secret"],
     feeCurrencies: ["secret"],
     coinType: 529
+  },
+  {
+    rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
+    rest: BETA_CYBER_NETWORK_REST_ENDPOINT,
+    chainId: "euler-6",
+    chainName: "Cyber",
+    nativeCurrency: "cyber",
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/euler-6/stake"
+        : "http://localhost:8081/#/euler-6/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/euler-6/stake"
+        : "http://localhost:8081/#/euler-6/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("cyber"),
+    currencies: ["cyber"],
+    feeCurrencies: ["cyber"],
+    beta: true
   }
 ];
 
@@ -119,6 +141,11 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
   },
   {
     chainId: "secret-1",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "euler-6",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
@@ -146,6 +173,11 @@ export const Currencies: {
     coinDenom: "SCRT",
     coinMinimalDenom: "uscrt",
     coinDecimals: 6
+  },
+  cyber: {
+    coinDenom: "EUL",
+    coinMinimalDenom: "eul",
+    coinDecimals: 0
   }
 };
 

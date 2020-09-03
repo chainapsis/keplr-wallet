@@ -8,8 +8,8 @@ const EventEmitter = require("events").EventEmitter;
 
 import { ChainsKeeper } from "../chains/keeper";
 import { init as chainsInit } from "../chains/init";
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
-import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import { KeyRingKeeper } from "./keeper";
 import { init } from "./init";
@@ -17,9 +17,9 @@ import { sendMessage } from "../../common/message/send/mock";
 import {
   ApproveSignMsg,
   ApproveTxBuilderConfigMsg,
-  ClearKeyRingMsg,
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
+  DeleteKeyRingMsg,
   EnableKeyRingMsg,
   GetKeyMsg,
   LockKeyRingMsg,
@@ -27,7 +27,6 @@ import {
   RejectTxBuilderConfigMsg,
   RequestSignMsg,
   RequestTxBuilderConfigMsg,
-  SetPathMsg,
   ShowKeyRingMsg,
   UnlockKeyRingMsg
 } from "./messages";
@@ -86,6 +85,7 @@ describe("Test keyring handler", () => {
     const keeper = new KeyRingKeeper(
       new MemoryKVStore("keyring"),
       chainsKeeper,
+      undefined as any,
       (): void => {},
       0
     );
@@ -160,7 +160,13 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
     );
 
@@ -231,7 +237,13 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
     );
 
@@ -317,7 +329,13 @@ describe("Test keyring handler", () => {
         port,
         new CreateMnemonicKeyMsg(
           "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-          "password"
+          "password",
+          {},
+          {
+            account: 0,
+            change: 0,
+            addressIndex: 0
+          }
         )
       );
     }, new Error("Key ring is not loaded or not empty"));
@@ -345,7 +363,13 @@ describe("Test keyring handler", () => {
         port,
         new CreateMnemonicKeyMsg(
           "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-          "password"
+          "password",
+          {},
+          {
+            account: 0,
+            change: 0,
+            addressIndex: 0
+          }
         )
       );
     }, new Error("Permission rejected"));
@@ -360,32 +384,14 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
-      )
-    );
-
-    await assert.rejects(async () => {
-      await sendMessage(
+        "password",
+        {},
         {
-          emitter,
-          id: extensionId,
-          url: extensionBaseURL,
-          origin: internalOrigin
-        },
-        port,
-        new GetKeyMsg("test-1")
-      );
-    });
-
-    await sendMessage(
-      {
-        emitter,
-        id: extensionId,
-        url: extensionBaseURL,
-        origin: internalOrigin
-      },
-      port,
-      new SetPathMsg("test-1", 0, 0)
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
+      )
     );
 
     let result = await sendMessage(
@@ -448,7 +454,8 @@ describe("Test keyring handler", () => {
         port,
         new CreatePrivateKeyMsg(
           "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-          "password"
+          "password",
+          {}
         )
       );
     }, new Error("Key ring is not loaded or not empty"));
@@ -476,7 +483,8 @@ describe("Test keyring handler", () => {
         port,
         new CreatePrivateKeyMsg(
           "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-          "password"
+          "password",
+          {}
         )
       );
     }, new Error("Permission rejected"));
@@ -491,35 +499,9 @@ describe("Test keyring handler", () => {
       port,
       new CreatePrivateKeyMsg(
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-        "password"
+        "password",
+        {}
       )
-    );
-
-    // Will throw an error if path is not set.
-    await assert.rejects(async () => {
-      await sendMessage(
-        {
-          emitter,
-          id: extensionId,
-          url: extensionBaseURL,
-          origin: internalOrigin
-        },
-        port,
-        new GetKeyMsg("test-1")
-      );
-    });
-
-    // Can't set path on private key mode even though it will not throw any error.
-    // But, path will be ignored.
-    await sendMessage(
-      {
-        emitter,
-        id: extensionId,
-        url: extensionBaseURL,
-        origin: internalOrigin
-      },
-      port,
-      new SetPathMsg("test-1", 0, 0)
     );
 
     let result = await sendMessage(
@@ -536,18 +518,6 @@ describe("Test keyring handler", () => {
     assert.strictEqual(
       result.bech32Address,
       "cosmos1m3y35cl0tlxqcuzkce6ld7ww0st0j4ra846wwh"
-    );
-
-    // Set other path.
-    await sendMessage(
-      {
-        emitter,
-        id: extensionId,
-        url: extensionBaseURL,
-        origin: internalOrigin
-      },
-      port,
-      new SetPathMsg("test-1", 50, 50)
     );
 
     result = await sendMessage(
@@ -597,7 +567,7 @@ describe("Test keyring handler", () => {
     }, new Error("This origin is not approved"));
   });
 
-  it("Test keyring clearing", async () => {
+  /* it("Test keyring clearing", async () => {
     const testClear = async () => {
       await assert.rejects(async () => {
         await sendMessage(
@@ -658,7 +628,8 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -674,12 +645,13 @@ describe("Test keyring handler", () => {
       port,
       new CreatePrivateKeyMsg(
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-        "password"
+        "password",
+        {}
       )
     );
 
     await testClear();
-  });
+  });*/
 
   it("Test show keyring", async () => {
     const testShow = async (expected: string) => {
@@ -692,9 +664,9 @@ describe("Test keyring handler", () => {
             origin: internalOrigin
           },
           port,
-          new ShowKeyRingMsg("invalid-password")
+          new ShowKeyRingMsg(0, "invalid-password")
         );
-      }, new Error("Unmatched mac"));
+      }, new Error("Invalid password"));
 
       await assert.rejects(async () => {
         await sendMessage(
@@ -705,7 +677,7 @@ describe("Test keyring handler", () => {
             origin: "http://test.com"
           },
           port,
-          new ShowKeyRingMsg("password")
+          new ShowKeyRingMsg(0, "password")
         );
       }, new Error("Permission rejected"));
 
@@ -717,7 +689,7 @@ describe("Test keyring handler", () => {
           origin: internalOrigin
         },
         port,
-        new ShowKeyRingMsg("password")
+        new ShowKeyRingMsg(0, "password")
       );
 
       assert.strictEqual(result, expected);
@@ -744,7 +716,13 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
     );
 
@@ -760,7 +738,7 @@ describe("Test keyring handler", () => {
         origin: internalOrigin
       },
       port,
-      new ClearKeyRingMsg("password")
+      new DeleteKeyRingMsg(0, "password")
     );
 
     await sendMessage(
@@ -773,7 +751,8 @@ describe("Test keyring handler", () => {
       port,
       new CreatePrivateKeyMsg(
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
-        "password"
+        "password",
+        {}
       )
     );
 
@@ -930,19 +909,14 @@ describe("Test keyring handler", () => {
       port,
       new CreateMnemonicKeyMsg(
         "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-        "password"
+        "password",
+        {},
+        {
+          account: 0,
+          change: 0,
+          addressIndex: 0
+        }
       )
-    );
-
-    await sendMessage(
-      {
-        emitter,
-        id: extensionId,
-        url: extensionBaseURL,
-        origin: internalOrigin
-      },
-      port,
-      new SetPathMsg("test-1", 0, 0)
     );
 
     // Only internal access can skip approving.

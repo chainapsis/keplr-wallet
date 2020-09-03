@@ -4,26 +4,27 @@ import styleWarningView from "./warning-view.module.scss";
 import { Alert, Button } from "reactstrap";
 import { useHistory } from "react-router";
 import { FormattedMessage } from "react-intl";
-import { observer } from "mobx-react";
-import { useStore } from "../../../stores";
 
-export const WarningView: FunctionComponent = observer(() => {
+import { MultiKeyStoreInfoWithSelectedElem } from "../../../../../background/keyring/keyring";
+
+export const WarningView: FunctionComponent<{
+  index: number;
+  keyStore: MultiKeyStoreInfoWithSelectedElem;
+}> = ({ index, keyStore }) => {
   const history = useHistory();
-
-  const { keyRingStore } = useStore();
 
   const onBackUpMnemonicButtonClick = useCallback(
     (e: MouseEvent) => {
       e.preventDefault();
 
-      history.push("/setting/export");
+      history.push(`/setting/export/${index}`);
     },
-    [history]
+    [history, index]
   );
 
   return (
     <div className={styleWarningView.innerContainer}>
-      {keyRingStore.keyRingType === "mnemonic" ? (
+      {keyStore.type === "mnemonic" ? (
         <Alert color="warning" fade={false}>
           <div>
             <FormattedMessage id="setting.clear.alert" />
@@ -50,4 +51,4 @@ export const WarningView: FunctionComponent = observer(() => {
       </div>
     </div>
   );
-});
+};

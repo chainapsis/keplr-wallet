@@ -8,7 +8,7 @@ import {
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
 
-import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
 import {
   txBuilderConfigFromPrimitive,
   txBuilderConfigToPrimitive

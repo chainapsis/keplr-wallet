@@ -9,8 +9,8 @@ import React, {
 import styleFeeButtons from "./fee-buttons.module.scss";
 
 import { Currency } from "../../../common/currency";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { CoinUtils } from "../../../common/coin-utils";
 import { DecUtils } from "../../../common/dec-utils";
 import {

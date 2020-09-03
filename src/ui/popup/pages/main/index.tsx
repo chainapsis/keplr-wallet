@@ -12,10 +12,38 @@ import { AssetView } from "./asset";
 import { StakeView } from "./stake";
 
 import classnames from "classnames";
+import { useHistory } from "react-router";
 
 export const MainPage: FunctionComponent = () => {
+  const history = useHistory();
+
   return (
-    <HeaderLayout showChainName canChangeChainInfo menuRenderer={<Menu />}>
+    <HeaderLayout
+      showChainName
+      canChangeChainInfo
+      menuRenderer={<Menu />}
+      rightRenderer={
+        <div
+          style={{
+            height: "64px",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            paddingRight: "24px",
+            cursor: "pointer"
+          }}
+        >
+          <i
+            className="fas fa-user"
+            onClick={e => {
+              e.preventDefault();
+
+              history.push("/setting/set-keyring");
+            }}
+          />
+        </div>
+      }
+    >
       <Card className={classnames(style.card, "shadow")}>
         <CardBody>
           <div className={style.containerAccountInner}>

@@ -3,7 +3,7 @@ import "mocha";
 
 import { KeyRing, KeyRingStatus } from "./keyring";
 import { MemoryKVStore } from "../../common/kvstore/memory";
-import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 
 describe("Test keyring", () => {
   let keyRing: KeyRing;
@@ -20,7 +20,7 @@ describe("Test keyring", () => {
   };
 
   beforeEach(() => {
-    keyRing = new KeyRing(new MemoryKVStore("test"));
+    keyRing = new KeyRing(new MemoryKVStore("test"), undefined as any);
   });
 
   it("Status of keyring should be not loaded before loading", () => {
@@ -41,7 +41,13 @@ describe("Test keyring", () => {
 
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-      "password"
+      "password",
+      {},
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      }
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -49,7 +55,7 @@ describe("Test keyring", () => {
 
     assert.strictEqual(keyRing.canSetPath, true);
 
-    const key = keyRing.getKey("m/44'/118'/0'/0/0");
+    const key = await keyRing.getKey(118);
 
     assert.strictEqual(
       new AccAddress(key.address, "cosmos").toBech32(),
@@ -67,7 +73,8 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
         "hex"
       ),
-      "password"
+      "password",
+      {}
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -76,7 +83,7 @@ describe("Test keyring", () => {
     assert.strictEqual(keyRing.canSetPath, false);
 
     // Path will be ignored if it is on private key mode.
-    const key = keyRing.getKey("m/44'/118'/0'/0/0");
+    const key = await keyRing.getKey(118);
 
     assert.strictEqual(
       new AccAddress(key.address, "cosmos").toBech32(),
@@ -91,7 +98,13 @@ describe("Test keyring", () => {
 
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-      "password"
+      "password",
+      {},
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      }
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -123,7 +136,8 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
         "hex"
       ),
-      "password"
+      "password",
+      {}
     );
 
     assert.strictEqual(keyRing.status, KeyRingStatus.UNLOCKED);
@@ -152,15 +166,21 @@ describe("Test keyring", () => {
 
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-      "password"
+      "password",
+      {},
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      }
     );
 
     await assert.rejects(async () => {
-      await keyRing.showKeyRing("invalid-password");
+      await keyRing.showKeyRing(0, "invalid-password");
     });
 
     await assert.doesNotReject(async () => {
-      const result = await keyRing.showKeyRing("password");
+      const result = await keyRing.showKeyRing(0, "password");
 
       assert.strictEqual(
         result,
@@ -179,15 +199,16 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
         "hex"
       ),
-      "password"
+      "password",
+      {}
     );
 
     await assert.rejects(async () => {
-      await keyRing.showKeyRing("invalid-password");
+      await keyRing.showKeyRing(0, "invalid-password");
     });
 
     await assert.doesNotReject(async () => {
-      const result = await keyRing.showKeyRing("password");
+      const result = await keyRing.showKeyRing(0, "password");
 
       assert.strictEqual(
         result,
@@ -203,15 +224,21 @@ describe("Test keyring", () => {
 
     await keyRing.createMnemonicKey(
       "estate trim mixture pull annual unfold napkin runway wisdom web bridge main",
-      "password"
+      "password",
+      {},
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0
+      }
     );
 
     await assert.rejects(async () => {
-      await keyRing.clear("invalid-password");
+      await keyRing.deleteKeyRing(0, "invalid-password");
     });
 
     await assert.doesNotReject(async () => {
-      await keyRing.clear("password");
+      await keyRing.deleteKeyRing(0, "password");
     });
 
     assert.strictEqual(keyRing.status, KeyRingStatus.EMPTY);
@@ -228,15 +255,16 @@ describe("Test keyring", () => {
         "b48c37e10017645264f985ac118b59448bf3d280ed5ed6674440dc7a4a452d81",
         "hex"
       ),
-      "password"
+      "password",
+      {}
     );
 
     await assert.rejects(async () => {
-      await keyRing.clear("invalid-password");
+      await keyRing.deleteKeyRing(0, "invalid-password");
     });
 
     await assert.doesNotReject(async () => {
-      await keyRing.clear("password");
+      await keyRing.deleteKeyRing(0, "password");
     });
 
     assert.strictEqual(keyRing.status, KeyRingStatus.EMPTY);

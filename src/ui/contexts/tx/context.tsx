@@ -8,10 +8,10 @@ import React, {
   useState
 } from "react";
 
-import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { Currency } from "../../../common/currency";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { Int } from "@chainapsis/cosmosjs/common/int";
 
 type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 

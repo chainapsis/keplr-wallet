@@ -14,24 +14,21 @@ import { observer } from "mobx-react";
 
 import styleStake from "./stake.module.scss";
 import classnames from "classnames";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 import {
   getCurrency,
   getCurrencyFromMinimalDenom
 } from "../../../../common/currency";
 import { Currency } from "../../../../common/currency";
-import { Msg } from "@everett-protocol/cosmosjs/core/tx";
-import { MsgWithdrawDelegatorReward } from "@everett-protocol/cosmosjs/x/distribution";
-import {
-  AccAddress,
-  ValAddress
-} from "@everett-protocol/cosmosjs/common/address";
+import { Msg } from "@chainapsis/cosmosjs/core/tx";
+import { MsgWithdrawDelegatorReward } from "@chainapsis/cosmosjs/x/distribution";
+import { AccAddress, ValAddress } from "@chainapsis/cosmosjs/common/address";
 import { useCosmosJS } from "../../../hooks";
 import { PopupWalletProvider } from "../../wallet-provider";
-import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
 import bigInteger from "big-integer";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
+import { Int } from "@chainapsis/cosmosjs/common/int";
 import { CoinUtils } from "../../../../common/coin-utils";
 
 import { useNotification } from "../../../components/notification";

@@ -1,5 +1,5 @@
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
-import { Bech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import { AxiosRequestConfig } from "axios";
 
@@ -31,6 +31,13 @@ export interface ChainInfo {
    * This is used for fetching address from ENS if this field is set.
    */
   readonly coinType?: number;
+
+  /**
+   * Shows whether the blockchain is in production phase or beta phase.
+   * Major features such as staking and sending are supported on staging blockchains, but without guarantee.
+   * If the blockchain is in an early stage, please set it as beta.
+   */
+  readonly beta?: boolean;
 }
 
 export interface AccessOrigin {

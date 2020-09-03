@@ -1,6 +1,7 @@
 import scrypt from "scrypt-js";
 import AES, { Counter } from "aes-js";
 import { sha256 } from "sha.js";
+import { BIP44HDPath } from "./types";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -22,7 +23,11 @@ export interface KeyStore {
    * Type can be "mnemonic" or "privateKey".
    * Below version "1", type is not defined and it is considered as "mnemonic".
    */
-  type?: "mnemonic" | "privateKey";
+  type?: "mnemonic" | "privateKey" | "ledger";
+  bip44HDPath?: BIP44HDPath;
+  meta?: {
+    [key: string]: string;
+  };
   crypto: {
     cipher: "aes-128-ctr";
     cipherparams: {
@@ -37,9 +42,11 @@ export interface KeyStore {
 
 export class Crypto {
   public static async encrypt(
-    type: "mnemonic" | "privateKey",
+    type: "mnemonic" | "privateKey" | "ledger",
     text: string,
-    password: string
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath?: BIP44HDPath
   ): Promise<KeyStore> {
     let random = new Uint8Array(32);
     crypto.getRandomValues(random);
@@ -70,6 +77,8 @@ export class Crypto {
     return {
       version: "1.1",
       type,
+      bip44HDPath,
+      meta,
       crypto: {
         cipher: "aes-128-ctr",
         cipherparams: {

@@ -1,6 +1,6 @@
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
+import { Int } from "@chainapsis/cosmosjs/common/int";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 import {
   Currency,
   getCurrencyFromDenom,

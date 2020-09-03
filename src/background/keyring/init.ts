@@ -5,7 +5,6 @@ import {
   SaveKeyRingMsg,
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
-  SetPathMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
   RequestSignMsg,
@@ -15,11 +14,17 @@ import {
   ApproveSignMsg,
   RejectSignMsg,
   LockKeyRingMsg,
-  ClearKeyRingMsg,
+  DeleteKeyRingMsg,
   ShowKeyRingMsg,
   RequestTxBuilderConfigMsg,
   GetRequestedTxBuilderConfigMsg,
-  GetKeyRingTypeMsg
+  GetKeyRingTypeMsg,
+  AddMnemonicKeyMsg,
+  AddPrivateKeyMsg,
+  GetMultiKeyStoreInfoMsg,
+  ChangeKeyRingMsg,
+  CreateLedgerKeyMsg,
+  AddLedgerKeyMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -32,13 +37,16 @@ export function init(
   messageManager.registerMessage(EnableKeyRingMsg);
   messageManager.registerMessage(RestoreKeyRingMsg);
   messageManager.registerMessage(SaveKeyRingMsg);
-  messageManager.registerMessage(ClearKeyRingMsg);
+  messageManager.registerMessage(DeleteKeyRingMsg);
   messageManager.registerMessage(ShowKeyRingMsg);
   messageManager.registerMessage(CreateMnemonicKeyMsg);
+  messageManager.registerMessage(AddMnemonicKeyMsg);
   messageManager.registerMessage(CreatePrivateKeyMsg);
+  messageManager.registerMessage(AddPrivateKeyMsg);
+  messageManager.registerMessage(CreateLedgerKeyMsg);
+  messageManager.registerMessage(AddLedgerKeyMsg);
   messageManager.registerMessage(LockKeyRingMsg);
   messageManager.registerMessage(UnlockKeyRingMsg);
-  messageManager.registerMessage(SetPathMsg);
   messageManager.registerMessage(GetKeyMsg);
   messageManager.registerMessage(RequestTxBuilderConfigMsg);
   messageManager.registerMessage(GetRequestedTxBuilderConfigMsg);
@@ -49,6 +57,8 @@ export function init(
   messageManager.registerMessage(ApproveSignMsg);
   messageManager.registerMessage(RejectSignMsg);
   messageManager.registerMessage(GetKeyRingTypeMsg);
+  messageManager.registerMessage(GetMultiKeyStoreInfoMsg);
+  messageManager.registerMessage(ChangeKeyRingMsg);
 
   messageManager.addHandler(ROUTE, getHandler(keeper));
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Web3 from "web3";
 import { EthereumEndpoint } from "../../config";
-import { Address } from "@everett-protocol/cosmosjs/crypto";
+import { Address } from "@chainapsis/cosmosjs/crypto";
 
 // TODO: Add definition for ethereum-ens.
 // eslint-disable-next-line @typescript-eslint/no-var-requires

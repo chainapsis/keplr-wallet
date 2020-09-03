@@ -1,8 +1,14 @@
-import { Key, KeyRing, KeyRingStatus } from "./keyring";
+import {
+  Key,
+  KeyRing,
+  KeyRingStatus,
+  MultiKeyStoreInfoWithSelected
+} from "./keyring";
 
-import { Address } from "@everett-protocol/cosmosjs/crypto";
+import { Address } from "@chainapsis/cosmosjs/crypto";
 import { AsyncApprover } from "../../common/async-approver";
 import {
+  BIP44HDPath,
   TxBuilderConfigPrimitive,
   TxBuilderConfigPrimitiveWithChainId
 } from "./types";
@@ -10,6 +16,7 @@ import {
 import { KVStore } from "../../common/kvstore";
 
 import { ChainsKeeper } from "../chains/keeper";
+import { LedgerKeeper } from "../ledger/keeper";
 
 export interface KeyHex {
   algo: string;
@@ -25,7 +32,6 @@ interface SignMessage {
 
 export class KeyRingKeeper {
   private readonly keyRing: KeyRing;
-  private path = "";
 
   private readonly unlockApprover: AsyncApprover;
 
@@ -39,10 +45,11 @@ export class KeyRingKeeper {
   constructor(
     kvStore: KVStore,
     public readonly chainsKeeper: ChainsKeeper,
+    ledgerKeeper: LedgerKeeper,
     private readonly windowOpener: (url: string) => void,
     approverTimeout: number | undefined = undefined
   ) {
-    this.keyRing = new KeyRing(kvStore);
+    this.keyRing = new KeyRing(kvStore, ledgerKeeper);
 
     this.unlockApprover = new AsyncApprover({
       defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
@@ -89,7 +96,7 @@ export class KeyRingKeeper {
   }
 
   async checkBech32Address(chainId: string, bech32Address: string) {
-    const key = await this.getKey();
+    const key = await this.getKey(chainId);
     if (
       bech32Address !==
       new Address(key.address).toBech32(
@@ -110,33 +117,51 @@ export class KeyRingKeeper {
     await this.keyRing.save();
   }
 
-  /**
-   * This will clear all key ring data.
-   */
-  async clear(password: string): Promise<KeyRingStatus> {
-    await this.keyRing.clear(password);
-    return this.keyRing.status;
+  async deleteKeyRing(
+    index: number,
+    password: string
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+    status: KeyRingStatus;
+  }> {
+    const multiKeyStoreInfo = await this.keyRing.deleteKeyRing(index, password);
+    return {
+      multiKeyStoreInfo,
+      status: this.keyRing.status
+    };
   }
 
-  async showKeyRing(password: string): Promise<string> {
-    return await this.keyRing.showKeyRing(password);
+  async showKeyRing(index: number, password: string): Promise<string> {
+    return await this.keyRing.showKeyRing(index, password);
   }
 
   async createMnemonicKey(
     mnemonic: string,
-    password: string
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
   ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createMnemonicKey(mnemonic, password);
+    await this.keyRing.createMnemonicKey(mnemonic, password, meta, bip44HDPath);
     return this.keyRing.status;
   }
 
   async createPrivateKey(
     privateKey: Uint8Array,
-    password: string
+    password: string,
+    meta: Record<string, string>
   ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createPrivateKey(privateKey, password);
+    await this.keyRing.createPrivateKey(privateKey, password, meta);
+    return this.keyRing.status;
+  }
+
+  async createLedgerKey(
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<KeyRingStatus> {
+    await this.keyRing.createLedgerKey(password, meta, bip44HDPath);
     return this.keyRing.status;
   }
 
@@ -156,18 +181,10 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
-  async setPath(chainId: string, account: number, index: number) {
-    this.path = (
-      await this.chainsKeeper.getChainInfo(chainId)
-    ).bip44.pathString(account, index);
-  }
-
-  async getKey(): Promise<Key> {
-    if (!this.path) {
-      throw new Error("path not set");
-    }
-
-    return this.keyRing.getKey(this.path);
+  async getKey(chainId: string): Promise<Key> {
+    return this.keyRing.getKey(
+      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType
+    );
   }
 
   async requestTxBuilderConfig(
@@ -224,7 +241,10 @@ export class KeyRingKeeper {
     skipApprove: boolean
   ): Promise<Uint8Array> {
     if (skipApprove) {
-      return this.keyRing.sign(this.path, message);
+      return await this.keyRing.sign(
+        (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+        message
+      );
     }
 
     if (openPopup) {
@@ -234,7 +254,10 @@ export class KeyRingKeeper {
     }
 
     await this.signApprover.request(id, { chainId, message });
-    return this.keyRing.sign(this.path, message);
+    return await this.keyRing.sign(
+      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+      message
+    );
   }
 
   getRequestedMessage(id: string): SignMessage {
@@ -252,5 +275,37 @@ export class KeyRingKeeper {
 
   rejectSign(id: string): void {
     this.signApprover.reject(id);
+  }
+
+  async addMnemonicKey(
+    mnemonic: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    return this.keyRing.addMnemonicKey(mnemonic, meta, bip44HDPath);
+  }
+
+  async addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    return this.keyRing.addPrivateKey(privateKey, meta);
+  }
+
+  async addLedgerKey(
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    return this.keyRing.addLedgerKey(meta, bip44HDPath);
+  }
+
+  public async changeKeyStoreFromMultiKeyStore(
+    index: number
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    return this.keyRing.changeKeyStoreFromMultiKeyStore(index);
+  }
+
+  getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
+    return this.keyRing.getMultiKeyStoreInfo();
   }
 }

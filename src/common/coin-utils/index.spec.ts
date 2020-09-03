@@ -1,7 +1,7 @@
 import assert from "assert";
 import "mocha";
 import { CoinUtils } from "./index";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { Int } from "@chainapsis/cosmosjs/common/int";
 
 describe("Test shrink decimals", () => {
   it("shrink decimals", () => {
