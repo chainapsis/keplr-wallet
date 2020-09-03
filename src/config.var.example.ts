@@ -23,6 +23,15 @@ export const SECRET_NETWORK_REST_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
 
+export const BETA_CYBER_NETWORK_RPC_ENDPOINT = "";
+export const BETA_CYBER_NETWORK_RPC_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+export const BETA_CYBER_NETWORK_REST_ENDPOINT = "";
+export const BETA_CYBER_NETWORK_REST_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+
 export const ADDITIONAL_SIGN_IN_PREPEND:
   | React.ReactElement
   | undefined = undefined;
