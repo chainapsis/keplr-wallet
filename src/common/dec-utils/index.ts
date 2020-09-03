@@ -1,4 +1,4 @@
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 
 export class DecUtils {
   static trim(dec: Dec | string): string {

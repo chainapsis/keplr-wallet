@@ -8,8 +8,8 @@ const EventEmitter = require("events").EventEmitter;
 
 import { ChainsKeeper } from "../chains/keeper";
 import { init as chainsInit } from "../chains/init";
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
-import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import { KeyRingKeeper } from "./keeper";
 import { init } from "./init";

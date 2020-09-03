@@ -1,5 +1,5 @@
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
-import { Bech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import { AxiosRequestConfig } from "axios";
 

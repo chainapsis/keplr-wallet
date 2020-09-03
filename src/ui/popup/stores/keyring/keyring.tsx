@@ -1,4 +1,4 @@
-import { generateSeed } from "@everett-protocol/cosmosjs/utils/key";
+import { generateSeed } from "@chainapsis/cosmosjs/utils/key";
 
 import { ChainInfo } from "../../../../background/chains";
 

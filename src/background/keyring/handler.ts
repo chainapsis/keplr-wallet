@@ -27,7 +27,7 @@ import {
   CreateLedgerKeyMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
-import { Address } from "@everett-protocol/cosmosjs/crypto";
+import { Address } from "@chainapsis/cosmosjs/crypto";
 
 const Buffer = require("buffer/").Buffer;
 

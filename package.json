@@ -14,11 +14,11 @@
     "lint-test"
   ],
   "keywords": [],
-  "author": "everett-protocol",
+  "author": "chainapsis",
   "license": "Apache-2.0",
   "dependencies": {
     "@ensdomains/resolver": "^0.2.4",
-    "@everett-protocol/cosmosjs": "git+https://github.com/everett-protocol/cosmosjs-dist.git#e63127f",
+    "@chainapsis/cosmosjs": "git+https://github.com/chainapsis/cosmosjs-dist.git#00d97d0",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@ledgerhq/hw-transport-webusb": "^5.21.0",
     "aes-js": "^3.1.2",

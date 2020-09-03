@@ -3,8 +3,8 @@ import "mocha";
 import { ChainsKeeper } from "./keeper";
 import { MemoryKVStore } from "../../common/kvstore/memory";
 
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
-import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import delay from "delay";
 

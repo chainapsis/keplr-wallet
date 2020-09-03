@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { CoinUtils } from "../../../../common/coin-utils";
 
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import {

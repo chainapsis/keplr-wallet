@@ -1,7 +1,7 @@
 import { action, observable } from "mobx";
 import { actionAsync, task } from "mobx-utils";
 
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 
 import Axios, { CancelTokenSource } from "axios";
 import {

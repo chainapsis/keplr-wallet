@@ -3,7 +3,7 @@ import "mocha";
 
 import { KeyRing, KeyRingStatus } from "./keyring";
 import { MemoryKVStore } from "../../common/kvstore/memory";
-import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 
 describe("Test keyring", () => {
   let keyRing: KeyRing;

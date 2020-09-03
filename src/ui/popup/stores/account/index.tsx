@@ -7,9 +7,9 @@ import { action, observable } from "mobx";
 import { actionAsync, task } from "mobx-utils";
 
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
 
-import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
+import { queryAccount } from "@chainapsis/cosmosjs/core/query";
 import { RootStore } from "../root";
 
 import Axios, { CancelTokenSource } from "axios";

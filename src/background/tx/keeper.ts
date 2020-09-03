@@ -1,11 +1,11 @@
 import Axios, { AxiosInstance } from "axios";
 
-import { Context, IContext } from "@everett-protocol/cosmosjs/core/context";
-import { TendermintRPC } from "@everett-protocol/cosmosjs/rpc/tendermint";
+import { Context, IContext } from "@chainapsis/cosmosjs/core/context";
+import { TendermintRPC } from "@chainapsis/cosmosjs/rpc/tendermint";
 import {
   ResultBroadcastTx,
   ResultBroadcastTxCommit
-} from "@everett-protocol/cosmosjs/rpc/tx";
+} from "@chainapsis/cosmosjs/rpc/tx";
 import { ChainsKeeper } from "../chains/keeper";
 
 const Buffer = require("buffer/").Buffer;

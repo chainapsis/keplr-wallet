@@ -12,7 +12,7 @@ import { GetChainInfosMsg } from "../../../../background/chains/messages";
 import { sendMessage } from "../../../../common/message";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 

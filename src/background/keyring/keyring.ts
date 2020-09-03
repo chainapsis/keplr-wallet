@@ -1,10 +1,10 @@
 import { Crypto, KeyStore } from "./crypto";
-import { generateWalletFromMnemonic } from "@everett-protocol/cosmosjs/utils/key";
+import { generateWalletFromMnemonic } from "@chainapsis/cosmosjs/utils/key";
 import {
   PrivKey,
   PrivKeySecp256k1,
   PubKeySecp256k1
-} from "@everett-protocol/cosmosjs/crypto";
+} from "@chainapsis/cosmosjs/crypto";
 import { KVStore } from "../../common/kvstore";
 import { LedgerKeeper } from "../ledger/keeper";
 import { BIP44HDPath } from "./types";

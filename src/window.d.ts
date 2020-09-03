@@ -1,4 +1,4 @@
-import { WalletProvider } from "@everett-protocol/cosmosjs/core/walletProvider";
+import { WalletProvider } from "@chainapsis/cosmosjs/core/walletProvider";
 
 declare global {
   interface Window {

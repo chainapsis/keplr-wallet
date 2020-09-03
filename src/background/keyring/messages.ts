@@ -13,7 +13,7 @@ import {
 } from "./types";
 import { AsyncApprover } from "../../common/async-approver";
 
-import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");

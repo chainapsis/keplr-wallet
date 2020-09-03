@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect } from "react";
 
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";

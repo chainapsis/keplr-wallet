@@ -5,7 +5,7 @@ import {
   MultiKeyStoreInfoWithSelected
 } from "./keyring";
 
-import { Address } from "@everett-protocol/cosmosjs/crypto";
+import { Address } from "@chainapsis/cosmosjs/crypto";
 import { AsyncApprover } from "../../common/async-approver";
 import {
   BIP44HDPath,

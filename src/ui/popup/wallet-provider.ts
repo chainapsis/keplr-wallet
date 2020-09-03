@@ -1,8 +1,5 @@
-import {
-  Key,
-  WalletProvider
-} from "@everett-protocol/cosmosjs/core/walletProvider";
-import { Context } from "@everett-protocol/cosmosjs/core/context";
+import { Key, WalletProvider } from "@chainapsis/cosmosjs/core/walletProvider";
+import { Context } from "@chainapsis/cosmosjs/core/context";
 import {
   GetKeyMsg,
   RequestSignMsg,
@@ -10,7 +7,7 @@ import {
 } from "../../background/keyring";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
-import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
 import {
   txBuilderConfigFromPrimitive,
   txBuilderConfigToPrimitive

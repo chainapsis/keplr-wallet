@@ -18,13 +18,13 @@ import { HeaderLayout } from "../../layouts";
 
 import { PopupWalletProvider } from "../../wallet-provider";
 
-import { MsgSend } from "@everett-protocol/cosmosjs/x/bank";
-import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
+import { MsgSend } from "@chainapsis/cosmosjs/x/bank";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 
 import { observer } from "mobx-react";
 
 import { useCosmosJS } from "../../../hooks";
-import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
 import { getCurrencies } from "../../../../common/currency";
 
 import style from "./style.module.scss";

@@ -16,7 +16,7 @@ import {
 import { Button } from "reactstrap";
 
 import { useTxBuilderConfig } from "../../../hooks";
-import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
 
 import bigInteger from "big-integer";
 import queryString from "query-string";
@@ -33,7 +33,7 @@ import {
 
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxState, withTxStateProvider } from "../../../contexts/tx";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { Int } from "@chainapsis/cosmosjs/common/int";
 import { getCurrencies } from "../../../../common/currency";
 import { useHistory, useLocation, useRouteMatch } from "react-router";
 

@@ -1,6 +1,6 @@
-import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
 import { TxBuilderConfigPrimitive } from "./types";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import bigInteger from "big-integer";
 
 export function feeToString(fee: Coin | Coin[]) {

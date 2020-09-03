@@ -1,7 +1,7 @@
 import React from "react";
 import { shortenAddress } from "../../../../common/address";
 import { CoinUtils } from "../../../../common/coin-utils";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { IntlShape, FormattedMessage } from "react-intl";
 
 export interface MessageObj {

@@ -7,8 +7,8 @@ import { init } from "./init";
 import { MockMessageManager } from "../../common/message/manager/mock";
 const EventEmitter = require("events").EventEmitter;
 
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
-import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import {
   ApproveAccessMsg,
