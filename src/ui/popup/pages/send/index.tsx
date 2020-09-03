@@ -82,6 +82,14 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       txState.setGas(gasForSendMsg);
     }, [gasForSendMsg, txState]);
 
+    // Cyber chain (eular-6) doesn't require the fees to send tx.
+    // So, don't need to show the fee input.
+    // This is temporary hardcoding.
+    const isCyberNetwork = /^(euler-)(\d)+/.test(chainStore.chainInfo.chainId);
+    const txStateIsValid = isCyberNetwork
+      ? txState.isValid("recipient", "amount", "memo", "gas")
+      : txState.isValid("recipient", "amount", "memo", "fees", "gas");
+
     return (
       <HeaderLayout
         showChainName
@@ -94,10 +102,7 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           className={style.formContainer}
           onSubmit={useCallback(
             e => {
-              if (
-                cosmosJS.sendMsgs &&
-                txState.isValid("recipient", "amount", "memo", "fees", "gas")
-              ) {
+              if (cosmosJS.sendMsgs && txStateIsValid) {
                 e.preventDefault();
 
                 const msg = new MsgSend(
@@ -146,7 +151,12 @@ export const SendPage: FunctionComponent = withTxStateProvider(
               cosmosJS,
               history,
               notification,
-              txState
+              txState.amount,
+              txState.fees,
+              txState.gas,
+              txState.memo,
+              txState.recipient,
+              txStateIsValid
             ]
           )}
         >
@@ -190,17 +200,19 @@ export const SendPage: FunctionComponent = withTxStateProvider(
               <MemoInput
                 label={intl.formatMessage({ id: "send.input.memo" })}
               />
-              <FeeButtons
-                label={intl.formatMessage({ id: "send.input.fee" })}
-                feeSelectLabels={{
-                  low: intl.formatMessage({ id: "fee-buttons.select.low" }),
-                  average: intl.formatMessage({
-                    id: "fee-buttons.select.average"
-                  }),
-                  high: intl.formatMessage({ id: "fee-buttons.select.high" })
-                }}
-                gasPriceStep={DefaultGasPriceStep}
-              />
+              {isCyberNetwork ? null : (
+                <FeeButtons
+                  label={intl.formatMessage({ id: "send.input.fee" })}
+                  feeSelectLabels={{
+                    low: intl.formatMessage({ id: "fee-buttons.select.low" }),
+                    average: intl.formatMessage({
+                      id: "fee-buttons.select.average"
+                    }),
+                    high: intl.formatMessage({ id: "fee-buttons.select.high" })
+                  }}
+                  gasPriceStep={DefaultGasPriceStep}
+                />
+              )}
             </div>
             <div style={{ flex: 1 }} />
             <Button
@@ -208,10 +220,7 @@ export const SendPage: FunctionComponent = withTxStateProvider(
               color="primary"
               block
               data-loading={cosmosJS.loading}
-              disabled={
-                cosmosJS.sendMsgs == null ||
-                !txState.isValid("recipient", "amount", "memo", "fees", "gas")
-              }
+              disabled={cosmosJS.sendMsgs == null || !txStateIsValid}
             >
               {intl.formatMessage({
                 id: "send.button.send"

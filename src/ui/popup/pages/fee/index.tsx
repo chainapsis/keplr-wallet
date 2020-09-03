@@ -123,6 +123,14 @@ export const FeePage: FunctionComponent = withTxStateProvider(
       };
     }, [txBuilder, external]);
 
+    // Cyber chain (eular-6) doesn't require the fees to send tx.
+    // So, don't need to show the fee input.
+    // This is temporary hardcoding.
+    const isCyberNetwork = /^(euler-)(\d)+/.test(chainStore.chainInfo.chainId);
+    const txStateIsValid = isCyberNetwork
+      ? txState.isValid("gas", "memo")
+      : txState.isValid("gas", "memo", "fees");
+
     return (
       <HeaderLayout
         showChainName
@@ -139,7 +147,7 @@ export const FeePage: FunctionComponent = withTxStateProvider(
           className={style.formContainer}
           onSubmit={useCallback(
             e => {
-              if (txState.isValid("gas", "memo", "fees")) {
+              if (txStateIsValid) {
                 e.preventDefault();
 
                 if (!txBuilder.approve) {
@@ -163,29 +171,28 @@ export const FeePage: FunctionComponent = withTxStateProvider(
             <div>
               <GasInput label={intl.formatMessage({ id: "fee.input.gas" })} />
               <MemoInput label={intl.formatMessage({ id: "fee.input.memo" })} />
-              <FeeButtons
-                label={intl.formatMessage({
-                  id: "fee.input.fee"
-                })}
-                feeSelectLabels={{
-                  low: intl.formatMessage({ id: "fee-buttons.select.low" }),
-                  average: intl.formatMessage({
-                    id: "fee-buttons.select.average"
-                  }),
-                  high: intl.formatMessage({ id: "fee-buttons.select.high" })
-                }}
-                gasPriceStep={DefaultGasPriceStep}
-              />
+              {isCyberNetwork ? null : (
+                <FeeButtons
+                  label={intl.formatMessage({
+                    id: "fee.input.fee"
+                  })}
+                  feeSelectLabels={{
+                    low: intl.formatMessage({ id: "fee-buttons.select.low" }),
+                    average: intl.formatMessage({
+                      id: "fee-buttons.select.average"
+                    }),
+                    high: intl.formatMessage({ id: "fee-buttons.select.high" })
+                  }}
+                  gasPriceStep={DefaultGasPriceStep}
+                />
+              )}
             </div>
             <div style={{ flex: 1 }} />
             <Button
               type="submit"
               color="primary"
               block
-              disabled={
-                txBuilder.initializing ||
-                !txState.isValid("gas", "memo", "fees")
-              }
+              disabled={txBuilder.initializing || !txStateIsValid}
               data-loading={txBuilder.requested}
             >
               <FormattedMessage id="fee.button.set" />

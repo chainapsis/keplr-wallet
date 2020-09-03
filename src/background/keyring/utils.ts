@@ -18,6 +18,10 @@ export function feeToString(fee: Coin | Coin[]) {
 }
 
 export function feeFromString(feeStr: string): Coin | Coin[] {
+  if (feeStr === "") {
+    return [];
+  }
+
   let fee: Coin[] | Coin = [];
   const coinStrs = feeStr.split(",");
   if (coinStrs.length === 1) {

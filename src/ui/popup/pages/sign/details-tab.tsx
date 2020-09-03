@@ -45,8 +45,10 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
 
         const coinObjs = msgObj.fee.amount;
         const fees: Coin[] = [];
-        for (const coinObj of coinObjs) {
-          fees.push(new Coin(coinObj.denom, coinObj.amount));
+        if (coinObjs) {
+          for (const coinObj of coinObjs) {
+            fees.push(new Coin(coinObj.denom, coinObj.amount));
+          }
         }
         setFee(fees);
       }
