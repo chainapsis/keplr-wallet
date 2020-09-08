@@ -44,3 +44,11 @@ export interface AccessOrigin {
   chainId: string;
   origins: string[];
 }
+
+export type ChainInfoWithEmbed = ChainInfo & {
+  embeded: boolean;
+};
+
+export type SuggestedChainInfo = ChainInfo & {
+  origin: string;
+};

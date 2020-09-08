@@ -6,7 +6,10 @@ import {
   RejectAccessMsg,
   GetReqeustAccessDataMsg,
   GetAccessOriginMsg,
-  RemoveAccessOriginMsg
+  RemoveAccessOriginMsg,
+  SuggestChainInfoMsg,
+  ApproveSuggestedChainInfoMsg,
+  RejectSuggestedChainInfoMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -17,6 +20,9 @@ export function init(
   keeper: ChainsKeeper
 ): void {
   messageManager.registerMessage(GetChainInfosMsg);
+  messageManager.registerMessage(SuggestChainInfoMsg);
+  messageManager.registerMessage(ApproveSuggestedChainInfoMsg);
+  messageManager.registerMessage(RejectSuggestedChainInfoMsg);
   messageManager.registerMessage(ReqeustAccessMsg);
   messageManager.registerMessage(ApproveAccessMsg);
   messageManager.registerMessage(RejectAccessMsg);

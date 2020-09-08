@@ -1,33 +1,72 @@
-import { AccessOrigin, ChainInfo } from "./types";
+import {
+  AccessOrigin,
+  ChainInfo,
+  ChainInfoWithEmbed,
+  SuggestedChainInfo
+} from "./types";
 import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export class ChainsKeeper {
   private readonly accessRequestApprover: AsyncApprover<AccessOrigin>;
+  private readonly suggestApprover: AsyncApprover<SuggestedChainInfo>;
 
   constructor(
     private kvStore: KVStore,
     private readonly embedChainInfos: ChainInfo[],
     private readonly embedAccessOrigins: AccessOrigin[],
     private readonly windowOpener: (url: string) => void,
-    approverTimeout: number | undefined = undefined
+    signApproverTimeout: number | undefined = undefined,
+    suggestApproverTimeout: number | undefined = undefined
   ) {
     this.accessRequestApprover = new AsyncApprover<AccessOrigin>({
-      defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
+      defaultTimeout:
+        signApproverTimeout != null ? signApproverTimeout : 3 * 60 * 1000
+    });
+
+    this.suggestApprover = new AsyncApprover<SuggestedChainInfo>({
+      defaultTimeout:
+        suggestApproverTimeout != null ? suggestApproverTimeout : 3 * 60 * 1000
     });
   }
 
-  async getChainInfos(): Promise<ChainInfo[]> {
-    const chainInfos = this.embedChainInfos.slice();
-    const savedChainInfos = await this.kvStore.get<ChainInfo[]>("chain-infos");
+  async getChainInfos(): Promise<ChainInfoWithEmbed[]> {
+    const chainInfos = this.embedChainInfos.map(chainInfo => {
+      return {
+        ...chainInfo,
+        embeded: true
+      };
+    });
+    let savedChainInfos = await this.kvStore.get<ChainInfo[]>("chain-infos");
     if (savedChainInfos) {
-      return chainInfos.concat(savedChainInfos);
+      // Should restore the prototype because BIP44 is the class.
+      savedChainInfos = savedChainInfos.map(
+        (chainInfo: Writeable<ChainInfo>) => {
+          chainInfo.bip44 = Object.setPrototypeOf(
+            chainInfo.bip44,
+            BIP44.prototype
+          );
+          return chainInfo;
+        }
+      );
+
+      return chainInfos.concat(
+        savedChainInfos.map(chainInfo => {
+          return {
+            ...chainInfo,
+            embeded: false
+          };
+        })
+      );
     } else {
       return chainInfos;
     }
   }
 
-  async getChainInfo(chainId: string): Promise<ChainInfo> {
+  async getChainInfo(chainId: string): Promise<ChainInfoWithEmbed> {
     const chainInfo = (await this.getChainInfos()).find(chainInfo => {
       return chainInfo.chainId === chainId;
     });
@@ -36,6 +75,84 @@ export class ChainsKeeper {
       throw new Error(`There is no chain info for ${chainId}`);
     }
     return chainInfo;
+  }
+
+  async hasChainInfo(chainId: string): Promise<boolean> {
+    return (
+      (await this.getChainInfos()).find(chainInfo => {
+        return chainInfo.chainId === chainId;
+      }) != null
+    );
+  }
+
+  async suggestChainInfo(
+    chainInfo: ChainInfo,
+    extensionBaseURL: string,
+    openPopup: boolean,
+    origin: string
+  ): Promise<void> {
+    // TODO: Validate the chain info's fields.
+
+    if (openPopup) {
+      this.windowOpener(
+        `${extensionBaseURL}popup.html#/suggest-chain/${chainInfo.chainId}`
+      );
+    }
+
+    await this.suggestApprover.request(chainInfo.chainId, {
+      ...chainInfo,
+      origin
+    });
+
+    await this.addChainInfo(chainInfo);
+  }
+
+  getSuggestedChainInfo(chainId: string): SuggestedChainInfo {
+    const chainInfo = this.suggestApprover.getData(chainId);
+    if (!chainInfo) {
+      throw new Error("Unknown suggested chain");
+    }
+
+    return chainInfo;
+  }
+
+  approveSuggestChain(chainId: string) {
+    this.suggestApprover.approve(chainId);
+  }
+
+  rejectSuggestChain(chainId: string) {
+    this.suggestApprover.reject(chainId);
+  }
+
+  async addChainInfo(chainInfo: ChainInfo): Promise<void> {
+    if (await this.hasChainInfo(chainInfo.chainId)) {
+      throw new Error("Same chain is already registered");
+    }
+
+    const savedChainInfos =
+      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? [];
+    savedChainInfos.push(chainInfo);
+
+    await this.kvStore.set<ChainInfo[]>("chain-infos", savedChainInfos);
+  }
+
+  async removeChainInfo(chainId: string): Promise<void> {
+    if (!(await this.hasChainInfo(chainId))) {
+      throw new Error("Chain is not registered");
+    }
+
+    if ((await this.getChainInfo(chainId)).embeded) {
+      throw new Error("Can't remove the embedded chain");
+    }
+
+    const savedChainInfos =
+      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? [];
+
+    const resultChainInfo = savedChainInfos.filter(chainInfo => {
+      return chainInfo.chainId !== chainId;
+    });
+
+    await this.kvStore.set<ChainInfo[]>("chain-infos", resultChainInfo);
   }
 
   async requestAccess(

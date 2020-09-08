@@ -1,5 +1,5 @@
 import { Message } from "../../common/message";
-import { AccessOrigin, ChainInfo } from "./types";
+import { AccessOrigin, ChainInfo, SuggestedChainInfo } from "./types";
 import { ROUTE } from "./constants";
 import { AsyncApprover } from "../../common/async-approver";
 
@@ -20,6 +20,109 @@ export class GetChainInfosMsg extends Message<{
 
   type(): string {
     return GetChainInfosMsg.type();
+  }
+}
+
+export class SuggestChainInfoMsg extends Message<void> {
+  public static type() {
+    return "suggest-chain-info";
+  }
+
+  constructor(
+    public readonly chainInfo: ChainInfo,
+    public readonly openPopup: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainInfo) {
+      throw new Error("chain info not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SuggestChainInfoMsg.type();
+  }
+}
+
+export class GetSuggestedChainInfoMsg extends Message<SuggestedChainInfo> {
+  public static type() {
+    return "get-suggested-chain-info";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetSuggestedChainInfoMsg.type();
+  }
+}
+
+export class ApproveSuggestedChainInfoMsg extends Message<void> {
+  public static type() {
+    return "approve-suggested-chain-info";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ApproveSuggestedChainInfoMsg.type();
+  }
+}
+
+export class RejectSuggestedChainInfoMsg extends Message<void> {
+  public static type() {
+    return "reject-suggested-chain-info";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RejectSuggestedChainInfoMsg.type();
   }
 }
 
