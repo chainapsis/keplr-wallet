@@ -153,64 +153,73 @@ export class PriceStore {
     }
 
     this.lastFetchingCancleToken = Axios.CancelToken.source();
-    try {
-      const result = await task(
-        Axios.get<CoinGeckoPriceResult>(
-          CoinGeckoAPIEndPoint + CoinGeckoGetPrice,
-          {
-            method: "GET",
-            params: {
-              ids: ids.join(","),
-              // eslint-disable-next-line @typescript-eslint/camelcase
-              vs_currencies: fiats.join(",")
-            },
-            cancelToken: this.lastFetchingCancleToken.token
+    const result = await task(
+      // Task should not throw an error.
+      (async () => {
+        try {
+          const result = await Axios.get<CoinGeckoPriceResult>(
+            CoinGeckoAPIEndPoint + CoinGeckoGetPrice,
+            {
+              method: "GET",
+              params: {
+                ids: ids.join(","),
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                vs_currencies: fiats.join(",")
+              },
+              cancelToken: this.lastFetchingCancleToken?.token
+            }
+          );
+
+          if (result.status === 200) {
+            return {
+              data: result.data
+            };
+          } else {
+            return { data: {} };
           }
-        )
-      );
+        } catch (e) {
+          if (!Axios.isCancel(e)) {
+            console.log(`Error occurs during fetching price: ${e.toString()}`);
+          }
+          return { data: {} };
+        }
+      })()
+    );
 
-      if (result.status === 200) {
-        const data = result.data;
+    const data = result.data;
 
-        for (const id in data) {
-          if (!data.hasOwnProperty(id)) {
+    for (const id in data) {
+      if (!data.hasOwnProperty(id)) {
+        continue;
+      }
+      const prices = data[id];
+      if (prices) {
+        for (const currency in prices) {
+          if (!prices.hasOwnProperty(currency)) {
             continue;
           }
-          const prices = data[id];
-          if (prices) {
-            for (const currency in prices) {
-              if (!prices.hasOwnProperty(currency)) {
-                continue;
-              }
-              const price = prices[currency];
-              if (price) {
-                this.setValue(currency, id, {
-                  value: new Dec(price.toString())
-                });
-              }
-            }
+          const price = prices[currency];
+          if (price) {
+            this.setValue(currency, id, {
+              value: new Dec(price.toString())
+            });
           }
         }
+      }
+    }
 
-        await task(
-          this.saveResultDataToStorage({
-            ...(await task(this.loadResultDataFromStorage()))?.priceData,
-            ...data
-          })
-        );
-      }
-    } catch (e) {
-      if (!Axios.isCancel(e)) {
-        console.log(`Error occurs during fetching price: ${e.toString()}`);
-      }
-    } finally {
-      this.lastFetchingCancleToken = undefined;
-      for (const fiat of fiats) {
-        for (const id of ids) {
-          this.setValue(fiat, id, {
-            isFetching: false
-          });
-        }
+    await task(
+      this.saveResultDataToStorage({
+        ...(await task(this.loadResultDataFromStorage()))?.priceData,
+        ...data
+      })
+    );
+    this.lastFetchingCancleToken = undefined;
+    for (const fiat of fiats) {
+      for (const id of ids) {
+        this.setValue(fiat, id, {
+          isFetching: false
+        });
       }
     }
   }

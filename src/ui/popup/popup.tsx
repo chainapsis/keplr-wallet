@@ -30,6 +30,7 @@ import { StoreProvider, useStore } from "./stores";
 import { KeyRingStatus } from "./stores/keyring";
 import { SignPage } from "./pages/sign";
 import { FeePage } from "./pages/fee";
+import { ChainSuggestedPage } from "./pages/chain/suggest";
 import Modal from "react-modal";
 import { SettingPage } from "./pages/setting";
 import { SettingLanguagePage } from "./pages/setting/language";
@@ -203,6 +204,10 @@ ReactDOM.render(
                     component={ClearPage}
                   />
                   <Route path="/sign/:id" component={SignPage} />
+                  <Route
+                    path="/suggest-chain/:chainId"
+                    component={ChainSuggestedPage}
+                  />
                 </LedgerInitIndicator>
               </HashRouter>
             </ConfirmProvider>

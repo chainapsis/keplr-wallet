@@ -85,6 +85,15 @@ const handleSuggestChainInfoMsg: (
   keeper: ChainsKeeper
 ) => InternalHandler<SuggestChainInfoMsg> = keeper => {
   return async (env, msg) => {
+    if (
+      (await keeper.getChainInfos()).find(
+        chainInfo => chainInfo.chainId === msg.chainInfo.chainId
+      )
+    ) {
+      // If suggested chain info is already registered, just return.
+      return;
+    }
+
     const chainInfo = msg.chainInfo as Writeable<ChainInfo>;
     // Should restore the prototype because BIP44 is the class.
     chainInfo.bip44 = Object.setPrototypeOf(chainInfo.bip44, BIP44.prototype);
