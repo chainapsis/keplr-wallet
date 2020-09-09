@@ -10,6 +10,7 @@ import {
   RejectAccessMsg,
   RejectSuggestedChainInfoMsg,
   RemoveAccessOriginMsg,
+  RemoveSuggestedChainInfoMsg,
   ReqeustAccessMsg,
   SuggestChainInfoMsg
 } from "./messages";
@@ -42,6 +43,11 @@ export const getHandler: (keeper: ChainsKeeper) => Handler = keeper => {
         return handleRejectSuggestedChainInfoMsg(keeper)(
           env,
           msg as RejectSuggestedChainInfoMsg
+        );
+      case RemoveSuggestedChainInfoMsg:
+        return handleRemoveSuggestedChainInfoMsg(keeper)(
+          env,
+          msg as RemoveSuggestedChainInfoMsg
         );
       case ReqeustAccessMsg:
         return handleRequestAccessMsg(keeper)(env, msg as ReqeustAccessMsg);
@@ -131,6 +137,15 @@ const handleRejectSuggestedChainInfoMsg: (
 ) => InternalHandler<RejectSuggestedChainInfoMsg> = keeper => {
   return (_, msg) => {
     keeper.rejectSuggestChain(msg.chainId);
+  };
+};
+
+const handleRemoveSuggestedChainInfoMsg: (
+  keeper: ChainsKeeper
+) => InternalHandler<RemoveSuggestedChainInfoMsg> = keeper => {
+  return async (_, msg) => {
+    await keeper.removeChainInfo(msg.chainId);
+    return await keeper.getChainInfos();
   };
 };
 

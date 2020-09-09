@@ -11,6 +11,11 @@
     color: rgba(255, 255, 255, 0.5);
     border-radius: 6px;
 
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     &:global(.selected) {
       cursor: auto;
       color: white;
@@ -24,6 +29,14 @@
     margin-top: 4px;
     &:first-child {
       margin-top: 0;
+    }
+
+    .remove-btn {
+      position: absolute;
+      right: 0;
+      display: flex;
+      height: 100%;
+      align-items: center;
     }
   }
 }

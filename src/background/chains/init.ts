@@ -10,7 +10,8 @@ import {
   SuggestChainInfoMsg,
   ApproveSuggestedChainInfoMsg,
   RejectSuggestedChainInfoMsg,
-  GetSuggestedChainInfoMsg
+  GetSuggestedChainInfoMsg,
+  RemoveSuggestedChainInfoMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -25,6 +26,7 @@ export function init(
   messageManager.registerMessage(GetSuggestedChainInfoMsg);
   messageManager.registerMessage(ApproveSuggestedChainInfoMsg);
   messageManager.registerMessage(RejectSuggestedChainInfoMsg);
+  messageManager.registerMessage(RemoveSuggestedChainInfoMsg);
   messageManager.registerMessage(ReqeustAccessMsg);
   messageManager.registerMessage(ApproveAccessMsg);
   messageManager.registerMessage(RejectAccessMsg);

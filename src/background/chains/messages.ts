@@ -1,10 +1,15 @@
 import { Message } from "../../common/message";
-import { AccessOrigin, ChainInfo, SuggestedChainInfo } from "./types";
+import {
+  AccessOrigin,
+  ChainInfo,
+  ChainInfoWithEmbed,
+  SuggestedChainInfo
+} from "./types";
 import { ROUTE } from "./constants";
 import { AsyncApprover } from "../../common/async-approver";
 
 export class GetChainInfosMsg extends Message<{
-  chainInfos: ChainInfo[];
+  chainInfos: ChainInfoWithEmbed[];
 }> {
   public static type() {
     return "get-chain-infos";
@@ -123,6 +128,30 @@ export class RejectSuggestedChainInfoMsg extends Message<void> {
 
   type(): string {
     return RejectSuggestedChainInfoMsg.type();
+  }
+}
+
+export class RemoveSuggestedChainInfoMsg extends Message<ChainInfoWithEmbed[]> {
+  public static type() {
+    return "remove-suggested-chain-info";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RemoveSuggestedChainInfoMsg.type();
   }
 }
 

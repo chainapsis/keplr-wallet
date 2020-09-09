@@ -3,12 +3,15 @@ import { actionAsync, task } from "mobx-utils";
 
 import { RootStore } from "../root";
 
-import { ChainInfo } from "../../../../background/chains";
+import { ChainInfo, ChainInfoWithEmbed } from "../../../../background/chains";
 import {
   SetPersistentMemoryMsg,
   GetPersistentMemoryMsg
 } from "../../../../background/persistent-memory";
-import { GetChainInfosMsg } from "../../../../background/chains/messages";
+import {
+  GetChainInfosMsg,
+  RemoveSuggestedChainInfoMsg
+} from "../../../../background/chains/messages";
 import { sendMessage } from "../../../../common/message";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
@@ -17,7 +20,7 @@ import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export class ChainStore {
-  @observable public chainList!: ChainInfo[];
+  @observable public chainList!: ChainInfoWithEmbed[];
 
   @observable
   public chainInfo!: ChainInfo;
@@ -29,7 +32,14 @@ export class ChainStore {
     private rootStore: RootStore,
     private readonly embedChainInfos: ChainInfo[]
   ) {
-    this.setChainList(this.embedChainInfos);
+    this.setChainList(
+      this.embedChainInfos.map(chainInfo => {
+        return {
+          ...chainInfo,
+          embeded: true
+        };
+      })
+    );
 
     this.setChain(this.chainList[0].chainId);
     this.isChainSet = false;
@@ -82,8 +92,8 @@ export class ChainStore {
   private async getChainInfosFromBackground() {
     const msg = new GetChainInfosMsg();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
-    const chainInfos: ChainInfo[] = result.chainInfos.map(
-      (chainInfo: Writeable<ChainInfo>) => {
+    const chainInfos = result.chainInfos.map(
+      (chainInfo: Writeable<ChainInfoWithEmbed>) => {
         chainInfo.bip44 = Object.setPrototypeOf(
           chainInfo.bip44,
           BIP44.prototype
@@ -95,7 +105,19 @@ export class ChainStore {
   }
 
   @action
-  public setChainList(chainList: ChainInfo[]) {
+  public setChainList(chainList: ChainInfoWithEmbed[]) {
     this.chainList = chainList;
+  }
+
+  @actionAsync
+  public async removeChainInfo(chainId: string) {
+    const msg = new RemoveSuggestedChainInfoMsg(chainId);
+    const chainInfos = await task(sendMessage(BACKGROUND_PORT, msg));
+
+    this.setChainList(chainInfos);
+    // If currently selected chain is removed, just set the chain as first one.
+    if (chainId === this.chainInfo.chainId) {
+      this.setChain(chainInfos[0].chainId);
+    }
   }
 }
