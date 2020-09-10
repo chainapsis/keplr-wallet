@@ -30,6 +30,38 @@ export const ChainSuggestedPage: FunctionComponent = () => {
 
   const [chainInfo, setChainInfo] = useState<SuggestedChainInfo | undefined>();
 
+  const [requested, setRequested] = useState<boolean>(false);
+
+  const approve = async () => {
+    const msg = new ApproveSuggestedChainInfoMsg(chainId);
+    setRequested(true);
+    await sendMessage(BACKGROUND_PORT, msg);
+
+    window.close();
+  };
+
+  const reject = async () => {
+    const msg = new RejectSuggestedChainInfoMsg(chainId);
+    setRequested(true);
+    await sendMessage(BACKGROUND_PORT, msg);
+
+    window.close();
+  };
+
+  useEffect(() => {
+    // Force reject when closing window.
+    const beforeunload = async () => {
+      if (!requested) {
+        await reject();
+      }
+    };
+
+    addEventListener("beforeunload", beforeunload);
+    return () => {
+      removeEventListener("beforeunload", beforeunload);
+    };
+  }, [reject, requested]);
+
   useEffect(() => {
     if (chainId) {
       (async () => {
@@ -69,8 +101,7 @@ export const ChainSuggestedPage: FunctionComponent = () => {
           onClick={async e => {
             e.preventDefault();
 
-            const msg = new RejectSuggestedChainInfoMsg(chainId);
-            await sendMessage(BACKGROUND_PORT, msg);
+            await reject();
           }}
         >
           Reject
@@ -81,8 +112,7 @@ export const ChainSuggestedPage: FunctionComponent = () => {
           onClick={async e => {
             e.preventDefault();
 
-            const msg = new ApproveSuggestedChainInfoMsg(chainId);
-            await sendMessage(BACKGROUND_PORT, msg);
+            await approve();
           }}
         >
           Approve
