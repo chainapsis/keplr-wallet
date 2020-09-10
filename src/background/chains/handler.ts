@@ -12,7 +12,8 @@ import {
   RemoveAccessOriginMsg,
   RemoveSuggestedChainInfoMsg,
   ReqeustAccessMsg,
-  SuggestChainInfoMsg
+  SuggestChainInfoMsg,
+  TryUpdateChainMsg
 } from "./messages";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { ChainInfo } from "./types";
@@ -70,6 +71,8 @@ export const getHandler: (keeper: ChainsKeeper) => Handler = keeper => {
           env,
           msg as RemoveAccessOriginMsg
         );
+      case TryUpdateChainMsg:
+        return handleTryUpdateChainMsg(keeper)(env, msg as TryUpdateChainMsg);
       default:
         throw new Error("Unknown msg type");
     }
@@ -196,5 +199,14 @@ const handleRemoveAccessOriginMsg: (
 ) => InternalHandler<RemoveAccessOriginMsg> = keeper => {
   return async (_, msg) => {
     await keeper.removeAccessOrigin(msg.chainId, msg.appOrigin);
+  };
+};
+
+const handleTryUpdateChainMsg: (
+  keeper: ChainsKeeper
+) => InternalHandler<TryUpdateChainMsg> = keeper => {
+  return async (_, msg) => {
+    await keeper.tryUpdateChain(msg.chainId);
+    return await keeper.getChainInfos();
   };
 };

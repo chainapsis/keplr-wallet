@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useRef } from "react";
 
 import { HeaderLayout } from "../../layouts";
 
@@ -13,9 +13,38 @@ import { StakeView } from "./stake";
 
 import classnames from "classnames";
 import { useHistory } from "react-router";
+import { observer } from "mobx-react";
+import { useStore } from "../../stores";
+import { ChainsKeeper } from "../../../../background/chains/keeper";
+import { useConfirm } from "../../../components/confirm";
 
-export const MainPage: FunctionComponent = () => {
+export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
+
+  const { chainStore } = useStore();
+
+  const confirm = useConfirm();
+
+  const prevChainId = useRef<string | undefined>();
+  useEffect(() => {
+    if (prevChainId.current !== chainStore.chainInfo.chainId) {
+      // FIXME: This will be executed twice on initial because chain store set the chain info on constructor and init.
+      (async () => {
+        if (await ChainsKeeper.checkChainUpdate(chainStore.chainInfo)) {
+          // If chain info has been changed, warning the user wether update the chain or not.
+          if (
+            await confirm.confirm({
+              paragraph: "Chain has been changed"
+            })
+          ) {
+            await chainStore.tryUpdateChain(chainStore.chainInfo.chainId);
+          }
+        }
+      })();
+    }
+
+    prevChainId.current = chainStore.chainInfo.chainId;
+  }, [chainStore, chainStore.chainInfo, confirm]);
 
   return (
     <HeaderLayout
@@ -60,4 +89,4 @@ export const MainPage: FunctionComponent = () => {
       </Card>
     </HeaderLayout>
   );
-};
+});

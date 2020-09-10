@@ -10,7 +10,8 @@ import {
 } from "../../../../background/persistent-memory";
 import {
   GetChainInfosMsg,
-  RemoveSuggestedChainInfoMsg
+  RemoveSuggestedChainInfoMsg,
+  TryUpdateChainMsg
 } from "../../../../background/chains/messages";
 import { sendMessage } from "../../../../common/message";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
@@ -119,5 +120,11 @@ export class ChainStore {
     if (chainId === this.chainInfo.chainId) {
       this.setChain(chainInfos[0].chainId);
     }
+  }
+
+  @actionAsync
+  public async tryUpdateChain(chainId: string) {
+    const msg = new TryUpdateChainMsg(chainId);
+    this.setChainList(await task(sendMessage(BACKGROUND_PORT, msg)));
   }
 }

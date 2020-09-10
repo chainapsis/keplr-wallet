@@ -7,6 +7,7 @@ import {
 import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import Axios from "axios";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -41,6 +42,9 @@ export class ChainsKeeper {
       };
     });
     let savedChainInfos = await this.kvStore.get<ChainInfo[]>("chain-infos");
+
+    let result: ChainInfoWithEmbed[] = chainInfos;
+
     if (savedChainInfos) {
       // Should restore the prototype because BIP44 is the class.
       savedChainInfos = savedChainInfos.map(
@@ -53,7 +57,7 @@ export class ChainsKeeper {
         }
       );
 
-      return chainInfos.concat(
+      result = result.concat(
         savedChainInfos.map(chainInfo => {
           return {
             ...chainInfo,
@@ -61,9 +65,25 @@ export class ChainsKeeper {
           };
         })
       );
-    } else {
-      return chainInfos;
     }
+
+    // Set the updated property of the chain.
+    result = await Promise.all(
+      result.map(async chainInfo => {
+        const updatedChainInfo = await this.kvStore.get<Partial<ChainInfo>>(
+          ChainsKeeper.getUpdatedChainPropertyKey(chainInfo.chainId)
+        );
+        if (updatedChainInfo) {
+          return {
+            ...chainInfo,
+            ...updatedChainInfo
+          };
+        }
+        return chainInfo;
+      })
+    );
+
+    return result;
   }
 
   async getChainInfo(chainId: string): Promise<ChainInfoWithEmbed> {
@@ -153,6 +173,12 @@ export class ChainsKeeper {
     });
 
     await this.kvStore.set<ChainInfo[]>("chain-infos", resultChainInfo);
+
+    // Clear the updated chain info.
+    await this.kvStore.set(
+      ChainsKeeper.getUpdatedChainPropertyKey(chainId),
+      null
+    );
   }
 
   async requestAccess(
@@ -305,7 +331,73 @@ export class ChainsKeeper {
     }
   }
 
+  async tryUpdateChain(chainId: string): Promise<void> {
+    const chainInfo = await this.getChainInfo(chainId);
+
+    const instance = Axios.create({
+      baseURL: chainInfo.rpc
+    });
+
+    // Get the latest block.
+    const result = await instance.get<{
+      result: {
+        block: {
+          header: {
+            chain_id: string;
+          };
+        };
+      };
+    }>("/block");
+
+    const resultChainId = result.data.result.block.header.chain_id;
+
+    if (chainInfo.chainId !== resultChainId) {
+      const updatedChainInfo: Partial<ChainInfo> = {
+        chainId: resultChainId
+      };
+
+      await this.kvStore.set(
+        ChainsKeeper.getUpdatedChainPropertyKey(chainInfo.chainId),
+        updatedChainInfo
+      );
+    }
+  }
+
+  /**
+   * Returns wether the chain has been changed.
+   * Currently, only check the chain id has been changed.
+   * @param chainInfo Chain information.
+   */
+  public static async checkChainUpdate(
+    chainInfo: Readonly<ChainInfo>
+  ): Promise<boolean> {
+    const chainId = chainInfo.chainId;
+
+    const instance = Axios.create({
+      baseURL: chainInfo.rpc
+    });
+
+    // Get the latest block.
+    const result = await instance.get<{
+      result: {
+        block: {
+          header: {
+            chain_id: string;
+          };
+        };
+      };
+    }>("/block");
+
+    const resultChainId = result.data.result.block.header.chain_id;
+
+    return chainId !== resultChainId;
+  }
+
   private static getAccessOriginKey(chainId: string): string {
     return `access-origin-${chainId}`;
+  }
+
+  private static getUpdatedChainPropertyKey(chainId: string): string {
+    return `updated-chain-property-${chainId}`;
   }
 }

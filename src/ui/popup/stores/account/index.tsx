@@ -146,6 +146,15 @@ export class AccountStore {
       throw new Error("Address is fetching");
     }
 
+    // If bech32 address is not matched, don't need to fetch assets because it always fails.
+    if (
+      !this.bech32Address.startsWith(
+        this.chainInfo.bech32Config.bech32PrefixAccAddr
+      )
+    ) {
+      return;
+    }
+
     // If fetching is in progess, abort it.
     if (this.lastFetchingCancleToken) {
       this.lastFetchingCancleToken.cancel();
