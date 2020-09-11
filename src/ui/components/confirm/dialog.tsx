@@ -10,9 +10,12 @@ export const ConfirmDialog: FunctionComponent<{
   title?: string;
   paragraph: string;
 
+  yes?: string;
+  no?: string;
+
   onConfirm?: () => void;
   onReject?: () => void;
-}> = ({ img: imgElement, title, paragraph, onConfirm, onReject }) => {
+}> = ({ img: imgElement, title, paragraph, yes, no, onConfirm, onReject }) => {
   return (
     <div className={style.dialog}>
       <div className={style.bodyContainer}>
@@ -36,7 +39,7 @@ export const ConfirmDialog: FunctionComponent<{
             [onReject]
           )}
         >
-          <FormattedMessage id="confirm.no" />
+          {no ? no : <FormattedMessage id="confirm.no" />}
         </Button>
         <Button
           type="button"
@@ -52,7 +55,7 @@ export const ConfirmDialog: FunctionComponent<{
             [onConfirm]
           )}
         >
-          <FormattedMessage id="confirm.yes" />
+          {yes ? yes : <FormattedMessage id="confirm.yes" />}
         </Button>
       </div>
     </div>

@@ -124,7 +124,14 @@ export class ChainStore {
 
   @actionAsync
   public async tryUpdateChain(chainId: string) {
+    const selected = chainId === this.chainInfo.chainId;
+
     const msg = new TryUpdateChainMsg(chainId);
-    this.setChainList(await task(sendMessage(BACKGROUND_PORT, msg)));
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setChainList(result.chainInfos);
+    if (selected) {
+      this.setChain(result.chainId);
+      await this.saveLastViewChainId();
+    }
   }
 }

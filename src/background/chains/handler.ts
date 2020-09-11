@@ -103,6 +103,17 @@ const handleSuggestChainInfoMsg: (
       return;
     }
 
+    if (
+      (await keeper.getChainInfos(false)).find(
+        chainInfo => chainInfo.chainId === msg.chainInfo.chainId
+      )
+    ) {
+      // If suggested chain info is already registered without considering the chain update, throw an error because it probably needs to be updated.
+      throw new Error(
+        "The suggested chain was updated, probably frontend needs to be updated"
+      );
+    }
+
     const chainInfo = msg.chainInfo as Writeable<ChainInfo>;
     // Should restore the prototype because BIP44 is the class.
     chainInfo.bip44 = Object.setPrototypeOf(chainInfo.bip44, BIP44.prototype);
@@ -206,7 +217,10 @@ const handleTryUpdateChainMsg: (
   keeper: ChainsKeeper
 ) => InternalHandler<TryUpdateChainMsg> = keeper => {
   return async (_, msg) => {
-    await keeper.tryUpdateChain(msg.chainId);
-    return await keeper.getChainInfos();
+    const chainId = await keeper.tryUpdateChain(msg.chainId);
+    return {
+      chainId: chainId,
+      chainInfos: await keeper.getChainInfos()
+    };
   };
 };

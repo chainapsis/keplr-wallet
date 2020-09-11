@@ -324,7 +324,11 @@ export class RemoveAccessOriginMsg extends Message<void> {
   }
 }
 
-export class TryUpdateChainMsg extends Message<ChainInfoWithEmbed[]> {
+export class TryUpdateChainMsg extends Message<{
+  // Updated chain id
+  chainId: string;
+  chainInfos: ChainInfoWithEmbed[];
+}> {
   public static type() {
     return "try-update-chain";
   }

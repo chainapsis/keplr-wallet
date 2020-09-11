@@ -17,9 +17,11 @@ import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import { ChainsKeeper } from "../../../../background/chains/keeper";
 import { useConfirm } from "../../../components/confirm";
+import { useIntl } from "react-intl";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
+  const intl = useIntl();
 
   const { chainStore } = useStore();
 
@@ -34,7 +36,15 @@ export const MainPage: FunctionComponent = observer(() => {
           // If chain info has been changed, warning the user wether update the chain or not.
           if (
             await confirm.confirm({
-              paragraph: "Chain has been changed"
+              paragraph: intl.formatMessage({
+                id: "main.update-chain.confirm.paragraph"
+              }),
+              yes: intl.formatMessage({
+                id: "main.update-chain.confirm.yes"
+              }),
+              no: intl.formatMessage({
+                id: "main.update-chain.confirm.no"
+              })
             })
           ) {
             await chainStore.tryUpdateChain(chainStore.chainInfo.chainId);

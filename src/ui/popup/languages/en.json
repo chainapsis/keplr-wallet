@@ -18,6 +18,10 @@
   "main.menu.sign-out": "Sign out",
   "main.menu.footer.github": "Check it out on GitHub",
 
+  "main.update-chain.confirm.paragraph": "Chain information has changed. Verify that a chain upgrade has taken place.",
+  "main.update-chain.confirm.yes": "Proceed",
+  "main.update-chain.confirm.no": "Ignore",
+
   "setting.language": "Language",
   "setting.language.automatic": "Automatic (Browser default)",
   "setting.language.automatic-with-language": "Automatic ({language})",
@@ -168,6 +172,6 @@
   "fee-buttons.select.average": "Average",
   "fee-buttons.select.high": "High",
 
-  "confirm.yes": "yes",
-  "confirm.no": "no"
+  "confirm.yes": "Yes",
+  "confirm.no": "No"
 }
