@@ -54,7 +54,7 @@ export const MainPage: FunctionComponent = observer(() => {
     }
 
     prevChainId.current = chainStore.chainInfo.chainId;
-  }, [chainStore, chainStore.chainInfo, confirm]);
+  }, [chainStore, confirm, intl]);
 
   return (
     <HeaderLayout
@@ -92,11 +92,13 @@ export const MainPage: FunctionComponent = observer(() => {
           </div>
         </CardBody>
       </Card>
-      <Card className={classnames(style.card, "shadow")}>
-        <CardBody>
-          <StakeView />
-        </CardBody>
-      </Card>
+      {chainStore.chainInfo.walletUrlForStaking ? (
+        <Card className={classnames(style.card, "shadow")}>
+          <CardBody>
+            <StakeView />
+          </CardBody>
+        </Card>
+      ) : null}
     </HeaderLayout>
   );
 });
