@@ -15,10 +15,6 @@ import { observer } from "mobx-react";
 import styleStake from "./stake.module.scss";
 import classnames from "classnames";
 import { Dec } from "@chainapsis/cosmosjs/common/decimal";
-import {
-  getCurrency,
-  getCurrencyFromMinimalDenom
-} from "../../../../common/currency";
 import { Currency } from "../../../../common/currency";
 import { Msg } from "@chainapsis/cosmosjs/core/tx";
 import { MsgWithdrawDelegatorReward } from "@chainapsis/cosmosjs/x/distribution";
@@ -117,10 +113,7 @@ export const StakeView: FunctionComponent = observer(() => {
             gas: bigInteger(140000 * msgs.length),
             memo: "",
             fee: new Coin(
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              getCurrency(
-                chainStore.chainInfo.nativeCurrency
-              )!.coinMinimalDenom,
+              chainStore.chainInfo.stakeCurrency.coinMinimalDenom,
               new Int("1000")
             )
           };
@@ -152,8 +145,9 @@ export const StakeView: FunctionComponent = observer(() => {
   }, [
     reward.rewards,
     accountStore.bech32Address,
-    chainStore.chainInfo.bech32Config,
-    chainStore.chainInfo.nativeCurrency,
+    chainStore.chainInfo.bech32Config.bech32PrefixAccAddr,
+    chainStore.chainInfo.bech32Config.bech32PrefixValAddr,
+    chainStore.chainInfo.stakeCurrency.coinMinimalDenom,
     cosmosJS,
     history,
     notification
@@ -162,7 +156,9 @@ export const StakeView: FunctionComponent = observer(() => {
   let isRewardExist = false;
   let rewardCurrency: Currency | undefined;
   if (reward.totalReward && reward.totalReward.length > 0) {
-    rewardCurrency = getCurrencyFromMinimalDenom(reward.totalReward[0].denom);
+    rewardCurrency = chainStore.allCurrencies.find(currency => {
+      return currency.coinMinimalDenom === reward.totalReward[0].denom;
+    });
     isRewardExist = rewardCurrency != null;
   }
 

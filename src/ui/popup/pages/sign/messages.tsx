@@ -3,6 +3,7 @@ import { shortenAddress } from "../../../../common/address";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { IntlShape, FormattedMessage } from "react-intl";
+import { Currency } from "../../../../common/currency";
 
 export interface MessageObj {
   type: string;
@@ -86,6 +87,7 @@ function MessageType<T extends Messages>(
 /* eslint-disable react/display-name */
 export function renderMessage(
   msg: MessageObj,
+  currencies: Currency[],
   intl: IntlShape
 ): {
   icon: string | undefined;
@@ -96,7 +98,7 @@ export function renderMessage(
     const receives: { amount: string; denom: string }[] = [];
     for (const coinPrimitive of msg.value.amount) {
       const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
-      const parsed = CoinUtils.parseDecAndDenomFromCoin(coin);
+      const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
 
       receives.push({
         amount: clearDecimals(parsed.amount),
@@ -128,6 +130,7 @@ export function renderMessage(
 
   if (MessageType<MsgBeginRedelegate>(msg, "cosmos-sdk/MsgBeginRedelegate")) {
     const parsed = CoinUtils.parseDecAndDenomFromCoin(
+      currencies,
       new Coin(msg.value.amount.denom, msg.value.amount.amount)
     );
 
@@ -152,6 +155,7 @@ export function renderMessage(
 
   if (MessageType<MsgUndelegate>(msg, "cosmos-sdk/MsgUndelegate")) {
     const parsed = CoinUtils.parseDecAndDenomFromCoin(
+      currencies,
       new Coin(msg.value.amount.denom, msg.value.amount.amount)
     );
 
@@ -176,6 +180,7 @@ export function renderMessage(
 
   if (MessageType<MsgDelegate>(msg, "cosmos-sdk/MsgDelegate")) {
     const parsed = CoinUtils.parseDecAndDenomFromCoin(
+      currencies,
       new Coin(msg.value.amount.denom, msg.value.amount.amount)
     );
 

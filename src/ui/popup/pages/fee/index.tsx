@@ -34,7 +34,6 @@ import {
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxState, withTxStateProvider } from "../../../contexts/tx";
 import { Int } from "@chainapsis/cosmosjs/common/int";
-import { getCurrencies } from "../../../../common/currency";
 import { useHistory, useLocation, useRouteMatch } from "react-router";
 
 export const FeePage: FunctionComponent = withTxStateProvider(
@@ -65,7 +64,7 @@ export const FeePage: FunctionComponent = withTxStateProvider(
     const txState = useTxState();
 
     const memorizedFeeCurrencies = useMemo(
-      () => getCurrencies(chainStore.chainInfo.feeCurrencies),
+      () => chainStore.chainInfo.feeCurrencies,
       [chainStore.chainInfo.feeCurrencies]
     );
 
@@ -164,7 +163,7 @@ export const FeePage: FunctionComponent = withTxStateProvider(
                 txBuilder.approve(config);
               }
             },
-            [txBuilder, txState]
+            [txBuilder, txState.fees, txState.gas, txState.memo, txStateIsValid]
           )}
         >
           <div className={style.formInnerContainer}>

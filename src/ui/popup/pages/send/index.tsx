@@ -25,7 +25,6 @@ import { observer } from "mobx-react";
 
 import { useCosmosJS } from "../../../hooks";
 import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
-import { getCurrencies } from "../../../../common/currency";
 
 import style from "./style.module.scss";
 import { useNotification } from "../../../components/notification";
@@ -64,12 +63,11 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       txState.setBalances(accountStore.assets);
     }, [accountStore.assets, txState]);
 
-    const memorizedCurrencies = useMemo(
-      () => getCurrencies(chainStore.chainInfo.currencies),
-      [chainStore.chainInfo.currencies]
-    );
+    const memorizedCurrencies = useMemo(() => chainStore.chainInfo.currencies, [
+      chainStore.chainInfo.currencies
+    ]);
     const memorizedFeeCurrencies = useMemo(
-      () => getCurrencies(chainStore.chainInfo.feeCurrencies),
+      () => chainStore.chainInfo.feeCurrencies,
       [chainStore.chainInfo.feeCurrencies]
     );
 

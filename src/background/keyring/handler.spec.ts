@@ -62,13 +62,29 @@ describe("Test keyring handler", () => {
           rest: "nope",
           chainId: "test-1",
           chainName: "Test",
-          nativeCurrency: "test",
+          stakeCurrency: {
+            coinDenom: "TEST",
+            coinMinimalDenom: "test",
+            coinDecimals: 6
+          },
           walletUrl: "nope",
           walletUrlForStaking: "nope",
           bip44: new BIP44(44, 118, 0),
           bech32Config: defaultBech32Config("cosmos"),
-          currencies: ["test"],
-          feeCurrencies: ["test"],
+          currencies: [
+            {
+              coinDenom: "TEST",
+              coinMinimalDenom: "test",
+              coinDecimals: 6
+            }
+          ],
+          feeCurrencies: [
+            {
+              coinDenom: "TEST",
+              coinMinimalDenom: "test",
+              coinDecimals: 6
+            }
+          ],
           coinType: 118
         }
       ],

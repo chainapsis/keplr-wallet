@@ -49,13 +49,29 @@ describe("Test chains handler", () => {
           rest: "nope",
           chainId: "test-1",
           chainName: "Test",
-          nativeCurrency: "test",
+          stakeCurrency: {
+            coinDenom: "TEST",
+            coinMinimalDenom: "test",
+            coinDecimals: 6
+          },
           walletUrl: "nope",
           walletUrlForStaking: "nope",
           bip44: new BIP44(44, 118, 0),
           bech32Config: defaultBech32Config("test"),
-          currencies: ["test"],
-          feeCurrencies: ["test"],
+          currencies: [
+            {
+              coinDenom: "TEST",
+              coinMinimalDenom: "test",
+              coinDecimals: 6
+            }
+          ],
+          feeCurrencies: [
+            {
+              coinDenom: "TEST",
+              coinMinimalDenom: "test",
+              coinDecimals: 6
+            }
+          ],
           coinType: 118
         }
       ],

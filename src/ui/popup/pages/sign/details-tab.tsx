@@ -5,10 +5,7 @@ import { CoinUtils } from "../../../../common/coin-utils";
 import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
-import {
-  getCurrencyFromMinimalDenom,
-  getFiatCurrencyFromLanguage
-} from "../../../../common/currency";
+import { getFiatCurrencyFromLanguage } from "../../../../common/currency";
 
 import styleDetailsTab from "./details-tab.module.scss";
 import classnames from "classnames";
@@ -20,7 +17,7 @@ import { useLanguage } from "../../language";
 
 export const DetailsTab: FunctionComponent<{ message: string }> = observer(
   ({ message }) => {
-    const { priceStore } = useStore();
+    const { chainStore, priceStore } = useStore();
 
     const intl = useIntl();
 
@@ -66,7 +63,9 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
       let hasCoinGeckoId = true;
 
       for (const coin of fee) {
-        const currency = getCurrencyFromMinimalDenom(coin.denom);
+        const currency = chainStore.allCurrencies.find(currency => {
+          return currency.coinMinimalDenom === coin.denom;
+        });
         if (currency) {
           if (!currency.coinGeckoId) {
             hasCoinGeckoId = false;
@@ -84,7 +83,10 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
             fiatCurrency.currency,
             currency.coinGeckoId
           );
-          const parsed = CoinUtils.parseDecAndDenomFromCoin(coin);
+          const parsed = CoinUtils.parseDecAndDenomFromCoin(
+            chainStore.allCurrencies,
+            coin
+          );
           if (value) {
             price = price.add(new Dec(parsed.amount).mul(value.value));
           }
@@ -93,7 +95,7 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
 
       setHasCoinGeckoId(hasCoinGeckoId);
       setFeeFiat(price);
-    }, [fee, fiatCurrency.currency, priceStore]);
+    }, [chainStore.allCurrencies, fee, fiatCurrency.currency, priceStore]);
 
     return (
       <div className={styleDetailsTab.container}>
@@ -109,7 +111,11 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
             })}
           </div>
           {msgs.map((msg, i) => {
-            const msgContent = renderMessage(msg, intl);
+            const msgContent = renderMessage(
+              msg,
+              chainStore.allCurrencies,
+              intl
+            );
             return (
               <React.Fragment key={i.toString()}>
                 <Msg icon={msgContent.icon} title={msgContent.title}>
@@ -130,7 +136,10 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
             <div>
               {fee
                 .map(fee => {
-                  const parsed = CoinUtils.parseDecAndDenomFromCoin(fee);
+                  const parsed = CoinUtils.parseDecAndDenomFromCoin(
+                    chainStore.allCurrencies,
+                    fee
+                  );
                   return `${DecUtils.trim(parsed.amount)} ${parsed.denom}`;
                 })
                 .join(",")}

@@ -2,6 +2,7 @@ import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import { AxiosRequestConfig } from "axios";
+import { Currency } from "../../common/currency";
 
 export interface ChainInfo {
   readonly rpc: string;
@@ -14,18 +15,18 @@ export interface ChainInfo {
    * This indicates the type of coin that can be used for stake.
    * You can get actual currency information from Currencies.
    */
-  readonly nativeCurrency: string;
+  readonly stakeCurrency: Currency;
   readonly walletUrl: string;
   readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;
   readonly bech32Config: Bech32Config;
 
-  readonly currencies: string[];
+  readonly currencies: Currency[];
   /**
    * This indicates which coin or token can be used for fee to send transaction.
    * You can get actual currency information from Currencies.
    */
-  readonly feeCurrencies: string[];
+  readonly feeCurrencies: Currency[];
   /**
    * This is the coin type in slip-044.
    * This is used for fetching address from ENS if this field is set.

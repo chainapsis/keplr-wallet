@@ -17,6 +17,7 @@ import { sendMessage } from "../../../../common/message";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { Currency } from "../../../../common/currency";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -26,6 +27,9 @@ export class ChainStore {
   @observable
   public chainInfo!: ChainInfo;
 
+  @observable
+  public allCurrencies!: Currency[];
+
   // Indicate whether the chain info is set.
   private isChainSet = false;
 
@@ -33,6 +37,8 @@ export class ChainStore {
     private rootStore: RootStore,
     private readonly embedChainInfos: ChainInfo[]
   ) {
+    this.setAllCurrencies([]);
+
     this.setChainList(
       this.embedChainInfos.map(chainInfo => {
         return {
@@ -108,6 +114,17 @@ export class ChainStore {
   @action
   public setChainList(chainList: ChainInfoWithEmbed[]) {
     this.chainList = chainList;
+
+    const allCurrencies = chainList
+      .map(chainInfo => {
+        return chainInfo.currencies;
+      })
+      // Flaten
+      .reduce((acc, val) => {
+        return acc.concat(val);
+      }, []);
+
+    this.setAllCurrencies(allCurrencies);
   }
 
   @actionAsync
@@ -133,5 +150,10 @@ export class ChainStore {
       this.setChain(result.chainId);
       await this.saveLastViewChainId();
     }
+  }
+
+  @action
+  public setAllCurrencies(currencies: Currency[]) {
+    this.allCurrencies = currencies;
   }
 }

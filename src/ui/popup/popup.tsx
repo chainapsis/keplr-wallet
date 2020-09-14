@@ -43,17 +43,13 @@ import { LedgerGrantPage, LedgerInitIndicator } from "./pages/ledger";
 
 import * as LedgerInit from "../../background/ledger/foreground";
 
-import {
-  AdditonalIntlMessages,
-  Currencies,
-  LanguageToFiatCurrency
-} from "../../config";
+import { AdditonalIntlMessages, LanguageToFiatCurrency } from "../../config";
 import { init as currencyInit } from "../../common/currency";
 import { MessageManager } from "../../common/message/manager";
 import { POPUP_PORT } from "../../common/message/constant";
 import { InitLedgerNotifiyHandler } from "../../background/ledger/foreground";
 
-currencyInit(Currencies, LanguageToFiatCurrency);
+currencyInit(LanguageToFiatCurrency);
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");

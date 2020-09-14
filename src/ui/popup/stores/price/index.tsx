@@ -10,10 +10,7 @@ import {
   AutoFetchingFiatValueInterval
 } from "../../../../config";
 import { ChainInfo } from "../../../../background/chains";
-import {
-  getCurrencies,
-  getFiatCurrencyFromLanguage
-} from "../../../../common/currency";
+import { getFiatCurrencyFromLanguage } from "../../../../common/currency";
 
 interface CoinGeckoPriceResult {
   [id: string]: {
@@ -78,7 +75,7 @@ export class PriceStore {
         this.lastFetchingIntervalId = undefined;
       }
 
-      const currencies = getCurrencies(this.chainInfo.currencies);
+      const currencies = this.chainInfo.currencies;
       if (currencies.length > 0) {
         const coinGeckoIds = currencies
           .map(currency => {

@@ -66,7 +66,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     error,
     gasPriceStep
   }) => {
-    const { priceStore } = useStore();
+    const { chainStore, priceStore } = useStore();
     const language = useLanguage();
     const txState = useTxState();
 
@@ -206,7 +206,10 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             >
               {currency && feeLow
                 ? `${DecUtils.trim(
-                    CoinUtils.parseDecAndDenomFromCoin(feeLow).amount
+                    CoinUtils.parseDecAndDenomFromCoin(
+                      chainStore.allCurrencies,
+                      feeLow
+                    ).amount
                   )}${currency.coinDenom}`
                 : "loading"}
             </div>
@@ -252,7 +255,10 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             >
               {currency && feeAverage
                 ? `${DecUtils.trim(
-                    CoinUtils.parseDecAndDenomFromCoin(feeAverage).amount
+                    CoinUtils.parseDecAndDenomFromCoin(
+                      chainStore.allCurrencies,
+                      feeAverage
+                    ).amount
                   )}${currency.coinDenom}`
                 : "loading"}
             </div>
@@ -296,7 +302,10 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             >
               {currency && feeHigh
                 ? `${DecUtils.trim(
-                    CoinUtils.parseDecAndDenomFromCoin(feeHigh).amount
+                    CoinUtils.parseDecAndDenomFromCoin(
+                      chainStore.allCurrencies,
+                      feeHigh
+                    ).amount
                   )}${currency.coinDenom}`
                 : "loading"}
             </div>
