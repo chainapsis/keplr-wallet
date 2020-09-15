@@ -7,12 +7,7 @@ import React, {
 
 import { HeaderLayout } from "../../layouts/header-layout";
 
-import {
-  DefaultGasPriceStep,
-  FeeButtons,
-  GasInput,
-  MemoInput
-} from "../../../components/form";
+import { FeeButtons, GasInput, MemoInput } from "../../../components/form";
 import { Button } from "reactstrap";
 
 import { useTxBuilderConfig } from "../../../hooks";
@@ -182,7 +177,6 @@ export const FeePage: FunctionComponent = withTxStateProvider(
                     }),
                     high: intl.formatMessage({ id: "fee-buttons.select.high" })
                   }}
-                  gasPriceStep={DefaultGasPriceStep}
                 />
               )}
             </div>

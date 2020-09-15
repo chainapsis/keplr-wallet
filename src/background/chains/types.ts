@@ -34,6 +34,17 @@ export interface ChainInfo {
   readonly coinType?: number;
 
   /**
+   * This is used to set the fee of the transaction.
+   * If this field is empty, it just use the default gas price step (low: 0.01, average: 0.025, high: 0.04).
+   * And, set field's type as primitive number because it is hard to restore the prototype after deserialzing if field's type is `Dec`.
+   */
+  readonly gasPriceStep?: {
+    low: number;
+    average: number;
+    high: number;
+  };
+
+  /**
    * Shows whether the blockchain is in production phase or beta phase.
    * Major features such as staking and sending are supported on staging blockchains, but without guarantee.
    * If the blockchain is in an early stage, please set it as beta.

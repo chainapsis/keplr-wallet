@@ -50,7 +50,10 @@ export interface FeeButtonsProps {
   };
   error?: string;
 
-  gasPriceStep: GasPriceStep;
+  /**
+   * If this prop is set, it override the gas price step of the chain info.
+   */
+  gasPriceStep?: GasPriceStep;
 }
 
 enum FeeSelect {
@@ -64,7 +67,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     label,
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
     error,
-    gasPriceStep
+    gasPriceStep: propGasPriceStep
   }) => {
     const { chainStore, priceStore } = useStore();
     const language = useLanguage();
@@ -101,6 +104,25 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
         priceStore.fetchValue([fiatCurrency.currency], [currency.coinGeckoId]);
       }
     }, [currency, fiatCurrency.currency, priceStore]);
+
+    const [gasPriceStep, setGasPriceStep] = useState<GasPriceStep>(
+      DefaultGasPriceStep
+    );
+    useEffect(() => {
+      if (propGasPriceStep) {
+        setGasPriceStep(propGasPriceStep);
+      } else if (chainStore.chainInfo.gasPriceStep) {
+        setGasPriceStep({
+          low: new Dec(chainStore.chainInfo.gasPriceStep.low.toString()),
+          average: new Dec(
+            chainStore.chainInfo.gasPriceStep.average.toString()
+          ),
+          high: new Dec(chainStore.chainInfo.gasPriceStep.high.toString())
+        });
+      } else {
+        setGasPriceStep(DefaultGasPriceStep);
+      }
+    }, [chainStore.chainInfo.gasPriceStep, propGasPriceStep]);
 
     useEffect(() => {
       if (currency) {
@@ -151,7 +173,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
       } else {
         throw new Error("Invalid fee select");
       }
-    }, [feeAverage, feeHigh, feeLow, feeSelect]);
+    }, [feeAverage, feeHigh, feeLow, feeSelect, txState]);
 
     const [inputId] = useState(() => {
       const bytes = new Uint8Array(4);

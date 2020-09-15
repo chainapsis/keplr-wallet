@@ -124,7 +124,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: SECRET_NETWORK_RPC_CONFIG,
     rest: SECRET_NETWORK_REST_ENDPOINT,
     restConfig: SECRET_NETWORK_REST_CONFIG,
-    chainId: "secret-1",
+    chainId: "secret-2",
     chainName: "Secret Network",
     stakeCurrency: {
       coinDenom: "SCRT",
@@ -155,7 +155,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6
       }
     ],
-    coinType: 529
+    coinType: 529,
+    gasPriceStep: {
+      low: 0.1,
+      average: 0.25,
+      high: 0.4
+    }
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,

@@ -9,8 +9,7 @@ import {
   AddressInput,
   FeeButtons,
   CoinInput,
-  MemoInput,
-  DefaultGasPriceStep
+  MemoInput
 } from "../../../components/form";
 import { useStore } from "../../stores";
 
@@ -208,7 +207,6 @@ export const SendPage: FunctionComponent = withTxStateProvider(
                     }),
                     high: intl.formatMessage({ id: "fee-buttons.select.high" })
                   }}
-                  gasPriceStep={DefaultGasPriceStep}
                 />
               )}
             </div>
