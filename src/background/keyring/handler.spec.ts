@@ -948,7 +948,7 @@ describe("Test keyring handler", () => {
         "test-1",
         "1234",
         "cosmos1jgfuw4mswjmdc6npcj5vcjjmqa2x8y63l5lq2s",
-        "ff",
+        Buffer.from(`{"chain_id":"test-1"}`).toString("hex"),
         false,
         true
       )
@@ -968,7 +968,7 @@ describe("Test keyring handler", () => {
           "test-1",
           "1234",
           "cosmos1jgfuw4mswjmdc6npcj5vcjjmqa2x8y63l5lq2s",
-          "ff",
+          Buffer.from(`{"chain_id":"test-1"}`).toString("hex"),
           false,
           true
         )
@@ -989,7 +989,7 @@ describe("Test keyring handler", () => {
           "test-1",
           "1234",
           "cosmos1jgfuw4mswjmdc6npcj5vcjjmqa2x8y63l5lq2s",
-          "ff",
+          Buffer.from(`{"chain_id":"test-1"}`).toString("hex"),
           false,
           true
         )

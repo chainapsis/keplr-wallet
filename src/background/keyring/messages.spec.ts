@@ -302,12 +302,25 @@ describe("Test keyring message's validate basic method", () => {
       msg.validateBasic();
     });
 
+    // Chain id mismatched.
+    assert.throws(() => {
+      const msg = new Messages.RequestSignMsg(
+        "test-1",
+        "12345678",
+        "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k",
+        Buffer.from(`{"chain_id":"test-2"}`).toString("hex"),
+        false,
+        true
+      );
+      msg.validateBasic();
+    });
+
     assert.doesNotThrow(() => {
       const msg = new Messages.RequestSignMsg(
         "test-1",
         "12345678",
         "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k",
-        "FF",
+        Buffer.from(`{"chain_id":"test-1"}`).toString("hex"),
         false,
         true
       );
@@ -380,7 +393,7 @@ describe("Test keyring message's external permission", () => {
         "test-1",
         "12345678",
         "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k",
-        "FF",
+        Buffer.from(`{"chain_id":"test-1"}`).toString("hex"),
         false,
         true
       );
@@ -401,7 +414,7 @@ describe("Test keyring message's external permission", () => {
         "test-1",
         "12345678",
         "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k",
-        "FF",
+        Buffer.from(`{"chain_id":"test-1"}`).toString("hex"),
         false,
         true
       );

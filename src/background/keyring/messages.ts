@@ -580,7 +580,15 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     AccAddress.fromBech32(this.bech32Address);
 
     // Check that message is encoded as hex.
-    Buffer.from(this.messageHex, "hex");
+    const buffer = Buffer.from(this.messageHex, "hex");
+
+    // Message should be json.
+    const message = JSON.parse(buffer.toString());
+    if (message["chain_id"] !== this.chainId) {
+      throw new Error(
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
 
     AsyncApprover.isValidId(this.id);
   }
