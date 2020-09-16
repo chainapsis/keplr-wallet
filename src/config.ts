@@ -110,22 +110,22 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: STRAIGHTEDGE_RPC_CONFIG,
     rest: STRAIGHTEDGE_REST_ENDPOINT,
     restConfig: STRAIGHTEDGE_REST_CONFIG,
-    chainId: "straightedge-3",
+    chainId: "straightedge-2",
     chainName: "Straightedge",
     nativeCurrency: "str",
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/straightedge-1/stake"
-        : "http://localhost:8081/#/straightedge-1/stake",
+        ? "https://wallet.keplr.app/#/straightedge-2/stake"
+        : "http://localhost:8081/#/straightedge-2/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/straightedge-1/stake"
-        : "http://localhost:8081/#/straightedge-1/stake",
+        ? "https://wallet.keplr.app/#/straightedge-2/stake"
+        : "http://localhost:8081/#/straightedge-2/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("str"),
     currencies: ["str"],
     feeCurrencies: ["str"],
-    coinType: 118 // TODO
+    coinType: 551
   }
 ];
 
@@ -149,7 +149,7 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   },
   {
-    chainId: "straightedge-1",
+    chainId: "straightedge-2",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
