@@ -7,11 +7,14 @@ import { useStore } from "../../stores";
 import style from "./chain-list.module.scss";
 import { ChainInfoWithEmbed } from "../../../../background/chains";
 import { useConfirm } from "../../../components/confirm";
+import { useIntl } from "react-intl";
 
 const ChainElement: FunctionComponent<{
   chainInfo: ChainInfoWithEmbed;
 }> = observer(({ chainInfo }) => {
   const { chainStore } = useStore();
+
+  const intl = useIntl();
 
   const confirm = useConfirm();
 
@@ -40,7 +43,14 @@ const ChainElement: FunctionComponent<{
 
               if (
                 await confirm.confirm({
-                  paragraph: `Are you sure to remove the ${chainInfo.chainName}?`
+                  paragraph: intl.formatMessage(
+                    {
+                      id: "chain.remove.confirm.paragraph"
+                    },
+                    {
+                      chainName: chainInfo.chainName
+                    }
+                  )
                 })
               ) {
                 await chainStore.removeChainInfo(chainInfo.chainId);

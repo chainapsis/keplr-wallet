@@ -9,11 +9,12 @@ import { sendMessage } from "../../../../../common/message/send";
 import { BACKGROUND_PORT } from "../../../../../common/message/constant";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { SuggestedChainInfo } from "../../../../../background/chains";
-import { Button } from "reactstrap";
+import { Button, Alert } from "reactstrap";
 
 import style from "./style.module.scss";
 import { EmptyLayout } from "../../../layouts/empty-layout";
 import { disableScroll, fitWindow } from "../../../../../common/window";
+import { FormattedMessage } from "react-intl";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -85,38 +86,71 @@ export const ChainSuggestedPage: FunctionComponent = () => {
   }, [chainId]);
 
   return (
-    <EmptyLayout className={style.container}>
-      <p>대충 experimental feature라고 경고하는 메세지</p>
-      {chainInfo ? (
-        <p>
-          {`${chainInfo?.origin} suggests the chain `}
-          <b>{chainInfo?.chainId}</b>
+    <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
+      <div className={style.container}>
+        <img
+          src={require("../../../public/assets/temp-icon.svg")}
+          alt="logo"
+          style={{ height: "92px" }}
+        />
+        <h1 className={style.header}>
+          <FormattedMessage id="chain.suggested.title" />
+        </h1>
+        <p className={style.paragraph}>
+          <FormattedMessage
+            id="chain.suggested.paragraph"
+            values={{
+              host: chainInfo?.origin,
+              chainId: chainInfo?.chainId,
+              // eslint-disable-next-line react/display-name
+              b: (...chunks: any) => <b>{chunks}</b>
+            }}
+          />
         </p>
-      ) : null}
-      <div style={{ flex: 1 }} />
-      <div className={style.buttons}>
-        <Button
-          color="danger"
-          disabled={!chainInfo}
-          onClick={async e => {
-            e.preventDefault();
+        <div style={{ flex: 1 }} />
+        <Alert className={style.warning} color="warning">
+          <div className={style.imgContainer}>
+            <img
+              src={require("../../../public/assets/img/icons8-test-tube.svg")}
+              alt="experiment"
+            />
+          </div>
+          <div className={style.content}>
+            <div className={style.title}>
+              <FormattedMessage id="chain.suggested.waring.experiment.title" />
+            </div>
+            <div>
+              <FormattedMessage id="chain.suggested.waring.experiment.paragraph" />
+            </div>
+          </div>
+        </Alert>
+        <div className={style.buttons}>
+          <Button
+            className={style.button}
+            color="danger"
+            outline
+            disabled={!chainInfo}
+            onClick={async e => {
+              e.preventDefault();
 
-            await reject();
-          }}
-        >
-          Reject
-        </Button>
-        <Button
-          color="primary"
-          disabled={!chainInfo}
-          onClick={async e => {
-            e.preventDefault();
+              await reject();
+            }}
+          >
+            <FormattedMessage id="chain.suggested.button.reject" />
+          </Button>
+          <Button
+            className={style.button}
+            color="primary"
+            disabled={!chainInfo}
+            onClick={async e => {
+              e.preventDefault();
 
-            await approve();
-          }}
-        >
-          Approve
-        </Button>
+              await approve();
+            }}
+          >
+            <FormattedMessage id="chain.suggested.button.approve" />
+          </Button>
+        </div>
       </div>
     </EmptyLayout>
   );
