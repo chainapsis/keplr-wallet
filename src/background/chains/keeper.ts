@@ -1,6 +1,7 @@
 import {
   AccessOrigin,
   ChainInfo,
+  ChainInfoSchema,
   ChainInfoWithEmbed,
   SuggestedChainInfo
 } from "./types";
@@ -122,7 +123,7 @@ export class ChainsKeeper {
     openPopup: boolean,
     origin: string
   ): Promise<void> {
-    // TODO: Validate the chain info's fields.
+    chainInfo = await ChainInfoSchema.validateAsync(chainInfo);
 
     if (openPopup) {
       this.windowOpener(

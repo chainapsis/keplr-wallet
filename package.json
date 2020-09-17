@@ -17,8 +17,8 @@
   "author": "chainapsis",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ensdomains/resolver": "^0.2.4",
     "@chainapsis/cosmosjs": "git+https://github.com/chainapsis/cosmosjs-dist.git#00d97d0",
+    "@ensdomains/resolver": "^0.2.4",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@ledgerhq/hw-transport-webusb": "^5.21.0",
     "aes-js": "^3.1.2",
@@ -31,6 +31,7 @@
     "delay": "^4.4.0",
     "ethereum-ens": "^0.8.0",
     "framer-motion": "^1.6.14",
+    "joi": "^17.2.1",
     "ledger-cosmos-js": "^2.1.7",
     "mobx": "^5.15.0",
     "mobx-react": "^6.1.3",

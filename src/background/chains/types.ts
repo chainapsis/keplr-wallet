@@ -4,6 +4,8 @@ import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 import { AxiosRequestConfig } from "axios";
 import { Currency } from "../../common/currency";
 
+import Joi from "joi";
+
 export interface ChainInfo {
   readonly rpc: string;
   readonly rpcConfig?: AxiosRequestConfig;
@@ -16,7 +18,7 @@ export interface ChainInfo {
    * You can get actual currency information from Currencies.
    */
   readonly stakeCurrency: Currency;
-  readonly walletUrl: string;
+  readonly walletUrl?: string;
   readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;
   readonly bech32Config: Bech32Config;
@@ -64,3 +66,67 @@ export type ChainInfoWithEmbed = ChainInfo & {
 export type SuggestedChainInfo = ChainInfo & {
   origin: string;
 };
+
+export const CurrencySchema = Joi.object<Currency>({
+  coinDenom: Joi.string().required(),
+  coinMinimalDenom: Joi.string().required(),
+  coinDecimals: Joi.number()
+    .integer()
+    .min(0)
+    .max(18)
+    .required(),
+  coinGeckoId: Joi.string()
+});
+
+export const Bech32ConfigSchema = Joi.object<Bech32Config>({
+  bech32PrefixAccAddr: Joi.string().required(),
+  bech32PrefixAccPub: Joi.string().required(),
+  bech32PrefixValAddr: Joi.string().required(),
+  bech32PrefixValPub: Joi.string().required(),
+  bech32PrefixConsAddr: Joi.string().required(),
+  bech32PrefixConsPub: Joi.string().required()
+});
+
+export const ChainInfoSchema = Joi.object<ChainInfo>({
+  rpc: Joi.string()
+    .required()
+    .uri(),
+  // TODO: Handle rpc config.
+  rest: Joi.string()
+    .required()
+    .uri(),
+  // TODO: Handle rest config.
+  chainId: Joi.string()
+    .required()
+    .min(1)
+    .max(30),
+  chainName: Joi.string()
+    .required()
+    .min(1)
+    .max(30),
+  stakeCurrency: CurrencySchema.required(),
+  walletUrl: Joi.string().uri(),
+  walletUrlForStaking: Joi.string().uri(),
+  bip44: Joi.custom(value => {
+    if (!(value instanceof BIP44)) {
+      throw new Error("Invalid bip44 type");
+    }
+    return value;
+  }).required(),
+  bech32Config: Bech32ConfigSchema.required(),
+  currencies: Joi.array()
+    .min(1)
+    .items(CurrencySchema)
+    .required(),
+  feeCurrencies: Joi.array()
+    .min(1)
+    .items(CurrencySchema)
+    .required(),
+  coinType: Joi.number().integer(),
+  beta: Joi.boolean(),
+  gasPriceStep: Joi.object({
+    low: Joi.number().required(),
+    average: Joi.number().required(),
+    high: Joi.number().required()
+  })
+});
