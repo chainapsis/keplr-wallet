@@ -25,7 +25,7 @@ const chainsKeeper = new Chains.ChainsKeeper(
 );
 Chains.init(messageManager, chainsKeeper);
 
-const ledgerKeeper = new Ledger.LedgerKeeper();
+const ledgerKeeper = new Ledger.LedgerKeeper(new BrowserKVStore("ledger"));
 Ledger.init(messageManager, ledgerKeeper);
 
 const keyRingKeeper = new KeyRing.KeyRingKeeper(

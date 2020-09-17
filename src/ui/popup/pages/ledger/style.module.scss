@@ -2,9 +2,6 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 .confirm-ledger-dialog {
@@ -72,6 +69,8 @@
 
 .instruction {
   margin-bottom: 30px;
+  padding-left: 10px;
+  padding-right: 10px;
 
   color: #32325d;
 

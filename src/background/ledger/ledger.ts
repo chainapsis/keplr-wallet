@@ -1,5 +1,8 @@
 const CosmosApp: any = require("ledger-cosmos-js").default;
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore
+import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 
 import { signatureImport } from "secp256k1";
 
@@ -21,10 +24,12 @@ export class LedgerInitError extends Error {
 export class Ledger {
   constructor(private readonly cosmosApp: any) {}
 
-  static async init(): Promise<Ledger> {
+  static async init(useWebHID: boolean = false): Promise<Ledger> {
     let transport: TransportWebUSB | undefined;
     try {
-      transport = await TransportWebUSB.create();
+      transport = useWebHID
+        ? await TransportWebHID.create()
+        : await TransportWebUSB.create();
     } catch (e) {
       throw new LedgerInitError(LedgerInitErrorOn.Transport, e.message);
     }
@@ -109,5 +114,9 @@ export class Ledger {
 
   async close(): Promise<void> {
     return await this.cosmosApp.transport.close();
+  }
+
+  static async isWebHIDSupported(): Promise<boolean> {
+    return await TransportWebHID.isSupported();
   }
 }

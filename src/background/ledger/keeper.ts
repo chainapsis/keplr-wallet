@@ -13,6 +13,7 @@ import {
 import { AsyncWaitGroup } from "../../common/async-wait-group";
 import { openWindow } from "../../common/window";
 import { BIP44HDPath } from "../keyring/types";
+import { KVStore } from "../../common/kvstore";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -20,6 +21,8 @@ export class LedgerKeeper {
   private previousInitAborter: ((e: Error) => void) | undefined;
 
   private readonly initWG: AsyncWaitGroup = new AsyncWaitGroup();
+
+  constructor(private readonly kvStore: KVStore) {}
 
   async getPublicKey(bip44HDPath: BIP44HDPath): Promise<Uint8Array> {
     return await this.useLedger(async ledger => {
@@ -125,7 +128,7 @@ export class LedgerKeeper {
     while (true) {
       try {
         this.initWG.add();
-        const ledger = await Ledger.init();
+        const ledger = await Ledger.init(await this.getWebHIDFlag());
         this.previousInitAborter = undefined;
         return ledger;
       } catch (e) {
@@ -190,5 +193,14 @@ export class LedgerKeeper {
 
       await delay(1000);
     }
+  }
+
+  async getWebHIDFlag(): Promise<boolean> {
+    const webHIDFlag = await this.kvStore.get<boolean>("webhid");
+    return !!webHIDFlag;
+  }
+
+  async setWebHIDFlag(flag: boolean): Promise<void> {
+    await this.kvStore.set<boolean>("webhid", flag);
   }
 }

@@ -1,8 +1,18 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 
 import { Button } from "reactstrap";
 
-import { LedgerInitResumeMsg } from "../../../../background/ledger/messages";
+import {
+  LedgerGetWebHIDFlagMsg,
+  LedgerInitResumeMsg,
+  LedgerSetWebHIDFlagMsg
+} from "../../../../background/ledger/messages";
 import { sendMessage } from "../../../../common/message/send";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
@@ -17,6 +27,8 @@ import { disableScroll, fitWindow } from "../../../../common/window";
 
 import classnames from "classnames";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useNotification } from "../../../components/notification";
+import delay from "delay";
 
 export const LedgerGrantPage: FunctionComponent = () => {
   useEffect(() => {
@@ -26,8 +38,49 @@ export const LedgerGrantPage: FunctionComponent = () => {
 
   const intl = useIntl();
 
+  const notification = useNotification();
+
   const [signCompleted, setSignCompleted] = useState(false);
   const [signRejected, setSignRejected] = useState(false);
+
+  const [useWebHID, setUseWebHID] = useState(false);
+  const [showWebHIDWarning, setShowWebHIDWarning] = useState(false);
+
+  const fetchUseWebHID = useCallback(async () => {
+    const msg = new LedgerGetWebHIDFlagMsg();
+    const current = await sendMessage(BACKGROUND_PORT, msg);
+    setUseWebHID(current);
+
+    if (current && !(await Ledger.isWebHIDSupported())) {
+      setShowWebHIDWarning(true);
+    }
+  }, []);
+
+  const toggleUseWebHIDFlag = useCallback(
+    async (e: ChangeEvent) => {
+      e.preventDefault();
+
+      const getMsg = new LedgerGetWebHIDFlagMsg();
+      const current = await sendMessage(BACKGROUND_PORT, getMsg);
+
+      if (!current && !(await Ledger.isWebHIDSupported())) {
+        setShowWebHIDWarning(true);
+        return;
+      }
+      setShowWebHIDWarning(false);
+
+      const setMsg = new LedgerSetWebHIDFlagMsg(!current);
+      await sendMessage(BACKGROUND_PORT, setMsg);
+
+      await fetchUseWebHID();
+    },
+    [fetchUseWebHID]
+  );
+
+  useEffect(() => {
+    fetchUseWebHID();
+    // Fetch the web hid flag when mounted.
+  }, [fetchUseWebHID]);
 
   useEffect(() => {
     const closeAfterDelay = (e: CustomEvent) => {
@@ -63,8 +116,13 @@ export const LedgerGrantPage: FunctionComponent = () => {
     let initErrorOn: LedgerInitErrorOn | undefined;
 
     try {
-      const ledger = await Ledger.init();
+      const ledger = await Ledger.init(useWebHID);
       await ledger.close();
+      // Unfortunately, closing ledger blocks the writing to Ledger on background process.
+      // I'm not sure why this happens. But, not closing reduce this problem if transport is webhid.
+      if (!useWebHID) {
+        delay(1000);
+      }
     } catch (e) {
       console.log(e);
       if (e.errorOn != null) {
@@ -118,6 +176,66 @@ export const LedgerGrantPage: FunctionComponent = () => {
             pass={initTryCount > 0 && initErrorOn == null}
           />
           <div style={{ flex: 1 }} />
+          <div className="custom-control custom-checkbox mb-2">
+            <input
+              className="custom-control-input"
+              id="use-webhid"
+              type="checkbox"
+              checked={useWebHID}
+              onChange={toggleUseWebHIDFlag}
+            />
+            <label
+              className="custom-control-label"
+              htmlFor="use-webhid"
+              style={{ color: "#666666", paddingTop: "1px" }}
+            >
+              <FormattedMessage id="ledger.option.webhid.checkbox" />
+            </label>
+          </div>
+          {showWebHIDWarning ? (
+            <div
+              style={{
+                fontSize: "14px",
+                marginBottom: "20px",
+                color: "#777777"
+              }}
+            >
+              <FormattedMessage
+                id="ledger.option.webhid.warning"
+                values={{
+                  link: (
+                    <a
+                      href="chrome://flags/#enable-experimental-web-platform-features"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        navigator.clipboard
+                          .writeText(
+                            "chrome://flags/#enable-experimental-web-platform-features"
+                          )
+                          .then(() => {
+                            notification.push({
+                              placement: "top-center",
+                              type: "success",
+                              duration: 2,
+                              content: intl.formatMessage({
+                                id: "ledger.option.webhid.link.copied"
+                              }),
+                              canDelete: true,
+                              transition: {
+                                duration: 0.25
+                              }
+                            });
+                          });
+                      }}
+                    >
+                      chrome://flags/#enable-experimental-web-platform-features
+                    </a>
+                  )
+                }}
+              />
+            </div>
+          ) : null}
           <Button
             color="primary"
             block
