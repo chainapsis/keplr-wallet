@@ -19,6 +19,24 @@ export class LedgerInitFailedMsg extends Message<void> {
   }
 }
 
+export class LedgerInitAbortedMsg extends Message<void> {
+  public static type() {
+    return "ledger-init-aborted";
+  }
+
+  validateBasic(): void {
+    // notop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return LedgerInitAbortedMsg.type();
+  }
+}
+
 export class LedgerInitResumedMsg extends Message<void> {
   public static type() {
     return "ledger-init-resumed";

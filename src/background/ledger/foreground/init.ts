@@ -1,6 +1,7 @@
 import { MessageManager } from "../../../common/message";
 import {
   LedgerGetPublicKeyCompletedMsg,
+  LedgerInitAbortedMsg,
   LedgerInitFailedMsg,
   LedgerInitResumedMsg,
   LedgerSignCompletedMsg
@@ -14,6 +15,7 @@ export function init(
   keeper: LedgerInitNotifyKeeper
 ): void {
   messageManager.registerMessage(LedgerInitFailedMsg);
+  messageManager.registerMessage(LedgerInitAbortedMsg);
   messageManager.registerMessage(LedgerInitResumedMsg);
   messageManager.registerMessage(LedgerGetPublicKeyCompletedMsg);
   messageManager.registerMessage(LedgerSignCompletedMsg);

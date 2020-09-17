@@ -48,6 +48,17 @@ export const SignPage: FunctionComponent = observer(() => {
     } else {
       enableScroll();
     }
+
+    // Close when ledger is aborted if external.
+    if (external) {
+      window.addEventListener("ledgerInitAborted", window.close);
+    }
+
+    return () => {
+      if (external) {
+        window.removeEventListener("ledgerInitAborted", window.close);
+      }
+    };
   }, [external]);
 
   const id = match.params.id;

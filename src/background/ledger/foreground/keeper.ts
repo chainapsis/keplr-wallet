@@ -1,5 +1,6 @@
 export interface InitLedgerNotifiyHandler {
   onInitFailed(): void;
+  onInitAborted(): void;
   onInitResumed(): void;
 }
 
@@ -20,6 +21,10 @@ export class LedgerInitNotifyKeeper {
 
   onInitFailed(): void {
     this.onInitNotifiyHandler.onInitFailed();
+  }
+
+  onInitAborted(): void {
+    this.onInitNotifiyHandler.onInitAborted();
   }
 
   onInitResumed(): void {

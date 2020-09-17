@@ -86,6 +86,9 @@ const initLedgerNotifiyHandler: InitLedgerNotifiyHandler = {
   onInitFailed: () => {
     window.dispatchEvent(new Event("ledgerInitFailed"));
   },
+  onInitAborted(): void {
+    window.dispatchEvent(new Event("ledgerInitAborted"));
+  },
   onInitResumed: () => {
     window.dispatchEvent(new Event("ledgerInitResumed"));
   }

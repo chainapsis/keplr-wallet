@@ -21,10 +21,12 @@ export const LedgerInitIndicator: FunctionComponent = ({ children }) => {
     };
 
     window.addEventListener("ledgerInitFailed", startLoading);
+    window.addEventListener("ledgerInitAborted", endLoading);
     window.addEventListener("ledgerInitResumed", endLoading);
 
     return () => {
       window.removeEventListener("ledgerInitFailed", startLoading);
+      window.removeEventListener("ledgerInitAborted", endLoading);
       window.removeEventListener("ledgerInitResumed", endLoading);
     };
   }, [loadingIndicator, location.pathname]);

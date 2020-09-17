@@ -6,6 +6,7 @@ import { sendMessage } from "../../common/message/send";
 import { POPUP_PORT } from "../../common/message/constant";
 import {
   LedgerGetPublicKeyCompletedMsg,
+  LedgerInitAbortedMsg,
   LedgerInitFailedMsg,
   LedgerInitResumedMsg,
   LedgerSignCompletedMsg
@@ -140,6 +141,7 @@ export class LedgerKeeper {
           (async () => {
             // If ledger is not initied in 3 minutes, abort it.
             await delay(3 * 60 * 1000);
+            await sendMessage(POPUP_PORT, new LedgerInitAbortedMsg());
             throw new Error("Ledger init timeout");
           })(),
           aborter.wait(),
@@ -188,6 +190,7 @@ export class LedgerKeeper {
       }
 
       if (!find) {
+        await sendMessage(POPUP_PORT, new LedgerInitAbortedMsg());
         throw new Error("Ledger init aborted");
       }
 

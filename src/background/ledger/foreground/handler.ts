@@ -8,7 +8,8 @@ import {
   LedgerInitFailedMsg,
   LedgerInitResumedMsg,
   LedgerGetPublicKeyCompletedMsg,
-  LedgerSignCompletedMsg
+  LedgerSignCompletedMsg,
+  LedgerInitAbortedMsg
 } from "./messages";
 import { LedgerInitNotifyKeeper } from "./keeper";
 
@@ -21,6 +22,11 @@ export const getHandler: (keeper: LedgerInitNotifyKeeper) => Handler = (
         return handleLedgerInitFailedMsg(keeper)(
           env,
           msg as LedgerInitFailedMsg
+        );
+      case LedgerInitAbortedMsg:
+        return handleLedgerInitAbortedMsg(keeper)(
+          env,
+          msg as LedgerInitAbortedMsg
         );
       case LedgerInitResumedMsg:
         return handleLedgerInitResumedMsg(keeper)(
@@ -48,6 +54,14 @@ const handleLedgerInitFailedMsg: (
 ) => InternalHandler<LedgerInitFailedMsg> = keeper => {
   return (_env, _msg) => {
     return keeper.onInitFailed();
+  };
+};
+
+const handleLedgerInitAbortedMsg: (
+  keeper: LedgerInitNotifyKeeper
+) => InternalHandler<LedgerInitAbortedMsg> = keeper => {
+  return (_env, _msg) => {
+    return keeper.onInitAborted();
   };
 };
 
