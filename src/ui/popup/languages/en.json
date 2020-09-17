@@ -115,7 +115,7 @@
   "chain.remove.confirm.paragraph": "Are you sure to remove the {chainName}?",
 
   "access.title": "Requesting Connection",
-  "access.paragraph": "{host} is requesting to connect to your Keplr account on <b>{chainId}</b>.",
+  "access.paragraph": "<b>{host}</b> is requesting to connect to your Keplr account on <b>{chainId}</b>.",
   "access.permission.title": "By approving this request, the website will:",
   "access.permission.account": "Know your wallet address",
   "access.permission.tx-request": "Be able to request signatures for txs",

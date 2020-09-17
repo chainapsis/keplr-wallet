@@ -113,7 +113,7 @@
   "chain.remove.confirm.paragraph": "{chainName}를 삭제하시겠습니까?",
 
   "access.title": "접근 요청",
-  "access.paragraph": "{host}가 <b>{chainId}</b>에 접근을 요청합니다.",
+  "access.paragraph": "<b>{host}</b>가 <b>{chainId}</b>에 접근을 요청합니다.",
   "access.permission.title": "이 웹사이트는 다음과 같은 권한을 가질 수 있습니다",
   "access.permission.account": "계정의 주소를 알 수 있습니다",
   "access.permission.tx-request": "트랜잭션 서명을 요청할 수 있습니다",
