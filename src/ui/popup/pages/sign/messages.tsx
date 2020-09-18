@@ -71,6 +71,22 @@ interface MsgBeginRedelegate {
   };
 }
 
+interface MsgInstantiateContract {
+  type: "wasm/MsgInstantiateContract";
+  value: {
+    sender: string;
+    code_id: string;
+    label: string;
+    init_msg: object;
+    init_funds: [
+      {
+        amount: string;
+        denom: string;
+      }
+    ];
+  };
+}
+
 interface MsgExecuteContract {
   type: "wasm/MsgExecuteContract";
   value: {
@@ -105,6 +121,7 @@ type Messages =
   | MsgUndelegate
   | MsgWithdrawDelegatorReward
   | MsgBeginRedelegate
+  | MsgInstantiateContract
   | MsgExecuteContract
   | MsgLink;
 
@@ -253,6 +270,45 @@ export function renderMessage(
             validator: shortenAddress(msg.value.validator_address, 34)
           }}
         />
+      )
+    };
+  }
+
+  if (MessageType<MsgInstantiateContract>(msg, "wasm/MsgInstantiateContract")) {
+    const funds: { amount: string; denom: string }[] = [];
+    for (const coinPrimitive of msg.value.init_funds) {
+      const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
+      const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
+
+      funds.push({
+        amount: clearDecimals(parsed.amount),
+        denom: parsed.denom
+      });
+    }
+
+    return {
+      icon: "fas fa-cog",
+      title: "Instantiate Wasm Contract",
+      content: (
+        <React.Fragment>
+          Instantiate code ID <b>{msg.value.code_id}</b> contract with{" "}
+          {msg.value.label} label
+          {funds.length > 0 ? (
+            <React.Fragment>
+              {" "}
+              by funding{" "}
+              <b>
+                {funds
+                  .map(coin => {
+                    return `${coin.amount} ${coin.denom}`;
+                  })
+                  .join(",")}
+              </b>
+            </React.Fragment>
+          ) : null}
+          <br />
+          <WasmExecutionMsgView msg={msg.value.init_msg} />
+        </React.Fragment>
       )
     };
   }
