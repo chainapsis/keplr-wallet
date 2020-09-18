@@ -45,11 +45,27 @@ export class BackgroundTxKeeper {
     return;
   }
 
+  async requestTxWithResult(
+    chainId: string,
+    txBytes: string,
+    mode: "sync" | "async" | "commit"
+  ): Promise<ResultBroadcastTx | ResultBroadcastTxCommit> {
+    const info = await this.chainsKeeper.getChainInfo(chainId);
+    const instance = Axios.create({
+      ...{
+        baseURL: info.rpc
+      },
+      ...info.rpcConfig
+    });
+
+    return await BackgroundTxKeeper.sendTransaction(instance, txBytes, mode);
+  }
+
   private static async sendTransaction(
     instance: AxiosInstance,
     txBytes: string,
     mode: "sync" | "async" | "commit"
-  ) {
+  ): Promise<ResultBroadcastTx | ResultBroadcastTxCommit> {
     const rpc = new TendermintRPC(
       new Context({
         rpcInstance: instance
@@ -58,20 +74,42 @@ export class BackgroundTxKeeper {
 
     let result: ResultBroadcastTx | ResultBroadcastTxCommit | undefined;
 
-    try {
-      browser.notifications.create({
-        type: "basic",
-        iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
-        title: "Tx is pending...",
-        message: "Wait a second"
-      });
+    browser.notifications.create({
+      type: "basic",
+      iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
+      title: "Tx is pending...",
+      message: "Wait a second"
+    });
 
+    try {
       if (mode === "commit") {
         result = await rpc.broadcastTxCommit(Buffer.from(txBytes, "hex"));
       } else {
         result = await rpc.broadcastTx(Buffer.from(txBytes, "hex"), mode);
       }
 
+      BackgroundTxKeeper.processTxResultNotification(result);
+
+      browser.notifications.create({
+        type: "basic",
+        iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
+        title: "Tx succeeds",
+        // TODO: Let users know the tx id?
+        message: "Congratulations!"
+      });
+    } catch (e) {
+      BackgroundTxKeeper.processTxErrorNotification(e);
+
+      throw e;
+    }
+
+    return result;
+  }
+
+  private static processTxResultNotification(
+    result: ResultBroadcastTx | ResultBroadcastTxCommit
+  ): void {
+    try {
       if (result.mode === "sync" || result.mode === "async") {
         if (result.code !== 0) {
           throw new Error(result.log);
@@ -96,53 +134,57 @@ export class BackgroundTxKeeper {
         message: "Congratulations!"
       });
     } catch (e) {
-      console.log(e);
-      let message = e.message;
+      BackgroundTxKeeper.processTxErrorNotification(e);
+    }
+  }
 
-      // Tendermint rpc error.
-      const regResult = /code:\s*(-?\d+),\s*message:\s*(.+),\sdata:\s(.+)/g.exec(
-        e.message
-      );
-      if (regResult && regResult.length === 4) {
-        // If error is from tendermint
-        message = regResult[3];
+  private static processTxErrorNotification(e: Error): void {
+    console.log(e);
+    let message = e.message;
+
+    // Tendermint rpc error.
+    const regResult = /code:\s*(-?\d+),\s*message:\s*(.+),\sdata:\s(.+)/g.exec(
+      e.message
+    );
+    if (regResult && regResult.length === 4) {
+      // If error is from tendermint
+      message = regResult[3];
+    }
+
+    try {
+      // Cosmos-sdk error in ante handler
+      const sdkErr: CosmosSdkError = JSON.parse(e.message);
+      if (sdkErr?.message) {
+        message = sdkErr.message;
       }
+    } catch {
+      // noop
+    }
 
-      try {
-        // Cosmos-sdk error in ante handler
-        const sdkErr: CosmosSdkError = JSON.parse(e.message);
-        if (sdkErr?.message) {
-          message = sdkErr.message;
-        }
-      } catch {
-        // noop
-      }
-
-      try {
-        // Cosmos-sdk error in processing message
-        const abciMessageLogs: ABCIMessageLog[] = JSON.parse(e.message);
-        if (abciMessageLogs && abciMessageLogs.length > 0) {
-          for (const abciMessageLog of abciMessageLogs) {
-            if (!abciMessageLog.success) {
-              const sdkErr: CosmosSdkError = JSON.parse(abciMessageLog.log);
-              if (sdkErr?.message) {
-                message = sdkErr.message;
-                break;
-              }
+    try {
+      // Cosmos-sdk error in processing message
+      const abciMessageLogs: ABCIMessageLog[] = JSON.parse(e.message);
+      if (abciMessageLogs && abciMessageLogs.length > 0) {
+        for (const abciMessageLog of abciMessageLogs) {
+          if (!abciMessageLog.success) {
+            const sdkErr: CosmosSdkError = JSON.parse(abciMessageLog.log);
+            if (sdkErr?.message) {
+              message = sdkErr.message;
+              break;
             }
           }
         }
-      } catch {
-        // noop
       }
-
-      browser.notifications.create({
-        type: "basic",
-        iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
-        title: "Tx failed",
-        message
-      });
+    } catch {
+      // noop
     }
+
+    browser.notifications.create({
+      type: "basic",
+      iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
+      title: "Tx failed",
+      message
+    });
   }
 
   async checkAccessOrigin(
