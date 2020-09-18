@@ -42,12 +42,14 @@ import { ExportPage } from "./pages/setting/export";
 import { LedgerGrantPage, LedgerInitIndicator } from "./pages/ledger";
 
 import * as LedgerInit from "../../background/ledger/foreground";
+import * as BackgroundTxResult from "../../background/tx/foreground";
 
 import { AdditonalIntlMessages, LanguageToFiatCurrency } from "../../config";
 import { init as currencyInit } from "../../common/currency";
 import { MessageManager } from "../../common/message/manager";
 import { POPUP_PORT } from "../../common/message/constant";
 import { InitLedgerNotifiyHandler } from "../../background/ledger/foreground";
+import { BackgroundTxProvider } from "./background-tx-provider";
 
 currencyInit(LanguageToFiatCurrency);
 
@@ -113,6 +115,20 @@ const ledgerInitNotifyKeeper = new LedgerInit.LedgerInitNotifyKeeper(
   }
 );
 LedgerInit.init(messageManager, ledgerInitNotifyKeeper);
+const backgroundTxNotifiyKeepr = new BackgroundTxResult.BackgroundTxNotifyKeeper(
+  {
+    onTxCommitted: (chainId: string) => {
+      window.dispatchEvent(
+        new CustomEvent("backgroundTxCommitted", {
+          detail: {
+            chainId
+          }
+        })
+      );
+    }
+  }
+);
+BackgroundTxResult.init(messageManager, backgroundTxNotifiyKeepr);
 messageManager.listen(POPUP_PORT);
 
 const StateRenderer: FunctionComponent = observer(() => {
@@ -159,55 +175,61 @@ ReactDOM.render(
           <NotificationProvider>
             <ConfirmProvider>
               <HashRouter>
-                <LedgerInitIndicator>
-                  <Route exact path="/" component={StateRenderer} />
-                  <Route exact path="/access" component={AccessPage} />
-                  <Route exact path="/register" component={RegisterPage} />
-                  <Route exact path="/send" component={SendPage} />
-                  <Route exact path="/fee/:id" component={FeePage} />
-                  <Route exact path="/setting" component={SettingPage} />
-                  <Route
-                    exact
-                    path="/ledger-grant"
-                    component={LedgerGrantPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/language"
-                    component={SettingLanguagePage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/connections"
-                    component={SettingConnectionsPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/address-book"
-                    component={AddressBookPage}
-                  />
-                  <Route exact path="/setting/credit" component={CreditPage} />
-                  <Route
-                    exact
-                    path="/setting/set-keyring"
-                    component={SetKeyRingPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/export/:index"
-                    component={ExportPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/clear/:index"
-                    component={ClearPage}
-                  />
-                  <Route path="/sign/:id" component={SignPage} />
-                  <Route
-                    path="/suggest-chain/:chainId"
-                    component={ChainSuggestedPage}
-                  />
-                </LedgerInitIndicator>
+                <BackgroundTxProvider>
+                  <LedgerInitIndicator>
+                    <Route exact path="/" component={StateRenderer} />
+                    <Route exact path="/access" component={AccessPage} />
+                    <Route exact path="/register" component={RegisterPage} />
+                    <Route exact path="/send" component={SendPage} />
+                    <Route exact path="/fee/:id" component={FeePage} />
+                    <Route exact path="/setting" component={SettingPage} />
+                    <Route
+                      exact
+                      path="/ledger-grant"
+                      component={LedgerGrantPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/language"
+                      component={SettingLanguagePage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/connections"
+                      component={SettingConnectionsPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/address-book"
+                      component={AddressBookPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/credit"
+                      component={CreditPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/set-keyring"
+                      component={SetKeyRingPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/export/:index"
+                      component={ExportPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/clear/:index"
+                      component={ClearPage}
+                    />
+                    <Route path="/sign/:id" component={SignPage} />
+                    <Route
+                      path="/suggest-chain/:chainId"
+                      component={ChainSuggestedPage}
+                    />
+                  </LedgerInitIndicator>
+                </BackgroundTxProvider>
               </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>

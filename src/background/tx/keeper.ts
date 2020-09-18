@@ -7,6 +7,9 @@ import {
   ResultBroadcastTxCommit
 } from "@chainapsis/cosmosjs/rpc/tx";
 import { ChainsKeeper } from "../chains/keeper";
+import { sendMessage } from "../../common/message/send";
+import { POPUP_PORT } from "../../common/message/constant";
+import { TxCommittedMsg } from "./foreground";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -40,7 +43,7 @@ export class BackgroundTxKeeper {
     });
 
     // Do not await.
-    BackgroundTxKeeper.sendTransaction(instance, txBytes, mode);
+    BackgroundTxKeeper.sendTransaction(chainId, instance, txBytes, mode);
 
     return;
   }
@@ -58,10 +61,16 @@ export class BackgroundTxKeeper {
       ...info.rpcConfig
     });
 
-    return await BackgroundTxKeeper.sendTransaction(instance, txBytes, mode);
+    return await BackgroundTxKeeper.sendTransaction(
+      chainId,
+      instance,
+      txBytes,
+      mode
+    );
   }
 
   private static async sendTransaction(
+    chainId: string,
     instance: AxiosInstance,
     txBytes: string,
     mode: "sync" | "async" | "commit"
@@ -90,13 +99,8 @@ export class BackgroundTxKeeper {
 
       BackgroundTxKeeper.processTxResultNotification(result);
 
-      browser.notifications.create({
-        type: "basic",
-        iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
-        title: "Tx succeeds",
-        // TODO: Let users know the tx id?
-        message: "Congratulations!"
-      });
+      // Notify the tx is committed.
+      sendMessage(POPUP_PORT, new TxCommittedMsg(chainId));
     } catch (e) {
       BackgroundTxKeeper.processTxErrorNotification(e);
 
