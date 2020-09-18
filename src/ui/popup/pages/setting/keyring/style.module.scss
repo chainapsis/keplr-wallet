@@ -1,0 +1,16 @@
+@import "../../../styles/var";
+
+.container {
+  margin: 0 calc(#{$layout-padding} * -1) calc(#{$layout-padding} * -1);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.inner-top-container {
+  display: flex;
+  margin: 0 $layout-padding;
+
+  min-height: 43px;
+}

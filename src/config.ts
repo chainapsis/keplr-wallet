@@ -1,8 +1,8 @@
 import React from "react";
 
-import { Currency, FiatCurrency } from "./common/currency";
-import { BIP44 } from "@everett-protocol/cosmosjs/core/bip44";
-import { defaultBech32Config } from "@everett-protocol/cosmosjs/core/bech32Config";
+import { FiatCurrency } from "./common/currency";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 import { ChainInfo, AccessOrigin } from "./background/chains";
 
 import {
@@ -20,7 +20,9 @@ import {
   SECRET_NETWORK_RPC_CONFIG,
   SECRET_NETWORK_RPC_ENDPOINT,
   ADDITIONAL_SIGN_IN_PREPEND,
-  ADDITIONAL_INTL_MESSAGES
+  ADDITIONAL_INTL_MESSAGES,
+  BETA_CYBER_NETWORK_REST_ENDPOINT,
+  BETA_CYBER_NETWORK_RPC_ENDPOINT
 } from "./config.var";
 import { IntlMessages } from "./ui/popup/language";
 
@@ -42,7 +44,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     restConfig: COSMOS_REST_CONFIG,
     chainId: "cosmoshub-3",
     chainName: "Cosmos",
-    nativeCurrency: "atom",
+    stakeCurrency: {
+      coinDenom: "ATOM",
+      coinMinimalDenom: "uatom",
+      coinDecimals: 6,
+      coinGeckoId: "cosmos"
+    },
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/cosmoshub-3/stake"
@@ -53,8 +60,22 @@ export const EmbedChainInfos: ChainInfo[] = [
         : "http://localhost:8081/#/cosmoshub-3/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
-    currencies: ["atom"],
-    feeCurrencies: ["atom"],
+    currencies: [
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "uatom",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos"
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "uatom",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos"
+      }
+    ],
     coinType: 118
   },
   {
@@ -64,7 +85,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     restConfig: KAVA_REST_CONFIG,
     chainId: "kava-3",
     chainName: "Kava",
-    nativeCurrency: "kava",
+    stakeCurrency: {
+      coinDenom: "KAVA",
+      coinMinimalDenom: "ukava",
+      coinDecimals: 6,
+      coinGeckoId: "kava"
+    },
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/kava-3/stake"
@@ -75,8 +101,22 @@ export const EmbedChainInfos: ChainInfo[] = [
         : "http://localhost:8081/#/kava-3/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("kava"),
-    currencies: ["kava"],
-    feeCurrencies: ["kava"],
+    currencies: [
+      {
+        coinDenom: "KAVA",
+        coinMinimalDenom: "ukava",
+        coinDecimals: 6,
+        coinGeckoId: "kava"
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "KAVA",
+        coinMinimalDenom: "ukava",
+        coinDecimals: 6,
+        coinGeckoId: "kava"
+      }
+    ],
     coinType: 459
   },
   {
@@ -84,9 +124,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: SECRET_NETWORK_RPC_CONFIG,
     rest: SECRET_NETWORK_REST_ENDPOINT,
     restConfig: SECRET_NETWORK_REST_CONFIG,
-    chainId: "secret-1",
+    chainId: "secret-2",
     chainName: "Secret Network",
-    nativeCurrency: "secret",
+    stakeCurrency: {
+      coinDenom: "SCRT",
+      coinMinimalDenom: "uscrt",
+      coinDecimals: 6
+    },
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/secret-1/stake"
@@ -97,9 +141,62 @@ export const EmbedChainInfos: ChainInfo[] = [
         : "http://localhost:8081/#/secret-1/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("secret"),
-    currencies: ["secret"],
-    feeCurrencies: ["secret"],
-    coinType: 529
+    currencies: [
+      {
+        coinDenom: "SCRT",
+        coinMinimalDenom: "uscrt",
+        coinDecimals: 6
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "SCRT",
+        coinMinimalDenom: "uscrt",
+        coinDecimals: 6
+      }
+    ],
+    coinType: 529,
+    gasPriceStep: {
+      low: 0.1,
+      average: 0.25,
+      high: 0.4
+    }
+  },
+  {
+    rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
+    rest: BETA_CYBER_NETWORK_REST_ENDPOINT,
+    chainId: "euler-6",
+    chainName: "Cyber",
+    stakeCurrency: {
+      coinDenom: "EUL",
+      coinMinimalDenom: "eul",
+      coinDecimals: 0
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/euler-6/stake"
+        : "http://localhost:8081/#/euler-6/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/euler-6/stake"
+        : "http://localhost:8081/#/euler-6/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("cyber"),
+    currencies: [
+      {
+        coinDenom: "EUL",
+        coinMinimalDenom: "eul",
+        coinDecimals: 0
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "EUL",
+        coinMinimalDenom: "eul",
+        coinDecimals: 0
+      }
+    ],
+    beta: true
   }
 ];
 
@@ -121,33 +218,13 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
     chainId: "secret-1",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "euler-6",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
 ];
-
-/**
- * Currencis include the currency information for matched coin.
- */
-export const Currencies: {
-  readonly [currency: string]: Currency;
-} = {
-  atom: {
-    coinDenom: "ATOM",
-    coinMinimalDenom: "uatom",
-    coinDecimals: 6,
-    coinGeckoId: "cosmos"
-  },
-  kava: {
-    coinDenom: "KAVA",
-    coinMinimalDenom: "ukava",
-    coinDecimals: 6,
-    coinGeckoId: "kava"
-  },
-  secret: {
-    coinDenom: "SCRT",
-    coinMinimalDenom: "uscrt",
-    coinDecimals: 6
-  }
-};
 
 export const LanguageToFiatCurrency: {
   [language: string]: FiatCurrency;

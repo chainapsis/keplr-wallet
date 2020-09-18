@@ -1,11 +1,7 @@
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
-import {
-  Currency,
-  getCurrencyFromDenom,
-  getCurrencyFromMinimalDenom
-} from "../currency";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
+import { Int } from "@chainapsis/cosmosjs/common/int";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
+import { Currency } from "../currency";
 import { DecUtils } from "../dec-utils";
 
 export class CoinUtils {
@@ -51,8 +47,14 @@ export class CoinUtils {
     return arr.reduce(reducer, []);
   }
 
-  static getCoinFromDecimals(decAmountStr: string, denom: string): Coin {
-    const currency = getCurrencyFromDenom(denom);
+  static getCoinFromDecimals(
+    currencies: Currency[],
+    decAmountStr: string,
+    denom: string
+  ): Coin {
+    const currency = currencies.find(currency => {
+      return currency.coinDenom === denom;
+    });
     if (!currency) {
       throw new Error("Invalid currency");
     }
@@ -73,9 +75,12 @@ export class CoinUtils {
   }
 
   static parseDecAndDenomFromCoin(
+    currencies: Currency[],
     coin: Coin
   ): { amount: string; denom: string } {
-    const currency = getCurrencyFromMinimalDenom(coin.denom);
+    const currency = currencies.find(currency => {
+      return currency.coinMinimalDenom === coin.denom;
+    });
     if (!currency) {
       throw new Error("Invalid currency");
     }

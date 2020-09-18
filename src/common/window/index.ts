@@ -3,7 +3,7 @@ const PopupSize = {
   height: 580
 };
 
-let lastWindowId: number | undefined = undefined;
+const lastWindowIds: Record<string, number | undefined> = {};
 
 /**
  * Try open window if no previous window exists.
@@ -11,7 +11,10 @@ let lastWindowId: number | undefined = undefined;
  * Finally, try to recover focusing for opened window.
  * @param url
  */
-export function openWindow(url: string) {
+export async function openWindow(
+  url: string,
+  channel: string = "default"
+): Promise<number | undefined> {
   const option = {
     width: PopupSize.width,
     height: PopupSize.height,
@@ -19,37 +22,50 @@ export function openWindow(url: string) {
     type: "popup" as "popup"
   };
 
-  (async () => {
-    if (lastWindowId !== undefined) {
-      try {
-        const window = await browser.windows.get(lastWindowId, {
+  if (lastWindowIds[channel] !== undefined) {
+    try {
+      const window = await browser.windows.get(
+        lastWindowIds[channel] as number,
+        {
           populate: true
-        });
-        if (window?.tabs?.length) {
-          const tab = window.tabs[0];
-          if (tab?.id) {
-            await browser.tabs.update(tab.id, { active: true, url });
-          } else {
-            throw new Error("Null window or tabs");
-          }
+        }
+      );
+      if (window?.tabs?.length) {
+        const tab = window.tabs[0];
+        if (tab?.id) {
+          await browser.tabs.update(tab.id, { active: true, url });
         } else {
           throw new Error("Null window or tabs");
         }
-      } catch {
-        lastWindowId = (await browser.windows.create(option)).id;
+      } else {
+        throw new Error("Null window or tabs");
       }
-    } else {
-      lastWindowId = (await browser.windows.create(option)).id;
+    } catch {
+      lastWindowIds[channel] = (await browser.windows.create(option)).id;
     }
+  } else {
+    lastWindowIds[channel] = (await browser.windows.create(option)).id;
+  }
 
-    if (lastWindowId) {
-      try {
-        await browser.windows.update(lastWindowId, {
-          focused: true
-        });
-      } catch (e) {
-        console.log(`Failed to update window focus: ${e.message}`);
-      }
+  if (lastWindowIds[channel]) {
+    try {
+      await browser.windows.update(lastWindowIds[channel] as number, {
+        focused: true
+      });
+    } catch (e) {
+      console.log(`Failed to update window focus: ${e.message}`);
+    }
+  }
+
+  return lastWindowIds[channel];
+}
+
+export function closeWindow(channel: string) {
+  (async () => {
+    const windowId = lastWindowIds[channel];
+
+    if (windowId) {
+      await browser.windows.remove(windowId);
     }
   })();
 }

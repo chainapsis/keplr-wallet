@@ -1,24 +1,24 @@
 import { ChainInfo } from "../../background/chains";
-import { WalletProvider } from "@everett-protocol/cosmosjs/core/walletProvider";
-import { Context } from "@everett-protocol/cosmosjs/core/context";
-import { GaiaRest } from "@everett-protocol/cosmosjs/gaia/rest";
-import { Codec } from "@node-a-team/ts-amino";
-import * as CmnCdc from "@everett-protocol/cosmosjs/common/codec";
-import * as Crypto from "@everett-protocol/cosmosjs/crypto";
-import * as Bank from "@everett-protocol/cosmosjs/x/bank";
-import * as Distr from "@everett-protocol/cosmosjs/x/distribution";
-import * as Staking from "@everett-protocol/cosmosjs/x/staking";
-import * as Slashing from "@everett-protocol/cosmosjs/x/slashing";
-import * as Gov from "@everett-protocol/cosmosjs/x/gov";
-import { Rest } from "@everett-protocol/cosmosjs/core/rest";
+import { WalletProvider } from "@chainapsis/cosmosjs/core/walletProvider";
+import { Context } from "@chainapsis/cosmosjs/core/context";
+import { GaiaRest } from "@chainapsis/cosmosjs/gaia/rest";
+import { Codec } from "@chainapsis/ts-amino";
+import * as CmnCdc from "@chainapsis/cosmosjs/common/codec";
+import * as Crypto from "@chainapsis/cosmosjs/crypto";
+import * as Bank from "@chainapsis/cosmosjs/x/bank";
+import * as Distr from "@chainapsis/cosmosjs/x/distribution";
+import * as Staking from "@chainapsis/cosmosjs/x/staking";
+import * as Slashing from "@chainapsis/cosmosjs/x/slashing";
+import * as Gov from "@chainapsis/cosmosjs/x/gov";
+import { Rest } from "@chainapsis/cosmosjs/core/rest";
 import { useCallback, useEffect, useState } from "react";
-import { Msg } from "@everett-protocol/cosmosjs/core/tx";
-import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
-import { Api } from "@everett-protocol/cosmosjs/core/api";
-import { defaultTxEncoder } from "@everett-protocol/cosmosjs/common/stdTx";
-import { stdTxBuilder } from "@everett-protocol/cosmosjs/common/stdTxBuilder";
-import { Account } from "@everett-protocol/cosmosjs/core/account";
-import { queryAccount } from "@everett-protocol/cosmosjs/core/query";
+import { Msg } from "@chainapsis/cosmosjs/core/tx";
+import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
+import { Api } from "@chainapsis/cosmosjs/core/api";
+import { defaultTxEncoder } from "@chainapsis/cosmosjs/common/stdTx";
+import { stdTxBuilder } from "@chainapsis/cosmosjs/common/stdTxBuilder";
+import { Account } from "@chainapsis/cosmosjs/core/account";
+import { queryAccount } from "@chainapsis/cosmosjs/core/query";
 import { RequestBackgroundTxMsg } from "../../background/tx";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
@@ -199,8 +199,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
             const msg = new RequestBackgroundTxMsg(
               api.context.get("chainId"),
               Buffer.from(bz).toString("hex"),
-              mode,
-              window.location.origin
+              mode
             );
             await sendMessage(BACKGROUND_PORT, msg);
           }

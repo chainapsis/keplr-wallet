@@ -1,4 +1,4 @@
-import { generateSeed } from "@everett-protocol/cosmosjs/utils/key";
+import { generateSeed } from "@chainapsis/cosmosjs/utils/key";
 
 import { ChainInfo } from "../../../../background/chains";
 
@@ -10,8 +10,14 @@ import {
   CreateMnemonicKeyMsg,
   UnlockKeyRingMsg,
   LockKeyRingMsg,
-  ClearKeyRingMsg,
   CreatePrivateKeyMsg,
+  GetMultiKeyStoreInfoMsg,
+  ChangeKeyRingMsg,
+  AddMnemonicKeyMsg,
+  AddPrivateKeyMsg,
+  DeleteKeyRingMsg,
+  CreateLedgerKeyMsg,
+  AddLedgerKeyMsg,
   GetKeyRingTypeMsg
 } from "../../../../background/keyring";
 
@@ -20,6 +26,8 @@ import { actionAsync, task } from "mobx-utils";
 
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RootStore } from "../root";
+import { MultiKeyStoreInfoWithSelected } from "../../../../background/keyring/keyring";
+import { BIP44HDPath } from "../../../../background/keyring/types";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -47,9 +55,13 @@ export class KeyRingStore {
   @observable
   public keyRingType!: string;
 
+  @observable
+  public multiKeyStoreInfo!: MultiKeyStoreInfoWithSelected;
+
   constructor(private rootStore: RootStore) {
     this.setKeyRingType("none");
     this.setStatus(KeyRingStatus.NOTLOADED);
+    this.setMultiKeyStoreInfo([]);
   }
 
   @action
@@ -69,21 +81,110 @@ export class KeyRingStore {
     this.rootStore.setKeyRingStatus(status);
   }
 
-  @actionAsync
-  public async createMnemonicKey(mnemonic: string, password: string) {
-    const msg = new CreateMnemonicKeyMsg(mnemonic, password);
-    const result = await task(sendMessage(BACKGROUND_PORT, msg));
-    this.setStatus(result.status);
+  @action
+  private setMultiKeyStoreInfo(info: MultiKeyStoreInfoWithSelected) {
+    this.multiKeyStoreInfo = info;
   }
 
   @actionAsync
-  public async createPrivateKey(privateKey: Uint8Array, password: string) {
+  public async createMnemonicKey(
+    mnemonic: string,
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ) {
+    const msg = new CreateMnemonicKeyMsg(mnemonic, password, meta, bip44HDPath);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setStatus(result.status);
+
+    const type = await task(
+      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
+    );
+    this.setKeyRingType(type);
+  }
+
+  @actionAsync
+  public async createPrivateKey(
+    privateKey: Uint8Array,
+    password: string,
+    meta: Record<string, string>
+  ) {
     const msg = new CreatePrivateKeyMsg(
       Buffer.from(privateKey).toString("hex"),
-      password
+      password,
+      meta
     );
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+
+    const type = await task(
+      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
+    );
+    this.setKeyRingType(type);
+  }
+
+  @actionAsync
+  public async createLedgerKey(
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ) {
+    const msg = new CreateLedgerKeyMsg(password, meta, bip44HDPath);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setStatus(result.status);
+
+    const type = await task(
+      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
+    );
+    this.setKeyRingType(type);
+  }
+
+  @actionAsync
+  public async addMnemonicKey(
+    mnemonic: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ) {
+    const msg = new AddMnemonicKeyMsg(mnemonic, meta, bip44HDPath);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+  }
+
+  @actionAsync
+  public async addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>
+  ) {
+    const msg = new AddPrivateKeyMsg(
+      Buffer.from(privateKey).toString("hex"),
+      meta
+    );
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+  }
+
+  @actionAsync
+  public async addLedgerKey(
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ) {
+    const msg = new AddLedgerKeyMsg(meta, bip44HDPath);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+  }
+
+  @actionAsync
+  public async changeKeyRing(index: number) {
+    const msg = new ChangeKeyRingMsg(index);
+    const result = await task(sendMessage(BACKGROUND_PORT, msg));
+    this.setMultiKeyStoreInfo(result);
+
+    const type = await task(
+      sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
+    );
+    this.setKeyRingType(type);
+
+    this.rootStore.changeKeyRing();
   }
 
   @actionAsync
@@ -110,6 +211,11 @@ export class KeyRingStore {
       sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
     );
     this.setKeyRingType(type);
+
+    const multiKeyStoreInfo = await task(
+      sendMessage(BACKGROUND_PORT, new GetMultiKeyStoreInfoMsg())
+    );
+    this.setMultiKeyStoreInfo(multiKeyStoreInfo);
   }
 
   @actionAsync
@@ -123,18 +229,19 @@ export class KeyRingStore {
     this.setKeyRingType(type);
   }
 
-  /**
-   * Clear key ring data.
-   */
   @actionAsync
-  public async clear(password: string) {
-    const msg = new ClearKeyRingMsg(password);
+  public async deleteKeyRing(index: number, password: string) {
+    const msg = new DeleteKeyRingMsg(index, password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+    this.setMultiKeyStoreInfo(result.multiKeyStoreInfo);
 
+    // Possibly, key ring can be changed if deleting key store was selected one.
     const type = await task(
       sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
     );
     this.setKeyRingType(type);
+
+    this.rootStore.changeKeyRing();
   }
 }

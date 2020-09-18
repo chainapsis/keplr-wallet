@@ -16,6 +16,9 @@ export interface ConfirmOptions {
   img?: React.ReactElement;
   title?: string;
   paragraph: string;
+
+  yes?: string;
+  no?: string;
 }
 
 const ConfirmContext = createContext<
@@ -100,6 +103,8 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
                 ? currentConfirm.paragraph
                 : "Unexpected. Something is wrong."
             }
+            yes={currentConfirm?.yes}
+            no={currentConfirm?.no}
             onConfirm={currentConfirm?.resolve}
             onReject={currentConfirm?.reject}
           />

@@ -1,10 +1,15 @@
-import { Message, MessageSender } from "../../common/message";
-import { AccessOrigin, ChainInfo } from "./types";
+import { Message } from "../../common/message";
+import {
+  AccessOrigin,
+  ChainInfo,
+  ChainInfoWithEmbed,
+  SuggestedChainInfo
+} from "./types";
 import { ROUTE } from "./constants";
 import { AsyncApprover } from "../../common/async-approver";
 
 export class GetChainInfosMsg extends Message<{
-  chainInfos: ChainInfo[];
+  chainInfos: ChainInfoWithEmbed[];
 }> {
   public static type() {
     return "get-chain-infos";
@@ -23,6 +28,133 @@ export class GetChainInfosMsg extends Message<{
   }
 }
 
+export class SuggestChainInfoMsg extends Message<void> {
+  public static type() {
+    return "suggest-chain-info";
+  }
+
+  constructor(
+    public readonly chainInfo: ChainInfo,
+    public readonly openPopup: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainInfo) {
+      throw new Error("chain info not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SuggestChainInfoMsg.type();
+  }
+}
+
+export class GetSuggestedChainInfoMsg extends Message<SuggestedChainInfo> {
+  public static type() {
+    return "get-suggested-chain-info";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetSuggestedChainInfoMsg.type();
+  }
+}
+
+export class ApproveSuggestedChainInfoMsg extends Message<void> {
+  public static type() {
+    return "approve-suggested-chain-info";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ApproveSuggestedChainInfoMsg.type();
+  }
+}
+
+export class RejectSuggestedChainInfoMsg extends Message<void> {
+  public static type() {
+    return "reject-suggested-chain-info";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RejectSuggestedChainInfoMsg.type();
+  }
+}
+
+export class RemoveSuggestedChainInfoMsg extends Message<ChainInfoWithEmbed[]> {
+  public static type() {
+    return "remove-suggested-chain-info";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RemoveSuggestedChainInfoMsg.type();
+  }
+}
+
 export class ReqeustAccessMsg extends Message<void> {
   public static type() {
     return "request-access";
@@ -31,7 +163,7 @@ export class ReqeustAccessMsg extends Message<void> {
   constructor(
     public readonly id: string,
     public readonly chainId: string,
-    public readonly origin: string
+    public readonly appOrigin: string
   ) {
     super();
   }
@@ -41,18 +173,20 @@ export class ReqeustAccessMsg extends Message<void> {
       throw new Error("chain id is empty");
     }
 
+    if (!this.appOrigin) {
+      throw new Error("Empty origin");
+    }
+
+    const url = new URL(this.appOrigin);
+    if (!url.origin || url.origin === "null") {
+      throw new Error("Invalid app origin");
+    }
+
     AsyncApprover.isValidId(this.id);
   }
 
-  // Approve external approves sending message if they submit their origin correctly.
-  // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: MessageSender): boolean {
-    const isInternal = super.approveExternal(sender);
-    if (isInternal) {
-      return true;
-    }
-
-    return Message.checkOriginIsValid(this.origin, sender);
+  approveExternal(): boolean {
+    return true;
   }
 
   route(): string {
@@ -159,7 +293,10 @@ export class RemoveAccessOriginMsg extends Message<void> {
     return "remove-access-origin";
   }
 
-  constructor(public readonly chainId: string, public readonly origin: string) {
+  constructor(
+    public readonly chainId: string,
+    public readonly appOrigin: string
+  ) {
     super();
   }
 
@@ -168,8 +305,13 @@ export class RemoveAccessOriginMsg extends Message<void> {
       throw new Error("Empty chain id");
     }
 
-    if (!this.origin) {
+    if (!this.appOrigin) {
       throw new Error("Empty origin");
+    }
+
+    const url = new URL(this.appOrigin);
+    if (!url.origin || url.origin === "null") {
+      throw new Error("Invalid app origin");
     }
   }
 
@@ -179,5 +321,33 @@ export class RemoveAccessOriginMsg extends Message<void> {
 
   type(): string {
     return RemoveAccessOriginMsg.type();
+  }
+}
+
+export class TryUpdateChainMsg extends Message<{
+  // Updated chain id
+  chainId: string;
+  chainInfos: ChainInfoWithEmbed[];
+}> {
+  public static type() {
+    return "try-update-chain";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Empty chain id");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return TryUpdateChainMsg.type();
   }
 }

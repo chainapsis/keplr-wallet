@@ -18,6 +18,10 @@
   "main.menu.sign-out": "Sign out",
   "main.menu.footer.github": "Check it out on GitHub",
 
+  "main.update-chain.confirm.paragraph": "Chain information has changed. Verify that a chain upgrade has taken place.",
+  "main.update-chain.confirm.yes": "Proceed",
+  "main.update-chain.confirm.no": "Ignore",
+
   "setting.language": "Language",
   "setting.language.automatic": "Automatic (Browser default)",
   "setting.language.automatic-with-language": "Automatic ({language})",
@@ -33,9 +37,7 @@
   "setting.address-book.add-address.title": "Add Address",
   "setting.address-book.edit-address.title": "Edit Address",
   "setting.address-book.name": "Name",
-  "setting.address-book.name.error.required": "Name is required",
   "setting.address-book.address": "Address",
-  "setting.address-book.address.error.required": "Address is required",
   "setting.address-book.address.error.invalid": "Invalid address",
   "setting.address-book.memo": "Default Memo (Optional)",
   "setting.address-book.confirm.delete-address.title": "Delete Address",
@@ -43,6 +45,11 @@
   "setting.address-book.button.save": "Save",
 
   "setting.credit": "Special thanks",
+
+  "setting.keyring": "Select Account",
+  "setting.keyring.button.add": "Add Account",
+  "setting.keyring.unnamed-account": "Keplr Account",
+  "setting.keyring.selected-account": "(Selected)",
 
   "setting.export": "View Mnemonic Seed",
   "setting.export.warning": "Please input your password to proceed",
@@ -60,7 +67,14 @@
   "setting.clear.input.password.error.invalid": "Invalid password",
   "setting.clear.button.confirm": "Confirm",
 
+  "register.name": "Account name",
+  "register.name.error.required": "Account name is required",
   "register.button.back": "Back",
+
+  "register.bip44.button.advanced": "Advanced",
+  "register.bip44.input.hd-path": "HD Derivation Path",
+  "register.bip44.confirm.clear": "Closing this toggle will reset the HD Path. Are you sure you want to proceed?",
+
   "register.intro.button.new-account.title": "Create new account",
   "register.intro.button.new-account.content": "Create a new wallet using a new seed",
   "register.intro.button.import-account.title": "Import existing account",
@@ -83,14 +97,25 @@
   "register.create.textarea.mnemonic.error.too-short": "Too short mnemonic",
   "register.create.button.next": "Next",
 
+  "register.ledger.title": "Import ledger",
+
   "register.verify.button.register": "Register",
 
   "register.welcome.title": "You’re all set!",
   "register.welcome.content": "Open the extension and sign in to begin your interchain journey.",
   "register.welcome.button.done": "Done",
 
+  "chain.suggested.title": "Chain Add Request",
+  "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
+  "chain.suggested.waring.experiment.title": "Experimental Feature",
+  "chain.suggested.waring.experiment.paragraph": "For the brave-hearted cosmonauts",
+  "chain.suggested.button.approve": "Approve",
+  "chain.suggested.button.reject": "Reject",
+
+  "chain.remove.confirm.paragraph": "Are you sure to remove the {chainName}?",
+
   "access.title": "Requesting Connection",
-  "access.paragraph": "{host} is requesting to connect to your Keplr account on <b>{chainId}</b>.",
+  "access.paragraph": "<b>{host}</b> is requesting to connect to your Keplr account on <b>{chainId}</b>.",
   "access.permission.title": "By approving this request, the website will:",
   "access.permission.account": "Know your wallet address",
   "access.permission.tx-request": "Be able to request signatures for txs",
@@ -103,14 +128,12 @@
   "lock.button.unlock": "Unlock",
 
   "send.input.recipient": "Recipient",
-  "send.input.recipient.error.required": "Recipient is required",
   "send.input.recipient.error.invalid": "Invalid address",
   "send.input.recipient.error.ens-invalid-name": "Invalid ENS name format",
   "send.input.recipient.error.ens-not-found": "ENS name not found",
   "sned.input.recipient.error.ens-unknown-error": "Failed to get address from ENS",
   "send.input.recipient.error.ens-not-supported": "ENS not supported for this chain",
   "send.input.amount": "Amount",
-  "send.input.amount.error.required": "Amount is required",
   "send.input.amount.error.insufficient": "Insufficient asset",
   "send.input.memo": "Memo (Optional)",
   "send.input.fee": "Fee",
@@ -119,8 +142,6 @@
   "send.button.send": "Send",
 
   "fee.input.gas": "Gas",
-  "fee.input.gas.required": "Gas is required",
-  "fee.input.gas.invalid": "Gas should be number",
   "fee.input.memo": "Memo (Optional)",
   "fee.input.fee": "Fee",
   "fee.button.set": "Set Fee",
@@ -132,6 +153,7 @@
   "sign.info.memo": "Memo",
   "sign.button.approve": "Approve",
   "sign.button.reject": "Reject",
+  "sign.button.confirm-ledger": "Waiting for Ledger to confirm",
 
   "sign.list.message.cosmos-sdk/MsgSend.title": "Send",
   "sign.list.message.cosmos-sdk/MsgSend.content": "<b>{recipient}</b> will receive <b>{amount}</b>",
@@ -139,16 +161,32 @@
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "Delegate <b>{amount}</b> to <b>{validator}</b>",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "Undelegate",
   "sign.list.message.cosmos-sdk/MsgUndelegate.content": "Undelegate <b>{amount}</b> from <b>{validator}</b>{br}Asset will be liquid after unbonding period",
+  "sign.list.message.cosmos-sdk/MsgBeginRedelegate.title": "Redelegate",
+  "sign.list.message.cosmos-sdk/MsgBeginRedelegate.content": "Redelegate <b>{amount}</b> from <b>{fromValidator}</b> to <b>{toValidator}</b>",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Claim Staking Reward",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
   
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{address}</b> create link {br}<b>{link}</b>",
 
+  "ledger.step1": "Step 1",
+  "ledger.step1.paragraph": "Connect and unlock your Ledger.",
+  "ledger.step2": "Step 2",
+  "ledger.step2.paragraph": "Open the Cosmos app on your Ledger device.",
+  "ledger.option.webhid.checkbox": "Using Ledger X on Windows?",
+  "ledger.option.webhid.warning": "Please copy and paste the following link {link} on your browser and enable ‘experimental web platform features’",
+  "ledger.option.webhid.link.copied": "Link copied!",
+  "ledger.button.next": "Next",
+  "ledger.confirm.waiting.paragraph": "Waiting for confirmation on Ledger device",
+  "ledger.confirm.success": "Success",
+  "ledger.confirm.success.paragraph": "This page will automatically close in 3 seconds",
+  "ledger.confirm.rejected": "Rejected by Ledger",
+  "ledger.confirm.rejected.paragraph": "This page will automatically close in 3 seconds",
+
   "fee-buttons.select.low": "Low",
   "fee-buttons.select.average": "Average",
   "fee-buttons.select.high": "High",
 
-  "confirm.yes": "yes",
-  "confirm.no": "no"
+  "confirm.yes": "Yes",
+  "confirm.no": "No"
 }

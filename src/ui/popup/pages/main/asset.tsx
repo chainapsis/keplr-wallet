@@ -1,16 +1,12 @@
 import React, { FunctionComponent, useEffect } from "react";
 
-import { Dec } from "@everett-protocol/cosmosjs/common/decimal";
+import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
 import { CoinUtils } from "../../../../common/coin-utils";
-import { Currency } from "../../../../common/currency";
-import {
-  getCurrency,
-  getFiatCurrencyFromLanguage
-} from "../../../../common/currency";
+import { getFiatCurrencyFromLanguage } from "../../../../common/currency";
 
 import { FormattedMessage } from "react-intl";
 import { ToolTip } from "../../../components/tooltip";
@@ -24,14 +20,13 @@ export const AssetView: FunctionComponent = observer(() => {
   const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
 
   useEffect(() => {
-    const coinGeckoId = getCurrency(chainStore.chainInfo.nativeCurrency)
-      ?.coinGeckoId;
+    const coinGeckoId = chainStore.chainInfo.stakeCurrency.coinGeckoId;
 
     if (coinGeckoId != null && !priceStore.hasFiat(fiatCurrency.currency)) {
       priceStore.fetchValue([fiatCurrency.currency], [coinGeckoId]);
     }
   }, [
-    chainStore.chainInfo.nativeCurrency,
+    chainStore.chainInfo.stakeCurrency.coinGeckoId,
     fiatCurrency.currency,
     language.language,
     priceStore
@@ -39,21 +34,17 @@ export const AssetView: FunctionComponent = observer(() => {
 
   const fiat = priceStore.getValue(
     fiatCurrency.currency,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    getCurrency(chainStore.chainInfo.nativeCurrency)!.coinGeckoId
+    chainStore.chainInfo.stakeCurrency.coinGeckoId
   );
 
-  const nativeCurrency = getCurrency(
-    chainStore.chainInfo.nativeCurrency
-  ) as Currency;
+  const stakeCurrency = chainStore.chainInfo.stakeCurrency;
 
   const coinAmount = CoinUtils.amountOf(
     accountStore.assets,
-    nativeCurrency.coinMinimalDenom
+    stakeCurrency.coinMinimalDenom
   );
 
-  const hasCoinGeckoId =
-    getCurrency(chainStore.chainInfo.nativeCurrency)?.coinGeckoId != null;
+  const hasCoinGeckoId = stakeCurrency.coinGeckoId != null;
 
   return (
     <div className={styleAsset.containerAsset}>
@@ -67,7 +58,7 @@ export const AssetView: FunctionComponent = observer(() => {
               fiatCurrency.parse(
                 parseFloat(
                   fiat.value
-                    .mul(new Dec(coinAmount, nativeCurrency.coinDecimals))
+                    .mul(new Dec(coinAmount, stakeCurrency.coinDecimals))
                     .toString()
                 )
               )
@@ -82,12 +73,12 @@ export const AssetView: FunctionComponent = observer(() => {
           {!(accountStore.assets.length === 0)
             ? CoinUtils.shrinkDecimals(
                 coinAmount,
-                nativeCurrency.coinDecimals,
+                stakeCurrency.coinDecimals,
                 0,
                 6
               )
             : "0"}{" "}
-          {nativeCurrency.coinDenom}
+          {stakeCurrency.coinDenom}
         </div>
         <div className={styleAsset.indicatorIcon}>
           {accountStore.isAssetFetching ? (

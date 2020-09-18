@@ -1,4 +1,4 @@
-import { Message, MessageSender } from "../../common/message";
+import { Message } from "../../common/message";
 import { ROUTE } from "./constants";
 
 export class RequestBackgroundTxMsg extends Message<{}> {
@@ -14,8 +14,7 @@ export class RequestBackgroundTxMsg extends Message<{}> {
   constructor(
     public readonly chainId: string,
     public readonly txBytes: string,
-    public readonly mode: "sync" | "async" | "commit",
-    public readonly origin: string
+    public readonly mode: "sync" | "async" | "commit"
   ) {
     super();
   }
@@ -37,25 +36,8 @@ export class RequestBackgroundTxMsg extends Message<{}> {
     }
   }
 
-  // Approve external approves sending message if they submit their origin correctly.
-  // Keeper or handler must check that this origin has right permission.
-  approveExternal(sender: MessageSender): boolean {
-    const isInternal = super.approveExternal(sender);
-    if (isInternal) {
-      return true;
-    }
-
-    // TODO: When is a url undefined?
-    if (!sender.url) {
-      throw new Error("url is empty");
-    }
-
-    if (!this.origin) {
-      throw new Error("origin is empty");
-    }
-
-    const url = new URL(sender.url);
-    return url.origin === this.origin;
+  approveExternal(): boolean {
+    return true;
   }
 
   route(): string {

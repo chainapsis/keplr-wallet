@@ -16,7 +16,7 @@ import {
   Button
 } from "reactstrap";
 import { useTxState } from "../../contexts/tx";
-import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 import {
   ENSUnsupportedError,
   InvalidENSNameError,

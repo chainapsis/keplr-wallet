@@ -1,7 +1,12 @@
-import React, { FunctionComponent, useCallback, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 import { HeaderLayout } from "../../../layouts/header-layout";
 
-import { useHistory } from "react-router";
+import { useHistory, useRouteMatch } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Input } from "../../../../components/form";
 import { Button, Form } from "reactstrap";
@@ -19,6 +24,7 @@ interface FormData {
 
 export const ExportPage: FunctionComponent = () => {
   const history = useHistory();
+  const match = useRouteMatch<{ index: string }>();
   const intl = useIntl();
 
   const [loading, setLoading] = useState(false);
@@ -29,6 +35,12 @@ export const ExportPage: FunctionComponent = () => {
       password: ""
     }
   });
+
+  useEffect(() => {
+    if (parseInt(match.params.index).toString() !== match.params.index) {
+      throw new Error("Invalid index");
+    }
+  }, [match.params.index]);
 
   return (
     <HeaderLayout
@@ -51,7 +63,10 @@ export const ExportPage: FunctionComponent = () => {
               onSubmit={handleSubmit(async data => {
                 setLoading(true);
                 try {
-                  const msg = new ShowKeyRingMsg(data.password);
+                  const msg = new ShowKeyRingMsg(
+                    parseInt(match.params.index),
+                    data.password
+                  );
                   setKeyRing(await sendMessage(BACKGROUND_PORT, msg));
                 } catch (e) {
                   console.log("Fail to decrypt: " + e.message);

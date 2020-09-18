@@ -4,11 +4,12 @@ import EventEmitter = NodeJS.EventEmitter;
 
 let lastSequence = 0;
 
-export async function sendMockMessage<M extends Message<unknown>>(
+export async function sendMessage<M extends Message<unknown>>(
   opts: {
     emitter: EventEmitter;
     id: string;
     url: string;
+    origin: string;
   },
   port: string,
   msg: M
@@ -32,6 +33,10 @@ export async function sendMockMessage<M extends Message<unknown>>(
 
       resolve(result.return);
     });
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    msg["origin"] = opts.origin;
 
     opts.emitter.emit("message", {
       port,

@@ -31,6 +31,10 @@ export class RootStore {
   public setKeyRingStatus(status: KeyRingStatus) {
     this.accountStore.setKeyRingStatus(status);
   }
+
+  public changeKeyRing() {
+    this.accountStore.changeKeyRing();
+  }
 }
 
 export function createRootStore() {

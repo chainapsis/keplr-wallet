@@ -8,10 +8,10 @@ import React, {
   useState
 } from "react";
 
-import { AccAddress } from "@everett-protocol/cosmosjs/common/address";
-import { Coin } from "@everett-protocol/cosmosjs/common/coin";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
+import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { Currency } from "../../../common/currency";
-import { Int } from "@everett-protocol/cosmosjs/common/int";
+import { Int } from "@chainapsis/cosmosjs/common/int";
 
 type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 
@@ -36,6 +36,7 @@ export interface TxState {
   // Balances of account to send tx
   balances: Coin[];
 
+  // TODO: Check the equality of the object value to prevent the infinite render.
   setRawAddress(rawAddress: string): void;
   setRecipient(recipient: AccAddress | null): void;
   setAmount(amount: Coin | null): void;
@@ -64,7 +65,15 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
   const [amount, setAmount] = useState<Coin | null>(null);
 
   const [gas, setGas] = useState(0);
-  const [fees, setFees] = useState<Coin[]>([]);
+  const [fees, _setFees] = useState<Coin[]>([]);
+  const setFees = useCallback(
+    (argFees: Coin[]) => {
+      if (fees.toString() !== argFees.toString()) {
+        _setFees(argFees);
+      }
+    },
+    [fees]
+  );
   const [memo, setMemo] = useState<string>("");
 
   const [currencies, setCurrencies] = useState<Currency[]>([]);
@@ -183,6 +192,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           currencies,
           balances,
           feeCurrencies,
+          setFees,
           setContextErrors,
           getError,
           isValid

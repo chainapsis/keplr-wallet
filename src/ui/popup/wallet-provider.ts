@@ -1,8 +1,5 @@
-import {
-  Key,
-  WalletProvider
-} from "@everett-protocol/cosmosjs/core/walletProvider";
-import { Context } from "@everett-protocol/cosmosjs/core/context";
+import { Key, WalletProvider } from "@chainapsis/cosmosjs/core/walletProvider";
+import { Context } from "@chainapsis/cosmosjs/core/context";
 import {
   GetKeyMsg,
   RequestSignMsg,
@@ -10,7 +7,7 @@ import {
 } from "../../background/keyring";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
-import { TxBuilderConfig } from "@everett-protocol/cosmosjs/core/txBuilder";
+import { TxBuilderConfig } from "@chainapsis/cosmosjs/core/txBuilder";
 import {
   txBuilderConfigFromPrimitive,
   txBuilderConfigToPrimitive
@@ -50,11 +47,7 @@ export class PopupWalletProvider implements WalletProvider {
    * Get array of keys that includes bech32 address string, address bytes and public key from wallet if user have approved the access.
    */
   async getKeys(context: Context): Promise<Key[]> {
-    const msg = new GetKeyMsg(
-      context.get("chainId"),
-      // There is no need to set origin because this wallet provider is used in internal.
-      ""
-    );
+    const msg = new GetKeyMsg(context.get("chainId"));
     const key = await sendMessage(BACKGROUND_PORT, msg);
     return Promise.resolve([
       {
@@ -87,8 +80,6 @@ export class PopupWalletProvider implements WalletProvider {
       },
       id,
       false,
-      // There is no need to set origin because this wallet provider is used in internal.
-      "",
       this.feeApprover == null
     );
 
@@ -126,8 +117,6 @@ export class PopupWalletProvider implements WalletProvider {
       bech32Address,
       Buffer.from(message).toString("hex"),
       false,
-      // There is no need to set origin because this wallet provider is used in internal.
-      "",
       this.signApprover == null
     );
 

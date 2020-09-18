@@ -17,20 +17,21 @@ import { useSignature } from "../../../hooks";
 import classnames from "classnames";
 import { DataTab } from "./data-tab";
 import { DetailsTab } from "./details-tab";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   disableScroll,
   enableScroll,
   fitWindow
 } from "../../../../common/window";
 import { useHistory, useLocation, useRouteMatch } from "react-router";
+import { observer } from "mobx-react";
 
 enum Tab {
   Details,
   Data
 }
 
-export const SignPage: FunctionComponent = () => {
+export const SignPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const location = useLocation();
   const match = useRouteMatch<{
@@ -47,6 +48,17 @@ export const SignPage: FunctionComponent = () => {
     } else {
       enableScroll();
     }
+
+    // Close when ledger is aborted if external.
+    if (external) {
+      window.addEventListener("ledgerInitAborted", window.close);
+    }
+
+    return () => {
+      if (external) {
+        window.removeEventListener("ledgerInitAborted", window.close);
+      }
+    };
   }, [external]);
 
   const id = match.params.id;
@@ -55,7 +67,7 @@ export const SignPage: FunctionComponent = () => {
 
   const intl = useIntl();
 
-  const { chainStore } = useStore();
+  const { chainStore, keyRingStore } = useStore();
 
   const signing = useSignature(
     id,
@@ -66,6 +78,27 @@ export const SignPage: FunctionComponent = () => {
       [chainStore]
     )
   );
+
+  // Approve signing automatically if key type is ledger.
+  useEffect(() => {
+    const closeWindowIfExternal = () => {
+      if (external) {
+        window.close();
+      }
+    };
+
+    if (keyRingStore.keyRingType === "ledger") {
+      window.addEventListener("ledgerSignCompleted", closeWindowIfExternal);
+
+      if (signing.approve && !signing.requested && !signing.loading) {
+        signing.approve();
+      }
+    }
+
+    return () => {
+      window.removeEventListener("ledgerSignCompleted", closeWindowIfExternal);
+    };
+  }, [external, keyRingStore.keyRingType, signing]);
 
   useEffect(() => {
     // Force reject when closing window.
@@ -163,39 +196,53 @@ export const SignPage: FunctionComponent = () => {
         </div>
         <div style={{ flex: 1 }} />
         <div className={style.buttons}>
-          <Button
-            className={style.button}
-            color="danger"
-            disabled={
-              signing.message == null ||
-              signing.message === "" ||
-              signing.initializing
-            }
-            data-loading={signing.requested}
-            onClick={onRejectClick}
-            outline
-          >
-            {intl.formatMessage({
-              id: "sign.button.reject"
-            })}
-          </Button>
-          <Button
-            className={style.button}
-            color="primary"
-            disabled={
-              signing.message == null ||
-              signing.message === "" ||
-              signing.initializing
-            }
-            data-loading={signing.requested}
-            onClick={onApproveClick}
-          >
-            {intl.formatMessage({
-              id: "sign.button.approve"
-            })}
-          </Button>
+          {keyRingStore.keyRingType === "ledger" ? (
+            <Button
+              className={style.button}
+              color="primary"
+              disabled={true}
+              outline
+            >
+              <FormattedMessage id="sign.button.confirm-ledger" />{" "}
+              <i className="fa fa-spinner fa-spin fa-fw" />
+            </Button>
+          ) : (
+            <React.Fragment>
+              <Button
+                className={style.button}
+                color="danger"
+                disabled={
+                  signing.message == null ||
+                  signing.message === "" ||
+                  signing.initializing
+                }
+                data-loading={signing.requested}
+                onClick={onRejectClick}
+                outline
+              >
+                {intl.formatMessage({
+                  id: "sign.button.reject"
+                })}
+              </Button>
+              <Button
+                className={style.button}
+                color="primary"
+                disabled={
+                  signing.message == null ||
+                  signing.message === "" ||
+                  signing.initializing
+                }
+                data-loading={signing.requested}
+                onClick={onApproveClick}
+              >
+                {intl.formatMessage({
+                  id: "sign.button.approve"
+                })}
+              </Button>
+            </React.Fragment>
+          )}
         </div>
       </div>
     </HeaderLayout>
   );
-};
+});

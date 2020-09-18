@@ -1,14 +1,23 @@
 import { MessageManager } from "./index";
 import { Result } from "../interfaces";
+import { Env } from "../types";
 
 import EventEmitter = NodeJS.EventEmitter;
 
 export class MockMessageManager extends MessageManager {
   constructor(
     private readonly emitter: EventEmitter,
-    private readonly id: string
+    public readonly extensionId: string,
+    public readonly extensionBaseURL: string
   ) {
     super();
+  }
+
+  protected produceEnv(): Env {
+    return {
+      extensionId: this.extensionId,
+      extensionBaseURL: this.extensionBaseURL
+    };
   }
 
   public listen(port: string) {
@@ -17,31 +26,23 @@ export class MockMessageManager extends MessageManager {
     }
 
     this.port = port;
-    this.emitter.on("message", message => {
-      const sender = message.sender;
-      delete message.sender;
-
-      const sequence = message.sequence;
-      delete message.sequence;
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore
-      // Force injecting very minimal browser api.
-      global.browser = {
-        runtime: {
-          id: this.id,
-          getURL: (path: string) => {
-            if (path.length > 0 && path[0] === "/") {
-              path = path.substring(1);
-            }
-
-            return `http://${this.id}/${path}`;
-          }
-        }
-      };
-      this.onMessage(message, sender, (result: Result) => {
-        this.emitter.emit(`message-result-${sequence}`, result);
-      });
-    });
+    this.emitter.on("message", this.onEmitMessage);
   }
+
+  public unlisten(): void {
+    this.port = "";
+    this.emitter.off("message", this.onEmitMessage);
+  }
+
+  public onEmitMessage = (message: any) => {
+    const sender = message.sender;
+    delete message.sender;
+
+    const sequence = message.sequence;
+    delete message.sequence;
+
+    this.onMessage(message, sender, (result: Result) => {
+      this.emitter.emit(`message-result-${sequence}`, result);
+    });
+  };
 }
