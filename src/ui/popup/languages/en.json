@@ -166,6 +166,13 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Claim Staking Reward",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
 
+  "sign.list.message.wasm.button.details": "Details",
+  "sign.list.message.wasm.button.close": "Close",
+  "sign.list.message.wasm/MsgInstantiateContract.title": "Instantiate Wasm Contract",
+  "sign.list.message.wasm/MsgInstantiateContract.content": "Instantiate code ID <b>{codeId}</b> contract with <b>{label}</b> label<only-funds-exist> by funding <b>{funds}</b></only-funds-exist>",
+  "sign.list.message.wasm/MsgExecuteContract.title": "Execute Wasm Contract",
+  "sign.list.message.wasm/MsgExecuteContract.content": "Execute contract <b>{address}</b><only-sent-exist> by sending <b>{sent}</b></only-sent-exist>",
+
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{address}</b> create link {br}<b>{link}</b>",
 

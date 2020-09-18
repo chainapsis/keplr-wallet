@@ -3,7 +3,7 @@ import { shortenAddress } from "../../../../common/address";
 import { truncHashPortion } from "../../../../common/hash";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Coin } from "@chainapsis/cosmosjs/common/coin";
-import { IntlShape, FormattedMessage } from "react-intl";
+import { IntlShape, FormattedMessage, useIntl } from "react-intl";
 import { Currency } from "../../../../common/currency";
 import { Button } from "reactstrap";
 
@@ -288,24 +288,27 @@ export function renderMessage(
 
     return {
       icon: "fas fa-cog",
-      title: "Instantiate Wasm Contract",
+      title: intl.formatMessage({
+        id: "sign.list.message.wasm/MsgInstantiateContract.title"
+      }),
       content: (
         <React.Fragment>
-          Instantiate code ID <b>{msg.value.code_id}</b> contract with{" "}
-          {msg.value.label} label
-          {funds.length > 0 ? (
-            <React.Fragment>
-              {" "}
-              by funding{" "}
-              <b>
-                {funds
-                  .map(coin => {
-                    return `${coin.amount} ${coin.denom}`;
-                  })
-                  .join(",")}
-              </b>
-            </React.Fragment>
-          ) : null}
+          <FormattedMessage
+            id="sign.list.message.wasm/MsgInstantiateContract.content"
+            values={{
+              b: (...chunks: any[]) => <b>{chunks}</b>,
+              br: <br />,
+              codeId: msg.value.code_id,
+              label: msg.value.label,
+              ["only-funds-exist"]: (...chunks: any[]) =>
+                funds.length > 0 ? chunks : "",
+              funds: funds
+                .map(coin => {
+                  return `${coin.amount} ${coin.denom}`;
+                })
+                .join(",")
+            }}
+          />
           <br />
           <WasmExecutionMsgView msg={msg.value.init_msg} />
         </React.Fragment>
@@ -327,23 +330,26 @@ export function renderMessage(
 
     return {
       icon: "fas fa-cog",
-      title: "Execute Wasm Contract",
+      title: intl.formatMessage({
+        id: "sign.list.message.wasm/MsgExecuteContract.title"
+      }),
       content: (
         <React.Fragment>
-          Execute contract <b>{shortenAddress(msg.value.contract, 26)}</b>
-          {sent.length > 0 ? (
-            <React.Fragment>
-              {" "}
-              by sending{" "}
-              <b>
-                {sent
-                  .map(coin => {
-                    return `${coin.amount} ${coin.denom}`;
-                  })
-                  .join(",")}
-              </b>
-            </React.Fragment>
-          ) : null}
+          <FormattedMessage
+            id="sign.list.message.wasm/MsgExecuteContract.content"
+            values={{
+              b: (...chunks: any[]) => <b>{chunks}</b>,
+              br: <br />,
+              address: shortenAddress(msg.value.contract, 26),
+              ["only-sent-exist"]: (...chunks: any[]) =>
+                sent.length > 0 ? chunks : "",
+              sent: sent
+                .map(coin => {
+                  return `${coin.amount} ${coin.denom}`;
+                })
+                .join(",")
+            }}
+          />
           <br />
           <WasmExecutionMsgView msg={msg.value.msg} />
         </React.Fragment>
@@ -399,6 +405,7 @@ export const WasmExecutionMsgView: FunctionComponent<{ msg: object }> = ({
   msg
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const intl = useIntl();
 
   const toggleOpen = () => setIsOpen(isOpen => !isOpen);
 
@@ -419,7 +426,13 @@ export const WasmExecutionMsgView: FunctionComponent<{ msg: object }> = ({
           toggleOpen();
         }}
       >
-        {isOpen ? "Close" : "Details"}
+        {isOpen
+          ? intl.formatMessage({
+              id: "sign.list.message.wasm.button.close"
+            })
+          : intl.formatMessage({
+              id: "sign.list.message.wasm.button.details"
+            })}
       </Button>
       <div style={{ height: "36px" }} />
     </div>
