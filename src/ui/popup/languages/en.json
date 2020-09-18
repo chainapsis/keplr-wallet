@@ -165,6 +165,9 @@
   "sign.list.message.cosmos-sdk/MsgBeginRedelegate.content": "Redelegate <b>{amount}</b> from <b>{fromValidator}</b> to <b>{toValidator}</b>",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Claim Staking Reward",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
+  
+  "sign.list.message.cyber/Link.title": "Cyberlink",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> create link {br}<b>{link}</b>",
 
   "ledger.step1": "Step 1",
   "ledger.step1.paragraph": "Connect and unlock your Ledger.",

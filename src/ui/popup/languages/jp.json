@@ -125,6 +125,9 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "ステーク報酬を取得する",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "<b>{validator}</b> に対してステーキング報酬を要求する",
 
+  "sign.list.message.cyber/Link.title": "Cyberlink",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> リンクを作成 {br}<b>{link}</b>",
+
   "fee-buttons.select.low": "安価",
   "fee-buttons.select.average": "平均",
   "fee-buttons.select.high": "高価"

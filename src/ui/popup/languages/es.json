@@ -112,6 +112,9 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Reclamar la recompensa",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Reclamar la participación pendiente de <b>{validator}</b>",
 
+  "sign.list.message.cyber/Link.title": "Cyberlink",
+  "sign.list.message.cyber/Link.content": "<b>{address}</b> crear vínculo {br}<b>{link}</b>",
+
   "fee-buttons.select.low": "Bajo",
   "fee-buttons.select.average": "Promedio",
   "fee-buttons.select.high": "alto"
