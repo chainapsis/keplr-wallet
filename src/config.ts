@@ -19,10 +19,16 @@ import {
   SECRET_NETWORK_REST_ENDPOINT,
   SECRET_NETWORK_RPC_CONFIG,
   SECRET_NETWORK_RPC_ENDPOINT,
-  ADDITIONAL_SIGN_IN_PREPEND,
-  ADDITIONAL_INTL_MESSAGES,
   BETA_CYBER_NETWORK_REST_ENDPOINT,
-  BETA_CYBER_NETWORK_RPC_ENDPOINT
+  BETA_CYBER_NETWORK_REST_CONFIG,
+  BETA_CYBER_NETWORK_RPC_ENDPOINT,
+  BETA_CYBER_NETWORK_RPC_CONFIG,
+  BETA_STRAIGHTEDGE_REST_ENDPOINT,
+  BETA_STRAIGHTEDGE_REST_CONFIG,
+  BETA_STRAIGHTEDGE_RPC_ENDPOINT,
+  BETA_STRAIGHTEDGE_RPC_CONFIG,
+  ADDITIONAL_SIGN_IN_PREPEND,
+  ADDITIONAL_INTL_MESSAGES
 } from "./config.var";
 import { IntlMessages } from "./ui/popup/language";
 
@@ -164,7 +170,9 @@ export const EmbedChainInfos: ChainInfo[] = [
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
+    rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,
     rest: BETA_CYBER_NETWORK_REST_ENDPOINT,
+    restConfig: BETA_CYBER_NETWORK_REST_CONFIG,
     chainId: "euler-6",
     chainName: "Cyber",
     stakeCurrency: {
@@ -197,6 +205,45 @@ export const EmbedChainInfos: ChainInfo[] = [
       }
     ],
     beta: true
+  },
+  {
+    rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
+    rpcConfig: BETA_STRAIGHTEDGE_RPC_CONFIG,
+    rest: BETA_STRAIGHTEDGE_REST_ENDPOINT,
+    restConfig: BETA_STRAIGHTEDGE_REST_CONFIG,
+    chainId: "straightedge-2",
+    chainName: "Straightedge",
+    stakeCurrency: {
+      coinDenom: "STR",
+      coinMinimalDenom: "astr",
+      coinDecimals: 18
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/straightedge-2/stake"
+        : "http://localhost:8081/#/straightedge-2/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/straightedge-2/stake"
+        : "http://localhost:8081/#/straightedge-2/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("str"),
+    currencies: [
+      {
+        coinDenom: "STR",
+        coinMinimalDenom: "astr",
+        coinDecimals: 18
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STR",
+        coinMinimalDenom: "astr",
+        coinDecimals: 18
+      }
+    ],
+    coinType: 551,
+    beta: true
   }
 ];
 
@@ -221,6 +268,11 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
   },
   {
     chainId: "euler-6",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "straightedge-2",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
