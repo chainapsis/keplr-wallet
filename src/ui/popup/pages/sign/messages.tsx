@@ -126,7 +126,7 @@ export function renderMessage(
   title: string;
   content: React.ReactElement;
 } {
-    if (MessageType<MsgSend>(msg, "cosmos-sdk/MsgSend")) {
+  if (MessageType<MsgSend>(msg, "cosmos-sdk/MsgSend")) {
     const receives: { amount: string; denom: string }[] = [];
     for (const coinPrimitive of msg.value.amount) {
       const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
@@ -294,11 +294,10 @@ export function renderMessage(
       )
     };
   }
-  
+
   if (MessageType<MsgLink>(msg, "cyber/Link")) {
     const cyberlinks: { from: string; to: string }[] = [];
     for (const link of msg.value.links) {
-
       cyberlinks.push({
         from: link.from,
         to: link.to
@@ -319,7 +318,11 @@ export function renderMessage(
             address: shortenAddress(msg.value.address, 20),
             link: cyberlinks
               .map(link => {
-                return `${truncHashPortion(link.from, 7, 7)} → ${truncHashPortion(link.to, 7, 7)}`;
+                return `${truncHashPortion(
+                  link.from,
+                  7,
+                  7
+                )} → ${truncHashPortion(link.to, 7, 7)}`;
               })
               .join(", ")
           }}
@@ -327,7 +330,7 @@ export function renderMessage(
       )
     };
   }
-  
+
   return {
     icon: undefined,
     title: "Unknown",

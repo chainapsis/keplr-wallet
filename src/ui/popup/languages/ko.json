@@ -165,8 +165,8 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "<b>{validator}</b>에게 위임된 스테이킹 보상을 요청합니다",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
-  "sign.list.message.cyber/Link.content": "<b>{address}</b> 링크를 생성 {br}<b>{link}</b>",
-  
+  "sign.list.message.cyber/Link.content": "<b>{address}</b>가 링크<b>{link}</b>를 생성합니다",
+
   "ledger.step1": "1 단계",
   "ledger.step1.paragraph": "렛저를 연결하고 잠금을 해제하세요",
   "ledger.step2": "2 단계",
