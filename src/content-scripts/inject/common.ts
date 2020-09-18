@@ -1,4 +1,4 @@
-import { ChainInfo } from "../../background/chains";
+import { SuggestingChainInfo } from "../../background/chains";
 import { SuggestChainInfoMsg } from "../../background/chains/messages";
 import { sendMessage } from "../../common/message/send";
 import { BACKGROUND_PORT } from "../../common/message/constant";
@@ -14,7 +14,7 @@ import {
 const Buffer = require("buffer/").Buffer;
 
 export class Keplr {
-  async experimentalSuggestChain(chainInfo: ChainInfo) {
+  async experimentalSuggestChain(chainInfo: SuggestingChainInfo) {
     const msg = new SuggestChainInfoMsg(chainInfo, true);
     await sendMessage(BACKGROUND_PORT, msg);
   }

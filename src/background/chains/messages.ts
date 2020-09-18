@@ -1,9 +1,9 @@
 import { Message } from "../../common/message";
 import {
   AccessOrigin,
-  ChainInfo,
   ChainInfoWithEmbed,
-  SuggestedChainInfo
+  SuggestedChainInfo,
+  SuggestingChainInfo
 } from "./types";
 import { ROUTE } from "./constants";
 import { AsyncApprover } from "../../common/async-approver";
@@ -34,7 +34,7 @@ export class SuggestChainInfoMsg extends Message<void> {
   }
 
   constructor(
-    public readonly chainInfo: ChainInfo,
+    public readonly chainInfo: SuggestingChainInfo,
     public readonly openPopup: boolean
   ) {
     super();

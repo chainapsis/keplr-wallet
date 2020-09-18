@@ -63,6 +63,12 @@ export type ChainInfoWithEmbed = ChainInfo & {
   embeded: boolean;
 };
 
+export type SuggestingChainInfo = Omit<ChainInfo, "bip44"> & {
+  bip44: {
+    coinType: number;
+  };
+};
+
 export type SuggestedChainInfo = ChainInfo & {
   origin: string;
 };
@@ -87,7 +93,15 @@ export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixConsPub: Joi.string().required()
 });
 
-export const ChainInfoSchema = Joi.object<ChainInfo>({
+export const SuggestingBIP44Schema = Joi.object<{ coinType: number }>({
+  coinType: Joi.number()
+    .integer()
+    .min(-1)
+    .required()
+  // Alow the any keys for compatibility of cosmosJS's BIP44.
+}).keys();
+
+export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
   rpc: Joi.string()
     .required()
     .uri(),
@@ -107,12 +121,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   stakeCurrency: CurrencySchema.required(),
   walletUrl: Joi.string().uri(),
   walletUrlForStaking: Joi.string().uri(),
-  bip44: Joi.custom(value => {
-    if (!(value instanceof BIP44)) {
-      throw new Error("Invalid bip44 type");
-    }
-    return value;
-  }).required(),
+  bip44: SuggestingBIP44Schema.required(),
   bech32Config: Bech32ConfigSchema.required(),
   currencies: Joi.array()
     .min(1)

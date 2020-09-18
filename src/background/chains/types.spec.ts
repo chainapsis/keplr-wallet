@@ -2,13 +2,12 @@ import assert from "assert";
 import "mocha";
 import {
   Bech32ConfigSchema,
-  ChainInfo,
   ChainInfoSchema,
-  CurrencySchema
+  CurrencySchema,
+  SuggestingChainInfo
 } from "./types";
 import { Currency } from "../../common/currency";
 import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
-import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
@@ -243,7 +242,7 @@ describe("Test chain info schema", () => {
   });
 
   it("test chain info schema", () => {
-    const generatePlainChainInfo = (): ChainInfo => {
+    const generatePlainChainInfo = (): SuggestingChainInfo => {
       return {
         rpc: "http://test.com",
         rest: "http://test.com",
@@ -254,7 +253,9 @@ describe("Test chain info schema", () => {
           coinMinimalDenom: "utest",
           coinDecimals: 6
         },
-        bip44: new BIP44(44, 118, 0),
+        bip44: {
+          coinType: 118
+        },
         bech32Config: {
           bech32PrefixAccAddr: "test",
           bech32PrefixAccPub: "test",
@@ -385,6 +386,38 @@ describe("Test chain info schema", () => {
 
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when bip44 is undefined");
+
+    assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["bip44"] = {};
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw error when bip44 has no coinType");
+
+    assert.doesNotReject(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["bip44"] = { coinType: 0 };
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "BIP44 coinType can be 0");
+
+    assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["bip44"] = { coinType: -1 };
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw error when bip44 has negative coinType");
+
+    assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["bip44"] = { coinType: 1.1 };
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw error when bip44 has non integer coinType");
 
     assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();

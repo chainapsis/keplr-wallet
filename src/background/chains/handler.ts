@@ -115,9 +115,7 @@ const handleSuggestChainInfoMsg: (
     }
 
     const chainInfo = msg.chainInfo as Writeable<ChainInfo>;
-    // Should restore the prototype because BIP44 is the class.
-    chainInfo.bip44 = Object.setPrototypeOf(chainInfo.bip44, BIP44.prototype);
-
+    chainInfo.bip44 = new BIP44(44, msg.chainInfo.bip44.coinType);
     // And, always handle it as beta.
     chainInfo.beta = true;
 
