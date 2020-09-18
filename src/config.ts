@@ -243,6 +243,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       }
     ],
     coinType: 551,
+    // STR's decimal is high. Thus, if gas price is set as 0.025, it produces very low and long fee.
+    // And, currently, this long fee is not visible well in Keplr.
+    // Just, increase the gas price step temporarily.
+    gasPriceStep: {
+      low: 0.01 * Math.pow(10, 12),
+      average: 0.025 * Math.pow(10, 12),
+      high: 0.04 * Math.pow(10, 12)
+    },
     beta: true
   }
 ];
