@@ -167,7 +167,7 @@
   "sign.list.message.wasm.button.details": "자세히",
   "sign.list.message.wasm.button.close": "닫기",
   "sign.list.message.wasm/MsgInstantiateContract.title": "Wasm 컨트랙트 활성화",
-  "sign.list.message.wasm/MsgInstantiateContract.content": "<only-funds-exist><b>{funds}</b>를 전송하여 </only-funds-exist><b>{label}</b> 라벨의 Code ID <b>{codeId}</b> 컨트랙트를 활성화합니다",
+  "sign.list.message.wasm/MsgInstantiateContract.content": "<only-funds-exist><b>{funds}</b>를 전송하여 </only-funds-exist><only-admin-exist><b>{admin}</b>을 관리자 계정으로 가지는 </only-admin-exist><b>{label}</b> 라벨의 Code ID <b>{codeId}</b> 컨트랙트를 활성화합니다",
   "sign.list.message.wasm/MsgExecuteContract.title": "Wasm 컨트랙트 실행 요청",
   "sign.list.message.wasm/MsgExecuteContract.content": "<only-sent-exist><b>{sent}</b>를 전송하며 </only-sent-exist><b>{address}</b> 컨트랙트를 실행합니다",
 

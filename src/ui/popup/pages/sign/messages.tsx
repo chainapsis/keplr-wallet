@@ -74,6 +74,8 @@ interface MsgBeginRedelegate {
 interface MsgInstantiateContract {
   type: "wasm/MsgInstantiateContract";
   value: {
+    // Admin field can be omitted.
+    admin?: string;
     sender: string;
     code_id: string;
     label: string;
@@ -298,6 +300,9 @@ export function renderMessage(
             values={{
               b: (...chunks: any[]) => <b>{chunks}</b>,
               br: <br />,
+              admin: msg.value.admin ? shortenAddress(msg.value.admin, 30) : "",
+              ["only-admin-exist"]: (...chunks: any[]) =>
+                msg.value.admin ? chunks : "",
               codeId: msg.value.code_id,
               label: msg.value.label,
               ["only-funds-exist"]: (...chunks: any[]) =>
