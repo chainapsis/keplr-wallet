@@ -99,8 +99,12 @@ export class BackgroundTxKeeper {
 
       BackgroundTxKeeper.processTxResultNotification(result);
 
-      // Notify the tx is committed.
-      sendMessage(POPUP_PORT, new TxCommittedMsg(chainId));
+      try {
+        // Notify the tx is committed.
+        sendMessage(POPUP_PORT, new TxCommittedMsg(chainId));
+      } catch {
+        // No matter if error is thrown.
+      }
     } catch (e) {
       BackgroundTxKeeper.processTxErrorNotification(e);
 
