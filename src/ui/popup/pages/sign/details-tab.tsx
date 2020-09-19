@@ -178,7 +178,7 @@ const Msg: FunctionComponent<{
   return (
     <div className={styleDetailsTab.msg}>
       <div className={styleDetailsTab.icon}>
-        <div style={{ flex: 1 }} />
+        <div style={{ height: "2px" }} />
         <i className={icon} />
         <div style={{ flex: 1 }} />
       </div>
