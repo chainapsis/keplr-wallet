@@ -30,8 +30,11 @@ export class ChainStore {
   @observable
   public allCurrencies!: Currency[];
 
-  // Indicate whether the chain info is set.
-  private isChainSet = false;
+  // Indicate whether the chain store is initializing.
+  private isIntializing = false;
+
+  // Defer setting chain right after init is complete.
+  private deferChainSet: string = "";
 
   constructor(
     private rootStore: RootStore,
@@ -49,11 +52,19 @@ export class ChainStore {
     );
 
     this.setChain(this.chainList[0].chainId);
-    this.isChainSet = false;
   }
 
   @action
   public setChain(chainId: string) {
+    if (this.chainInfo && this.chainInfo.chainId === chainId) {
+      // No need to change chain info.
+      return;
+    }
+
+    if (this.isIntializing) {
+      this.deferChainSet = chainId;
+    }
+
     let chainInfo: ChainInfo | null = null;
     for (const ci of this.chainList) {
       if (ci.chainId === chainId) {
@@ -62,11 +73,15 @@ export class ChainStore {
     }
     // If no match chain id, throw error.
     if (chainInfo === null) {
+      if (this.isIntializing) {
+        // If store is still initializing, don't throw and defer it.
+        return;
+      }
+
       throw new Error("Invalid chain id");
     }
 
     this.chainInfo = chainInfo;
-    this.isChainSet = true;
 
     this.rootStore.setChainInfo(chainInfo);
   }
@@ -82,16 +97,23 @@ export class ChainStore {
 
   @actionAsync
   public async init() {
+    this.isIntializing = true;
     await task(this.getChainInfosFromBackground());
 
     // Get last view chain id to persistent background
     const msg = new GetPersistentMemoryMsg();
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     if (result && result.lastViewChainId) {
-      // If chain info is already set, skip setting the last used chain info.
-      if (!this.isChainSet) {
+      // If setting chain info is defered, skip setting the last used chain info.
+      if (!this.deferChainSet) {
         this.setChain(result.lastViewChainId);
       }
+    }
+    this.isIntializing = false;
+
+    if (this.deferChainSet) {
+      this.setChain(this.deferChainSet);
+      this.deferChainSet = "";
     }
   }
 
