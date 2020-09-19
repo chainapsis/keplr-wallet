@@ -68,12 +68,15 @@ export const MainPage: FunctionComponent = observer(() => {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            paddingRight: "24px",
-            cursor: "pointer"
+            paddingRight: "20px"
           }}
         >
           <i
             className="fas fa-user"
+            style={{
+              cursor: "pointer",
+              padding: "4px"
+            }}
             onClick={e => {
               e.preventDefault();
 
