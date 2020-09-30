@@ -41,6 +41,15 @@ export const STRAIGHTEDGE_REST_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
 
+export const BETA_STAKEBIRD_RPC_ENDPOINT = "";
+export const BETA_STAKEBIRD_RPC_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+export const BETA_STAKEBIRD_REST_ENDPOINT = "";
+export const BETA_STAKEBIRD_REST_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+
 export const ADDITIONAL_SIGN_IN_PREPEND:
   | React.ReactElement
   | undefined = undefined;

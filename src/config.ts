@@ -27,6 +27,10 @@ import {
   BETA_STRAIGHTEDGE_REST_CONFIG,
   BETA_STRAIGHTEDGE_RPC_ENDPOINT,
   BETA_STRAIGHTEDGE_RPC_CONFIG,
+  BETA_STAKEBIRD_REST_ENDPOINT,
+  BETA_STAKEBIRD_REST_CONFIG,
+  BETA_STAKEBIRD_RPC_ENDPOINT,
+  BETA_STAKEBIRD_RPC_CONFIG,
   ADDITIONAL_SIGN_IN_PREPEND,
   ADDITIONAL_INTL_MESSAGES
 } from "./config.var";
@@ -252,6 +256,53 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04 * Math.pow(10, 12)
     },
     beta: true
+  },
+  {
+    rpc: BETA_STAKEBIRD_RPC_ENDPOINT,
+    rpcConfig: BETA_STAKEBIRD_RPC_CONFIG,
+    rest: BETA_STAKEBIRD_REST_ENDPOINT,
+    restConfig: BETA_STAKEBIRD_REST_CONFIG,
+    chainId: "stakebird-1",
+    chainName: "Stakebird",
+    stakeCurrency: {
+      coinDenom: "STB",
+      coinMinimalDenom: "ustb",
+      coinDecimals: 6,
+      coinGeckoId: "ustb"
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/stakebird-1/stake"
+        : "http://localhost:8081/#/stakebird-1/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/stakebird-1/stake"
+        : "http://localhost:8081/#/stakebird-1/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("stb"),
+    currencies: [
+      {
+        coinDenom: "STB",
+        coinMinimalDenom: "ustb",
+        coinDecimals: 6,
+        coinGeckoId: "stb"
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "uatom",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos"
+      },
+      {
+        coinDenom: "STB",
+        coinMinimalDenom: "ustb",
+        coinDecimals: 6,
+        coinGeckoId: "stb"
+      }
+    ],
+    coinType: 563
   }
 ];
 
@@ -281,6 +332,11 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
   },
   {
     chainId: "straightedge-2",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "stakebird-1",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
