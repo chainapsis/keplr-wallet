@@ -277,6 +277,13 @@ export class KeyRingKeeper {
     this.signApprover.reject(id);
   }
 
+  async sign(chainId: string, message: Uint8Array): Promise<Uint8Array> {
+    return this.keyRing.sign(
+      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+      message
+    );
+  }
+
   async addMnemonicKey(
     mnemonic: string,
     meta: Record<string, string>,

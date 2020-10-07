@@ -4,6 +4,7 @@ import * as PersistentMemory from "./persistent-memory/internal";
 import * as Chains from "./chains/internal";
 import * as Ledger from "./ledger/internal";
 import * as KeyRing from "./keyring/internal";
+import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
 
 import { BrowserKVStore } from "../common/kvstore";
@@ -35,6 +36,13 @@ const keyRingKeeper = new KeyRing.KeyRingKeeper(
   openWindow
 );
 KeyRing.init(messageManager, keyRingKeeper);
+
+const secretWasmKeeper = new SecretWasm.SecretWasmKeeper(
+  "holodeck",
+  chainsKeeper,
+  keyRingKeeper
+);
+SecretWasm.init(messageManager, secretWasmKeeper);
 
 const backgroundTxKeeper = new BackgroundTx.BackgroundTxKeeper(chainsKeeper);
 BackgroundTx.init(messageManager, backgroundTxKeeper);
