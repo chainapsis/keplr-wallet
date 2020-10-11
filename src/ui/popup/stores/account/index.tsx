@@ -31,6 +31,7 @@ export class AccountStore {
   @observable
   public lastAssetFetchingError: Error | undefined;
 
+  // Assets that exist on the chain itself.
   @observable
   public assets!: Coin[];
 
@@ -133,7 +134,9 @@ export class AccountStore {
 
       this.lastAssetFetchingError = undefined;
       // Load the assets from storage.
-      this.assets = await task(this.loadAssetsFromStorage(this.bech32Address));
+      this.assets = await task(
+        this.loadAssetsFromStorage(this.chainInfo.chainId, this.bech32Address)
+      );
     }
   }
 
@@ -182,7 +185,13 @@ export class AccountStore {
       this.assets = account.getCoins();
       this.lastAssetFetchingError = undefined;
       // Save the assets to storage.
-      await task(this.saveAssetsToStorage(this.bech32Address, this.assets));
+      await task(
+        this.saveAssetsToStorage(
+          this.chainInfo.chainId,
+          this.bech32Address,
+          this.assets
+        )
+      );
     } catch (e) {
       if (!Axios.isCancel(e)) {
         if (
@@ -205,6 +214,7 @@ export class AccountStore {
 
   // Not action
   private async saveAssetsToStorage(
+    chainId: string,
     bech32Address: string,
     assets: Coin[]
   ): Promise<void> {
@@ -213,21 +223,26 @@ export class AccountStore {
       coinStrs.push(coin.toString());
     }
 
+    const store = (await browser.storage.local.get()).assets ?? {};
+
     await browser.storage.local.set({
-      assets: {
-        [bech32Address]: coinStrs.join(",")
-      }
+      assets: Object.assign({}, store, {
+        [`${chainId}-${bech32Address}`]: coinStrs.join(",")
+      })
     });
   }
 
   // Not action
-  private async loadAssetsFromStorage(bech32Address: string): Promise<Coin[]> {
+  private async loadAssetsFromStorage(
+    chainId: string,
+    bech32Address: string
+  ): Promise<Coin[]> {
     const items = await browser.storage.local.get();
 
     const coins: Coin[] = [];
     const assets = items?.assets;
     if (assets) {
-      const coinsStr = assets[bech32Address];
+      const coinsStr = assets[`${chainId}-${bech32Address}`];
       if (coinsStr) {
         const coinStrs = coinsStr.split(",");
         for (const coinStr of coinStrs) {
