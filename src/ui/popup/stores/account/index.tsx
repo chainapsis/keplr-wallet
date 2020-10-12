@@ -14,6 +14,63 @@ import { RootStore } from "../root";
 
 import Axios, { CancelTokenSource } from "axios";
 import { AutoFetchingAssetsInterval } from "../../../../config";
+import { Int } from "@chainapsis/cosmosjs/common/int";
+
+type RestResult<Result> = {
+  height: string;
+  result: Result;
+};
+
+type ResultDelegations = [
+  {
+    delegator_address: string;
+    validator_address: string;
+    shares: string;
+    balance:
+      | {
+          denom: string;
+          amount: string;
+        }
+      | string;
+  }
+];
+
+type ResultUnbondings = [
+  {
+    delegator_address: string;
+    validator_address: string;
+    entries: [
+      {
+        initial_balance: string;
+        balance:
+          | {
+              denom: string;
+              amount: string;
+            }
+          | string;
+      }
+    ];
+  }
+];
+
+type ResultRedelegations = [
+  {
+    delegator_address: string;
+    validator_src_address: string;
+    validator_dst_address: string;
+    entries: [
+      {
+        initial_balance: string;
+        balance:
+          | {
+              denom: string;
+              amount: string;
+            }
+          | string;
+      }
+    ];
+  }
+];
 
 export class AccountStore {
   @observable
@@ -34,6 +91,10 @@ export class AccountStore {
   // Assets that exist on the chain itself.
   @observable
   public assets!: Coin[];
+
+  // Asset that is staked or being unbonded or being redelegated.
+  @observable
+  public stakedAsset: Coin | undefined;
 
   @observable
   public keyRingStatus!: KeyRingStatus;
@@ -81,7 +142,7 @@ export class AccountStore {
 
     // Fetch the assets by interval.
     this.lastFetchingIntervalId = setInterval(() => {
-      this.fetchAssets();
+      this.fetchAssets(false);
     }, AutoFetchingAssetsInterval);
   }
 
@@ -137,6 +198,17 @@ export class AccountStore {
       this.assets = await task(
         this.loadAssetsFromStorage(this.chainInfo.chainId, this.bech32Address)
       );
+      // Load the staked assets from storage.
+      const stakedAsset = await task(
+        this.loadAssetsFromStorage(
+          this.chainInfo.chainId,
+          this.bech32Address,
+          true
+        )
+      );
+      if (stakedAsset.length > 0) {
+        this.stakedAsset = stakedAsset[0];
+      }
     }
   }
 
@@ -144,7 +216,7 @@ export class AccountStore {
    This should be called when isAddressFetching is false.
    */
   @actionAsync
-  private async fetchAssets() {
+  private async fetchAssets(fetchStakedAsset: boolean = true) {
     if (this.isAddressFetching) {
       throw new Error("Address is fetching");
     }
@@ -192,6 +264,88 @@ export class AccountStore {
           this.assets
         )
       );
+
+      if (fetchStakedAsset) {
+        const restInstance = Axios.create({
+          ...this.chainInfo.restConfig,
+          ...{
+            baseURL: this.chainInfo.rest,
+            cancelToken: this.lastFetchingCancleToken?.token
+          }
+        });
+
+        const staked: Coin = new Coin(
+          this.chainInfo.stakeCurrency.coinMinimalDenom,
+          0
+        );
+
+        const delegations = await task(
+          restInstance.get<RestResult<ResultDelegations>>(
+            `/staking/delegators/${this.bech32Address}/delegations`
+          )
+        );
+        if (delegations.status === 200) {
+          for (const delegation of delegations.data.result ?? []) {
+            staked.amount = staked.amount.add(
+              new Int(
+                typeof delegation.balance === "string"
+                  ? delegation.balance
+                  : delegation.balance.amount
+              )
+            );
+          }
+        }
+
+        const unbondings = await task(
+          restInstance.get<RestResult<ResultUnbondings>>(
+            `/staking/delegators/${this.bech32Address}/unbonding_delegations`
+          )
+        );
+        if (unbondings.status === 200) {
+          for (const unbonding of unbondings.data.result ?? []) {
+            for (const entry of unbonding.entries ?? []) {
+              staked.amount = staked.amount.add(
+                new Int(
+                  typeof entry.balance === "string"
+                    ? entry.balance
+                    : entry.balance.amount
+                )
+              );
+            }
+          }
+        }
+
+        // Why only this query uses the params?
+        const redelegations = await task(
+          restInstance.get<RestResult<ResultRedelegations>>(
+            `/staking/redelegations?delegator=${this.bech32Address}`
+          )
+        );
+        if (redelegations.status === 200) {
+          for (const redelegation of redelegations.data.result ?? []) {
+            for (const entry of redelegation.entries ?? []) {
+              staked.amount = staked.amount.add(
+                new Int(
+                  typeof entry.balance === "string"
+                    ? entry.balance
+                    : entry.balance.amount
+                )
+              );
+            }
+          }
+        }
+
+        this.stakedAsset = staked;
+
+        await task(
+          this.saveAssetsToStorage(
+            this.chainInfo.chainId,
+            this.bech32Address,
+            [staked],
+            true
+          )
+        );
+      }
     } catch (e) {
       if (!Axios.isCancel(e)) {
         if (
@@ -201,6 +355,7 @@ export class AccountStore {
         } else {
           // If account doesn't exist
           this.assets = [];
+          this.stakedAsset = undefined;
         }
         // Though error occurs, don't clear last fetched assets.
         // Show last fetched assets with warning that error occured.
@@ -216,7 +371,8 @@ export class AccountStore {
   private async saveAssetsToStorage(
     chainId: string,
     bech32Address: string,
-    assets: Coin[]
+    assets: Coin[],
+    staked: boolean = false
   ): Promise<void> {
     const coinStrs: string[] = [];
     for (const coin of assets) {
@@ -227,7 +383,9 @@ export class AccountStore {
 
     await browser.storage.local.set({
       assets: Object.assign({}, store, {
-        [`${chainId}-${bech32Address}`]: coinStrs.join(",")
+        [`${chainId}-${bech32Address}${
+          staked ? "-staked" : ""
+        }`]: coinStrs.join(",")
       })
     });
   }
@@ -235,14 +393,16 @@ export class AccountStore {
   // Not action
   private async loadAssetsFromStorage(
     chainId: string,
-    bech32Address: string
+    bech32Address: string,
+    staked: boolean = false
   ): Promise<Coin[]> {
     const items = await browser.storage.local.get();
 
     const coins: Coin[] = [];
     const assets = items?.assets;
     if (assets) {
-      const coinsStr = assets[`${chainId}-${bech32Address}`];
+      const coinsStr =
+        assets[`${chainId}-${bech32Address}${staked ? "-staked" : ""}`];
       if (coinsStr) {
         const coinStrs = coinsStr.split(",");
         for (const coinStr of coinStrs) {
