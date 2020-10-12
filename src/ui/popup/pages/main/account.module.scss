@@ -1,3 +1,13 @@
+.container-name {
+  display: flex;
+  flex-direction: row;
+}
+
+.name {
+  font-size: 20px;
+  color: #32325d;
+}
+
 .container-account {
   display: flex;
   flex-direction: row;

@@ -10,7 +10,7 @@ import { useNotification } from "../../../components/notification";
 import { useIntl } from "react-intl";
 
 export const AccountView: FunctionComponent = observer(() => {
-  const { accountStore } = useStore();
+  const { accountStore, keyRingStore } = useStore();
   const intl = useIntl();
 
   const notification = useNotification();
@@ -32,15 +32,34 @@ export const AccountView: FunctionComponent = observer(() => {
     });
   }, [notification, accountStore.bech32Address]);
 
+  const selectedKeyStore = keyRingStore.multiKeyStoreInfo.find(
+    keyStore => keyStore.selected
+  );
+
+  const selectedKeyStoreName =
+    selectedKeyStore?.meta?.name ??
+    intl.formatMessage({
+      id: "setting.keyring.unnamed-account"
+    });
+
   return (
-    <div className={styleAccount.containerAccount}>
-      <div style={{ flex: 1 }} />
-      <div className={styleAccount.address} onClick={copyAddress}>
-        <Address maxCharacters={22} lineBreakBeforePrefix={false}>
-          {accountStore.isAddressFetching ? "..." : accountStore.bech32Address}
-        </Address>
+    <div>
+      <div className={styleAccount.containerName}>
+        <div style={{ flex: 1 }} />
+        <div className={styleAccount.name}>{selectedKeyStoreName}</div>
+        <div style={{ flex: 1 }} />
       </div>
-      <div style={{ flex: 1 }} />
+      <div className={styleAccount.containerAccount}>
+        <div style={{ flex: 1 }} />
+        <div className={styleAccount.address} onClick={copyAddress}>
+          <Address maxCharacters={22} lineBreakBeforePrefix={false}>
+            {accountStore.isAddressFetching
+              ? "..."
+              : accountStore.bech32Address}
+          </Address>
+        </div>
+        <div style={{ flex: 1 }} />
+      </div>
     </div>
   );
 });
