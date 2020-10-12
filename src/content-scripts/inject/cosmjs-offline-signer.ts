@@ -2,9 +2,12 @@ import {
   Coin,
   encodeSecp256k1Signature,
   OfflineSigner,
-  serializeSignDoc
+  serializeSignDoc,
+  AccountData,
+  SignResponse,
+  StdSignDoc
 } from "@cosmjs/launchpad";
-import { AccountData, SignResponse } from "@cosmjs/launchpad/types/signer";
+import { toHex, fromHex } from "@cosmjs/encoding";
 import {
   GetKeyMsg,
   RequestSignMsg,
@@ -12,7 +15,6 @@ import {
 } from "../../background/keyring";
 import { sendMessage } from "../../common/message/send";
 import { BACKGROUND_PORT } from "../../common/message/constant";
-import { StdSignDoc } from "@cosmjs/launchpad/types/encoding";
 import { feeFromString } from "../../background/keyring/utils";
 
 const Buffer = require("buffer/").Buffer;
@@ -28,7 +30,7 @@ export class CosmJSOfflineSigner implements OfflineSigner {
         address: key.bech32Address,
         // Currently, only secp256k1 is supported.
         algo: "secp256k1",
-        pubkey: Buffer.from(key.pubKeyHex)
+        pubkey: fromHex(key.pubKeyHex)
       }
     ];
   }
@@ -106,7 +108,7 @@ export class CosmJSOfflineSigner implements OfflineSigner {
       signDoc.chain_id,
       id,
       signerAddress,
-      Buffer.from(serializeSignDoc(newSignDoc), "utf8").toString("hex"),
+      toHex(serializeSignDoc(newSignDoc)),
       true
     );
     const signature = await sendMessage(BACKGROUND_PORT, requestSignMsg);
@@ -115,8 +117,8 @@ export class CosmJSOfflineSigner implements OfflineSigner {
       signed: newSignDoc,
       // Currently, only secp256k1 is supported.
       signature: encodeSecp256k1Signature(
-        Buffer.from(key.pubKeyHex, "hex"),
-        Buffer.from(signature.signatureHex, "hex")
+        fromHex(key.pubKeyHex),
+        fromHex(signature.signatureHex)
       )
     };
   }
