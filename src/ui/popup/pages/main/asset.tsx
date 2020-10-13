@@ -15,9 +15,88 @@ import {
 import { useLanguage } from "../../language";
 import { DecUtils } from "../../../../common/dec-utils";
 
-const LazyDoughnut = React.lazy(() =>
-  import("react-chartjs-2").then(module => ({ default: module.Doughnut }))
-);
+const LazyDoughnut = React.lazy(async () => {
+  const module = await import("react-chartjs-2");
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  const chartJS = module.Chart as any;
+
+  chartJS.pluginService.register({
+    beforeDraw: function(chart: any): void {
+      const round = {
+        x: (chart.chartArea.left + chart.chartArea.right) / 2,
+        y: (chart.chartArea.top + chart.chartArea.bottom) / 2,
+        radius: (chart.outerRadius + chart.innerRadius) / 2,
+        thickness: (chart.outerRadius - chart.innerRadius) / 2
+      };
+
+      const ctx = chart.chart.ctx;
+
+      // Draw the background circle.
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(round.x, round.y, round.radius, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.lineWidth = round.thickness * 2;
+      ctx.strokeStyle = "#f4f5f7";
+      ctx.stroke();
+      ctx.restore();
+    },
+    afterDraw: function(chart: any): void {
+      const data = chart.getDatasetMeta(0).data;
+
+      const round = {
+        x: (chart.chartArea.left + chart.chartArea.right) / 2,
+        y: (chart.chartArea.top + chart.chartArea.bottom) / 2,
+        radius: (chart.outerRadius + chart.innerRadius) / 2,
+        thickness: (chart.outerRadius - chart.innerRadius) / 2
+      };
+
+      const ctx = chart.chart.ctx;
+
+      const drawCircleEnd = (arc: any) => {
+        const startAngle = Math.PI / 2 - arc._view.startAngle;
+        const endAngle = Math.PI / 2 - arc._view.endAngle;
+
+        if (
+          Math.abs(startAngle) > (Math.PI / 180) * 3 ||
+          Math.abs(endAngle) > (Math.PI / 180) * 3
+        ) {
+          ctx.save();
+          ctx.translate(round.x, round.y);
+          ctx.fillStyle = arc._model.backgroundColor;
+          ctx.beginPath();
+          ctx.arc(
+            round.radius * Math.sin(startAngle),
+            round.radius * Math.cos(startAngle),
+            round.thickness,
+            0,
+            2 * Math.PI
+          );
+          ctx.arc(
+            round.radius * Math.sin(endAngle),
+            round.radius * Math.cos(endAngle),
+            round.thickness,
+            0,
+            2 * Math.PI
+          );
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+      };
+
+      if (data.length > 0) {
+        for (const arc of data) {
+          drawCircleEnd(arc);
+        }
+      }
+    }
+  });
+
+  return { default: module.Doughnut };
+});
 import { Int } from "@chainapsis/cosmosjs/common/int";
 import { Price } from "../../stores/price";
 
@@ -54,7 +133,8 @@ export const AssetStakedChartView: FunctionComponent<{
               datasets: [
                 {
                   data,
-                  backgroundColor: ["#5e72e4", "#11cdef"]
+                  backgroundColor: ["#5e72e4", "#11cdef"],
+                  borderWidth: [0, 0]
                 }
               ],
 
@@ -111,7 +191,7 @@ export const AssetStakedChartView: FunctionComponent<{
           </div>
         </div>
       </div>
-      <div>
+      <div style={{ marginTop: "12px" }}>
         <div
           style={{
             display: "flex",
