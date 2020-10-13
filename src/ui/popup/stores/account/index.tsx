@@ -208,6 +208,8 @@ export class AccountStore {
       );
       if (stakedAsset.length > 0) {
         this.stakedAsset = stakedAsset[0];
+      } else {
+        this.stakedAsset = undefined;
       }
     }
   }
