@@ -45,3 +45,44 @@
     min-width: 140px;
   }
 }
+
+.container-chart {
+  position: relative;
+
+  .center-text {
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    .big {
+      font-size: 13px;
+      color: #32325d;
+    }
+
+    .small {
+      font-size: 20px;
+      color: #32325d;
+      font-weight: bold;
+    }
+  }
+
+  canvas {
+    position: relative;
+  }
+}
+
+.legend {
+  display: flex;
+  justify-content: space-between;
+
+  .label {
+    letter-spacing: -0.3px;
+  }
+
+  .value {
+    letter-spacing: -0.3px;
+    font-weight: bold;
+  }
+}

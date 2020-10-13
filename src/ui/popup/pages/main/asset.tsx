@@ -126,7 +126,27 @@ export const AssetStakedChartView: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <div style={{ position: "relative" }}>
+      <div className={styleAsset.containerChart}>
+        <div className={styleAsset.centerText}>
+          <div className={styleAsset.big}>Total Balance</div>
+          <div className={styleAsset.small}>
+            {fiat && !fiat.value.equals(new Dec(0))
+              ? fiatCurrency.symbol +
+                DecUtils.trim(
+                  fiatCurrency.parse(
+                    parseFloat(fiat.value.mul(totalDec).toString())
+                  )
+                )
+              : hasCoinGeckoId
+              ? "?"
+              : `${CoinUtils.shrinkDecimals(
+                  available.add(staked),
+                  stakeCurrency.coinDecimals,
+                  0,
+                  3
+                )} ${stakeCurrency.coinDenom.toUpperCase()}`}
+          </div>
+        </div>
         <React.Suspense fallback={<div />}>
           <LazyDoughnut
             data={{
@@ -149,56 +169,10 @@ export const AssetStakedChartView: FunctionComponent<{
             }}
           />
         </React.Suspense>
-        <div
-          style={{
-            position: "absolute",
-            textAlign: "center",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)"
-          }}
-        >
-          <div
-            style={{
-              fontSize: "13px",
-              color: "#32325d"
-            }}
-          >
-            Total Balance
-          </div>
-          <div
-            style={{
-              fontSize: "20px",
-              color: "#32325d",
-              fontWeight: "bold"
-            }}
-          >
-            {fiat && !fiat.value.equals(new Dec(0))
-              ? fiatCurrency.symbol +
-                DecUtils.trim(
-                  fiatCurrency.parse(
-                    parseFloat(fiat.value.mul(totalDec).toString())
-                  )
-                )
-              : hasCoinGeckoId
-              ? "?"
-              : `${CoinUtils.shrinkDecimals(
-                  available.add(staked),
-                  stakeCurrency.coinDecimals,
-                  0,
-                  3
-                )} ${stakeCurrency.coinDenom.toUpperCase()}`}
-          </div>
-        </div>
       </div>
       <div style={{ marginTop: "12px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between"
-          }}
-        >
-          <div style={{ color: "#5e72e4", letterSpacing: "-0.3px" }}>
+        <div className={styleAsset.legend}>
+          <div className={styleAsset.label} style={{ color: "#5e72e4" }}>
             <span className="badge-dot badge badge-secondary">
               <i className="bg-primary" />
             </span>
@@ -206,10 +180,9 @@ export const AssetStakedChartView: FunctionComponent<{
           </div>
           <div style={{ minWidth: "12px" }} />
           <div
+            className={styleAsset.value}
             style={{
-              color: "#525f7f",
-              letterSpacing: "-0.3px",
-              fontWeight: "bold"
+              color: "#525f7f"
             }}
           >{`${CoinUtils.shrinkDecimals(
             available,
@@ -218,13 +191,8 @@ export const AssetStakedChartView: FunctionComponent<{
             4
           )} ${stakeCurrency.coinDenom.toUpperCase()}`}</div>
         </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between"
-          }}
-        >
-          <div style={{ color: "#11cdef", letterSpacing: "-0.3px" }}>
+        <div className={styleAsset.legend}>
+          <div className={styleAsset.label} style={{ color: "#11cdef" }}>
             <span className="badge-dot badge badge-secondary">
               <i className="bg-info" />
             </span>
@@ -232,10 +200,9 @@ export const AssetStakedChartView: FunctionComponent<{
           </div>
           <div style={{ minWidth: "12px" }} />
           <div
+            className={styleAsset.value}
             style={{
-              color: "#525f7f",
-              letterSpacing: "-0.3px",
-              fontWeight: "bold"
+              color: "#525f7f"
             }}
           >{`${CoinUtils.shrinkDecimals(
             staked,
