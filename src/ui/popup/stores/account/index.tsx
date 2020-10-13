@@ -53,25 +53,6 @@ type ResultUnbondings = [
   }
 ];
 
-type ResultRedelegations = [
-  {
-    delegator_address: string;
-    validator_src_address: string;
-    validator_dst_address: string;
-    entries: [
-      {
-        initial_balance: string;
-        balance:
-          | {
-              denom: string;
-              amount: string;
-            }
-          | string;
-      }
-    ];
-  }
-];
-
 export class AccountStore {
   @observable
   private chainInfo!: ChainInfo;
@@ -306,26 +287,6 @@ export class AccountStore {
         if (unbondings.status === 200) {
           for (const unbonding of unbondings.data.result ?? []) {
             for (const entry of unbonding.entries ?? []) {
-              staked.amount = staked.amount.add(
-                new Int(
-                  typeof entry.balance === "string"
-                    ? entry.balance
-                    : entry.balance.amount
-                )
-              );
-            }
-          }
-        }
-
-        // Why only this query uses the params?
-        const redelegations = await task(
-          restInstance.get<RestResult<ResultRedelegations>>(
-            `/staking/redelegations?delegator=${this.bech32Address}`
-          )
-        );
-        if (redelegations.status === 200) {
-          for (const redelegation of redelegations.data.result ?? []) {
-            for (const entry of redelegation.entries ?? []) {
               staked.amount = staked.amount.add(
                 new Int(
                   typeof entry.balance === "string"
