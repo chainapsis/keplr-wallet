@@ -16,7 +16,9 @@ import { useLanguage } from "../../language";
 import { DecUtils } from "../../../../common/dec-utils";
 
 const LazyDoughnut = React.lazy(async () => {
-  const module = await import("react-chartjs-2");
+  const module = await import(
+    /* webpackChunkName: "reactChartJS" */ "react-chartjs-2"
+  );
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore

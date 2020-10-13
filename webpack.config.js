@@ -103,7 +103,7 @@ const extensionConfig = (env, args) => {
       new HtmlWebpackPlugin({
         template: "./src/popup.html",
         filename: "popup.html",
-        chunks: ["popup"]
+        excludeChunks: ["background", "contentScripts", "injectedScript"]
       }),
       new WriteFilePlugin(),
       new webpack.EnvironmentPlugin(["NODE_ENV"]),
