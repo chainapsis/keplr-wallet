@@ -226,9 +226,31 @@ export const AssetStakedChartView: FunctionComponent<{
               tooltips: {
                 callbacks: {
                   // Don't show the label.
-                  label: item => {
+                  label: (item, chartData) => {
+                    let total = 0;
+                    let data: number[] = [];
+                    if (chartData.datasets?.length) {
+                      data = (chartData.datasets[0].data as number[]) ?? [];
+                    }
+                    total = data.reduce((a, b) => a + b, 0) ?? 0;
+
+                    let suffix = "";
+                    if (total && item.index != null && data[item.index]) {
+                      let ratioDec = new Dec(data[item.index].toString())
+                        .quo(new Dec(total.toString()))
+                        .mul(DecUtils.getPrecisionDec(3));
+
+                      if (item.index > 0) {
+                        ratioDec = new Dec(ratioDec.roundUp());
+                      }
+
+                      suffix += ` (${ratioDec
+                        .quo(DecUtils.getPrecisionDec(1))
+                        .toString(1)}%)`;
+                    }
+
                     if (item.index != null) {
-                      return labels[item.index];
+                      return " " + labels[item.index] + suffix;
                     }
                     return "Unexpected error";
                   }
