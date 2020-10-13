@@ -124,6 +124,37 @@ export const AssetStakedChartView: FunctionComponent<{
       : parseFloat(stakedDec.toString())
   ];
 
+  // Show the chart's label as coin if price is not fetched.
+  let labels: string[] = [
+    `${CoinUtils.shrinkDecimals(
+      available,
+      stakeCurrency.coinDecimals,
+      0,
+      6
+    )} ${stakeCurrency.coinDenom.toUpperCase()}`,
+    `${CoinUtils.shrinkDecimals(
+      staked,
+      stakeCurrency.coinDecimals,
+      0,
+      6
+    )} ${stakeCurrency.coinDenom.toUpperCase()}`
+  ];
+  // Else if price is fetched, show the label as price.
+  if (hasCoinGeckoId && fiat && !fiat.value.equals(new Dec(0))) {
+    labels = [
+      fiatCurrency.symbol +
+        DecUtils.trim(
+          fiatCurrency.parse(
+            parseFloat(fiat.value.mul(availableDec).toString())
+          )
+        ),
+      fiatCurrency.symbol +
+        DecUtils.trim(
+          fiatCurrency.parse(parseFloat(fiat.value.mul(stakedDec).toString()))
+        )
+    ];
+  }
+
   return (
     <React.Fragment>
       <div className={styleAsset.containerChart}>
@@ -165,6 +196,17 @@ export const AssetStakedChartView: FunctionComponent<{
               cutoutPercentage: 85,
               legend: {
                 display: false
+              },
+              tooltips: {
+                callbacks: {
+                  // Don't show the label.
+                  label: item => {
+                    if (item.index != null) {
+                      return labels[item.index];
+                    }
+                    return "Unexpected error";
+                  }
+                }
               }
             }}
           />
