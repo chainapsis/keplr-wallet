@@ -45,7 +45,7 @@ const LazyDoughnut = React.lazy(async () => {
       ctx.stroke();
       ctx.restore();
     },
-    afterDraw: function(chart: any): void {
+    beforeTooltipDraw: function(chart: any): void {
       const data = chart.getDatasetMeta(0).data;
 
       const round = {
