@@ -114,6 +114,7 @@ const LazyDoughnut = React.lazy(async () => {
 import { Int } from "@chainapsis/cosmosjs/common/int";
 import { Price } from "../../stores/price";
 import { ToolTip } from "../../../components/tooltip";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const AssetStakedChartView: FunctionComponent<{
   fiat: Price | undefined;
@@ -130,6 +131,8 @@ export const AssetStakedChartView: FunctionComponent<{
   staked,
   loadingIndicator
 }) => {
+  const intl = useIntl();
+
   const hasCoinGeckoId = stakeCurrency.coinGeckoId != null;
 
   const availableDec = new Dec(available, stakeCurrency.coinDecimals);
@@ -182,7 +185,9 @@ export const AssetStakedChartView: FunctionComponent<{
     <React.Fragment>
       <div className={styleAsset.containerChart}>
         <div className={styleAsset.centerText}>
-          <div className={styleAsset.big}>Total Balance</div>
+          <div className={styleAsset.big}>
+            <FormattedMessage id="main.account.chart.total-balance" />
+          </div>
           <div className={styleAsset.small}>
             {fiat && !fiat.value.equals(new Dec(0))
               ? fiatCurrency.symbol +
@@ -215,7 +220,14 @@ export const AssetStakedChartView: FunctionComponent<{
                 }
               ],
 
-              labels: ["Available", "Staked"]
+              labels: [
+                intl.formatMessage({
+                  id: "main.account.chart.available-balance"
+                }),
+                intl.formatMessage({
+                  id: "main.account.chart.staked-balance"
+                })
+              ]
             }}
             options={{
               rotation: 0.5 * Math.PI,
@@ -260,35 +272,37 @@ export const AssetStakedChartView: FunctionComponent<{
           />
         </React.Suspense>
       </div>
-      <div style={{ marginTop: "12px" }}>
+      <div style={{ marginTop: "12px", width: "100%" }}>
         <div className={styleAsset.legend}>
           <div className={styleAsset.label} style={{ color: "#5e72e4" }}>
             <span className="badge-dot badge badge-secondary">
               <i className="bg-primary" />
             </span>
-            Available
+            <FormattedMessage id="main.account.chart.available-balance" />
           </div>
-          <div style={{ minWidth: "12px" }} />
+          <div style={{ minWidth: "16px" }} />
           <div
             className={styleAsset.value}
             style={{
               color: "#525f7f"
             }}
-          >{`${CoinUtils.shrinkDecimals(
-            available,
-            stakeCurrency.coinDecimals,
-            0,
-            4
-          )} ${stakeCurrency.coinDenom.toUpperCase()}`}</div>
+          >
+            {`${CoinUtils.shrinkDecimals(
+              available,
+              stakeCurrency.coinDecimals,
+              0,
+              4
+            )} ${stakeCurrency.coinDenom.toUpperCase()}`}
+          </div>
         </div>
         <div className={styleAsset.legend}>
           <div className={styleAsset.label} style={{ color: "#11cdef" }}>
             <span className="badge-dot badge badge-secondary">
               <i className="bg-info" />
             </span>
-            Staked
+            <FormattedMessage id="main.account.chart.staked-balance" />
           </div>
-          <div style={{ minWidth: "12px" }} />
+          <div style={{ minWidth: "16px" }} />
           <div
             className={styleAsset.value}
             style={{

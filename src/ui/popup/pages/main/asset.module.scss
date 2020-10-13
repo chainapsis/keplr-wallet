@@ -75,14 +75,19 @@
 
 .legend {
   display: flex;
-  justify-content: space-between;
+  width: 100%;
 
   .label {
     letter-spacing: -0.3px;
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
   }
 
   .value {
     letter-spacing: -0.3px;
+    flex: 1;
+    display: flex;
     font-weight: bold;
   }
 }
