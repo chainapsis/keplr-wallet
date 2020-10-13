@@ -15,7 +15,9 @@ import {
 import { useLanguage } from "../../language";
 import { DecUtils } from "../../../../common/dec-utils";
 
-import { Doughnut } from "react-chartjs-2";
+const LazyDoughnut = React.lazy(() =>
+  import("react-chartjs-2").then(module => ({ default: module.Doughnut }))
+);
 import { Int } from "@chainapsis/cosmosjs/common/int";
 import { Price } from "../../stores/price";
 
@@ -46,25 +48,27 @@ export const AssetStakedChartView: FunctionComponent<{
   return (
     <React.Fragment>
       <div style={{ position: "relative" }}>
-        <Doughnut
-          data={{
-            datasets: [
-              {
-                data,
-                backgroundColor: ["#5e72e4", "#11cdef"]
-              }
-            ],
+        <React.Suspense fallback={<div />}>
+          <LazyDoughnut
+            data={{
+              datasets: [
+                {
+                  data,
+                  backgroundColor: ["#5e72e4", "#11cdef"]
+                }
+              ],
 
-            labels: ["Available", "Staked"]
-          }}
-          options={{
-            rotation: 0.5 * Math.PI,
-            cutoutPercentage: 85,
-            legend: {
-              display: false
-            }
-          }}
-        />
+              labels: ["Available", "Staked"]
+            }}
+            options={{
+              rotation: 0.5 * Math.PI,
+              cutoutPercentage: 85,
+              legend: {
+                display: false
+              }
+            }}
+          />
+        </React.Suspense>
         <div
           style={{
             position: "absolute",
