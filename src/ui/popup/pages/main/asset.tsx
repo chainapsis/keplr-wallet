@@ -99,6 +99,7 @@ const LazyDoughnut = React.lazy(async () => {
 });
 import { Int } from "@chainapsis/cosmosjs/common/int";
 import { Price } from "../../stores/price";
+import { ToolTip } from "../../../components/tooltip";
 
 export const AssetStakedChartView: FunctionComponent<{
   fiat: Price | undefined;
@@ -106,7 +107,15 @@ export const AssetStakedChartView: FunctionComponent<{
   stakeCurrency: Currency;
   available: Int;
   staked: Int;
-}> = ({ fiat, fiatCurrency, stakeCurrency, available, staked }) => {
+  loadingIndicator?: React.ReactElement;
+}> = ({
+  fiat,
+  fiatCurrency,
+  stakeCurrency,
+  available,
+  staked,
+  loadingIndicator
+}) => {
   const hasCoinGeckoId = stakeCurrency.coinGeckoId != null;
 
   const availableDec = new Dec(available, stakeCurrency.coinDecimals);
@@ -177,6 +186,9 @@ export const AssetStakedChartView: FunctionComponent<{
                   3
                 )} ${stakeCurrency.coinDenom.toUpperCase()}`}
           </div>
+          {loadingIndicator ? (
+            <div className={styleAsset.indicatorIcon}>{loadingIndicator}</div>
+          ) : null}
         </div>
         <React.Suspense fallback={<div />}>
           <LazyDoughnut
@@ -295,64 +307,34 @@ export const AssetView: FunctionComponent = observer(() => {
 
   return (
     <div className={styleAsset.containerAsset}>
-      {/*<div className={styleAsset.title}>
-        <FormattedMessage id="main.account.message.available-balance" />
-      </div>
-      <div className={styleAsset.fiat}>
-        {fiat && !fiat.value.equals(new Dec(0))
-          ? fiatCurrency.symbol +
-            DecUtils.trim(
-              fiatCurrency.parse(
-                parseFloat(
-                  fiat.value
-                    .mul(new Dec(coinAmount, stakeCurrency.coinDecimals))
-                    .toString()
-                )
-              )
-            )
-          : hasCoinGeckoId
-          ? "?"
-          : "-"}
-      </div>*/}
       <AssetStakedChartView
         fiat={fiat}
         fiatCurrency={fiatCurrency}
         stakeCurrency={stakeCurrency}
         available={availableAmount}
         staked={stakedAmount}
+        loadingIndicator={
+          <React.Fragment>
+            {accountStore.isAssetFetching ? (
+              <i className="fas fa-spinner fa-spin" />
+            ) : accountStore.lastAssetFetchingError ? (
+              <ToolTip
+                tooltip={
+                  accountStore.lastAssetFetchingError.message ??
+                  accountStore.lastAssetFetchingError.toString()
+                }
+                theme="dark"
+                trigger="hover"
+                options={{
+                  placement: "top"
+                }}
+              >
+                <i className="fas fa-exclamation-triangle text-danger" />
+              </ToolTip>
+            ) : null}
+          </React.Fragment>
+        }
       />
-      {/*<div className={styleAsset.amount}>
-        <div>
-          {!(accountStore.assets.length === 0)
-            ? CoinUtils.shrinkDecimals(
-                coinAmount,
-                stakeCurrency.coinDecimals,
-                0,
-                6
-              )
-            : "0"}{" "}
-          {stakeCurrency.coinDenom}
-        </div>
-        <div className={styleAsset.indicatorIcon}>
-          {accountStore.isAssetFetching ? (
-            <i className="fas fa-spinner fa-spin" />
-          ) : accountStore.lastAssetFetchingError ? (
-            <ToolTip
-              tooltip={
-                accountStore.lastAssetFetchingError.message ??
-                accountStore.lastAssetFetchingError.toString()
-              }
-              theme="dark"
-              trigger="hover"
-              options={{
-                placement: "top"
-              }}
-            >
-              <i className="fas fa-exclamation-triangle text-danger" />
-            </ToolTip>
-          ) : null}
-        </div>
-      </div>*/}
     </div>
   );
 });

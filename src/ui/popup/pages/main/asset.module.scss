@@ -35,11 +35,6 @@
     color: #8f8f8f;
   }
 
-  .indicator-icon {
-    position: absolute;
-    right: -26px;
-  }
-
   :global(.popper) {
     font-size: 14px;
     min-width: 140px;
@@ -65,6 +60,11 @@
       font-size: 20px;
       color: #32325d;
       font-weight: bold;
+    }
+
+    .indicator-icon {
+      position: absolute;
+      width: 100%;
     }
   }
 
