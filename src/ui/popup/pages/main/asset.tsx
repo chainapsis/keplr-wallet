@@ -85,7 +85,8 @@ export const AssetStakedChartView: FunctionComponent<{
           <div
             style={{
               fontSize: "20px",
-              color: "#32325d"
+              color: "#32325d",
+              fontWeight: "bold"
             }}
           >
             {fiat && !fiat.value.equals(new Dec(0))
@@ -121,7 +122,11 @@ export const AssetStakedChartView: FunctionComponent<{
           </div>
           <div style={{ minWidth: "12px" }} />
           <div
-            style={{ color: "#525f7f", letterSpacing: "-0.3px" }}
+            style={{
+              color: "#525f7f",
+              letterSpacing: "-0.3px",
+              fontWeight: "bold"
+            }}
           >{`${CoinUtils.shrinkDecimals(
             available,
             stakeCurrency.coinDecimals,
@@ -143,7 +148,11 @@ export const AssetStakedChartView: FunctionComponent<{
           </div>
           <div style={{ minWidth: "12px" }} />
           <div
-            style={{ color: "#525f7f", letterSpacing: "-0.3px" }}
+            style={{
+              color: "#525f7f",
+              letterSpacing: "-0.3px",
+              fontWeight: "bold"
+            }}
           >{`${CoinUtils.shrinkDecimals(
             staked,
             stakeCurrency.coinDecimals,
