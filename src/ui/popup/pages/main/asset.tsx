@@ -55,42 +55,54 @@ const LazyDoughnut = React.lazy(async () => {
 
       const ctx = chart.chart.ctx;
 
-      const drawCircleEnd = (arc: any) => {
-        const startAngle = Math.PI / 2 - arc._view.startAngle;
-        const endAngle = Math.PI / 2 - arc._view.endAngle;
+      const drawCircle = (angle: number, color: string) => {
+        ctx.save();
+        ctx.translate(round.x, round.y);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(
+          round.radius * Math.sin(angle),
+          round.radius * Math.cos(angle),
+          round.thickness,
+          0,
+          2 * Math.PI
+        );
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      };
+
+      const drawCircleEndEachOther = (arc1: any, arc2: any) => {
+        const startAngle1 = Math.PI / 2 - arc1._view.startAngle;
+        const endAngle1 = Math.PI / 2 - arc1._view.endAngle;
+
+        const startAngle2 = Math.PI / 2 - arc2._view.startAngle;
+        // Nomalize
+        const endAngle2 = Math.atan2(
+          Math.sin(Math.PI / 2 - arc2._view.endAngle),
+          Math.cos(Math.PI / 2 - arc2._view.endAngle)
+        );
+
+        // If the end of the first arc and the end of the second arc overlap,
+        // Don't draw the first arc's end because it overlaps and looks weird.
+        if (Math.abs(startAngle1 - endAngle2) > (Math.PI / 180) * 3) {
+          drawCircle(startAngle1, arc1._view.backgroundColor);
+        }
+        if (Math.abs(endAngle1 - startAngle2) > (Math.PI / 180) * 3) {
+          drawCircle(endAngle1, arc1._view.backgroundColor);
+        }
 
         if (
-          Math.abs(startAngle) > (Math.PI / 180) * 3 ||
-          Math.abs(endAngle) > (Math.PI / 180) * 3
+          Math.abs(startAngle2) > (Math.PI / 180) * 3 ||
+          Math.abs(endAngle2) > (Math.PI / 180) * 3
         ) {
-          ctx.save();
-          ctx.translate(round.x, round.y);
-          ctx.fillStyle = arc._model.backgroundColor;
-          ctx.beginPath();
-          ctx.arc(
-            round.radius * Math.sin(startAngle),
-            round.radius * Math.cos(startAngle),
-            round.thickness,
-            0,
-            2 * Math.PI
-          );
-          ctx.arc(
-            round.radius * Math.sin(endAngle),
-            round.radius * Math.cos(endAngle),
-            round.thickness,
-            0,
-            2 * Math.PI
-          );
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
+          drawCircle(startAngle2, arc2._view.backgroundColor);
+          drawCircle(endAngle2, arc2._view.backgroundColor);
         }
       };
 
-      if (data.length > 0) {
-        for (const arc of data) {
-          drawCircleEnd(arc);
-        }
+      if (data.length == 2) {
+        drawCircleEndEachOther(data[0], data[1]);
       }
     }
   });
@@ -190,7 +202,7 @@ export const AssetStakedChartView: FunctionComponent<{
             <div className={styleAsset.indicatorIcon}>{loadingIndicator}</div>
           ) : null}
         </div>
-        <React.Suspense fallback={<div />}>
+        <React.Suspense fallback={<div style={{ height: "150px" }} />}>
           <LazyDoughnut
             data={{
               datasets: [
