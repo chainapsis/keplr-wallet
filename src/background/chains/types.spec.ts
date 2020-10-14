@@ -158,8 +158,11 @@ describe("Test chain info schema", () => {
       };
 
       currency = await CW20CurrencyShema.validateAsync(currency);
-      if (currency.coinMinimalDenom !== "cw20:utest") {
-        throw new Error("actual denom doens't start with `type:`");
+      if (
+        currency.coinMinimalDenom !==
+        "this should be validated in the keeper:utest"
+      ) {
+        throw new Error("actual denom doens't start with `contract-address:`");
       }
     });
 
@@ -168,13 +171,16 @@ describe("Test chain info schema", () => {
         type: "cw20",
         contractAddress: "this should be validated in the keeper",
         coinDenom: "TEST",
-        coinMinimalDenom: "cw20:utest",
+        coinMinimalDenom: "this should be validated in the keeper:utest",
         coinDecimals: 0
       };
 
       currency = await CW20CurrencyShema.validateAsync(currency);
-      if (currency.coinMinimalDenom !== "cw20:utest") {
-        throw new Error("actual denom doens't start with `type:`");
+      if (
+        currency.coinMinimalDenom !==
+        "this should be validated in the keeper:utest"
+      ) {
+        throw new Error("actual denom doens't start with `contract-address:`");
       }
     });
 
@@ -225,8 +231,11 @@ describe("Test chain info schema", () => {
       };
 
       const currencies = await AppCurrencyShemaTest.validateAsync([currency]);
-      if (currencies[0].coinMinimalDenom !== "cw20:utest") {
-        throw new Error("actual denom doens't start with `type:`");
+      if (
+        currencies[0].coinMinimalDenom !==
+        "this should be validated in the keeper:utest"
+      ) {
+        throw new Error("actual denom doens't start with `contract-address:`");
       }
 
       currency = {
@@ -426,8 +435,14 @@ describe("Test chain info schema", () => {
       ];
 
       chainInfo = await ChainInfoSchema.validateAsync(chainInfo);
-      if (chainInfo.currencies[1].coinMinimalDenom !== "cw20:utest") {
-        throw new Error("actual denom doens't start with `type:`");
+      if (chainInfo.currencies[0].coinMinimalDenom !== "utest") {
+        throw new Error("native currency's actual denom should not be changed");
+      }
+      if (
+        chainInfo.currencies[1].coinMinimalDenom !==
+        "this should be validated in the keeper:utest"
+      ) {
+        throw new Error("actual denom doens't start with `contract-address:`");
       }
     });
 

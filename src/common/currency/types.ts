@@ -15,7 +15,7 @@ export interface Currency {
 /**
  * The currency that is supported on the cosmwasm.
  * This should be the CW-20 that confirms the standard.
- * And, in this case, `coinMinimalDenom` must start with the type of currency such as "cw20:ukeplr".
+ * And, in this case, `coinMinimalDenom` must start with the contract address of currency such as "coral1vv6hruqu...3sfhwh:ukeplr".
  */
 export interface CW20Currency extends Currency {
   type: "cw20";

@@ -89,23 +89,23 @@ export const CurrencySchema = Joi.object<Currency>({
   coinGeckoId: Joi.string()
 });
 
-export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<
-  CW20Currency
->).keys({
-  type: Joi.string()
-    .equal("cw20")
-    .required(),
-  contractAddress: Joi.string().required(),
-  coinMinimalDenom: Joi.string()
-    .required()
-    .custom((value: string) => {
-      if (value.startsWith("cw20:")) {
-        return value;
-      } else {
-        return "cw20:" + value;
-      }
-    })
-});
+export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<CW20Currency>)
+  .keys({
+    type: Joi.string()
+      .equal("cw20")
+      .required(),
+    contractAddress: Joi.string().required(),
+    coinMinimalDenom: Joi.string().required()
+  })
+  .custom((value: CW20Currency) => {
+    if (value.coinMinimalDenom.startsWith(`${value.contractAddress}:`)) {
+      return value;
+    } else {
+      value.coinMinimalDenom =
+        `${value.contractAddress}:` + value.coinMinimalDenom;
+      return value;
+    }
+  });
 
 export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixAccAddr: Joi.string().required(),
