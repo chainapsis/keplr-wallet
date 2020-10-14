@@ -47,6 +47,11 @@ export interface ChainInfo {
   };
 
   /**
+   * Indicate the features supported by this chain. Ex) cosmwasm, secretwasm ...
+   */
+  readonly features?: string[];
+
+  /**
    * Shows whether the blockchain is in production phase or beta phase.
    * Major features such as staking and sending are supported on staging blockchains, but without guarantee.
    * If the blockchain is in an early stage, please set it as beta.
@@ -137,5 +142,6 @@ export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
     low: Joi.number().required(),
     average: Joi.number().required(),
     high: Joi.number().required()
-  })
+  }),
+  features: Joi.array().items(Joi.string())
 });
