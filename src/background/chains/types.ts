@@ -2,9 +2,9 @@ import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import { AxiosRequestConfig } from "axios";
-import { Currency } from "../../common/currency";
+import { AppCurrency, Currency, CW20Currency } from "../../common/currency";
 
-import Joi from "joi";
+import Joi, { ObjectSchema } from "joi";
 
 export interface ChainInfo {
   readonly rpc: string;
@@ -23,7 +23,7 @@ export interface ChainInfo {
   readonly bip44: BIP44;
   readonly bech32Config: Bech32Config;
 
-  readonly currencies: Currency[];
+  readonly currencies: AppCurrency[];
   /**
    * This indicates which coin or token can be used for fee to send transaction.
    * You can get actual currency information from Currencies.
@@ -89,6 +89,20 @@ export const CurrencySchema = Joi.object<Currency>({
   coinGeckoId: Joi.string()
 });
 
+export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<
+  CW20Currency
+>).keys({
+  type: Joi.string()
+    .equal("cw20")
+    .required(),
+  contractAddress: Joi.string().required()
+});
+
+export const AppCurrencyShema = Joi.any().valid(
+  CurrencySchema,
+  CW20CurrencyShema
+);
+
 export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixAccAddr: Joi.string().required(),
   bech32PrefixAccPub: Joi.string().required(),
@@ -130,7 +144,7 @@ export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
   bech32Config: Bech32ConfigSchema.required(),
   currencies: Joi.array()
     .min(1)
-    .items(CurrencySchema)
+    .items(AppCurrencyShema)
     .required(),
   feeCurrencies: Joi.array()
     .min(1)

@@ -1,12 +1,14 @@
 import assert from "assert";
 import "mocha";
 import {
+  AppCurrencyShema,
   Bech32ConfigSchema,
   ChainInfoSchema,
   CurrencySchema,
+  CW20CurrencyShema,
   SuggestingChainInfo
 } from "./types";
-import { Currency } from "../../common/currency";
+import { AppCurrency, Currency, CW20Currency } from "../../common/currency";
 import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
@@ -139,6 +141,98 @@ describe("Test chain info schema", () => {
       };
 
       await CurrencySchema.validateAsync(currency);
+    }, "Should throw error when coin decimal is not integer");
+
+    assert.doesNotReject(async () => {
+      const currency: CW20Currency = {
+        type: "cw20",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await CW20CurrencyShema.validateAsync(currency);
+    });
+
+    assert.rejects(async () => {
+      const currency: CW20Currency = {
+        // @ts-ignore
+        type: "?",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await CW20CurrencyShema.validateAsync(currency);
+    }, "Should throw error when type is not cw20");
+
+    assert.rejects(async () => {
+      // @ts-ignore
+      const currency: CW20Currency = {
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await CW20CurrencyShema.validateAsync(currency);
+    }, "Should throw error when type is missing");
+
+    assert.rejects(async () => {
+      // @ts-ignore
+      const currency: CW20Currency = {
+        type: "cw20",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await CW20CurrencyShema.validateAsync(currency);
+    }, "Should throw error when contract address is missing");
+
+    assert.doesNotReject(async () => {
+      let currency: AppCurrency = {
+        type: "cw20",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await AppCurrencyShema.validateAsync(currency);
+
+      currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 6,
+        coinGeckoId: "test"
+      };
+
+      await AppCurrencyShema.validateAsync(currency);
+    });
+
+    assert.rejects(async () => {
+      // @ts-ignore
+      const currency: CW20Currency = {
+        type: "cw20",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await AppCurrencyShema.validateAsync(currency);
+    }, "Should throw error when contract address is missing");
+
+    assert.rejects(async () => {
+      const currency: Currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 1.5
+      };
+
+      await AppCurrencyShema.validateAsync(currency);
     }, "Should throw error when coin decimal is not integer");
   });
 

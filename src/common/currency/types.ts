@@ -1,3 +1,6 @@
+/**
+ * The currency that is supported on the chain natively.
+ */
 export interface Currency {
   coinDenom: string;
   coinMinimalDenom: string;
@@ -8,6 +11,20 @@ export interface Currency {
    */
   coinGeckoId?: string;
 }
+
+/**
+ * The currency that is supported on the cosmwasm.
+ * This should be the CW-20 that confirms the standard.
+ */
+export interface CW20Currency extends Currency {
+  type: "cw20";
+  contractAddress: string;
+}
+
+/**
+ * Any type of currency that Kepler applications can support.
+ */
+export type AppCurrency = Currency | CW20Currency;
 
 export interface FiatCurrency {
   currency: string;
