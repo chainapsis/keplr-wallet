@@ -163,6 +163,21 @@ describe("Test chain info schema", () => {
       }
     });
 
+    await assert.doesNotReject(async () => {
+      let currency: CW20Currency = {
+        type: "cw20",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "cw20:utest",
+        coinDecimals: 0
+      };
+
+      currency = await CW20CurrencyShema.validateAsync(currency);
+      if (currency.coinMinimalDenom !== "cw20:utest") {
+        throw new Error("actual denom doens't start with `type:`");
+      }
+    });
+
     await assert.rejects(async () => {
       const currency: CW20Currency = {
         // @ts-ignore
