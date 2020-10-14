@@ -18,6 +18,8 @@ import { CoinUtils } from "../../../common/coin-utils";
 import { Int } from "@chainapsis/cosmosjs/common/int";
 import { observer } from "mobx-react";
 import { useStore } from "../../popup/stores";
+import { useLocation } from "react-router";
+import queryString from "query-string";
 
 const ErrorIdInsufficient = "insufficient";
 
@@ -37,7 +39,27 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
   ({ balanceText, className, label, errorTexts, disableAllBalance }) => {
     const { chainStore } = useStore();
 
+    const location = useLocation();
+    const query = queryString.parse(location.search);
+    const defaultDenom: string | undefined = query.defaultdenom as
+      | string
+      | undefined;
+    const [defaultCurrency, setDefaultCurrency] = useState<
+      Currency | undefined
+    >();
+    const [wasDefaultCurrencySet, setWasDefaultCurrencySet] = useState(false);
+
     const txState = useTxState();
+
+    useEffect(() => {
+      if (defaultDenom) {
+        const defaultCurrency = txState.currencies.find(currency => {
+          return defaultDenom && currency.coinMinimalDenom === defaultDenom;
+        });
+
+        setDefaultCurrency(defaultCurrency);
+      }
+    }, [defaultDenom, txState.currencies]);
 
     const [currency, setCurrency] = useState<Currency | undefined>();
     const [balance, setBalance] = useState<Coin | undefined>();
@@ -68,6 +90,16 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
         }
       }
     }, [currency, txState.currencies]);
+
+    // Set the default currency if it is provided by params.
+    // Default currency can be the undefined value if the chain info of the chain store was not set first.
+    // So if default currency is provided and the default currency has not been set, set the default currency to the selected currency.
+    useEffect(() => {
+      if (!wasDefaultCurrencySet && defaultCurrency) {
+        setCurrency(defaultCurrency);
+        setWasDefaultCurrencySet(true);
+      }
+    }, [defaultCurrency, wasDefaultCurrencySet]);
 
     // When the amount input is changes, set the amount for the tx state.
     useEffect(() => {
