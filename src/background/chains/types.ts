@@ -107,11 +107,6 @@ export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<
     })
 });
 
-export const AppCurrencyShema = Joi.any().valid(
-  CurrencySchema,
-  CW20CurrencyShema
-);
-
 export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixAccAddr: Joi.string().required(),
   bech32PrefixAccPub: Joi.string().required(),
@@ -124,10 +119,10 @@ export const Bech32ConfigSchema = Joi.object<Bech32Config>({
 export const SuggestingBIP44Schema = Joi.object<{ coinType: number }>({
   coinType: Joi.number()
     .integer()
-    .min(-1)
+    .min(0)
     .required()
   // Alow the any keys for compatibility of cosmosJS's BIP44.
-}).keys();
+}).unknown(true);
 
 export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
   rpc: Joi.string()
@@ -153,7 +148,7 @@ export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
   bech32Config: Bech32ConfigSchema.required(),
   currencies: Joi.array()
     .min(1)
-    .items(AppCurrencyShema)
+    .items(CurrencySchema, CW20CurrencyShema)
     .required(),
   feeCurrencies: Joi.array()
     .min(1)
