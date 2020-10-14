@@ -95,7 +95,16 @@ export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<
   type: Joi.string()
     .equal("cw20")
     .required(),
-  contractAddress: Joi.string().required()
+  contractAddress: Joi.string().required(),
+  coinMinimalDenom: Joi.string()
+    .required()
+    .custom((value: string) => {
+      if (value.startsWith("cw20:")) {
+        return value;
+      } else {
+        return "cw20:" + value;
+      }
+    })
 });
 
 export const AppCurrencyShema = Joi.any().valid(
