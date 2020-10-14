@@ -158,7 +158,6 @@ describe("Test chain info schema", () => {
       };
 
       currency = await CW20CurrencyShema.validateAsync(currency);
-      console.log(currency.coinMinimalDenom);
       if (currency.coinMinimalDenom !== "cw20:utest") {
         throw new Error("actual denom doens't start with `type:`");
       }
@@ -391,6 +390,30 @@ describe("Test chain info schema", () => {
       const chainInfo = generatePlainChainInfo();
 
       await ChainInfoSchema.validateAsync(chainInfo);
+    });
+
+    await assert.doesNotReject(async () => {
+      let chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["currencies"] = [
+        {
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6
+        },
+        {
+          type: "cw20",
+          contractAddress: "this should be validated in the keeper",
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6
+        }
+      ];
+
+      chainInfo = await ChainInfoSchema.validateAsync(chainInfo);
+      if (chainInfo.currencies[1].coinMinimalDenom !== "cw20:utest") {
+        throw new Error("actual denom doens't start with `type:`");
+      }
     });
 
     await assert.rejects(async () => {
