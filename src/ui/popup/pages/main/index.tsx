@@ -18,12 +18,13 @@ import { useStore } from "../../stores";
 import { ChainsKeeper } from "../../../../background/chains/keeper";
 import { useConfirm } from "../../../components/confirm";
 import { useIntl } from "react-intl";
+import { TokensView } from "./token";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
 
-  const { chainStore } = useStore();
+  const { chainStore, accountStore } = useStore();
 
   const confirm = useConfirm();
 
@@ -55,6 +56,14 @@ export const MainPage: FunctionComponent = observer(() => {
 
     prevChainId.current = chainStore.chainInfo.chainId;
   }, [chainStore, confirm, intl]);
+
+  const stakeCurrency = chainStore.chainInfo.stakeCurrency;
+
+  const nativeTokens = accountStore.assets.filter(asset => {
+    return asset.denom !== stakeCurrency.coinMinimalDenom;
+  });
+
+  const hasTokens = nativeTokens.length > 0;
 
   return (
     <HeaderLayout
@@ -99,6 +108,13 @@ export const MainPage: FunctionComponent = observer(() => {
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>
             <StakeView />
+          </CardBody>
+        </Card>
+      ) : null}
+      {hasTokens ? (
+        <Card className={classnames(style.card, "shadow")}>
+          <CardBody>
+            <TokensView tokens={nativeTokens} />
           </CardBody>
         </Card>
       ) : null}
