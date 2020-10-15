@@ -335,7 +335,9 @@ export class AccountStore {
           // If account doesn't exist
           this.assets = [];
           this.stakedAsset = undefined;
-          return true;
+          // Token based on the contract can exist even if the account doesn't exist on the chain.
+          // So, don't handle this case as canceled.
+          // return true;
         }
         // Though error occurs, don't clear last fetched assets.
         // Show last fetched assets with warning that error occured.
