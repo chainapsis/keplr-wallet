@@ -59,11 +59,11 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const stakeCurrency = chainStore.chainInfo.stakeCurrency;
 
-  const nativeTokens = accountStore.assets.filter(asset => {
+  const tokens = accountStore.assets.filter(asset => {
     return asset.denom !== stakeCurrency.coinMinimalDenom;
   });
 
-  const hasTokens = nativeTokens.length > 0;
+  const hasTokens = tokens.length > 0;
 
   return (
     <HeaderLayout
@@ -114,7 +114,7 @@ export const MainPage: FunctionComponent = observer(() => {
       {hasTokens ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>
-            <TokensView tokens={nativeTokens} />
+            <TokensView tokens={tokens} />
           </CardBody>
         </Card>
       ) : null}

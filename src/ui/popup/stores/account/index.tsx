@@ -15,6 +15,9 @@ import { RootStore } from "../root";
 import Axios, { CancelTokenSource } from "axios";
 import { AutoFetchingAssetsInterval } from "../../../../config";
 import { Int } from "@chainapsis/cosmosjs/common/int";
+import { CW20Currency } from "../../../../common/currency";
+
+const Buffer = require("buffer/").Buffer;
 
 type RestResult<Result> = {
   height: string;
@@ -86,6 +89,9 @@ export class AccountStore {
   // If chain is changed, abort last interval and restart fetching by interval.
   private lastFetchingIntervalId!: NodeJS.Timeout | undefined;
 
+  // Not need to be observable
+  private lastFetchingTokenCancleToken!: CancelTokenSource | undefined;
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   constructor(private readonly rootStore: RootStore) {
@@ -123,7 +129,11 @@ export class AccountStore {
 
     // Fetch the assets by interval.
     this.lastFetchingIntervalId = setInterval(() => {
-      this.fetchAssets(false);
+      this.fetchAssets(false).then(canceled => {
+        if (!canceled) {
+          this.fetchTokensSequently();
+        }
+      });
     }, AutoFetchingAssetsInterval);
   }
 
@@ -151,7 +161,10 @@ export class AccountStore {
   @actionAsync
   public async fetchAccount() {
     await task(this.fetchBech32Address());
-    await task(this.fetchAssets());
+    const cancelded = await task(this.fetchAssets());
+    if (!cancelded) {
+      await task(this.fetchTokensSequently());
+    }
   }
 
   @actionAsync
@@ -197,9 +210,12 @@ export class AccountStore {
 
   /*
    This should be called when isAddressFetching is false.
+   If this is canceled, return true.
    */
   @actionAsync
-  private async fetchAssets(fetchStakedAsset: boolean = true) {
+  private async fetchAssets(
+    fetchStakedAsset: boolean = true
+  ): Promise<boolean> {
     if (this.isAddressFetching) {
       throw new Error("Address is fetching");
     }
@@ -210,7 +226,7 @@ export class AccountStore {
         this.chainInfo.bech32Config.bech32PrefixAccAddr
       )
     ) {
-      return;
+      return true;
     }
 
     // If fetching is in progess, abort it.
@@ -237,7 +253,7 @@ export class AccountStore {
         )
       );
 
-      this.assets = account.getCoins();
+      this.pushAssets(account.getCoins());
       this.lastAssetFetchingError = undefined;
       // Save the assets to storage.
       await task(
@@ -319,14 +335,115 @@ export class AccountStore {
           // If account doesn't exist
           this.assets = [];
           this.stakedAsset = undefined;
+          return true;
         }
         // Though error occurs, don't clear last fetched assets.
         // Show last fetched assets with warning that error occured.
         console.log(`Error occurs during fetching assets: ${e.toString()}`);
+      } else {
+        return true;
       }
     } finally {
       this.lastFetchingCancleToken = undefined;
       this.isAssetFetching = false;
+    }
+
+    return false;
+  }
+
+  @actionAsync
+  private async fetchTokensSequently() {
+    for (const currency of this.chainInfo.currencies) {
+      if ("type" in currency) {
+        switch (currency.type) {
+          case "cw20":
+            await task(this.fetchCW20Token(currency));
+            break;
+        }
+      }
+    }
+  }
+
+  @actionAsync
+  private async fetchCW20Token(currency: CW20Currency) {
+    // If fetching is in progess, abort it.
+    if (this.lastFetchingTokenCancleToken) {
+      this.lastFetchingTokenCancleToken.cancel();
+      this.lastFetchingTokenCancleToken = undefined;
+    }
+    this.lastFetchingTokenCancleToken = Axios.CancelToken.source();
+
+    const restInstance = Axios.create({
+      ...this.chainInfo.restConfig,
+      ...{
+        baseURL: this.chainInfo.rest,
+        cancelToken: this.lastFetchingTokenCancleToken?.token
+      }
+    });
+
+    try {
+      const result = await task(
+        restInstance.get<{
+          height: string;
+          result: {
+            smart: string;
+          };
+        }>(
+          `/wasm/contract/${currency.contractAddress}/smart/${Buffer.from(
+            JSON.stringify({
+              balance: { address: this.bech32Address }
+            })
+          ).toString("hex")}?encoding=hex`
+        )
+      );
+
+      if (result.status === 200) {
+        const obj = JSON.parse(
+          Buffer.from(result.data.result.smart, "base64").toString()
+        );
+        const balance = obj.balance;
+        const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
+
+        this.pushAsset(asset);
+        // Save the assets to storage.
+        await task(
+          this.saveAssetsToStorage(
+            this.chainInfo.chainId,
+            this.bech32Address,
+            this.assets
+          )
+        );
+      }
+    } catch (e) {
+      if (!Axios.isCancel(e)) {
+        // TODO: Make the way to handle error.
+        console.log(e);
+      }
+    }
+  }
+
+  @action
+  private pushAsset(asset: Coin) {
+    const index = this.assets.findIndex(a => {
+      return a.denom === asset.denom;
+    });
+
+    if (index >= 0) {
+      const assets = this.assets.slice();
+      this.assets = [
+        ...assets.slice(0, index),
+        asset,
+        ...assets.slice(index + 1)
+      ];
+    } else {
+      this.assets.push(asset);
+    }
+  }
+
+  @action
+  private pushAssets(assets: Coin[]) {
+    for (const asset of assets) {
+      this.pushAsset(asset);
     }
   }
 

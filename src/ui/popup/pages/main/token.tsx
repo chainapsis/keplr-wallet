@@ -4,9 +4,8 @@ import styleToken from "./token.module.scss";
 import { observer } from "mobx-react";
 import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { useStore } from "../../stores";
-import { DecUtils } from "../../../../common/dec-utils";
-import { Dec } from "@chainapsis/cosmosjs/common/decimal";
 import { useHistory } from "react-router";
+import { CoinUtils } from "../../../../common/coin-utils";
 
 const TokenView: FunctionComponent<{
   name: string;
@@ -73,10 +72,11 @@ export const TokensView: FunctionComponent<{
 
         if (currency) {
           const name = currency.coinDenom.toUpperCase();
-          const amount = DecUtils.trim(
-            new Dec(asset.amount).quo(
-              DecUtils.getPrecisionDec(currency.coinDecimals)
-            )
+          const amount = CoinUtils.shrinkDecimals(
+            asset.amount,
+            currency.coinDecimals,
+            0,
+            6
           );
 
           return (
