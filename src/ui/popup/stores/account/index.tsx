@@ -333,7 +333,12 @@ export class AccountStore {
           this.lastAssetFetchingError = e;
         } else {
           // If account doesn't exist
-          this.assets = [];
+          for (const currency of this.chainInfo.currencies) {
+            // Remove all the native coin/tokens.
+            if (!("type" in currency)) {
+              this.removeAsset(currency.coinMinimalDenom);
+            }
+          }
           this.stakedAsset = undefined;
           // Token based on the contract can exist even if the account doesn't exist on the chain.
           // So, don't handle this case as canceled.
@@ -446,6 +451,18 @@ export class AccountStore {
   private pushAssets(assets: Coin[]) {
     for (const asset of assets) {
       this.pushAsset(asset);
+    }
+  }
+
+  @action
+  private removeAsset(denom: string) {
+    const index = this.assets.findIndex(a => {
+      return a.denom === denom;
+    });
+
+    if (index >= 0) {
+      const assets = this.assets.slice();
+      this.assets = [...assets.slice(0, index), ...assets.slice(index + 1)];
     }
   }
 
