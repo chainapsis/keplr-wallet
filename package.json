@@ -7,7 +7,7 @@
     "build": "cross-env NODE_ENV=production webpack",
     "dev": "cross-env NODE_ENV=development webpack",
     "dev:analyzer": "cross-env NODE_ENV=development ANALYZER=true webpack",
-    "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
+    "test": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
     "lint-test": "eslint \"src/**/*\" webpack.config.js && prettier --check \"src/**/*\" webpack.config.js",
     "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js"
   },
