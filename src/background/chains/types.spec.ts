@@ -160,9 +160,11 @@ describe("Test chain info schema", () => {
       currency = await CW20CurrencyShema.validateAsync(currency);
       if (
         currency.coinMinimalDenom !==
-        "this should be validated in the keeper:utest"
+        "cw20:this should be validated in the keeper:utest"
       ) {
-        throw new Error("actual denom doens't start with `contract-address:`");
+        throw new Error(
+          "actual denom doens't start with `type:contract-address:`"
+        );
       }
     });
 
@@ -171,16 +173,18 @@ describe("Test chain info schema", () => {
         type: "cw20",
         contractAddress: "this should be validated in the keeper",
         coinDenom: "TEST",
-        coinMinimalDenom: "this should be validated in the keeper:utest",
+        coinMinimalDenom: "cw20:this should be validated in the keeper:utest",
         coinDecimals: 0
       };
 
       currency = await CW20CurrencyShema.validateAsync(currency);
       if (
         currency.coinMinimalDenom !==
-        "this should be validated in the keeper:utest"
+        "cw20:this should be validated in the keeper:utest"
       ) {
-        throw new Error("actual denom doens't start with `contract-address:`");
+        throw new Error(
+          "actual denom doens't start with `type:contract-address:`"
+        );
       }
     });
 
@@ -233,9 +237,11 @@ describe("Test chain info schema", () => {
       const currencies = await AppCurrencyShemaTest.validateAsync([currency]);
       if (
         currencies[0].coinMinimalDenom !==
-        "this should be validated in the keeper:utest"
+        "cw20:this should be validated in the keeper:utest"
       ) {
-        throw new Error("actual denom doens't start with `contract-address:`");
+        throw new Error(
+          "actual denom doens't start with `cw20:contract-address:`"
+        );
       }
 
       currency = {
@@ -440,9 +446,11 @@ describe("Test chain info schema", () => {
       }
       if (
         chainInfo.currencies[1].coinMinimalDenom !==
-        "this should be validated in the keeper:utest"
+        "cw20:this should be validated in the keeper:utest"
       ) {
-        throw new Error("actual denom doens't start with `contract-address:`");
+        throw new Error(
+          "actual denom doens't start with `cw20:contract-address:`"
+        );
       }
     });
 

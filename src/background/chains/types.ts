@@ -98,11 +98,15 @@ export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<CW20Currency>)
     coinMinimalDenom: Joi.string().required()
   })
   .custom((value: CW20Currency) => {
-    if (value.coinMinimalDenom.startsWith(`${value.contractAddress}:`)) {
+    if (
+      value.coinMinimalDenom.startsWith(
+        `${value.type}:${value.contractAddress}:`
+      )
+    ) {
       return value;
     } else {
       value.coinMinimalDenom =
-        `${value.contractAddress}:` + value.coinMinimalDenom;
+        `${value.type}:${value.contractAddress}:` + value.coinMinimalDenom;
       return value;
     }
   });
