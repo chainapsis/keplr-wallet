@@ -1,10 +1,4 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState
-} from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import {
   AddressInput,
   FeeButtons,
@@ -17,7 +11,6 @@ import { HeaderLayout } from "../../layouts";
 
 import { PopupWalletProvider } from "../../wallet-provider";
 
-import { MsgSend } from "@chainapsis/cosmosjs/x/bank";
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 
 import { observer } from "mobx-react";
@@ -97,65 +90,46 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       >
         <form
           className={style.formContainer}
-          onSubmit={useCallback(
-            e => {
-              if (cosmosJS.sendMsgs && txStateIsValid) {
-                e.preventDefault();
+          onSubmit={async e => {
+            if (cosmosJS.sendMsgs && txStateIsValid) {
+              e.preventDefault();
 
-                const msg = new MsgSend(
-                  AccAddress.fromBech32(
-                    accountStore.bech32Address,
-                    chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                  ),
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  txState.recipient!,
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  [txState.amount!]
-                );
+              const msg = await txState.generateSendMsg(
+                AccAddress.fromBech32(
+                  accountStore.bech32Address,
+                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                )
+              );
 
-                const config: TxBuilderConfig = {
-                  gas: txState.gas,
-                  memo: txState.memo,
-                  fee: txState.fees
-                };
+              const config: TxBuilderConfig = {
+                gas: txState.gas,
+                memo: txState.memo,
+                fee: txState.fees
+              };
 
-                cosmosJS.sendMsgs(
-                  [msg],
-                  config,
-                  () => {
-                    history.replace("/");
-                  },
-                  e => {
-                    history.replace("/");
-                    notification.push({
-                      type: "danger",
-                      content: e.toString(),
-                      duration: 5,
-                      canDelete: true,
-                      placement: "top-center",
-                      transition: {
-                        duration: 0.25
-                      }
-                    });
-                  },
-                  "commit"
-                );
-              }
-            },
-            [
-              accountStore.bech32Address,
-              chainStore.chainInfo.bech32Config.bech32PrefixAccAddr,
-              cosmosJS,
-              history,
-              notification,
-              txState.amount,
-              txState.fees,
-              txState.gas,
-              txState.memo,
-              txState.recipient,
-              txStateIsValid
-            ]
-          )}
+              await cosmosJS.sendMsgs(
+                [msg],
+                config,
+                () => {
+                  history.replace("/");
+                },
+                e => {
+                  history.replace("/");
+                  notification.push({
+                    type: "danger",
+                    content: e.toString(),
+                    duration: 5,
+                    canDelete: true,
+                    placement: "top-center",
+                    transition: {
+                      duration: 0.25
+                    }
+                  });
+                },
+                "commit"
+              );
+            }
+          }}
         >
           <div className={style.formInnerContainer}>
             <div>

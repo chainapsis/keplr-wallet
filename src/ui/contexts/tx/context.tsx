@@ -12,6 +12,8 @@ import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { Currency } from "../../../common/currency";
 import { Int } from "@chainapsis/cosmosjs/common/int";
+import { Msg } from "@chainapsis/cosmosjs/core/tx";
+import { MsgSend } from "@chainapsis/cosmosjs/x/bank";
 
 type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 
@@ -35,6 +37,10 @@ export interface TxState {
 
   // Balances of account to send tx
   balances: Coin[];
+
+  // Generate the send message according to the type.
+  // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
+  generateSendMsg(sender: AccAddress): Promise<Msg>;
 
   // TODO: Check the equality of the object value to prevent the infinite render.
   setRawAddress(rawAddress: string): void;
@@ -80,6 +86,16 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
   const [feeCurrencies, setFeeCurrencies] = useState<Currency[]>([]);
 
   const [balances, setBalances] = useState<Coin[]>([]);
+
+  const generateSendMsg = useCallback(
+    async (sender: AccAddress) => {
+      if (!recipient || !amount) {
+        throw new Error("recipient or amount is not set");
+      }
+      return new MsgSend(sender, recipient, [amount]);
+    },
+    [amount, recipient]
+  );
 
   const [errors, setErrors] = useState<any>({});
 
@@ -169,6 +185,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           currencies,
           balances,
           feeCurrencies,
+          generateSendMsg,
           setRawAddress,
           setRecipient,
           setAmount,
@@ -192,6 +209,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           currencies,
           balances,
           feeCurrencies,
+          generateSendMsg,
           setFees,
           setContextErrors,
           getError,
