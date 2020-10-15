@@ -18,7 +18,7 @@
   "author": "chainapsis",
   "license": "Apache-2.0",
   "dependencies": {
-    "@chainapsis/cosmosjs": "git+https://github.com/chainapsis/cosmosjs-dist.git#00d97d0",
+    "@chainapsis/cosmosjs": "git+https://github.com/chainapsis/cosmosjs-dist.git#9e94261",
     "@ensdomains/resolver": "^0.2.4",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@ledgerhq/hw-transport-webhid": "^5.23.0",
