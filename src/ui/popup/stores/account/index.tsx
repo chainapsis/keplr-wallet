@@ -337,18 +337,22 @@ export class AccountStore {
     assets: Coin[],
     staked: boolean = false
   ): Promise<void> {
-    const coinStrs: string[] = [];
-    for (const coin of assets) {
-      coinStrs.push(coin.toString());
+    const json: {
+      denom: string;
+      amount: string;
+    }[] = [];
+    for (const asset of assets) {
+      json.push({
+        denom: asset.denom,
+        amount: asset.amount.toString()
+      });
     }
 
-    const store = (await browser.storage.local.get()).assets ?? {};
+    const store = (await browser.storage.local.get()).assetsJson ?? {};
 
     await browser.storage.local.set({
-      assets: Object.assign({}, store, {
-        [`${chainId}-${bech32Address}${
-          staked ? "-staked" : ""
-        }`]: coinStrs.join(",")
+      assetsJson: Object.assign({}, store, {
+        [`${chainId}-${bech32Address}${staked ? "-staked" : ""}`]: json
       })
     });
   }
@@ -362,14 +366,17 @@ export class AccountStore {
     const items = await browser.storage.local.get();
 
     const coins: Coin[] = [];
-    const assets = items?.assets;
-    if (assets) {
-      const coinsStr =
-        assets[`${chainId}-${bech32Address}${staked ? "-staked" : ""}`];
-      if (coinsStr) {
-        const coinStrs = coinsStr.split(",");
-        for (const coinStr of coinStrs) {
-          coins.push(Coin.parse(coinStr));
+    const assetsJson = items?.assetsJson;
+    if (assetsJson) {
+      const json: {
+        denom: string;
+        amount: string;
+      }[] = assetsJson[`${chainId}-${bech32Address}${staked ? "-staked" : ""}`];
+
+      if (json) {
+        for (const c of json) {
+          const coin = new Coin(c.denom, c.amount);
+          coins.push(coin);
         }
       }
     }
