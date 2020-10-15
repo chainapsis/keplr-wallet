@@ -6,6 +6,7 @@ import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { useStore } from "../../stores";
 import { useHistory } from "react-router";
 import { CoinUtils } from "../../../../common/coin-utils";
+import { DecUtils } from "../../../../common/dec-utils";
 
 const TokenView: FunctionComponent<{
   name: string;
@@ -72,11 +73,8 @@ export const TokensView: FunctionComponent<{
 
         if (currency) {
           const name = currency.coinDenom.toUpperCase();
-          const amount = CoinUtils.shrinkDecimals(
-            asset.amount,
-            currency.coinDecimals,
-            0,
-            6
+          const amount = DecUtils.trim(
+            CoinUtils.shrinkDecimals(asset.amount, currency.coinDecimals, 0, 6)
           );
 
           return (
