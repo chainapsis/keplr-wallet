@@ -14,6 +14,7 @@ import { Currency } from "../../../common/currency";
 import { Int } from "@chainapsis/cosmosjs/common/int";
 import { Msg } from "@chainapsis/cosmosjs/core/tx";
 import { MsgSend } from "@chainapsis/cosmosjs/x/bank";
+import { MsgExecuteContract } from "@chainapsis/cosmosjs/x/wasm";
 
 type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 
@@ -92,7 +93,30 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
       if (!recipient || !amount) {
         throw new Error("recipient or amount is not set");
       }
-      return new MsgSend(sender, recipient, [amount]);
+
+      // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
+      const split = amount.denom.split(/(\w+):(\w+):(\w+)/).filter(Boolean);
+      if (split.length === 3) {
+        // If token based on the contract.
+        switch (split[0]) {
+          case "cw20":
+            return new MsgExecuteContract(
+              sender,
+              AccAddress.fromBech32(split[1]),
+              {
+                transfer: {
+                  recipient: recipient.toBech32(),
+                  amount: amount.amount.toString()
+                }
+              },
+              []
+            );
+          default:
+            throw new Error("Unknown type of token");
+        }
+      } else {
+        return new MsgSend(sender, recipient, [amount]);
+      }
     },
     [amount, recipient]
   );

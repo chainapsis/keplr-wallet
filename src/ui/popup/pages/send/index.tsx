@@ -47,9 +47,30 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       useBackgroundTx: true
     });
 
-    const [gasForSendMsg] = useState(80000);
+    const [gasForSendMsg, setGasForSendMsg] = useState(80000);
 
     const txState = useTxState();
+
+    useEffect(() => {
+      if (txState.amount?.denom) {
+        // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
+        const split = txState.amount.denom
+          .split(/(\w+):(\w+):(\w+)/)
+          .filter(Boolean);
+        if (split.length == 3) {
+          // If token based on the contract.
+          switch (split[0]) {
+            case "cw20":
+              setGasForSendMsg(250000);
+              break;
+            default:
+              setGasForSendMsg(80000);
+          }
+        } else {
+          setGasForSendMsg(80000);
+        }
+      }
+    }, [txState.amount?.denom]);
 
     useEffect(() => {
       txState.setBalances(accountStore.assets);
