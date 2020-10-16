@@ -2,9 +2,9 @@ import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import { AxiosRequestConfig } from "axios";
-import { Currency } from "../../common/currency";
+import { AppCurrency, Currency, CW20Currency } from "../../common/currency";
 
-import Joi from "joi";
+import Joi, { ObjectSchema } from "joi";
 
 export interface ChainInfo {
   readonly rpc: string;
@@ -23,7 +23,7 @@ export interface ChainInfo {
   readonly bip44: BIP44;
   readonly bech32Config: Bech32Config;
 
-  readonly currencies: Currency[];
+  readonly currencies: AppCurrency[];
   /**
    * This indicates which coin or token can be used for fee to send transaction.
    * You can get actual currency information from Currencies.
@@ -45,6 +45,11 @@ export interface ChainInfo {
     average: number;
     high: number;
   };
+
+  /**
+   * Indicate the features supported by this chain. Ex) cosmwasm, secretwasm ...
+   */
+  readonly features?: string[];
 
   /**
    * Shows whether the blockchain is in production phase or beta phase.
@@ -84,6 +89,28 @@ export const CurrencySchema = Joi.object<Currency>({
   coinGeckoId: Joi.string()
 });
 
+export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<CW20Currency>)
+  .keys({
+    type: Joi.string()
+      .equal("cw20")
+      .required(),
+    contractAddress: Joi.string().required(),
+    coinMinimalDenom: Joi.string().required()
+  })
+  .custom((value: CW20Currency) => {
+    if (
+      value.coinMinimalDenom.startsWith(
+        `${value.type}:${value.contractAddress}:`
+      )
+    ) {
+      return value;
+    } else {
+      value.coinMinimalDenom =
+        `${value.type}:${value.contractAddress}:` + value.coinMinimalDenom;
+      return value;
+    }
+  });
+
 export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixAccAddr: Joi.string().required(),
   bech32PrefixAccPub: Joi.string().required(),
@@ -96,10 +123,10 @@ export const Bech32ConfigSchema = Joi.object<Bech32Config>({
 export const SuggestingBIP44Schema = Joi.object<{ coinType: number }>({
   coinType: Joi.number()
     .integer()
-    .min(-1)
+    .min(0)
     .required()
   // Alow the any keys for compatibility of cosmosJS's BIP44.
-}).keys();
+}).unknown(true);
 
 export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
   rpc: Joi.string()
@@ -125,7 +152,7 @@ export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
   bech32Config: Bech32ConfigSchema.required(),
   currencies: Joi.array()
     .min(1)
-    .items(CurrencySchema)
+    .items(CurrencySchema, CW20CurrencyShema)
     .required(),
   feeCurrencies: Joi.array()
     .min(1)
@@ -137,5 +164,6 @@ export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
     low: Joi.number().required(),
     average: Joi.number().required(),
     high: Joi.number().required()
-  })
+  }),
+  features: Joi.array().items(Joi.string())
 });

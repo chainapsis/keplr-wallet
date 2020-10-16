@@ -1,10 +1,4 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState
-} from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import {
   AddressInput,
   FeeButtons,
@@ -17,7 +11,6 @@ import { HeaderLayout } from "../../layouts";
 
 import { PopupWalletProvider } from "../../wallet-provider";
 
-import { MsgSend } from "@chainapsis/cosmosjs/x/bank";
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 
 import { observer } from "mobx-react";
@@ -54,9 +47,30 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       useBackgroundTx: true
     });
 
-    const [gasForSendMsg] = useState(80000);
+    const [gasForSendMsg, setGasForSendMsg] = useState(80000);
 
     const txState = useTxState();
+
+    useEffect(() => {
+      if (txState.amount?.denom) {
+        // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
+        const split = txState.amount.denom
+          .split(/(\w+):(\w+):(\w+)/)
+          .filter(Boolean);
+        if (split.length == 3) {
+          // If token based on the contract.
+          switch (split[0]) {
+            case "cw20":
+              setGasForSendMsg(250000);
+              break;
+            default:
+              setGasForSendMsg(80000);
+          }
+        } else {
+          setGasForSendMsg(80000);
+        }
+      }
+    }, [txState.amount?.denom]);
 
     useEffect(() => {
       txState.setBalances(accountStore.assets);
@@ -97,65 +111,46 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       >
         <form
           className={style.formContainer}
-          onSubmit={useCallback(
-            e => {
-              if (cosmosJS.sendMsgs && txStateIsValid) {
-                e.preventDefault();
+          onSubmit={async e => {
+            if (cosmosJS.sendMsgs && txStateIsValid) {
+              e.preventDefault();
 
-                const msg = new MsgSend(
-                  AccAddress.fromBech32(
-                    accountStore.bech32Address,
-                    chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                  ),
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  txState.recipient!,
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  [txState.amount!]
-                );
+              const msg = await txState.generateSendMsg(
+                AccAddress.fromBech32(
+                  accountStore.bech32Address,
+                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
+                )
+              );
 
-                const config: TxBuilderConfig = {
-                  gas: txState.gas,
-                  memo: txState.memo,
-                  fee: txState.fees
-                };
+              const config: TxBuilderConfig = {
+                gas: txState.gas,
+                memo: txState.memo,
+                fee: txState.fees
+              };
 
-                cosmosJS.sendMsgs(
-                  [msg],
-                  config,
-                  () => {
-                    history.replace("/");
-                  },
-                  e => {
-                    history.replace("/");
-                    notification.push({
-                      type: "danger",
-                      content: e.toString(),
-                      duration: 5,
-                      canDelete: true,
-                      placement: "top-center",
-                      transition: {
-                        duration: 0.25
-                      }
-                    });
-                  },
-                  "commit"
-                );
-              }
-            },
-            [
-              accountStore.bech32Address,
-              chainStore.chainInfo.bech32Config.bech32PrefixAccAddr,
-              cosmosJS,
-              history,
-              notification,
-              txState.amount,
-              txState.fees,
-              txState.gas,
-              txState.memo,
-              txState.recipient,
-              txStateIsValid
-            ]
-          )}
+              await cosmosJS.sendMsgs(
+                [msg],
+                config,
+                () => {
+                  history.replace("/");
+                },
+                e => {
+                  history.replace("/");
+                  notification.push({
+                    type: "danger",
+                    content: e.toString(),
+                    duration: 5,
+                    canDelete: true,
+                    placement: "top-center",
+                    transition: {
+                      duration: 0.25
+                    }
+                  });
+                },
+                "commit"
+              );
+            }
+          }}
         >
           <div className={style.formInnerContainer}>
             <div>

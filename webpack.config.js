@@ -6,8 +6,11 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WriteFilePlugin = require("write-file-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+  .BundleAnalyzerPlugin;
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
+const isEnvAnalyzer = process.env.ANALYZER === "true";
 const commonResolve = dir => ({
   extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
   alias: {
@@ -100,10 +103,13 @@ const extensionConfig = (env, args) => {
       new HtmlWebpackPlugin({
         template: "./src/popup.html",
         filename: "popup.html",
-        chunks: ["popup"]
+        excludeChunks: ["background", "contentScripts", "injectedScript"]
       }),
       new WriteFilePlugin(),
-      new webpack.EnvironmentPlugin(["NODE_ENV"])
+      new webpack.EnvironmentPlugin(["NODE_ENV"]),
+      new BundleAnalyzerPlugin({
+        analyzerMode: isEnvAnalyzer ? "server" : "disabled"
+      })
     ]
   };
 };

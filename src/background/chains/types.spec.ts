@@ -4,16 +4,23 @@ import {
   Bech32ConfigSchema,
   ChainInfoSchema,
   CurrencySchema,
+  CW20CurrencyShema,
   SuggestingChainInfo
 } from "./types";
-import { Currency } from "../../common/currency";
+import { AppCurrency, Currency, CW20Currency } from "../../common/currency";
 import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
+import Joi from "joi";
+
+const AppCurrencyShemaTest = Joi.array().items(
+  CurrencySchema,
+  CW20CurrencyShema
+);
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 describe("Test chain info schema", () => {
-  it("test currency schema", () => {
-    assert.doesNotReject(async () => {
+  it("test currency schema", async () => {
+    await assert.doesNotReject(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -23,7 +30,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     });
 
-    assert.doesNotReject(async () => {
+    await assert.doesNotReject(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -33,7 +40,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     });
 
-    assert.doesNotReject(async () => {
+    await assert.doesNotReject(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -43,7 +50,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     });
 
-    assert.doesNotReject(async () => {
+    await assert.doesNotReject(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -54,7 +61,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       // @ts-ignore
       const currency: Currency = {
         // coinDenom: "TEST",
@@ -66,7 +73,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     }, "Should throw error when coin denom is missing");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       // @ts-ignore
       const currency: Currency = {
         coinDenom: "TEST",
@@ -77,7 +84,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     }, "Should throw error when coin minimal denom is missing");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       // @ts-ignore
       const currency: Currency = {
         coinDenom: "TEST",
@@ -88,7 +95,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     }, "Should throw error when coin decimals is missing");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -99,7 +106,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     }, "Should throw error when coin decimals is not number");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -111,7 +118,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     }, "Should throw error when coingecko id is not string");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -121,7 +128,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     }, "Should throw error when coin decimal is too big");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -131,7 +138,7 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     }, "Should throw error when coin decimal is negative");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const currency: Currency = {
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
@@ -140,10 +147,138 @@ describe("Test chain info schema", () => {
 
       await CurrencySchema.validateAsync(currency);
     }, "Should throw error when coin decimal is not integer");
+
+    await assert.doesNotReject(async () => {
+      let currency: CW20Currency = {
+        type: "cw20",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      currency = await CW20CurrencyShema.validateAsync(currency);
+      if (
+        currency.coinMinimalDenom !==
+        "cw20:this should be validated in the keeper:utest"
+      ) {
+        throw new Error(
+          "actual denom doens't start with `type:contract-address:`"
+        );
+      }
+    });
+
+    await assert.doesNotReject(async () => {
+      let currency: CW20Currency = {
+        type: "cw20",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "cw20:this should be validated in the keeper:utest",
+        coinDecimals: 0
+      };
+
+      currency = await CW20CurrencyShema.validateAsync(currency);
+      if (
+        currency.coinMinimalDenom !==
+        "cw20:this should be validated in the keeper:utest"
+      ) {
+        throw new Error(
+          "actual denom doens't start with `type:contract-address:`"
+        );
+      }
+    });
+
+    await assert.rejects(async () => {
+      const currency: CW20Currency = {
+        // @ts-ignore
+        type: "?",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await CW20CurrencyShema.validateAsync(currency);
+    }, "Should throw error when type is not cw20");
+
+    await assert.rejects(async () => {
+      // @ts-ignore
+      const currency: CW20Currency = {
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await CW20CurrencyShema.validateAsync(currency);
+    }, "Should throw error when type is missing");
+
+    await assert.rejects(async () => {
+      // @ts-ignore
+      const currency: CW20Currency = {
+        type: "cw20",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await CW20CurrencyShema.validateAsync(currency);
+    }, "Should throw error when contract address is missing");
+
+    await assert.doesNotReject(async () => {
+      let currency: AppCurrency = {
+        type: "cw20",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      const currencies = await AppCurrencyShemaTest.validateAsync([currency]);
+      if (
+        currencies[0].coinMinimalDenom !==
+        "cw20:this should be validated in the keeper:utest"
+      ) {
+        throw new Error(
+          "actual denom doens't start with `cw20:contract-address:`"
+        );
+      }
+
+      currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 6,
+        coinGeckoId: "test"
+      };
+
+      await AppCurrencyShemaTest.validateAsync([currency]);
+    });
+
+    await assert.rejects(async () => {
+      // @ts-ignore
+      const currency: CW20Currency = {
+        type: "cw20",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0
+      };
+
+      await AppCurrencyShemaTest.validateAsync([currency]);
+    }, "Should throw error when contract address is missing");
+
+    await assert.rejects(async () => {
+      const currency: Currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 1.5
+      };
+
+      await AppCurrencyShemaTest.validateAsync([currency]);
+    }, "Should throw error when coin decimal is not integer");
   });
 
-  it("test bech32 config schema", () => {
-    assert.doesNotReject(async () => {
+  it("test bech32 config schema", async () => {
+    await assert.doesNotReject(async () => {
       const bech32Config: Bech32Config = {
         bech32PrefixAccAddr: "test",
         bech32PrefixAccPub: "test",
@@ -192,56 +327,56 @@ describe("Test chain info schema", () => {
       await Bech32ConfigSchema.validateAsync(bech32Config);
     };
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNullField("bech32PrefixAccAddr");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNullField("bech32PrefixAccPub");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNullField("bech32PrefixValAddr");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNullField("bech32PrefixValPub");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNullField("bech32PrefixConsAddr");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNullField("bech32PrefixConsPub");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNonStringField("bech32PrefixAccAddr");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNonStringField("bech32PrefixAccPub");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNonStringField("bech32PrefixValAddr");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNonStringField("bech32PrefixValPub");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNonStringField("bech32PrefixConsAddr");
     });
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await validateNonStringField("bech32PrefixConsPub");
     });
   });
 
-  it("test chain info schema", () => {
+  it("test chain info schema", async () => {
     const generatePlainChainInfo = (): SuggestingChainInfo => {
       return {
         rpc: "http://test.com",
@@ -281,13 +416,45 @@ describe("Test chain info schema", () => {
       };
     };
 
-    assert.doesNotReject(async () => {
+    await assert.doesNotReject(async () => {
       const chainInfo = generatePlainChainInfo();
 
       await ChainInfoSchema.validateAsync(chainInfo);
     });
 
-    assert.rejects(async () => {
+    await assert.doesNotReject(async () => {
+      let chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["currencies"] = [
+        {
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6
+        },
+        {
+          type: "cw20",
+          contractAddress: "this should be validated in the keeper",
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6
+        }
+      ];
+
+      chainInfo = await ChainInfoSchema.validateAsync(chainInfo);
+      if (chainInfo.currencies[0].coinMinimalDenom !== "utest") {
+        throw new Error("native currency's actual denom should not be changed");
+      }
+      if (
+        chainInfo.currencies[1].coinMinimalDenom !==
+        "cw20:this should be validated in the keeper:utest"
+      ) {
+        throw new Error(
+          "actual denom doens't start with `cw20:contract-address:`"
+        );
+      }
+    });
+
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["rpc"] = "asd";
@@ -295,7 +462,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when rpc is not uri");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["rpc"] = undefined;
@@ -303,7 +470,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when rpc is undefined");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["rest"] = "asd";
@@ -311,7 +478,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when rest is not uri");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["rest"] = undefined;
@@ -319,7 +486,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when rest is undefined");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["chainId"] = undefined;
@@ -327,7 +494,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when chain id is undefined");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["chainId"] = "";
@@ -335,7 +502,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when chain id is empty string");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["chainName"] = undefined;
@@ -343,7 +510,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when chain name is undefined");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["chainName"] = "";
@@ -351,7 +518,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when chain name is empty string");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["stakeCurrency"] = undefined;
@@ -359,7 +526,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when stake currency is undefined");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["stakeCurrency"] = "should-throw-error";
@@ -367,7 +534,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when stake currency is non object");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["stakeCurrency"] = {
@@ -379,7 +546,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when stake currency is invalid");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["bip44"] = undefined;
@@ -387,7 +554,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when bip44 is undefined");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["bip44"] = {};
@@ -395,7 +562,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when bip44 has no coinType");
 
-    assert.doesNotReject(async () => {
+    await assert.doesNotReject(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["bip44"] = { coinType: 0 };
@@ -403,7 +570,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "BIP44 coinType can be 0");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["bip44"] = { coinType: -1 };
@@ -411,7 +578,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when bip44 has negative coinType");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["bip44"] = { coinType: 1.1 };
@@ -419,7 +586,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when bip44 has non integer coinType");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["bip44"] = {};
@@ -427,7 +594,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when bip44 is not instance of BIP44");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["bech32Config"] = "should-throw-error";
@@ -435,7 +602,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when bech32config is non object");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["bech32Config"] = {
@@ -445,7 +612,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when bech32Config is invalid");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["currencies"] = undefined;
@@ -453,7 +620,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when currencies is undefined");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["currencies"] = [];
@@ -461,7 +628,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when currencies has no item");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["currencies"] = [
@@ -480,7 +647,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when currencies has invalid item");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["feeCurrencies"] = undefined;
@@ -488,7 +655,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when fee currencies is undefined");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["feeCurrencies"] = [];
@@ -496,7 +663,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when fee currencies has no item");
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["feeCurrencies"] = [

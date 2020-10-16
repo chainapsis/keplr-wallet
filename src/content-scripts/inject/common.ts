@@ -1,5 +1,8 @@
 import { SuggestingChainInfo } from "../../background/chains";
-import { SuggestChainInfoMsg } from "../../background/chains/messages";
+import {
+  ReqeustAccessMsg,
+  SuggestChainInfoMsg
+} from "../../background/chains/messages";
 import { sendMessage } from "../../common/message/send";
 import { BACKGROUND_PORT } from "../../common/message/constant";
 import {
@@ -10,6 +13,7 @@ import {
   ResultBroadcastTx,
   ResultBroadcastTxCommit
 } from "@chainapsis/cosmosjs/rpc/tx";
+import { EnableKeyRingMsg, KeyRingStatus } from "../../background/keyring";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -17,6 +21,23 @@ export class Keplr {
   async experimentalSuggestChain(chainInfo: SuggestingChainInfo) {
     const msg = new SuggestChainInfoMsg(chainInfo, true);
     await sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async enable(chainId: string) {
+    const random = new Uint8Array(4);
+    crypto.getRandomValues(random);
+    const id = Buffer.from(random).toString("hex");
+
+    await sendMessage(
+      BACKGROUND_PORT,
+      new ReqeustAccessMsg(id, chainId, window.location.origin)
+    );
+
+    const msg = new EnableKeyRingMsg(chainId);
+    const result = await sendMessage(BACKGROUND_PORT, msg);
+    if (result.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Keyring not unlocked");
+    }
   }
 
   async requestTx(
