@@ -56,7 +56,11 @@ export class ChainStore {
 
   @action
   public setChain(chainId: string) {
-    if (this.chainInfo && this.chainInfo.chainId === chainId) {
+    if (
+      this.chainInfo &&
+      this.chainInfo.chainId === chainId &&
+      !this.isIntializing
+    ) {
       // No need to change chain info.
       return;
     }
