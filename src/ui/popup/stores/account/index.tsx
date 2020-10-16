@@ -243,6 +243,8 @@ export class AccountStore {
         ? this.chainInfo.features.includes("stargate")
         : false;
 
+      const balances: Coin[] = [];
+
       if (!isStargate) {
         const account = await task(
           queryAccount(
@@ -259,7 +261,7 @@ export class AccountStore {
           )
         );
 
-        this.pushAssets(account.getCoins());
+        balances.push(...account.getCoins());
       } else {
         // In stargate, the assets doens't exist on account itself.
         // It exists on the bank module. So, we should to fetch the balances from bank module.
@@ -284,16 +286,27 @@ export class AccountStore {
           throw new Error(result.statusText);
         }
 
-        const balances: Coin[] = [];
         for (const asset of result.data.result) {
           const balance = new Coin(asset.denom, asset.amount);
           balances.push(balance);
         }
-
-        this.pushAssets(balances);
       }
 
       this.lastAssetFetchingError = undefined;
+      if (balances.length > 0) {
+        this.pushAssets(balances);
+      } else {
+        // If account doesn't exist
+        // Remove all the native coin/tokens.
+        const assets = this.assets.slice();
+        for (const asset of assets) {
+          // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
+          const split = asset.denom.split(/(\w+):(\w+):(\w+)/).filter(Boolean);
+          if (split.length !== 3) {
+            this.removeAsset(asset.denom);
+          }
+        }
+      }
       // Save the assets to storage.
       await task(
         this.saveAssetsToStorage(
@@ -372,10 +385,15 @@ export class AccountStore {
           this.lastAssetFetchingError = e;
         } else {
           // If account doesn't exist
-          for (const currency of this.chainInfo.currencies) {
-            // Remove all the native coin/tokens.
-            if (!("type" in currency)) {
-              this.removeAsset(currency.coinMinimalDenom);
+          // Remove all the native coin/tokens.
+          const assets = this.assets.slice();
+          for (const asset of assets) {
+            // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
+            const split = asset.denom
+              .split(/(\w+):(\w+):(\w+)/)
+              .filter(Boolean);
+            if (split.length !== 3) {
+              this.removeAsset(asset.denom);
             }
           }
           this.stakedAsset = undefined;
@@ -458,6 +476,7 @@ export class AccountStore {
           Buffer.from(result.data.result.smart, "base64").toString()
         );
         const balance = obj.balance;
+        // Balance can be 0
         const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
 
         this.pushAsset(asset);
