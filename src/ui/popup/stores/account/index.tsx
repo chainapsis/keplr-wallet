@@ -360,11 +360,16 @@ export class AccountStore {
 
   @actionAsync
   private async fetchTokensSequently() {
+    const chainId = this.chainInfo.chainId;
     for (const currency of this.chainInfo.currencies) {
+      // If chain id has been changed after fetching, just do nothing.
+      if (chainId !== this.chainInfo.chainId) {
+        break;
+      }
       if ("type" in currency) {
         switch (currency.type) {
           case "cw20":
-            await task(this.fetchCW20Token(currency));
+            await task(this.fetchCW20Token(chainId, currency));
             break;
         }
       }
@@ -372,7 +377,7 @@ export class AccountStore {
   }
 
   @actionAsync
-  private async fetchCW20Token(currency: CW20Currency) {
+  private async fetchCW20Token(chainId: string, currency: CW20Currency) {
     // If fetching is in progess, abort it.
     if (this.lastFetchingTokenCancleToken) {
       this.lastFetchingTokenCancleToken.cancel();
@@ -403,6 +408,11 @@ export class AccountStore {
           ).toString("hex")}?encoding=hex`
         )
       );
+
+      // If chain id has been changed after fetching, just do nothing.
+      if (this.chainInfo.chainId !== chainId) {
+        return;
+      }
 
       if (result.status === 200) {
         const obj = JSON.parse(
