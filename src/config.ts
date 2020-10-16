@@ -135,7 +135,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     stakeCurrency: {
       coinDenom: "SCRT",
       coinMinimalDenom: "uscrt",
-      coinDecimals: 6
+      coinDecimals: 6,
+      coinGeckoId: "secret"
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -151,14 +152,16 @@ export const EmbedChainInfos: ChainInfo[] = [
       {
         coinDenom: "SCRT",
         coinMinimalDenom: "uscrt",
-        coinDecimals: 6
+        coinDecimals: 6,
+        coinGeckoId: "secret"
       }
     ],
     feeCurrencies: [
       {
         coinDenom: "SCRT",
         coinMinimalDenom: "uscrt",
-        coinDecimals: 6
+        coinDecimals: 6,
+        coinGeckoId: "secret"
       }
     ],
     coinType: 529,
