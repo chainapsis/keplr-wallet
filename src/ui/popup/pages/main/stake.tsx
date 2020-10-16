@@ -32,6 +32,10 @@ import { useNotification } from "../../../components/notification";
 import { useHistory } from "react-router";
 
 import { FormattedMessage } from "react-intl";
+import { useInflationInfo } from "../../../hooks/use-inflation-info";
+import { useStakingPool } from "../../../hooks/use-staking-pool";
+import { useSupplyTotal } from "../../../hooks/use-supply-total";
+import { DecUtils } from "../../../../common/dec-utils";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -50,6 +54,45 @@ export const StakeView: FunctionComponent = observer(() => {
   });
 
   const notification = useNotification();
+
+  const inflation = useInflationInfo(chainStore.chainInfo.rest);
+  const stakingPool = useStakingPool(chainStore.chainInfo.rest);
+  const supply = useSupplyTotal(
+    chainStore.chainInfo.rest,
+    chainStore.chainInfo.stakeCurrency.coinMinimalDenom
+  );
+
+  const apr = useMemo(() => {
+    if (inflation.inflation && !inflation.fetching) {
+      if (
+        stakingPool.pool &&
+        !stakingPool.fetching &&
+        supply.result &&
+        !supply.fetching
+      ) {
+        let dec = inflation.inflation.mulTruncate(DecUtils.getPrecisionDec(2));
+        const bondedToken = new Dec(stakingPool.pool.bonded_tokens);
+        const total = new Dec(supply.result);
+        if (total.gt(new Dec(0))) {
+          const stakingRatio = bondedToken.quo(new Dec(supply.result));
+
+          dec = dec.quo(stakingRatio);
+        }
+        return dec;
+      } else {
+        return inflation.inflation.mulTruncate(DecUtils.getPrecisionDec(2));
+      }
+    } else {
+      return undefined;
+    }
+  }, [
+    inflation.fetching,
+    inflation.inflation,
+    stakingPool.fetching,
+    stakingPool.pool,
+    supply.fetching,
+    supply.result
+  ]);
 
   const reward = useReward(
     chainStore.chainInfo.rest,
@@ -243,7 +286,22 @@ export const StakeView: FunctionComponent = observer(() => {
               styleStake.paragraphSub
             )}
           >
-            <FormattedMessage id="main.stake.message.earning" />
+            <FormattedMessage
+              id="main.stake.message.earning"
+              values={{
+                apr: (
+                  <React.Fragment>
+                    {apr ? (
+                      DecUtils.trim(apr ? apr.toString(1) : "0")
+                    ) : (
+                      <span>
+                        <i className="fas fa-spinner fa-spin" />
+                      </span>
+                    )}
+                  </React.Fragment>
+                )
+              }}
+            />
           </p>
         </div>
         <div style={{ flex: 1 }} />

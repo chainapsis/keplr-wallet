@@ -8,7 +8,7 @@
 
   "main.stake.message.pending-staking-reward": "Pending Staking Reward",
   "main.stake.message.stake": "Stake",
-  "main.stake.message.earning": "Earn up to 7-11% per year",
+  "main.stake.message.earning": "Earn up to {apr}% per year",
   "main.stake.button.claim-rewards": "Claim",
   "main.stake.button.stake": "Stake",
   "main.stake.tooltip.no-asset": "No token in your account. Deposit some tokens to stake.",
