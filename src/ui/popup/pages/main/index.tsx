@@ -19,6 +19,7 @@ import { ChainsKeeper } from "../../../../background/chains/keeper";
 import { useConfirm } from "../../../components/confirm";
 import { useIntl } from "react-intl";
 import { TokensView } from "./token";
+import { Int } from "@chainapsis/cosmosjs/common/int";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -60,7 +61,10 @@ export const MainPage: FunctionComponent = observer(() => {
   const stakeCurrency = chainStore.chainInfo.stakeCurrency;
 
   const tokens = accountStore.assets.filter(asset => {
-    return asset.denom !== stakeCurrency.coinMinimalDenom;
+    return (
+      asset.denom !== stakeCurrency.coinMinimalDenom &&
+      asset.amount.gt(new Int(0))
+    );
   });
 
   const hasTokens = tokens.length > 0;
