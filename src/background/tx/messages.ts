@@ -18,7 +18,8 @@ export class RequestBackgroundTxMsg extends Message<{}> {
   constructor(
     public readonly chainId: string,
     public readonly txBytes: string,
-    public readonly mode: "sync" | "async" | "commit"
+    public readonly mode: "sync" | "async" | "commit",
+    public readonly isRestAPI: boolean = false
   ) {
     super();
   }
@@ -68,7 +69,8 @@ export class RequestBackgroundTxWithResultMsg extends Message<
   constructor(
     public readonly chainId: string,
     public readonly txBytes: string,
-    public readonly mode: "sync" | "async" | "commit"
+    public readonly mode: "sync" | "async" | "commit",
+    public readonly isRestAPI: boolean = false
   ) {
     super();
   }

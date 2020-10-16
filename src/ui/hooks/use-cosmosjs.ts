@@ -90,6 +90,10 @@ export const useCosmosJS = <R extends Rest = Rest>(
     setLoading(false);
     let isSubscribed = true;
 
+    const isStargate = chainInfo.features
+      ? chainInfo.features.includes("stargate")
+      : false;
+
     const api = new Api<R>(
       {
         chainId: chainInfo.chainId,
@@ -128,7 +132,10 @@ export const useCosmosJS = <R extends Rest = Rest>(
           return queryAccount(
             context.get("rpcInstance"),
             address,
-            chainInfo.bech32Config.bech32PrefixAccAddr
+            chainInfo.bech32Config.bech32PrefixAccAddr,
+            {
+              isStargate
+            }
           );
         },
         bech32Config: chainInfo.bech32Config,
@@ -154,6 +161,8 @@ export const useCosmosJS = <R extends Rest = Rest>(
         }
       })();
     }
+
+    api.isStargate = isStargate;
 
     const _sendMsgs: SendMsgs = async (
       msgs: Msg[],
@@ -196,12 +205,18 @@ export const useCosmosJS = <R extends Rest = Rest>(
               msgs,
               config
             );
-            const bz = api.context.get("txEncoder")(api.context, tx);
+            let bz = api.context.get("txEncoder")(api.context, tx, isStargate);
+
+            if (isStargate) {
+              const json = JSON.parse(Buffer.from(bz).toString());
+              bz = Buffer.from(JSON.stringify(json.value));
+            }
 
             const msg = new RequestBackgroundTxMsg(
               api.context.get("chainId"),
               Buffer.from(bz).toString("hex"),
-              mode
+              mode,
+              isStargate
             );
             await sendMessage(BACKGROUND_PORT, msg);
           }

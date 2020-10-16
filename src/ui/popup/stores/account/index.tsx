@@ -239,21 +239,60 @@ export class AccountStore {
     this.isAssetFetching = true;
 
     try {
-      const account = await task(
-        queryAccount(
-          Axios.create({
-            ...this.chainInfo.rpcConfig,
-            ...{
-              baseURL: this.chainInfo.rpc,
-              cancelToken: this.lastFetchingCancleToken.token
-            }
-          }),
-          this.bech32Address,
-          this.chainInfo.bech32Config.bech32PrefixAccAddr
-        )
-      );
+      const isStargate = this.chainInfo.features
+        ? this.chainInfo.features.includes("stargate")
+        : false;
 
-      this.pushAssets(account.getCoins());
+      if (!isStargate) {
+        const account = await task(
+          queryAccount(
+            Axios.create({
+              ...this.chainInfo.rpcConfig,
+              ...{
+                baseURL: this.chainInfo.rpc,
+                cancelToken: this.lastFetchingCancleToken.token
+              }
+            }),
+            this.bech32Address,
+            this.chainInfo.bech32Config.bech32PrefixAccAddr,
+            { isStargate }
+          )
+        );
+
+        this.pushAssets(account.getCoins());
+      } else {
+        // In stargate, the assets doens't exist on account itself.
+        // It exists on the bank module. So, we should to fetch the balances from bank module.
+        const restInstance = Axios.create({
+          ...this.chainInfo.restConfig,
+          ...{
+            baseURL: this.chainInfo.rest,
+            cancelToken: this.lastFetchingCancleToken.token
+          }
+        });
+
+        const result = await task(
+          restInstance.get<{
+            result: {
+              denom: string;
+              amount: string;
+            }[];
+          }>(`/bank/balances/${this.bech32Address}`)
+        );
+
+        if (result.status !== 200) {
+          throw new Error(result.statusText);
+        }
+
+        const balances: Coin[] = [];
+        for (const asset of result.data.result) {
+          const balance = new Coin(asset.denom, asset.amount);
+          balances.push(balance);
+        }
+
+        this.pushAssets(balances);
+      }
+
       this.lastAssetFetchingError = undefined;
       // Save the assets to storage.
       await task(

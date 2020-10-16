@@ -36,7 +36,7 @@ const handleRequestBackgroundTxMsg: (
       msg.origin
     );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await keeper.requestTx(msg.chainId, msg.txBytes, msg.mode!);
+    await keeper.requestTx(msg.chainId, msg.txBytes, msg.mode!, msg.isRestAPI);
     return {};
   };
 };
@@ -54,7 +54,8 @@ const handleRequestBackgroundTxWithResultMsg: (
       msg.chainId,
       msg.txBytes,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      msg.mode!
+      msg.mode!,
+      msg.isRestAPI
     );
   };
 };

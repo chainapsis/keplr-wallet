@@ -32,18 +32,32 @@ export class BackgroundTxKeeper {
   async requestTx(
     chainId: string,
     txBytes: string,
-    mode: "sync" | "async" | "commit"
+    mode: "sync" | "async" | "commit",
+    isRestAPI: boolean
   ) {
     const info = await this.chainsKeeper.getChainInfo(chainId);
-    const instance = Axios.create({
+    const rpcInstance = Axios.create({
       ...{
         baseURL: info.rpc
       },
       ...info.rpcConfig
     });
+    const restInstance = Axios.create({
+      ...{
+        baseURL: info.rest
+      },
+      ...info.restConfig
+    });
 
     // Do not await.
-    BackgroundTxKeeper.sendTransaction(chainId, instance, txBytes, mode);
+    BackgroundTxKeeper.sendTransaction(
+      chainId,
+      rpcInstance,
+      restInstance,
+      txBytes,
+      mode,
+      isRestAPI
+    );
 
     return;
   }
@@ -51,33 +65,44 @@ export class BackgroundTxKeeper {
   async requestTxWithResult(
     chainId: string,
     txBytes: string,
-    mode: "sync" | "async" | "commit"
+    mode: "sync" | "async" | "commit",
+    isRestAPI: boolean
   ): Promise<ResultBroadcastTx | ResultBroadcastTxCommit> {
     const info = await this.chainsKeeper.getChainInfo(chainId);
-    const instance = Axios.create({
+    const rpcInstance = Axios.create({
       ...{
         baseURL: info.rpc
       },
       ...info.rpcConfig
     });
+    const restInstance = Axios.create({
+      ...{
+        baseURL: info.rest
+      },
+      ...info.restConfig
+    });
 
     return await BackgroundTxKeeper.sendTransaction(
       chainId,
-      instance,
+      rpcInstance,
+      restInstance,
       txBytes,
-      mode
+      mode,
+      isRestAPI
     );
   }
 
   private static async sendTransaction(
     chainId: string,
-    instance: AxiosInstance,
+    rpcInstance: AxiosInstance,
+    restInstance: AxiosInstance,
     txBytes: string,
-    mode: "sync" | "async" | "commit"
+    mode: "sync" | "async" | "commit",
+    isRestAPI: boolean
   ): Promise<ResultBroadcastTx | ResultBroadcastTxCommit> {
     const rpc = new TendermintRPC(
       new Context({
-        rpcInstance: instance
+        rpcInstance
       } as IContext)
     );
 
@@ -91,10 +116,26 @@ export class BackgroundTxKeeper {
     });
 
     try {
-      if (mode === "commit") {
-        result = await rpc.broadcastTxCommit(Buffer.from(txBytes, "hex"));
+      if (!isRestAPI) {
+        if (mode === "commit") {
+          result = await rpc.broadcastTxCommit(Buffer.from(txBytes, "hex"));
+        } else {
+          result = await rpc.broadcastTx(Buffer.from(txBytes, "hex"), mode);
+        }
       } else {
-        result = await rpc.broadcastTx(Buffer.from(txBytes, "hex"), mode);
+        const json = JSON.parse(Buffer.from(txBytes, "hex").toString());
+        const restResult = await restInstance.post<
+          ResultBroadcastTx | ResultBroadcastTxCommit
+        >("/txs", {
+          tx: json,
+          mode: mode === "commit" ? "block" : mode
+        });
+
+        if (restResult.status !== 200 && restResult.status !== 202) {
+          throw new Error(restResult.statusText);
+        }
+
+        result = restResult.data;
       }
 
       BackgroundTxKeeper.processTxResultNotification(result);
@@ -118,11 +159,7 @@ export class BackgroundTxKeeper {
     result: ResultBroadcastTx | ResultBroadcastTxCommit
   ): void {
     try {
-      if (result.mode === "sync" || result.mode === "async") {
-        if (result.code !== 0) {
-          throw new Error(result.log);
-        }
-      } else if (result.mode === "commit") {
+      if (result.mode === "commit") {
         if (result.checkTx.code !== undefined && result.checkTx.code !== 0) {
           throw new Error(result.checkTx.log);
         }
@@ -131,6 +168,12 @@ export class BackgroundTxKeeper {
           result.deliverTx.code !== 0
         ) {
           throw new Error(result.deliverTx.log);
+        }
+      } else {
+        if (result.code != null && result.code !== 0) {
+          // XXX: Hack of the support of the stargate.
+          const log = result.log ?? (result as any)["raw_log"];
+          throw new Error(log);
         }
       }
 
