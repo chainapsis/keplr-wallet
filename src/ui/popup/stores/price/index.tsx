@@ -18,7 +18,7 @@ interface CoinGeckoPriceResult {
   };
 }
 
-interface Price {
+export interface Price {
   value: Dec;
   isFetching: boolean;
 }

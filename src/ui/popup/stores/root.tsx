@@ -16,6 +16,7 @@ export class RootStore {
     this.accountStore = new AccountStore(this);
     this.keyRingStore = new KeyRingStore(this);
     this.priceStore = new PriceStore();
+
     this.chainStore = new ChainStore(this, EmbedChainInfos);
 
     this.chainStore.init();

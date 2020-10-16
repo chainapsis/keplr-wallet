@@ -7,7 +7,7 @@
   justify-content: space-around;
   align-items: center;
 
-  padding: 20px 0;
+  padding: 14px 0;
 
   .title {
     font-size: 14px;
@@ -35,13 +35,59 @@
     color: #8f8f8f;
   }
 
-  .indicator-icon {
-    position: absolute;
-    right: -26px;
-  }
-
   :global(.popper) {
     font-size: 14px;
     min-width: 140px;
+  }
+}
+
+.container-chart {
+  position: relative;
+
+  .center-text {
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    .big {
+      font-size: 13px;
+      color: #32325d;
+    }
+
+    .small {
+      font-size: 20px;
+      color: #32325d;
+      font-weight: bold;
+    }
+
+    .indicator-icon {
+      position: absolute;
+      width: 100%;
+    }
+  }
+
+  canvas {
+    position: relative;
+  }
+}
+
+.legend {
+  display: flex;
+  width: 100%;
+
+  .label {
+    letter-spacing: -0.3px;
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .value {
+    letter-spacing: -0.3px;
+    flex: 1;
+    display: flex;
+    font-weight: bold;
   }
 }
