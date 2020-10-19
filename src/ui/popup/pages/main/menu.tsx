@@ -8,7 +8,7 @@ import { FormattedMessage } from "react-intl";
 import { useHistory } from "react-router";
 
 export const Menu: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const { chainStore, keyRingStore } = useStore();
 
   const history = useHistory();
 
@@ -34,6 +34,20 @@ export const Menu: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.menu.settings" />
       </div>
+      {(chainStore.chainInfo.features ?? []).find(
+        feature => feature === "cosmwasm"
+      ) ? (
+        <div
+          className={styleMenu.item}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/token/add"
+            });
+          }}
+        >
+          Add Token
+        </div>
+      ) : null}
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
       <div

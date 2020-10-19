@@ -34,8 +34,6 @@ export class TokensKeeper {
     currency: AppCurrency
   ): Promise<AppCurrency> {
     // Validate the schema.
-    currency = await CurrencySchema.validateAsync(currency);
-
     if ("type" in currency) {
       switch (currency.type) {
         case "cw20":
@@ -47,6 +45,8 @@ export class TokensKeeper {
         default:
           throw new Error("Unknown type of currency");
       }
+    } else {
+      currency = await CurrencySchema.validateAsync(currency);
     }
 
     return currency;
