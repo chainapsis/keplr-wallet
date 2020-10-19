@@ -9,6 +9,7 @@ import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import Axios from "axios";
+import { TokensKeeper } from "../tokens/keeper";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -124,6 +125,19 @@ export class ChainsKeeper {
     origin: string
   ): Promise<void> {
     chainInfo = await ChainInfoSchema.validateAsync(chainInfo);
+
+    // Validate the stake currency.
+    await TokensKeeper.validateCurrency(chainInfo, chainInfo.stakeCurrency);
+
+    // Validate the currencies.
+    for (const currency of chainInfo.currencies) {
+      await TokensKeeper.validateCurrency(chainInfo, currency);
+    }
+
+    // Validate the fee currencies.
+    for (const currency of chainInfo.feeCurrencies) {
+      await TokensKeeper.validateCurrency(chainInfo, currency);
+    }
 
     if (openPopup) {
       this.windowOpener(
@@ -450,14 +464,18 @@ export class ChainsKeeper {
     return chainId !== resultChainId;
   }
 
-  private async setUpdatedChainProperty(
+  async setUpdatedChainProperty(
     chainId: string,
     updatedChainInfo: Partial<ChainInfo>
   ): Promise<void> {
-    await this.kvStore.set(
-      ChainsKeeper.getUpdatedChainPropertyKey(chainId),
-      updatedChainInfo
+    const savedChainInfo = await this.kvStore.get<Partial<ChainInfo>>(
+      ChainsKeeper.getUpdatedChainPropertyKey(chainId)
     );
+
+    await this.kvStore.set(ChainsKeeper.getUpdatedChainPropertyKey(chainId), {
+      ...savedChainInfo,
+      ...updatedChainInfo
+    });
 
     await this.kvStore.set(
       ChainsKeeper.getUpdatedChainPropertyReverseKey(

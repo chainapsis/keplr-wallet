@@ -5,6 +5,7 @@ import * as Chains from "./chains/internal";
 import * as Ledger from "./ledger/internal";
 import * as KeyRing from "./keyring/internal";
 import * as BackgroundTx from "./tx/internal";
+import * as Tokens from "./tokens/internal";
 
 import { BrowserKVStore } from "../common/kvstore";
 
@@ -24,6 +25,9 @@ const chainsKeeper = new Chains.ChainsKeeper(
   openWindow
 );
 Chains.init(messageManager, chainsKeeper);
+
+const tokensKeeper = new Tokens.TokensKeeper(chainsKeeper);
+Tokens.init(messageManager, tokensKeeper);
 
 const ledgerKeeper = new Ledger.LedgerKeeper(new BrowserKVStore("ledger"));
 Ledger.init(messageManager, ledgerKeeper);
