@@ -97,6 +97,24 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               : undefined
           }
         />
+        <Input
+          type="text"
+          label="Name"
+          value={tokenInfo.tokenInfo?.name}
+          readOnly={true}
+        />
+        <Input
+          type="text"
+          label="Symbol"
+          value={tokenInfo.tokenInfo?.symbol}
+          readOnly={true}
+        />
+        <Input
+          type="text"
+          label="Decimals"
+          value={tokenInfo.tokenInfo?.decimals}
+          readOnly={true}
+        />
         <div style={{ flex: 1 }} />
         <Button
           type="submit"
