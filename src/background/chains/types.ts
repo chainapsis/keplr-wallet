@@ -165,5 +165,14 @@ export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
     average: Joi.number().required(),
     high: Joi.number().required()
   }),
-  features: Joi.array().items(Joi.string())
+  features: Joi.array()
+    .items(Joi.string().valid("stargate", "cosmwasm", "secretwasm"))
+    .unique()
+    .custom((value: string[]) => {
+      if (value.indexOf("cosmwasm") >= 0 && value.indexOf("secretwasm") >= 0) {
+        throw new Error("cosmwasm and secretwasm are not compatible");
+      }
+
+      return value;
+    })
 });
