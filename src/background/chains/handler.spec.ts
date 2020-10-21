@@ -19,6 +19,7 @@ import {
 } from "./messages";
 import { sendMessage } from "../../common/message/send/mock";
 import delay from "delay";
+import { ChainUpdaterKeeper } from "../updater/keeper";
 
 describe("Test chains handler", () => {
   let messageManager: MockMessageManager;
@@ -43,6 +44,7 @@ describe("Test chains handler", () => {
 
     const keeper = new ChainsKeeper(
       new MemoryKVStore("chains"),
+      new ChainUpdaterKeeper(new MemoryKVStore("updater")),
       [
         {
           rpc: "nope",

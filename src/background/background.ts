@@ -5,6 +5,7 @@ import * as Chains from "./chains/internal";
 import * as Ledger from "./ledger/internal";
 import * as KeyRing from "./keyring/internal";
 import * as BackgroundTx from "./tx/internal";
+import * as Updater from "./updater/internal";
 
 import { BrowserKVStore } from "../common/kvstore";
 
@@ -17,8 +18,13 @@ const messageManager = new MessageManager();
 const persistentMemory = new PersistentMemory.PersistentMemoryKeeper();
 PersistentMemory.init(messageManager, persistentMemory);
 
+const chainUpdaterKeeper = new Updater.ChainUpdaterKeeper(
+  new BrowserKVStore("updater")
+);
+
 const chainsKeeper = new Chains.ChainsKeeper(
   new BrowserKVStore("chains"),
+  chainUpdaterKeeper,
   EmbedChainInfos,
   EmbedAccessOrigins,
   openWindow

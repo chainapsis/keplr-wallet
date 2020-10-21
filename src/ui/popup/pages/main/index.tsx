@@ -15,11 +15,11 @@ import classnames from "classnames";
 import { useHistory } from "react-router";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
-import { ChainsKeeper } from "../../../../background/chains/keeper";
 import { useConfirm } from "../../../components/confirm";
 import { useIntl } from "react-intl";
 import { TokensView } from "./token";
 import { Int } from "@chainapsis/cosmosjs/common/int";
+import { ChainUpdaterKeeper } from "../../../../background/updater/keeper";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -34,7 +34,7 @@ export const MainPage: FunctionComponent = observer(() => {
     if (prevChainId.current !== chainStore.chainInfo.chainId) {
       // FIXME: This will be executed twice on initial because chain store set the chain info on constructor and init.
       (async () => {
-        if (await ChainsKeeper.checkChainUpdate(chainStore.chainInfo)) {
+        if (await ChainUpdaterKeeper.checkChainUpdate(chainStore.chainInfo)) {
           // If chain info has been changed, warning the user wether update the chain or not.
           if (
             await confirm.confirm({
@@ -56,7 +56,7 @@ export const MainPage: FunctionComponent = observer(() => {
     }
 
     prevChainId.current = chainStore.chainInfo.chainId;
-  }, [chainStore, confirm, intl]);
+  }, [chainStore, chainStore.chainInfo, confirm, intl]);
 
   const stakeCurrency = chainStore.chainInfo.stakeCurrency;
 
