@@ -2,9 +2,13 @@ import { AppCurrency, CW20Currency } from "../../common/currency";
 import { ChainInfo, CurrencySchema, CW20CurrencyShema } from "../chains";
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 import { ChainsKeeper } from "../chains/keeper";
+import { ChainUpdaterKeeper } from "../updater/keeper";
 
 export class TokensKeeper {
-  constructor(private chainsKeeper: ChainsKeeper) {}
+  constructor(
+    private readonly chainsKeeper: ChainsKeeper,
+    private readonly chainUpdaterKeeper: ChainUpdaterKeeper
+  ) {}
 
   async addToken(chainId: string, currency: AppCurrency) {
     const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
@@ -24,9 +28,10 @@ export class TokensKeeper {
       }
     }
 
-    await this.chainsKeeper.setUpdatedChainProperty(chainId, {
-      currencies: [...chainInfo.currencies, currency]
-    });
+    await this.chainUpdaterKeeper.updateChainCurrencies(chainId, [
+      ...chainInfo.currencies,
+      currency
+    ]);
   }
 
   static async validateCurrency(

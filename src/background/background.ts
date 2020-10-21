@@ -32,7 +32,7 @@ const chainsKeeper = new Chains.ChainsKeeper(
 );
 Chains.init(messageManager, chainsKeeper);
 
-const tokensKeeper = new Tokens.TokensKeeper(chainsKeeper);
+const tokensKeeper = new Tokens.TokensKeeper(chainsKeeper, chainUpdaterKeeper);
 Tokens.init(messageManager, tokensKeeper);
 
 const ledgerKeeper = new Ledger.LedgerKeeper(new BrowserKVStore("ledger"));

@@ -1,6 +1,7 @@
 import { ChainInfo } from "../chains";
 import Axios from "axios";
 import { KVStore } from "../../common/kvstore";
+import { AppCurrency } from "../../common/currency";
 
 // IsVersionFormat checks if a chainID is in the format required for parsing versions
 // The chainID must be in the form: `{identifier}-{version}`
@@ -20,6 +21,16 @@ export class ChainUpdaterKeeper {
       ...chainInfo,
       ...updatedProperty
     };
+  }
+
+  async updateChainCurrencies(chainId: string, currencies: AppCurrency[]) {
+    const version = ChainUpdaterKeeper.getChainVersion(chainId);
+
+    const chainInfo: Partial<ChainInfo> = {
+      currencies
+    };
+
+    await this.saveChainProperty(version.identifier, chainInfo);
   }
 
   async clearUpdatedProperty(chainId: string) {
@@ -80,24 +91,9 @@ export class ChainUpdaterKeeper {
   private async getUpdatedChainProperty(
     chainId: string
   ): Promise<Partial<ChainInfo>> {
-    let resultChainId = chainId;
-
     const version = ChainUpdaterKeeper.getChainVersion(chainId);
 
-    // Handle the chain id if it was updated.
-    const chainInfo = await this.loadChainProperty(version.identifier);
-    if (chainInfo.chainId) {
-      const updatedVersion = ChainUpdaterKeeper.getChainVersion(
-        chainInfo.chainId
-      );
-      if (updatedVersion.version > version.version) {
-        resultChainId = chainInfo.chainId;
-      }
-    }
-
-    return {
-      chainId: resultChainId
-    };
+    return await this.loadChainProperty(version.identifier);
   }
 
   private async saveChainProperty(
@@ -153,7 +149,15 @@ export class ChainUpdaterKeeper {
 
     const resultChainId = result.data.result.block.header.chain_id;
 
-    return chainId !== resultChainId;
+    const version = ChainUpdaterKeeper.getChainVersion(chainId);
+    const fetchedVersion = ChainUpdaterKeeper.getChainVersion(resultChainId);
+
+    // TODO: Should throw an error?
+    if (version.identifier !== fetchedVersion.identifier) {
+      return false;
+    }
+
+    return version.version < fetchedVersion.version;
   }
 
   static getChainVersion(
