@@ -188,10 +188,26 @@ export class AccountStore {
       }
 
       this.lastAssetFetchingError = undefined;
+
       // Load the assets from storage.
       this.assets = await task(
         this.loadAssetsFromStorage(this.chainInfo.chainId, this.bech32Address)
       );
+
+      // Clear the assets that hasn't been registered.
+      // NOTE: Currently, there is a bug that assets is saved to invalid chain id if the chain is changed before finishing fetching.
+      //       To solve this problem, just remove the unintended assets when loading it from cache storage.
+      //       This way may be not good for performance if the currencies is too many.
+      //       We solve the problem in this way temporarily.
+      for (const asset of this.assets) {
+        const find = this.chainInfo.currencies.find(
+          cur => cur.coinMinimalDenom === asset.denom
+        );
+        if (!find) {
+          this.removeAsset(asset.denom);
+        }
+      }
+
       // Load the staked assets from storage.
       const stakedAsset = await task(
         this.loadAssetsFromStorage(

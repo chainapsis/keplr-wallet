@@ -50,6 +50,7 @@ import { MessageManager } from "../../common/message/manager";
 import { POPUP_PORT } from "../../common/message/constant";
 import { InitLedgerNotifiyHandler } from "../../background/ledger/foreground";
 import { BackgroundTxProvider } from "./background-tx-provider";
+import { AddTokenPage } from "./pages/setting/token/add";
 
 currencyInit(LanguageToFiatCurrency);
 
@@ -222,6 +223,11 @@ ReactDOM.render(
                       exact
                       path="/setting/clear/:index"
                       component={ClearPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/token/add"
+                      component={AddTokenPage}
                     />
                     <Route path="/sign/:id" component={SignPage} />
                     <Route
