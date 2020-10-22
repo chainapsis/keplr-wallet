@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { shortenAddress } from "../../../../common/address";
 import { truncHashPortion } from "../../../../common/hash";
 import { CoinUtils } from "../../../../common/coin-utils";
@@ -6,6 +6,13 @@ import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { IntlShape, FormattedMessage, useIntl } from "react-intl";
 import { Currency } from "../../../../common/currency";
 import { Button } from "reactstrap";
+import { sendMessage } from "../../../../common/message/send";
+import { BACKGROUND_PORT } from "../../../../common/message/constant";
+import { RequestDecryptMsg } from "../../../../background/secret-wasm";
+import { observer } from "mobx-react";
+import { useStore } from "../../stores";
+
+const Buffer = require("buffer/").Buffer;
 
 export interface MessageObj {
   type: string;
@@ -89,11 +96,13 @@ interface MsgInstantiateContract {
   };
 }
 
+// This message can be a normal cosmwasm message or a secret-wasm message.
 interface MsgExecuteContract {
   type: "wasm/MsgExecuteContract";
   value: {
     contract: string;
-    msg: object;
+    // If message is for secret-wasm, msg will be the base64 encoded and encrypted string.
+    msg: object | string;
     sender: string;
     sent_funds: [
       {
@@ -101,6 +110,9 @@ interface MsgExecuteContract {
         denom: string;
       }
     ];
+    // The bottom two fields are for secret-wasm message.
+    callback_code_hash?: string;
+    callback_sig?: string | null;
   };
 }
 
@@ -321,6 +333,7 @@ export function renderMessage(
     };
   }
 
+  // TODO: Show users that this message is encrypted if message is for secret-wasm
   if (MessageType<MsgExecuteContract>(msg, "wasm/MsgExecuteContract")) {
     const sent: { amount: string; denom: string }[] = [];
     for (const coinPrimitive of msg.value.sent_funds) {
@@ -405,22 +418,55 @@ export function renderMessage(
   };
 }
 /* eslint-enable react/display-name */
+export const WasmExecutionMsgView: FunctionComponent<{
+  msg: object | string;
+}> = observer(({ msg }) => {
+  const { chainStore } = useStore();
 
-export const WasmExecutionMsgView: FunctionComponent<{ msg: object }> = ({
-  msg
-}) => {
   const [isOpen, setIsOpen] = useState(false);
   const intl = useIntl();
 
   const toggleOpen = () => setIsOpen(isOpen => !isOpen);
 
+  const [detailsMsg, setDetailsMsg] = useState(JSON.stringify(msg, null, 2));
+
+  useEffect(() => {
+    // If msg is string, it will be the message for secret-wasm.
+    // So, try to decrypt.
+    // But, if this msg is not encrypted via Kepler, Kepler cannot decrypt it.
+    // TODO: Handle the error case. If an error occurs, rather than rejecting the signing, it informs the user that Kepler cannot decrypt it and allows the user to choose.
+    if (typeof msg === "string") {
+      (async () => {
+        let cipherText = Buffer.from(Buffer.from(msg, "base64"));
+        // Msg is start with 32 bytes nonce and 32 bytes public key.
+        const nonce = cipherText.slice(0, 32);
+        cipherText = cipherText.slice(64);
+
+        let plainText = Buffer.from(
+          await sendMessage(
+            BACKGROUND_PORT,
+            new RequestDecryptMsg(
+              chainStore.chainInfo.chainId,
+              cipherText.toString("hex"),
+              nonce.toString("hex")
+            )
+          ),
+          "hex"
+        );
+
+        // Remove the contract code hash.
+        plainText = plainText.slice(64);
+
+        setDetailsMsg(
+          JSON.stringify(JSON.parse(plainText.toString()), null, 2)
+        );
+      })();
+    }
+  }, [chainStore.chainInfo.chainId, msg]);
+
   return (
     <div>
-      {
-        <pre style={{ width: "280px" }}>
-          {isOpen ? JSON.stringify(msg, null, 2) : ""}
-        </pre>
-      }
+      {<pre style={{ width: "280px" }}>{isOpen ? detailsMsg : ""}</pre>}
       <Button
         size="sm"
         style={{ position: "absolute", right: "20px" }}
@@ -442,7 +488,7 @@ export const WasmExecutionMsgView: FunctionComponent<{ msg: object }> = ({
       <div style={{ height: "36px" }} />
     </div>
   );
-};
+});
 
 function clearDecimals(dec: string): string {
   for (let i = dec.length - 1; i >= 0; i--) {

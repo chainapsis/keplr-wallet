@@ -55,6 +55,7 @@
     "reactstrap": "^8.4.1",
     "scrypt-js": "^2.0.4",
     "scryptsy": "^2.1.0",
+    "secretjs": "^0.9.17",
     "sha.js": "^2.4.11",
     "web3": "^1.2.6",
     "webextension-polyfill": "^0.6.0"
