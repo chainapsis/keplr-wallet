@@ -22,10 +22,16 @@ export interface CW20Currency extends Currency {
   contractAddress: string;
 }
 
+export interface Secret20Currency extends Currency {
+  type: "secret20";
+  contractAddress: string;
+  viewingKey: string;
+}
+
 /**
  * Any type of currency that Kepler applications can support.
  */
-export type AppCurrency = Currency | CW20Currency;
+export type AppCurrency = Currency | CW20Currency | Secret20Currency;
 
 export interface FiatCurrency {
   currency: string;
