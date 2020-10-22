@@ -7,7 +7,6 @@ const Buffer = require("buffer/").Buffer;
 
 export class SecretWasmKeeper {
   constructor(
-    private readonly testnetChainId: string,
     private readonly chainsKeeper: ChainsKeeper,
     private readonly keyRingKeeper: KeyRingKeeper
   ) {}
@@ -17,10 +16,6 @@ export class SecretWasmKeeper {
     contractCodeHash: string,
     msg: object
   ): Promise<Uint8Array> {
-    if (chainId !== this.testnetChainId) {
-      throw new Error("Only supported on testnet");
-    }
-
     const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
 
     const keyRingType = await this.keyRingKeeper.getKeyRingType();
@@ -55,10 +50,6 @@ export class SecretWasmKeeper {
     ciphertext: Uint8Array,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    if (chainId !== this.testnetChainId) {
-      throw new Error("Only supported on testnet");
-    }
-
     const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
 
     const keyRingType = await this.keyRingKeeper.getKeyRingType();

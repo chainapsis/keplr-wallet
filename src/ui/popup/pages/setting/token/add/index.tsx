@@ -32,9 +32,13 @@ export const AddTokenPage: FunctionComponent = observer(() => {
   const contractAddress = form.watch("contractAddress");
 
   const tokenInfo = useWasmTokenInfo(
+    chainStore.chainInfo.chainId,
     chainStore.chainInfo.rest,
     contractAddress,
-    chainStore.chainInfo.restConfig
+    chainStore.chainInfo.restConfig,
+    (chainStore.chainInfo.features ?? []).find(
+      feature => feature === "secretwasm"
+    ) != null
   );
 
   return (

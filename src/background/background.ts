@@ -48,7 +48,6 @@ const keyRingKeeper = new KeyRing.KeyRingKeeper(
 KeyRing.init(messageManager, keyRingKeeper);
 
 const secretWasmKeeper = new SecretWasm.SecretWasmKeeper(
-  "holodeck",
   chainsKeeper,
   keyRingKeeper
 );

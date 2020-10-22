@@ -35,7 +35,7 @@ export const Menu: FunctionComponent = observer(() => {
         <FormattedMessage id="main.menu.settings" />
       </div>
       {(chainStore.chainInfo.features ?? []).find(
-        feature => feature === "cosmwasm"
+        feature => feature === "cosmwasm" || feature === "secretwasm"
       ) ? (
         <div
           className={styleMenu.item}
