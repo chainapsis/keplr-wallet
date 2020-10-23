@@ -102,7 +102,7 @@ export class MsgExecuteContract extends Msg {
   public async encrypt(
     restInstance: AxiosInstance,
     encrypter: (contractCodeHash: string, msg: object) => Promise<Uint8Array>
-  ) {
+  ): Promise<Uint8Array> {
     const contractCodeHashResult = await restInstance.get<{
       result: string;
     }>(`/wasm/contract/${this.contract.toBech32()}/code-hash`);
@@ -110,5 +110,8 @@ export class MsgExecuteContract extends Msg {
     const contractCodeHash = contractCodeHashResult.data.result;
 
     this.msg = await encrypter(contractCodeHash, this.rawMsg);
+
+    // Return nonce.
+    return this.msg.slice(0, 32);
   }
 }

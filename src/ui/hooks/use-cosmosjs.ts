@@ -25,13 +25,17 @@ import { RequestBackgroundTxMsg } from "../../background/tx";
 import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
 import Axios from "axios";
+import {
+  ResultBroadcastTx,
+  ResultBroadcastTxCommit
+} from "@chainapsis/cosmosjs/rpc/tx";
 
 const Buffer = require("buffer/").Buffer;
 
 export type SendMsgs = (
   msgs: Msg[],
   config: TxBuilderConfig,
-  onSuccess?: () => void,
+  onSuccess?: (result?: ResultBroadcastTx | ResultBroadcastTxCommit) => void,
   onFail?: (e: Error) => void,
   mode?: "commit" | "sync" | "async"
 ) => Promise<void>;
@@ -169,7 +173,9 @@ export const useCosmosJS = <R extends Rest = Rest>(
     const _sendMsgs: SendMsgs = async (
       msgs: Msg[],
       config: TxBuilderConfig,
-      onSuccess?: () => void,
+      onSuccess?: (
+        result?: ResultBroadcastTx | ResultBroadcastTxCommit
+      ) => void,
       onFail?: (e: Error) => void,
       mode: "commit" | "sync" | "async" = "commit"
     ) => {
@@ -201,6 +207,10 @@ export const useCosmosJS = <R extends Rest = Rest>(
                 throw new Error(result.deliverTx.log);
               }
             }
+
+            if (onSuccess) {
+              onSuccess(result);
+            }
           } else {
             const tx = await api.context.get("txBuilder")(
               api.context,
@@ -221,10 +231,10 @@ export const useCosmosJS = <R extends Rest = Rest>(
               isStargate
             );
             await sendMessage(BACKGROUND_PORT, msg);
-          }
 
-          if (onSuccess) {
-            onSuccess();
+            if (onSuccess) {
+              onSuccess();
+            }
           }
         } else {
           throw new Error("their is no wallet");
