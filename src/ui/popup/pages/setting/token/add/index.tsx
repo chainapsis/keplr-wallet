@@ -104,19 +104,19 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         <Input
           type="text"
           label="Name"
-          value={tokenInfo.tokenInfo?.name}
+          value={tokenInfo.tokenInfo?.name ?? ""}
           readOnly={true}
         />
         <Input
           type="text"
           label="Symbol"
-          value={tokenInfo.tokenInfo?.symbol}
+          value={tokenInfo.tokenInfo?.symbol ?? ""}
           readOnly={true}
         />
         <Input
           type="text"
           label="Decimals"
-          value={tokenInfo.tokenInfo?.decimals}
+          value={tokenInfo.tokenInfo?.decimals ?? ""}
           readOnly={true}
         />
         <div style={{ flex: 1 }} />
