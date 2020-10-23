@@ -15,6 +15,13 @@ import { Int } from "@chainapsis/cosmosjs/common/int";
 import { Msg } from "@chainapsis/cosmosjs/core/tx";
 import { MsgSend } from "@chainapsis/cosmosjs/x/bank";
 import { MsgExecuteContract } from "@chainapsis/cosmosjs/x/wasm";
+import { MsgExecuteContract as SecretMsgExecuteContract } from "../../../common/secretjs/x/compute";
+import { AxiosInstance } from "axios";
+import { sendMessage } from "../../../common/message/send";
+import { BACKGROUND_PORT } from "../../../common/message/constant";
+import { ReqeustEncryptMsg } from "../../../background/secret-wasm";
+
+const Buffer = require("buffer/").Buffer;
 
 type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 
@@ -41,7 +48,11 @@ export interface TxState {
 
   // Generate the send message according to the type.
   // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
-  generateSendMsg(sender: AccAddress): Promise<Msg>;
+  generateSendMsg(
+    chainId: string,
+    sender: AccAddress,
+    restInstance: AxiosInstance
+  ): Promise<Msg>;
 
   // TODO: Check the equality of the object value to prevent the infinite render.
   setRawAddress(rawAddress: string): void;
@@ -89,7 +100,11 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
   const [balances, setBalances] = useState<Coin[]>([]);
 
   const generateSendMsg = useCallback(
-    async (sender: AccAddress) => {
+    async (
+      chainId: string,
+      sender: AccAddress,
+      restInstance: AxiosInstance
+    ) => {
       if (!recipient || !amount) {
         throw new Error("recipient or amount is not set");
       }
@@ -111,6 +126,39 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
               },
               []
             );
+          case "secret20":
+            const msg = new SecretMsgExecuteContract(
+              sender,
+              AccAddress.fromBech32(split[1]),
+              {
+                transfer: {
+                  recipient: recipient.toBech32(),
+                  amount: amount.amount.toString()
+                }
+              },
+              "",
+              []
+            );
+
+            await msg.encrypt(
+              restInstance,
+              async (contractCodeHash, msg): Promise<Uint8Array> => {
+                return Buffer.from(
+                  await sendMessage(
+                    BACKGROUND_PORT,
+                    new ReqeustEncryptMsg(
+                      "12345678",
+                      chainId,
+                      contractCodeHash,
+                      msg
+                    )
+                  ),
+                  "hex"
+                );
+              }
+            );
+
+            return msg;
           default:
             throw new Error("Unknown type of token");
         }
