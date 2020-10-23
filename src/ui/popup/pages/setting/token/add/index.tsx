@@ -273,6 +273,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
           type="text"
           label="Contract Address"
           name="contractAddress"
+          autoComplete="off"
           ref={form.register({
             required: "Contract address is required",
             validate: (value: string): string | undefined => {
@@ -299,6 +300,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             type="text"
             label="Viewing Key"
             name="viewingKey"
+            autoComplete="off"
             ref={form.register({
               required: "Viewing key is required"
             })}
