@@ -1,5 +1,14 @@
-import { AppCurrency, CW20Currency } from "../../common/currency";
-import { ChainInfo, CurrencySchema, CW20CurrencyShema } from "../chains";
+import {
+  AppCurrency,
+  CW20Currency,
+  Secret20Currency
+} from "../../common/currency";
+import {
+  ChainInfo,
+  CurrencySchema,
+  CW20CurrencyShema,
+  Secret20CurrencyShema
+} from "../chains";
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 import { ChainsKeeper } from "../chains/keeper";
 import { ChainUpdaterKeeper } from "../updater/keeper";
@@ -47,6 +56,12 @@ export class TokensKeeper {
             currency
           );
           break;
+        case "secret20":
+          currency = await TokensKeeper.validateSecret20Currency(
+            chainInfo,
+            currency
+          );
+          break;
         default:
           throw new Error("Unknown type of currency");
       }
@@ -63,6 +78,22 @@ export class TokensKeeper {
   ): Promise<CW20Currency> {
     // Validate the schema.
     currency = await CW20CurrencyShema.validateAsync(currency);
+
+    // Validate the contract address.
+    AccAddress.fromBech32(
+      currency.contractAddress,
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    );
+
+    return currency;
+  }
+
+  static async validateSecret20Currency(
+    chainInfo: ChainInfo,
+    currency: Secret20Currency
+  ): Promise<Secret20Currency> {
+    // Validate the schema.
+    currency = await Secret20CurrencyShema.validateAsync(currency);
 
     // Validate the contract address.
     AccAddress.fromBech32(
