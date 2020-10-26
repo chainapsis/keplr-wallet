@@ -83,6 +83,10 @@ export class KeyRingKeeper {
     return this.keyRing.status;
   }
 
+  get keyRingStatus(): KeyRingStatus {
+    return this.keyRing.status;
+  }
+
   async checkAccessOrigin(
     extensionBaseURL: string,
     chainId: string,
@@ -182,9 +186,13 @@ export class KeyRingKeeper {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    return this.keyRing.getKey(
+    return this.getKeyByCoinType(
       (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType
     );
+  }
+
+  async getKeyByCoinType(coinType: number): Promise<Key> {
+    return this.keyRing.getKey(coinType);
   }
 
   async requestTxBuilderConfig(

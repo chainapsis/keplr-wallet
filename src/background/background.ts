@@ -24,17 +24,18 @@ const chainUpdaterKeeper = new Updater.ChainUpdaterKeeper(
   new BrowserKVStore("updater")
 );
 
+const tokensKeeper = new Tokens.TokensKeeper(new BrowserKVStore("tokens"));
+Tokens.init(messageManager, tokensKeeper);
+
 const chainsKeeper = new Chains.ChainsKeeper(
   new BrowserKVStore("chains"),
   chainUpdaterKeeper,
+  tokensKeeper,
   EmbedChainInfos,
   EmbedAccessOrigins,
   openWindow
 );
 Chains.init(messageManager, chainsKeeper);
-
-const tokensKeeper = new Tokens.TokensKeeper(chainsKeeper, chainUpdaterKeeper);
-Tokens.init(messageManager, tokensKeeper);
 
 const ledgerKeeper = new Ledger.LedgerKeeper(new BrowserKVStore("ledger"));
 Ledger.init(messageManager, ledgerKeeper);
@@ -46,6 +47,8 @@ const keyRingKeeper = new KeyRing.KeyRingKeeper(
   openWindow
 );
 KeyRing.init(messageManager, keyRingKeeper);
+
+tokensKeeper.init(chainsKeeper, keyRingKeeper);
 
 const secretWasmKeeper = new SecretWasm.SecretWasmKeeper(
   chainsKeeper,

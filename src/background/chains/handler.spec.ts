@@ -45,6 +45,8 @@ describe("Test chains handler", () => {
     const keeper = new ChainsKeeper(
       new MemoryKVStore("chains"),
       new ChainUpdaterKeeper(new MemoryKVStore("updater")),
+      // TODO: Fix me
+      undefined as any,
       [
         {
           rpc: "nope",

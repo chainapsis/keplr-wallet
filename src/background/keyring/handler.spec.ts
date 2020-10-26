@@ -58,6 +58,8 @@ describe("Test keyring handler", () => {
     const chainsKeeper = new ChainsKeeper(
       new MemoryKVStore("chains"),
       new ChainUpdaterKeeper(new MemoryKVStore("updater")),
+      // TODO: Fix me
+      undefined as any,
       [
         {
           rpc: "nope",

@@ -184,6 +184,8 @@ export class KeyRingStore {
     );
     this.setKeyRingType(type);
 
+    await this.rootStore.refreshChainList();
+
     this.rootStore.changeKeyRing();
   }
 
@@ -199,6 +201,8 @@ export class KeyRingStore {
     const msg = new UnlockKeyRingMsg(password);
     const result = await task(sendMessage(BACKGROUND_PORT, msg));
     this.setStatus(result.status);
+
+    await this.rootStore.refreshChainList();
   }
 
   @actionAsync
@@ -241,6 +245,8 @@ export class KeyRingStore {
       sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
     );
     this.setKeyRingType(type);
+
+    await this.rootStore.refreshChainList();
 
     this.rootStore.changeKeyRing();
   }
