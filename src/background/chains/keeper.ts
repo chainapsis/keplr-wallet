@@ -202,6 +202,7 @@ export class ChainsKeeper {
 
     // Clear the updated chain info.
     await this.chainUpdaterKeeper.clearUpdatedProperty(chainId);
+    await this.tokensKeeper.clearTokens(chainId);
 
     // Clear the access origin.
     await this.clearAccessOrigins(chainId);

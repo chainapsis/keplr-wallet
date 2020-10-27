@@ -102,6 +102,14 @@ export class TokensKeeper {
     return chainCurrencies.concat(keyCurrencies);
   }
 
+  public async clearTokens(chainId: string): Promise<void> {
+    const version = ChainUpdaterKeeper.getChainVersion(chainId);
+
+    await this.kvStore.set(version.identifier, null);
+
+    // TODO: Remove the tokens that has been registered according to the account.
+  }
+
   private async getTokensFromChain(chainId: string): Promise<AppCurrency[]> {
     const version = ChainUpdaterKeeper.getChainVersion(chainId);
 
