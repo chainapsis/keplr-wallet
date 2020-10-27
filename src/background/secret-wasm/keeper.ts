@@ -22,9 +22,6 @@ export class SecretWasmKeeper {
     if (keyRingType === "none") {
       throw new Error("Key ring is not initialized");
     }
-    if (keyRingType === "ledger") {
-      throw new Error("Ledger is not supported yet");
-    }
 
     // XXX: Keplr should generate the seed deterministically according to the account.
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
@@ -34,7 +31,19 @@ export class SecretWasmKeeper {
       Buffer.from(
         await this.keyRingKeeper.sign(
           chainId,
-          Buffer.from(`secret-seed-for-${chainId}`)
+          Buffer.from(
+            JSON.stringify({
+              // eslint-disable-next-line @typescript-eslint/camelcase
+              account_number: 0,
+              // eslint-disable-next-line @typescript-eslint/camelcase
+              chain_id: chainId,
+              fee: [],
+              memo:
+                "Create Keplr Secret encryption key. Only approve requests by Keplr.",
+              msgs: [],
+              sequence: 0
+            })
+          )
         )
       )
     );
@@ -56,9 +65,6 @@ export class SecretWasmKeeper {
     if (keyRingType === "none") {
       throw new Error("Key ring is not initialized");
     }
-    if (keyRingType === "ledger") {
-      throw new Error("Ledger is not supported yet");
-    }
 
     // XXX: Keplr should generate the seed deterministically according to the account.
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
@@ -68,7 +74,19 @@ export class SecretWasmKeeper {
       Buffer.from(
         await this.keyRingKeeper.sign(
           chainId,
-          Buffer.from(`secret-seed-for-${chainId}`)
+          Buffer.from(
+            JSON.stringify({
+              // eslint-disable-next-line @typescript-eslint/camelcase
+              account_number: 0,
+              // eslint-disable-next-line @typescript-eslint/camelcase
+              chain_id: chainId,
+              fee: [],
+              memo:
+                "Create Keplr Secret encryption key. Only approve requests by Keplr.",
+              msgs: [],
+              sequence: 0
+            })
+          )
         )
       )
     );
