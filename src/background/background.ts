@@ -51,6 +51,7 @@ KeyRing.init(messageManager, keyRingKeeper);
 tokensKeeper.init(chainsKeeper, keyRingKeeper);
 
 const secretWasmKeeper = new SecretWasm.SecretWasmKeeper(
+  new BrowserKVStore("secretwasm"),
   chainsKeeper,
   keyRingKeeper
 );

@@ -2,11 +2,15 @@ import { EnigmaUtils } from "secretjs";
 import { KeyRingKeeper } from "../keyring/keeper";
 import { ChainsKeeper } from "../chains/keeper";
 import { Crypto } from "../keyring/crypto";
+import { KVStore } from "../../common/kvstore";
+import { ChainInfo } from "../chains";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 
 const Buffer = require("buffer/").Buffer;
 
 export class SecretWasmKeeper {
   constructor(
+    private readonly kvStore: KVStore,
     private readonly chainsKeeper: ChainsKeeper,
     private readonly keyRingKeeper: KeyRingKeeper
   ) {}
@@ -27,26 +31,7 @@ export class SecretWasmKeeper {
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
     // For now, use the signature of some string to generate the seed.
     // It need to more research.
-    const seed = Crypto.sha256(
-      Buffer.from(
-        await this.keyRingKeeper.sign(
-          chainId,
-          Buffer.from(
-            JSON.stringify({
-              // eslint-disable-next-line @typescript-eslint/camelcase
-              account_number: 0,
-              // eslint-disable-next-line @typescript-eslint/camelcase
-              chain_id: chainId,
-              fee: [],
-              memo:
-                "Create Keplr Secret encryption key. Only approve requests by Keplr.",
-              msgs: [],
-              sequence: 0
-            })
-          )
-        )
-      )
-    );
+    const seed = await this.getSeed(chainInfo);
 
     // TODO: Handle the rest config.
     const utils = new EnigmaUtils(chainInfo.rest, seed);
@@ -70,16 +55,39 @@ export class SecretWasmKeeper {
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
     // For now, use the signature of some string to generate the seed.
     // It need to more research.
+    const seed = await this.getSeed(chainInfo);
+
+    // TODO: Handle the rest config.
+    const utils = new EnigmaUtils(chainInfo.rest, seed);
+
+    return await utils.decrypt(ciphertext, nonce);
+  }
+
+  private async getSeed(chainInfo: ChainInfo): Promise<Uint8Array> {
+    const key = await this.keyRingKeeper.getKeyByCoinType(
+      chainInfo.bip44.coinType
+    );
+
+    const storeKey = `seed-${chainInfo.chainId}-${new AccAddress(
+      key.address,
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    )}`;
+
+    const cached = await this.kvStore.get(storeKey);
+    if (cached) {
+      return Buffer.from(cached, "hex");
+    }
+
     const seed = Crypto.sha256(
       Buffer.from(
         await this.keyRingKeeper.sign(
-          chainId,
+          chainInfo.chainId,
           Buffer.from(
             JSON.stringify({
               // eslint-disable-next-line @typescript-eslint/camelcase
               account_number: 0,
               // eslint-disable-next-line @typescript-eslint/camelcase
-              chain_id: chainId,
+              chain_id: chainInfo.chainId,
               fee: [],
               memo:
                 "Create Keplr Secret encryption key. Only approve requests by Keplr.",
@@ -91,10 +99,9 @@ export class SecretWasmKeeper {
       )
     );
 
-    // TODO: Handle the rest config.
-    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    await this.kvStore.set(storeKey, Buffer.from(seed).toString("hex"));
 
-    return await utils.decrypt(ciphertext, nonce);
+    return seed;
   }
 
   async checkAccessOrigin(
