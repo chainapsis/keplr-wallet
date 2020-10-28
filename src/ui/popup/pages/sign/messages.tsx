@@ -372,7 +372,7 @@ export function renderMessage(
           />
           {isSecretWasm ? (
             <Badge color="primary" pill style={{ marginTop: "6px" }}>
-              Encrypted
+              <FormattedMessage id="sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm" />
             </Badge>
           ) : (
             <br />
@@ -473,12 +473,15 @@ export const WasmExecutionMsgView: FunctionComponent<{
           setWarningMsg("");
         } catch {
           setWarningMsg(
-            "Failed to decrypt Secret message. This may be due to Keplr viewing key not matching the transaction viewing key."
+            intl.formatMessage({
+              id:
+                "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption"
+            })
           );
         }
       })();
     }
-  }, [chainStore.chainInfo.chainId, msg]);
+  }, [chainStore.chainInfo.chainId, intl, msg]);
 
   return (
     <div>
