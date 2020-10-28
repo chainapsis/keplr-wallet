@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useCallback, useState } from "react";
 import { HeaderLayout } from "../../../../layouts/header-layout";
 import { useHistory, useLocation } from "react-router";
-import { useIntl } from "react-intl";
+import { useIntl, FormattedMessage } from "react-intl";
 
 import style from "./style.module.scss";
 import { Button, Form, InputGroupAddon } from "reactstrap";
@@ -222,7 +222,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
       showChainName={false}
       canChangeChainInfo={false}
       alternativeTitle={intl.formatMessage({
-        id: "token.add"
+        id: "setting.token.add"
       })}
       onBackButton={useCallback(() => {
         history.goBack();
@@ -271,7 +271,9 @@ export const AddTokenPage: FunctionComponent = observer(() => {
       >
         <Input
           type="text"
-          label="Contract Address"
+          label={intl.formatMessage({
+            id: "setting.token.add.contract-address"
+          })}
           name="contractAddress"
           autoComplete="off"
           ref={form.register({
@@ -298,7 +300,9 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         {isSecret20 ? (
           <Input
             type="text"
-            label="Viewing Key"
+            label={intl.formatMessage({
+              id: "setting.token.add.secret20.viewing-key"
+            })}
             name="viewingKey"
             autoComplete="off"
             ref={form.register({
@@ -324,7 +328,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
                     await createViewingKey();
                   }}
                 >
-                  Create
+                  <FormattedMessage id="setting.token.add.secret20.viewing-key.button.create" />
                 </Button>
               </InputGroupAddon>
             }
@@ -332,19 +336,25 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         ) : null}
         <Input
           type="text"
-          label="Name"
+          label={intl.formatMessage({
+            id: "setting.token.add.name"
+          })}
           value={tokenInfo.tokenInfo?.name ?? ""}
           readOnly={true}
         />
         <Input
           type="text"
-          label="Symbol"
+          label={intl.formatMessage({
+            id: "setting.token.add.symbol"
+          })}
           value={tokenInfo.tokenInfo?.symbol ?? ""}
           readOnly={true}
         />
         <Input
           type="text"
-          label="Decimals"
+          label={intl.formatMessage({
+            id: "setting.token.add.decimals"
+          })}
           value={tokenInfo.tokenInfo?.decimals ?? ""}
           readOnly={true}
         />
@@ -354,7 +364,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
           color="primary"
           disabled={tokenInfo.tokenInfo == null || tokenInfo.fetching}
         >
-          Submit
+          <FormattedMessage id="setting.token.add.button.submit" />
         </Button>
       </Form>
     </HeaderLayout>

@@ -67,6 +67,15 @@
   "setting.clear.input.password.error.invalid": "잘못된 비밀번호입니다",
   "setting.clear.button.confirm": "확인",
 
+  "setting.token.add": "토큰 추가",
+  "setting.token.add.contract-address": "컨트랙트 주소",
+  "setting.token.add.name": "이름",
+  "setting.token.add.symbol": "심볼",
+  "setting.token.add.decimals": "소수점 자릿수",
+  "setting.token.add.button.submit": "등록",
+  "setting.token.add.secret20.viewing-key": "뷰잉 키",
+  "setting.token.add.secret20.viewing-key.button.create": "생성",
+
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
   "register.button.back": "뒤로",

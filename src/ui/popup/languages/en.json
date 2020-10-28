@@ -69,6 +69,15 @@
   "setting.clear.input.password.error.invalid": "Invalid password",
   "setting.clear.button.confirm": "Confirm",
 
+  "setting.token.add": "Add Token",
+  "setting.token.add.contract-address": "Contract Address",
+  "setting.token.add.name": "Name",
+  "setting.token.add.symbol": "Symbol",
+  "setting.token.add.decimals": "Decimals",
+  "setting.token.add.button.submit": "Submit",
+  "setting.token.add.secret20.viewing-key": "Viewing Key",
+  "setting.token.add.secret20.viewing-key.button.create": "Create",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",

@@ -45,7 +45,7 @@ export const Menu: FunctionComponent = observer(() => {
             });
           }}
         >
-          Add Token
+          <FormattedMessage id="setting.token.add" />
         </div>
       ) : null}
       {/* Empty div for separating last item */}
