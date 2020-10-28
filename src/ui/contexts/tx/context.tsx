@@ -146,12 +146,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
                 return Buffer.from(
                   await sendMessage(
                     BACKGROUND_PORT,
-                    new ReqeustEncryptMsg(
-                      "12345678",
-                      chainId,
-                      contractCodeHash,
-                      msg
-                    )
+                    new ReqeustEncryptMsg(chainId, contractCodeHash, msg)
                   ),
                   "hex"
                 );

@@ -1,5 +1,4 @@
 import { Message } from "../../common/message";
-import { AsyncApprover } from "../../common/async-approver";
 import { ROUTE } from "./constants";
 
 const Buffer = require("buffer/").Buffer;
@@ -11,7 +10,6 @@ export class ReqeustEncryptMsg extends Message<string> {
   }
 
   constructor(
-    public readonly id: string,
     public readonly chainId: string,
     public readonly contractCodeHash: string,
     public readonly msg: object
@@ -20,8 +18,6 @@ export class ReqeustEncryptMsg extends Message<string> {
   }
 
   validateBasic(): void {
-    AsyncApprover.isValidId(this.id);
-
     if (!this.chainId) {
       throw new Error("chain id not set");
     }

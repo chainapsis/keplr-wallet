@@ -64,15 +64,10 @@ export const useWasmTokenInfo = (
 
           const contractCodeHash = contractCodeHashResult.data.result;
 
-          const encryptMsg = new ReqeustEncryptMsg(
-            "12345678",
-            chainId,
-            contractCodeHash,
-            {
-              // eslint-disable-next-line @typescript-eslint/camelcase
-              token_info: {}
-            }
-          );
+          const encryptMsg = new ReqeustEncryptMsg(chainId, contractCodeHash, {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            token_info: {}
+          });
 
           const encrypted = await sendMessage(BACKGROUND_PORT, encryptMsg);
 

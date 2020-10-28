@@ -549,14 +549,9 @@ export class AccountStore {
 
       const contractCodeHash = contractCodeHashResult.data.result;
 
-      const encryptMsg = new ReqeustEncryptMsg(
-        "12345678",
-        chainId,
-        contractCodeHash,
-        {
-          balance: { address: this.bech32Address, key: currency.viewingKey }
-        }
-      );
+      const encryptMsg = new ReqeustEncryptMsg(chainId, contractCodeHash, {
+        balance: { address: this.bech32Address, key: currency.viewingKey }
+      });
 
       const encrypted = await task(sendMessage(BACKGROUND_PORT, encryptMsg));
       const nonce = encrypted.slice(0, 64);

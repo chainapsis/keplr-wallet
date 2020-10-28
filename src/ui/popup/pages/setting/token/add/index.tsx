@@ -123,7 +123,6 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             await sendMessage(
               BACKGROUND_PORT,
               new ReqeustEncryptMsg(
-                "12345678",
                 chainStore.chainInfo.chainId,
                 contractCodeHash,
                 msg

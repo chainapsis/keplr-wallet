@@ -21,7 +21,7 @@ export class KeplrEnigmaUtils {
     return Buffer.from(
       await sendMessage(
         BACKGROUND_PORT,
-        new ReqeustEncryptMsg("TODO", this.chainId, contractCodeHash, msg)
+        new ReqeustEncryptMsg(this.chainId, contractCodeHash, msg)
       ),
       "hex"
     );
