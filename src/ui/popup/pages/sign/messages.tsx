@@ -5,7 +5,7 @@ import { CoinUtils } from "../../../../common/coin-utils";
 import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import { IntlShape, FormattedMessage, useIntl } from "react-intl";
 import { Currency } from "../../../../common/currency";
-import { Button } from "reactstrap";
+import { Button, Badge } from "reactstrap";
 import { sendMessage } from "../../../../common/message/send";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RequestDecryptMsg } from "../../../../background/secret-wasm";
@@ -346,6 +346,8 @@ export function renderMessage(
       });
     }
 
+    const isSecretWasm = msg.value.callback_code_hash != null;
+
     return {
       icon: "fas fa-cog",
       title: intl.formatMessage({
@@ -368,7 +370,13 @@ export function renderMessage(
                 .join(",")
             }}
           />
-          <br />
+          {isSecretWasm ? (
+            <Badge color="primary" pill style={{ marginTop: "6px" }}>
+              Encrypted
+            </Badge>
+          ) : (
+            <br />
+          )}
           <WasmExecutionMsgView msg={msg.value.msg} />
         </React.Fragment>
       )
@@ -429,6 +437,7 @@ export const WasmExecutionMsgView: FunctionComponent<{
   const toggleOpen = () => setIsOpen(isOpen => !isOpen);
 
   const [detailsMsg, setDetailsMsg] = useState(JSON.stringify(msg, null, 2));
+  const [warningMsg, setWarningMsg] = useState("");
 
   useEffect(() => {
     // If msg is string, it will be the message for secret-wasm.
@@ -437,36 +446,48 @@ export const WasmExecutionMsgView: FunctionComponent<{
     // TODO: Handle the error case. If an error occurs, rather than rejecting the signing, it informs the user that Kepler cannot decrypt it and allows the user to choose.
     if (typeof msg === "string") {
       (async () => {
-        let cipherText = Buffer.from(Buffer.from(msg, "base64"));
-        // Msg is start with 32 bytes nonce and 32 bytes public key.
-        const nonce = cipherText.slice(0, 32);
-        cipherText = cipherText.slice(64);
+        try {
+          let cipherText = Buffer.from(Buffer.from(msg, "base64"));
+          // Msg is start with 32 bytes nonce and 32 bytes public key.
+          const nonce = cipherText.slice(0, 32);
+          cipherText = cipherText.slice(64);
 
-        let plainText = Buffer.from(
-          await sendMessage(
-            BACKGROUND_PORT,
-            new RequestDecryptMsg(
-              chainStore.chainInfo.chainId,
-              cipherText.toString("hex"),
-              nonce.toString("hex")
-            )
-          ),
-          "hex"
-        );
+          let plainText = Buffer.from(
+            await sendMessage(
+              BACKGROUND_PORT,
+              new RequestDecryptMsg(
+                chainStore.chainInfo.chainId,
+                cipherText.toString("hex"),
+                nonce.toString("hex")
+              )
+            ),
+            "hex"
+          );
 
-        // Remove the contract code hash.
-        plainText = plainText.slice(64);
+          // Remove the contract code hash.
+          plainText = plainText.slice(64);
 
-        setDetailsMsg(
-          JSON.stringify(JSON.parse(plainText.toString()), null, 2)
-        );
+          setDetailsMsg(
+            JSON.stringify(JSON.parse(plainText.toString()), null, 2)
+          );
+          setWarningMsg("");
+        } catch {
+          setWarningMsg(
+            "Failed to decrypt Secret message. This may be due to Keplr viewing key not matching the transaction viewing key."
+          );
+        }
       })();
     }
   }, [chainStore.chainInfo.chainId, msg]);
 
   return (
     <div>
-      {<pre style={{ width: "280px" }}>{isOpen ? detailsMsg : ""}</pre>}
+      {isOpen ? (
+        <React.Fragment>
+          <pre style={{ width: "280px" }}>{isOpen ? detailsMsg : ""}</pre>
+          {warningMsg ? <div>{warningMsg}</div> : null}
+        </React.Fragment>
+      ) : null}
       <Button
         size="sm"
         style={{ position: "absolute", right: "20px" }}
