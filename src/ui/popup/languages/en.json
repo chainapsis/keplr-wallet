@@ -130,6 +130,7 @@
   "access.permission.title": "By approving this request, the website will:",
   "access.permission.account": "Know your wallet address",
   "access.permission.tx-request": "Be able to request signatures for txs",
+  "access.permission.secret": "Be able to encrypt/decrypt your messages",
   "access.button.approve": "Approve",
   "access.button.reject": "Reject",
 
