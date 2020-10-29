@@ -7,6 +7,7 @@ import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import delay from "delay";
+import { ChainUpdaterKeeper } from "../updater/keeper";
 
 describe("Test chains keeper", () => {
   let keeper: ChainsKeeper;
@@ -14,6 +15,9 @@ describe("Test chains keeper", () => {
   beforeEach(() => {
     keeper = new ChainsKeeper(
       new MemoryKVStore("chains"),
+      new ChainUpdaterKeeper(new MemoryKVStore("updater")),
+      // TODO: Fix me
+      undefined as any,
       [
         {
           rpc: "nope",
@@ -87,7 +91,7 @@ describe("Test chains keeper", () => {
   it("Chains keeper can add the other permitted access origins", async () => {
     await Promise.all([
       keeper.requestAccess("http://extension/", "1234", "test-1", [
-        "http://test2.com"
+        "http://other1.com"
       ]),
       (async () => {
         await delay(100);
@@ -100,13 +104,13 @@ describe("Test chains keeper", () => {
     assert.strictEqual(origin.chainId, "test-1");
     assert.strictEqual(origin.origins.length, 2);
     assert.strictEqual(origin.origins[0], "http://test.com");
-    assert.strictEqual(origin.origins[1], "http://test2.com");
+    assert.strictEqual(origin.origins[1], "http://other1.com");
   });
 
   it("Chains keeper can't add the other permitted access origins to unknown chain", async () => {
     await assert.rejects(async () => {
-      await keeper.requestAccess("http://extension/", "1234", "test-2", [
-        "http://test2.com"
+      await keeper.requestAccess("http://extension/", "1234", "other-1", [
+        "http://other1.com"
       ]);
     });
   });
@@ -117,12 +121,12 @@ describe("Test chains keeper", () => {
     }, "can't remove the origin that is embeded");
 
     await assert.rejects(async () => {
-      await keeper.removeAccessOrigin("test-1", "http://test2.com");
+      await keeper.removeAccessOrigin("test-1", "http://other1.com");
     });
 
     await Promise.all([
       keeper.requestAccess("http://extension/", "1234", "test-1", [
-        "http://test2.com"
+        "http://other1.com"
       ]),
       (async () => {
         await delay(100);
@@ -130,7 +134,7 @@ describe("Test chains keeper", () => {
       })()
     ]);
 
-    await keeper.removeAccessOrigin("test-1", "http://test2.com");
+    await keeper.removeAccessOrigin("test-1", "http://other1.com");
 
     const origin = await keeper.getAccessOrigin("test-1");
 
@@ -150,14 +154,14 @@ describe("Test chains keeper", () => {
       await keeper.checkAccessOrigin(
         "http://extension",
         "test-1",
-        "http://test2.com"
+        "http://other1.com"
       );
     });
 
     await assert.rejects(async () => {
       await keeper.checkAccessOrigin(
         "http://extension",
-        "test-2",
+        "other-1",
         "http://test.com"
       );
     });
@@ -169,5 +173,76 @@ describe("Test chains keeper", () => {
       "test-1",
       "http://extension"
     );
+  });
+
+  it("Chains keeper should reject adding the same chain", async () => {
+    await assert.rejects(async () => {
+      await keeper.addChainInfo({
+        rpc: "nope",
+        rest: "nope",
+        chainId: "test-1",
+        chainName: "Test",
+        stakeCurrency: {
+          coinDenom: "TEST",
+          coinMinimalDenom: "test",
+          coinDecimals: 6
+        },
+        walletUrl: "nope",
+        walletUrlForStaking: "nope",
+        bip44: new BIP44(44, 118, 0),
+        bech32Config: defaultBech32Config("test"),
+        currencies: [
+          {
+            coinDenom: "TEST",
+            coinMinimalDenom: "test",
+            coinDecimals: 6
+          }
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: "TEST",
+            coinMinimalDenom: "test",
+            coinDecimals: 6
+          }
+        ],
+        coinType: 118
+      });
+    });
+  });
+
+  it("Chains keeper should reject adding the ambiguous chain", async () => {
+    await assert.rejects(async () => {
+      await keeper.addChainInfo({
+        rpc: "nope",
+        rest: "nope",
+        // If the chain id is formatted as {identifer}-{version}, the same identifier is ambiguous and it is not permitted.
+        chainId: "test-2",
+        chainName: "Test",
+        stakeCurrency: {
+          coinDenom: "TEST",
+          coinMinimalDenom: "test",
+          coinDecimals: 6
+        },
+        walletUrl: "nope",
+        walletUrlForStaking: "nope",
+        bip44: new BIP44(44, 118, 0),
+        bech32Config: defaultBech32Config("test"),
+        currencies: [
+          {
+            coinDenom: "TEST",
+            coinMinimalDenom: "test",
+            coinDecimals: 6
+          }
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: "TEST",
+            coinMinimalDenom: "test",
+            coinDecimals: 6
+          }
+        ],
+        coinType: 118
+      });
+    });
   });
 });

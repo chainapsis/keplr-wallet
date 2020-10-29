@@ -43,12 +43,14 @@ export class Keplr {
   async requestTx(
     chainId: string,
     txBytes: Uint8Array,
-    mode: "sync" | "async" | "commit"
+    mode: "sync" | "async" | "commit",
+    isRestAPI: boolean = false
   ): Promise<void> {
     const msg = new RequestBackgroundTxMsg(
       chainId,
       Buffer.from(txBytes).toString("hex"),
-      mode
+      mode,
+      isRestAPI
     );
     await sendMessage(BACKGROUND_PORT, msg);
   }
@@ -56,12 +58,14 @@ export class Keplr {
   async requestTxWithResult(
     chainId: string,
     txBytes: Uint8Array,
-    mode: "sync" | "async" | "commit"
+    mode: "sync" | "async" | "commit",
+    isRestAPI: boolean = false
   ): Promise<ResultBroadcastTx | ResultBroadcastTxCommit> {
     const msg = new RequestBackgroundTxWithResultMsg(
       chainId,
       Buffer.from(txBytes).toString("hex"),
-      mode
+      mode,
+      isRestAPI
     );
     return await sendMessage(BACKGROUND_PORT, msg);
   }

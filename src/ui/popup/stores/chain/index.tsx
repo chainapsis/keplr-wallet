@@ -17,7 +17,8 @@ import { sendMessage } from "../../../../common/message";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
-import { Currency } from "../../../../common/currency";
+import { AppCurrency, Currency } from "../../../../common/currency";
+import { AddTokenMsg } from "../../../../background/tokens/messages";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -181,5 +182,40 @@ export class ChainStore {
   @action
   public setAllCurrencies(currencies: Currency[]) {
     this.allCurrencies = currencies;
+  }
+
+  @actionAsync
+  public async addToken(currency: AppCurrency) {
+    const msg = new AddTokenMsg(this.chainInfo.chainId, currency);
+
+    await task(sendMessage(BACKGROUND_PORT, msg));
+
+    await this.refreshChainList();
+  }
+
+  @actionAsync
+  public async refreshChainList() {
+    // Remember the chain id before fetching the chain list.
+    const chainId = this.chainInfo.chainId;
+
+    await this.getChainInfosFromBackground();
+
+    const chainInfo = this.chainList.find(chainInfo => {
+      return chainInfo.chainId === chainId;
+    });
+
+    if (chainInfo) {
+      this.chainInfo = chainInfo;
+
+      this.rootStore.setChainInfo(chainInfo);
+    }
+  }
+
+  @actionAsync
+  public async changeKeyRingSync() {
+    // Refresh the chain list because the currencies can be different according to the account in the case of secret20...
+    if (!this.isIntializing) {
+      await this.refreshChainList();
+    }
   }
 }

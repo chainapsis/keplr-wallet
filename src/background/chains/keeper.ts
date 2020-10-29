@@ -8,7 +8,8 @@ import {
 import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
-import Axios from "axios";
+import { ChainUpdaterKeeper } from "../updater/keeper";
+import { TokensKeeper } from "../tokens/keeper";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -17,7 +18,9 @@ export class ChainsKeeper {
   private readonly suggestApprover: AsyncApprover<SuggestedChainInfo>;
 
   constructor(
-    private kvStore: KVStore,
+    private readonly kvStore: KVStore,
+    private readonly chainUpdaterKeeper: ChainUpdaterKeeper,
+    private readonly tokensKeeper: TokensKeeper,
     private readonly embedChainInfos: ChainInfo[],
     private readonly embedAccessOrigins: AccessOrigin[],
     private readonly windowOpener: (url: string) => void,
@@ -51,46 +54,36 @@ export class ChainsKeeper {
         embeded: true
       };
     });
-    let savedChainInfos = await this.kvStore.get<ChainInfo[]>("chain-infos");
+    const savedChainInfos: ChainInfoWithEmbed[] = (
+      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? []
+    ).map((chainInfo: Writeable<ChainInfo>) => {
+      chainInfo.bip44 = Object.setPrototypeOf(chainInfo.bip44, BIP44.prototype);
 
-    let result: ChainInfoWithEmbed[] = chainInfos;
+      return {
+        ...chainInfo,
+        embeded: false
+      };
+    });
 
-    if (savedChainInfos) {
-      // Should restore the prototype because BIP44 is the class.
-      savedChainInfos = savedChainInfos.map(
-        (chainInfo: Writeable<ChainInfo>) => {
-          chainInfo.bip44 = Object.setPrototypeOf(
-            chainInfo.bip44,
-            BIP44.prototype
-          );
-          return chainInfo;
-        }
-      );
-
-      result = result.concat(
-        savedChainInfos.map(chainInfo => {
-          return {
-            ...chainInfo,
-            embeded: false
-          };
-        })
-      );
-    }
+    let result: ChainInfoWithEmbed[] = chainInfos.concat(savedChainInfos);
 
     if (applyUpdatedProperty) {
       // Set the updated property of the chain.
       result = await Promise.all(
         result.map(async chainInfo => {
-          const updatedChainInfo = await this.getUpdatedChainProperty(
-            chainInfo.chainId
+          const updated: Writeable<ChainInfo> = await this.chainUpdaterKeeper.putUpdatedPropertyToChainInfo(
+            chainInfo
           );
-          if (updatedChainInfo) {
-            return {
-              ...chainInfo,
-              ...updatedChainInfo
-            };
-          }
-          return chainInfo;
+
+          updated.currencies = await this.tokensKeeper.getTokens(
+            updated.chainId,
+            updated.currencies
+          );
+
+          return {
+            ...updated,
+            embeded: chainInfo.embeded
+          };
         })
       );
     }
@@ -161,8 +154,26 @@ export class ChainsKeeper {
       throw new Error("Same chain is already registered");
     }
 
+    const ambiguousChainInfo = (await this.getChainInfos()).find(
+      savedChainInfo => {
+        return (
+          ChainUpdaterKeeper.getChainVersion(savedChainInfo.chainId)
+            .identifier ===
+          ChainUpdaterKeeper.getChainVersion(chainInfo.chainId).identifier
+        );
+      }
+    );
+
+    // Prevent the ambiguous chain that has the same identifier.
+    if (ambiguousChainInfo) {
+      throw new Error(
+        `The chain ${ambiguousChainInfo.chainId} is already registered, and ${chainInfo.chainId} is ambiguous with it. So, this request is rejected`
+      );
+    }
+
     const savedChainInfos =
       (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? [];
+
     savedChainInfos.push(chainInfo);
 
     await this.kvStore.set<ChainInfo[]>("chain-infos", savedChainInfos);
@@ -177,20 +188,21 @@ export class ChainsKeeper {
       throw new Error("Can't remove the embedded chain");
     }
 
-    // If chain id is updated, get the original chain id.
-    const originChainId = await this.getReverseUpdatedChainId(chainId);
-
     const savedChainInfos =
       (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? [];
 
     const resultChainInfo = savedChainInfos.filter(chainInfo => {
-      return chainInfo.chainId !== (originChainId ?? chainId);
+      return (
+        ChainUpdaterKeeper.getChainVersion(chainInfo.chainId).identifier !==
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      );
     });
 
     await this.kvStore.set<ChainInfo[]>("chain-infos", resultChainInfo);
 
     // Clear the updated chain info.
-    await this.removeUpdatedChainProperty(chainId);
+    await this.chainUpdaterKeeper.clearUpdatedProperty(chainId);
+    await this.tokensKeeper.clearTokens(chainId);
 
     // Clear the access origin.
     await this.clearAccessOrigins(chainId);
@@ -263,13 +275,10 @@ export class ChainsKeeper {
   }
 
   async addAccessOrigin(chainId: string, origin: string): Promise<void> {
-    // If chain id is updated, get the original chain id.
-    const originChainId = await this.getReverseUpdatedChainId(chainId);
-    // Override the chain id if the chain was updated.
-    chainId = originChainId ?? chainId;
-
     let accessOrigin = await this.kvStore.get<AccessOrigin>(
-      ChainsKeeper.getAccessOriginKey(chainId)
+      ChainsKeeper.getAccessOriginKey(
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      )
     );
     if (!accessOrigin) {
       accessOrigin = {
@@ -281,19 +290,18 @@ export class ChainsKeeper {
     accessOrigin.origins.push(origin);
 
     await this.kvStore.set<AccessOrigin>(
-      ChainsKeeper.getAccessOriginKey(chainId),
+      ChainsKeeper.getAccessOriginKey(
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      ),
       accessOrigin
     );
   }
 
   async removeAccessOrigin(chainId: string, origin: string): Promise<void> {
-    // If chain id is updated, get the original chain id.
-    const originChainId = await this.getReverseUpdatedChainId(chainId);
-    // Override the chain id if the chain was updated.
-    chainId = originChainId ?? chainId;
-
     const accessOrigin = await this.kvStore.get<AccessOrigin>(
-      ChainsKeeper.getAccessOriginKey(chainId)
+      ChainsKeeper.getAccessOriginKey(
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      )
     );
     if (!accessOrigin) {
       throw new Error("There is no matched origin");
@@ -309,61 +317,50 @@ export class ChainsKeeper {
       .concat(accessOrigin.origins.slice(i + 1));
 
     await this.kvStore.set<AccessOrigin>(
-      ChainsKeeper.getAccessOriginKey(chainId),
+      ChainsKeeper.getAccessOriginKey(
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      ),
       accessOrigin
     );
   }
 
   async clearAccessOrigins(chainId: string): Promise<void> {
-    // If chain id is updated, get the original chain id.
-    const originChainId = await this.getReverseUpdatedChainId(chainId);
-    // Override the chain id if the chain was updated.
-    chainId = originChainId ?? chainId;
-
     await this.kvStore.set<AccessOrigin>(
-      ChainsKeeper.getAccessOriginKey(chainId),
+      ChainsKeeper.getAccessOriginKey(
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      ),
       null
     );
   }
 
   async getAccessOrigin(chainId: string): Promise<AccessOrigin> {
-    // If chain id is updated, get the original chain id.
-    const originChainId = await this.getReverseUpdatedChainId(chainId);
-    // Override the chain id if the chain was updated.
-    chainId = originChainId ?? chainId;
-
     let nativeAccessOrigins: string[] = [];
     for (const access of this.embedAccessOrigins) {
-      if (access.chainId === chainId) {
+      if (
+        ChainUpdaterKeeper.getChainVersion(access.chainId).identifier ===
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      ) {
         nativeAccessOrigins = access.origins.slice();
         break;
       }
     }
 
     const accessOrigin = await this.kvStore.get<AccessOrigin>(
-      ChainsKeeper.getAccessOriginKey(chainId)
+      ChainsKeeper.getAccessOriginKey(
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      )
     );
-    if (accessOrigin) {
-      return {
-        chainId: accessOrigin.chainId,
-        origins: nativeAccessOrigins.concat(accessOrigin.origins)
-      };
-    } else {
-      return {
-        chainId,
-        origins: nativeAccessOrigins
-      };
-    }
+    return {
+      chainId,
+      origins: nativeAccessOrigins.concat(accessOrigin?.origins ?? [])
+    };
   }
 
   async getAccessOriginWithoutEmbed(chainId: string): Promise<AccessOrigin> {
-    // If chain id is updated, get the original chain id.
-    const originChainId = await this.getReverseUpdatedChainId(chainId);
-    // Override the chain id if the chain was updated.
-    chainId = originChainId ?? chainId;
+    const version = ChainUpdaterKeeper.getChainVersion(chainId);
 
     const accessOrigin = await this.kvStore.get<AccessOrigin>(
-      ChainsKeeper.getAccessOriginKey(chainId)
+      ChainsKeeper.getAccessOriginKey(version.identifier)
     );
     if (accessOrigin) {
       return {
@@ -381,151 +378,10 @@ export class ChainsKeeper {
   async tryUpdateChain(chainId: string): Promise<string> {
     const chainInfo = await this.getChainInfo(chainId);
 
-    const instance = Axios.create({
-      baseURL: chainInfo.rpc
-    });
-
-    // Get the latest block.
-    const result = await instance.get<{
-      result: {
-        block: {
-          header: {
-            chain_id: string;
-          };
-        };
-      };
-    }>("/block");
-
-    const resultChainId = result.data.result.block.header.chain_id;
-
-    if (chainInfo.chainId !== resultChainId) {
-      // If the same chain is already registered, just remove it.
-      if (
-        (await this.getChainInfos()).find(
-          chainInfo => chainInfo.chainId === resultChainId
-        )
-      ) {
-        await this.removeChainInfo(chainId);
-        return resultChainId;
-      }
-
-      const updatedChainInfo: Partial<ChainInfo> = {
-        chainId: resultChainId
-      };
-
-      await this.setUpdatedChainProperty(chainInfo.chainId, updatedChainInfo);
-      return resultChainId;
-    }
-
-    return chainInfo.chainId;
+    return await this.chainUpdaterKeeper.tryUpdateChainId(chainInfo);
   }
 
-  /**
-   * Returns wether the chain has been changed.
-   * Currently, only check the chain id has been changed.
-   * @param chainInfo Chain information.
-   */
-  public static async checkChainUpdate(
-    chainInfo: Readonly<ChainInfo>
-  ): Promise<boolean> {
-    const chainId = chainInfo.chainId;
-
-    const instance = Axios.create({
-      baseURL: chainInfo.rpc
-    });
-
-    // Get the latest block.
-    const result = await instance.get<{
-      result: {
-        block: {
-          header: {
-            chain_id: string;
-          };
-        };
-      };
-    }>("/block");
-
-    const resultChainId = result.data.result.block.header.chain_id;
-
-    return chainId !== resultChainId;
-  }
-
-  private async setUpdatedChainProperty(
-    chainId: string,
-    updatedChainInfo: Partial<ChainInfo>
-  ): Promise<void> {
-    await this.kvStore.set(
-      ChainsKeeper.getUpdatedChainPropertyKey(chainId),
-      updatedChainInfo
-    );
-
-    await this.kvStore.set(
-      ChainsKeeper.getUpdatedChainPropertyReverseKey(
-        updatedChainInfo.chainId ?? chainId
-      ),
-      chainId
-    );
-  }
-
-  private async getUpdatedChainProperty(
-    chainId: string
-  ): Promise<Partial<ChainInfo> | undefined> {
-    return await this.kvStore.get(
-      ChainsKeeper.getUpdatedChainPropertyKey(chainId)
-    );
-  }
-
-  private async getReverseUpdatedChainId(
-    chainId: string
-  ): Promise<string | undefined> {
-    let prevOriginChainId: string | undefined;
-    // Get the original chain id before being updated.
-    while (true) {
-      const originChainId = await this.kvStore.get<string>(
-        ChainsKeeper.getUpdatedChainPropertyReverseKey(
-          prevOriginChainId ?? chainId
-        )
-      );
-      if (!originChainId) {
-        return prevOriginChainId;
-      }
-
-      prevOriginChainId = originChainId;
-    }
-  }
-
-  private async removeUpdatedChainProperty(chainId: string): Promise<void> {
-    let prevChainId = chainId;
-    while (true) {
-      const updatedChainInfo = await this.getUpdatedChainProperty(prevChainId);
-      if (updatedChainInfo) {
-        await this.kvStore.set(
-          ChainsKeeper.getUpdatedChainPropertyKey(prevChainId),
-          null
-        );
-        await this.kvStore.set(
-          ChainsKeeper.getUpdatedChainPropertyReverseKey(
-            updatedChainInfo.chainId ?? prevChainId
-          ),
-          null
-        );
-
-        prevChainId = updatedChainInfo.chainId ?? prevChainId;
-      } else {
-        break;
-      }
-    }
-  }
-
-  private static getAccessOriginKey(chainId: string): string {
-    return `access-origin-${chainId}`;
-  }
-
-  private static getUpdatedChainPropertyKey(chainId: string): string {
-    return `updated-chain-property-${chainId}`;
-  }
-
-  private static getUpdatedChainPropertyReverseKey(chainId: string): string {
-    return `updated-chain-property-reverse-${chainId}`;
+  private static getAccessOriginKey(identifier: string): string {
+    return `access-origin-${identifier}`;
   }
 }

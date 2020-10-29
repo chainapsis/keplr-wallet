@@ -27,6 +27,8 @@ import { Button } from "reactstrap";
 import { useTxState, withTxStateProvider } from "../../../contexts/tx";
 import { useHistory } from "react-router";
 
+import Axios from "axios";
+
 export const SendPage: FunctionComponent = withTxStateProvider(
   observer(() => {
     const history = useHistory();
@@ -61,6 +63,9 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           // If token based on the contract.
           switch (split[0]) {
             case "cw20":
+              setGasForSendMsg(250000);
+              break;
+            case "secret20":
               setGasForSendMsg(250000);
               break;
             default:
@@ -116,10 +121,17 @@ export const SendPage: FunctionComponent = withTxStateProvider(
               e.preventDefault();
 
               const msg = await txState.generateSendMsg(
+                chainStore.chainInfo.chainId,
                 AccAddress.fromBech32(
                   accountStore.bech32Address,
                   chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                )
+                ),
+                Axios.create({
+                  ...{
+                    baseURL: chainStore.chainInfo.rest
+                  },
+                  ...chainStore.chainInfo.restConfig
+                })
               );
 
               const config: TxBuilderConfig = {

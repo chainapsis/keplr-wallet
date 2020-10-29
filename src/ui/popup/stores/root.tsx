@@ -33,6 +33,10 @@ export class RootStore {
     this.accountStore.setKeyRingStatus(status);
   }
 
+  public async refreshChainList(): Promise<void> {
+    await this.chainStore.refreshChainList();
+  }
+
   public changeKeyRing() {
     this.accountStore.changeKeyRing();
   }

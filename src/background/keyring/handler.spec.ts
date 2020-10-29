@@ -32,6 +32,7 @@ import {
 } from "./messages";
 import { KeyRingStatus } from "./keyring";
 import delay from "delay";
+import { ChainUpdaterKeeper } from "../updater/keeper";
 
 describe("Test keyring handler", () => {
   let messageManager: MockMessageManager;
@@ -56,6 +57,9 @@ describe("Test keyring handler", () => {
 
     const chainsKeeper = new ChainsKeeper(
       new MemoryKVStore("chains"),
+      new ChainUpdaterKeeper(new MemoryKVStore("updater")),
+      // TODO: Fix me
+      undefined as any,
       [
         {
           rpc: "nope",

@@ -67,6 +67,15 @@
   "setting.clear.input.password.error.invalid": "잘못된 비밀번호입니다",
   "setting.clear.button.confirm": "확인",
 
+  "setting.token.add": "토큰 추가",
+  "setting.token.add.contract-address": "컨트랙트 주소",
+  "setting.token.add.name": "이름",
+  "setting.token.add.symbol": "심볼",
+  "setting.token.add.decimals": "소수점 자릿수",
+  "setting.token.add.button.submit": "등록",
+  "setting.token.add.secret20.viewing-key": "뷰잉 키",
+  "setting.token.add.secret20.viewing-key.button.create": "생성",
+
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
   "register.button.back": "뒤로",
@@ -119,6 +128,7 @@
   "access.permission.title": "이 웹사이트는 다음과 같은 권한을 가질 수 있습니다",
   "access.permission.account": "계정의 주소를 알 수 있습니다",
   "access.permission.tx-request": "트랜잭션 서명을 요청할 수 있습니다",
+  "access.permission.secret": "메세지를 암호화/복호화할 수 있습니다",
   "access.button.approve": "허락",
   "access.button.reject": "거부",
 
@@ -172,6 +182,8 @@
   "sign.list.message.wasm/MsgInstantiateContract.content": "<only-funds-exist><b>{funds}</b>를 전송하여 </only-funds-exist><only-admin-exist><b>{admin}</b>을 관리자 계정으로 가지는 </only-admin-exist><b>{label}</b> 라벨의 Code ID <b>{codeId}</b> 컨트랙트를 활성화합니다",
   "sign.list.message.wasm/MsgExecuteContract.title": "Wasm 컨트랙트 실행 요청",
   "sign.list.message.wasm/MsgExecuteContract.content": "<only-sent-exist><b>{sent}</b>를 전송하며 </only-sent-exist><b>{address}</b> 컨트랙트를 실행합니다",
+  "sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm": "암호화됨",
+  "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "메세지를 복호화하지 못 했습니다. 케플러를 통하지 않고 암호화되었을 수 있습니다.",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{address}</b>가 링크<b>{link}</b>를 생성합니다",

@@ -3,6 +3,7 @@ import React, {
   MouseEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState
 } from "react";
 
@@ -35,6 +36,13 @@ export const AccessPage: FunctionComponent = observer(() => {
   }
 
   const { chainStore } = useStore();
+
+  const isSecretWasm = useMemo(() => {
+    if (chainStore.chainInfo.features) {
+      return chainStore.chainInfo.features.indexOf("secretwasm") >= 0;
+    }
+    return false;
+  }, [chainStore.chainInfo.features]);
 
   const access = useRequestAccess(
     query.id,
@@ -128,6 +136,11 @@ export const AccessPage: FunctionComponent = observer(() => {
           <li>
             <FormattedMessage id="access.permission.tx-request" />
           </li>
+          {isSecretWasm ? (
+            <li>
+              <FormattedMessage id="access.permission.secret" />
+            </li>
+          ) : null}
         </ul>
         <div style={{ flex: 1 }} />
         <div className={style.buttons}>

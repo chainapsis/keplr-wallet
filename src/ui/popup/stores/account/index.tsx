@@ -15,7 +15,11 @@ import { RootStore } from "../root";
 import Axios, { CancelTokenSource } from "axios";
 import { AutoFetchingAssetsInterval } from "../../../../config";
 import { Int } from "@chainapsis/cosmosjs/common/int";
-import { CW20Currency } from "../../../../common/currency";
+import { CW20Currency, Secret20Currency } from "../../../../common/currency";
+import {
+  ReqeustEncryptMsg,
+  RequestDecryptMsg
+} from "../../../../background/secret-wasm";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -188,10 +192,26 @@ export class AccountStore {
       }
 
       this.lastAssetFetchingError = undefined;
+
       // Load the assets from storage.
       this.assets = await task(
         this.loadAssetsFromStorage(this.chainInfo.chainId, this.bech32Address)
       );
+
+      // Clear the assets that hasn't been registered.
+      // NOTE: Currently, there is a bug that assets is saved to invalid chain id if the chain is changed before finishing fetching.
+      //       To solve this problem, just remove the unintended assets when loading it from cache storage.
+      //       This way may be not good for performance if the currencies is too many.
+      //       We solve the problem in this way temporarily.
+      for (const asset of this.assets) {
+        const find = this.chainInfo.currencies.find(
+          cur => cur.coinMinimalDenom === asset.denom
+        );
+        if (!find) {
+          this.removeAsset(asset.denom);
+        }
+      }
+
       // Load the staked assets from storage.
       const stakedAsset = await task(
         this.loadAssetsFromStorage(
@@ -428,6 +448,9 @@ export class AccountStore {
           case "cw20":
             await task(this.fetchCW20Token(chainId, currency));
             break;
+          case "secret20":
+            await task(this.fetchSecret20Token(chainId, currency));
+            break;
         }
       }
     }
@@ -476,6 +499,99 @@ export class AccountStore {
           Buffer.from(result.data.result.smart, "base64").toString()
         );
         const balance = obj.balance;
+        // Balance can be 0
+        const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
+
+        this.pushAsset(asset);
+        // Save the assets to storage.
+        await task(
+          this.saveAssetsToStorage(
+            this.chainInfo.chainId,
+            this.bech32Address,
+            this.assets
+          )
+        );
+      }
+    } catch (e) {
+      if (!Axios.isCancel(e)) {
+        // TODO: Make the way to handle error.
+        console.log(e);
+      }
+    }
+  }
+
+  @actionAsync
+  private async fetchSecret20Token(
+    chainId: string,
+    currency: Secret20Currency
+  ) {
+    // If fetching is in progess, abort it.
+    if (this.lastFetchingTokenCancleToken) {
+      this.lastFetchingTokenCancleToken.cancel();
+      this.lastFetchingTokenCancleToken = undefined;
+    }
+    this.lastFetchingTokenCancleToken = Axios.CancelToken.source();
+
+    const restInstance = Axios.create({
+      ...this.chainInfo.restConfig,
+      ...{
+        baseURL: this.chainInfo.rest,
+        cancelToken: this.lastFetchingTokenCancleToken?.token
+      }
+    });
+
+    try {
+      const contractCodeHashResult = await task(
+        restInstance.get<{
+          result: string;
+        }>(`/wasm/contract/${currency.contractAddress}/code-hash`)
+      );
+
+      const contractCodeHash = contractCodeHashResult.data.result;
+
+      const encryptMsg = new ReqeustEncryptMsg(chainId, contractCodeHash, {
+        balance: { address: this.bech32Address, key: currency.viewingKey }
+      });
+
+      const encrypted = await task(sendMessage(BACKGROUND_PORT, encryptMsg));
+      const nonce = encrypted.slice(0, 64);
+
+      const encoded = Buffer.from(
+        Buffer.from(encrypted, "hex").toString("base64")
+      ).toString("hex");
+
+      const result = await task(
+        restInstance.get<{
+          height: string;
+          result: {
+            smart: string;
+          };
+        }>(
+          `/wasm/contract/${currency.contractAddress}/query/${encoded}?encoding=hex`
+        )
+      );
+
+      // If chain id has been changed after fetching, just do nothing.
+      if (this.chainInfo.chainId !== chainId) {
+        return;
+      }
+
+      if (result.status === 200) {
+        const decryptMsg = new RequestDecryptMsg(
+          chainId,
+          Buffer.from(result.data.result.smart, "base64").toString("hex"),
+          nonce
+        );
+
+        const decrypted = await task(sendMessage(BACKGROUND_PORT, decryptMsg));
+
+        const message = Buffer.from(
+          Buffer.from(decrypted, "hex").toString(),
+          "base64"
+        ).toString();
+
+        const obj = JSON.parse(message);
+        const balance = obj.balance.amount;
         // Balance can be 0
         const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
 

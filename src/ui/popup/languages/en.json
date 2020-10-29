@@ -69,6 +69,15 @@
   "setting.clear.input.password.error.invalid": "Invalid password",
   "setting.clear.button.confirm": "Confirm",
 
+  "setting.token.add": "Add Token",
+  "setting.token.add.contract-address": "Contract Address",
+  "setting.token.add.name": "Name",
+  "setting.token.add.symbol": "Symbol",
+  "setting.token.add.decimals": "Decimals",
+  "setting.token.add.button.submit": "Submit",
+  "setting.token.add.secret20.viewing-key": "Viewing Key",
+  "setting.token.add.secret20.viewing-key.button.create": "Create",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",
@@ -121,6 +130,7 @@
   "access.permission.title": "By approving this request, the website will:",
   "access.permission.account": "Know your wallet address",
   "access.permission.tx-request": "Be able to request signatures for txs",
+  "access.permission.secret": "Be able to encrypt/decrypt your messages",
   "access.button.approve": "Approve",
   "access.button.reject": "Reject",
 
@@ -174,6 +184,8 @@
   "sign.list.message.wasm/MsgInstantiateContract.content": "Instantiate code ID <b>{codeId}</b> contract with<only-admin-exist> <b>{admin}</b> admin account and</only-admin-exist> <b>{label}</b> label<only-funds-exist> by funding <b>{funds}</b></only-funds-exist>",
   "sign.list.message.wasm/MsgExecuteContract.title": "Execute Wasm Contract",
   "sign.list.message.wasm/MsgExecuteContract.content": "Execute contract <b>{address}</b><only-sent-exist> by sending <b>{sent}</b></only-sent-exist>",
+  "sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm": "Encrypted",
+  "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "Failed to decrypt Secret message. This may be due to Keplr viewing key not matching the transaction viewing key.",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{address}</b> create link {br}<b>{link}</b>",
