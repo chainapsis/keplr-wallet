@@ -166,9 +166,12 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               const data = JSON.parse(dataOutput);
               const viewingKey = data["create_viewing_key"]["key"];
 
+              // Should encode viewing key as URL encoding because it can includes reversed characters (such as "+") for URL.
               history.push({
                 pathname: "/setting/token/add",
-                search: `?contractaddress=${contractAddress}&viewingkey=${viewingKey}`
+                search: `?contractaddress=${contractAddress}&viewingkey=${encodeURIComponent(
+                  viewingKey
+                )}`
               });
             } catch (e) {
               notification.push({
