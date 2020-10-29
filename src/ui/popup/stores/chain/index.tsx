@@ -190,6 +190,11 @@ export class ChainStore {
 
     await task(sendMessage(BACKGROUND_PORT, msg));
 
+    await this.refreshChainList();
+  }
+
+  @actionAsync
+  public async refreshChainList() {
     // Remember the chain id before fetching the chain list.
     const chainId = this.chainInfo.chainId;
 
@@ -203,6 +208,14 @@ export class ChainStore {
       this.chainInfo = chainInfo;
 
       this.rootStore.setChainInfo(chainInfo);
+    }
+  }
+
+  @actionAsync
+  public async changeKeyRingSync() {
+    // Refresh the chain list because the currencies can be different according to the account in the case of secret20...
+    if (!this.isIntializing) {
+      await this.refreshChainList();
     }
   }
 }

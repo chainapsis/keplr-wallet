@@ -169,7 +169,8 @@ export const EmbedChainInfos: ChainInfo[] = [
       low: 0.1,
       average: 0.25,
       high: 0.4
-    }
+    },
+    features: ["secretwasm"]
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,

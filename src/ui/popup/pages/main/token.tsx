@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 
 import styleToken from "./token.module.scss";
 import { observer } from "mobx-react";
@@ -7,12 +7,30 @@ import { useStore } from "../../stores";
 import { useHistory } from "react-router";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { DecUtils } from "../../../../common/dec-utils";
+import { Crypto } from "../../../../background/keyring/crypto";
 
 const TokenView: FunctionComponent<{
   name: string;
+  minimalDenom: string;
   amount: string;
   onClick: () => void;
-}> = ({ name, amount, onClick }) => {
+}> = ({ name, minimalDenom, amount, onClick }) => {
+  const [backgroundColors] = useState([
+    "#5e72e4",
+    "#11cdef",
+    "#2dce89",
+    "#fb6340"
+  ]);
+
+  const backgroundColor = useMemo(() => {
+    const hash = Crypto.sha256(Buffer.from(minimalDenom));
+    if (hash.length > 0) {
+      return backgroundColors[hash[0] % backgroundColors.length];
+    } else {
+      return backgroundColors[0];
+    }
+  }, [backgroundColors, minimalDenom]);
+
   return (
     <div
       className={styleToken.tokenContainer}
@@ -28,7 +46,7 @@ const TokenView: FunctionComponent<{
             width: "100%",
             height: "100%",
             borderRadius: "100000px",
-            backgroundColor: "#5e72e4",
+            backgroundColor,
 
             display: "flex",
             justifyContent: "center",
@@ -81,6 +99,7 @@ export const TokensView: FunctionComponent<{
             <TokenView
               key={i.toString()}
               name={name}
+              minimalDenom={currency.coinMinimalDenom}
               amount={`${amount} ${name}`}
               onClick={() => {
                 history.push({

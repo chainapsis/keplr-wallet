@@ -681,5 +681,46 @@ describe("Test chain info schema", () => {
 
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when fee currencies has invalid item");
+
+    const stargate = "stargate";
+    const cosmwasm = "cosmwasm";
+    const secretwasm = "secretwasm";
+
+    await assert.doesNotReject(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["features"] = [stargate, cosmwasm];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+
+      // @ts-ignore
+      chainInfo["features"] = [stargate, secretwasm];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    });
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["features"] = ["unknown"];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw error when the features include the unknown feature");
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["features"] = [stargate, stargate];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw error when the features include the duplicated feature");
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["features"] = [cosmwasm, secretwasm];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw error when the features has cosmwasm and secretwasm at the same time");
   });
 });

@@ -2,7 +2,12 @@ import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { Bech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import { AxiosRequestConfig } from "axios";
-import { AppCurrency, Currency, CW20Currency } from "../../common/currency";
+import {
+  AppCurrency,
+  Currency,
+  CW20Currency,
+  Secret20Currency
+} from "../../common/currency";
 
 import Joi, { ObjectSchema } from "joi";
 
@@ -94,10 +99,33 @@ export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<CW20Currency>)
     type: Joi.string()
       .equal("cw20")
       .required(),
-    contractAddress: Joi.string().required(),
-    coinMinimalDenom: Joi.string().required()
+    contractAddress: Joi.string().required()
   })
   .custom((value: CW20Currency) => {
+    if (
+      value.coinMinimalDenom.startsWith(
+        `${value.type}:${value.contractAddress}:`
+      )
+    ) {
+      return value;
+    } else {
+      value.coinMinimalDenom =
+        `${value.type}:${value.contractAddress}:` + value.coinMinimalDenom;
+      return value;
+    }
+  });
+
+export const Secret20CurrencyShema = (CurrencySchema as ObjectSchema<
+  Secret20Currency
+>)
+  .keys({
+    type: Joi.string()
+      .equal("secret20")
+      .required(),
+    contractAddress: Joi.string().required(),
+    viewingKey: Joi.string().required()
+  })
+  .custom((value: Secret20Currency) => {
     if (
       value.coinMinimalDenom.startsWith(
         `${value.type}:${value.contractAddress}:`
@@ -152,7 +180,7 @@ export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
   bech32Config: Bech32ConfigSchema.required(),
   currencies: Joi.array()
     .min(1)
-    .items(CurrencySchema, CW20CurrencyShema)
+    .items(CurrencySchema, CW20CurrencyShema, Secret20CurrencyShema)
     .required(),
   feeCurrencies: Joi.array()
     .min(1)
@@ -165,5 +193,14 @@ export const ChainInfoSchema = Joi.object<SuggestingChainInfo>({
     average: Joi.number().required(),
     high: Joi.number().required()
   }),
-  features: Joi.array().items(Joi.string())
+  features: Joi.array()
+    .items(Joi.string().valid("stargate", "cosmwasm", "secretwasm"))
+    .unique()
+    .custom((value: string[]) => {
+      if (value.indexOf("cosmwasm") >= 0 && value.indexOf("secretwasm") >= 0) {
+        throw new Error("cosmwasm and secretwasm are not compatible");
+      }
+
+      return value;
+    })
 });

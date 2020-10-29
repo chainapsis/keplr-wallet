@@ -35,7 +35,7 @@ export const Menu: FunctionComponent = observer(() => {
         <FormattedMessage id="main.menu.settings" />
       </div>
       {(chainStore.chainInfo.features ?? []).find(
-        feature => feature === "cosmwasm"
+        feature => feature === "cosmwasm" || feature === "secretwasm"
       ) ? (
         <div
           className={styleMenu.item}
@@ -45,7 +45,7 @@ export const Menu: FunctionComponent = observer(() => {
             });
           }}
         >
-          Add Token
+          <FormattedMessage id="setting.token.add" />
         </div>
       ) : null}
       {/* Empty div for separating last item */}

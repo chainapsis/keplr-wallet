@@ -9,6 +9,7 @@ import { KVStore } from "../../common/kvstore";
 import { AsyncApprover } from "../../common/async-approver";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { ChainUpdaterKeeper } from "../updater/keeper";
+import { TokensKeeper } from "../tokens/keeper";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -19,6 +20,7 @@ export class ChainsKeeper {
   constructor(
     private readonly kvStore: KVStore,
     private readonly chainUpdaterKeeper: ChainUpdaterKeeper,
+    private readonly tokensKeeper: TokensKeeper,
     private readonly embedChainInfos: ChainInfo[],
     private readonly embedAccessOrigins: AccessOrigin[],
     private readonly windowOpener: (url: string) => void,
@@ -69,10 +71,17 @@ export class ChainsKeeper {
       // Set the updated property of the chain.
       result = await Promise.all(
         result.map(async chainInfo => {
+          const updated: Writeable<ChainInfo> = await this.chainUpdaterKeeper.putUpdatedPropertyToChainInfo(
+            chainInfo
+          );
+
+          updated.currencies = await this.tokensKeeper.getTokens(
+            updated.chainId,
+            updated.currencies
+          );
+
           return {
-            ...(await this.chainUpdaterKeeper.putUpdatedPropertyToChainInfo(
-              chainInfo
-            )),
+            ...updated,
             embeded: chainInfo.embeded
           };
         })
@@ -193,6 +202,7 @@ export class ChainsKeeper {
 
     // Clear the updated chain info.
     await this.chainUpdaterKeeper.clearUpdatedProperty(chainId);
+    await this.tokensKeeper.clearTokens(chainId);
 
     // Clear the access origin.
     await this.clearAccessOrigins(chainId);

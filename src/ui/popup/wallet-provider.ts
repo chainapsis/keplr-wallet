@@ -23,6 +23,7 @@ export interface FeeApprover {
 
 export interface SignApprover {
   onRequestSignature: (index: string) => void;
+  onSignatureApproved?: () => void;
 }
 
 export class PopupWalletProvider implements WalletProvider {
@@ -121,7 +122,7 @@ export class PopupWalletProvider implements WalletProvider {
     );
 
     // Send requestSignMsg message and execute sign approver after some delay if it is set.
-    return new Uint8Array(
+    const signature = new Uint8Array(
       Buffer.from(
         (
           await Promise.all([
@@ -137,5 +138,10 @@ export class PopupWalletProvider implements WalletProvider {
         "hex"
       )
     );
+
+    if (this.signApprover?.onSignatureApproved) {
+      this.signApprover.onSignatureApproved();
+    }
+    return signature;
   }
 }
