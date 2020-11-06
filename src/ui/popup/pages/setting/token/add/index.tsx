@@ -136,7 +136,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
       await cosmosJS.sendMsgs(
         [msg],
         {
-          gas: bigInteger(3000000),
+          gas: bigInteger(150000),
           memo: "",
           fee: new Coin(
             chainStore.chainInfo.stakeCurrency.coinMinimalDenom,
