@@ -8,16 +8,22 @@ import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
 import delay from "delay";
 import { ChainUpdaterKeeper } from "../updater/keeper";
+import { KeyRingKeeper } from "../keyring/keeper";
+import { TokensKeeper } from "../tokens/keeper";
 
 describe("Test chains keeper", () => {
   let keeper: ChainsKeeper;
 
   beforeEach(() => {
+    const tokensKeeper = new TokensKeeper(
+      new MemoryKVStore("tokens"),
+      (): void => {}
+    );
+
     keeper = new ChainsKeeper(
       new MemoryKVStore("chains"),
       new ChainUpdaterKeeper(new MemoryKVStore("updater")),
-      // TODO: Fix me
-      undefined as any,
+      tokensKeeper,
       [
         {
           rpc: "nope",
@@ -59,6 +65,16 @@ describe("Test chains keeper", () => {
       (): void => {},
       0
     );
+
+    const keyRingKeeper = new KeyRingKeeper(
+      new MemoryKVStore("keyring"),
+      keeper,
+      undefined as any,
+      (): void => {},
+      0
+    );
+
+    tokensKeeper.init(keeper, keyRingKeeper);
   });
 
   it("Chains keeper should return the saved chains", async () => {

@@ -15,6 +15,9 @@ import { KeyRingKeeper } from "../keyring/keeper";
 import { KVStore } from "../../common/kvstore";
 import { KeyRingStatus } from "../keyring";
 import { ChainUpdaterKeeper } from "../updater/keeper";
+import { AsyncApprover } from "../../common/async-approver";
+
+import queryString from "query-string";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -22,11 +25,61 @@ export class TokensKeeper {
   private chainsKeeper!: ChainsKeeper;
   private keyRingKeeper!: KeyRingKeeper;
 
-  constructor(private readonly kvStore: KVStore) {}
+  private readonly suggestTokenApprover: AsyncApprover<void>;
+
+  constructor(
+    private readonly kvStore: KVStore,
+    private readonly windowOpener: (url: string) => void,
+    suggestTokenApproverTimeout: number | undefined = undefined
+  ) {
+    this.suggestTokenApprover = new AsyncApprover<void>({
+      validateId: () => {},
+      defaultTimeout:
+        suggestTokenApproverTimeout != null
+          ? suggestTokenApproverTimeout
+          : 3 * 60 * 1000
+    });
+  }
 
   init(chainsKeeper: ChainsKeeper, keyRingKeeper: KeyRingKeeper) {
     this.chainsKeeper = chainsKeeper;
     this.keyRingKeeper = keyRingKeeper;
+  }
+
+  async suggestToken(
+    chainId: string,
+    extensionBaseURL: string,
+    contractAddress: string
+  ) {
+    const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
+
+    // Validate the contract address.
+    AccAddress.fromBech32(
+      contractAddress,
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    );
+
+    const params = {
+      chainId,
+      contractAddress,
+      external: true
+    };
+
+    this.windowOpener(
+      `${extensionBaseURL}popup.html#/setting/token/add?${queryString.stringify(
+        params
+      )}`
+    );
+
+    await this.suggestTokenApprover.request(chainId);
+  }
+
+  approveSuggestedToken(chainId: string) {
+    this.suggestTokenApprover.approve(chainId);
+  }
+
+  rejectSuggestedToken(chainId: string) {
+    this.suggestTokenApprover.reject(chainId);
   }
 
   async addToken(chainId: string, currency: AppCurrency) {
@@ -149,6 +202,18 @@ export class TokensKeeper {
         "hex"
       )}`,
       currencies
+    );
+  }
+
+  async checkAccessOrigin(
+    extensionBaseURL: string,
+    chainId: string,
+    origin: string
+  ) {
+    await this.chainsKeeper.checkAccessOrigin(
+      extensionBaseURL,
+      chainId,
+      origin
     );
   }
 

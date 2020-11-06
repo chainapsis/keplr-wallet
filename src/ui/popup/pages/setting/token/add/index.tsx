@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { HeaderLayout } from "../../../../layouts/header-layout";
 import { useHistory, useLocation } from "react-router";
 import { useIntl, FormattedMessage } from "react-intl";
@@ -31,6 +31,11 @@ import {
 import { useLoadingIndicator } from "../../../../../components/loading-indicator";
 import { useNotification } from "../../../../../components/notification";
 import queryString from "query-string";
+import { fitWindow } from "../../../../../../common/window";
+import {
+  ApproveSuggestedTokenMsg,
+  RejectSuggestedTokenMsg
+} from "../../../../../../background/tokens/messages";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -46,13 +51,43 @@ export const AddTokenPage: FunctionComponent = observer(() => {
 
   const location = useLocation();
   const query = queryString.parse(location.search);
+  const external = query.external ?? false;
+
+  useEffect(() => {
+    if (external) {
+      fitWindow();
+    }
+  }, [external]);
 
   const { chainStore } = useStore();
 
+  useEffect(() => {
+    if (query.chainId && typeof query.chainId === "string") {
+      chainStore.setChain(query.chainId);
+    }
+  }, [chainStore, query.chainId]);
+
+  useEffect(() => {
+    // Force reject when closing window.
+    const beforeunload = async () => {
+      if (external) {
+        const msg = new RejectSuggestedTokenMsg(chainStore.chainInfo.chainId);
+        await sendMessage(BACKGROUND_PORT, msg);
+      }
+    };
+
+    addEventListener("beforeunload", beforeunload);
+    return () => {
+      removeEventListener("beforeunload", beforeunload);
+    };
+  }, [chainStore.chainInfo.chainId, external]);
+
   const form = useForm<FormData>({
     defaultValues: {
-      contractAddress: (query.contractaddress as string) ?? "",
-      viewingKey: (query.viewingkey as string) ?? ""
+      contractAddress: (query.contractAddress as string) ?? "",
+      viewingKey: query.viewingKey
+        ? decodeURIComponent(query.viewingKey as string)
+        : ""
     }
   });
 
@@ -166,12 +201,16 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               const data = JSON.parse(dataOutput);
               const viewingKey = data["create_viewing_key"]["key"];
 
+              const params = {
+                contractAddress,
+                viewingKey: encodeURIComponent(viewingKey),
+                external: external ? true : undefined
+              };
+
               // Should encode viewing key as URL encoding because it can includes reversed characters (such as "+") for URL.
               history.push({
                 pathname: "/setting/token/add",
-                search: `?contractaddress=${contractAddress}&viewingkey=${encodeURIComponent(
-                  viewingKey
-                )}`
+                search: `?${queryString.stringify(params)}`
               });
             } catch (e) {
               notification.push({
@@ -226,9 +265,13 @@ export const AddTokenPage: FunctionComponent = observer(() => {
       alternativeTitle={intl.formatMessage({
         id: "setting.token.add"
       })}
-      onBackButton={useCallback(() => {
-        history.goBack();
-      }, [history])}
+      onBackButton={
+        query.external
+          ? undefined
+          : () => {
+              history.goBack();
+            }
+      }
     >
       <Form
         className={style.container}
@@ -248,10 +291,6 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               };
 
               await chainStore.addToken(currency);
-
-              history.push({
-                pathname: "/"
-              });
             } else {
               const currency: Secret20Currency = {
                 type: "secret20",
@@ -263,7 +302,15 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               };
 
               await chainStore.addToken(currency);
+            }
 
+            if (external) {
+              const msg = new ApproveSuggestedTokenMsg(
+                chainStore.chainInfo.chainId
+              );
+              await sendMessage(BACKGROUND_PORT, msg);
+              window.close();
+            } else {
               history.push({
                 pathname: "/"
               });
