@@ -53,6 +53,16 @@ export class TokensKeeper {
   ) {
     const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
 
+    const find = chainInfo.currencies.find(
+      currency =>
+        "contractAddress" in currency &&
+        currency.contractAddress === contractAddress
+    );
+    // If the same currency is already registered, do nothing.
+    if (find) {
+      return;
+    }
+
     // Validate the contract address.
     AccAddress.fromBech32(
       contractAddress,
