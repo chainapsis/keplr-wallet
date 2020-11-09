@@ -2,6 +2,7 @@ import { MessageManager } from "../../common/message";
 import {
   AddTokenMsg,
   ApproveSuggestedTokenMsg,
+  GetSecret20ViewingKey,
   RejectSuggestedTokenMsg,
   SuggestTokenMsg
 } from "./messages";
@@ -17,6 +18,7 @@ export function init(
   messageManager.registerMessage(ApproveSuggestedTokenMsg);
   messageManager.registerMessage(RejectSuggestedTokenMsg);
   messageManager.registerMessage(AddTokenMsg);
+  messageManager.registerMessage(GetSecret20ViewingKey);
 
   messageManager.addHandler(ROUTE, getHandler(keeper));
 }

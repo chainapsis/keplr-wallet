@@ -14,7 +14,10 @@ import {
   ResultBroadcastTxCommit
 } from "@chainapsis/cosmosjs/rpc/tx";
 import { EnableKeyRingMsg, KeyRingStatus } from "../../background/keyring";
-import { SuggestTokenMsg } from "../../background/tokens/messages";
+import {
+  GetSecret20ViewingKey,
+  SuggestTokenMsg
+} from "../../background/tokens/messages";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -76,5 +79,15 @@ export class Keplr {
       isRestAPI
     );
     return await sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async getSecret20ViewingKey(
+    chainId: string,
+    contractAddress: string
+  ): Promise<string> {
+    return await sendMessage(
+      BACKGROUND_PORT,
+      new GetSecret20ViewingKey(chainId, contractAddress)
+    );
   }
 }

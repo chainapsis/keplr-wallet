@@ -3,6 +3,7 @@ import { TokensKeeper } from "./keeper";
 import {
   AddTokenMsg,
   ApproveSuggestedTokenMsg,
+  GetSecret20ViewingKey,
   RejectSuggestedTokenMsg,
   SuggestTokenMsg
 } from "./messages";
@@ -24,6 +25,11 @@ export const getHandler: (keeper: TokensKeeper) => Handler = keeper => {
         );
       case AddTokenMsg:
         return handleAddTokenMsg(keeper)(env, msg as AddTokenMsg);
+      case GetSecret20ViewingKey:
+        return handleGetSecret20ViewingKey(keeper)(
+          env,
+          msg as GetSecret20ViewingKey
+        );
       default:
         throw new Error("Unknown msg type");
     }
@@ -69,5 +75,19 @@ const handleAddTokenMsg: (
 ) => InternalHandler<AddTokenMsg> = keeper => {
   return async (_, msg) => {
     await keeper.addToken(msg.chainId, msg.currency);
+  };
+};
+
+const handleGetSecret20ViewingKey: (
+  keeper: TokensKeeper
+) => InternalHandler<GetSecret20ViewingKey> = keeper => {
+  return async (env, msg) => {
+    await keeper.checkAccessOrigin(
+      env.extensionBaseURL,
+      msg.chainId,
+      msg.origin
+    );
+
+    return await keeper.getSecret20ViewingKey(msg.chainId, msg.contractAddress);
   };
 };

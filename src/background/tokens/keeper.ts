@@ -215,6 +215,23 @@ export class TokensKeeper {
     );
   }
 
+  async getSecret20ViewingKey(
+    chainId: string,
+    contractAddress: string
+  ): Promise<string> {
+    const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
+
+    for (const currency of chainInfo.currencies) {
+      if ("type" in currency && currency.type === "secret20") {
+        if (currency.contractAddress === contractAddress) {
+          return currency.viewingKey;
+        }
+      }
+    }
+
+    throw new Error("There is no matched secret20");
+  }
+
   async checkAccessOrigin(
     extensionBaseURL: string,
     chainId: string,

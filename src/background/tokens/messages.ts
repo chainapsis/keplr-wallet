@@ -19,6 +19,10 @@ export class SuggestTokenMsg extends Message<void> {
   }
 
   validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id is empty");
+    }
+
     if (!this.contractAddress) {
       throw new Error("Contract address is empty");
     }
@@ -43,7 +47,9 @@ export class ApproveSuggestedTokenMsg extends Message<void> {
   }
 
   validateBasic(): void {
-    // noop
+    if (!this.chainId) {
+      throw new Error("Chain id is empty");
+    }
   }
 
   route(): string {
@@ -65,7 +71,9 @@ export class RejectSuggestedTokenMsg extends Message<void> {
   }
 
   validateBasic(): void {
-    // noop
+    if (!this.chainId) {
+      throw new Error("Chain id is empty");
+    }
   }
 
   route(): string {
@@ -90,7 +98,9 @@ export class AddTokenMsg extends Message<void> {
   }
 
   validateBasic(): void {
-    // noop
+    if (!this.chainId) {
+      throw new Error("Chain id is empty");
+    }
   }
 
   route(): string {
@@ -99,5 +109,40 @@ export class AddTokenMsg extends Message<void> {
 
   type(): string {
     return AddTokenMsg.type();
+  }
+}
+
+export class GetSecret20ViewingKey extends Message<string> {
+  public static type() {
+    return "get-secret20-viewing-key";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly contractAddress: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Chain id is empty");
+    }
+
+    if (!this.contractAddress) {
+      throw new Error("Contract address is empty");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetSecret20ViewingKey.type();
   }
 }
