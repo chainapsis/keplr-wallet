@@ -4,6 +4,35 @@ import { ROUTE } from "./constants";
 const Buffer = require("buffer/").Buffer;
 
 // Return hex encoded result
+export class GetPubkeyMsg extends Message<string> {
+  public static type() {
+    return "get-pubkey-msg";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetPubkeyMsg.type();
+  }
+}
+
+// Return hex encoded result
 export class ReqeustEncryptMsg extends Message<string> {
   public static type() {
     return "request-encrypt-msg";

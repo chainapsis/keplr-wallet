@@ -1,5 +1,5 @@
 import { Env, Handler, InternalHandler, Message } from "../../common/message";
-import { ReqeustEncryptMsg, RequestDecryptMsg } from "./messages";
+import { GetPubkeyMsg, ReqeustEncryptMsg, RequestDecryptMsg } from "./messages";
 import { SecretWasmKeeper } from "./keeper";
 
 const Buffer = require("buffer/").Buffer;
@@ -9,6 +9,8 @@ export const getHandler: (keeper: SecretWasmKeeper) => Handler = (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
+      case GetPubkeyMsg:
+        return handleGetPubkeyMsg(keeper)(env, msg as GetPubkeyMsg);
       case ReqeustEncryptMsg:
         return handleReqeustEncryptMsg(keeper)(env, msg as ReqeustEncryptMsg);
       case RequestDecryptMsg:
@@ -16,6 +18,20 @@ export const getHandler: (keeper: SecretWasmKeeper) => Handler = (
       default:
         throw new Error("Unknown msg type");
     }
+  };
+};
+
+const handleGetPubkeyMsg: (
+  keeper: SecretWasmKeeper
+) => InternalHandler<GetPubkeyMsg> = keeper => {
+  return async (env, msg) => {
+    await keeper.checkAccessOrigin(
+      env.extensionBaseURL,
+      msg.chainId,
+      msg.origin
+    );
+
+    return Buffer.from(await keeper.getPubkey(msg.chainId)).toString("hex");
   };
 };
 

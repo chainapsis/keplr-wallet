@@ -1,7 +1,8 @@
 import { sendMessage } from "../../common/message/send";
 import {
   RequestDecryptMsg,
-  ReqeustEncryptMsg
+  ReqeustEncryptMsg,
+  GetPubkeyMsg
 } from "../../background/secret-wasm";
 import { BACKGROUND_PORT } from "../../common/message/constant";
 
@@ -13,10 +14,17 @@ const Buffer = require("buffer/").Buffer;
 export class KeplrEnigmaUtils {
   constructor(private readonly chainId: string) {}
 
-  public async encrypt(
+  public getPubkey = async (): Promise<Uint8Array> => {
+    return Buffer.from(
+      await sendMessage(BACKGROUND_PORT, new GetPubkeyMsg(this.chainId)),
+      "hex"
+    );
+  };
+
+  public encrypt = async (
     contractCodeHash: string,
     msg: object
-  ): Promise<Uint8Array> {
+  ): Promise<Uint8Array> => {
     // TODO: Set id.
     return Buffer.from(
       await sendMessage(
@@ -25,12 +33,12 @@ export class KeplrEnigmaUtils {
       ),
       "hex"
     );
-  }
+  };
 
-  public async decrypt(
+  public decrypt = async (
     ciphertext: Uint8Array,
     nonce: Uint8Array
-  ): Promise<Uint8Array> {
+  ): Promise<Uint8Array> => {
     return Buffer.from(
       await sendMessage(
         BACKGROUND_PORT,
@@ -42,5 +50,5 @@ export class KeplrEnigmaUtils {
       ),
       "hex"
     );
-  }
+  };
 }
