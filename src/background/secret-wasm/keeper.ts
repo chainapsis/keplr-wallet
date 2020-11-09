@@ -15,6 +15,21 @@ export class SecretWasmKeeper {
     private readonly keyRingKeeper: KeyRingKeeper
   ) {}
 
+  async getPubkey(chainId: string): Promise<Uint8Array> {
+    const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
+
+    const keyRingType = await this.keyRingKeeper.getKeyRingType();
+    if (keyRingType === "none") {
+      throw new Error("Key ring is not initialized");
+    }
+
+    const seed = await this.getSeed(chainInfo);
+
+    // TODO: Handle the rest config.
+    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    return utils.pubkey;
+  }
+
   async encrypt(
     chainId: string,
     contractCodeHash: string,

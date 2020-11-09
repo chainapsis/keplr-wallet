@@ -24,7 +24,10 @@ const chainUpdaterKeeper = new Updater.ChainUpdaterKeeper(
   new BrowserKVStore("updater")
 );
 
-const tokensKeeper = new Tokens.TokensKeeper(new BrowserKVStore("tokens"));
+const tokensKeeper = new Tokens.TokensKeeper(
+  new BrowserKVStore("tokens"),
+  openWindow
+);
 Tokens.init(messageManager, tokensKeeper);
 
 const chainsKeeper = new Chains.ChainsKeeper(

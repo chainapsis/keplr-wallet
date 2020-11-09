@@ -20,6 +20,10 @@ import {
 import { sendMessage } from "../../common/message/send/mock";
 import delay from "delay";
 import { ChainUpdaterKeeper } from "../updater/keeper";
+import { KeyRingKeeper } from "../keyring/keeper";
+import { init as keyRingInit } from "../keyring/init";
+import { TokensKeeper } from "../tokens/keeper";
+import { init as tokensInit } from "../tokens/init";
 
 describe("Test chains handler", () => {
   let messageManager: MockMessageManager;
@@ -42,11 +46,15 @@ describe("Test chains handler", () => {
       extensionBaseURL
     );
 
+    const tokensKeeper = new TokensKeeper(
+      new MemoryKVStore("tokens"),
+      (): void => {}
+    );
+
     const keeper = new ChainsKeeper(
       new MemoryKVStore("chains"),
       new ChainUpdaterKeeper(new MemoryKVStore("updater")),
-      // TODO: Fix me
-      undefined as any,
+      tokensKeeper,
       [
         {
           rpc: "nope",
@@ -89,7 +97,19 @@ describe("Test chains handler", () => {
       0
     );
 
+    const keyRingKeeper = new KeyRingKeeper(
+      new MemoryKVStore("keyring"),
+      keeper,
+      undefined as any,
+      (): void => {},
+      0
+    );
+
+    tokensKeeper.init(keeper, keyRingKeeper);
+
     init(messageManager, keeper);
+    keyRingInit(messageManager, keyRingKeeper);
+    tokensInit(messageManager, tokensKeeper);
     messageManager.listen(port);
   });
 

@@ -8,6 +8,8 @@ const EventEmitter = require("events").EventEmitter;
 
 import { ChainsKeeper } from "../chains/keeper";
 import { init as chainsInit } from "../chains/init";
+import { TokensKeeper } from "../tokens/keeper";
+import { init as tokensInit } from "../tokens/init";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { defaultBech32Config } from "@chainapsis/cosmosjs/core/bech32Config";
 
@@ -55,11 +57,15 @@ describe("Test keyring handler", () => {
       extensionBaseURL
     );
 
+    const tokensKeeper = new TokensKeeper(
+      new MemoryKVStore("tokens"),
+      (): void => {}
+    );
+
     const chainsKeeper = new ChainsKeeper(
       new MemoryKVStore("chains"),
       new ChainUpdaterKeeper(new MemoryKVStore("updater")),
-      // TODO: Fix me
-      undefined as any,
+      tokensKeeper,
       [
         {
           rpc: "nope",
@@ -110,7 +116,10 @@ describe("Test keyring handler", () => {
       0
     );
 
+    tokensKeeper.init(chainsKeeper, keeper);
+
     chainsInit(messageManager, chainsKeeper);
+    tokensInit(messageManager, tokensKeeper);
     init(messageManager, keeper);
     messageManager.listen(port);
   });
