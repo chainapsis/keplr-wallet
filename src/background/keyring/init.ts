@@ -24,7 +24,8 @@ import {
   GetMultiKeyStoreInfoMsg,
   ChangeKeyRingMsg,
   CreateLedgerKeyMsg,
-  AddLedgerKeyMsg
+  AddLedgerKeyMsg,
+  GetExistentAccountsFromBIP44sMsg
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -59,6 +60,7 @@ export function init(
   messageManager.registerMessage(GetKeyRingTypeMsg);
   messageManager.registerMessage(GetMultiKeyStoreInfoMsg);
   messageManager.registerMessage(ChangeKeyRingMsg);
+  messageManager.registerMessage(GetExistentAccountsFromBIP44sMsg);
 
   messageManager.addHandler(ROUTE, getHandler(keeper));
 }

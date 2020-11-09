@@ -152,7 +152,7 @@ export class TokensKeeper {
 
     let keyCurrencies: AppCurrency[] = [];
     if (this.keyRingKeeper.keyRingStatus === KeyRingStatus.UNLOCKED) {
-      const currentKey = await this.keyRingKeeper.getKeyByCoinType(118);
+      const currentKey = await this.keyRingKeeper.getKey(chainId);
 
       keyCurrencies =
         (await this.kvStore.get<AppCurrency[]>(

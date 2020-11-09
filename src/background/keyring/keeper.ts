@@ -17,6 +17,9 @@ import { KVStore } from "../../common/kvstore";
 
 import { ChainsKeeper } from "../chains/keeper";
 import { LedgerKeeper } from "../ledger/keeper";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import Axios from "axios";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 
 export interface KeyHex {
   algo: string;
@@ -186,13 +189,10 @@ export class KeyRingKeeper {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    return this.getKeyByCoinType(
-      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType
+    return this.keyRing.getKey(
+      chainId,
+      await this.chainsKeeper.getChainCoinType(chainId)
     );
-  }
-
-  async getKeyByCoinType(coinType: number): Promise<Key> {
-    return this.keyRing.getKey(coinType);
   }
 
   async requestTxBuilderConfig(
@@ -322,5 +322,79 @@ export class KeyRingKeeper {
 
   getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
     return this.keyRing.getMultiKeyStoreInfo();
+  }
+
+  async getExistentAccountsFromBIP44s(
+    chainId: string,
+    paths: BIP44[]
+  ): Promise<
+    {
+      readonly path: BIP44;
+      readonly bech32Address: string;
+      readonly isExistent: boolean;
+    }[]
+  > {
+    const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
+
+    const restInstance = Axios.create({
+      ...{
+        baseURL: chainInfo.rest
+      },
+      ...chainInfo.restConfig
+    });
+
+    const accounts: {
+      readonly path: BIP44;
+      readonly bech32Address: string;
+      readonly isExistent: boolean;
+    }[] = [];
+
+    for (const path of paths) {
+      const key = await this.keyRing.getKeyFromCoinType(path.coinType);
+      const bech32Address = new AccAddress(
+        key.address,
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      ).toBech32();
+
+      try {
+        const result = await restInstance.get(
+          `/auth/accounts/${bech32Address}`
+        );
+
+        if (result.status === 200) {
+          // If there is no account, rest will not throw an error and it will return the empty account type.
+          // So, to test that an account exists, just check that the result includes the match address string.
+          const str = JSON.stringify(result.data);
+          if (str.includes(bech32Address)) {
+            accounts.push({
+              path,
+              bech32Address,
+              isExistent: true
+            });
+          } else {
+            accounts.push({
+              path,
+              bech32Address,
+              isExistent: false
+            });
+          }
+        } else {
+          accounts.push({
+            path,
+            bech32Address,
+            isExistent: false
+          });
+        }
+      } catch (e) {
+        accounts.push({
+          path,
+          bech32Address,
+          isExistent: false
+        });
+        console.log(`Failed to fetch account: ${e.message}`);
+      }
+    }
+
+    return accounts;
   }
 }

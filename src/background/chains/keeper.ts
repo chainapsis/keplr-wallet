@@ -102,6 +102,22 @@ export class ChainsKeeper {
     return chainInfo;
   }
 
+  async getChainCoinType(chainId: string): Promise<number> {
+    const chainInfo = (await this.getChainInfos(false)).find(chainInfo => {
+      return chainInfo.chainId === chainId;
+    });
+
+    if (!chainInfo) {
+      throw new Error(`There is no chain info for ${chainId}`);
+    }
+
+    const updated = await this.chainUpdaterKeeper.putUpdatedPropertyToChainInfo(
+      chainInfo
+    );
+
+    return updated.bip44.coinType;
+  }
+
   async hasChainInfo(chainId: string): Promise<boolean> {
     return (
       (await this.getChainInfos()).find(chainInfo => {

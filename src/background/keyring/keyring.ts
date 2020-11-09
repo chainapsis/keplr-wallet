@@ -8,6 +8,7 @@ import {
 import { KVStore } from "../../common/kvstore";
 import { LedgerKeeper } from "../ledger/keeper";
 import { BIP44HDPath } from "./types";
+import { ChainUpdaterKeeper } from "../updater/keeper";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -141,7 +142,19 @@ export class KeyRing {
     }
   }
 
-  public getKey(coinType: number): Key {
+  public getKey(chainId: string, defaultCoinType: number): Key {
+    if (!this.keyStore) {
+      throw new Error("Key Store is empty");
+    }
+
+    const version = ChainUpdaterKeeper.getChainVersion(chainId);
+    const coinType = this.keyStore.coinTypeForChain
+      ? this.keyStore.coinTypeForChain[version.identifier] ?? defaultCoinType
+      : defaultCoinType;
+    return this.loadKey(coinType);
+  }
+
+  public getKeyFromCoinType(coinType: number): Key {
     return this.loadKey(coinType);
   }
 
@@ -275,6 +288,7 @@ export class KeyRing {
     } else {
       this.multiKeyStore = multiKeyStore;
     }
+
     this.loaded = true;
   }
 

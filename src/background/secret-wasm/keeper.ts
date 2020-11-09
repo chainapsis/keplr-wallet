@@ -64,9 +64,7 @@ export class SecretWasmKeeper {
   }
 
   private async getSeed(chainInfo: ChainInfo): Promise<Uint8Array> {
-    const key = await this.keyRingKeeper.getKeyByCoinType(
-      chainInfo.bip44.coinType
-    );
+    const key = await this.keyRingKeeper.getKey(chainInfo.chainId);
 
     const storeKey = `seed-${chainInfo.chainId}-${new AccAddress(
       key.address,

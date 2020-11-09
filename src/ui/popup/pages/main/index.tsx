@@ -20,6 +20,9 @@ import { useIntl } from "react-intl";
 import { TokensView } from "./token";
 import { Int } from "@chainapsis/cosmosjs/common/int";
 import { ChainUpdaterKeeper } from "../../../../background/updater/keeper";
+import { sendMessage } from "../../../../common/message/send";
+import { GetExistentAccountsFromBIP44sMsg } from "../../../../background/keyring";
+import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -32,8 +35,19 @@ export const MainPage: FunctionComponent = observer(() => {
   const prevChainId = useRef<string | undefined>();
   useEffect(() => {
     if (prevChainId.current !== chainStore.chainInfo.chainId) {
+      console.log(prevChainId.current, chainStore.chainInfo.chainId);
       // FIXME: This will be executed twice on initial because chain store set the chain info on constructor and init.
       (async () => {
+        console.log(
+          await sendMessage(
+            BACKGROUND_PORT,
+            new GetExistentAccountsFromBIP44sMsg(chainStore.chainInfo.chainId, [
+              chainStore.chainInfo.bip44,
+              ...(chainStore.chainInfo.alternativeBIP44s ?? [])
+            ])
+          )
+        );
+
         if (await ChainUpdaterKeeper.checkChainUpdate(chainStore.chainInfo)) {
           // If chain info has been changed, warning the user wether update the chain or not.
           if (

@@ -14,6 +14,7 @@ import {
 import { AsyncApprover } from "../../common/async-approver";
 
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -750,5 +751,32 @@ export class ChangeKeyRingMsg extends Message<MultiKeyStoreInfoWithSelected> {
 
   type(): string {
     return ChangeKeyRingMsg.type();
+  }
+}
+
+export class GetExistentAccountsFromBIP44sMsg extends Message<
+  {
+    readonly path: BIP44;
+    readonly bech32Address: string;
+  }[]
+> {
+  public static type() {
+    return "get-existent-accounts-from-bip44s";
+  }
+
+  constructor(public readonly chainId: string, public readonly paths: BIP44[]) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetExistentAccountsFromBIP44sMsg.type();
   }
 }
