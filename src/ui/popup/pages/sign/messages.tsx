@@ -371,9 +371,12 @@ export function renderMessage(
             }}
           />
           {isSecretWasm ? (
-            <Badge color="primary" pill style={{ marginTop: "6px" }}>
-              <FormattedMessage id="sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm" />
-            </Badge>
+            <React.Fragment>
+              <br />
+              <Badge color="primary" pill style={{ marginTop: "6px" }}>
+                <FormattedMessage id="sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm" />
+              </Badge>
+            </React.Fragment>
           ) : (
             <br />
           )}
