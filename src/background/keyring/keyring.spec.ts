@@ -20,7 +20,7 @@ describe("Test keyring", () => {
   };
 
   beforeEach(() => {
-    keyRing = new KeyRing(new MemoryKVStore("test"), undefined as any);
+    keyRing = new KeyRing([], new MemoryKVStore("test"), undefined as any);
   });
 
   it("Status of keyring should be not loaded before loading", () => {

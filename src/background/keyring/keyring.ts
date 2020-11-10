@@ -9,6 +9,7 @@ import { KVStore } from "../../common/kvstore";
 import { LedgerKeeper } from "../ledger/keeper";
 import { BIP44HDPath } from "./types";
 import { ChainUpdaterKeeper } from "../updater/keeper";
+import { ChainInfo } from "../chains";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -27,7 +28,7 @@ export interface Key {
 
 export type MultiKeyStoreInfoElem = Pick<
   KeyStore,
-  "version" | "type" | "meta" | "bip44HDPath"
+  "version" | "type" | "meta" | "bip44HDPath" | "coinTypeForChain"
 >;
 export type MultiKeyStoreInfo = MultiKeyStoreInfoElem[];
 export type MultiKeyStoreInfoWithSelectedElem = MultiKeyStoreInfoElem & {
@@ -62,6 +63,7 @@ export class KeyRing {
   private password: string = "";
 
   constructor(
+    private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
     private readonly ledgerKeeper: LedgerKeeper
   ) {
@@ -142,16 +144,36 @@ export class KeyRing {
     }
   }
 
+  public getKeyStoreCoinType(chainId: string): number | undefined {
+    if (!this.keyStore) {
+      return undefined;
+    }
+
+    if (!this.keyStore.coinTypeForChain) {
+      return undefined;
+    }
+
+    return this.keyStore.coinTypeForChain[
+      ChainUpdaterKeeper.getChainVersion(chainId).identifier
+    ];
+  }
+
   public getKey(chainId: string, defaultCoinType: number): Key {
+    return this.loadKey(this.computeKeyStoreCoinType(chainId, defaultCoinType));
+  }
+
+  private computeKeyStoreCoinType(
+    chainId: string,
+    defaultCoinType: number
+  ): number {
     if (!this.keyStore) {
       throw new Error("Key Store is empty");
     }
 
     const version = ChainUpdaterKeeper.getChainVersion(chainId);
-    const coinType = this.keyStore.coinTypeForChain
+    return this.keyStore.coinTypeForChain
       ? this.keyStore.coinTypeForChain[version.identifier] ?? defaultCoinType
       : defaultCoinType;
-    return this.loadKey(coinType);
   }
 
   public getKeyFromCoinType(coinType: number): Key {
@@ -289,7 +311,88 @@ export class KeyRing {
       this.multiKeyStore = multiKeyStore;
     }
 
+    let hasLegacyKeyStore = false;
+    // In prior of version 1.2, bip44 path didn't tie with the keystore, and bip44 exists on the chain info.
+    // But, after some chain matures, they decided the bip44 path's coin type.
+    // So, some chain can have the multiple bip44 coin type (one is the standard coin type and other is the legacy coin type).
+    // We should support the legacy coin type, so we determined that the coin type ties with the keystore.
+    // To decrease the barrier of existing users, set the alternative coin type by force if the keystore version is prior than 1.2.
+    if (this.keyStore) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      if (this.keyStore.version === "1" || this.keyStore.version === "1.1") {
+        hasLegacyKeyStore = true;
+        this.updateLegacyKeyStore(this.keyStore);
+      }
+    }
+    for (const keyStore of this.multiKeyStore) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      if (keyStore.version === "1" || keyStore.version === "1.1") {
+        hasLegacyKeyStore = true;
+        this.updateLegacyKeyStore(keyStore);
+      }
+    }
+    if (hasLegacyKeyStore) {
+      await this.save();
+    }
+
     this.loaded = true;
+  }
+
+  private updateLegacyKeyStore(keyStore: KeyStore) {
+    keyStore.version = "1.2";
+    for (const chainInfo of this.embedChainInfos) {
+      const version = ChainUpdaterKeeper.getChainVersion(chainInfo.chainId);
+      const coinType = (() => {
+        if (
+          chainInfo.alternativeBIP44s &&
+          chainInfo.alternativeBIP44s.length > 0
+        ) {
+          return chainInfo.alternativeBIP44s[0].coinType;
+        } else {
+          return chainInfo.bip44.coinType;
+        }
+      })();
+      keyStore.coinTypeForChain = {
+        ...keyStore.coinTypeForChain,
+        [version.identifier]: coinType
+      };
+    }
+  }
+
+  public setKeyStoreCoinType(chainId: string, coinType: number) {
+    if (!this.keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    const version = ChainUpdaterKeeper.getChainVersion(chainId);
+
+    if (
+      this.keyStore.coinTypeForChain &&
+      this.keyStore.coinTypeForChain[version.identifier] !== undefined
+    ) {
+      throw new Error("Coin type already set");
+    }
+
+    this.keyStore.coinTypeForChain = {
+      ...this.keyStore.coinTypeForChain,
+      [version.identifier]: coinType
+    };
+
+    const keyStoreInMulti = this.multiKeyStore.find(keyStore => {
+      return (
+        KeyRing.getKeyStoreId(keyStore) ===
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        KeyRing.getKeyStoreId(this.keyStore!)
+      );
+    });
+
+    if (keyStoreInMulti) {
+      keyStoreInMulti.coinTypeForChain = {
+        ...this.keyStore.coinTypeForChain
+      };
+    }
   }
 
   public async deleteKeyRing(
@@ -420,7 +523,8 @@ export class KeyRing {
   }
 
   public async sign(
-    coinType: number,
+    chainId: string,
+    defaultCoinType: number,
     message: Uint8Array
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
@@ -444,6 +548,8 @@ export class KeyRing {
         message
       );
     } else {
+      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+
       const privKey = this.loadPrivKey(coinType);
       return privKey.sign(message);
     }
@@ -566,6 +672,7 @@ export class KeyRing {
         version: keyStore.version,
         type: keyStore.type,
         meta: keyStore.meta,
+        coinTypeForChain: keyStore.coinTypeForChain,
         bip44HDPath: keyStore.bip44HDPath,
         selected: this.keyStore
           ? KeyRing.getKeyStoreId(keyStore) ===

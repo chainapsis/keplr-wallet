@@ -20,6 +20,7 @@ import { LedgerKeeper } from "../ledger/keeper";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import Axios from "axios";
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
+import { ChainInfo } from "../chains";
 
 export interface KeyHex {
   algo: string;
@@ -46,13 +47,14 @@ export class KeyRingKeeper {
   private readonly signApprover: AsyncApprover<SignMessage>;
 
   constructor(
+    embedChainInfos: ChainInfo[],
     kvStore: KVStore,
     public readonly chainsKeeper: ChainsKeeper,
     ledgerKeeper: LedgerKeeper,
     private readonly windowOpener: (url: string) => void,
     approverTimeout: number | undefined = undefined
   ) {
-    this.keyRing = new KeyRing(kvStore, ledgerKeeper);
+    this.keyRing = new KeyRing(embedChainInfos, kvStore, ledgerKeeper);
 
     this.unlockApprover = new AsyncApprover({
       defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
@@ -250,7 +252,8 @@ export class KeyRingKeeper {
   ): Promise<Uint8Array> {
     if (skipApprove) {
       return await this.keyRing.sign(
-        (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+        chainId,
+        await this.chainsKeeper.getChainCoinType(chainId),
         message
       );
     }
@@ -263,7 +266,8 @@ export class KeyRingKeeper {
 
     await this.signApprover.request(id, { chainId, message });
     return await this.keyRing.sign(
-      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+      chainId,
+      await this.chainsKeeper.getChainCoinType(chainId),
       message
     );
   }
@@ -287,7 +291,8 @@ export class KeyRingKeeper {
 
   async sign(chainId: string, message: Uint8Array): Promise<Uint8Array> {
     return this.keyRing.sign(
-      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+      chainId,
+      await this.chainsKeeper.getChainCoinType(chainId),
       message
     );
   }
@@ -324,7 +329,11 @@ export class KeyRingKeeper {
     return this.keyRing.getMultiKeyStoreInfo();
   }
 
-  async getExistentAccountsFromBIP44s(
+  setKeyStoreCoinType(chainId: string, coinType: number): void {
+    this.keyRing.setKeyStoreCoinType(chainId, coinType);
+  }
+
+  async getKeyStoreBIP44Selectables(
     chainId: string,
     paths: BIP44[]
   ): Promise<
@@ -334,6 +343,11 @@ export class KeyRingKeeper {
       readonly isExistent: boolean;
     }[]
   > {
+    // If keystore already has the coin type, return empty array.
+    if (this.keyRing.getKeyStoreCoinType(chainId) !== undefined) {
+      return [];
+    }
+
     const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
 
     const restInstance = Axios.create({

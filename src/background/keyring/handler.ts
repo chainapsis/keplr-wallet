@@ -25,7 +25,8 @@ import {
   ChangeKeyRingMsg,
   AddLedgerKeyMsg,
   CreateLedgerKeyMsg,
-  GetExistentAccountsFromBIP44sMsg
+  GetKeyStoreBIP44SelectablesMsg,
+  SetKeyStoreCoinTypeMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@chainapsis/cosmosjs/crypto";
@@ -111,10 +112,15 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         );
       case ChangeKeyRingMsg:
         return handleChangeKeyRingMsg(keeper)(env, msg as ChangeKeyRingMsg);
-      case GetExistentAccountsFromBIP44sMsg:
-        return handleGetExistentAccountsFromBIP44sMsg(keeper)(
+      case SetKeyStoreCoinTypeMsg:
+        return handleSetKeyRingCoinTypeMsg(keeper)(
           env,
-          msg as GetExistentAccountsFromBIP44sMsg
+          msg as SetKeyStoreCoinTypeMsg
+        );
+      case GetKeyStoreBIP44SelectablesMsg:
+        return handleGetKeyStoreBIP44SelectablesMsg(keeper)(
+          env,
+          msg as GetKeyStoreBIP44SelectablesMsg
         );
       default:
         throw new Error("Unknown msg type");
@@ -437,10 +443,19 @@ const handleChangeKeyRingMsg: (
   };
 };
 
-const handleGetExistentAccountsFromBIP44sMsg: (
+const handleSetKeyRingCoinTypeMsg: (
   keeper: KeyRingKeeper
-) => InternalHandler<GetExistentAccountsFromBIP44sMsg> = keeper => {
+) => InternalHandler<SetKeyStoreCoinTypeMsg> = keeper => {
   return (_, msg) => {
-    return keeper.getExistentAccountsFromBIP44s(msg.chainId, msg.paths);
+    keeper.setKeyStoreCoinType(msg.chainId, msg.coinType);
+    return keeper.keyRingStatus;
+  };
+};
+
+const handleGetKeyStoreBIP44SelectablesMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<GetKeyStoreBIP44SelectablesMsg> = keeper => {
+  return (_, msg) => {
+    return keeper.getKeyStoreBIP44Selectables(msg.chainId, msg.paths);
   };
 };

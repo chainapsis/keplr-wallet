@@ -18,7 +18,8 @@ import {
   DeleteKeyRingMsg,
   CreateLedgerKeyMsg,
   AddLedgerKeyMsg,
-  GetKeyRingTypeMsg
+  GetKeyRingTypeMsg,
+  SetKeyStoreCoinTypeMsg
 } from "../../../../background/keyring";
 
 import { action, observable } from "mobx";
@@ -249,5 +250,27 @@ export class KeyRingStore {
     await this.rootStore.refreshChainList();
 
     this.rootStore.changeKeyRing();
+  }
+
+  // Set the coin type to current key store.
+  // And, save it, refresh the key store.
+  @actionAsync
+  public async setKeyStoreCoinType(chainId: string, coinType: number) {
+    console.log(chainId, coinType);
+    const status = await task(
+      sendMessage(
+        BACKGROUND_PORT,
+        new SetKeyStoreCoinTypeMsg(chainId, coinType)
+      )
+    );
+
+    await task(this.save());
+
+    const multiKeyStoreInfo = await task(
+      sendMessage(BACKGROUND_PORT, new GetMultiKeyStoreInfoMsg())
+    );
+    this.setMultiKeyStoreInfo(multiKeyStoreInfo);
+
+    this.setStatus(status);
   }
 }

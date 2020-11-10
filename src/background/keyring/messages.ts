@@ -754,14 +754,15 @@ export class ChangeKeyRingMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 }
 
-export class GetExistentAccountsFromBIP44sMsg extends Message<
+export class GetKeyStoreBIP44SelectablesMsg extends Message<
   {
     readonly path: BIP44;
     readonly bech32Address: string;
+    readonly isExistent: boolean;
   }[]
 > {
   public static type() {
-    return "get-existent-accounts-from-bip44s";
+    return "get-keystore-bip44-selectables";
   }
 
   constructor(public readonly chainId: string, public readonly paths: BIP44[]) {
@@ -769,7 +770,9 @@ export class GetExistentAccountsFromBIP44sMsg extends Message<
   }
 
   validateBasic(): void {
-    // noop
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
   }
 
   route(): string {
@@ -777,6 +780,41 @@ export class GetExistentAccountsFromBIP44sMsg extends Message<
   }
 
   type(): string {
-    return GetExistentAccountsFromBIP44sMsg.type();
+    return GetKeyStoreBIP44SelectablesMsg.type();
+  }
+}
+
+export class SetKeyStoreCoinTypeMsg extends Message<KeyRingStatus> {
+  public static type() {
+    return "set-keystore-coin-type";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly coinType: number
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (this.coinType < 0) {
+      throw new Error("coin type can not be negative");
+    }
+
+    if (!Number.isInteger(this.coinType)) {
+      throw new Error("coin type should be integer");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SetKeyStoreCoinTypeMsg.type();
   }
 }
