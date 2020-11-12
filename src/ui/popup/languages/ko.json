@@ -58,7 +58,8 @@
   "setting.keyring.selected-account": "(선택됨)",
 
   "setting.export": "니모닉 시드 보기",
-  "setting.export.warning": "니모닉 시드를 보려면 패스워드를 입력하세요",
+  "setting.export.private-key": "개인키 보기",
+  "setting.export.warning": "진행하려면 패스워드를 입력하세요",
   "setting.export.input.password": "비밀번호",
   "setting.export.input.password.error.required": "비밀번호를 입력하세요",
   "setting.export.input.password.error.invalid": "잘못된 비밀번호입니다",

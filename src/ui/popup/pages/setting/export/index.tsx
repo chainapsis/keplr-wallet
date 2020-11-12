@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { HeaderLayout } from "../../../layouts/header-layout";
 
-import { useHistory, useRouteMatch } from "react-router";
+import { useHistory, useLocation, useRouteMatch } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Input } from "../../../../components/form";
 import { Button, Form } from "reactstrap";
@@ -16,6 +16,9 @@ import { sendMessage } from "../../../../../common/message/send";
 import { BACKGROUND_PORT } from "../../../../../common/message/constant";
 import { WarningView } from "./warning-view";
 
+import classnames from "classnames";
+import queryString from "query-string";
+
 import style from "./style.module.scss";
 
 interface FormData {
@@ -24,8 +27,13 @@ interface FormData {
 
 export const ExportPage: FunctionComponent = () => {
   const history = useHistory();
-  const match = useRouteMatch<{ index: string }>();
+  const location = useLocation();
+  const match = useRouteMatch<{ index: string; type?: string }>();
   const intl = useIntl();
+
+  const query = queryString.parse(location.search);
+
+  const type = query.type ?? "mnemonic";
 
   const [loading, setLoading] = useState(false);
   const [keyRing, setKeyRing] = useState("");
@@ -47,7 +55,8 @@ export const ExportPage: FunctionComponent = () => {
       showChainName={false}
       canChangeChainInfo={false}
       alternativeTitle={intl.formatMessage({
-        id: "setting.export"
+        id:
+          type === "mnemonic" ? "setting.export" : "setting.export.private-key"
       })}
       onBackButton={useCallback(() => {
         history.goBack();
@@ -55,7 +64,13 @@ export const ExportPage: FunctionComponent = () => {
     >
       <div className={style.container}>
         {keyRing ? (
-          <div className={style.mnemonic}>{keyRing}</div>
+          <div
+            className={classnames(style.mnemonic, {
+              [style.altHex]: type !== "mnemonic"
+            })}
+          >
+            {keyRing}
+          </div>
         ) : (
           <React.Fragment>
             <WarningView />
