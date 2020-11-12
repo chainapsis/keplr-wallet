@@ -8,6 +8,7 @@ import { useStore } from "../../stores";
 import { observer } from "mobx-react";
 import { CoinUtils } from "../../../../common/coin-utils";
 import { Int } from "@chainapsis/cosmosjs/common/int";
+import { FormattedMessage } from "react-intl";
 
 const BIP44Selectable: FunctionComponent<{
   selectable: SelectableAccount;
@@ -44,7 +45,9 @@ const BIP44Selectable: FunctionComponent<{
           >{`m/44’/${selectable.path.coinType}’`}</div>
           <Row>
             <Col>
-              <div className={style.label}>Address</div>
+              <div className={style.label}>
+                <FormattedMessage id="main.modal.select-account.label.address" />
+              </div>
               <div className={style.value}>
                 {shortenAddress(selectable.bech32Address, 26)}
               </div>
@@ -52,7 +55,9 @@ const BIP44Selectable: FunctionComponent<{
           </Row>
           <Row>
             <Col>
-              <div className={style.label}>Balance</div>
+              <div className={style.label}>
+                <FormattedMessage id="main.modal.select-account.label.balance" />
+              </div>
               <div className={style.value}>
                 {coin
                   ? CoinUtils.shrinkDecimals(
@@ -66,7 +71,9 @@ const BIP44Selectable: FunctionComponent<{
               </div>
             </Col>
             <Col>
-              <div className={style.label}>Previous Txs</div>
+              <div className={style.label}>
+                <FormattedMessage id="main.modal.select-account.label.sequence" />
+              </div>
               <div className={style.value}>{selectable.sequence}</div>
             </Col>
           </Row>
@@ -102,7 +109,9 @@ export const BIP44SelectModal: FunctionComponent<{
   return (
     <Modal isOpen={enabled && accounts.length > 0} centered>
       <ModalBody>
-        <div className={style.title}>Select your account</div>
+        <div className={style.title}>
+          <FormattedMessage id="main.modal.select-account.title" />
+        </div>
         <div>
           {accounts.map(selectable => {
             return (
@@ -129,7 +138,7 @@ export const BIP44SelectModal: FunctionComponent<{
             await select();
           }}
         >
-          Select Account
+          <FormattedMessage id="main.modal.select-account.button.select" />
         </Button>
       </ModalBody>
     </Modal>
