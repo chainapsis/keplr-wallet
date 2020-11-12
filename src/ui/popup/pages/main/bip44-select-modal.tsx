@@ -102,6 +102,7 @@ export const BIP44SelectModal: FunctionComponent<{
   return (
     <Modal isOpen={enabled && accounts.length > 0} centered>
       <ModalBody>
+        <div className={style.title}>Select your account</div>
         <div>
           {accounts.map(selectable => {
             return (
@@ -128,7 +129,7 @@ export const BIP44SelectModal: FunctionComponent<{
             await select();
           }}
         >
-          Import Account
+          Select Account
         </Button>
       </ModalBody>
     </Modal>
