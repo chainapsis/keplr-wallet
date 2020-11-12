@@ -187,7 +187,7 @@ export class KeyRingKeeper {
 
   async getKey(chainId: string): Promise<Key> {
     return this.getKeyByCoinType(
-      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType
+      await this.chainsKeeper.getChainCoinType(chainId)
     );
   }
 
