@@ -170,7 +170,11 @@ export class TokensKeeper {
 
     await this.kvStore.set(version.identifier, null);
 
-    // TODO: Remove the tokens that has been registered according to the account.
+    const reverse = await this.getTokensToAccountReverse(chainId);
+    for (const hexAddress of reverse) {
+      await this.kvStore.set(`${version.identifier}-${hexAddress}`, null);
+    }
+    await this.setTokensToAccountReverse(chainId, []);
   }
 
   private async getTokensFromChain(chainId: string): Promise<AppCurrency[]> {
@@ -207,12 +211,33 @@ export class TokensKeeper {
     const version = ChainUpdaterKeeper.getChainVersion(chainId);
 
     const currentKey = await this.keyRingKeeper.getKey(chainId);
-    await this.kvStore.set(
-      `${version.identifier}-${Buffer.from(currentKey.address).toString(
-        "hex"
-      )}`,
-      currencies
-    );
+    const hexAddress = Buffer.from(currentKey.address).toString("hex");
+    await this.kvStore.set(`${version.identifier}-${hexAddress}`, currencies);
+
+    await this.insertTokensToAccountReverse(chainId, hexAddress);
+  }
+
+  private async getTokensToAccountReverse(chainId: string): Promise<string[]> {
+    const version = ChainUpdaterKeeper.getChainVersion(chainId);
+
+    return (await this.kvStore.get(`${version.identifier}-addresses`)) ?? [];
+  }
+
+  private async setTokensToAccountReverse(
+    chainId: string,
+    addresses: string[]
+  ) {
+    const version = ChainUpdaterKeeper.getChainVersion(chainId);
+
+    await this.kvStore.set(`${version.identifier}-addresses`, addresses);
+  }
+
+  private async insertTokensToAccountReverse(chainId: string, address: string) {
+    const reverse = await this.getTokensToAccountReverse(chainId);
+    if (reverse.indexOf(address) < 0) {
+      reverse.push(address);
+      await this.setTokensToAccountReverse(chainId, reverse);
+    }
   }
 
   async getSecret20ViewingKey(
