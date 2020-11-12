@@ -86,12 +86,17 @@ export const MainPage: FunctionComponent = observer(() => {
   const selectedKeyStore = keyRingStore.multiKeyStoreInfo.find(
     keyStore => keyStore.selected
   );
-  const coinTypeExist =
+  let coinTypeExist =
     selectedKeyStore == null ||
     selectedKeyStore.coinTypeForChain[
       ChainUpdaterKeeper.getChainVersion(chainStore.chainInfo.chainId)
         .identifier
     ] !== undefined;
+
+  // Just treat the key as if it has a coin type if it is not mnemonic because only mnemonic can set the coin type
+  if (keyRingStore.keyRingType !== "mnemonic") {
+    coinTypeExist = true;
+  }
 
   const [needSelectCoinType, setNeedSelectCoinType] = useState(false);
   const alternativeBIP44Exist =
