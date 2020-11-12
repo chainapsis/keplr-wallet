@@ -2,7 +2,7 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 
 import { HeaderLayout } from "../../layouts";
 
-import { Card, CardBody, Modal, ModalBody } from "reactstrap";
+import { Card, CardBody } from "reactstrap";
 
 import style from "./style.module.scss";
 import { Menu } from "./menu";
@@ -24,17 +24,13 @@ import { sendMessage } from "../../../../common/message/send";
 import { GetKeyStoreBIP44SelectablesMsg } from "../../../../background/keyring";
 import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { ChainInfo } from "../../../../background/chains";
-import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { useLoadingIndicator } from "../../../components/loading-indicator";
-import { shortenAddress } from "../../../../common/address";
+import { BIP44SelectModal } from "./bip44-select-modal";
+import { SelectableAccount } from "../../../../background/keyring/types";
 
 const useBIP44Select = (chainInfo: ChainInfo, coinTypeExist: boolean) => {
   const [selectableAccounts, setSelectableAccounts] = useState<
-    {
-      readonly path: BIP44;
-      readonly bech32Address: string;
-      readonly isExistent: boolean;
-    }[]
+    SelectableAccount[]
   >([]);
 
   const prevChainId = useRef<string | undefined>();
@@ -240,34 +236,10 @@ export const MainPage: FunctionComponent = observer(() => {
         </div>
       }
     >
-      <Modal
-        isOpen={needSelectCoinType && selectableAccounts.length > 0}
-        centered
-      >
-        <ModalBody>
-          <div>
-            {selectableAccounts.map(selectable => {
-              return (
-                <div
-                  key={selectable.bech32Address}
-                  style={{ cursor: "pointer" }}
-                  onClick={async e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    await keyRingStore.setKeyStoreCoinType(
-                      chainStore.chainInfo.chainId,
-                      selectable.path.coinType
-                    );
-                  }}
-                >
-                  {shortenAddress(selectable.bech32Address, 32)}
-                </div>
-              );
-            })}
-          </div>
-        </ModalBody>
-      </Modal>
+      <BIP44SelectModal
+        enabled={needSelectCoinType}
+        accounts={selectableAccounts}
+      />
       <Card className={classnames(style.card, "shadow")}>
         <CardBody>
           <div className={style.containerAccountInner}>

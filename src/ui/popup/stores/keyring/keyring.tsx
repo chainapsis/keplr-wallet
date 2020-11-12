@@ -256,7 +256,6 @@ export class KeyRingStore {
   // And, save it, refresh the key store.
   @actionAsync
   public async setKeyStoreCoinType(chainId: string, coinType: number) {
-    console.log(chainId, coinType);
     const status = await task(
       sendMessage(
         BACKGROUND_PORT,

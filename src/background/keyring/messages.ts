@@ -8,6 +8,7 @@ import {
 import { KeyHex } from "./keeper";
 import {
   BIP44HDPath,
+  SelectableAccount,
   TxBuilderConfigPrimitive,
   TxBuilderConfigPrimitiveWithChainId
 } from "./types";
@@ -755,11 +756,7 @@ export class ChangeKeyRingMsg extends Message<MultiKeyStoreInfoWithSelected> {
 }
 
 export class GetKeyStoreBIP44SelectablesMsg extends Message<
-  {
-    readonly path: BIP44;
-    readonly bech32Address: string;
-    readonly isExistent: boolean;
-  }[]
+  SelectableAccount[]
 > {
   public static type() {
     return "get-keystore-bip44-selectables";
