@@ -86,7 +86,7 @@ export class SecretWasmKeeper {
     const storeKey = `seed-${chainInfo.chainId}-${new AccAddress(
       key.address,
       chainInfo.bech32Config.bech32PrefixAccAddr
-    )}`;
+    ).toBech32()}`;
 
     const cached = await this.kvStore.get(storeKey);
     if (cached) {
