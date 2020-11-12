@@ -1,6 +1,7 @@
 import React, {
   FunctionComponent,
   useCallback,
+  useEffect,
   useMemo,
   useState
 } from "react";
@@ -39,9 +40,9 @@ import { DecUtils } from "../../../../common/dec-utils";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, keyRingStore } = useStore();
 
-  const [walletProvider] = useState(
+  const [walletProvider, setWalletProvider] = useState(
     // Skip the approving for withdrawing rewards.
     new PopupWalletProvider({
       onRequestTxBuilderConfig: (chainId: string) => {
@@ -49,6 +50,40 @@ export const StakeView: FunctionComponent = observer(() => {
       }
     })
   );
+  useEffect(() => {
+    if (
+      keyRingStore.keyRingType === "ledger" &&
+      walletProvider.signApprover == null
+    ) {
+      // If the key type is ledger, don't skip the signing page.
+      // Skipping signing will conflict the users because they can't see the progress if siging page is not shown.
+      setWalletProvider(
+        new PopupWalletProvider(
+          {
+            onRequestTxBuilderConfig: (chainId: string) => {
+              history.push(`/fee/${chainId}`);
+            }
+          },
+          {
+            onRequestSignature: (id: string) => {
+              history.push(`/sign/${id}`);
+            }
+          }
+        )
+      );
+    } else if (
+      keyRingStore.keyRingType !== "ledger" &&
+      walletProvider.signApprover
+    ) {
+      setWalletProvider(
+        new PopupWalletProvider({
+          onRequestTxBuilderConfig: (chainId: string) => {
+            history.push(`/fee/${chainId}`);
+          }
+        })
+      );
+    }
+  }, [history, keyRingStore.keyRingType, walletProvider.signApprover]);
   const cosmosJS = useCosmosJS(chainStore.chainInfo, walletProvider, {
     useBackgroundTx: true
   });
