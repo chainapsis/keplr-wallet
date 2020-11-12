@@ -8,12 +8,14 @@ import {
 import { KeyHex } from "./keeper";
 import {
   BIP44HDPath,
+  SelectableAccount,
   TxBuilderConfigPrimitive,
   TxBuilderConfigPrimitiveWithChainId
 } from "./types";
 import { AsyncApprover } from "../../common/async-approver";
 
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -750,5 +752,66 @@ export class ChangeKeyRingMsg extends Message<MultiKeyStoreInfoWithSelected> {
 
   type(): string {
     return ChangeKeyRingMsg.type();
+  }
+}
+
+export class GetKeyStoreBIP44SelectablesMsg extends Message<
+  SelectableAccount[]
+> {
+  public static type() {
+    return "get-keystore-bip44-selectables";
+  }
+
+  constructor(public readonly chainId: string, public readonly paths: BIP44[]) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetKeyStoreBIP44SelectablesMsg.type();
+  }
+}
+
+export class SetKeyStoreCoinTypeMsg extends Message<KeyRingStatus> {
+  public static type() {
+    return "set-keystore-coin-type";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly coinType: number
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (this.coinType < 0) {
+      throw new Error("coin type can not be negative");
+    }
+
+    if (!Number.isInteger(this.coinType)) {
+      throw new Error("coin type should be integer");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SetKeyStoreCoinTypeMsg.type();
   }
 }

@@ -9,6 +9,7 @@ import { Address } from "@chainapsis/cosmosjs/crypto";
 import { AsyncApprover } from "../../common/async-approver";
 import {
   BIP44HDPath,
+  SelectableAccount,
   TxBuilderConfigPrimitive,
   TxBuilderConfigPrimitiveWithChainId
 } from "./types";
@@ -17,6 +18,11 @@ import { KVStore } from "../../common/kvstore";
 
 import { ChainsKeeper } from "../chains/keeper";
 import { LedgerKeeper } from "../ledger/keeper";
+import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import Axios from "axios";
+import { AccAddress } from "@chainapsis/cosmosjs/common/address";
+import { ChainInfo } from "../chains";
+import { BaseAccount } from "@chainapsis/cosmosjs/common/baseAccount";
 
 export interface KeyHex {
   algo: string;
@@ -43,13 +49,14 @@ export class KeyRingKeeper {
   private readonly signApprover: AsyncApprover<SignMessage>;
 
   constructor(
+    embedChainInfos: ChainInfo[],
     kvStore: KVStore,
     public readonly chainsKeeper: ChainsKeeper,
     ledgerKeeper: LedgerKeeper,
     private readonly windowOpener: (url: string) => void,
     approverTimeout: number | undefined = undefined
   ) {
-    this.keyRing = new KeyRing(kvStore, ledgerKeeper);
+    this.keyRing = new KeyRing(embedChainInfos, kvStore, ledgerKeeper);
 
     this.unlockApprover = new AsyncApprover({
       defaultTimeout: approverTimeout != null ? approverTimeout : 3 * 60 * 1000
@@ -186,13 +193,10 @@ export class KeyRingKeeper {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    return this.getKeyByCoinType(
+    return this.keyRing.getKey(
+      chainId,
       await this.chainsKeeper.getChainCoinType(chainId)
     );
-  }
-
-  async getKeyByCoinType(coinType: number): Promise<Key> {
-    return this.keyRing.getKey(coinType);
   }
 
   async requestTxBuilderConfig(
@@ -250,7 +254,8 @@ export class KeyRingKeeper {
   ): Promise<Uint8Array> {
     if (skipApprove) {
       return await this.keyRing.sign(
-        (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+        chainId,
+        await this.chainsKeeper.getChainCoinType(chainId),
         message
       );
     }
@@ -263,7 +268,8 @@ export class KeyRingKeeper {
 
     await this.signApprover.request(id, { chainId, message });
     return await this.keyRing.sign(
-      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+      chainId,
+      await this.chainsKeeper.getChainCoinType(chainId),
       message
     );
   }
@@ -287,7 +293,8 @@ export class KeyRingKeeper {
 
   async sign(chainId: string, message: Uint8Array): Promise<Uint8Array> {
     return this.keyRing.sign(
-      (await this.chainsKeeper.getChainInfo(chainId)).bip44.coinType,
+      chainId,
+      await this.chainsKeeper.getChainCoinType(chainId),
       message
     );
   }
@@ -322,5 +329,80 @@ export class KeyRingKeeper {
 
   getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
     return this.keyRing.getMultiKeyStoreInfo();
+  }
+
+  setKeyStoreCoinType(chainId: string, coinType: number): void {
+    this.keyRing.setKeyStoreCoinType(chainId, coinType);
+  }
+
+  async getKeyStoreBIP44Selectables(
+    chainId: string,
+    paths: BIP44[]
+  ): Promise<SelectableAccount[]> {
+    // If keystore already has the coin type, return empty array.
+    if (this.keyRing.getKeyStoreCoinType(chainId) !== undefined) {
+      return [];
+    }
+
+    const chainInfo = await this.chainsKeeper.getChainInfo(chainId);
+
+    const restInstance = Axios.create({
+      ...{
+        baseURL: chainInfo.rest
+      },
+      ...chainInfo.restConfig
+    });
+
+    const accounts: SelectableAccount[] = [];
+
+    for (const path of paths) {
+      const key = await this.keyRing.getKeyFromCoinType(path.coinType);
+      const bech32Address = new AccAddress(
+        key.address,
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      ).toBech32();
+
+      try {
+        const result = await restInstance.get(
+          `/auth/accounts/${bech32Address}`
+        );
+
+        if (result.status === 200) {
+          const baseAccount = BaseAccount.fromJSON(result.data);
+          accounts.push({
+            path,
+            bech32Address,
+            isExistent: true,
+            sequence: baseAccount.getSequence().toString(),
+            // TODO: If the chain is stargate, this will return empty array because the balances doens't exist on the account itself.
+            coins: baseAccount.getCoins().map(coin => {
+              return {
+                denom: coin.denom,
+                amount: coin.amount.toString()
+              };
+            })
+          });
+        } else {
+          accounts.push({
+            path,
+            bech32Address,
+            isExistent: false,
+            sequence: "0",
+            coins: []
+          });
+        }
+      } catch (e) {
+        accounts.push({
+          path,
+          bech32Address,
+          isExistent: false,
+          sequence: "0",
+          coins: []
+        });
+        console.log(`Failed to fetch account: ${e.message}`);
+      }
+    }
+
+    return accounts;
   }
 }

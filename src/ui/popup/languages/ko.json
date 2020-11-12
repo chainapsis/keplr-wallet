@@ -6,6 +6,12 @@
   "main.account.button.send": "보내기",
   "main.account.tooltip.no-asset": "계정에 자산이 없습니다. 자산을 입금해주세요.",
 
+  "main.modal.select-account.title": "계정을 선택하세요",
+  "main.modal.select-account.button.select": "계정 선택",
+  "main.modal.select-account.label.address": "주소",
+  "main.modal.select-account.label.balance": "잔고",
+  "main.modal.select-account.label.sequence": "보낸 트랜잭션",
+
   "main.stake.message.pending-staking-reward": "스테이킹 보상",
   "main.stake.message.stake": "스테이킹",
   "main.stake.message.earning": "연간 {apr}%의 이자를 받으세요",

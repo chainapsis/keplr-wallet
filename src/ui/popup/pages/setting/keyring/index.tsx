@@ -102,8 +102,10 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                       try {
                         await keyRingStore.changeKeyRing(i);
                         await keyRingStore.save();
+                        loadingIndicator.setIsLoading("keyring", false);
                         history.push("/");
-                      } finally {
+                      } catch (e) {
+                        console.log(`Failed to change keyring: ${e.message}`);
                         loadingIndicator.setIsLoading("keyring", false);
                       }
                     }

@@ -1,7 +1,7 @@
 import scrypt from "scrypt-js";
 import AES, { Counter } from "aes-js";
 import { sha256 } from "sha.js";
-import { BIP44HDPath } from "./types";
+import { BIP44HDPath, CoinTypeForChain } from "./types";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -18,12 +18,13 @@ interface ScryptParams {
  * But, the encryped data is not the private key, but the mnemonic words.
  */
 export interface KeyStore {
-  version: "1" | "1.1";
+  version: "1.2";
   /**
    * Type can be "mnemonic" or "privateKey".
    * Below version "1", type is not defined and it is considered as "mnemonic".
    */
   type?: "mnemonic" | "privateKey" | "ledger";
+  coinTypeForChain: CoinTypeForChain;
   bip44HDPath?: BIP44HDPath;
   meta?: {
     [key: string]: string;
@@ -75,8 +76,9 @@ export class Crypto {
       Buffer.concat([derivedKey.slice(derivedKey.length / 2), ciphertext])
     );
     return {
-      version: "1.1",
+      version: "1.2",
       type,
+      coinTypeForChain: {},
       bip44HDPath,
       meta,
       crypto: {

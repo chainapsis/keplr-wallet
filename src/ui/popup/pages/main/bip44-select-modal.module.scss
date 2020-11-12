@@ -1,0 +1,33 @@
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #32325d;
+}
+
+.selectable {
+  margin-left: 6px;
+  margin-top: -6px;
+
+  .path {
+    font-size: 12px;
+    font-weight: bold;
+    color: #9092b6;
+
+    margin-bottom: 6px;
+  }
+
+  .label {
+    font-size: 12px;
+    line-height: 1.2;
+    color: #8898aa;
+
+    text-transform: uppercase;
+  }
+
+  .value {
+    font-size: 16px;
+    color: #212529;
+
+    margin-bottom: 8px;
+  }
+}

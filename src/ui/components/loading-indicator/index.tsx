@@ -33,6 +33,9 @@ export const LoadingIndicatorProvider: FunctionComponent = ({ children }) => {
           const loading = loadingList.find(loading => loading.type === type);
 
           if (loading) {
+            if (loading.isLoading === isLoading) {
+              return;
+            }
             loading.isLoading = isLoading;
             setLoadingList(loadingList.concat());
           } else {

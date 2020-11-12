@@ -105,7 +105,8 @@ export const EmbedChainInfos: ChainInfo[] = [
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/kava-3/stake"
         : "http://localhost:8081/#/kava-3/stake",
-    bip44: new BIP44(44, 118, 0),
+    bip44: new BIP44(44, 459, 0),
+    alternativeBIP44s: [new BIP44(44, 118, 0)],
     bech32Config: defaultBech32Config("kava"),
     currencies: [
       {
@@ -146,7 +147,8 @@ export const EmbedChainInfos: ChainInfo[] = [
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/secret-1/stake"
         : "http://localhost:8081/#/secret-1/stake",
-    bip44: new BIP44(44, 118, 0),
+    bip44: new BIP44(44, 529, 0),
+    alternativeBIP44s: [new BIP44(44, 118, 0)],
     bech32Config: defaultBech32Config("secret"),
     currencies: [
       {

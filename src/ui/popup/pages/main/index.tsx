@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useRef } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 
 import { HeaderLayout } from "../../layouts";
 
@@ -20,12 +20,149 @@ import { useIntl } from "react-intl";
 import { TokensView } from "./token";
 import { Int } from "@chainapsis/cosmosjs/common/int";
 import { ChainUpdaterKeeper } from "../../../../background/updater/keeper";
+import { sendMessage } from "../../../../common/message/send";
+import { GetKeyStoreBIP44SelectablesMsg } from "../../../../background/keyring";
+import { BACKGROUND_PORT } from "../../../../common/message/constant";
+import { ChainInfo } from "../../../../background/chains";
+import { useLoadingIndicator } from "../../../components/loading-indicator";
+import { BIP44SelectModal } from "./bip44-select-modal";
+import { SelectableAccount } from "../../../../background/keyring/types";
+
+const useBIP44Select = (chainInfo: ChainInfo, coinTypeExist: boolean) => {
+  const [selectableAccounts, setSelectableAccounts] = useState<
+    SelectableAccount[]
+  >([]);
+
+  const prevChainId = useRef<string | undefined>();
+  useEffect(() => {
+    let isMounted = true;
+
+    if (coinTypeExist) {
+      setSelectableAccounts([]);
+    }
+
+    if (prevChainId.current !== chainInfo.chainId) {
+      setSelectableAccounts([]);
+      if (!coinTypeExist) {
+        (async () => {
+          const selectables = await sendMessage(
+            BACKGROUND_PORT,
+            new GetKeyStoreBIP44SelectablesMsg(chainInfo.chainId, [
+              chainInfo.bip44,
+              ...(chainInfo.alternativeBIP44s ?? [])
+            ])
+          );
+
+          if (isMounted) {
+            setSelectableAccounts(selectables);
+          }
+        })();
+      }
+    }
+
+    prevChainId.current = chainInfo.chainId;
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    chainInfo.alternativeBIP44s,
+    chainInfo.bip44,
+    chainInfo.chainId,
+    coinTypeExist
+  ]);
+
+  return {
+    selectableAccounts
+  };
+};
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
 
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, keyRingStore } = useStore();
+
+  const selectedKeyStore = keyRingStore.multiKeyStoreInfo.find(
+    keyStore => keyStore.selected
+  );
+  const coinTypeExist =
+    selectedKeyStore == null ||
+    selectedKeyStore.coinTypeForChain[
+      ChainUpdaterKeeper.getChainVersion(chainStore.chainInfo.chainId)
+        .identifier
+    ] !== undefined;
+
+  const [needSelectCoinType, setNeedSelectCoinType] = useState(false);
+  const alternativeBIP44Exist =
+    chainStore.chainInfo.alternativeBIP44s &&
+    chainStore.chainInfo.alternativeBIP44s.length > 0;
+  const { selectableAccounts } = useBIP44Select(
+    chainStore.chainInfo,
+    coinTypeExist
+  );
+
+  const loading = useLoadingIndicator();
+
+  useEffect(() => {
+    if (
+      !coinTypeExist &&
+      selectableAccounts.length === 0 &&
+      alternativeBIP44Exist
+    ) {
+      loading.setIsLoading("select-bip44", true);
+    } else {
+      loading.setIsLoading("select-bip44", false);
+    }
+  }, [
+    alternativeBIP44Exist,
+    coinTypeExist,
+    loading,
+    selectableAccounts.length
+  ]);
+
+  useEffect(() => {
+    if (!coinTypeExist && !alternativeBIP44Exist) {
+      keyRingStore.setKeyStoreCoinType(
+        chainStore.chainInfo.chainId,
+        chainStore.chainInfo.bip44.coinType
+      );
+    }
+  }, [
+    alternativeBIP44Exist,
+    chainStore.chainInfo.bip44.coinType,
+    chainStore.chainInfo.chainId,
+    coinTypeExist,
+    keyRingStore
+  ]);
+
+  useEffect(() => {
+    if (!coinTypeExist && selectableAccounts.length > 0) {
+      let accounts = selectableAccounts.slice();
+
+      // Remove the account that has main bip44's coin type.
+      accounts = accounts.filter(
+        account => account.path.coinType !== chainStore.chainInfo.bip44.coinType
+      );
+
+      // If no other accounts exist on the chain,
+      if (!accounts.find(account => account.isExistent)) {
+        // Select the coin type in main bip44.
+        keyRingStore.setKeyStoreCoinType(
+          chainStore.chainInfo.chainId,
+          chainStore.chainInfo.bip44.coinType
+        );
+      } else {
+        setNeedSelectCoinType(true);
+      }
+    }
+  }, [
+    chainStore.chainInfo.bip44.coinType,
+    chainStore.chainInfo.chainId,
+    coinTypeExist,
+    keyRingStore,
+    selectableAccounts
+  ]);
 
   const confirm = useConfirm();
 
@@ -99,6 +236,10 @@ export const MainPage: FunctionComponent = observer(() => {
         </div>
       }
     >
+      <BIP44SelectModal
+        enabled={needSelectCoinType}
+        accounts={selectableAccounts}
+      />
       <Card className={classnames(style.card, "shadow")}>
         <CardBody>
           <div className={style.containerAccountInner}>
