@@ -109,6 +109,7 @@ describe("Test keyring handler", () => {
     );
 
     const keeper = new KeyRingKeeper(
+      [],
       new MemoryKVStore("keyring"),
       chainsKeeper,
       undefined as any,

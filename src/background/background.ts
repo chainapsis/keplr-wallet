@@ -44,6 +44,7 @@ const ledgerKeeper = new Ledger.LedgerKeeper(new BrowserKVStore("ledger"));
 Ledger.init(messageManager, ledgerKeeper);
 
 const keyRingKeeper = new KeyRing.KeyRingKeeper(
+  EmbedChainInfos,
   new BrowserKVStore("keyring"),
   chainsKeeper,
   ledgerKeeper,

@@ -20,7 +20,7 @@ describe("Test keyring", () => {
   };
 
   beforeEach(() => {
-    keyRing = new KeyRing(new MemoryKVStore("test"), undefined as any);
+    keyRing = new KeyRing([], new MemoryKVStore("test"), undefined as any);
   });
 
   it("Status of keyring should be not loaded before loading", () => {
@@ -55,7 +55,7 @@ describe("Test keyring", () => {
 
     assert.strictEqual(keyRing.canSetPath, true);
 
-    const key = await keyRing.getKey(118);
+    const key = await keyRing.getKey("test-1", 118);
 
     assert.strictEqual(
       new AccAddress(key.address, "cosmos").toBech32(),
@@ -83,7 +83,7 @@ describe("Test keyring", () => {
     assert.strictEqual(keyRing.canSetPath, false);
 
     // Path will be ignored if it is on private key mode.
-    const key = await keyRing.getKey(118);
+    const key = await keyRing.getKey("test-1", 118);
 
     assert.strictEqual(
       new AccAddress(key.address, "cosmos").toBech32(),

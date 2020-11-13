@@ -24,7 +24,9 @@ import {
   GetMultiKeyStoreInfoMsg,
   ChangeKeyRingMsg,
   AddLedgerKeyMsg,
-  CreateLedgerKeyMsg
+  CreateLedgerKeyMsg,
+  GetKeyStoreBIP44SelectablesMsg,
+  SetKeyStoreCoinTypeMsg
 } from "./messages";
 import { KeyRingKeeper } from "./keeper";
 import { Address } from "@chainapsis/cosmosjs/crypto";
@@ -110,6 +112,16 @@ export const getHandler: (keeper: KeyRingKeeper) => Handler = (
         );
       case ChangeKeyRingMsg:
         return handleChangeKeyRingMsg(keeper)(env, msg as ChangeKeyRingMsg);
+      case SetKeyStoreCoinTypeMsg:
+        return handleSetKeyRingCoinTypeMsg(keeper)(
+          env,
+          msg as SetKeyStoreCoinTypeMsg
+        );
+      case GetKeyStoreBIP44SelectablesMsg:
+        return handleGetKeyStoreBIP44SelectablesMsg(keeper)(
+          env,
+          msg as GetKeyStoreBIP44SelectablesMsg
+        );
       default:
         throw new Error("Unknown msg type");
     }
@@ -428,5 +440,22 @@ const handleChangeKeyRingMsg: (
 ) => InternalHandler<ChangeKeyRingMsg> = keeper => {
   return (_, msg) => {
     return keeper.changeKeyStoreFromMultiKeyStore(msg.index);
+  };
+};
+
+const handleSetKeyRingCoinTypeMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<SetKeyStoreCoinTypeMsg> = keeper => {
+  return (_, msg) => {
+    keeper.setKeyStoreCoinType(msg.chainId, msg.coinType);
+    return keeper.keyRingStatus;
+  };
+};
+
+const handleGetKeyStoreBIP44SelectablesMsg: (
+  keeper: KeyRingKeeper
+) => InternalHandler<GetKeyStoreBIP44SelectablesMsg> = keeper => {
+  return (_, msg) => {
+    return keeper.getKeyStoreBIP44Selectables(msg.chainId, msg.paths);
   };
 };

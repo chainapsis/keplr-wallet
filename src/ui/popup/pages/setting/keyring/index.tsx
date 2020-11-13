@@ -102,8 +102,10 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                       try {
                         await keyRingStore.changeKeyRing(i);
                         await keyRingStore.save();
+                        loadingIndicator.setIsLoading("keyring", false);
                         history.push("/");
-                      } finally {
+                      } catch (e) {
+                        console.log(`Failed to change keyring: ${e.message}`);
                         loadingIndicator.setIsLoading("keyring", false);
                       }
                     }
@@ -151,17 +153,23 @@ const KeyRingToolsIcon: FunctionComponent<{
             history.push("");
           }}
         >
-          {keyStore.type === "mnemonic" ? (
+          {keyStore.type === "mnemonic" || keyStore.type === "privateKey" ? (
             <div
               style={{ cursor: "pointer" }}
               onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                history.push(`/setting/export/${index}`);
+                history.push(`/setting/export/${index}?type=${keyStore.type}`);
               }}
             >
-              <FormattedMessage id="setting.export" />
+              <FormattedMessage
+                id={
+                  keyStore.type === "mnemonic"
+                    ? "setting.export"
+                    : "setting.export.private-key"
+                }
+              />
             </div>
           ) : null}
           <div

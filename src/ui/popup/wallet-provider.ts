@@ -32,8 +32,8 @@ export class PopupWalletProvider implements WalletProvider {
    * @param signApprover If this field is null, skip sign approving.
    */
   constructor(
-    private feeApprover?: FeeApprover,
-    private signApprover?: SignApprover
+    public readonly feeApprover?: FeeApprover,
+    public readonly signApprover?: SignApprover
   ) {}
 
   /**

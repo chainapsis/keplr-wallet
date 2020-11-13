@@ -26,6 +26,7 @@ export interface ChainInfo {
   readonly walletUrl?: string;
   readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;
+  readonly alternativeBIP44s?: BIP44[];
   readonly bech32Config: Bech32Config;
 
   readonly currencies: AppCurrency[];

@@ -21,4 +21,12 @@
   border-radius: 6px;
 
   box-shadow: $input-alternative-box-shadow !important;
+
+  &.alt-hex {
+    word-break: break-all;
+
+    &::before {
+      content: "0x";
+    }
+  }
 }

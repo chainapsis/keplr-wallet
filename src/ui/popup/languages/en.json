@@ -6,6 +6,12 @@
   "main.account.button.send": "Send",
   "main.account.tooltip.no-asset": "No token in your account. Deposit some tokens to send.",
 
+  "main.modal.select-account.title": "Select your account",
+  "main.modal.select-account.button.select": "Select Account",
+  "main.modal.select-account.label.address": "Address",
+  "main.modal.select-account.label.balance": "Balance",
+  "main.modal.select-account.label.sequence": "Previous Txs",
+
   "main.stake.message.pending-staking-reward": "Pending Staking Reward",
   "main.stake.message.stake": "Stake",
   "main.stake.message.earning": "Earn up to {apr}% per year",
@@ -54,6 +60,7 @@
   "setting.keyring.selected-account": "(Selected)",
 
   "setting.export": "View Mnemonic Seed",
+  "setting.export.private-key": "View Private Key",
   "setting.export.warning": "Please input your password to proceed",
   "setting.export.input.password": "Password",
   "setting.export.input.password.error.required": "Password is required",
