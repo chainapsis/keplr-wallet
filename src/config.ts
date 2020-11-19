@@ -28,7 +28,15 @@ import {
   BETA_STRAIGHTEDGE_RPC_ENDPOINT,
   BETA_STRAIGHTEDGE_RPC_CONFIG,
   ADDITIONAL_SIGN_IN_PREPEND,
-  ADDITIONAL_INTL_MESSAGES
+  ADDITIONAL_INTL_MESSAGES,
+  AKASH_RPC_ENDPOINT,
+  AKASH_RPC_CONFIG,
+  AKASH_REST_ENDPOINT,
+  AKASH_REST_CONFIG,
+  IOV_RPC_ENDPOINT,
+  IOV_RPC_CONFIG,
+  IOV_REST_ENDPOINT,
+  IOV_REST_CONFIG
 } from "./config.var";
 import { IntlMessages } from "./ui/popup/language";
 
@@ -175,6 +183,86 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["secretwasm"]
   },
   {
+    rpc: AKASH_RPC_ENDPOINT,
+    rpcConfig: AKASH_RPC_CONFIG,
+    rest: AKASH_REST_ENDPOINT,
+    restConfig: AKASH_REST_CONFIG,
+    chainId: "akashnet-1",
+    chainName: "Akash",
+    stakeCurrency: {
+      coinDenom: "AKT",
+      coinMinimalDenom: "uakt",
+      coinDecimals: 6,
+      coinGeckoId: "akash-network"
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/akashnet-1/stake"
+        : "http://localhost:8081/#/akashnet-1/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/akashnet-1/stake"
+        : "http://localhost:8081/#/akashnet-1/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("akash"),
+    currencies: [
+      {
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
+        coinDecimals: 6,
+        coinGeckoId: "akash-network"
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
+        coinDecimals: 6,
+        coinGeckoId: "akash-network"
+      }
+    ]
+  },
+  {
+    rpc: IOV_RPC_ENDPOINT,
+    rpcConfig: IOV_RPC_CONFIG,
+    rest: IOV_REST_ENDPOINT,
+    restConfig: IOV_REST_CONFIG,
+    chainId: "iov-mainnet-2",
+    chainName: "Starname",
+    stakeCurrency: {
+      coinDenom: "IOV",
+      coinMinimalDenom: "uiov",
+      coinDecimals: 6,
+      coinGeckoId: "starname"
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/iov-mainnet-2/stake"
+        : "http://localhost:8081/#/iov-mainnet-2/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/iov-mainnet-2/stake"
+        : "http://localhost:8081/#/iov-mainnet-2/stake",
+    bip44: new BIP44(44, 234, 0),
+    bech32Config: defaultBech32Config("star"),
+    currencies: [
+      {
+        coinDenom: "IOV",
+        coinMinimalDenom: "uiov",
+        coinDecimals: 6,
+        coinGeckoId: "starname"
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IOV",
+        coinMinimalDenom: "uiov",
+        coinDecimals: 6,
+        coinGeckoId: "starname"
+      }
+    ]
+  },
+  {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
     rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,
     rest: BETA_CYBER_NETWORK_REST_ENDPOINT,
@@ -287,6 +375,16 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
   },
   {
     chainId: "straightedge-2",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "akashnet-1",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "iov-mainnet-2",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }

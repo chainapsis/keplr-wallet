@@ -23,6 +23,16 @@ export const SECRET_NETWORK_REST_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
 
+export const AKASH_RPC_ENDPOINT = "";
+export const AKASH_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const AKASH_REST_ENDPOINT = "";
+export const AKASH_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const IOV_RPC_ENDPOINT = "";
+export const IOV_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const IOV_REST_ENDPOINT = "";
+export const IOV_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const BETA_CYBER_NETWORK_RPC_ENDPOINT = "";
 export const BETA_CYBER_NETWORK_RPC_CONFIG:
   | AxiosRequestConfig
