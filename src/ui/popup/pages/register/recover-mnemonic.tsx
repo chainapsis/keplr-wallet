@@ -22,7 +22,8 @@ const bip39 = require("bip39");
 
 function trimWordsStr(str: string): string {
   str = str.trim();
-  const splited = str.split(" ");
+  // Split on the whitespace or new line.
+  const splited = str.split(/\s+/);
   const words = splited
     .map(word => word.trim())
     .filter(word => word.trim().length > 0);
