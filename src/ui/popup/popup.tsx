@@ -51,6 +51,7 @@ import { POPUP_PORT } from "../../common/message/constant";
 import { InitLedgerNotifiyHandler } from "../../background/ledger/foreground";
 import { BackgroundTxProvider } from "./background-tx-provider";
 import { AddTokenPage } from "./pages/setting/token/add";
+import { SettingFiatPage } from "./pages/setting/fiat";
 
 currencyInit(LanguageToFiatCurrency);
 
@@ -193,6 +194,11 @@ ReactDOM.render(
                       exact
                       path="/setting/language"
                       component={SettingLanguagePage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/fiat"
+                      component={SettingFiatPage}
                     />
                     <Route
                       exact

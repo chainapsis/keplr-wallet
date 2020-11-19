@@ -36,6 +36,10 @@
   "setting.language.en": "English",
   "setting.language.ko": "한국어",
 
+  "setting.fiat": "Currency",
+  "setting.fiat.automatic": "Automatic",
+  "setting.fiat.automatic-with-fiat": "Automatic ({fiat})",
+
   "setting.connections": "Manage Connections",
   "setting.connections.paragraph": "Manage websites connected to your wallet",
   "setting.connections.confirm.delete-connection.title": "Disable Connection",
