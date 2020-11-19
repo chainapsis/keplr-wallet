@@ -54,7 +54,19 @@ export class ChainsKeeper {
         embeded: true
       };
     });
-    const savedChainInfos: ChainInfoWithEmbed[] = (
+
+    const embedChainIdentifiers = chainInfos
+      .map(chainInfo => {
+        return ChainUpdaterKeeper.getChainVersion(chainInfo.chainId).identifier;
+      })
+      .reduce<{
+        [identifier: string]: boolean;
+      }>((obj, identifier) => {
+        obj[identifier] = true;
+        return obj;
+      }, {});
+
+    let savedChainInfos: ChainInfoWithEmbed[] = (
       (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? []
     ).map((chainInfo: Writeable<ChainInfo>) => {
       chainInfo.bip44 = Object.setPrototypeOf(chainInfo.bip44, BIP44.prototype);
@@ -63,6 +75,12 @@ export class ChainsKeeper {
         ...chainInfo,
         embeded: false
       };
+    });
+
+    // Remove the chain info that is already embeded.
+    savedChainInfos = savedChainInfos.filter(chainInfo => {
+      const version = ChainUpdaterKeeper.getChainVersion(chainInfo.chainId);
+      return !embedChainIdentifiers[version.identifier];
     });
 
     let result: ChainInfoWithEmbed[] = chainInfos.concat(savedChainInfos);
