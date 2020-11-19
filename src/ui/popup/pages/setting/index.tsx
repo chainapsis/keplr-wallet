@@ -6,6 +6,10 @@ import { PageButton } from "./page-button";
 import style from "./style.module.scss";
 import { useLanguage } from "../../language";
 import { useIntl } from "react-intl";
+import {
+  getFiatCurrencyFromLanguage,
+  getManualFiatCurrency
+} from "../../../../common/currency";
 
 export const SettingPage: FunctionComponent = () => {
   const language = useLanguage();
@@ -27,6 +31,20 @@ export const SettingPage: FunctionComponent = () => {
         id: `setting.language.${language.language}`
       });
 
+  const fiat = getManualFiatCurrency();
+  const paragraphFiat = fiat
+    ? fiat.currency.toUpperCase()
+    : intl.formatMessage(
+        {
+          id: "setting.fiat.automatic-with-fiat"
+        },
+        {
+          fiat: getFiatCurrencyFromLanguage(
+            language.language
+          ).currency.toUpperCase()
+        }
+      );
+
   return (
     <HeaderLayout
       showChainName={false}
@@ -47,6 +65,21 @@ export const SettingPage: FunctionComponent = () => {
           onClick={useCallback(() => {
             history.push({
               pathname: "/setting/language"
+            });
+          }, [history])}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.fiat"
+          })}
+          paragraph={paragraphFiat}
+          onClick={useCallback(() => {
+            history.push({
+              pathname: "/setting/fiat"
             });
           }, [history])}
           icons={useMemo(

@@ -123,202 +123,204 @@ export const AssetStakedChartView: FunctionComponent<{
   available: Int;
   staked: Int;
   loadingIndicator?: React.ReactElement;
-}> = ({
-  fiat,
-  fiatCurrency,
-  stakeCurrency,
-  available,
-  staked,
-  loadingIndicator
-}) => {
-  const intl = useIntl();
+}> = observer(
+  ({
+    fiat,
+    fiatCurrency,
+    stakeCurrency,
+    available,
+    staked,
+    loadingIndicator
+  }) => {
+    const intl = useIntl();
 
-  const hasCoinGeckoId = stakeCurrency.coinGeckoId != null;
+    const hasCoinGeckoId = stakeCurrency.coinGeckoId != null;
 
-  const availableDec = new Dec(available, stakeCurrency.coinDecimals);
-  const stakedDec = new Dec(staked, stakeCurrency.coinDecimals);
-  const totalDec = availableDec.add(stakedDec);
+    const availableDec = new Dec(available, stakeCurrency.coinDecimals);
+    const stakedDec = new Dec(staked, stakeCurrency.coinDecimals);
+    const totalDec = availableDec.add(stakedDec);
 
-  // If fiat value is fetched, show the value that is multiplied with amount and fiat value.
-  // If not, just show the amount of asset.
-  const data: number[] = [
-    fiat && !fiat.value.equals(new Dec(0))
-      ? parseFloat(availableDec.mul(fiat.value).toString())
-      : parseFloat(availableDec.toString()),
-    fiat && !fiat.value.equals(new Dec(0))
-      ? parseFloat(stakedDec.mul(fiat.value).toString())
-      : parseFloat(stakedDec.toString())
-  ];
-
-  // Show the chart's label as coin if price is not fetched.
-  let labels: string[] = [
-    `${CoinUtils.shrinkDecimals(
-      available,
-      stakeCurrency.coinDecimals,
-      0,
-      6
-    )} ${stakeCurrency.coinDenom.toUpperCase()}`,
-    `${CoinUtils.shrinkDecimals(
-      staked,
-      stakeCurrency.coinDecimals,
-      0,
-      6
-    )} ${stakeCurrency.coinDenom.toUpperCase()}`
-  ];
-  // Else if price is fetched, show the label as price.
-  if (hasCoinGeckoId && fiat && !fiat.value.equals(new Dec(0))) {
-    labels = [
-      fiatCurrency.symbol +
-        DecUtils.trim(
-          fiatCurrency.parse(
-            parseFloat(fiat.value.mul(availableDec).toString())
-          )
-        ),
-      fiatCurrency.symbol +
-        DecUtils.trim(
-          fiatCurrency.parse(parseFloat(fiat.value.mul(stakedDec).toString()))
-        )
+    // If fiat value is fetched, show the value that is multiplied with amount and fiat value.
+    // If not, just show the amount of asset.
+    const data: number[] = [
+      fiat && !fiat.value.equals(new Dec(0))
+        ? parseFloat(availableDec.mul(fiat.value).toString())
+        : parseFloat(availableDec.toString()),
+      fiat && !fiat.value.equals(new Dec(0))
+        ? parseFloat(stakedDec.mul(fiat.value).toString())
+        : parseFloat(stakedDec.toString())
     ];
-  }
 
-  return (
-    <React.Fragment>
-      <div className={styleAsset.containerChart}>
-        <div className={styleAsset.centerText}>
-          <div className={styleAsset.big}>
-            <FormattedMessage id="main.account.chart.total-balance" />
-          </div>
-          <div className={styleAsset.small}>
-            {fiat && !fiat.value.equals(new Dec(0))
-              ? fiatCurrency.symbol +
-                DecUtils.trim(
-                  fiatCurrency.parse(
-                    parseFloat(fiat.value.mul(totalDec).toString())
+    // Show the chart's label as coin if price is not fetched.
+    let labels: string[] = [
+      `${CoinUtils.shrinkDecimals(
+        available,
+        stakeCurrency.coinDecimals,
+        0,
+        6
+      )} ${stakeCurrency.coinDenom.toUpperCase()}`,
+      `${CoinUtils.shrinkDecimals(
+        staked,
+        stakeCurrency.coinDecimals,
+        0,
+        6
+      )} ${stakeCurrency.coinDenom.toUpperCase()}`
+    ];
+    // Else if price is fetched, show the label as price.
+    if (hasCoinGeckoId && fiat && !fiat.value.equals(new Dec(0))) {
+      labels = [
+        fiatCurrency.symbol +
+          DecUtils.trim(
+            fiatCurrency.parse(
+              parseFloat(fiat.value.mul(availableDec).toString())
+            )
+          ),
+        fiatCurrency.symbol +
+          DecUtils.trim(
+            fiatCurrency.parse(parseFloat(fiat.value.mul(stakedDec).toString()))
+          )
+      ];
+    }
+
+    return (
+      <React.Fragment>
+        <div className={styleAsset.containerChart}>
+          <div className={styleAsset.centerText}>
+            <div className={styleAsset.big}>
+              <FormattedMessage id="main.account.chart.total-balance" />
+            </div>
+            <div className={styleAsset.small}>
+              {fiat && !fiat.value.equals(new Dec(0))
+                ? fiatCurrency.symbol +
+                  DecUtils.trim(
+                    fiatCurrency.parse(
+                      parseFloat(fiat.value.mul(totalDec).toString())
+                    )
                   )
-                )
-              : hasCoinGeckoId
-              ? "?"
-              : `${CoinUtils.shrinkDecimals(
-                  available.add(staked),
-                  stakeCurrency.coinDecimals,
-                  0,
-                  3
-                )} ${stakeCurrency.coinDenom.toUpperCase()}`}
+                : hasCoinGeckoId
+                ? "?"
+                : `${CoinUtils.shrinkDecimals(
+                    available.add(staked),
+                    stakeCurrency.coinDecimals,
+                    0,
+                    3
+                  )} ${stakeCurrency.coinDenom.toUpperCase()}`}
+            </div>
+            {loadingIndicator ? (
+              <div className={styleAsset.indicatorIcon}>{loadingIndicator}</div>
+            ) : null}
           </div>
-          {loadingIndicator ? (
-            <div className={styleAsset.indicatorIcon}>{loadingIndicator}</div>
-          ) : null}
-        </div>
-        <React.Suspense fallback={<div style={{ height: "150px" }} />}>
-          <LazyDoughnut
-            data={{
-              datasets: [
-                {
-                  data,
-                  backgroundColor: ["#5e72e4", "#11cdef"],
-                  borderWidth: [0, 0]
-                }
-              ],
+          <React.Suspense fallback={<div style={{ height: "150px" }} />}>
+            <LazyDoughnut
+              data={{
+                datasets: [
+                  {
+                    data,
+                    backgroundColor: ["#5e72e4", "#11cdef"],
+                    borderWidth: [0, 0]
+                  }
+                ],
 
-              labels: [
-                intl.formatMessage({
-                  id: "main.account.chart.available-balance"
-                }),
-                intl.formatMessage({
-                  id: "main.account.chart.staked-balance"
-                })
-              ]
-            }}
-            options={{
-              rotation: 0.5 * Math.PI,
-              cutoutPercentage: 85,
-              legend: {
-                display: false
-              },
-              tooltips: {
-                callbacks: {
-                  // Don't show the label.
-                  label: (item, chartData) => {
-                    let total = 0;
-                    let data: number[] = [];
-                    if (chartData.datasets?.length) {
-                      data = (chartData.datasets[0].data as number[]) ?? [];
-                    }
-                    total = data.reduce((a, b) => a + b, 0) ?? 0;
+                labels: [
+                  intl.formatMessage({
+                    id: "main.account.chart.available-balance"
+                  }),
+                  intl.formatMessage({
+                    id: "main.account.chart.staked-balance"
+                  })
+                ]
+              }}
+              options={{
+                rotation: 0.5 * Math.PI,
+                cutoutPercentage: 85,
+                legend: {
+                  display: false
+                },
+                tooltips: {
+                  callbacks: {
+                    // Don't show the label.
+                    label: (item, chartData) => {
+                      let total = 0;
+                      let data: number[] = [];
+                      if (chartData.datasets?.length) {
+                        data = (chartData.datasets[0].data as number[]) ?? [];
+                      }
+                      total = data.reduce((a, b) => a + b, 0) ?? 0;
 
-                    let suffix = "";
-                    if (total && item.index != null && data[item.index]) {
-                      let ratioDec = new Dec(data[item.index].toString())
-                        .quo(new Dec(total.toString()))
-                        .mul(DecUtils.getPrecisionDec(3));
+                      let suffix = "";
+                      if (total && item.index != null && data[item.index]) {
+                        let ratioDec = new Dec(data[item.index].toString())
+                          .quo(new Dec(total.toString()))
+                          .mul(DecUtils.getPrecisionDec(3));
 
-                      if (item.index > 0) {
-                        ratioDec = new Dec(ratioDec.roundUp());
+                        if (item.index > 0) {
+                          ratioDec = new Dec(ratioDec.roundUp());
+                        }
+
+                        suffix += ` (${ratioDec
+                          .quo(DecUtils.getPrecisionDec(1))
+                          .toString(1)}%)`;
                       }
 
-                      suffix += ` (${ratioDec
-                        .quo(DecUtils.getPrecisionDec(1))
-                        .toString(1)}%)`;
+                      if (item.index != null) {
+                        return " " + labels[item.index] + suffix;
+                      }
+                      return "Unexpected error";
                     }
-
-                    if (item.index != null) {
-                      return " " + labels[item.index] + suffix;
-                    }
-                    return "Unexpected error";
                   }
                 }
-              }
-            }}
-          />
-        </React.Suspense>
-      </div>
-      <div style={{ marginTop: "12px", width: "100%" }}>
-        <div className={styleAsset.legend}>
-          <div className={styleAsset.label} style={{ color: "#5e72e4" }}>
-            <span className="badge-dot badge badge-secondary">
-              <i className="bg-primary" />
-            </span>
-            <FormattedMessage id="main.account.chart.available-balance" />
+              }}
+            />
+          </React.Suspense>
+        </div>
+        <div style={{ marginTop: "12px", width: "100%" }}>
+          <div className={styleAsset.legend}>
+            <div className={styleAsset.label} style={{ color: "#5e72e4" }}>
+              <span className="badge-dot badge badge-secondary">
+                <i className="bg-primary" />
+              </span>
+              <FormattedMessage id="main.account.chart.available-balance" />
+            </div>
+            <div style={{ minWidth: "16px" }} />
+            <div
+              className={styleAsset.value}
+              style={{
+                color: "#525f7f"
+              }}
+            >
+              {`${CoinUtils.shrinkDecimals(
+                available,
+                stakeCurrency.coinDecimals,
+                0,
+                4
+              )} ${stakeCurrency.coinDenom.toUpperCase()}`}
+            </div>
           </div>
-          <div style={{ minWidth: "16px" }} />
-          <div
-            className={styleAsset.value}
-            style={{
-              color: "#525f7f"
-            }}
-          >
-            {`${CoinUtils.shrinkDecimals(
-              available,
+          <div className={styleAsset.legend}>
+            <div className={styleAsset.label} style={{ color: "#11cdef" }}>
+              <span className="badge-dot badge badge-secondary">
+                <i className="bg-info" />
+              </span>
+              <FormattedMessage id="main.account.chart.staked-balance" />
+            </div>
+            <div style={{ minWidth: "16px" }} />
+            <div
+              className={styleAsset.value}
+              style={{
+                color: "#525f7f"
+              }}
+            >{`${CoinUtils.shrinkDecimals(
+              staked,
               stakeCurrency.coinDecimals,
               0,
               4
-            )} ${stakeCurrency.coinDenom.toUpperCase()}`}
+            )} ${stakeCurrency.coinDenom.toUpperCase()}`}</div>
           </div>
         </div>
-        <div className={styleAsset.legend}>
-          <div className={styleAsset.label} style={{ color: "#11cdef" }}>
-            <span className="badge-dot badge badge-secondary">
-              <i className="bg-info" />
-            </span>
-            <FormattedMessage id="main.account.chart.staked-balance" />
-          </div>
-          <div style={{ minWidth: "16px" }} />
-          <div
-            className={styleAsset.value}
-            style={{
-              color: "#525f7f"
-            }}
-          >{`${CoinUtils.shrinkDecimals(
-            staked,
-            stakeCurrency.coinDecimals,
-            0,
-            4
-          )} ${stakeCurrency.coinDenom.toUpperCase()}`}</div>
-        </div>
-      </div>
-    </React.Fragment>
-  );
-};
+      </React.Fragment>
+    );
+  }
+);
 
 export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore } = useStore();

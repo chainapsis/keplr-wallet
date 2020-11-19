@@ -34,6 +34,10 @@
   "setting.language.automatic": "자동 (브라우저 언어)",
   "setting.language.automatic-with-language": "자동 ({language})",
 
+  "setting.fiat": "통화",
+  "setting.fiat.automatic": "자동",
+  "setting.fiat.automatic-with-fiat": "자동 ({fiat})",
+
   "setting.connections": "연결 관리",
   "setting.connections.paragraph": "지갑에 연결을 허용한 웹사이트를 관리합니다",
   "setting.connections.confirm.delete-connection.title": "연결 삭제",

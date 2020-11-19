@@ -28,7 +28,15 @@ import {
   BETA_STRAIGHTEDGE_RPC_ENDPOINT,
   BETA_STRAIGHTEDGE_RPC_CONFIG,
   ADDITIONAL_SIGN_IN_PREPEND,
-  ADDITIONAL_INTL_MESSAGES
+  ADDITIONAL_INTL_MESSAGES,
+  AKASH_RPC_ENDPOINT,
+  AKASH_RPC_CONFIG,
+  AKASH_REST_ENDPOINT,
+  AKASH_REST_CONFIG,
+  IOV_RPC_ENDPOINT,
+  IOV_RPC_CONFIG,
+  IOV_REST_ENDPOINT,
+  IOV_REST_CONFIG
 } from "./config.var";
 import { IntlMessages } from "./ui/popup/language";
 
@@ -175,6 +183,91 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["secretwasm"]
   },
   {
+    rpc: AKASH_RPC_ENDPOINT,
+    rpcConfig: AKASH_RPC_CONFIG,
+    rest: AKASH_REST_ENDPOINT,
+    restConfig: AKASH_REST_CONFIG,
+    chainId: "akashnet-1",
+    chainName: "Akash",
+    stakeCurrency: {
+      coinDenom: "AKT",
+      coinMinimalDenom: "uakt",
+      coinDecimals: 6,
+      coinGeckoId: "akash-network"
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/akashnet-1/stake"
+        : "http://localhost:8081/#/akashnet-1/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/akashnet-1/stake"
+        : "http://localhost:8081/#/akashnet-1/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("akash"),
+    currencies: [
+      {
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
+        coinDecimals: 6,
+        coinGeckoId: "akash-network"
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
+        coinDecimals: 6,
+        coinGeckoId: "akash-network"
+      }
+    ]
+  },
+  {
+    rpc: IOV_RPC_ENDPOINT,
+    rpcConfig: IOV_RPC_CONFIG,
+    rest: IOV_REST_ENDPOINT,
+    restConfig: IOV_REST_CONFIG,
+    chainId: "iov-mainnet-2",
+    chainName: "Starname",
+    stakeCurrency: {
+      coinDenom: "IOV",
+      coinMinimalDenom: "uiov",
+      coinDecimals: 6,
+      coinGeckoId: "starname"
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/iov-mainnet-2/stake"
+        : "http://localhost:8081/#/iov-mainnet-2/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/iov-mainnet-2/stake"
+        : "http://localhost:8081/#/iov-mainnet-2/stake",
+    bip44: new BIP44(44, 234, 0),
+    bech32Config: defaultBech32Config("star"),
+    currencies: [
+      {
+        coinDenom: "IOV",
+        coinMinimalDenom: "uiov",
+        coinDecimals: 6,
+        coinGeckoId: "starname"
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IOV",
+        coinMinimalDenom: "uiov",
+        coinDecimals: 6,
+        coinGeckoId: "starname"
+      }
+    ],
+    gasPriceStep: {
+      low: 1,
+      average: 2,
+      high: 3
+    }
+  },
+  {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
     rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,
     rest: BETA_CYBER_NETWORK_REST_ENDPOINT,
@@ -289,13 +382,23 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
     chainId: "straightedge-2",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "akashnet-1",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "iov-mainnet-2",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
 ];
 
-export const LanguageToFiatCurrency: {
-  [language: string]: FiatCurrency;
+export const FiatCurrencies: {
+  [currency: string]: FiatCurrency;
 } = {
-  default: {
+  usd: {
     currency: "usd",
     symbol: "$",
     parse: (value: number) => {
@@ -308,7 +411,59 @@ export const LanguageToFiatCurrency: {
       });
     }
   },
-  ko: {
+  eur: {
+    currency: "eur",
+    symbol: "€",
+    parse: (value: number) => {
+      let fractionDigits = 2;
+      if (value < 0.01) {
+        fractionDigits = 4;
+      }
+      return value.toLocaleString("de-DE", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
+  },
+  gbp: {
+    currency: "gbp",
+    symbol: "£",
+    parse: (value: number) => {
+      let fractionDigits = 2;
+      if (value < 0.01) {
+        fractionDigits = 4;
+      }
+      return value.toLocaleString("en-GB", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
+  },
+  cad: {
+    currency: "cad",
+    symbol: "CA$",
+    parse: (value: number) => {
+      let fractionDigits = 2;
+      if (value < 0.01) {
+        fractionDigits = 4;
+      }
+      return value.toLocaleString("en-CA", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
+  },
+  rub: {
+    currency: "rub",
+    symbol: "₽",
+    parse: (value: number) => {
+      let fractionDigits = 0;
+      if (value < 1) {
+        fractionDigits = 1;
+      }
+      return value.toLocaleString("ru", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
+  },
+  krw: {
     currency: "krw",
     symbol: "￦",
     parse: (value: number) => {
@@ -320,7 +475,66 @@ export const LanguageToFiatCurrency: {
         maximumFractionDigits: fractionDigits
       });
     }
+  },
+  hkd: {
+    currency: "hkd",
+    symbol: "HK$",
+    parse: (value: number) => {
+      let fractionDigits = 1;
+      if (value < 0.1) {
+        fractionDigits = 2;
+      }
+      return value.toLocaleString("en-HK", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
+  },
+  cny: {
+    currency: "cny",
+    symbol: "¥",
+    parse: (value: number) => {
+      let fractionDigits = 0;
+      if (value < 1) {
+        fractionDigits = 1;
+      }
+      return value.toLocaleString("zh-CN", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
+  },
+  jpy: {
+    currency: "jpy",
+    symbol: "¥",
+    parse: (value: number) => {
+      let fractionDigits = 0;
+      if (value < 1) {
+        fractionDigits = 1;
+      }
+      return value.toLocaleString("ja-JP", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
+  },
+  inr: {
+    currency: "inr",
+    symbol: "₹",
+    parse: (value: number) => {
+      let fractionDigits = 0;
+      if (value < 1) {
+        fractionDigits = 1;
+      }
+      return value.toLocaleString("en-IN", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
   }
+};
+
+export const LanguageToFiatCurrency: {
+  [language: string]: FiatCurrency;
+} = {
+  default: FiatCurrencies["usd"],
+  ko: FiatCurrencies["krw"]
 };
 
 export const AdditionalSignInPrepend:
