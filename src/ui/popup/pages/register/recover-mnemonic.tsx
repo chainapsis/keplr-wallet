@@ -20,6 +20,15 @@ import { AdvancedBIP44Option } from "./advanced-bip44";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
+function trimWordsStr(str: string): string {
+  str = str.trim();
+  const splited = str.split(" ");
+  const words = splited
+    .map(word => word.trim())
+    .filter(word => word.trim().length > 0);
+  return words.join(" ");
+}
+
 interface FormData {
   name: string;
   words: string;
@@ -91,9 +100,10 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
               setIsLoading(true);
 
               try {
+                const words = trimWordsStr(data.words);
                 if (registerState.mode === RegisterMode.ADD) {
                   await keyRingStore.addMnemonicKey(
-                    data.words,
+                    words,
                     {
                       name: data.name
                     },
@@ -101,7 +111,7 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
                   );
                 } else {
                   await keyRingStore.createMnemonicKey(
-                    data.words,
+                    words,
                     data.password,
                     { name: data.name },
                     registerState.bip44HDPath
@@ -125,6 +135,8 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
               ref={register({
                 required: "Mnemonic is required",
                 validate: (value: string): string | undefined => {
+                  value = trimWordsStr(value);
+
                   if (value.split(" ").length < 8) {
                     return intl.formatMessage({
                       id: "register.create.textarea.mnemonic.error.too-short"
