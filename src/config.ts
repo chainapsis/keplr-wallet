@@ -260,7 +260,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "starname"
       }
-    ]
+    ],
+    gasPriceStep: {
+      low: 1,
+      average: 2,
+      high: 3
+    }
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
