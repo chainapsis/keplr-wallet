@@ -103,7 +103,7 @@
   "register.intro.button.import-account.content": "Use a 12/24 word seed to import an existing wallet",
   "register.intro.sub-content": "All sensitive information is stored only on your device.{br}This process does not require an internet connection.",
 
-  "register.recover.title": "Input yout seed",
+  "register.recover.title": "Input your seed",
 
   "register.create.title": "Mnemonic Seed",
   "register.create.toggle.word12": "12 words",
