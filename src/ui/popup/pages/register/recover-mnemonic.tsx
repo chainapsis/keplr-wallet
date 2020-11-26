@@ -17,8 +17,18 @@ import { observer } from "mobx-react";
 import { useStore } from "../../stores";
 import { AdvancedBIP44Option } from "./advanced-bip44";
 
+const Buffer = require("buffer/").Buffer;
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
+
+function isPrivateKey(str: string): boolean {
+  if (str.startsWith("0x")) {
+    return true;
+  }
+
+  return str.length === 64;
+}
 
 function trimWordsStr(str: string): string {
   str = str.trim();
@@ -101,22 +111,42 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
               setIsLoading(true);
 
               try {
-                const words = trimWordsStr(data.words);
-                if (registerState.mode === RegisterMode.ADD) {
-                  await keyRingStore.addMnemonicKey(
-                    words,
-                    {
-                      name: data.name
-                    },
-                    registerState.bip44HDPath
-                  );
+                if (!isPrivateKey(data.words.trim())) {
+                  const words = trimWordsStr(data.words);
+                  if (registerState.mode === RegisterMode.ADD) {
+                    await keyRingStore.addMnemonicKey(
+                      words,
+                      {
+                        name: data.name
+                      },
+                      registerState.bip44HDPath
+                    );
+                  } else {
+                    await keyRingStore.createMnemonicKey(
+                      words,
+                      data.password,
+                      { name: data.name },
+                      registerState.bip44HDPath
+                    );
+                  }
                 } else {
-                  await keyRingStore.createMnemonicKey(
-                    words,
-                    data.password,
-                    { name: data.name },
-                    registerState.bip44HDPath
+                  const privateKey = Buffer.from(
+                    data.words.trim().replace("0x", ""),
+                    "hex"
                   );
+                  if (registerState.mode === RegisterMode.ADD) {
+                    await keyRingStore.addPrivateKey(privateKey, {
+                      name: data.name
+                    });
+                  } else {
+                    await keyRingStore.createPrivateKey(
+                      privateKey,
+                      data.password,
+                      {
+                        name: data.name
+                      }
+                    );
+                  }
                 }
                 await keyRingStore.save();
                 registerState.setStatus(RegisterStatus.COMPLETE);
@@ -136,6 +166,36 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
               ref={register({
                 required: "Mnemonic is required",
                 validate: (value: string): string | undefined => {
+                  value = value.trim();
+                  if (isPrivateKey(value)) {
+                    value = value.replace("0x", "");
+                    if (value.length !== 64) {
+                      return intl.formatMessage({
+                        id:
+                          "register.import.textarea.private-key.error.invalid-length"
+                      });
+                    }
+
+                    try {
+                      if (
+                        Buffer.from(value, "hex")
+                          .toString("hex")
+                          .toLowerCase() !== value.toLowerCase()
+                      ) {
+                        return intl.formatMessage({
+                          id:
+                            "register.import.textarea.private-key.error.invalid"
+                        });
+                      }
+                    } catch {
+                      return intl.formatMessage({
+                        id: "register.import.textarea.private-key.error.invalid"
+                      });
+                    }
+
+                    return;
+                  }
+
                   value = trimWordsStr(value);
 
                   if (value.split(" ").length < 8) {
