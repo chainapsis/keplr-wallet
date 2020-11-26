@@ -139,9 +139,13 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
                       name: data.name
                     });
                   } else {
-                    await keyRingStore.addPrivateKey(privateKey, {
-                      name: data.name
-                    });
+                    await keyRingStore.createPrivateKey(
+                      privateKey,
+                      data.password,
+                      {
+                        name: data.name
+                      }
+                    );
                   }
                 }
                 await keyRingStore.save();
