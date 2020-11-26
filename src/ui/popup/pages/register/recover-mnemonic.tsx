@@ -111,7 +111,7 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
               setIsLoading(true);
 
               try {
-                if (!isPrivateKey(data.words)) {
+                if (!isPrivateKey(data.words.trim())) {
                   const words = trimWordsStr(data.words);
                   if (registerState.mode === RegisterMode.ADD) {
                     await keyRingStore.addMnemonicKey(
@@ -131,7 +131,7 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
                   }
                 } else {
                   const privateKey = Buffer.from(
-                    data.words.replace("0x", ""),
+                    data.words.trim().replace("0x", ""),
                     "hex"
                   );
                   if (registerState.mode === RegisterMode.ADD) {
@@ -166,6 +166,7 @@ const NewMnemonicPageIn: FunctionComponent = observer(() => {
               ref={register({
                 required: "Mnemonic is required",
                 validate: (value: string): string | undefined => {
+                  value = value.trim();
                   if (isPrivateKey(value)) {
                     value = value.replace("0x", "");
                     if (value.length !== 64) {
