@@ -1,7 +1,6 @@
 import {
   Coin,
   encodeSecp256k1Signature,
-  OfflineSigner,
   serializeSignDoc,
   AccountData,
   SignResponse,
@@ -16,10 +15,14 @@ import {
 import { sendMessage } from "../../common/message/send";
 import { BACKGROUND_PORT } from "../../common/message/constant";
 import { feeFromString } from "../../background/keyring/utils";
+import { OfflineSigner } from "@cosmjs/launchpad";
+import { OfflineDirectSigner, makeSignBytes } from "@cosmjs/proto-signing";
+import { cosmos } from "@cosmjs/proto-signing/types/codec";
+import { DirectSignResponse } from "@cosmjs/proto-signing/types/signer";
 
 const Buffer = require("buffer/").Buffer;
 
-export class CosmJSOfflineSigner implements OfflineSigner {
+export class CosmJSOfflineSigner implements OfflineSigner, OfflineDirectSigner {
   constructor(private readonly chainId: string) {}
 
   async getAccounts(): Promise<AccountData[]> {
@@ -33,6 +36,46 @@ export class CosmJSOfflineSigner implements OfflineSigner {
         pubkey: fromHex(key.pubKeyHex)
       }
     ];
+  }
+
+  async signDirect(
+    signerAddress: string,
+    signDoc: cosmos.tx.v1beta1.ISignDoc
+  ): Promise<DirectSignResponse> {
+    const key = await sendMessage(BACKGROUND_PORT, new GetKeyMsg(this.chainId));
+
+    // TODO: Handle the tx config.
+
+    const signBytes = makeSignBytes(signDoc);
+
+    const random = new Uint8Array(4);
+    crypto.getRandomValues(random);
+    const id = Buffer.from(random).toString("hex");
+
+    const requestSignMsg = new RequestSignMsg(
+      this.chainId,
+      id,
+      signerAddress,
+      toHex(signBytes),
+      true
+    );
+    const signature = await sendMessage(BACKGROUND_PORT, requestSignMsg);
+    return {
+      signed: signDoc,
+      // Currently, only secp256k1 is supported.
+      signature: encodeSecp256k1Signature(
+        fromHex(key.pubKeyHex),
+        fromHex(signature.signatureHex)
+      )
+    };
+  }
+
+  // Fallback to `sign` to support cosmjs v0.23.0.
+  async signAmino(
+    signerAddress: string,
+    signDoc: StdSignDoc
+  ): Promise<SignResponse> {
+    return this.sign(signerAddress, signDoc);
   }
 
   async sign(
