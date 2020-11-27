@@ -49,4 +49,15 @@ export class SignDocHelper {
   get accountNumber(): string {
     return this.signDoc.accountNumber.toString();
   }
+
+  toString(): string {
+    const pretty = {
+      txBody: this.txBody.toJSON(),
+      authInfo: this.authInfo.toJSON(),
+      chainId: this.chainId,
+      accountNumber: this.accountNumber
+    };
+
+    return JSON.stringify(pretty);
+  }
 }
