@@ -45,9 +45,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns BaseAccount instance
          */
-        public static create(
-          properties?: cosmos.auth.v1beta1.IBaseAccount
-        ): cosmos.auth.v1beta1.BaseAccount;
+        public static create(properties?: cosmos.auth.v1beta1.IBaseAccount): cosmos.auth.v1beta1.BaseAccount;
 
         /**
          * Encodes the specified BaseAccount message. Does not implicitly {@link cosmos.auth.v1beta1.BaseAccount.verify|verify} messages.
@@ -55,10 +53,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.auth.v1beta1.IBaseAccount,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.auth.v1beta1.IBaseAccount, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a BaseAccount message from the specified reader or buffer.
@@ -68,10 +63,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.auth.v1beta1.BaseAccount;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.auth.v1beta1.BaseAccount;
+
+        /**
+         * Creates a BaseAccount message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns BaseAccount
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.auth.v1beta1.BaseAccount;
+
+        /**
+         * Creates a plain object from a BaseAccount message. Also converts values to other types if specified.
+         * @param m BaseAccount
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.auth.v1beta1.BaseAccount,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this BaseAccount to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a ModuleAccount. */
@@ -109,7 +125,7 @@ export namespace cosmos {
          * @returns ModuleAccount instance
          */
         public static create(
-          properties?: cosmos.auth.v1beta1.IModuleAccount
+          properties?: cosmos.auth.v1beta1.IModuleAccount,
         ): cosmos.auth.v1beta1.ModuleAccount;
 
         /**
@@ -118,10 +134,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.auth.v1beta1.IModuleAccount,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.auth.v1beta1.IModuleAccount, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a ModuleAccount message from the specified reader or buffer.
@@ -131,10 +144,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.auth.v1beta1.ModuleAccount;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.auth.v1beta1.ModuleAccount;
+
+        /**
+         * Creates a ModuleAccount message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns ModuleAccount
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.auth.v1beta1.ModuleAccount;
+
+        /**
+         * Creates a plain object from a ModuleAccount message. Also converts values to other types if specified.
+         * @param m ModuleAccount
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.auth.v1beta1.ModuleAccount,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this ModuleAccount to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Params. */
@@ -183,9 +217,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Params instance
          */
-        public static create(
-          properties?: cosmos.auth.v1beta1.IParams
-        ): cosmos.auth.v1beta1.Params;
+        public static create(properties?: cosmos.auth.v1beta1.IParams): cosmos.auth.v1beta1.Params;
 
         /**
          * Encodes the specified Params message. Does not implicitly {@link cosmos.auth.v1beta1.Params.verify|verify} messages.
@@ -193,10 +225,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.auth.v1beta1.IParams,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.auth.v1beta1.IParams, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Params message from the specified reader or buffer.
@@ -206,10 +235,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.auth.v1beta1.Params;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.auth.v1beta1.Params;
+
+        /**
+         * Creates a Params message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Params
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.auth.v1beta1.Params;
+
+        /**
+         * Creates a plain object from a Params message. Also converts values to other types if specified.
+         * @param m Params
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.auth.v1beta1.Params,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Params to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Represents a Query */
@@ -220,11 +270,7 @@ export namespace cosmos {
          * @param [requestDelimited=false] Whether requests are length-delimited
          * @param [responseDelimited=false] Whether responses are length-delimited
          */
-        constructor(
-          rpcImpl: $protobuf.RPCImpl,
-          requestDelimited?: boolean,
-          responseDelimited?: boolean
-        );
+        constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
 
         /**
          * Creates new Query service using the specified rpc implementation.
@@ -236,7 +282,7 @@ export namespace cosmos {
         public static create(
           rpcImpl: $protobuf.RPCImpl,
           requestDelimited?: boolean,
-          responseDelimited?: boolean
+          responseDelimited?: boolean,
         ): Query;
 
         /**
@@ -246,7 +292,7 @@ export namespace cosmos {
          */
         public account(
           request: cosmos.auth.v1beta1.IQueryAccountRequest,
-          callback: cosmos.auth.v1beta1.Query.AccountCallback
+          callback: cosmos.auth.v1beta1.Query.AccountCallback,
         ): void;
 
         /**
@@ -255,7 +301,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public account(
-          request: cosmos.auth.v1beta1.IQueryAccountRequest
+          request: cosmos.auth.v1beta1.IQueryAccountRequest,
         ): Promise<cosmos.auth.v1beta1.QueryAccountResponse>;
 
         /**
@@ -265,7 +311,7 @@ export namespace cosmos {
          */
         public params(
           request: cosmos.auth.v1beta1.IQueryParamsRequest,
-          callback: cosmos.auth.v1beta1.Query.ParamsCallback
+          callback: cosmos.auth.v1beta1.Query.ParamsCallback,
         ): void;
 
         /**
@@ -274,7 +320,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public params(
-          request: cosmos.auth.v1beta1.IQueryParamsRequest
+          request: cosmos.auth.v1beta1.IQueryParamsRequest,
         ): Promise<cosmos.auth.v1beta1.QueryParamsResponse>;
       }
 
@@ -286,7 +332,7 @@ export namespace cosmos {
          */
         type AccountCallback = (
           error: Error | null,
-          response?: cosmos.auth.v1beta1.QueryAccountResponse
+          response?: cosmos.auth.v1beta1.QueryAccountResponse,
         ) => void;
 
         /**
@@ -296,7 +342,7 @@ export namespace cosmos {
          */
         type ParamsCallback = (
           error: Error | null,
-          response?: cosmos.auth.v1beta1.QueryParamsResponse
+          response?: cosmos.auth.v1beta1.QueryParamsResponse,
         ) => void;
       }
 
@@ -323,7 +369,7 @@ export namespace cosmos {
          * @returns QueryAccountRequest instance
          */
         public static create(
-          properties?: cosmos.auth.v1beta1.IQueryAccountRequest
+          properties?: cosmos.auth.v1beta1.IQueryAccountRequest,
         ): cosmos.auth.v1beta1.QueryAccountRequest;
 
         /**
@@ -334,7 +380,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.auth.v1beta1.IQueryAccountRequest,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -347,8 +393,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.auth.v1beta1.QueryAccountRequest;
+
+        /**
+         * Creates a QueryAccountRequest message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryAccountRequest
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.auth.v1beta1.QueryAccountRequest;
+
+        /**
+         * Creates a plain object from a QueryAccountRequest message. Also converts values to other types if specified.
+         * @param m QueryAccountRequest
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.auth.v1beta1.QueryAccountRequest,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryAccountRequest to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryAccountResponse. */
@@ -374,7 +444,7 @@ export namespace cosmos {
          * @returns QueryAccountResponse instance
          */
         public static create(
-          properties?: cosmos.auth.v1beta1.IQueryAccountResponse
+          properties?: cosmos.auth.v1beta1.IQueryAccountResponse,
         ): cosmos.auth.v1beta1.QueryAccountResponse;
 
         /**
@@ -385,7 +455,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.auth.v1beta1.IQueryAccountResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -398,8 +468,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.auth.v1beta1.QueryAccountResponse;
+
+        /**
+         * Creates a QueryAccountResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryAccountResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.auth.v1beta1.QueryAccountResponse;
+
+        /**
+         * Creates a plain object from a QueryAccountResponse message. Also converts values to other types if specified.
+         * @param m QueryAccountResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.auth.v1beta1.QueryAccountResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryAccountResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryParamsRequest. */
@@ -419,7 +513,7 @@ export namespace cosmos {
          * @returns QueryParamsRequest instance
          */
         public static create(
-          properties?: cosmos.auth.v1beta1.IQueryParamsRequest
+          properties?: cosmos.auth.v1beta1.IQueryParamsRequest,
         ): cosmos.auth.v1beta1.QueryParamsRequest;
 
         /**
@@ -430,7 +524,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.auth.v1beta1.IQueryParamsRequest,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -443,8 +537,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.auth.v1beta1.QueryParamsRequest;
+
+        /**
+         * Creates a QueryParamsRequest message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryParamsRequest
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.auth.v1beta1.QueryParamsRequest;
+
+        /**
+         * Creates a plain object from a QueryParamsRequest message. Also converts values to other types if specified.
+         * @param m QueryParamsRequest
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.auth.v1beta1.QueryParamsRequest,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryParamsRequest to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryParamsResponse. */
@@ -470,7 +588,7 @@ export namespace cosmos {
          * @returns QueryParamsResponse instance
          */
         public static create(
-          properties?: cosmos.auth.v1beta1.IQueryParamsResponse
+          properties?: cosmos.auth.v1beta1.IQueryParamsResponse,
         ): cosmos.auth.v1beta1.QueryParamsResponse;
 
         /**
@@ -481,7 +599,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.auth.v1beta1.IQueryParamsResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -494,8 +612,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.auth.v1beta1.QueryParamsResponse;
+
+        /**
+         * Creates a QueryParamsResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryParamsResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.auth.v1beta1.QueryParamsResponse;
+
+        /**
+         * Creates a plain object from a QueryParamsResponse message. Also converts values to other types if specified.
+         * @param m QueryParamsResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.auth.v1beta1.QueryParamsResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryParamsResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
   }
@@ -532,9 +674,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Params instance
          */
-        public static create(
-          properties?: cosmos.bank.v1beta1.IParams
-        ): cosmos.bank.v1beta1.Params;
+        public static create(properties?: cosmos.bank.v1beta1.IParams): cosmos.bank.v1beta1.Params;
 
         /**
          * Encodes the specified Params message. Does not implicitly {@link cosmos.bank.v1beta1.Params.verify|verify} messages.
@@ -542,10 +682,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.IParams,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.IParams, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Params message from the specified reader or buffer.
@@ -555,10 +692,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.Params;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.Params;
+
+        /**
+         * Creates a Params message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Params
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.Params;
+
+        /**
+         * Creates a plain object from a Params message. Also converts values to other types if specified.
+         * @param m Params
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.Params,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Params to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a SendEnabled. */
@@ -589,9 +747,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns SendEnabled instance
          */
-        public static create(
-          properties?: cosmos.bank.v1beta1.ISendEnabled
-        ): cosmos.bank.v1beta1.SendEnabled;
+        public static create(properties?: cosmos.bank.v1beta1.ISendEnabled): cosmos.bank.v1beta1.SendEnabled;
 
         /**
          * Encodes the specified SendEnabled message. Does not implicitly {@link cosmos.bank.v1beta1.SendEnabled.verify|verify} messages.
@@ -599,10 +755,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.ISendEnabled,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.ISendEnabled, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a SendEnabled message from the specified reader or buffer.
@@ -612,10 +765,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.SendEnabled;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.SendEnabled;
+
+        /**
+         * Creates a SendEnabled message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns SendEnabled
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.SendEnabled;
+
+        /**
+         * Creates a plain object from a SendEnabled message. Also converts values to other types if specified.
+         * @param m SendEnabled
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.SendEnabled,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this SendEnabled to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of an Input. */
@@ -646,9 +820,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Input instance
          */
-        public static create(
-          properties?: cosmos.bank.v1beta1.IInput
-        ): cosmos.bank.v1beta1.Input;
+        public static create(properties?: cosmos.bank.v1beta1.IInput): cosmos.bank.v1beta1.Input;
 
         /**
          * Encodes the specified Input message. Does not implicitly {@link cosmos.bank.v1beta1.Input.verify|verify} messages.
@@ -656,10 +828,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.IInput,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.IInput, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes an Input message from the specified reader or buffer.
@@ -669,10 +838,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.Input;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.Input;
+
+        /**
+         * Creates an Input message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Input
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.Input;
+
+        /**
+         * Creates a plain object from an Input message. Also converts values to other types if specified.
+         * @param m Input
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.Input,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Input to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of an Output. */
@@ -703,9 +893,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Output instance
          */
-        public static create(
-          properties?: cosmos.bank.v1beta1.IOutput
-        ): cosmos.bank.v1beta1.Output;
+        public static create(properties?: cosmos.bank.v1beta1.IOutput): cosmos.bank.v1beta1.Output;
 
         /**
          * Encodes the specified Output message. Does not implicitly {@link cosmos.bank.v1beta1.Output.verify|verify} messages.
@@ -713,10 +901,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.IOutput,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.IOutput, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes an Output message from the specified reader or buffer.
@@ -726,10 +911,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.Output;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.Output;
+
+        /**
+         * Creates an Output message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Output
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.Output;
+
+        /**
+         * Creates a plain object from an Output message. Also converts values to other types if specified.
+         * @param m Output
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.Output,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Output to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Supply. */
@@ -754,9 +960,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Supply instance
          */
-        public static create(
-          properties?: cosmos.bank.v1beta1.ISupply
-        ): cosmos.bank.v1beta1.Supply;
+        public static create(properties?: cosmos.bank.v1beta1.ISupply): cosmos.bank.v1beta1.Supply;
 
         /**
          * Encodes the specified Supply message. Does not implicitly {@link cosmos.bank.v1beta1.Supply.verify|verify} messages.
@@ -764,10 +968,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.ISupply,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.ISupply, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Supply message from the specified reader or buffer.
@@ -777,10 +978,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.Supply;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.Supply;
+
+        /**
+         * Creates a Supply message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Supply
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.Supply;
+
+        /**
+         * Creates a plain object from a Supply message. Also converts values to other types if specified.
+         * @param m Supply
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.Supply,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Supply to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a DenomUnit. */
@@ -817,9 +1039,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns DenomUnit instance
          */
-        public static create(
-          properties?: cosmos.bank.v1beta1.IDenomUnit
-        ): cosmos.bank.v1beta1.DenomUnit;
+        public static create(properties?: cosmos.bank.v1beta1.IDenomUnit): cosmos.bank.v1beta1.DenomUnit;
 
         /**
          * Encodes the specified DenomUnit message. Does not implicitly {@link cosmos.bank.v1beta1.DenomUnit.verify|verify} messages.
@@ -827,10 +1047,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.IDenomUnit,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.IDenomUnit, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a DenomUnit message from the specified reader or buffer.
@@ -840,10 +1057,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.DenomUnit;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.DenomUnit;
+
+        /**
+         * Creates a DenomUnit message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns DenomUnit
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.DenomUnit;
+
+        /**
+         * Creates a plain object from a DenomUnit message. Also converts values to other types if specified.
+         * @param m DenomUnit
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.DenomUnit,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this DenomUnit to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Metadata. */
@@ -886,9 +1124,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Metadata instance
          */
-        public static create(
-          properties?: cosmos.bank.v1beta1.IMetadata
-        ): cosmos.bank.v1beta1.Metadata;
+        public static create(properties?: cosmos.bank.v1beta1.IMetadata): cosmos.bank.v1beta1.Metadata;
 
         /**
          * Encodes the specified Metadata message. Does not implicitly {@link cosmos.bank.v1beta1.Metadata.verify|verify} messages.
@@ -896,10 +1132,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.IMetadata,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.IMetadata, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Metadata message from the specified reader or buffer.
@@ -909,10 +1142,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.Metadata;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.Metadata;
+
+        /**
+         * Creates a Metadata message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Metadata
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.Metadata;
+
+        /**
+         * Creates a plain object from a Metadata message. Also converts values to other types if specified.
+         * @param m Metadata
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.Metadata,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Metadata to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Represents a Query */
@@ -923,11 +1177,7 @@ export namespace cosmos {
          * @param [requestDelimited=false] Whether requests are length-delimited
          * @param [responseDelimited=false] Whether responses are length-delimited
          */
-        constructor(
-          rpcImpl: $protobuf.RPCImpl,
-          requestDelimited?: boolean,
-          responseDelimited?: boolean
-        );
+        constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
 
         /**
          * Creates new Query service using the specified rpc implementation.
@@ -939,7 +1189,7 @@ export namespace cosmos {
         public static create(
           rpcImpl: $protobuf.RPCImpl,
           requestDelimited?: boolean,
-          responseDelimited?: boolean
+          responseDelimited?: boolean,
         ): Query;
 
         /**
@@ -949,7 +1199,7 @@ export namespace cosmos {
          */
         public balance(
           request: cosmos.bank.v1beta1.IQueryBalanceRequest,
-          callback: cosmos.bank.v1beta1.Query.BalanceCallback
+          callback: cosmos.bank.v1beta1.Query.BalanceCallback,
         ): void;
 
         /**
@@ -958,7 +1208,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public balance(
-          request: cosmos.bank.v1beta1.IQueryBalanceRequest
+          request: cosmos.bank.v1beta1.IQueryBalanceRequest,
         ): Promise<cosmos.bank.v1beta1.QueryBalanceResponse>;
 
         /**
@@ -968,7 +1218,7 @@ export namespace cosmos {
          */
         public allBalances(
           request: cosmos.bank.v1beta1.IQueryAllBalancesRequest,
-          callback: cosmos.bank.v1beta1.Query.AllBalancesCallback
+          callback: cosmos.bank.v1beta1.Query.AllBalancesCallback,
         ): void;
 
         /**
@@ -977,7 +1227,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public allBalances(
-          request: cosmos.bank.v1beta1.IQueryAllBalancesRequest
+          request: cosmos.bank.v1beta1.IQueryAllBalancesRequest,
         ): Promise<cosmos.bank.v1beta1.QueryAllBalancesResponse>;
 
         /**
@@ -987,7 +1237,7 @@ export namespace cosmos {
          */
         public totalSupply(
           request: cosmos.bank.v1beta1.IQueryTotalSupplyRequest,
-          callback: cosmos.bank.v1beta1.Query.TotalSupplyCallback
+          callback: cosmos.bank.v1beta1.Query.TotalSupplyCallback,
         ): void;
 
         /**
@@ -996,7 +1246,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public totalSupply(
-          request: cosmos.bank.v1beta1.IQueryTotalSupplyRequest
+          request: cosmos.bank.v1beta1.IQueryTotalSupplyRequest,
         ): Promise<cosmos.bank.v1beta1.QueryTotalSupplyResponse>;
 
         /**
@@ -1006,7 +1256,7 @@ export namespace cosmos {
          */
         public supplyOf(
           request: cosmos.bank.v1beta1.IQuerySupplyOfRequest,
-          callback: cosmos.bank.v1beta1.Query.SupplyOfCallback
+          callback: cosmos.bank.v1beta1.Query.SupplyOfCallback,
         ): void;
 
         /**
@@ -1015,7 +1265,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public supplyOf(
-          request: cosmos.bank.v1beta1.IQuerySupplyOfRequest
+          request: cosmos.bank.v1beta1.IQuerySupplyOfRequest,
         ): Promise<cosmos.bank.v1beta1.QuerySupplyOfResponse>;
 
         /**
@@ -1025,7 +1275,7 @@ export namespace cosmos {
          */
         public params(
           request: cosmos.bank.v1beta1.IQueryParamsRequest,
-          callback: cosmos.bank.v1beta1.Query.ParamsCallback
+          callback: cosmos.bank.v1beta1.Query.ParamsCallback,
         ): void;
 
         /**
@@ -1034,7 +1284,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public params(
-          request: cosmos.bank.v1beta1.IQueryParamsRequest
+          request: cosmos.bank.v1beta1.IQueryParamsRequest,
         ): Promise<cosmos.bank.v1beta1.QueryParamsResponse>;
       }
 
@@ -1046,7 +1296,7 @@ export namespace cosmos {
          */
         type BalanceCallback = (
           error: Error | null,
-          response?: cosmos.bank.v1beta1.QueryBalanceResponse
+          response?: cosmos.bank.v1beta1.QueryBalanceResponse,
         ) => void;
 
         /**
@@ -1056,7 +1306,7 @@ export namespace cosmos {
          */
         type AllBalancesCallback = (
           error: Error | null,
-          response?: cosmos.bank.v1beta1.QueryAllBalancesResponse
+          response?: cosmos.bank.v1beta1.QueryAllBalancesResponse,
         ) => void;
 
         /**
@@ -1066,7 +1316,7 @@ export namespace cosmos {
          */
         type TotalSupplyCallback = (
           error: Error | null,
-          response?: cosmos.bank.v1beta1.QueryTotalSupplyResponse
+          response?: cosmos.bank.v1beta1.QueryTotalSupplyResponse,
         ) => void;
 
         /**
@@ -1076,7 +1326,7 @@ export namespace cosmos {
          */
         type SupplyOfCallback = (
           error: Error | null,
-          response?: cosmos.bank.v1beta1.QuerySupplyOfResponse
+          response?: cosmos.bank.v1beta1.QuerySupplyOfResponse,
         ) => void;
 
         /**
@@ -1086,7 +1336,7 @@ export namespace cosmos {
          */
         type ParamsCallback = (
           error: Error | null,
-          response?: cosmos.bank.v1beta1.QueryParamsResponse
+          response?: cosmos.bank.v1beta1.QueryParamsResponse,
         ) => void;
       }
 
@@ -1119,7 +1369,7 @@ export namespace cosmos {
          * @returns QueryBalanceRequest instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQueryBalanceRequest
+          properties?: cosmos.bank.v1beta1.IQueryBalanceRequest,
         ): cosmos.bank.v1beta1.QueryBalanceRequest;
 
         /**
@@ -1130,7 +1380,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQueryBalanceRequest,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1143,8 +1393,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QueryBalanceRequest;
+
+        /**
+         * Creates a QueryBalanceRequest message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryBalanceRequest
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QueryBalanceRequest;
+
+        /**
+         * Creates a plain object from a QueryBalanceRequest message. Also converts values to other types if specified.
+         * @param m QueryBalanceRequest
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QueryBalanceRequest,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryBalanceRequest to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryBalanceResponse. */
@@ -1170,7 +1444,7 @@ export namespace cosmos {
          * @returns QueryBalanceResponse instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQueryBalanceResponse
+          properties?: cosmos.bank.v1beta1.IQueryBalanceResponse,
         ): cosmos.bank.v1beta1.QueryBalanceResponse;
 
         /**
@@ -1181,7 +1455,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQueryBalanceResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1194,8 +1468,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QueryBalanceResponse;
+
+        /**
+         * Creates a QueryBalanceResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryBalanceResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QueryBalanceResponse;
+
+        /**
+         * Creates a plain object from a QueryBalanceResponse message. Also converts values to other types if specified.
+         * @param m QueryBalanceResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QueryBalanceResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryBalanceResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryAllBalancesRequest. */
@@ -1227,7 +1525,7 @@ export namespace cosmos {
          * @returns QueryAllBalancesRequest instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQueryAllBalancesRequest
+          properties?: cosmos.bank.v1beta1.IQueryAllBalancesRequest,
         ): cosmos.bank.v1beta1.QueryAllBalancesRequest;
 
         /**
@@ -1238,7 +1536,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQueryAllBalancesRequest,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1251,8 +1549,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QueryAllBalancesRequest;
+
+        /**
+         * Creates a QueryAllBalancesRequest message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryAllBalancesRequest
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QueryAllBalancesRequest;
+
+        /**
+         * Creates a plain object from a QueryAllBalancesRequest message. Also converts values to other types if specified.
+         * @param m QueryAllBalancesRequest
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QueryAllBalancesRequest,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryAllBalancesRequest to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryAllBalancesResponse. */
@@ -1284,7 +1606,7 @@ export namespace cosmos {
          * @returns QueryAllBalancesResponse instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQueryAllBalancesResponse
+          properties?: cosmos.bank.v1beta1.IQueryAllBalancesResponse,
         ): cosmos.bank.v1beta1.QueryAllBalancesResponse;
 
         /**
@@ -1295,7 +1617,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQueryAllBalancesResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1308,8 +1630,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QueryAllBalancesResponse;
+
+        /**
+         * Creates a QueryAllBalancesResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryAllBalancesResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QueryAllBalancesResponse;
+
+        /**
+         * Creates a plain object from a QueryAllBalancesResponse message. Also converts values to other types if specified.
+         * @param m QueryAllBalancesResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QueryAllBalancesResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryAllBalancesResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryTotalSupplyRequest. */
@@ -1329,7 +1675,7 @@ export namespace cosmos {
          * @returns QueryTotalSupplyRequest instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQueryTotalSupplyRequest
+          properties?: cosmos.bank.v1beta1.IQueryTotalSupplyRequest,
         ): cosmos.bank.v1beta1.QueryTotalSupplyRequest;
 
         /**
@@ -1340,7 +1686,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQueryTotalSupplyRequest,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1353,8 +1699,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QueryTotalSupplyRequest;
+
+        /**
+         * Creates a QueryTotalSupplyRequest message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryTotalSupplyRequest
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QueryTotalSupplyRequest;
+
+        /**
+         * Creates a plain object from a QueryTotalSupplyRequest message. Also converts values to other types if specified.
+         * @param m QueryTotalSupplyRequest
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QueryTotalSupplyRequest,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryTotalSupplyRequest to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryTotalSupplyResponse. */
@@ -1380,7 +1750,7 @@ export namespace cosmos {
          * @returns QueryTotalSupplyResponse instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQueryTotalSupplyResponse
+          properties?: cosmos.bank.v1beta1.IQueryTotalSupplyResponse,
         ): cosmos.bank.v1beta1.QueryTotalSupplyResponse;
 
         /**
@@ -1391,7 +1761,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQueryTotalSupplyResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1404,8 +1774,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QueryTotalSupplyResponse;
+
+        /**
+         * Creates a QueryTotalSupplyResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryTotalSupplyResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QueryTotalSupplyResponse;
+
+        /**
+         * Creates a plain object from a QueryTotalSupplyResponse message. Also converts values to other types if specified.
+         * @param m QueryTotalSupplyResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QueryTotalSupplyResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryTotalSupplyResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QuerySupplyOfRequest. */
@@ -1431,7 +1825,7 @@ export namespace cosmos {
          * @returns QuerySupplyOfRequest instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQuerySupplyOfRequest
+          properties?: cosmos.bank.v1beta1.IQuerySupplyOfRequest,
         ): cosmos.bank.v1beta1.QuerySupplyOfRequest;
 
         /**
@@ -1442,7 +1836,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQuerySupplyOfRequest,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1455,8 +1849,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QuerySupplyOfRequest;
+
+        /**
+         * Creates a QuerySupplyOfRequest message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QuerySupplyOfRequest
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QuerySupplyOfRequest;
+
+        /**
+         * Creates a plain object from a QuerySupplyOfRequest message. Also converts values to other types if specified.
+         * @param m QuerySupplyOfRequest
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QuerySupplyOfRequest,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QuerySupplyOfRequest to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QuerySupplyOfResponse. */
@@ -1482,7 +1900,7 @@ export namespace cosmos {
          * @returns QuerySupplyOfResponse instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQuerySupplyOfResponse
+          properties?: cosmos.bank.v1beta1.IQuerySupplyOfResponse,
         ): cosmos.bank.v1beta1.QuerySupplyOfResponse;
 
         /**
@@ -1493,7 +1911,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQuerySupplyOfResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1506,8 +1924,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QuerySupplyOfResponse;
+
+        /**
+         * Creates a QuerySupplyOfResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QuerySupplyOfResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QuerySupplyOfResponse;
+
+        /**
+         * Creates a plain object from a QuerySupplyOfResponse message. Also converts values to other types if specified.
+         * @param m QuerySupplyOfResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QuerySupplyOfResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QuerySupplyOfResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryParamsRequest. */
@@ -1527,7 +1969,7 @@ export namespace cosmos {
          * @returns QueryParamsRequest instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQueryParamsRequest
+          properties?: cosmos.bank.v1beta1.IQueryParamsRequest,
         ): cosmos.bank.v1beta1.QueryParamsRequest;
 
         /**
@@ -1538,7 +1980,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQueryParamsRequest,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1551,8 +1993,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QueryParamsRequest;
+
+        /**
+         * Creates a QueryParamsRequest message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryParamsRequest
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QueryParamsRequest;
+
+        /**
+         * Creates a plain object from a QueryParamsRequest message. Also converts values to other types if specified.
+         * @param m QueryParamsRequest
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QueryParamsRequest,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryParamsRequest to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a QueryParamsResponse. */
@@ -1578,7 +2044,7 @@ export namespace cosmos {
          * @returns QueryParamsResponse instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IQueryParamsResponse
+          properties?: cosmos.bank.v1beta1.IQueryParamsResponse,
         ): cosmos.bank.v1beta1.QueryParamsResponse;
 
         /**
@@ -1589,7 +2055,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IQueryParamsResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1602,8 +2068,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.QueryParamsResponse;
+
+        /**
+         * Creates a QueryParamsResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns QueryParamsResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.QueryParamsResponse;
+
+        /**
+         * Creates a plain object from a QueryParamsResponse message. Also converts values to other types if specified.
+         * @param m QueryParamsResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.QueryParamsResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this QueryParamsResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Represents a Msg */
@@ -1614,11 +2104,7 @@ export namespace cosmos {
          * @param [requestDelimited=false] Whether requests are length-delimited
          * @param [responseDelimited=false] Whether responses are length-delimited
          */
-        constructor(
-          rpcImpl: $protobuf.RPCImpl,
-          requestDelimited?: boolean,
-          responseDelimited?: boolean
-        );
+        constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
 
         /**
          * Creates new Msg service using the specified rpc implementation.
@@ -1630,7 +2116,7 @@ export namespace cosmos {
         public static create(
           rpcImpl: $protobuf.RPCImpl,
           requestDelimited?: boolean,
-          responseDelimited?: boolean
+          responseDelimited?: boolean,
         ): Msg;
 
         /**
@@ -1640,7 +2126,7 @@ export namespace cosmos {
          */
         public send(
           request: cosmos.bank.v1beta1.IMsgSend,
-          callback: cosmos.bank.v1beta1.Msg.SendCallback
+          callback: cosmos.bank.v1beta1.Msg.SendCallback,
         ): void;
 
         /**
@@ -1648,9 +2134,7 @@ export namespace cosmos {
          * @param request MsgSend message or plain object
          * @returns Promise
          */
-        public send(
-          request: cosmos.bank.v1beta1.IMsgSend
-        ): Promise<cosmos.bank.v1beta1.MsgSendResponse>;
+        public send(request: cosmos.bank.v1beta1.IMsgSend): Promise<cosmos.bank.v1beta1.MsgSendResponse>;
 
         /**
          * Calls MultiSend.
@@ -1659,7 +2143,7 @@ export namespace cosmos {
          */
         public multiSend(
           request: cosmos.bank.v1beta1.IMsgMultiSend,
-          callback: cosmos.bank.v1beta1.Msg.MultiSendCallback
+          callback: cosmos.bank.v1beta1.Msg.MultiSendCallback,
         ): void;
 
         /**
@@ -1668,7 +2152,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public multiSend(
-          request: cosmos.bank.v1beta1.IMsgMultiSend
+          request: cosmos.bank.v1beta1.IMsgMultiSend,
         ): Promise<cosmos.bank.v1beta1.MsgMultiSendResponse>;
       }
 
@@ -1678,10 +2162,7 @@ export namespace cosmos {
          * @param error Error, if any
          * @param [response] MsgSendResponse
          */
-        type SendCallback = (
-          error: Error | null,
-          response?: cosmos.bank.v1beta1.MsgSendResponse
-        ) => void;
+        type SendCallback = (error: Error | null, response?: cosmos.bank.v1beta1.MsgSendResponse) => void;
 
         /**
          * Callback as used by {@link cosmos.bank.v1beta1.Msg#multiSend}.
@@ -1690,7 +2171,7 @@ export namespace cosmos {
          */
         type MultiSendCallback = (
           error: Error | null,
-          response?: cosmos.bank.v1beta1.MsgMultiSendResponse
+          response?: cosmos.bank.v1beta1.MsgMultiSendResponse,
         ) => void;
       }
 
@@ -1728,9 +2209,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns MsgSend instance
          */
-        public static create(
-          properties?: cosmos.bank.v1beta1.IMsgSend
-        ): cosmos.bank.v1beta1.MsgSend;
+        public static create(properties?: cosmos.bank.v1beta1.IMsgSend): cosmos.bank.v1beta1.MsgSend;
 
         /**
          * Encodes the specified MsgSend message. Does not implicitly {@link cosmos.bank.v1beta1.MsgSend.verify|verify} messages.
@@ -1738,10 +2217,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.IMsgSend,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.IMsgSend, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a MsgSend message from the specified reader or buffer.
@@ -1751,10 +2227,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.MsgSend;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.MsgSend;
+
+        /**
+         * Creates a MsgSend message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgSend
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.MsgSend;
+
+        /**
+         * Creates a plain object from a MsgSend message. Also converts values to other types if specified.
+         * @param m MsgSend
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.MsgSend,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgSend to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgSendResponse. */
@@ -1774,7 +2271,7 @@ export namespace cosmos {
          * @returns MsgSendResponse instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IMsgSendResponse
+          properties?: cosmos.bank.v1beta1.IMsgSendResponse,
         ): cosmos.bank.v1beta1.MsgSendResponse;
 
         /**
@@ -1783,10 +2280,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.IMsgSendResponse,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.IMsgSendResponse, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a MsgSendResponse message from the specified reader or buffer.
@@ -1798,8 +2292,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.MsgSendResponse;
+
+        /**
+         * Creates a MsgSendResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgSendResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.MsgSendResponse;
+
+        /**
+         * Creates a plain object from a MsgSendResponse message. Also converts values to other types if specified.
+         * @param m MsgSendResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.MsgSendResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgSendResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgMultiSend. */
@@ -1831,7 +2349,7 @@ export namespace cosmos {
          * @returns MsgMultiSend instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IMsgMultiSend
+          properties?: cosmos.bank.v1beta1.IMsgMultiSend,
         ): cosmos.bank.v1beta1.MsgMultiSend;
 
         /**
@@ -1840,10 +2358,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.bank.v1beta1.IMsgMultiSend,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.bank.v1beta1.IMsgMultiSend, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a MsgMultiSend message from the specified reader or buffer.
@@ -1853,10 +2368,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.bank.v1beta1.MsgMultiSend;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.bank.v1beta1.MsgMultiSend;
+
+        /**
+         * Creates a MsgMultiSend message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgMultiSend
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.MsgMultiSend;
+
+        /**
+         * Creates a plain object from a MsgMultiSend message. Also converts values to other types if specified.
+         * @param m MsgMultiSend
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.MsgMultiSend,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgMultiSend to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgMultiSendResponse. */
@@ -1876,7 +2412,7 @@ export namespace cosmos {
          * @returns MsgMultiSendResponse instance
          */
         public static create(
-          properties?: cosmos.bank.v1beta1.IMsgMultiSendResponse
+          properties?: cosmos.bank.v1beta1.IMsgMultiSendResponse,
         ): cosmos.bank.v1beta1.MsgMultiSendResponse;
 
         /**
@@ -1887,7 +2423,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.bank.v1beta1.IMsgMultiSendResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -1900,8 +2436,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.bank.v1beta1.MsgMultiSendResponse;
+
+        /**
+         * Creates a MsgMultiSendResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgMultiSendResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.bank.v1beta1.MsgMultiSendResponse;
+
+        /**
+         * Creates a plain object from a MsgMultiSendResponse message. Also converts values to other types if specified.
+         * @param m MsgMultiSendResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.bank.v1beta1.MsgMultiSendResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgMultiSendResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
   }
@@ -1953,7 +2513,7 @@ export namespace cosmos {
            * @returns PageRequest instance
            */
           public static create(
-            properties?: cosmos.base.query.v1beta1.IPageRequest
+            properties?: cosmos.base.query.v1beta1.IPageRequest,
           ): cosmos.base.query.v1beta1.PageRequest;
 
           /**
@@ -1964,7 +2524,7 @@ export namespace cosmos {
            */
           public static encode(
             m: cosmos.base.query.v1beta1.IPageRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -1977,8 +2537,32 @@ export namespace cosmos {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): cosmos.base.query.v1beta1.PageRequest;
+
+          /**
+           * Creates a PageRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns PageRequest
+           */
+          public static fromObject(d: { [k: string]: any }): cosmos.base.query.v1beta1.PageRequest;
+
+          /**
+           * Creates a plain object from a PageRequest message. Also converts values to other types if specified.
+           * @param m PageRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: cosmos.base.query.v1beta1.PageRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this PageRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a PageResponse. */
@@ -2010,7 +2594,7 @@ export namespace cosmos {
            * @returns PageResponse instance
            */
           public static create(
-            properties?: cosmos.base.query.v1beta1.IPageResponse
+            properties?: cosmos.base.query.v1beta1.IPageResponse,
           ): cosmos.base.query.v1beta1.PageResponse;
 
           /**
@@ -2021,7 +2605,7 @@ export namespace cosmos {
            */
           public static encode(
             m: cosmos.base.query.v1beta1.IPageResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -2034,8 +2618,32 @@ export namespace cosmos {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): cosmos.base.query.v1beta1.PageResponse;
+
+          /**
+           * Creates a PageResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns PageResponse
+           */
+          public static fromObject(d: { [k: string]: any }): cosmos.base.query.v1beta1.PageResponse;
+
+          /**
+           * Creates a plain object from a PageResponse message. Also converts values to other types if specified.
+           * @param m PageResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: cosmos.base.query.v1beta1.PageResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this PageResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
       }
     }
@@ -2070,9 +2678,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Coin instance
          */
-        public static create(
-          properties?: cosmos.base.v1beta1.ICoin
-        ): cosmos.base.v1beta1.Coin;
+        public static create(properties?: cosmos.base.v1beta1.ICoin): cosmos.base.v1beta1.Coin;
 
         /**
          * Encodes the specified Coin message. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
@@ -2080,10 +2686,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.base.v1beta1.ICoin,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.base.v1beta1.ICoin, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Coin message from the specified reader or buffer.
@@ -2093,10 +2696,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.base.v1beta1.Coin;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.base.v1beta1.Coin;
+
+        /**
+         * Creates a Coin message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Coin
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.base.v1beta1.Coin;
+
+        /**
+         * Creates a plain object from a Coin message. Also converts values to other types if specified.
+         * @param m Coin
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.base.v1beta1.Coin,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Coin to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a DecCoin. */
@@ -2127,9 +2751,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns DecCoin instance
          */
-        public static create(
-          properties?: cosmos.base.v1beta1.IDecCoin
-        ): cosmos.base.v1beta1.DecCoin;
+        public static create(properties?: cosmos.base.v1beta1.IDecCoin): cosmos.base.v1beta1.DecCoin;
 
         /**
          * Encodes the specified DecCoin message. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
@@ -2137,10 +2759,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.base.v1beta1.IDecCoin,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.base.v1beta1.IDecCoin, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a DecCoin message from the specified reader or buffer.
@@ -2150,10 +2769,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.base.v1beta1.DecCoin;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.base.v1beta1.DecCoin;
+
+        /**
+         * Creates a DecCoin message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns DecCoin
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.base.v1beta1.DecCoin;
+
+        /**
+         * Creates a plain object from a DecCoin message. Also converts values to other types if specified.
+         * @param m DecCoin
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.base.v1beta1.DecCoin,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this DecCoin to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of an IntProto. */
@@ -2178,9 +2818,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns IntProto instance
          */
-        public static create(
-          properties?: cosmos.base.v1beta1.IIntProto
-        ): cosmos.base.v1beta1.IntProto;
+        public static create(properties?: cosmos.base.v1beta1.IIntProto): cosmos.base.v1beta1.IntProto;
 
         /**
          * Encodes the specified IntProto message. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
@@ -2188,10 +2826,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.base.v1beta1.IIntProto,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.base.v1beta1.IIntProto, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes an IntProto message from the specified reader or buffer.
@@ -2201,10 +2836,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.base.v1beta1.IntProto;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.base.v1beta1.IntProto;
+
+        /**
+         * Creates an IntProto message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns IntProto
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.base.v1beta1.IntProto;
+
+        /**
+         * Creates a plain object from an IntProto message. Also converts values to other types if specified.
+         * @param m IntProto
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.base.v1beta1.IntProto,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this IntProto to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a DecProto. */
@@ -2229,9 +2885,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns DecProto instance
          */
-        public static create(
-          properties?: cosmos.base.v1beta1.IDecProto
-        ): cosmos.base.v1beta1.DecProto;
+        public static create(properties?: cosmos.base.v1beta1.IDecProto): cosmos.base.v1beta1.DecProto;
 
         /**
          * Encodes the specified DecProto message. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
@@ -2239,10 +2893,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.base.v1beta1.IDecProto,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.base.v1beta1.IDecProto, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a DecProto message from the specified reader or buffer.
@@ -2252,10 +2903,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.base.v1beta1.DecProto;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.base.v1beta1.DecProto;
+
+        /**
+         * Creates a DecProto message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns DecProto
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.base.v1beta1.DecProto;
+
+        /**
+         * Creates a plain object from a DecProto message. Also converts values to other types if specified.
+         * @param m DecProto
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.base.v1beta1.DecProto,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this DecProto to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
   }
@@ -2289,7 +2961,7 @@ export namespace cosmos {
            * @returns MultiSignature instance
            */
           public static create(
-            properties?: cosmos.crypto.multisig.v1beta1.IMultiSignature
+            properties?: cosmos.crypto.multisig.v1beta1.IMultiSignature,
           ): cosmos.crypto.multisig.v1beta1.MultiSignature;
 
           /**
@@ -2300,7 +2972,7 @@ export namespace cosmos {
            */
           public static encode(
             m: cosmos.crypto.multisig.v1beta1.IMultiSignature,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -2313,8 +2985,32 @@ export namespace cosmos {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): cosmos.crypto.multisig.v1beta1.MultiSignature;
+
+          /**
+           * Creates a MultiSignature message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MultiSignature
+           */
+          public static fromObject(d: { [k: string]: any }): cosmos.crypto.multisig.v1beta1.MultiSignature;
+
+          /**
+           * Creates a plain object from a MultiSignature message. Also converts values to other types if specified.
+           * @param m MultiSignature
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: cosmos.crypto.multisig.v1beta1.MultiSignature,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MultiSignature to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a CompactBitArray. */
@@ -2346,7 +3042,7 @@ export namespace cosmos {
            * @returns CompactBitArray instance
            */
           public static create(
-            properties?: cosmos.crypto.multisig.v1beta1.ICompactBitArray
+            properties?: cosmos.crypto.multisig.v1beta1.ICompactBitArray,
           ): cosmos.crypto.multisig.v1beta1.CompactBitArray;
 
           /**
@@ -2357,7 +3053,7 @@ export namespace cosmos {
            */
           public static encode(
             m: cosmos.crypto.multisig.v1beta1.ICompactBitArray,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -2370,8 +3066,32 @@ export namespace cosmos {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): cosmos.crypto.multisig.v1beta1.CompactBitArray;
+
+          /**
+           * Creates a CompactBitArray message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns CompactBitArray
+           */
+          public static fromObject(d: { [k: string]: any }): cosmos.crypto.multisig.v1beta1.CompactBitArray;
+
+          /**
+           * Creates a plain object from a CompactBitArray message. Also converts values to other types if specified.
+           * @param m CompactBitArray
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: cosmos.crypto.multisig.v1beta1.CompactBitArray,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this CompactBitArray to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
       }
     }
@@ -2400,9 +3120,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns PubKey instance
          */
-        public static create(
-          properties?: cosmos.crypto.secp256k1.IPubKey
-        ): cosmos.crypto.secp256k1.PubKey;
+        public static create(properties?: cosmos.crypto.secp256k1.IPubKey): cosmos.crypto.secp256k1.PubKey;
 
         /**
          * Encodes the specified PubKey message. Does not implicitly {@link cosmos.crypto.secp256k1.PubKey.verify|verify} messages.
@@ -2410,10 +3128,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.crypto.secp256k1.IPubKey,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.crypto.secp256k1.IPubKey, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a PubKey message from the specified reader or buffer.
@@ -2423,10 +3138,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.crypto.secp256k1.PubKey;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.crypto.secp256k1.PubKey;
+
+        /**
+         * Creates a PubKey message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns PubKey
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.crypto.secp256k1.PubKey;
+
+        /**
+         * Creates a plain object from a PubKey message. Also converts values to other types if specified.
+         * @param m PubKey
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.crypto.secp256k1.PubKey,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this PubKey to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a PrivKey. */
@@ -2451,9 +3187,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns PrivKey instance
          */
-        public static create(
-          properties?: cosmos.crypto.secp256k1.IPrivKey
-        ): cosmos.crypto.secp256k1.PrivKey;
+        public static create(properties?: cosmos.crypto.secp256k1.IPrivKey): cosmos.crypto.secp256k1.PrivKey;
 
         /**
          * Encodes the specified PrivKey message. Does not implicitly {@link cosmos.crypto.secp256k1.PrivKey.verify|verify} messages.
@@ -2461,10 +3195,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.crypto.secp256k1.IPrivKey,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.crypto.secp256k1.IPrivKey, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a PrivKey message from the specified reader or buffer.
@@ -2474,10 +3205,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.crypto.secp256k1.PrivKey;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.crypto.secp256k1.PrivKey;
+
+        /**
+         * Creates a PrivKey message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns PrivKey
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.crypto.secp256k1.PrivKey;
+
+        /**
+         * Creates a plain object from a PrivKey message. Also converts values to other types if specified.
+         * @param m PrivKey
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.crypto.secp256k1.PrivKey,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this PrivKey to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
   }
@@ -2515,7 +3267,7 @@ export namespace cosmos {
          * @returns HistoricalInfo instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IHistoricalInfo
+          properties?: cosmos.staking.v1beta1.IHistoricalInfo,
         ): cosmos.staking.v1beta1.HistoricalInfo;
 
         /**
@@ -2526,7 +3278,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IHistoricalInfo,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -2539,8 +3291,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.HistoricalInfo;
+
+        /**
+         * Creates a HistoricalInfo message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns HistoricalInfo
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.HistoricalInfo;
+
+        /**
+         * Creates a plain object from a HistoricalInfo message. Also converts values to other types if specified.
+         * @param m HistoricalInfo
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.HistoricalInfo,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this HistoricalInfo to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a CommissionRates. */
@@ -2578,7 +3354,7 @@ export namespace cosmos {
          * @returns CommissionRates instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.ICommissionRates
+          properties?: cosmos.staking.v1beta1.ICommissionRates,
         ): cosmos.staking.v1beta1.CommissionRates;
 
         /**
@@ -2589,7 +3365,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.ICommissionRates,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -2602,8 +3378,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.CommissionRates;
+
+        /**
+         * Creates a CommissionRates message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns CommissionRates
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.CommissionRates;
+
+        /**
+         * Creates a plain object from a CommissionRates message. Also converts values to other types if specified.
+         * @param m CommissionRates
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.CommissionRates,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this CommissionRates to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Commission. */
@@ -2635,7 +3435,7 @@ export namespace cosmos {
          * @returns Commission instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.ICommission
+          properties?: cosmos.staking.v1beta1.ICommission,
         ): cosmos.staking.v1beta1.Commission;
 
         /**
@@ -2644,10 +3444,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.ICommission,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.ICommission, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Commission message from the specified reader or buffer.
@@ -2657,10 +3454,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.staking.v1beta1.Commission;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.staking.v1beta1.Commission;
+
+        /**
+         * Creates a Commission message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Commission
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.Commission;
+
+        /**
+         * Creates a plain object from a Commission message. Also converts values to other types if specified.
+         * @param m Commission
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.Commission,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Commission to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Description. */
@@ -2710,7 +3528,7 @@ export namespace cosmos {
          * @returns Description instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IDescription
+          properties?: cosmos.staking.v1beta1.IDescription,
         ): cosmos.staking.v1beta1.Description;
 
         /**
@@ -2719,10 +3537,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IDescription,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IDescription, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Description message from the specified reader or buffer.
@@ -2734,8 +3549,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.Description;
+
+        /**
+         * Creates a Description message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Description
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.Description;
+
+        /**
+         * Creates a plain object from a Description message. Also converts values to other types if specified.
+         * @param m Description
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.Description,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Description to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Validator. */
@@ -2821,7 +3660,7 @@ export namespace cosmos {
          * @returns Validator instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IValidator
+          properties?: cosmos.staking.v1beta1.IValidator,
         ): cosmos.staking.v1beta1.Validator;
 
         /**
@@ -2830,10 +3669,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IValidator,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IValidator, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Validator message from the specified reader or buffer.
@@ -2843,10 +3679,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.staking.v1beta1.Validator;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.staking.v1beta1.Validator;
+
+        /**
+         * Creates a Validator message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Validator
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.Validator;
+
+        /**
+         * Creates a plain object from a Validator message. Also converts values to other types if specified.
+         * @param m Validator
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.Validator,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Validator to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** BondStatus enum. */
@@ -2854,7 +3711,7 @@ export namespace cosmos {
         BOND_STATUS_UNSPECIFIED = 0,
         BOND_STATUS_UNBONDED = 1,
         BOND_STATUS_UNBONDING = 2,
-        BOND_STATUS_BONDED = 3
+        BOND_STATUS_BONDED = 3,
       }
 
       /** Properties of a ValAddresses. */
@@ -2880,7 +3737,7 @@ export namespace cosmos {
          * @returns ValAddresses instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IValAddresses
+          properties?: cosmos.staking.v1beta1.IValAddresses,
         ): cosmos.staking.v1beta1.ValAddresses;
 
         /**
@@ -2889,10 +3746,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IValAddresses,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IValAddresses, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a ValAddresses message from the specified reader or buffer.
@@ -2904,8 +3758,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.ValAddresses;
+
+        /**
+         * Creates a ValAddresses message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns ValAddresses
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.ValAddresses;
+
+        /**
+         * Creates a plain object from a ValAddresses message. Also converts values to other types if specified.
+         * @param m ValAddresses
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.ValAddresses,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this ValAddresses to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a DVPair. */
@@ -2936,9 +3814,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns DVPair instance
          */
-        public static create(
-          properties?: cosmos.staking.v1beta1.IDVPair
-        ): cosmos.staking.v1beta1.DVPair;
+        public static create(properties?: cosmos.staking.v1beta1.IDVPair): cosmos.staking.v1beta1.DVPair;
 
         /**
          * Encodes the specified DVPair message. Does not implicitly {@link cosmos.staking.v1beta1.DVPair.verify|verify} messages.
@@ -2946,10 +3822,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IDVPair,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IDVPair, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a DVPair message from the specified reader or buffer.
@@ -2959,10 +3832,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.staking.v1beta1.DVPair;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.staking.v1beta1.DVPair;
+
+        /**
+         * Creates a DVPair message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns DVPair
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.DVPair;
+
+        /**
+         * Creates a plain object from a DVPair message. Also converts values to other types if specified.
+         * @param m DVPair
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.DVPair,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this DVPair to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a DVPairs. */
@@ -2987,9 +3881,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns DVPairs instance
          */
-        public static create(
-          properties?: cosmos.staking.v1beta1.IDVPairs
-        ): cosmos.staking.v1beta1.DVPairs;
+        public static create(properties?: cosmos.staking.v1beta1.IDVPairs): cosmos.staking.v1beta1.DVPairs;
 
         /**
          * Encodes the specified DVPairs message. Does not implicitly {@link cosmos.staking.v1beta1.DVPairs.verify|verify} messages.
@@ -2997,10 +3889,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IDVPairs,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IDVPairs, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a DVPairs message from the specified reader or buffer.
@@ -3010,10 +3899,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.staking.v1beta1.DVPairs;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.staking.v1beta1.DVPairs;
+
+        /**
+         * Creates a DVPairs message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns DVPairs
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.DVPairs;
+
+        /**
+         * Creates a plain object from a DVPairs message. Also converts values to other types if specified.
+         * @param m DVPairs
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.DVPairs,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this DVPairs to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a DVVTriplet. */
@@ -3051,7 +3961,7 @@ export namespace cosmos {
          * @returns DVVTriplet instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IDVVTriplet
+          properties?: cosmos.staking.v1beta1.IDVVTriplet,
         ): cosmos.staking.v1beta1.DVVTriplet;
 
         /**
@@ -3060,10 +3970,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IDVVTriplet,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IDVVTriplet, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a DVVTriplet message from the specified reader or buffer.
@@ -3073,10 +3980,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.staking.v1beta1.DVVTriplet;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.staking.v1beta1.DVVTriplet;
+
+        /**
+         * Creates a DVVTriplet message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns DVVTriplet
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.DVVTriplet;
+
+        /**
+         * Creates a plain object from a DVVTriplet message. Also converts values to other types if specified.
+         * @param m DVVTriplet
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.DVVTriplet,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this DVVTriplet to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a DVVTriplets. */
@@ -3102,7 +4030,7 @@ export namespace cosmos {
          * @returns DVVTriplets instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IDVVTriplets
+          properties?: cosmos.staking.v1beta1.IDVVTriplets,
         ): cosmos.staking.v1beta1.DVVTriplets;
 
         /**
@@ -3111,10 +4039,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IDVVTriplets,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IDVVTriplets, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a DVVTriplets message from the specified reader or buffer.
@@ -3126,8 +4051,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.DVVTriplets;
+
+        /**
+         * Creates a DVVTriplets message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns DVVTriplets
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.DVVTriplets;
+
+        /**
+         * Creates a plain object from a DVVTriplets message. Also converts values to other types if specified.
+         * @param m DVVTriplets
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.DVVTriplets,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this DVVTriplets to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Delegation. */
@@ -3165,7 +4114,7 @@ export namespace cosmos {
          * @returns Delegation instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IDelegation
+          properties?: cosmos.staking.v1beta1.IDelegation,
         ): cosmos.staking.v1beta1.Delegation;
 
         /**
@@ -3174,10 +4123,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IDelegation,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IDelegation, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Delegation message from the specified reader or buffer.
@@ -3187,10 +4133,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.staking.v1beta1.Delegation;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.staking.v1beta1.Delegation;
+
+        /**
+         * Creates a Delegation message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Delegation
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.Delegation;
+
+        /**
+         * Creates a plain object from a Delegation message. Also converts values to other types if specified.
+         * @param m Delegation
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.Delegation,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Delegation to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of an UnbondingDelegation. */
@@ -3228,7 +4195,7 @@ export namespace cosmos {
          * @returns UnbondingDelegation instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IUnbondingDelegation
+          properties?: cosmos.staking.v1beta1.IUnbondingDelegation,
         ): cosmos.staking.v1beta1.UnbondingDelegation;
 
         /**
@@ -3239,7 +4206,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IUnbondingDelegation,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -3252,8 +4219,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.UnbondingDelegation;
+
+        /**
+         * Creates an UnbondingDelegation message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns UnbondingDelegation
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.UnbondingDelegation;
+
+        /**
+         * Creates a plain object from an UnbondingDelegation message. Also converts values to other types if specified.
+         * @param m UnbondingDelegation
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.UnbondingDelegation,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this UnbondingDelegation to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of an UnbondingDelegationEntry. */
@@ -3297,7 +4288,7 @@ export namespace cosmos {
          * @returns UnbondingDelegationEntry instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IUnbondingDelegationEntry
+          properties?: cosmos.staking.v1beta1.IUnbondingDelegationEntry,
         ): cosmos.staking.v1beta1.UnbondingDelegationEntry;
 
         /**
@@ -3308,7 +4299,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IUnbondingDelegationEntry,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -3321,8 +4312,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.UnbondingDelegationEntry;
+
+        /**
+         * Creates an UnbondingDelegationEntry message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns UnbondingDelegationEntry
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.UnbondingDelegationEntry;
+
+        /**
+         * Creates a plain object from an UnbondingDelegationEntry message. Also converts values to other types if specified.
+         * @param m UnbondingDelegationEntry
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.UnbondingDelegationEntry,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this UnbondingDelegationEntry to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a RedelegationEntry. */
@@ -3366,7 +4381,7 @@ export namespace cosmos {
          * @returns RedelegationEntry instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IRedelegationEntry
+          properties?: cosmos.staking.v1beta1.IRedelegationEntry,
         ): cosmos.staking.v1beta1.RedelegationEntry;
 
         /**
@@ -3377,7 +4392,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IRedelegationEntry,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -3390,8 +4405,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.RedelegationEntry;
+
+        /**
+         * Creates a RedelegationEntry message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns RedelegationEntry
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.RedelegationEntry;
+
+        /**
+         * Creates a plain object from a RedelegationEntry message. Also converts values to other types if specified.
+         * @param m RedelegationEntry
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.RedelegationEntry,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this RedelegationEntry to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Redelegation. */
@@ -3435,7 +4474,7 @@ export namespace cosmos {
          * @returns Redelegation instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IRedelegation
+          properties?: cosmos.staking.v1beta1.IRedelegation,
         ): cosmos.staking.v1beta1.Redelegation;
 
         /**
@@ -3444,10 +4483,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IRedelegation,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IRedelegation, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Redelegation message from the specified reader or buffer.
@@ -3459,8 +4495,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.Redelegation;
+
+        /**
+         * Creates a Redelegation message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Redelegation
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.Redelegation;
+
+        /**
+         * Creates a plain object from a Redelegation message. Also converts values to other types if specified.
+         * @param m Redelegation
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.Redelegation,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Redelegation to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Params. */
@@ -3509,9 +4569,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Params instance
          */
-        public static create(
-          properties?: cosmos.staking.v1beta1.IParams
-        ): cosmos.staking.v1beta1.Params;
+        public static create(properties?: cosmos.staking.v1beta1.IParams): cosmos.staking.v1beta1.Params;
 
         /**
          * Encodes the specified Params message. Does not implicitly {@link cosmos.staking.v1beta1.Params.verify|verify} messages.
@@ -3519,10 +4577,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IParams,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IParams, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Params message from the specified reader or buffer.
@@ -3532,10 +4587,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.staking.v1beta1.Params;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.staking.v1beta1.Params;
+
+        /**
+         * Creates a Params message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Params
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.Params;
+
+        /**
+         * Creates a plain object from a Params message. Also converts values to other types if specified.
+         * @param m Params
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.Params,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Params to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a DelegationResponse. */
@@ -3567,7 +4643,7 @@ export namespace cosmos {
          * @returns DelegationResponse instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IDelegationResponse
+          properties?: cosmos.staking.v1beta1.IDelegationResponse,
         ): cosmos.staking.v1beta1.DelegationResponse;
 
         /**
@@ -3578,7 +4654,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IDelegationResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -3591,8 +4667,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.DelegationResponse;
+
+        /**
+         * Creates a DelegationResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns DelegationResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.DelegationResponse;
+
+        /**
+         * Creates a plain object from a DelegationResponse message. Also converts values to other types if specified.
+         * @param m DelegationResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.DelegationResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this DelegationResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a RedelegationEntryResponse. */
@@ -3624,7 +4724,7 @@ export namespace cosmos {
          * @returns RedelegationEntryResponse instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IRedelegationEntryResponse
+          properties?: cosmos.staking.v1beta1.IRedelegationEntryResponse,
         ): cosmos.staking.v1beta1.RedelegationEntryResponse;
 
         /**
@@ -3635,7 +4735,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IRedelegationEntryResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -3648,8 +4748,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.RedelegationEntryResponse;
+
+        /**
+         * Creates a RedelegationEntryResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns RedelegationEntryResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.RedelegationEntryResponse;
+
+        /**
+         * Creates a plain object from a RedelegationEntryResponse message. Also converts values to other types if specified.
+         * @param m RedelegationEntryResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.RedelegationEntryResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this RedelegationEntryResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a RedelegationResponse. */
@@ -3681,7 +4805,7 @@ export namespace cosmos {
          * @returns RedelegationResponse instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IRedelegationResponse
+          properties?: cosmos.staking.v1beta1.IRedelegationResponse,
         ): cosmos.staking.v1beta1.RedelegationResponse;
 
         /**
@@ -3692,7 +4816,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IRedelegationResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -3705,8 +4829,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.RedelegationResponse;
+
+        /**
+         * Creates a RedelegationResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns RedelegationResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.RedelegationResponse;
+
+        /**
+         * Creates a plain object from a RedelegationResponse message. Also converts values to other types if specified.
+         * @param m RedelegationResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.RedelegationResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this RedelegationResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a Pool. */
@@ -3737,9 +4885,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Pool instance
          */
-        public static create(
-          properties?: cosmos.staking.v1beta1.IPool
-        ): cosmos.staking.v1beta1.Pool;
+        public static create(properties?: cosmos.staking.v1beta1.IPool): cosmos.staking.v1beta1.Pool;
 
         /**
          * Encodes the specified Pool message. Does not implicitly {@link cosmos.staking.v1beta1.Pool.verify|verify} messages.
@@ -3747,10 +4893,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IPool,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IPool, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Pool message from the specified reader or buffer.
@@ -3760,10 +4903,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.staking.v1beta1.Pool;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.staking.v1beta1.Pool;
+
+        /**
+         * Creates a Pool message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Pool
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.Pool;
+
+        /**
+         * Creates a plain object from a Pool message. Also converts values to other types if specified.
+         * @param m Pool
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.Pool,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Pool to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Represents a Msg */
@@ -3774,11 +4938,7 @@ export namespace cosmos {
          * @param [requestDelimited=false] Whether requests are length-delimited
          * @param [responseDelimited=false] Whether responses are length-delimited
          */
-        constructor(
-          rpcImpl: $protobuf.RPCImpl,
-          requestDelimited?: boolean,
-          responseDelimited?: boolean
-        );
+        constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
 
         /**
          * Creates new Msg service using the specified rpc implementation.
@@ -3790,7 +4950,7 @@ export namespace cosmos {
         public static create(
           rpcImpl: $protobuf.RPCImpl,
           requestDelimited?: boolean,
-          responseDelimited?: boolean
+          responseDelimited?: boolean,
         ): Msg;
 
         /**
@@ -3800,7 +4960,7 @@ export namespace cosmos {
          */
         public createValidator(
           request: cosmos.staking.v1beta1.IMsgCreateValidator,
-          callback: cosmos.staking.v1beta1.Msg.CreateValidatorCallback
+          callback: cosmos.staking.v1beta1.Msg.CreateValidatorCallback,
         ): void;
 
         /**
@@ -3809,7 +4969,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public createValidator(
-          request: cosmos.staking.v1beta1.IMsgCreateValidator
+          request: cosmos.staking.v1beta1.IMsgCreateValidator,
         ): Promise<cosmos.staking.v1beta1.MsgCreateValidatorResponse>;
 
         /**
@@ -3819,7 +4979,7 @@ export namespace cosmos {
          */
         public editValidator(
           request: cosmos.staking.v1beta1.IMsgEditValidator,
-          callback: cosmos.staking.v1beta1.Msg.EditValidatorCallback
+          callback: cosmos.staking.v1beta1.Msg.EditValidatorCallback,
         ): void;
 
         /**
@@ -3828,7 +4988,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public editValidator(
-          request: cosmos.staking.v1beta1.IMsgEditValidator
+          request: cosmos.staking.v1beta1.IMsgEditValidator,
         ): Promise<cosmos.staking.v1beta1.MsgEditValidatorResponse>;
 
         /**
@@ -3838,7 +4998,7 @@ export namespace cosmos {
          */
         public delegate(
           request: cosmos.staking.v1beta1.IMsgDelegate,
-          callback: cosmos.staking.v1beta1.Msg.DelegateCallback
+          callback: cosmos.staking.v1beta1.Msg.DelegateCallback,
         ): void;
 
         /**
@@ -3847,7 +5007,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public delegate(
-          request: cosmos.staking.v1beta1.IMsgDelegate
+          request: cosmos.staking.v1beta1.IMsgDelegate,
         ): Promise<cosmos.staking.v1beta1.MsgDelegateResponse>;
 
         /**
@@ -3857,7 +5017,7 @@ export namespace cosmos {
          */
         public beginRedelegate(
           request: cosmos.staking.v1beta1.IMsgBeginRedelegate,
-          callback: cosmos.staking.v1beta1.Msg.BeginRedelegateCallback
+          callback: cosmos.staking.v1beta1.Msg.BeginRedelegateCallback,
         ): void;
 
         /**
@@ -3866,7 +5026,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public beginRedelegate(
-          request: cosmos.staking.v1beta1.IMsgBeginRedelegate
+          request: cosmos.staking.v1beta1.IMsgBeginRedelegate,
         ): Promise<cosmos.staking.v1beta1.MsgBeginRedelegateResponse>;
 
         /**
@@ -3876,7 +5036,7 @@ export namespace cosmos {
          */
         public undelegate(
           request: cosmos.staking.v1beta1.IMsgUndelegate,
-          callback: cosmos.staking.v1beta1.Msg.UndelegateCallback
+          callback: cosmos.staking.v1beta1.Msg.UndelegateCallback,
         ): void;
 
         /**
@@ -3885,7 +5045,7 @@ export namespace cosmos {
          * @returns Promise
          */
         public undelegate(
-          request: cosmos.staking.v1beta1.IMsgUndelegate
+          request: cosmos.staking.v1beta1.IMsgUndelegate,
         ): Promise<cosmos.staking.v1beta1.MsgUndelegateResponse>;
       }
 
@@ -3897,7 +5057,7 @@ export namespace cosmos {
          */
         type CreateValidatorCallback = (
           error: Error | null,
-          response?: cosmos.staking.v1beta1.MsgCreateValidatorResponse
+          response?: cosmos.staking.v1beta1.MsgCreateValidatorResponse,
         ) => void;
 
         /**
@@ -3907,7 +5067,7 @@ export namespace cosmos {
          */
         type EditValidatorCallback = (
           error: Error | null,
-          response?: cosmos.staking.v1beta1.MsgEditValidatorResponse
+          response?: cosmos.staking.v1beta1.MsgEditValidatorResponse,
         ) => void;
 
         /**
@@ -3917,7 +5077,7 @@ export namespace cosmos {
          */
         type DelegateCallback = (
           error: Error | null,
-          response?: cosmos.staking.v1beta1.MsgDelegateResponse
+          response?: cosmos.staking.v1beta1.MsgDelegateResponse,
         ) => void;
 
         /**
@@ -3927,7 +5087,7 @@ export namespace cosmos {
          */
         type BeginRedelegateCallback = (
           error: Error | null,
-          response?: cosmos.staking.v1beta1.MsgBeginRedelegateResponse
+          response?: cosmos.staking.v1beta1.MsgBeginRedelegateResponse,
         ) => void;
 
         /**
@@ -3937,7 +5097,7 @@ export namespace cosmos {
          */
         type UndelegateCallback = (
           error: Error | null,
-          response?: cosmos.staking.v1beta1.MsgUndelegateResponse
+          response?: cosmos.staking.v1beta1.MsgUndelegateResponse,
         ) => void;
       }
 
@@ -4000,7 +5160,7 @@ export namespace cosmos {
          * @returns MsgCreateValidator instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgCreateValidator
+          properties?: cosmos.staking.v1beta1.IMsgCreateValidator,
         ): cosmos.staking.v1beta1.MsgCreateValidator;
 
         /**
@@ -4011,7 +5171,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgCreateValidator,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4024,8 +5184,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgCreateValidator;
+
+        /**
+         * Creates a MsgCreateValidator message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgCreateValidator
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgCreateValidator;
+
+        /**
+         * Creates a plain object from a MsgCreateValidator message. Also converts values to other types if specified.
+         * @param m MsgCreateValidator
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgCreateValidator,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgCreateValidator to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgCreateValidatorResponse. */
@@ -4045,7 +5229,7 @@ export namespace cosmos {
          * @returns MsgCreateValidatorResponse instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgCreateValidatorResponse
+          properties?: cosmos.staking.v1beta1.IMsgCreateValidatorResponse,
         ): cosmos.staking.v1beta1.MsgCreateValidatorResponse;
 
         /**
@@ -4056,7 +5240,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgCreateValidatorResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4069,8 +5253,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgCreateValidatorResponse;
+
+        /**
+         * Creates a MsgCreateValidatorResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgCreateValidatorResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgCreateValidatorResponse;
+
+        /**
+         * Creates a plain object from a MsgCreateValidatorResponse message. Also converts values to other types if specified.
+         * @param m MsgCreateValidatorResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgCreateValidatorResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgCreateValidatorResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgEditValidator. */
@@ -4114,7 +5322,7 @@ export namespace cosmos {
          * @returns MsgEditValidator instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgEditValidator
+          properties?: cosmos.staking.v1beta1.IMsgEditValidator,
         ): cosmos.staking.v1beta1.MsgEditValidator;
 
         /**
@@ -4125,7 +5333,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgEditValidator,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4138,8 +5346,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgEditValidator;
+
+        /**
+         * Creates a MsgEditValidator message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgEditValidator
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgEditValidator;
+
+        /**
+         * Creates a plain object from a MsgEditValidator message. Also converts values to other types if specified.
+         * @param m MsgEditValidator
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgEditValidator,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgEditValidator to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgEditValidatorResponse. */
@@ -4159,7 +5391,7 @@ export namespace cosmos {
          * @returns MsgEditValidatorResponse instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgEditValidatorResponse
+          properties?: cosmos.staking.v1beta1.IMsgEditValidatorResponse,
         ): cosmos.staking.v1beta1.MsgEditValidatorResponse;
 
         /**
@@ -4170,7 +5402,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgEditValidatorResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4183,8 +5415,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgEditValidatorResponse;
+
+        /**
+         * Creates a MsgEditValidatorResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgEditValidatorResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgEditValidatorResponse;
+
+        /**
+         * Creates a plain object from a MsgEditValidatorResponse message. Also converts values to other types if specified.
+         * @param m MsgEditValidatorResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgEditValidatorResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgEditValidatorResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgDelegate. */
@@ -4222,7 +5478,7 @@ export namespace cosmos {
          * @returns MsgDelegate instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgDelegate
+          properties?: cosmos.staking.v1beta1.IMsgDelegate,
         ): cosmos.staking.v1beta1.MsgDelegate;
 
         /**
@@ -4231,10 +5487,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.staking.v1beta1.IMsgDelegate,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.staking.v1beta1.IMsgDelegate, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a MsgDelegate message from the specified reader or buffer.
@@ -4246,8 +5499,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgDelegate;
+
+        /**
+         * Creates a MsgDelegate message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgDelegate
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgDelegate;
+
+        /**
+         * Creates a plain object from a MsgDelegate message. Also converts values to other types if specified.
+         * @param m MsgDelegate
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgDelegate,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgDelegate to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgDelegateResponse. */
@@ -4267,7 +5544,7 @@ export namespace cosmos {
          * @returns MsgDelegateResponse instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgDelegateResponse
+          properties?: cosmos.staking.v1beta1.IMsgDelegateResponse,
         ): cosmos.staking.v1beta1.MsgDelegateResponse;
 
         /**
@@ -4278,7 +5555,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgDelegateResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4291,8 +5568,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgDelegateResponse;
+
+        /**
+         * Creates a MsgDelegateResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgDelegateResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgDelegateResponse;
+
+        /**
+         * Creates a plain object from a MsgDelegateResponse message. Also converts values to other types if specified.
+         * @param m MsgDelegateResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgDelegateResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgDelegateResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgBeginRedelegate. */
@@ -4336,7 +5637,7 @@ export namespace cosmos {
          * @returns MsgBeginRedelegate instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgBeginRedelegate
+          properties?: cosmos.staking.v1beta1.IMsgBeginRedelegate,
         ): cosmos.staking.v1beta1.MsgBeginRedelegate;
 
         /**
@@ -4347,7 +5648,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgBeginRedelegate,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4360,8 +5661,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgBeginRedelegate;
+
+        /**
+         * Creates a MsgBeginRedelegate message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgBeginRedelegate
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgBeginRedelegate;
+
+        /**
+         * Creates a plain object from a MsgBeginRedelegate message. Also converts values to other types if specified.
+         * @param m MsgBeginRedelegate
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgBeginRedelegate,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgBeginRedelegate to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgBeginRedelegateResponse. */
@@ -4387,7 +5712,7 @@ export namespace cosmos {
          * @returns MsgBeginRedelegateResponse instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgBeginRedelegateResponse
+          properties?: cosmos.staking.v1beta1.IMsgBeginRedelegateResponse,
         ): cosmos.staking.v1beta1.MsgBeginRedelegateResponse;
 
         /**
@@ -4398,7 +5723,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgBeginRedelegateResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4411,8 +5736,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgBeginRedelegateResponse;
+
+        /**
+         * Creates a MsgBeginRedelegateResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgBeginRedelegateResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgBeginRedelegateResponse;
+
+        /**
+         * Creates a plain object from a MsgBeginRedelegateResponse message. Also converts values to other types if specified.
+         * @param m MsgBeginRedelegateResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgBeginRedelegateResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgBeginRedelegateResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgUndelegate. */
@@ -4450,7 +5799,7 @@ export namespace cosmos {
          * @returns MsgUndelegate instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgUndelegate
+          properties?: cosmos.staking.v1beta1.IMsgUndelegate,
         ): cosmos.staking.v1beta1.MsgUndelegate;
 
         /**
@@ -4461,7 +5810,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgUndelegate,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4474,8 +5823,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgUndelegate;
+
+        /**
+         * Creates a MsgUndelegate message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgUndelegate
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgUndelegate;
+
+        /**
+         * Creates a plain object from a MsgUndelegate message. Also converts values to other types if specified.
+         * @param m MsgUndelegate
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgUndelegate,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgUndelegate to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a MsgUndelegateResponse. */
@@ -4501,7 +5874,7 @@ export namespace cosmos {
          * @returns MsgUndelegateResponse instance
          */
         public static create(
-          properties?: cosmos.staking.v1beta1.IMsgUndelegateResponse
+          properties?: cosmos.staking.v1beta1.IMsgUndelegateResponse,
         ): cosmos.staking.v1beta1.MsgUndelegateResponse;
 
         /**
@@ -4512,7 +5885,7 @@ export namespace cosmos {
          */
         public static encode(
           m: cosmos.staking.v1beta1.IMsgUndelegateResponse,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -4525,8 +5898,32 @@ export namespace cosmos {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): cosmos.staking.v1beta1.MsgUndelegateResponse;
+
+        /**
+         * Creates a MsgUndelegateResponse message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns MsgUndelegateResponse
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.staking.v1beta1.MsgUndelegateResponse;
+
+        /**
+         * Creates a plain object from a MsgUndelegateResponse message. Also converts values to other types if specified.
+         * @param m MsgUndelegateResponse
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.staking.v1beta1.MsgUndelegateResponse,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this MsgUndelegateResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
   }
@@ -4542,7 +5939,7 @@ export namespace cosmos {
           SIGN_MODE_UNSPECIFIED = 0,
           SIGN_MODE_DIRECT = 1,
           SIGN_MODE_TEXTUAL = 2,
-          SIGN_MODE_LEGACY_AMINO_JSON = 127
+          SIGN_MODE_LEGACY_AMINO_JSON = 127,
         }
 
         /** Properties of a SignatureDescriptors. */
@@ -4568,7 +5965,7 @@ export namespace cosmos {
            * @returns SignatureDescriptors instance
            */
           public static create(
-            properties?: cosmos.tx.signing.v1beta1.ISignatureDescriptors
+            properties?: cosmos.tx.signing.v1beta1.ISignatureDescriptors,
           ): cosmos.tx.signing.v1beta1.SignatureDescriptors;
 
           /**
@@ -4579,7 +5976,7 @@ export namespace cosmos {
            */
           public static encode(
             m: cosmos.tx.signing.v1beta1.ISignatureDescriptors,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -4592,8 +5989,32 @@ export namespace cosmos {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): cosmos.tx.signing.v1beta1.SignatureDescriptors;
+
+          /**
+           * Creates a SignatureDescriptors message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns SignatureDescriptors
+           */
+          public static fromObject(d: { [k: string]: any }): cosmos.tx.signing.v1beta1.SignatureDescriptors;
+
+          /**
+           * Creates a plain object from a SignatureDescriptors message. Also converts values to other types if specified.
+           * @param m SignatureDescriptors
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: cosmos.tx.signing.v1beta1.SignatureDescriptors,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this SignatureDescriptors to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a SignatureDescriptor. */
@@ -4631,7 +6052,7 @@ export namespace cosmos {
            * @returns SignatureDescriptor instance
            */
           public static create(
-            properties?: cosmos.tx.signing.v1beta1.ISignatureDescriptor
+            properties?: cosmos.tx.signing.v1beta1.ISignatureDescriptor,
           ): cosmos.tx.signing.v1beta1.SignatureDescriptor;
 
           /**
@@ -4642,7 +6063,7 @@ export namespace cosmos {
            */
           public static encode(
             m: cosmos.tx.signing.v1beta1.ISignatureDescriptor,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -4655,8 +6076,32 @@ export namespace cosmos {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): cosmos.tx.signing.v1beta1.SignatureDescriptor;
+
+          /**
+           * Creates a SignatureDescriptor message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns SignatureDescriptor
+           */
+          public static fromObject(d: { [k: string]: any }): cosmos.tx.signing.v1beta1.SignatureDescriptor;
+
+          /**
+           * Creates a plain object from a SignatureDescriptor message. Also converts values to other types if specified.
+           * @param m SignatureDescriptor
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: cosmos.tx.signing.v1beta1.SignatureDescriptor,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this SignatureDescriptor to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         namespace SignatureDescriptor {
@@ -4675,9 +6120,7 @@ export namespace cosmos {
              * Constructs a new Data.
              * @param [p] Properties to set
              */
-            constructor(
-              p?: cosmos.tx.signing.v1beta1.SignatureDescriptor.IData
-            );
+            constructor(p?: cosmos.tx.signing.v1beta1.SignatureDescriptor.IData);
 
             /** Data single. */
             public single?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.ISingle | null;
@@ -4694,7 +6137,7 @@ export namespace cosmos {
              * @returns Data instance
              */
             public static create(
-              properties?: cosmos.tx.signing.v1beta1.SignatureDescriptor.IData
+              properties?: cosmos.tx.signing.v1beta1.SignatureDescriptor.IData,
             ): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data;
 
             /**
@@ -4705,7 +6148,7 @@ export namespace cosmos {
              */
             public static encode(
               m: cosmos.tx.signing.v1beta1.SignatureDescriptor.IData,
-              w?: $protobuf.Writer
+              w?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
@@ -4718,8 +6161,34 @@ export namespace cosmos {
              */
             public static decode(
               r: $protobuf.Reader | Uint8Array,
-              l?: number
+              l?: number,
             ): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data;
+
+            /**
+             * Creates a Data message from a plain object. Also converts values to their respective internal types.
+             * @param d Plain object
+             * @returns Data
+             */
+            public static fromObject(d: {
+              [k: string]: any;
+            }): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data;
+
+            /**
+             * Creates a plain object from a Data message. Also converts values to other types if specified.
+             * @param m Data
+             * @param [o] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(
+              m: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data,
+              o?: $protobuf.IConversionOptions,
+            ): { [k: string]: any };
+
+            /**
+             * Converts this Data to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
           }
 
           namespace Data {
@@ -4738,9 +6207,7 @@ export namespace cosmos {
                * Constructs a new Single.
                * @param [p] Properties to set
                */
-              constructor(
-                p?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.ISingle
-              );
+              constructor(p?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.ISingle);
 
               /** Single mode. */
               public mode: cosmos.tx.signing.v1beta1.SignMode;
@@ -4754,7 +6221,7 @@ export namespace cosmos {
                * @returns Single instance
                */
               public static create(
-                properties?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.ISingle
+                properties?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.ISingle,
               ): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Single;
 
               /**
@@ -4765,7 +6232,7 @@ export namespace cosmos {
                */
               public static encode(
                 m: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.ISingle,
-                w?: $protobuf.Writer
+                w?: $protobuf.Writer,
               ): $protobuf.Writer;
 
               /**
@@ -4778,8 +6245,34 @@ export namespace cosmos {
                */
               public static decode(
                 r: $protobuf.Reader | Uint8Array,
-                l?: number
+                l?: number,
               ): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Single;
+
+              /**
+               * Creates a Single message from a plain object. Also converts values to their respective internal types.
+               * @param d Plain object
+               * @returns Single
+               */
+              public static fromObject(d: {
+                [k: string]: any;
+              }): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Single;
+
+              /**
+               * Creates a plain object from a Single message. Also converts values to other types if specified.
+               * @param m Single
+               * @param [o] Conversion options
+               * @returns Plain object
+               */
+              public static toObject(
+                m: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Single,
+                o?: $protobuf.IConversionOptions,
+              ): { [k: string]: any };
+
+              /**
+               * Converts this Single to JSON.
+               * @returns JSON object
+               */
+              public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a Multi. */
@@ -4788,9 +6281,7 @@ export namespace cosmos {
               bitarray?: cosmos.crypto.multisig.v1beta1.ICompactBitArray | null;
 
               /** Multi signatures */
-              signatures?:
-                | cosmos.tx.signing.v1beta1.SignatureDescriptor.IData[]
-                | null;
+              signatures?: cosmos.tx.signing.v1beta1.SignatureDescriptor.IData[] | null;
             }
 
             /** Represents a Multi. */
@@ -4799,9 +6290,7 @@ export namespace cosmos {
                * Constructs a new Multi.
                * @param [p] Properties to set
                */
-              constructor(
-                p?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.IMulti
-              );
+              constructor(p?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.IMulti);
 
               /** Multi bitarray. */
               public bitarray?: cosmos.crypto.multisig.v1beta1.ICompactBitArray | null;
@@ -4815,7 +6304,7 @@ export namespace cosmos {
                * @returns Multi instance
                */
               public static create(
-                properties?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.IMulti
+                properties?: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.IMulti,
               ): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Multi;
 
               /**
@@ -4826,7 +6315,7 @@ export namespace cosmos {
                */
               public static encode(
                 m: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.IMulti,
-                w?: $protobuf.Writer
+                w?: $protobuf.Writer,
               ): $protobuf.Writer;
 
               /**
@@ -4839,8 +6328,34 @@ export namespace cosmos {
                */
               public static decode(
                 r: $protobuf.Reader | Uint8Array,
-                l?: number
+                l?: number,
               ): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Multi;
+
+              /**
+               * Creates a Multi message from a plain object. Also converts values to their respective internal types.
+               * @param d Plain object
+               * @returns Multi
+               */
+              public static fromObject(d: {
+                [k: string]: any;
+              }): cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Multi;
+
+              /**
+               * Creates a plain object from a Multi message. Also converts values to other types if specified.
+               * @param m Multi
+               * @param [o] Conversion options
+               * @returns Plain object
+               */
+              public static toObject(
+                m: cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Multi,
+                o?: $protobuf.IConversionOptions,
+              ): { [k: string]: any };
+
+              /**
+               * Converts this Multi to JSON.
+               * @returns JSON object
+               */
+              public toJSON(): { [k: string]: any };
             }
           }
         }
@@ -4883,9 +6398,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Tx instance
          */
-        public static create(
-          properties?: cosmos.tx.v1beta1.ITx
-        ): cosmos.tx.v1beta1.Tx;
+        public static create(properties?: cosmos.tx.v1beta1.ITx): cosmos.tx.v1beta1.Tx;
 
         /**
          * Encodes the specified Tx message. Does not implicitly {@link cosmos.tx.v1beta1.Tx.verify|verify} messages.
@@ -4893,10 +6406,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.tx.v1beta1.ITx,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.tx.v1beta1.ITx, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Tx message from the specified reader or buffer.
@@ -4906,10 +6416,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.tx.v1beta1.Tx;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.tx.v1beta1.Tx;
+
+        /**
+         * Creates a Tx message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Tx
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.Tx;
+
+        /**
+         * Creates a plain object from a Tx message. Also converts values to other types if specified.
+         * @param m Tx
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.tx.v1beta1.Tx,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Tx to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a TxRaw. */
@@ -4946,9 +6477,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns TxRaw instance
          */
-        public static create(
-          properties?: cosmos.tx.v1beta1.ITxRaw
-        ): cosmos.tx.v1beta1.TxRaw;
+        public static create(properties?: cosmos.tx.v1beta1.ITxRaw): cosmos.tx.v1beta1.TxRaw;
 
         /**
          * Encodes the specified TxRaw message. Does not implicitly {@link cosmos.tx.v1beta1.TxRaw.verify|verify} messages.
@@ -4956,10 +6485,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.tx.v1beta1.ITxRaw,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.tx.v1beta1.ITxRaw, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a TxRaw message from the specified reader or buffer.
@@ -4969,10 +6495,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.tx.v1beta1.TxRaw;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.tx.v1beta1.TxRaw;
+
+        /**
+         * Creates a TxRaw message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns TxRaw
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.TxRaw;
+
+        /**
+         * Creates a plain object from a TxRaw message. Also converts values to other types if specified.
+         * @param m TxRaw
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.tx.v1beta1.TxRaw,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this TxRaw to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a SignDoc. */
@@ -5015,9 +6562,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns SignDoc instance
          */
-        public static create(
-          properties?: cosmos.tx.v1beta1.ISignDoc
-        ): cosmos.tx.v1beta1.SignDoc;
+        public static create(properties?: cosmos.tx.v1beta1.ISignDoc): cosmos.tx.v1beta1.SignDoc;
 
         /**
          * Encodes the specified SignDoc message. Does not implicitly {@link cosmos.tx.v1beta1.SignDoc.verify|verify} messages.
@@ -5025,10 +6570,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.tx.v1beta1.ISignDoc,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.tx.v1beta1.ISignDoc, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a SignDoc message from the specified reader or buffer.
@@ -5038,10 +6580,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.tx.v1beta1.SignDoc;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.tx.v1beta1.SignDoc;
+
+        /**
+         * Creates a SignDoc message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns SignDoc
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.SignDoc;
+
+        /**
+         * Creates a plain object from a SignDoc message. Also converts values to other types if specified.
+         * @param m SignDoc
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.tx.v1beta1.SignDoc,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this SignDoc to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a TxBody. */
@@ -5090,9 +6653,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns TxBody instance
          */
-        public static create(
-          properties?: cosmos.tx.v1beta1.ITxBody
-        ): cosmos.tx.v1beta1.TxBody;
+        public static create(properties?: cosmos.tx.v1beta1.ITxBody): cosmos.tx.v1beta1.TxBody;
 
         /**
          * Encodes the specified TxBody message. Does not implicitly {@link cosmos.tx.v1beta1.TxBody.verify|verify} messages.
@@ -5100,10 +6661,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.tx.v1beta1.ITxBody,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.tx.v1beta1.ITxBody, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a TxBody message from the specified reader or buffer.
@@ -5113,10 +6671,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.tx.v1beta1.TxBody;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.tx.v1beta1.TxBody;
+
+        /**
+         * Creates a TxBody message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns TxBody
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.TxBody;
+
+        /**
+         * Creates a plain object from a TxBody message. Also converts values to other types if specified.
+         * @param m TxBody
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.tx.v1beta1.TxBody,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this TxBody to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of an AuthInfo. */
@@ -5147,9 +6726,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns AuthInfo instance
          */
-        public static create(
-          properties?: cosmos.tx.v1beta1.IAuthInfo
-        ): cosmos.tx.v1beta1.AuthInfo;
+        public static create(properties?: cosmos.tx.v1beta1.IAuthInfo): cosmos.tx.v1beta1.AuthInfo;
 
         /**
          * Encodes the specified AuthInfo message. Does not implicitly {@link cosmos.tx.v1beta1.AuthInfo.verify|verify} messages.
@@ -5157,10 +6734,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.tx.v1beta1.IAuthInfo,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.tx.v1beta1.IAuthInfo, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes an AuthInfo message from the specified reader or buffer.
@@ -5170,10 +6744,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.tx.v1beta1.AuthInfo;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.tx.v1beta1.AuthInfo;
+
+        /**
+         * Creates an AuthInfo message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns AuthInfo
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.AuthInfo;
+
+        /**
+         * Creates a plain object from an AuthInfo message. Also converts values to other types if specified.
+         * @param m AuthInfo
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.tx.v1beta1.AuthInfo,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this AuthInfo to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a SignerInfo. */
@@ -5210,9 +6805,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns SignerInfo instance
          */
-        public static create(
-          properties?: cosmos.tx.v1beta1.ISignerInfo
-        ): cosmos.tx.v1beta1.SignerInfo;
+        public static create(properties?: cosmos.tx.v1beta1.ISignerInfo): cosmos.tx.v1beta1.SignerInfo;
 
         /**
          * Encodes the specified SignerInfo message. Does not implicitly {@link cosmos.tx.v1beta1.SignerInfo.verify|verify} messages.
@@ -5220,10 +6813,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.tx.v1beta1.ISignerInfo,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.tx.v1beta1.ISignerInfo, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a SignerInfo message from the specified reader or buffer.
@@ -5233,10 +6823,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.tx.v1beta1.SignerInfo;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.tx.v1beta1.SignerInfo;
+
+        /**
+         * Creates a SignerInfo message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns SignerInfo
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.SignerInfo;
+
+        /**
+         * Creates a plain object from a SignerInfo message. Also converts values to other types if specified.
+         * @param m SignerInfo
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.tx.v1beta1.SignerInfo,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this SignerInfo to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a ModeInfo. */
@@ -5270,9 +6881,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns ModeInfo instance
          */
-        public static create(
-          properties?: cosmos.tx.v1beta1.IModeInfo
-        ): cosmos.tx.v1beta1.ModeInfo;
+        public static create(properties?: cosmos.tx.v1beta1.IModeInfo): cosmos.tx.v1beta1.ModeInfo;
 
         /**
          * Encodes the specified ModeInfo message. Does not implicitly {@link cosmos.tx.v1beta1.ModeInfo.verify|verify} messages.
@@ -5280,10 +6889,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.tx.v1beta1.IModeInfo,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.tx.v1beta1.IModeInfo, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a ModeInfo message from the specified reader or buffer.
@@ -5293,10 +6899,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.tx.v1beta1.ModeInfo;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.tx.v1beta1.ModeInfo;
+
+        /**
+         * Creates a ModeInfo message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns ModeInfo
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.ModeInfo;
+
+        /**
+         * Creates a plain object from a ModeInfo message. Also converts values to other types if specified.
+         * @param m ModeInfo
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.tx.v1beta1.ModeInfo,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this ModeInfo to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       namespace ModeInfo {
@@ -5323,7 +6950,7 @@ export namespace cosmos {
            * @returns Single instance
            */
           public static create(
-            properties?: cosmos.tx.v1beta1.ModeInfo.ISingle
+            properties?: cosmos.tx.v1beta1.ModeInfo.ISingle,
           ): cosmos.tx.v1beta1.ModeInfo.Single;
 
           /**
@@ -5332,10 +6959,7 @@ export namespace cosmos {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: cosmos.tx.v1beta1.ModeInfo.ISingle,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: cosmos.tx.v1beta1.ModeInfo.ISingle, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a Single message from the specified reader or buffer.
@@ -5347,8 +6971,32 @@ export namespace cosmos {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): cosmos.tx.v1beta1.ModeInfo.Single;
+
+          /**
+           * Creates a Single message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Single
+           */
+          public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.ModeInfo.Single;
+
+          /**
+           * Creates a plain object from a Single message. Also converts values to other types if specified.
+           * @param m Single
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: cosmos.tx.v1beta1.ModeInfo.Single,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Single to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a Multi. */
@@ -5380,7 +7028,7 @@ export namespace cosmos {
            * @returns Multi instance
            */
           public static create(
-            properties?: cosmos.tx.v1beta1.ModeInfo.IMulti
+            properties?: cosmos.tx.v1beta1.ModeInfo.IMulti,
           ): cosmos.tx.v1beta1.ModeInfo.Multi;
 
           /**
@@ -5389,10 +7037,7 @@ export namespace cosmos {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: cosmos.tx.v1beta1.ModeInfo.IMulti,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: cosmos.tx.v1beta1.ModeInfo.IMulti, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a Multi message from the specified reader or buffer.
@@ -5404,8 +7049,32 @@ export namespace cosmos {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): cosmos.tx.v1beta1.ModeInfo.Multi;
+
+          /**
+           * Creates a Multi message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Multi
+           */
+          public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.ModeInfo.Multi;
+
+          /**
+           * Creates a plain object from a Multi message. Also converts values to other types if specified.
+           * @param m Multi
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: cosmos.tx.v1beta1.ModeInfo.Multi,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Multi to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
       }
 
@@ -5449,9 +7118,7 @@ export namespace cosmos {
          * @param [properties] Properties to set
          * @returns Fee instance
          */
-        public static create(
-          properties?: cosmos.tx.v1beta1.IFee
-        ): cosmos.tx.v1beta1.Fee;
+        public static create(properties?: cosmos.tx.v1beta1.IFee): cosmos.tx.v1beta1.Fee;
 
         /**
          * Encodes the specified Fee message. Does not implicitly {@link cosmos.tx.v1beta1.Fee.verify|verify} messages.
@@ -5459,10 +7126,7 @@ export namespace cosmos {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: cosmos.tx.v1beta1.IFee,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: cosmos.tx.v1beta1.IFee, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a Fee message from the specified reader or buffer.
@@ -5472,10 +7136,31 @@ export namespace cosmos {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): cosmos.tx.v1beta1.Fee;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): cosmos.tx.v1beta1.Fee;
+
+        /**
+         * Creates a Fee message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Fee
+         */
+        public static fromObject(d: { [k: string]: any }): cosmos.tx.v1beta1.Fee;
+
+        /**
+         * Creates a plain object from a Fee message. Also converts values to other types if specified.
+         * @param m Fee
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: cosmos.tx.v1beta1.Fee,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Fee to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
   }
@@ -5513,9 +7198,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns Any instance
        */
-      public static create(
-        properties?: google.protobuf.IAny
-      ): google.protobuf.Any;
+      public static create(properties?: google.protobuf.IAny): google.protobuf.Any;
 
       /**
        * Encodes the specified Any message. Does not implicitly {@link google.protobuf.Any.verify|verify} messages.
@@ -5523,10 +7206,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IAny,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IAny, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes an Any message from the specified reader or buffer.
@@ -5536,10 +7216,28 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.Any;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.Any;
+
+      /**
+       * Creates an Any message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Any
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.Any;
+
+      /**
+       * Creates a plain object from an Any message. Also converts values to other types if specified.
+       * @param m Any
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(m: google.protobuf.Any, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+      /**
+       * Converts this Any to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a FileDescriptorSet. */
@@ -5565,7 +7263,7 @@ export namespace google {
        * @returns FileDescriptorSet instance
        */
       public static create(
-        properties?: google.protobuf.IFileDescriptorSet
+        properties?: google.protobuf.IFileDescriptorSet,
       ): google.protobuf.FileDescriptorSet;
 
       /**
@@ -5574,10 +7272,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IFileDescriptorSet,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IFileDescriptorSet, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a FileDescriptorSet message from the specified reader or buffer.
@@ -5587,10 +7282,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.FileDescriptorSet;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.FileDescriptorSet;
+
+      /**
+       * Creates a FileDescriptorSet message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns FileDescriptorSet
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.FileDescriptorSet;
+
+      /**
+       * Creates a plain object from a FileDescriptorSet message. Also converts values to other types if specified.
+       * @param m FileDescriptorSet
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.FileDescriptorSet,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this FileDescriptorSet to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a FileDescriptorProto. */
@@ -5682,7 +7398,7 @@ export namespace google {
        * @returns FileDescriptorProto instance
        */
       public static create(
-        properties?: google.protobuf.IFileDescriptorProto
+        properties?: google.protobuf.IFileDescriptorProto,
       ): google.protobuf.FileDescriptorProto;
 
       /**
@@ -5691,10 +7407,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IFileDescriptorProto,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IFileDescriptorProto, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a FileDescriptorProto message from the specified reader or buffer.
@@ -5704,10 +7417,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.FileDescriptorProto;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.FileDescriptorProto;
+
+      /**
+       * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns FileDescriptorProto
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.FileDescriptorProto;
+
+      /**
+       * Creates a plain object from a FileDescriptorProto message. Also converts values to other types if specified.
+       * @param m FileDescriptorProto
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.FileDescriptorProto,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this FileDescriptorProto to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a DescriptorProto. */
@@ -5786,9 +7520,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns DescriptorProto instance
        */
-      public static create(
-        properties?: google.protobuf.IDescriptorProto
-      ): google.protobuf.DescriptorProto;
+      public static create(properties?: google.protobuf.IDescriptorProto): google.protobuf.DescriptorProto;
 
       /**
        * Encodes the specified DescriptorProto message. Does not implicitly {@link google.protobuf.DescriptorProto.verify|verify} messages.
@@ -5796,10 +7528,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IDescriptorProto,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IDescriptorProto, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a DescriptorProto message from the specified reader or buffer.
@@ -5809,10 +7538,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.DescriptorProto;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.DescriptorProto;
+
+      /**
+       * Creates a DescriptorProto message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns DescriptorProto
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.DescriptorProto;
+
+      /**
+       * Creates a plain object from a DescriptorProto message. Also converts values to other types if specified.
+       * @param m DescriptorProto
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.DescriptorProto,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this DescriptorProto to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     namespace DescriptorProto {
@@ -5845,7 +7595,7 @@ export namespace google {
          * @returns ExtensionRange instance
          */
         public static create(
-          properties?: google.protobuf.DescriptorProto.IExtensionRange
+          properties?: google.protobuf.DescriptorProto.IExtensionRange,
         ): google.protobuf.DescriptorProto.ExtensionRange;
 
         /**
@@ -5856,7 +7606,7 @@ export namespace google {
          */
         public static encode(
           m: google.protobuf.DescriptorProto.IExtensionRange,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -5869,8 +7619,32 @@ export namespace google {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): google.protobuf.DescriptorProto.ExtensionRange;
+
+        /**
+         * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns ExtensionRange
+         */
+        public static fromObject(d: { [k: string]: any }): google.protobuf.DescriptorProto.ExtensionRange;
+
+        /**
+         * Creates a plain object from an ExtensionRange message. Also converts values to other types if specified.
+         * @param m ExtensionRange
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: google.protobuf.DescriptorProto.ExtensionRange,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this ExtensionRange to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
 
       /** Properties of a ReservedRange. */
@@ -5902,7 +7676,7 @@ export namespace google {
          * @returns ReservedRange instance
          */
         public static create(
-          properties?: google.protobuf.DescriptorProto.IReservedRange
+          properties?: google.protobuf.DescriptorProto.IReservedRange,
         ): google.protobuf.DescriptorProto.ReservedRange;
 
         /**
@@ -5913,7 +7687,7 @@ export namespace google {
          */
         public static encode(
           m: google.protobuf.DescriptorProto.IReservedRange,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -5926,8 +7700,32 @@ export namespace google {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): google.protobuf.DescriptorProto.ReservedRange;
+
+        /**
+         * Creates a ReservedRange message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns ReservedRange
+         */
+        public static fromObject(d: { [k: string]: any }): google.protobuf.DescriptorProto.ReservedRange;
+
+        /**
+         * Creates a plain object from a ReservedRange message. Also converts values to other types if specified.
+         * @param m ReservedRange
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: google.protobuf.DescriptorProto.ReservedRange,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this ReservedRange to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
 
@@ -6008,7 +7806,7 @@ export namespace google {
        * @returns FieldDescriptorProto instance
        */
       public static create(
-        properties?: google.protobuf.IFieldDescriptorProto
+        properties?: google.protobuf.IFieldDescriptorProto,
       ): google.protobuf.FieldDescriptorProto;
 
       /**
@@ -6017,10 +7815,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IFieldDescriptorProto,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IFieldDescriptorProto, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a FieldDescriptorProto message from the specified reader or buffer.
@@ -6032,8 +7827,32 @@ export namespace google {
        */
       public static decode(
         r: $protobuf.Reader | Uint8Array,
-        l?: number
+        l?: number,
       ): google.protobuf.FieldDescriptorProto;
+
+      /**
+       * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns FieldDescriptorProto
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.FieldDescriptorProto;
+
+      /**
+       * Creates a plain object from a FieldDescriptorProto message. Also converts values to other types if specified.
+       * @param m FieldDescriptorProto
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.FieldDescriptorProto,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this FieldDescriptorProto to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     namespace FieldDescriptorProto {
@@ -6056,14 +7875,14 @@ export namespace google {
         TYPE_SFIXED32 = 15,
         TYPE_SFIXED64 = 16,
         TYPE_SINT32 = 17,
-        TYPE_SINT64 = 18
+        TYPE_SINT64 = 18,
       }
 
       /** Label enum. */
       enum Label {
         LABEL_OPTIONAL = 1,
         LABEL_REQUIRED = 2,
-        LABEL_REPEATED = 3
+        LABEL_REPEATED = 3,
       }
     }
 
@@ -6096,7 +7915,7 @@ export namespace google {
        * @returns OneofDescriptorProto instance
        */
       public static create(
-        properties?: google.protobuf.IOneofDescriptorProto
+        properties?: google.protobuf.IOneofDescriptorProto,
       ): google.protobuf.OneofDescriptorProto;
 
       /**
@@ -6105,10 +7924,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IOneofDescriptorProto,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IOneofDescriptorProto, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes an OneofDescriptorProto message from the specified reader or buffer.
@@ -6120,8 +7936,32 @@ export namespace google {
        */
       public static decode(
         r: $protobuf.Reader | Uint8Array,
-        l?: number
+        l?: number,
       ): google.protobuf.OneofDescriptorProto;
+
+      /**
+       * Creates an OneofDescriptorProto message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns OneofDescriptorProto
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.OneofDescriptorProto;
+
+      /**
+       * Creates a plain object from an OneofDescriptorProto message. Also converts values to other types if specified.
+       * @param m OneofDescriptorProto
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.OneofDescriptorProto,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this OneofDescriptorProto to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of an EnumDescriptorProto. */
@@ -6159,7 +7999,7 @@ export namespace google {
        * @returns EnumDescriptorProto instance
        */
       public static create(
-        properties?: google.protobuf.IEnumDescriptorProto
+        properties?: google.protobuf.IEnumDescriptorProto,
       ): google.protobuf.EnumDescriptorProto;
 
       /**
@@ -6168,10 +8008,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IEnumDescriptorProto,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IEnumDescriptorProto, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes an EnumDescriptorProto message from the specified reader or buffer.
@@ -6181,10 +8018,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.EnumDescriptorProto;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.EnumDescriptorProto;
+
+      /**
+       * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns EnumDescriptorProto
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.EnumDescriptorProto;
+
+      /**
+       * Creates a plain object from an EnumDescriptorProto message. Also converts values to other types if specified.
+       * @param m EnumDescriptorProto
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.EnumDescriptorProto,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this EnumDescriptorProto to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of an EnumValueDescriptorProto. */
@@ -6222,7 +8080,7 @@ export namespace google {
        * @returns EnumValueDescriptorProto instance
        */
       public static create(
-        properties?: google.protobuf.IEnumValueDescriptorProto
+        properties?: google.protobuf.IEnumValueDescriptorProto,
       ): google.protobuf.EnumValueDescriptorProto;
 
       /**
@@ -6233,7 +8091,7 @@ export namespace google {
        */
       public static encode(
         m: google.protobuf.IEnumValueDescriptorProto,
-        w?: $protobuf.Writer
+        w?: $protobuf.Writer,
       ): $protobuf.Writer;
 
       /**
@@ -6246,8 +8104,32 @@ export namespace google {
        */
       public static decode(
         r: $protobuf.Reader | Uint8Array,
-        l?: number
+        l?: number,
       ): google.protobuf.EnumValueDescriptorProto;
+
+      /**
+       * Creates an EnumValueDescriptorProto message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns EnumValueDescriptorProto
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.EnumValueDescriptorProto;
+
+      /**
+       * Creates a plain object from an EnumValueDescriptorProto message. Also converts values to other types if specified.
+       * @param m EnumValueDescriptorProto
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.EnumValueDescriptorProto,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this EnumValueDescriptorProto to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a ServiceDescriptorProto. */
@@ -6285,7 +8167,7 @@ export namespace google {
        * @returns ServiceDescriptorProto instance
        */
       public static create(
-        properties?: google.protobuf.IServiceDescriptorProto
+        properties?: google.protobuf.IServiceDescriptorProto,
       ): google.protobuf.ServiceDescriptorProto;
 
       /**
@@ -6296,7 +8178,7 @@ export namespace google {
        */
       public static encode(
         m: google.protobuf.IServiceDescriptorProto,
-        w?: $protobuf.Writer
+        w?: $protobuf.Writer,
       ): $protobuf.Writer;
 
       /**
@@ -6309,8 +8191,32 @@ export namespace google {
        */
       public static decode(
         r: $protobuf.Reader | Uint8Array,
-        l?: number
+        l?: number,
       ): google.protobuf.ServiceDescriptorProto;
+
+      /**
+       * Creates a ServiceDescriptorProto message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns ServiceDescriptorProto
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.ServiceDescriptorProto;
+
+      /**
+       * Creates a plain object from a ServiceDescriptorProto message. Also converts values to other types if specified.
+       * @param m ServiceDescriptorProto
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.ServiceDescriptorProto,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this ServiceDescriptorProto to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a MethodDescriptorProto. */
@@ -6366,7 +8272,7 @@ export namespace google {
        * @returns MethodDescriptorProto instance
        */
       public static create(
-        properties?: google.protobuf.IMethodDescriptorProto
+        properties?: google.protobuf.IMethodDescriptorProto,
       ): google.protobuf.MethodDescriptorProto;
 
       /**
@@ -6375,10 +8281,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IMethodDescriptorProto,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IMethodDescriptorProto, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a MethodDescriptorProto message from the specified reader or buffer.
@@ -6390,8 +8293,32 @@ export namespace google {
        */
       public static decode(
         r: $protobuf.Reader | Uint8Array,
-        l?: number
+        l?: number,
       ): google.protobuf.MethodDescriptorProto;
+
+      /**
+       * Creates a MethodDescriptorProto message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns MethodDescriptorProto
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.MethodDescriptorProto;
+
+      /**
+       * Creates a plain object from a MethodDescriptorProto message. Also converts values to other types if specified.
+       * @param m MethodDescriptorProto
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.MethodDescriptorProto,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this MethodDescriptorProto to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a FileOptions. */
@@ -6500,9 +8427,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns FileOptions instance
        */
-      public static create(
-        properties?: google.protobuf.IFileOptions
-      ): google.protobuf.FileOptions;
+      public static create(properties?: google.protobuf.IFileOptions): google.protobuf.FileOptions;
 
       /**
        * Encodes the specified FileOptions message. Does not implicitly {@link google.protobuf.FileOptions.verify|verify} messages.
@@ -6510,10 +8435,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IFileOptions,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IFileOptions, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a FileOptions message from the specified reader or buffer.
@@ -6523,10 +8445,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.FileOptions;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.FileOptions;
+
+      /**
+       * Creates a FileOptions message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns FileOptions
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.FileOptions;
+
+      /**
+       * Creates a plain object from a FileOptions message. Also converts values to other types if specified.
+       * @param m FileOptions
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.FileOptions,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this FileOptions to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     namespace FileOptions {
@@ -6534,7 +8477,7 @@ export namespace google {
       enum OptimizeMode {
         SPEED = 1,
         CODE_SIZE = 2,
-        LITE_RUNTIME = 3
+        LITE_RUNTIME = 3,
       }
     }
 
@@ -6584,9 +8527,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns MessageOptions instance
        */
-      public static create(
-        properties?: google.protobuf.IMessageOptions
-      ): google.protobuf.MessageOptions;
+      public static create(properties?: google.protobuf.IMessageOptions): google.protobuf.MessageOptions;
 
       /**
        * Encodes the specified MessageOptions message. Does not implicitly {@link google.protobuf.MessageOptions.verify|verify} messages.
@@ -6594,10 +8535,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IMessageOptions,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IMessageOptions, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a MessageOptions message from the specified reader or buffer.
@@ -6607,10 +8545,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.MessageOptions;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.MessageOptions;
+
+      /**
+       * Creates a MessageOptions message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns MessageOptions
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.MessageOptions;
+
+      /**
+       * Creates a plain object from a MessageOptions message. Also converts values to other types if specified.
+       * @param m MessageOptions
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.MessageOptions,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this MessageOptions to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a FieldOptions. */
@@ -6671,9 +8630,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns FieldOptions instance
        */
-      public static create(
-        properties?: google.protobuf.IFieldOptions
-      ): google.protobuf.FieldOptions;
+      public static create(properties?: google.protobuf.IFieldOptions): google.protobuf.FieldOptions;
 
       /**
        * Encodes the specified FieldOptions message. Does not implicitly {@link google.protobuf.FieldOptions.verify|verify} messages.
@@ -6681,10 +8638,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IFieldOptions,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IFieldOptions, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a FieldOptions message from the specified reader or buffer.
@@ -6694,10 +8648,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.FieldOptions;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.FieldOptions;
+
+      /**
+       * Creates a FieldOptions message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns FieldOptions
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.FieldOptions;
+
+      /**
+       * Creates a plain object from a FieldOptions message. Also converts values to other types if specified.
+       * @param m FieldOptions
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.FieldOptions,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this FieldOptions to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     namespace FieldOptions {
@@ -6705,14 +8680,14 @@ export namespace google {
       enum CType {
         STRING = 0,
         CORD = 1,
-        STRING_PIECE = 2
+        STRING_PIECE = 2,
       }
 
       /** JSType enum. */
       enum JSType {
         JS_NORMAL = 0,
         JS_STRING = 1,
-        JS_NUMBER = 2
+        JS_NUMBER = 2,
       }
     }
 
@@ -6738,9 +8713,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns OneofOptions instance
        */
-      public static create(
-        properties?: google.protobuf.IOneofOptions
-      ): google.protobuf.OneofOptions;
+      public static create(properties?: google.protobuf.IOneofOptions): google.protobuf.OneofOptions;
 
       /**
        * Encodes the specified OneofOptions message. Does not implicitly {@link google.protobuf.OneofOptions.verify|verify} messages.
@@ -6748,10 +8721,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IOneofOptions,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IOneofOptions, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes an OneofOptions message from the specified reader or buffer.
@@ -6761,10 +8731,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.OneofOptions;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.OneofOptions;
+
+      /**
+       * Creates an OneofOptions message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns OneofOptions
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.OneofOptions;
+
+      /**
+       * Creates a plain object from an OneofOptions message. Also converts values to other types if specified.
+       * @param m OneofOptions
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.OneofOptions,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this OneofOptions to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of an EnumOptions. */
@@ -6801,9 +8792,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns EnumOptions instance
        */
-      public static create(
-        properties?: google.protobuf.IEnumOptions
-      ): google.protobuf.EnumOptions;
+      public static create(properties?: google.protobuf.IEnumOptions): google.protobuf.EnumOptions;
 
       /**
        * Encodes the specified EnumOptions message. Does not implicitly {@link google.protobuf.EnumOptions.verify|verify} messages.
@@ -6811,10 +8800,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IEnumOptions,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IEnumOptions, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes an EnumOptions message from the specified reader or buffer.
@@ -6824,10 +8810,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.EnumOptions;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.EnumOptions;
+
+      /**
+       * Creates an EnumOptions message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns EnumOptions
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.EnumOptions;
+
+      /**
+       * Creates a plain object from an EnumOptions message. Also converts values to other types if specified.
+       * @param m EnumOptions
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.EnumOptions,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this EnumOptions to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of an EnumValueOptions. */
@@ -6858,9 +8865,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns EnumValueOptions instance
        */
-      public static create(
-        properties?: google.protobuf.IEnumValueOptions
-      ): google.protobuf.EnumValueOptions;
+      public static create(properties?: google.protobuf.IEnumValueOptions): google.protobuf.EnumValueOptions;
 
       /**
        * Encodes the specified EnumValueOptions message. Does not implicitly {@link google.protobuf.EnumValueOptions.verify|verify} messages.
@@ -6868,10 +8873,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IEnumValueOptions,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IEnumValueOptions, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes an EnumValueOptions message from the specified reader or buffer.
@@ -6881,10 +8883,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.EnumValueOptions;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.EnumValueOptions;
+
+      /**
+       * Creates an EnumValueOptions message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns EnumValueOptions
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.EnumValueOptions;
+
+      /**
+       * Creates a plain object from an EnumValueOptions message. Also converts values to other types if specified.
+       * @param m EnumValueOptions
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.EnumValueOptions,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this EnumValueOptions to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a ServiceOptions. */
@@ -6915,9 +8938,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns ServiceOptions instance
        */
-      public static create(
-        properties?: google.protobuf.IServiceOptions
-      ): google.protobuf.ServiceOptions;
+      public static create(properties?: google.protobuf.IServiceOptions): google.protobuf.ServiceOptions;
 
       /**
        * Encodes the specified ServiceOptions message. Does not implicitly {@link google.protobuf.ServiceOptions.verify|verify} messages.
@@ -6925,10 +8946,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IServiceOptions,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IServiceOptions, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a ServiceOptions message from the specified reader or buffer.
@@ -6938,10 +8956,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.ServiceOptions;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.ServiceOptions;
+
+      /**
+       * Creates a ServiceOptions message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns ServiceOptions
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.ServiceOptions;
+
+      /**
+       * Creates a plain object from a ServiceOptions message. Also converts values to other types if specified.
+       * @param m ServiceOptions
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.ServiceOptions,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this ServiceOptions to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a MethodOptions. */
@@ -6975,9 +9014,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns MethodOptions instance
        */
-      public static create(
-        properties?: google.protobuf.IMethodOptions
-      ): google.protobuf.MethodOptions;
+      public static create(properties?: google.protobuf.IMethodOptions): google.protobuf.MethodOptions;
 
       /**
        * Encodes the specified MethodOptions message. Does not implicitly {@link google.protobuf.MethodOptions.verify|verify} messages.
@@ -6985,10 +9022,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IMethodOptions,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IMethodOptions, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a MethodOptions message from the specified reader or buffer.
@@ -6998,10 +9032,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.MethodOptions;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.MethodOptions;
+
+      /**
+       * Creates a MethodOptions message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns MethodOptions
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.MethodOptions;
+
+      /**
+       * Creates a plain object from a MethodOptions message. Also converts values to other types if specified.
+       * @param m MethodOptions
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.MethodOptions,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this MethodOptions to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of an UninterpretedOption. */
@@ -7063,7 +9118,7 @@ export namespace google {
        * @returns UninterpretedOption instance
        */
       public static create(
-        properties?: google.protobuf.IUninterpretedOption
+        properties?: google.protobuf.IUninterpretedOption,
       ): google.protobuf.UninterpretedOption;
 
       /**
@@ -7072,10 +9127,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IUninterpretedOption,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IUninterpretedOption, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes an UninterpretedOption message from the specified reader or buffer.
@@ -7085,10 +9137,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.UninterpretedOption;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.UninterpretedOption;
+
+      /**
+       * Creates an UninterpretedOption message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns UninterpretedOption
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.UninterpretedOption;
+
+      /**
+       * Creates a plain object from an UninterpretedOption message. Also converts values to other types if specified.
+       * @param m UninterpretedOption
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.UninterpretedOption,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this UninterpretedOption to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     namespace UninterpretedOption {
@@ -7121,7 +9194,7 @@ export namespace google {
          * @returns NamePart instance
          */
         public static create(
-          properties?: google.protobuf.UninterpretedOption.INamePart
+          properties?: google.protobuf.UninterpretedOption.INamePart,
         ): google.protobuf.UninterpretedOption.NamePart;
 
         /**
@@ -7132,7 +9205,7 @@ export namespace google {
          */
         public static encode(
           m: google.protobuf.UninterpretedOption.INamePart,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -7145,8 +9218,32 @@ export namespace google {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): google.protobuf.UninterpretedOption.NamePart;
+
+        /**
+         * Creates a NamePart message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns NamePart
+         */
+        public static fromObject(d: { [k: string]: any }): google.protobuf.UninterpretedOption.NamePart;
+
+        /**
+         * Creates a plain object from a NamePart message. Also converts values to other types if specified.
+         * @param m NamePart
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: google.protobuf.UninterpretedOption.NamePart,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this NamePart to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
 
@@ -7172,9 +9269,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns SourceCodeInfo instance
        */
-      public static create(
-        properties?: google.protobuf.ISourceCodeInfo
-      ): google.protobuf.SourceCodeInfo;
+      public static create(properties?: google.protobuf.ISourceCodeInfo): google.protobuf.SourceCodeInfo;
 
       /**
        * Encodes the specified SourceCodeInfo message. Does not implicitly {@link google.protobuf.SourceCodeInfo.verify|verify} messages.
@@ -7182,10 +9277,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.ISourceCodeInfo,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.ISourceCodeInfo, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a SourceCodeInfo message from the specified reader or buffer.
@@ -7195,10 +9287,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.SourceCodeInfo;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.SourceCodeInfo;
+
+      /**
+       * Creates a SourceCodeInfo message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns SourceCodeInfo
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.SourceCodeInfo;
+
+      /**
+       * Creates a plain object from a SourceCodeInfo message. Also converts values to other types if specified.
+       * @param m SourceCodeInfo
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.SourceCodeInfo,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this SourceCodeInfo to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     namespace SourceCodeInfo {
@@ -7249,7 +9362,7 @@ export namespace google {
          * @returns Location instance
          */
         public static create(
-          properties?: google.protobuf.SourceCodeInfo.ILocation
+          properties?: google.protobuf.SourceCodeInfo.ILocation,
         ): google.protobuf.SourceCodeInfo.Location;
 
         /**
@@ -7260,7 +9373,7 @@ export namespace google {
          */
         public static encode(
           m: google.protobuf.SourceCodeInfo.ILocation,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -7273,8 +9386,32 @@ export namespace google {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): google.protobuf.SourceCodeInfo.Location;
+
+        /**
+         * Creates a Location message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Location
+         */
+        public static fromObject(d: { [k: string]: any }): google.protobuf.SourceCodeInfo.Location;
+
+        /**
+         * Creates a plain object from a Location message. Also converts values to other types if specified.
+         * @param m Location
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: google.protobuf.SourceCodeInfo.Location,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Location to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
 
@@ -7301,7 +9438,7 @@ export namespace google {
        * @returns GeneratedCodeInfo instance
        */
       public static create(
-        properties?: google.protobuf.IGeneratedCodeInfo
+        properties?: google.protobuf.IGeneratedCodeInfo,
       ): google.protobuf.GeneratedCodeInfo;
 
       /**
@@ -7310,10 +9447,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IGeneratedCodeInfo,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IGeneratedCodeInfo, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a GeneratedCodeInfo message from the specified reader or buffer.
@@ -7323,10 +9457,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.GeneratedCodeInfo;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.GeneratedCodeInfo;
+
+      /**
+       * Creates a GeneratedCodeInfo message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns GeneratedCodeInfo
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.GeneratedCodeInfo;
+
+      /**
+       * Creates a plain object from a GeneratedCodeInfo message. Also converts values to other types if specified.
+       * @param m GeneratedCodeInfo
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.GeneratedCodeInfo,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this GeneratedCodeInfo to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     namespace GeneratedCodeInfo {
@@ -7371,7 +9526,7 @@ export namespace google {
          * @returns Annotation instance
          */
         public static create(
-          properties?: google.protobuf.GeneratedCodeInfo.IAnnotation
+          properties?: google.protobuf.GeneratedCodeInfo.IAnnotation,
         ): google.protobuf.GeneratedCodeInfo.Annotation;
 
         /**
@@ -7382,7 +9537,7 @@ export namespace google {
          */
         public static encode(
           m: google.protobuf.GeneratedCodeInfo.IAnnotation,
-          w?: $protobuf.Writer
+          w?: $protobuf.Writer,
         ): $protobuf.Writer;
 
         /**
@@ -7395,8 +9550,32 @@ export namespace google {
          */
         public static decode(
           r: $protobuf.Reader | Uint8Array,
-          l?: number
+          l?: number,
         ): google.protobuf.GeneratedCodeInfo.Annotation;
+
+        /**
+         * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns Annotation
+         */
+        public static fromObject(d: { [k: string]: any }): google.protobuf.GeneratedCodeInfo.Annotation;
+
+        /**
+         * Creates a plain object from an Annotation message. Also converts values to other types if specified.
+         * @param m Annotation
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: google.protobuf.GeneratedCodeInfo.Annotation,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this Annotation to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
 
@@ -7428,9 +9607,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns Duration instance
        */
-      public static create(
-        properties?: google.protobuf.IDuration
-      ): google.protobuf.Duration;
+      public static create(properties?: google.protobuf.IDuration): google.protobuf.Duration;
 
       /**
        * Encodes the specified Duration message. Does not implicitly {@link google.protobuf.Duration.verify|verify} messages.
@@ -7438,10 +9615,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.IDuration,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.IDuration, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Duration message from the specified reader or buffer.
@@ -7451,10 +9625,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.Duration;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.Duration;
+
+      /**
+       * Creates a Duration message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Duration
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.Duration;
+
+      /**
+       * Creates a plain object from a Duration message. Also converts values to other types if specified.
+       * @param m Duration
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.Duration,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Duration to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Timestamp. */
@@ -7485,9 +9680,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns Timestamp instance
        */
-      public static create(
-        properties?: google.protobuf.ITimestamp
-      ): google.protobuf.Timestamp;
+      public static create(properties?: google.protobuf.ITimestamp): google.protobuf.Timestamp;
 
       /**
        * Encodes the specified Timestamp message. Does not implicitly {@link google.protobuf.Timestamp.verify|verify} messages.
@@ -7495,10 +9688,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.protobuf.ITimestamp,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.protobuf.ITimestamp, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Timestamp message from the specified reader or buffer.
@@ -7508,10 +9698,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.protobuf.Timestamp;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.protobuf.Timestamp;
+
+      /**
+       * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Timestamp
+       */
+      public static fromObject(d: { [k: string]: any }): google.protobuf.Timestamp;
+
+      /**
+       * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+       * @param m Timestamp
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.protobuf.Timestamp,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Timestamp to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
   }
 
@@ -7547,10 +9758,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.api.IHttp,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.api.IHttp, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Http message from the specified reader or buffer.
@@ -7560,10 +9768,28 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.api.Http;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.api.Http;
+
+      /**
+       * Creates a Http message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Http
+       */
+      public static fromObject(d: { [k: string]: any }): google.api.Http;
+
+      /**
+       * Creates a plain object from a Http message. Also converts values to other types if specified.
+       * @param m Http
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(m: google.api.Http, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+      /**
+       * Converts this Http to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a HttpRule. */
@@ -7639,9 +9865,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns HttpRule instance
        */
-      public static create(
-        properties?: google.api.IHttpRule
-      ): google.api.HttpRule;
+      public static create(properties?: google.api.IHttpRule): google.api.HttpRule;
 
       /**
        * Encodes the specified HttpRule message. Does not implicitly {@link google.api.HttpRule.verify|verify} messages.
@@ -7649,10 +9873,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.api.IHttpRule,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.api.IHttpRule, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a HttpRule message from the specified reader or buffer.
@@ -7662,10 +9883,28 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.api.HttpRule;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.api.HttpRule;
+
+      /**
+       * Creates a HttpRule message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns HttpRule
+       */
+      public static fromObject(d: { [k: string]: any }): google.api.HttpRule;
+
+      /**
+       * Creates a plain object from a HttpRule message. Also converts values to other types if specified.
+       * @param m HttpRule
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(m: google.api.HttpRule, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+      /**
+       * Converts this HttpRule to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a CustomHttpPattern. */
@@ -7696,9 +9935,7 @@ export namespace google {
        * @param [properties] Properties to set
        * @returns CustomHttpPattern instance
        */
-      public static create(
-        properties?: google.api.ICustomHttpPattern
-      ): google.api.CustomHttpPattern;
+      public static create(properties?: google.api.ICustomHttpPattern): google.api.CustomHttpPattern;
 
       /**
        * Encodes the specified CustomHttpPattern message. Does not implicitly {@link google.api.CustomHttpPattern.verify|verify} messages.
@@ -7706,10 +9943,7 @@ export namespace google {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: google.api.ICustomHttpPattern,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: google.api.ICustomHttpPattern, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a CustomHttpPattern message from the specified reader or buffer.
@@ -7719,10 +9953,31 @@ export namespace google {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): google.api.CustomHttpPattern;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): google.api.CustomHttpPattern;
+
+      /**
+       * Creates a CustomHttpPattern message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns CustomHttpPattern
+       */
+      public static fromObject(d: { [k: string]: any }): google.api.CustomHttpPattern;
+
+      /**
+       * Creates a plain object from a CustomHttpPattern message. Also converts values to other types if specified.
+       * @param m CustomHttpPattern
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: google.api.CustomHttpPattern,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this CustomHttpPattern to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
   }
 }
@@ -7781,9 +10036,7 @@ export namespace ibc {
            * @param [properties] Properties to set
            * @returns Channel instance
            */
-          public static create(
-            properties?: ibc.core.channel.v1.IChannel
-          ): ibc.core.channel.v1.Channel;
+          public static create(properties?: ibc.core.channel.v1.IChannel): ibc.core.channel.v1.Channel;
 
           /**
            * Encodes the specified Channel message. Does not implicitly {@link ibc.core.channel.v1.Channel.verify|verify} messages.
@@ -7791,10 +10044,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.channel.v1.IChannel,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.channel.v1.IChannel, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a Channel message from the specified reader or buffer.
@@ -7804,10 +10054,31 @@ export namespace ibc {
            * @throws {Error} If the payload is not a reader or valid buffer
            * @throws {$protobuf.util.ProtocolError} If required fields are missing
            */
-          public static decode(
-            r: $protobuf.Reader | Uint8Array,
-            l?: number
-          ): ibc.core.channel.v1.Channel;
+          public static decode(r: $protobuf.Reader | Uint8Array, l?: number): ibc.core.channel.v1.Channel;
+
+          /**
+           * Creates a Channel message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Channel
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.Channel;
+
+          /**
+           * Creates a plain object from a Channel message. Also converts values to other types if specified.
+           * @param m Channel
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.Channel,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Channel to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an IdentifiedChannel. */
@@ -7869,7 +10140,7 @@ export namespace ibc {
            * @returns IdentifiedChannel instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IIdentifiedChannel
+            properties?: ibc.core.channel.v1.IIdentifiedChannel,
           ): ibc.core.channel.v1.IdentifiedChannel;
 
           /**
@@ -7880,7 +10151,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IIdentifiedChannel,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -7893,8 +10164,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.IdentifiedChannel;
+
+          /**
+           * Creates an IdentifiedChannel message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns IdentifiedChannel
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.IdentifiedChannel;
+
+          /**
+           * Creates a plain object from an IdentifiedChannel message. Also converts values to other types if specified.
+           * @param m IdentifiedChannel
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.IdentifiedChannel,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this IdentifiedChannel to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** State enum. */
@@ -7903,14 +10198,14 @@ export namespace ibc {
           STATE_INIT = 1,
           STATE_TRYOPEN = 2,
           STATE_OPEN = 3,
-          STATE_CLOSED = 4
+          STATE_CLOSED = 4,
         }
 
         /** Order enum. */
         enum Order {
           ORDER_NONE_UNSPECIFIED = 0,
           ORDER_UNORDERED = 1,
-          ORDER_ORDERED = 2
+          ORDER_ORDERED = 2,
         }
 
         /** Properties of a Counterparty. */
@@ -7942,7 +10237,7 @@ export namespace ibc {
            * @returns Counterparty instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.ICounterparty
+            properties?: ibc.core.channel.v1.ICounterparty,
           ): ibc.core.channel.v1.Counterparty;
 
           /**
@@ -7951,10 +10246,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.channel.v1.ICounterparty,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.channel.v1.ICounterparty, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a Counterparty message from the specified reader or buffer.
@@ -7966,8 +10258,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.Counterparty;
+
+          /**
+           * Creates a Counterparty message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Counterparty
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.Counterparty;
+
+          /**
+           * Creates a plain object from a Counterparty message. Also converts values to other types if specified.
+           * @param m Counterparty
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.Counterparty,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Counterparty to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a Packet. */
@@ -8034,9 +10350,7 @@ export namespace ibc {
            * @param [properties] Properties to set
            * @returns Packet instance
            */
-          public static create(
-            properties?: ibc.core.channel.v1.IPacket
-          ): ibc.core.channel.v1.Packet;
+          public static create(properties?: ibc.core.channel.v1.IPacket): ibc.core.channel.v1.Packet;
 
           /**
            * Encodes the specified Packet message. Does not implicitly {@link ibc.core.channel.v1.Packet.verify|verify} messages.
@@ -8044,10 +10358,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.channel.v1.IPacket,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.channel.v1.IPacket, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a Packet message from the specified reader or buffer.
@@ -8057,10 +10368,31 @@ export namespace ibc {
            * @throws {Error} If the payload is not a reader or valid buffer
            * @throws {$protobuf.util.ProtocolError} If required fields are missing
            */
-          public static decode(
-            r: $protobuf.Reader | Uint8Array,
-            l?: number
-          ): ibc.core.channel.v1.Packet;
+          public static decode(r: $protobuf.Reader | Uint8Array, l?: number): ibc.core.channel.v1.Packet;
+
+          /**
+           * Creates a Packet message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Packet
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.Packet;
+
+          /**
+           * Creates a plain object from a Packet message. Also converts values to other types if specified.
+           * @param m Packet
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.Packet,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Packet to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a PacketState. */
@@ -8104,7 +10436,7 @@ export namespace ibc {
            * @returns PacketState instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IPacketState
+            properties?: ibc.core.channel.v1.IPacketState,
           ): ibc.core.channel.v1.PacketState;
 
           /**
@@ -8113,10 +10445,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.channel.v1.IPacketState,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.channel.v1.IPacketState, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a PacketState message from the specified reader or buffer.
@@ -8126,10 +10455,31 @@ export namespace ibc {
            * @throws {Error} If the payload is not a reader or valid buffer
            * @throws {$protobuf.util.ProtocolError} If required fields are missing
            */
-          public static decode(
-            r: $protobuf.Reader | Uint8Array,
-            l?: number
-          ): ibc.core.channel.v1.PacketState;
+          public static decode(r: $protobuf.Reader | Uint8Array, l?: number): ibc.core.channel.v1.PacketState;
+
+          /**
+           * Creates a PacketState message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns PacketState
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.PacketState;
+
+          /**
+           * Creates a plain object from a PacketState message. Also converts values to other types if specified.
+           * @param m PacketState
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.PacketState,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this PacketState to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an Acknowledgement. */
@@ -8164,7 +10514,7 @@ export namespace ibc {
            * @returns Acknowledgement instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IAcknowledgement
+            properties?: ibc.core.channel.v1.IAcknowledgement,
           ): ibc.core.channel.v1.Acknowledgement;
 
           /**
@@ -8175,7 +10525,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IAcknowledgement,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -8188,8 +10538,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.Acknowledgement;
+
+          /**
+           * Creates an Acknowledgement message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Acknowledgement
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.Acknowledgement;
+
+          /**
+           * Creates a plain object from an Acknowledgement message. Also converts values to other types if specified.
+           * @param m Acknowledgement
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.Acknowledgement,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Acknowledgement to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Represents a Query */
@@ -8200,11 +10574,7 @@ export namespace ibc {
            * @param [requestDelimited=false] Whether requests are length-delimited
            * @param [responseDelimited=false] Whether responses are length-delimited
            */
-          constructor(
-            rpcImpl: $protobuf.RPCImpl,
-            requestDelimited?: boolean,
-            responseDelimited?: boolean
-          );
+          constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
 
           /**
            * Creates new Query service using the specified rpc implementation.
@@ -8216,7 +10586,7 @@ export namespace ibc {
           public static create(
             rpcImpl: $protobuf.RPCImpl,
             requestDelimited?: boolean,
-            responseDelimited?: boolean
+            responseDelimited?: boolean,
           ): Query;
 
           /**
@@ -8226,7 +10596,7 @@ export namespace ibc {
            */
           public channel(
             request: ibc.core.channel.v1.IQueryChannelRequest,
-            callback: ibc.core.channel.v1.Query.ChannelCallback
+            callback: ibc.core.channel.v1.Query.ChannelCallback,
           ): void;
 
           /**
@@ -8235,7 +10605,7 @@ export namespace ibc {
            * @returns Promise
            */
           public channel(
-            request: ibc.core.channel.v1.IQueryChannelRequest
+            request: ibc.core.channel.v1.IQueryChannelRequest,
           ): Promise<ibc.core.channel.v1.QueryChannelResponse>;
 
           /**
@@ -8245,7 +10615,7 @@ export namespace ibc {
            */
           public channels(
             request: ibc.core.channel.v1.IQueryChannelsRequest,
-            callback: ibc.core.channel.v1.Query.ChannelsCallback
+            callback: ibc.core.channel.v1.Query.ChannelsCallback,
           ): void;
 
           /**
@@ -8254,7 +10624,7 @@ export namespace ibc {
            * @returns Promise
            */
           public channels(
-            request: ibc.core.channel.v1.IQueryChannelsRequest
+            request: ibc.core.channel.v1.IQueryChannelsRequest,
           ): Promise<ibc.core.channel.v1.QueryChannelsResponse>;
 
           /**
@@ -8264,7 +10634,7 @@ export namespace ibc {
            */
           public connectionChannels(
             request: ibc.core.channel.v1.IQueryConnectionChannelsRequest,
-            callback: ibc.core.channel.v1.Query.ConnectionChannelsCallback
+            callback: ibc.core.channel.v1.Query.ConnectionChannelsCallback,
           ): void;
 
           /**
@@ -8273,7 +10643,7 @@ export namespace ibc {
            * @returns Promise
            */
           public connectionChannels(
-            request: ibc.core.channel.v1.IQueryConnectionChannelsRequest
+            request: ibc.core.channel.v1.IQueryConnectionChannelsRequest,
           ): Promise<ibc.core.channel.v1.QueryConnectionChannelsResponse>;
 
           /**
@@ -8283,7 +10653,7 @@ export namespace ibc {
            */
           public channelClientState(
             request: ibc.core.channel.v1.IQueryChannelClientStateRequest,
-            callback: ibc.core.channel.v1.Query.ChannelClientStateCallback
+            callback: ibc.core.channel.v1.Query.ChannelClientStateCallback,
           ): void;
 
           /**
@@ -8292,7 +10662,7 @@ export namespace ibc {
            * @returns Promise
            */
           public channelClientState(
-            request: ibc.core.channel.v1.IQueryChannelClientStateRequest
+            request: ibc.core.channel.v1.IQueryChannelClientStateRequest,
           ): Promise<ibc.core.channel.v1.QueryChannelClientStateResponse>;
 
           /**
@@ -8302,7 +10672,7 @@ export namespace ibc {
            */
           public channelConsensusState(
             request: ibc.core.channel.v1.IQueryChannelConsensusStateRequest,
-            callback: ibc.core.channel.v1.Query.ChannelConsensusStateCallback
+            callback: ibc.core.channel.v1.Query.ChannelConsensusStateCallback,
           ): void;
 
           /**
@@ -8311,7 +10681,7 @@ export namespace ibc {
            * @returns Promise
            */
           public channelConsensusState(
-            request: ibc.core.channel.v1.IQueryChannelConsensusStateRequest
+            request: ibc.core.channel.v1.IQueryChannelConsensusStateRequest,
           ): Promise<ibc.core.channel.v1.QueryChannelConsensusStateResponse>;
 
           /**
@@ -8321,7 +10691,7 @@ export namespace ibc {
            */
           public packetCommitment(
             request: ibc.core.channel.v1.IQueryPacketCommitmentRequest,
-            callback: ibc.core.channel.v1.Query.PacketCommitmentCallback
+            callback: ibc.core.channel.v1.Query.PacketCommitmentCallback,
           ): void;
 
           /**
@@ -8330,7 +10700,7 @@ export namespace ibc {
            * @returns Promise
            */
           public packetCommitment(
-            request: ibc.core.channel.v1.IQueryPacketCommitmentRequest
+            request: ibc.core.channel.v1.IQueryPacketCommitmentRequest,
           ): Promise<ibc.core.channel.v1.QueryPacketCommitmentResponse>;
 
           /**
@@ -8340,7 +10710,7 @@ export namespace ibc {
            */
           public packetCommitments(
             request: ibc.core.channel.v1.IQueryPacketCommitmentsRequest,
-            callback: ibc.core.channel.v1.Query.PacketCommitmentsCallback
+            callback: ibc.core.channel.v1.Query.PacketCommitmentsCallback,
           ): void;
 
           /**
@@ -8349,7 +10719,7 @@ export namespace ibc {
            * @returns Promise
            */
           public packetCommitments(
-            request: ibc.core.channel.v1.IQueryPacketCommitmentsRequest
+            request: ibc.core.channel.v1.IQueryPacketCommitmentsRequest,
           ): Promise<ibc.core.channel.v1.QueryPacketCommitmentsResponse>;
 
           /**
@@ -8359,7 +10729,7 @@ export namespace ibc {
            */
           public packetReceipt(
             request: ibc.core.channel.v1.IQueryPacketReceiptRequest,
-            callback: ibc.core.channel.v1.Query.PacketReceiptCallback
+            callback: ibc.core.channel.v1.Query.PacketReceiptCallback,
           ): void;
 
           /**
@@ -8368,7 +10738,7 @@ export namespace ibc {
            * @returns Promise
            */
           public packetReceipt(
-            request: ibc.core.channel.v1.IQueryPacketReceiptRequest
+            request: ibc.core.channel.v1.IQueryPacketReceiptRequest,
           ): Promise<ibc.core.channel.v1.QueryPacketReceiptResponse>;
 
           /**
@@ -8378,7 +10748,7 @@ export namespace ibc {
            */
           public packetAcknowledgement(
             request: ibc.core.channel.v1.IQueryPacketAcknowledgementRequest,
-            callback: ibc.core.channel.v1.Query.PacketAcknowledgementCallback
+            callback: ibc.core.channel.v1.Query.PacketAcknowledgementCallback,
           ): void;
 
           /**
@@ -8387,7 +10757,7 @@ export namespace ibc {
            * @returns Promise
            */
           public packetAcknowledgement(
-            request: ibc.core.channel.v1.IQueryPacketAcknowledgementRequest
+            request: ibc.core.channel.v1.IQueryPacketAcknowledgementRequest,
           ): Promise<ibc.core.channel.v1.QueryPacketAcknowledgementResponse>;
 
           /**
@@ -8397,7 +10767,7 @@ export namespace ibc {
            */
           public packetAcknowledgements(
             request: ibc.core.channel.v1.IQueryPacketAcknowledgementsRequest,
-            callback: ibc.core.channel.v1.Query.PacketAcknowledgementsCallback
+            callback: ibc.core.channel.v1.Query.PacketAcknowledgementsCallback,
           ): void;
 
           /**
@@ -8406,7 +10776,7 @@ export namespace ibc {
            * @returns Promise
            */
           public packetAcknowledgements(
-            request: ibc.core.channel.v1.IQueryPacketAcknowledgementsRequest
+            request: ibc.core.channel.v1.IQueryPacketAcknowledgementsRequest,
           ): Promise<ibc.core.channel.v1.QueryPacketAcknowledgementsResponse>;
 
           /**
@@ -8416,7 +10786,7 @@ export namespace ibc {
            */
           public unreceivedPackets(
             request: ibc.core.channel.v1.IQueryUnreceivedPacketsRequest,
-            callback: ibc.core.channel.v1.Query.UnreceivedPacketsCallback
+            callback: ibc.core.channel.v1.Query.UnreceivedPacketsCallback,
           ): void;
 
           /**
@@ -8425,7 +10795,7 @@ export namespace ibc {
            * @returns Promise
            */
           public unreceivedPackets(
-            request: ibc.core.channel.v1.IQueryUnreceivedPacketsRequest
+            request: ibc.core.channel.v1.IQueryUnreceivedPacketsRequest,
           ): Promise<ibc.core.channel.v1.QueryUnreceivedPacketsResponse>;
 
           /**
@@ -8435,7 +10805,7 @@ export namespace ibc {
            */
           public unreceivedAcks(
             request: ibc.core.channel.v1.IQueryUnreceivedAcksRequest,
-            callback: ibc.core.channel.v1.Query.UnreceivedAcksCallback
+            callback: ibc.core.channel.v1.Query.UnreceivedAcksCallback,
           ): void;
 
           /**
@@ -8444,7 +10814,7 @@ export namespace ibc {
            * @returns Promise
            */
           public unreceivedAcks(
-            request: ibc.core.channel.v1.IQueryUnreceivedAcksRequest
+            request: ibc.core.channel.v1.IQueryUnreceivedAcksRequest,
           ): Promise<ibc.core.channel.v1.QueryUnreceivedAcksResponse>;
 
           /**
@@ -8454,7 +10824,7 @@ export namespace ibc {
            */
           public nextSequenceReceive(
             request: ibc.core.channel.v1.IQueryNextSequenceReceiveRequest,
-            callback: ibc.core.channel.v1.Query.NextSequenceReceiveCallback
+            callback: ibc.core.channel.v1.Query.NextSequenceReceiveCallback,
           ): void;
 
           /**
@@ -8463,7 +10833,7 @@ export namespace ibc {
            * @returns Promise
            */
           public nextSequenceReceive(
-            request: ibc.core.channel.v1.IQueryNextSequenceReceiveRequest
+            request: ibc.core.channel.v1.IQueryNextSequenceReceiveRequest,
           ): Promise<ibc.core.channel.v1.QueryNextSequenceReceiveResponse>;
         }
 
@@ -8475,7 +10845,7 @@ export namespace ibc {
            */
           type ChannelCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryChannelResponse
+            response?: ibc.core.channel.v1.QueryChannelResponse,
           ) => void;
 
           /**
@@ -8485,7 +10855,7 @@ export namespace ibc {
            */
           type ChannelsCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryChannelsResponse
+            response?: ibc.core.channel.v1.QueryChannelsResponse,
           ) => void;
 
           /**
@@ -8495,7 +10865,7 @@ export namespace ibc {
            */
           type ConnectionChannelsCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryConnectionChannelsResponse
+            response?: ibc.core.channel.v1.QueryConnectionChannelsResponse,
           ) => void;
 
           /**
@@ -8505,7 +10875,7 @@ export namespace ibc {
            */
           type ChannelClientStateCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryChannelClientStateResponse
+            response?: ibc.core.channel.v1.QueryChannelClientStateResponse,
           ) => void;
 
           /**
@@ -8515,7 +10885,7 @@ export namespace ibc {
            */
           type ChannelConsensusStateCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryChannelConsensusStateResponse
+            response?: ibc.core.channel.v1.QueryChannelConsensusStateResponse,
           ) => void;
 
           /**
@@ -8525,7 +10895,7 @@ export namespace ibc {
            */
           type PacketCommitmentCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryPacketCommitmentResponse
+            response?: ibc.core.channel.v1.QueryPacketCommitmentResponse,
           ) => void;
 
           /**
@@ -8535,7 +10905,7 @@ export namespace ibc {
            */
           type PacketCommitmentsCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryPacketCommitmentsResponse
+            response?: ibc.core.channel.v1.QueryPacketCommitmentsResponse,
           ) => void;
 
           /**
@@ -8545,7 +10915,7 @@ export namespace ibc {
            */
           type PacketReceiptCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryPacketReceiptResponse
+            response?: ibc.core.channel.v1.QueryPacketReceiptResponse,
           ) => void;
 
           /**
@@ -8555,7 +10925,7 @@ export namespace ibc {
            */
           type PacketAcknowledgementCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryPacketAcknowledgementResponse
+            response?: ibc.core.channel.v1.QueryPacketAcknowledgementResponse,
           ) => void;
 
           /**
@@ -8565,7 +10935,7 @@ export namespace ibc {
            */
           type PacketAcknowledgementsCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryPacketAcknowledgementsResponse
+            response?: ibc.core.channel.v1.QueryPacketAcknowledgementsResponse,
           ) => void;
 
           /**
@@ -8575,7 +10945,7 @@ export namespace ibc {
            */
           type UnreceivedPacketsCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryUnreceivedPacketsResponse
+            response?: ibc.core.channel.v1.QueryUnreceivedPacketsResponse,
           ) => void;
 
           /**
@@ -8585,7 +10955,7 @@ export namespace ibc {
            */
           type UnreceivedAcksCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryUnreceivedAcksResponse
+            response?: ibc.core.channel.v1.QueryUnreceivedAcksResponse,
           ) => void;
 
           /**
@@ -8595,7 +10965,7 @@ export namespace ibc {
            */
           type NextSequenceReceiveCallback = (
             error: Error | null,
-            response?: ibc.core.channel.v1.QueryNextSequenceReceiveResponse
+            response?: ibc.core.channel.v1.QueryNextSequenceReceiveResponse,
           ) => void;
         }
 
@@ -8628,7 +10998,7 @@ export namespace ibc {
            * @returns QueryChannelRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryChannelRequest
+            properties?: ibc.core.channel.v1.IQueryChannelRequest,
           ): ibc.core.channel.v1.QueryChannelRequest;
 
           /**
@@ -8639,7 +11009,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryChannelRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -8652,8 +11022,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryChannelRequest;
+
+          /**
+           * Creates a QueryChannelRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryChannelRequest
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryChannelRequest;
+
+          /**
+           * Creates a plain object from a QueryChannelRequest message. Also converts values to other types if specified.
+           * @param m QueryChannelRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryChannelRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryChannelRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryChannelResponse. */
@@ -8691,7 +11085,7 @@ export namespace ibc {
            * @returns QueryChannelResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryChannelResponse
+            properties?: ibc.core.channel.v1.IQueryChannelResponse,
           ): ibc.core.channel.v1.QueryChannelResponse;
 
           /**
@@ -8702,7 +11096,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryChannelResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -8715,8 +11109,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryChannelResponse;
+
+          /**
+           * Creates a QueryChannelResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryChannelResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryChannelResponse;
+
+          /**
+           * Creates a plain object from a QueryChannelResponse message. Also converts values to other types if specified.
+           * @param m QueryChannelResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryChannelResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryChannelResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryChannelsRequest. */
@@ -8742,7 +11160,7 @@ export namespace ibc {
            * @returns QueryChannelsRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryChannelsRequest
+            properties?: ibc.core.channel.v1.IQueryChannelsRequest,
           ): ibc.core.channel.v1.QueryChannelsRequest;
 
           /**
@@ -8753,7 +11171,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryChannelsRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -8766,8 +11184,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryChannelsRequest;
+
+          /**
+           * Creates a QueryChannelsRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryChannelsRequest
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryChannelsRequest;
+
+          /**
+           * Creates a plain object from a QueryChannelsRequest message. Also converts values to other types if specified.
+           * @param m QueryChannelsRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryChannelsRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryChannelsRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryChannelsResponse. */
@@ -8805,7 +11247,7 @@ export namespace ibc {
            * @returns QueryChannelsResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryChannelsResponse
+            properties?: ibc.core.channel.v1.IQueryChannelsResponse,
           ): ibc.core.channel.v1.QueryChannelsResponse;
 
           /**
@@ -8816,7 +11258,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryChannelsResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -8829,8 +11271,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryChannelsResponse;
+
+          /**
+           * Creates a QueryChannelsResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryChannelsResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryChannelsResponse;
+
+          /**
+           * Creates a plain object from a QueryChannelsResponse message. Also converts values to other types if specified.
+           * @param m QueryChannelsResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryChannelsResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryChannelsResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionChannelsRequest. */
@@ -8843,8 +11309,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryConnectionChannelsRequest. */
-        class QueryConnectionChannelsRequest
-          implements IQueryConnectionChannelsRequest {
+        class QueryConnectionChannelsRequest implements IQueryConnectionChannelsRequest {
           /**
            * Constructs a new QueryConnectionChannelsRequest.
            * @param [p] Properties to set
@@ -8863,7 +11328,7 @@ export namespace ibc {
            * @returns QueryConnectionChannelsRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryConnectionChannelsRequest
+            properties?: ibc.core.channel.v1.IQueryConnectionChannelsRequest,
           ): ibc.core.channel.v1.QueryConnectionChannelsRequest;
 
           /**
@@ -8874,7 +11339,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryConnectionChannelsRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -8887,8 +11352,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryConnectionChannelsRequest;
+
+          /**
+           * Creates a QueryConnectionChannelsRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionChannelsRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryConnectionChannelsRequest;
+
+          /**
+           * Creates a plain object from a QueryConnectionChannelsRequest message. Also converts values to other types if specified.
+           * @param m QueryConnectionChannelsRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryConnectionChannelsRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionChannelsRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionChannelsResponse. */
@@ -8904,8 +11395,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryConnectionChannelsResponse. */
-        class QueryConnectionChannelsResponse
-          implements IQueryConnectionChannelsResponse {
+        class QueryConnectionChannelsResponse implements IQueryConnectionChannelsResponse {
           /**
            * Constructs a new QueryConnectionChannelsResponse.
            * @param [p] Properties to set
@@ -8927,7 +11417,7 @@ export namespace ibc {
            * @returns QueryConnectionChannelsResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryConnectionChannelsResponse
+            properties?: ibc.core.channel.v1.IQueryConnectionChannelsResponse,
           ): ibc.core.channel.v1.QueryConnectionChannelsResponse;
 
           /**
@@ -8938,7 +11428,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryConnectionChannelsResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -8951,8 +11441,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryConnectionChannelsResponse;
+
+          /**
+           * Creates a QueryConnectionChannelsResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionChannelsResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryConnectionChannelsResponse;
+
+          /**
+           * Creates a plain object from a QueryConnectionChannelsResponse message. Also converts values to other types if specified.
+           * @param m QueryConnectionChannelsResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryConnectionChannelsResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionChannelsResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryChannelClientStateRequest. */
@@ -8965,8 +11481,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryChannelClientStateRequest. */
-        class QueryChannelClientStateRequest
-          implements IQueryChannelClientStateRequest {
+        class QueryChannelClientStateRequest implements IQueryChannelClientStateRequest {
           /**
            * Constructs a new QueryChannelClientStateRequest.
            * @param [p] Properties to set
@@ -8985,7 +11500,7 @@ export namespace ibc {
            * @returns QueryChannelClientStateRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryChannelClientStateRequest
+            properties?: ibc.core.channel.v1.IQueryChannelClientStateRequest,
           ): ibc.core.channel.v1.QueryChannelClientStateRequest;
 
           /**
@@ -8996,7 +11511,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryChannelClientStateRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9009,8 +11524,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryChannelClientStateRequest;
+
+          /**
+           * Creates a QueryChannelClientStateRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryChannelClientStateRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryChannelClientStateRequest;
+
+          /**
+           * Creates a plain object from a QueryChannelClientStateRequest message. Also converts values to other types if specified.
+           * @param m QueryChannelClientStateRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryChannelClientStateRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryChannelClientStateRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryChannelClientStateResponse. */
@@ -9026,8 +11567,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryChannelClientStateResponse. */
-        class QueryChannelClientStateResponse
-          implements IQueryChannelClientStateResponse {
+        class QueryChannelClientStateResponse implements IQueryChannelClientStateResponse {
           /**
            * Constructs a new QueryChannelClientStateResponse.
            * @param [p] Properties to set
@@ -9049,7 +11589,7 @@ export namespace ibc {
            * @returns QueryChannelClientStateResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryChannelClientStateResponse
+            properties?: ibc.core.channel.v1.IQueryChannelClientStateResponse,
           ): ibc.core.channel.v1.QueryChannelClientStateResponse;
 
           /**
@@ -9060,7 +11600,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryChannelClientStateResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9073,8 +11613,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryChannelClientStateResponse;
+
+          /**
+           * Creates a QueryChannelClientStateResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryChannelClientStateResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryChannelClientStateResponse;
+
+          /**
+           * Creates a plain object from a QueryChannelClientStateResponse message. Also converts values to other types if specified.
+           * @param m QueryChannelClientStateResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryChannelClientStateResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryChannelClientStateResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryChannelConsensusStateRequest. */
@@ -9093,15 +11659,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryChannelConsensusStateRequest. */
-        class QueryChannelConsensusStateRequest
-          implements IQueryChannelConsensusStateRequest {
+        class QueryChannelConsensusStateRequest implements IQueryChannelConsensusStateRequest {
           /**
            * Constructs a new QueryChannelConsensusStateRequest.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.channel.v1.IQueryChannelConsensusStateRequest
-          );
+          constructor(p?: ibc.core.channel.v1.IQueryChannelConsensusStateRequest);
 
           /** QueryChannelConsensusStateRequest portId. */
           public portId: string;
@@ -9121,7 +11684,7 @@ export namespace ibc {
            * @returns QueryChannelConsensusStateRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryChannelConsensusStateRequest
+            properties?: ibc.core.channel.v1.IQueryChannelConsensusStateRequest,
           ): ibc.core.channel.v1.QueryChannelConsensusStateRequest;
 
           /**
@@ -9132,7 +11695,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryChannelConsensusStateRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9145,8 +11708,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryChannelConsensusStateRequest;
+
+          /**
+           * Creates a QueryChannelConsensusStateRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryChannelConsensusStateRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryChannelConsensusStateRequest;
+
+          /**
+           * Creates a plain object from a QueryChannelConsensusStateRequest message. Also converts values to other types if specified.
+           * @param m QueryChannelConsensusStateRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryChannelConsensusStateRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryChannelConsensusStateRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryChannelConsensusStateResponse. */
@@ -9165,15 +11754,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryChannelConsensusStateResponse. */
-        class QueryChannelConsensusStateResponse
-          implements IQueryChannelConsensusStateResponse {
+        class QueryChannelConsensusStateResponse implements IQueryChannelConsensusStateResponse {
           /**
            * Constructs a new QueryChannelConsensusStateResponse.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.channel.v1.IQueryChannelConsensusStateResponse
-          );
+          constructor(p?: ibc.core.channel.v1.IQueryChannelConsensusStateResponse);
 
           /** QueryChannelConsensusStateResponse consensusState. */
           public consensusState?: google.protobuf.IAny | null;
@@ -9193,7 +11779,7 @@ export namespace ibc {
            * @returns QueryChannelConsensusStateResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryChannelConsensusStateResponse
+            properties?: ibc.core.channel.v1.IQueryChannelConsensusStateResponse,
           ): ibc.core.channel.v1.QueryChannelConsensusStateResponse;
 
           /**
@@ -9204,7 +11790,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryChannelConsensusStateResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9217,8 +11803,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryChannelConsensusStateResponse;
+
+          /**
+           * Creates a QueryChannelConsensusStateResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryChannelConsensusStateResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryChannelConsensusStateResponse;
+
+          /**
+           * Creates a plain object from a QueryChannelConsensusStateResponse message. Also converts values to other types if specified.
+           * @param m QueryChannelConsensusStateResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryChannelConsensusStateResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryChannelConsensusStateResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketCommitmentRequest. */
@@ -9234,8 +11846,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketCommitmentRequest. */
-        class QueryPacketCommitmentRequest
-          implements IQueryPacketCommitmentRequest {
+        class QueryPacketCommitmentRequest implements IQueryPacketCommitmentRequest {
           /**
            * Constructs a new QueryPacketCommitmentRequest.
            * @param [p] Properties to set
@@ -9257,7 +11868,7 @@ export namespace ibc {
            * @returns QueryPacketCommitmentRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketCommitmentRequest
+            properties?: ibc.core.channel.v1.IQueryPacketCommitmentRequest,
           ): ibc.core.channel.v1.QueryPacketCommitmentRequest;
 
           /**
@@ -9268,7 +11879,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketCommitmentRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9281,8 +11892,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketCommitmentRequest;
+
+          /**
+           * Creates a QueryPacketCommitmentRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketCommitmentRequest
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryPacketCommitmentRequest;
+
+          /**
+           * Creates a plain object from a QueryPacketCommitmentRequest message. Also converts values to other types if specified.
+           * @param m QueryPacketCommitmentRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketCommitmentRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketCommitmentRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketCommitmentResponse. */
@@ -9298,8 +11933,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketCommitmentResponse. */
-        class QueryPacketCommitmentResponse
-          implements IQueryPacketCommitmentResponse {
+        class QueryPacketCommitmentResponse implements IQueryPacketCommitmentResponse {
           /**
            * Constructs a new QueryPacketCommitmentResponse.
            * @param [p] Properties to set
@@ -9321,7 +11955,7 @@ export namespace ibc {
            * @returns QueryPacketCommitmentResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketCommitmentResponse
+            properties?: ibc.core.channel.v1.IQueryPacketCommitmentResponse,
           ): ibc.core.channel.v1.QueryPacketCommitmentResponse;
 
           /**
@@ -9332,7 +11966,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketCommitmentResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9345,8 +11979,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketCommitmentResponse;
+
+          /**
+           * Creates a QueryPacketCommitmentResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketCommitmentResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryPacketCommitmentResponse;
+
+          /**
+           * Creates a plain object from a QueryPacketCommitmentResponse message. Also converts values to other types if specified.
+           * @param m QueryPacketCommitmentResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketCommitmentResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketCommitmentResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketCommitmentsRequest. */
@@ -9362,8 +12022,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketCommitmentsRequest. */
-        class QueryPacketCommitmentsRequest
-          implements IQueryPacketCommitmentsRequest {
+        class QueryPacketCommitmentsRequest implements IQueryPacketCommitmentsRequest {
           /**
            * Constructs a new QueryPacketCommitmentsRequest.
            * @param [p] Properties to set
@@ -9385,7 +12044,7 @@ export namespace ibc {
            * @returns QueryPacketCommitmentsRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketCommitmentsRequest
+            properties?: ibc.core.channel.v1.IQueryPacketCommitmentsRequest,
           ): ibc.core.channel.v1.QueryPacketCommitmentsRequest;
 
           /**
@@ -9396,7 +12055,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketCommitmentsRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9409,8 +12068,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketCommitmentsRequest;
+
+          /**
+           * Creates a QueryPacketCommitmentsRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketCommitmentsRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryPacketCommitmentsRequest;
+
+          /**
+           * Creates a plain object from a QueryPacketCommitmentsRequest message. Also converts values to other types if specified.
+           * @param m QueryPacketCommitmentsRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketCommitmentsRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketCommitmentsRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketCommitmentsResponse. */
@@ -9426,8 +12111,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketCommitmentsResponse. */
-        class QueryPacketCommitmentsResponse
-          implements IQueryPacketCommitmentsResponse {
+        class QueryPacketCommitmentsResponse implements IQueryPacketCommitmentsResponse {
           /**
            * Constructs a new QueryPacketCommitmentsResponse.
            * @param [p] Properties to set
@@ -9449,7 +12133,7 @@ export namespace ibc {
            * @returns QueryPacketCommitmentsResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketCommitmentsResponse
+            properties?: ibc.core.channel.v1.IQueryPacketCommitmentsResponse,
           ): ibc.core.channel.v1.QueryPacketCommitmentsResponse;
 
           /**
@@ -9460,7 +12144,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketCommitmentsResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9473,8 +12157,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketCommitmentsResponse;
+
+          /**
+           * Creates a QueryPacketCommitmentsResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketCommitmentsResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryPacketCommitmentsResponse;
+
+          /**
+           * Creates a plain object from a QueryPacketCommitmentsResponse message. Also converts values to other types if specified.
+           * @param m QueryPacketCommitmentsResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketCommitmentsResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketCommitmentsResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketReceiptRequest. */
@@ -9512,7 +12222,7 @@ export namespace ibc {
            * @returns QueryPacketReceiptRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketReceiptRequest
+            properties?: ibc.core.channel.v1.IQueryPacketReceiptRequest,
           ): ibc.core.channel.v1.QueryPacketReceiptRequest;
 
           /**
@@ -9523,7 +12233,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketReceiptRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9536,8 +12246,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketReceiptRequest;
+
+          /**
+           * Creates a QueryPacketReceiptRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketReceiptRequest
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryPacketReceiptRequest;
+
+          /**
+           * Creates a plain object from a QueryPacketReceiptRequest message. Also converts values to other types if specified.
+           * @param m QueryPacketReceiptRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketReceiptRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketReceiptRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketReceiptResponse. */
@@ -9553,8 +12287,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketReceiptResponse. */
-        class QueryPacketReceiptResponse
-          implements IQueryPacketReceiptResponse {
+        class QueryPacketReceiptResponse implements IQueryPacketReceiptResponse {
           /**
            * Constructs a new QueryPacketReceiptResponse.
            * @param [p] Properties to set
@@ -9576,7 +12309,7 @@ export namespace ibc {
            * @returns QueryPacketReceiptResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketReceiptResponse
+            properties?: ibc.core.channel.v1.IQueryPacketReceiptResponse,
           ): ibc.core.channel.v1.QueryPacketReceiptResponse;
 
           /**
@@ -9587,7 +12320,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketReceiptResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9600,8 +12333,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketReceiptResponse;
+
+          /**
+           * Creates a QueryPacketReceiptResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketReceiptResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryPacketReceiptResponse;
+
+          /**
+           * Creates a plain object from a QueryPacketReceiptResponse message. Also converts values to other types if specified.
+           * @param m QueryPacketReceiptResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketReceiptResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketReceiptResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketAcknowledgementRequest. */
@@ -9617,15 +12374,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketAcknowledgementRequest. */
-        class QueryPacketAcknowledgementRequest
-          implements IQueryPacketAcknowledgementRequest {
+        class QueryPacketAcknowledgementRequest implements IQueryPacketAcknowledgementRequest {
           /**
            * Constructs a new QueryPacketAcknowledgementRequest.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.channel.v1.IQueryPacketAcknowledgementRequest
-          );
+          constructor(p?: ibc.core.channel.v1.IQueryPacketAcknowledgementRequest);
 
           /** QueryPacketAcknowledgementRequest portId. */
           public portId: string;
@@ -9642,7 +12396,7 @@ export namespace ibc {
            * @returns QueryPacketAcknowledgementRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketAcknowledgementRequest
+            properties?: ibc.core.channel.v1.IQueryPacketAcknowledgementRequest,
           ): ibc.core.channel.v1.QueryPacketAcknowledgementRequest;
 
           /**
@@ -9653,7 +12407,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketAcknowledgementRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9666,8 +12420,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketAcknowledgementRequest;
+
+          /**
+           * Creates a QueryPacketAcknowledgementRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketAcknowledgementRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryPacketAcknowledgementRequest;
+
+          /**
+           * Creates a plain object from a QueryPacketAcknowledgementRequest message. Also converts values to other types if specified.
+           * @param m QueryPacketAcknowledgementRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketAcknowledgementRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketAcknowledgementRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketAcknowledgementResponse. */
@@ -9683,15 +12463,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketAcknowledgementResponse. */
-        class QueryPacketAcknowledgementResponse
-          implements IQueryPacketAcknowledgementResponse {
+        class QueryPacketAcknowledgementResponse implements IQueryPacketAcknowledgementResponse {
           /**
            * Constructs a new QueryPacketAcknowledgementResponse.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.channel.v1.IQueryPacketAcknowledgementResponse
-          );
+          constructor(p?: ibc.core.channel.v1.IQueryPacketAcknowledgementResponse);
 
           /** QueryPacketAcknowledgementResponse acknowledgement. */
           public acknowledgement: Uint8Array;
@@ -9708,7 +12485,7 @@ export namespace ibc {
            * @returns QueryPacketAcknowledgementResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketAcknowledgementResponse
+            properties?: ibc.core.channel.v1.IQueryPacketAcknowledgementResponse,
           ): ibc.core.channel.v1.QueryPacketAcknowledgementResponse;
 
           /**
@@ -9719,7 +12496,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketAcknowledgementResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9732,8 +12509,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketAcknowledgementResponse;
+
+          /**
+           * Creates a QueryPacketAcknowledgementResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketAcknowledgementResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryPacketAcknowledgementResponse;
+
+          /**
+           * Creates a plain object from a QueryPacketAcknowledgementResponse message. Also converts values to other types if specified.
+           * @param m QueryPacketAcknowledgementResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketAcknowledgementResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketAcknowledgementResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketAcknowledgementsRequest. */
@@ -9749,15 +12552,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketAcknowledgementsRequest. */
-        class QueryPacketAcknowledgementsRequest
-          implements IQueryPacketAcknowledgementsRequest {
+        class QueryPacketAcknowledgementsRequest implements IQueryPacketAcknowledgementsRequest {
           /**
            * Constructs a new QueryPacketAcknowledgementsRequest.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.channel.v1.IQueryPacketAcknowledgementsRequest
-          );
+          constructor(p?: ibc.core.channel.v1.IQueryPacketAcknowledgementsRequest);
 
           /** QueryPacketAcknowledgementsRequest portId. */
           public portId: string;
@@ -9774,7 +12574,7 @@ export namespace ibc {
            * @returns QueryPacketAcknowledgementsRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketAcknowledgementsRequest
+            properties?: ibc.core.channel.v1.IQueryPacketAcknowledgementsRequest,
           ): ibc.core.channel.v1.QueryPacketAcknowledgementsRequest;
 
           /**
@@ -9785,7 +12585,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketAcknowledgementsRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9798,8 +12598,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketAcknowledgementsRequest;
+
+          /**
+           * Creates a QueryPacketAcknowledgementsRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketAcknowledgementsRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryPacketAcknowledgementsRequest;
+
+          /**
+           * Creates a plain object from a QueryPacketAcknowledgementsRequest message. Also converts values to other types if specified.
+           * @param m QueryPacketAcknowledgementsRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketAcknowledgementsRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketAcknowledgementsRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryPacketAcknowledgementsResponse. */
@@ -9815,15 +12641,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryPacketAcknowledgementsResponse. */
-        class QueryPacketAcknowledgementsResponse
-          implements IQueryPacketAcknowledgementsResponse {
+        class QueryPacketAcknowledgementsResponse implements IQueryPacketAcknowledgementsResponse {
           /**
            * Constructs a new QueryPacketAcknowledgementsResponse.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.channel.v1.IQueryPacketAcknowledgementsResponse
-          );
+          constructor(p?: ibc.core.channel.v1.IQueryPacketAcknowledgementsResponse);
 
           /** QueryPacketAcknowledgementsResponse acknowledgements. */
           public acknowledgements: ibc.core.channel.v1.IPacketState[];
@@ -9840,7 +12663,7 @@ export namespace ibc {
            * @returns QueryPacketAcknowledgementsResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryPacketAcknowledgementsResponse
+            properties?: ibc.core.channel.v1.IQueryPacketAcknowledgementsResponse,
           ): ibc.core.channel.v1.QueryPacketAcknowledgementsResponse;
 
           /**
@@ -9851,7 +12674,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryPacketAcknowledgementsResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9864,8 +12687,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryPacketAcknowledgementsResponse;
+
+          /**
+           * Creates a QueryPacketAcknowledgementsResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryPacketAcknowledgementsResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryPacketAcknowledgementsResponse;
+
+          /**
+           * Creates a plain object from a QueryPacketAcknowledgementsResponse message. Also converts values to other types if specified.
+           * @param m QueryPacketAcknowledgementsResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryPacketAcknowledgementsResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryPacketAcknowledgementsResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryUnreceivedPacketsRequest. */
@@ -9881,8 +12730,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryUnreceivedPacketsRequest. */
-        class QueryUnreceivedPacketsRequest
-          implements IQueryUnreceivedPacketsRequest {
+        class QueryUnreceivedPacketsRequest implements IQueryUnreceivedPacketsRequest {
           /**
            * Constructs a new QueryUnreceivedPacketsRequest.
            * @param [p] Properties to set
@@ -9904,7 +12752,7 @@ export namespace ibc {
            * @returns QueryUnreceivedPacketsRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryUnreceivedPacketsRequest
+            properties?: ibc.core.channel.v1.IQueryUnreceivedPacketsRequest,
           ): ibc.core.channel.v1.QueryUnreceivedPacketsRequest;
 
           /**
@@ -9915,7 +12763,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryUnreceivedPacketsRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9928,8 +12776,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryUnreceivedPacketsRequest;
+
+          /**
+           * Creates a QueryUnreceivedPacketsRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryUnreceivedPacketsRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryUnreceivedPacketsRequest;
+
+          /**
+           * Creates a plain object from a QueryUnreceivedPacketsRequest message. Also converts values to other types if specified.
+           * @param m QueryUnreceivedPacketsRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryUnreceivedPacketsRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryUnreceivedPacketsRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryUnreceivedPacketsResponse. */
@@ -9942,8 +12816,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryUnreceivedPacketsResponse. */
-        class QueryUnreceivedPacketsResponse
-          implements IQueryUnreceivedPacketsResponse {
+        class QueryUnreceivedPacketsResponse implements IQueryUnreceivedPacketsResponse {
           /**
            * Constructs a new QueryUnreceivedPacketsResponse.
            * @param [p] Properties to set
@@ -9962,7 +12835,7 @@ export namespace ibc {
            * @returns QueryUnreceivedPacketsResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryUnreceivedPacketsResponse
+            properties?: ibc.core.channel.v1.IQueryUnreceivedPacketsResponse,
           ): ibc.core.channel.v1.QueryUnreceivedPacketsResponse;
 
           /**
@@ -9973,7 +12846,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryUnreceivedPacketsResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -9986,8 +12859,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryUnreceivedPacketsResponse;
+
+          /**
+           * Creates a QueryUnreceivedPacketsResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryUnreceivedPacketsResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryUnreceivedPacketsResponse;
+
+          /**
+           * Creates a plain object from a QueryUnreceivedPacketsResponse message. Also converts values to other types if specified.
+           * @param m QueryUnreceivedPacketsResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryUnreceivedPacketsResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryUnreceivedPacketsResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryUnreceivedAcksRequest. */
@@ -10003,8 +12902,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryUnreceivedAcksRequest. */
-        class QueryUnreceivedAcksRequest
-          implements IQueryUnreceivedAcksRequest {
+        class QueryUnreceivedAcksRequest implements IQueryUnreceivedAcksRequest {
           /**
            * Constructs a new QueryUnreceivedAcksRequest.
            * @param [p] Properties to set
@@ -10026,7 +12924,7 @@ export namespace ibc {
            * @returns QueryUnreceivedAcksRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryUnreceivedAcksRequest
+            properties?: ibc.core.channel.v1.IQueryUnreceivedAcksRequest,
           ): ibc.core.channel.v1.QueryUnreceivedAcksRequest;
 
           /**
@@ -10037,7 +12935,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryUnreceivedAcksRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10050,8 +12948,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryUnreceivedAcksRequest;
+
+          /**
+           * Creates a QueryUnreceivedAcksRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryUnreceivedAcksRequest
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryUnreceivedAcksRequest;
+
+          /**
+           * Creates a plain object from a QueryUnreceivedAcksRequest message. Also converts values to other types if specified.
+           * @param m QueryUnreceivedAcksRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryUnreceivedAcksRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryUnreceivedAcksRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryUnreceivedAcksResponse. */
@@ -10064,8 +12986,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryUnreceivedAcksResponse. */
-        class QueryUnreceivedAcksResponse
-          implements IQueryUnreceivedAcksResponse {
+        class QueryUnreceivedAcksResponse implements IQueryUnreceivedAcksResponse {
           /**
            * Constructs a new QueryUnreceivedAcksResponse.
            * @param [p] Properties to set
@@ -10084,7 +13005,7 @@ export namespace ibc {
            * @returns QueryUnreceivedAcksResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryUnreceivedAcksResponse
+            properties?: ibc.core.channel.v1.IQueryUnreceivedAcksResponse,
           ): ibc.core.channel.v1.QueryUnreceivedAcksResponse;
 
           /**
@@ -10095,7 +13016,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryUnreceivedAcksResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10108,8 +13029,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryUnreceivedAcksResponse;
+
+          /**
+           * Creates a QueryUnreceivedAcksResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryUnreceivedAcksResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.channel.v1.QueryUnreceivedAcksResponse;
+
+          /**
+           * Creates a plain object from a QueryUnreceivedAcksResponse message. Also converts values to other types if specified.
+           * @param m QueryUnreceivedAcksResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryUnreceivedAcksResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryUnreceivedAcksResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryNextSequenceReceiveRequest. */
@@ -10122,8 +13067,7 @@ export namespace ibc {
         }
 
         /** Represents a QueryNextSequenceReceiveRequest. */
-        class QueryNextSequenceReceiveRequest
-          implements IQueryNextSequenceReceiveRequest {
+        class QueryNextSequenceReceiveRequest implements IQueryNextSequenceReceiveRequest {
           /**
            * Constructs a new QueryNextSequenceReceiveRequest.
            * @param [p] Properties to set
@@ -10142,7 +13086,7 @@ export namespace ibc {
            * @returns QueryNextSequenceReceiveRequest instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryNextSequenceReceiveRequest
+            properties?: ibc.core.channel.v1.IQueryNextSequenceReceiveRequest,
           ): ibc.core.channel.v1.QueryNextSequenceReceiveRequest;
 
           /**
@@ -10153,7 +13097,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryNextSequenceReceiveRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10166,8 +13110,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryNextSequenceReceiveRequest;
+
+          /**
+           * Creates a QueryNextSequenceReceiveRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryNextSequenceReceiveRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryNextSequenceReceiveRequest;
+
+          /**
+           * Creates a plain object from a QueryNextSequenceReceiveRequest message. Also converts values to other types if specified.
+           * @param m QueryNextSequenceReceiveRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryNextSequenceReceiveRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryNextSequenceReceiveRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryNextSequenceReceiveResponse. */
@@ -10183,15 +13153,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryNextSequenceReceiveResponse. */
-        class QueryNextSequenceReceiveResponse
-          implements IQueryNextSequenceReceiveResponse {
+        class QueryNextSequenceReceiveResponse implements IQueryNextSequenceReceiveResponse {
           /**
            * Constructs a new QueryNextSequenceReceiveResponse.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.channel.v1.IQueryNextSequenceReceiveResponse
-          );
+          constructor(p?: ibc.core.channel.v1.IQueryNextSequenceReceiveResponse);
 
           /** QueryNextSequenceReceiveResponse nextSequenceReceive. */
           public nextSequenceReceive: Long;
@@ -10208,7 +13175,7 @@ export namespace ibc {
            * @returns QueryNextSequenceReceiveResponse instance
            */
           public static create(
-            properties?: ibc.core.channel.v1.IQueryNextSequenceReceiveResponse
+            properties?: ibc.core.channel.v1.IQueryNextSequenceReceiveResponse,
           ): ibc.core.channel.v1.QueryNextSequenceReceiveResponse;
 
           /**
@@ -10219,7 +13186,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.channel.v1.IQueryNextSequenceReceiveResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10232,8 +13199,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.channel.v1.QueryNextSequenceReceiveResponse;
+
+          /**
+           * Creates a QueryNextSequenceReceiveResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryNextSequenceReceiveResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.channel.v1.QueryNextSequenceReceiveResponse;
+
+          /**
+           * Creates a plain object from a QueryNextSequenceReceiveResponse message. Also converts values to other types if specified.
+           * @param m QueryNextSequenceReceiveResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.channel.v1.QueryNextSequenceReceiveResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryNextSequenceReceiveResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
       }
     }
@@ -10250,11 +13243,7 @@ export namespace ibc {
            * @param [requestDelimited=false] Whether requests are length-delimited
            * @param [responseDelimited=false] Whether responses are length-delimited
            */
-          constructor(
-            rpcImpl: $protobuf.RPCImpl,
-            requestDelimited?: boolean,
-            responseDelimited?: boolean
-          );
+          constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
 
           /**
            * Creates new Msg service using the specified rpc implementation.
@@ -10266,7 +13255,7 @@ export namespace ibc {
           public static create(
             rpcImpl: $protobuf.RPCImpl,
             requestDelimited?: boolean,
-            responseDelimited?: boolean
+            responseDelimited?: boolean,
           ): Msg;
 
           /**
@@ -10276,7 +13265,7 @@ export namespace ibc {
            */
           public createClient(
             request: ibc.core.client.v1.IMsgCreateClient,
-            callback: ibc.core.client.v1.Msg.CreateClientCallback
+            callback: ibc.core.client.v1.Msg.CreateClientCallback,
           ): void;
 
           /**
@@ -10285,7 +13274,7 @@ export namespace ibc {
            * @returns Promise
            */
           public createClient(
-            request: ibc.core.client.v1.IMsgCreateClient
+            request: ibc.core.client.v1.IMsgCreateClient,
           ): Promise<ibc.core.client.v1.MsgCreateClientResponse>;
 
           /**
@@ -10295,7 +13284,7 @@ export namespace ibc {
            */
           public updateClient(
             request: ibc.core.client.v1.IMsgUpdateClient,
-            callback: ibc.core.client.v1.Msg.UpdateClientCallback
+            callback: ibc.core.client.v1.Msg.UpdateClientCallback,
           ): void;
 
           /**
@@ -10304,7 +13293,7 @@ export namespace ibc {
            * @returns Promise
            */
           public updateClient(
-            request: ibc.core.client.v1.IMsgUpdateClient
+            request: ibc.core.client.v1.IMsgUpdateClient,
           ): Promise<ibc.core.client.v1.MsgUpdateClientResponse>;
 
           /**
@@ -10314,7 +13303,7 @@ export namespace ibc {
            */
           public upgradeClient(
             request: ibc.core.client.v1.IMsgUpgradeClient,
-            callback: ibc.core.client.v1.Msg.UpgradeClientCallback
+            callback: ibc.core.client.v1.Msg.UpgradeClientCallback,
           ): void;
 
           /**
@@ -10323,7 +13312,7 @@ export namespace ibc {
            * @returns Promise
            */
           public upgradeClient(
-            request: ibc.core.client.v1.IMsgUpgradeClient
+            request: ibc.core.client.v1.IMsgUpgradeClient,
           ): Promise<ibc.core.client.v1.MsgUpgradeClientResponse>;
 
           /**
@@ -10333,7 +13322,7 @@ export namespace ibc {
            */
           public submitMisbehaviour(
             request: ibc.core.client.v1.IMsgSubmitMisbehaviour,
-            callback: ibc.core.client.v1.Msg.SubmitMisbehaviourCallback
+            callback: ibc.core.client.v1.Msg.SubmitMisbehaviourCallback,
           ): void;
 
           /**
@@ -10342,7 +13331,7 @@ export namespace ibc {
            * @returns Promise
            */
           public submitMisbehaviour(
-            request: ibc.core.client.v1.IMsgSubmitMisbehaviour
+            request: ibc.core.client.v1.IMsgSubmitMisbehaviour,
           ): Promise<ibc.core.client.v1.MsgSubmitMisbehaviourResponse>;
         }
 
@@ -10354,7 +13343,7 @@ export namespace ibc {
            */
           type CreateClientCallback = (
             error: Error | null,
-            response?: ibc.core.client.v1.MsgCreateClientResponse
+            response?: ibc.core.client.v1.MsgCreateClientResponse,
           ) => void;
 
           /**
@@ -10364,7 +13353,7 @@ export namespace ibc {
            */
           type UpdateClientCallback = (
             error: Error | null,
-            response?: ibc.core.client.v1.MsgUpdateClientResponse
+            response?: ibc.core.client.v1.MsgUpdateClientResponse,
           ) => void;
 
           /**
@@ -10374,7 +13363,7 @@ export namespace ibc {
            */
           type UpgradeClientCallback = (
             error: Error | null,
-            response?: ibc.core.client.v1.MsgUpgradeClientResponse
+            response?: ibc.core.client.v1.MsgUpgradeClientResponse,
           ) => void;
 
           /**
@@ -10384,7 +13373,7 @@ export namespace ibc {
            */
           type SubmitMisbehaviourCallback = (
             error: Error | null,
-            response?: ibc.core.client.v1.MsgSubmitMisbehaviourResponse
+            response?: ibc.core.client.v1.MsgSubmitMisbehaviourResponse,
           ) => void;
         }
 
@@ -10429,7 +13418,7 @@ export namespace ibc {
            * @returns MsgCreateClient instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IMsgCreateClient
+            properties?: ibc.core.client.v1.IMsgCreateClient,
           ): ibc.core.client.v1.MsgCreateClient;
 
           /**
@@ -10440,7 +13429,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IMsgCreateClient,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10453,8 +13442,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.MsgCreateClient;
+
+          /**
+           * Creates a MsgCreateClient message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MsgCreateClient
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.MsgCreateClient;
+
+          /**
+           * Creates a plain object from a MsgCreateClient message. Also converts values to other types if specified.
+           * @param m MsgCreateClient
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.MsgCreateClient,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MsgCreateClient to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MsgCreateClientResponse. */
@@ -10474,7 +13487,7 @@ export namespace ibc {
            * @returns MsgCreateClientResponse instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IMsgCreateClientResponse
+            properties?: ibc.core.client.v1.IMsgCreateClientResponse,
           ): ibc.core.client.v1.MsgCreateClientResponse;
 
           /**
@@ -10485,7 +13498,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IMsgCreateClientResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10498,8 +13511,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.MsgCreateClientResponse;
+
+          /**
+           * Creates a MsgCreateClientResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MsgCreateClientResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.MsgCreateClientResponse;
+
+          /**
+           * Creates a plain object from a MsgCreateClientResponse message. Also converts values to other types if specified.
+           * @param m MsgCreateClientResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.MsgCreateClientResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MsgCreateClientResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MsgUpdateClient. */
@@ -10537,7 +13574,7 @@ export namespace ibc {
            * @returns MsgUpdateClient instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IMsgUpdateClient
+            properties?: ibc.core.client.v1.IMsgUpdateClient,
           ): ibc.core.client.v1.MsgUpdateClient;
 
           /**
@@ -10548,7 +13585,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IMsgUpdateClient,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10561,8 +13598,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.MsgUpdateClient;
+
+          /**
+           * Creates a MsgUpdateClient message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MsgUpdateClient
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.MsgUpdateClient;
+
+          /**
+           * Creates a plain object from a MsgUpdateClient message. Also converts values to other types if specified.
+           * @param m MsgUpdateClient
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.MsgUpdateClient,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MsgUpdateClient to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MsgUpdateClientResponse. */
@@ -10582,7 +13643,7 @@ export namespace ibc {
            * @returns MsgUpdateClientResponse instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IMsgUpdateClientResponse
+            properties?: ibc.core.client.v1.IMsgUpdateClientResponse,
           ): ibc.core.client.v1.MsgUpdateClientResponse;
 
           /**
@@ -10593,7 +13654,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IMsgUpdateClientResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10606,8 +13667,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.MsgUpdateClientResponse;
+
+          /**
+           * Creates a MsgUpdateClientResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MsgUpdateClientResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.MsgUpdateClientResponse;
+
+          /**
+           * Creates a plain object from a MsgUpdateClientResponse message. Also converts values to other types if specified.
+           * @param m MsgUpdateClientResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.MsgUpdateClientResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MsgUpdateClientResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MsgUpgradeClient. */
@@ -10657,7 +13742,7 @@ export namespace ibc {
            * @returns MsgUpgradeClient instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IMsgUpgradeClient
+            properties?: ibc.core.client.v1.IMsgUpgradeClient,
           ): ibc.core.client.v1.MsgUpgradeClient;
 
           /**
@@ -10668,7 +13753,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IMsgUpgradeClient,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10681,8 +13766,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.MsgUpgradeClient;
+
+          /**
+           * Creates a MsgUpgradeClient message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MsgUpgradeClient
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.MsgUpgradeClient;
+
+          /**
+           * Creates a plain object from a MsgUpgradeClient message. Also converts values to other types if specified.
+           * @param m MsgUpgradeClient
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.MsgUpgradeClient,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MsgUpgradeClient to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MsgUpgradeClientResponse. */
@@ -10702,7 +13811,7 @@ export namespace ibc {
            * @returns MsgUpgradeClientResponse instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IMsgUpgradeClientResponse
+            properties?: ibc.core.client.v1.IMsgUpgradeClientResponse,
           ): ibc.core.client.v1.MsgUpgradeClientResponse;
 
           /**
@@ -10713,7 +13822,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IMsgUpgradeClientResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10726,8 +13835,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.MsgUpgradeClientResponse;
+
+          /**
+           * Creates a MsgUpgradeClientResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MsgUpgradeClientResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.MsgUpgradeClientResponse;
+
+          /**
+           * Creates a plain object from a MsgUpgradeClientResponse message. Also converts values to other types if specified.
+           * @param m MsgUpgradeClientResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.MsgUpgradeClientResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MsgUpgradeClientResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MsgSubmitMisbehaviour. */
@@ -10765,7 +13898,7 @@ export namespace ibc {
            * @returns MsgSubmitMisbehaviour instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IMsgSubmitMisbehaviour
+            properties?: ibc.core.client.v1.IMsgSubmitMisbehaviour,
           ): ibc.core.client.v1.MsgSubmitMisbehaviour;
 
           /**
@@ -10776,7 +13909,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IMsgSubmitMisbehaviour,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10789,16 +13922,39 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.MsgSubmitMisbehaviour;
+
+          /**
+           * Creates a MsgSubmitMisbehaviour message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MsgSubmitMisbehaviour
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.MsgSubmitMisbehaviour;
+
+          /**
+           * Creates a plain object from a MsgSubmitMisbehaviour message. Also converts values to other types if specified.
+           * @param m MsgSubmitMisbehaviour
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.MsgSubmitMisbehaviour,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MsgSubmitMisbehaviour to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MsgSubmitMisbehaviourResponse. */
         interface IMsgSubmitMisbehaviourResponse {}
 
         /** Represents a MsgSubmitMisbehaviourResponse. */
-        class MsgSubmitMisbehaviourResponse
-          implements IMsgSubmitMisbehaviourResponse {
+        class MsgSubmitMisbehaviourResponse implements IMsgSubmitMisbehaviourResponse {
           /**
            * Constructs a new MsgSubmitMisbehaviourResponse.
            * @param [p] Properties to set
@@ -10811,7 +13967,7 @@ export namespace ibc {
            * @returns MsgSubmitMisbehaviourResponse instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IMsgSubmitMisbehaviourResponse
+            properties?: ibc.core.client.v1.IMsgSubmitMisbehaviourResponse,
           ): ibc.core.client.v1.MsgSubmitMisbehaviourResponse;
 
           /**
@@ -10822,7 +13978,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IMsgSubmitMisbehaviourResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10835,8 +13991,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.MsgSubmitMisbehaviourResponse;
+
+          /**
+           * Creates a MsgSubmitMisbehaviourResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MsgSubmitMisbehaviourResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.MsgSubmitMisbehaviourResponse;
+
+          /**
+           * Creates a plain object from a MsgSubmitMisbehaviourResponse message. Also converts values to other types if specified.
+           * @param m MsgSubmitMisbehaviourResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.MsgSubmitMisbehaviourResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MsgSubmitMisbehaviourResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an IdentifiedClientState. */
@@ -10868,7 +14048,7 @@ export namespace ibc {
            * @returns IdentifiedClientState instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IIdentifiedClientState
+            properties?: ibc.core.client.v1.IIdentifiedClientState,
           ): ibc.core.client.v1.IdentifiedClientState;
 
           /**
@@ -10879,7 +14059,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IIdentifiedClientState,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10892,8 +14072,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.IdentifiedClientState;
+
+          /**
+           * Creates an IdentifiedClientState message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns IdentifiedClientState
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.IdentifiedClientState;
+
+          /**
+           * Creates a plain object from an IdentifiedClientState message. Also converts values to other types if specified.
+           * @param m IdentifiedClientState
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.IdentifiedClientState,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this IdentifiedClientState to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ConsensusStateWithHeight. */
@@ -10925,7 +14129,7 @@ export namespace ibc {
            * @returns ConsensusStateWithHeight instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IConsensusStateWithHeight
+            properties?: ibc.core.client.v1.IConsensusStateWithHeight,
           ): ibc.core.client.v1.ConsensusStateWithHeight;
 
           /**
@@ -10936,7 +14140,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IConsensusStateWithHeight,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -10949,8 +14153,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.ConsensusStateWithHeight;
+
+          /**
+           * Creates a ConsensusStateWithHeight message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns ConsensusStateWithHeight
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.ConsensusStateWithHeight;
+
+          /**
+           * Creates a plain object from a ConsensusStateWithHeight message. Also converts values to other types if specified.
+           * @param m ConsensusStateWithHeight
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.ConsensusStateWithHeight,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this ConsensusStateWithHeight to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ClientConsensusStates. */
@@ -10959,9 +14187,7 @@ export namespace ibc {
           clientId?: string | null;
 
           /** ClientConsensusStates consensusStates */
-          consensusStates?:
-            | ibc.core.client.v1.IConsensusStateWithHeight[]
-            | null;
+          consensusStates?: ibc.core.client.v1.IConsensusStateWithHeight[] | null;
         }
 
         /** Represents a ClientConsensusStates. */
@@ -10984,7 +14210,7 @@ export namespace ibc {
            * @returns ClientConsensusStates instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IClientConsensusStates
+            properties?: ibc.core.client.v1.IClientConsensusStates,
           ): ibc.core.client.v1.ClientConsensusStates;
 
           /**
@@ -10995,7 +14221,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IClientConsensusStates,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11008,8 +14234,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.ClientConsensusStates;
+
+          /**
+           * Creates a ClientConsensusStates message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns ClientConsensusStates
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.ClientConsensusStates;
+
+          /**
+           * Creates a plain object from a ClientConsensusStates message. Also converts values to other types if specified.
+           * @param m ClientConsensusStates
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.ClientConsensusStates,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this ClientConsensusStates to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ClientUpdateProposal. */
@@ -11053,7 +14303,7 @@ export namespace ibc {
            * @returns ClientUpdateProposal instance
            */
           public static create(
-            properties?: ibc.core.client.v1.IClientUpdateProposal
+            properties?: ibc.core.client.v1.IClientUpdateProposal,
           ): ibc.core.client.v1.ClientUpdateProposal;
 
           /**
@@ -11064,7 +14314,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.client.v1.IClientUpdateProposal,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11077,8 +14327,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.client.v1.ClientUpdateProposal;
+
+          /**
+           * Creates a ClientUpdateProposal message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns ClientUpdateProposal
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.ClientUpdateProposal;
+
+          /**
+           * Creates a plain object from a ClientUpdateProposal message. Also converts values to other types if specified.
+           * @param m ClientUpdateProposal
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.ClientUpdateProposal,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this ClientUpdateProposal to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an Height. */
@@ -11109,9 +14383,7 @@ export namespace ibc {
            * @param [properties] Properties to set
            * @returns Height instance
            */
-          public static create(
-            properties?: ibc.core.client.v1.IHeight
-          ): ibc.core.client.v1.Height;
+          public static create(properties?: ibc.core.client.v1.IHeight): ibc.core.client.v1.Height;
 
           /**
            * Encodes the specified Height message. Does not implicitly {@link ibc.core.client.v1.Height.verify|verify} messages.
@@ -11119,10 +14391,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.client.v1.IHeight,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.client.v1.IHeight, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes an Height message from the specified reader or buffer.
@@ -11132,10 +14401,31 @@ export namespace ibc {
            * @throws {Error} If the payload is not a reader or valid buffer
            * @throws {$protobuf.util.ProtocolError} If required fields are missing
            */
-          public static decode(
-            r: $protobuf.Reader | Uint8Array,
-            l?: number
-          ): ibc.core.client.v1.Height;
+          public static decode(r: $protobuf.Reader | Uint8Array, l?: number): ibc.core.client.v1.Height;
+
+          /**
+           * Creates an Height message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Height
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.Height;
+
+          /**
+           * Creates a plain object from an Height message. Also converts values to other types if specified.
+           * @param m Height
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.client.v1.Height,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Height to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
       }
     }
@@ -11167,7 +14457,7 @@ export namespace ibc {
            * @returns MerkleRoot instance
            */
           public static create(
-            properties?: ibc.core.commitment.v1.IMerkleRoot
+            properties?: ibc.core.commitment.v1.IMerkleRoot,
           ): ibc.core.commitment.v1.MerkleRoot;
 
           /**
@@ -11176,10 +14466,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.commitment.v1.IMerkleRoot,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.commitment.v1.IMerkleRoot, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a MerkleRoot message from the specified reader or buffer.
@@ -11191,8 +14478,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.commitment.v1.MerkleRoot;
+
+          /**
+           * Creates a MerkleRoot message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MerkleRoot
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.commitment.v1.MerkleRoot;
+
+          /**
+           * Creates a plain object from a MerkleRoot message. Also converts values to other types if specified.
+           * @param m MerkleRoot
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.commitment.v1.MerkleRoot,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MerkleRoot to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MerklePrefix. */
@@ -11218,7 +14529,7 @@ export namespace ibc {
            * @returns MerklePrefix instance
            */
           public static create(
-            properties?: ibc.core.commitment.v1.IMerklePrefix
+            properties?: ibc.core.commitment.v1.IMerklePrefix,
           ): ibc.core.commitment.v1.MerklePrefix;
 
           /**
@@ -11229,7 +14540,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.commitment.v1.IMerklePrefix,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11242,8 +14553,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.commitment.v1.MerklePrefix;
+
+          /**
+           * Creates a MerklePrefix message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MerklePrefix
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.commitment.v1.MerklePrefix;
+
+          /**
+           * Creates a plain object from a MerklePrefix message. Also converts values to other types if specified.
+           * @param m MerklePrefix
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.commitment.v1.MerklePrefix,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MerklePrefix to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MerklePath. */
@@ -11269,7 +14604,7 @@ export namespace ibc {
            * @returns MerklePath instance
            */
           public static create(
-            properties?: ibc.core.commitment.v1.IMerklePath
+            properties?: ibc.core.commitment.v1.IMerklePath,
           ): ibc.core.commitment.v1.MerklePath;
 
           /**
@@ -11278,10 +14613,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.commitment.v1.IMerklePath,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.commitment.v1.IMerklePath, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a MerklePath message from the specified reader or buffer.
@@ -11293,8 +14625,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.commitment.v1.MerklePath;
+
+          /**
+           * Creates a MerklePath message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MerklePath
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.commitment.v1.MerklePath;
+
+          /**
+           * Creates a plain object from a MerklePath message. Also converts values to other types if specified.
+           * @param m MerklePath
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.commitment.v1.MerklePath,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MerklePath to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MerkleProof. */
@@ -11320,7 +14676,7 @@ export namespace ibc {
            * @returns MerkleProof instance
            */
           public static create(
-            properties?: ibc.core.commitment.v1.IMerkleProof
+            properties?: ibc.core.commitment.v1.IMerkleProof,
           ): ibc.core.commitment.v1.MerkleProof;
 
           /**
@@ -11331,7 +14687,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.commitment.v1.IMerkleProof,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11344,8 +14700,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.commitment.v1.MerkleProof;
+
+          /**
+           * Creates a MerkleProof message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns MerkleProof
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.commitment.v1.MerkleProof;
+
+          /**
+           * Creates a plain object from a MerkleProof message. Also converts values to other types if specified.
+           * @param m MerkleProof
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.commitment.v1.MerkleProof,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this MerkleProof to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a KeyPath. */
@@ -11370,9 +14750,7 @@ export namespace ibc {
            * @param [properties] Properties to set
            * @returns KeyPath instance
            */
-          public static create(
-            properties?: ibc.core.commitment.v1.IKeyPath
-          ): ibc.core.commitment.v1.KeyPath;
+          public static create(properties?: ibc.core.commitment.v1.IKeyPath): ibc.core.commitment.v1.KeyPath;
 
           /**
            * Encodes the specified KeyPath message. Does not implicitly {@link ibc.core.commitment.v1.KeyPath.verify|verify} messages.
@@ -11380,10 +14758,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.commitment.v1.IKeyPath,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.commitment.v1.IKeyPath, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a KeyPath message from the specified reader or buffer.
@@ -11393,10 +14768,31 @@ export namespace ibc {
            * @throws {Error} If the payload is not a reader or valid buffer
            * @throws {$protobuf.util.ProtocolError} If required fields are missing
            */
-          public static decode(
-            r: $protobuf.Reader | Uint8Array,
-            l?: number
-          ): ibc.core.commitment.v1.KeyPath;
+          public static decode(r: $protobuf.Reader | Uint8Array, l?: number): ibc.core.commitment.v1.KeyPath;
+
+          /**
+           * Creates a KeyPath message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns KeyPath
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.commitment.v1.KeyPath;
+
+          /**
+           * Creates a plain object from a KeyPath message. Also converts values to other types if specified.
+           * @param m KeyPath
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.commitment.v1.KeyPath,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this KeyPath to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a Key. */
@@ -11427,9 +14823,7 @@ export namespace ibc {
            * @param [properties] Properties to set
            * @returns Key instance
            */
-          public static create(
-            properties?: ibc.core.commitment.v1.IKey
-          ): ibc.core.commitment.v1.Key;
+          public static create(properties?: ibc.core.commitment.v1.IKey): ibc.core.commitment.v1.Key;
 
           /**
            * Encodes the specified Key message. Does not implicitly {@link ibc.core.commitment.v1.Key.verify|verify} messages.
@@ -11437,10 +14831,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.commitment.v1.IKey,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.commitment.v1.IKey, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a Key message from the specified reader or buffer.
@@ -11450,16 +14841,37 @@ export namespace ibc {
            * @throws {Error} If the payload is not a reader or valid buffer
            * @throws {$protobuf.util.ProtocolError} If required fields are missing
            */
-          public static decode(
-            r: $protobuf.Reader | Uint8Array,
-            l?: number
-          ): ibc.core.commitment.v1.Key;
+          public static decode(r: $protobuf.Reader | Uint8Array, l?: number): ibc.core.commitment.v1.Key;
+
+          /**
+           * Creates a Key message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Key
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.commitment.v1.Key;
+
+          /**
+           * Creates a plain object from a Key message. Also converts values to other types if specified.
+           * @param m Key
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.commitment.v1.Key,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Key to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** KeyEncoding enum. */
         enum KeyEncoding {
           KEY_ENCODING_URL_UNSPECIFIED = 0,
-          KEY_ENCODING_HEX = 1
+          KEY_ENCODING_HEX = 1,
         }
       }
     }
@@ -11509,7 +14921,7 @@ export namespace ibc {
            * @returns ConnectionEnd instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IConnectionEnd
+            properties?: ibc.core.connection.v1.IConnectionEnd,
           ): ibc.core.connection.v1.ConnectionEnd;
 
           /**
@@ -11520,7 +14932,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IConnectionEnd,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11533,8 +14945,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.ConnectionEnd;
+
+          /**
+           * Creates a ConnectionEnd message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns ConnectionEnd
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.ConnectionEnd;
+
+          /**
+           * Creates a plain object from a ConnectionEnd message. Also converts values to other types if specified.
+           * @param m ConnectionEnd
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.ConnectionEnd,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this ConnectionEnd to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an IdentifiedConnection. */
@@ -11584,7 +15020,7 @@ export namespace ibc {
            * @returns IdentifiedConnection instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IIdentifiedConnection
+            properties?: ibc.core.connection.v1.IIdentifiedConnection,
           ): ibc.core.connection.v1.IdentifiedConnection;
 
           /**
@@ -11595,7 +15031,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IIdentifiedConnection,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11608,8 +15044,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.IdentifiedConnection;
+
+          /**
+           * Creates an IdentifiedConnection message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns IdentifiedConnection
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.IdentifiedConnection;
+
+          /**
+           * Creates a plain object from an IdentifiedConnection message. Also converts values to other types if specified.
+           * @param m IdentifiedConnection
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.IdentifiedConnection,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this IdentifiedConnection to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** State enum. */
@@ -11617,7 +15077,7 @@ export namespace ibc {
           STATE_UNINITIALIZED_UNSPECIFIED = 0,
           STATE_INIT = 1,
           STATE_TRYOPEN = 2,
-          STATE_OPEN = 3
+          STATE_OPEN = 3,
         }
 
         /** Properties of a Counterparty. */
@@ -11655,7 +15115,7 @@ export namespace ibc {
            * @returns Counterparty instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.ICounterparty
+            properties?: ibc.core.connection.v1.ICounterparty,
           ): ibc.core.connection.v1.Counterparty;
 
           /**
@@ -11666,7 +15126,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.ICounterparty,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11679,8 +15139,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.Counterparty;
+
+          /**
+           * Creates a Counterparty message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Counterparty
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.Counterparty;
+
+          /**
+           * Creates a plain object from a Counterparty message. Also converts values to other types if specified.
+           * @param m Counterparty
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.Counterparty,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Counterparty to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ClientPaths. */
@@ -11706,7 +15190,7 @@ export namespace ibc {
            * @returns ClientPaths instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IClientPaths
+            properties?: ibc.core.connection.v1.IClientPaths,
           ): ibc.core.connection.v1.ClientPaths;
 
           /**
@@ -11717,7 +15201,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IClientPaths,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11730,8 +15214,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.ClientPaths;
+
+          /**
+           * Creates a ClientPaths message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns ClientPaths
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.ClientPaths;
+
+          /**
+           * Creates a plain object from a ClientPaths message. Also converts values to other types if specified.
+           * @param m ClientPaths
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.ClientPaths,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this ClientPaths to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ConnectionPaths. */
@@ -11763,7 +15271,7 @@ export namespace ibc {
            * @returns ConnectionPaths instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IConnectionPaths
+            properties?: ibc.core.connection.v1.IConnectionPaths,
           ): ibc.core.connection.v1.ConnectionPaths;
 
           /**
@@ -11774,7 +15282,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IConnectionPaths,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -11787,8 +15295,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.ConnectionPaths;
+
+          /**
+           * Creates a ConnectionPaths message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns ConnectionPaths
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.ConnectionPaths;
+
+          /**
+           * Creates a plain object from a ConnectionPaths message. Also converts values to other types if specified.
+           * @param m ConnectionPaths
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.ConnectionPaths,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this ConnectionPaths to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a Version. */
@@ -11819,9 +15351,7 @@ export namespace ibc {
            * @param [properties] Properties to set
            * @returns Version instance
            */
-          public static create(
-            properties?: ibc.core.connection.v1.IVersion
-          ): ibc.core.connection.v1.Version;
+          public static create(properties?: ibc.core.connection.v1.IVersion): ibc.core.connection.v1.Version;
 
           /**
            * Encodes the specified Version message. Does not implicitly {@link ibc.core.connection.v1.Version.verify|verify} messages.
@@ -11829,10 +15359,7 @@ export namespace ibc {
            * @param [w] Writer to encode to
            * @returns Writer
            */
-          public static encode(
-            m: ibc.core.connection.v1.IVersion,
-            w?: $protobuf.Writer
-          ): $protobuf.Writer;
+          public static encode(m: ibc.core.connection.v1.IVersion, w?: $protobuf.Writer): $protobuf.Writer;
 
           /**
            * Decodes a Version message from the specified reader or buffer.
@@ -11842,10 +15369,31 @@ export namespace ibc {
            * @throws {Error} If the payload is not a reader or valid buffer
            * @throws {$protobuf.util.ProtocolError} If required fields are missing
            */
-          public static decode(
-            r: $protobuf.Reader | Uint8Array,
-            l?: number
-          ): ibc.core.connection.v1.Version;
+          public static decode(r: $protobuf.Reader | Uint8Array, l?: number): ibc.core.connection.v1.Version;
+
+          /**
+           * Creates a Version message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns Version
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.Version;
+
+          /**
+           * Creates a plain object from a Version message. Also converts values to other types if specified.
+           * @param m Version
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.Version,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this Version to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Represents a Query */
@@ -11856,11 +15404,7 @@ export namespace ibc {
            * @param [requestDelimited=false] Whether requests are length-delimited
            * @param [responseDelimited=false] Whether responses are length-delimited
            */
-          constructor(
-            rpcImpl: $protobuf.RPCImpl,
-            requestDelimited?: boolean,
-            responseDelimited?: boolean
-          );
+          constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
 
           /**
            * Creates new Query service using the specified rpc implementation.
@@ -11872,7 +15416,7 @@ export namespace ibc {
           public static create(
             rpcImpl: $protobuf.RPCImpl,
             requestDelimited?: boolean,
-            responseDelimited?: boolean
+            responseDelimited?: boolean,
           ): Query;
 
           /**
@@ -11882,7 +15426,7 @@ export namespace ibc {
            */
           public connection(
             request: ibc.core.connection.v1.IQueryConnectionRequest,
-            callback: ibc.core.connection.v1.Query.ConnectionCallback
+            callback: ibc.core.connection.v1.Query.ConnectionCallback,
           ): void;
 
           /**
@@ -11891,7 +15435,7 @@ export namespace ibc {
            * @returns Promise
            */
           public connection(
-            request: ibc.core.connection.v1.IQueryConnectionRequest
+            request: ibc.core.connection.v1.IQueryConnectionRequest,
           ): Promise<ibc.core.connection.v1.QueryConnectionResponse>;
 
           /**
@@ -11901,7 +15445,7 @@ export namespace ibc {
            */
           public connections(
             request: ibc.core.connection.v1.IQueryConnectionsRequest,
-            callback: ibc.core.connection.v1.Query.ConnectionsCallback
+            callback: ibc.core.connection.v1.Query.ConnectionsCallback,
           ): void;
 
           /**
@@ -11910,7 +15454,7 @@ export namespace ibc {
            * @returns Promise
            */
           public connections(
-            request: ibc.core.connection.v1.IQueryConnectionsRequest
+            request: ibc.core.connection.v1.IQueryConnectionsRequest,
           ): Promise<ibc.core.connection.v1.QueryConnectionsResponse>;
 
           /**
@@ -11920,7 +15464,7 @@ export namespace ibc {
            */
           public clientConnections(
             request: ibc.core.connection.v1.IQueryClientConnectionsRequest,
-            callback: ibc.core.connection.v1.Query.ClientConnectionsCallback
+            callback: ibc.core.connection.v1.Query.ClientConnectionsCallback,
           ): void;
 
           /**
@@ -11929,7 +15473,7 @@ export namespace ibc {
            * @returns Promise
            */
           public clientConnections(
-            request: ibc.core.connection.v1.IQueryClientConnectionsRequest
+            request: ibc.core.connection.v1.IQueryClientConnectionsRequest,
           ): Promise<ibc.core.connection.v1.QueryClientConnectionsResponse>;
 
           /**
@@ -11939,7 +15483,7 @@ export namespace ibc {
            */
           public connectionClientState(
             request: ibc.core.connection.v1.IQueryConnectionClientStateRequest,
-            callback: ibc.core.connection.v1.Query.ConnectionClientStateCallback
+            callback: ibc.core.connection.v1.Query.ConnectionClientStateCallback,
           ): void;
 
           /**
@@ -11948,7 +15492,7 @@ export namespace ibc {
            * @returns Promise
            */
           public connectionClientState(
-            request: ibc.core.connection.v1.IQueryConnectionClientStateRequest
+            request: ibc.core.connection.v1.IQueryConnectionClientStateRequest,
           ): Promise<ibc.core.connection.v1.QueryConnectionClientStateResponse>;
 
           /**
@@ -11958,7 +15502,7 @@ export namespace ibc {
            */
           public connectionConsensusState(
             request: ibc.core.connection.v1.IQueryConnectionConsensusStateRequest,
-            callback: ibc.core.connection.v1.Query.ConnectionConsensusStateCallback
+            callback: ibc.core.connection.v1.Query.ConnectionConsensusStateCallback,
           ): void;
 
           /**
@@ -11967,10 +15511,8 @@ export namespace ibc {
            * @returns Promise
            */
           public connectionConsensusState(
-            request: ibc.core.connection.v1.IQueryConnectionConsensusStateRequest
-          ): Promise<
-            ibc.core.connection.v1.QueryConnectionConsensusStateResponse
-          >;
+            request: ibc.core.connection.v1.IQueryConnectionConsensusStateRequest,
+          ): Promise<ibc.core.connection.v1.QueryConnectionConsensusStateResponse>;
         }
 
         namespace Query {
@@ -11981,7 +15523,7 @@ export namespace ibc {
            */
           type ConnectionCallback = (
             error: Error | null,
-            response?: ibc.core.connection.v1.QueryConnectionResponse
+            response?: ibc.core.connection.v1.QueryConnectionResponse,
           ) => void;
 
           /**
@@ -11991,7 +15533,7 @@ export namespace ibc {
            */
           type ConnectionsCallback = (
             error: Error | null,
-            response?: ibc.core.connection.v1.QueryConnectionsResponse
+            response?: ibc.core.connection.v1.QueryConnectionsResponse,
           ) => void;
 
           /**
@@ -12001,7 +15543,7 @@ export namespace ibc {
            */
           type ClientConnectionsCallback = (
             error: Error | null,
-            response?: ibc.core.connection.v1.QueryClientConnectionsResponse
+            response?: ibc.core.connection.v1.QueryClientConnectionsResponse,
           ) => void;
 
           /**
@@ -12011,7 +15553,7 @@ export namespace ibc {
            */
           type ConnectionClientStateCallback = (
             error: Error | null,
-            response?: ibc.core.connection.v1.QueryConnectionClientStateResponse
+            response?: ibc.core.connection.v1.QueryConnectionClientStateResponse,
           ) => void;
 
           /**
@@ -12021,7 +15563,7 @@ export namespace ibc {
            */
           type ConnectionConsensusStateCallback = (
             error: Error | null,
-            response?: ibc.core.connection.v1.QueryConnectionConsensusStateResponse
+            response?: ibc.core.connection.v1.QueryConnectionConsensusStateResponse,
           ) => void;
         }
 
@@ -12048,7 +15590,7 @@ export namespace ibc {
            * @returns QueryConnectionRequest instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryConnectionRequest
+            properties?: ibc.core.connection.v1.IQueryConnectionRequest,
           ): ibc.core.connection.v1.QueryConnectionRequest;
 
           /**
@@ -12059,7 +15601,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryConnectionRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12072,8 +15614,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryConnectionRequest;
+
+          /**
+           * Creates a QueryConnectionRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionRequest
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.QueryConnectionRequest;
+
+          /**
+           * Creates a plain object from a QueryConnectionRequest message. Also converts values to other types if specified.
+           * @param m QueryConnectionRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryConnectionRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionResponse. */
@@ -12111,7 +15677,7 @@ export namespace ibc {
            * @returns QueryConnectionResponse instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryConnectionResponse
+            properties?: ibc.core.connection.v1.IQueryConnectionResponse,
           ): ibc.core.connection.v1.QueryConnectionResponse;
 
           /**
@@ -12122,7 +15688,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryConnectionResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12135,8 +15701,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryConnectionResponse;
+
+          /**
+           * Creates a QueryConnectionResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.QueryConnectionResponse;
+
+          /**
+           * Creates a plain object from a QueryConnectionResponse message. Also converts values to other types if specified.
+           * @param m QueryConnectionResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryConnectionResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionsRequest. */
@@ -12162,7 +15752,7 @@ export namespace ibc {
            * @returns QueryConnectionsRequest instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryConnectionsRequest
+            properties?: ibc.core.connection.v1.IQueryConnectionsRequest,
           ): ibc.core.connection.v1.QueryConnectionsRequest;
 
           /**
@@ -12173,7 +15763,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryConnectionsRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12186,8 +15776,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryConnectionsRequest;
+
+          /**
+           * Creates a QueryConnectionsRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionsRequest
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.QueryConnectionsRequest;
+
+          /**
+           * Creates a plain object from a QueryConnectionsRequest message. Also converts values to other types if specified.
+           * @param m QueryConnectionsRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryConnectionsRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionsRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionsResponse. */
@@ -12225,7 +15839,7 @@ export namespace ibc {
            * @returns QueryConnectionsResponse instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryConnectionsResponse
+            properties?: ibc.core.connection.v1.IQueryConnectionsResponse,
           ): ibc.core.connection.v1.QueryConnectionsResponse;
 
           /**
@@ -12236,7 +15850,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryConnectionsResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12249,8 +15863,32 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryConnectionsResponse;
+
+          /**
+           * Creates a QueryConnectionsResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionsResponse
+           */
+          public static fromObject(d: { [k: string]: any }): ibc.core.connection.v1.QueryConnectionsResponse;
+
+          /**
+           * Creates a plain object from a QueryConnectionsResponse message. Also converts values to other types if specified.
+           * @param m QueryConnectionsResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryConnectionsResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionsResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryClientConnectionsRequest. */
@@ -12260,15 +15898,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryClientConnectionsRequest. */
-        class QueryClientConnectionsRequest
-          implements IQueryClientConnectionsRequest {
+        class QueryClientConnectionsRequest implements IQueryClientConnectionsRequest {
           /**
            * Constructs a new QueryClientConnectionsRequest.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.connection.v1.IQueryClientConnectionsRequest
-          );
+          constructor(p?: ibc.core.connection.v1.IQueryClientConnectionsRequest);
 
           /** QueryClientConnectionsRequest clientId. */
           public clientId: string;
@@ -12279,7 +15914,7 @@ export namespace ibc {
            * @returns QueryClientConnectionsRequest instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryClientConnectionsRequest
+            properties?: ibc.core.connection.v1.IQueryClientConnectionsRequest,
           ): ibc.core.connection.v1.QueryClientConnectionsRequest;
 
           /**
@@ -12290,7 +15925,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryClientConnectionsRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12303,8 +15938,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryClientConnectionsRequest;
+
+          /**
+           * Creates a QueryClientConnectionsRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryClientConnectionsRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.connection.v1.QueryClientConnectionsRequest;
+
+          /**
+           * Creates a plain object from a QueryClientConnectionsRequest message. Also converts values to other types if specified.
+           * @param m QueryClientConnectionsRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryClientConnectionsRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryClientConnectionsRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryClientConnectionsResponse. */
@@ -12320,15 +15981,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryClientConnectionsResponse. */
-        class QueryClientConnectionsResponse
-          implements IQueryClientConnectionsResponse {
+        class QueryClientConnectionsResponse implements IQueryClientConnectionsResponse {
           /**
            * Constructs a new QueryClientConnectionsResponse.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.connection.v1.IQueryClientConnectionsResponse
-          );
+          constructor(p?: ibc.core.connection.v1.IQueryClientConnectionsResponse);
 
           /** QueryClientConnectionsResponse connectionPaths. */
           public connectionPaths: string[];
@@ -12345,7 +16003,7 @@ export namespace ibc {
            * @returns QueryClientConnectionsResponse instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryClientConnectionsResponse
+            properties?: ibc.core.connection.v1.IQueryClientConnectionsResponse,
           ): ibc.core.connection.v1.QueryClientConnectionsResponse;
 
           /**
@@ -12356,7 +16014,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryClientConnectionsResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12369,8 +16027,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryClientConnectionsResponse;
+
+          /**
+           * Creates a QueryClientConnectionsResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryClientConnectionsResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.connection.v1.QueryClientConnectionsResponse;
+
+          /**
+           * Creates a plain object from a QueryClientConnectionsResponse message. Also converts values to other types if specified.
+           * @param m QueryClientConnectionsResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryClientConnectionsResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryClientConnectionsResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionClientStateRequest. */
@@ -12380,15 +16064,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryConnectionClientStateRequest. */
-        class QueryConnectionClientStateRequest
-          implements IQueryConnectionClientStateRequest {
+        class QueryConnectionClientStateRequest implements IQueryConnectionClientStateRequest {
           /**
            * Constructs a new QueryConnectionClientStateRequest.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.connection.v1.IQueryConnectionClientStateRequest
-          );
+          constructor(p?: ibc.core.connection.v1.IQueryConnectionClientStateRequest);
 
           /** QueryConnectionClientStateRequest connectionId. */
           public connectionId: string;
@@ -12399,7 +16080,7 @@ export namespace ibc {
            * @returns QueryConnectionClientStateRequest instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryConnectionClientStateRequest
+            properties?: ibc.core.connection.v1.IQueryConnectionClientStateRequest,
           ): ibc.core.connection.v1.QueryConnectionClientStateRequest;
 
           /**
@@ -12410,7 +16091,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryConnectionClientStateRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12423,8 +16104,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryConnectionClientStateRequest;
+
+          /**
+           * Creates a QueryConnectionClientStateRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionClientStateRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.connection.v1.QueryConnectionClientStateRequest;
+
+          /**
+           * Creates a plain object from a QueryConnectionClientStateRequest message. Also converts values to other types if specified.
+           * @param m QueryConnectionClientStateRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryConnectionClientStateRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionClientStateRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionClientStateResponse. */
@@ -12440,15 +16147,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryConnectionClientStateResponse. */
-        class QueryConnectionClientStateResponse
-          implements IQueryConnectionClientStateResponse {
+        class QueryConnectionClientStateResponse implements IQueryConnectionClientStateResponse {
           /**
            * Constructs a new QueryConnectionClientStateResponse.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.connection.v1.IQueryConnectionClientStateResponse
-          );
+          constructor(p?: ibc.core.connection.v1.IQueryConnectionClientStateResponse);
 
           /** QueryConnectionClientStateResponse identifiedClientState. */
           public identifiedClientState?: ibc.core.client.v1.IIdentifiedClientState | null;
@@ -12465,7 +16169,7 @@ export namespace ibc {
            * @returns QueryConnectionClientStateResponse instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryConnectionClientStateResponse
+            properties?: ibc.core.connection.v1.IQueryConnectionClientStateResponse,
           ): ibc.core.connection.v1.QueryConnectionClientStateResponse;
 
           /**
@@ -12476,7 +16180,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryConnectionClientStateResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12489,8 +16193,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryConnectionClientStateResponse;
+
+          /**
+           * Creates a QueryConnectionClientStateResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionClientStateResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.connection.v1.QueryConnectionClientStateResponse;
+
+          /**
+           * Creates a plain object from a QueryConnectionClientStateResponse message. Also converts values to other types if specified.
+           * @param m QueryConnectionClientStateResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryConnectionClientStateResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionClientStateResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionConsensusStateRequest. */
@@ -12506,15 +16236,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryConnectionConsensusStateRequest. */
-        class QueryConnectionConsensusStateRequest
-          implements IQueryConnectionConsensusStateRequest {
+        class QueryConnectionConsensusStateRequest implements IQueryConnectionConsensusStateRequest {
           /**
            * Constructs a new QueryConnectionConsensusStateRequest.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.connection.v1.IQueryConnectionConsensusStateRequest
-          );
+          constructor(p?: ibc.core.connection.v1.IQueryConnectionConsensusStateRequest);
 
           /** QueryConnectionConsensusStateRequest connectionId. */
           public connectionId: string;
@@ -12531,7 +16258,7 @@ export namespace ibc {
            * @returns QueryConnectionConsensusStateRequest instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryConnectionConsensusStateRequest
+            properties?: ibc.core.connection.v1.IQueryConnectionConsensusStateRequest,
           ): ibc.core.connection.v1.QueryConnectionConsensusStateRequest;
 
           /**
@@ -12542,7 +16269,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryConnectionConsensusStateRequest,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12555,8 +16282,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryConnectionConsensusStateRequest;
+
+          /**
+           * Creates a QueryConnectionConsensusStateRequest message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionConsensusStateRequest
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.connection.v1.QueryConnectionConsensusStateRequest;
+
+          /**
+           * Creates a plain object from a QueryConnectionConsensusStateRequest message. Also converts values to other types if specified.
+           * @param m QueryConnectionConsensusStateRequest
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryConnectionConsensusStateRequest,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionConsensusStateRequest to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a QueryConnectionConsensusStateResponse. */
@@ -12575,15 +16328,12 @@ export namespace ibc {
         }
 
         /** Represents a QueryConnectionConsensusStateResponse. */
-        class QueryConnectionConsensusStateResponse
-          implements IQueryConnectionConsensusStateResponse {
+        class QueryConnectionConsensusStateResponse implements IQueryConnectionConsensusStateResponse {
           /**
            * Constructs a new QueryConnectionConsensusStateResponse.
            * @param [p] Properties to set
            */
-          constructor(
-            p?: ibc.core.connection.v1.IQueryConnectionConsensusStateResponse
-          );
+          constructor(p?: ibc.core.connection.v1.IQueryConnectionConsensusStateResponse);
 
           /** QueryConnectionConsensusStateResponse consensusState. */
           public consensusState?: google.protobuf.IAny | null;
@@ -12603,7 +16353,7 @@ export namespace ibc {
            * @returns QueryConnectionConsensusStateResponse instance
            */
           public static create(
-            properties?: ibc.core.connection.v1.IQueryConnectionConsensusStateResponse
+            properties?: ibc.core.connection.v1.IQueryConnectionConsensusStateResponse,
           ): ibc.core.connection.v1.QueryConnectionConsensusStateResponse;
 
           /**
@@ -12614,7 +16364,7 @@ export namespace ibc {
            */
           public static encode(
             m: ibc.core.connection.v1.IQueryConnectionConsensusStateResponse,
-            w?: $protobuf.Writer
+            w?: $protobuf.Writer,
           ): $protobuf.Writer;
 
           /**
@@ -12627,8 +16377,34 @@ export namespace ibc {
            */
           public static decode(
             r: $protobuf.Reader | Uint8Array,
-            l?: number
+            l?: number,
           ): ibc.core.connection.v1.QueryConnectionConsensusStateResponse;
+
+          /**
+           * Creates a QueryConnectionConsensusStateResponse message from a plain object. Also converts values to their respective internal types.
+           * @param d Plain object
+           * @returns QueryConnectionConsensusStateResponse
+           */
+          public static fromObject(d: {
+            [k: string]: any;
+          }): ibc.core.connection.v1.QueryConnectionConsensusStateResponse;
+
+          /**
+           * Creates a plain object from a QueryConnectionConsensusStateResponse message. Also converts values to other types if specified.
+           * @param m QueryConnectionConsensusStateResponse
+           * @param [o] Conversion options
+           * @returns Plain object
+           */
+          public static toObject(
+            m: ibc.core.connection.v1.QueryConnectionConsensusStateResponse,
+            o?: $protobuf.IConversionOptions,
+          ): { [k: string]: any };
+
+          /**
+           * Converts this QueryConnectionConsensusStateResponse to JSON.
+           * @returns JSON object
+           */
+          public toJSON(): { [k: string]: any };
         }
       }
     }
@@ -12670,9 +16446,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns PublicKey instance
        */
-      public static create(
-        properties?: tendermint.crypto.IPublicKey
-      ): tendermint.crypto.PublicKey;
+      public static create(properties?: tendermint.crypto.IPublicKey): tendermint.crypto.PublicKey;
 
       /**
        * Encodes the specified PublicKey message. Does not implicitly {@link tendermint.crypto.PublicKey.verify|verify} messages.
@@ -12680,10 +16454,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.crypto.IPublicKey,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.crypto.IPublicKey, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a PublicKey message from the specified reader or buffer.
@@ -12693,10 +16464,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.crypto.PublicKey;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.crypto.PublicKey;
+
+      /**
+       * Creates a PublicKey message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns PublicKey
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.crypto.PublicKey;
+
+      /**
+       * Creates a plain object from a PublicKey message. Also converts values to other types if specified.
+       * @param m PublicKey
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.crypto.PublicKey,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this PublicKey to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Proof. */
@@ -12739,9 +16531,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Proof instance
        */
-      public static create(
-        properties?: tendermint.crypto.IProof
-      ): tendermint.crypto.Proof;
+      public static create(properties?: tendermint.crypto.IProof): tendermint.crypto.Proof;
 
       /**
        * Encodes the specified Proof message. Does not implicitly {@link tendermint.crypto.Proof.verify|verify} messages.
@@ -12749,10 +16539,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.crypto.IProof,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.crypto.IProof, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Proof message from the specified reader or buffer.
@@ -12762,10 +16549,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.crypto.Proof;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.crypto.Proof;
+
+      /**
+       * Creates a Proof message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Proof
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.crypto.Proof;
+
+      /**
+       * Creates a plain object from a Proof message. Also converts values to other types if specified.
+       * @param m Proof
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.crypto.Proof,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Proof to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a ValueOp. */
@@ -12796,9 +16604,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns ValueOp instance
        */
-      public static create(
-        properties?: tendermint.crypto.IValueOp
-      ): tendermint.crypto.ValueOp;
+      public static create(properties?: tendermint.crypto.IValueOp): tendermint.crypto.ValueOp;
 
       /**
        * Encodes the specified ValueOp message. Does not implicitly {@link tendermint.crypto.ValueOp.verify|verify} messages.
@@ -12806,10 +16612,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.crypto.IValueOp,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.crypto.IValueOp, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a ValueOp message from the specified reader or buffer.
@@ -12819,10 +16622,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.crypto.ValueOp;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.crypto.ValueOp;
+
+      /**
+       * Creates a ValueOp message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns ValueOp
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.crypto.ValueOp;
+
+      /**
+       * Creates a plain object from a ValueOp message. Also converts values to other types if specified.
+       * @param m ValueOp
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.crypto.ValueOp,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this ValueOp to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a DominoOp. */
@@ -12859,9 +16683,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns DominoOp instance
        */
-      public static create(
-        properties?: tendermint.crypto.IDominoOp
-      ): tendermint.crypto.DominoOp;
+      public static create(properties?: tendermint.crypto.IDominoOp): tendermint.crypto.DominoOp;
 
       /**
        * Encodes the specified DominoOp message. Does not implicitly {@link tendermint.crypto.DominoOp.verify|verify} messages.
@@ -12869,10 +16691,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.crypto.IDominoOp,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.crypto.IDominoOp, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a DominoOp message from the specified reader or buffer.
@@ -12882,10 +16701,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.crypto.DominoOp;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.crypto.DominoOp;
+
+      /**
+       * Creates a DominoOp message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns DominoOp
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.crypto.DominoOp;
+
+      /**
+       * Creates a plain object from a DominoOp message. Also converts values to other types if specified.
+       * @param m DominoOp
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.crypto.DominoOp,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this DominoOp to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a ProofOp. */
@@ -12922,9 +16762,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns ProofOp instance
        */
-      public static create(
-        properties?: tendermint.crypto.IProofOp
-      ): tendermint.crypto.ProofOp;
+      public static create(properties?: tendermint.crypto.IProofOp): tendermint.crypto.ProofOp;
 
       /**
        * Encodes the specified ProofOp message. Does not implicitly {@link tendermint.crypto.ProofOp.verify|verify} messages.
@@ -12932,10 +16770,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.crypto.IProofOp,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.crypto.IProofOp, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a ProofOp message from the specified reader or buffer.
@@ -12945,10 +16780,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.crypto.ProofOp;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.crypto.ProofOp;
+
+      /**
+       * Creates a ProofOp message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns ProofOp
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.crypto.ProofOp;
+
+      /**
+       * Creates a plain object from a ProofOp message. Also converts values to other types if specified.
+       * @param m ProofOp
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.crypto.ProofOp,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this ProofOp to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a ProofOps. */
@@ -12973,9 +16829,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns ProofOps instance
        */
-      public static create(
-        properties?: tendermint.crypto.IProofOps
-      ): tendermint.crypto.ProofOps;
+      public static create(properties?: tendermint.crypto.IProofOps): tendermint.crypto.ProofOps;
 
       /**
        * Encodes the specified ProofOps message. Does not implicitly {@link tendermint.crypto.ProofOps.verify|verify} messages.
@@ -12983,10 +16837,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.crypto.IProofOps,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.crypto.IProofOps, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a ProofOps message from the specified reader or buffer.
@@ -12996,10 +16847,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.crypto.ProofOps;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.crypto.ProofOps;
+
+      /**
+       * Creates a ProofOps message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns ProofOps
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.crypto.ProofOps;
+
+      /**
+       * Creates a plain object from a ProofOps message. Also converts values to other types if specified.
+       * @param m ProofOps
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.crypto.ProofOps,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this ProofOps to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
   }
 
@@ -13035,9 +16907,7 @@ export namespace tendermint {
          * @param [properties] Properties to set
          * @returns BitArray instance
          */
-        public static create(
-          properties?: tendermint.libs.bits.IBitArray
-        ): tendermint.libs.bits.BitArray;
+        public static create(properties?: tendermint.libs.bits.IBitArray): tendermint.libs.bits.BitArray;
 
         /**
          * Encodes the specified BitArray message. Does not implicitly {@link tendermint.libs.bits.BitArray.verify|verify} messages.
@@ -13045,10 +16915,7 @@ export namespace tendermint {
          * @param [w] Writer to encode to
          * @returns Writer
          */
-        public static encode(
-          m: tendermint.libs.bits.IBitArray,
-          w?: $protobuf.Writer
-        ): $protobuf.Writer;
+        public static encode(m: tendermint.libs.bits.IBitArray, w?: $protobuf.Writer): $protobuf.Writer;
 
         /**
          * Decodes a BitArray message from the specified reader or buffer.
@@ -13058,10 +16925,31 @@ export namespace tendermint {
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        public static decode(
-          r: $protobuf.Reader | Uint8Array,
-          l?: number
-        ): tendermint.libs.bits.BitArray;
+        public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.libs.bits.BitArray;
+
+        /**
+         * Creates a BitArray message from a plain object. Also converts values to their respective internal types.
+         * @param d Plain object
+         * @returns BitArray
+         */
+        public static fromObject(d: { [k: string]: any }): tendermint.libs.bits.BitArray;
+
+        /**
+         * Creates a plain object from a BitArray message. Also converts values to other types if specified.
+         * @param m BitArray
+         * @param [o] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(
+          m: tendermint.libs.bits.BitArray,
+          o?: $protobuf.IConversionOptions,
+        ): { [k: string]: any };
+
+        /**
+         * Converts this BitArray to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
       }
     }
   }
@@ -13073,7 +16961,7 @@ export namespace tendermint {
       BLOCK_ID_FLAG_UNKNOWN = 0,
       BLOCK_ID_FLAG_ABSENT = 1,
       BLOCK_ID_FLAG_COMMIT = 2,
-      BLOCK_ID_FLAG_NIL = 3
+      BLOCK_ID_FLAG_NIL = 3,
     }
 
     /** SignedMsgType enum. */
@@ -13081,7 +16969,7 @@ export namespace tendermint {
       SIGNED_MSG_TYPE_UNKNOWN = 0,
       SIGNED_MSG_TYPE_PREVOTE = 1,
       SIGNED_MSG_TYPE_PRECOMMIT = 2,
-      SIGNED_MSG_TYPE_PROPOSAL = 32
+      SIGNED_MSG_TYPE_PROPOSAL = 32,
     }
 
     /** Properties of a PartSetHeader. */
@@ -13112,9 +17000,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns PartSetHeader instance
        */
-      public static create(
-        properties?: tendermint.types.IPartSetHeader
-      ): tendermint.types.PartSetHeader;
+      public static create(properties?: tendermint.types.IPartSetHeader): tendermint.types.PartSetHeader;
 
       /**
        * Encodes the specified PartSetHeader message. Does not implicitly {@link tendermint.types.PartSetHeader.verify|verify} messages.
@@ -13122,10 +17008,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IPartSetHeader,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IPartSetHeader, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a PartSetHeader message from the specified reader or buffer.
@@ -13135,10 +17018,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.PartSetHeader;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.PartSetHeader;
+
+      /**
+       * Creates a PartSetHeader message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns PartSetHeader
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.PartSetHeader;
+
+      /**
+       * Creates a plain object from a PartSetHeader message. Also converts values to other types if specified.
+       * @param m PartSetHeader
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.PartSetHeader,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this PartSetHeader to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Part. */
@@ -13175,9 +17079,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Part instance
        */
-      public static create(
-        properties?: tendermint.types.IPart
-      ): tendermint.types.Part;
+      public static create(properties?: tendermint.types.IPart): tendermint.types.Part;
 
       /**
        * Encodes the specified Part message. Does not implicitly {@link tendermint.types.Part.verify|verify} messages.
@@ -13185,10 +17087,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IPart,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IPart, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Part message from the specified reader or buffer.
@@ -13198,10 +17097,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.Part;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.Part;
+
+      /**
+       * Creates a Part message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Part
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.Part;
+
+      /**
+       * Creates a plain object from a Part message. Also converts values to other types if specified.
+       * @param m Part
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.Part,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Part to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a BlockID. */
@@ -13232,9 +17152,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns BlockID instance
        */
-      public static create(
-        properties?: tendermint.types.IBlockID
-      ): tendermint.types.BlockID;
+      public static create(properties?: tendermint.types.IBlockID): tendermint.types.BlockID;
 
       /**
        * Encodes the specified BlockID message. Does not implicitly {@link tendermint.types.BlockID.verify|verify} messages.
@@ -13242,10 +17160,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IBlockID,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IBlockID, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a BlockID message from the specified reader or buffer.
@@ -13255,10 +17170,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.BlockID;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.BlockID;
+
+      /**
+       * Creates a BlockID message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns BlockID
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.BlockID;
+
+      /**
+       * Creates a plain object from a BlockID message. Also converts values to other types if specified.
+       * @param m BlockID
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.BlockID,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this BlockID to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Header. */
@@ -13361,9 +17297,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Header instance
        */
-      public static create(
-        properties?: tendermint.types.IHeader
-      ): tendermint.types.Header;
+      public static create(properties?: tendermint.types.IHeader): tendermint.types.Header;
 
       /**
        * Encodes the specified Header message. Does not implicitly {@link tendermint.types.Header.verify|verify} messages.
@@ -13371,10 +17305,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IHeader,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IHeader, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Header message from the specified reader or buffer.
@@ -13384,10 +17315,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.Header;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.Header;
+
+      /**
+       * Creates a Header message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Header
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.Header;
+
+      /**
+       * Creates a plain object from a Header message. Also converts values to other types if specified.
+       * @param m Header
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.Header,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Header to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Data. */
@@ -13412,9 +17364,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Data instance
        */
-      public static create(
-        properties?: tendermint.types.IData
-      ): tendermint.types.Data;
+      public static create(properties?: tendermint.types.IData): tendermint.types.Data;
 
       /**
        * Encodes the specified Data message. Does not implicitly {@link tendermint.types.Data.verify|verify} messages.
@@ -13422,10 +17372,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IData,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IData, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Data message from the specified reader or buffer.
@@ -13435,10 +17382,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.Data;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.Data;
+
+      /**
+       * Creates a Data message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Data
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.Data;
+
+      /**
+       * Creates a plain object from a Data message. Also converts values to other types if specified.
+       * @param m Data
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.Data,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Data to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Vote. */
@@ -13505,9 +17473,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Vote instance
        */
-      public static create(
-        properties?: tendermint.types.IVote
-      ): tendermint.types.Vote;
+      public static create(properties?: tendermint.types.IVote): tendermint.types.Vote;
 
       /**
        * Encodes the specified Vote message. Does not implicitly {@link tendermint.types.Vote.verify|verify} messages.
@@ -13515,10 +17481,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IVote,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IVote, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Vote message from the specified reader or buffer.
@@ -13528,10 +17491,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.Vote;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.Vote;
+
+      /**
+       * Creates a Vote message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Vote
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.Vote;
+
+      /**
+       * Creates a plain object from a Vote message. Also converts values to other types if specified.
+       * @param m Vote
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.Vote,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Vote to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Commit. */
@@ -13574,9 +17558,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Commit instance
        */
-      public static create(
-        properties?: tendermint.types.ICommit
-      ): tendermint.types.Commit;
+      public static create(properties?: tendermint.types.ICommit): tendermint.types.Commit;
 
       /**
        * Encodes the specified Commit message. Does not implicitly {@link tendermint.types.Commit.verify|verify} messages.
@@ -13584,10 +17566,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.ICommit,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.ICommit, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Commit message from the specified reader or buffer.
@@ -13597,10 +17576,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.Commit;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.Commit;
+
+      /**
+       * Creates a Commit message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Commit
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.Commit;
+
+      /**
+       * Creates a plain object from a Commit message. Also converts values to other types if specified.
+       * @param m Commit
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.Commit,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Commit to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a CommitSig. */
@@ -13643,9 +17643,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns CommitSig instance
        */
-      public static create(
-        properties?: tendermint.types.ICommitSig
-      ): tendermint.types.CommitSig;
+      public static create(properties?: tendermint.types.ICommitSig): tendermint.types.CommitSig;
 
       /**
        * Encodes the specified CommitSig message. Does not implicitly {@link tendermint.types.CommitSig.verify|verify} messages.
@@ -13653,10 +17651,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.ICommitSig,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.ICommitSig, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a CommitSig message from the specified reader or buffer.
@@ -13666,10 +17661,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.CommitSig;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.CommitSig;
+
+      /**
+       * Creates a CommitSig message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns CommitSig
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.CommitSig;
+
+      /**
+       * Creates a plain object from a CommitSig message. Also converts values to other types if specified.
+       * @param m CommitSig
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.CommitSig,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this CommitSig to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Proposal. */
@@ -13730,9 +17746,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Proposal instance
        */
-      public static create(
-        properties?: tendermint.types.IProposal
-      ): tendermint.types.Proposal;
+      public static create(properties?: tendermint.types.IProposal): tendermint.types.Proposal;
 
       /**
        * Encodes the specified Proposal message. Does not implicitly {@link tendermint.types.Proposal.verify|verify} messages.
@@ -13740,10 +17754,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IProposal,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IProposal, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Proposal message from the specified reader or buffer.
@@ -13753,10 +17764,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.Proposal;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.Proposal;
+
+      /**
+       * Creates a Proposal message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Proposal
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.Proposal;
+
+      /**
+       * Creates a plain object from a Proposal message. Also converts values to other types if specified.
+       * @param m Proposal
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.Proposal,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Proposal to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a SignedHeader. */
@@ -13787,9 +17819,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns SignedHeader instance
        */
-      public static create(
-        properties?: tendermint.types.ISignedHeader
-      ): tendermint.types.SignedHeader;
+      public static create(properties?: tendermint.types.ISignedHeader): tendermint.types.SignedHeader;
 
       /**
        * Encodes the specified SignedHeader message. Does not implicitly {@link tendermint.types.SignedHeader.verify|verify} messages.
@@ -13797,10 +17827,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.ISignedHeader,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.ISignedHeader, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a SignedHeader message from the specified reader or buffer.
@@ -13810,10 +17837,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.SignedHeader;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.SignedHeader;
+
+      /**
+       * Creates a SignedHeader message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns SignedHeader
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.SignedHeader;
+
+      /**
+       * Creates a plain object from a SignedHeader message. Also converts values to other types if specified.
+       * @param m SignedHeader
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.SignedHeader,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this SignedHeader to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a LightBlock. */
@@ -13844,9 +17892,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns LightBlock instance
        */
-      public static create(
-        properties?: tendermint.types.ILightBlock
-      ): tendermint.types.LightBlock;
+      public static create(properties?: tendermint.types.ILightBlock): tendermint.types.LightBlock;
 
       /**
        * Encodes the specified LightBlock message. Does not implicitly {@link tendermint.types.LightBlock.verify|verify} messages.
@@ -13854,10 +17900,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.ILightBlock,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.ILightBlock, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a LightBlock message from the specified reader or buffer.
@@ -13867,10 +17910,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.LightBlock;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.LightBlock;
+
+      /**
+       * Creates a LightBlock message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns LightBlock
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.LightBlock;
+
+      /**
+       * Creates a plain object from a LightBlock message. Also converts values to other types if specified.
+       * @param m LightBlock
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.LightBlock,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this LightBlock to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a BlockMeta. */
@@ -13913,9 +17977,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns BlockMeta instance
        */
-      public static create(
-        properties?: tendermint.types.IBlockMeta
-      ): tendermint.types.BlockMeta;
+      public static create(properties?: tendermint.types.IBlockMeta): tendermint.types.BlockMeta;
 
       /**
        * Encodes the specified BlockMeta message. Does not implicitly {@link tendermint.types.BlockMeta.verify|verify} messages.
@@ -13923,10 +17985,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IBlockMeta,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IBlockMeta, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a BlockMeta message from the specified reader or buffer.
@@ -13936,10 +17995,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.BlockMeta;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.BlockMeta;
+
+      /**
+       * Creates a BlockMeta message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns BlockMeta
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.BlockMeta;
+
+      /**
+       * Creates a plain object from a BlockMeta message. Also converts values to other types if specified.
+       * @param m BlockMeta
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.BlockMeta,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this BlockMeta to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a TxProof. */
@@ -13976,9 +18056,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns TxProof instance
        */
-      public static create(
-        properties?: tendermint.types.ITxProof
-      ): tendermint.types.TxProof;
+      public static create(properties?: tendermint.types.ITxProof): tendermint.types.TxProof;
 
       /**
        * Encodes the specified TxProof message. Does not implicitly {@link tendermint.types.TxProof.verify|verify} messages.
@@ -13986,10 +18064,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.ITxProof,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.ITxProof, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a TxProof message from the specified reader or buffer.
@@ -13999,10 +18074,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.TxProof;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.TxProof;
+
+      /**
+       * Creates a TxProof message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns TxProof
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.TxProof;
+
+      /**
+       * Creates a plain object from a TxProof message. Also converts values to other types if specified.
+       * @param m TxProof
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.TxProof,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this TxProof to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a ValidatorSet. */
@@ -14039,9 +18135,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns ValidatorSet instance
        */
-      public static create(
-        properties?: tendermint.types.IValidatorSet
-      ): tendermint.types.ValidatorSet;
+      public static create(properties?: tendermint.types.IValidatorSet): tendermint.types.ValidatorSet;
 
       /**
        * Encodes the specified ValidatorSet message. Does not implicitly {@link tendermint.types.ValidatorSet.verify|verify} messages.
@@ -14049,10 +18143,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IValidatorSet,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IValidatorSet, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a ValidatorSet message from the specified reader or buffer.
@@ -14062,10 +18153,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.ValidatorSet;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.ValidatorSet;
+
+      /**
+       * Creates a ValidatorSet message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns ValidatorSet
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.ValidatorSet;
+
+      /**
+       * Creates a plain object from a ValidatorSet message. Also converts values to other types if specified.
+       * @param m ValidatorSet
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.ValidatorSet,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this ValidatorSet to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Validator. */
@@ -14108,9 +18220,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Validator instance
        */
-      public static create(
-        properties?: tendermint.types.IValidator
-      ): tendermint.types.Validator;
+      public static create(properties?: tendermint.types.IValidator): tendermint.types.Validator;
 
       /**
        * Encodes the specified Validator message. Does not implicitly {@link tendermint.types.Validator.verify|verify} messages.
@@ -14118,10 +18228,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.IValidator,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.IValidator, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Validator message from the specified reader or buffer.
@@ -14131,10 +18238,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.Validator;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.Validator;
+
+      /**
+       * Creates a Validator message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Validator
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.Validator;
+
+      /**
+       * Creates a plain object from a Validator message. Also converts values to other types if specified.
+       * @param m Validator
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.Validator,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Validator to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a SimpleValidator. */
@@ -14165,9 +18293,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns SimpleValidator instance
        */
-      public static create(
-        properties?: tendermint.types.ISimpleValidator
-      ): tendermint.types.SimpleValidator;
+      public static create(properties?: tendermint.types.ISimpleValidator): tendermint.types.SimpleValidator;
 
       /**
        * Encodes the specified SimpleValidator message. Does not implicitly {@link tendermint.types.SimpleValidator.verify|verify} messages.
@@ -14175,10 +18301,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.types.ISimpleValidator,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.types.ISimpleValidator, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a SimpleValidator message from the specified reader or buffer.
@@ -14188,10 +18311,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.types.SimpleValidator;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.types.SimpleValidator;
+
+      /**
+       * Creates a SimpleValidator message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns SimpleValidator
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.types.SimpleValidator;
+
+      /**
+       * Creates a plain object from a SimpleValidator message. Also converts values to other types if specified.
+       * @param m SimpleValidator
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.types.SimpleValidator,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this SimpleValidator to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
   }
 
@@ -14225,9 +18369,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns App instance
        */
-      public static create(
-        properties?: tendermint.version.IApp
-      ): tendermint.version.App;
+      public static create(properties?: tendermint.version.IApp): tendermint.version.App;
 
       /**
        * Encodes the specified App message. Does not implicitly {@link tendermint.version.App.verify|verify} messages.
@@ -14235,10 +18377,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.version.IApp,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.version.IApp, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes an App message from the specified reader or buffer.
@@ -14248,10 +18387,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.version.App;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.version.App;
+
+      /**
+       * Creates an App message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns App
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.version.App;
+
+      /**
+       * Creates a plain object from an App message. Also converts values to other types if specified.
+       * @param m App
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.version.App,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this App to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a Consensus. */
@@ -14282,9 +18442,7 @@ export namespace tendermint {
        * @param [properties] Properties to set
        * @returns Consensus instance
        */
-      public static create(
-        properties?: tendermint.version.IConsensus
-      ): tendermint.version.Consensus;
+      public static create(properties?: tendermint.version.IConsensus): tendermint.version.Consensus;
 
       /**
        * Encodes the specified Consensus message. Does not implicitly {@link tendermint.version.Consensus.verify|verify} messages.
@@ -14292,10 +18450,7 @@ export namespace tendermint {
        * @param [w] Writer to encode to
        * @returns Writer
        */
-      public static encode(
-        m: tendermint.version.IConsensus,
-        w?: $protobuf.Writer
-      ): $protobuf.Writer;
+      public static encode(m: tendermint.version.IConsensus, w?: $protobuf.Writer): $protobuf.Writer;
 
       /**
        * Decodes a Consensus message from the specified reader or buffer.
@@ -14305,10 +18460,31 @@ export namespace tendermint {
        * @throws {Error} If the payload is not a reader or valid buffer
        * @throws {$protobuf.util.ProtocolError} If required fields are missing
        */
-      public static decode(
-        r: $protobuf.Reader | Uint8Array,
-        l?: number
-      ): tendermint.version.Consensus;
+      public static decode(r: $protobuf.Reader | Uint8Array, l?: number): tendermint.version.Consensus;
+
+      /**
+       * Creates a Consensus message from a plain object. Also converts values to their respective internal types.
+       * @param d Plain object
+       * @returns Consensus
+       */
+      public static fromObject(d: { [k: string]: any }): tendermint.version.Consensus;
+
+      /**
+       * Creates a plain object from a Consensus message. Also converts values to other types if specified.
+       * @param m Consensus
+       * @param [o] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(
+        m: tendermint.version.Consensus,
+        o?: $protobuf.IConversionOptions,
+      ): { [k: string]: any };
+
+      /**
+       * Converts this Consensus to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
     }
   }
 }
