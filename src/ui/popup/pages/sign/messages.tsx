@@ -11,6 +11,7 @@ import { BACKGROUND_PORT } from "../../../../common/message/constant";
 import { RequestDecryptMsg } from "../../../../background/secret-wasm";
 import { observer } from "mobx-react";
 import { useStore } from "../../stores";
+import { CoinPrimitive } from "../../../hooks/use-reward";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -147,6 +148,46 @@ function MessageType<T extends Messages>(
   return msg.type === type;
 }
 
+export function renderSendMsg(
+  currencies: Currency[],
+  intl: IntlShape,
+  toAddress: string,
+  amount: CoinPrimitive[]
+) {
+  const receives: { amount: string; denom: string }[] = [];
+  for (const coinPrimitive of amount) {
+    const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
+    const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin, true);
+
+    receives.push({
+      amount: clearDecimals(parsed.amount),
+      denom: parsed.denom
+    });
+  }
+
+  return {
+    icon: "fas fa-paper-plane",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgSend.title"
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgSend.content"
+        values={{
+          // eslint-disable-next-line react/display-name
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          recipient: shortenAddress(toAddress, 20),
+          amount: receives
+            .map(coin => {
+              return `${coin.amount} ${coin.denom}`;
+            })
+            .join(",")
+        }}
+      />
+    )
+  };
+}
+
 /* eslint-disable react/display-name */
 export function renderMessage(
   msg: MessageObj,
@@ -158,37 +199,12 @@ export function renderMessage(
   content: React.ReactElement;
 } {
   if (MessageType<MsgSend>(msg, "cosmos-sdk/MsgSend")) {
-    const receives: { amount: string; denom: string }[] = [];
-    for (const coinPrimitive of msg.value.amount) {
-      const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
-      const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
-
-      receives.push({
-        amount: clearDecimals(parsed.amount),
-        denom: parsed.denom
-      });
-    }
-
-    return {
-      icon: "fas fa-paper-plane",
-      title: intl.formatMessage({
-        id: "sign.list.message.cosmos-sdk/MsgSend.title"
-      }),
-      content: (
-        <FormattedMessage
-          id="sign.list.message.cosmos-sdk/MsgSend.content"
-          values={{
-            b: (...chunks: any[]) => <b>{chunks}</b>,
-            recipient: shortenAddress(msg.value.to_address, 20),
-            amount: receives
-              .map(coin => {
-                return `${coin.amount} ${coin.denom}`;
-              })
-              .join(",")
-          }}
-        />
-      )
-    };
+    return renderSendMsg(
+      currencies,
+      intl,
+      msg.value.to_address,
+      msg.value.amount
+    );
   }
 
   if (MessageType<MsgBeginRedelegate>(msg, "cosmos-sdk/MsgBeginRedelegate")) {
