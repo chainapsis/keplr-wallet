@@ -3,7 +3,7 @@ import {
   encodeSecp256k1Signature,
   serializeSignDoc,
   AccountData,
-  SignResponse,
+  AminoSignResponse,
   StdSignDoc
 } from "@cosmjs/launchpad";
 import { toHex, fromHex } from "@cosmjs/encoding";
@@ -74,14 +74,14 @@ export class CosmJSOfflineSigner implements OfflineSigner, OfflineDirectSigner {
   async signAmino(
     signerAddress: string,
     signDoc: StdSignDoc
-  ): Promise<SignResponse> {
+  ): Promise<AminoSignResponse> {
     return this.sign(signerAddress, signDoc);
   }
 
   async sign(
     signerAddress: string,
     signDoc: StdSignDoc
-  ): Promise<SignResponse> {
+  ): Promise<AminoSignResponse> {
     const key = await sendMessage(BACKGROUND_PORT, new GetKeyMsg(this.chainId));
 
     if (key.bech32Address !== signerAddress) {
