@@ -17,8 +17,15 @@ import { BACKGROUND_PORT } from "../../common/message/constant";
 import { feeFromString } from "../../background/keyring/utils";
 import { OfflineSigner } from "@cosmjs/launchpad";
 import { OfflineDirectSigner, makeSignBytes } from "@cosmjs/proto-signing";
-import { cosmos } from "@cosmjs/proto-signing/types/codec";
 import { DirectSignResponse } from "@cosmjs/proto-signing/types/signer";
+
+// TODO: Isn't there a way to import the proto definition in the codec?
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore
+import { cosmos } from "@cosmjs/proto-signing/build/codec";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Long = require("long");
 
 const Buffer = require("buffer/").Buffer;
 
@@ -44,13 +51,76 @@ export class CosmJSOfflineSigner implements OfflineSigner, OfflineDirectSigner {
   ): Promise<DirectSignResponse> {
     const key = await sendMessage(BACKGROUND_PORT, new GetKeyMsg(this.chainId));
 
-    // TODO: Handle the tx config.
-
-    const signBytes = makeSignBytes(signDoc);
-
     const random = new Uint8Array(4);
     crypto.getRandomValues(random);
     const id = Buffer.from(random).toString("hex");
+
+    // Currently, @cosmjs/stargate has the limitation that can't change the sign doc in the offline signer.
+    // Just, do not change the sign doc temporarily.
+    if (false) {
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
+      const txBody = cosmos.tx.v1beta1.TxBody.decode(signDoc.bodyBytes!);
+      const authInfo = cosmos.tx.v1beta1.AuthInfo.decode(
+        signDoc.authInfoBytes!
+      );
+
+      const requestTxBuilderConfigMsg = new RequestTxBuilderConfigMsg(
+        {
+          chainId: signDoc.chainId!,
+          accountNumber: signDoc.accountNumber!.toString(),
+          sequence: authInfo.signerInfos[0].sequence!.toString(),
+          gas: authInfo.fee!.gasLimit!.toString(),
+          fee: authInfo
+            .fee!.amount!.map((coin: Coin) => `${coin.amount} ${coin.denom}`)
+            .join(","),
+          memo: txBody.memo
+        },
+        id,
+        true
+      );
+      const txConfig = await sendMessage(
+        BACKGROUND_PORT,
+        requestTxBuilderConfigMsg
+      );
+
+      txBody.memo = txConfig.config.memo;
+      authInfo.fee!.gasLimit = Long.fromString(txConfig.config.gas);
+      /*let feeAmountCoins: Coin[];
+      const feeAmount = feeFromString(txConfig.config.fee);
+      if (Array.isArray(feeAmount)) {
+        feeAmountCoins = feeAmount.map(coin => {
+          return {
+            denom: coin.denom,
+            amount: coin.amount.toString()
+          };
+        });
+      } else {
+        feeAmountCoins = [
+          {
+            denom: feeAmount.denom,
+            amount: feeAmount.amount.toString()
+          }
+        ];
+      }
+      authInfo.fee!.amount = feeAmountCoins;*/
+      if (txConfig.config.sequence) {
+        authInfo.signerInfos[0]!.sequence = Long.fromString(
+          txConfig.config.sequence
+        );
+      }
+      if (txConfig.config.accountNumber) {
+        signDoc.accountNumber = Long.fromString(txConfig.config.accountNumber);
+      }
+
+      /* eslint-enable @typescript-eslint/no-non-null-assertion */
+
+      signDoc.bodyBytes = cosmos.tx.v1beta1.TxBody.encode(txBody).finish();
+      signDoc.authInfoBytes = cosmos.tx.v1beta1.AuthInfo.encode(
+        authInfo
+      ).finish();
+    }
+
+    const signBytes = makeSignBytes(signDoc);
 
     const requestSignMsg = new RequestSignMsg(
       this.chainId,
