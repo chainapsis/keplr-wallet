@@ -1,13 +1,23 @@
 import React, { FunctionComponent } from "react";
 
 import { SignDocHelper } from "../../../../common/stargate/sign";
-import { MessageObj, renderMessage, renderSendMsg } from "./messages";
+import {
+  MessageObj,
+  renderAminoMessage,
+  renderBeginRedelegateMsg,
+  renderDelegateMsg,
+  renderSendMsg,
+  renderUndelegateMsg,
+  renderUnknownMessage
+} from "./messages";
 import { Coin } from "@chainapsis/cosmosjs/common/coin";
 import styleDetailsTab from "./details-tab.module.scss";
 import { Currency } from "../../../../common/currency";
 import { IntlShape } from "react-intl";
 
 import { cosmos } from "../../../../common/stargate/proto";
+import { toBase64 } from "@cosmjs/encoding";
+import { CoinPrimitive } from "../../../hooks/use-reward";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -92,34 +102,76 @@ export class SignDocWrapper {
     return JSON.stringify(this.aminoJsonObj, undefined, 2);
   }
 
+  protected static renderProtobufMsgs(
+    currencies: Currency[],
+    intl: IntlShape,
+    msgs: any[]
+  ) {
+    return (
+      <React.Fragment>
+        {msgs.map((msg, i) => {
+          let msgContent;
+
+          /*
+           switch (msg.constroctor) hinders the `Typescript`'s type-inference feature...
+           So, just ust the if-elseif-else.
+           Is there a better way?
+           */
+          if (msg instanceof cosmos.bank.v1beta1.MsgSend) {
+            msgContent = renderSendMsg(
+              currencies,
+              intl,
+              msg.toAddress,
+              msg.amount as CoinPrimitive[]
+            );
+          } else if (msg instanceof cosmos.staking.v1beta1.MsgDelegate) {
+            msgContent = renderDelegateMsg(
+              currencies,
+              intl,
+              msg.amount as CoinPrimitive,
+              msg.validatorAddress
+            );
+          } else if (msg instanceof cosmos.staking.v1beta1.MsgBeginRedelegate) {
+            msgContent = renderBeginRedelegateMsg(
+              currencies,
+              intl,
+              msg.amount as CoinPrimitive,
+              msg.validatorSrcAddress,
+              msg.validatorDstAddress
+            );
+          } else if (msg instanceof cosmos.staking.v1beta1.MsgUndelegate) {
+            msgContent = renderUndelegateMsg(
+              currencies,
+              intl,
+              msg.amount as CoinPrimitive,
+              msg.validatorAddress
+            );
+          } else {
+            msgContent = renderUnknownMessage(currencies, intl, {
+              typeUrl: msg.typeUrl || msg.type_url || "Unknown",
+              value: toBase64(msg.value)
+            });
+          }
+
+          return (
+            <React.Fragment key={i.toString()}>
+              <Msg icon={msgContent.icon} title={msgContent.title}>
+                {msgContent.content}
+              </Msg>
+              <hr />
+            </React.Fragment>
+          );
+        })}
+      </React.Fragment>
+    );
+  }
+
   renderMsgs(currencies: Currency[], intl: IntlShape): React.ReactElement {
     if (this.isProtobuf) {
-      const msgs = this.protoSignDoc.txMsgs;
-
-      return (
-        <React.Fragment>
-          {msgs.map((msg, i) => {
-            let msgContent = renderMessage(msg, currencies, intl);
-            if (msg instanceof cosmos.bank.v1beta1.MsgSend) {
-              msgContent = renderSendMsg(
-                currencies,
-                intl,
-                msg.toAddress,
-                // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                // @ts-ignore
-                msg.amount
-              );
-            }
-            return (
-              <React.Fragment key={i.toString()}>
-                <Msg icon={msgContent.icon} title={msgContent.title}>
-                  {msgContent.content}
-                </Msg>
-                <hr />
-              </React.Fragment>
-            );
-          })}
-        </React.Fragment>
+      return SignDocWrapper.renderProtobufMsgs(
+        currencies,
+        intl,
+        this.protoSignDoc.txMsgs
       );
     }
 
@@ -128,7 +180,7 @@ export class SignDocWrapper {
     return (
       <React.Fragment>
         {msgs.map((msg, i) => {
-          const msgContent = renderMessage(msg, currencies, intl);
+          const msgContent = renderAminoMessage(msg, currencies, intl);
           return (
             <React.Fragment key={i.toString()}>
               <Msg icon={msgContent.icon} title={msgContent.title}>
