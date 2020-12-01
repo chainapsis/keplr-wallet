@@ -189,6 +189,8 @@
   "sign.list.message.cosmos-sdk/MsgBeginRedelegate.content": "<b>{fromValidator}</b>로부터 <b>{toValidator}</b>에게 <b>{amount}</b>를 재위임합니다",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "스테이킹 보상 요청",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "<b>{validator}</b>에게 위임된 스테이킹 보상을 요청합니다",
+  "sign.list.message.cosmos-sdk/MsgVote.title": "투표",
+  "sign.list.message.cosmos-sdk/MsgVote.content": "<b>제안 {id}</b>에 <b>{option}</b>를 투표합니다",
 
   "sign.list.message.wasm.button.details": "자세히",
   "sign.list.message.wasm.button.close": "닫기",
