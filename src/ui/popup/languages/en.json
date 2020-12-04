@@ -210,7 +210,7 @@
   "ledger.step1.paragraph": "Connect and unlock your Ledger.",
   "ledger.step2": "Step 2",
   "ledger.step2.paragraph": "Open the Cosmos app on your Ledger device.",
-  "ledger.option.webhid.checkbox": "Using Ledger X on Windows?",
+  "ledger.option.webhid.checkbox": "Using Ledger on Windows?",
   "ledger.option.webhid.warning": "Please copy and paste the following link {link} on your browser and enable ‘experimental web platform features’",
   "ledger.option.webhid.link.copied": "Link copied!",
   "ledger.button.next": "Next",
