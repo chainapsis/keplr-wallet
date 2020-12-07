@@ -12,6 +12,8 @@ export class MessageManager {
 
   protected port = "";
 
+  constructor(protected readonly isContentScripts: boolean = false) {}
+
   public registerMessage(
     msgCls: { new (...args: any): Message<unknown> } & { type(): string }
   ): void {
@@ -37,13 +39,17 @@ export class MessageManager {
 
     this.port = port;
     browser.runtime.onMessage.addListener(this.onMessage);
-    browser.runtime.onMessageExternal.addListener(this.onMessage);
+    if (browser.runtime.onMessageExternal) {
+      browser.runtime.onMessageExternal.addListener(this.onMessage);
+    }
   }
 
   public unlisten(): void {
     this.port = "";
     browser.runtime.onMessage.removeListener(this.onMessage);
-    browser.runtime.onMessageExternal.removeListener(this.onMessage);
+    if (browser.runtime.onMessageExternal) {
+      browser.runtime.onMessageExternal.removeListener(this.onMessage);
+    }
   }
 
   protected produceEnv(): Env {
@@ -57,13 +63,23 @@ export class MessageManager {
     message: Message<unknown>,
     sender: MessageSender
   ): boolean {
+    if (!message.origin) {
+      throw new Error("origin is empty");
+    }
+
+    // If manager is on the content scripts, the message doesn't have the url field.
+    // TODO: Split the logic via middleware pattern.
+    if (this.isContentScripts) {
+      const env = this.produceEnv();
+      return (
+        sender.id === env.extensionId &&
+        message.origin === new URL(env.extensionBaseURL).origin
+      );
+    }
+
     // TODO: When is a url undefined?
     if (!sender.url) {
       throw new Error("url is empty");
-    }
-
-    if (!message.origin) {
-      throw new Error("origin is empty");
     }
 
     const url = new URL(sender.url);
@@ -71,6 +87,13 @@ export class MessageManager {
   }
 
   protected checkMessageIsInternal(env: Env, sender: MessageSender): boolean {
+    // If manager is on the content scripts, the message doesn't have the url field.
+    // TODO: Split the logic via middleware pattern.
+    if (this.isContentScripts) {
+      const env = this.produceEnv();
+      return sender.id === env.extensionId;
+    }
+
     if (!sender.url) {
       return false;
     }

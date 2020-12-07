@@ -1,4 +1,7 @@
 import { listenAndProxyMessages } from "../common/message";
+import { listenEvents } from "./events";
+
+listenEvents();
 
 listenAndProxyMessages();
 
