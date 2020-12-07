@@ -288,6 +288,7 @@ const handleGetKeyMsg: (
     const key = await keeper.getKey(getKeyMsg.chainId);
 
     return {
+      name: keeper.getKeyStoreMeta("name"),
       algo: "secp256k1",
       pubKeyHex: Buffer.from(key.pubKey).toString("hex"),
       addressHex: Buffer.from(key.address).toString("hex"),

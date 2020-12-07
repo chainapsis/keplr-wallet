@@ -25,6 +25,8 @@ import { ChainInfo } from "../chains";
 import { BaseAccount } from "@chainapsis/cosmosjs/common/baseAccount";
 
 export interface KeyHex {
+  // Name of the selected key store.
+  name: string;
   algo: string;
   pubKeyHex: string;
   addressHex: string;
@@ -197,6 +199,10 @@ export class KeyRingKeeper {
       chainId,
       await this.chainsKeeper.getChainCoinType(chainId)
     );
+  }
+
+  getKeyStoreMeta(key: string): string {
+    return this.keyRing.getKeyStoreMeta(key);
   }
 
   async requestTxBuilderConfig(
