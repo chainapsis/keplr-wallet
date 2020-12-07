@@ -10,7 +10,10 @@ async function _sendMessage(
   // @ts-ignore
   msg["origin"] = window.location.origin;
 
-  const tabs = await browser.tabs.query({});
+  const tabs = await browser.tabs.query({
+    discarded: false,
+    status: "complete"
+  });
 
   for (let i = 0; i < tabs.length; i++) {
     const tabId = tabs[i].id;
