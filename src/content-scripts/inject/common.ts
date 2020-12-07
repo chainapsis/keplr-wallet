@@ -3,7 +3,7 @@ import {
   ReqeustAccessMsg,
   SuggestChainInfoMsg
 } from "../../background/chains/messages";
-import { sendMessage } from "../../common/message/send";
+import { sendMessage } from "../../common/message";
 import { BACKGROUND_PORT } from "../../common/message/constant";
 import {
   RequestBackgroundTxMsg,
@@ -13,11 +13,19 @@ import {
   ResultBroadcastTx,
   ResultBroadcastTxCommit
 } from "@chainapsis/cosmosjs/rpc/tx";
-import { EnableKeyRingMsg, KeyRingStatus } from "../../background/keyring";
+import {
+  EnableKeyRingMsg,
+  GetKeyMsg,
+  KeyRingStatus,
+  RequestSignMsg,
+  RequestTxBuilderConfigMsg
+} from "../../background/keyring";
 import {
   GetSecret20ViewingKey,
   SuggestTokenMsg
 } from "../../background/tokens/messages";
+import { TxBuilderConfigPrimitive } from "../../background/keyring/types";
+import { toHex } from "@cosmjs/encoding";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -42,6 +50,42 @@ export class Keplr {
     if (result.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Keyring not unlocked");
     }
+  }
+
+  async getKey(chainId: string) {
+    const msg = new GetKeyMsg(chainId);
+    return await sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async getTxConfig(chainId: string, config: TxBuilderConfigPrimitive) {
+    const bytes = new Uint8Array(8);
+    const id: string = Array.from(crypto.getRandomValues(bytes))
+      .map(value => {
+        return value.toString(16);
+      })
+      .join("");
+
+    const msg = new RequestTxBuilderConfigMsg(
+      {
+        chainId,
+        ...config
+      },
+      id,
+      true
+    );
+    return await sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async sign(chainId: string, signer: string, message: Uint8Array) {
+    const bytes = new Uint8Array(8);
+    const id: string = Array.from(crypto.getRandomValues(bytes))
+      .map(value => {
+        return value.toString(16);
+      })
+      .join("");
+
+    const msg = new RequestSignMsg(chainId, id, signer, toHex(message), true);
+    return await sendMessage(BACKGROUND_PORT, msg);
   }
 
   async suggestToken(chainId: string, contractAddress: string) {
