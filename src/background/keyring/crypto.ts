@@ -27,7 +27,7 @@ export interface KeyStore {
   coinTypeForChain: CoinTypeForChain;
   bip44HDPath?: BIP44HDPath;
   meta?: {
-    [key: string]: string;
+    [key: string]: string | undefined;
   };
   crypto: {
     cipher: "aes-128-ctr";
