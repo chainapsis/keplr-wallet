@@ -116,9 +116,8 @@ export class MessageManager {
 
   protected onMessage = (
     message: any,
-    sender: MessageSender,
-    sendResponse: (response: Result) => void
-  ) => {
+    sender: MessageSender
+  ): Promise<Result> | undefined => {
     if (message.port !== this.port) {
       return;
     }
@@ -129,18 +128,16 @@ export class MessageManager {
       // );
 
       if (!message?.type) {
-        sendResponse({
+        return Promise.resolve({
           error: "Null type"
         });
-        return;
       }
 
       const msgCls = this.registeredMsgType.get(message.type);
       if (!msgCls) {
-        sendResponse({
+        return Promise.resolve({
           error: `Unregistered msg type ${message.type}`
         });
-        return;
       }
       const msg = Object.setPrototypeOf(
         message.msg,
@@ -149,26 +146,24 @@ export class MessageManager {
 
       try {
         if (!this.checkOriginIsValid(msg, sender)) {
-          sendResponse({
+          return Promise.resolve({
             error: "Invalid origin"
           });
-          return;
         }
       } catch (e) {
         if (e) {
-          sendResponse({
-            error: `Invalid origin: ${e.message || e.toString()}`
-          });
-
           console.log(
             `${msg.type()}'s origin is invalid: ${e.message || e.toString()}`
           );
+
+          return Promise.resolve({
+            error: `Invalid origin: ${e.message || e.toString()}`
+          });
         } else {
-          sendResponse({
+          return Promise.resolve({
             error: "Invalid origin"
           });
         }
-        return;
       }
 
       try {
@@ -176,26 +171,24 @@ export class MessageManager {
           !this.checkMessageIsInternal(this.produceEnv(), sender) &&
           !msg.approveExternal(this.produceEnv(), sender)
         ) {
-          sendResponse({
+          return Promise.resolve({
             error: "Permission rejected"
           });
-          return;
         }
       } catch (e) {
         if (e) {
-          sendResponse({
-            error: `Permission rejected: ${e.message || e.toString()}`
-          });
-
           console.log(
             `${msg.type()} is rejected: ${e.message || e.toString()}`
           );
+
+          return Promise.resolve({
+            error: `Permission rejected: ${e.message || e.toString()}`
+          });
         } else {
-          sendResponse({
+          return Promise.resolve({
             error: "Permission rejected, and error is null"
           });
         }
-        return;
       }
 
       try {
@@ -203,80 +196,72 @@ export class MessageManager {
         msg.validateBasic();
       } catch (e) {
         if (e) {
-          sendResponse({
-            error: e.message || e.toString()
-          });
-
           console.log(
             `${msg.type()} is not valid: ${e.message || e.toString()}`
           );
+
+          return Promise.resolve({
+            error: e.message || e.toString()
+          });
         } else {
-          sendResponse({
+          return Promise.resolve({
             error: "Fail to validate msg, and error is null"
           });
         }
-        return;
       }
 
       const route = msg.route();
       if (!route) {
-        sendResponse({
+        return Promise.resolve({
           error: "Null route"
         });
-        return;
       }
       const handler = this.registeredHandler.get(route);
       if (!handler) {
-        sendResponse({
+        return Promise.resolve({
           error: "Can't get handler"
         });
-        return;
       }
 
       try {
-        const promise = Promise.resolve(handler(this.produceEnv(), msg));
-        promise
-          .then(result => {
-            sendResponse({
-              return: result
+        return new Promise(resolve => {
+          Promise.resolve(handler(this.produceEnv(), msg))
+            .then(result => {
+              resolve({ return: result });
+            })
+            .catch(e => {
+              if (e) {
+                console.log(
+                  `${msg.type()} occurs error: ${e.message || e.toString()}`
+                );
+
+                resolve({
+                  error: e.message || e.toString()
+                });
+              } else {
+                resolve({
+                  error: "Unknown error, and error is null"
+                });
+              }
             });
-          })
-          .catch(e => {
-            if (e) {
-              sendResponse({
-                error: e.message || e.toString()
-              });
-
-              console.log(
-                `${msg.type()} occurs error: ${e.message || e.toString()}`
-              );
-            } else {
-              sendResponse({
-                error: "Unknown error, and error is null"
-              });
-            }
-          });
-
-        return true;
+        });
       } catch (e) {
-        sendResponse({
+        console.log(`${msg.type()} occurs error: ${e.message || e.toString()}`);
+
+        return Promise.resolve({
           error: e.message || e.toString()
         });
-
-        console.log(`${msg.type()} occurs error: ${e.message || e.toString()}`);
-        return;
       }
     } catch (e) {
       if (e) {
-        sendResponse({
+        return Promise.resolve({
           error: e.message || e.toString()
         });
       } else {
-        sendResponse({
+        return Promise.resolve({
           error: "Unknown error, and error is null"
         });
       }
-      return;
     }
   };
 }
