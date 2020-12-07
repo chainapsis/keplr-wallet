@@ -277,7 +277,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         className={style.container}
         onSubmit={form.handleSubmit(async data => {
           if (
-            tokenInfo.tokenInfo?.decimals &&
+            tokenInfo.tokenInfo?.decimals != null &&
             tokenInfo.tokenInfo.name &&
             tokenInfo.tokenInfo.symbol
           ) {
