@@ -26,6 +26,7 @@ import {
 } from "../../background/tokens/messages";
 import { TxBuilderConfigPrimitive } from "../../background/keyring/types";
 import { toHex } from "@cosmjs/encoding";
+import { BroadcastMode, BroadcastTxResult, StdTx } from "@cosmjs/launchpad";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -57,8 +58,11 @@ export class Keplr {
     return await sendMessage(BACKGROUND_PORT, msg);
   }
 
-  async getTxConfig(chainId: string, config: TxBuilderConfigPrimitive) {
-    const bytes = new Uint8Array(8);
+  async getTxConfig(
+    chainId: string,
+    config: TxBuilderConfigPrimitive
+  ): Promise<TxBuilderConfigPrimitive> {
+    const bytes = new Uint8Array(4);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map(value => {
         return value.toString(16);
@@ -73,11 +77,11 @@ export class Keplr {
       id,
       true
     );
-    return await sendMessage(BACKGROUND_PORT, msg);
+    return (await sendMessage(BACKGROUND_PORT, msg)).config;
   }
 
   async sign(chainId: string, signer: string, message: Uint8Array) {
-    const bytes = new Uint8Array(8);
+    const bytes = new Uint8Array(4);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map(value => {
         return value.toString(16);
@@ -86,6 +90,28 @@ export class Keplr {
 
     const msg = new RequestSignMsg(chainId, id, signer, toHex(message), true);
     return await sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  /**
+   * Broadcast tx to the rest endpoint that Keplr knows.
+   * @param chainId
+   * @param stdTx
+   * @param mode
+   */
+  async sendTx(
+    chainId: string,
+    stdTx: StdTx,
+    mode: BroadcastMode
+  ): Promise<BroadcastTxResult> {
+    // TODO: Clear up the message for broadcasting tx to the rest endpoint.
+    const msg = new RequestBackgroundTxWithResultMsg(
+      chainId,
+      Buffer.from(JSON.stringify(stdTx)).toString("hex"),
+      mode === BroadcastMode.Block ? "commit" : mode,
+      true
+    );
+    // TODO: Parse the `Uint8Array`.
+    return (await sendMessage(BACKGROUND_PORT, msg)) as any;
   }
 
   async suggestToken(chainId: string, contractAddress: string) {
