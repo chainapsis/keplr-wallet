@@ -1,5 +1,4 @@
 import { MessageManager } from "./index";
-import { Result } from "../interfaces";
 import { Env } from "../types";
 
 import EventEmitter = NodeJS.EventEmitter;
@@ -41,8 +40,10 @@ export class MockMessageManager extends MessageManager {
     const sequence = message.sequence;
     delete message.sequence;
 
-    this.onMessage(message, sender, (result: Result) => {
-      this.emitter.emit(`message-result-${sequence}`, result);
+    Promise.resolve(this.onMessage(message, sender)).then(result => {
+      if (result) {
+        this.emitter.emit(`message-result-${sequence}`, result);
+      }
     });
   };
 }

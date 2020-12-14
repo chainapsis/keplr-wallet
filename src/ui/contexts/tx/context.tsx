@@ -110,7 +110,9 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
       }
 
       // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
-      const split = amount.denom.split(/(\w+):(\w+):(\w+)/).filter(Boolean);
+      const split = amount.denom
+        .split(/(\w+):(\w+):([A-Za-z0-9_ -]+)/)
+        .filter(Boolean);
       if (split.length === 3) {
         // If token based on the contract.
         switch (split[0]) {

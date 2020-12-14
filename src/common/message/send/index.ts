@@ -132,7 +132,7 @@ export function postMessage<M extends Message<unknown>>(
       msg
     };
 
-    window.postMessage(proxyMsg, "*");
+    window.postMessage(proxyMsg, window.location.origin);
   });
 }
 
@@ -159,7 +159,7 @@ export function listenAndProxyMessages(): void {
         result
       };
 
-      window.postMessage(proxyMsgResult, "*");
+      window.postMessage(proxyMsgResult, window.location.origin);
     });
   });
 }

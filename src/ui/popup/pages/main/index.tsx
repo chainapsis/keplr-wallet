@@ -18,7 +18,6 @@ import { useStore } from "../../stores";
 import { useConfirm } from "../../../components/confirm";
 import { useIntl } from "react-intl";
 import { TokensView } from "./token";
-import { Int } from "@chainapsis/cosmosjs/common/int";
 import { ChainUpdaterKeeper } from "../../../../background/updater/keeper";
 import { sendMessage } from "../../../../common/message/send";
 import { GetKeyStoreBIP44SelectablesMsg } from "../../../../background/keyring";
@@ -203,10 +202,7 @@ export const MainPage: FunctionComponent = observer(() => {
   const stakeCurrency = chainStore.chainInfo.stakeCurrency;
 
   const tokens = accountStore.assets.filter(asset => {
-    return (
-      asset.denom !== stakeCurrency.coinMinimalDenom &&
-      asset.amount.gt(new Int(0))
-    );
+    return asset.denom !== stakeCurrency.coinMinimalDenom;
   });
 
   const hasTokens = tokens.length > 0;

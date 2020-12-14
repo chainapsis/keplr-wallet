@@ -162,6 +162,14 @@ export class KeyRing {
     return this.loadKey(this.computeKeyStoreCoinType(chainId, defaultCoinType));
   }
 
+  public getKeyStoreMeta(key: string): string {
+    if (!this.keyStore || this.keyStore.meta == null) {
+      return "";
+    }
+
+    return this.keyStore.meta[key] ?? "";
+  }
+
   private computeKeyStoreCoinType(
     chainId: string,
     defaultCoinType: number

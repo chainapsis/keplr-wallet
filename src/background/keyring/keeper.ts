@@ -23,8 +23,13 @@ import Axios from "axios";
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 import { ChainInfo } from "../chains";
 import { BaseAccount } from "@chainapsis/cosmosjs/common/baseAccount";
+import { WEBPAGE_PORT } from "../../common/message/constant";
+import { KeyStoreChangedMsg } from "./foreground";
+import { sendMessageToContentScripts } from "../../common/message/send/content-scripts";
 
 export interface KeyHex {
+  // Name of the selected key store.
+  name: string;
   algo: string;
   pubKeyHex: string;
   addressHex: string;
@@ -199,6 +204,10 @@ export class KeyRingKeeper {
     );
   }
 
+  getKeyStoreMeta(key: string): string {
+    return this.keyRing.getKeyStoreMeta(key);
+  }
+
   async requestTxBuilderConfig(
     extensionBaseURL: string,
     config: TxBuilderConfigPrimitiveWithChainId,
@@ -324,7 +333,17 @@ export class KeyRingKeeper {
   public async changeKeyStoreFromMultiKeyStore(
     index: number
   ): Promise<MultiKeyStoreInfoWithSelected> {
-    return this.keyRing.changeKeyStoreFromMultiKeyStore(index);
+    const result = await this.keyRing.changeKeyStoreFromMultiKeyStore(index);
+    // Notify the key store changed to the webpages, it will ignore the result of message.
+    sendMessageToContentScripts(WEBPAGE_PORT, new KeyStoreChangedMsg()).catch(
+      e => {
+        console.log(
+          `Error occured when dispatching the key store change event: ${e.message ??
+            e.toString()}`
+        );
+      }
+    );
+    return result;
   }
 
   getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
