@@ -321,7 +321,9 @@ export class AccountStore {
         const assets = this.assets.slice();
         for (const asset of assets) {
           // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
-          const split = asset.denom.split(/(\w+):(\w+):(\w+)/).filter(Boolean);
+          const split = asset.denom
+            .split(/(\w+):(\w+):([A-Za-z0-9_ -]+)/)
+            .filter(Boolean);
           if (split.length !== 3) {
             this.removeAsset(asset.denom);
           }
@@ -410,7 +412,7 @@ export class AccountStore {
           for (const asset of assets) {
             // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
             const split = asset.denom
-              .split(/(\w+):(\w+):(\w+)/)
+              .split(/(\w+):(\w+):([A-Za-z0-9_ -]+)/)
               .filter(Boolean);
             if (split.length !== 3) {
               this.removeAsset(asset.denom);

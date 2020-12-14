@@ -57,7 +57,7 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       if (txState.amount?.denom) {
         // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
         const split = txState.amount.denom
-          .split(/(\w+):(\w+):(\w+)/)
+          .split(/(\w+):(\w+):([A-Za-z0-9_ -]+)/)
           .filter(Boolean);
         if (split.length == 3) {
           // If token based on the contract.
