@@ -9,6 +9,8 @@ import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 const Buffer = require("buffer/").Buffer;
 
 export class SecretWasmKeeper {
+  protected cacheEnigmaUtils: Map<string, EnigmaUtils> = new Map();
+
   constructor(
     private readonly kvStore: KVStore,
     private readonly chainsKeeper: ChainsKeeper,
@@ -25,8 +27,7 @@ export class SecretWasmKeeper {
 
     const seed = await this.getSeed(chainInfo);
 
-    // TODO: Handle the rest config.
-    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    const utils = this.getEnigmaUtils(chainInfo, seed);
     return utils.pubkey;
   }
 
@@ -48,8 +49,7 @@ export class SecretWasmKeeper {
     // It need to more research.
     const seed = await this.getSeed(chainInfo);
 
-    // TODO: Handle the rest config.
-    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    const utils = this.getEnigmaUtils(chainInfo, seed);
 
     return await utils.encrypt(contractCodeHash, msg);
   }
@@ -72,10 +72,24 @@ export class SecretWasmKeeper {
     // It need to more research.
     const seed = await this.getSeed(chainInfo);
 
-    // TODO: Handle the rest config.
-    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    const utils = this.getEnigmaUtils(chainInfo, seed);
 
     return await utils.decrypt(ciphertext, nonce);
+  }
+
+  private getEnigmaUtils(chainInfo: ChainInfo, seed: Uint8Array): EnigmaUtils {
+    const key = `${chainInfo.chainId}-${Buffer.from(seed).toString("hex")}`;
+
+    if (this.cacheEnigmaUtils.has(key)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return this.cacheEnigmaUtils.get(key)!;
+    }
+
+    // TODO: Handle the rest config.
+    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    this.cacheEnigmaUtils.set(key, utils);
+
+    return utils;
   }
 
   private async getSeed(chainInfo: ChainInfo): Promise<Uint8Array> {
