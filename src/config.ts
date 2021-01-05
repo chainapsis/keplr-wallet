@@ -180,8 +180,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 529,
     gasPriceStep: {
-      low: 0.1,
-      average: 0.25,
+      low: 0.25,
+      average: 0.3,
       high: 0.4
     },
     features: ["secretwasm"]
