@@ -78,7 +78,11 @@ export const useCosmosJS = <R extends Rest = Rest>(
       ((codec: Codec) => {
         CmnCdc.registerCodec(codec);
         Crypto.registerCodec(codec);
-        Bank.registerCodec(codec);
+        if (chainInfo.chainId.startsWith("shentu")) {
+          codec.registerConcrete("bank/MsgSend", Bank.MsgSend.prototype);
+        } else {
+          Bank.registerCodec(codec);
+        }
         Distr.registerCodec(codec);
         Staking.registerCodec(codec);
         Slashing.registerCodec(codec);

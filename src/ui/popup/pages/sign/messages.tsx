@@ -20,7 +20,7 @@ export interface MessageObj {
 }
 
 interface MsgSend {
-  type: "cosmos-sdk/MsgSend";
+  type: "cosmos-sdk/MsgSend" | "bank/MsgSend";
   value: {
     amount: [
       {
@@ -167,7 +167,10 @@ export function renderMessage(
   title: string;
   content: React.ReactElement;
 } {
-  if (MessageType<MsgSend>(msg, "cosmos-sdk/MsgSend")) {
+  if (
+    MessageType<MsgSend>(msg, "cosmos-sdk/MsgSend") ||
+    MessageType<MsgSend>(msg, "bank/MsgSend")
+  ) {
     const receives: { amount: string; denom: string }[] = [];
     for (const coinPrimitive of msg.value.amount) {
       const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);

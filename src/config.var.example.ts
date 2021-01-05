@@ -51,6 +51,11 @@ export const STRAIGHTEDGE_REST_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
 
+export const CERTIK_RPC_ENDPOINT = "";
+export const CERTIK_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const CERTIK_REST_ENDPOINT = "";
+export const CERTIK_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const ADDITIONAL_SIGN_IN_PREPEND:
   | React.ReactElement
   | undefined = undefined;

@@ -36,7 +36,11 @@ import {
   IOV_RPC_ENDPOINT,
   IOV_RPC_CONFIG,
   IOV_REST_ENDPOINT,
-  IOV_REST_CONFIG
+  IOV_REST_CONFIG,
+  CERTIK_RPC_ENDPOINT,
+  CERTIK_RPC_CONFIG,
+  CERTIK_REST_ENDPOINT,
+  CERTIK_REST_CONFIG
 } from "./config.var";
 import { IntlMessages } from "./ui/popup/language";
 
@@ -266,6 +270,46 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 2,
       high: 3
     }
+  },
+  {
+    rpc: CERTIK_RPC_ENDPOINT,
+    rpcConfig: CERTIK_RPC_CONFIG,
+    rest: CERTIK_REST_ENDPOINT,
+    restConfig: CERTIK_REST_CONFIG,
+    chainId: "shentu-1",
+    chainName: "Certik",
+    stakeCurrency: {
+      coinDenom: "CTK",
+      coinMinimalDenom: "uctk",
+      coinDecimals: 6,
+      coinGeckoId: "certik"
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/shentu-1/stake"
+        : "http://localhost:8081/#/shentu-1/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/shentu-1/stake"
+        : "http://localhost:8081/#/shentu-1/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("certik"),
+    currencies: [
+      {
+        coinDenom: "CTK",
+        coinMinimalDenom: "uctk",
+        coinDecimals: 6,
+        coinGeckoId: "certik"
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "CTK",
+        coinMinimalDenom: "uctk",
+        coinDecimals: 6,
+        coinGeckoId: "certik"
+      }
+    ]
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
