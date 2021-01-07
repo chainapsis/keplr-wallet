@@ -436,6 +436,11 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
     chainId: "iov-mainnet-2",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "shentu-1",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
 ];
 
