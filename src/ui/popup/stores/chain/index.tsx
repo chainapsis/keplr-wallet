@@ -91,6 +91,16 @@ export class ChainStore {
     this.rootStore.setChainInfo(chainInfo);
   }
 
+  public getChain(chainId: string): ChainInfo {
+    const find = this.chainList.find(info => info.chainId === chainId);
+
+    if (!find) {
+      throw new Error(`Unknown chain info: ${chainId}`);
+    }
+
+    return find;
+  }
+
   @actionAsync
   public async saveLastViewChainId() {
     // Save last view chain id to persistent background

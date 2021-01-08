@@ -22,12 +22,18 @@ import style from "./style.module.scss";
 import { useNotification } from "../../../components/notification";
 
 import { useIntl } from "react-intl";
-import { Button } from "reactstrap";
+import { Button, ButtonGroup, FormGroup, Label } from "reactstrap";
 
 import { useTxState, withTxStateProvider } from "../../../contexts/tx";
 import { useHistory } from "react-router";
 
 import Axios from "axios";
+import { IBCChannelRegisterModal } from "./ibc";
+
+enum TxType {
+  Internal,
+  IBC
+}
 
 export const SendPage: FunctionComponent = withTxStateProvider(
   observer(() => {
@@ -106,6 +112,8 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       ? txState.isValid("recipient", "amount", "memo", "gas")
       : txState.isValid("recipient", "amount", "memo", "fees", "gas");
 
+    const [txType, setTxType] = useState<TxType>(TxType.Internal);
+
     return (
       <HeaderLayout
         showChainName
@@ -114,6 +122,7 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           history.goBack();
         }}
       >
+        <IBCChannelRegisterModal />
         <form
           className={style.formContainer}
           onSubmit={async e => {
@@ -165,6 +174,41 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           }}
         >
           <div className={style.formInnerContainer}>
+            <FormGroup>
+              <Label for="tx-type" className="form-control-label">
+                Transaction Type
+              </Label>
+              <ButtonGroup id="tx-type" style={{ display: "flex" }}>
+                <Button
+                  type="button"
+                  color="primary"
+                  size="sm"
+                  outline={txType !== TxType.Internal}
+                  style={{ flex: 1 }}
+                  onClick={e => {
+                    e.preventDefault();
+
+                    setTxType(TxType.Internal);
+                  }}
+                >
+                  Internal
+                </Button>
+                <Button
+                  type="button"
+                  color="primary"
+                  size="sm"
+                  outline={txType !== TxType.IBC}
+                  style={{ flex: 1 }}
+                  onClick={e => {
+                    e.preventDefault();
+
+                    setTxType(TxType.IBC);
+                  }}
+                >
+                  IBC
+                </Button>
+              </ButtonGroup>
+            </FormGroup>
             <div>
               <AddressInput
                 label={intl.formatMessage({ id: "send.input.recipient" })}

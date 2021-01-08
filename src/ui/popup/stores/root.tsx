@@ -4,12 +4,16 @@ import { AccountStore } from "./account";
 import { ChainInfo } from "../../../background/chains";
 import { PriceStore } from "./price";
 import { EmbedChainInfos } from "../../../config";
+import { QueriesStore } from "./query";
+import { BrowserKVStore } from "../../../common/kvstore";
 
 export class RootStore {
   public chainStore: ChainStore;
   public keyRingStore: KeyRingStore;
   public accountStore: AccountStore;
   public priceStore: PriceStore;
+
+  public queriesStore: QueriesStore;
 
   constructor() {
     // Order is important.
@@ -18,6 +22,11 @@ export class RootStore {
     this.priceStore = new PriceStore();
 
     this.chainStore = new ChainStore(this, EmbedChainInfos);
+
+    this.queriesStore = new QueriesStore(
+      new BrowserKVStore("queries"),
+      this.chainStore
+    );
 
     this.chainStore.init();
     this.keyRingStore.restore();
