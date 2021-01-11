@@ -27,8 +27,9 @@ import { Button, ButtonGroup, FormGroup, Label } from "reactstrap";
 import { useTxState, withTxStateProvider } from "../../../contexts/tx";
 import { useHistory } from "react-router";
 
+import { DestinationSelector } from "./ibc";
+
 import Axios from "axios";
-import { IBCChannelRegisterModal } from "./ibc";
 
 enum TxType {
   Internal,
@@ -87,9 +88,19 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       txState.setBalances(accountStore.assets);
     }, [accountStore.assets, txState]);
 
-    const memorizedCurrencies = useMemo(() => chainStore.chainInfo.currencies, [
-      chainStore.chainInfo.currencies
-    ]);
+    const [txType, setTxType] = useState<TxType>(TxType.Internal);
+
+    const memorizedCurrencies = useMemo(() => {
+      if (txType === TxType.Internal) {
+        return chainStore.chainInfo.currencies;
+      } else {
+        // If tx is for IBC transfer, only show the native currencies.
+        return chainStore.chainInfo.currencies.filter(
+          currency => !("type" in currency)
+        );
+      }
+    }, [chainStore.chainInfo.currencies, txType]);
+
     const memorizedFeeCurrencies = useMemo(
       () => chainStore.chainInfo.feeCurrencies,
       [chainStore.chainInfo.feeCurrencies]
@@ -112,7 +123,18 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       ? txState.isValid("recipient", "amount", "memo", "gas")
       : txState.isValid("recipient", "amount", "memo", "fees", "gas");
 
-    const [txType, setTxType] = useState<TxType>(TxType.Internal);
+    const baseChainInfo = (() => {
+      if (txState.ibcSendTo) {
+        const find = chainStore.chainList.find(
+          chainInfo => chainInfo.chainId === txState.ibcSendTo
+        );
+        if (find) {
+          return find;
+        }
+      }
+
+      return chainStore.chainInfo;
+    })();
 
     return (
       <HeaderLayout
@@ -122,7 +144,6 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           history.goBack();
         }}
       >
-        <IBCChannelRegisterModal />
         <form
           className={style.formContainer}
           onSubmit={async e => {
@@ -189,6 +210,7 @@ export const SendPage: FunctionComponent = withTxStateProvider(
                     e.preventDefault();
 
                     setTxType(TxType.Internal);
+                    txState.setIBCSendTo(undefined);
                   }}
                 >
                   Internal
@@ -210,12 +232,11 @@ export const SendPage: FunctionComponent = withTxStateProvider(
               </ButtonGroup>
             </FormGroup>
             <div>
+              {txType === TxType.IBC ? <DestinationSelector /> : null}
               <AddressInput
                 label={intl.formatMessage({ id: "send.input.recipient" })}
-                bech32Prefix={
-                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                }
-                coinType={chainStore.chainInfo.coinType}
+                bech32Prefix={baseChainInfo.bech32Config.bech32PrefixAccAddr}
+                coinType={baseChainInfo.coinType}
                 errorTexts={{
                   invalidBech32Address: intl.formatMessage({
                     id: "send.input.recipient.error.invalid"

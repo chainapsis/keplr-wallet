@@ -3,6 +3,7 @@ import { KVStore } from "../../../../common/kvstore";
 import { DeepReadonly } from "utility-types";
 import { ChainInfo } from "../../../../background/chains";
 import { ObservableQueryIBCChannel } from "./channel";
+import { ObservableQueryIBCClientState } from "./client-state";
 
 export interface ChainGetter {
   // Return the chain info matched with chain id.
@@ -13,9 +14,15 @@ export interface ChainGetter {
 
 export class Queries {
   protected readonly _queryIBCChannel: ObservableQueryIBCChannel;
+  protected readonly _queryIBCClientState: ObservableQueryIBCClientState;
 
   constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     this._queryIBCChannel = new ObservableQueryIBCChannel(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this._queryIBCClientState = new ObservableQueryIBCClientState(
       kvStore,
       chainId,
       chainGetter
@@ -24,6 +31,10 @@ export class Queries {
 
   getQueryIBCChannel(): DeepReadonly<ObservableQueryIBCChannel> {
     return this._queryIBCChannel;
+  }
+
+  getQueryIBCClientState(): DeepReadonly<ObservableQueryIBCClientState> {
+    return this._queryIBCClientState;
   }
 }
 

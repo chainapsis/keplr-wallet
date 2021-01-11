@@ -6,6 +6,7 @@ import { PriceStore } from "./price";
 import { EmbedChainInfos } from "../../../config";
 import { QueriesStore } from "./query";
 import { BrowserKVStore } from "../../../common/kvstore";
+import { IBCStore } from "./ibc";
 
 export class RootStore {
   public chainStore: ChainStore;
@@ -14,6 +15,7 @@ export class RootStore {
   public priceStore: PriceStore;
 
   public queriesStore: QueriesStore;
+  public ibcStore: IBCStore;
 
   constructor() {
     // Order is important.
@@ -27,6 +29,7 @@ export class RootStore {
       new BrowserKVStore("queries"),
       this.chainStore
     );
+    this.ibcStore = new IBCStore(new BrowserKVStore("store-ibc"));
 
     this.chainStore.init();
     this.keyRingStore.restore();

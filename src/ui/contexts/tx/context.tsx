@@ -29,6 +29,10 @@ type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 // This doesn't use reducer/dispatch pattern because this is relatively simple
 // and doesn't act as global state and act as the pipeline for the components to handle the tx information.
 export interface TxState {
+  // Chain id that the IBC tx will be sent.
+  // If it is not for IBC, this will be undefined.
+  ibcSendTo: string | undefined;
+
   rawAddress: string;
   recipient: AccAddress | null;
   amount: Coin | null;
@@ -54,6 +58,8 @@ export interface TxState {
     restInstance: AxiosInstance
   ): Promise<Msg>;
 
+  setIBCSendTo(chainId: string | undefined): void;
+
   // TODO: Check the equality of the object value to prevent the infinite render.
   setRawAddress(rawAddress: string): void;
   setRecipient(recipient: AccAddress | null): void;
@@ -78,6 +84,8 @@ export interface TxState {
 const TxContext = createContext<TxState | undefined>(undefined);
 
 export const TxStateProvider: FunctionComponent = ({ children }) => {
+  const [ibcSendTo, setIBCSendTo] = useState<string | undefined>(undefined);
+
   const [rawAddress, setRawAddress] = useState<string>("");
   const [recipient, setRecipient] = useState<AccAddress | null>(null);
   const [amount, setAmount] = useState<Coin | null>(null);
@@ -245,6 +253,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
     <TxContext.Provider
       value={useMemo(
         () => ({
+          ibcSendTo,
           rawAddress,
           recipient,
           amount,
@@ -255,6 +264,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           balances,
           feeCurrencies,
           generateSendMsg,
+          setIBCSendTo,
           setRawAddress,
           setRecipient,
           setAmount,
@@ -269,6 +279,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           isValid
         }),
         [
+          ibcSendTo,
           rawAddress,
           recipient,
           amount,
