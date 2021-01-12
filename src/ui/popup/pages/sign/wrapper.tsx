@@ -112,6 +112,7 @@ export class SignDocWrapper {
         {msgs.map((msg, i) => {
           let msgContent;
 
+          console.log(msg, i);
           /*
            switch (msg.constroctor) hinders the `Typescript`'s type-inference feature...
            So, just ust the if-elseif-else.
@@ -147,10 +148,18 @@ export class SignDocWrapper {
               msg.validatorAddress
             );
           } else {
-            msgContent = renderUnknownMessage(currencies, intl, {
-              typeUrl: msg.typeUrl || msg.type_url || "Unknown",
-              value: toBase64(msg.value)
-            });
+            const isAny = (msg.typeUrl || msg.type_url) != null;
+
+            msgContent = renderUnknownMessage(
+              currencies,
+              intl,
+              isAny
+                ? {
+                    typeUrl: msg.typeUrl || msg.type_url || "Unknown",
+                    value: toBase64(msg.value)
+                  }
+                : msg
+            );
           }
 
           return (

@@ -21,6 +21,8 @@ import { sendMessage } from "../../../common/message/send";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
 import { ReqeustEncryptMsg } from "../../../background/secret-wasm";
 import { Channel } from "../../popup/stores/ibc/types";
+import { google, ibc } from "../../../common/stargate/proto";
+import Long from "long";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -57,7 +59,7 @@ export interface TxState {
     chainId: string,
     sender: AccAddress,
     restInstance: AxiosInstance
-  ): Promise<Msg>;
+  ): Promise<Msg | google.protobuf.Any>;
 
   setIBCSendTo(chainId: Channel | undefined): void;
 
@@ -126,6 +128,25 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
         throw new Error("recipient or amount is not set");
       }
 
+      if (ibcSendTo) {
+        return new google.protobuf.Any({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          type_url: "/ibc.applications.transfer.v1.Msg/Transfer",
+          value: ibc.applications.transfer.v1.MsgTransfer.encode({
+            sourcePort: ibcSendTo.portId,
+            sourceChannel: ibcSendTo.channelId,
+            token: {
+              denom: amount.denom,
+              amount: amount.amount.toString()
+            },
+            sender: sender.toBech32(),
+            receiver: recipient.toBech32(),
+            // TODO: Set timeout properly.
+            timeoutTimestamp: Long.fromString("9223372036854775807")
+          }).finish()
+        });
+      }
+
       // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
       const split = amount.denom
         .split(/(\w+):(\w+):([A-Za-z0-9_ -]+)/)
@@ -180,7 +201,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
         return new MsgSend(sender, recipient, [amount]);
       }
     },
-    [amount, recipient]
+    [amount, ibcSendTo, recipient]
   );
 
   const [errors, setErrors] = useState<any>({});
@@ -299,6 +320,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           balances,
           feeCurrencies,
           generateSendMsg,
+          setIBCSendTo,
           setFees,
           setContextErrors,
           getError,

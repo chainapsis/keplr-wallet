@@ -30,6 +30,13 @@ import { useHistory } from "react-router";
 import { DestinationSelector } from "./ibc";
 
 import Axios from "axios";
+import { Msg } from "@chainapsis/cosmosjs/core/tx";
+import { makeProtobufTx } from "../../../../common/stargate/tx";
+import { RequestBackgroundTxMsg } from "../../../../background/tx";
+import { sendMessage } from "../../../../common/message";
+import { BACKGROUND_PORT } from "../../../../common/message/constant";
+
+import { Buffer } from "buffer/";
 
 enum TxType {
   Internal,
@@ -171,27 +178,65 @@ export const SendPage: FunctionComponent = withTxStateProvider(
                 fee: txState.fees
               };
 
-              await cosmosJS.sendMsgs(
-                [msg],
-                config,
-                () => {
-                  history.replace("/");
-                },
-                e => {
-                  history.replace("/");
-                  notification.push({
-                    type: "danger",
-                    content: e.toString(),
-                    duration: 5,
-                    canDelete: true,
-                    placement: "top-center",
-                    transition: {
-                      duration: 0.25
-                    }
-                  });
-                },
-                "commit"
-              );
+              if (msg instanceof Msg) {
+                await cosmosJS.sendMsgs(
+                  [msg],
+                  config,
+                  () => {
+                    history.replace("/");
+                  },
+                  e => {
+                    history.replace("/");
+                    notification.push({
+                      type: "danger",
+                      content: e.toString(),
+                      duration: 5,
+                      canDelete: true,
+                      placement: "top-center",
+                      transition: {
+                        duration: 0.25
+                      }
+                    });
+                  },
+                  "commit"
+                );
+              } else {
+                // Protobuf encoded msg.
+                if (cosmosJS.api) {
+                  const context = cosmosJS.api.context;
+
+                  const config: TxBuilderConfig = {
+                    gas: txState.gas,
+                    memo: txState.memo,
+                    fee: txState.fees
+                  };
+                  try {
+                    const tx = await makeProtobufTx(context, [msg], config);
+
+                    await sendMessage(
+                      BACKGROUND_PORT,
+                      new RequestBackgroundTxMsg(
+                        chainStore.chainInfo.chainId,
+                        Buffer.from(tx).toString("hex"),
+                        "commit"
+                      )
+                    );
+                  } catch (e) {
+                    notification.push({
+                      type: "danger",
+                      content: e.toString(),
+                      duration: 5,
+                      canDelete: true,
+                      placement: "top-center",
+                      transition: {
+                        duration: 0.25
+                      }
+                    });
+                  } finally {
+                    history.replace("/");
+                  }
+                }
+              }
             }
           }}
         >

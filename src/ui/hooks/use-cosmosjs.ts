@@ -41,6 +41,7 @@ export type SendMsgs = (
 ) => Promise<void>;
 
 export interface CosmosJsHook {
+  api?: Api<Rest>;
   loading: boolean;
   error?: Error;
   addresses: string[];
@@ -64,6 +65,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
     useBackgroundTx?: boolean;
   } = {}
 ): CosmosJsHook => {
+  const [api, setApi] = useState<Api<Rest> | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
@@ -173,6 +175,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
     }
 
     api.isStargate = isStargate;
+    setApi(api);
 
     const _sendMsgs: SendMsgs = async (
       msgs: Msg[],
@@ -271,6 +274,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
   ]);
 
   return {
+    api,
     loading,
     error,
     addresses,

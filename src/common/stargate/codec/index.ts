@@ -1,7 +1,7 @@
 import { google } from "../proto";
 import * as $protobuf from "protobufjs";
 
-import { cosmos } from "../proto";
+import { cosmos, ibc } from "../proto";
 import { UnknownMessage } from "./unknown";
 
 export class ProtoCodec {
@@ -42,4 +42,8 @@ export const defaultProtoCodec = new ProtoCodec();
 defaultProtoCodec.registerAny(
   "/cosmos.bank.v1beta1.MsgSend",
   cosmos.bank.v1beta1.MsgSend
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.transfer.v1.Msg/Transfer",
+  ibc.applications.transfer.v1.MsgTransfer
 );
