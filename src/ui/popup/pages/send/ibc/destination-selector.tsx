@@ -36,7 +36,7 @@ export const DestinationSelector: FunctionComponent = observer(() => {
     }
 
     return chainStore.chainList.find(
-      chainInfo => chainInfo.chainId === txState.ibcSendTo
+      chainInfo => chainInfo.chainId === txState.ibcSendTo?.counterpartyChainId
     );
   }, [chainStore.chainList, txState.ibcSendTo]);
 
@@ -75,7 +75,7 @@ export const DestinationSelector: FunctionComponent = observer(() => {
                     onClick={e => {
                       e.preventDefault();
 
-                      txState.setIBCSendTo(chainInfo.chainId);
+                      txState.setIBCSendTo(channel);
                     }}
                   >
                     {`${chainInfo.chainName} (${channel.channelId})`}

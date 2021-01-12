@@ -20,6 +20,7 @@ import { AxiosInstance } from "axios";
 import { sendMessage } from "../../../common/message/send";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
 import { ReqeustEncryptMsg } from "../../../background/secret-wasm";
+import { Channel } from "../../popup/stores/ibc/types";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -29,9 +30,9 @@ type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 // This doesn't use reducer/dispatch pattern because this is relatively simple
 // and doesn't act as global state and act as the pipeline for the components to handle the tx information.
 export interface TxState {
-  // Chain id that the IBC tx will be sent.
+  // Channel that the IBC tx will be sent.
   // If it is not for IBC, this will be undefined.
-  ibcSendTo: string | undefined;
+  ibcSendTo: Channel | undefined;
 
   rawAddress: string;
   recipient: AccAddress | null;
@@ -58,7 +59,7 @@ export interface TxState {
     restInstance: AxiosInstance
   ): Promise<Msg>;
 
-  setIBCSendTo(chainId: string | undefined): void;
+  setIBCSendTo(chainId: Channel | undefined): void;
 
   // TODO: Check the equality of the object value to prevent the infinite render.
   setRawAddress(rawAddress: string): void;
@@ -84,7 +85,15 @@ export interface TxState {
 const TxContext = createContext<TxState | undefined>(undefined);
 
 export const TxStateProvider: FunctionComponent = ({ children }) => {
-  const [ibcSendTo, setIBCSendTo] = useState<string | undefined>(undefined);
+  const [ibcSendTo, _setIBCSendTo] = useState<Channel | undefined>(undefined);
+  const setIBCSendTo = useCallback(
+    (channel: Channel | undefined) => {
+      if (JSON.stringify(ibcSendTo) !== JSON.stringify(channel)) {
+        _setIBCSendTo(channel);
+      }
+    },
+    [ibcSendTo]
+  );
 
   const [rawAddress, setRawAddress] = useState<string>("");
   const [recipient, setRecipient] = useState<AccAddress | null>(null);

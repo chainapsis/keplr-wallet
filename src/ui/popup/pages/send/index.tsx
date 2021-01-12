@@ -126,7 +126,8 @@ export const SendPage: FunctionComponent = withTxStateProvider(
     const baseChainInfo = (() => {
       if (txState.ibcSendTo) {
         const find = chainStore.chainList.find(
-          chainInfo => chainInfo.chainId === txState.ibcSendTo
+          chainInfo =>
+            chainInfo.chainId === txState.ibcSendTo?.counterpartyChainId
         );
         if (find) {
           return find;
