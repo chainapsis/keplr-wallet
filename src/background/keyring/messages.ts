@@ -16,6 +16,7 @@ import { AsyncApprover } from "../../common/async-approver";
 
 import { AccAddress } from "@chainapsis/cosmosjs/common/address";
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
+import { SignDocHelper } from "../../common/stargate/sign";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -584,12 +585,22 @@ export class RequestSignMsg extends Message<{ signatureHex: string }> {
     // Check that message is encoded as hex.
     const buffer = Buffer.from(this.messageHex, "hex");
 
-    // Message should be json.
-    const message = JSON.parse(buffer.toString());
-    if (message["chain_id"] !== this.chainId) {
-      throw new Error(
-        "Chain id in the message is not matched with the requested chain id"
-      );
+    // Message should be amino json or protobuf encoded `SignDoc`.
+    if (buffer[0] === 123) {
+      // If buffer starts with { (123), assume that it is encoded as amino json.
+      const message = JSON.parse(buffer.toString());
+      if (message["chain_id"] !== this.chainId) {
+        throw new Error(
+          "Chain id in the message is not matched with the requested chain id"
+        );
+      }
+    } else {
+      const signDoc = SignDocHelper.decode(buffer);
+      if (signDoc.chainId !== this.chainId) {
+        throw new Error(
+          "Chain id in the message is not matched with the requested chain id"
+        );
+      }
     }
 
     AsyncApprover.isValidId(this.id);

@@ -76,24 +76,36 @@ export class CoinUtils {
 
   static parseDecAndDenomFromCoin(
     currencies: Currency[],
-    coin: Coin
+    coin: Coin,
+    approveUnknownCurrency: boolean = false
   ): { amount: string; denom: string } {
-    const currency = currencies.find(currency => {
+    let currency = currencies.find(currency => {
       return currency.coinMinimalDenom === coin.denom;
     });
-    if (!currency) {
+    if (!approveUnknownCurrency && !currency) {
       throw new Error("Invalid currency");
     }
 
+    if (approveUnknownCurrency && !currency) {
+      currency = {
+        coinDenom: coin.denom,
+        coinMinimalDenom: coin.denom,
+        coinDecimals: 0
+      };
+    }
+
     let precision = new Dec(1);
-    for (let i = 0; i < currency.coinDecimals; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    for (let i = 0; i < currency!.coinDecimals; i++) {
       precision = precision.mul(new Dec(10));
     }
 
     const decAmount = new Dec(coin.amount).quoTruncate(precision);
     return {
-      amount: decAmount.toString(currency.coinDecimals),
-      denom: currency.coinDenom
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      amount: decAmount.toString(currency!.coinDecimals),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      denom: currency!.coinDenom
     };
   }
 

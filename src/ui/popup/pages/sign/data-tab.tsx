@@ -1,18 +1,22 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 
 import style from "./style.module.scss";
+import { SignDocWrapper } from "./wrapper";
+
+const Buffer = require("buffer/").Buffer;
 
 export const DataTab: FunctionComponent<{
-  message: string;
-}> = ({ message }) => {
-  let prettyMessage = message;
-  if (prettyMessage) {
-    try {
-      prettyMessage = JSON.stringify(JSON.parse(prettyMessage), undefined, 2);
-    } catch (e) {
-      prettyMessage = message;
+  messageHex: string;
+}> = ({ messageHex }) => {
+  const wrapper = useMemo(() => {
+    if (messageHex) {
+      return new SignDocWrapper(Buffer.from(messageHex, "hex"));
     }
-  }
+  }, [messageHex]);
 
-  return <pre className={style.message}>{prettyMessage}</pre>;
+  return (
+    <pre className={style.message}>
+      {wrapper ? wrapper.toString() : "Preparing..."}
+    </pre>
+  );
 };
