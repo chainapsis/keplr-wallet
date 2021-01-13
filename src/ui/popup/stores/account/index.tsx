@@ -542,6 +542,8 @@ export class AccountStore {
       }
     });
 
+    let nonce = "";
+
     try {
       const contractCodeHashResult = await task(
         restInstance.get<{
@@ -556,7 +558,7 @@ export class AccountStore {
       });
 
       const encrypted = await task(sendMessage(BACKGROUND_PORT, encryptMsg));
-      const nonce = encrypted.slice(0, 64);
+      nonce = encrypted.slice(0, 64);
 
       const encoded = Buffer.from(
         Buffer.from(encrypted, "hex").toString("base64")
@@ -593,24 +595,69 @@ export class AccountStore {
         ).toString();
 
         const obj = JSON.parse(message);
-        const balance = obj.balance.amount;
-        // Balance can be 0
-        const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
+        if (obj.balance) {
+          console.log(
+            `Valid response of secret20(${
+              currency.contractAddress
+            }) balance: ${JSON.stringify(obj)}`
+          );
+          const balance = obj.balance.amount;
+          // Balance can be 0
+          const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
 
-        this.pushAsset(asset);
-        // Save the assets to storage.
-        await task(
-          this.saveAssetsToStorage(
-            this.chainInfo.chainId,
-            this.bech32Address,
-            this.assets
-          )
-        );
+          this.pushAsset(asset);
+          // Save the assets to storage.
+          await task(
+            this.saveAssetsToStorage(
+              this.chainInfo.chainId,
+              this.bech32Address,
+              this.assets
+            )
+          );
+        } else {
+          console.log(
+            `Invalid response of secret20(${
+              currency.contractAddress
+            }) balance: ${JSON.stringify(obj)}`
+          );
+        }
       }
     } catch (e) {
       if (!Axios.isCancel(e)) {
         // TODO: Make the way to handle error.
-        console.log(e);
+        console.log(
+          `Failed to fetch the secret20(${currency.contractAddress}): ${e}`
+        );
+
+        if (e.response?.data?.error) {
+          const encryptedError = e.response.data.error;
+
+          const errorMessageRgx = /query contract failed: encrypted: (.+)/g;
+
+          const rgxMatches = errorMessageRgx.exec(encryptedError);
+          if (rgxMatches == null || rgxMatches.length != 2) {
+            return;
+          }
+
+          const errorCipherB64 = rgxMatches[1];
+          const errorCipherBz = Buffer.from(errorCipherB64, "base64");
+
+          const decryptMsg = new RequestDecryptMsg(
+            chainId,
+            Buffer.from(errorCipherBz).toString("hex"),
+            nonce
+          );
+
+          const decrypted = await task(
+            sendMessage(BACKGROUND_PORT, decryptMsg)
+          );
+
+          console.log(
+            `Failed to fetch the secret20(${
+              currency.contractAddress
+            }): decrypted -> ${Buffer.from(decrypted, "hex").toString()}`
+          );
+        }
       }
     }
   }
