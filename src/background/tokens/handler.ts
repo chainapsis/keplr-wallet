@@ -5,6 +5,7 @@ import {
   ApproveSuggestedTokenMsg,
   GetSecret20ViewingKey,
   RejectSuggestedTokenMsg,
+  RemoveTokenMsg,
   SuggestTokenMsg
 } from "./messages";
 
@@ -25,6 +26,8 @@ export const getHandler: (keeper: TokensKeeper) => Handler = keeper => {
         );
       case AddTokenMsg:
         return handleAddTokenMsg(keeper)(env, msg as AddTokenMsg);
+      case RemoveTokenMsg:
+        return handleRemoveTokenMsg(keeper)(env, msg as RemoveTokenMsg);
       case GetSecret20ViewingKey:
         return handleGetSecret20ViewingKey(keeper)(
           env,
@@ -75,6 +78,14 @@ const handleAddTokenMsg: (
 ) => InternalHandler<AddTokenMsg> = keeper => {
   return async (_, msg) => {
     await keeper.addToken(msg.chainId, msg.currency);
+  };
+};
+
+const handleRemoveTokenMsg: (
+  keeper: TokensKeeper
+) => InternalHandler<RemoveTokenMsg> = keeper => {
+  return async (_, msg) => {
+    await keeper.removeToken(msg.chainId, msg.currency);
   };
 };
 

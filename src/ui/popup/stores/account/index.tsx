@@ -87,6 +87,11 @@ export class AccountStore {
   @observable
   public keyRingStatus!: KeyRingStatus;
 
+  @observable
+  public secret20ViewingKeyError!: {
+    [contractAddress: string]: boolean | undefined;
+  };
+
   // Not need to be observable
   private lastFetchingCancleToken!: CancelTokenSource | undefined;
   // Account store fetchs the assets that the account has for chain by interval.
@@ -111,6 +116,8 @@ export class AccountStore {
     this.assets = [];
 
     this.keyRingStatus = KeyRingStatus.NOTLOADED;
+
+    this.secret20ViewingKeyError = {};
   }
 
   // This will be called by chain store.
@@ -192,6 +199,7 @@ export class AccountStore {
       }
 
       this.lastAssetFetchingError = undefined;
+      this.secret20ViewingKeyError = {};
 
       // Load the assets from storage.
       this.assets = await task(
@@ -605,6 +613,8 @@ export class AccountStore {
           // Balance can be 0
           const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
 
+          this.secret20ViewingKeyError[currency.contractAddress] = false;
+
           this.pushAsset(asset);
           // Save the assets to storage.
           await task(
@@ -615,6 +625,9 @@ export class AccountStore {
             )
           );
         } else {
+          if (obj["viewing_key_error"]) {
+            this.secret20ViewingKeyError[currency.contractAddress] = true;
+          }
           console.log(
             `Invalid response of secret20(${
               currency.contractAddress

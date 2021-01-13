@@ -48,6 +48,20 @@ export const Menu: FunctionComponent = observer(() => {
           <FormattedMessage id="setting.token.add" />
         </div>
       ) : null}
+      {(chainStore.chainInfo.features ?? []).find(
+        feature => feature === "secretwasm"
+      ) ? (
+        <div
+          className={styleMenu.item}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/token/manage"
+            });
+          }}
+        >
+          Token List
+        </div>
+      ) : null}
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
       <div
