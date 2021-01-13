@@ -52,6 +52,7 @@ import { InitLedgerNotifiyHandler } from "../../background/ledger/foreground";
 import { BackgroundTxProvider } from "./background-tx-provider";
 import { AddTokenPage } from "./pages/setting/token/add";
 import { SettingFiatPage } from "./pages/setting/fiat";
+import { ManageTokenPage } from "./pages/setting/token/manage";
 
 currencyInit(LanguageToFiatCurrency);
 
@@ -234,6 +235,11 @@ ReactDOM.render(
                       exact
                       path="/setting/token/add"
                       component={AddTokenPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/token/manage"
+                      component={ManageTokenPage}
                     />
                     <Route path="/sign/:id" component={SignPage} />
                     <Route
