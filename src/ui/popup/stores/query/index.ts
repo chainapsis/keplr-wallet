@@ -4,6 +4,7 @@ import { DeepReadonly } from "utility-types";
 import { ChainInfo } from "../../../../background/chains";
 import { ObservableQueryIBCChannel } from "./channel";
 import { ObservableQueryIBCClientState } from "./client-state";
+import { ObservableQueryDenomTrace } from "./denom-trace";
 
 export interface ChainGetter {
   // Return the chain info matched with chain id.
@@ -15,6 +16,7 @@ export interface ChainGetter {
 export class Queries {
   protected readonly _queryIBCChannel: ObservableQueryIBCChannel;
   protected readonly _queryIBCClientState: ObservableQueryIBCClientState;
+  protected readonly _queryDenomTrace: ObservableQueryDenomTrace;
 
   constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     this._queryIBCChannel = new ObservableQueryIBCChannel(
@@ -27,6 +29,11 @@ export class Queries {
       chainId,
       chainGetter
     );
+    this._queryDenomTrace = new ObservableQueryDenomTrace(
+      kvStore,
+      chainId,
+      chainGetter
+    );
   }
 
   getQueryIBCChannel(): DeepReadonly<ObservableQueryIBCChannel> {
@@ -35,6 +42,10 @@ export class Queries {
 
   getQueryIBCClientState(): DeepReadonly<ObservableQueryIBCClientState> {
     return this._queryIBCClientState;
+  }
+
+  getQueryDenomTrace(): DeepReadonly<ObservableQueryDenomTrace> {
+    return this._queryDenomTrace;
   }
 }
 

@@ -20,6 +20,7 @@ import {
   ReqeustEncryptMsg,
   RequestDecryptMsg
 } from "../../../../background/secret-wasm";
+import { IBCStore } from "../ibc";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -96,9 +97,12 @@ export class AccountStore {
   // Not need to be observable
   private lastFetchingTokenCancleToken!: CancelTokenSource | undefined;
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  constructor(private readonly rootStore: RootStore) {
+  constructor(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    private readonly rootStore: RootStore,
+    protected readonly ibcStore: IBCStore
+  ) {
     this.init();
   }
 
@@ -310,6 +314,8 @@ export class AccountStore {
           const balance = new Coin(asset.denom, asset.amount);
           balances.push(balance);
         }
+
+        this.ibcStore.setAssets(this.chainInfo.chainId, result.data.result);
       }
 
       this.lastAssetFetchingError = undefined;

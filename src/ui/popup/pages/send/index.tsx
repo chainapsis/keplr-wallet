@@ -86,10 +86,14 @@ export const SendPage: FunctionComponent = withTxStateProvider(
               setGasForSendMsg(80000);
           }
         } else {
-          setGasForSendMsg(80000);
+          if (txState.ibcSendTo) {
+            setGasForSendMsg(120000);
+          } else {
+            setGasForSendMsg(80000);
+          }
         }
       }
-    }, [txState.amount?.denom]);
+    }, [txState.amount?.denom, txState.ibcSendTo]);
 
     useEffect(() => {
       txState.setBalances(accountStore.assets);

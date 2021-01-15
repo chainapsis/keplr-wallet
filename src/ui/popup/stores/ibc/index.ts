@@ -1,14 +1,18 @@
 import { KVStore } from "../../../../common/kvstore";
-import { observable, runInAction } from "mobx";
+import { autorun, observable, runInAction } from "mobx";
 import { actionAsync, computedFn, task } from "mobx-utils";
 import { HasMapStore } from "../common/map";
 import { Channel, ChannelWithChainId } from "./types";
 import { ChainUpdaterKeeper } from "../../../../background/updater/keeper";
+import { Currency } from "../../../../common/currency";
+import { ChainGetter, QueriesStore } from "../query";
+import { QueryResponse } from "../query/base";
+import { DenomTractResponse } from "../query/denom-trace";
 
 export class IBCStoreInner {
   // channelMap[portId]
   @observable.shallow
-  protected channelMap!: Map<string, Channel[]>;
+  protected channelMap!: Map<string, Map<string, Channel>>;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -30,21 +34,47 @@ export class IBCStoreInner {
       runInAction(() => {
         this.channelMap.set(
           portId,
-          observable.array([], {
-            deep: false
-          })
+          observable.map(
+            {},
+            {
+              deep: false
+            }
+          )
         );
       });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.channelMap.get(portId)!;
+    const channelMapOfPort = this.channelMap.get(portId)!;
+
+    const channels: Channel[] = [];
+    for (const channel of channelMapOfPort.values()) {
+      channels.push(channel);
+    }
+
+    return channels;
+  });
+
+  readonly getChannel = computedFn((portId: string, channelId: string) => {
+    return this.channelMap.get(portId)?.get(channelId);
   });
 
   @actionAsync
   async addChannel(channel: Channel) {
-    const channels = this.getChannelsToPort(channel.portId);
-    this.channelMap.set(channel.portId, channels.concat(channel));
+    if (!this.channelMap.has(channel.portId)) {
+      this.channelMap.set(
+        channel.portId,
+        observable.map(
+          {},
+          {
+            deep: false
+          }
+        )
+      );
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.channelMap.get(channel.portId)!.set(channel.channelId, channel);
 
     await task(this.saveChannels());
   }
@@ -53,7 +83,7 @@ export class IBCStoreInner {
   protected async loadChannels() {
     const obj = await task(
       this.kvStore.get<{
-        [portId: string]: Channel[];
+        [portId: string]: { [channelId: string]: Channel };
       }>(
         `${
           ChainUpdaterKeeper.getChainVersion(this.chainId).identifier
@@ -63,17 +93,32 @@ export class IBCStoreInner {
 
     if (obj) {
       for (const portId of Object.keys(obj)) {
-        this.channelMap.set(portId, obj[portId]);
+        const map = obj[portId];
+        for (const channelId of Object.keys(map)) {
+          if (!this.channelMap.has(portId)) {
+            this.channelMap.set(portId, observable.map({}, { deep: false }));
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const innerMap = this.channelMap.get(portId)!;
+          innerMap.set(channelId, map[channelId]);
+        }
       }
     }
   }
 
   async saveChannels() {
     const obj: {
-      [portId: string]: Channel[];
+      [portId: string]: { [channelId: string]: Channel };
     } = {};
-    this.channelMap.forEach((v, k) => {
-      obj[k] = v;
+    this.channelMap.forEach((v, portId) => {
+      obj[portId] = (() => {
+        const obj: { [channelId: string]: Channel } = {};
+        v.forEach((channel, channelId) => {
+          obj[channelId] = channel;
+        });
+        return obj;
+      })();
     });
 
     await this.kvStore.set(
@@ -84,10 +129,25 @@ export class IBCStoreInner {
 }
 
 export class IBCStore extends HasMapStore<IBCStoreInner> {
+  @observable
+  ibcAssetsPerChain!: Map<string, Currency[]>;
+
+  protected querier!: QueriesStore;
+  protected chainGetter!: ChainGetter;
+
   constructor(protected readonly kvStore: KVStore) {
     super((chainId: string) => {
       return new IBCStoreInner(kvStore, chainId);
     });
+
+    runInAction(() => {
+      this.ibcAssetsPerChain = new Map();
+    });
+  }
+
+  init(querier: QueriesStore, chainGetter: ChainGetter) {
+    this.querier = querier;
+    this.chainGetter = chainGetter;
   }
 
   get(chainId: string): IBCStoreInner {
@@ -98,5 +158,66 @@ export class IBCStore extends HasMapStore<IBCStoreInner> {
     for (const channel of channels) {
       await this.get(channel.chainId).addChannel(channel);
     }
+  }
+
+  async setAssets(
+    chainId: string,
+    assetPrimitives: { denom: string; amount: string }[]
+  ) {
+    const ibcCurrencies: Currency[] = [];
+
+    for (const asset of assetPrimitives) {
+      if (asset.denom.startsWith("ibc/")) {
+        const hash = asset.denom.replace("ibc/", "");
+        const queryDenomTrace = this.querier
+          .get(chainId)
+          .getQueryDenomTrace()
+          .getDenomTrace(hash);
+
+        const denomTrace = await (() => {
+          return new Promise<QueryResponse<DenomTractResponse>>(resolve => {
+            const disposer = autorun(() => {
+              if (!queryDenomTrace.isFetching) {
+                resolve(queryDenomTrace.response);
+                disposer();
+              }
+            });
+          });
+        })();
+
+        if (denomTrace && denomTrace.data) {
+          const path = denomTrace.data.denom_trace.path;
+          const sourcePort = path.split("/")[0];
+          const sourceChannel = path.split("/")[1];
+
+          const channel = this.get(chainId).getChannel(
+            sourcePort,
+            sourceChannel
+          );
+
+          if (channel) {
+            const chainInfo = this.chainGetter.getChain(
+              channel.counterpartyChainId
+            );
+
+            const baseCurrency = chainInfo.currencies.find(
+              cur =>
+                cur.coinMinimalDenom === denomTrace.data.denom_trace.base_denom
+            );
+            if (baseCurrency) {
+              ibcCurrencies.push({
+                coinDenom: `${baseCurrency.coinDenom} (${channel.channelId})`,
+                coinMinimalDenom: asset.denom,
+                coinDecimals: baseCurrency.coinDecimals
+              });
+            }
+          }
+        }
+      }
+    }
+
+    runInAction(() => {
+      this.ibcAssetsPerChain.set(chainId, ibcCurrencies);
+    });
   }
 }

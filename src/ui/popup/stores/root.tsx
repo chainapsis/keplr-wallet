@@ -19,17 +19,18 @@ export class RootStore {
 
   constructor() {
     // Order is important.
-    this.accountStore = new AccountStore(this);
+    this.ibcStore = new IBCStore(new BrowserKVStore("store-ibc"));
+    this.accountStore = new AccountStore(this, this.ibcStore);
     this.keyRingStore = new KeyRingStore(this);
     this.priceStore = new PriceStore();
 
-    this.chainStore = new ChainStore(this, EmbedChainInfos);
+    this.chainStore = new ChainStore(this, this.ibcStore, EmbedChainInfos);
 
     this.queriesStore = new QueriesStore(
       new BrowserKVStore("queries"),
       this.chainStore
     );
-    this.ibcStore = new IBCStore(new BrowserKVStore("store-ibc"));
+    this.ibcStore.init(this.queriesStore, this.chainStore);
 
     this.chainStore.init();
     this.keyRingStore.restore();

@@ -112,7 +112,6 @@ export class SignDocWrapper {
         {msgs.map((msg, i) => {
           let msgContent;
 
-          console.log(msg, i);
           /*
            switch (msg.constroctor) hinders the `Typescript`'s type-inference feature...
            So, just ust the if-elseif-else.
