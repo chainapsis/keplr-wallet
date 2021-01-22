@@ -23,6 +23,7 @@ import { ReqeustEncryptMsg } from "../../../background/secret-wasm";
 import { Channel } from "../../popup/stores/ibc/types";
 import { google, ibc } from "../../../common/stargate/proto";
 import Long from "long";
+import { ChainUpdaterKeeper } from "../../../background/updater/keeper";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -129,6 +130,10 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
       }
 
       if (ibcSendTo) {
+        const counterparty = ChainUpdaterKeeper.getChainVersion(
+          ibcSendTo.counterpartyChainId
+        );
+
         return new google.protobuf.Any({
           // eslint-disable-next-line @typescript-eslint/camelcase
           type_url: "/ibc.applications.transfer.v1.Msg/Transfer",
@@ -142,6 +147,10 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
             sender: sender.toBech32(),
             receiver: recipient.toBech32(),
             // TODO: Set timeout properly.
+            timeoutHeight: {
+              revisionNumber: Long.fromNumber(counterparty.version),
+              revisionHeight: Long.fromString("9223372036854775807")
+            },
             timeoutTimestamp: Long.fromString("9223372036854775807")
           }).finish()
         });
