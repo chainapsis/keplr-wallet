@@ -69,6 +69,7 @@ export class ChainStore {
               );
               if (!find) {
                 chainInfo.currencies.push(ibcCurrency);
+                this.allCurrencies.push(ibcCurrency);
               }
             }
           });

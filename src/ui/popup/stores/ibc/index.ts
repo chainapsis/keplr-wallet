@@ -14,15 +14,32 @@ export class IBCStoreInner {
   @observable.shallow
   protected channelMap!: Map<string, Map<string, Channel>>;
 
+  @observable
+  protected loaded!: boolean;
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainId: string
   ) {
     runInAction(() => {
       this.channelMap = new Map();
+      this.loaded = false;
     });
 
     this.loadChannels();
+  }
+
+  async waitLoad() {
+    if (this.loaded) return;
+
+    return new Promise<void>(resolve => {
+      const disposer = autorun(() => {
+        if (this.loaded) {
+          disposer();
+          resolve();
+        }
+      });
+    });
   }
 
   getTransferChannels(): Channel[] {
@@ -105,6 +122,8 @@ export class IBCStoreInner {
         }
       }
     }
+
+    this.loaded = true;
   }
 
   async saveChannels() {
@@ -190,10 +209,10 @@ export class IBCStore extends HasMapStore<IBCStoreInner> {
           const sourcePort = path.split("/")[0];
           const sourceChannel = path.split("/")[1];
 
-          const channel = this.get(chainId).getChannel(
-            sourcePort,
-            sourceChannel
-          );
+          const channelStore = this.get(chainId);
+          await channelStore.waitLoad();
+
+          const channel = channelStore.getChannel(sourcePort, sourceChannel);
 
           if (channel) {
             const chainInfo = this.chainGetter.getChain(

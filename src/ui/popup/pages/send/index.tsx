@@ -245,42 +245,44 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           }}
         >
           <div className={style.formInnerContainer}>
-            <FormGroup>
-              <Label for="tx-type" className="form-control-label">
-                Transaction Type
-              </Label>
-              <ButtonGroup id="tx-type" style={{ display: "flex" }}>
-                <Button
-                  type="button"
-                  color="primary"
-                  size="sm"
-                  outline={txType !== TxType.Internal}
-                  style={{ flex: 1 }}
-                  onClick={e => {
-                    e.preventDefault();
+            {(chainStore.chainInfo.features ?? []).includes("stargate") ? (
+              <FormGroup>
+                <Label for="tx-type" className="form-control-label">
+                  Transaction Type
+                </Label>
+                <ButtonGroup id="tx-type" style={{ display: "flex" }}>
+                  <Button
+                    type="button"
+                    color="primary"
+                    size="sm"
+                    outline={txType !== TxType.Internal}
+                    style={{ flex: 1 }}
+                    onClick={e => {
+                      e.preventDefault();
 
-                    setTxType(TxType.Internal);
-                    txState.setIBCSendTo(undefined);
-                  }}
-                >
-                  Internal
-                </Button>
-                <Button
-                  type="button"
-                  color="primary"
-                  size="sm"
-                  outline={txType !== TxType.IBC}
-                  style={{ flex: 1 }}
-                  onClick={e => {
-                    e.preventDefault();
+                      setTxType(TxType.Internal);
+                      txState.setIBCSendTo(undefined);
+                    }}
+                  >
+                    Internal
+                  </Button>
+                  <Button
+                    type="button"
+                    color="primary"
+                    size="sm"
+                    outline={txType !== TxType.IBC}
+                    style={{ flex: 1 }}
+                    onClick={e => {
+                      e.preventDefault();
 
-                    setTxType(TxType.IBC);
-                  }}
-                >
-                  IBC
-                </Button>
-              </ButtonGroup>
-            </FormGroup>
+                      setTxType(TxType.IBC);
+                    }}
+                  >
+                    IBC
+                  </Button>
+                </ButtonGroup>
+              </FormGroup>
+            ) : null}
             <div>
               {txType === TxType.IBC ? <DestinationSelector /> : null}
               <AddressInput

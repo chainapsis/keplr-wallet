@@ -91,7 +91,8 @@ export const DestinationSelector: FunctionComponent = observer(() => {
                   setIsIBCregisterModalOpen(true);
                 }}
               >
-                New IBC Transfer Channel
+                <i className="fas fa-plus-circle my-1 mr-1" /> New IBC Transfer
+                Channel
               </DropdownItem>
             }
           </DropdownMenu>
