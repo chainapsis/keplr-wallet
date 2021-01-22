@@ -97,64 +97,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     coinType: 118
   },
   {
-    rpc: "http://localhost:26657",
-    rest: "http://localhost:1317",
-    chainId: "test1",
-    chainName: "Test1",
-    stakeCurrency: {
-      coinDenom: "STAKE",
-      coinMinimalDenom: "stake",
-      coinDecimals: 6
-    },
-    bip44: new BIP44(44, 118, 0),
-    bech32Config: defaultBech32Config("cosmos"),
-    currencies: [
-      {
-        coinDenom: "STAKE",
-        coinMinimalDenom: "stake",
-        coinDecimals: 6
-      }
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "STAKE",
-        coinMinimalDenom: "stake",
-        coinDecimals: 6
-      }
-    ],
-    coinType: 118,
-    features: ["stargate"]
-  },
-  {
-    rpc: "http://localhost:16657",
-    rest: "http://localhost:2317",
-    chainId: "test2",
-    chainName: "Test2",
-    stakeCurrency: {
-      coinDenom: "STAKE",
-      coinMinimalDenom: "stake",
-      coinDecimals: 6
-    },
-    bip44: new BIP44(44, 118, 0),
-    bech32Config: defaultBech32Config("cosmos"),
-    currencies: [
-      {
-        coinDenom: "STAKE",
-        coinMinimalDenom: "stake",
-        coinDecimals: 6
-      }
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "STAKE",
-        coinMinimalDenom: "stake",
-        coinDecimals: 6
-      }
-    ],
-    coinType: 118,
-    features: ["stargate"]
-  },
-  {
     rpc: KAVA_RPC_ENDPOINT,
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
