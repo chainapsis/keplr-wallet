@@ -60,19 +60,21 @@ export const IBCChannelRegisterModal: FunctionComponent<{
               <DropdownMenu>
                 {chainStore.chainList.map(chainInfo => {
                   if (chainStore.chainInfo.chainId !== chainInfo.chainId) {
-                    return (
-                      <DropdownItem
-                        key={chainInfo.chainId}
-                        onClick={e => {
-                          e.preventDefault();
+                    if ((chainInfo.features ?? []).includes("stargate")) {
+                      return (
+                        <DropdownItem
+                          key={chainInfo.chainId}
+                          onClick={e => {
+                            e.preventDefault();
 
-                          setSelectedChainId(chainInfo.chainId);
-                          setError("");
-                        }}
-                      >
-                        {chainInfo.chainName}
-                      </DropdownItem>
-                    );
+                            setSelectedChainId(chainInfo.chainId);
+                            setError("");
+                          }}
+                        >
+                          {chainInfo.chainName}
+                        </DropdownItem>
+                      );
+                    }
                   }
                 })}
               </DropdownMenu>
