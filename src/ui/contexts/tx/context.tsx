@@ -21,9 +21,9 @@ import { sendMessage } from "../../../common/message/send";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
 import { ReqeustEncryptMsg } from "../../../background/secret-wasm";
 import { Channel } from "../../popup/stores/ibc/types";
-import { google, ibc } from "../../../common/stargate/proto";
-import Long from "long";
+import { google } from "../../../common/stargate/proto";
 import { ChainUpdaterKeeper } from "../../../background/updater/keeper";
+import { MsgTransfer, Height } from "../../../common/stargate/x/ibc";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -134,6 +134,17 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           ibcSendTo.counterpartyChainId
         );
 
+        return new MsgTransfer(
+          ibcSendTo.portId,
+          ibcSendTo.channelId,
+          new Coin(amount.denom, amount.amount),
+          sender,
+          recipient,
+          new Height(counterparty.version.toString(), "9223372036854775807"),
+          "9223372036854775807"
+        );
+
+        /*
         return new google.protobuf.Any({
           // eslint-disable-next-line @typescript-eslint/camelcase
           type_url: "/ibc.applications.transfer.v1.Msg/Transfer",
@@ -154,6 +165,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
             timeoutTimestamp: Long.fromString("9223372036854775807")
           }).finish()
         });
+         */
       }
 
       // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
