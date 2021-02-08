@@ -1,4 +1,4 @@
-import { observable, action } from "mobx";
+import { observable, action, autorun, runInAction } from "mobx";
 import { actionAsync, task } from "mobx-utils";
 
 import { RootStore } from "../root";
@@ -22,6 +22,7 @@ import {
   AddTokenMsg,
   RemoveTokenMsg
 } from "../../../../background/tokens/messages";
+import { IBCStore } from "../ibc";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -42,6 +43,7 @@ export class ChainStore {
 
   constructor(
     private rootStore: RootStore,
+    protected readonly ibcStore: IBCStore,
     private readonly embedChainInfos: ChainInfo[]
   ) {
     this.setAllCurrencies([]);
@@ -56,6 +58,27 @@ export class ChainStore {
     );
 
     this.setChain(this.chainList[0].chainId);
+
+    autorun(() => {
+      for (const chainInfo of this.chainList) {
+        const ibcCurrencies = this.ibcStore.ibcAssetsPerChain.get(
+          chainInfo.chainId
+        );
+        if (ibcCurrencies && ibcCurrencies.length > 0) {
+          runInAction(() => {
+            for (const ibcCurrency of ibcCurrencies) {
+              const find = chainInfo.currencies.find(
+                cur => cur.coinMinimalDenom === ibcCurrency.coinMinimalDenom
+              );
+              if (!find) {
+                chainInfo.currencies.push(ibcCurrency);
+                this.allCurrencies.push(ibcCurrency);
+              }
+            }
+          });
+        }
+      }
+    });
   }
 
   @action
@@ -92,6 +115,16 @@ export class ChainStore {
     this.chainInfo = chainInfo;
 
     this.rootStore.setChainInfo(chainInfo);
+  }
+
+  public getChain(chainId: string): ChainInfo {
+    const find = this.chainList.find(info => info.chainId === chainId);
+
+    if (!find) {
+      throw new Error(`Unknown chain info: ${chainId}`);
+    }
+
+    return find;
   }
 
   @actionAsync

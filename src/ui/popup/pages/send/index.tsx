@@ -22,12 +22,26 @@ import style from "./style.module.scss";
 import { useNotification } from "../../../components/notification";
 
 import { useIntl } from "react-intl";
-import { Button } from "reactstrap";
+import { Button, ButtonGroup, FormGroup, Label } from "reactstrap";
 
 import { useTxState, withTxStateProvider } from "../../../contexts/tx";
 import { useHistory } from "react-router";
 
+import { DestinationSelector } from "./ibc";
+
 import Axios from "axios";
+import { Msg } from "@chainapsis/cosmosjs/core/tx";
+import { makeProtobufTx } from "../../../../common/stargate/tx";
+import { RequestBackgroundTxMsg } from "../../../../background/tx";
+import { sendMessage } from "../../../../common/message";
+import { BACKGROUND_PORT } from "../../../../common/message/constant";
+
+import { Buffer } from "buffer/";
+
+enum TxType {
+  Internal,
+  IBC
+}
 
 export const SendPage: FunctionComponent = withTxStateProvider(
   observer(() => {
@@ -49,7 +63,9 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       useBackgroundTx: true
     });
 
-    const [gasForSendMsg, setGasForSendMsg] = useState(80000);
+    const [gasForSendMsg, setGasForSendMsg] = useState(
+      chainStore.chainInfo.chainId.startsWith("akashnet-") ? 120000 : 80000
+    );
 
     const txState = useTxState();
 
@@ -72,18 +88,40 @@ export const SendPage: FunctionComponent = withTxStateProvider(
               setGasForSendMsg(80000);
           }
         } else {
-          setGasForSendMsg(80000);
+          if (txState.ibcSendTo) {
+            setGasForSendMsg(120000);
+          } else {
+            if (chainStore.chainInfo.chainId.startsWith("akashnet-")) {
+              setGasForSendMsg(120000);
+            } else {
+              setGasForSendMsg(80000);
+            }
+          }
         }
       }
-    }, [txState.amount?.denom]);
+    }, [
+      chainStore.chainInfo.chainId,
+      txState.amount?.denom,
+      txState.ibcSendTo
+    ]);
 
     useEffect(() => {
       txState.setBalances(accountStore.assets);
     }, [accountStore.assets, txState]);
 
-    const memorizedCurrencies = useMemo(() => chainStore.chainInfo.currencies, [
-      chainStore.chainInfo.currencies
-    ]);
+    const [txType, setTxType] = useState<TxType>(TxType.Internal);
+
+    const memorizedCurrencies = useMemo(() => {
+      if (txType === TxType.Internal) {
+        return chainStore.chainInfo.currencies;
+      } else {
+        // If tx is for IBC transfer, only show the native currencies.
+        return chainStore.chainInfo.currencies.filter(
+          currency => !("type" in currency)
+        );
+      }
+    }, [chainStore.chainInfo.currencies, txType]);
+
     const memorizedFeeCurrencies = useMemo(
       () => chainStore.chainInfo.feeCurrencies,
       [chainStore.chainInfo.feeCurrencies]
@@ -105,6 +143,20 @@ export const SendPage: FunctionComponent = withTxStateProvider(
     const txStateIsValid = isCyberNetwork
       ? txState.isValid("recipient", "amount", "memo", "gas")
       : txState.isValid("recipient", "amount", "memo", "fees", "gas");
+
+    const baseChainInfo = (() => {
+      if (txState.ibcSendTo) {
+        const find = chainStore.chainList.find(
+          chainInfo =>
+            chainInfo.chainId === txState.ibcSendTo?.counterpartyChainId
+        );
+        if (find) {
+          return find;
+        }
+      }
+
+      return chainStore.chainInfo;
+    })();
 
     return (
       <HeaderLayout
@@ -140,38 +192,114 @@ export const SendPage: FunctionComponent = withTxStateProvider(
                 fee: txState.fees
               };
 
-              await cosmosJS.sendMsgs(
-                [msg],
-                config,
-                () => {
-                  history.replace("/");
-                },
-                e => {
-                  history.replace("/");
-                  notification.push({
-                    type: "danger",
-                    content: e.toString(),
-                    duration: 5,
-                    canDelete: true,
-                    placement: "top-center",
-                    transition: {
-                      duration: 0.25
-                    }
-                  });
-                },
-                "commit"
-              );
+              if (msg instanceof Msg) {
+                await cosmosJS.sendMsgs(
+                  [msg],
+                  config,
+                  () => {
+                    history.replace("/");
+                  },
+                  e => {
+                    history.replace("/");
+                    notification.push({
+                      type: "danger",
+                      content: e.toString(),
+                      duration: 5,
+                      canDelete: true,
+                      placement: "top-center",
+                      transition: {
+                        duration: 0.25
+                      }
+                    });
+                  },
+                  "commit"
+                );
+              } else {
+                // Protobuf encoded msg.
+                if (cosmosJS.api) {
+                  const context = cosmosJS.api.context;
+
+                  const config: TxBuilderConfig = {
+                    gas: txState.gas,
+                    memo: txState.memo,
+                    fee: txState.fees
+                  };
+                  try {
+                    const tx = await makeProtobufTx(context, [msg], config);
+
+                    await sendMessage(
+                      BACKGROUND_PORT,
+                      new RequestBackgroundTxMsg(
+                        chainStore.chainInfo.chainId,
+                        Buffer.from(tx).toString("hex"),
+                        "commit"
+                      )
+                    );
+                  } catch (e) {
+                    notification.push({
+                      type: "danger",
+                      content: e.toString(),
+                      duration: 5,
+                      canDelete: true,
+                      placement: "top-center",
+                      transition: {
+                        duration: 0.25
+                      }
+                    });
+                  } finally {
+                    history.replace("/");
+                  }
+                }
+              }
             }
           }}
         >
           <div className={style.formInnerContainer}>
+            {(chainStore.chainInfo.features ?? []).includes("stargate") &&
+            (chainStore.chainInfo.features ?? []).includes("ibc") ? (
+              <FormGroup>
+                <Label for="tx-type" className="form-control-label">
+                  Transaction Type
+                </Label>
+                <ButtonGroup id="tx-type" style={{ display: "flex" }}>
+                  <Button
+                    type="button"
+                    color="primary"
+                    size="sm"
+                    outline={txType !== TxType.Internal}
+                    style={{ flex: 1 }}
+                    onClick={e => {
+                      e.preventDefault();
+
+                      setTxType(TxType.Internal);
+                      txState.setIBCSendTo(undefined);
+                    }}
+                  >
+                    Internal
+                  </Button>
+                  <Button
+                    type="button"
+                    color="primary"
+                    size="sm"
+                    outline={txType !== TxType.IBC}
+                    style={{ flex: 1 }}
+                    onClick={e => {
+                      e.preventDefault();
+
+                      setTxType(TxType.IBC);
+                    }}
+                  >
+                    IBC
+                  </Button>
+                </ButtonGroup>
+              </FormGroup>
+            ) : null}
             <div>
+              {txType === TxType.IBC ? <DestinationSelector /> : null}
               <AddressInput
                 label={intl.formatMessage({ id: "send.input.recipient" })}
-                bech32Prefix={
-                  chainStore.chainInfo.bech32Config.bech32PrefixAccAddr
-                }
-                coinType={chainStore.chainInfo.coinType}
+                bech32Prefix={baseChainInfo.bech32Config.bech32PrefixAccAddr}
+                coinType={baseChainInfo.coinType}
                 errorTexts={{
                   invalidBech32Address: intl.formatMessage({
                     id: "send.input.recipient.error.invalid"

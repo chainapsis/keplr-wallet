@@ -150,7 +150,9 @@ export class ChainsKeeper {
     openPopup: boolean,
     origin: string
   ): Promise<void> {
-    chainInfo = await ChainInfoSchema.validateAsync(chainInfo);
+    chainInfo = await ChainInfoSchema.validateAsync(chainInfo, {
+      stripUnknown: true
+    });
 
     if (openPopup) {
       this.windowOpener(

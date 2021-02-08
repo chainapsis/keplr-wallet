@@ -20,6 +20,7 @@ import {
   ReqeustEncryptMsg,
   RequestDecryptMsg
 } from "../../../../background/secret-wasm";
+import { IBCStore } from "../ibc";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -101,9 +102,12 @@ export class AccountStore {
   // Not need to be observable
   private lastFetchingTokenCancleToken!: CancelTokenSource | undefined;
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  constructor(private readonly rootStore: RootStore) {
+  constructor(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    private readonly rootStore: RootStore,
+    protected readonly ibcStore: IBCStore
+  ) {
     this.init();
   }
 
@@ -196,43 +200,53 @@ export class AccountStore {
       if (this.lastFetchingCancleToken) {
         this.lastFetchingCancleToken.cancel();
         this.lastFetchingCancleToken = undefined;
+        this.secret20ViewingKeyError = {};
       }
 
       this.lastAssetFetchingError = undefined;
-      this.secret20ViewingKeyError = {};
+    }
 
-      // Load the assets from storage.
-      this.assets = await task(
-        this.loadAssetsFromStorage(this.chainInfo.chainId, this.bech32Address)
+    // Load the assets from storage.
+    this.assets = await task(
+      this.loadAssetsFromStorage(this.chainInfo.chainId, this.bech32Address)
+    );
+
+    this.ibcStore.setAssets(
+      this.chainInfo.chainId,
+      this.assets.map(c => {
+        return {
+          denom: c.denom,
+          amount: c.amount.toString()
+        };
+      })
+    );
+
+    // Clear the assets that hasn't been registered.
+    // NOTE: Currently, there is a bug that assets is saved to invalid chain id if the chain is changed before finishing fetching.
+    //       To solve this problem, just remove the unintended assets when loading it from cache storage.
+    //       This way may be not good for performance if the currencies is too many.
+    //       We solve the problem in this way temporarily.
+    for (const asset of this.assets) {
+      const find = this.chainInfo.currencies.find(
+        cur => cur.coinMinimalDenom === asset.denom
       );
-
-      // Clear the assets that hasn't been registered.
-      // NOTE: Currently, there is a bug that assets is saved to invalid chain id if the chain is changed before finishing fetching.
-      //       To solve this problem, just remove the unintended assets when loading it from cache storage.
-      //       This way may be not good for performance if the currencies is too many.
-      //       We solve the problem in this way temporarily.
-      for (const asset of this.assets) {
-        const find = this.chainInfo.currencies.find(
-          cur => cur.coinMinimalDenom === asset.denom
-        );
-        if (!find) {
-          this.removeAsset(asset.denom);
-        }
+      if (!find) {
+        this.removeAsset(asset.denom);
       }
+    }
 
-      // Load the staked assets from storage.
-      const stakedAsset = await task(
-        this.loadAssetsFromStorage(
-          this.chainInfo.chainId,
-          this.bech32Address,
-          true
-        )
-      );
-      if (stakedAsset.length > 0) {
-        this.stakedAsset = stakedAsset[0];
-      } else {
-        this.stakedAsset = undefined;
-      }
+    // Load the staked assets from storage.
+    const stakedAsset = await task(
+      this.loadAssetsFromStorage(
+        this.chainInfo.chainId,
+        this.bech32Address,
+        true
+      )
+    );
+    if (stakedAsset.length > 0) {
+      this.stakedAsset = stakedAsset[0];
+    } else {
+      this.stakedAsset = undefined;
     }
   }
 
@@ -318,6 +332,8 @@ export class AccountStore {
           const balance = new Coin(asset.denom, asset.amount);
           balances.push(balance);
         }
+
+        this.ibcStore.setAssets(this.chainInfo.chainId, result.data.result);
       }
 
       this.lastAssetFetchingError = undefined;
@@ -609,6 +625,7 @@ export class AccountStore {
               currency.contractAddress
             }) balance: ${JSON.stringify(obj)}`
           );
+
           const balance = obj.balance.amount;
           // Balance can be 0
           const asset = new Coin(currency.coinMinimalDenom, new Int(balance));

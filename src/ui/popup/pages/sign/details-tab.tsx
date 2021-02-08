@@ -10,46 +10,35 @@ import { getFiatCurrencyFromLanguage } from "../../../../common/currency";
 import styleDetailsTab from "./details-tab.module.scss";
 import classnames from "classnames";
 
-import { MessageObj, renderMessage } from "./messages";
 import { DecUtils } from "../../../../common/dec-utils";
 import { useIntl } from "react-intl";
 import { useLanguage } from "../../language";
+import { SignDocWrapper } from "./wrapper";
 
-export const DetailsTab: FunctionComponent<{ message: string }> = observer(
-  ({ message }) => {
+const Buffer = require("buffer/").Buffer;
+
+export const DetailsTab: FunctionComponent<{ messageHex: string }> = observer(
+  ({ messageHex }) => {
     const { chainStore, priceStore } = useStore();
 
     const intl = useIntl();
 
+    const [wrapper, setWapper] = useState<SignDocWrapper | undefined>(
+      undefined
+    );
+
     const [fee, setFee] = useState<Coin[]>([]);
     const [feeFiat, setFeeFiat] = useState(new Dec(0));
     const [memo, setMemo] = useState("");
-    const [msgs, setMsgs] = useState<MessageObj[]>([]);
 
     useEffect(() => {
-      if (message) {
-        const msgObj: {
-          fee: {
-            amount: [{ amount: string; denom: string }];
-            gas: string;
-          };
-          memo: string;
-          msgs: MessageObj[];
-        } = JSON.parse(message);
-
-        setMemo(msgObj.memo);
-        setMsgs(msgObj.msgs);
-
-        const coinObjs = msgObj.fee.amount;
-        const fees: Coin[] = [];
-        if (coinObjs) {
-          for (const coinObj of coinObjs) {
-            fees.push(new Coin(coinObj.denom, coinObj.amount));
-          }
-        }
-        setFee(fees);
+      if (messageHex) {
+        const wrapper = new SignDocWrapper(Buffer.from(messageHex, "hex"));
+        setWapper(wrapper);
+        setMemo(wrapper.memo);
+        setFee(wrapper.fees);
       }
-    }, [message]);
+    }, [messageHex]);
 
     const language = useLanguage();
     const fiatCurrency = getFiatCurrencyFromLanguage(language.language);
@@ -90,6 +79,9 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
           if (value) {
             price = price.add(new Dec(parsed.amount).mul(value.value));
           }
+        } else {
+          hasCoinGeckoId = false;
+          price = new Dec(0);
         }
       }
 
@@ -110,21 +102,7 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
               id: "sign.list.messages.label"
             })}
           </div>
-          {msgs.map((msg, i) => {
-            const msgContent = renderMessage(
-              msg,
-              chainStore.allCurrencies,
-              intl
-            );
-            return (
-              <React.Fragment key={i.toString()}>
-                <Msg icon={msgContent.icon} title={msgContent.title}>
-                  {msgContent.content}
-                </Msg>
-                <hr />
-              </React.Fragment>
-            );
-          })}
+          {wrapper ? wrapper.renderMsgs(chainStore.allCurrencies, intl) : null}
         </div>
         <div className={styleDetailsTab.section}>
           <div className={styleDetailsTab.title}>
@@ -136,6 +114,13 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
             <div>
               {fee
                 .map(fee => {
+                  const find = chainStore.allCurrencies.find(
+                    cur => cur.coinMinimalDenom === fee.denom
+                  );
+                  if (!find) {
+                    return `${fee.amount.toString()} ${fee.denom}`;
+                  }
+
                   const parsed = CoinUtils.parseDecAndDenomFromCoin(
                     chainStore.allCurrencies,
                     fee
@@ -170,22 +155,3 @@ export const DetailsTab: FunctionComponent<{ message: string }> = observer(
     );
   }
 );
-
-const Msg: FunctionComponent<{
-  icon?: string;
-  title: string;
-}> = ({ icon = "fas fa-question", title, children }) => {
-  return (
-    <div className={styleDetailsTab.msg}>
-      <div className={styleDetailsTab.icon}>
-        <div style={{ height: "2px" }} />
-        <i className={icon} />
-        <div style={{ flex: 1 }} />
-      </div>
-      <div className={styleDetailsTab.contentContainer}>
-        <div className={styleDetailsTab.contentTitle}>{title}</div>
-        <div className={styleDetailsTab.content}>{children}</div>
-      </div>
-    </div>
-  );
-};

@@ -20,6 +20,10 @@ import { AxiosInstance } from "axios";
 import { sendMessage } from "../../../common/message/send";
 import { BACKGROUND_PORT } from "../../../common/message/constant";
 import { ReqeustEncryptMsg } from "../../../background/secret-wasm";
+import { Channel } from "../../popup/stores/ibc/types";
+import { google, ibc } from "../../../common/stargate/proto";
+import Long from "long";
+import { ChainUpdaterKeeper } from "../../../background/updater/keeper";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -29,6 +33,10 @@ type TxStateErrorType = "recipient" | "amount" | "memo" | "fees" | "gas";
 // This doesn't use reducer/dispatch pattern because this is relatively simple
 // and doesn't act as global state and act as the pipeline for the components to handle the tx information.
 export interface TxState {
+  // Channel that the IBC tx will be sent.
+  // If it is not for IBC, this will be undefined.
+  ibcSendTo: Channel | undefined;
+
   rawAddress: string;
   recipient: AccAddress | null;
   amount: Coin | null;
@@ -52,7 +60,9 @@ export interface TxState {
     chainId: string,
     sender: AccAddress,
     restInstance: AxiosInstance
-  ): Promise<Msg>;
+  ): Promise<Msg | google.protobuf.Any>;
+
+  setIBCSendTo(chainId: Channel | undefined): void;
 
   // TODO: Check the equality of the object value to prevent the infinite render.
   setRawAddress(rawAddress: string): void;
@@ -78,6 +88,16 @@ export interface TxState {
 const TxContext = createContext<TxState | undefined>(undefined);
 
 export const TxStateProvider: FunctionComponent = ({ children }) => {
+  const [ibcSendTo, _setIBCSendTo] = useState<Channel | undefined>(undefined);
+  const setIBCSendTo = useCallback(
+    (channel: Channel | undefined) => {
+      if (JSON.stringify(ibcSendTo) !== JSON.stringify(channel)) {
+        _setIBCSendTo(channel);
+      }
+    },
+    [ibcSendTo]
+  );
+
   const [rawAddress, setRawAddress] = useState<string>("");
   const [recipient, setRecipient] = useState<AccAddress | null>(null);
   const [amount, setAmount] = useState<Coin | null>(null);
@@ -107,6 +127,45 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
     ) => {
       if (!recipient || !amount) {
         throw new Error("recipient or amount is not set");
+      }
+
+      if (ibcSendTo) {
+        const counterparty = ChainUpdaterKeeper.getChainVersion(
+          ibcSendTo.counterpartyChainId
+        );
+
+        /*
+        return new MsgTransfer(
+          ibcSendTo.portId,
+          ibcSendTo.channelId,
+          new Coin(amount.denom, amount.amount),
+          sender,
+          recipient,
+          new Height(counterparty.version.toString(), "9223372036854775807"),
+          "9223372036854775807"
+        );
+         */
+
+        return new google.protobuf.Any({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          type_url: "/ibc.applications.transfer.v1.Msg/Transfer",
+          value: ibc.applications.transfer.v1.MsgTransfer.encode({
+            sourcePort: ibcSendTo.portId,
+            sourceChannel: ibcSendTo.channelId,
+            token: {
+              denom: amount.denom,
+              amount: amount.amount.toString()
+            },
+            sender: sender.toBech32(),
+            receiver: recipient.toBech32(),
+            // TODO: Set timeout properly.
+            timeoutHeight: {
+              revisionNumber: Long.fromNumber(counterparty.version),
+              revisionHeight: Long.fromString("9223372036854775807")
+            },
+            timeoutTimestamp: Long.fromString("9223372036854775807")
+          }).finish()
+        });
       }
 
       // Remember that the coin's actual denom should start with "type:contractAddress:" if it is for the token based on contract.
@@ -163,7 +222,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
         return new MsgSend(sender, recipient, [amount]);
       }
     },
-    [amount, recipient]
+    [amount, ibcSendTo, recipient]
   );
 
   const [errors, setErrors] = useState<any>({});
@@ -245,6 +304,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
     <TxContext.Provider
       value={useMemo(
         () => ({
+          ibcSendTo,
           rawAddress,
           recipient,
           amount,
@@ -255,6 +315,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           balances,
           feeCurrencies,
           generateSendMsg,
+          setIBCSendTo,
           setRawAddress,
           setRecipient,
           setAmount,
@@ -269,6 +330,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           isValid
         }),
         [
+          ibcSendTo,
           rawAddress,
           recipient,
           amount,
@@ -279,6 +341,7 @@ export const TxStateProvider: FunctionComponent = ({ children }) => {
           balances,
           feeCurrencies,
           generateSendMsg,
+          setIBCSendTo,
           setFees,
           setContextErrors,
           getError,

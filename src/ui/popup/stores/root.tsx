@@ -4,6 +4,9 @@ import { AccountStore } from "./account";
 import { ChainInfo } from "../../../background/chains";
 import { PriceStore } from "./price";
 import { EmbedChainInfos } from "../../../config";
+import { QueriesStore } from "./query";
+import { BrowserKVStore } from "../../../common/kvstore";
+import { IBCStore } from "./ibc";
 
 export class RootStore {
   public chainStore: ChainStore;
@@ -11,13 +14,23 @@ export class RootStore {
   public accountStore: AccountStore;
   public priceStore: PriceStore;
 
+  public queriesStore: QueriesStore;
+  public ibcStore: IBCStore;
+
   constructor() {
     // Order is important.
-    this.accountStore = new AccountStore(this);
+    this.ibcStore = new IBCStore(new BrowserKVStore("store-ibc"));
+    this.accountStore = new AccountStore(this, this.ibcStore);
     this.keyRingStore = new KeyRingStore(this);
     this.priceStore = new PriceStore();
 
-    this.chainStore = new ChainStore(this, EmbedChainInfos);
+    this.chainStore = new ChainStore(this, this.ibcStore, EmbedChainInfos);
+
+    this.queriesStore = new QueriesStore(
+      new BrowserKVStore("queries"),
+      this.chainStore
+    );
+    this.ibcStore.init(this.queriesStore, this.chainStore);
 
     this.chainStore.init();
     this.keyRingStore.restore();
