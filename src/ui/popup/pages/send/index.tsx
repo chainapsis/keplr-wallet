@@ -255,7 +255,8 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           }}
         >
           <div className={style.formInnerContainer}>
-            {(chainStore.chainInfo.features ?? []).includes("stargate") ? (
+            {(chainStore.chainInfo.features ?? []).includes("stargate") &&
+            (chainStore.chainInfo.features ?? []).includes("ibc") ? (
               <FormGroup>
                 <Label for="tx-type" className="form-control-label">
                   Transaction Type

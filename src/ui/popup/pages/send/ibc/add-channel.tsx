@@ -60,7 +60,10 @@ export const IBCChannelRegisterModal: FunctionComponent<{
               <DropdownMenu>
                 {chainStore.chainList.map(chainInfo => {
                   if (chainStore.chainInfo.chainId !== chainInfo.chainId) {
-                    if ((chainInfo.features ?? []).includes("stargate")) {
+                    if (
+                      (chainInfo.features ?? []).includes("stargate") &&
+                      (chainInfo.features ?? []).includes("ibc")
+                    ) {
                       return (
                         <DropdownItem
                           key={chainInfo.chainId}
