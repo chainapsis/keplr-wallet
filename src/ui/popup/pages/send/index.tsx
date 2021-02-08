@@ -63,7 +63,9 @@ export const SendPage: FunctionComponent = withTxStateProvider(
       useBackgroundTx: true
     });
 
-    const [gasForSendMsg, setGasForSendMsg] = useState(80000);
+    const [gasForSendMsg, setGasForSendMsg] = useState(
+      chainStore.chainInfo.chainId.startsWith("akashnet-") ? 120000 : 80000
+    );
 
     const txState = useTxState();
 
@@ -89,11 +91,19 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           if (txState.ibcSendTo) {
             setGasForSendMsg(120000);
           } else {
-            setGasForSendMsg(80000);
+            if (chainStore.chainInfo.chainId.startsWith("akashnet-")) {
+              setGasForSendMsg(120000);
+            } else {
+              setGasForSendMsg(80000);
+            }
           }
         }
       }
-    }, [txState.amount?.denom, txState.ibcSendTo]);
+    }, [
+      chainStore.chainInfo.chainId,
+      txState.amount?.denom,
+      txState.ibcSendTo
+    ]);
 
     useEffect(() => {
       txState.setBalances(accountStore.assets);
