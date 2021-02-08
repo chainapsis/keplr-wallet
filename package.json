@@ -28,7 +28,7 @@
     "@ledgerhq/hw-transport-webusb": "^5.21.0",
     "aes-js": "^3.1.2",
     "argon-dashboard-react": "^1.1.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "bignumber.js": "^9.0.0",
     "bip39": "^3.0.2",
     "buffer": "^5.4.3",
