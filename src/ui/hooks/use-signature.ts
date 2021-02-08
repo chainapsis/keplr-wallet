@@ -23,7 +23,7 @@ export const useSignature = (
   onMessageInit: (chainId: string, message: string) => void
 ) => {
   const [initializing, setInitializing] = useState(false);
-  const [message, setMessage] = useState("");
+  const [messageHex, setMessageHex] = useState("");
   const [loading, setLoading] = useState(false);
   const [requested, setRequested] = useState(false);
   const [error, setError] = useState<Error | undefined>();
@@ -39,17 +39,16 @@ export const useSignature = (
       try {
         const result = await sendMessage(BACKGROUND_PORT, msg);
 
-        const message = Buffer.from(result.messageHex, "hex").toString();
         if (isMounted) {
-          onMessageInit(result.chainId, message);
+          onMessageInit(result.chainId, result.messageHex);
         }
 
         if (isMounted) {
-          setMessage(message);
+          setMessageHex(result.messageHex);
         }
       } catch (e) {
         if (isMounted) {
-          setMessage("");
+          setMessageHex("");
         }
       } finally {
         if (isMounted) {
@@ -132,7 +131,7 @@ export const useSignature = (
   return {
     id,
     initializing,
-    message,
+    messageHex,
     loading,
     requested,
     error,

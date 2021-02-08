@@ -20,6 +20,7 @@ import {
   ReqeustEncryptMsg,
   RequestDecryptMsg
 } from "../../../../background/secret-wasm";
+import { IBCStore } from "../ibc";
 
 const Buffer = require("buffer/").Buffer;
 
@@ -87,11 +88,6 @@ export class AccountStore {
   @observable
   public keyRingStatus!: KeyRingStatus;
 
-  @observable
-  public secret20ViewingKeyError!: {
-    [contractAddress: string]: boolean | undefined;
-  };
-
   // Not need to be observable
   private lastFetchingCancleToken!: CancelTokenSource | undefined;
   // Account store fetchs the assets that the account has for chain by interval.
@@ -101,9 +97,12 @@ export class AccountStore {
   // Not need to be observable
   private lastFetchingTokenCancleToken!: CancelTokenSource | undefined;
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  constructor(private readonly rootStore: RootStore) {
+  constructor(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    private readonly rootStore: RootStore,
+    protected readonly ibcStore: IBCStore
+  ) {
     this.init();
   }
 
@@ -116,8 +115,6 @@ export class AccountStore {
     this.assets = [];
 
     this.keyRingStatus = KeyRingStatus.NOTLOADED;
-
-    this.secret20ViewingKeyError = {};
   }
 
   // This will be called by chain store.
@@ -199,40 +196,49 @@ export class AccountStore {
       }
 
       this.lastAssetFetchingError = undefined;
-      this.secret20ViewingKeyError = {};
+    }
 
-      // Load the assets from storage.
-      this.assets = await task(
-        this.loadAssetsFromStorage(this.chainInfo.chainId, this.bech32Address)
+    // Load the assets from storage.
+    this.assets = await task(
+      this.loadAssetsFromStorage(this.chainInfo.chainId, this.bech32Address)
+    );
+
+    this.ibcStore.setAssets(
+      this.chainInfo.chainId,
+      this.assets.map(c => {
+        return {
+          denom: c.denom,
+          amount: c.amount.toString()
+        };
+      })
+    );
+
+    // Clear the assets that hasn't been registered.
+    // NOTE: Currently, there is a bug that assets is saved to invalid chain id if the chain is changed before finishing fetching.
+    //       To solve this problem, just remove the unintended assets when loading it from cache storage.
+    //       This way may be not good for performance if the currencies is too many.
+    //       We solve the problem in this way temporarily.
+    for (const asset of this.assets) {
+      const find = this.chainInfo.currencies.find(
+        cur => cur.coinMinimalDenom === asset.denom
       );
-
-      // Clear the assets that hasn't been registered.
-      // NOTE: Currently, there is a bug that assets is saved to invalid chain id if the chain is changed before finishing fetching.
-      //       To solve this problem, just remove the unintended assets when loading it from cache storage.
-      //       This way may be not good for performance if the currencies is too many.
-      //       We solve the problem in this way temporarily.
-      for (const asset of this.assets) {
-        const find = this.chainInfo.currencies.find(
-          cur => cur.coinMinimalDenom === asset.denom
-        );
-        if (!find) {
-          this.removeAsset(asset.denom);
-        }
+      if (!find) {
+        this.removeAsset(asset.denom);
       }
+    }
 
-      // Load the staked assets from storage.
-      const stakedAsset = await task(
-        this.loadAssetsFromStorage(
-          this.chainInfo.chainId,
-          this.bech32Address,
-          true
-        )
-      );
-      if (stakedAsset.length > 0) {
-        this.stakedAsset = stakedAsset[0];
-      } else {
-        this.stakedAsset = undefined;
-      }
+    // Load the staked assets from storage.
+    const stakedAsset = await task(
+      this.loadAssetsFromStorage(
+        this.chainInfo.chainId,
+        this.bech32Address,
+        true
+      )
+    );
+    if (stakedAsset.length > 0) {
+      this.stakedAsset = stakedAsset[0];
+    } else {
+      this.stakedAsset = undefined;
     }
   }
 
@@ -318,6 +324,8 @@ export class AccountStore {
           const balance = new Coin(asset.denom, asset.amount);
           balances.push(balance);
         }
+
+        this.ibcStore.setAssets(this.chainInfo.chainId, result.data.result);
       }
 
       this.lastAssetFetchingError = undefined;
@@ -550,8 +558,6 @@ export class AccountStore {
       }
     });
 
-    let nonce = "";
-
     try {
       const contractCodeHashResult = await task(
         restInstance.get<{
@@ -566,7 +572,7 @@ export class AccountStore {
       });
 
       const encrypted = await task(sendMessage(BACKGROUND_PORT, encryptMsg));
-      nonce = encrypted.slice(0, 64);
+      const nonce = encrypted.slice(0, 64);
 
       const encoded = Buffer.from(
         Buffer.from(encrypted, "hex").toString("base64")
@@ -603,74 +609,24 @@ export class AccountStore {
         ).toString();
 
         const obj = JSON.parse(message);
-        if (obj.balance) {
-          console.log(
-            `Valid response of secret20(${
-              currency.contractAddress
-            }) balance: ${JSON.stringify(obj)}`
-          );
-          const balance = obj.balance.amount;
-          // Balance can be 0
-          const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
+        const balance = obj.balance.amount;
+        // Balance can be 0
+        const asset = new Coin(currency.coinMinimalDenom, new Int(balance));
 
-          this.secret20ViewingKeyError[currency.contractAddress] = false;
-
-          this.pushAsset(asset);
-          // Save the assets to storage.
-          await task(
-            this.saveAssetsToStorage(
-              this.chainInfo.chainId,
-              this.bech32Address,
-              this.assets
-            )
-          );
-        } else {
-          if (obj["viewing_key_error"]) {
-            this.secret20ViewingKeyError[currency.contractAddress] = true;
-          }
-          console.log(
-            `Invalid response of secret20(${
-              currency.contractAddress
-            }) balance: ${JSON.stringify(obj)}`
-          );
-        }
+        this.pushAsset(asset);
+        // Save the assets to storage.
+        await task(
+          this.saveAssetsToStorage(
+            this.chainInfo.chainId,
+            this.bech32Address,
+            this.assets
+          )
+        );
       }
     } catch (e) {
       if (!Axios.isCancel(e)) {
         // TODO: Make the way to handle error.
-        console.log(
-          `Failed to fetch the secret20(${currency.contractAddress}): ${e}`
-        );
-
-        if (e.response?.data?.error) {
-          const encryptedError = e.response.data.error;
-
-          const errorMessageRgx = /query contract failed: encrypted: (.+)/g;
-
-          const rgxMatches = errorMessageRgx.exec(encryptedError);
-          if (rgxMatches == null || rgxMatches.length != 2) {
-            return;
-          }
-
-          const errorCipherB64 = rgxMatches[1];
-          const errorCipherBz = Buffer.from(errorCipherB64, "base64");
-
-          const decryptMsg = new RequestDecryptMsg(
-            chainId,
-            Buffer.from(errorCipherBz).toString("hex"),
-            nonce
-          );
-
-          const decrypted = await task(
-            sendMessage(BACKGROUND_PORT, decryptMsg)
-          );
-
-          console.log(
-            `Failed to fetch the secret20(${
-              currency.contractAddress
-            }): decrypted -> ${Buffer.from(decrypted, "hex").toString()}`
-          );
-        }
+        console.log(e);
       }
     }
   }

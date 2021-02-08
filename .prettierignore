@@ -9,3 +9,6 @@ node_modules
 
 dist
 prod
+
+**/codecimpl.d.ts
+**/codecimpl.js

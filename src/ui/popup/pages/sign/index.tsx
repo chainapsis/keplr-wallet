@@ -189,9 +189,11 @@ export const SignPage: FunctionComponent = observer(() => {
           </ul>
         </div>
         <div className={style.tabContainer}>
-          {tab === Tab.Data ? <DataTab message={signing.message} /> : null}
+          {tab === Tab.Data ? (
+            <DataTab messageHex={signing.messageHex} />
+          ) : null}
           {tab === Tab.Details ? (
-            <DetailsTab message={signing.message} />
+            <DetailsTab messageHex={signing.messageHex} />
           ) : null}
         </div>
         <div style={{ flex: 1 }} />
@@ -212,8 +214,8 @@ export const SignPage: FunctionComponent = observer(() => {
                 className={style.button}
                 color="danger"
                 disabled={
-                  signing.message == null ||
-                  signing.message === "" ||
+                  signing.messageHex == null ||
+                  signing.messageHex === "" ||
                   signing.initializing
                 }
                 data-loading={signing.requested}
@@ -228,8 +230,8 @@ export const SignPage: FunctionComponent = observer(() => {
                 className={style.button}
                 color="primary"
                 disabled={
-                  signing.message == null ||
-                  signing.message === "" ||
+                  signing.messageHex == null ||
+                  signing.messageHex === "" ||
                   signing.initializing
                 }
                 data-loading={signing.requested}

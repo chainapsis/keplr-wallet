@@ -12,6 +12,7 @@ import * as Slashing from "@chainapsis/cosmosjs/x/slashing";
 import * as Gov from "@chainapsis/cosmosjs/x/gov";
 import * as Wasm from "@chainapsis/cosmosjs/x/wasm";
 import * as SecretWasm from "../../common/secretjs/x/compute";
+import * as IBC from "../../common/stargate/x/ibc";
 import { Rest } from "@chainapsis/cosmosjs/core/rest";
 import { useCallback, useEffect, useState } from "react";
 import { Msg } from "@chainapsis/cosmosjs/core/tx";
@@ -41,6 +42,7 @@ export type SendMsgs = (
 ) => Promise<void>;
 
 export interface CosmosJsHook {
+  api?: Api<Rest>;
   loading: boolean;
   error?: Error;
   addresses: string[];
@@ -64,6 +66,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
     useBackgroundTx?: boolean;
   } = {}
 ): CosmosJsHook => {
+  const [api, setApi] = useState<Api<Rest> | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
@@ -89,6 +92,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
         Gov.registerCodec(codec);
         Wasm.registerCodec(codec);
         SecretWasm.registerCodec(codec);
+        IBC.registerCodec(codec);
       }),
     [opts?.registerCodec]
   );
@@ -173,6 +177,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
     }
 
     api.isStargate = isStargate;
+    setApi(api);
 
     const _sendMsgs: SendMsgs = async (
       msgs: Msg[],
@@ -271,6 +276,7 @@ export const useCosmosJS = <R extends Rest = Rest>(
   ]);
 
   return {
+    api,
     loading,
     error,
     addresses,
