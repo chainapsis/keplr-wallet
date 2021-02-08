@@ -18,7 +18,10 @@ import { BACKGROUND_PORT } from "../../../../common/message/constant";
 
 import { BIP44 } from "@chainapsis/cosmosjs/core/bip44";
 import { AppCurrency, Currency } from "../../../../common/currency";
-import { AddTokenMsg } from "../../../../background/tokens/messages";
+import {
+  AddTokenMsg,
+  RemoveTokenMsg
+} from "../../../../background/tokens/messages";
 import { IBCStore } from "../ibc";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
@@ -220,6 +223,15 @@ export class ChainStore {
   @actionAsync
   public async addToken(currency: AppCurrency) {
     const msg = new AddTokenMsg(this.chainInfo.chainId, currency);
+
+    await task(sendMessage(BACKGROUND_PORT, msg));
+
+    await this.refreshChainList();
+  }
+
+  @actionAsync
+  public async removeToken(currency: AppCurrency) {
+    const msg = new RemoveTokenMsg(this.chainInfo.chainId, currency);
 
     await task(sendMessage(BACKGROUND_PORT, msg));
 
