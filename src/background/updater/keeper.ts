@@ -79,9 +79,31 @@ export class ChainUpdaterKeeper {
       }
     }
 
+    let features = chainInfo.features;
+    let featuresUpdated = false;
+
+    if (!features || !features.includes("stargate")) {
+      const restInstance = Axios.create({
+        baseURL: chainInfo.rest
+      });
+
+      // If the chain doesn't have the stargate feature,
+      // but it can use the GRPC HTTP Gateway,
+      // assume that it can support the stargate and try to update the features.
+      await restInstance.get("/cosmos/base/tendermint/v1beta1/node_info");
+
+      featuresUpdated = true;
+      if (!features) {
+        features = ["stargate"];
+      } else {
+        features.push("stargate");
+      }
+    }
+
     if (resultChainId !== chainInfo.chainId) {
       await this.saveChainProperty(version.identifier, {
-        chainId: resultChainId
+        chainId: resultChainId,
+        features: featuresUpdated ? features : undefined
       });
     }
 
@@ -123,14 +145,19 @@ export class ChainUpdaterKeeper {
    */
   public static async checkChainUpdate(
     chainInfo: Readonly<ChainInfo>
-  ): Promise<boolean> {
+  ): Promise<{ explicitUpdate: boolean; slientUpdate: boolean }> {
     const chainId = chainInfo.chainId;
 
     // If chain id is not fomatted as {chainID}-{version},
     // there is no way to deal with the updated chain id.
     if (!ChainUpdaterKeeper.hasChainVersion(chainId)) {
-      return false;
+      return {
+        explicitUpdate: true,
+        slientUpdate: true
+      };
     }
+
+    let slientUpdate = false;
 
     const instance = Axios.create({
       baseURL: chainInfo.rpc
@@ -154,10 +181,30 @@ export class ChainUpdaterKeeper {
 
     // TODO: Should throw an error?
     if (version.identifier !== fetchedVersion.identifier) {
-      return false;
+      return {
+        explicitUpdate: true,
+        slientUpdate: true
+      };
     }
 
-    return version.version < fetchedVersion.version;
+    try {
+      if (!chainInfo.features || !chainInfo.features.includes("stargate")) {
+        const restInstance = Axios.create({
+          baseURL: chainInfo.rest
+        });
+
+        // If the chain doesn't have the stargate feature,
+        // but it can use the GRPC HTTP Gateway,
+        // assume that it can support the stargate and try to update the features.
+        await restInstance.get("/cosmos/base/tendermint/v1beta1/node_info");
+        slientUpdate = true;
+      }
+    } catch {}
+
+    return {
+      explicitUpdate: version.version < fetchedVersion.version,
+      slientUpdate
+    };
   }
 
   static getChainVersion(

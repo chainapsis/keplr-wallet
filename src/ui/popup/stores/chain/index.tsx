@@ -23,6 +23,7 @@ import {
   RemoveTokenMsg
 } from "../../../../background/tokens/messages";
 import { IBCStore } from "../ibc";
+import { ChainUpdaterKeeper } from "../../../../background/updater/keeper";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -36,7 +37,8 @@ export class ChainStore {
   public allCurrencies!: Currency[];
 
   // Indicate whether the chain store is initializing.
-  private isIntializing = false;
+  @observable
+  public isIntializing!: boolean;
 
   // Defer setting chain right after init is complete.
   private deferChainSet: string = "";
@@ -46,6 +48,10 @@ export class ChainStore {
     protected readonly ibcStore: IBCStore,
     private readonly embedChainInfos: ChainInfo[]
   ) {
+    runInAction(() => {
+      this.isIntializing = false;
+    });
+
     this.setAllCurrencies([]);
 
     this.setChainList(
@@ -98,7 +104,10 @@ export class ChainStore {
 
     let chainInfo: ChainInfo | null = null;
     for (const ci of this.chainList) {
-      if (ci.chainId === chainId) {
+      if (
+        ChainUpdaterKeeper.getChainVersion(ci.chainId).identifier ===
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      ) {
         chainInfo = ci;
       }
     }
@@ -118,7 +127,11 @@ export class ChainStore {
   }
 
   public getChain(chainId: string): ChainInfo {
-    const find = this.chainList.find(info => info.chainId === chainId);
+    const find = this.chainList.find(
+      info =>
+        ChainUpdaterKeeper.getChainVersion(info.chainId).identifier ===
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+    );
 
     if (!find) {
       throw new Error(`Unknown chain info: ${chainId}`);
@@ -156,6 +169,11 @@ export class ChainStore {
       this.setChain(this.deferChainSet);
       this.deferChainSet = "";
     }
+
+    // Try to refrest the chain info after getting the chain infos from background.
+    this.setChain(
+      ChainUpdaterKeeper.getChainVersion(this.chainInfo.chainId).identifier
+    );
   }
 
   @actionAsync

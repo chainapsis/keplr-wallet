@@ -172,10 +172,16 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const prevChainId = useRef<string | undefined>();
   useEffect(() => {
-    if (prevChainId.current !== chainStore.chainInfo.chainId) {
+    if (
+      !chainStore.isIntializing &&
+      prevChainId.current !== chainStore.chainInfo.chainId
+    ) {
       // FIXME: This will be executed twice on initial because chain store set the chain info on constructor and init.
       (async () => {
-        if (await ChainUpdaterKeeper.checkChainUpdate(chainStore.chainInfo)) {
+        const updateInfo = await ChainUpdaterKeeper.checkChainUpdate(
+          chainStore.chainInfo
+        );
+        if (updateInfo.explicitUpdate) {
           // If chain info has been changed, warning the user wether update the chain or not.
           if (
             await confirm.confirm({
@@ -192,12 +198,20 @@ export const MainPage: FunctionComponent = observer(() => {
           ) {
             await chainStore.tryUpdateChain(chainStore.chainInfo.chainId);
           }
+        } else if (updateInfo.slientUpdate) {
+          await chainStore.tryUpdateChain(chainStore.chainInfo.chainId);
         }
       })();
     }
 
     prevChainId.current = chainStore.chainInfo.chainId;
-  }, [chainStore, chainStore.chainInfo, confirm, intl]);
+  }, [
+    chainStore,
+    chainStore.chainInfo,
+    chainStore.isIntializing,
+    confirm,
+    intl
+  ]);
 
   const stakeCurrency = chainStore.chainInfo.stakeCurrency;
 

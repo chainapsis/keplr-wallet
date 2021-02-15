@@ -111,7 +111,10 @@ export class ChainsKeeper {
 
   async getChainInfo(chainId: string): Promise<ChainInfoWithEmbed> {
     const chainInfo = (await this.getChainInfos()).find(chainInfo => {
-      return chainInfo.chainId === chainId;
+      return (
+        ChainUpdaterKeeper.getChainVersion(chainInfo.chainId).identifier ===
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      );
     });
 
     if (!chainInfo) {
@@ -122,7 +125,10 @@ export class ChainsKeeper {
 
   async getChainCoinType(chainId: string): Promise<number> {
     const chainInfo = (await this.getChainInfos(false)).find(chainInfo => {
-      return chainInfo.chainId === chainId;
+      return (
+        ChainUpdaterKeeper.getChainVersion(chainInfo.chainId).identifier ===
+        ChainUpdaterKeeper.getChainVersion(chainId).identifier
+      );
     });
 
     if (!chainInfo) {
@@ -139,7 +145,10 @@ export class ChainsKeeper {
   async hasChainInfo(chainId: string): Promise<boolean> {
     return (
       (await this.getChainInfos()).find(chainInfo => {
-        return chainInfo.chainId === chainId;
+        return (
+          ChainUpdaterKeeper.getChainVersion(chainInfo.chainId).identifier ===
+          ChainUpdaterKeeper.getChainVersion(chainId).identifier
+        );
       }) != null
     );
   }
@@ -274,7 +283,7 @@ export class ChainsKeeper {
     });
 
     for (const origin of origins) {
-      this.addAccessOrigin(chainId, origin);
+      await this.addAccessOrigin(chainId, origin);
     }
   }
 
