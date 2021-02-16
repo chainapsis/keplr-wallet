@@ -138,7 +138,6 @@ describe("Test keyring handler", () => {
     );
 
     assert.strictEqual(result.status, KeyRingStatus.EMPTY);
-
     // Should throw an error if chain is unknown.
     await assert.rejects(async () => {
       await sendMessage(
@@ -149,9 +148,10 @@ describe("Test keyring handler", () => {
           origin: internalOrigin
         },
         port,
-        new EnableKeyRingMsg("test-2")
+
+        new EnableKeyRingMsg("test2-1")
       );
-    }, new Error("There is no chain info for test-2"));
+    }, new Error("There is no chain info for test2-1"));
   });
 
   it("Test EnableKeyRingMsg with locking/unlocking", async () => {
