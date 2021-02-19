@@ -60,7 +60,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: COSMOS_RPC_CONFIG,
     rest: COSMOS_REST_ENDPOINT,
     restConfig: COSMOS_REST_CONFIG,
-    chainId: "cosmoshub-3",
+    chainId: "cosmoshub-4",
     chainName: "Cosmos",
     stakeCurrency: {
       coinDenom: "ATOM",
@@ -94,7 +94,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "cosmos"
       }
     ],
-    coinType: 118
+    coinType: 118,
+    features: ["stargate"]
   },
   {
     rpc: KAVA_RPC_ENDPOINT,
