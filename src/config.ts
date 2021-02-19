@@ -70,12 +70,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub-3/stake"
-        : "http://localhost:8081/#/cosmoshub-3/stake",
+        ? "https://wallet.keplr.app/#/cosmoshub-4/stake"
+        : "http://localhost:8081/#/cosmoshub-4/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub-3/stake"
-        : "http://localhost:8081/#/cosmoshub-3/stake",
+        ? "https://wallet.keplr.app/#/cosmoshub-4/stake"
+        : "http://localhost:8081/#/cosmoshub-4/stake",
     bip44: new BIP44(44, 118, 0),
     bech32Config: defaultBech32Config("cosmos"),
     currencies: [
@@ -404,7 +404,7 @@ export const EmbedChainInfos: ChainInfo[] = [
  */
 export const EmbedAccessOrigins: AccessOrigin[] = [
   {
-    chainId: "cosmoshub-3",
+    chainId: "cosmoshub-4",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   },
