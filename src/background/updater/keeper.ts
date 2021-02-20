@@ -152,8 +152,8 @@ export class ChainUpdaterKeeper {
     // there is no way to deal with the updated chain id.
     if (!ChainUpdaterKeeper.hasChainVersion(chainId)) {
       return {
-        explicitUpdate: true,
-        slientUpdate: true
+        explicitUpdate: false,
+        slientUpdate: false
       };
     }
 
@@ -182,8 +182,8 @@ export class ChainUpdaterKeeper {
     // TODO: Should throw an error?
     if (version.identifier !== fetchedVersion.identifier) {
       return {
-        explicitUpdate: true,
-        slientUpdate: true
+        explicitUpdate: false,
+        slientUpdate: false
       };
     }
 

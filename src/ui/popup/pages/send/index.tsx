@@ -64,7 +64,10 @@ export const SendPage: FunctionComponent = withTxStateProvider(
     });
 
     const [gasForSendMsg, setGasForSendMsg] = useState(
-      chainStore.chainInfo.chainId.startsWith("akashnet-") ? 120000 : 80000
+      chainStore.chainInfo.chainId.startsWith("akashnet-") ||
+        chainStore.chainInfo.chainId.startsWith("sifchain")
+        ? 120000
+        : 80000
     );
 
     const txState = useTxState();
@@ -91,7 +94,10 @@ export const SendPage: FunctionComponent = withTxStateProvider(
           if (txState.ibcSendTo) {
             setGasForSendMsg(120000);
           } else {
-            if (chainStore.chainInfo.chainId.startsWith("akashnet-")) {
+            if (
+              chainStore.chainInfo.chainId.startsWith("akashnet-") ||
+              chainStore.chainInfo.chainId.startsWith("sifchain")
+            ) {
               setGasForSendMsg(120000);
             } else {
               setGasForSendMsg(80000);

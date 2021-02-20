@@ -40,7 +40,11 @@ import {
   CERTIK_RPC_ENDPOINT,
   CERTIK_RPC_CONFIG,
   CERTIK_REST_ENDPOINT,
-  CERTIK_REST_CONFIG
+  CERTIK_REST_CONFIG,
+  SIFCHAIN_RPC_ENDPOINT,
+  SIFCHAIN_RPC_CONFIG,
+  SIFCHAIN_REST_ENDPOINT,
+  SIFCHAIN_REST_CONFIG
 } from "./config.var";
 import { IntlMessages } from "./ui/popup/language";
 
@@ -273,6 +277,48 @@ export const EmbedChainInfos: ChainInfo[] = [
     }
   },
   {
+    rpc: SIFCHAIN_RPC_ENDPOINT,
+    rpcConfig: SIFCHAIN_RPC_CONFIG,
+    rest: SIFCHAIN_REST_ENDPOINT,
+    restConfig: SIFCHAIN_REST_CONFIG,
+    chainId: "sifchain",
+    chainName: "Sifchain",
+    stakeCurrency: {
+      coinDenom: "ROWAN",
+      coinMinimalDenom: "rowan",
+      coinDecimals: 18
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sifchain/stake"
+        : "http://localhost:8081/#/sifchain/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sifchain/stake"
+        : "http://localhost:8081/#/sifchain/stake",
+    bip44: new BIP44(44, 118, 0),
+    bech32Config: defaultBech32Config("sif"),
+    currencies: [
+      {
+        coinDenom: "ROWAN",
+        coinMinimalDenom: "rowan",
+        coinDecimals: 18
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ROWAN",
+        coinMinimalDenom: "rowan",
+        coinDecimals: 18
+      }
+    ],
+    gasPriceStep: {
+      low: 500000000000,
+      average: 1000000000000,
+      high: 2000000000000
+    }
+  },
+  {
     rpc: CERTIK_RPC_ENDPOINT,
     rpcConfig: CERTIK_RPC_CONFIG,
     rest: CERTIK_REST_ENDPOINT,
@@ -440,6 +486,11 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
   },
   {
     chainId: "shentu-1",
+    origins:
+      process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
+  },
+  {
+    chainId: "sifchain",
     origins:
       process.env.NODE_ENV === "production" ? ["https://wallet.keplr.app"] : []
   }
