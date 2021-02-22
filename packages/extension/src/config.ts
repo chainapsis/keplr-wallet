@@ -26,6 +26,22 @@ import {
   BETA_STRAIGHTEDGE_RPC_CONFIG,
   ADDITIONAL_SIGN_IN_PREPEND,
   ADDITIONAL_INTL_MESSAGES,
+  AKASH_RPC_ENDPOINT,
+  AKASH_RPC_CONFIG,
+  AKASH_REST_ENDPOINT,
+  AKASH_REST_CONFIG,
+  IOV_RPC_ENDPOINT,
+  IOV_RPC_CONFIG,
+  IOV_REST_ENDPOINT,
+  IOV_REST_CONFIG,
+  CERTIK_RPC_ENDPOINT,
+  CERTIK_RPC_CONFIG,
+  CERTIK_REST_ENDPOINT,
+  CERTIK_REST_CONFIG,
+  SIFCHAIN_RPC_ENDPOINT,
+  SIFCHAIN_RPC_CONFIG,
+  SIFCHAIN_REST_ENDPOINT,
+  SIFCHAIN_REST_CONFIG,
 } from "./config.var";
 import {
   IntlMessages,
@@ -49,7 +65,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: COSMOS_RPC_CONFIG,
     rest: COSMOS_REST_ENDPOINT,
     restConfig: COSMOS_REST_CONFIG,
-    chainId: "cosmoshub-3",
+    chainId: "cosmoshub-4",
     chainName: "Cosmos",
     stakeCurrency: {
       coinDenom: "ATOM",
@@ -59,12 +75,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub-3/stake"
-        : "http://localhost:8081/#/cosmoshub-3/stake",
+        ? "https://wallet.keplr.app/#/cosmoshub-4/stake"
+        : "http://localhost:8081/#/cosmoshub-4/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub-3/stake"
-        : "http://localhost:8081/#/cosmoshub-3/stake",
+        ? "https://wallet.keplr.app/#/cosmoshub-4/stake"
+        : "http://localhost:8081/#/cosmoshub-4/stake",
     bip44: {
       coinType: 118,
     },
@@ -86,6 +102,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 118,
+    features: ["stargate"],
   },
   {
     rpc: KAVA_RPC_ENDPOINT,
@@ -108,9 +125,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/kava-3/stake"
         : "http://localhost:8081/#/kava-3/stake",
-    bip44: {
-      coinType: 459,
-    },
+    bip44: { coinType: 459 },
     alternativeBIP44s: [{ coinType: 118 }],
     bech32Config: Bech32Address.defaultBech32Config("kava"),
     currencies: [
@@ -155,7 +170,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     bip44: {
       coinType: 529,
     },
-    alternativeBIP44s: [{ coinType: 118 }],
+    alternativeBIP44s: [
+      {
+        coinType: 118,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("secret"),
     currencies: [
       {
@@ -175,11 +194,186 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 529,
     gasPriceStep: {
-      low: 0.1,
-      average: 0.25,
+      low: 0.25,
+      average: 0.3,
       high: 0.4,
     },
     features: ["secretwasm"],
+  },
+  {
+    rpc: AKASH_RPC_ENDPOINT,
+    rpcConfig: AKASH_RPC_CONFIG,
+    rest: AKASH_REST_ENDPOINT,
+    restConfig: AKASH_REST_CONFIG,
+    chainId: "akashnet-1",
+    chainName: "Akash",
+    stakeCurrency: {
+      coinDenom: "AKT",
+      coinMinimalDenom: "uakt",
+      coinDecimals: 6,
+      coinGeckoId: "akash-network",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/akashnet-1/stake"
+        : "http://localhost:8081/#/akashnet-1/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/akashnet-1/stake"
+        : "http://localhost:8081/#/akashnet-1/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("akash"),
+    currencies: [
+      {
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
+        coinDecimals: 6,
+        coinGeckoId: "akash-network",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
+        coinDecimals: 6,
+        coinGeckoId: "akash-network",
+      },
+    ],
+  },
+  {
+    rpc: IOV_RPC_ENDPOINT,
+    rpcConfig: IOV_RPC_CONFIG,
+    rest: IOV_REST_ENDPOINT,
+    restConfig: IOV_REST_CONFIG,
+    chainId: "iov-mainnet-2",
+    chainName: "Starname",
+    stakeCurrency: {
+      coinDenom: "IOV",
+      coinMinimalDenom: "uiov",
+      coinDecimals: 6,
+      coinGeckoId: "starname",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/iov-mainnet-2/stake"
+        : "http://localhost:8081/#/iov-mainnet-2/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/iov-mainnet-2/stake"
+        : "http://localhost:8081/#/iov-mainnet-2/stake",
+    bip44: {
+      coinType: 234,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("star"),
+    currencies: [
+      {
+        coinDenom: "IOV",
+        coinMinimalDenom: "uiov",
+        coinDecimals: 6,
+        coinGeckoId: "starname",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IOV",
+        coinMinimalDenom: "uiov",
+        coinDecimals: 6,
+        coinGeckoId: "starname",
+      },
+    ],
+    gasPriceStep: {
+      low: 1,
+      average: 2,
+      high: 3,
+    },
+  },
+  {
+    rpc: SIFCHAIN_RPC_ENDPOINT,
+    rpcConfig: SIFCHAIN_RPC_CONFIG,
+    rest: SIFCHAIN_REST_ENDPOINT,
+    restConfig: SIFCHAIN_REST_CONFIG,
+    chainId: "sifchain",
+    chainName: "Sifchain",
+    stakeCurrency: {
+      coinDenom: "ROWAN",
+      coinMinimalDenom: "rowan",
+      coinDecimals: 18,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sifchain/stake"
+        : "http://localhost:8081/#/sifchain/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sifchain/stake"
+        : "http://localhost:8081/#/sifchain/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("sif"),
+    currencies: [
+      {
+        coinDenom: "ROWAN",
+        coinMinimalDenom: "rowan",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ROWAN",
+        coinMinimalDenom: "rowan",
+        coinDecimals: 18,
+      },
+    ],
+    gasPriceStep: {
+      low: 500000000000,
+      average: 1000000000000,
+      high: 2000000000000,
+    },
+  },
+  {
+    rpc: CERTIK_RPC_ENDPOINT,
+    rpcConfig: CERTIK_RPC_CONFIG,
+    rest: CERTIK_REST_ENDPOINT,
+    restConfig: CERTIK_REST_CONFIG,
+    chainId: "shentu-1",
+    chainName: "Certik",
+    stakeCurrency: {
+      coinDenom: "CTK",
+      coinMinimalDenom: "uctk",
+      coinDecimals: 6,
+      coinGeckoId: "certik",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/shentu-1/stake"
+        : "http://localhost:8081/#/shentu-1/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/shentu-1/stake"
+        : "http://localhost:8081/#/shentu-1/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("certik"),
+    currencies: [
+      {
+        coinDenom: "CTK",
+        coinMinimalDenom: "uctk",
+        coinDecimals: 6,
+        coinGeckoId: "certik",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "CTK",
+        coinMinimalDenom: "uctk",
+        coinDecimals: 6,
+        coinGeckoId: "certik",
+      },
+    ],
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
