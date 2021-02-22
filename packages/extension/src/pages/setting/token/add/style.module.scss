@@ -1,0 +1,14 @@
+@import "../../../../styles/var";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  input:read-only {
+    box-shadow: none !important;
+    background: transparent;
+    padding: 0;
+    height: 20px;
+  }
+}

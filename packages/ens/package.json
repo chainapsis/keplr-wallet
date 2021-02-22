@@ -1,0 +1,24 @@
+{
+  "name": "@keplr/ens",
+  "version": "0.0.1-alpha.0",
+  "main": "build/index.js",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "private": false,
+  "scripts": {
+    "clean": "rm -rf build",
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
+    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "ethereum-ens": "^0.8.0",
+    "@ensdomains/resolver": "^0.2.4",
+    "web3": "^1.2.6",
+    "buffer": "^5.4.3",
+    "mobx": "^6.1.7"
+  }
+}

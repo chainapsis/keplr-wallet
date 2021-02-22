@@ -1,0 +1,154 @@
+import { Coin } from "./coin";
+import { Int } from "./int";
+import { Dec } from "./decimal";
+import { DecUtils } from "./dec-utils";
+import { Currency } from "@keplr/types";
+
+export class CoinUtils {
+  static createCoinsFromPrimitives(
+    coinPrimitives: {
+      denom: string;
+      amount: string;
+    }[]
+  ): Coin[] {
+    return coinPrimitives.map((primitive) => {
+      return new Coin(primitive.denom, primitive.amount);
+    });
+  }
+
+  static amountOf(coins: Coin[], denom: string): Int {
+    const coin = coins.find((coin) => {
+      return coin.denom === denom;
+    });
+
+    if (!coin) {
+      return new Int(0);
+    } else {
+      return coin.amount;
+    }
+  }
+
+  static exclude(coins: Coin[], demons: string[]): Coin[] {
+    return coins.filter((coin) => {
+      return demons.indexOf(coin.denom) === 0;
+    });
+  }
+
+  static concat(...coins: Coin[]): Coin[] {
+    if (coins.length === 0) {
+      return [];
+    }
+
+    const arr = coins.slice();
+    const reducer = (accumulator: Coin[], coin: Coin) => {
+      // Find the duplicated denom.
+      const find = accumulator.find((c) => c.denom === coin.denom);
+      // If duplicated coin exists, add the amount to duplicated one.
+      if (find) {
+        const newCoin = new Coin(find.denom, find.amount.add(coin.amount));
+        accumulator.push(newCoin);
+      } else {
+        const newCoin = new Coin(coin.denom, coin.amount);
+        accumulator.push(newCoin);
+      }
+
+      return accumulator;
+    };
+
+    return arr.reduce(reducer, []);
+  }
+
+  static getCoinFromDecimals(
+    currencies: Currency[],
+    decAmountStr: string,
+    denom: string
+  ): Coin {
+    const currency = currencies.find((currency) => {
+      return currency.coinDenom === denom;
+    });
+    if (!currency) {
+      throw new Error("Invalid currency");
+    }
+
+    let precision = new Dec(1);
+    for (let i = 0; i < currency.coinDecimals; i++) {
+      precision = precision.mul(new Dec(10));
+    }
+
+    let decAmount = new Dec(decAmountStr);
+    decAmount = decAmount.mul(precision);
+
+    if (!new Dec(decAmount.truncate()).equals(decAmount)) {
+      throw new Error("Can't divide anymore");
+    }
+
+    return new Coin(currency.coinMinimalDenom, decAmount.truncate());
+  }
+
+  static parseDecAndDenomFromCoin(
+    currencies: Currency[],
+    coin: Coin
+  ): { amount: string; denom: string } {
+    const currency = currencies.find((currency) => {
+      return currency.coinMinimalDenom === coin.denom;
+    });
+    if (!currency) {
+      throw new Error("Invalid currency");
+    }
+
+    let precision = new Dec(1);
+    for (let i = 0; i < currency.coinDecimals; i++) {
+      precision = precision.mul(new Dec(10));
+    }
+
+    const decAmount = new Dec(coin.amount).quoTruncate(precision);
+    return {
+      amount: decAmount.toString(currency.coinDecimals),
+      denom: currency.coinDenom,
+    };
+  }
+
+  static shrinkDecimals(
+    amount: Int,
+    baseDecimals: number,
+    minDecimals: number,
+    maxDecimals: number,
+    locale: boolean = false
+  ): string {
+    if (amount.equals(new Int(0))) {
+      return "0";
+    }
+
+    const dec = new Dec(amount, baseDecimals);
+
+    const integer = dec.truncate();
+    const fraction = dec.sub(new Dec(integer));
+
+    const decimals = Math.max(
+      maxDecimals - integer.toString().length + 1,
+      minDecimals
+    );
+
+    const fractionStr = fraction.toString(decimals).replace("0.", "");
+
+    const integerStr = locale
+      ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        BigInt(integer.toString()).toLocaleString("en-US")
+      : integer.toString();
+
+    return integerStr + (fractionStr.length > 0 ? "." : "") + fractionStr;
+  }
+
+  static coinToTrimmedString(
+    coin: Coin,
+    currency: Currency,
+    separator: string = " "
+  ): string {
+    const dec = new Dec(coin.amount).quoTruncate(
+      DecUtils.getPrecisionDec(currency.coinDecimals)
+    );
+
+    return `${DecUtils.trim(dec)}${separator}${currency.coinDenom}`;
+  }
+}

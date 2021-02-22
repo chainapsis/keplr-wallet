@@ -1,0 +1,54 @@
+.hr {
+  background-color: gray;
+  margin: 0;
+  height: 1px;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.msg-container {
+  overflow: auto;
+  flex: 1;
+
+  hr {
+    margin: 8px 0;
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: row;
+
+    .icon {
+      display: flex;
+      flex-direction: column;
+      margin: 0 10px 0 8px;
+      width: 24px;
+      text-align: center;
+
+      i {
+        font-size: 20px;
+        line-height: 20px;
+      }
+    }
+
+    .content-container {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+
+      .content-title {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .content {
+        font-size: 12px;
+        color: gray;
+      }
+    }
+  }
+}

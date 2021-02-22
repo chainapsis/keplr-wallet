@@ -1,0 +1,40 @@
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/functions";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/mixins";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/variables";
+
+.form-container {
+  height: 100%;
+}
+
+.form-inner-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.full-modal {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+
+  &:global(.modal-content) {
+    box-shadow: none;
+  }
+}
+
+.address-book-button {
+  background: white;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-width: 0;
+
+  box-shadow: $input-alternative-box-shadow !important;
+
+  &:hover {
+    box-shadow: $input-focus-alternative-box-shadow !important;
+  }
+}

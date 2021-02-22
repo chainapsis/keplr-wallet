@@ -1,0 +1,32 @@
+@import "../../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/functions";
+@import "../../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/mixins";
+@import "../../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/variables";
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+}
+
+.mnemonic {
+  font-family: "Courier Prime", serif;
+  font-size: 16px;
+  letter-spacing: -0.36px;
+
+  padding: 20px 30px;
+  text-align: center;
+
+  background: white;
+  border-radius: 6px;
+
+  box-shadow: $input-alternative-box-shadow !important;
+
+  &.alt-hex {
+    word-break: break-all;
+
+    &::before {
+      content: "0x";
+    }
+  }
+}
