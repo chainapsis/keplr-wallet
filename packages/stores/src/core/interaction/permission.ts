@@ -8,11 +8,57 @@ import {
   RemovePermissionOrigin,
   isSecret20ViewingKeyPermissionType,
   splitSecret20ViewingKeyPermissionType,
+  getSecret20ViewingKeyPermissionType,
 } from "@keplr/background";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { HasMapStore } from "../../common";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr/router";
 import { toGenerator } from "@keplr/common";
+
+export class Secret20ViewingKeyPermissionInnerStore {
+  @observable.ref
+  protected _origins: string[] = [];
+
+  constructor(
+    protected readonly chainId: string,
+    protected readonly contractAddress: string,
+    protected readonly requester: MessageRequester
+  ) {
+    makeObservable(this);
+
+    this.refreshOrigins();
+  }
+
+  get origins(): string[] {
+    return this._origins;
+  }
+
+  @flow
+  *removeOrigin(origin: string) {
+    yield this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new RemovePermissionOrigin(
+        this.chainId,
+        getSecret20ViewingKeyPermissionType(this.contractAddress),
+        origin
+      )
+    );
+    yield this.refreshOrigins();
+  }
+
+  @flow
+  protected *refreshOrigins() {
+    this._origins = yield* toGenerator(
+      this.requester.sendMessage(
+        BACKGROUND_PORT,
+        new GetPermissionOriginsMsg(
+          this.chainId,
+          getSecret20ViewingKeyPermissionType(this.contractAddress)
+        )
+      )
+    );
+  }
+}
 
 export class BasicAccessPermissionInnerStore {
   @observable.ref
@@ -58,7 +104,15 @@ export class BasicAccessPermissionInnerStore {
   }
 }
 
-export class PermissionStore extends HasMapStore<any> {
+interface MapKeyData {
+  type: "basicAccess" | "viewingKey";
+  chainId: string;
+  contractAddress: string;
+}
+
+export class PermissionStore extends HasMapStore<
+  BasicAccessPermissionInnerStore | Secret20ViewingKeyPermissionInnerStore
+> {
   @observable
   protected _isLoading: boolean = false;
 
@@ -66,14 +120,43 @@ export class PermissionStore extends HasMapStore<any> {
     protected readonly interactionStore: InteractionStore,
     protected readonly requester: MessageRequester
   ) {
-    super((chainId: string) => {
-      return new BasicAccessPermissionInnerStore(chainId, this.requester);
+    super((key: string) => {
+      const data = JSON.parse(key) as MapKeyData;
+      if (data.type === "basicAccess") {
+        return new BasicAccessPermissionInnerStore(
+          data.chainId,
+          this.requester
+        );
+      } else {
+        return new Secret20ViewingKeyPermissionInnerStore(
+          data.chainId,
+          data.contractAddress,
+          this.requester
+        );
+      }
     });
     makeObservable(this);
   }
 
   getBasicAccessInfo(chainId: string): BasicAccessPermissionInnerStore {
-    return this.get(chainId);
+    const key = JSON.stringify({
+      type: "basicAccess",
+      chainId,
+      contractAddress: "",
+    });
+    return this.get(key) as BasicAccessPermissionInnerStore;
+  }
+
+  getSecret20ViewingKeyAccessInfo(
+    chainId: string,
+    contractAddress: string
+  ): Secret20ViewingKeyPermissionInnerStore {
+    const key = JSON.stringify({
+      type: "viewingKey",
+      chainId,
+      contractAddress,
+    });
+    return this.get(key) as Secret20ViewingKeyPermissionInnerStore;
   }
 
   @computed

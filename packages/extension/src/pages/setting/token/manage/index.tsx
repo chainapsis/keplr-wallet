@@ -69,6 +69,23 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
           icons.push(
             <i
+              key="connections"
+              className="fas fa-link"
+              style={{
+                cursor: "pointer",
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+
+                history.push(
+                  `/setting/connections/viewing-key/${currency.contractAddress}`
+                );
+              }}
+            />
+          );
+
+          icons.push(
+            <i
               key="trash"
               className="fas fa-trash-alt"
               style={{

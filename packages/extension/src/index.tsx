@@ -34,7 +34,10 @@ import Modal from "react-modal";
 import { SettingPage } from "./pages/setting";
 import { SettingLanguagePage } from "./pages/setting/language";
 import { SettingFiatPage } from "./pages/setting/fiat";
-import { SettingConnectionsPage } from "./pages/setting/connections";
+import {
+  SettingConnectionsPage,
+  SettingSecret20ViewingKeyConnectionsPage,
+} from "./pages/setting/connections";
 import { AddressBookPage } from "./pages/setting/address-book";
 import { CreditPage } from "./pages/setting/credit";
 import { ClearPage } from "./pages/setting/clear";
@@ -160,6 +163,11 @@ ReactDOM.render(
                     exact
                     path="/setting/connections"
                     component={SettingConnectionsPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/connections/viewing-key/:contractAddress"
+                    component={SettingSecret20ViewingKeyConnectionsPage}
                   />
                   <Route
                     exact
