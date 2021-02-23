@@ -20,7 +20,7 @@ import { Env, MessageRequester, WEBPAGE_PORT } from "@keplr/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
-import { EnableKeyRingMsg, RequestSignMsg } from "./messages";
+import { EnableKeyRingMsg } from "./messages";
 
 import {
   encodeSecp256k1Signature,
@@ -184,7 +184,7 @@ export class KeyRingService {
     return this.keyRing.type;
   }
 
-  async requestSign(
+  async requestSignAmino(
     env: Env,
     chainId: string,
     signDoc: StdSignDoc
@@ -192,9 +192,10 @@ export class KeyRingService {
     const newSignDoc = (await this.interactionService.waitApprove(
       env,
       "/sign",
-      RequestSignMsg.type(),
+      "request-sign",
       {
         chainId,
+        mode: "amino",
         signDoc,
       }
     )) as StdSignDoc;
@@ -219,7 +220,7 @@ export class KeyRingService {
       await this.interactionService.dispatchData(
         env,
         "/sign",
-        `${RequestSignMsg.type()}-end`,
+        "request-sign-end",
         {}
       );
     }

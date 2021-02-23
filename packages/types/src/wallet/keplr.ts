@@ -21,7 +21,7 @@ export interface Keplr {
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
   getKey(chainId: string): Promise<KeyHex>;
-  sign(
+  signAmino(
     chainId: string,
     signer: string,
     signDoc: StdSignDoc

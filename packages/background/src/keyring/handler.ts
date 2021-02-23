@@ -5,7 +5,7 @@ import {
   CreatePrivateKeyMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
-  RequestSignMsg,
+  RequestSignAminoMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
   ShowKeyRingMsg,
@@ -65,8 +65,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleUnlockKeyRingMsg(service)(env, msg as UnlockKeyRingMsg);
       case GetKeyMsg:
         return handleGetKeyMsg(service)(env, msg as GetKeyMsg);
-      case RequestSignMsg:
-        return handleRequestSignMsg(service)(env, msg as RequestSignMsg);
+      case RequestSignAminoMsg:
+        return handleRequestSignAminoMsg(service)(
+          env,
+          msg as RequestSignAminoMsg
+        );
       case GetKeyRingTypeMsg:
         return handleGetKeyRingTypeMsg(service)(env, msg as GetKeyRingTypeMsg);
       case GetMultiKeyStoreInfoMsg:
@@ -256,9 +259,9 @@ const handleGetKeyMsg: (
   };
 };
 
-const handleRequestSignMsg: (
+const handleRequestSignAminoMsg: (
   service: KeyRingService
-) => InternalHandler<RequestSignMsg> = (service) => {
+) => InternalHandler<RequestSignAminoMsg> = (service) => {
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
@@ -268,7 +271,7 @@ const handleRequestSignMsg: (
 
     await service.checkBech32Address(msg.chainId, msg.bech32Address);
 
-    return await service.requestSign(env, msg.chainId, msg.signDoc);
+    return await service.requestSignAmino(env, msg.chainId, msg.signDoc);
   };
 };
 

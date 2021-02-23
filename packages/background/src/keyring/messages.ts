@@ -413,9 +413,9 @@ export class GetKeyMsg extends Message<KeyHex> {
   }
 }
 
-export class RequestSignMsg extends Message<AminoSignResponse> {
+export class RequestSignAminoMsg extends Message<AminoSignResponse> {
   public static type() {
-    return "request-sign";
+    return "request-sign-amino";
   }
 
   constructor(
@@ -454,7 +454,7 @@ export class RequestSignMsg extends Message<AminoSignResponse> {
   }
 
   type(): string {
-    return RequestSignMsg.type();
+    return RequestSignAminoMsg.type();
   }
 }
 

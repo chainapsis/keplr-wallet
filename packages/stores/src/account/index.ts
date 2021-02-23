@@ -796,7 +796,7 @@ export class AccountStoreInner {
       account.getSequence().toString()
     );
 
-    const signResponse = await keplr.sign(
+    const signResponse = await keplr.signAmino(
       this.chainId,
       this.bech32Address,
       signDoc

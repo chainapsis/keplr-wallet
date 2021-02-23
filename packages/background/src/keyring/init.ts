@@ -5,7 +5,7 @@ import {
   CreatePrivateKeyMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
-  RequestSignMsg,
+  RequestSignAminoMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
   ShowKeyRingMsg,
@@ -38,7 +38,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(LockKeyRingMsg);
   router.registerMessage(UnlockKeyRingMsg);
   router.registerMessage(GetKeyMsg);
-  router.registerMessage(RequestSignMsg);
+  router.registerMessage(RequestSignAminoMsg);
   router.registerMessage(GetKeyRingTypeMsg);
   router.registerMessage(GetMultiKeyStoreInfoMsg);
   router.registerMessage(ChangeKeyRingMsg);

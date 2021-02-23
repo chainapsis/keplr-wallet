@@ -10,10 +10,10 @@ import {
   EnableKeyRingMsg,
   SuggestChainInfoMsg,
   GetKeyMsg,
-  RequestSignMsg,
   SuggestTokenMsg,
   SendTxMsg,
   GetSecret20ViewingKey,
+  RequestSignAminoMsg,
 } from "@keplr/background";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -50,12 +50,12 @@ export class Keplr implements IKeplr {
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
-  async sign(
+  async signAmino(
     chainId: string,
     signer: string,
     signDoc: StdSignDoc
   ): Promise<AminoSignResponse> {
-    const msg = new RequestSignMsg(chainId, signer, signDoc);
+    const msg = new RequestSignAminoMsg(chainId, signer, signDoc);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 

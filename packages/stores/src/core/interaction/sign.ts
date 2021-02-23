@@ -1,5 +1,4 @@
 import { InteractionStore } from "./interaction";
-import { RequestSignMsg } from "@keplr/background";
 import { autorun, flow, makeObservable, observable } from "mobx";
 import { StdSignDoc } from "@cosmjs/launchpad";
 
@@ -26,7 +25,7 @@ export class SignInteractionStore {
     return this.interactionStore.getDatas<{
       chainId: string;
       signDoc: StdSignDoc;
-    }>(RequestSignMsg.type());
+    }>("request-sign");
   }
 
   get waitingData() {
@@ -40,16 +39,11 @@ export class SignInteractionStore {
   }
 
   protected isEnded(): boolean {
-    return (
-      this.interactionStore.getDatas<void>(`${RequestSignMsg.type()}-end`)
-        .length > 0
-    );
+    return this.interactionStore.getDatas<void>("request-sign-end").length > 0;
   }
 
   protected clearEnded() {
-    const datas = this.interactionStore.getDatas<void>(
-      `${RequestSignMsg.type()}-end`
-    );
+    const datas = this.interactionStore.getDatas<void>("request-sign-end");
     for (const data of datas) {
       this.interactionStore.removeData(data.type, data.id);
     }
@@ -80,7 +74,7 @@ export class SignInteractionStore {
     this._isLoading = true;
     try {
       yield this.interactionStore.approve(
-        RequestSignMsg.type(),
+        "request-sign",
         this.waitingDatas[0].id,
         newSignDoc
       );
@@ -100,7 +94,7 @@ export class SignInteractionStore {
     this._isLoading = true;
     try {
       yield this.interactionStore.reject(
-        RequestSignMsg.type(),
+        "request-sign",
         this.waitingDatas[0].id
       );
     } finally {
@@ -112,7 +106,7 @@ export class SignInteractionStore {
   *rejectAll() {
     this._isLoading = true;
     try {
-      yield this.interactionStore.rejectAll(RequestSignMsg.type());
+      yield this.interactionStore.rejectAll("request-sign");
     } finally {
       this._isLoading = false;
     }
@@ -120,7 +114,7 @@ export class SignInteractionStore {
 
   @flow
   protected *rejectWithId(id: string) {
-    yield this.interactionStore.reject(RequestSignMsg.type(), id);
+    yield this.interactionStore.reject("request-sign", id);
   }
 
   get isLoading(): boolean {

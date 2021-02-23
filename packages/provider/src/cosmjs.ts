@@ -40,7 +40,7 @@ export class CosmJSOfflineSigner implements OfflineSigner {
       throw new Error("Unknown signer address");
     }
 
-    return await this.keplr.sign(this.chainId, signerAddress, signDoc);
+    return await this.keplr.signAmino(this.chainId, signerAddress, signDoc);
   }
 
   // Fallback function for the legacy cosmjs implementation before the staragte.
