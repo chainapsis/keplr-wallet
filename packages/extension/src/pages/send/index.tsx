@@ -134,6 +134,7 @@ export const SendPage: FunctionComponent = observer(() => {
             />
             <FeeButtons
               feeConfig={sendConfigs.feeConfig}
+              gasConfig={sendConfigs.gasConfig}
               priceStore={priceStore}
               label={intl.formatMessage({ id: "send.input.fee" })}
               feeSelectLabels={{
@@ -143,6 +144,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 }),
                 high: intl.formatMessage({ id: "fee-buttons.select.high" }),
               }}
+              gasLabel={intl.formatMessage({ id: "send.input.gas" })}
             />
           </div>
           <div style={{ flex: 1 }} />

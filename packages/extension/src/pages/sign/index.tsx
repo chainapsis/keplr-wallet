@@ -156,6 +156,7 @@ export const SignPage: FunctionComponent = observer(() => {
               signDocHelper={signDocHelper}
               memoConfig={memoConfig}
               feeConfig={feeConfig}
+              gasConfig={gasConfig}
               hideFeeButtons={hideFeeButtons}
             />
           ) : null}

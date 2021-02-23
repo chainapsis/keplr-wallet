@@ -12,6 +12,7 @@ import {
   ButtonGroup,
   FormFeedback,
   FormGroup,
+  FormText,
   Label,
 } from "reactstrap";
 
@@ -19,15 +20,19 @@ import classnames from "classnames";
 import { observer } from "mobx-react-lite";
 import {
   IFeeConfig,
+  IGasConfig,
   InsufficientFeeError,
   NotLoadedFeeError,
 } from "@keplr/hooks";
 import { CoinGeckoPriceStore } from "@keplr/stores";
-import { useLanguage } from "../../languages";
+import { useLanguage } from "../../../languages";
 import { useIntl } from "react-intl";
+import { GasInput } from "../gas-input";
+import { action, makeObservable, observable } from "mobx";
 
 export interface FeeButtonsProps {
   feeConfig: IFeeConfig;
+  gasConfig: IGasConfig;
   priceStore: CoinGeckoPriceStore;
 
   className?: string;
@@ -37,15 +42,41 @@ export interface FeeButtonsProps {
     average: string;
     high: string;
   };
+
+  gasLabel?: string;
+}
+
+class FeeButtonState {
+  @observable
+  protected _isGasInputOpen: boolean = false;
+
+  constructor() {
+    makeObservable(this);
+  }
+
+  get isGasInputOpen(): boolean {
+    return this._isGasInputOpen;
+  }
+
+  @action
+  setIsGasInputOpen(open: boolean) {
+    this._isGasInputOpen = open;
+  }
 }
 
 export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
   ({
     feeConfig,
+    gasConfig,
     priceStore,
     label,
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
+    gasLabel,
   }) => {
+    // This may be not the good way to handle the states across the components.
+    // But, rather than using the context API with boilerplate code, just use the mobx state to simplify the logic.
+    const [feeButtonState] = useState(new FeeButtonState());
+
     return (
       <React.Fragment>
         {feeConfig.feeCurrency ? (
@@ -54,19 +85,29 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             priceStore={priceStore}
             label={label}
             feeSelectLabels={feeSelectLabels}
+            feeButtonState={feeButtonState}
           />
+        ) : null}
+        {feeButtonState.isGasInputOpen || !feeConfig.feeCurrency ? (
+          <GasInput label={gasLabel} gasConfig={gasConfig} />
         ) : null}
       </React.Fragment>
     );
   }
 );
 
-export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
+export const FeeButtonsInner: FunctionComponent<
+  Pick<
+    FeeButtonsProps,
+    "feeConfig" | "priceStore" | "label" | "feeSelectLabels"
+  > & { feeButtonState: FeeButtonState }
+> = observer(
   ({
     feeConfig,
     priceStore,
     label,
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
+    feeButtonState,
   }) => {
     useEffect(() => {
       if (feeConfig.feeCurrency && !feeConfig.fee) {
@@ -115,7 +156,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
     })();
 
     return (
-      <FormGroup>
+      <FormGroup style={{ position: "relative" }}>
         {label ? (
           <Label for={inputId} className="form-control-label">
             {label}
@@ -207,13 +248,25 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
           </Button>
         </ButtonGroup>
         {isFeeLoading ? (
-          <FormFeedback style={{ display: "block" }}>
-            <i className="fa fa-spinner fa-spin fa-fw text-gray" />
-          </FormFeedback>
+          <FormText>
+            <i className="fa fa-spinner fa-spin fa-fw" />
+          </FormText>
         ) : null}
         {errorText != null ? (
           <FormFeedback style={{ display: "block" }}>{errorText}</FormFeedback>
         ) : null}
+        <div style={{ position: "absolute", right: 0 }}>
+          <Button
+            size="sm"
+            color="link"
+            onClick={(e) => {
+              e.preventDefault();
+              feeButtonState.setIsGasInputOpen(!feeButtonState.isGasInputOpen);
+            }}
+          >
+            {!feeButtonState.isGasInputOpen ? "Set Gas" : "Close"}
+          </Button>
+        </div>
       </FormGroup>
     );
   }
