@@ -1,11 +1,12 @@
-import { ObservableQuery } from "../common";
+import { ObservableQuery, QueryResponse } from "../common";
 import { CoinGeckoSimplePrice } from "./types";
-import Axios from "axios";
+import Axios, { CancelToken } from "axios";
 import { KVStore } from "@keplr/common";
 import { Dec, CoinPretty, Int } from "@keplr/unit";
 import { FiatCurrency } from "@keplr/types";
 import { PricePretty } from "@keplr/unit/build/price-pretty";
 import { DeepReadonly } from "utility-types";
+import deepmerge from "deepmerge";
 
 export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   protected coinIds: string[];
@@ -45,6 +46,21 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
 
   protected canFetch(): boolean {
     return this.coinIds.length > 0 && this.vsCurrencies.length > 0;
+  }
+
+  protected async fetchResponse(
+    cancelToken: CancelToken
+  ): Promise<QueryResponse<CoinGeckoSimplePrice>> {
+    const response = await super.fetchResponse(cancelToken);
+    // Because this store only queries the price of the tokens that have been requested from start,
+    // it will remove the prior prices that have not been requested to just return the fetching result.
+    // So, to prevent this problem, merge the prior response and current response with retaining the prior response's price.
+    return {
+      ...response,
+      ...{
+        data: deepmerge(this.response ? this.response.data : {}, response.data),
+      },
+    };
   }
 
   protected refetch() {
