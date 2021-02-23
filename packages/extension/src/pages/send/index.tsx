@@ -86,7 +86,7 @@ export const SendPage: FunctionComponent = observer(() => {
 
           if (accountInfo.isReadyToSendMsgs && txStateIsValid) {
             try {
-              const feeAmount = sendConfigs.feeConfig.getFeePrimitive();
+              const stdFee = sendConfigs.feeConfig.toStdFee();
 
               await accountInfo.sendToken(
                 sendConfigs.amountConfig.amount,
@@ -94,7 +94,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 sendConfigs.amountConfig.sendCurrency!,
                 sendConfigs.recipientConfig.recipient,
                 sendConfigs.memoConfig.memo,
-                feeAmount ? [feeAmount] : []
+                stdFee
               );
               history.replace("/");
             } catch (e) {
