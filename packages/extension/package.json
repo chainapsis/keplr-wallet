@@ -14,8 +14,8 @@
     "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js"
   },
   "dependencies": {
-    "@cosmjs/encoding": "^0.23.0",
-    "@cosmjs/launchpad": "^0.23.0",
+    "@cosmjs/encoding": "^0.24.0-alpha.25",
+    "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@keplr/background": "0.0.1-alpha.0",
     "@keplr/common": "0.0.1-alpha.0",

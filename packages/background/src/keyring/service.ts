@@ -25,7 +25,7 @@ import { EnableKeyRingMsg, RequestSignMsg } from "./messages";
 import {
   encodeSecp256k1Signature,
   serializeSignDoc,
-  SignResponse,
+  AminoSignResponse,
   StdSignDoc,
 } from "@cosmjs/launchpad";
 
@@ -188,7 +188,7 @@ export class KeyRingService {
     env: Env,
     chainId: string,
     signDoc: StdSignDoc
-  ): Promise<SignResponse> {
+  ): Promise<AminoSignResponse> {
     const newSignDoc = (await this.interactionService.waitApprove(
       env,
       "/sign",

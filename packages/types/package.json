@@ -17,7 +17,7 @@
     "mocha": "^8.2.1"
   },
   "dependencies": {
-    "@cosmjs/launchpad": "0.23.1",
+    "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "axios": "^0.21.0",
     "secretjs": "^0.10.4"
   }

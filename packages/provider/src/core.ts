@@ -2,7 +2,7 @@ import { ChainInfo, Keplr as IKeplr, KeyHex } from "@keplr/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr/router";
 import {
   BroadcastMode,
-  SignResponse,
+  AminoSignResponse,
   StdSignDoc,
   StdTx,
 } from "@cosmjs/launchpad";
@@ -54,7 +54,7 @@ export class Keplr implements IKeplr {
     chainId: string,
     signer: string,
     signDoc: StdSignDoc
-  ): Promise<SignResponse> {
+  ): Promise<AminoSignResponse> {
     const msg = new RequestSignMsg(chainId, signer, signDoc);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }

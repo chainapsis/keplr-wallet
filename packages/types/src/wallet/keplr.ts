@@ -1,7 +1,7 @@
 import { ChainInfo } from "../chain-info";
 import {
   BroadcastMode,
-  SignResponse,
+  AminoSignResponse,
   StdSignDoc,
   StdTx,
 } from "@cosmjs/launchpad";
@@ -25,7 +25,7 @@ export interface Keplr {
     chainId: string,
     signer: string,
     signDoc: StdSignDoc
-  ): Promise<SignResponse>;
+  ): Promise<AminoSignResponse>;
   sendTx(
     chainId: string,
     stdTx: StdTx,

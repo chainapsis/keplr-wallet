@@ -1,7 +1,7 @@
 import {
   OfflineSigner,
   AccountData,
-  SignResponse,
+  AminoSignResponse,
   StdSignDoc,
 } from "@cosmjs/launchpad";
 import { fromHex } from "@cosmjs/encoding";
@@ -26,10 +26,10 @@ export class CosmJSOfflineSigner implements OfflineSigner {
     ];
   }
 
-  async sign(
+  async signAmino(
     signerAddress: string,
     signDoc: StdSignDoc
-  ): Promise<SignResponse> {
+  ): Promise<AminoSignResponse> {
     if (this.chainId !== signDoc.chain_id) {
       throw new Error("Unmatched chain id with the offline signer");
     }
@@ -41,5 +41,13 @@ export class CosmJSOfflineSigner implements OfflineSigner {
     }
 
     return await this.keplr.sign(this.chainId, signerAddress, signDoc);
+  }
+
+  // Fallback function for the legacy cosmjs implementation before the staragte.
+  async sign(
+    signerAddress: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.signAmino(signerAddress, signDoc);
   }
 }

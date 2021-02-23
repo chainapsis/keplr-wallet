@@ -10,7 +10,7 @@ import { BIP44HDPath } from "./types";
 import { Bech32Address } from "@keplr/cosmos";
 import { BIP44, KeyHex } from "@keplr/types";
 
-import { StdSignDoc, SignResponse } from "@cosmjs/launchpad";
+import { StdSignDoc, AminoSignResponse } from "@cosmjs/launchpad";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -413,7 +413,7 @@ export class GetKeyMsg extends Message<KeyHex> {
   }
 }
 
-export class RequestSignMsg extends Message<SignResponse> {
+export class RequestSignMsg extends Message<AminoSignResponse> {
   public static type() {
     return "request-sign";
   }
