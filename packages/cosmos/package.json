@@ -22,6 +22,7 @@
     "@keplr/unit": "0.0.1-alpha.0",
     "axios": "^0.21.0",
     "bech32": "^1.1.4",
-    "buffer": "^6.0.3"
+    "buffer": "^6.0.3",
+    "protobufjs": "^6.10.2"
   }
 }

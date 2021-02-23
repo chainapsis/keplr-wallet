@@ -24,6 +24,7 @@ export class SignInteractionStore {
   protected get waitingDatas() {
     return this.interactionStore.getDatas<{
       chainId: string;
+      mode: "amino" | "direct";
       signDoc: StdSignDoc;
     }>("request-sign");
   }
