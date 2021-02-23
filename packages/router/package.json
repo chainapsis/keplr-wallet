@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@keplr/popup": "0.0.1-alpha.0",
-    "buffer": "^6.0.3"
+    "buffer": "^6.0.3",
+    "p-queue": "^6.6.2"
   },
   "devDependencies": {
     "mocha": "^8.2.1"

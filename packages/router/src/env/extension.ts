@@ -1,7 +1,21 @@
 import { Env, FnRequestInteraction, MessageSender } from "../types";
-import { openPopupWindow } from "@keplr/popup";
+import { openPopupWindow as openPopupWindowInner } from "@keplr/popup";
 import { APP_PORT } from "../constant";
 import { InExtensionMessageRequester } from "../requester";
+import PQueue from "p-queue";
+
+const openPopupQueue = new PQueue({
+  concurrency: 1,
+});
+
+// To handle the opening popup more easily,
+// just open the popup one by one.
+async function openPopupWindow(
+  url: string,
+  channel: string = "default"
+): Promise<number> {
+  return await openPopupQueue.add(() => openPopupWindowInner(url, channel));
+}
 
 export class ExtensionEnv {
   static readonly produceEnv = (sender: MessageSender): Env => {
