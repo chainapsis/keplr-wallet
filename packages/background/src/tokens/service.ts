@@ -284,6 +284,9 @@ export class TokensService {
     contractAddress: string,
     origin: string
   ) {
+    // Ensure that the secret20 was registered.
+    await this.getSecret20ViewingKey(chainId, contractAddress);
+
     const type = getSecret20ViewingKeyPermissionType(contractAddress);
 
     if (!this.permissionService.hasPermisson(chainId, type, origin)) {
