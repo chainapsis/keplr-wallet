@@ -8,6 +8,7 @@ import { Currency } from "@keplr/types";
 import { Button, Badge } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import yaml from "js-yaml";
 
 import { Buffer } from "buffer/";
 import { AccountStore, CoinPrimitive } from "@keplr/stores";
@@ -133,10 +134,9 @@ export interface MsgLink {
 export function renderUnknownMessage(msg: object) {
   return {
     icon: undefined,
-    title: "Unknown",
+    title: "Custom",
     content: (
       <React.Fragment>
-        <b>Check data tab</b>
         <UnknownMsgView msg={msg} />
       </React.Fragment>
     ),
@@ -439,7 +439,7 @@ export const WasmExecutionMsgView: FunctionComponent<{
 }> = observer(({ msg }) => {
   const { chainStore } = useStore();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const intl = useIntl();
 
   const toggleOpen = () => setIsOpen((isOpen) => !isOpen);
@@ -520,46 +520,18 @@ export const WasmExecutionMsgView: FunctionComponent<{
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const intl = useIntl();
-
-  const toggleOpen = () => setIsOpen((isOpen) => !isOpen);
-
   const prettyMsg = useMemo(() => {
     try {
-      return JSON.stringify(msg, undefined, 2);
+      return yaml.dump(msg);
     } catch (e) {
       console.log(e);
-      return "";
+      return "Failed to decode the msg";
     }
   }, [msg]);
 
   return (
     <div>
-      {isOpen ? (
-        <React.Fragment>
-          <pre style={{ width: "280px" }}>{isOpen ? prettyMsg : ""}</pre>
-        </React.Fragment>
-      ) : null}
-      <Button
-        size="sm"
-        style={{ position: "absolute", right: "20px" }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          toggleOpen();
-        }}
-      >
-        {isOpen
-          ? intl.formatMessage({
-              id: "sign.list.message.wasm.button.close",
-            })
-          : intl.formatMessage({
-              id: "sign.list.message.wasm.button.details",
-            })}
-      </Button>
-      <div style={{ height: "36px" }} />
+      <pre style={{ width: "280px" }}>{prettyMsg}</pre>
     </div>
   );
 };
