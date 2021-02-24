@@ -116,7 +116,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
 
   @override
   *fetch() {
-    yield* this.querySecret20Balance.fetch();
+    yield this.querySecret20Balance.fetch();
   }
 
   get isFetching(): boolean {

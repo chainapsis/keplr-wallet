@@ -45,7 +45,7 @@ export class ObservableQueryBalanceNative extends ObservableQueryBalanceInner {
 
   @override
   *fetch() {
-    yield* this.nativeBalances.fetch();
+    yield this.nativeBalances.fetch();
   }
 
   @computed
