@@ -31,6 +31,11 @@ export const DetailsTab: FunctionComponent<{
 
     const language = useLanguage();
 
+    const msgs =
+      signDocHelper.signDocWrapper?.mode === "amino"
+        ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
+        : [];
+
     return (
       <div className={styleDetailsTab.container}>
         <Label
@@ -40,11 +45,11 @@ export const DetailsTab: FunctionComponent<{
         >
           <FormattedMessage id="sign.list.messages.label" />
           <Badge className="ml-2" color="primary">
-            {signDocHelper.msgs.length}
+            {msgs.length}
           </Badge>
         </Label>
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
-          {signDocHelper.msgs.map((msg, i) => {
+          {msgs.map((msg, i) => {
             const msgContent = renderMessage(
               msg,
               chainStore.current.currencies,

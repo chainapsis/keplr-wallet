@@ -1,5 +1,4 @@
 import { action, computed, makeObservable, observable } from "mobx";
-import { Msg } from "@cosmjs/launchpad";
 import { useState } from "react";
 import { IFeeConfig, IMemoConfig } from "../tx";
 import { cosmos, SignDocWrapper } from "@keplr/cosmos";
@@ -79,11 +78,6 @@ export class SignDocHelper {
         2
       );
     }
-  }
-
-  @computed
-  get msgs(): readonly Msg[] {
-    return [];
   }
 
   @action

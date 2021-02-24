@@ -191,6 +191,8 @@
   "sign.list.message.cosmos-sdk/MsgBeginRedelegate.content": "Redelegate <b>{amount}</b> from <b>{fromValidator}</b> to <b>{toValidator}</b>",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title": "Claim Staking Reward",
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
+  "sign.list.message.cosmos-sdk/MsgVote.title": "Vote",
+  "sign.list.message.cosmos-sdk/MsgVote.content": "Vote <b>{option}</b> on <b>Proposal {id}</b>",
 
   "sign.list.message.wasm.button.details": "Details",
   "sign.list.message.wasm.button.close": "Close",

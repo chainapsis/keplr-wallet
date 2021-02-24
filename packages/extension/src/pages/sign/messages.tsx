@@ -75,6 +75,15 @@ interface MsgBeginRedelegate {
   };
 }
 
+interface MsgVote {
+  type: "cosmos-sdk/MsgVote";
+  value: {
+    proposal_id: string;
+    voter: string;
+    option: string;
+  };
+}
+
 interface MsgInstantiateContract {
   type: "wasm/MsgInstantiateContract";
   value: {
@@ -134,6 +143,7 @@ type Messages =
   | MsgUndelegate
   | MsgWithdrawDelegatorReward
   | MsgBeginRedelegate
+  | MsgVote
   | MsgInstantiateContract
   | MsgExecuteContract
   | MsgLink;
@@ -296,6 +306,26 @@ export function renderMessage(
               msg.value.validator_address,
               34
             ),
+          }}
+        />
+      ),
+    };
+  }
+
+  if (MessageType<MsgVote>(msg, "cosmos-sdk/MsgVote")) {
+    return {
+      icon: "fas fa-vote-yea",
+      title: intl.formatMessage({
+        id: "sign.list.message.cosmos-sdk/MsgVote.title",
+      }),
+      content: (
+        <FormattedMessage
+          id="sign.list.message.cosmos-sdk/MsgVote.content"
+          values={{
+            // eslint-disable-next-line react/display-name
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            id: msg.value.proposal_id,
+            option: msg.value.option,
           }}
         />
       ),

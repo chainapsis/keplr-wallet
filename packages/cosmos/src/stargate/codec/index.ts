@@ -45,3 +45,15 @@ defaultProtoCodec.registerAny(
   "/cosmos.bank.v1beta1.MsgSend",
   cosmos.bank.v1beta1.MsgSend
 );
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgDelegate",
+  cosmos.staking.v1beta1.MsgDelegate
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgUndelegate",
+  cosmos.staking.v1beta1.MsgUndelegate
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+  cosmos.staking.v1beta1.MsgBeginRedelegate
+);
