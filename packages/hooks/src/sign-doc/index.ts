@@ -70,19 +70,15 @@ export class SignDocHelper {
   }
 
   @computed
-  get signDocJson(): string {
+  get signDocJson(): any {
     if (!this.signDocWrapper) {
-      return "";
+      return undefined;
     }
 
     if (this.signDocWrapper.mode === "amino") {
-      return JSON.stringify(this.signDocWrapper.aminoSignDoc, undefined, 2);
+      return this.signDocWrapper.aminoSignDoc;
     } else {
-      return JSON.stringify(
-        this.signDocWrapper.protoSignDoc.toJSON(),
-        undefined,
-        2
-      );
+      return this.signDocWrapper.protoSignDoc.toJSON();
     }
   }
 

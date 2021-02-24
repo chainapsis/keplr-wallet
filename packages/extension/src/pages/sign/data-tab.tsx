@@ -7,5 +7,9 @@ import style from "./style.module.scss";
 export const DataTab: FunctionComponent<{
   signDocHelper: SignDocHelper;
 }> = observer(({ signDocHelper }) => {
-  return <pre className={style.message}>{signDocHelper.signDocJson}</pre>;
+  return (
+    <pre className={style.message}>
+      {JSON.stringify(signDocHelper.signDocJson, undefined, 2)}
+    </pre>
+  );
 });
