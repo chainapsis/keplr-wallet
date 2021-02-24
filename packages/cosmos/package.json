@@ -7,7 +7,7 @@
   "private": false,
   "scripts": {
     "clean": "rm -rf build",
-    "build": "tsc",
+    "build": "tsc; mkdir -p build/stargate/proto/generated && cp ./src/stargate/proto/generated/* ./build/stargate/proto/generated",
     "dev": "tsc -w",
     "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
@@ -23,6 +23,7 @@
     "axios": "^0.21.0",
     "bech32": "^1.1.4",
     "buffer": "^6.0.3",
+    "long": "^4.0.0",
     "protobufjs": "^6.10.2"
   }
 }

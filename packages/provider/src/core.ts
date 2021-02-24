@@ -14,10 +14,13 @@ import {
   SendTxMsg,
   GetSecret20ViewingKey,
   RequestSignAminoMsg,
+  RequestSignDirectMsg,
 } from "@keplr/background";
+import { cosmos } from "@keplr/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
+import { DirectSignResponse } from "@cosmjs/proto-signing";
 
 export class Keplr implements IKeplr {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
@@ -57,6 +60,24 @@ export class Keplr implements IKeplr {
   ): Promise<AminoSignResponse> {
     const msg = new RequestSignAminoMsg(chainId, signer, signDoc);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async signDirect(
+    chainId: string,
+    signer: string,
+    signDoc: cosmos.tx.v1beta1.ISignDoc
+  ): Promise<DirectSignResponse> {
+    const msg = new RequestSignDirectMsg(
+      chainId,
+      signer,
+      cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish()
+    );
+    const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+
+    return {
+      signed: cosmos.tx.v1beta1.SignDoc.decode(response.signedBytes),
+      signature: response.signature,
+    };
   }
 
   async suggestToken(chainId: string, contractAddress: string): Promise<void> {

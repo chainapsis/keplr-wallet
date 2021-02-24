@@ -28,9 +28,11 @@ import {
   AminoSignResponse,
   StdSignDoc,
 } from "@cosmjs/launchpad";
+import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
 import { RNG } from "@keplr/crypto";
 import { KeyStoreChangedEventMsg } from "./webpage";
+import { cosmos } from "@keplr/cosmos";
 
 @singleton()
 export class KeyRingService {
@@ -208,6 +210,50 @@ export class KeyRingService {
         chainId,
         coinType,
         serializeSignDoc(newSignDoc)
+      );
+
+      const key = await this.keyRing.getKey(chainId, coinType);
+
+      return {
+        signed: newSignDoc,
+        signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      await this.interactionService.dispatchData(
+        env,
+        "/sign",
+        "request-sign-end",
+        {}
+      );
+    }
+  }
+
+  async requestSignDirect(
+    env: Env,
+    chainId: string,
+    signDoc: cosmos.tx.v1beta1.SignDoc
+  ): Promise<DirectSignResponse> {
+    const newSignDocBytes = (await this.interactionService.waitApprove(
+      env,
+      "/sign",
+      "request-sign",
+      {
+        chainId,
+        mode: "direct",
+        signDocBytes: cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
+      }
+    )) as Uint8Array;
+
+    const newSignDoc = cosmos.tx.v1beta1.SignDoc.decode(newSignDocBytes);
+
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+
+    try {
+      const signature = await this.keyRing.sign(
+        env,
+        chainId,
+        coinType,
+        makeSignBytes(newSignDoc)
       );
 
       const key = await this.keyRing.getKey(chainId, coinType);

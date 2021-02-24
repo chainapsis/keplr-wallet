@@ -10,11 +10,12 @@ import { BIP44HDPath } from "./types";
 import { Bech32Address } from "@keplr/cosmos";
 import { BIP44, KeyHex } from "@keplr/types";
 
-import { StdSignDoc, AminoSignResponse } from "@cosmjs/launchpad";
+import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 import { Buffer } from "buffer/";
+import { cosmos } from "@keplr/cosmos";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
@@ -455,6 +456,57 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
 
   type(): string {
     return RequestSignAminoMsg.type();
+  }
+}
+
+export class RequestSignDirectMsg extends Message<{
+  // Bytes of the sign doc
+  readonly signedBytes: Uint8Array;
+  readonly signature: StdSignature;
+}> {
+  public static type() {
+    return "request-sign-direct";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly bech32Address: string,
+    public readonly signDocBytes: Uint8Array
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.bech32Address) {
+      throw new Error("bech32 address not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.bech32Address);
+
+    const signDoc = cosmos.tx.v1beta1.SignDoc.decode(this.signDocBytes);
+
+    if (signDoc.chainId !== this.chainId) {
+      throw new Error(
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignDirectMsg.type();
   }
 }
 

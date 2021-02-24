@@ -5,7 +5,9 @@ import {
   StdSignDoc,
   StdTx,
 } from "@cosmjs/launchpad";
+import { DirectSignResponse } from "@cosmjs/proto-signing";
 import { SecretUtils } from "secretjs/types/enigmautils";
+import Long from "long";
 
 // TODO: Return the `Uint8Array` instead of hex string.
 export interface KeyHex {
@@ -26,6 +28,23 @@ export interface Keplr {
     signer: string,
     signDoc: StdSignDoc
   ): Promise<AminoSignResponse>;
+  signDirect(
+    chainId: string,
+    signer: string,
+    signDoc: {
+      /** SignDoc bodyBytes */
+      bodyBytes?: Uint8Array | null;
+
+      /** SignDoc authInfoBytes */
+      authInfoBytes?: Uint8Array | null;
+
+      /** SignDoc chainId */
+      chainId?: string | null;
+
+      /** SignDoc accountNumber */
+      accountNumber?: Long | null;
+    }
+  ): Promise<DirectSignResponse>;
   sendTx(
     chainId: string,
     stdTx: StdTx,

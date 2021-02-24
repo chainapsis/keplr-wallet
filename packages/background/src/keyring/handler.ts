@@ -6,6 +6,7 @@ import {
   GetKeyMsg,
   UnlockKeyRingMsg,
   RequestSignAminoMsg,
+  RequestSignDirectMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
   ShowKeyRingMsg,
@@ -24,6 +25,7 @@ import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr/cosmos";
 
 import { Buffer } from "buffer/";
+import { cosmos } from "@keplr/cosmos";
 
 export const getHandler: (service: KeyRingService) => Handler = (
   service: KeyRingService
@@ -69,6 +71,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleRequestSignAminoMsg(service)(
           env,
           msg as RequestSignAminoMsg
+        );
+      case RequestSignDirectMsg:
+        return handleRequestSignDirectMsg(service)(
+          env,
+          msg as RequestSignDirectMsg
         );
       case GetKeyRingTypeMsg:
         return handleGetKeyRingTypeMsg(service)(env, msg as GetKeyRingTypeMsg);
@@ -272,6 +279,29 @@ const handleRequestSignAminoMsg: (
     await service.checkBech32Address(msg.chainId, msg.bech32Address);
 
     return await service.requestSignAmino(env, msg.chainId, msg.signDoc);
+  };
+};
+
+const handleRequestSignDirectMsg: (
+  service: KeyRingService
+) => InternalHandler<RequestSignDirectMsg> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      msg.chainId,
+      msg.origin
+    );
+
+    await service.checkBech32Address(msg.chainId, msg.bech32Address);
+
+    const signDoc = cosmos.tx.v1beta1.SignDoc.decode(msg.signDocBytes);
+
+    const response = await service.requestSignDirect(env, msg.chainId, signDoc);
+
+    return {
+      signedBytes: cosmos.tx.v1beta1.SignDoc.encode(response.signed).finish(),
+      signature: response.signature,
+    };
   };
 };
 

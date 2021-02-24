@@ -6,8 +6,11 @@ import {
 } from "@cosmjs/launchpad";
 import { fromHex } from "@cosmjs/encoding";
 import { Keplr } from "@keplr/types";
+import { cosmos } from "@keplr/cosmos";
+import { OfflineDirectSigner } from "@cosmjs/proto-signing";
+import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
 
-export class CosmJSOfflineSigner implements OfflineSigner {
+export class CosmJSOfflineSigner implements OfflineSigner, OfflineDirectSigner {
   constructor(
     protected readonly chainId: string,
     protected readonly keplr: Keplr
@@ -41,6 +44,23 @@ export class CosmJSOfflineSigner implements OfflineSigner {
     }
 
     return await this.keplr.signAmino(this.chainId, signerAddress, signDoc);
+  }
+
+  async signDirect(
+    signerAddress: string,
+    signDoc: cosmos.tx.v1beta1.ISignDoc
+  ): Promise<DirectSignResponse> {
+    if (this.chainId !== signDoc.chainId) {
+      throw new Error("Unmatched chain id with the offline signer");
+    }
+
+    const key = await this.keplr.getKey(signDoc.chainId);
+
+    if (key.bech32Address !== signerAddress) {
+      throw new Error("Unknown signer address");
+    }
+
+    return await this.keplr.signDirect(this.chainId, signerAddress, signDoc);
   }
 
   // Fallback function for the legacy cosmjs implementation before the staragte.

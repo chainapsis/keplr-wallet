@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
+    "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@keplr/common": "0.0.1-alpha.0",
     "@keplr/cosmos": "0.0.1-alpha.0",
     "@keplr/crypto": "0.0.1-alpha.0",
