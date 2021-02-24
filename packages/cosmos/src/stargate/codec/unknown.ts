@@ -1,3 +1,5 @@
+import { Buffer } from "buffer/";
+
 export class UnknownMessage {
   constructor(
     /** Any type_url. */
@@ -12,5 +14,12 @@ export class UnknownMessage {
 
   get value(): Uint8Array {
     return this._value;
+  }
+
+  toJSON() {
+    return {
+      type_url: this._typeUrl,
+      value: Buffer.from(this._value).toString("base64"),
+    };
   }
 }

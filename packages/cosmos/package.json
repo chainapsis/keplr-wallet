@@ -17,6 +17,7 @@
     "mocha": "^8.2.1"
   },
   "dependencies": {
+    "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@keplr/common": "0.0.1-alpha.0",
     "@keplr/types": "0.0.1-alpha.0",
     "@keplr/unit": "0.0.1-alpha.0",

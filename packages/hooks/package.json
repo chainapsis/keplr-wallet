@@ -32,6 +32,7 @@
     "mobx-utils": "^6.0.3",
     "react": "^16.14.0",
     "react-router": "^5.1.2",
-    "utility-types": "^3.10.0"
+    "utility-types": "^3.10.0",
+    "long": "^4.0.0"
   }
 }

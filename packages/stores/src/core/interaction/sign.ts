@@ -1,6 +1,8 @@
 import { InteractionStore } from "./interaction";
-import { autorun, flow, makeObservable, observable } from "mobx";
+import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { StdSignDoc } from "@cosmjs/launchpad";
+import { InteractionWaitingData } from "@keplr/background";
+import { SignDocWrapper } from "@keplr/cosmos";
 
 export class SignInteractionStore {
   @observable
@@ -22,21 +24,39 @@ export class SignInteractionStore {
   }
 
   protected get waitingDatas() {
-    return this.interactionStore.getDatas<{
-      chainId: string;
-      mode: "amino" | "direct";
-      signDoc: StdSignDoc;
-    }>("request-sign");
+    return this.interactionStore.getDatas<
+      | {
+          chainId: string;
+          mode: "amino";
+          signDoc: StdSignDoc;
+        }
+      | {
+          chainId: string;
+          mode: "direct";
+          signDocBytes: Uint8Array;
+        }
+    >("request-sign");
   }
 
-  get waitingData() {
+  @computed
+  get waitingData(): InteractionWaitingData<SignDocWrapper> | undefined {
     const datas = this.waitingDatas;
 
     if (datas.length === 0) {
       return undefined;
     }
 
-    return datas[0].data;
+    const data = datas[0];
+    const wrapper =
+      data.data.mode === "amino"
+        ? SignDocWrapper.fromAminoSignDoc(data.data.signDoc)
+        : new SignDocWrapper(data.data.mode, data.data.signDocBytes);
+
+    return {
+      id: data.id,
+      type: data.type,
+      data: wrapper,
+    };
   }
 
   protected isEnded(): boolean {
@@ -67,13 +87,18 @@ export class SignInteractionStore {
   }
 
   @flow
-  *approveAndWaitEnd(newSignDoc: StdSignDoc) {
+  *approveAndWaitEnd(newSignDocWrapper: SignDocWrapper) {
     if (this.waitingDatas.length === 0) {
       return;
     }
 
     this._isLoading = true;
     try {
+      const newSignDoc =
+        newSignDocWrapper.mode === "amino"
+          ? newSignDocWrapper.aminoSignDoc
+          : newSignDocWrapper.protoSignDoc.toBytes();
+
       yield this.interactionStore.approve(
         "request-sign",
         this.waitingDatas[0].id,

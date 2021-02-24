@@ -11,7 +11,7 @@ export class ProtoSignDocDecoder {
   protected _authInfo?: cosmos.tx.v1beta1.AuthInfo;
 
   constructor(
-    protected readonly signDoc: SignDoc,
+    public readonly signDoc: SignDoc,
     protected readonly protoCodec: ProtoCodec = defaultProtoCodec
   ) {}
 
@@ -50,9 +50,23 @@ export class ProtoSignDocDecoder {
     return this.signDoc.accountNumber.toString();
   }
 
+  toBytes(): Uint8Array {
+    return cosmos.tx.v1beta1.SignDoc.encode(this.signDoc).finish();
+  }
+
   toJSON(): any {
     return {
-      txBody: this.txBody.toJSON(),
+      txBody: {
+        ...this.txBody.toJSON(),
+        ...{
+          messages: this.txMsgs.map((msg) => {
+            if (msg && msg.toJSON) {
+              return msg.toJSON();
+            }
+            return msg;
+          }),
+        },
+      },
       authInfo: this.authInfo.toJSON(),
       chainId: this.chainId,
       accountNumber: this.accountNumber,

@@ -72,7 +72,7 @@ export class SignDocAmountConfig
   getAmountPrimitive = computedFn(
     (): CoinPrimitive => {
       if (
-        !this.signDocHelper?.signDoc ||
+        !this.signDocHelper?.signDocWrapper ||
         this.chainInfo.feeCurrencies.length === 0
       ) {
         return {
@@ -81,7 +81,7 @@ export class SignDocAmountConfig
         };
       }
 
-      const msgs = this.signDocHelper.signDoc.msgs;
+      const msgs = this.signDocHelper.msgs;
 
       const amount = new Coin(this.sendCurrency.coinMinimalDenom, new Int(0));
 

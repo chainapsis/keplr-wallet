@@ -64,26 +64,32 @@ export const SignPage: FunctionComponent = observer(() => {
   );
   const memoConfig = useMemoConfig(chainStore, current.chainId);
 
-  const signDoc = signInteractionStore.waitingData?.signDoc;
+  const signDocWapper = signInteractionStore.waitingData?.data;
   const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
   amountConfig.setSignDocHelper(signDocHelper);
 
-  const isSignDocInternalSend =
-    interactionInfo.interaction &&
-    interactionInfo.interactionInternal &&
-    signDoc &&
-    signDoc.msgs.length === 1 &&
-    signDoc.msgs[0].type === "cosmos-sdk/MsgSend";
+  const isSignDocInternalSend = (() => {
+    if (signDocWapper && signDocWapper.mode === "amino") {
+      const signDoc = signDocWapper.aminoSignDoc;
+      return (
+        interactionInfo.interaction &&
+        interactionInfo.interactionInternal &&
+        signDoc.msgs.length === 1 &&
+        signDoc.msgs[0].type === "cosmos-sdk/MsgSend"
+      );
+    }
+    return false;
+  })();
 
   useEffect(() => {
     if (signInteractionStore.waitingData) {
       const data = signInteractionStore.waitingData;
-      chainStore.selectChain(data.chainId);
-      signDocHelper.setSignDoc(data.signDoc);
-      gasConfig.setGas(parseInt(data.signDoc.fee.gas));
-      memoConfig.setMemo(data.signDoc.memo);
+      chainStore.selectChain(data.data.chainId);
+      signDocHelper.setSignDocWrapper(data.data);
+      gasConfig.setGas(data.data.gas);
+      memoConfig.setMemo(data.data.memo);
       if (isSignDocInternalSend) {
-        feeConfig.setManualFee(data.signDoc.fee.amount[0]);
+        feeConfig.setManualFee(data.data.fees[0]);
       }
     }
   }, [
@@ -179,7 +185,9 @@ export const SignPage: FunctionComponent = observer(() => {
               <Button
                 className={style.button}
                 color="danger"
-                disabled={signDoc == null || signDocHelper.signDoc == null}
+                disabled={
+                  signDocWapper == null || signDocHelper.signDocWrapper == null
+                }
                 data-loading={signInteractionStore.isLoading}
                 onClick={async (e) => {
                   e.preventDefault();
@@ -207,8 +215,8 @@ export const SignPage: FunctionComponent = observer(() => {
                 className={style.button}
                 color="primary"
                 disabled={
-                  signDoc == null ||
-                  signDocHelper.signDoc == null ||
+                  signDocWapper == null ||
+                  signDocHelper.signDocWrapper == null ||
                   memoConfig.getError() != null ||
                   feeConfig.getError() != null
                 }
@@ -220,9 +228,9 @@ export const SignPage: FunctionComponent = observer(() => {
                     setIsLoadingSignDocInternalSend(true);
                   }
 
-                  if (signDocHelper.signDoc) {
+                  if (signDocHelper.signDocWrapper) {
                     await signInteractionStore.approveAndWaitEnd(
-                      signDocHelper.signDoc
+                      signDocHelper.signDocWrapper
                     );
                   }
 
