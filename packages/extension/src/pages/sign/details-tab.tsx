@@ -5,7 +5,8 @@ import { useStore } from "../../stores";
 
 import styleDetailsTab from "./details-tab.module.scss";
 
-import { renderMessage } from "./messages";
+import { renderAminoMessage } from "./amino";
+import { Msg } from "@cosmjs/launchpad";
 import { FormattedMessage, useIntl } from "react-intl";
 import { FeeButtons, MemoInput } from "../../components/form";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@keplr/hooks";
 import { useLanguage } from "../../languages";
 import { Badge, Label } from "reactstrap";
+import { renderDirectMessage } from "./direct";
 
 export const DetailsTab: FunctionComponent<{
   signDocHelper: SignDocHelper;
@@ -26,15 +28,58 @@ export const DetailsTab: FunctionComponent<{
   hideFeeButtons: boolean | undefined;
 }> = observer(
   ({ signDocHelper, memoConfig, feeConfig, gasConfig, hideFeeButtons }) => {
-    const { chainStore, priceStore } = useStore();
+    const { chainStore, priceStore, accountStore } = useStore();
     const intl = useIntl();
 
     const language = useLanguage();
 
-    const msgs =
-      signDocHelper.signDocWrapper?.mode === "amino"
+    const mode = signDocHelper.signDocWrapper
+      ? signDocHelper.signDocWrapper.mode
+      : "none";
+    const msgs = signDocHelper.signDocWrapper
+      ? signDocHelper.signDocWrapper.mode === "amino"
         ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
-        : [];
+        : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
+      : [];
+
+    const renderedMsgs = (() => {
+      if (mode === "amino") {
+        return (msgs as readonly Msg[]).map((msg, i) => {
+          const msgContent = renderAminoMessage(
+            accountStore.getAccount(chainStore.current.chainId).msgOpts,
+            msg,
+            chainStore.current.currencies,
+            intl
+          );
+          return (
+            <React.Fragment key={i.toString()}>
+              <Msg icon={msgContent.icon} title={msgContent.title}>
+                {msgContent.content}
+              </Msg>
+              <hr />
+            </React.Fragment>
+          );
+        });
+      } else if (mode === "direct") {
+        return (msgs as any[]).map((msg, i) => {
+          const msgContent = renderDirectMessage(
+            msg,
+            chainStore.current.currencies,
+            intl
+          );
+          return (
+            <React.Fragment key={i.toString()}>
+              <Msg icon={msgContent.icon} title={msgContent.title}>
+                {msgContent.content}
+              </Msg>
+              <hr />
+            </React.Fragment>
+          );
+        });
+      } else {
+        return null;
+      }
+    })();
 
     return (
       <div className={styleDetailsTab.container}>
@@ -49,21 +94,7 @@ export const DetailsTab: FunctionComponent<{
           </Badge>
         </Label>
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
-          {msgs.map((msg, i) => {
-            const msgContent = renderMessage(
-              msg,
-              chainStore.current.currencies,
-              intl
-            );
-            return (
-              <React.Fragment key={i.toString()}>
-                <Msg icon={msgContent.icon} title={msgContent.title}>
-                  {msgContent.content}
-                </Msg>
-                <hr />
-              </React.Fragment>
-            );
-          })}
+          {renderedMsgs}
         </div>
         <MemoInput
           memoConfig={memoConfig}

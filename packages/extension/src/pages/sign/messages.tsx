@@ -1,6 +1,7 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+/* eslint-disable react/display-name */
+
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { Bech32Address } from "@keplr/cosmos";
-import { Hash } from "@keplr/crypto";
 import { CoinUtils, Coin } from "@keplr/unit";
 import { IntlShape, FormattedMessage, useIntl } from "react-intl";
 import { Currency } from "@keplr/types";
@@ -9,15 +10,14 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import { Buffer } from "buffer/";
-import { AccountStore } from "@keplr/stores";
+import { AccountStore, CoinPrimitive } from "@keplr/stores";
 
 export interface MessageObj {
   readonly type: string;
   readonly value: unknown;
 }
 
-interface MsgSend {
-  type: "cosmos-sdk/MsgSend";
+export interface MsgSend {
   value: {
     amount: [
       {
@@ -30,8 +30,7 @@ interface MsgSend {
   };
 }
 
-interface MsgDelegate {
-  type: "cosmos-sdk/MsgDelegate";
+export interface MsgDelegate {
   value: {
     amount: {
       amount: string;
@@ -42,8 +41,7 @@ interface MsgDelegate {
   };
 }
 
-interface MsgUndelegate {
-  type: "cosmos-sdk/MsgUndelegate";
+export interface MsgUndelegate {
   value: {
     amount: {
       amount: string;
@@ -54,16 +52,14 @@ interface MsgUndelegate {
   };
 }
 
-interface MsgWithdrawDelegatorReward {
-  type: "cosmos-sdk/MsgWithdrawDelegationReward";
+export interface MsgWithdrawDelegatorReward {
   value: {
     delegator_address: string;
     validator_address: string;
   };
 }
 
-interface MsgBeginRedelegate {
-  type: "cosmos-sdk/MsgBeginRedelegate";
+export interface MsgBeginRedelegate {
   value: {
     amount: {
       amount: string;
@@ -75,8 +71,7 @@ interface MsgBeginRedelegate {
   };
 }
 
-interface MsgVote {
-  type: "cosmos-sdk/MsgVote";
+export interface MsgVote {
   value: {
     proposal_id: string;
     voter: string;
@@ -84,8 +79,7 @@ interface MsgVote {
   };
 }
 
-interface MsgInstantiateContract {
-  type: "wasm/MsgInstantiateContract";
+export interface MsgInstantiateContract {
   value: {
     // Admin field can be omitted.
     admin?: string;
@@ -104,8 +98,7 @@ interface MsgInstantiateContract {
 }
 
 // This message can be a normal cosmwasm message or a secret-wasm message.
-interface MsgExecuteContract {
-  type: "wasm/MsgExecuteContract";
+export interface MsgExecuteContract {
   value: {
     contract: string;
     // If message is for secret-wasm, msg will be the base64 encoded and encrypted string.
@@ -124,8 +117,7 @@ interface MsgExecuteContract {
   };
 }
 
-interface MsgLink {
-  type: "cyber/Link";
+export interface MsgLink {
   value: {
     links: [
       {
@@ -137,348 +129,310 @@ interface MsgLink {
   };
 }
 
-type Messages =
-  | MsgSend
-  | MsgDelegate
-  | MsgUndelegate
-  | MsgWithdrawDelegatorReward
-  | MsgBeginRedelegate
-  | MsgVote
-  | MsgInstantiateContract
-  | MsgExecuteContract
-  | MsgLink;
-
-// Type guard for messages.
-function MessageType<T extends Messages>(
-  msg: MessageObj,
-  type: T["type"]
-): msg is T {
-  return msg.type === type;
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function renderUnknownMessage(msg: object) {
+  return {
+    icon: undefined,
+    title: "Unknown",
+    content: (
+      <React.Fragment>
+        <b>Check data tab</b>
+        <UnknownMsgView msg={msg} />
+      </React.Fragment>
+    ),
+  };
 }
 
-/* eslint-disable react/display-name */
-export function renderMessage(
-  msg: MessageObj,
+export function renderMsgSend(
   currencies: Currency[],
-  intl: IntlShape
-): {
-  icon: string | undefined;
-  title: string;
-  content: React.ReactElement;
-} {
-  if (MessageType<MsgSend>(msg, "cosmos-sdk/MsgSend")) {
-    const receives: { amount: string; denom: string }[] = [];
-    for (const coinPrimitive of msg.value.amount) {
-      const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
-      const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
+  intl: IntlShape,
+  amount: CoinPrimitive[],
+  toAddress: string
+) {
+  const receives: CoinPrimitive[] = [];
+  for (const coinPrimitive of amount) {
+    const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
+    const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
 
-      receives.push({
-        amount: clearDecimals(parsed.amount),
-        denom: parsed.denom,
-      });
-    }
+    receives.push({
+      amount: clearDecimals(parsed.amount),
+      denom: parsed.denom,
+    });
+  }
 
-    return {
-      icon: "fas fa-paper-plane",
-      title: intl.formatMessage({
-        id: "sign.list.message.cosmos-sdk/MsgSend.title",
-      }),
-      content: (
+  return {
+    icon: "fas fa-paper-plane",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgSend.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgSend.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          recipient: Bech32Address.shortenAddress(toAddress, 20),
+          amount: receives
+            .map((coin) => {
+              return `${coin.amount} ${coin.denom}`;
+            })
+            .join(","),
+        }}
+      />
+    ),
+  };
+}
+
+export function renderMsgBeginRedelegate(
+  currencies: Currency[],
+  intl: IntlShape,
+  amount: CoinPrimitive,
+  validatorSrcAddress: string,
+  validatorDstAddress: string
+) {
+  const parsed = CoinUtils.parseDecAndDenomFromCoin(
+    currencies,
+    new Coin(amount.denom, amount.amount)
+  );
+
+  return {
+    icon: "fas fa-layer-group",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgBeginRedelegate.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgBeginRedelegate.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          fromValidator: Bech32Address.shortenAddress(validatorSrcAddress, 24),
+          toValidator: Bech32Address.shortenAddress(validatorDstAddress, 24),
+          amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`,
+        }}
+      />
+    ),
+  };
+}
+
+export function renderMsgUndelegate(
+  currencies: Currency[],
+  intl: IntlShape,
+  amount: CoinPrimitive,
+  validatorAddress: string
+) {
+  const parsed = CoinUtils.parseDecAndDenomFromCoin(
+    currencies,
+    new Coin(amount.denom, amount.amount)
+  );
+
+  return {
+    icon: "fas fa-layer-group",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgUndelegate.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgUndelegate.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          br: <br />,
+          validator: Bech32Address.shortenAddress(validatorAddress, 24),
+          amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`,
+        }}
+      />
+    ),
+  };
+}
+
+export function renderMsgDelegate(
+  currencies: Currency[],
+  intl: IntlShape,
+  amount: CoinPrimitive,
+  validatorAddress: string
+) {
+  const parsed = CoinUtils.parseDecAndDenomFromCoin(
+    currencies,
+    new Coin(amount.denom, amount.amount)
+  );
+
+  return {
+    icon: "fas fa-layer-group",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgDelegate.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgDelegate.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          validator: Bech32Address.shortenAddress(validatorAddress, 24),
+          amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`,
+        }}
+      />
+    ),
+  };
+}
+
+export function renderMsgWithdrawDelegatorReward(
+  intl: IntlShape,
+  validatorAddress: string
+) {
+  return {
+    icon: "fas fa-money-bill",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          validator: Bech32Address.shortenAddress(validatorAddress, 34),
+        }}
+      />
+    ),
+  };
+}
+
+export function renderMsgVote(
+  intl: IntlShape,
+  proposalId: string,
+  option: string
+) {
+  return {
+    icon: "fas fa-vote-yea",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgVote.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgVote.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          id: proposalId,
+          option: option,
+        }}
+      />
+    ),
+  };
+}
+
+export function renderMsgInstantiateContract(
+  currencies: Currency[],
+  intl: IntlShape,
+  initFunds: CoinPrimitive[],
+  admin: string | undefined,
+  codeId: string,
+  label: string,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  initMsg: object
+) {
+  const funds: { amount: string; denom: string }[] = [];
+  for (const coinPrimitive of initFunds) {
+    const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
+    const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
+
+    funds.push({
+      amount: clearDecimals(parsed.amount),
+      denom: parsed.denom,
+    });
+  }
+
+  return {
+    icon: "fas fa-cog",
+    title: intl.formatMessage({
+      id: "sign.list.message.wasm/MsgInstantiateContract.title",
+    }),
+    content: (
+      <React.Fragment>
         <FormattedMessage
-          id="sign.list.message.cosmos-sdk/MsgSend.content"
+          id="sign.list.message.wasm/MsgInstantiateContract.content"
           values={{
             b: (...chunks: any[]) => <b>{chunks}</b>,
-            recipient: Bech32Address.shortenAddress(msg.value.to_address, 20),
-            amount: receives
+            br: <br />,
+            admin: admin ? Bech32Address.shortenAddress(admin, 30) : "",
+            ["only-admin-exist"]: (...chunks: any[]) => (admin ? chunks : ""),
+            codeId: codeId,
+            label: label,
+            ["only-funds-exist"]: (...chunks: any[]) =>
+              funds.length > 0 ? chunks : "",
+            funds: funds
               .map((coin) => {
                 return `${coin.amount} ${coin.denom}`;
               })
               .join(","),
           }}
         />
-      ),
-    };
-  }
-
-  if (MessageType<MsgBeginRedelegate>(msg, "cosmos-sdk/MsgBeginRedelegate")) {
-    const parsed = CoinUtils.parseDecAndDenomFromCoin(
-      currencies,
-      new Coin(msg.value.amount.denom, msg.value.amount.amount)
-    );
-
-    return {
-      icon: "fas fa-layer-group",
-      title: intl.formatMessage({
-        id: "sign.list.message.cosmos-sdk/MsgBeginRedelegate.title",
-      }),
-      content: (
-        <FormattedMessage
-          id="sign.list.message.cosmos-sdk/MsgBeginRedelegate.content"
-          values={{
-            b: (...chunks: any[]) => <b>{chunks}</b>,
-            fromValidator: Bech32Address.shortenAddress(
-              msg.value.validator_src_address,
-              24
-            ),
-            toValidator: Bech32Address.shortenAddress(
-              msg.value.validator_dst_address,
-              24
-            ),
-            amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`,
-          }}
-        />
-      ),
-    };
-  }
-
-  if (MessageType<MsgUndelegate>(msg, "cosmos-sdk/MsgUndelegate")) {
-    const parsed = CoinUtils.parseDecAndDenomFromCoin(
-      currencies,
-      new Coin(msg.value.amount.denom, msg.value.amount.amount)
-    );
-
-    return {
-      icon: "fas fa-layer-group",
-      title: intl.formatMessage({
-        id: "sign.list.message.cosmos-sdk/MsgUndelegate.title",
-      }),
-      content: (
-        <FormattedMessage
-          id="sign.list.message.cosmos-sdk/MsgUndelegate.content"
-          values={{
-            b: (...chunks: any[]) => <b>{chunks}</b>,
-            br: <br />,
-            validator: Bech32Address.shortenAddress(
-              msg.value.validator_address,
-              24
-            ),
-            amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`,
-          }}
-        />
-      ),
-    };
-  }
-
-  if (MessageType<MsgDelegate>(msg, "cosmos-sdk/MsgDelegate")) {
-    const parsed = CoinUtils.parseDecAndDenomFromCoin(
-      currencies,
-      new Coin(msg.value.amount.denom, msg.value.amount.amount)
-    );
-
-    return {
-      icon: "fas fa-layer-group",
-      title: intl.formatMessage({
-        id: "sign.list.message.cosmos-sdk/MsgDelegate.title",
-      }),
-      content: (
-        <FormattedMessage
-          id="sign.list.message.cosmos-sdk/MsgDelegate.content"
-          values={{
-            b: (...chunks: any[]) => <b>{chunks}</b>,
-            validator: Bech32Address.shortenAddress(
-              msg.value.validator_address,
-              24
-            ),
-            amount: `${clearDecimals(parsed.amount)} ${parsed.denom}`,
-          }}
-        />
-      ),
-    };
-  }
-
-  if (
-    MessageType<MsgWithdrawDelegatorReward>(
-      msg,
-      "cosmos-sdk/MsgWithdrawDelegationReward"
-    )
-  ) {
-    return {
-      icon: "fas fa-money-bill",
-      title: intl.formatMessage({
-        id: "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.title",
-      }),
-      content: (
-        <FormattedMessage
-          id="sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content"
-          values={{
-            b: (...chunks: any[]) => <b>{chunks}</b>,
-            validator: Bech32Address.shortenAddress(
-              msg.value.validator_address,
-              34
-            ),
-          }}
-        />
-      ),
-    };
-  }
-
-  if (MessageType<MsgVote>(msg, "cosmos-sdk/MsgVote")) {
-    return {
-      icon: "fas fa-vote-yea",
-      title: intl.formatMessage({
-        id: "sign.list.message.cosmos-sdk/MsgVote.title",
-      }),
-      content: (
-        <FormattedMessage
-          id="sign.list.message.cosmos-sdk/MsgVote.content"
-          values={{
-            // eslint-disable-next-line react/display-name
-            b: (...chunks: any[]) => <b>{chunks}</b>,
-            id: msg.value.proposal_id,
-            option: msg.value.option,
-          }}
-        />
-      ),
-    };
-  }
-
-  if (MessageType<MsgInstantiateContract>(msg, "wasm/MsgInstantiateContract")) {
-    const funds: { amount: string; denom: string }[] = [];
-    for (const coinPrimitive of msg.value.init_funds) {
-      const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
-      const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
-
-      funds.push({
-        amount: clearDecimals(parsed.amount),
-        denom: parsed.denom,
-      });
-    }
-
-    return {
-      icon: "fas fa-cog",
-      title: intl.formatMessage({
-        id: "sign.list.message.wasm/MsgInstantiateContract.title",
-      }),
-      content: (
-        <React.Fragment>
-          <FormattedMessage
-            id="sign.list.message.wasm/MsgInstantiateContract.content"
-            values={{
-              b: (...chunks: any[]) => <b>{chunks}</b>,
-              br: <br />,
-              admin: msg.value.admin
-                ? Bech32Address.shortenAddress(msg.value.admin, 30)
-                : "",
-              ["only-admin-exist"]: (...chunks: any[]) =>
-                msg.value.admin ? chunks : "",
-              codeId: msg.value.code_id,
-              label: msg.value.label,
-              ["only-funds-exist"]: (...chunks: any[]) =>
-                funds.length > 0 ? chunks : "",
-              funds: funds
-                .map((coin) => {
-                  return `${coin.amount} ${coin.denom}`;
-                })
-                .join(","),
-            }}
-          />
-          <br />
-          <WasmExecutionMsgView msg={msg.value.init_msg} />
-        </React.Fragment>
-      ),
-    };
-  }
-
-  // TODO: Show users that this message is encrypted if message is for secret-wasm
-  if (MessageType<MsgExecuteContract>(msg, "wasm/MsgExecuteContract")) {
-    const sent: { amount: string; denom: string }[] = [];
-    for (const coinPrimitive of msg.value.sent_funds) {
-      const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
-      const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
-
-      sent.push({
-        amount: clearDecimals(parsed.amount),
-        denom: parsed.denom,
-      });
-    }
-
-    const isSecretWasm = msg.value.callback_code_hash != null;
-
-    return {
-      icon: "fas fa-cog",
-      title: intl.formatMessage({
-        id: "sign.list.message.wasm/MsgExecuteContract.title",
-      }),
-      content: (
-        <React.Fragment>
-          <FormattedMessage
-            id="sign.list.message.wasm/MsgExecuteContract.content"
-            values={{
-              b: (...chunks: any[]) => <b>{chunks}</b>,
-              br: <br />,
-              address: Bech32Address.shortenAddress(msg.value.contract, 26),
-              ["only-sent-exist"]: (...chunks: any[]) =>
-                sent.length > 0 ? chunks : "",
-              sent: sent
-                .map((coin) => {
-                  return `${coin.amount} ${coin.denom}`;
-                })
-                .join(","),
-            }}
-          />
-          {isSecretWasm ? (
-            <React.Fragment>
-              <br />
-              <Badge
-                color="primary"
-                pill
-                style={{ marginTop: "6px", marginBottom: "6px" }}
-              >
-                <FormattedMessage id="sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm" />
-              </Badge>
-            </React.Fragment>
-          ) : (
-            <br />
-          )}
-          <WasmExecutionMsgView msg={msg.value.msg} />
-        </React.Fragment>
-      ),
-    };
-  }
-
-  if (MessageType<MsgLink>(msg, "cyber/Link")) {
-    const cyberlinks: { from: string; to: string }[] = [];
-    for (const link of msg.value.links) {
-      cyberlinks.push({
-        from: link.from,
-        to: link.to,
-      });
-    }
-
-    return {
-      icon: "fas fa-paper-plane",
-      title: intl.formatMessage({
-        id: "sign.list.message.cyber/Link.title",
-      }),
-      content: (
-        <FormattedMessage
-          id="sign.list.message.cyber/Link.content"
-          values={{
-            b: (...chunks: any[]) => <b>{chunks}</b>,
-            br: <br />,
-            address: Bech32Address.shortenAddress(msg.value.address, 20),
-            link: cyberlinks
-              .map((link) => {
-                return `${Hash.truncHashPortion(
-                  link.from,
-                  7,
-                  7
-                )} → ${Hash.truncHashPortion(link.to, 7, 7)}`;
-              })
-              .join(", "),
-          }}
-        />
-      ),
-    };
-  }
-
-  return {
-    icon: undefined,
-    title: "Unknown",
-    content: <b>Check data tab</b>,
+        <br />
+        <WasmExecutionMsgView msg={initMsg} />
+      </React.Fragment>
+    ),
   };
 }
-/* eslint-enable react/display-name */
+
+export function renderMsgExecuteContract(
+  currencies: Currency[],
+  intl: IntlShape,
+  sentFunds: CoinPrimitive[],
+  callbackCodeHash: string | undefined,
+  contract: string,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  msg: object | string
+) {
+  const sent: { amount: string; denom: string }[] = [];
+  for (const coinPrimitive of sentFunds) {
+    const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
+    const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
+
+    sent.push({
+      amount: clearDecimals(parsed.amount),
+      denom: parsed.denom,
+    });
+  }
+
+  const isSecretWasm = callbackCodeHash != null;
+
+  return {
+    icon: "fas fa-cog",
+    title: intl.formatMessage({
+      id: "sign.list.message.wasm/MsgExecuteContract.title",
+    }),
+    content: (
+      <React.Fragment>
+        <FormattedMessage
+          id="sign.list.message.wasm/MsgExecuteContract.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            br: <br />,
+            address: Bech32Address.shortenAddress(contract, 26),
+            ["only-sent-exist"]: (...chunks: any[]) =>
+              sent.length > 0 ? chunks : "",
+            sent: sent
+              .map((coin) => {
+                return `${coin.amount} ${coin.denom}`;
+              })
+              .join(","),
+          }}
+        />
+        {isSecretWasm ? (
+          <React.Fragment>
+            <br />
+            <Badge
+              color="primary"
+              pill
+              style={{ marginTop: "6px", marginBottom: "6px" }}
+            >
+              <FormattedMessage id="sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm" />
+            </Badge>
+          </React.Fragment>
+        ) : (
+          <br />
+        )}
+        <WasmExecutionMsgView msg={msg} />
+      </React.Fragment>
+    ),
+  };
+}
+
 export const WasmExecutionMsgView: FunctionComponent<{
   // eslint-disable-next-line @typescript-eslint/ban-types
   msg: object | string;
@@ -563,6 +517,52 @@ export const WasmExecutionMsgView: FunctionComponent<{
     </div>
   );
 });
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const intl = useIntl();
+
+  const toggleOpen = () => setIsOpen((isOpen) => !isOpen);
+
+  const prettyMsg = useMemo(() => {
+    try {
+      return JSON.stringify(msg, undefined, 2);
+    } catch (e) {
+      console.log(e);
+      return "";
+    }
+  }, [msg]);
+
+  return (
+    <div>
+      {isOpen ? (
+        <React.Fragment>
+          <pre style={{ width: "280px" }}>{isOpen ? prettyMsg : ""}</pre>
+        </React.Fragment>
+      ) : null}
+      <Button
+        size="sm"
+        style={{ position: "absolute", right: "20px" }}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          toggleOpen();
+        }}
+      >
+        {isOpen
+          ? intl.formatMessage({
+              id: "sign.list.message.wasm.button.close",
+            })
+          : intl.formatMessage({
+              id: "sign.list.message.wasm.button.details",
+            })}
+      </Button>
+      <div style={{ height: "36px" }} />
+    </div>
+  );
+};
 
 function clearDecimals(dec: string): string {
   for (let i = dec.length - 1; i >= 0; i--) {

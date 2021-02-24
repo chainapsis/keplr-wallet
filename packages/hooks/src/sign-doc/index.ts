@@ -51,6 +51,12 @@ export class SignDocHelper {
     const newSignDoc = cosmos.tx.v1beta1.SignDoc.create({
       ...protoSignDoc.signDoc,
       ...{
+        bodyBytes: cosmos.tx.v1beta1.TxBody.encode({
+          ...protoSignDoc.txBody,
+          ...{
+            memo: this.memoConfig.memo,
+          },
+        }).finish(),
         authInfoBytes: cosmos.tx.v1beta1.AuthInfo.encode({
           ...protoSignDoc.authInfo,
           ...{
