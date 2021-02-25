@@ -19,5 +19,9 @@ jobs:
       - run: wget -qO - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | sudo apt-key add -
       - run: sudo apt-get install apt-transport-https
       - run: sudo apt-get update && sudo apt-get install git-secret
+      - run: printf $GPG_KEY | base64 --decode > private.key
+        env:
+          GPG_KEY: ${{ secrets.GPG_KEY }}
+      - run: gpg --import --no-tty --batch --yes ./private.key
       - run: git-secret reveal
       - run: yarn ci
