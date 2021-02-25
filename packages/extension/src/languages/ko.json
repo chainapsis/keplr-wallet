@@ -116,9 +116,11 @@
   "register.create.input.confirm-password": "비밀번호 확인",
   "register.create.input.confirm-password.error.required": "비밀번호를 입력하세요",
   "register.create.input.confirm-password.error.unmatched": "비밀번호가 일치하지 않습니다",
-  "register.create.textarea.mnemonic.place-holder": "니모닉 단어를 입력하세요",
+  "register.create.textarea.mnemonic.place-holder": "니모닉 단어 또는 개인키를 입력하세요",
   "register.create.textarea.mnemonic.error.invalid": "잘못된 니모닉 단어입니다",
   "register.create.textarea.mnemonic.error.too-short": "니모닉 단어가 너무 적습니다",
+  "register.import.textarea.private-key.error.invalid": "잘못된 개인키 입니다",
+  "register.import.textarea.private-key.error.invalid-length": "잘못된 길이의 개인키 입니다",
   "register.create.button.next": "다음",
 
   "register.ledger.title": "렛저 계정 불러오기",

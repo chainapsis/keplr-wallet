@@ -11,8 +11,28 @@ import { observer } from "mobx-react-lite";
 import { RegisterConfig } from "@keplr/hooks";
 import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 
+import { Buffer } from "buffer/";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
+
+function isPrivateKey(str: string): boolean {
+  if (str.startsWith("0x")) {
+    return true;
+  }
+
+  return str.length === 64;
+}
+
+function trimWordsStr(str: string): string {
+  str = str.trim();
+  // Split on the whitespace or new line.
+  const splited = str.split(/\s+/);
+  const words = splited
+    .map((word) => word.trim())
+    .filter((word) => word.trim().length > 0);
+  return words.join(" ");
+}
 
 interface FormData {
   name: string;
@@ -70,12 +90,24 @@ export const RecoverMnemonicPage: FunctionComponent<{
           className={style.formContainer}
           onSubmit={handleSubmit(async (data: FormData) => {
             try {
-              await registerConfig.createMnemonic(
-                data.name,
-                data.words,
-                data.password,
-                bip44Option.bip44HDPath
-              );
+              if (!isPrivateKey(data.words)) {
+                await registerConfig.createMnemonic(
+                  data.name,
+                  trimWordsStr(data.words),
+                  data.password,
+                  bip44Option.bip44HDPath
+                );
+              } else {
+                const privateKey = Buffer.from(
+                  data.words.trim().replace("0x", ""),
+                  "hex"
+                );
+                await registerConfig.createPrivateKey(
+                  data.name,
+                  privateKey,
+                  data.password
+                );
+              }
             } catch (e) {
               alert(e.message ? e.message : e.toString());
               registerConfig.clear();
@@ -92,16 +124,44 @@ export const RecoverMnemonicPage: FunctionComponent<{
             ref={register({
               required: "Mnemonic is required",
               validate: (value: string): string | undefined => {
-                if (value.split(" ").length < 8) {
-                  return intl.formatMessage({
-                    id: "register.create.textarea.mnemonic.error.too-short",
-                  });
-                }
+                if (!isPrivateKey(value)) {
+                  value = trimWordsStr(value);
+                  if (value.split(" ").length < 8) {
+                    return intl.formatMessage({
+                      id: "register.create.textarea.mnemonic.error.too-short",
+                    });
+                  }
 
-                if (!bip39.validateMnemonic(value)) {
-                  return intl.formatMessage({
-                    id: "register.create.textarea.mnemonic.error.invalid",
-                  });
+                  if (!bip39.validateMnemonic(value)) {
+                    return intl.formatMessage({
+                      id: "register.create.textarea.mnemonic.error.invalid",
+                    });
+                  }
+                } else {
+                  value = value.replace("0x", "");
+                  if (value.length !== 64) {
+                    return intl.formatMessage({
+                      id:
+                        "register.import.textarea.private-key.error.invalid-length",
+                    });
+                  }
+
+                  try {
+                    if (
+                      Buffer.from(value, "hex")
+                        .toString("hex")
+                        .toLowerCase() !== value.toLowerCase()
+                    ) {
+                      return intl.formatMessage({
+                        id:
+                          "register.import.textarea.private-key.error.invalid",
+                      });
+                    }
+                  } catch {
+                    return intl.formatMessage({
+                      id: "register.import.textarea.private-key.error.invalid",
+                    });
+                  }
                 }
               },
             })}

@@ -118,9 +118,11 @@
   "register.create.input.confirm-password": "Confirm password",
   "register.create.input.confirm-password.error.required": "Confirm password is required",
   "register.create.input.confirm-password.error.unmatched": "Password should match",
-  "register.create.textarea.mnemonic.place-holder": "Type your mnemonic",
+  "register.create.textarea.mnemonic.place-holder": "Type your mnemonic / private key",
   "register.create.textarea.mnemonic.error.invalid": "Invalid mnemonic",
   "register.create.textarea.mnemonic.error.too-short": "Too short mnemonic",
+  "register.import.textarea.private-key.error.invalid": "Invalid private key",
+  "register.import.textarea.private-key.error.invalid-length": "Invalid length of private key",
   "register.create.button.next": "Next",
 
   "register.ledger.title": "Import ledger",
