@@ -23,5 +23,8 @@ jobs:
         env:
           GPG_KEY: ${{ secrets.GPG_KEY }}
       - run: gpg --import --no-tty --batch --yes ./private.key
-      - run: git-secret reveal
+      - run: git-secret reveal -f -v -p $GPG_PASSPHRASE
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - run: git submodule init && git submodule update
       - run: yarn ci
