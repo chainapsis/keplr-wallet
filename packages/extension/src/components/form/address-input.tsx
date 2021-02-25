@@ -49,7 +49,6 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       return `input-${Buffer.from(bytes).toString("hex")}`;
     });
 
-    let isENSLoading: boolean = false;
     const isENSAddress = ObservableEnsFetcher.isValidENS(
       recipientConfig.rawRecipient
     );
@@ -74,13 +73,14 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               id: "input.recipient.error.ens-failed-to-fetch",
             });
           case ENSIsFetchingError:
-            isENSLoading = true;
-            break;
+            return;
           default:
             return intl.formatMessage({ id: "input.recipient.error.unknown" });
         }
       }
     }, [intl, error]);
+
+    const isENSLoading: boolean = error instanceof ENSIsFetchingError;
 
     const selectAddressFromAddressBook = {
       setRecipient: (recipient: string) => {
