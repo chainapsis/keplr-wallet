@@ -67,6 +67,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
             />
           );
 
+          /*
           icons.push(
             <i
               key="connections"
@@ -83,6 +84,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
               }}
             />
           );
+           */
 
           icons.push(
             <i
