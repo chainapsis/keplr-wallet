@@ -1,0 +1,3 @@
+[submodule "packages/extension/src/keplr-torus-signin"]
+	path = packages/extension/src/keplr-torus-signin
+	url = https://github.com/chainapsis/keplr-torus-signin.git
