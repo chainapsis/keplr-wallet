@@ -264,7 +264,13 @@ export const FeeButtonsInner: FunctionComponent<
               feeButtonState.setIsGasInputOpen(!feeButtonState.isGasInputOpen);
             }}
           >
-            {!feeButtonState.isGasInputOpen ? "Set Gas" : "Close"}
+            {!feeButtonState.isGasInputOpen
+              ? intl.formatMessage({
+                  id: "input.fee.toggle.set-gas",
+                })
+              : intl.formatMessage({
+                  id: "input.fee.toggle.set-gas.close",
+                })}
           </Button>
         </div>
       </FormGroup>

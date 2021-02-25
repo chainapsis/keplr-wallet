@@ -59,7 +59,7 @@ export const Menu: FunctionComponent = observer(() => {
             });
           }}
         >
-          Token List
+          <FormattedMessage id="main.menu.token-list" />
         </div>
       ) : null}
       {/* Empty div for separating last item */}

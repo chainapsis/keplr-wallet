@@ -23,6 +23,7 @@
 
   "main.menu.settings": "Settings",
   "main.menu.address-book": "Address Book",
+  "main.menu.token-list": "Token List",
   "main.menu.sign-out": "Sign out",
   "main.menu.footer.github": "Check it out on GitHub",
 
@@ -35,6 +36,10 @@
   "setting.language.automatic-with-language": "Automatic ({language})",
   "setting.language.en": "English",
   "setting.language.ko": "한국어",
+
+  "setting.fiat": "Currency",
+  "setting.fiat.automatic": "Automatic",
+  "setting.fiat.automatic-with-fiat": "Automatic ({fiat})",
 
   "setting.connections": "Manage Connections",
   "setting.connections.paragraph": "Manage websites connected to your wallet",
@@ -82,8 +87,11 @@
   "setting.token.add.symbol": "Symbol",
   "setting.token.add.decimals": "Decimals",
   "setting.token.add.button.submit": "Submit",
+  "setting.token.add.secret20.checkbox.import-viewing-key": "(Advanced) Import my own viewing key",
   "setting.token.add.secret20.viewing-key": "Viewing Key",
-  "setting.token.add.secret20.viewing-key.button.create": "Create",
+
+  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
+  "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
 
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
@@ -164,6 +172,7 @@
   "send.input.memo": "Memo (Optional)",
   "send.input.fee": "Fee",
   "send.input.fee.error.required": "Fee is required",
+  "send.input.gas": "Gas",
   "send.input-button.balance": "Balance",
   "send.button.send": "Send",
 
@@ -177,6 +186,7 @@
   "sign.list.messages.label": "Messages",
   "sign.info.fee": "Fee",
   "sign.info.memo": "Memo",
+  "sign.info.gas": "Gas",
   "sign.button.approve": "Approve",
   "sign.button.reject": "Reject",
   "sign.button.confirm-ledger": "Waiting for Ledger to confirm",
@@ -223,6 +233,17 @@
   "fee-buttons.select.low": "Low",
   "fee-buttons.select.average": "Average",
   "fee-buttons.select.high": "High",
+
+  "input.recipient.error.invalid-bech32": "Invalid address",
+  "input.recipient.error.ens-not-supported": "ENS not supported for this chain",
+  "input.recipient.error.ens-failed-to-fetch": "Failed to get address from ENS",
+  "input.amount.error.invalid-number": "Invalid number",
+  "input.amount.error.is-zero": "Amount should not be zero",
+  "input.amount.error.is-negative": "Amount should be positive",
+  "input.amount.error.insufficient": "Insufficient asset",
+  "input.fee.error.insufficient": "Insufficient available balance for transaction fee",
+  "input.fee.toggle.set-gas": "Set Gas",
+  "input.fee.toggle.set-gas.close": "Close",
 
   "confirm.yes": "Yes",
   "confirm.no": "No"

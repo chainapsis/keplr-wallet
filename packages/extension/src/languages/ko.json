@@ -23,6 +23,7 @@
 
   "main.menu.settings": "설정",
   "main.menu.address-book": "주소록",
+  "main.menu.token-list": "토큰 목록",
   "main.menu.sign-out": "로그아웃",
   "main.menu.footer.github": "깃허브를 확인하세요",
 
@@ -33,6 +34,10 @@
   "setting.language": "언어",
   "setting.language.automatic": "자동 (브라우저 언어)",
   "setting.language.automatic-with-language": "자동 ({language})",
+
+  "setting.fiat": "통화",
+  "setting.fiat.automatic": "자동",
+  "setting.fiat.automatic-with-fiat": "자동 ({fiat})",
 
   "setting.connections": "연결 관리",
   "setting.connections.paragraph": "지갑에 연결을 허용한 웹사이트를 관리합니다",
@@ -80,8 +85,11 @@
   "setting.token.add.symbol": "심볼",
   "setting.token.add.decimals": "소수점 자릿수",
   "setting.token.add.button.submit": "등록",
+  "setting.token.add.secret20.checkbox.import-viewing-key": "(고급) 뷰잉키를 이미 가지고 계십니까?",
   "setting.token.add.secret20.viewing-key": "뷰잉 키",
-  "setting.token.add.secret20.viewing-key.button.create": "생성",
+
+  "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",
+  "setting.token.manage.notification.viewing-key.copy": "뷰잉키가 복사되었습니다",
 
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
@@ -155,6 +163,7 @@
   "send.input.memo": "메모 (선택사항)",
   "send.input.fee": "수수료",
   "send.input.fee.error.required": "수수료를 입력하세요",
+  "send.input.gas": "가스",
   "send.input-button.balance": "잔고",
   "send.button.send": "보내기",
 
@@ -168,6 +177,7 @@
   "sign.list.messages.label": "메세지",
   "sign.info.fee": "수수료",
   "sign.info.memo": "메모",
+  "sign.info.gas": "가스",
   "sign.button.approve": "허락",
   "sign.button.reject": "거부",
   "sign.button.confirm-ledger": "렛저를 확인하세요",
@@ -214,6 +224,17 @@
   "fee-buttons.select.low": "느림",
   "fee-buttons.select.average": "평균",
   "fee-buttons.select.high": "빠름",
+
+  "input.recipient.error.invalid-bech32": "잘못된 주소입니다",
+  "input.recipient.error.ens-not-supported": "이 체인에는 ENS가 지원되지 않습니다",
+  "input.recipient.error.ens-failed-to-fetch": "ENS로부터 주소를 받는데 실패했습니다",
+  "input.amount.error.invalid-number": "잘못된 숫자입니",
+  "input.amount.error.is-zero": "0이 아니여야 합니다",
+  "input.amount.error.is-negative": "양수여야 합니다",
+  "input.amount.error.insufficient": "자산이 부족합니다",
+  "input.fee.error.insufficient": "수수료를 낼 충분한 잔고가 없습니다",
+  "input.fee.toggle.set-gas": "가스 설정",
+  "input.fee.toggle.set-gas.close": "닫기",
 
   "confirm.yes": "예",
   "confirm.no": "아니요"

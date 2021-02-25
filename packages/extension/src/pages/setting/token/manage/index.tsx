@@ -10,9 +10,11 @@ import { Bech32Address } from "@keplr/cosmos";
 import { useNotification } from "../../../../components/notification";
 import { useConfirm } from "../../../../components/confirm";
 import { Secret20Currency } from "@keplr/types";
+import { useIntl } from "react-intl";
 
 export const ManageTokenPage: FunctionComponent = observer(() => {
   const history = useHistory();
+  const intl = useIntl();
   const notification = useNotification();
   const confirm = useConfirm();
 
@@ -26,7 +28,9 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle="Token List"
+      alternativeTitle={intl.formatMessage({
+        id: "main.menu.token-list",
+      })}
       onBackButton={() => {
         history.goBack();
       }}
@@ -57,7 +61,9 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                   placement: "top-center",
                   type: "success",
                   duration: 2,
-                  content: "Viewing key copied!",
+                  content: intl.formatMessage({
+                    id: "setting.token.manage.notification.viewing-key.copy",
+                  }),
                   canDelete: true,
                   transition: {
                     duration: 0.25,
@@ -98,8 +104,9 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
                 if (
                   await confirm.confirm({
-                    paragraph:
-                      "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
+                    paragraph: intl.formatMessage({
+                      id: "setting.token.manage.confirm.remove-token",
+                    }),
                   })
                 ) {
                   await tokensStore

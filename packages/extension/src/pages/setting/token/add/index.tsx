@@ -309,7 +309,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             htmlFor="viewing-key-checkbox"
             style={{ color: "#666666", paddingTop: "1px" }}
           >
-            (Advanced) Import my own viewing key
+            <FormattedMessage id="setting.token.add.secret20.checkbox.import-viewing-key" />
           </label>
         </div>
         <Button
