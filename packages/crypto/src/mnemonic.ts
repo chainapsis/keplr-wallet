@@ -1,7 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bip39 = require("bip39");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bip32 = require("bip32");
+import bip39 from "bip39";
+import bip32 from "bip32";
 
 import { Buffer } from "buffer/";
 

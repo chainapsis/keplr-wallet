@@ -6,8 +6,8 @@ import { toGenerator } from "@keplr/common";
 export type NewMnemonicMode = "generate" | "verify";
 
 export enum NumWords {
-  WORDS12,
-  WORDS24,
+  WORDS12 = 128,
+  WORDS24 = 256,
 }
 
 export class NewMnemonicConfig {
@@ -48,15 +48,10 @@ export class NewMnemonicConfig {
   @flow
   *setNumWords(numWords: NumWords) {
     this._numWords = numWords;
-    if (numWords === NumWords.WORDS12) {
-      this._mnemonic = yield* toGenerator(
-        this.registerConfig.generateMnemonic(128)
-      );
-    } else if (numWords === NumWords.WORDS24) {
-      this._mnemonic = yield* toGenerator(
-        this.registerConfig.generateMnemonic(256)
-      );
-    }
+
+    this._mnemonic = yield* toGenerator(
+      this.registerConfig.generateMnemonic(numWords)
+    );
   }
 
   get mnemonic(): string {
