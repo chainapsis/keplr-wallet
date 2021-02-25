@@ -107,10 +107,6 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
   const loadingIndicator = useLoadingIndicator();
   useEffect(() => {
     if (selectables.isInitializing) {
-      loadingIndicator.setIsLoading(
-        "bip44-selectables-init",
-        selectables.isInitializing
-      );
       setIsModalOpen(false);
     } else if (!selectables.needSelectCoinType) {
       loadingIndicator.setIsLoading("bip44-selectables-init", false);
