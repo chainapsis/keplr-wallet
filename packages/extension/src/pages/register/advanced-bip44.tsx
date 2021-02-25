@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState } from "react";
 import { Button, FormGroup, Input, Label } from "reactstrap";
 import { useConfirm } from "../../components/confirm";
 import { FormattedMessage, useIntl } from "react-intl";
-import { action, computed, observable, runInAction } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
 import { BIP44HDPath } from "@keplr/background";
 
@@ -11,21 +11,18 @@ export class BIP44Option {
   protected _coinType?: number;
 
   @observable
-  protected _account!: number;
+  protected _account: number = 0;
 
   @observable
-  protected _change!: number;
+  protected _change: number = 0;
 
   @observable
-  protected _index!: number;
+  protected _index: number = 0;
 
   constructor(coinType?: number) {
-    runInAction(() => {
-      this._coinType = coinType;
-      this._account = 0;
-      this._change = 0;
-      this._index = 0;
-    });
+    this._coinType = coinType;
+
+    makeObservable(this);
   }
 
   get coinType(): number | undefined {
