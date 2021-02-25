@@ -1,4 +1,4 @@
-import { CoinPrimitive } from "../../../common/types";
+import { CoinPrimitive } from "../../../common";
 
 export type Balances = {
   height: string;
