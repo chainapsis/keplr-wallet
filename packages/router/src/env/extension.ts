@@ -102,7 +102,10 @@ export class ExtensionEnv {
         const windows = browser.extension.getViews().filter((window) => {
           return window.location.href !== backgroundPage.location.href;
         });
-        windows[0].location.href = url;
+        const prefer = windows.find((window) => {
+          return window.location.href === sender.url;
+        });
+        (prefer ?? windows[0]).location.href = url;
 
         return await new InExtensionMessageRequester().sendMessage(
           APP_PORT,
