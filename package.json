@@ -13,7 +13,9 @@
     "build": "lerna run build",
     "test": "lerna run test",
     "lint-test": "lerna run lint-test",
-    "lint-fix": "lerna run lint-fix"
+    "lint-fix": "lerna run lint-fix",
+    "ci": "yarn install --frozen-lockfile && yarn build && yarn test",
+    "ci-lint": "yarn install --frozen-lockfile && yarn lint-test"
   },
   "pre-commit": [
     "lint-test"

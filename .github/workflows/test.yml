@@ -1,0 +1,23 @@
+name: Test Unit
+on:
+  pull_request:
+  push:
+
+jobs:
+  test-lint:
+    name: Test code base
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - run: npm install --global yarn
+      - run: sudo apt-get install libusb-1.0-0-dev
+      - run: echo "deb https://dl.bintray.com/sobolevn/deb git-secret main" | sudo tee -a /etc/apt/sources.list
+      - run: wget -qO - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | sudo apt-key add -
+      - run: sudo apt-get install apt-transport-https
+      - run: sudo apt-get update && sudo apt-get install git-secret
+      - run: git-secret reveal
+      - run: yarn ci
