@@ -1,5 +1,5 @@
 {
-  "name": "@keplr/types",
+  "name": "@keplr-wallet/types",
   "version": "0.8.0-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",

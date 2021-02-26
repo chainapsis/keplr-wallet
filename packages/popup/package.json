@@ -1,5 +1,5 @@
 {
-  "name": "@keplr/popup",
+  "name": "@keplr-wallet/popup",
   "version": "0.8.0-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",

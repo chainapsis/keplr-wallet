@@ -1,5 +1,5 @@
 {
-  "name": "@keplr/router",
+  "name": "@keplr-wallet/router",
   "version": "0.8.0-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
@@ -14,7 +14,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr/popup": "^0.8.0-rc.0",
+    "@keplr-wallet/popup": "^0.8.0-rc.0",
     "buffer": "^6.0.3",
     "p-queue": "^6.6.2"
   },
