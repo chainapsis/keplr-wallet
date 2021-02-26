@@ -1,6 +1,6 @@
 import { action, flow, makeObservable, observable } from "mobx";
 import { RegisterConfig } from "@keplr-wallet/hooks";
-import { useState } from "react";
+import { useRef } from "react";
 import { toGenerator } from "@keplr-wallet/common";
 
 export type NewMnemonicMode = "generate" | "verify";
@@ -88,7 +88,7 @@ export class NewMnemonicConfig {
 }
 
 export const useNewMnemonicConfig = (registerConfig: RegisterConfig) => {
-  const [newMnemonicConfig] = useState(new NewMnemonicConfig(registerConfig));
+  const newMnemonicConfig = useRef(new NewMnemonicConfig(registerConfig));
 
-  return newMnemonicConfig;
+  return newMnemonicConfig.current;
 };

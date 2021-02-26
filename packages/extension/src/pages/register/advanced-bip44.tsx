@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useRef, useState } from "react";
 import { Button, FormGroup, Input, Label } from "reactstrap";
 import { useConfirm } from "../../components/confirm";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -73,7 +73,7 @@ export class BIP44Option {
 
 // CONTRACT: Use with `observer`
 export const useBIP44Option = (coinType?: number) => {
-  const [bip44Option] = useState(new BIP44Option(coinType));
+  const bip44Option = useRef(new BIP44Option(coinType)).current;
 
   return bip44Option;
 };

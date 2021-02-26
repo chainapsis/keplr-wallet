@@ -10,7 +10,7 @@ import {
   InvalidBech32Error,
 } from "./errors";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { useState } from "react";
+import { useRef } from "react";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 
 export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
@@ -136,7 +136,7 @@ export const useRecipientConfig = (
   chainId: string,
   ensEndpoint?: string
 ) => {
-  const [config] = useState(new RecipientConfig(chainGetter, chainId));
+  const config = useRef(new RecipientConfig(chainGetter, chainId)).current;
   config.setChain(chainId);
   config.setENSEndpoint(ensEndpoint);
 
