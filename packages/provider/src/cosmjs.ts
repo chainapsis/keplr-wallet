@@ -5,8 +5,8 @@ import {
   StdSignDoc,
 } from "@cosmjs/launchpad";
 import { fromHex } from "@cosmjs/encoding";
-import { Keplr } from "@keplr/types";
-import { cosmos } from "@keplr/cosmos";
+import { Keplr } from "@keplr-wallet/types";
+import { cosmos } from "@keplr-wallet/cosmos";
 import { OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
 

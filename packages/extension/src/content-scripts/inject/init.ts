@@ -1,4 +1,4 @@
-import { Keplr } from "@keplr/provider";
+import { Keplr } from "@keplr-wallet/provider";
 import { OfflineSigner } from "@cosmjs/launchpad";
 import { SecretUtils } from "secretjs/types/enigmautils";
 

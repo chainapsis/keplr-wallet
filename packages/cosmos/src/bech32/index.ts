@@ -1,5 +1,5 @@
 import bech32 from "bech32";
-import { Bech32Config } from "@keplr/types";
+import { Bech32Config } from "@keplr-wallet/types";
 
 export class Bech32Address {
   static shortenAddress(bech32: string, maxCharacters: number): string {

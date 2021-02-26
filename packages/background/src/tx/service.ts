@@ -3,7 +3,7 @@ import { delay, inject, singleton } from "tsyringe";
 import Axios, { AxiosInstance } from "axios";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
-import { TendermintTxTracer } from "@keplr/cosmos/build/tx-tracer";
+import { TendermintTxTracer } from "@keplr-wallet/cosmos/build/tx-tracer";
 
 import { Buffer } from "buffer/";
 

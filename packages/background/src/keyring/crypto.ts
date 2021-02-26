@@ -1,7 +1,7 @@
 import scrypt from "scrypt-js";
 import AES, { Counter } from "aes-js";
 import { BIP44HDPath, CoinTypeForChain } from "./types";
-import { Hash, RNG } from "@keplr/crypto";
+import { Hash, RNG } from "@keplr-wallet/crypto";
 
 import { Buffer } from "buffer/";
 

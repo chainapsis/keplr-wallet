@@ -1,9 +1,9 @@
 import { GasConfig } from "./gas";
-import { DenomHelper } from "@keplr/common";
-import { ChainGetter } from "@keplr/stores";
+import { DenomHelper } from "@keplr-wallet/common";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { IAmountConfig } from "./types";
 import { useState } from "react";
-import { MsgOpts } from "@keplr/stores";
+import { MsgOpts } from "@keplr-wallet/stores";
 import { makeObservable, observable } from "mobx";
 
 export class SendGasConfig extends GasConfig {

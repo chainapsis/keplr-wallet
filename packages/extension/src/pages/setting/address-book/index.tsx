@@ -17,15 +17,15 @@ import styleAddressBook from "./style.module.scss";
 import { useStore } from "../../../stores";
 import { PageButton } from "../page-button";
 import { AddAddressModal } from "./add-address-modal";
-import { ExtensionKVStore } from "@keplr/common";
-import { Bech32Address } from "@keplr/cosmos";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useConfirm } from "../../../components/confirm";
 import {
   AddressBookSelectHandler,
   useAddressBookConfig,
   useMemoConfig,
   useRecipientConfig,
-} from "@keplr/hooks";
+} from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../../config";
 
 export const AddressBookPage: FunctionComponent<{

@@ -1,4 +1,4 @@
-import { Router } from "@keplr/router";
+import { Router } from "@keplr-wallet/router";
 import { GetPubkeyMsg, ReqeustEncryptMsg, RequestDecryptMsg } from "./messages";
 import { SecretWasmService } from "./service";
 import { ROUTE } from "./constants";

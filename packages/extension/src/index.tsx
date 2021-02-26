@@ -27,7 +27,7 @@ import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 
 import { StoreProvider, useStore } from "./stores";
-import { KeyRingStatus } from "@keplr/background";
+import { KeyRingStatus } from "@keplr-wallet/background";
 import { SignPage } from "./pages/sign";
 import { ChainSuggestedPage } from "./pages/chain/suggest";
 import Modal from "react-modal";
@@ -50,8 +50,8 @@ import { ManageTokenPage } from "./pages/setting/token/manage";
 
 import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config";
 
-import { Keplr } from "@keplr/provider";
-import { InExtensionMessageRequester } from "@keplr/router";
+import { Keplr } from "@keplr-wallet/provider";
+import { InExtensionMessageRequester } from "@keplr-wallet/router";
 
 window.keplr = new Keplr(new InExtensionMessageRequester());
 

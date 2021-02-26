@@ -1,6 +1,6 @@
-import { Message } from "@keplr/router";
+import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import { AppCurrency } from "@keplr/types";
+import { AppCurrency } from "@keplr-wallet/types";
 
 export class GetTokensMsg extends Message<AppCurrency[]> {
   public static type() {

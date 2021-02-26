@@ -2,7 +2,7 @@ import assert from "assert";
 import "mocha";
 import { Mnemonic } from "./mnemonic";
 import { PrivKeySecp256k1 } from "./key";
-import { Bech32Address } from "@keplr/cosmos";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 describe("Test priv key", () => {
   it("priv key should generate the valid address", () => {

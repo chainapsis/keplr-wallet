@@ -9,11 +9,11 @@ import {
   isSecret20ViewingKeyPermissionType,
   splitSecret20ViewingKeyPermissionType,
   getSecret20ViewingKeyPermissionType,
-} from "@keplr/background";
+} from "@keplr-wallet/background";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { HasMapStore } from "../../common";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr/router";
-import { toGenerator } from "@keplr/common";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
+import { toGenerator } from "@keplr-wallet/common";
 
 export class Secret20ViewingKeyPermissionInnerStore {
   @observable.ref

@@ -1,9 +1,9 @@
 import { ObservableChainQuery } from "../../chain-query";
 import { GovProposals, Proposal, ProposalTally } from "./types";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
 import { computed, makeObservable, observable, runInAction } from "mobx";
-import { CoinPretty, Dec, DecUtils, Int, IntPretty } from "@keplr/unit";
+import { CoinPretty, Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { DeepReadonly } from "utility-types";
 import {
   ObservableQueryGovParamDeposit,

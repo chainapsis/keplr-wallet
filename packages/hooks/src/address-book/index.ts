@@ -1,7 +1,7 @@
 import { flow, makeObservable, observable, toJS } from "mobx";
-import { KVStore, toGenerator } from "@keplr/common";
-import { ChainInfo } from "@keplr/types";
-import { ChainGetter, HasMapStore } from "@keplr/stores";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { ChainInfo } from "@keplr-wallet/types";
+import { ChainGetter, HasMapStore } from "@keplr-wallet/stores";
 import { DeepReadonly } from "utility-types";
 import { useState } from "react";
 

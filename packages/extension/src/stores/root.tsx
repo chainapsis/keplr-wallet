@@ -11,16 +11,16 @@ import {
   LedgerInitStore,
   TokensStore,
   ChainSuggestStore,
-} from "@keplr/stores";
-import { ExtensionKVStore } from "@keplr/common";
+} from "@keplr-wallet/stores";
+import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   Router,
   ContentScriptEnv,
   ContentScriptGuards,
   InExtensionMessageRequester,
   APP_PORT,
-} from "@keplr/router";
-import { ChainInfoWithEmbed } from "@keplr/background";
+} from "@keplr-wallet/router";
+import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 
 export class RootStore {
   public readonly chainStore: ChainStore;

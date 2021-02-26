@@ -6,8 +6,13 @@ import {
   CurrencySchema,
   CW20CurrencyShema,
 } from "./types";
-import { AppCurrency, ChainInfo, Currency, CW20Currency } from "@keplr/types";
-import { Bech32Config } from "@keplr/types";
+import {
+  AppCurrency,
+  ChainInfo,
+  Currency,
+  CW20Currency,
+} from "@keplr-wallet/types";
+import { Bech32Config } from "@keplr-wallet/types";
 import Joi from "joi";
 
 const AppCurrencyShemaTest = Joi.array().items(

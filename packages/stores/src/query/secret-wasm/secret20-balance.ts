@@ -1,9 +1,9 @@
 import { computed, makeObservable, override } from "mobx";
-import { DenomHelper, KVStore } from "@keplr/common";
+import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainGetter, QueryResponse } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { QueryError } from "../../common";
-import { CoinPretty, Int } from "@keplr/unit";
+import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
 import { ObservableSecretContractChainQuery } from "./contract-query";
 import { CancelToken } from "axios";

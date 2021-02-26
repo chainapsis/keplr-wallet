@@ -1,6 +1,6 @@
-import { Currency } from "@keplr/types";
+import { Currency } from "@keplr-wallet/types";
 import { CoinPrimitive } from "../types";
-import { CoinPretty, Int } from "@keplr/unit";
+import { CoinPretty, Int } from "@keplr-wallet/unit";
 
 export class StoreUtils {
   public static getBalancesFromCurrencies(

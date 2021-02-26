@@ -1,4 +1,4 @@
-import { BACKGROUND_PORT, MessageRequester } from "@keplr/router";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   AddLedgerKeyMsg,
   AddMnemonicKeyMsg,
@@ -20,16 +20,16 @@ import {
   SetKeyStoreCoinTypeMsg,
   ShowKeyRingMsg,
   UnlockKeyRingMsg,
-} from "@keplr/background";
+} from "@keplr-wallet/background";
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 
 import { Buffer } from "buffer/";
 import { InteractionStore } from "./interaction";
 import { ChainGetter } from "../common";
-import { BIP44 } from "@keplr/types";
+import { BIP44 } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
-import { toGenerator } from "@keplr/common";
+import { toGenerator } from "@keplr-wallet/common";
 
 export class KeyRingSelectablesStore {
   @observable

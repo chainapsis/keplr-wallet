@@ -1,4 +1,4 @@
-import { Env, Handler, InternalHandler, Message } from "@keplr/router";
+import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import {
   EnableKeyRingMsg,
   CreateMnemonicKeyMsg,
@@ -22,10 +22,10 @@ import {
   GetIsKeyStoreCoinTypeSetMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
-import { Bech32Address } from "@keplr/cosmos";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 import { Buffer } from "buffer/";
-import { cosmos } from "@keplr/cosmos";
+import { cosmos } from "@keplr-wallet/cosmos";
 
 export const getHandler: (service: KeyRingService) => Handler = (
   service: KeyRingService

@@ -5,11 +5,11 @@ import { EnigmaUtils } from "secretjs";
 import { KeyRingService } from "../keyring";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
-import { Hash } from "@keplr/crypto";
-import { KVStore } from "@keplr/common";
-import { ChainInfo } from "@keplr/types";
-import { Bech32Address } from "@keplr/cosmos";
-import { Env } from "@keplr/router";
+import { Hash } from "@keplr-wallet/crypto";
+import { KVStore } from "@keplr-wallet/common";
+import { ChainInfo } from "@keplr-wallet/types";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { Env } from "@keplr-wallet/router";
 
 import { Buffer } from "buffer/";
 

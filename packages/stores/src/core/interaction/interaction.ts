@@ -1,4 +1,8 @@
-import { Router, MessageRequester, BACKGROUND_PORT } from "@keplr/router";
+import {
+  Router,
+  MessageRequester,
+  BACKGROUND_PORT,
+} from "@keplr-wallet/router";
 import {
   InteractionForegroundHandler,
   interactionForegroundInit,
@@ -6,7 +10,7 @@ import {
   InteractionWaitingData,
   ApproveInteractionMsg,
   RejectInteractionMsg,
-} from "@keplr/background";
+} from "@keplr-wallet/background";
 import {
   action,
   observable,

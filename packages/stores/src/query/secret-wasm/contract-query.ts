@@ -1,10 +1,10 @@
 import { ObservableChainQuery } from "../chain-query";
-import { KVStore, toGenerator } from "@keplr/common";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { AccountStore } from "../../account";
-import { Keplr } from "@keplr/types";
+import { Keplr } from "@keplr-wallet/types";
 import Axios, { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
 

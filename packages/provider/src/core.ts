@@ -1,5 +1,5 @@
-import { ChainInfo, Keplr as IKeplr, KeyHex } from "@keplr/types";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr/router";
+import { ChainInfo, Keplr as IKeplr, KeyHex } from "@keplr-wallet/types";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   BroadcastMode,
   AminoSignResponse,
@@ -15,8 +15,8 @@ import {
   GetSecret20ViewingKey,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
-} from "@keplr/background";
-import { cosmos } from "@keplr/cosmos";
+} from "@keplr-wallet/background";
+import { cosmos } from "@keplr-wallet/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";

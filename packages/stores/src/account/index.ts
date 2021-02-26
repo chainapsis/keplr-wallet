@@ -1,9 +1,9 @@
 import { HasMapStore } from "../common";
-import { DenomHelper, toGenerator } from "@keplr/common";
+import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../common";
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
-import { AppCurrency, Keplr } from "@keplr/types";
-import { BaseAccount, TendermintTxTracer } from "@keplr/cosmos";
+import { AppCurrency, Keplr } from "@keplr-wallet/types";
+import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
 import Axios, { AxiosInstance } from "axios";
 import {
   BroadcastMode,
@@ -14,7 +14,7 @@ import {
   StdSignDoc,
 } from "@cosmjs/launchpad";
 import { fromHex } from "@cosmjs/encoding";
-import { Dec, DecUtils } from "@keplr/unit";
+import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { QueriesStore } from "../query";
 import { Queries } from "../query/queries";
 

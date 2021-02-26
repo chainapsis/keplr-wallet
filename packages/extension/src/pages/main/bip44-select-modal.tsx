@@ -1,14 +1,14 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Button, Col, CustomInput, Modal, ModalBody, Row } from "reactstrap";
-import { Bech32Address } from "@keplr/cosmos";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 import style from "./bip44-select-modal.module.scss";
 import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
 import { FormattedMessage } from "react-intl";
-import { BIP44 } from "@keplr/types";
+import { BIP44 } from "@keplr-wallet/types";
 import { useLoadingIndicator } from "../../components/loading-indicator";
-import { Dec } from "@keplr/unit";
+import { Dec } from "@keplr-wallet/unit";
 
 const BIP44Selectable: FunctionComponent<{
   selectable: {

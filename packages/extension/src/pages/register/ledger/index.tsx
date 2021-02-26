@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { RegisterConfig } from "@keplr/hooks";
+import { RegisterConfig } from "@keplr-wallet/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Button, Form } from "reactstrap";
 import useForm from "react-hook-form";

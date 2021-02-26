@@ -3,7 +3,7 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { BondStatus, Validators, Validator } from "./types";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
 import {
   autorun,
@@ -15,7 +15,7 @@ import {
 import { ObservableQuery, QueryResponse } from "../../../common";
 import Axios, { CancelToken } from "axios";
 import PQueue from "p-queue";
-import { CoinPretty, Dec } from "@keplr/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
 
 interface KeybaseResult {

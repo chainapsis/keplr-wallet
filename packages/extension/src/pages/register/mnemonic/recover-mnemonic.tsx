@@ -8,7 +8,7 @@ import { BackButton } from "../index";
 import { Input, TextArea } from "../../../components/form";
 import useForm from "react-hook-form";
 import { observer } from "mobx-react-lite";
-import { RegisterConfig } from "@keplr/hooks";
+import { RegisterConfig } from "@keplr-wallet/hooks";
 import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 
 import { Buffer } from "buffer/";

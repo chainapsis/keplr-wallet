@@ -1,5 +1,5 @@
 import { SupplyTotal, SupplyTotalStargate } from "./types";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import {
   ObservableChainQuery,
   ObservableChainQueryMap,

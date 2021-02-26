@@ -14,7 +14,7 @@ import {
   IGasConfig,
   IMemoConfig,
   SignDocHelper,
-} from "@keplr/hooks";
+} from "@keplr-wallet/hooks";
 import { useLanguage } from "../../languages";
 import { Badge, Label } from "reactstrap";
 import { renderDirectMessage } from "./direct";

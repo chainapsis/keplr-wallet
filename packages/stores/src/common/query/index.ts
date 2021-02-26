@@ -9,7 +9,7 @@ import {
   onBecomeUnobserved,
 } from "mobx";
 import Axios, { AxiosInstance, CancelToken, CancelTokenSource } from "axios";
-import { KVStore, toGenerator } from "@keplr/common";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { DeepReadonly } from "utility-types";
 import { HasMapStore } from "../map";
 

@@ -1,11 +1,11 @@
 import { InteractionStore } from "./interaction";
 import { computed, flow, makeObservable, observable } from "mobx";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr/router";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   LedgerGetWebHIDFlagMsg,
   LedgerSetWebHIDFlagMsg,
-} from "@keplr/background";
-import { toGenerator } from "@keplr/common";
+} from "@keplr-wallet/background";
+import { toGenerator } from "@keplr-wallet/common";
 
 export type LedgerInitDataType =
   | {

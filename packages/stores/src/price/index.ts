@@ -1,10 +1,10 @@
 import { ObservableQuery, QueryResponse } from "../common";
 import { CoinGeckoSimplePrice } from "./types";
 import Axios, { CancelToken } from "axios";
-import { KVStore } from "@keplr/common";
-import { Dec, CoinPretty, Int } from "@keplr/unit";
-import { FiatCurrency } from "@keplr/types";
-import { PricePretty } from "@keplr/unit/build/price-pretty";
+import { KVStore } from "@keplr-wallet/common";
+import { Dec, CoinPretty, Int } from "@keplr-wallet/unit";
+import { FiatCurrency } from "@keplr-wallet/types";
+import { PricePretty } from "@keplr-wallet/unit/build/price-pretty";
 import { DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
 

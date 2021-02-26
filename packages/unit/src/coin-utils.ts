@@ -2,7 +2,7 @@ import { Coin } from "./coin";
 import { Int } from "./int";
 import { Dec } from "./decimal";
 import { DecUtils } from "./dec-utils";
-import { Currency } from "@keplr/types";
+import { Currency } from "@keplr-wallet/types";
 
 export class CoinUtils {
   static createCoinsFromPrimitives(

@@ -8,7 +8,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useNotification } from "../../components/notification";
 import { useIntl } from "react-intl";
-import { WalletStatus } from "@keplr/stores";
+import { WalletStatus } from "@keplr-wallet/stores";
 
 export const AccountView: FunctionComponent = observer(() => {
   const { accountStore, chainStore } = useStore();

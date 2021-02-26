@@ -23,7 +23,7 @@ import { FormattedMessage } from "react-intl";
 import { useHistory } from "react-router";
 
 import classnames from "classnames";
-import { Dec } from "@keplr/unit";
+import { Dec } from "@keplr-wallet/unit";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");

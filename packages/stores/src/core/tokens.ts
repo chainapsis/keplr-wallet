@@ -1,17 +1,17 @@
 import { HasMapStore } from "../common";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr/router";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   AddTokenMsg,
   GetTokensMsg,
   RemoveTokenMsg,
   SuggestTokenMsg,
-} from "@keplr/background";
+} from "@keplr-wallet/background";
 import { flow, makeObservable, observable } from "mobx";
-import { AppCurrency, ChainInfo } from "@keplr/types";
+import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import { ChainStore } from "../chain";
 import { InteractionStore } from "./interaction";
-import { toGenerator } from "@keplr/common";
+import { toGenerator } from "@keplr-wallet/common";
 
 export class TokensStoreInner {
   @observable.ref

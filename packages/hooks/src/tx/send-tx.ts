@@ -1,5 +1,5 @@
-import { ChainGetter, MsgOpts } from "@keplr/stores";
-import { ObservableQueryBalances } from "@keplr/stores/build/query/balances";
+import { ChainGetter, MsgOpts } from "@keplr-wallet/stores";
+import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
 import { useFeeConfig, useMemoConfig, useRecipientConfig } from "./index";
 import { useSendGasConfig } from "./send-gas";
 import { useAmountConfig } from "./amount";

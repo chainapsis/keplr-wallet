@@ -1,5 +1,8 @@
-import { keyStoreEventInit, KeyStoreEventService } from "@keplr/background";
-import { Router } from "@keplr/router";
+import {
+  keyStoreEventInit,
+  KeyStoreEventService,
+} from "@keplr-wallet/background";
+import { Router } from "@keplr-wallet/router";
 
 export function initEvents(router: Router) {
   keyStoreEventInit(

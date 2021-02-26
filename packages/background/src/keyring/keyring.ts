@@ -4,15 +4,15 @@ import {
   PubKeySecp256k1,
   PrivKeySecp256k1,
   RNG,
-} from "@keplr/crypto";
-import { KVStore } from "@keplr/common";
+} from "@keplr-wallet/crypto";
+import { KVStore } from "@keplr-wallet/common";
 import { LedgerService } from "../ledger";
 import { BIP44HDPath } from "./types";
-import { ChainInfo } from "@keplr/types";
-import { Env } from "@keplr/router";
+import { ChainInfo } from "@keplr-wallet/types";
+import { Env } from "@keplr-wallet/router";
 
 import { Buffer } from "buffer/";
-import { ChainIdHelper } from "@keplr/cosmos";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export enum KeyRingStatus {
   NOTLOADED,

@@ -3,9 +3,9 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { UnbondingDelegation, UnbondingDelegations } from "./types";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
-import { CoinPretty, Int } from "@keplr/unit";
+import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 
 export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQuery<UnbondingDelegations> {

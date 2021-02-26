@@ -7,7 +7,7 @@ import React, {
 
 import { Button } from "reactstrap";
 
-import { Ledger, LedgerInitErrorOn } from "@keplr/background";
+import { Ledger, LedgerInitErrorOn } from "@keplr-wallet/background";
 
 import style from "./style.module.scss";
 import { EmptyLayout } from "../../layouts/empty-layout";
@@ -16,7 +16,7 @@ import classnames from "classnames";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNotification } from "../../components/notification";
 import delay from "delay";
-import { useInteractionInfo } from "@keplr/hooks";
+import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 

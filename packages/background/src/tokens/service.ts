@@ -1,22 +1,22 @@
 import { delay, inject, singleton } from "tsyringe";
 import { TYPES } from "../types";
 
-import { Env } from "@keplr/router";
+import { Env } from "@keplr-wallet/router";
 import {
   ChainInfo,
   AppCurrency,
   CW20Currency,
   Secret20Currency,
-} from "@keplr/types";
+} from "@keplr-wallet/types";
 import {
   CurrencySchema,
   CW20CurrencyShema,
   Secret20CurrencyShema,
 } from "../chains";
-import { Bech32Address, ChainIdHelper } from "@keplr/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import { KeyRingStatus } from "../keyring";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";

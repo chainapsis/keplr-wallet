@@ -1,11 +1,11 @@
 /* eslint-disable react/display-name */
 
-import { MsgOpts } from "@keplr/stores";
-import { Currency } from "@keplr/types";
+import { MsgOpts } from "@keplr-wallet/stores";
+import { Currency } from "@keplr-wallet/types";
 import { FormattedMessage, IntlShape } from "react-intl";
 import React from "react";
-import { Bech32Address } from "@keplr/cosmos";
-import { Hash } from "@keplr/crypto";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { Hash } from "@keplr-wallet/crypto";
 import {
   MessageObj,
   MsgBeginRedelegate,

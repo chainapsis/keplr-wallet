@@ -1,4 +1,4 @@
-import { Router } from "@keplr/router";
+import { Router } from "@keplr-wallet/router";
 import { PermissionService } from "./service";
 import { GetPermissionOriginsMsg, RemovePermissionOrigin } from "./messages";
 import { ROUTE } from "./constants";

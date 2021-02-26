@@ -1,17 +1,17 @@
 /* eslint-disable react/display-name */
 
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { Bech32Address } from "@keplr/cosmos";
-import { CoinUtils, Coin } from "@keplr/unit";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { CoinUtils, Coin } from "@keplr-wallet/unit";
 import { IntlShape, FormattedMessage, useIntl } from "react-intl";
-import { Currency } from "@keplr/types";
+import { Currency } from "@keplr-wallet/types";
 import { Button, Badge } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import yaml from "js-yaml";
 
 import { Buffer } from "buffer/";
-import { AccountStore, CoinPrimitive } from "@keplr/stores";
+import { AccountStore, CoinPrimitive } from "@keplr-wallet/stores";
 
 export interface MessageObj {
   readonly type: string;

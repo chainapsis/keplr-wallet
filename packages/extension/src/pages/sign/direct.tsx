@@ -1,6 +1,6 @@
-import { Currency } from "@keplr/types";
+import { Currency } from "@keplr-wallet/types";
 import { IntlShape } from "react-intl";
-import { cosmos, UnknownMessage } from "@keplr/cosmos";
+import { cosmos, UnknownMessage } from "@keplr-wallet/cosmos";
 import {
   renderMsgBeginRedelegate,
   renderMsgDelegate,
@@ -8,7 +8,7 @@ import {
   renderMsgUndelegate,
   renderUnknownMessage,
 } from "./messages";
-import { CoinPrimitive } from "@keplr/stores";
+import { CoinPrimitive } from "@keplr-wallet/stores";
 
 import { Buffer } from "buffer/";
 

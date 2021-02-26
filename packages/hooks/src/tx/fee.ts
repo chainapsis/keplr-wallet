@@ -6,14 +6,14 @@ import {
   IGasConfig,
 } from "./types";
 import { TxChainSetter } from "./chain";
-import { ChainGetter, CoinPrimitive } from "@keplr/stores";
+import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
-import { Coin, CoinPretty, Dec, DecUtils, Int } from "@keplr/unit";
-import { Currency } from "@keplr/types";
+import { Coin, CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { Currency } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
 import { StdFee } from "@cosmjs/launchpad";
 import { useState } from "react";
-import { ObservableQueryBalances } from "@keplr/stores/build/query/balances";
+import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
 import { InsufficientFeeError, NotLoadedFeeError } from "./errors";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {

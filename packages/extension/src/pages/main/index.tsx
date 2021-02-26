@@ -19,7 +19,7 @@ import { TokensView } from "./token";
 import { BIP44SelectModal } from "./bip44-select-modal";
 import { useIntl } from "react-intl";
 import { useConfirm } from "../../components/confirm";
-import { ChainUpdaterService } from "@keplr/background";
+import { ChainUpdaterService } from "@keplr-wallet/background";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();

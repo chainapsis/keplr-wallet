@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { container } from "tsyringe";
 import { TYPES } from "./types";
 
-import { MessageRequester, Router } from "@keplr/router";
+import { MessageRequester, Router } from "@keplr-wallet/router";
 
 import * as PersistentMemory from "./persistent-memory/internal";
 import * as Chains from "./chains/internal";
@@ -27,9 +27,9 @@ export * from "./tokens";
 export * from "./interaction";
 export * from "./permission";
 
-import { KVStore } from "@keplr/common";
-import { ChainInfo } from "@keplr/types";
-import { RNG } from "@keplr/crypto";
+import { KVStore } from "@keplr-wallet/common";
+import { ChainInfo } from "@keplr-wallet/types";
+import { RNG } from "@keplr-wallet/crypto";
 
 export function init(
   router: Router,

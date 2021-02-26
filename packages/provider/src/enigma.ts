@@ -1,10 +1,10 @@
 import { SecretUtils } from "secretjs/types/enigmautils";
-import { MessageRequester, BACKGROUND_PORT } from "@keplr/router";
+import { MessageRequester, BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
-} from "@keplr/background";
+} from "@keplr-wallet/background";
 
 import { Buffer } from "buffer/";
 

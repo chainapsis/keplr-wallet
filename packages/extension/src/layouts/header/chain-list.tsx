@@ -5,7 +5,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import style from "./chain-list.module.scss";
-import { ChainInfoWithEmbed } from "@keplr/background";
+import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { useConfirm } from "../../components/confirm";
 import { useIntl } from "react-intl";
 

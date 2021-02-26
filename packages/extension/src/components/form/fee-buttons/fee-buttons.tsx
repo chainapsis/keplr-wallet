@@ -23,8 +23,8 @@ import {
   IGasConfig,
   InsufficientFeeError,
   NotLoadedFeeError,
-} from "@keplr/hooks";
-import { CoinGeckoPriceStore } from "@keplr/stores";
+} from "@keplr-wallet/hooks";
+import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
 import { useLanguage } from "../../../languages";
 import { useIntl } from "react-intl";
 import { GasInput } from "../gas-input";

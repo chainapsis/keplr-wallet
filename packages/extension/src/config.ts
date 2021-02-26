@@ -1,5 +1,5 @@
-import { Bech32Address } from "@keplr/cosmos";
-import { ChainInfo } from "@keplr/types";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { ChainInfo } from "@keplr-wallet/types";
 
 import {
   PRIVILEGED_ORIGINS,
@@ -47,7 +47,7 @@ import {
   IntlMessages,
   LanguageToFiatCurrency as TypeLanguageToFiatCurrency,
 } from "./languages";
-import { RegisterOption } from "@keplr/hooks";
+import { RegisterOption } from "@keplr-wallet/hooks";
 
 export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
 export const CoinGeckoGetPrice = "/simple/price";

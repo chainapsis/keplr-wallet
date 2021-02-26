@@ -11,7 +11,7 @@ import { Button, Popover, PopoverBody } from "reactstrap";
 import style from "./style.module.scss";
 import { useLoadingIndicator } from "../../../components/loading-indicator";
 import { PageButton } from "../page-button";
-import { MultiKeyStoreInfoWithSelectedElem } from "@keplr/background";
+import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {

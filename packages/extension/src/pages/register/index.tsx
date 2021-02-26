@@ -10,7 +10,7 @@ import { Button } from "reactstrap";
 
 import { FormattedMessage } from "react-intl";
 
-import { useRegisterConfig } from "@keplr/hooks";
+import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
 import { NewMnemonicIntro, NewMnemonicPage, TypeNewMnemonic } from "./mnemonic";
 import {

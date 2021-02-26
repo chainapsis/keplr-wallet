@@ -13,8 +13,8 @@ import {
   InsufficientAmountError,
   IAmountConfig,
   IFeeConfig,
-} from "@keplr/hooks";
-import { CoinPretty, Dec, DecUtils, Int } from "@keplr/unit";
+} from "@keplr-wallet/hooks";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
 import { useStore } from "../../stores";
 

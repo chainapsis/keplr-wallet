@@ -6,10 +6,10 @@ import { PageButton } from "../../page-button";
 import style from "./style.module.scss";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { Bech32Address } from "@keplr/cosmos";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useNotification } from "../../../../components/notification";
 import { useConfirm } from "../../../../components/confirm";
-import { Secret20Currency } from "@keplr/types";
+import { Secret20Currency } from "@keplr-wallet/types";
 import { useIntl } from "react-intl";
 
 export const ManageTokenPage: FunctionComponent = observer(() => {

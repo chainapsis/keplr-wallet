@@ -8,7 +8,7 @@ import { observer } from "mobx-react-lite";
 
 import styleStake from "./stake.module.scss";
 import classnames from "classnames";
-import { Dec } from "@keplr/unit";
+import { Dec } from "@keplr-wallet/unit";
 
 import { useNotification } from "../../components/notification";
 

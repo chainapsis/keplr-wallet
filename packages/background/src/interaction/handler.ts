@@ -1,4 +1,4 @@
-import { Env, Handler, InternalHandler, Message } from "@keplr/router";
+import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import { ApproveInteractionMsg, RejectInteractionMsg } from "./messages";
 import { InteractionService } from "./service";
 

@@ -1,6 +1,6 @@
 import { IRecipientConfig } from "./types";
 import { TxChainSetter } from "./chain";
-import { ChainGetter } from "@keplr/stores";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { action, makeObservable, observable, runInAction } from "mobx";
 import {
   EmptyAddressError,
@@ -9,9 +9,9 @@ import {
   ENSNotSupportedError,
   InvalidBech32Error,
 } from "./errors";
-import { Bech32Address } from "@keplr/cosmos";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useState } from "react";
-import { ObservableEnsFetcher } from "@keplr/ens";
+import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 
 export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @observable

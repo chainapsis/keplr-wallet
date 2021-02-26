@@ -1,6 +1,6 @@
 import { IMemoConfig } from "./types";
 import { action, makeObservable, observable } from "mobx";
-import { ChainGetter } from "@keplr/stores";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { TxChainSetter } from "./chain";
 import { useState } from "react";
 

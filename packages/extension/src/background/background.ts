@@ -4,9 +4,9 @@ import {
   ExtensionEnv,
   BACKGROUND_PORT,
   ContentScriptMessageRequester,
-} from "@keplr/router";
-import { ExtensionKVStore } from "@keplr/common";
-import { init } from "@keplr/background";
+} from "@keplr-wallet/router";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { init } from "@keplr-wallet/background";
 
 import { EmbedChainInfos, PrivilegedOrigins } from "../config";
 

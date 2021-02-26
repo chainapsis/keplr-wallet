@@ -1,4 +1,4 @@
-import { Router } from "@keplr/router";
+import { Router } from "@keplr-wallet/router";
 import {
   GetTokensMsg,
   AddTokenMsg,

@@ -1,4 +1,4 @@
-import { Env, Handler, InternalHandler, Message } from "@keplr/router";
+import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import { PushInteractionDataMsg } from "./messages";
 import { InteractionForegroundService } from "./service";
 

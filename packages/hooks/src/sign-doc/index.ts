@@ -1,7 +1,7 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { IFeeConfig, IMemoConfig } from "../tx";
-import { cosmos, SignDocWrapper } from "@keplr/cosmos";
+import { cosmos, SignDocWrapper } from "@keplr-wallet/cosmos";
 import Long from "long";
 
 export * from "./amount";

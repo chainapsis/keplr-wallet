@@ -4,7 +4,7 @@ import { useConfirm } from "../../components/confirm";
 import { FormattedMessage, useIntl } from "react-intl";
 import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
-import { BIP44HDPath } from "@keplr/background";
+import { BIP44HDPath } from "@keplr-wallet/background";
 
 export class BIP44Option {
   @observable

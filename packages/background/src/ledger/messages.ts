@@ -1,4 +1,4 @@
-import { Message } from "@keplr/router";
+import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 
 export class LedgerGetWebHIDFlagMsg extends Message<boolean> {

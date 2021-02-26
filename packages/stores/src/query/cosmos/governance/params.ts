@@ -1,6 +1,6 @@
 import { ObservableChainQuery } from "../../chain-query";
 import { GovParamsDeposit, GovParamsTally, GovParamsVoting } from "./types";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
 
 export class ObservableQueryGovParamTally extends ObservableChainQuery<GovParamsTally> {

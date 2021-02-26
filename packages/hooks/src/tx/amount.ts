@@ -1,9 +1,9 @@
 import { IAmountConfig } from "./types";
 import { TxChainSetter } from "./chain";
-import { ChainGetter, CoinPrimitive } from "@keplr/stores";
+import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
-import { ObservableQueryBalances } from "@keplr/stores/build/query/balances";
-import { AppCurrency } from "@keplr/types";
+import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
+import { AppCurrency } from "@keplr-wallet/types";
 import {
   EmptyAmountError,
   InsufficientAmountError,
@@ -11,7 +11,7 @@ import {
   NagativeAmountError,
   ZeroAmountError,
 } from "./errors";
-import { Dec, DecUtils } from "@keplr/unit";
+import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { useState } from "react";
 
 export class AmountConfig extends TxChainSetter implements IAmountConfig {

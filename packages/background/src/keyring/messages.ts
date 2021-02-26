@@ -1,4 +1,4 @@
-import { Message } from "@keplr/router";
+import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import {
   KeyRing,
@@ -7,15 +7,15 @@ import {
 } from "./keyring";
 import { BIP44HDPath } from "./types";
 
-import { Bech32Address } from "@keplr/cosmos";
-import { BIP44, KeyHex } from "@keplr/types";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { BIP44, KeyHex } from "@keplr-wallet/types";
 
 import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 import { Buffer } from "buffer/";
-import { cosmos } from "@keplr/cosmos";
+import { cosmos } from "@keplr-wallet/cosmos";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;

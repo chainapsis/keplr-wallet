@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useState } from "react";
-import { KeyRingStore } from "@keplr/stores";
+import { KeyRingStore } from "@keplr-wallet/stores";
 import { action, computed, flow, makeObservable, observable } from "mobx";
-import { Mnemonic, RNG } from "@keplr/crypto";
-import { BIP44HDPath } from "@keplr/background";
+import { Mnemonic, RNG } from "@keplr-wallet/crypto";
+import { BIP44HDPath } from "@keplr-wallet/background";
 
 export type RegisterMode = "create" | "add";
 

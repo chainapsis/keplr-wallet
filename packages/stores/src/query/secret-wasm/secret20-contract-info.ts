@@ -1,5 +1,5 @@
 import { Secret20ContractTokenInfo } from "./types";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import { ObservableChainQueryMap } from "../chain-query";
 import { ChainGetter, QueryError } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";

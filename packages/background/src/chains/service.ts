@@ -2,13 +2,13 @@ import { delay, inject, singleton } from "tsyringe";
 import { TYPES } from "../types";
 
 import { ChainInfoSchema, ChainInfoWithEmbed } from "./types";
-import { ChainInfo } from "@keplr/types";
-import { KVStore } from "@keplr/common";
+import { ChainInfo } from "@keplr-wallet/types";
+import { KVStore } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
-import { Env } from "@keplr/router";
+import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
-import { ChainIdHelper } from "@keplr/cosmos";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 

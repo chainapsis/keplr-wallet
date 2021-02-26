@@ -2,16 +2,16 @@ import { delay, inject, singleton } from "tsyringe";
 import { TYPES } from "../types";
 
 import { InteractionService } from "../interaction";
-import { Env } from "@keplr/router";
+import { Env } from "@keplr-wallet/router";
 import {
   getBasicAccessPermissionType,
   INTERACTION_TYPE_PERMISSION,
   PermissionData,
 } from "./types";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
-import { ChainIdHelper } from "@keplr/cosmos";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 @singleton()
 export class PermissionService {

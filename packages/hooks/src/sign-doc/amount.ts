@@ -1,14 +1,14 @@
 import { IAmountConfig } from "../tx";
 import { TxChainSetter } from "../tx/chain";
-import { ChainGetter, CoinPrimitive, MsgOpts } from "@keplr/stores";
-import { AppCurrency } from "@keplr/types";
+import { ChainGetter, CoinPrimitive, MsgOpts } from "@keplr-wallet/stores";
+import { AppCurrency } from "@keplr-wallet/types";
 import { action, computed, makeObservable, observable } from "mobx";
-import { Coin, CoinPretty, Int } from "@keplr/unit";
+import { Coin, CoinPretty, Int } from "@keplr-wallet/unit";
 import { SignDocHelper } from "./index";
 import { useState } from "react";
 import { computedFn } from "mobx-utils";
 import { Msg } from "@cosmjs/launchpad";
-import { cosmos } from "@keplr/cosmos";
+import { cosmos } from "@keplr-wallet/cosmos";
 
 // This config helps the fee config to calculate that the fee is enough to send with considering
 // the amount in the sign doc.

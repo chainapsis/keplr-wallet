@@ -1,5 +1,5 @@
 import { Env, FnRequestInteraction, MessageSender } from "../types";
-import { openPopupWindow as openPopupWindowInner } from "@keplr/popup";
+import { openPopupWindow as openPopupWindowInner } from "@keplr-wallet/popup";
 import { APP_PORT } from "../constant";
 import { InExtensionMessageRequester } from "../requester";
 import PQueue from "p-queue";

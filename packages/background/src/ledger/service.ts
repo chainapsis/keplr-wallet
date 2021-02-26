@@ -5,9 +5,9 @@ import { Ledger } from "./ledger";
 
 import delay from "delay";
 
-import { Env } from "@keplr/router";
+import { Env } from "@keplr-wallet/router";
 import { BIP44HDPath } from "../keyring";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
 
 import { Buffer } from "buffer/";

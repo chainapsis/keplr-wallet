@@ -1,5 +1,5 @@
 import { computed, makeObservable } from "mobx";
-import { Dec, DecUtils, Int, IntPretty } from "@keplr/unit";
+import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { ObservableQuerySupplyTotal } from "./supply";
 import { MintingInflation } from "./types";
 import { StakingPool } from "../staking/types";

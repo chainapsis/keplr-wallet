@@ -4,7 +4,7 @@ import {
   InjectedMessageRequester,
   Router,
   WEBPAGE_PORT,
-} from "@keplr/router";
+} from "@keplr-wallet/router";
 import { initEvents } from "./events";
 
 InjectedMessageRequester.startProxy();

@@ -1,13 +1,13 @@
 import { Rewards } from "./types";
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { ChainGetter } from "../../../common";
 import { computed, makeObservable } from "mobx";
-import { CoinPretty, Dec, Int } from "@keplr/unit";
-import { Currency } from "@keplr/types";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { Currency } from "@keplr-wallet/types";
 import { StoreUtils } from "../../../common";
 import { computedFn } from "mobx-utils";
 

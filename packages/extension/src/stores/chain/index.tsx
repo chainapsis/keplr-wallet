@@ -1,8 +1,8 @@
 import { observable, action, computed, makeObservable, flow } from "mobx";
 
-import { ChainStore as BaseChainStore } from "@keplr/stores";
+import { ChainStore as BaseChainStore } from "@keplr-wallet/stores";
 
-import { ChainInfo } from "@keplr/types";
+import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithEmbed,
   SetPersistentMemoryMsg,
@@ -10,11 +10,11 @@ import {
   GetChainInfosMsg,
   RemoveSuggestedChainInfoMsg,
   TryUpdateChainMsg,
-} from "@keplr/background";
-import { BACKGROUND_PORT } from "@keplr/router";
+} from "@keplr-wallet/background";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
-import { MessageRequester } from "@keplr/router";
-import { toGenerator } from "@keplr/common";
+import { MessageRequester } from "@keplr-wallet/router";
+import { toGenerator } from "@keplr-wallet/common";
 
 export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   @observable

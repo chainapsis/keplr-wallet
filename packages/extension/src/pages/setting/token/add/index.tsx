@@ -9,9 +9,9 @@ import { Input } from "../../../../components/form";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import useForm from "react-hook-form";
-import { Bech32Address } from "@keplr/cosmos";
-import { CW20Currency, Secret20Currency } from "@keplr/types";
-import { useInteractionInfo } from "@keplr/hooks";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
+import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { useLoadingIndicator } from "../../../../components/loading-indicator";
 import { useNotification } from "../../../../components/notification";
 

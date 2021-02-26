@@ -4,7 +4,7 @@ import {
   Currency,
   CW20Currency,
   Secret20Currency,
-} from "@keplr/types";
+} from "@keplr-wallet/types";
 
 import Joi, { ObjectSchema } from "joi";
 

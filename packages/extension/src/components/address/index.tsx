@@ -1,7 +1,7 @@
 import React from "react";
 
 import { ToolTip } from "../tooltip";
-import { Bech32Address } from "@keplr/cosmos";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export interface AddressProps {
   maxCharacters: number;

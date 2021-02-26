@@ -2,7 +2,7 @@ import { useLocation } from "react-router";
 
 import queryString from "querystring";
 
-import { disableScroll, fitPopupWindow } from "@keplr/popup";
+import { disableScroll, fitPopupWindow } from "@keplr-wallet/popup";
 import { useEffect, useRef } from "react";
 
 export const useInteractionInfo = (cleanUp?: () => void) => {

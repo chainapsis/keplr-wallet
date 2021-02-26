@@ -1,8 +1,8 @@
 import { InteractionStore } from "./interaction";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { StdSignDoc } from "@cosmjs/launchpad";
-import { InteractionWaitingData } from "@keplr/background";
-import { SignDocWrapper } from "@keplr/cosmos";
+import { InteractionWaitingData } from "@keplr-wallet/background";
+import { SignDocWrapper } from "@keplr-wallet/cosmos";
 
 export class SignInteractionStore {
   @observable

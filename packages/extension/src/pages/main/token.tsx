@@ -4,11 +4,11 @@ import styleToken from "./token.module.scss";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useHistory } from "react-router";
-import { Hash } from "@keplr/crypto";
-import { ObservableQueryBalanceInner } from "@keplr/stores/build/query/balances";
+import { Hash } from "@keplr-wallet/crypto";
+import { ObservableQueryBalanceInner } from "@keplr-wallet/stores/build/query/balances";
 import classmames from "classnames";
 import { UncontrolledTooltip } from "reactstrap";
-import { WrongViewingKeyError } from "@keplr/stores";
+import { WrongViewingKeyError } from "@keplr-wallet/stores";
 import { useNotification } from "../../components/notification";
 import { useLoadingIndicator } from "../../components/loading-indicator";
 

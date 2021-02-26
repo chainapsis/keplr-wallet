@@ -1,7 +1,7 @@
 import { action, flow, makeObservable, observable } from "mobx";
-import { RegisterConfig } from "@keplr/hooks";
+import { RegisterConfig } from "@keplr-wallet/hooks";
 import { useState } from "react";
-import { toGenerator } from "@keplr/common";
+import { toGenerator } from "@keplr-wallet/common";
 
 export type NewMnemonicMode = "generate" | "verify";
 

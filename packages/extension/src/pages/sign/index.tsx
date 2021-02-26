@@ -21,7 +21,7 @@ import {
   useFeeConfig,
   useMemoConfig,
   useSignDocAmountConfig,
-} from "@keplr/hooks";
+} from "@keplr-wallet/hooks";
 
 enum Tab {
   Details,

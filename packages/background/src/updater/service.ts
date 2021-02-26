@@ -1,10 +1,10 @@
 import { inject, singleton, delay } from "tsyringe";
 import { TYPES } from "../types";
 
-import { ChainInfo } from "@keplr/types";
+import { ChainInfo } from "@keplr-wallet/types";
 import Axios from "axios";
-import { KVStore } from "@keplr/common";
-import { ChainIdHelper } from "@keplr/cosmos";
+import { KVStore } from "@keplr-wallet/common";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
 
 @singleton()

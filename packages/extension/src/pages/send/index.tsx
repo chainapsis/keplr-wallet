@@ -20,7 +20,7 @@ import { Button } from "reactstrap";
 import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
-import { useSendTxConfig } from "@keplr/hooks";
+import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../config";
 
 export const SendPage: FunctionComponent = observer(() => {

@@ -22,10 +22,10 @@ import {
   ENSNotSupportedError,
   ENSFailedToFetchError,
   ENSIsFetchingError,
-} from "@keplr/hooks";
+} from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
-import { ObservableEnsFetcher } from "@keplr/ens";
+import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;

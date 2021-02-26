@@ -2,9 +2,9 @@ import { singleton, inject } from "tsyringe";
 import { TYPES } from "../types";
 
 import { InteractionWaitingData } from "./types";
-import { Env, FnRequestInteractionOptions } from "@keplr/router";
+import { Env, FnRequestInteractionOptions } from "@keplr-wallet/router";
 import { PushInteractionDataMsg } from "./foreground";
-import { RNG } from "@keplr/crypto";
+import { RNG } from "@keplr-wallet/crypto";
 
 @singleton()
 export class InteractionService {

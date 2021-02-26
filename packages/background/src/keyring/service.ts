@@ -8,15 +8,15 @@ import {
   MultiKeyStoreInfoWithSelected,
 } from "./keyring";
 
-import { Bech32Address } from "@keplr/cosmos";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { BIP44HDPath } from "./types";
 
-import { KVStore } from "@keplr/common";
+import { KVStore } from "@keplr-wallet/common";
 
 import { ChainsService } from "../chains";
 import { LedgerService } from "../ledger";
-import { BIP44, ChainInfo } from "@keplr/types";
-import { Env, MessageRequester, WEBPAGE_PORT } from "@keplr/router";
+import { BIP44, ChainInfo } from "@keplr-wallet/types";
+import { Env, MessageRequester, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
@@ -30,9 +30,9 @@ import {
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
-import { RNG } from "@keplr/crypto";
+import { RNG } from "@keplr-wallet/crypto";
 import { KeyStoreChangedEventMsg } from "./webpage";
-import { cosmos } from "@keplr/cosmos";
+import { cosmos } from "@keplr-wallet/cosmos";
 
 @singleton()
 export class KeyRingService {

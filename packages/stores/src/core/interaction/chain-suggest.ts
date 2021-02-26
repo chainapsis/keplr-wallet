@@ -1,6 +1,6 @@
 import { InteractionStore } from "./interaction";
-import { ChainInfo } from "@keplr/types";
-import { SuggestChainInfoMsg } from "@keplr/background";
+import { ChainInfo } from "@keplr-wallet/types";
+import { SuggestChainInfoMsg } from "@keplr-wallet/background";
 import { flow, makeObservable, observable } from "mobx";
 
 export class ChainSuggestStore {

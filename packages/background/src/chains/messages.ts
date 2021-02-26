@@ -1,6 +1,6 @@
-import { Message } from "@keplr/router";
+import { Message } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "./types";
-import { ChainInfo } from "@keplr/types";
+import { ChainInfo } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 
 export class GetChainInfosMsg extends Message<{

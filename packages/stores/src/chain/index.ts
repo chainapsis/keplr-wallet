@@ -1,7 +1,7 @@
 import { action, computed, makeObservable, observable } from "mobx";
-import { ChainInfo } from "@keplr/types";
+import { ChainInfo } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
-import { ChainIdHelper } from "@keplr/cosmos";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { DeepReadonly } from "utility-types";
 
 export type ChainInfoOverrider<C extends ChainInfo = ChainInfo> = (

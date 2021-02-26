@@ -1,4 +1,4 @@
-import { Router } from "@keplr/router";
+import { Router } from "@keplr-wallet/router";
 import { ApproveInteractionMsg, RejectInteractionMsg } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
