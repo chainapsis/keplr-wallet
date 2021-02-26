@@ -1,6 +1,6 @@
 {
   "name": "@keplr/hooks",
-  "version": "0.0.1-alpha.0",
+  "version": "0.8.0-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -19,20 +19,20 @@
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@keplr/background": "0.0.1-alpha.0",
-    "@keplr/common": "0.0.1-alpha.0",
-    "@keplr/cosmos": "0.0.1-alpha.0",
-    "@keplr/crypto": "0.0.1-alpha.0",
-    "@keplr/ens": "0.0.1-alpha.0",
-    "@keplr/popup": "0.0.1-alpha.0",
-    "@keplr/stores": "0.0.1-alpha.0",
-    "@keplr/types": "0.0.1-alpha.0",
-    "@keplr/unit": "0.0.1-alpha.0",
+    "@keplr/background": "^0.8.0-rc.0",
+    "@keplr/common": "^0.8.0-rc.0",
+    "@keplr/cosmos": "^0.8.0-rc.0",
+    "@keplr/crypto": "^0.8.0-rc.0",
+    "@keplr/ens": "^0.8.0-rc.0",
+    "@keplr/popup": "^0.8.0-rc.0",
+    "@keplr/stores": "^0.8.0-rc.0",
+    "@keplr/types": "^0.8.0-rc.0",
+    "@keplr/unit": "^0.8.0-rc.0",
+    "long": "^4.0.0",
     "mobx": "^6.1.7",
     "mobx-utils": "^6.0.3",
     "react": "^16.14.0",
     "react-router": "^5.1.2",
-    "utility-types": "^3.10.0",
-    "long": "^4.0.0"
+    "utility-types": "^3.10.0"
   }
 }

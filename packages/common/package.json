@@ -1,6 +1,6 @@
 {
   "name": "@keplr/common",
-  "version": "0.0.1-alpha.0",
+  "version": "0.8.0-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",

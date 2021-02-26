@@ -1,6 +1,6 @@
 {
   "name": "@keplr/provider",
-  "version": "0.0.1-alpha.0",
+  "version": "0.8.0-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -20,11 +20,11 @@
     "@cosmjs/encoding": "^0.24.0-alpha.25",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
-    "@keplr/background": "0.0.1-alpha.0",
-    "@keplr/cosmos": "0.0.1-alpha.0",
-    "@keplr/router": "0.0.1-alpha.0",
-    "@keplr/types": "0.0.1-alpha.0",
-    "@keplr/unit": "0.0.1-alpha.0",
+    "@keplr/background": "^0.8.0-rc.0",
+    "@keplr/cosmos": "^0.8.0-rc.0",
+    "@keplr/router": "^0.8.0-rc.0",
+    "@keplr/types": "^0.8.0-rc.0",
+    "@keplr/unit": "^0.8.0-rc.0",
     "buffer": "^6.0.3",
     "secretjs": "^0.10.4"
   }

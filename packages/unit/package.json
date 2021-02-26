@@ -1,6 +1,6 @@
 {
   "name": "@keplr/unit",
-  "version": "0.0.1-alpha.0",
+  "version": "0.8.0-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -14,7 +14,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr/types": "0.0.1-alpha.0",
+    "@keplr/types": "^0.8.0-rc.0",
     "big-integer": "^1.6.48",
     "utility-types": "^3.10.0"
   },
