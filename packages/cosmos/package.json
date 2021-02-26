@@ -5,6 +5,9 @@
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "clean": "rm -rf build",
     "build": "tsc; mkdir -p build/stargate/proto/generated && cp ./src/stargate/proto/generated/* ./build/stargate/proto/generated",
