@@ -15,7 +15,8 @@
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
     "ci": "yarn install --frozen-lockfile && yarn build && yarn test",
-    "ci-lint": "yarn install --frozen-lockfile && yarn lint-test"
+    "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
+    "ci-publish": "yarn install --frozen-lockfile && yarn clean && lerna run build --ignore @keplr/extension && lerna publish from-git"
   },
   "pre-commit": [
     "lint-test"
