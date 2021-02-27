@@ -20,7 +20,22 @@ const watchFolders = [
 ];
 
 module.exports = {
+  projectRoot: path.resolve(__dirname, '.'),
   watchFolders,
+  resolver: {
+    extraNodeModules: {
+      crypto: path.resolve(__dirname, 'node_modules/react-native-crypto'),
+      stream: path.resolve(__dirname, '../../node_modules/stream-browserify'),
+      string_decoder: path.resolve(
+        __dirname,
+        '../../node_modules/string_decoder',
+      ),
+      path: path.resolve(__dirname, '../../node_modules/path-browserify'),
+      http: path.resolve(__dirname, '../../node_modules/http-browserify'),
+      https: path.resolve(__dirname, '../../node_modules/https-browserify'),
+      os: path.resolve(__dirname, '../../node_modules/os-browserify'),
+    },
+  },
   transformer: {
     getTransformOptions: async () => ({
       transform: {
