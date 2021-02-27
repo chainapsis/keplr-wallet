@@ -3,9 +3,17 @@
   "version": "0.7.2",
   "description": "Keplr is a browser extension wallet for the Inter blockchain ecosystem.",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/@react-native-community/**",
+      "**/react-native",
+      "**/react-native/**",
+      "**/jetifier"
+    ]
+  },
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
