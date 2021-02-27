@@ -1,5 +1,5 @@
 import {
-  Router,
+  ExtensionRouter,
   ExtensionGuards,
   ExtensionEnv,
   BACKGROUND_PORT,
@@ -10,7 +10,7 @@ import { init } from "@keplr-wallet/background";
 
 import { EmbedChainInfos, PrivilegedOrigins } from "../config";
 
-const router = new Router(ExtensionEnv.produceEnv);
+const router = new ExtensionRouter(ExtensionEnv.produceEnv);
 router.addGuard(ExtensionGuards.checkOriginIsValid);
 router.addGuard(ExtensionGuards.checkMessageIsInternal);
 

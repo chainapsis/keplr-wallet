@@ -14,7 +14,7 @@ import {
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
-  Router,
+  ExtensionRouter,
   ContentScriptEnv,
   ContentScriptGuards,
   InExtensionMessageRequester,
@@ -38,7 +38,7 @@ export class RootStore {
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
   constructor() {
-    const router = new Router(ContentScriptEnv.produceEnv);
+    const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 
     // Order is important.
