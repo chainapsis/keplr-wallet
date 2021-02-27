@@ -10,7 +10,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "react": "16.13.1",
+    "react": "^16.14.0",
     "react-native": "0.63.4"
   },
   "devDependencies": {
@@ -21,15 +21,10 @@
     "@types/react-native": "^0.63.2",
     "@types/react-test-renderer": "^16.9.2",
     "babel-jest": "^25.1.0",
-    "eslint": "^6.5.1",
     "get-yarn-workspaces": "^1.0.2",
     "jest": "^25.1.0",
     "metro-react-native-babel-preset": "^0.59.0",
-    "react-test-renderer": "16.13.1",
-    "typescript": "^3.8.3"
-  },
-  "resolutions": {
-    "@types/react": "^16"
+    "react-test-renderer": "16.13.1"
   },
   "jest": {
     "preset": "react-native",
