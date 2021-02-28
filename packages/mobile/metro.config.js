@@ -31,7 +31,10 @@ module.exports = {
     // and use the only react in the root project.
     blacklistRE: blacklist([/packages\/mobile\/node_modules\/react\/.*/]),
     extraNodeModules: {
-      crypto: path.resolve(__dirname, "./crypto"),
+      crypto: path.resolve(
+        __dirname,
+        "./node_modules/expo-standard-web-crypto"
+      ),
       buffer: path.resolve(__dirname, "../../node_modules/buffer"),
       stream: path.resolve(__dirname, "../../node_modules/stream-browserify"),
       string_decoder: path.resolve(

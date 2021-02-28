@@ -3,7 +3,7 @@ import { RNRouter } from "./src/router";
 import { MemoryKVStore } from "@keplr-wallet/common";
 
 // TODO: Implement the env producer for the react native
-const router = new RNRouter(undefined as any);
+const router = new RNRouter();
 
 // TODO: Implement the KVStore for the react-native async storage.
 init(

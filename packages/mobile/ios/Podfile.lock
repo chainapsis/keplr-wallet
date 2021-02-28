@@ -16,6 +16,8 @@ PODS:
   - EXPermissions (10.0.0):
     - UMCore
     - UMPermissionsInterface
+  - EXRandom (11.0.0):
+    - React-Core
   - FBLazyVector (0.63.4)
   - FBReactNativeSpec (0.63.4):
     - Folly (= 2020.01.13.00)
@@ -336,6 +338,7 @@ DEPENDENCIES:
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - EXPermissions (from `../node_modules/expo-permissions/ios`)
+  - EXRandom (from `../node_modules/expo-random/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
   - Flipper (~> 0.54.0)
@@ -422,6 +425,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image-loader/ios"
   EXPermissions:
     :path: "../node_modules/expo-permissions/ios"
+  EXRandom:
+    :path: "../node_modules/expo-random/ios"
   FBLazyVector:
     :path: "../node_modules/react-native/Libraries/FBLazyVector"
   FBReactNativeSpec:
@@ -508,6 +513,7 @@ SPEC CHECKSUMS:
   EXFileSystem: 0e4974ab77bff04cda68d2886d070cbe64b93a6b
   EXImageLoader: f96ec9992733a4224418bbd9382e5485c8948944
   EXPermissions: 17d4846ad1880f6891c74ae58ca1acb43e47ed47
+  EXRandom: 4f71ea72eaeea674c4597e536e3014b4387af21a
   FBLazyVector: 3bb422f41b18121b71783a905c10e58606f7dc3e
   FBReactNativeSpec: f2c97f2529dd79c083355182cc158c9f98f4bd6e
   Flipper: be611d4b742d8c87fbae2ca5f44603a02539e365

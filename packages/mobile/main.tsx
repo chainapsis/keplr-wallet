@@ -31,7 +31,7 @@ import { useInteractionInfo } from "@keplr-wallet/hooks";
 declare const global: { HermesInternal: null | {} };
 
 export const Main: FunctionComponent = observer(() => {
-  useInteractionInfo();
+  // useInteractionInfo();
 
   return (
     <>

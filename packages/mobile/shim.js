@@ -1,3 +1,8 @@
+import { polyfillWebCrypto } from "expo-standard-web-crypto";
+
+polyfillWebCrypto();
+// crypto is now globally defined
+
 if (typeof __dirname === "undefined") global.__dirname = "/";
 if (typeof __filename === "undefined") global.__filename = "";
 if (typeof process === "undefined") {

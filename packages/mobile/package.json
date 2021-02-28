@@ -19,6 +19,8 @@
     "@keplr-wallet/hooks": "0.8.0-rc.1",
     "@keplr-wallet/router": "0.8.0-rc.1",
     "buffer": "^6.0.3",
+    "expo-random": "^11.0.0",
+    "expo-standard-web-crypto": "^1.0.0",
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",
     "mobx": "^6.1.7",
