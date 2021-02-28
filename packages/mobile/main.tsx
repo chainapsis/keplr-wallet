@@ -9,34 +9,23 @@
  */
 
 import React, { FunctionComponent } from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from "react-native";
+import { SafeAreaView, StatusBar } from "react-native";
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from "react-native/Libraries/NewAppScreen";
 import { observer } from "mobx-react-lite";
-import { useInteractionInfo } from "@keplr-wallet/hooks";
+import { StoreProvider } from "./src/stores";
+import { MainScreen } from "./src/screens/main";
 
 declare const global: { HermesInternal: null | {} };
 
 export const Main: FunctionComponent = observer(() => {
-  // useInteractionInfo();
-
   return (
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
+        <StoreProvider>
+          <MainScreen />
+        </StoreProvider>
+        {/*
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}
@@ -76,11 +65,13 @@ export const Main: FunctionComponent = observer(() => {
             <LearnMoreLinks />
           </View>
         </ScrollView>
+        */}
       </SafeAreaView>
     </>
   );
 });
 
+/*
 const styles = StyleSheet.create({
   scrollView: {
     backgroundColor: Colors.lighter,
@@ -119,3 +110,4 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 });
+ */
