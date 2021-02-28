@@ -9,8 +9,14 @@ const router = new RNRouter(undefined as any);
 init(
   router,
   (key: string) => new MemoryKVStore(key),
-  undefined as any,
+  {
+    sendMessage: () => {
+      throw new Error('TODO: Implement me');
+    },
+  },
   [],
   [],
-  undefined as any,
+  (array) => {
+    return Promise.resolve(crypto.getRandomValues(array));
+  },
 );

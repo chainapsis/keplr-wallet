@@ -2,6 +2,7 @@
  * @format
  */
 
+import './crypto';
 import './shim';
 
 import 'text-encoding';

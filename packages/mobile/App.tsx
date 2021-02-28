@@ -25,10 +25,14 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import {observer} from 'mobx-react-lite';
+import {useInteractionInfo} from '@keplr-wallet/hooks';
 
 declare const global: {HermesInternal: null | {}};
 
-const App = () => {
+const App = observer(() => {
+  useInteractionInfo();
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -74,7 +78,7 @@ const App = () => {
       </SafeAreaView>
     </>
   );
-};
+});
 
 const styles = StyleSheet.create({
   scrollView: {

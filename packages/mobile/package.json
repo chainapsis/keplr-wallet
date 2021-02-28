@@ -2,6 +2,11 @@
   "name": "mobile",
   "version": "0.0.1",
   "private": true,
+  "workspaces": {
+    "nohoist": [
+      "mobx-react-lite"
+    ]
+  },
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -11,6 +16,10 @@
   "dependencies": {
     "@keplr-wallet/background": "0.8.0-rc.1",
     "@keplr-wallet/router": "0.8.0-rc.1",
+    "@keplr-wallet/hooks": "0.8.0-rc.1",
+    "mobx": "^6.1.7",
+    "mobx-react-lite": "^3.2.0",
+    "buffer": "^6.0.3",
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",
