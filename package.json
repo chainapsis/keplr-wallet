@@ -12,6 +12,9 @@
       "**/react-native",
       "**/react-native/**",
       "**/react-native-*",
+      "**/expo-*",
+      "**/@unimodules/**",
+      "**/unimodules-*",
       "**/jetifier"
     ]
   },
