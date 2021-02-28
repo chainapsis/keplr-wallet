@@ -1,6 +1,6 @@
-import {init} from '@keplr-wallet/background';
-import {RNRouter} from './src/router';
-import {MemoryKVStore} from '@keplr-wallet/common';
+import { init } from "@keplr-wallet/background";
+import { RNRouter } from "./src/router";
+import { MemoryKVStore } from "@keplr-wallet/common";
 
 // TODO: Implement the env producer for the react native
 const router = new RNRouter(undefined as any);
@@ -11,12 +11,12 @@ init(
   (key: string) => new MemoryKVStore(key),
   {
     sendMessage: () => {
-      throw new Error('TODO: Implement me');
+      throw new Error("TODO: Implement me");
     },
   },
   [],
   [],
   (array) => {
     return Promise.resolve(crypto.getRandomValues(array));
-  },
+  }
 );

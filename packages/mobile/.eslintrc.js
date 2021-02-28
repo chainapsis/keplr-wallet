@@ -1,4 +1,8 @@
+const config = require("../../.eslintrc");
+
 module.exports = {
-  root: true,
-  extends: '@react-native-community',
+  ...config,
+  ...{
+    extends: ["@react-native-community", ...config.extends],
+  },
 };

@@ -1,1 +1,1 @@
-export * from './rn-router';
+export * from "./rn-router";
