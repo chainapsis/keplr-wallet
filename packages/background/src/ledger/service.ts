@@ -118,11 +118,14 @@ export class LedgerService {
   }
 
   async useLedger<T>(env: Env, fn: (ledger: Ledger) => Promise<T>): Promise<T> {
-    const ledger = await this.initLedger(env);
+    let ledger: Ledger | undefined;
     try {
+      ledger = await this.initLedger(env);
       return await fn(ledger);
     } finally {
-      await ledger.close();
+      if (ledger) {
+        await ledger.close();
+      }
     }
   }
 
