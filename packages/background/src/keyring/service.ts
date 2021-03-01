@@ -16,7 +16,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
 import { LedgerService } from "../ledger";
 import { BIP44, ChainInfo } from "@keplr-wallet/types";
-import { Env, MessageRequester, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { APP_PORT, Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
@@ -31,7 +31,6 @@ import {
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
 import { RNG } from "@keplr-wallet/crypto";
-import { KeyStoreChangedEventMsg } from "./webpage";
 import { cosmos } from "@keplr-wallet/cosmos";
 
 @singleton()
@@ -51,8 +50,6 @@ export class KeyRingService {
     public readonly permissionService: PermissionService,
     @inject(LedgerService)
     ledgerService: LedgerService,
-    @inject(TYPES.MsgRequesterToWebPage)
-    protected readonly msgRequester: MessageRequester,
     @inject(TYPES.RNG)
     protected readonly rng: RNG
   ) {
@@ -219,9 +216,8 @@ export class KeyRingService {
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
-      await this.interactionService.dispatchData(
-        env,
-        "/sign",
+      await this.interactionService.dispatchEvent(
+        APP_PORT,
         "request-sign-end",
         {}
       );
@@ -263,9 +259,8 @@ export class KeyRingService {
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
-      await this.interactionService.dispatchData(
-        env,
-        "/sign",
+      await this.interactionService.dispatchEvent(
+        APP_PORT,
         "request-sign-end",
         {}
       );
@@ -314,13 +309,11 @@ export class KeyRingService {
     try {
       return await this.keyRing.changeKeyStoreFromMultiKeyStore(index);
     } finally {
-      this.msgRequester
-        .sendMessage(WEBPAGE_PORT, new KeyStoreChangedEventMsg())
-        .catch((e) => {
-          // No need to handle the error case.
-          // Just ignore.
-          console.log(e);
-        });
+      await this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
     }
   }
 

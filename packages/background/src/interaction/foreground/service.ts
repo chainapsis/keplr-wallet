@@ -7,4 +7,8 @@ export class InteractionForegroundService {
   pushData(data: InteractionWaitingData): void {
     this.handler.onInteractionDataReceived(data);
   }
+
+  pushEvent(data: Omit<InteractionWaitingData, "id">): void {
+    this.handler.onEventDataReceived(data);
+  }
 }

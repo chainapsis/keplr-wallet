@@ -2,8 +2,12 @@ import { singleton, inject } from "tsyringe";
 import { TYPES } from "../types";
 
 import { InteractionWaitingData } from "./types";
-import { Env, FnRequestInteractionOptions } from "@keplr-wallet/router";
-import { PushInteractionDataMsg } from "./foreground";
+import {
+  Env,
+  FnRequestInteractionOptions,
+  MessageRequester,
+} from "@keplr-wallet/router";
+import { PushEventDataMsg, PushInteractionDataMsg } from "./foreground";
 import { RNG } from "@keplr-wallet/crypto";
 
 @singleton()
@@ -14,26 +18,29 @@ export class InteractionService {
     { onApprove: (result: unknown) => void; onReject: (e: Error) => void }
   > = new Map();
 
-  constructor(@inject(TYPES.RNG) protected readonly rng: RNG) {}
+  constructor(
+    @inject(TYPES.EventMsgRequester)
+    protected readonly eventMsgRequester: MessageRequester,
+    @inject(TYPES.RNG) protected readonly rng: RNG
+  ) {}
 
-  // Dispatch the data to the frontend. Don't wait any interaction.
-  async dispatchData(
-    env: Env,
-    url: string,
-    type: string,
-    data: unknown,
-    options?: FnRequestInteractionOptions
-  ) {
+  // Dispatch the event to the frontend. Don't wait any interaction.
+  // And, don't ensure that the event is delivered successfully, just ignore the any errors.
+  async dispatchEvent(port: string, type: string, data: unknown) {
     if (!type) {
       throw new Error("Type should not be empty");
     }
 
-    // TODO: Add timeout?
-    const interactionWaitingData = await this.addDataToMap(type, data);
+    const msg = new PushEventDataMsg({
+      type,
+      data,
+    });
 
-    const msg = new PushInteractionDataMsg(interactionWaitingData);
-
-    await env.requestInteraction(url, msg, options);
+    try {
+      await this.eventMsgRequester.sendMessage(port, msg);
+    } catch (e) {
+      console.log(`Failed to send the event to ${port}: ${e.message}`);
+    }
   }
 
   async waitApprove(

@@ -5,7 +5,7 @@ import { Ledger } from "./ledger";
 
 import delay from "delay";
 
-import { Env } from "@keplr-wallet/router";
+import { APP_PORT, Env } from "@keplr-wallet/router";
 import { BIP44HDPath } from "../keyring";
 import { KVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
@@ -37,19 +37,10 @@ export class LedgerService {
       } finally {
         // Notify UI Ledger pubkey derivation succeeded only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchData(
-            env,
-            "/ledger-grant",
-            "ledger-init",
-            {
-              event: "get-pubkey",
-              success: true,
-            },
-            {
-              forceOpenWindow: true,
-              channel: "ledger",
-            }
-          );
+          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+            event: "get-pubkey",
+            success: true,
+          });
         }
       }
     });
@@ -89,37 +80,19 @@ export class LedgerService {
         );
         // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchData(
-            env,
-            "/ledger-grant",
-            "ledger-init",
-            {
-              event: "sign",
-              success: true,
-            },
-            {
-              forceOpenWindow: true,
-              channel: "ledger",
-            }
-          );
+          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+            event: "sign",
+            success: true,
+          });
         }
         return signature;
       } catch (e) {
         // Notify UI Ledger signing failed only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchData(
-            env,
-            "/ledger-grant",
-            "ledger-init",
-            {
-              event: "sign",
-              success: false,
-            },
-            {
-              forceOpenWindow: true,
-              channel: "ledger",
-            }
-          );
+          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+            event: "sign",
+            success: false,
+          });
         }
         throw e;
       }
@@ -199,16 +172,11 @@ export class LedgerService {
           (async () => {
             // If ledger is not inited in 5 minutes, abort it.
             await delay(5 * 60 * 1000);
-            await this.interactionService.dispatchData(
-              env,
-              "/ledger-grant",
+            await this.interactionService.dispatchEvent(
+              APP_PORT,
               "ledger-init",
               {
                 event: "init-aborted",
-              },
-              {
-                forceOpenWindow: true,
-                channel: "ledger",
               }
             );
             throw new Error("Ledger init timeout");
