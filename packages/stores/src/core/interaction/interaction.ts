@@ -47,7 +47,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     type: string
   ): Omit<InteractionWaitingData<T>, "id">[] {
     return (
-      (this.datas.get(type) as Omit<InteractionWaitingData<T>, "id">[]) ?? []
+      (this.events.get(type) as Omit<InteractionWaitingData<T>, "id">[]) ?? []
     );
   }
 
