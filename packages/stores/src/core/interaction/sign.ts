@@ -60,14 +60,11 @@ export class SignInteractionStore {
   }
 
   protected isEnded(): boolean {
-    return this.interactionStore.getDatas<void>("request-sign-end").length > 0;
+    return this.interactionStore.getEvents<void>("request-sign-end").length > 0;
   }
 
   protected clearEnded() {
-    const datas = this.interactionStore.getDatas<void>("request-sign-end");
-    for (const data of datas) {
-      this.interactionStore.removeData(data.type, data.id);
-    }
+    this.interactionStore.clearEvent("request-sign-end");
   }
 
   protected waitEnd(): Promise<void> {

@@ -65,7 +65,7 @@ export class LedgerInitStore {
 
   @computed
   get isGetPubKeySucceeded(): boolean {
-    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+    const datas = this.interactionStore.getEvents<LedgerInitDataType>(
       "ledger-init"
     );
 
@@ -85,7 +85,7 @@ export class LedgerInitStore {
 
   @computed
   get isSignSucceeded(): boolean {
-    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+    const datas = this.interactionStore.getEvents<LedgerInitDataType>(
       "ledger-init"
     );
 
@@ -100,7 +100,7 @@ export class LedgerInitStore {
 
   @computed
   get isSignRejected(): boolean {
-    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+    const datas = this.interactionStore.getEvents<LedgerInitDataType>(
       "ledger-init"
     );
 
@@ -115,7 +115,7 @@ export class LedgerInitStore {
 
   @computed
   get isInitAborted(): boolean {
-    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+    const datas = this.interactionStore.getEvents<LedgerInitDataType>(
       "ledger-init"
     );
 
