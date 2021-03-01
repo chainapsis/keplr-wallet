@@ -1,4 +1,4 @@
-import { Router } from "./index";
+import { Router } from "./types";
 import { JSONUint8Array } from "../json-uint8-array";
 import { MessageSender } from "../types";
 import { Result } from "../interfaces";
