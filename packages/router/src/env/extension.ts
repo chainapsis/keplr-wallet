@@ -19,7 +19,11 @@ async function openPopupWindow(
 
 export class ExtensionEnv {
   static readonly produceEnv = (sender: MessageSender): Env => {
-    const isInternalMsg = ExtensionEnv.checkIsInternalMessage(sender);
+    const isInternalMsg = ExtensionEnv.checkIsInternalMessage(
+      sender,
+      browser.runtime.id,
+      browser.runtime.getURL("/")
+    );
 
     // Add additional query string for letting the extension know it is for interaction.
     const queryString = `interaction=true&interactionInternal=${isInternalMsg}`;
@@ -120,18 +124,20 @@ export class ExtensionEnv {
     }
   };
 
-  protected static readonly checkIsInternalMessage = (
-    sender: MessageSender
+  public static readonly checkIsInternalMessage = (
+    sender: MessageSender,
+    extensionId: string,
+    extensionUrl: string
   ): boolean => {
     if (!sender.url) {
-      return false;
+      throw new Error("Empty sender url");
     }
     const url = new URL(sender.url);
     if (!url.origin || url.origin === "null") {
       throw new Error("Invalid sender url");
     }
 
-    const browserURL = new URL(browser.runtime.getURL("/"));
+    const browserURL = new URL(extensionUrl);
     if (!browserURL.origin || browserURL.origin === "null") {
       throw new Error("Invalid browser url");
     }
@@ -140,6 +146,6 @@ export class ExtensionEnv {
       return false;
     }
 
-    return sender.id === browser.runtime.id;
+    return sender.id === extensionId;
   };
 }
