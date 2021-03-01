@@ -54,7 +54,16 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
       // So, don't need to consider the window refocusing.
       window.close();
     }
-  }, [ledgerInitStore.isGetPubKeySucceeded, ledgerInitStore.isSignCompleted]);
+
+    if (ledgerInitStore.isInitAborted) {
+      // If ledger init is aborted due to the timeout on the background, just close the window.
+      window.close();
+    }
+  }, [
+    ledgerInitStore.isGetPubKeySucceeded,
+    ledgerInitStore.isSignCompleted,
+    ledgerInitStore.isInitAborted,
+  ]);
 
   const [initTryCount, setInitTryCount] = useState(0);
   const [initErrorOn, setInitErrorOn] = useState<LedgerInitErrorOn | undefined>(
