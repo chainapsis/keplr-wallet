@@ -156,34 +156,53 @@ export class LedgerService {
       } catch (e) {
         console.log(e);
 
-        await Promise.race([
-          this.interactionService.waitApprove(
-            env,
-            "/ledger-grant",
-            "ledger-init",
-            {
-              event: "init-failed",
-            },
-            {
-              forceOpenWindow: true,
-              channel: "ledger",
-            }
-          ),
-          (async () => {
-            // If ledger is not inited in 5 minutes, abort it.
-            await delay(5 * 60 * 1000);
-            await this.interactionService.dispatchEvent(
-              APP_PORT,
+        const timeoutAbortController = new AbortController();
+
+        try {
+          await Promise.race([
+            this.interactionService.waitApprove(
+              env,
+              "/ledger-grant",
               "ledger-init",
               {
-                event: "init-aborted",
+                event: "init-failed",
+              },
+              {
+                forceOpenWindow: true,
+                channel: "ledger",
               }
-            );
-            throw new Error("Ledger init timeout");
-          })(),
-          aborter.wait(),
-          this.testLedgerGrantUIOpened(),
-        ]);
+            ),
+            (async () => {
+              let timeoutAborted = false;
+              // If ledger is not inited in 5 minutes, abort it.
+              try {
+                await delay(5 * 60 * 1000, {
+                  signal: timeoutAbortController.signal,
+                });
+              } catch (e) {
+                if (e.name === "AbortError") {
+                  timeoutAborted = true;
+                } else {
+                  throw e;
+                }
+              }
+              if (!timeoutAborted) {
+                await this.interactionService.dispatchEvent(
+                  APP_PORT,
+                  "ledger-init",
+                  {
+                    event: "init-aborted",
+                  }
+                );
+                throw new Error("Ledger init timeout");
+              }
+            })(),
+            aborter.wait(),
+            this.testLedgerGrantUIOpened(),
+          ]);
+        } finally {
+          timeoutAbortController.abort();
+        }
       }
 
       retryCount++;
