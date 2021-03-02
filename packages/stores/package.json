@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf build",
+    "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
     "test": "mocha -r ts-node/register 'src/**/*.spec.ts'",

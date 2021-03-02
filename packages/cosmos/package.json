@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf build",
+    "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc; mkdir -p build/stargate/proto/generated && cp ./src/stargate/proto/generated/* ./build/stargate/proto/generated",
     "dev": "tsc -w",
     "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
