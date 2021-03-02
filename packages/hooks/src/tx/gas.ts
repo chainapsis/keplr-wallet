@@ -2,7 +2,7 @@ import { IGasConfig } from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { action, makeObservable, observable } from "mobx";
-import { useRef } from "react";
+import { useState } from "react";
 
 export class GasConfig extends TxChainSetter implements IGasConfig {
   @observable
@@ -42,8 +42,9 @@ export const useGasConfig = (
   chainId: string,
   initialGas: number = 0
 ) => {
-  const txConfig = useRef(new GasConfig(chainGetter, chainId, initialGas))
-    .current;
+  const [txConfig] = useState(
+    () => new GasConfig(chainGetter, chainId, initialGas)
+  );
   txConfig.setChain(chainId);
 
   return txConfig;

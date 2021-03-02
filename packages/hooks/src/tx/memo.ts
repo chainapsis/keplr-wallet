@@ -2,7 +2,7 @@ import { IMemoConfig } from "./types";
 import { action, makeObservable, observable } from "mobx";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { TxChainSetter } from "./chain";
-import { useRef } from "react";
+import { useState } from "react";
 
 export class MemoConfig extends TxChainSetter implements IMemoConfig {
   @observable
@@ -28,7 +28,7 @@ export class MemoConfig extends TxChainSetter implements IMemoConfig {
 }
 
 export const useMemoConfig = (chainGetter: ChainGetter, chainId: string) => {
-  const config = useRef(new MemoConfig(chainGetter, chainId)).current;
+  const [config] = useState(() => new MemoConfig(chainGetter, chainId));
   config.setChain(chainId);
 
   return config;

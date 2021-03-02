@@ -1,5 +1,5 @@
 import { action, computed, makeObservable, observable } from "mobx";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { IFeeConfig, IMemoConfig } from "../tx";
 import { cosmos, SignDocWrapper } from "@keplr-wallet/cosmos";
 import Long from "long";
@@ -92,7 +92,7 @@ export const useSignDocHelper = (
   feeConfig: IFeeConfig,
   memoConfig: IMemoConfig
 ) => {
-  const helper = useRef(new SignDocHelper(feeConfig, memoConfig)).current;
+  const [helper] = useState(() => new SignDocHelper(feeConfig, memoConfig));
 
   return helper;
 };

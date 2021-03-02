@@ -3,7 +3,7 @@ import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainGetter, HasMapStore } from "@keplr-wallet/stores";
 import { DeepReadonly } from "utility-types";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export interface AddressBookSelectHandler {
   setRecipient(recipient: string): void;
@@ -127,8 +127,9 @@ export const useAddressBookConfig = (
   chainId: string,
   handler: AddressBookSelectHandler
 ) => {
-  const configMap = useRef(new AddressBookConfigMap(kvStore, chainGetter))
-    .current;
+  const [configMap] = useState(
+    () => new AddressBookConfigMap(kvStore, chainGetter)
+  );
 
   const config = configMap.getAddressBookConfig(chainId);
   config.setSelectHandler(handler);
