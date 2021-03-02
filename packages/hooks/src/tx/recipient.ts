@@ -136,7 +136,7 @@ export const useRecipientConfig = (
   chainId: string,
   ensEndpoint?: string
 ) => {
-  const [config] = useState(new RecipientConfig(chainGetter, chainId));
+  const [config] = useState(() => new RecipientConfig(chainGetter, chainId));
   config.setChain(chainId);
   config.setENSEndpoint(ensEndpoint);
 

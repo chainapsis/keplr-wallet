@@ -28,7 +28,7 @@ export class MemoConfig extends TxChainSetter implements IMemoConfig {
 }
 
 export const useMemoConfig = (chainGetter: ChainGetter, chainId: string) => {
-  const [config] = useState(new MemoConfig(chainGetter, chainId));
+  const [config] = useState(() => new MemoConfig(chainGetter, chainId));
   config.setChain(chainId);
 
   return config;

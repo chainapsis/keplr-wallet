@@ -56,7 +56,7 @@ export const useSendGasConfig = (
   sendMsgOpts: MsgOpts["send"]
 ) => {
   const [gasConfig] = useState(
-    new SendGasConfig(chainGetter, chainId, amountConfig, sendMsgOpts)
+    () => new SendGasConfig(chainGetter, chainId, amountConfig, sendMsgOpts)
   );
   gasConfig.setChain(chainId);
   gasConfig.setSendMsgOpts(sendMsgOpts);

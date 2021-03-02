@@ -444,7 +444,9 @@ export const WasmExecutionMsgView: FunctionComponent<{
 
   const toggleOpen = () => setIsOpen((isOpen) => !isOpen);
 
-  const [detailsMsg, setDetailsMsg] = useState(JSON.stringify(msg, null, 2));
+  const [detailsMsg, setDetailsMsg] = useState(() =>
+    JSON.stringify(msg, null, 2)
+  );
   const [warningMsg, setWarningMsg] = useState("");
 
   useEffect(() => {

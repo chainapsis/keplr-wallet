@@ -164,7 +164,7 @@ export const useAmountConfig = (
   queryBalances: ObservableQueryBalances
 ) => {
   const [txConfig] = useState(
-    new AmountConfig(chainGetter, chainId, sender, queryBalances)
+    () => new AmountConfig(chainGetter, chainId, sender, queryBalances)
   );
   txConfig.setChain(chainId);
   txConfig.setQueryBalances(queryBalances);
