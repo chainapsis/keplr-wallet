@@ -8,7 +8,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
-    "clean": "rm -rf node_modules; lerna run clean",
+    "clean": "lerna run clean; rm -rf node_modules",
     "build": "lerna run build",
     "test": "lerna run test",
     "lint-test": "lerna run lint-test",
