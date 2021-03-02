@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true
+          token: ${{ secrets.TOKEN }}
       - name: Setup node
         uses: actions/setup-node@v2
         with:
@@ -26,5 +29,5 @@ jobs:
       - run: git-secret reveal -f -v -p $GPG_PASSPHRASE
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      - run: git submodule init && git submodule update
+      - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
       - run: yarn ci
