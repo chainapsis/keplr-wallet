@@ -10,11 +10,21 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Env } from "@keplr-wallet/router";
+import pDebounce from "p-debounce";
 
 import { Buffer } from "buffer/";
 
 @singleton()
 export class SecretWasmService {
+  protected debouncerMap: Map<
+    string,
+    (
+      env: Env,
+      chainInfo: ChainInfo,
+      bech32Address: string
+    ) => Promise<Uint8Array>
+  > = new Map();
+
   protected cacheEnigmaUtils: Map<string, EnigmaUtils> = new Map();
 
   constructor(
@@ -112,12 +122,36 @@ export class SecretWasmService {
     return utils;
   }
 
-  private async getSeed(env: Env, chainInfo: ChainInfo): Promise<Uint8Array> {
+  // GetSeed will be debounced if the prior promise is pending.
+  // GetSeed can be occured multiple times at once,
+  // this case can be problem if the cache doesn't exist and key type is ledger,
+  // because multiple requests to ledger will make the connection unstable.
+  protected async getSeed(env: Env, chainInfo: ChainInfo): Promise<Uint8Array> {
     const key = await this.keyRingService.getKey(chainInfo.chainId);
+    const bech32Address = new Bech32Address(key.address).toBech32(
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    );
+    const debouncerKey = `${env.isInternalMsg}/${chainInfo.chainId}/${bech32Address}`;
 
-    const storeKey = `seed-${chainInfo.chainId}-${new Bech32Address(
-      key.address
-    ).toBech32(chainInfo.bech32Config.bech32PrefixAccAddr)}`;
+    if (!this.debouncerMap.has(debouncerKey)) {
+      this.debouncerMap.set(
+        debouncerKey,
+        pDebounce.promise(this.getSeedInner.bind(this))
+      );
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const debouncedFn = this.debouncerMap.get(debouncerKey)!;
+
+    return await debouncedFn(env, chainInfo, bech32Address);
+  }
+
+  protected async getSeedInner(
+    env: Env,
+    chainInfo: ChainInfo,
+    bech32Address: string
+  ): Promise<Uint8Array> {
+    const storeKey = `seed-${chainInfo.chainId}-${bech32Address}`;
 
     const cached = await this.kvStore.get<string>(storeKey);
     if (cached) {

@@ -12241,6 +12241,11 @@ p-cancelable@^1.0.0:
   resolved "https://registry.yarnpkg.com/p-cancelable/-/p-cancelable-1.1.0.tgz#d078d15a3af409220c886f1d9a0ca2e441ab26cc"
   integrity sha512-s73XxOZ4zpt1edZYZzvhqFa6uvQc1vwUa0K0BdtIZgQMAJj9IbebH+JkgKZc9h+B05PKHLOTl4ajG1BmNrVZlw==
 
+p-debounce@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/p-debounce/-/p-debounce-3.0.1.tgz#51c38b03aa09f319ec507f1d8aba831949c8bbf2"
+  integrity sha512-7n7FWY/f4gmVkd6BwC2EZRbTnAmZbL/Zdrc3qbJRnwkb3OUp4HbPlEN1XybpQk0MML6RDDdePMFIr4dOXXfPNw==
+
 p-defer@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/p-defer/-/p-defer-1.0.0.tgz#9f6eb182f6c9aa8cd743004a7d4f96b196b0fb0c"
