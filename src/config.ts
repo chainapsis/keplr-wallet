@@ -499,6 +499,19 @@ export const EmbedAccessOrigins: AccessOrigin[] = [
 export const FiatCurrencies: {
   [currency: string]: FiatCurrency;
 } = {
+  aud: {
+    currency: "aud",
+    symbol: "AU$",
+    parse: (value: number) => {
+      let fractionDigits = 2;
+      if (value < 0.01) {
+        fractionDigits = 4;
+      }
+      return value.toLocaleString("en-AU", {
+        maximumFractionDigits: fractionDigits
+      });
+    }
+  },
   usd: {
     currency: "usd",
     symbol: "$",
