@@ -125,25 +125,15 @@ export class Crypto {
     text: string,
     params: ScryptParams
   ): Promise<Uint8Array> {
-    return new Promise((resolve, reject) => {
-      const buf = Buffer.from(text);
+    const buf = Buffer.from(text);
 
-      scrypt(
-        buf,
-        Buffer.from(params.salt, "hex"),
-        params.n,
-        params.r,
-        params.p,
-        params.dklen,
-        (error, _, key) => {
-          if (error) {
-            reject(error);
-            return;
-          } else if (key) {
-            resolve(Buffer.from(key as any));
-          }
-        }
-      );
-    });
+    return await scrypt.scrypt(
+      buf,
+      Buffer.from(params.salt, "hex"),
+      params.n,
+      params.r,
+      params.p,
+      params.dklen
+    );
   }
 }
