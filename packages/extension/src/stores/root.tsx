@@ -1,5 +1,5 @@
 import { ChainStore } from "./chain";
-import { EmbedChainInfos } from "../config";
+import { EmbedChainInfos, FiatCurrencies } from "../config";
 import {
   KeyRingStore,
   InteractionStore,
@@ -21,6 +21,7 @@ import {
   APP_PORT,
 } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
+import { FiatCurrency } from "@keplr-wallet/types";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -92,62 +93,12 @@ export class RootStore {
 
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),
-      {
-        usd: {
-          currency: "usd",
-          symbol: "$",
-          maxDecimals: 2,
-          locale: "en-US",
-        },
-        eur: {
-          currency: "eur",
-          symbol: "€",
-          maxDecimals: 2,
-          locale: "de-DE",
-        },
-        gbp: {
-          currency: "gbp",
-          symbol: "£",
-          maxDecimals: 2,
-          locale: "en-GB",
-        },
-        cad: {
-          currency: "cad",
-          symbol: "CA$",
-          maxDecimals: 2,
-          locale: "en-CA",
-        },
-        rub: {
-          currency: "rub",
-          symbol: "₽",
-          maxDecimals: 0,
-          locale: "ru",
-        },
-        krw: {
-          currency: "krw",
-          symbol: "₩",
-          maxDecimals: 0,
-          locale: "ko-KR",
-        },
-        hkd: {
-          currency: "hkd",
-          symbol: "HK$",
-          maxDecimals: 1,
-          locale: "en-HK",
-        },
-        cny: {
-          currency: "cny",
-          symbol: "¥",
-          maxDecimals: 1,
-          locale: "zh-CN",
-        },
-        jpy: {
-          currency: "jpy",
-          symbol: "¥",
-          maxDecimals: 0,
-          locale: "ja-JP",
-        },
-      }
+      FiatCurrencies.reduce<{
+        [vsCurrency: string]: FiatCurrency;
+      }>((obj, fiat) => {
+        obj[fiat.currency] = fiat;
+        return obj;
+      }, {})
     );
 
     this.tokensStore = new TokensStore(

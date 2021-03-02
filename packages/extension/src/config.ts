@@ -1,5 +1,5 @@
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, FiatCurrency } from "@keplr-wallet/types";
 
 import {
   PRIVILEGED_ORIGINS,
@@ -462,6 +462,69 @@ export const EmbedChainInfos: ChainInfo[] = [
 
 // The origins that are able to pass any permission that external webpages can have.
 export const PrivilegedOrigins: string[] = PRIVILEGED_ORIGINS;
+
+export const FiatCurrencies: FiatCurrency[] = [
+  {
+    currency: "usd",
+    symbol: "$",
+    maxDecimals: 2,
+    locale: "en-US",
+  },
+  {
+    currency: "eur",
+    symbol: "€",
+    maxDecimals: 2,
+    locale: "de-DE",
+  },
+  {
+    currency: "gbp",
+    symbol: "£",
+    maxDecimals: 2,
+    locale: "en-GB",
+  },
+  {
+    currency: "cad",
+    symbol: "CA$",
+    maxDecimals: 2,
+    locale: "en-CA",
+  },
+  {
+    currency: "aud",
+    symbol: "AU$",
+    maxDecimals: 2,
+    locale: "en-AU",
+  },
+  {
+    currency: "rub",
+    symbol: "₽",
+    maxDecimals: 0,
+    locale: "ru",
+  },
+  {
+    currency: "krw",
+    symbol: "₩",
+    maxDecimals: 0,
+    locale: "ko-KR",
+  },
+  {
+    currency: "hkd",
+    symbol: "HK$",
+    maxDecimals: 1,
+    locale: "en-HK",
+  },
+  {
+    currency: "cny",
+    symbol: "¥",
+    maxDecimals: 1,
+    locale: "zh-CN",
+  },
+  {
+    currency: "jpy",
+    symbol: "¥",
+    maxDecimals: 0,
+    locale: "ja-JP",
+  },
+];
 
 export const LanguageToFiatCurrency: TypeLanguageToFiatCurrency = {
   default: "usd",
