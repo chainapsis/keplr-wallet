@@ -95,19 +95,6 @@ export class KeyRingService {
     return this.keyRing.status;
   }
 
-  async checkBech32Address(chainId: string, bech32Address: string) {
-    const key = await this.getKey(chainId);
-    if (
-      bech32Address !==
-      new Bech32Address(key.address).toBech32(
-        (await this.chainsService.getChainInfo(chainId)).bech32Config
-          .bech32PrefixAccAddr
-      )
-    ) {
-      throw new Error("Invalid bech32 address");
-    }
-  }
-
   async deleteKeyRing(
     index: number,
     password: string
@@ -186,8 +173,20 @@ export class KeyRingService {
   async requestSignAmino(
     env: Env,
     chainId: string,
+    signer: string,
     signDoc: StdSignDoc
   ): Promise<AminoSignResponse> {
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+
+    const key = await this.keyRing.getKey(chainId, coinType);
+    const bech32Address = new Bech32Address(key.address).toBech32(
+      (await this.chainsService.getChainInfo(chainId)).bech32Config
+        .bech32PrefixAccAddr
+    );
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
     const newSignDoc = (await this.interactionService.waitApprove(
       env,
       "/sign",
@@ -196,10 +195,9 @@ export class KeyRingService {
         chainId,
         mode: "amino",
         signDoc,
+        signer,
       }
     )) as StdSignDoc;
-
-    const coinType = await this.chainsService.getChainCoinType(chainId);
 
     try {
       const signature = await this.keyRing.sign(
@@ -208,8 +206,6 @@ export class KeyRingService {
         coinType,
         serializeSignDoc(newSignDoc)
       );
-
-      const key = await this.keyRing.getKey(chainId, coinType);
 
       return {
         signed: newSignDoc,
@@ -227,8 +223,20 @@ export class KeyRingService {
   async requestSignDirect(
     env: Env,
     chainId: string,
+    signer: string,
     signDoc: cosmos.tx.v1beta1.SignDoc
   ): Promise<DirectSignResponse> {
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+
+    const key = await this.keyRing.getKey(chainId, coinType);
+    const bech32Address = new Bech32Address(key.address).toBech32(
+      (await this.chainsService.getChainInfo(chainId)).bech32Config
+        .bech32PrefixAccAddr
+    );
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
     const newSignDocBytes = (await this.interactionService.waitApprove(
       env,
       "/sign",
@@ -237,12 +245,11 @@ export class KeyRingService {
         chainId,
         mode: "direct",
         signDocBytes: cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
+        signer,
       }
     )) as Uint8Array;
 
     const newSignDoc = cosmos.tx.v1beta1.SignDoc.decode(newSignDocBytes);
-
-    const coinType = await this.chainsService.getChainCoinType(chainId);
 
     try {
       const signature = await this.keyRing.sign(
@@ -251,8 +258,6 @@ export class KeyRingService {
         coinType,
         makeSignBytes(newSignDoc)
       );
-
-      const key = await this.keyRing.getKey(chainId, coinType);
 
       return {
         signed: newSignDoc,

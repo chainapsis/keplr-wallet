@@ -28,18 +28,22 @@ export class SignInteractionStore {
       | {
           chainId: string;
           mode: "amino";
+          signer: string;
           signDoc: StdSignDoc;
         }
       | {
           chainId: string;
           mode: "direct";
+          signer: string;
           signDocBytes: Uint8Array;
         }
     >("request-sign");
   }
 
   @computed
-  get waitingData(): InteractionWaitingData<SignDocWrapper> | undefined {
+  get waitingData():
+    | InteractionWaitingData<{ signer: string; signDocWrapper: SignDocWrapper }>
+    | undefined {
     const datas = this.waitingDatas;
 
     if (datas.length === 0) {
@@ -55,7 +59,7 @@ export class SignInteractionStore {
     return {
       id: data.id,
       type: data.type,
-      data: wrapper,
+      data: { signer: data.data.signer, signDocWrapper: wrapper },
     };
   }
 

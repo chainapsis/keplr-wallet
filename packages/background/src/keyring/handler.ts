@@ -276,9 +276,12 @@ const handleRequestSignAminoMsg: (
       msg.origin
     );
 
-    await service.checkBech32Address(msg.chainId, msg.bech32Address);
-
-    return await service.requestSignAmino(env, msg.chainId, msg.signDoc);
+    return await service.requestSignAmino(
+      env,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc
+    );
   };
 };
 
@@ -292,11 +295,14 @@ const handleRequestSignDirectMsg: (
       msg.origin
     );
 
-    await service.checkBech32Address(msg.chainId, msg.bech32Address);
-
     const signDoc = cosmos.tx.v1beta1.SignDoc.decode(msg.signDocBytes);
 
-    const response = await service.requestSignDirect(env, msg.chainId, signDoc);
+    const response = await service.requestSignDirect(
+      env,
+      msg.chainId,
+      msg.signer,
+      signDoc
+    );
 
     return {
       signedBytes: cosmos.tx.v1beta1.SignDoc.encode(response.signed).finish(),

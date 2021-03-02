@@ -421,7 +421,7 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
 
   constructor(
     public readonly chainId: string,
-    public readonly bech32Address: string,
+    public readonly signer: string,
     public readonly signDoc: StdSignDoc
   ) {
     super();
@@ -432,12 +432,12 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
       throw new Error("chain id not set");
     }
 
-    if (!this.bech32Address) {
-      throw new Error("bech32 address not set");
+    if (!this.signer) {
+      throw new Error("signer not set");
     }
 
     // Validate bech32 address.
-    Bech32Address.validate(this.bech32Address);
+    Bech32Address.validate(this.signer);
 
     if (this.signDoc.chain_id !== this.chainId) {
       throw new Error(
@@ -470,7 +470,7 @@ export class RequestSignDirectMsg extends Message<{
 
   constructor(
     public readonly chainId: string,
-    public readonly bech32Address: string,
+    public readonly signer: string,
     public readonly signDocBytes: Uint8Array
   ) {
     super();
@@ -481,12 +481,12 @@ export class RequestSignDirectMsg extends Message<{
       throw new Error("chain id not set");
     }
 
-    if (!this.bech32Address) {
-      throw new Error("bech32 address not set");
+    if (!this.signer) {
+      throw new Error("signer not set");
     }
 
     // Validate bech32 address.
-    Bech32Address.validate(this.bech32Address);
+    Bech32Address.validate(this.signer);
 
     const signDoc = cosmos.tx.v1beta1.SignDoc.decode(this.signDocBytes);
 
