@@ -106,3 +106,23 @@ export type GovParamsTally = {
     veto: string;
   };
 };
+
+export type ProposalVoter = {
+  height: string;
+  result: {
+    proposal_id: string;
+    voter: string;
+    option: "Yes" | "Abstain" | "No" | "NoWithVeto";
+  };
+};
+
+export type ProposalVoterStargate = {
+  height: string;
+  result: {
+    proposal_id: string;
+    voter: string;
+    // Vote option is enum on the stargate
+    // (empty: 0, yes: 1, abstain: 2, no: 3, no with veto: 4)
+    option: number;
+  };
+};

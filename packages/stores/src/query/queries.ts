@@ -19,6 +19,7 @@ import {
   ObservableQueryValidators,
   ObservableQueryGovernance,
   ObservableQueryAccount,
+  ObservableQueryProposalVote,
 } from "./cosmos";
 import { ObservableQueryCosmosBalanceRegistry } from "./cosmos/balance";
 import { ObservableQuerySecret20ContractInfo } from "./secret-wasm/secret20-contract-info";
@@ -37,6 +38,7 @@ export class Queries {
   protected readonly _queryUnbondingDelegations: ObservableQueryUnbondingDelegations;
   protected readonly _queryValidators: ObservableQueryValidators;
   protected readonly _queryGovernance: ObservableQueryGovernance;
+  protected readonly _queryProposalVote: ObservableQueryProposalVote;
 
   protected readonly _querySecretContractCodeHash: ObservableQuerySecretContractCodeHash;
   protected readonly _querySecret20ContractInfo: ObservableQuerySecret20ContractInfo;
@@ -107,6 +109,11 @@ export class Queries {
       chainGetter,
       this._queryPool
     );
+    this._queryProposalVote = new ObservableQueryProposalVote(
+      kvStore,
+      chainId,
+      chainGetter
+    );
 
     this._querySecretContractCodeHash = new ObservableQuerySecretContractCodeHash(
       kvStore,
@@ -173,6 +180,10 @@ export class Queries {
 
   getQueryGovernance(): DeepReadonly<ObservableQueryGovernance> {
     return this._queryGovernance;
+  }
+
+  getQueryProposalVote(): DeepReadonly<ObservableQueryProposalVote> {
+    return this._queryProposalVote;
   }
 
   getQuerySecretContractCodeHash(): DeepReadonly<ObservableQuerySecretContractCodeHash> {
