@@ -1,13 +1,14 @@
 import {
   ContentScriptEnv,
   ContentScriptGuards,
-  InjectedMessageRequester,
   ExtensionRouter,
+  InExtensionMessageRequester,
   WEBPAGE_PORT,
 } from "@keplr-wallet/router";
+import { Keplr, InjectedKeplr } from "@keplr-wallet/provider";
 import { initEvents } from "./events";
 
-InjectedMessageRequester.startProxy();
+InjectedKeplr.startProxy(new Keplr(new InExtensionMessageRequester()));
 
 const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
 router.addGuard(ContentScriptGuards.checkMessageIsInternal);

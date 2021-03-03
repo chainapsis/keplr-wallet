@@ -1,10 +1,11 @@
-import { Keplr } from "@keplr-wallet/provider";
+import { Keplr } from "@keplr-wallet/types";
 import { OfflineSigner } from "@cosmjs/launchpad";
 import { SecretUtils } from "secretjs/types/enigmautils";
+import { OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 export function init(
   keplr: Keplr,
-  getOfflineSigner: (chainId: string) => OfflineSigner,
+  getOfflineSigner: (chainId: string) => OfflineSigner & OfflineDirectSigner,
   getEnigmaUtils: (chainId: string) => SecretUtils
 ) {
   // Give a priority to production build.

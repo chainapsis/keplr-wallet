@@ -4,8 +4,9 @@ import {
   AminoSignResponse,
   StdSignDoc,
   StdTx,
+  OfflineSigner,
 } from "@cosmjs/launchpad";
-import { DirectSignResponse } from "@cosmjs/proto-signing";
+import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import Long from "long";
 
@@ -50,10 +51,28 @@ export interface Keplr {
     stdTx: StdTx,
     mode: BroadcastMode
   ): Promise<Uint8Array>;
+
+  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
+
   suggestToken(chainId: string, contractAddress: string): Promise<void>;
   getSecret20ViewingKey(
     chainId: string,
     contractAddress: string
   ): Promise<string>;
   getEnigmaUtils(chainId: string): SecretUtils;
+
+  // Related to Enigma.
+  // But, recommended to use `getEnigmaUtils` rather than using below.
+  getEnigmaPubKey(chainId: string): Promise<Uint8Array>;
+  enigmaEncrypt(
+    chainId: string,
+    contractCodeHash: string,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    msg: object
+  ): Promise<Uint8Array>;
+  enigmaDecrypt(
+    chainId: string,
+    ciphertext: Uint8Array,
+    nonce: Uint8Array
+  ): Promise<Uint8Array>;
 }
