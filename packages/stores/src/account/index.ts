@@ -602,10 +602,29 @@ export class AccountStoreInner {
     memo: string = "",
     onFulfill?: (tx: any) => void
   ) {
+    const voteOption = (() => {
+      if (
+        this.chainGetter.getChain(this.chainId).features?.includes("stargate")
+      ) {
+        switch (option) {
+          case "Yes":
+            return 1;
+          case "Abstain":
+            return 2;
+          case "No":
+            return 3;
+          case "NoWithVeto":
+            return 4;
+        }
+      } else {
+        return option;
+      }
+    })();
+
     const msg = {
       type: this.opts.msgOpts.govVote.type,
       value: {
-        option,
+        option: voteOption,
         proposal_id: proposalId,
         voter: this.bech32Address,
       },

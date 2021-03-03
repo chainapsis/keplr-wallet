@@ -1,3 +1,13 @@
+// This is not the type for result of query.
+export enum ProposalStatus {
+  UNSPECIFIED,
+  DEPOSIT_PERIOD,
+  VOTING_PERIOD,
+  PASSED,
+  REJECTED,
+  FAILED,
+}
+
 export type Tally = {
   // Int
   yes: string;
@@ -36,9 +46,35 @@ export type Proposal = {
   voting_end_time: string;
 };
 
+export type ProposalStargate = {
+  content: {
+    type: string;
+    value: {
+      title: string;
+      description: string;
+    };
+  };
+  // Int
+  id: string;
+  // Proposal status is changed to the ENUM.
+  status: number;
+  final_tally_result: Tally;
+  submit_time: string;
+  deposit_end_time: string;
+  total_deposit: [
+    {
+      denom: string;
+      // Int
+      amount: string;
+    }
+  ];
+  voting_start_time: string;
+  voting_end_time: string;
+};
+
 export type GovProposals = {
   height: string;
-  result: Proposal[];
+  result: Proposal[] | ProposalStargate[];
 };
 
 export type GovParamsDeposit = {

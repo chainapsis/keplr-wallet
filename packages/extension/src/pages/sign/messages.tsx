@@ -76,7 +76,8 @@ export interface MsgVote {
   value: {
     proposal_id: string;
     voter: string;
-    option: string;
+    // In the stargate, option would be the enum (0: empty, 1: yes, 2: abstain, 3: no, 4: no with veto).
+    option: string | number;
   };
 }
 
@@ -296,8 +297,29 @@ export function renderMsgWithdrawDelegatorReward(
 export function renderMsgVote(
   intl: IntlShape,
   proposalId: string,
-  option: string
+  option: string | number
 ) {
+  const textualOption = (() => {
+    if (typeof option === "string") {
+      return option;
+    }
+
+    switch (option) {
+      case 0:
+        return "Empty";
+      case 1:
+        return "Yes";
+      case 2:
+        return "Abstain";
+      case 3:
+        return "No";
+      case 4:
+        return "No with veto";
+      default:
+        return "Unspecified";
+    }
+  })();
+
   return {
     icon: "fas fa-vote-yea",
     title: intl.formatMessage({
@@ -309,7 +331,7 @@ export function renderMsgVote(
         values={{
           b: (...chunks: any[]) => <b>{chunks}</b>,
           id: proposalId,
-          option: option,
+          option: textualOption,
         }}
       />
     ),

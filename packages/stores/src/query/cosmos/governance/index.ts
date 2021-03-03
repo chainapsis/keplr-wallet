@@ -1,5 +1,11 @@
 import { ObservableChainQuery } from "../../chain-query";
-import { GovProposals, Proposal, ProposalTally } from "./types";
+import {
+  GovProposals,
+  Proposal,
+  ProposalStargate,
+  ProposalStatus,
+  ProposalTally,
+} from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
 import { computed, makeObservable, observable, runInAction } from "mobx";
@@ -18,7 +24,7 @@ export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally>
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly _raw: Proposal,
+    protected readonly _raw: Proposal | ProposalStargate,
     protected readonly governance: ObservableQueryGovernance
   ) {
     super(kvStore, chainId, chainGetter, `/gov/proposals/${_raw.id}/tally`);
@@ -26,11 +32,45 @@ export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally>
   }
 
   protected canFetch(): boolean {
-    return this.raw.proposal_status === "VotingPeriod";
+    return this.proposalStatus === ProposalStatus.VOTING_PERIOD;
   }
 
-  get raw(): DeepReadonly<Proposal> {
+  get raw(): DeepReadonly<Proposal | ProposalStargate> {
     return this._raw;
+  }
+
+  get proposalStatus(): ProposalStatus {
+    if ("proposal_status" in this.raw) {
+      switch (this.raw.proposal_status) {
+        case "DepositPeriod":
+          return ProposalStatus.DEPOSIT_PERIOD;
+        case "VotingPeriod":
+          return ProposalStatus.VOTING_PERIOD;
+        case "Passed":
+          return ProposalStatus.PASSED;
+        case "Rejected":
+          return ProposalStatus.REJECTED;
+        case "Failed":
+          return ProposalStatus.FAILED;
+        default:
+          return ProposalStatus.UNSPECIFIED;
+      }
+    }
+
+    switch (this.raw.status) {
+      case 1:
+        return ProposalStatus.DEPOSIT_PERIOD;
+      case 2:
+        return ProposalStatus.VOTING_PERIOD;
+      case 3:
+        return ProposalStatus.PASSED;
+      case 4:
+        return ProposalStatus.REJECTED;
+      case 5:
+        return ProposalStatus.FAILED;
+      default:
+        return ProposalStatus.UNSPECIFIED;
+    }
   }
 
   get id(): string {
@@ -87,7 +127,7 @@ export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally>
   } {
     const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
 
-    if (this.raw.proposal_status !== "VotingPeriod") {
+    if (this.proposalStatus !== ProposalStatus.VOTING_PERIOD) {
       return {
         yes: new IntPretty(new Int(this.raw.final_tally_result.yes))
           .precision(stakeCurrency.coinDecimals)
