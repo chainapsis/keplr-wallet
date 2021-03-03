@@ -4,7 +4,6 @@ import {
   AminoSignResponse,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { fromHex } from "@cosmjs/encoding";
 import { Keplr } from "@keplr-wallet/types";
 import { cosmos } from "@keplr-wallet/cosmos";
 import { OfflineDirectSigner } from "@cosmjs/proto-signing";
@@ -24,7 +23,7 @@ export class CosmJSOfflineSigner implements OfflineSigner, OfflineDirectSigner {
         address: key.bech32Address,
         // Currently, only secp256k1 is supported.
         algo: "secp256k1",
-        pubkey: fromHex(key.pubKeyHex),
+        pubkey: key.pubKey,
       },
     ];
   }

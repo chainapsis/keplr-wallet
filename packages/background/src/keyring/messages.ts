@@ -8,13 +8,12 @@ import {
 import { BIP44HDPath } from "./types";
 
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { BIP44, KeyHex } from "@keplr-wallet/types";
+import { BIP44, Key } from "@keplr-wallet/types";
 
 import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
-import { Buffer } from "buffer/";
 import { cosmos } from "@keplr-wallet/cosmos";
 
 export class RestoreKeyRingMsg extends Message<{
@@ -224,8 +223,7 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   constructor(
-    // Hex encoded bytes.
-    public readonly privateKeyHex: string,
+    public readonly privateKey: Uint8Array,
     public readonly password: string,
     public readonly meta: Record<string, string>
   ) {
@@ -233,16 +231,17 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   validateBasic(): void {
-    if (!this.privateKeyHex) {
+    if (!this.privateKey || this.privateKey.length === 0) {
       throw new Error("private key not set");
+    }
+
+    if (this.privateKey.length !== 32) {
+      throw new Error("invalid length of private key");
     }
 
     if (!this.password) {
       throw new Error("password not set");
     }
-
-    // Check that private key is encoded as hex.
-    Buffer.from(this.privateKeyHex, "hex");
   }
 
   route(): string {
@@ -290,20 +289,20 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 
   constructor(
-    // Hex encoded bytes.
-    public readonly privateKeyHex: string,
+    public readonly privateKey: Uint8Array,
     public readonly meta: Record<string, string>
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.privateKeyHex) {
+    if (!this.privateKey || this.privateKey.length === 0) {
       throw new Error("private key not set");
     }
 
-    // Check that private key is encoded as hex.
-    Buffer.from(this.privateKeyHex, "hex");
+    if (this.privateKey.length !== 32) {
+      throw new Error("invalid length of private key");
+    }
   }
 
   route(): string {
@@ -386,7 +385,7 @@ export class UnlockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class GetKeyMsg extends Message<KeyHex> {
+export class GetKeyMsg extends Message<Key> {
   public static type() {
     return "get-key";
   }

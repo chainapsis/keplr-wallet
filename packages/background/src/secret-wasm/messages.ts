@@ -1,10 +1,7 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 
-import { Buffer } from "buffer/";
-
-// Return hex encoded result
-export class GetPubkeyMsg extends Message<string> {
+export class GetPubkeyMsg extends Message<Uint8Array> {
   public static type() {
     return "get-pubkey-msg";
   }
@@ -32,8 +29,7 @@ export class GetPubkeyMsg extends Message<string> {
   }
 }
 
-// Return hex encoded result
-export class ReqeustEncryptMsg extends Message<string> {
+export class ReqeustEncryptMsg extends Message<Uint8Array> {
   public static type() {
     return "request-encrypt-msg";
   }
@@ -74,16 +70,15 @@ export class ReqeustEncryptMsg extends Message<string> {
   }
 }
 
-// Return hex encoded result
-export class RequestDecryptMsg extends Message<string> {
+export class RequestDecryptMsg extends Message<Uint8Array> {
   public static type() {
     return "request-decrypt-msg";
   }
 
   constructor(
     public readonly chainId: string,
-    public readonly cipherTextHex: string,
-    public readonly nonceHex: string
+    public readonly cipherText: Uint8Array,
+    public readonly nonce: Uint8Array
   ) {
     super();
   }
@@ -93,19 +88,13 @@ export class RequestDecryptMsg extends Message<string> {
       throw new Error("chain id not set");
     }
 
-    if (!this.cipherTextHex) {
+    if (!this.cipherText || this.cipherText.length === 0) {
       throw new Error("ciphertext not set");
     }
 
-    // Make sure that cipher text hex is encoded by hex.
-    Buffer.from(this.cipherTextHex, "hex");
-
-    if (!this.nonceHex) {
+    if (!this.nonce || this.nonce.length === 0) {
       throw new Error("nonce not set");
     }
-
-    // Make sure that nonce hex is encoded by hex.
-    Buffer.from(this.nonceHex, "hex");
   }
 
   approveExternal(): boolean {

@@ -24,7 +24,6 @@ import {
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 
-import { Buffer } from "buffer/";
 import { InteractionStore } from "./interaction";
 import { ChainGetter } from "../common";
 import { BIP44 } from "@keplr-wallet/types";
@@ -167,11 +166,7 @@ export class KeyRingStore {
     password: string,
     meta: Record<string, string>
   ) {
-    const msg = new CreatePrivateKeyMsg(
-      Buffer.from(privateKey).toString("hex"),
-      password,
-      meta
-    );
+    const msg = new CreatePrivateKeyMsg(privateKey, password, meta);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -213,10 +208,7 @@ export class KeyRingStore {
 
   @flow
   *addPrivateKey(privateKey: Uint8Array, meta: Record<string, string>) {
-    const msg = new AddPrivateKeyMsg(
-      Buffer.from(privateKey).toString("hex"),
-      meta
-    );
+    const msg = new AddPrivateKeyMsg(privateKey, meta);
     this.multiKeyStoreInfo = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );

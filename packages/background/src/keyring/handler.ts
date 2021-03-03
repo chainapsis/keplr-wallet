@@ -24,7 +24,6 @@ import {
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
-import { Buffer } from "buffer/";
 import { cosmos } from "@keplr-wallet/cosmos";
 
 export const getHandler: (service: KeyRingService) => Handler = (
@@ -179,7 +178,7 @@ const handleCreatePrivateKeyMsg: (
   return async (_, msg) => {
     return {
       status: await service.createPrivateKey(
-        Buffer.from(msg.privateKeyHex, "hex"),
+        msg.privateKey,
         msg.password,
         msg.meta
       ),
@@ -191,10 +190,7 @@ const handleAddPrivateKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddPrivateKeyMsg> = (service) => {
   return async (_, msg) => {
-    return await service.addPrivateKey(
-      Buffer.from(msg.privateKeyHex, "hex"),
-      msg.meta
-    );
+    return await service.addPrivateKey(msg.privateKey, msg.meta);
   };
 };
 
@@ -256,8 +252,8 @@ const handleGetKeyMsg: (
     return {
       name: service.getKeyStoreMeta("name"),
       algo: "secp256k1",
-      pubKeyHex: Buffer.from(key.pubKey).toString("hex"),
-      addressHex: Buffer.from(key.address).toString("hex"),
+      pubKey: key.pubKey,
+      address: key.address,
       bech32Address: new Bech32Address(key.address).toBech32(
         (await service.chainsService.getChainInfo(msg.chainId)).bech32Config
           .bech32PrefixAccAddr

@@ -1,4 +1,4 @@
-import { ChainInfo, Keplr, Keplr as IKeplr, KeyHex } from "@keplr-wallet/types";
+import { ChainInfo, Keplr, Keplr as IKeplr, Key } from "@keplr-wallet/types";
 import { Result } from "@keplr-wallet/router";
 import {
   BroadcastMode,
@@ -152,7 +152,7 @@ export class InjectedKeplr implements IKeplr {
     await this.requestMethod("experimentalSuggestChain", [chainInfo]);
   }
 
-  async getKey(chainId: string): Promise<KeyHex> {
+  async getKey(chainId: string): Promise<Key> {
     return await this.requestMethod("getKey", [chainId]);
   }
 

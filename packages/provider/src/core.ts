@@ -1,4 +1,4 @@
-import { ChainInfo, Keplr as IKeplr, KeyHex } from "@keplr-wallet/types";
+import { ChainInfo, Keplr as IKeplr, Key } from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   BroadcastMode,
@@ -26,7 +26,6 @@ import { SecretUtils } from "secretjs/types/enigmautils";
 import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
-import { Buffer } from "buffer/";
 import { CosmJSOfflineSigner } from "./cosmjs";
 
 export class Keplr implements IKeplr {
@@ -46,7 +45,7 @@ export class Keplr implements IKeplr {
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
-  async getKey(chainId: string): Promise<KeyHex> {
+  async getKey(chainId: string): Promise<Key> {
     const msg = new GetKeyMsg(chainId);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
@@ -105,12 +104,9 @@ export class Keplr implements IKeplr {
   }
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
-    return Buffer.from(
-      await this.requester.sendMessage(
-        BACKGROUND_PORT,
-        new GetPubkeyMsg(chainId)
-      ),
-      "hex"
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetPubkeyMsg(chainId)
     );
   }
 
@@ -120,13 +116,9 @@ export class Keplr implements IKeplr {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object
   ): Promise<Uint8Array> {
-    // TODO: Set id.
-    return Buffer.from(
-      await this.requester.sendMessage(
-        BACKGROUND_PORT,
-        new ReqeustEncryptMsg(chainId, contractCodeHash, msg)
-      ),
-      "hex"
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new ReqeustEncryptMsg(chainId, contractCodeHash, msg)
     );
   }
 
@@ -139,16 +131,9 @@ export class Keplr implements IKeplr {
       return new Uint8Array();
     }
 
-    return Buffer.from(
-      await this.requester.sendMessage(
-        BACKGROUND_PORT,
-        new RequestDecryptMsg(
-          chainId,
-          Buffer.from(ciphertext).toString("hex"),
-          Buffer.from(nonce).toString("hex")
-        )
-      ),
-      "hex"
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new RequestDecryptMsg(chainId, ciphertext, nonce)
     );
   }
 

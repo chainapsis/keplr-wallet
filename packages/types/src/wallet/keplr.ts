@@ -10,20 +10,19 @@ import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import Long from "long";
 
-// TODO: Return the `Uint8Array` instead of hex string.
-export interface KeyHex {
+export interface Key {
   // Name of the selected key store.
   readonly name: string;
   readonly algo: string;
-  readonly pubKeyHex: string;
-  readonly addressHex: string;
+  readonly pubKey: Uint8Array;
+  readonly address: Uint8Array;
   readonly bech32Address: string;
 }
 
 export interface Keplr {
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
-  getKey(chainId: string): Promise<KeyHex>;
+  getKey(chainId: string): Promise<Key>;
   signAmino(
     chainId: string,
     signer: string,

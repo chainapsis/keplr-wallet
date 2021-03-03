@@ -13,7 +13,6 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { fromHex } from "@cosmjs/encoding";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { QueriesStore } from "../query";
 import { Queries } from "../query/queries";
@@ -182,7 +181,7 @@ export class AccountStoreInner {
     const key = yield* toGenerator(keplr.getKey(this.chainId));
     this._bech32Address = key.bech32Address;
     this._name = key.name;
-    this.pubKey = fromHex(key.pubKeyHex);
+    this.pubKey = key.pubKey;
 
     // Set the wallet status as loaded after getting all necessary infos.
     this._walletStatus = WalletStatus.Loaded;
