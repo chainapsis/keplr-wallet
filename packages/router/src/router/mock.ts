@@ -20,12 +20,13 @@ export class MockRouter extends Router {
     MockRouter.eventEmitter.removeListener("message", this.onMessage);
   }
 
-  protected onMessage = async (
-    message: any,
+  protected onMessage = async (params: {
+    message: any;
     sender: MessageSender & {
       resolver: (result: Result) => void;
-    }
-  ): Promise<void> => {
+    };
+  }): Promise<void> => {
+    const { message, sender } = params;
     if (message.port !== this.port) {
       return;
     }
