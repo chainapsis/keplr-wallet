@@ -28,11 +28,15 @@ export const AddTokenPage: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore, tokensStore } = useStore();
   const tokensOf = tokensStore.getTokensOf(chainStore.current.chainId);
 
-  const interactionInfo = useInteractionInfo(() => {
-    tokensStore.rejectAllSuggestedTokens();
-  });
-
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+
+  const interactionInfo = useInteractionInfo(() => {
+    // When creating the secret20 viewing key, this page will be moved to "/sign" page to generate the signature.
+    // So, if it is creating phase, don't reject the waiting datas.
+    if (accountInfo.isSendingMsg !== "createSecret20ViewingKey") {
+      tokensStore.rejectAllSuggestedTokens();
+    }
+  });
 
   const form = useForm<FormData>({
     defaultValues: {
