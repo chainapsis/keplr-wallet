@@ -65,6 +65,9 @@ export interface AccountStoreOpts {
 
 export class AccountStoreInner {
   @observable
+  protected _walletVersion: string | undefined = undefined;
+
+  @observable
   protected _walletStatus: WalletStatus = WalletStatus.Loading;
 
   @observable
@@ -175,6 +178,8 @@ export class AccountStoreInner {
       return;
     }
 
+    this._walletVersion = keplr.version;
+
     // TODO: Handle not approved.
     yield this.enable(keplr, this.chainId);
 
@@ -185,6 +190,10 @@ export class AccountStoreInner {
 
     // Set the wallet status as loaded after getting all necessary infos.
     this._walletStatus = WalletStatus.Loaded;
+  }
+
+  get walletVersion(): string | undefined {
+    return this._walletVersion;
   }
 
   @computed

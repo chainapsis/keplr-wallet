@@ -31,7 +31,10 @@ import { CosmJSOfflineSigner } from "./cosmjs";
 export class Keplr implements IKeplr {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
 
-  constructor(protected readonly requester: MessageRequester) {}
+  constructor(
+    public readonly version: string,
+    protected readonly requester: MessageRequester
+  ) {}
 
   async enable(chainId: string): Promise<void> {
     await this.requester.sendMessage(

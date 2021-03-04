@@ -48,6 +48,10 @@ export class InjectedKeplr implements IKeplr {
           throw new Error("Empty id");
         }
 
+        if (message.method === "version") {
+          throw new Error("Version is not function");
+        }
+
         if (
           !keplr[message.method] ||
           typeof keplr[message.method] !== "function"
@@ -143,6 +147,8 @@ export class InjectedKeplr implements IKeplr {
   }
 
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
+
+  constructor(public readonly version: string) {}
 
   async enable(chainId: string): Promise<void> {
     await this.requestMethod("enable", [chainId]);

@@ -8,7 +8,11 @@ import {
 import { Keplr, InjectedKeplr } from "@keplr-wallet/provider";
 import { initEvents } from "./events";
 
-InjectedKeplr.startProxy(new Keplr(new InExtensionMessageRequester()));
+import manifest from "../manifest.json";
+
+InjectedKeplr.startProxy(
+  new Keplr(manifest.version, new InExtensionMessageRequester())
+);
 
 const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
 router.addGuard(ContentScriptGuards.checkMessageIsInternal);

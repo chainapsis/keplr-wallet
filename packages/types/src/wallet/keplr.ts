@@ -20,6 +20,8 @@ export interface Key {
 }
 
 export interface Keplr {
+  readonly version: string;
+
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
   getKey(chainId: string): Promise<Key>;

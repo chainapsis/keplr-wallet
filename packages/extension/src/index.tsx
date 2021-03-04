@@ -50,10 +50,11 @@ import { ManageTokenPage } from "./pages/setting/token/manage";
 
 import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config";
 
+import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router";
 
-window.keplr = new Keplr(new InExtensionMessageRequester());
+window.keplr = new Keplr(manifest.version, new InExtensionMessageRequester());
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");

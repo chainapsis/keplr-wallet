@@ -1,7 +1,9 @@
 import { InjectedKeplr } from "@keplr-wallet/provider";
 import { init } from "./init";
 
-const keplr = new InjectedKeplr();
+import manifest from "../../manifest.json";
+
+const keplr = new InjectedKeplr(manifest.version);
 
 init(
   keplr,
