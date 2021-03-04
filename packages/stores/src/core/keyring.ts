@@ -263,6 +263,11 @@ export class KeyRingStore {
   }
 
   @flow
+  *rejectAll() {
+    yield this.interactionStore.rejectAll("unlock");
+  }
+
+  @flow
   protected *restore() {
     const msg = new RestoreKeyRingMsg();
     const result = yield* toGenerator(

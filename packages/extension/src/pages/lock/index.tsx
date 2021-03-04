@@ -25,8 +25,6 @@ export const LockPage: FunctionComponent = observer(() => {
   const intl = useIntl();
   const history = useHistory();
 
-  const interactionInfo = useInteractionInfo();
-
   const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {
       password: "",
@@ -35,6 +33,10 @@ export const LockPage: FunctionComponent = observer(() => {
 
   const { keyRingStore } = useStore();
   const [loading, setLoading] = useState(false);
+
+  const interactionInfo = useInteractionInfo(() => {
+    keyRingStore.rejectAll();
+  });
 
   return (
     <EmptyLayout style={{ backgroundColor: "white", height: "100%" }}>
