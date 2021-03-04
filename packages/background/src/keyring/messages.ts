@@ -41,36 +41,6 @@ export class RestoreKeyRingMsg extends Message<{
   }
 }
 
-export class EnableKeyRingMsg extends Message<{
-  status: KeyRingStatus;
-}> {
-  public static type() {
-    return "enable-keyring";
-  }
-
-  constructor(public readonly chainId: string) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id is empty");
-    }
-  }
-
-  approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return EnableKeyRingMsg.type();
-  }
-}
-
 export class DeleteKeyRingMsg extends Message<{
   status: KeyRingStatus;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;

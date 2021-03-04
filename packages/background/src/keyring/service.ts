@@ -20,8 +20,6 @@ import { APP_PORT, Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
-import { EnableKeyRingMsg } from "./messages";
-
 import {
   encodeSecp256k1Signature,
   serializeSignDoc,
@@ -79,12 +77,7 @@ export class KeyRingService {
     }
 
     if (this.keyRing.status === KeyRingStatus.LOCKED) {
-      await this.interactionService.waitApprove(
-        env,
-        "/unlock",
-        EnableKeyRingMsg.type(),
-        {}
-      );
+      await this.interactionService.waitApprove(env, "/unlock", "unlock", {});
       return this.keyRing.status;
     }
 

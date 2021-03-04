@@ -1,6 +1,5 @@
 import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import {
-  EnableKeyRingMsg,
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
   GetKeyMsg,
@@ -33,8 +32,6 @@ export const getHandler: (service: KeyRingService) => Handler = (
     switch (msg.constructor) {
       case RestoreKeyRingMsg:
         return handleRestoreKeyRingMsg(service)(env, msg as RestoreKeyRingMsg);
-      case EnableKeyRingMsg:
-        return handleEnableKeyRingMsg(service)(env, msg as EnableKeyRingMsg);
       case DeleteKeyRingMsg:
         return handleDeleteKeyRingMsg(service)(env, msg as DeleteKeyRingMsg);
       case ShowKeyRingMsg:
@@ -106,26 +103,6 @@ const handleRestoreKeyRingMsg: (
 ) => InternalHandler<RestoreKeyRingMsg> = (service) => {
   return async (_env, _msg) => {
     return await service.restore();
-  };
-};
-
-const handleEnableKeyRingMsg: (
-  service: KeyRingService
-) => InternalHandler<EnableKeyRingMsg> = (service) => {
-  return async (env, msg) => {
-    // Will throw an error if chain is unknown.
-    await service.chainsService.getChainInfo(msg.chainId);
-
-    // This method itself tries to unlock the keyring.
-    await service.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainId,
-      msg.origin
-    );
-
-    return {
-      status: service.keyRingStatus,
-    };
   };
 };
 

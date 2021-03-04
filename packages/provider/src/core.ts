@@ -8,7 +8,7 @@ import {
   OfflineSigner,
 } from "@cosmjs/launchpad";
 import {
-  EnableKeyRingMsg,
+  EnableAccessMsg,
   SuggestChainInfoMsg,
   GetKeyMsg,
   SuggestTokenMsg,
@@ -36,7 +36,7 @@ export class Keplr implements IKeplr {
   async enable(chainId: string): Promise<void> {
     await this.requester.sendMessage(
       BACKGROUND_PORT,
-      new EnableKeyRingMsg(chainId)
+      new EnableAccessMsg(chainId)
     );
   }
 

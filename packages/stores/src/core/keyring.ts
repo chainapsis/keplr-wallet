@@ -9,7 +9,6 @@ import {
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
   DeleteKeyRingMsg,
-  EnableKeyRingMsg,
   GetIsKeyStoreCoinTypeSetMsg,
   GetKeyRingTypeMsg,
   GetMultiKeyStoreInfoMsg,
@@ -256,14 +255,8 @@ export class KeyRingStore {
     this.status = result.status;
 
     // Approve all waiting interaction for the enabling key ring.
-    for (const interaction of this.interactionStore.getDatas(
-      EnableKeyRingMsg.type()
-    )) {
-      yield this.interactionStore.approve(
-        EnableKeyRingMsg.type(),
-        interaction.id,
-        {}
-      );
+    for (const interaction of this.interactionStore.getDatas("unlock")) {
+      yield this.interactionStore.approve("unlock", interaction.id, {});
     }
 
     window.dispatchEvent(new Event("keplr_keystoreunlock"));

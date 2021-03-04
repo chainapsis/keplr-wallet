@@ -1,6 +1,5 @@
 import { Router } from "@keplr-wallet/router";
 import {
-  EnableKeyRingMsg,
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
   GetKeyMsg,
@@ -27,7 +26,6 @@ import { KeyRingService } from "./service";
 
 export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(RestoreKeyRingMsg);
-  router.registerMessage(EnableKeyRingMsg);
   router.registerMessage(DeleteKeyRingMsg);
   router.registerMessage(ShowKeyRingMsg);
   router.registerMessage(CreateMnemonicKeyMsg);
