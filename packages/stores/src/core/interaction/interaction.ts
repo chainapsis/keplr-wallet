@@ -17,6 +17,7 @@ import {
   IObservableArray,
   makeObservable,
   flow,
+  toJS,
 } from "mobx";
 
 export class InteractionStore implements InteractionForegroundHandler {
@@ -40,14 +41,15 @@ export class InteractionStore implements InteractionForegroundHandler {
   }
 
   getDatas<T = unknown>(type: string): InteractionWaitingData<T>[] {
-    return (this.datas.get(type) as InteractionWaitingData<T>[]) ?? [];
+    return toJS(this.datas.get(type) as InteractionWaitingData<T>[]) ?? [];
   }
 
   getEvents<T = unknown>(
     type: string
   ): Omit<InteractionWaitingData<T>, "id">[] {
     return (
-      (this.events.get(type) as Omit<InteractionWaitingData<T>, "id">[]) ?? []
+      toJS(this.events.get(type) as Omit<InteractionWaitingData<T>, "id">[]) ??
+      []
     );
   }
 
