@@ -1,4 +1,4 @@
-import { HasMapStore } from "../common";
+import { CoinPrimitive, HasMapStore } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../common";
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -337,6 +337,7 @@ export class AccountStoreInner {
               amount: actualAmount,
             },
           },
+          [],
           stdFee,
           memo,
           (tx) => {
@@ -679,6 +680,7 @@ export class AccountStoreInner {
       {
         create_viewing_key: { entropy },
       },
+      [],
       {
         amount: [],
         gas: this.opts.msgOpts.createSecret20ViewingKey.gas.toString(),
@@ -725,7 +727,7 @@ export class AccountStoreInner {
     contractAddress: string,
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object,
-    // TODO: Add the `sentFunds`.
+    sentFunds: CoinPrimitive[],
     fee: StdFee,
     memo: string = "",
     onFulfill?: (tx: any) => void
@@ -750,7 +752,7 @@ export class AccountStoreInner {
         contract: contractAddress,
         callback_code_hash: "",
         msg: Buffer.from(encryptedMsg).toString("base64"),
-        sent_funds: [],
+        sent_funds: sentFunds,
         callback_sig: null,
       },
     };
