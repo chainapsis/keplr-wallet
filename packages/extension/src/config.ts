@@ -113,7 +113,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-4",
+    chainId: "kava-6",
     chainName: "Kava",
     stakeCurrency: {
       coinDenom: "KAVA",
@@ -425,6 +425,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.3,
       high: 0.4,
     },
+    features: ["stargate"],
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
