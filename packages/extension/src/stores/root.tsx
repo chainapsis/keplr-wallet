@@ -87,6 +87,37 @@ export class RootStore {
         prefetching: !window.location.href.includes("#/unlock"),
       },
       chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
+        // In certik, change the msg type of the MsgSend to "bank/MsgSend"
+        if (chainInfo.chainId.startsWith("shentu-")) {
+          return {
+            chainId: chainInfo.chainId,
+            msgOpts: {
+              send: {
+                native: {
+                  type: "bank/MsgSend",
+                },
+              },
+            },
+          };
+        }
+
+        // In akash or sifchain, increase the default gas for sending
+        if (
+          chainInfo.chainId.startsWith("akashnet-") ||
+          chainInfo.chainId.startsWith("sifchain")
+        ) {
+          return {
+            chainId: chainInfo.chainId,
+            msgOpts: {
+              send: {
+                native: {
+                  gas: 120000,
+                },
+              },
+            },
+          };
+        }
+
         return { chainId: chainInfo.chainId };
       }),
     });
