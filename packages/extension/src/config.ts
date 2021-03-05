@@ -42,6 +42,10 @@ import {
   SIFCHAIN_RPC_CONFIG,
   SIFCHAIN_REST_ENDPOINT,
   SIFCHAIN_REST_CONFIG,
+  IRIS_RPC_ENDPOINT,
+  IRIS_RPC_CONFIG,
+  IRIS_REST_ENDPOINT,
+  IRIS_REST_CONFIG,
 } from "./config.var";
 import {
   IntlMessages,
@@ -374,6 +378,53 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "certik",
       },
     ],
+  },
+  {
+    rpc: IRIS_RPC_ENDPOINT,
+    rpcConfig: IRIS_RPC_CONFIG,
+    rest: IRIS_REST_ENDPOINT,
+    restConfig: IRIS_REST_CONFIG,
+    chainId: "irishub-1",
+    chainName: "IRISnet",
+    stakeCurrency: {
+      coinDenom: "IRIS",
+      coinMinimalDenom: "uiris",
+      coinDecimals: 6,
+      coinGeckoId: "iris-network",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/irishub-1/stake"
+        : "http://localhost:8081/#/irishub-1stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/irishub-1/stake"
+        : "http://localhost:8081/#/irishub-1/stake",
+    bip44: {
+      coinType: 566,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("iaa"),
+    currencies: [
+      {
+        coinDenom: "IRIS",
+        coinMinimalDenom: "uiris",
+        coinDecimals: 6,
+        coinGeckoId: "iris-network",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IRIS",
+        coinMinimalDenom: "uiris",
+        coinDecimals: 6,
+        coinGeckoId: "iris-network",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.2,
+      average: 0.3,
+      high: 0.4,
+    },
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
