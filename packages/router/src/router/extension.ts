@@ -10,17 +10,25 @@ export class ExtensionRouter extends Router {
 
     this.port = port;
     browser.runtime.onMessage.addListener(this.onMessage);
+    // Although security considerations cross-extension communication are in place,
+    // we have put in additional security measures by disbling extension-to-extension communication until a formal security audit has taken place.
+    /*
     if (browser.runtime.onMessageExternal) {
       browser.runtime.onMessageExternal.addListener(this.onMessage);
     }
+     */
   }
 
   unlisten(): void {
     this.port = "";
     browser.runtime.onMessage.removeListener(this.onMessage);
+    // Although security considerations cross-extension communication are in place,
+    // we have put in additional security measures by disbling extension-to-extension communication until a formal security audit has taken place.
+    /*
     if (browser.runtime.onMessageExternal) {
       browser.runtime.onMessageExternal.removeListener(this.onMessage);
     }
+     */
   }
 
   // You shouldn't set this handler as async funtion,
