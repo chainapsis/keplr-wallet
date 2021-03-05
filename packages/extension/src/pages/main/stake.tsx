@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo, useRef, useState } from "react";
 
 import { Button, Tooltip } from "reactstrap";
 
@@ -66,6 +66,8 @@ export const StakeView: FunctionComponent = observer(() => {
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const toogleTooltip = () => setTooltipOpen((value) => !value);
+
+  const stakeBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div>
@@ -173,7 +175,7 @@ export const StakeView: FunctionComponent = observer(() => {
             To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
           */}
           <Button
-            id="btn-stake"
+            innerRef={stakeBtnRef}
             className={classnames(styleStake.button, {
               disabled: !isStakableExist,
             })}
@@ -187,7 +189,7 @@ export const StakeView: FunctionComponent = observer(() => {
             <Tooltip
               placement="bottom"
               isOpen={tooltipOpen}
-              target="btn-stake"
+              target={stakeBtnRef}
               toggle={toogleTooltip}
               fade
             >

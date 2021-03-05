@@ -105,6 +105,8 @@ export const TxButtonView: FunctionComponent = observer(() => {
     queryBalances.balances.find((bal) => bal.balance.toDec().gt(new Dec(0))) !==
     undefined;
 
+  const sendBtnRef = useRef<HTMLButtonElement>(null);
+
   return (
     <div className={styleTxButton.containerTxButton}>
       <Modal
@@ -134,7 +136,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
        */}
       <Button
-        id="btn-send"
+        innerRef={sendBtnRef}
         className={classnames(styleTxButton.button, {
           disabled: !hasAssets,
         })}
@@ -155,7 +157,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         <Tooltip
           placement="bottom"
           isOpen={tooltipOpen}
-          target="btn-send"
+          target={sendBtnRef}
           toggle={() => setTooltipOpen((value) => !value)}
           fade
         >
