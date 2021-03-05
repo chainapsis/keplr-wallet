@@ -1,6 +1,6 @@
 import { delay, inject, singleton } from "tsyringe";
 
-import Axios, { AxiosInstance } from "axios";
+import Axios from "axios";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos/build/tx-tracer";
@@ -74,125 +74,6 @@ export class BackgroundTxService {
       BackgroundTxService.processTxErrorNotification(e);
       throw e;
     }
-  }
-
-  async requestTx(
-    chainId: string,
-    txBytes: string,
-    mode: "sync" | "async" | "commit",
-    isRestAPI: boolean
-  ) {
-    const info = await this.chainsService.getChainInfo(chainId);
-    const rpcInstance = Axios.create({
-      ...{
-        baseURL: info.rpc,
-      },
-      ...info.rpcConfig,
-    });
-    const restInstance = Axios.create({
-      ...{
-        baseURL: info.rest,
-      },
-      ...info.restConfig,
-    });
-
-    // Do not await.
-    BackgroundTxService.sendTransaction(
-      chainId,
-      rpcInstance,
-      restInstance,
-      txBytes,
-      mode,
-      isRestAPI
-    );
-
-    return;
-  }
-
-  async requestTxWithResult(
-    chainId: string,
-    txBytes: string,
-    mode: "sync" | "async" | "commit",
-    isRestAPI: boolean
-  ): Promise<unknown> {
-    const info = await this.chainsService.getChainInfo(chainId);
-    const rpcInstance = Axios.create({
-      ...{
-        baseURL: info.rpc,
-      },
-      ...info.rpcConfig,
-    });
-    const restInstance = Axios.create({
-      ...{
-        baseURL: info.rest,
-      },
-      ...info.restConfig,
-    });
-
-    return await BackgroundTxService.sendTransaction(
-      chainId,
-      rpcInstance,
-      restInstance,
-      txBytes,
-      mode,
-      isRestAPI
-    );
-  }
-
-  private static async sendTransaction(
-    _chainId: string,
-    rpcInstance: AxiosInstance,
-    restInstance: AxiosInstance,
-    txBytes: string,
-    mode: "sync" | "async" | "commit",
-    isRestAPI: boolean
-  ): Promise<unknown> {
-    let result: unknown;
-
-    browser.notifications.create({
-      type: "basic",
-      iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
-      title: "Tx is pending...",
-      message: "Wait a second",
-    });
-
-    try {
-      if (!isRestAPI) {
-        result = await rpcInstance.get(`/broadcast_tx_${mode}`, {
-          params: {
-            tx: "0x" + txBytes,
-          },
-        });
-      } else {
-        const json = JSON.parse(Buffer.from(txBytes, "hex").toString());
-        const restResult = await restInstance.post<unknown>("/txs", {
-          tx: json,
-          mode: mode === "commit" ? "block" : mode,
-        });
-
-        if (restResult.status !== 200 && restResult.status !== 202) {
-          throw new Error(restResult.statusText);
-        }
-
-        result = restResult.data;
-      }
-
-      BackgroundTxService.processTxResultNotification(result);
-
-      try {
-        // TODO: FIXME
-        // Notify the tx is committed.
-        // sendMessage(APP_PORT, new TxCommittedMsg(chainId));
-      } catch {
-        // No matter if error is thrown.
-      }
-    } catch (e) {
-      BackgroundTxService.processTxErrorNotification(e);
-
-      throw e;
-    }
-
-    return result;
   }
 
   private static processTxResultNotification(result: any): void {
