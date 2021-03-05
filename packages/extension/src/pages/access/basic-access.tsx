@@ -67,9 +67,11 @@ export const AccessPage: FunctionComponent = observer(() => {
             id="access.paragraph"
             values={{
               host,
-              chainId: waitingPermission
-                ? chainStore.getChain(waitingPermission.data.chainId).chainId
-                : "loading...",
+              chainId:
+                waitingPermission &&
+                chainStore.hasChain(waitingPermission.data.chainId)
+                  ? chainStore.getChain(waitingPermission.data.chainId).chainId
+                  : "loading...",
               // eslint-disable-next-line react/display-name
               b: (...chunks: any) => <b>{chunks}</b>,
             }}
