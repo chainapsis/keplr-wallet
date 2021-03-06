@@ -1,5 +1,5 @@
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { ChainInfo, FiatCurrency } from "@keplr-wallet/types";
+import { ChainInfo } from "@keplr-wallet/types";
 
 import {
   PRIVILEGED_ORIGINS,
@@ -7,7 +7,6 @@ import {
   COSMOS_REST_ENDPOINT,
   COSMOS_RPC_CONFIG,
   COSMOS_RPC_ENDPOINT,
-  ETHEREUM_ENDPOINT,
   KAVA_REST_CONFIG,
   KAVA_REST_ENDPOINT,
   KAVA_RPC_CONFIG,
@@ -24,8 +23,6 @@ import {
   BETA_STRAIGHTEDGE_REST_CONFIG,
   BETA_STRAIGHTEDGE_RPC_ENDPOINT,
   BETA_STRAIGHTEDGE_RPC_CONFIG,
-  ADDITIONAL_SIGN_IN_PREPEND,
-  ADDITIONAL_INTL_MESSAGES,
   AKASH_RPC_ENDPOINT,
   AKASH_RPC_CONFIG,
   AKASH_REST_ENDPOINT,
@@ -47,21 +44,6 @@ import {
   IRIS_REST_ENDPOINT,
   IRIS_REST_CONFIG,
 } from "./config.var";
-import {
-  IntlMessages,
-  LanguageToFiatCurrency as TypeLanguageToFiatCurrency,
-} from "./languages";
-import { RegisterOption } from "@keplr-wallet/hooks";
-
-export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
-export const CoinGeckoGetPrice = "/simple/price";
-export const AutoFetchingFiatValueInterval = 300 * 1000; // 5min
-
-export const AutoFetchingAssetsInterval = 15 * 1000; // 15sec
-
-// Endpoint for Ethereum node.
-// This is used for ENS.
-export const EthereumEndpoint = ETHEREUM_ENDPOINT;
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
@@ -514,77 +496,3 @@ export const EmbedChainInfos: ChainInfo[] = [
 
 // The origins that are able to pass any permission that external webpages can have.
 export const PrivilegedOrigins: string[] = PRIVILEGED_ORIGINS;
-
-export const FiatCurrencies: FiatCurrency[] = [
-  {
-    currency: "usd",
-    symbol: "$",
-    maxDecimals: 2,
-    locale: "en-US",
-  },
-  {
-    currency: "eur",
-    symbol: "€",
-    maxDecimals: 2,
-    locale: "de-DE",
-  },
-  {
-    currency: "gbp",
-    symbol: "£",
-    maxDecimals: 2,
-    locale: "en-GB",
-  },
-  {
-    currency: "cad",
-    symbol: "CA$",
-    maxDecimals: 2,
-    locale: "en-CA",
-  },
-  {
-    currency: "aud",
-    symbol: "AU$",
-    maxDecimals: 2,
-    locale: "en-AU",
-  },
-  {
-    currency: "rub",
-    symbol: "₽",
-    maxDecimals: 0,
-    locale: "ru",
-  },
-  {
-    currency: "krw",
-    symbol: "₩",
-    maxDecimals: 0,
-    locale: "ko-KR",
-  },
-  {
-    currency: "hkd",
-    symbol: "HK$",
-    maxDecimals: 1,
-    locale: "en-HK",
-  },
-  {
-    currency: "cny",
-    symbol: "¥",
-    maxDecimals: 1,
-    locale: "zh-CN",
-  },
-  {
-    currency: "jpy",
-    symbol: "¥",
-    maxDecimals: 0,
-    locale: "ja-JP",
-  },
-];
-
-export const LanguageToFiatCurrency: TypeLanguageToFiatCurrency = {
-  default: "usd",
-  ko: "krw",
-};
-
-export const AdditionalSignInPrepend:
-  | RegisterOption[]
-  | undefined = ADDITIONAL_SIGN_IN_PREPEND;
-
-export const AdditonalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;

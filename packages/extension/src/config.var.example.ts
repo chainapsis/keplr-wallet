@@ -1,6 +1,4 @@
 import { AxiosRequestConfig } from "axios";
-import { IntlMessages } from "./languages";
-import { RegisterOption } from "@keplr-wallet/hooks";
 
 export const COSMOS_RPC_ENDPOINT = "";
 export const COSMOS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
@@ -64,10 +62,4 @@ export const IRIS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const IRIS_REST_ENDPOINT = "";
 export const IRIS_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
-export const ADDITIONAL_SIGN_IN_PREPEND:
-  | RegisterOption[]
-  | undefined = undefined;
-
 export const PRIVILEGED_ORIGINS: string[] = [];
-
-export const ADDITIONAL_INTL_MESSAGES: IntlMessages = {};

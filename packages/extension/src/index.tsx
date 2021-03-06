@@ -48,7 +48,7 @@ import { ManageTokenPage } from "./pages/setting/token/manage";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
 
-import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config";
+import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";

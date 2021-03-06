@@ -26,7 +26,7 @@ import {
   useMemoConfig,
   useRecipientConfig,
 } from "@keplr-wallet/hooks";
-import { EthereumEndpoint } from "../../../config";
+import { EthereumEndpoint } from "../../../config.ui";
 
 export const AddressBookPage: FunctionComponent<{
   onBackButton?: () => void;

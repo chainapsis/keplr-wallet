@@ -21,7 +21,7 @@ import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
 import { useSendTxConfig } from "@keplr-wallet/hooks";
-import { EthereumEndpoint } from "../../config";
+import { EthereumEndpoint } from "../../config.ui";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();

@@ -1,5 +1,6 @@
 import { ChainStore } from "./chain";
-import { EmbedChainInfos, FiatCurrencies } from "../config";
+import { EmbedChainInfos } from "../config";
+import { FiatCurrencies } from "../config.ui";
 import {
   KeyRingStore,
   InteractionStore,
