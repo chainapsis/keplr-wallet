@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/common",
-  "version": "0.8.0-rc.1",
+  "version": "0.8.1",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf build",
+    "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
     "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",

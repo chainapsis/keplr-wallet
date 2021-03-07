@@ -1,4 +1,4 @@
-import { HasMapStore } from "../common";
+import { CoinPrimitive, HasMapStore } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../common";
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -13,7 +13,6 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { fromHex } from "@cosmjs/encoding";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { QueriesStore } from "../query";
 import { Queries } from "../query/queries";
@@ -65,6 +64,9 @@ export interface AccountStoreOpts {
 }
 
 export class AccountStoreInner {
+  @observable
+  protected _walletVersion: string | undefined = undefined;
+
   @observable
   protected _walletStatus: WalletStatus = WalletStatus.Loading;
 
@@ -176,16 +178,22 @@ export class AccountStoreInner {
       return;
     }
 
+    this._walletVersion = keplr.version;
+
     // TODO: Handle not approved.
     yield this.enable(keplr, this.chainId);
 
     const key = yield* toGenerator(keplr.getKey(this.chainId));
     this._bech32Address = key.bech32Address;
     this._name = key.name;
-    this.pubKey = fromHex(key.pubKeyHex);
+    this.pubKey = key.pubKey;
 
     // Set the wallet status as loaded after getting all necessary infos.
     this._walletStatus = WalletStatus.Loaded;
+  }
+
+  get walletVersion(): string | undefined {
+    return this._walletVersion;
   }
 
   @computed
@@ -329,6 +337,7 @@ export class AccountStoreInner {
               amount: actualAmount,
             },
           },
+          [],
           stdFee,
           memo,
           (tx) => {
@@ -602,10 +611,29 @@ export class AccountStoreInner {
     memo: string = "",
     onFulfill?: (tx: any) => void
   ) {
+    const voteOption = (() => {
+      if (
+        this.chainGetter.getChain(this.chainId).features?.includes("stargate")
+      ) {
+        switch (option) {
+          case "Yes":
+            return 1;
+          case "Abstain":
+            return 2;
+          case "No":
+            return 3;
+          case "NoWithVeto":
+            return 4;
+        }
+      } else {
+        return option;
+      }
+    })();
+
     const msg = {
       type: this.opts.msgOpts.govVote.type,
       value: {
-        option,
+        option: voteOption,
         proposal_id: proposalId,
         voter: this.bech32Address,
       },
@@ -652,6 +680,7 @@ export class AccountStoreInner {
       {
         create_viewing_key: { entropy },
       },
+      [],
       {
         amount: [],
         gas: this.opts.msgOpts.createSecret20ViewingKey.gas.toString(),
@@ -698,7 +727,7 @@ export class AccountStoreInner {
     contractAddress: string,
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object,
-    // TODO: Add the `sentFunds`.
+    sentFunds: CoinPrimitive[],
     fee: StdFee,
     memo: string = "",
     onFulfill?: (tx: any) => void
@@ -723,7 +752,7 @@ export class AccountStoreInner {
         contract: contractAddress,
         callback_code_hash: "",
         msg: Buffer.from(encryptedMsg).toString("base64"),
-        sent_funds: [],
+        sent_funds: sentFunds,
         callback_sig: null,
       },
     };

@@ -16,11 +16,9 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
 import { LedgerService } from "../ledger";
 import { BIP44, ChainInfo } from "@keplr-wallet/types";
-import { Env, MessageRequester, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { APP_PORT, Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
-
-import { EnableKeyRingMsg } from "./messages";
 
 import {
   encodeSecp256k1Signature,
@@ -31,7 +29,6 @@ import {
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
 import { RNG } from "@keplr-wallet/crypto";
-import { KeyStoreChangedEventMsg } from "./webpage";
 import { cosmos } from "@keplr-wallet/cosmos";
 
 @singleton()
@@ -51,8 +48,6 @@ export class KeyRingService {
     public readonly permissionService: PermissionService,
     @inject(LedgerService)
     ledgerService: LedgerService,
-    @inject(TYPES.MsgRequesterToWebPage)
-    protected readonly msgRequester: MessageRequester,
     @inject(TYPES.RNG)
     protected readonly rng: RNG
   ) {
@@ -82,12 +77,7 @@ export class KeyRingService {
     }
 
     if (this.keyRing.status === KeyRingStatus.LOCKED) {
-      await this.interactionService.waitApprove(
-        env,
-        "/unlock",
-        EnableKeyRingMsg.type(),
-        {}
-      );
+      await this.interactionService.waitApprove(env, "/unlock", "unlock", {});
       return this.keyRing.status;
     }
 
@@ -96,19 +86,6 @@ export class KeyRingService {
 
   get keyRingStatus(): KeyRingStatus {
     return this.keyRing.status;
-  }
-
-  async checkBech32Address(chainId: string, bech32Address: string) {
-    const key = await this.getKey(chainId);
-    if (
-      bech32Address !==
-      new Bech32Address(key.address).toBech32(
-        (await this.chainsService.getChainInfo(chainId)).bech32Config
-          .bech32PrefixAccAddr
-      )
-    ) {
-      throw new Error("Invalid bech32 address");
-    }
   }
 
   async deleteKeyRing(
@@ -189,8 +166,20 @@ export class KeyRingService {
   async requestSignAmino(
     env: Env,
     chainId: string,
+    signer: string,
     signDoc: StdSignDoc
   ): Promise<AminoSignResponse> {
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+
+    const key = await this.keyRing.getKey(chainId, coinType);
+    const bech32Address = new Bech32Address(key.address).toBech32(
+      (await this.chainsService.getChainInfo(chainId)).bech32Config
+        .bech32PrefixAccAddr
+    );
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
     const newSignDoc = (await this.interactionService.waitApprove(
       env,
       "/sign",
@@ -199,10 +188,9 @@ export class KeyRingService {
         chainId,
         mode: "amino",
         signDoc,
+        signer,
       }
     )) as StdSignDoc;
-
-    const coinType = await this.chainsService.getChainCoinType(chainId);
 
     try {
       const signature = await this.keyRing.sign(
@@ -212,16 +200,13 @@ export class KeyRingService {
         serializeSignDoc(newSignDoc)
       );
 
-      const key = await this.keyRing.getKey(chainId, coinType);
-
       return {
         signed: newSignDoc,
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
-      await this.interactionService.dispatchData(
-        env,
-        "/sign",
+      await this.interactionService.dispatchEvent(
+        APP_PORT,
         "request-sign-end",
         {}
       );
@@ -231,8 +216,20 @@ export class KeyRingService {
   async requestSignDirect(
     env: Env,
     chainId: string,
+    signer: string,
     signDoc: cosmos.tx.v1beta1.SignDoc
   ): Promise<DirectSignResponse> {
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+
+    const key = await this.keyRing.getKey(chainId, coinType);
+    const bech32Address = new Bech32Address(key.address).toBech32(
+      (await this.chainsService.getChainInfo(chainId)).bech32Config
+        .bech32PrefixAccAddr
+    );
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
     const newSignDocBytes = (await this.interactionService.waitApprove(
       env,
       "/sign",
@@ -241,12 +238,11 @@ export class KeyRingService {
         chainId,
         mode: "direct",
         signDocBytes: cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
+        signer,
       }
     )) as Uint8Array;
 
     const newSignDoc = cosmos.tx.v1beta1.SignDoc.decode(newSignDocBytes);
-
-    const coinType = await this.chainsService.getChainCoinType(chainId);
 
     try {
       const signature = await this.keyRing.sign(
@@ -256,16 +252,13 @@ export class KeyRingService {
         makeSignBytes(newSignDoc)
       );
 
-      const key = await this.keyRing.getKey(chainId, coinType);
-
       return {
         signed: newSignDoc,
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
-      await this.interactionService.dispatchData(
-        env,
-        "/sign",
+      await this.interactionService.dispatchEvent(
+        APP_PORT,
         "request-sign-end",
         {}
       );
@@ -314,13 +307,11 @@ export class KeyRingService {
     try {
       return await this.keyRing.changeKeyStoreFromMultiKeyStore(index);
     } finally {
-      this.msgRequester
-        .sendMessage(WEBPAGE_PORT, new KeyStoreChangedEventMsg())
-        .catch((e) => {
-          // No need to handle the error case.
-          // Just ignore.
-          console.log(e);
-        });
+      await this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
     }
   }
 

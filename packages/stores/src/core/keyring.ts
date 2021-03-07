@@ -9,7 +9,6 @@ import {
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
   DeleteKeyRingMsg,
-  EnableKeyRingMsg,
   GetIsKeyStoreCoinTypeSetMsg,
   GetKeyRingTypeMsg,
   GetMultiKeyStoreInfoMsg,
@@ -24,7 +23,6 @@ import {
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 
-import { Buffer } from "buffer/";
 import { InteractionStore } from "./interaction";
 import { ChainGetter } from "../common";
 import { BIP44 } from "@keplr-wallet/types";
@@ -167,11 +165,7 @@ export class KeyRingStore {
     password: string,
     meta: Record<string, string>
   ) {
-    const msg = new CreatePrivateKeyMsg(
-      Buffer.from(privateKey).toString("hex"),
-      password,
-      meta
-    );
+    const msg = new CreatePrivateKeyMsg(privateKey, password, meta);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -213,10 +207,7 @@ export class KeyRingStore {
 
   @flow
   *addPrivateKey(privateKey: Uint8Array, meta: Record<string, string>) {
-    const msg = new AddPrivateKeyMsg(
-      Buffer.from(privateKey).toString("hex"),
-      meta
-    );
+    const msg = new AddPrivateKeyMsg(privateKey, meta);
     this.multiKeyStoreInfo = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -264,17 +255,16 @@ export class KeyRingStore {
     this.status = result.status;
 
     // Approve all waiting interaction for the enabling key ring.
-    for (const interaction of this.interactionStore.getDatas(
-      EnableKeyRingMsg.type()
-    )) {
-      yield this.interactionStore.approve(
-        EnableKeyRingMsg.type(),
-        interaction.id,
-        {}
-      );
+    for (const interaction of this.interactionStore.getDatas("unlock")) {
+      yield this.interactionStore.approve("unlock", interaction.id, {});
     }
 
     window.dispatchEvent(new Event("keplr_keystoreunlock"));
+  }
+
+  @flow
+  *rejectAll() {
+    yield this.interactionStore.rejectAll("unlock");
   }
 
   @flow

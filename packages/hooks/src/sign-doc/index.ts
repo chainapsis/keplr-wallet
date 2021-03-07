@@ -92,7 +92,7 @@ export const useSignDocHelper = (
   feeConfig: IFeeConfig,
   memoConfig: IMemoConfig
 ) => {
-  const [helper] = useState(new SignDocHelper(feeConfig, memoConfig));
+  const [helper] = useState(() => new SignDocHelper(feeConfig, memoConfig));
 
   return helper;
 };

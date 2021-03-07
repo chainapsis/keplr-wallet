@@ -42,7 +42,9 @@ export const useGasConfig = (
   chainId: string,
   initialGas: number = 0
 ) => {
-  const [txConfig] = useState(new GasConfig(chainGetter, chainId, initialGas));
+  const [txConfig] = useState(
+    () => new GasConfig(chainGetter, chainId, initialGas)
+  );
   txConfig.setChain(chainId);
 
   return txConfig;

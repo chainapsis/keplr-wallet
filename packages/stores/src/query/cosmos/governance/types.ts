@@ -1,3 +1,13 @@
+// This is not the type for result of query.
+export enum ProposalStatus {
+  UNSPECIFIED,
+  DEPOSIT_PERIOD,
+  VOTING_PERIOD,
+  PASSED,
+  REJECTED,
+  FAILED,
+}
+
 export type Tally = {
   // Int
   yes: string;
@@ -36,9 +46,35 @@ export type Proposal = {
   voting_end_time: string;
 };
 
+export type ProposalStargate = {
+  content: {
+    type: string;
+    value: {
+      title: string;
+      description: string;
+    };
+  };
+  // Int
+  id: string;
+  // Proposal status is changed to the ENUM.
+  status: number;
+  final_tally_result: Tally;
+  submit_time: string;
+  deposit_end_time: string;
+  total_deposit: [
+    {
+      denom: string;
+      // Int
+      amount: string;
+    }
+  ];
+  voting_start_time: string;
+  voting_end_time: string;
+};
+
 export type GovProposals = {
   height: string;
-  result: Proposal[];
+  result: Proposal[] | ProposalStargate[];
 };
 
 export type GovParamsDeposit = {
@@ -68,5 +104,25 @@ export type GovParamsTally = {
     quorum: string;
     threshold: string;
     veto: string;
+  };
+};
+
+export type ProposalVoter = {
+  height: string;
+  result: {
+    proposal_id: string;
+    voter: string;
+    option: "Yes" | "Abstain" | "No" | "NoWithVeto";
+  };
+};
+
+export type ProposalVoterStargate = {
+  height: string;
+  result: {
+    proposal_id: string;
+    voter: string;
+    // Vote option is enum on the stargate
+    // (empty: 0, yes: 1, abstain: 2, no: 3, no with veto: 4)
+    option: number;
   };
 };

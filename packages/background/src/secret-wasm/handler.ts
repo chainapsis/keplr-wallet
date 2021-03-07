@@ -2,8 +2,6 @@ import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import { GetPubkeyMsg, ReqeustEncryptMsg, RequestDecryptMsg } from "./messages";
 import { SecretWasmService } from "./service";
 
-import { Buffer } from "buffer/";
-
 export const getHandler: (service: SecretWasmService) => Handler = (
   service: SecretWasmService
 ) => {
@@ -31,9 +29,7 @@ const handleGetPubkeyMsg: (
       msg.origin
     );
 
-    return Buffer.from(await service.getPubkey(env, msg.chainId)).toString(
-      "hex"
-    );
+    return await service.getPubkey(env, msg.chainId);
   };
 };
 
@@ -48,9 +44,12 @@ const handleReqeustEncryptMsg: (
     );
 
     // TODO: Should ask for user whether approve or reject to encrypt.
-    return Buffer.from(
-      await service.encrypt(env, msg.chainId, msg.contractCodeHash, msg.msg)
-    ).toString("hex");
+    return await service.encrypt(
+      env,
+      msg.chainId,
+      msg.contractCodeHash,
+      msg.msg
+    );
   };
 };
 
@@ -65,13 +64,6 @@ const handleRequestDecryptMsg: (
     );
 
     // XXX: Is there need to ask for user whether approve or reject to decrypt?
-    return Buffer.from(
-      await service.decrypt(
-        env,
-        msg.chainId,
-        Buffer.from(msg.cipherTextHex, "hex"),
-        Buffer.from(msg.nonceHex, "hex")
-      )
-    ).toString("hex");
+    return await service.decrypt(env, msg.chainId, msg.cipherText, msg.nonce);
   };
 };

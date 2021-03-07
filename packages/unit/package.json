@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/unit",
-  "version": "0.8.0-rc.1",
+  "version": "0.8.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf build",
+    "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
     "test": "mocha -r ts-node/register 'src/**/*.spec.ts'",
@@ -17,7 +17,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/types": "^0.8.0-rc.1",
+    "@keplr-wallet/types": "^0.8.0",
     "big-integer": "^1.6.48",
     "utility-types": "^3.10.0"
   },

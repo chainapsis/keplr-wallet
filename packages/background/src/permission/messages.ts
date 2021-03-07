@@ -1,6 +1,34 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 
+export class EnableAccessMsg extends Message<void> {
+  public static type() {
+    return "enable-access";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  type(): string {
+    return EnableAccessMsg.type();
+  }
+}
+
 export class GetPermissionOriginsMsg extends Message<string[]> {
   public static type() {
     return "get-permission-origins";

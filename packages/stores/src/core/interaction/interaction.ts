@@ -17,11 +17,18 @@ import {
   IObservableArray,
   makeObservable,
   flow,
+  toJS,
 } from "mobx";
 
 export class InteractionStore implements InteractionForegroundHandler {
   @observable.shallow
   protected datas: Map<string, InteractionWaitingData[]> = new Map();
+
+  @observable.shallow
+  protected events: Map<
+    string,
+    Omit<InteractionWaitingData, "id">[]
+  > = new Map();
 
   constructor(
     protected readonly router: Router,
@@ -34,7 +41,16 @@ export class InteractionStore implements InteractionForegroundHandler {
   }
 
   getDatas<T = unknown>(type: string): InteractionWaitingData<T>[] {
-    return (this.datas.get(type) as InteractionWaitingData<T>[]) ?? [];
+    return toJS(this.datas.get(type) as InteractionWaitingData<T>[]) ?? [];
+  }
+
+  getEvents<T = unknown>(
+    type: string
+  ): Omit<InteractionWaitingData<T>, "id">[] {
+    return (
+      toJS(this.events.get(type) as Omit<InteractionWaitingData<T>, "id">[]) ??
+      []
+    );
   }
 
   @action
@@ -50,6 +66,21 @@ export class InteractionStore implements InteractionForegroundHandler {
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.datas.get(data.type)!.push(data);
+  }
+
+  @action
+  onEventDataReceived(data: Omit<InteractionWaitingData, "id">) {
+    if (!this.events.has(data.type)) {
+      this.events.set(
+        data.type,
+        observable.array([], {
+          deep: false,
+        })
+      );
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.events.get(data.type)!.push(data);
   }
 
   @flow
@@ -90,6 +121,19 @@ export class InteractionStore implements InteractionForegroundHandler {
           type
         ) as IObservableArray<InteractionWaitingData>).remove(find);
       }
+    }
+  }
+
+  @action
+  clearEvent(type: string) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (this.events.has(type) && this.events.get(type)!.length > 0) {
+      this.events.set(
+        type,
+        observable.array([], {
+          deep: false,
+        })
+      );
     }
   }
 }

@@ -24,7 +24,7 @@ import {
   TypeImportLedger,
 } from "./ledger";
 import { WelcomePage } from "./welcome";
-import { AdditionalSignInPrepend } from "../../config";
+import { AdditionalSignInPrepend } from "../../config.ui";
 
 export enum NunWords {
   WORDS12,

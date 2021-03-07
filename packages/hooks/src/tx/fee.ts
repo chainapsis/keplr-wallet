@@ -216,14 +216,15 @@ export const useFeeConfig = (
   gasConfig: IGasConfig
 ) => {
   const [config] = useState(
-    new FeeConfig(
-      chainGetter,
-      chainId,
-      sender,
-      queryBalances,
-      amountConfig,
-      gasConfig
-    )
+    () =>
+      new FeeConfig(
+        chainGetter,
+        chainId,
+        sender,
+        queryBalances,
+        amountConfig,
+        gasConfig
+      )
   );
   config.setChain(chainId);
   config.setQueryBalances(queryBalances);

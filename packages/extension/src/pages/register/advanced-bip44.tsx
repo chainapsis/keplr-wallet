@@ -73,7 +73,7 @@ export class BIP44Option {
 
 // CONTRACT: Use with `observer`
 export const useBIP44Option = (coinType?: number) => {
-  const [bip44Option] = useState(new BIP44Option(coinType));
+  const [bip44Option] = useState(() => new BIP44Option(coinType));
 
   return bip44Option;
 };

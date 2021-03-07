@@ -5,7 +5,7 @@ import { Ledger } from "./ledger";
 
 import delay from "delay";
 
-import { Env } from "@keplr-wallet/router";
+import { APP_PORT, Env } from "@keplr-wallet/router";
 import { BIP44HDPath } from "../keyring";
 import { KVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
@@ -24,7 +24,7 @@ export class LedgerService {
   ) {}
 
   async getPublicKey(env: Env, bip44HDPath: BIP44HDPath): Promise<Uint8Array> {
-    return await this.useLedger(env, async (ledger) => {
+    return await this.useLedger(env, async (ledger, retryCount) => {
       try {
         // Cosmos App on Ledger doesn't support the coin type other than 118.
         return await ledger.getPublicKey([
@@ -35,19 +35,13 @@ export class LedgerService {
           bip44HDPath.addressIndex,
         ]);
       } finally {
-        await this.interactionService.dispatchData(
-          env,
-          "/ledger-grant",
-          "ledger-init",
-          {
+        // Notify UI Ledger pubkey derivation succeeded only when Ledger initialization is tried again.
+        if (retryCount > 0) {
+          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "get-pubkey",
             success: true,
-          },
-          {
-            forceOpenWindow: true,
-            channel: "ledger",
-          }
-        );
+          });
+        }
       }
     });
   }
@@ -58,7 +52,7 @@ export class LedgerService {
     expectedPubKey: Uint8Array,
     message: Uint8Array
   ): Promise<Uint8Array> {
-    return await this.useLedger(env, async (ledger) => {
+    return await this.useLedger(env, async (ledger, retryCount: number) => {
       try {
         const pubKey = await ledger.getPublicKey([
           44,
@@ -84,49 +78,43 @@ export class LedgerService {
           ],
           message
         );
-        await this.interactionService.dispatchData(
-          env,
-          "/ledger-grant",
-          "ledger-init",
-          {
+        // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
+        if (retryCount > 0) {
+          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "sign",
             success: true,
-          },
-          {
-            forceOpenWindow: true,
-            channel: "ledger",
-          }
-        );
+          });
+        }
         return signature;
       } catch (e) {
-        await this.interactionService.dispatchData(
-          env,
-          "/ledger-grant",
-          "ledger-init",
-          {
+        // Notify UI Ledger signing failed only when Ledger initialization is tried again.
+        if (retryCount > 0) {
+          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "sign",
             success: false,
-          },
-          {
-            forceOpenWindow: true,
-            channel: "ledger",
-          }
-        );
+          });
+        }
         throw e;
       }
     });
   }
 
-  async useLedger<T>(env: Env, fn: (ledger: Ledger) => Promise<T>): Promise<T> {
-    const ledger = await this.initLedger(env);
+  async useLedger<T>(
+    env: Env,
+    fn: (ledger: Ledger, retryCount: number) => Promise<T>
+  ): Promise<T> {
+    let ledger: { ledger: Ledger; retryCount: number } | undefined;
     try {
-      return await fn(ledger);
+      ledger = await this.initLedger(env);
+      return await fn(ledger.ledger, ledger.retryCount);
     } finally {
-      await ledger.close();
+      if (ledger) {
+        await ledger.ledger.close();
+      }
     }
   }
 
-  async initLedger(env: Env): Promise<Ledger> {
+  async initLedger(env: Env): Promise<{ ledger: Ledger; retryCount: number }> {
     if (this.previousInitAborter) {
       this.previousInitAborter(
         new Error(
@@ -156,48 +144,68 @@ export class LedgerService {
     // Without this, the prior signing request can be delivered to the ledger and possibly make a user take a mistake.
     this.previousInitAborter = aborter.abort;
 
+    let retryCount = 0;
     while (true) {
       try {
         const ledger = await Ledger.init(await this.getWebHIDFlag());
         this.previousInitAborter = undefined;
-        return ledger;
+        return {
+          ledger,
+          retryCount,
+        };
       } catch (e) {
         console.log(e);
 
-        await Promise.race([
-          this.interactionService.waitApprove(
-            env,
-            "/ledger-grant",
-            "ledger-init",
-            {
-              event: "init-failed",
-            },
-            {
-              forceOpenWindow: true,
-              channel: "ledger",
-            }
-          ),
-          (async () => {
-            // If ledger is not inited in 5 minutes, abort it.
-            await delay(5 * 60 * 1000);
-            await this.interactionService.dispatchData(
+        const timeoutAbortController = new AbortController();
+
+        try {
+          await Promise.race([
+            this.interactionService.waitApprove(
               env,
               "/ledger-grant",
               "ledger-init",
               {
-                event: "init-aborted",
+                event: "init-failed",
               },
               {
                 forceOpenWindow: true,
                 channel: "ledger",
               }
-            );
-            throw new Error("Ledger init timeout");
-          })(),
-          aborter.wait(),
-          this.testLedgerGrantUIOpened(),
-        ]);
+            ),
+            (async () => {
+              let timeoutAborted = false;
+              // If ledger is not inited in 5 minutes, abort it.
+              try {
+                await delay(5 * 60 * 1000, {
+                  signal: timeoutAbortController.signal,
+                });
+              } catch (e) {
+                if (e.name === "AbortError") {
+                  timeoutAborted = true;
+                } else {
+                  throw e;
+                }
+              }
+              if (!timeoutAborted) {
+                await this.interactionService.dispatchEvent(
+                  APP_PORT,
+                  "ledger-init",
+                  {
+                    event: "init-aborted",
+                  }
+                );
+                throw new Error("Ledger init timeout");
+              }
+            })(),
+            aborter.wait(),
+            this.testLedgerGrantUIOpened(),
+          ]);
+        } finally {
+          timeoutAbortController.abort();
+        }
       }
+
+      retryCount++;
     }
   }
 

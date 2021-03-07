@@ -54,7 +54,9 @@ export class BaseAccount implements Account {
     // But, this can be different according to the version of cosmos-sdk.
     // So, anyway, try to parse it by some ways...
     const baseVestingAccount =
-      value.BaseVestingAccount || value.baseVestingAccount;
+      value.BaseVestingAccount ||
+      value.baseVestingAccount ||
+      value.base_vesting_account;
     if (baseVestingAccount) {
       value =
         baseVestingAccount.BaseAccount ||

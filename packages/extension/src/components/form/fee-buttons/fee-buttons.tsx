@@ -75,7 +75,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
   }) => {
     // This may be not the good way to handle the states across the components.
     // But, rather than using the context API with boilerplate code, just use the mobx state to simplify the logic.
-    const [feeButtonState] = useState(new FeeButtonState());
+    const [feeButtonState] = useState(() => new FeeButtonState());
 
     return (
       <React.Fragment>

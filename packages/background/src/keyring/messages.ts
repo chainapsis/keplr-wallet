@@ -8,13 +8,12 @@ import {
 import { BIP44HDPath } from "./types";
 
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { BIP44, KeyHex } from "@keplr-wallet/types";
+import { BIP44, Key } from "@keplr-wallet/types";
 
 import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
-import { Buffer } from "buffer/";
 import { cosmos } from "@keplr-wallet/cosmos";
 
 export class RestoreKeyRingMsg extends Message<{
@@ -39,36 +38,6 @@ export class RestoreKeyRingMsg extends Message<{
 
   type(): string {
     return RestoreKeyRingMsg.type();
-  }
-}
-
-export class EnableKeyRingMsg extends Message<{
-  status: KeyRingStatus;
-}> {
-  public static type() {
-    return "enable-keyring";
-  }
-
-  constructor(public readonly chainId: string) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id is empty");
-    }
-  }
-
-  approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return EnableKeyRingMsg.type();
   }
 }
 
@@ -224,8 +193,7 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   constructor(
-    // Hex encoded bytes.
-    public readonly privateKeyHex: string,
+    public readonly privateKey: Uint8Array,
     public readonly password: string,
     public readonly meta: Record<string, string>
   ) {
@@ -233,16 +201,17 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   validateBasic(): void {
-    if (!this.privateKeyHex) {
+    if (!this.privateKey || this.privateKey.length === 0) {
       throw new Error("private key not set");
+    }
+
+    if (this.privateKey.length !== 32) {
+      throw new Error("invalid length of private key");
     }
 
     if (!this.password) {
       throw new Error("password not set");
     }
-
-    // Check that private key is encoded as hex.
-    Buffer.from(this.privateKeyHex, "hex");
   }
 
   route(): string {
@@ -290,20 +259,20 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 
   constructor(
-    // Hex encoded bytes.
-    public readonly privateKeyHex: string,
+    public readonly privateKey: Uint8Array,
     public readonly meta: Record<string, string>
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.privateKeyHex) {
+    if (!this.privateKey || this.privateKey.length === 0) {
       throw new Error("private key not set");
     }
 
-    // Check that private key is encoded as hex.
-    Buffer.from(this.privateKeyHex, "hex");
+    if (this.privateKey.length !== 32) {
+      throw new Error("invalid length of private key");
+    }
   }
 
   route(): string {
@@ -386,7 +355,7 @@ export class UnlockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class GetKeyMsg extends Message<KeyHex> {
+export class GetKeyMsg extends Message<Key> {
   public static type() {
     return "get-key";
   }
@@ -421,7 +390,7 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
 
   constructor(
     public readonly chainId: string,
-    public readonly bech32Address: string,
+    public readonly signer: string,
     public readonly signDoc: StdSignDoc
   ) {
     super();
@@ -432,12 +401,12 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
       throw new Error("chain id not set");
     }
 
-    if (!this.bech32Address) {
-      throw new Error("bech32 address not set");
+    if (!this.signer) {
+      throw new Error("signer not set");
     }
 
     // Validate bech32 address.
-    Bech32Address.validate(this.bech32Address);
+    Bech32Address.validate(this.signer);
 
     if (this.signDoc.chain_id !== this.chainId) {
       throw new Error(
@@ -470,7 +439,7 @@ export class RequestSignDirectMsg extends Message<{
 
   constructor(
     public readonly chainId: string,
-    public readonly bech32Address: string,
+    public readonly signer: string,
     public readonly signDocBytes: Uint8Array
   ) {
     super();
@@ -481,12 +450,12 @@ export class RequestSignDirectMsg extends Message<{
       throw new Error("chain id not set");
     }
 
-    if (!this.bech32Address) {
-      throw new Error("bech32 address not set");
+    if (!this.signer) {
+      throw new Error("signer not set");
     }
 
     // Validate bech32 address.
-    Bech32Address.validate(this.bech32Address);
+    Bech32Address.validate(this.signer);
 
     const signDoc = cosmos.tx.v1beta1.SignDoc.decode(this.signDocBytes);
 

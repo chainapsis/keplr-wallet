@@ -4,7 +4,7 @@ export class DenomHelper {
 
   constructor(protected readonly _denom: string) {
     // Remember that the coin's actual denom should start with "type:contractAddress:denom" if it is for the token based on contract.
-    const split = this.denom.split(/(\w+):(\w+):([\w\s-.]+)/).filter(Boolean);
+    const split = this.denom.split(/(\w+):(\w+):(.+)/).filter(Boolean);
     if (split.length !== 1 && split.length !== 3) {
       throw new Error(`Invalid denom: ${this.denom}`);
     }

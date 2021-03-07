@@ -88,7 +88,9 @@ export class NewMnemonicConfig {
 }
 
 export const useNewMnemonicConfig = (registerConfig: RegisterConfig) => {
-  const [newMnemonicConfig] = useState(new NewMnemonicConfig(registerConfig));
+  const [newMnemonicConfig] = useState(
+    () => new NewMnemonicConfig(registerConfig)
+  );
 
   return newMnemonicConfig;
 };

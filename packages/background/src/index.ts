@@ -35,7 +35,7 @@ export function init(
   router: Router,
   storeCreator: (prefix: string) => KVStore,
   // Message requester to the content script.
-  msgRequesterToWebPage: MessageRequester,
+  eventMsgRequester: MessageRequester,
   embedChainInfos: ChainInfo[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
@@ -45,8 +45,8 @@ export function init(
     useValue: embedChainInfos,
   });
 
-  container.register(TYPES.MsgRequesterToWebPage, {
-    useValue: msgRequesterToWebPage,
+  container.register(TYPES.EventMsgRequester, {
+    useValue: eventMsgRequester,
   });
   container.register(TYPES.RNG, { useValue: rng });
 

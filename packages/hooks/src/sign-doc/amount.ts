@@ -195,7 +195,7 @@ export const useSignDocAmountConfig = (
   msgOpts: MsgOpts
 ) => {
   const [config] = useState(
-    new SignDocAmountConfig(chainGetter, chainId, msgOpts)
+    () => new SignDocAmountConfig(chainGetter, chainId, msgOpts)
   );
   config.setChain(chainId);
   config.setMsgOpts(msgOpts);

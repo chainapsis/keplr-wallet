@@ -4,25 +4,27 @@ import {
   AminoSignResponse,
   StdSignDoc,
   StdTx,
+  OfflineSigner,
 } from "@cosmjs/launchpad";
-import { DirectSignResponse } from "@cosmjs/proto-signing";
+import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import Long from "long";
 
-// TODO: Return the `Uint8Array` instead of hex string.
-export interface KeyHex {
+export interface Key {
   // Name of the selected key store.
   readonly name: string;
   readonly algo: string;
-  readonly pubKeyHex: string;
-  readonly addressHex: string;
+  readonly pubKey: Uint8Array;
+  readonly address: Uint8Array;
   readonly bech32Address: string;
 }
 
 export interface Keplr {
+  readonly version: string;
+
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
-  getKey(chainId: string): Promise<KeyHex>;
+  getKey(chainId: string): Promise<Key>;
   signAmino(
     chainId: string,
     signer: string,
@@ -50,10 +52,28 @@ export interface Keplr {
     stdTx: StdTx,
     mode: BroadcastMode
   ): Promise<Uint8Array>;
+
+  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
+
   suggestToken(chainId: string, contractAddress: string): Promise<void>;
   getSecret20ViewingKey(
     chainId: string,
     contractAddress: string
   ): Promise<string>;
   getEnigmaUtils(chainId: string): SecretUtils;
+
+  // Related to Enigma.
+  // But, recommended to use `getEnigmaUtils` rather than using below.
+  getEnigmaPubKey(chainId: string): Promise<Uint8Array>;
+  enigmaEncrypt(
+    chainId: string,
+    contractCodeHash: string,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    msg: object
+  ): Promise<Uint8Array>;
+  enigmaDecrypt(
+    chainId: string,
+    ciphertext: Uint8Array,
+    nonce: Uint8Array
+  ): Promise<Uint8Array>;
 }

@@ -46,6 +46,8 @@ export const SignPage: FunctionComponent = observer(() => {
     signInteractionStore.rejectAll();
   });
 
+  const [signer, setSigner] = useState("");
+
   const current = chainStore.current;
   // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
   const gasConfig = useGasConfig(chainStore, current.chainId, 1);
@@ -57,14 +59,14 @@ export const SignPage: FunctionComponent = observer(() => {
   const feeConfig = useFeeConfig(
     chainStore,
     current.chainId,
-    accountStore.getAccount(current.chainId).bech32Address,
+    signer,
     queriesStore.get(current.chainId).getQueryBalances(),
     amountConfig,
     gasConfig
   );
   const memoConfig = useMemoConfig(chainStore, current.chainId);
 
-  const signDocWapper = signInteractionStore.waitingData?.data;
+  const signDocWapper = signInteractionStore.waitingData?.data.signDocWrapper;
   const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
   amountConfig.setSignDocHelper(signDocHelper);
 
@@ -84,13 +86,14 @@ export const SignPage: FunctionComponent = observer(() => {
   useEffect(() => {
     if (signInteractionStore.waitingData) {
       const data = signInteractionStore.waitingData;
-      chainStore.selectChain(data.data.chainId);
-      signDocHelper.setSignDocWrapper(data.data);
-      gasConfig.setGas(data.data.gas);
-      memoConfig.setMemo(data.data.memo);
+      chainStore.selectChain(data.data.signDocWrapper.chainId);
+      signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
+      gasConfig.setGas(data.data.signDocWrapper.gas);
+      memoConfig.setMemo(data.data.signDocWrapper.memo);
       if (isSignDocInternalSend) {
-        feeConfig.setManualFee(data.data.fees[0]);
+        feeConfig.setManualFee(data.data.signDocWrapper.fees[0]);
       }
+      setSigner(data.data.signer);
     }
   }, [
     chainStore,

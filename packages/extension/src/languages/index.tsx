@@ -66,7 +66,9 @@ export const AppIntlProvider: FunctionComponent<{
   // Set the fiat currency according to the language if the fiat currency is not set (automatic).
   languageToFiatCurrency: LanguageToFiatCurrency;
 }> = ({ additionalMessages, languageToFiatCurrency, children }) => {
-  const [language, _setLanguage] = useState(initLanguage(additionalMessages));
+  const [language, _setLanguage] = useState(() =>
+    initLanguage(additionalMessages)
+  );
   const [automatic, setAutomatic] = useState(
     localStorage.getItem("language") == null
   );

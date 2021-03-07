@@ -1,13 +1,14 @@
-import { ChainInfo, Keplr as IKeplr, KeyHex } from "@keplr-wallet/types";
+import { ChainInfo, Keplr as IKeplr, Key } from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
   StdTx,
+  OfflineSigner,
 } from "@cosmjs/launchpad";
 import {
-  EnableKeyRingMsg,
+  EnableAccessMsg,
   SuggestChainInfoMsg,
   GetKeyMsg,
   SuggestTokenMsg,
@@ -15,22 +16,30 @@ import {
   GetSecret20ViewingKey,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
+  GetPubkeyMsg,
+  ReqeustEncryptMsg,
+  RequestDecryptMsg,
 } from "@keplr-wallet/background";
 import { cosmos } from "@keplr-wallet/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
-import { DirectSignResponse } from "@cosmjs/proto-signing";
+import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
+
+import { CosmJSOfflineSigner } from "./cosmjs";
 
 export class Keplr implements IKeplr {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
 
-  constructor(protected readonly requester: MessageRequester) {}
+  constructor(
+    public readonly version: string,
+    protected readonly requester: MessageRequester
+  ) {}
 
   async enable(chainId: string): Promise<void> {
     await this.requester.sendMessage(
       BACKGROUND_PORT,
-      new EnableKeyRingMsg(chainId)
+      new EnableAccessMsg(chainId)
     );
   }
 
@@ -39,7 +48,7 @@ export class Keplr implements IKeplr {
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
-  async getKey(chainId: string): Promise<KeyHex> {
+  async getKey(chainId: string): Promise<Key> {
     const msg = new GetKeyMsg(chainId);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
@@ -80,6 +89,10 @@ export class Keplr implements IKeplr {
     };
   }
 
+  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
+    return new CosmJSOfflineSigner(chainId, this);
+  }
+
   async suggestToken(chainId: string, contractAddress: string): Promise<void> {
     const msg = new SuggestTokenMsg(chainId, contractAddress);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
@@ -93,13 +106,47 @@ export class Keplr implements IKeplr {
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
+  async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetPubkeyMsg(chainId)
+    );
+  }
+
+  async enigmaEncrypt(
+    chainId: string,
+    contractCodeHash: string,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    msg: object
+  ): Promise<Uint8Array> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new ReqeustEncryptMsg(chainId, contractCodeHash, msg)
+    );
+  }
+
+  async enigmaDecrypt(
+    chainId: string,
+    ciphertext: Uint8Array,
+    nonce: Uint8Array
+  ): Promise<Uint8Array> {
+    if (!ciphertext || ciphertext.length === 0) {
+      return new Uint8Array();
+    }
+
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new RequestDecryptMsg(chainId, ciphertext, nonce)
+    );
+  }
+
   getEnigmaUtils(chainId: string): SecretUtils {
     if (this.enigmaUtils.has(chainId)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return this.enigmaUtils.get(chainId)!;
     }
 
-    const enigmaUtils = new KeplrEnigmaUtils(chainId, this.requester);
+    const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
   }

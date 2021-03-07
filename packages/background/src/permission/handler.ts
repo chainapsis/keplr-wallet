@@ -1,4 +1,8 @@
-import { GetPermissionOriginsMsg, RemovePermissionOrigin } from "./messages";
+import {
+  EnableAccessMsg,
+  GetPermissionOriginsMsg,
+  RemovePermissionOrigin,
+} from "./messages";
 import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import { PermissionService } from "./service";
 
@@ -7,6 +11,8 @@ export const getHandler: (service: PermissionService) => Handler = (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
+      case EnableAccessMsg:
+        return handleEnableAccessMsg(service)(env, msg as EnableAccessMsg);
       case GetPermissionOriginsMsg:
         return handleGetPermissionOriginsMsg(service)(
           env,
@@ -20,6 +26,18 @@ export const getHandler: (service: PermissionService) => Handler = (
       default:
         throw new Error("Unknown msg type");
     }
+  };
+};
+
+const handleEnableAccessMsg: (
+  service: PermissionService
+) => InternalHandler<EnableAccessMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.checkOrGrantBasicAccessPermission(
+      env,
+      msg.chainId,
+      msg.origin
+    );
   };
 };
 

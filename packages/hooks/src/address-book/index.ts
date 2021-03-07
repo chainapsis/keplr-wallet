@@ -127,7 +127,9 @@ export const useAddressBookConfig = (
   chainId: string,
   handler: AddressBookSelectHandler
 ) => {
-  const [configMap] = useState(new AddressBookConfigMap(kvStore, chainGetter));
+  const [configMap] = useState(
+    () => new AddressBookConfigMap(kvStore, chainGetter)
+  );
 
   const config = configMap.getAddressBookConfig(chainId);
   config.setSelectHandler(handler);

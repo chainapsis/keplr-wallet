@@ -1,6 +1,5 @@
 import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import {
-  EnableKeyRingMsg,
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
   GetKeyMsg,
@@ -24,7 +23,6 @@ import {
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
-import { Buffer } from "buffer/";
 import { cosmos } from "@keplr-wallet/cosmos";
 
 export const getHandler: (service: KeyRingService) => Handler = (
@@ -34,8 +32,6 @@ export const getHandler: (service: KeyRingService) => Handler = (
     switch (msg.constructor) {
       case RestoreKeyRingMsg:
         return handleRestoreKeyRingMsg(service)(env, msg as RestoreKeyRingMsg);
-      case EnableKeyRingMsg:
-        return handleEnableKeyRingMsg(service)(env, msg as EnableKeyRingMsg);
       case DeleteKeyRingMsg:
         return handleDeleteKeyRingMsg(service)(env, msg as DeleteKeyRingMsg);
       case ShowKeyRingMsg:
@@ -110,26 +106,6 @@ const handleRestoreKeyRingMsg: (
   };
 };
 
-const handleEnableKeyRingMsg: (
-  service: KeyRingService
-) => InternalHandler<EnableKeyRingMsg> = (service) => {
-  return async (env, msg) => {
-    // Will throw an error if chain is unknown.
-    await service.chainsService.getChainInfo(msg.chainId);
-
-    // This method itself tries to unlock the keyring.
-    await service.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainId,
-      msg.origin
-    );
-
-    return {
-      status: service.keyRingStatus,
-    };
-  };
-};
-
 const handleDeleteKeyRingMsg: (
   service: KeyRingService
 ) => InternalHandler<DeleteKeyRingMsg> = (service) => {
@@ -179,7 +155,7 @@ const handleCreatePrivateKeyMsg: (
   return async (_, msg) => {
     return {
       status: await service.createPrivateKey(
-        Buffer.from(msg.privateKeyHex, "hex"),
+        msg.privateKey,
         msg.password,
         msg.meta
       ),
@@ -191,10 +167,7 @@ const handleAddPrivateKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddPrivateKeyMsg> = (service) => {
   return async (_, msg) => {
-    return await service.addPrivateKey(
-      Buffer.from(msg.privateKeyHex, "hex"),
-      msg.meta
-    );
+    return await service.addPrivateKey(msg.privateKey, msg.meta);
   };
 };
 
@@ -256,8 +229,8 @@ const handleGetKeyMsg: (
     return {
       name: service.getKeyStoreMeta("name"),
       algo: "secp256k1",
-      pubKeyHex: Buffer.from(key.pubKey).toString("hex"),
-      addressHex: Buffer.from(key.address).toString("hex"),
+      pubKey: key.pubKey,
+      address: key.address,
       bech32Address: new Bech32Address(key.address).toBech32(
         (await service.chainsService.getChainInfo(msg.chainId)).bech32Config
           .bech32PrefixAccAddr
@@ -276,9 +249,12 @@ const handleRequestSignAminoMsg: (
       msg.origin
     );
 
-    await service.checkBech32Address(msg.chainId, msg.bech32Address);
-
-    return await service.requestSignAmino(env, msg.chainId, msg.signDoc);
+    return await service.requestSignAmino(
+      env,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc
+    );
   };
 };
 
@@ -292,11 +268,14 @@ const handleRequestSignDirectMsg: (
       msg.origin
     );
 
-    await service.checkBech32Address(msg.chainId, msg.bech32Address);
-
     const signDoc = cosmos.tx.v1beta1.SignDoc.decode(msg.signDocBytes);
 
-    const response = await service.requestSignDirect(env, msg.chainId, signDoc);
+    const response = await service.requestSignDirect(
+      env,
+      msg.chainId,
+      msg.signer,
+      signDoc
+    );
 
     return {
       signedBytes: cosmos.tx.v1beta1.SignDoc.encode(response.signed).finish(),

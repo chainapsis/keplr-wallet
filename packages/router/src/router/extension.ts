@@ -1,5 +1,4 @@
 import { Router } from "./types";
-import { JSONUint8Array } from "../json-uint8-array";
 import { MessageSender } from "../types";
 import { Result } from "../interfaces";
 
@@ -11,17 +10,25 @@ export class ExtensionRouter extends Router {
 
     this.port = port;
     browser.runtime.onMessage.addListener(this.onMessage);
+    // Although security considerations cross-extension communication are in place,
+    // we have put in additional security measures by disbling extension-to-extension communication until a formal security audit has taken place.
+    /*
     if (browser.runtime.onMessageExternal) {
       browser.runtime.onMessageExternal.addListener(this.onMessage);
     }
+     */
   }
 
   unlisten(): void {
     this.port = "";
     browser.runtime.onMessage.removeListener(this.onMessage);
+    // Although security considerations cross-extension communication are in place,
+    // we have put in additional security measures by disbling extension-to-extension communication until a formal security audit has taken place.
+    /*
     if (browser.runtime.onMessageExternal) {
       browser.runtime.onMessageExternal.removeListener(this.onMessage);
     }
+     */
   }
 
   // You shouldn't set this handler as async funtion,
@@ -30,42 +37,23 @@ export class ExtensionRouter extends Router {
   protected onMessage = (
     message: any,
     sender: MessageSender
-  ): Promise<Result | undefined> | undefined => {
+  ): Promise<Result> | undefined => {
     if (message.port !== this.port) {
       return;
     }
 
-    return this.handleMessage(message, sender);
+    return this.onMessageHandler(message, sender);
   };
 
-  protected async handleMessage(
+  protected async onMessageHandler(
     message: any,
     sender: MessageSender
   ): Promise<Result> {
     try {
-      const msg = this.msgRegistry.parseMessage(JSONUint8Array.unwrap(message));
-      const env = this.envProducer(sender);
-
-      for (const guard of this.guards) {
-        await guard(env, msg, sender);
-      }
-
-      // Can happen throw
-      msg.validateBasic();
-
-      const route = msg.route();
-      if (!route) {
-        throw new Error("Null router");
-      }
-      const handler = this.registeredHandler.get(route);
-      if (!handler) {
-        throw new Error("Can't get handler");
-      }
-
-      const result = JSONUint8Array.wrap(await handler(env, msg));
-      return Promise.resolve({
+      const result = await this.handleMessage(message, sender);
+      return {
         return: result,
-      });
+      };
     } catch (e) {
       console.log(
         `Failed to process msg ${message.type}: ${e?.message || e?.toString()}`

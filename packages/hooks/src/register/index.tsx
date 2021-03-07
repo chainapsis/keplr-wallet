@@ -213,7 +213,7 @@ export const useRegisterConfig = (
   }
 ) => {
   const [txConfig] = useState(
-    new RegisterConfig(keyRingStore, initialOptions, rng)
+    () => new RegisterConfig(keyRingStore, initialOptions, rng)
   );
 
   return txConfig;
