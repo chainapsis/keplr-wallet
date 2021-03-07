@@ -15,6 +15,7 @@
       "**/expo-*",
       "**/@unimodules/**",
       "**/unimodules-*",
+      "**/native-base",
       "**/jetifier"
     ]
   },
