@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Content, H3, Text } from "native-base";
 
-export const MainScreen: FunctionComponent = observer(() => {
+export const HomeScreen: FunctionComponent = observer(() => {
   const { accountStore, queriesStore } = useStore();
 
   const accountInfo = accountStore.getAccount("secret-2");

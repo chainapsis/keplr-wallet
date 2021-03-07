@@ -68,7 +68,7 @@ export const RegisterScreen: FunctionComponent = observer(() => {
             // @ts-ignore
             accountStore.getAccount(chainId).init();
 
-            navigation.dispatch(StackActions.replace("Main"));
+            navigation.dispatch(StackActions.replace("Home"));
           }}
         >
           <Text>Create</Text>

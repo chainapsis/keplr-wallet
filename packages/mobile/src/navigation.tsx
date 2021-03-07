@@ -6,7 +6,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 import { RegisterScreen } from "./screens/register";
-import { MainScreen } from "./screens/main";
+import { HomeScreen } from "./screens/home";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -29,11 +29,11 @@ export const AppNavigation: FunctionComponent = observer(() => {
         ) : (
           <Stack.Navigator
             initialRouteName={
-              keyRingStore.status === KeyRingStatus.EMPTY ? "Register" : "Main"
+              keyRingStore.status === KeyRingStatus.EMPTY ? "Register" : "Home"
             }
           >
             <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="Main" component={MainScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
           </Stack.Navigator>
         )}
       </NavigationContainer>
