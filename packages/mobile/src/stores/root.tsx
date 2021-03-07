@@ -7,10 +7,9 @@ import {
   CoinGeckoPriceStore,
   AccountStore,
 } from "@keplr-wallet/stores";
-import { MemoryKVStore } from "@keplr-wallet/common";
+import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
-import { RNEnv, RNRouter } from "../router";
-import { RNMessageRequester } from "../router/requester";
+import { RNEnv, RNRouter, RNMessageRequester } from "../router";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -40,14 +39,14 @@ export class RootStore {
     );
 
     this.queriesStore = new QueriesStore(
-      new MemoryKVStore("store_queries"),
+      new AsyncKVStore("store_queries"),
       this.chainStore
     );
 
     this.accountStore = new AccountStore(this.chainStore, this.queriesStore);
 
     this.priceStore = new CoinGeckoPriceStore(
-      new MemoryKVStore("store_prices"),
+      new AsyncKVStore("store_prices"),
       {
         usd: {
           currency: "usd",

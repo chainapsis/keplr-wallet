@@ -16,6 +16,7 @@
       "**/@unimodules/**",
       "**/unimodules-*",
       "**/native-base",
+      "**/@react-native-async-storage/async-storage",
       "**/jetifier"
     ]
   },
