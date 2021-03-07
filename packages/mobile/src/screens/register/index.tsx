@@ -1,13 +1,16 @@
 import React, { FunctionComponent, useState } from "react";
-import { Text, TextInput, Button, View } from "react-native";
+import { Content, Text, Textarea, Button } from "native-base";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../common";
+import { useNavigation, StackActions } from "@react-navigation/native";
 
 export const RegisterScreen: FunctionComponent = observer(() => {
+  const navigation = useNavigation();
+
   const chainId = "secret-2";
-  const { chainStore, keyRingStore, accountStore, queriesStore } = useStore();
+  const { chainStore, keyRingStore, accountStore } = useStore();
 
   const registerConfig = useRegisterConfig(
     keyRingStore,
@@ -15,24 +18,19 @@ export const RegisterScreen: FunctionComponent = observer(() => {
     getRandomBytesAsync
   );
 
-  const quries = queriesStore.get(chainId);
-
-  const stakable = quries
-    .getQueryBalances()
-    .getQueryBech32Address(accountStore.getAccount(chainId).bech32Address)
-    .stakable;
-
   const [mnemonic, setMnemonic] = useState("");
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+    <Content padder>
       <Text>{chainStore.getChain(chainId).chainId}</Text>
       <Text>{keyRingStore.status.toString()}</Text>
-      <TextInput
-        style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
+      <Textarea
         autoCapitalize="none"
         value={mnemonic}
         onChangeText={setMnemonic}
+        rowSpan={5}
+        bordered
+        placeholder="Mnemonic"
       />
       <Button
         onPress={async () => {
@@ -42,15 +40,16 @@ export const RegisterScreen: FunctionComponent = observer(() => {
             addressIndex: 0,
           });
 
+          // TODO: Remove this!!
           // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
           // @ts-ignore
           accountStore.getAccount(chainId).init();
+
+          navigation.dispatch(StackActions.replace("Main"));
         }}
-        title="Create"
-        color="#841584"
-        accessibilityLabel="Learn more about this purple button"
-      />
-      <Text>{stakable.balance.locale(false).toString()}</Text>
-    </View>
+      >
+        <Text>Create</Text>
+      </Button>
+    </Content>
   );
 });

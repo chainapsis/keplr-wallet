@@ -6,6 +6,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 import { RegisterScreen } from "./screens/register";
+import { MainScreen } from "./screens/main";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -32,6 +33,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
             }
           >
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="Main" component={MainScreen} />
           </Stack.Navigator>
         )}
       </NavigationContainer>
