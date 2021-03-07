@@ -40,7 +40,12 @@ export const RegisterScreen: FunctionComponent = observer(() => {
         </Item>
         <Item floatingLabel>
           <Label>Password</Label>
-          <Input value={password} onChangeText={setPassword} />
+          <Input
+            autoCompleteType="password"
+            secureTextEntry={true}
+            value={password}
+            onChangeText={setPassword}
+          />
         </Item>
         <Textarea
           autoCapitalize="none"
@@ -52,7 +57,6 @@ export const RegisterScreen: FunctionComponent = observer(() => {
         />
         <Button
           onPress={async () => {
-            console.log(name, password);
             await registerConfig.createMnemonic(name, mnemonic, password, {
               account: 0,
               change: 0,
