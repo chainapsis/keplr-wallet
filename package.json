@@ -11,6 +11,7 @@
       "**/react-native",
       "**/react-native/**",
       "**/react-native-*",
+      "**/@react-navigation/**",
       "**/expo-*",
       "**/@unimodules/**",
       "**/unimodules-*",

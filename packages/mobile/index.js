@@ -6,11 +6,13 @@ import "./shim";
 
 import "text-encoding";
 
+import "react-native-gesture-handler";
+
 import { AppRegistry } from "react-native";
 
-import { Main } from "./main";
+import { App } from "./src/app";
 import { name as appName } from "./app.json";
 
 import "./init";
 
-AppRegistry.registerComponent(appName, () => Main);
+AppRegistry.registerComponent(appName, () => App);
