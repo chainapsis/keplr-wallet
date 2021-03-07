@@ -26,6 +26,7 @@
     "@keplr-wallet/types": "0.8.0",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/native": "^5.9.3",
+    "@react-navigation/stack": "^5.14.3",
     "buffer": "^6.0.3",
     "eventemitter3": "^4.0.7",
     "expo-random": "^11.0.0",

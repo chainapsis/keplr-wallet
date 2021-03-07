@@ -1,8 +1,11 @@
 import React, { FunctionComponent } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { StoreProvider } from "./stores";
+import { AppNavigation } from "./navigation";
 
 export const App: FunctionComponent = () => {
   return (
-    <NavigationContainer>{/* Rest of your app code */}</NavigationContainer>
+    <StoreProvider>
+      <AppNavigation />
+    </StoreProvider>
   );
 };

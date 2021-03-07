@@ -1,11 +1,11 @@
 import React, { FunctionComponent, useState } from "react";
-import { Text, TextInput, Button } from "react-native";
+import { Text, TextInput, Button, View } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../common";
 
-export const MainScreen: FunctionComponent = observer(() => {
+export const RegisterScreen: FunctionComponent = observer(() => {
   const chainId = "secret-2";
   const { chainStore, keyRingStore, accountStore, queriesStore } = useStore();
 
@@ -25,7 +25,7 @@ export const MainScreen: FunctionComponent = observer(() => {
   const [mnemonic, setMnemonic] = useState("");
 
   return (
-    <React.Fragment>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
       <Text>{chainStore.getChain(chainId).chainId}</Text>
       <Text>{keyRingStore.status.toString()}</Text>
       <TextInput
@@ -51,6 +51,6 @@ export const MainScreen: FunctionComponent = observer(() => {
         accessibilityLabel="Learn more about this purple button"
       />
       <Text>{stakable.balance.locale(false).toString()}</Text>
-    </React.Fragment>
+    </View>
   );
 });
