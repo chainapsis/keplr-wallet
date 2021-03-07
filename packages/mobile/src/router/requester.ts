@@ -1,4 +1,4 @@
-import { Message, MessageRequester } from "@keplr-wallet/router";
+import { Message, MessageRequester, Result } from "@keplr-wallet/router";
 import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
 import { RNRouter } from "./rn-router";
 
@@ -14,25 +14,32 @@ export class RNMessageRequester implements MessageRequester {
     // @ts-ignore
     msg["origin"] = "react-native://internal";
 
-    return new Promise((resolve, reject) => {
-      const wrappedMSg = JSONUint8Array.wrap(msg);
-
-      if (
-        !RNRouter.EventEmitter.emit("message", {
-          port,
-          type: msg.type(),
-          msg: wrappedMSg,
+    const result: Result = JSONUint8Array.unwrap(
+      await new Promise((resolve) => {
+        RNRouter.EventEmitter.emit("message", {
+          message: {
+            port,
+            type: msg.type(),
+            msg: JSONUint8Array.wrap(msg),
+          },
           sender: {
             // WARNING: Currently, handle the message only as internal.
             id: "react-native",
             url: "react-native://internal",
             resolver: resolve,
-            rejector: reject,
           },
-        })
-      ) {
-        reject(new Error("Their is no listener"));
-      }
-    });
+        });
+      })
+    );
+
+    if (!result) {
+      throw new Error("Null result");
+    }
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    return result.return;
   }
 }
