@@ -45,7 +45,6 @@
   "devDependencies": {
     "@babel/core": "^7.8.4",
     "@babel/runtime": "^7.8.4",
-    "@react-native-community/eslint-config": "^1.1.0",
     "@types/react-native": "^0.63.2",
     "@types/react-test-renderer": "^16.9.2",
     "get-yarn-workspaces": "^1.0.2",
