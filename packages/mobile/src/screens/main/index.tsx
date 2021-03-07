@@ -29,6 +29,9 @@ export const MainScreen: FunctionComponent = observer(() => {
 
   return (
     <Content padder>
+      <H3>Name</H3>
+      <Text>{accountInfo.name}</Text>
+      <H3>Address</H3>
       <Text>{accountInfo.bech32Address}</Text>
       <H3>Stakable</H3>
       <Text>{stakable.balance.toString()}</Text>
