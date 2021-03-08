@@ -80,10 +80,10 @@ export type Validator = {
   tokens: string;
   delegator_shares: string;
   description: {
-    moniker: string;
-    identity: string;
-    website: string;
-    details: string;
+    moniker?: string;
+    identity?: string;
+    website?: string;
+    details?: string;
   };
   unbonding_height: string;
   unbonding_time: string;
