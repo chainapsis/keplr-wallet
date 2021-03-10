@@ -7,6 +7,7 @@ import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 import { RegisterScreen } from "./screens/register";
 import { HomeScreen } from "./screens/home";
+import { ModalsRenderer } from "./modals";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -37,6 +38,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
           </Stack.Navigator>
         )}
       </NavigationContainer>
+      <ModalsRenderer />
     </React.Fragment>
   );
 });

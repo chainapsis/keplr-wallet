@@ -10,11 +10,13 @@ import {
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
 import { RNEnv, RNRouter, RNMessageRequester } from "../router";
+import { InteractionModalStore } from "./interaction-modal";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
 
+  public readonly interactionModalStore: InteractionModalStore;
   protected readonly interactionStore: InteractionStore;
 
   public readonly queriesStore: QueriesStore;
@@ -24,6 +26,7 @@ export class RootStore {
   constructor() {
     const router = new RNRouter(RNEnv.produceEnv);
 
+    this.interactionModalStore = new InteractionModalStore();
     // Order is important.
     this.interactionStore = new InteractionStore(
       router,

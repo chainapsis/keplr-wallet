@@ -1,4 +1,6 @@
-import { Env, MessageSender } from "@keplr-wallet/router";
+import { APP_PORT, Env, Message, MessageSender } from "@keplr-wallet/router";
+import { InteractionModalStore } from "../stores/interaction-modal";
+import { RNMessageRequester } from "./requester";
 
 export class RNEnv {
   static readonly produceEnv = (sender: MessageSender): Env => {
@@ -6,8 +8,9 @@ export class RNEnv {
 
     return {
       isInternalMsg,
-      requestInteraction: () => {
-        throw new Error("TODO: Implement me");
+      requestInteraction: async (url: string, msg: Message<unknown>) => {
+        InteractionModalStore.pushUrl(url);
+        return await new RNMessageRequester().sendMessage(APP_PORT, msg);
       },
     };
   };
