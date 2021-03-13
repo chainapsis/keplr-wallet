@@ -1,5 +1,5 @@
 import { init } from "@keplr-wallet/background";
-import { RNEnv, RNRouter } from "../router";
+import { RNEnv, RNMessageRequester, RNRouter } from "../router";
 import { AsyncKVStore } from "../common";
 
 import { getRandomBytesAsync } from "../common";
@@ -13,11 +13,7 @@ const router = new RNRouter(RNEnv.produceEnv);
 init(
   router,
   (prefix: string) => new AsyncKVStore(prefix),
-  {
-    sendMessage: () => {
-      throw new Error("TODO: Implement me");
-    },
-  },
+  new RNMessageRequester(),
   EmbedChainInfos,
   [],
   getRandomBytesAsync

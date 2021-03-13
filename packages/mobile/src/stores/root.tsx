@@ -6,6 +6,7 @@ import {
   QueriesStore,
   CoinGeckoPriceStore,
   AccountStore,
+  SignInteractionStore,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -18,6 +19,7 @@ export class RootStore {
 
   public readonly interactionModalStore: InteractionModalStore;
   protected readonly interactionStore: InteractionStore;
+  public readonly signInteractionStore: SignInteractionStore;
 
   public readonly queriesStore: QueriesStore;
   public readonly accountStore: AccountStore;
@@ -32,6 +34,7 @@ export class RootStore {
       router,
       new RNMessageRequester()
     );
+    this.signInteractionStore = new SignInteractionStore(this.interactionStore);
 
     this.chainStore = new ChainStore(EmbedChainInfos);
 
