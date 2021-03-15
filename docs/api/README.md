@@ -75,7 +75,7 @@ There may be multiple ways to achieve the same result, and not one method is pre
 
 ## Keplr-specific features
 
-If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./cosmjs) section.
+If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./cosmjs.md) section.
 
 While Keplr supports an easy way to connect to CosmJS, there are additional functions specific to Keplr which provides additional features.
 
