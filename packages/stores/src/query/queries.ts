@@ -20,6 +20,9 @@ import {
   ObservableQueryGovernance,
   ObservableQueryAccount,
   ObservableQueryProposalVote,
+  ObservableQueryIBCClientState,
+  ObservableQueryIBCChannel,
+  ObservableQueryDenomTrace,
 } from "./cosmos";
 import { ObservableQueryCosmosBalanceRegistry } from "./cosmos/balance";
 import { ObservableQuerySecret20ContractInfo } from "./secret-wasm/secret20-contract-info";
@@ -39,6 +42,10 @@ export class Queries {
   protected readonly _queryValidators: ObservableQueryValidators;
   protected readonly _queryGovernance: ObservableQueryGovernance;
   protected readonly _queryProposalVote: ObservableQueryProposalVote;
+
+  protected readonly _queryIBCClientState: ObservableQueryIBCClientState;
+  protected readonly _queryIBCChannel: ObservableQueryIBCChannel;
+  protected readonly _queryIBCDenomTrace: ObservableQueryDenomTrace;
 
   protected readonly _querySecretContractCodeHash: ObservableQuerySecretContractCodeHash;
   protected readonly _querySecret20ContractInfo: ObservableQuerySecret20ContractInfo;
@@ -115,6 +122,22 @@ export class Queries {
       chainGetter
     );
 
+    this._queryIBCClientState = new ObservableQueryIBCClientState(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this._queryIBCChannel = new ObservableQueryIBCChannel(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this._queryIBCDenomTrace = new ObservableQueryDenomTrace(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
     this._querySecretContractCodeHash = new ObservableQuerySecretContractCodeHash(
       kvStore,
       chainId,
@@ -184,6 +207,18 @@ export class Queries {
 
   getQueryProposalVote(): DeepReadonly<ObservableQueryProposalVote> {
     return this._queryProposalVote;
+  }
+
+  getQueryIBCClientState(): DeepReadonly<ObservableQueryIBCClientState> {
+    return this._queryIBCClientState;
+  }
+
+  getQueryIBCCChannel(): DeepReadonly<ObservableQueryIBCChannel> {
+    return this._queryIBCChannel;
+  }
+
+  getQueryIBCCDenomTrace(): DeepReadonly<ObservableQueryDenomTrace> {
+    return this._queryIBCDenomTrace;
   }
 
   getQuerySecretContractCodeHash(): DeepReadonly<ObservableQuerySecretContractCodeHash> {
