@@ -12,6 +12,7 @@ import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
 import { SendPage } from "./pages/send";
+import { IBCTransferPage } from "./pages/ibc-transfer";
 import { SetKeyRingPage } from "./pages/setting/keyring";
 
 import { Banner } from "./components/banner";
@@ -143,6 +144,7 @@ ReactDOM.render(
                 />
                 <Route exact path="/register" component={RegisterPage} />
                 <Route exact path="/send" component={SendPage} />
+                <Route exact path="/ibc-transfer" component={IBCTransferPage} />
                 <Route exact path="/setting" component={SettingPage} />
                 <Route exact path="/ledger-grant" component={LedgerGrantPage} />
                 <Route

@@ -3,7 +3,11 @@ import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../common";
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency, Keplr } from "@keplr-wallet/types";
-import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
+import {
+  BaseAccount,
+  ChainIdHelper,
+  TendermintTxTracer,
+} from "@keplr-wallet/cosmos";
 import Axios, { AxiosInstance } from "axios";
 import {
   BroadcastMode,
@@ -105,7 +109,7 @@ export class AccountStoreInner {
       ibc: {
         transfer: {
           type: "cosmos-sdk/MsgTransfer",
-          gas: 80000,
+          gas: 120000,
         },
       },
       delegate: {
@@ -375,6 +379,74 @@ export class AccountStoreInner {
       default:
         throw new Error(`Unsupported type of currency (${denomHelper.type})`);
     }
+  }
+
+  async sendIBCTransferMsg(
+    channel: {
+      portId: string;
+      channelId: string;
+      counterpartyChainId: string;
+    },
+    amount: string,
+    currency: AppCurrency,
+    recipient: string,
+    memo: string = "",
+    stdFee: StdFee,
+    onFulfill?: (tx: any) => void
+  ) {
+    if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
+      throw new Error("Only native token can be sent via IBC");
+    }
+
+    const actualAmount = (() => {
+      let dec = new Dec(amount);
+      dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+      return dec.truncate().toString();
+    })();
+
+    const msg = {
+      type: this.opts.msgOpts.ibc.transfer.type,
+      value: {
+        source_port: channel.portId,
+        source_channel: channel.channelId,
+        token: {
+          denom: currency.coinMinimalDenom,
+          amount: actualAmount,
+        },
+        sender: this.bech32Address,
+        receiver: recipient,
+        timeout_height: {
+          revision_number: ChainIdHelper.parse(
+            channel.counterpartyChainId
+          ).version.toString() as string | undefined,
+          revision_height: "9999999999",
+        },
+      },
+    };
+
+    if (msg.value.timeout_height.revision_number === "0") {
+      delete msg.value.timeout_height.revision_number;
+    }
+
+    await this.sendMsgs("send", [msg], stdFee, memo, (tx) => {
+      if (tx.code == null || tx.code === 0) {
+        // After succeeding to send token, refresh the balance.
+        const queryBalance = this.queries
+          .getQueryBalances()
+          .getQueryBech32Address(this.bech32Address)
+          .balances.find((bal) => {
+            return bal.currency.coinMinimalDenom === currency.coinMinimalDenom;
+          });
+
+        if (queryBalance) {
+          queryBalance.fetch();
+        }
+      }
+
+      if (onFulfill) {
+        onFulfill(tx);
+      }
+    });
   }
 
   /**

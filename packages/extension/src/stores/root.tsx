@@ -12,6 +12,7 @@ import {
   LedgerInitStore,
   TokensStore,
   ChainSuggestStore,
+  IBCChannelStore,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -27,6 +28,7 @@ import { FiatCurrency } from "@keplr-wallet/types";
 export class RootStore {
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
+  public readonly ibcChannelStore: IBCChannelStore;
 
   protected readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
@@ -58,6 +60,10 @@ export class RootStore {
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
+    );
+
+    this.ibcChannelStore = new IBCChannelStore(
+      new ExtensionKVStore("store_ibc_channel")
     );
 
     this.permissionStore = new PermissionStore(
