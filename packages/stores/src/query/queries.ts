@@ -217,7 +217,7 @@ export class Queries {
     return this._queryIBCChannel;
   }
 
-  getQueryIBCCDenomTrace(): DeepReadonly<ObservableQueryDenomTrace> {
+  getQueryIBCDenomTrace(): DeepReadonly<ObservableQueryDenomTrace> {
     return this._queryIBCDenomTrace;
   }
 
