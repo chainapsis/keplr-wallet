@@ -40,6 +40,9 @@ export interface MsgOpts {
     cw20: Pick<MsgOpt, "gas">;
     secret20: Pick<MsgOpt, "gas">;
   };
+  ibc: {
+    transfer: MsgOpt;
+  };
   delegate: MsgOpt;
   undelegate: MsgOpt;
   redelegate: MsgOpt;
@@ -97,6 +100,12 @@ export class AccountStoreInner {
         },
         secret20: {
           gas: 250000,
+        },
+      },
+      ibc: {
+        transfer: {
+          type: "cosmos-sdk/MsgTransfer",
+          gas: 80000,
         },
       },
       delegate: {
