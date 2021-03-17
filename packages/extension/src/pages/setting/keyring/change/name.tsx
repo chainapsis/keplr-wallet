@@ -84,7 +84,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
           <Input
             type="text"
             label={intl.formatMessage({
-              id: "setting.keyring.change.before.name",
+              id: "setting.keyring.change.previous.name",
             })}
             value={keyStore.meta?.name}
             readOnly={true}

@@ -65,11 +65,11 @@
   "setting.keyring.change.password": "비밀번호 재설정",
 
   "setting.keyring.change.name": "계정 이름 변경",
-  "setting.keyring.change.before.name": "이전 계정 이름",
+  "setting.keyring.change.previous.name": "이전 계정 이름",
   "setting.keyring.change.input.name": "새로운 계정 이름",
   "setting.keyring.change.input.name.error.required": "계정 이름을 입력하세요",
   "setting.keyring.change.input.name.error.invalid": "계정 이름이 유효하지 않습니다",
-  "setting.keyring.change.name.button.confirm": "계정 이름 변경",
+  "setting.keyring.change.name.button.confirm": "변경",
 
   "setting.export": "니모닉 시드 보기",
   "setting.export.private-key": "개인키 보기",
