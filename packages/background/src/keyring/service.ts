@@ -102,6 +102,20 @@ export class KeyRingService {
     };
   }
 
+  async updateNameKeyRing(
+    index: number,
+    name: string
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+    status: KeyRingStatus;
+  }> {
+    const multiKeyStoreInfo = await this.keyRing.updateNameKeyRing(index, name);
+    return {
+      multiKeyStoreInfo,
+      status: this.keyRing.status,
+    };
+  }
+
   async showKeyRing(index: number, password: string): Promise<string> {
     return await this.keyRing.showKeyRing(index, password);
   }

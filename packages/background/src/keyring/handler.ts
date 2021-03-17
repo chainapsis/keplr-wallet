@@ -8,6 +8,7 @@ import {
   RequestSignDirectMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
+  UpdateNameKeyRingMsg,
   ShowKeyRingMsg,
   GetKeyRingTypeMsg,
   AddMnemonicKeyMsg,
@@ -34,6 +35,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleRestoreKeyRingMsg(service)(env, msg as RestoreKeyRingMsg);
       case DeleteKeyRingMsg:
         return handleDeleteKeyRingMsg(service)(env, msg as DeleteKeyRingMsg);
+      case UpdateNameKeyRingMsg:
+        return handleUpdateNameKeyRingMsg(service)(
+          env,
+          msg as UpdateNameKeyRingMsg
+        );
       case ShowKeyRingMsg:
         return handleShowKeyRingMsg(service)(env, msg as ShowKeyRingMsg);
       case CreateMnemonicKeyMsg:
@@ -111,6 +117,14 @@ const handleDeleteKeyRingMsg: (
 ) => InternalHandler<DeleteKeyRingMsg> = (service) => {
   return async (_, msg) => {
     return await service.deleteKeyRing(msg.index, msg.password);
+  };
+};
+
+const handleUpdateNameKeyRingMsg: (
+  service: KeyRingService
+) => InternalHandler<UpdateNameKeyRingMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.updateNameKeyRing(msg.index, msg.name);
   };
 };
 
