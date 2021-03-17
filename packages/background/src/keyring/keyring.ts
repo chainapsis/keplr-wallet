@@ -485,6 +485,32 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
+  public async updateNameKeyRing(
+    index: number,
+    name: string
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
+    const keyStore = this.multiKeyStore[index];
+
+    if (!keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    const newMeta = { ...keyStore.meta, name: name };
+
+    keyStore.meta = newMeta;
+
+    // If select key store and changed store are same, sync keystore
+    if (this.keyStore?.meta?.["__id__"] === KeyRing.getKeyStoreId(keyStore)) {
+      this.keyStore = keyStore;
+    }
+    await this.save();
+    return this.getMultiKeyStoreInfo();
+  }
+
   private loadKey(coinType: number): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
