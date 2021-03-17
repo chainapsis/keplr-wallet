@@ -67,11 +67,11 @@
   "setting.keyring.change.password": "Reset Password",
 
   "setting.keyring.change.name": "Change Account Name",
-  "setting.keyring.change.previous.name": "Previous account name",
+  "setting.keyring.change.previous-name": "Previous account name",
   "setting.keyring.change.input.name": "New account name",
   "setting.keyring.change.input.name.error.required": "Account name is required",
   "setting.keyring.change.input.name.error.invalid": "Account name is invalid",
-  "setting.keyring.change.name.button.confirm": "Save",
+  "setting.keyring.change.name.button.save": "Save",
 
   "setting.export": "View Mnemonic Seed",
   "setting.export.private-key": "View Private Key",

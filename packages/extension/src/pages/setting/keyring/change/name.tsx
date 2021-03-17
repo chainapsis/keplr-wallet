@@ -84,7 +84,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
           <Input
             type="text"
             label={intl.formatMessage({
-              id: "setting.keyring.change.previous.name",
+              id: "setting.keyring.change.previous-name",
             })}
             value={keyStore.meta?.name}
             readOnly={true}
@@ -103,7 +103,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
             })}
           />
           <Button type="submit" color="primary" block data-loading={loading}>
-            <FormattedMessage id="setting.keyring.change.name.button.confirm" />
+            <FormattedMessage id="setting.keyring.change.name.button.save" />
           </Button>
         </Form>
       </div>
