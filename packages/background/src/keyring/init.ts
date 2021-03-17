@@ -8,6 +8,7 @@ import {
   RequestSignDirectMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
+  UpdateNameKeyRingMsg,
   ShowKeyRingMsg,
   GetKeyRingTypeMsg,
   AddMnemonicKeyMsg,
@@ -27,6 +28,7 @@ import { KeyRingService } from "./service";
 export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(RestoreKeyRingMsg);
   router.registerMessage(DeleteKeyRingMsg);
+  router.registerMessage(UpdateNameKeyRingMsg);
   router.registerMessage(ShowKeyRingMsg);
   router.registerMessage(CreateMnemonicKeyMsg);
   router.registerMessage(AddMnemonicKeyMsg);

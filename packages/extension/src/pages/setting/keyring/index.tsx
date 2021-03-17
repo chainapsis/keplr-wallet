@@ -177,6 +177,17 @@ const KeyRingToolsIcon: FunctionComponent<{
               e.preventDefault();
               e.stopPropagation();
 
+              history.push(`/setting/keyring/change/name/${index}`);
+            }}
+          >
+            <FormattedMessage id="setting.keyring.change.name" />
+          </div>
+          <div
+            style={{ cursor: "pointer" }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+
               history.push(`/setting/clear/${index}`);
             }}
           >
