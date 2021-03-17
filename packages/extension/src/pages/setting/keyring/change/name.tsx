@@ -15,7 +15,7 @@ import useForm from "react-hook-form";
 import { useStore } from "../../../../stores";
 import { observer } from "mobx-react-lite";
 
-import nameStyle from "./name.module.scss";
+import styleName from "./name.module.scss";
 
 interface FormData {
   name: string;
@@ -57,7 +57,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
         history.goBack();
       }, [history])}
     >
-      <div className={nameStyle.container}>
+      <div className={styleName.container}>
         <Form
           onSubmit={handleSubmit(async (data) => {
             setLoading(true);
