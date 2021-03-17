@@ -64,6 +64,15 @@
   "setting.keyring.unnamed-account": "Keplr Account",
   "setting.keyring.selected-account": "(Selected)",
 
+  "setting.keyring.change.password": "Reset password",
+
+  "setting.keyring.change.name": "Change account name",
+  "setting.keyring.change.before.name": "Before account name",
+  "setting.keyring.change.input.name": "New account name",
+  "setting.keyring.change.input.name.error.required": "Account name is required",
+  "setting.keyring.change.input.name.error.invalid": "Account name is invalid",
+  "setting.keyring.change.name.button.confirm": "Change account name",
+
   "setting.export": "View Mnemonic Seed",
   "setting.export.private-key": "View Private Key",
   "setting.export.warning": "Please input your password to proceed",
