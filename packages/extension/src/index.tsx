@@ -40,6 +40,7 @@ import {
 } from "./pages/setting/connections";
 import { AddressBookPage } from "./pages/setting/address-book";
 import { CreditPage } from "./pages/setting/credit";
+import { ChangeNamePage } from "./pages/setting/keyring/change";
 import { ClearPage } from "./pages/setting/clear";
 import { ExportPage } from "./pages/setting/export";
 import { LedgerGrantPage } from "./pages/ledger";
@@ -181,6 +182,11 @@ ReactDOM.render(
                   exact
                   path="/setting/clear/:index"
                   component={ClearPage}
+                />
+                <Route
+                  exact
+                  path="/setting/keyring/change/name/:index"
+                  component={ChangeNamePage}
                 />
                 <Route
                   exact
