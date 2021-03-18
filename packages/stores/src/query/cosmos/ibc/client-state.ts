@@ -5,6 +5,37 @@ import {
 } from "../../chain-query";
 import { ChainGetter } from "../../../common";
 import { ClientStateResponse } from "./types";
+import { computed } from "mobx";
+
+export class ObservableChainQueryClientState extends ObservableChainQuery<ClientStateResponse> {
+  constructor(
+    kvStore: KVStore,
+    chainId: string,
+    chainGetter: ChainGetter,
+    portId: string,
+    channelId: string
+  ) {
+    super(
+      kvStore,
+      chainId,
+      chainGetter,
+      `/ibc/core/channel/v1beta1/channels/${channelId}/ports/${portId}/client_state`
+    );
+  }
+
+  /**
+   * clientChainId returns the chain id of the client state if the client state's type is known (currently, only tendermint is supported).
+   */
+  @computed
+  get clientChainId(): string | undefined {
+    if (!this.response) {
+      return undefined;
+    }
+
+    return this.response.data.identified_client_state?.client_state
+      ?.chain_id as string | undefined;
+  }
+}
 
 export class ObservableQueryIBCClientState extends ObservableChainQueryMap<ClientStateResponse> {
   constructor(
@@ -15,31 +46,32 @@ export class ObservableQueryIBCClientState extends ObservableChainQueryMap<Clien
     super(kvStore, chainId, chainGetter, (key: string) => {
       const params = JSON.parse(key);
 
-      return new ObservableChainQuery<ClientStateResponse>(
+      return new ObservableChainQueryClientState(
         this.kvStore,
         this.chainId,
         this.chainGetter,
-        `/ibc/core/channel/v1beta1/channels/${params.channelId}/ports/${params.portId}/client_state`
+        params.portId,
+        params.channelId
       );
     });
   }
 
   getClientStateOnTransferPort(
     channelId: string
-  ): ObservableChainQuery<ClientStateResponse> {
+  ): ObservableChainQueryClientState {
     return this.getClientState("transfer", channelId);
   }
 
   getClientState(
     portId: string,
     channelId: string
-  ): ObservableChainQuery<ClientStateResponse> {
+  ): ObservableChainQueryClientState {
     // Use key as the JSON encoded Object.
     const key = JSON.stringify({
       portId,
       channelId,
     });
 
-    return this.get(key);
+    return this.get(key) as ObservableChainQueryClientState;
   }
 }

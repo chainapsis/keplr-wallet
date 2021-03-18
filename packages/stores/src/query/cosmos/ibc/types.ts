@@ -36,7 +36,7 @@ export type ClientStateResponse = {
   };
 };
 
-export type DenomTractResponse = {
+export type DenomTraceResponse = {
   denom_trace: {
     path: string;
     base_denom: string;
