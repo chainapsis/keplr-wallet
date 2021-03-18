@@ -57,6 +57,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable.ref
   private _error?: Readonly<QueryError<E>> = undefined;
 
+  @observable
   private _isStarted: boolean = false;
 
   private cancelToken?: CancelTokenSource;
@@ -108,6 +109,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     return this.observedCount > 0;
   }
 
+  @action
   private start() {
     if (!this._isStarted) {
       this._isStarted = true;
@@ -115,6 +117,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
   }
 
+  @action
   private stop() {
     if (this.isStarted) {
       this.onStop();
