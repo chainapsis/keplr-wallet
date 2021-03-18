@@ -307,6 +307,20 @@ export class KeyRing {
     this.password = password;
   }
 
+  public checkPassword(password: string) {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
+    if (!this.keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    if (this.password !== password) {
+      throw new Error("Unmatched password");
+    }
+  }
+
   public async save() {
     await this.kvStore.set<KeyStore>(KeyStoreKey, this.keyStore);
     await this.kvStore.set<KeyStore[]>(KeyMultiStoreKey, this.multiKeyStore);
@@ -509,6 +523,38 @@ export class KeyRing {
     }
     await this.save();
     return this.getMultiKeyStoreInfo();
+  }
+
+  public async updatePassword(previousPassword: string, password: string) {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
+    if (!this.keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    if (this.password !== previousPassword) {
+      throw new Error("Unmatched password");
+    }
+
+    // After decrypt using previous password, encrypt using new password for all key store
+    for (const keyStore of this.multiKeyStore) {
+      const decryptText = Buffer.from(
+        await Crypto.decrypt(keyStore, previousPassword)
+      ).toString();
+      keyStore.crypto = await Crypto.encryptCrypto(
+        this.rng,
+        decryptText,
+        password
+      );
+      // If select key store and changed store are same, sync keystore
+      if (this.keyStore?.meta?.["__id__"] === KeyRing.getKeyStoreId(keyStore)) {
+        this.keyStore = keyStore;
+      }
+    }
+    this.password = password;
+    await this.save();
   }
 
   private loadKey(coinType: number): Key {
