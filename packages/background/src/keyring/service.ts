@@ -116,6 +116,14 @@ export class KeyRingService {
     };
   }
 
+  async updatePassword(
+    previousPassword: string,
+    password: string
+  ): Promise<KeyRingStatus> {
+    await this.keyRing.updatePassword(previousPassword, password);
+    return this.keyRing.status;
+  }
+
   async showKeyRing(index: number, password: string): Promise<string> {
     return await this.keyRing.showKeyRing(index, password);
   }
@@ -158,6 +166,12 @@ export class KeyRingService {
 
   async unlock(password: string): Promise<KeyRingStatus> {
     await this.keyRing.unlock(password);
+
+    return this.keyRing.status;
+  }
+
+  checkPassword(password: string): KeyRingStatus {
+    this.keyRing.checkPassword(password);
 
     return this.keyRing.status;
   }

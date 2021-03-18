@@ -102,6 +102,35 @@ export class UpdateNameKeyRingMsg extends Message<{
     return UpdateNameKeyRingMsg.type();
   }
 }
+export class UpdatePasswordMsg extends Message<{ status: KeyRingStatus }> {
+  public static type() {
+    return "update-password";
+  }
+
+  constructor(
+    public readonly previousPassword = "",
+    public readonly password = ""
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.previousPassword) {
+      throw new Error("previous password not set");
+    }
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return UpdatePasswordMsg.type();
+  }
+}
 
 export class ShowKeyRingMsg extends Message<string> {
   public static type() {
@@ -383,6 +412,32 @@ export class UnlockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
 
   type(): string {
     return UnlockKeyRingMsg.type();
+  }
+}
+
+export class CheckPasswordKeyRingMsg extends Message<{
+  status: KeyRingStatus;
+}> {
+  public static type() {
+    return "check-password-keyring";
+  }
+
+  constructor(public readonly password = "") {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckPasswordKeyRingMsg.type();
   }
 }
 

@@ -4,11 +4,13 @@ import {
   CreatePrivateKeyMsg,
   GetKeyMsg,
   UnlockKeyRingMsg,
+  CheckPasswordKeyRingMsg,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
+  UpdatePasswordMsg,
   ShowKeyRingMsg,
   GetKeyRingTypeMsg,
   AddMnemonicKeyMsg,
@@ -40,6 +42,8 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as UpdateNameKeyRingMsg
         );
+      case UpdatePasswordMsg:
+        return handleUpdatePasswordMsg(service)(env, msg as UpdatePasswordMsg);
       case ShowKeyRingMsg:
         return handleShowKeyRingMsg(service)(env, msg as ShowKeyRingMsg);
       case CreateMnemonicKeyMsg:
@@ -67,6 +71,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleLockKeyRingMsg(service)(env, msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
         return handleUnlockKeyRingMsg(service)(env, msg as UnlockKeyRingMsg);
+      case CheckPasswordKeyRingMsg:
+        return handleCheckPasswordKeyRingMsg(service)(
+          env,
+          msg as CheckPasswordKeyRingMsg
+        );
       case GetKeyMsg:
         return handleGetKeyMsg(service)(env, msg as GetKeyMsg);
       case RequestSignAminoMsg:
@@ -125,6 +134,16 @@ const handleUpdateNameKeyRingMsg: (
 ) => InternalHandler<UpdateNameKeyRingMsg> = (service) => {
   return async (_, msg) => {
     return await service.updateNameKeyRing(msg.index, msg.name);
+  };
+};
+
+const handleUpdatePasswordMsg: (
+  service: KeyRingService
+) => InternalHandler<UpdatePasswordMsg> = (service) => {
+  return async (_, msg) => {
+    return {
+      status: await service.updatePassword(msg.previousPassword, msg.password),
+    };
   };
 };
 
@@ -224,6 +243,16 @@ const handleUnlockKeyRingMsg: (
   return async (_, msg) => {
     return {
       status: await service.unlock(msg.password),
+    };
+  };
+};
+
+const handleCheckPasswordKeyRingMsg: (
+  service: KeyRingService
+) => InternalHandler<CheckPasswordKeyRingMsg> = (service) => {
+  return async (_, msg) => {
+    return {
+      status: await service.checkPassword(msg.password),
     };
   };
 };
