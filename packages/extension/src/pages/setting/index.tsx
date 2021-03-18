@@ -100,6 +100,20 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
+            id: "setting.keyring.change.password",
+          })}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/keyring/change/password",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
+          title={intl.formatMessage({
             id: "setting.credit",
           })}
           onClick={() => {
