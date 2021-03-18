@@ -29,27 +29,26 @@ export interface KeyStore {
   meta?: {
     [key: string]: string;
   };
-  crypto: {
-    cipher: "aes-128-ctr";
-    cipherparams: {
-      iv: string;
-    };
-    ciphertext: string;
-    kdf: "scrypt";
-    kdfparams: ScryptParams;
-    mac: string;
+  crypto: CryptoForm;
+}
+
+export interface CryptoForm {
+  cipher: "aes-128-ctr";
+  cipherparams: {
+    iv: string;
   };
+  ciphertext: string;
+  kdf: "scrypt";
+  kdfparams: ScryptParams;
+  mac: string;
 }
 
 export class Crypto {
-  public static async encrypt(
+  public static async encryptCrypto(
     rng: RNG,
-    type: "mnemonic" | "privateKey" | "ledger",
     text: string,
-    password: string,
-    meta: Record<string, string>,
-    bip44HDPath?: BIP44HDPath
-  ): Promise<KeyStore> {
+    password: string
+  ): Promise<CryptoForm> {
     let random = new Uint8Array(32);
     const salt = Buffer.from(await rng(random)).toString("hex");
 
@@ -78,21 +77,32 @@ export class Crypto {
       ])
     );
     return {
+      cipher: "aes-128-ctr",
+      cipherparams: {
+        iv: iv.toString("hex"),
+      },
+      ciphertext: ciphertext.toString("hex"),
+      kdf: "scrypt",
+      kdfparams: scryptParams,
+      mac: Buffer.from(mac).toString("hex"),
+    };
+  }
+
+  public static async encrypt(
+    rng: RNG,
+    type: "mnemonic" | "privateKey" | "ledger",
+    text: string,
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath?: BIP44HDPath
+  ): Promise<KeyStore> {
+    return {
       version: "1.2",
       type,
       coinTypeForChain: {},
       bip44HDPath,
       meta,
-      crypto: {
-        cipher: "aes-128-ctr",
-        cipherparams: {
-          iv: iv.toString("hex"),
-        },
-        ciphertext: ciphertext.toString("hex"),
-        kdf: "scrypt",
-        kdfparams: scryptParams,
-        mac: Buffer.from(mac).toString("hex"),
-      },
+      crypto: await Crypto.encryptCrypto(rng, text, password),
     };
   }
 
