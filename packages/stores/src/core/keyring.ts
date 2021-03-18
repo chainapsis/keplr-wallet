@@ -10,6 +10,7 @@ import {
   CreatePrivateKeyMsg,
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
+  UpdatePasswordMsg,
   GetIsKeyStoreCoinTypeSetMsg,
   GetKeyRingTypeMsg,
   GetMultiKeyStoreInfoMsg,
@@ -20,6 +21,7 @@ import {
   SetKeyStoreCoinTypeMsg,
   ShowKeyRingMsg,
   UnlockKeyRingMsg,
+  CheckPasswordKeyRingMsg,
 } from "@keplr-wallet/background";
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -264,6 +266,15 @@ export class KeyRingStore {
   }
 
   @flow
+  *checkPassword(password: string) {
+    const msg = new CheckPasswordKeyRingMsg(password);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this.status = result.status;
+  }
+
+  @flow
   *rejectAll() {
     yield this.interactionStore.rejectAll("unlock");
   }
@@ -315,6 +326,15 @@ export class KeyRingStore {
     if (selectedIndex === index) {
       window.dispatchEvent(new Event("keplr_keystorechange"));
     }
+  }
+
+  @flow
+  *updatePassword(previousPassword: string, password: string) {
+    const msg = new UpdatePasswordMsg(previousPassword, password);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this.status = result.status;
   }
 
   getKeyStoreSelectables(chainId: string): KeyRingSelectablesStore {
