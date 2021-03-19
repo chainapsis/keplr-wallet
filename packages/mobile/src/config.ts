@@ -5,8 +5,8 @@ export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
-    rpc: "https://client.secretnodes.org",
-    rest: "https://node-secret-1.keplr.app/rest",
+    rpc: "https://rpc-secret.keplr.app",
+    rest: "https://lcd-secret.keplr.app",
     chainId: "secret-2",
     chainName: "Secret Network",
     stakeCurrency: {
