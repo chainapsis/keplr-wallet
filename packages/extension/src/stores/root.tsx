@@ -13,6 +13,7 @@ import {
   TokensStore,
   ChainSuggestStore,
   IBCChannelStore,
+  IBCCurrencyRegsitrar,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -40,6 +41,8 @@ export class RootStore {
   public readonly accountStore: AccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
+
+  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   constructor() {
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
@@ -143,6 +146,12 @@ export class RootStore {
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
+    );
+
+    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
+      this.chainStore,
+      this.accountStore,
+      this.queriesStore
     );
 
     router.listen(APP_PORT);

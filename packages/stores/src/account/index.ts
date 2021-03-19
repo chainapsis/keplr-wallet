@@ -980,6 +980,10 @@ export class AccountStore extends HasMapStore<AccountStoreInner> {
     return this.get(chainId);
   }
 
+  hasAccount(chainId: string): boolean {
+    return this.has(chainId);
+  }
+
   static async getKeplr(): Promise<Keplr | undefined> {
     if (window.keplr) {
       return window.keplr;
