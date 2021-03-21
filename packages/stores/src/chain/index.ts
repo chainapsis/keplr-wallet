@@ -20,18 +20,27 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     this._chainInfos = embedChainInfos;
 
     makeObservable(this);
+
+    // Chain infos could be computed not from observer.
+    // But, the computation could be huge according to the chain info overrider.
+    // So, it is useful to set the chain infos as keep alive
+    keepAlive(this, "chainInfos");
   }
 
   @computed
   get chainInfos(): C[] {
     return this._chainInfos.map((chainInfo) => {
+      return this.getOverridedChainInfo(chainInfo);
+    });
+  }
+
+  protected getOverridedChainInfo = computedFn((chainInfo: C) => {
       for (const chainInfoOverrider of this._chainInfoOverriders) {
         chainInfo = chainInfoOverrider(chainInfo as DeepReadonly<C>);
       }
 
       return chainInfo;
     });
-  }
 
   getChain(chainId: string): C {
     const chainIdentifier = ChainIdHelper.parse(chainId);
