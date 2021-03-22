@@ -3,6 +3,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { DeepReadonly } from "utility-types";
+import { computedFn, keepAlive } from "mobx-utils";
 
 export type ChainInfoOverrider<C extends ChainInfo = ChainInfo> = (
   chainInfo: DeepReadonly<C>
@@ -35,12 +36,12 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   }
 
   protected getOverridedChainInfo = computedFn((chainInfo: C) => {
-      for (const chainInfoOverrider of this._chainInfoOverriders) {
-        chainInfo = chainInfoOverrider(chainInfo as DeepReadonly<C>);
-      }
+    for (const chainInfoOverrider of this._chainInfoOverriders) {
+      chainInfo = chainInfoOverrider(chainInfo as DeepReadonly<C>);
+    }
 
-      return chainInfo;
-    });
+    return chainInfo;
+  });
 
   getChain(chainId: string): C {
     const chainIdentifier = ChainIdHelper.parse(chainId);
