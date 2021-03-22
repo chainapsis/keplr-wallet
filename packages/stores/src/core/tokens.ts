@@ -12,6 +12,7 @@ import { DeepReadonly } from "utility-types";
 import { ChainStore } from "../chain";
 import { InteractionStore } from "./interaction";
 import { toGenerator } from "@keplr-wallet/common";
+import { computedFn } from "mobx-utils";
 
 export class TokensStoreInner {
   @observable.ref
@@ -81,25 +82,27 @@ export class TokensStore<
     this.chainStore.registerChainInfoOverrider(this.overrideChainInfo);
   }
 
-  protected readonly overrideChainInfo = (chainInfo: DeepReadonly<C>): C => {
-    const inner = this.getTokensOf(chainInfo.chainId);
+  protected readonly overrideChainInfo = computedFn(
+    (chainInfo: DeepReadonly<C>): C => {
+      const inner = this.getTokensOf(chainInfo.chainId);
 
-    const currencies = chainInfo.currencies.slice();
-    for (const token of inner.tokens) {
-      const find = currencies.find(
-        (cur) => cur.coinMinimalDenom === token.coinMinimalDenom
-      );
+      const currencies = chainInfo.currencies.slice();
+      for (const token of inner.tokens) {
+        const find = currencies.find(
+          (cur) => cur.coinMinimalDenom === token.coinMinimalDenom
+        );
 
-      if (!find) {
-        currencies.push(token);
+        if (!find) {
+          currencies.push(token);
+        }
       }
-    }
 
-    return {
-      ...(chainInfo as C),
-      currencies,
-    };
-  };
+      return {
+        ...(chainInfo as C),
+        currencies,
+      };
+    }
+  );
 
   getTokensOf(chainId: string) {
     return this.get(chainId);

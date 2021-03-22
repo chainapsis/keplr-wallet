@@ -10,6 +10,7 @@ import { AccountStore } from "../account";
 import { HasMapStore } from "../common";
 import { ObservableQueryBalances } from "../query/balances";
 import { Balances } from "../query/cosmos/balance/types";
+import { computedFn } from "mobx-utils";
 
 export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
   @observable.shallow
@@ -91,7 +92,28 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
       }
 
       runInAction(() => {
-        this._ibcCurrencies = ibcCurrencies;
+        // TODO: Change the type from array to map.
+        for (const currency of this._ibcCurrencies) {
+          if (
+            !ibcCurrencies.find(
+              (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
+            )
+          ) {
+            this._ibcCurrencies = this._ibcCurrencies.filter(
+              (cur) => cur.coinMinimalDenom !== currency.coinMinimalDenom
+            );
+          }
+        }
+
+        for (const currency of ibcCurrencies) {
+          if (
+            !this._ibcCurrencies.find(
+              (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
+            )
+          ) {
+            this._ibcCurrencies.push(currency);
+          }
+        }
       });
     });
   }
@@ -138,14 +160,20 @@ export class IBCCurrencyRegsitrar<
     this.chainStore.registerChainInfoOverrider(this.overrideChainInfo);
   }
 
-  protected readonly overrideChainInfo = (chainInfo: DeepReadonly<C>): C => {
-    const inner = this.get(chainInfo.chainId);
-    if (inner.ibcCurrencies.length > 0) {
-      return {
-        ...(chainInfo as C),
-        currencies: chainInfo.currencies.concat(inner.ibcCurrencies),
-      };
+  protected readonly overrideChainInfo = computedFn(
+    (chainInfo: DeepReadonly<C>): C => {
+      if (!chainInfo.features || !chainInfo.features.includes("stargate")) {
+        return chainInfo as C;
+      }
+
+      const inner = this.get(chainInfo.chainId);
+      if (inner.ibcCurrencies.length > 0) {
+        return {
+          ...(chainInfo as C),
+          currencies: chainInfo.currencies.concat(inner.ibcCurrencies),
+        };
+      }
+      return chainInfo as C;
     }
-    return chainInfo as C;
-  };
+  );
 }
