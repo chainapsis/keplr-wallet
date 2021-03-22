@@ -3,7 +3,16 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
 
-import { FormFeedback, FormGroup, Input, InputGroup, Label } from "reactstrap";
+import {
+  ButtonDropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  FormFeedback,
+  FormGroup,
+  Input,
+  Label,
+} from "reactstrap";
 import { observer } from "mobx-react-lite";
 import {
   EmptyAmountError,
@@ -74,10 +83,10 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
       }
     }, [balance, fee, isAllBalanceMode, amountConfig]);
 
-    const [inputId] = useState(() => {
+    const [randomId] = useState(() => {
       const bytes = new Uint8Array(4);
       crypto.getRandomValues(bytes);
-      return `input-${Buffer.from(bytes).toString("hex")}`;
+      return Buffer.from(bytes).toString("hex");
     });
 
     const error = amountConfig.getError();
@@ -109,42 +118,82 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
       }
     }, [intl, error]);
 
+    const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
+
     return (
-      <FormGroup className={className}>
-        {label ? (
+      <React.Fragment>
+        <FormGroup className={className}>
           <Label
-            for={inputId}
+            for={`selector-${randomId}`}
             className="form-control-label"
             style={{ width: "100%" }}
           >
-            {label}
-            {!disableAllBalance ? (
-              <div
-                className={classnames(
-                  styleCoinInput.balance,
-                  styleCoinInput.clickable,
-                  {
-                    [styleCoinInput.clicked]: isAllBalanceMode,
-                  }
-                )}
-                onClick={toggleAllBalanceMode}
-              >
-                {`Balance: ${balance.trim(true).maxDecimals(6).toString()}`}
-              </div>
-            ) : null}
+            Token
           </Label>
-        ) : null}
-        <InputGroup
-          id={inputId}
-          className={classnames(styleCoinInput.selectContainer, {
-            disabled: isAllBalanceMode,
-          })}
-        >
+          <ButtonDropdown
+            id={`selector-${randomId}`}
+            className={classnames(styleCoinInput.tokenSelector, {
+              disabled: isAllBalanceMode,
+            })}
+            isOpen={isOpenTokenSelector}
+            toggle={() => setIsOpenTokenSelector((value) => !value)}
+            disabled={isAllBalanceMode}
+          >
+            <DropdownToggle caret>
+              {amountConfig.sendCurrency.coinDenom}
+            </DropdownToggle>
+            <DropdownMenu>
+              {amountConfig.sendableCurrencies.map((currency) => {
+                return (
+                  <DropdownItem
+                    key={currency.coinMinimalDenom}
+                    active={
+                      currency.coinMinimalDenom ===
+                      amountConfig.sendCurrency.coinMinimalDenom
+                    }
+                    onClick={(e) => {
+                      e.preventDefault();
+
+                      amountConfig.setSendCurrency(currency);
+                    }}
+                  >
+                    {currency.coinDenom}
+                  </DropdownItem>
+                );
+              })}
+            </DropdownMenu>
+          </ButtonDropdown>
+        </FormGroup>
+        <FormGroup className={className}>
+          {label ? (
+            <Label
+              for={`input-${randomId}`}
+              className="form-control-label"
+              style={{ width: "100%" }}
+            >
+              {label}
+              {!disableAllBalance ? (
+                <div
+                  className={classnames(
+                    styleCoinInput.balance,
+                    styleCoinInput.clickable,
+                    {
+                      [styleCoinInput.clicked]: isAllBalanceMode,
+                    }
+                  )}
+                  onClick={toggleAllBalanceMode}
+                >
+                  {`Balance: ${balance.trim(true).maxDecimals(6).toString()}`}
+                </div>
+              ) : null}
+            </Label>
+          ) : null}
           <Input
             className={classnames(
               "form-control-alternative",
               styleCoinInput.input
             )}
+            id={`input-${randomId}`}
             type="number"
             value={amountConfig.amount}
             onChange={(e) => {
@@ -163,41 +212,13 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             disabled={isAllBalanceMode}
             autoComplete="off"
           />
-          <Input
-            type="select"
-            className={classnames(
-              "form-control-alternative",
-              styleCoinInput.select
-            )}
-            value={
-              amountConfig.sendCurrency
-                ? amountConfig.sendCurrency.coinMinimalDenom
-                : ""
-            }
-            onChange={(e) => {
-              const currency = amountConfig.sendableCurrencies.find(
-                (currency) => {
-                  return currency.coinMinimalDenom === e.target.value;
-                }
-              );
-              amountConfig.setSendCurrency(currency);
-              e.preventDefault();
-            }}
-            disabled={isAllBalanceMode}
-          >
-            {amountConfig.sendableCurrencies.map((currency, i) => {
-              return (
-                <option key={i.toString()} value={currency.coinMinimalDenom}>
-                  {currency.coinDenom}
-                </option>
-              );
-            })}
-          </Input>
-        </InputGroup>
-        {errorText != null ? (
-          <FormFeedback style={{ display: "block" }}>{errorText}</FormFeedback>
-        ) : null}
-      </FormGroup>
+          {errorText != null ? (
+            <FormFeedback style={{ display: "block" }}>
+              {errorText}
+            </FormFeedback>
+          ) : null}
+        </FormGroup>
+      </React.Fragment>
     );
   }
 );
