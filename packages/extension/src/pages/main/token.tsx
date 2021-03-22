@@ -27,7 +27,7 @@ const TokenView: FunctionComponent<{
 
   const name = balance.currency.coinDenom.toUpperCase();
   const minimalDenom = balance.currency.coinMinimalDenom;
-  const amount = balance.balance.trim(true).shrink(true);
+  let amount = balance.balance.trim(true).shrink(true);
 
   const backgroundColor = useMemo(() => {
     const hash = Hash.sha256(Buffer.from(minimalDenom));
@@ -70,6 +70,13 @@ const TokenView: FunctionComponent<{
       });
     }
   };
+
+  // If the currency is the IBC Currency.
+  // Show the amount as slightly different with other currencies.
+  // Show the actual coin denom to the top and just show the coin denom without channel info to the bottom.
+  if ("originCurrency" in amount.currency && amount.currency.originCurrency) {
+    amount = amount.setCurrency(amount.currency.originCurrency);
+  }
 
   return (
     <div

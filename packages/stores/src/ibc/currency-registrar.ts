@@ -77,12 +77,25 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
                       return cur.coinMinimalDenom === denomTrace.denom;
                     });
 
-                    if (currency) {
+                    if (currency && !("type" in currency)) {
                       ibcCurrencies.push({
                         ...currency,
                         coinMinimalDenom: bal.denom,
+                        coinDenom: `${currency.coinDenom} (${chainInfo.chainName}/${paths[0].channelId})`,
+                        paths: paths,
+                        originChainId: chainInfo.chainId,
+                        originCurrency: currency,
                       });
                     }
+                  } else {
+                    ibcCurrencies.push({
+                      coinDecimals: 0,
+                      coinMinimalDenom: bal.denom,
+                      coinDenom: `${denomTrace.denom} (Unknown/${paths[0].channelId})`,
+                      paths: paths,
+                      originChainId: undefined,
+                      originCurrency: undefined,
+                    });
                   }
                 }
               }
@@ -96,7 +109,9 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
         for (const currency of this._ibcCurrencies) {
           if (
             !ibcCurrencies.find(
-              (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
+              (cur) =>
+                cur.coinMinimalDenom === currency.coinMinimalDenom &&
+                cur.coinDenom === currency.coinDenom
             )
           ) {
             this._ibcCurrencies = this._ibcCurrencies.filter(
