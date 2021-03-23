@@ -37,6 +37,8 @@ export interface AddressInputProps {
   label?: string;
 
   disableAddressBook?: boolean;
+
+  disabled?: boolean;
 }
 
 export const AddressInput: FunctionComponent<AddressInputProps> = observer(
@@ -47,6 +49,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     className,
     label,
     disableAddressBook,
+    disabled = false,
   }) => {
     const intl = useIntl();
 
@@ -139,6 +142,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                 e.preventDefault();
               }}
               autoComplete="off"
+              disabled={disabled}
             />
             {!disableAddressBook && memoConfig ? (
               <Button
@@ -147,6 +151,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                 type="button"
                 outline
                 onClick={() => setIsAddressBookOpen(true)}
+                disabled={disabled}
               >
                 <i className="fas fa-address-book" />
               </Button>

@@ -10,11 +10,13 @@ export interface MemoInputProps {
   className?: string;
 
   rows?: number;
+
+  disabled?: boolean;
 }
 
 // TODO: Handle the max memo bytes length for each chain.
 export const MemoInput: FunctionComponent<MemoInputProps> = observer(
-  ({ memoConfig, label, className, rows }) => {
+  ({ memoConfig, label, className, rows, disabled = false }) => {
     const [inputId] = useState(() => {
       const bytes = new Uint8Array(4);
       crypto.getRandomValues(bytes);
@@ -40,6 +42,7 @@ export const MemoInput: FunctionComponent<MemoInputProps> = observer(
             e.preventDefault();
           }}
           autoComplete="off"
+          disabled={disabled}
         />
       </FormGroup>
     );

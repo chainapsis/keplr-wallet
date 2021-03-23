@@ -112,6 +112,8 @@ export const IBCTransferPageChannel: FunctionComponent<{
     recipientConfig.getError() == null &&
     memoConfig.getError() == null;
 
+  const isChannelSet = channelConfig.channel != null;
+
   return (
     <form className={style.formContainer}>
       <div className={style.formInnerContainer}>
@@ -121,8 +123,13 @@ export const IBCTransferPageChannel: FunctionComponent<{
           recipientConfig={recipientConfig}
           memoConfig={memoConfig}
           ibcChannelConfig={channelConfig}
+          disabled={!isChannelSet}
         />
-        <MemoInput label="Memo (Optional)" memoConfig={memoConfig} />
+        <MemoInput
+          label="Memo (Optional)"
+          memoConfig={memoConfig}
+          disabled={!isChannelSet}
+        />
         <div style={{ flex: 1 }} />
         <Button
           type="submit"
