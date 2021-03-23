@@ -101,7 +101,9 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     high: Joi.number().required(),
   }),
   features: Joi.array()
-    .items(Joi.string().valid("stargate", "cosmwasm", "secretwasm"))
+    .items(
+      Joi.string().valid("stargate", "cosmwasm", "secretwasm", "ibc-transfer")
+    )
     .unique()
     .custom((value: string[]) => {
       if (value.indexOf("cosmwasm") >= 0 && value.indexOf("secretwasm") >= 0) {
