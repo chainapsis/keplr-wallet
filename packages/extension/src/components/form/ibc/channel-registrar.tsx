@@ -86,8 +86,8 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
               setChannelId(e.target.value);
               setError("");
             }}
+            error={error}
           />
-          {error}
           <Button
             type="submit"
             block

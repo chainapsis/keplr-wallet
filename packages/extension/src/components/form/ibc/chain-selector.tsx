@@ -74,7 +74,8 @@ export const DestinationChainSelector: FunctionComponent<{
                       ibcChannelConfig.setChannel(channel);
                     }}
                   >
-                    {`${chainInfo.chainName} (${channel.channelId})`}
+                    {chainInfo.chainName}
+                    <div className={style.channel}>{channel.channelId}</div>
                   </DropdownItem>
                 );
               }
