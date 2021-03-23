@@ -9,9 +9,9 @@ import {
 } from "reactstrap";
 
 import style from "./style.module.scss";
-import { IBCChannelRegistrarModal } from "./ibc-channel-registrar-modal";
+import { IBCChannelRegistrarModal } from "./channel-registrar";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
+import { useStore } from "../../../stores";
 import { IIBCChannelConfig } from "@keplr-wallet/hooks";
 
 export const DestinationChainSelector: FunctionComponent<{

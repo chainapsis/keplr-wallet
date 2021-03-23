@@ -10,6 +10,7 @@ import {
   CoinInput,
   FeeButtons,
   MemoInput,
+  DestinationChainSelector,
 } from "../../components/form";
 import {
   IAmountConfig,
@@ -22,7 +23,6 @@ import {
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
 import { EthereumEndpoint } from "../../config.ui";
-import { DestinationChainSelector } from "./destination-chain";
 import { useNotification } from "../../components/notification";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {

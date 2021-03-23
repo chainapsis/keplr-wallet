@@ -1,0 +1,12 @@
+.chain-selector {
+  width: 100%;
+  height: 46px;
+
+  button {
+    width: 100%;
+  }
+
+  :global(.dropdown-menu.show) {
+    width: 100%;
+  }
+}

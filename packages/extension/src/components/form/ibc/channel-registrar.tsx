@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
+import { useStore } from "../../../stores";
 import {
   Button,
   ButtonDropdown,
@@ -9,13 +9,13 @@ import {
   DropdownToggle,
   Form,
   FormGroup,
-  Input,
   Label,
   Modal,
   ModalBody,
 } from "reactstrap";
 
 import style from "./style.module.scss";
+import { Input } from "../input";
 
 export const IBCChannelRegistrarModal: FunctionComponent<{
   isOpen: boolean;
