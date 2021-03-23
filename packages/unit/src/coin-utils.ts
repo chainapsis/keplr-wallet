@@ -89,11 +89,16 @@ export class CoinUtils {
     currencies: Currency[],
     coin: Coin
   ): { amount: string; denom: string } {
-    const currency = currencies.find((currency) => {
+    let currency = currencies.find((currency) => {
       return currency.coinMinimalDenom === coin.denom;
     });
     if (!currency) {
-      throw new Error("Invalid currency");
+      // If the currency is unknown, just use the raw currency.
+      currency = {
+        coinDecimals: 0,
+        coinDenom: coin.denom,
+        coinMinimalDenom: coin.denom,
+      };
     }
 
     let precision = new Dec(1);
