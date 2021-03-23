@@ -120,6 +120,7 @@ export const IBCTransferPageChannel: FunctionComponent<{
           label="Recipient"
           recipientConfig={recipientConfig}
           memoConfig={memoConfig}
+          ibcChannelConfig={channelConfig}
         />
         <MemoInput label="Memo (Optional)" memoConfig={memoConfig} />
         <div style={{ flex: 1 }} />

@@ -22,6 +22,7 @@ import {
   ENSNotSupportedError,
   ENSFailedToFetchError,
   ENSIsFetchingError,
+  IIBCChannelConfig,
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
@@ -30,6 +31,7 @@ import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
   memoConfig?: IMemoConfig;
+  ibcChannelConfig?: IIBCChannelConfig;
 
   className?: string;
   label?: string;
@@ -38,7 +40,14 @@ export interface AddressInputProps {
 }
 
 export const AddressInput: FunctionComponent<AddressInputProps> = observer(
-  ({ recipientConfig, memoConfig, className, label, disableAddressBook }) => {
+  ({
+    recipientConfig,
+    memoConfig,
+    ibcChannelConfig,
+    className,
+    label,
+    disableAddressBook,
+  }) => {
     const intl = useIntl();
 
     const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
@@ -107,6 +116,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               onBackButton={() => setIsAddressBookOpen(false)}
               hideChainDropdown={true}
               selectHandler={selectAddressFromAddressBook}
+              ibcChannelConfig={ibcChannelConfig}
             />
           </ModalBody>
         </Modal>
