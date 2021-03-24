@@ -89,6 +89,7 @@ export class ChainUpdaterService {
       });
     }
 
+    let staragteUpdate = false;
     try {
       if (!chainInfo.features || !chainInfo.features.includes("stargate")) {
         const restInstance = Axios.create({
@@ -107,6 +108,43 @@ export class ChainUpdaterService {
         await this.saveChainProperty(currentVersion.identifier, {
           features: (savedChainProperty.features ?? []).concat(["stargate"]),
         });
+        staragteUpdate = true;
+      }
+    } catch {}
+
+    try {
+      if (
+        (!chainInfo.features || !chainInfo.features.includes("ibc-transfer")) &&
+        (staragteUpdate ||
+          (chainInfo.features && chainInfo.features.includes("stargate")))
+      ) {
+        const restInstance = Axios.create({
+          baseURL: chainInfo.rest,
+        });
+
+        // If the chain doesn't have the ibc transfer feature,
+        // try to fetch the params of ibc transfer module.
+        // assume that it can support the ibc transfer if the params return true, and try to update the features.
+        const result = await restInstance.get<{
+          params: {
+            receive_enabled: boolean;
+            send_enabled: boolean;
+          };
+        }>("/ibc/applications/transfer/v1beta1/params");
+        if (
+          result.data.params.receive_enabled &&
+          result.data.params.send_enabled
+        ) {
+          const savedChainProperty = await this.getUpdatedChainProperty(
+            chainInfo.chainId
+          );
+
+          await this.saveChainProperty(currentVersion.identifier, {
+            features: (savedChainProperty.features ?? []).concat([
+              "ibc-transfer",
+            ]),
+          });
+        }
       }
     } catch {}
   }
@@ -189,8 +227,7 @@ export class ChainUpdaterService {
       };
     }
 
-    let slient = false;
-
+    let staragteUpdate = false;
     try {
       if (!chainInfo.features || !chainInfo.features.includes("stargate")) {
         const restInstance = Axios.create({
@@ -201,13 +238,42 @@ export class ChainUpdaterService {
         // but it can use the GRPC HTTP Gateway,
         // assume that it can support the stargate and try to update the features.
         await restInstance.get("/cosmos/base/tendermint/v1beta1/node_info");
-        slient = true;
+        staragteUpdate = true;
+      }
+    } catch {}
+
+    let ibcTransferUpdate = false;
+    try {
+      if (
+        (!chainInfo.features || !chainInfo.features.includes("ibc-transfer")) &&
+        (staragteUpdate ||
+          (chainInfo.features && chainInfo.features.includes("stargate")))
+      ) {
+        const restInstance = Axios.create({
+          baseURL: chainInfo.rest,
+        });
+
+        // If the chain doesn't have the ibc transfer feature,
+        // try to fetch the params of ibc transfer module.
+        // assume that it can support the ibc transfer if the params return true, and try to update the features.
+        const result = await restInstance.get<{
+          params: {
+            receive_enabled: boolean;
+            send_enabled: boolean;
+          };
+        }>("/ibc/applications/transfer/v1beta1/params");
+        if (
+          result.data.params.receive_enabled &&
+          result.data.params.send_enabled
+        ) {
+          ibcTransferUpdate = true;
+        }
       }
     } catch {}
 
     return {
       explicit: version.version < fetchedVersion.version,
-      slient,
+      slient: staragteUpdate || ibcTransferUpdate,
     };
   }
 }
