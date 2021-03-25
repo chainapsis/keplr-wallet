@@ -54,7 +54,8 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
                   .getDenomTrace(hash).denomTrace;
                 if (denomTrace) {
                   const paths = denomTrace.paths;
-                  let chainInfo: C | undefined;
+                  let counterpartyChainInfo: C | undefined;
+                  let originChainInfo: C | undefined;
                   for (const path of paths) {
                     const clientState = queries
                       .getQueryIBCClientState()
@@ -63,17 +64,22 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
                       clientState.clientChainId &&
                       this.chainStore.hasChain(clientState.clientChainId)
                     ) {
-                      chainInfo = this.chainStore.getChain(
+                      originChainInfo = this.chainStore.getChain(
                         clientState.clientChainId
                       );
+                      if (!counterpartyChainInfo) {
+                        counterpartyChainInfo = this.chainStore.getChain(
+                          clientState.clientChainId
+                        );
+                      }
                     } else {
-                      chainInfo = undefined;
+                      originChainInfo = undefined;
                       break;
                     }
                   }
 
-                  if (chainInfo) {
-                    const currency = chainInfo.currencies.find((cur) => {
+                  if (originChainInfo) {
+                    const currency = originChainInfo.currencies.find((cur) => {
                       return cur.coinMinimalDenom === denomTrace.denom;
                     });
 
@@ -81,9 +87,13 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
                       ibcCurrencies.push({
                         ...currency,
                         coinMinimalDenom: bal.denom,
-                        coinDenom: `${currency.coinDenom} (${chainInfo.chainName}/${paths[0].channelId})`,
+                        coinDenom: `${currency.coinDenom} (${
+                          counterpartyChainInfo
+                            ? counterpartyChainInfo.chainName
+                            : "Unknown"
+                        }/${paths[0].channelId})`,
                         paths: paths,
-                        originChainId: chainInfo.chainId,
+                        originChainId: originChainInfo.chainId,
                         originCurrency: currency,
                       });
                     }
@@ -91,7 +101,11 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
                     ibcCurrencies.push({
                       coinDecimals: 0,
                       coinMinimalDenom: bal.denom,
-                      coinDenom: `${denomTrace.denom} (Unknown/${paths[0].channelId})`,
+                      coinDenom: `${denomTrace.denom} (${
+                        counterpartyChainInfo
+                          ? counterpartyChainInfo.chainName
+                          : "Unknown"
+                      }/${paths[0].channelId})`,
                       paths: paths,
                       originChainId: undefined,
                       originCurrency: undefined,
