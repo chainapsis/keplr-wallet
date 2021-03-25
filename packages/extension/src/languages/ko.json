@@ -186,6 +186,8 @@
 
   "sign.list.message.cosmos-sdk/MsgSend.title": "보내기",
   "sign.list.message.cosmos-sdk/MsgSend.content": "<b>{recipient}</b>가 <b>{amount}</b>를 받을 것입니다",
+  "sign.list.message.cosmos-sdk/MsgTransfer.title": "IBC 전송",
+  "sign.list.message.cosmos-sdk/MsgTransfer.content": "채널 <b>{channel}</b>의 <b>{receiver}</b>가 <b>{amount}</b>를 받을 것입니다",
   "sign.list.message.cosmos-sdk/MsgDelegate.title": "위임",
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "<b>{validator}</b>에게 <b>{amount}</b>를 위임합니다",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "위임 해제",

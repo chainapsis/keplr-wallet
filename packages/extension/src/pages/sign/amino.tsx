@@ -14,6 +14,7 @@ import {
   MsgInstantiateContract,
   MsgLink,
   MsgSend,
+  MsgTransfer,
   MsgUndelegate,
   MsgVote,
   MsgWithdrawDelegatorReward,
@@ -22,6 +23,7 @@ import {
   renderMsgExecuteContract,
   renderMsgInstantiateContract,
   renderMsgSend,
+  renderMsgTransfer,
   renderMsgUndelegate,
   renderMsgVote,
   renderMsgWithdrawDelegatorReward,
@@ -41,6 +43,17 @@ export function renderAminoMessage(
   if (msg.type === msgOpts.send.native.type) {
     const value = msg.value as MsgSend["value"];
     return renderMsgSend(currencies, intl, value.amount, value.to_address);
+  }
+
+  if (msg.type === msgOpts.ibc.transfer.type) {
+    const value = msg.value as MsgTransfer["value"];
+    return renderMsgTransfer(
+      currencies,
+      intl,
+      value.token,
+      value.receiver,
+      value.source_channel
+    );
   }
 
   if (msg.type === msgOpts.redelegate.type) {
