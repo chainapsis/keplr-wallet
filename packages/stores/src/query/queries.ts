@@ -8,6 +8,7 @@ import {
   ObservableQuerySecretContractCodeHash,
 } from "./secret-wasm";
 import {
+  ObservableQueryBlock,
   ObservableQuerySupplyTotal,
   ObservableQueryInflation,
   ObservableQueryMintingInfation,
@@ -30,6 +31,7 @@ import { ObservableQuerySecret20ContractInfo } from "./secret-wasm/secret20-cont
 export class Queries {
   protected readonly _queryBalances: ObservableQueryBalances;
 
+  protected readonly _queryBlock: ObservableQueryBlock;
   protected readonly _queryAccount: ObservableQueryAccount;
   protected readonly _queryMint: ObservableQueryMintingInfation;
   protected readonly _queryPool: ObservableQueryStakingPool;
@@ -60,6 +62,7 @@ export class Queries {
       new ObservableQueryCosmosBalanceRegistry(kvStore)
     );
 
+    this._queryBlock = new ObservableQueryBlock(kvStore, chainId, chainGetter);
     this._queryAccount = new ObservableQueryAccount(
       kvStore,
       chainId,
@@ -155,6 +158,10 @@ export class Queries {
       chainGetter,
       this._querySecretContractCodeHash
     );
+  }
+
+  getQueryBlock(): DeepReadonly<ObservableQueryBlock> {
+    return this._queryBlock;
   }
 
   getQueryAccount(): DeepReadonly<ObservableQueryAccount> {

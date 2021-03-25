@@ -17,7 +17,7 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { Dec, DecUtils } from "@keplr-wallet/unit";
+import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { QueriesStore } from "../query";
 import { Queries } from "../query/queries";
 
@@ -147,7 +147,7 @@ export class AccountStoreInner {
   constructor(
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queries: Queries,
+    protected readonly queriesStore: QueriesStore,
     protected readonly opts: AccountStoreInnerOpts
   ) {
     makeObservable(this);
@@ -404,6 +404,20 @@ export class AccountStoreInner {
       return dec.truncate().toString();
     })();
 
+    const destinationBlockHeight = this.queriesStore
+      .get(channel.counterpartyChainId)
+      .getQueryBlock()
+      .getBlock("latest");
+
+    // Wait until fetching complete.
+    await destinationBlockHeight.waitFreshResponse();
+
+    if (destinationBlockHeight.height.equals(new Int("0"))) {
+      throw new Error(
+        `Failed to fetch the latest block of ${channel.counterpartyChainId}`
+      );
+    }
+
     const msg = {
       type: this.opts.msgOpts.ibc.transfer.type,
       value: {
@@ -419,7 +433,10 @@ export class AccountStoreInner {
           revision_number: ChainIdHelper.parse(
             channel.counterpartyChainId
           ).version.toString() as string | undefined,
-          revision_height: "9999999999",
+          // Set the timeout height as the current height + 150.
+          revision_height: destinationBlockHeight.height
+            .add(new Int("150"))
+            .toString(),
         },
       },
     };
@@ -945,6 +962,10 @@ export class AccountStoreInner {
   get isSendingMsg(): keyof MsgOpts | "unknown" | false {
     return this._isSendingMsg;
   }
+
+  protected get queries(): Queries {
+    return this.queriesStore.get(this.chainId);
+  }
 }
 
 export class AccountStore extends HasMapStore<AccountStoreInner> {
@@ -957,7 +978,7 @@ export class AccountStore extends HasMapStore<AccountStoreInner> {
       return new AccountStoreInner(
         this.chainGetter,
         chainId,
-        this.queriesStore.get(chainId),
+        this.queriesStore,
         deepmerge(
           AccountStoreInner.defaultOpts,
           this.opts.chainOpts?.find((opts) => opts.chainId === chainId) ?? {}
