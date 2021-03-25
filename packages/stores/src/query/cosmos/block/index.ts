@@ -18,7 +18,7 @@ export class ObservableQueryBlockInner extends ObservableChainQuery<{
     protected readonly paramHeight: number | "latest"
   ) {
     super(kvStore, chainId, chainGetter, `/blocks/${paramHeight}`);
-    
+
     makeObservable(this);
   }
 
