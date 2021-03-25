@@ -4,7 +4,7 @@ import { HeaderLayout } from "../../layouts";
 import { useHistory } from "react-router";
 
 import style from "./style.module.scss";
-import { Button } from "reactstrap";
+import { Alert, Button } from "reactstrap";
 import {
   AddressInput,
   CoinInput,
@@ -131,6 +131,13 @@ export const IBCTransferPageChannel: FunctionComponent<{
           disabled={!isChannelSet}
         />
         <div style={{ flex: 1 }} />
+        <Alert className={style.alert}>
+          <i className="fas fa-exclamation-circle" />
+          <div>
+            <h1>IBC is still experimental</h1>
+            <p>Only send small amounts until channels have stabilized</p>
+          </div>
+        </Alert>
         <Button
           type="submit"
           color="primary"

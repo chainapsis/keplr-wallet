@@ -20,3 +20,28 @@
     width: 100%;
   }
 }
+
+.alert {
+  display: flex;
+  border: solid 1px #9092b6;
+  background-color: #ffffff;
+  color: #32325d;
+
+  i {
+    font-size: 24px;
+    margin-right: 8px;
+  }
+
+  h1 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #32325d;
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 14px;
+    line-height: 1.57;
+    margin: 0;
+  }
+}
