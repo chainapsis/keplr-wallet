@@ -82,6 +82,12 @@ export const FiatCurrencies: FiatCurrency[] = [
     maxDecimals: 0,
     locale: "ja-JP",
   },
+  {
+    currency: "inr",
+    symbol: "₹",
+    maxDecimals: 1,
+    locale: "en-IN",
+  },
 ];
 
 export const LanguageToFiatCurrency: TypeLanguageToFiatCurrency = {
