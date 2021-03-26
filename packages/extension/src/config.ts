@@ -191,7 +191,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: AKASH_RPC_CONFIG,
     rest: AKASH_REST_ENDPOINT,
     restConfig: AKASH_REST_CONFIG,
-    chainId: "akashnet-1",
+    chainId: "akashnet-2",
     chainName: "Akash",
     stakeCurrency: {
       coinDenom: "AKT",
@@ -227,6 +227,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "akash-network",
       },
     ],
+    features: ["stargate"],
   },
   {
     rpc: IOV_RPC_ENDPOINT,
@@ -286,6 +287,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "ROWAN",
       coinMinimalDenom: "rowan",
       coinDecimals: 18,
+      coinGeckoId: "sifchain",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -304,6 +306,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "ROWAN",
         coinMinimalDenom: "rowan",
         coinDecimals: 18,
+        coinGeckoId: "sifchain",
       },
     ],
     feeCurrencies: [
@@ -311,6 +314,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "ROWAN",
         coinMinimalDenom: "rowan",
         coinDecimals: 18,
+        coinGeckoId: "sifchain",
       },
     ],
     gasPriceStep: {
