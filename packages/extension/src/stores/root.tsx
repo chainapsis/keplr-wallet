@@ -12,6 +12,8 @@ import {
   LedgerInitStore,
   TokensStore,
   ChainSuggestStore,
+  IBCChannelStore,
+  IBCCurrencyRegsitrar,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -27,6 +29,7 @@ import { FiatCurrency } from "@keplr-wallet/types";
 export class RootStore {
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
+  public readonly ibcChannelStore: IBCChannelStore;
 
   protected readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
@@ -38,6 +41,8 @@ export class RootStore {
   public readonly accountStore: AccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
+
+  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   constructor() {
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
@@ -58,6 +63,10 @@ export class RootStore {
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
+    );
+
+    this.ibcChannelStore = new IBCChannelStore(
+      new ExtensionKVStore("store_ibc_channel")
     );
 
     this.permissionStore = new PermissionStore(
@@ -137,6 +146,12 @@ export class RootStore {
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
+    );
+
+    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
+      this.chainStore,
+      this.accountStore,
+      this.queriesStore
     );
 
     router.listen(APP_PORT);

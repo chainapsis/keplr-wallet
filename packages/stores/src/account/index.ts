@@ -3,7 +3,11 @@ import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../common";
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency, Keplr } from "@keplr-wallet/types";
-import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
+import {
+  BaseAccount,
+  ChainIdHelper,
+  TendermintTxTracer,
+} from "@keplr-wallet/cosmos";
 import Axios, { AxiosInstance } from "axios";
 import {
   BroadcastMode,
@@ -13,7 +17,7 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { Dec, DecUtils } from "@keplr-wallet/unit";
+import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { QueriesStore } from "../query";
 import { Queries } from "../query/queries";
 
@@ -39,6 +43,9 @@ export interface MsgOpts {
     native: MsgOpt;
     cw20: Pick<MsgOpt, "gas">;
     secret20: Pick<MsgOpt, "gas">;
+  };
+  ibc: {
+    transfer: MsgOpt;
   };
   delegate: MsgOpt;
   undelegate: MsgOpt;
@@ -99,6 +106,12 @@ export class AccountStoreInner {
           gas: 250000,
         },
       },
+      ibc: {
+        transfer: {
+          type: "cosmos-sdk/MsgTransfer",
+          gas: 120000,
+        },
+      },
       delegate: {
         type: "cosmos-sdk/MsgDelegate",
         gas: 250000,
@@ -134,7 +147,7 @@ export class AccountStoreInner {
   constructor(
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queries: Queries,
+    protected readonly queriesStore: QueriesStore,
     protected readonly opts: AccountStoreInnerOpts
   ) {
     makeObservable(this);
@@ -366,6 +379,91 @@ export class AccountStoreInner {
       default:
         throw new Error(`Unsupported type of currency (${denomHelper.type})`);
     }
+  }
+
+  async sendIBCTransferMsg(
+    channel: {
+      portId: string;
+      channelId: string;
+      counterpartyChainId: string;
+    },
+    amount: string,
+    currency: AppCurrency,
+    recipient: string,
+    memo: string = "",
+    stdFee: StdFee,
+    onFulfill?: (tx: any) => void
+  ) {
+    if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
+      throw new Error("Only native token can be sent via IBC");
+    }
+
+    const actualAmount = (() => {
+      let dec = new Dec(amount);
+      dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+      return dec.truncate().toString();
+    })();
+
+    const destinationBlockHeight = this.queriesStore
+      .get(channel.counterpartyChainId)
+      .getQueryBlock()
+      .getBlock("latest");
+
+    // Wait until fetching complete.
+    await destinationBlockHeight.waitFreshResponse();
+
+    if (destinationBlockHeight.height.equals(new Int("0"))) {
+      throw new Error(
+        `Failed to fetch the latest block of ${channel.counterpartyChainId}`
+      );
+    }
+
+    const msg = {
+      type: this.opts.msgOpts.ibc.transfer.type,
+      value: {
+        source_port: channel.portId,
+        source_channel: channel.channelId,
+        token: {
+          denom: currency.coinMinimalDenom,
+          amount: actualAmount,
+        },
+        sender: this.bech32Address,
+        receiver: recipient,
+        timeout_height: {
+          revision_number: ChainIdHelper.parse(
+            channel.counterpartyChainId
+          ).version.toString() as string | undefined,
+          // Set the timeout height as the current height + 150.
+          revision_height: destinationBlockHeight.height
+            .add(new Int("150"))
+            .toString(),
+        },
+      },
+    };
+
+    if (msg.value.timeout_height.revision_number === "0") {
+      delete msg.value.timeout_height.revision_number;
+    }
+
+    await this.sendMsgs("send", [msg], stdFee, memo, (tx) => {
+      if (tx.code == null || tx.code === 0) {
+        // After succeeding to send token, refresh the balance.
+        const queryBalance = this.queries
+          .getQueryBalances()
+          .getQueryBech32Address(this.bech32Address)
+          .balances.find((bal) => {
+            return bal.currency.coinMinimalDenom === currency.coinMinimalDenom;
+          });
+
+        if (queryBalance) {
+          queryBalance.fetch();
+        }
+      }
+
+      if (onFulfill) {
+        onFulfill(tx);
+      }
+    });
   }
 
   /**
@@ -864,6 +962,10 @@ export class AccountStoreInner {
   get isSendingMsg(): keyof MsgOpts | "unknown" | false {
     return this._isSendingMsg;
   }
+
+  protected get queries(): Queries {
+    return this.queriesStore.get(this.chainId);
+  }
 }
 
 export class AccountStore extends HasMapStore<AccountStoreInner> {
@@ -876,7 +978,7 @@ export class AccountStore extends HasMapStore<AccountStoreInner> {
       return new AccountStoreInner(
         this.chainGetter,
         chainId,
-        this.queriesStore.get(chainId),
+        this.queriesStore,
         deepmerge(
           AccountStoreInner.defaultOpts,
           this.opts.chainOpts?.find((opts) => opts.chainId === chainId) ?? {}
@@ -897,6 +999,10 @@ export class AccountStore extends HasMapStore<AccountStoreInner> {
 
   getAccount(chainId: string): AccountStoreInner {
     return this.get(chainId);
+  }
+
+  hasAccount(chainId: string): boolean {
+    return this.has(chainId);
   }
 
   static async getKeplr(): Promise<Keplr | undefined> {

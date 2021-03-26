@@ -78,6 +78,7 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
     return fetcher;
   }
 
+  @action
   setENSEndpoint(endpoint: string | undefined) {
     this._ensEndpoint = endpoint;
   }

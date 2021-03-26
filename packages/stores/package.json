@@ -22,6 +22,7 @@
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
+    "@cosmjs/tendermint-rpc": "^0.24.1",
     "@keplr-wallet/background": "^0.8.1",
     "@keplr-wallet/common": "^0.8.1",
     "@keplr-wallet/cosmos": "^0.8.1",

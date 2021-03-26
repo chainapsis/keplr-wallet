@@ -204,6 +204,8 @@
 
   "sign.list.message.cosmos-sdk/MsgSend.title": "Send",
   "sign.list.message.cosmos-sdk/MsgSend.content": "<b>{recipient}</b> will receive <b>{amount}</b>",
+  "sign.list.message.cosmos-sdk/MsgTransfer.title": "IBC Transfer",
+  "sign.list.message.cosmos-sdk/MsgTransfer.content": "Send <b>{amount}</b> to <b>{receiver}</b> on <b>{channel}</b>",
   "sign.list.message.cosmos-sdk/MsgDelegate.title": "Delegate",
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "Delegate <b>{amount}</b> to <b>{validator}</b>",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "Undelegate",
