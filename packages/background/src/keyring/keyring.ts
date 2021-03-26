@@ -1,8 +1,8 @@
 import { Crypto, KeyStore } from "./crypto";
 import {
   Mnemonic,
-  PubKeySecp256k1,
   PrivKeySecp256k1,
+  PubKeySecp256k1,
   RNG,
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
@@ -499,12 +499,13 @@ export class KeyRing {
       throw new Error("Empty key store");
     }
 
-    const newMeta = { ...keyStore.meta, name: name };
-
-    keyStore.meta = newMeta;
+    keyStore.meta = { ...keyStore.meta, name: name };
 
     // If select key store and changed store are same, sync keystore
-    if (this.keyStore?.meta?.["__id__"] === KeyRing.getKeyStoreId(keyStore)) {
+    if (
+      this.keyStore &&
+      KeyRing.getKeyStoreId(this.keyStore) === KeyRing.getKeyStoreId(keyStore)
+    ) {
       this.keyStore = keyStore;
     }
     await this.save();

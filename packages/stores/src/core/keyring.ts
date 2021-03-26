@@ -309,7 +309,7 @@ export class KeyRingStore {
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
     const selectedIndex = this.multiKeyStoreInfo.findIndex(
-      (keyStore) => keyStore.selected === true
+      (keyStore) => keyStore.selected
     );
     // If selectedIndex and index are same, name could be changed, so dispatch keystore event
     if (selectedIndex === index) {

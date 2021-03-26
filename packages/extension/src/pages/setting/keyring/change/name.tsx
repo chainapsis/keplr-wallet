@@ -1,10 +1,4 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useState,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { FunctionComponent, useState, useEffect, useMemo } from "react";
 import { HeaderLayout } from "../../../../layouts";
 
 import { useHistory, useRouteMatch } from "react-router";
@@ -53,60 +47,60 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
       alternativeTitle={intl.formatMessage({
         id: "setting.keyring.change.name",
       })}
-      onBackButton={useCallback(() => {
+      onBackButton={() => {
         history.goBack();
-      }, [history])}
+      }}
     >
-      <div className={styleName.container}>
-        <Form
-          onSubmit={handleSubmit(async (data) => {
-            setLoading(true);
-            try {
-              // Make sure that name is changed
-              await keyRingStore.updateNameKeyRing(
-                parseInt(match.params.index),
-                data.name
-              );
-              history.push("/");
-            } catch (e) {
-              console.log("Fail to decrypt: " + e.message);
-              setError(
-                "name",
-                "invalid",
-                intl.formatMessage({
-                  id: "setting.keyring.change.input.name.error.invalid",
-                })
-              );
-              setLoading(false);
-            }
+      <Form
+        className={styleName.container}
+        onSubmit={handleSubmit(async (data) => {
+          setLoading(true);
+          try {
+            // Make sure that name is changed
+            await keyRingStore.updateNameKeyRing(
+              parseInt(match.params.index),
+              data.name
+            );
+            history.push("/");
+          } catch (e) {
+            console.log("Fail to decrypt: " + e.message);
+            setError(
+              "name",
+              "invalid",
+              intl.formatMessage({
+                id: "setting.keyring.change.input.name.error.invalid",
+              })
+            );
+            setLoading(false);
+          }
+        })}
+      >
+        <Input
+          type="text"
+          label={intl.formatMessage({
+            id: "setting.keyring.change.previous-name",
           })}
-        >
-          <Input
-            type="text"
-            label={intl.formatMessage({
-              id: "setting.keyring.change.previous-name",
-            })}
-            value={keyStore.meta?.name}
-            readOnly={true}
-          />
-          <Input
-            type="text"
-            label={intl.formatMessage({
-              id: "setting.keyring.change.input.name",
-            })}
-            name="name"
-            error={errors.name && errors.name.message}
-            ref={register({
-              required: intl.formatMessage({
-                id: "setting.keyring.change.input.name.error.required",
-              }),
-            })}
-          />
-          <Button type="submit" color="primary" block data-loading={loading}>
-            <FormattedMessage id="setting.keyring.change.name.button.save" />
-          </Button>
-        </Form>
-      </div>
+          value={keyStore.meta?.name}
+          readOnly={true}
+        />
+        <Input
+          type="text"
+          label={intl.formatMessage({
+            id: "setting.keyring.change.input.name",
+          })}
+          name="name"
+          error={errors.name && errors.name.message}
+          ref={register({
+            required: intl.formatMessage({
+              id: "setting.keyring.change.input.name.error.required",
+            }),
+          })}
+        />
+        <div style={{ flex: 1 }} />
+        <Button type="submit" color="primary" block data-loading={loading}>
+          <FormattedMessage id="setting.keyring.change.name.button.save" />
+        </Button>
+      </Form>
     </HeaderLayout>
   );
 });
