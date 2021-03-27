@@ -1,17 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import {
-  Button,
-  Content,
-  Form,
-  H3,
-  Input,
-  Item,
-  Label,
-  Text,
-} from "native-base";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
+import { Button, Input, Text } from "react-native-elements";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
@@ -56,52 +47,45 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const sendConfigIsValid = sendConfigError == null;
 
   return (
-    <Content padder>
-      <H3>Name</H3>
+    <React.Fragment>
+      <Text h3>Name</Text>
       <Text>{accountInfo.name}</Text>
-      <H3>Address</H3>
+      <Text h3>Address</Text>
       <Text>{accountInfo.bech32Address}</Text>
-      <H3>Stakable</H3>
+      <Text h3>Stakable</Text>
       <Text>{stakable.balance.toString()}</Text>
-      <H3>Staked</H3>
+      <Text h3>Staked</Text>
       <Text>{stakedSum.toString()}</Text>
-      <Form>
-        <Item floatingLabel>
-          <Label>Recipient</Label>
-          <Input
-            value={sendConfigs.recipientConfig.rawRecipient}
-            onChangeText={(value) => {
-              sendConfigs.recipientConfig.setRawRecipient(value);
-            }}
-          />
-        </Item>
-        <Item floatingLabel>
-          <Label>Amount</Label>
-          <Input
-            value={sendConfigs.amountConfig.amount}
-            onChangeText={(value) => {
-              sendConfigs.amountConfig.setAmount(value);
-            }}
-          />
-        </Item>
-        <Button
-          disabled={!sendConfigIsValid}
-          onPress={async () => {
-            await accountInfo.sendToken(
-              sendConfigs.amountConfig.amount,
-              sendConfigs.amountConfig.sendCurrency,
-              sendConfigs.recipientConfig.recipient,
-              sendConfigs.memoConfig.memo,
-              sendConfigs.feeConfig.toStdFee(),
-              (tx) => {
-                console.log(tx);
-              }
-            );
-          }}
-        >
-          <Text>Send</Text>
-        </Button>
-      </Form>
-    </Content>
+      <Input
+        label="Recipient"
+        value={sendConfigs.recipientConfig.rawRecipient}
+        onChangeText={(value) => {
+          sendConfigs.recipientConfig.setRawRecipient(value);
+        }}
+      />
+      <Input
+        label="Amount"
+        value={sendConfigs.amountConfig.amount}
+        onChangeText={(value) => {
+          sendConfigs.amountConfig.setAmount(value);
+        }}
+      />
+      <Button
+        title="Send"
+        disabled={!sendConfigIsValid}
+        onPress={async () => {
+          await accountInfo.sendToken(
+            sendConfigs.amountConfig.amount,
+            sendConfigs.amountConfig.sendCurrency,
+            sendConfigs.recipientConfig.recipient,
+            sendConfigs.memoConfig.memo,
+            sendConfigs.feeConfig.toStdFee(),
+            (tx) => {
+              console.log(tx);
+            }
+          );
+        }}
+      />
+    </React.Fragment>
   );
 });

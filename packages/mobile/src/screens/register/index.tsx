@@ -1,14 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
-import {
-  Content,
-  Text,
-  Textarea,
-  Button,
-  Form,
-  Item,
-  Label,
-  Input,
-} from "native-base";
+import { Button, Input } from "react-native-elements";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
@@ -32,48 +23,40 @@ export const RegisterScreen: FunctionComponent = observer(() => {
   const [mnemonic, setMnemonic] = useState("");
 
   return (
-    <Content padder>
-      <Form>
-        <Item floatingLabel>
-          <Label>Name</Label>
-          <Input value={name} onChangeText={setName} />
-        </Item>
-        <Item floatingLabel>
-          <Label>Password</Label>
-          <Input
-            autoCompleteType="password"
-            secureTextEntry={true}
-            value={password}
-            onChangeText={setPassword}
-          />
-        </Item>
-        <Textarea
-          autoCapitalize="none"
-          value={mnemonic}
-          onChangeText={setMnemonic}
-          rowSpan={5}
-          bordered
-          placeholder="Mnemonic"
-        />
-        <Button
-          onPress={async () => {
-            await registerConfig.createMnemonic(name, mnemonic, password, {
-              account: 0,
-              change: 0,
-              addressIndex: 0,
-            });
+    <React.Fragment>
+      <Input label="Name" value={name} onChangeText={setName} />
+      <Input
+        label="Password"
+        autoCompleteType="password"
+        secureTextEntry={true}
+        value={password}
+        onChangeText={setPassword}
+      />
+      <Input
+        label="Mnemonic"
+        autoCapitalize="none"
+        value={mnemonic}
+        onChangeText={setMnemonic}
+        multiline={true}
+        numberOfLines={5}
+      />
+      <Button
+        title="Create"
+        onPress={async () => {
+          await registerConfig.createMnemonic(name, mnemonic, password, {
+            account: 0,
+            change: 0,
+            addressIndex: 0,
+          });
 
-            // TODO: Remove this!!
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            accountStore.getAccount(chainId).init();
+          // TODO: Remove this!!
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          accountStore.getAccount(chainId).init();
 
-            navigation.dispatch(StackActions.replace("Home"));
-          }}
-        >
-          <Text>Create</Text>
-        </Button>
-      </Form>
-    </Content>
+          navigation.dispatch(StackActions.replace("Home"));
+        }}
+      />
+    </React.Fragment>
   );
 });

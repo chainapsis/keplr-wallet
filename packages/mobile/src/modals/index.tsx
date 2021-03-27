@@ -2,7 +2,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../stores";
 import Modal from "react-native-modal";
-import { Button, Form, Input, Item, Label, Text } from "native-base";
 import { View } from "react-native";
 import {
   useFeeConfig,
@@ -11,6 +10,7 @@ import {
   useSignDocAmountConfig,
   useSignDocHelper,
 } from "@keplr-wallet/hooks";
+import { Button, Input, Text } from "react-native-elements";
 
 export const ModalsRenderer: FunctionComponent = observer(() => {
   const {
@@ -74,30 +74,28 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
           }}
         >
           {interactionModalStore.lastUrl === "/unlock" ? (
-            <Form style={{ width: "100%" }}>
-              <Item floatingLabel>
-                <Label>Password</Label>
-                <Input
-                  autoCompleteType="password"
-                  secureTextEntry={true}
-                  value={password}
-                  onChangeText={setPassword}
-                />
-              </Item>
+            <React.Fragment>
+              <Input
+                label="Password"
+                autoCompleteType="password"
+                secureTextEntry={true}
+                value={password}
+                onChangeText={setPassword}
+              />
               <Button
+                title="Unlock"
                 onPress={async () => {
                   await keyRingStore.unlock(password);
                   interactionModalStore.popUrl();
                 }}
-              >
-                <Text>Unlock</Text>
-              </Button>
-            </Form>
+              />
+            </React.Fragment>
           ) : null}
           {interactionModalStore.lastUrl === "/sign" ? (
-            <View>
+            <React.Fragment>
               <Text>{JSON.stringify(signDocHelper.signDocJson, null, 2)}</Text>
               <Button
+                title="Approve"
                 onPress={async () => {
                   if (signDocHelper.signDocWrapper) {
                     await signInteractionStore.approveAndWaitEnd(
@@ -107,10 +105,8 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
 
                   interactionModalStore.popUrl();
                 }}
-              >
-                <Text>Approve</Text>
-              </Button>
-            </View>
+              />
+            </React.Fragment>
           ) : null}
         </View>
       </Modal>
