@@ -11,6 +11,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { SendStackScreen } from "./screens/send";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { DrawerContent } from "./components/drawer";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -35,7 +36,10 @@ export const MainTabNavigation: FunctionComponent = () => {
 
 export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   return (
-    <Drawer.Navigator drawerType="slide">
+    <Drawer.Navigator
+      drawerType="slide"
+      drawerContent={(props) => <DrawerContent {...props} />}
+    >
       <Drawer.Screen name="Main" component={MainTabNavigation} />
     </Drawer.Navigator>
   );
