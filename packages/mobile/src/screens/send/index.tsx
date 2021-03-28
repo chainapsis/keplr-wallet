@@ -6,6 +6,7 @@ import { Button } from "react-native-elements";
 import { Page } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AddressInput, CoinInput } from "../../components/form";
+import { FeeButtons } from "../../components/form/fee-buttons";
 
 const SendStack = createStackNavigator();
 
@@ -18,7 +19,7 @@ export const SendStackScreen: FunctionComponent = () => {
 };
 
 const SendScreen: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const accountInfo = accountStore.getAccount("secret-2");
 
@@ -46,6 +47,7 @@ const SendScreen: FunctionComponent = observer(() => {
     <Page>
       <AddressInput recipientConfig={sendConfigs.recipientConfig} />
       <CoinInput amountConfig={sendConfigs.amountConfig} />
+      <FeeButtons feeConfig={sendConfigs.feeConfig} priceStore={priceStore} />
       <Button
         title="Send"
         disabled={!sendConfigIsValid || !accountInfo.isReadyToSendMsgs}
