@@ -22,3 +22,23 @@ if (typeof Buffer === "undefined") global.Buffer = require("buffer").Buffer;
 
 const isDev = typeof __DEV__ === "boolean" && __DEV__;
 process.env["NODE_ENV"] = isDev ? "development" : "production";
+
+import EventEmitter from "eventemitter3";
+
+const eventListener = new EventEmitter();
+
+window.addEventListener = (type, fn, options) => {
+  if (options && options.once) {
+    eventListener.once(type, fn);
+  } else {
+    eventListener.addListener(type, fn);
+  }
+};
+
+window.removeEventListener = (type, fn) => {
+  eventListener.removeListener(type, fn);
+};
+
+window.dispatchEvent = (event) => {
+  eventListener.emit(event.type);
+};
