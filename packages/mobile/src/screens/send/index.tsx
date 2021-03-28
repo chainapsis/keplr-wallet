@@ -5,6 +5,7 @@ import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { Button, Input } from "react-native-elements";
 import { Page } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
+import { AddressInput } from "../../components/form";
 
 const SendStack = createStackNavigator();
 
@@ -43,23 +44,19 @@ const SendScreen: FunctionComponent = observer(() => {
 
   return (
     <Page>
-      <Input
-        label="Recipient"
-        value={sendConfigs.recipientConfig.rawRecipient}
-        onChangeText={(value) => {
-          sendConfigs.recipientConfig.setRawRecipient(value);
-        }}
-      />
+      <AddressInput recipientConfig={sendConfigs.recipientConfig} />
       <Input
         label="Amount"
         value={sendConfigs.amountConfig.amount}
         onChangeText={(value) => {
           sendConfigs.amountConfig.setAmount(value);
         }}
+        keyboardType="numeric"
       />
       <Button
         title="Send"
         disabled={!sendConfigIsValid || !accountInfo.isReadyToSendMsgs}
+        loading={accountInfo.isSendingMsg === "send"}
         onPress={async () => {
           await accountInfo.sendToken(
             sendConfigs.amountConfig.amount,
