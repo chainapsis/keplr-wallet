@@ -130,9 +130,14 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     if (Number.isNaN(parseFloat(this.amount))) {
       return new InvalidNumberAmountError("Invalid form of number");
     }
-    const dec = new Dec(this.amount);
-    if (dec.equals(new Dec(0))) {
-      return new ZeroAmountError("Amount is zero");
+    let dec;
+    try {
+      dec = new Dec(this.amount);
+      if (dec.equals(new Dec(0))) {
+        return new ZeroAmountError("Amount is zero");
+      }
+    } catch {
+      return new InvalidNumberAmountError("Invalid form of number");
     }
     if (new Dec(this.amount).lt(new Dec(0))) {
       return new NagativeAmountError("Amount is nagative");
