@@ -1,10 +1,11 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useLayoutEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Button, Text } from "react-native-elements";
 import { Page } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
-import { useNavigation } from "@react-navigation/native";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/Feather";
 
 const HomeStack = createStackNavigator();
 
@@ -17,7 +18,21 @@ export const HomeStackScreen: FunctionComponent = () => {
 };
 
 const HomeScreen: FunctionComponent = observer(() => {
-  const navigtion = useNavigation();
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      // eslint-disable-next-line react/display-name
+      headerLeft: () => (
+        <Button
+          onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+          icon={<Icon name="menu" size={18} />}
+          type="clear"
+        />
+      ),
+    });
+  }, [navigation]);
+
   const { accountStore, queriesStore } = useStore();
 
   const accountInfo = accountStore.getAccount("secret-2");
@@ -54,7 +69,7 @@ const HomeScreen: FunctionComponent = observer(() => {
       <Button
         title="Send"
         onPress={() => {
-          navigtion.navigate("Send");
+          navigation.navigate("Send");
         }}
       />
     </Page>
