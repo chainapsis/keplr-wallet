@@ -9,6 +9,7 @@ import {
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
   DeleteKeyRingMsg,
+  UpdateNameKeyRingMsg,
   GetIsKeyStoreCoinTypeSetMsg,
   GetKeyRingTypeMsg,
   GetMultiKeyStoreInfoMsg,
@@ -297,6 +298,23 @@ export class KeyRingStore {
     this.keyRingType = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
     );
+  }
+
+  @flow
+  *updateNameKeyRing(index: number, name: string) {
+    const msg = new UpdateNameKeyRingMsg(index, name);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this.status = result.status;
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+    const selectedIndex = this.multiKeyStoreInfo.findIndex(
+      (keyStore) => keyStore.selected
+    );
+    // If selectedIndex and index are same, name could be changed, so dispatch keystore event
+    if (selectedIndex === index) {
+      window.dispatchEvent(new Event("keplr_keystorechange"));
+    }
   }
 
   getKeyStoreSelectables(chainId: string): KeyRingSelectablesStore {

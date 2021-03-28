@@ -7,6 +7,7 @@ import {
   observable,
   onBecomeObserved,
   onBecomeUnobserved,
+  reaction,
 } from "mobx";
 import Axios, { AxiosInstance, CancelToken, CancelTokenSource } from "axios";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
@@ -56,6 +57,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable.ref
   private _error?: Readonly<QueryError<E>> = undefined;
 
+  @observable
   private _isStarted: boolean = false;
 
   private cancelToken?: CancelTokenSource;
@@ -107,6 +109,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     return this.observedCount > 0;
   }
 
+  @action
   private start() {
     if (!this._isStarted) {
       this._isStarted = true;
@@ -114,6 +117,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
   }
 
+  @action
   private stop() {
     if (this.isStarted) {
       this.onStop();
@@ -296,15 +300,24 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   /**
    * Wait the response and return the response until it is fetched.
    */
-  waitFreshResponse(): Promise<Readonly<QueryResponse<T>>> {
-    if (!this.isFetching && this.response && !this.response.staled) {
-      return Promise.resolve(this.response);
-    }
+  waitFreshResponse(): Promise<Readonly<QueryResponse<T>> | undefined> {
+    let onceCoerce = false;
+    // Make sure that the fetching is tracked to force to be fetched.
+    const reactionDisposer = reaction(
+      () => this.isFetching,
+      () => {
+        if (!onceCoerce) {
+          this.fetch();
+          onceCoerce = true;
+        }
+      }
+    );
 
     return new Promise((resolve) => {
       const disposer = autorun(() => {
-        if (!this.isFetching && this.response && !this.response.staled) {
+        if (!this.isFetching) {
           resolve(this.response);
+          reactionDisposer();
           disposer();
         }
       });

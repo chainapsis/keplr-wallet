@@ -12,6 +12,7 @@ import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
 import { SendPage } from "./pages/send";
+import { IBCTransferPage } from "./pages/ibc-transfer";
 import { SetKeyRingPage } from "./pages/setting/keyring";
 
 import { Banner } from "./components/banner";
@@ -40,6 +41,7 @@ import {
 } from "./pages/setting/connections";
 import { AddressBookPage } from "./pages/setting/address-book";
 import { CreditPage } from "./pages/setting/credit";
+import { ChangeNamePage } from "./pages/setting/keyring/change";
 import { ClearPage } from "./pages/setting/clear";
 import { ExportPage } from "./pages/setting/export";
 import { LedgerGrantPage } from "./pages/ledger";
@@ -143,6 +145,7 @@ ReactDOM.render(
                 />
                 <Route exact path="/register" component={RegisterPage} />
                 <Route exact path="/send" component={SendPage} />
+                <Route exact path="/ibc-transfer" component={IBCTransferPage} />
                 <Route exact path="/setting" component={SettingPage} />
                 <Route exact path="/ledger-grant" component={LedgerGrantPage} />
                 <Route
@@ -181,6 +184,11 @@ ReactDOM.render(
                   exact
                   path="/setting/clear/:index"
                   component={ClearPage}
+                />
+                <Route
+                  exact
+                  path="/setting/keyring/change/name/:index"
+                  component={ChangeNamePage}
                 />
                 <Route
                   exact

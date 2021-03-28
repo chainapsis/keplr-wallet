@@ -29,9 +29,31 @@ export interface Secret20Currency extends Currency {
 }
 
 /**
+ * IBCCurrency is the currency that is sent from the other chain via IBC.
+ * This will be handled as similar to the native currency.
+ * But, this has more information abounr IBC channel and paths.
+ */
+export interface IBCCurrency extends Currency {
+  readonly paths: {
+    portId: string;
+    channelId: string;
+  }[];
+  /**
+   * The chain id that the currency is from.
+   * If that chain is unknown, this will be undefined.
+   */
+  readonly originChainId: string | undefined;
+  readonly originCurrency: Currency | undefined;
+}
+
+/**
  * Any type of currency that Kepler applications can support.
  */
-export type AppCurrency = Currency | CW20Currency | Secret20Currency;
+export type AppCurrency =
+  | Currency
+  | CW20Currency
+  | Secret20Currency
+  | IBCCurrency;
 
 export interface FiatCurrency {
   readonly currency: string;

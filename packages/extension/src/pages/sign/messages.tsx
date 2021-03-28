@@ -31,6 +31,23 @@ export interface MsgSend {
   };
 }
 
+export interface MsgTransfer {
+  value: {
+    source_port: string;
+    source_channel: string;
+    token: {
+      denom: string;
+      amount: string;
+    };
+    sender: string;
+    receiver: string;
+    timeout_height: {
+      revision_number: string | undefined;
+      revision_height: string;
+    };
+  };
+}
+
 export interface MsgDelegate {
   value: {
     amount: {
@@ -177,6 +194,40 @@ export function renderMsgSend(
               return `${coin.amount} ${coin.denom}`;
             })
             .join(","),
+        }}
+      />
+    ),
+  };
+}
+
+export function renderMsgTransfer(
+  currencies: Currency[],
+  intl: IntlShape,
+  amount: CoinPrimitive,
+  receiver: string,
+  channelId: string
+) {
+  const coin = new Coin(amount.denom, amount.amount);
+  const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
+
+  amount = {
+    amount: clearDecimals(parsed.amount),
+    denom: parsed.denom,
+  };
+
+  return {
+    icon: "fas fa-paper-plane",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgTransfer.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgTransfer.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          receiver: Bech32Address.shortenAddress(receiver, 20),
+          amount: `${amount.amount} ${amount.denom}`,
+          channel: channelId,
         }}
       />
     ),

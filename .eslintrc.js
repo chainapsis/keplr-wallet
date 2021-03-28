@@ -19,6 +19,7 @@ module.exports = {
   rules: {
     "prettier/prettier": "error",
     "react/prop-types": "off",
+    "react/self-closing-comp": "error",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-inferrable-types": "off",

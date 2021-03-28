@@ -1,7 +1,7 @@
 import { IntPretty, IntPrettyOptions } from "./int-pretty";
 import { Int } from "./int";
 import { Dec } from "./decimal";
-import { Currency } from "@keplr-wallet/types";
+import { AppCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 
 export type CoinPrettyOptions = {
@@ -22,7 +22,7 @@ export class CoinPretty {
   };
 
   constructor(
-    protected _currency: Currency,
+    protected _currency: AppCurrency,
     protected amount: Int | Dec | IntPretty
   ) {
     if (amount instanceof IntPretty) {
@@ -47,8 +47,17 @@ export class CoinPretty {
     return this.currency.coinDenom;
   }
 
-  get currency(): Currency {
+  get currency(): AppCurrency {
     return this._currency;
+  }
+
+  setCurrency(currency: AppCurrency): CoinPretty {
+    const pretty = new CoinPretty(currency, this.amount);
+    pretty._options = {
+      ...this._options,
+    };
+    pretty.intPretty = this.intPretty.clone();
+    return pretty;
   }
 
   separator(str: string): CoinPretty {

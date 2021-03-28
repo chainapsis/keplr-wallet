@@ -1,8 +1,8 @@
 import { Crypto, KeyStore } from "./crypto";
 import {
   Mnemonic,
-  PubKeySecp256k1,
   PrivKeySecp256k1,
+  PubKeySecp256k1,
   RNG,
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
@@ -481,6 +481,33 @@ export class KeyRing {
     }
 
     this.multiKeyStore = multiKeyStore;
+    await this.save();
+    return this.getMultiKeyStoreInfo();
+  }
+
+  public async updateNameKeyRing(
+    index: number,
+    name: string
+  ): Promise<MultiKeyStoreInfoWithSelected> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
+    const keyStore = this.multiKeyStore[index];
+
+    if (!keyStore) {
+      throw new Error("Empty key store");
+    }
+
+    keyStore.meta = { ...keyStore.meta, name: name };
+
+    // If select key store and changed store are same, sync keystore
+    if (
+      this.keyStore &&
+      KeyRing.getKeyStoreId(this.keyStore) === KeyRing.getKeyStoreId(keyStore)
+    ) {
+      this.keyStore = keyStore;
+    }
     await this.save();
     return this.getMultiKeyStoreInfo();
   }

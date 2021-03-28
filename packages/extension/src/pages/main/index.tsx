@@ -20,6 +20,7 @@ import { BIP44SelectModal } from "./bip44-select-modal";
 import { useIntl } from "react-intl";
 import { useConfirm } from "../../components/confirm";
 import { ChainUpdaterService } from "@keplr-wallet/background";
+import { IBCTransferView } from "./ibc-transfer";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -124,6 +125,13 @@ export const MainPage: FunctionComponent = observer(() => {
       {hasTokens ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>{<TokensView />}</CardBody>
+        </Card>
+      ) : null}
+      {chainStore.current.features?.includes("ibc-transfer") ? (
+        <Card className={classnames(style.card, "shadow")}>
+          <CardBody>
+            <IBCTransferView />
+          </CardBody>
         </Card>
       ) : null}
     </HeaderLayout>

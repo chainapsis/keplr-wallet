@@ -8,6 +8,7 @@ import {
   ObservableQuerySecretContractCodeHash,
 } from "./secret-wasm";
 import {
+  ObservableQueryBlock,
   ObservableQuerySupplyTotal,
   ObservableQueryInflation,
   ObservableQueryMintingInfation,
@@ -20,6 +21,9 @@ import {
   ObservableQueryGovernance,
   ObservableQueryAccount,
   ObservableQueryProposalVote,
+  ObservableQueryIBCClientState,
+  ObservableQueryIBCChannel,
+  ObservableQueryDenomTrace,
 } from "./cosmos";
 import { ObservableQueryCosmosBalanceRegistry } from "./cosmos/balance";
 import { ObservableQuerySecret20ContractInfo } from "./secret-wasm/secret20-contract-info";
@@ -27,6 +31,7 @@ import { ObservableQuerySecret20ContractInfo } from "./secret-wasm/secret20-cont
 export class Queries {
   protected readonly _queryBalances: ObservableQueryBalances;
 
+  protected readonly _queryBlock: ObservableQueryBlock;
   protected readonly _queryAccount: ObservableQueryAccount;
   protected readonly _queryMint: ObservableQueryMintingInfation;
   protected readonly _queryPool: ObservableQueryStakingPool;
@@ -39,6 +44,10 @@ export class Queries {
   protected readonly _queryValidators: ObservableQueryValidators;
   protected readonly _queryGovernance: ObservableQueryGovernance;
   protected readonly _queryProposalVote: ObservableQueryProposalVote;
+
+  protected readonly _queryIBCClientState: ObservableQueryIBCClientState;
+  protected readonly _queryIBCChannel: ObservableQueryIBCChannel;
+  protected readonly _queryIBCDenomTrace: ObservableQueryDenomTrace;
 
   protected readonly _querySecretContractCodeHash: ObservableQuerySecretContractCodeHash;
   protected readonly _querySecret20ContractInfo: ObservableQuerySecret20ContractInfo;
@@ -53,6 +62,7 @@ export class Queries {
       new ObservableQueryCosmosBalanceRegistry(kvStore)
     );
 
+    this._queryBlock = new ObservableQueryBlock(kvStore, chainId, chainGetter);
     this._queryAccount = new ObservableQueryAccount(
       kvStore,
       chainId,
@@ -115,6 +125,22 @@ export class Queries {
       chainGetter
     );
 
+    this._queryIBCClientState = new ObservableQueryIBCClientState(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this._queryIBCChannel = new ObservableQueryIBCChannel(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this._queryIBCDenomTrace = new ObservableQueryDenomTrace(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
     this._querySecretContractCodeHash = new ObservableQuerySecretContractCodeHash(
       kvStore,
       chainId,
@@ -132,6 +158,10 @@ export class Queries {
       chainGetter,
       this._querySecretContractCodeHash
     );
+  }
+
+  getQueryBlock(): DeepReadonly<ObservableQueryBlock> {
+    return this._queryBlock;
   }
 
   getQueryAccount(): DeepReadonly<ObservableQueryAccount> {
@@ -184,6 +214,18 @@ export class Queries {
 
   getQueryProposalVote(): DeepReadonly<ObservableQueryProposalVote> {
     return this._queryProposalVote;
+  }
+
+  getQueryIBCClientState(): DeepReadonly<ObservableQueryIBCClientState> {
+    return this._queryIBCClientState;
+  }
+
+  getQueryIBCCChannel(): DeepReadonly<ObservableQueryIBCChannel> {
+    return this._queryIBCChannel;
+  }
+
+  getQueryIBCDenomTrace(): DeepReadonly<ObservableQueryDenomTrace> {
+    return this._queryIBCDenomTrace;
   }
 
   getQuerySecretContractCodeHash(): DeepReadonly<ObservableQuerySecretContractCodeHash> {

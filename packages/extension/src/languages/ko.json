@@ -62,6 +62,15 @@
   "setting.keyring.unnamed-account": "케플러 계정",
   "setting.keyring.selected-account": "(선택됨)",
 
+  "setting.keyring.change.password": "비밀번호 재설정",
+
+  "setting.keyring.change.name": "계정 이름 변경",
+  "setting.keyring.change.previous-name": "이전 계정 이름",
+  "setting.keyring.change.input.name": "새로운 계정 이름",
+  "setting.keyring.change.input.name.error.required": "계정 이름을 입력하세요",
+  "setting.keyring.change.input.name.error.invalid": "계정 이름이 유효하지 않습니다",
+  "setting.keyring.change.name.button.save": "저장",
+
   "setting.export": "니모닉 시드 보기",
   "setting.export.private-key": "개인키 보기",
   "setting.export.warning": "진행하려면 패스워드를 입력하세요",
@@ -186,6 +195,8 @@
 
   "sign.list.message.cosmos-sdk/MsgSend.title": "보내기",
   "sign.list.message.cosmos-sdk/MsgSend.content": "<b>{recipient}</b>가 <b>{amount}</b>를 받을 것입니다",
+  "sign.list.message.cosmos-sdk/MsgTransfer.title": "IBC 전송",
+  "sign.list.message.cosmos-sdk/MsgTransfer.content": "채널 <b>{channel}</b>의 <b>{receiver}</b>가 <b>{amount}</b>를 받을 것입니다",
   "sign.list.message.cosmos-sdk/MsgDelegate.title": "위임",
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "<b>{validator}</b>에게 <b>{amount}</b>를 위임합니다",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "위임 해제",

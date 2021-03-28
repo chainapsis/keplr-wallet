@@ -64,6 +64,15 @@
   "setting.keyring.unnamed-account": "Keplr Account",
   "setting.keyring.selected-account": "(Selected)",
 
+  "setting.keyring.change.password": "Reset Password",
+
+  "setting.keyring.change.name": "Change Account Name",
+  "setting.keyring.change.previous-name": "Previous account name",
+  "setting.keyring.change.input.name": "New account name",
+  "setting.keyring.change.input.name.error.required": "Account name is required",
+  "setting.keyring.change.input.name.error.invalid": "Account name is invalid",
+  "setting.keyring.change.name.button.save": "Save",
+
   "setting.export": "View Mnemonic Seed",
   "setting.export.private-key": "View Private Key",
   "setting.export.warning": "Please input your password to proceed",
@@ -107,7 +116,7 @@
   "register.intro.button.import-account.content": "Use a 12/24 word seed to import an existing wallet",
   "register.intro.sub-content": "All sensitive information is stored only on your device.{br}This process does not require an internet connection.",
 
-  "register.recover.title": "Input yout seed",
+  "register.recover.title": "Input your seed",
 
   "register.create.title": "Mnemonic Seed",
   "register.create.toggle.word12": "12 words",
@@ -195,6 +204,8 @@
 
   "sign.list.message.cosmos-sdk/MsgSend.title": "Send",
   "sign.list.message.cosmos-sdk/MsgSend.content": "<b>{recipient}</b> will receive <b>{amount}</b>",
+  "sign.list.message.cosmos-sdk/MsgTransfer.title": "IBC Transfer",
+  "sign.list.message.cosmos-sdk/MsgTransfer.content": "Send <b>{amount}</b> to <b>{receiver}</b> on <b>{channel}</b>",
   "sign.list.message.cosmos-sdk/MsgDelegate.title": "Delegate",
   "sign.list.message.cosmos-sdk/MsgDelegate.content": "Delegate <b>{amount}</b> to <b>{validator}</b>",
   "sign.list.message.cosmos-sdk/MsgUndelegate.title": "Undelegate",

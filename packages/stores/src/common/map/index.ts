@@ -20,4 +20,8 @@ export class HasMapStore<T> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.map.get(key)!;
   }
+
+  protected has(key: string): boolean {
+    return this.map.has(key);
+  }
 }

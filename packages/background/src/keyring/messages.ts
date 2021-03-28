@@ -72,6 +72,37 @@ export class DeleteKeyRingMsg extends Message<{
   }
 }
 
+export class UpdateNameKeyRingMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
+  public static type() {
+    return "update-name-keyring";
+  }
+
+  constructor(public readonly index: number, public readonly name: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!Number.isInteger(this.index)) {
+      throw new Error("Invalid index");
+    }
+
+    if (!this.name) {
+      throw new Error("name not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return UpdateNameKeyRingMsg.type();
+  }
+}
+
 export class ShowKeyRingMsg extends Message<string> {
   public static type() {
     return "show-keyring";

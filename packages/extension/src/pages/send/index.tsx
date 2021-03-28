@@ -33,6 +33,13 @@ export const SendPage: FunctionComponent = observer(() => {
     defaultDenom: string | undefined;
   };
 
+  useEffect(() => {
+    // Scroll to top on page mounted.
+    if (window.scrollTo) {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   const intl = useIntl();
 
   const notification = useNotification();

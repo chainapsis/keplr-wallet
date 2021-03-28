@@ -4,7 +4,7 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { IAmountConfig } from "./types";
 import { useState } from "react";
 import { MsgOpts } from "@keplr-wallet/stores";
-import { makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 
 export class SendGasConfig extends GasConfig {
   @observable.ref
@@ -23,6 +23,7 @@ export class SendGasConfig extends GasConfig {
     makeObservable(this);
   }
 
+  @action
   setSendMsgOpts(opts: MsgOpts["send"]) {
     this.sendMsgOpts = opts;
   }
