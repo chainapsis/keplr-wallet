@@ -10,6 +10,7 @@ import { ModalsRenderer } from "./modals";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { SendStackScreen } from "./screens/send";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -20,6 +21,7 @@ const SplashScreen: FunctionComponent = () => {
 };
 
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
 export const MainTabNavigation: FunctionComponent = () => {
@@ -28,6 +30,14 @@ export const MainTabNavigation: FunctionComponent = () => {
       <Tab.Screen name="Home" component={HomeStackScreen} />
       <Tab.Screen name="Send" component={SendStackScreen} />
     </Tab.Navigator>
+  );
+};
+
+export const MainTabNavigationWithDrawer: FunctionComponent = () => {
+  return (
+    <Drawer.Navigator drawerType="slide">
+      <Drawer.Screen name="Main" component={MainTabNavigation} />
+    </Drawer.Navigator>
   );
 };
 
@@ -48,7 +58,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
               headerShown: false,
             }}
           >
-            <Stack.Screen name="Main" component={MainTabNavigation} />
+            <Stack.Screen name="Main" component={MainTabNavigationWithDrawer} />
             <Stack.Screen name="Register" component={RegisterScreen} />
           </Stack.Navigator>
         )}
