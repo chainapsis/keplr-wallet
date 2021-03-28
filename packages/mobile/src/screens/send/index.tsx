@@ -2,10 +2,10 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
-import { Button, Input } from "react-native-elements";
+import { Button } from "react-native-elements";
 import { Page } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
-import { AddressInput } from "../../components/form";
+import { AddressInput, CoinInput } from "../../components/form";
 
 const SendStack = createStackNavigator();
 
@@ -45,14 +45,7 @@ const SendScreen: FunctionComponent = observer(() => {
   return (
     <Page>
       <AddressInput recipientConfig={sendConfigs.recipientConfig} />
-      <Input
-        label="Amount"
-        value={sendConfigs.amountConfig.amount}
-        onChangeText={(value) => {
-          sendConfigs.amountConfig.setAmount(value);
-        }}
-        keyboardType="numeric"
-      />
+      <CoinInput amountConfig={sendConfigs.amountConfig} />
       <Button
         title="Send"
         disabled={!sendConfigIsValid || !accountInfo.isReadyToSendMsgs}
