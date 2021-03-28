@@ -5,10 +5,11 @@ import { NavigationContainer } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 import { RegisterScreen } from "./screens/register";
-import { HomeScreen } from "./screens/home";
+import { HomeStackScreen } from "./screens/home";
 import { ModalsRenderer } from "./modals";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
+import { SendStackScreen } from "./screens/send";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -24,7 +25,8 @@ const Tab = createBottomTabNavigator();
 export const MainTabNavigation: FunctionComponent = () => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home" component={HomeStackScreen} />
+      <Tab.Screen name="Send" component={SendStackScreen} />
     </Tab.Navigator>
   );
 };
