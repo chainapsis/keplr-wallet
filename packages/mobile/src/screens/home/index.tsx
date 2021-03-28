@@ -33,11 +33,11 @@ const HomeScreen: FunctionComponent = observer(() => {
     });
   }, [navigation]);
 
-  const { accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore } = useStore();
 
-  const accountInfo = accountStore.getAccount("secret-2");
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-  const queries = queriesStore.get("secret-2");
+  const queries = queriesStore.get(chainStore.current.chainId);
 
   const delegated = queries
     .getQueryDelegations()

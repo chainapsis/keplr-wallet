@@ -5,6 +5,40 @@ export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
+    rpc: "https://rpc-cosmoshub.keplr.app",
+    rest: "https://lcd-cosmoshub.keplr.app",
+    chainId: "cosmoshub-4",
+    chainName: "Cosmos",
+    stakeCurrency: {
+      coinDenom: "ATOM",
+      coinMinimalDenom: "uatom",
+      coinDecimals: 6,
+      coinGeckoId: "cosmos",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("cosmos"),
+    currencies: [
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "uatom",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "uatom",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+      },
+    ],
+    coinType: 118,
+    features: ["stargate"],
+  },
+  {
     rpc: "https://rpc-secret.keplr.app",
     rest: "https://lcd-secret.keplr.app",
     chainId: "secret-2",
@@ -15,14 +49,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: "secret",
     },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/secret-1/stake"
-        : "http://localhost:8081/#/secret-1/stake",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/secret-1/stake"
-        : "http://localhost:8081/#/secret-1/stake",
     bip44: {
       coinType: 529,
     },

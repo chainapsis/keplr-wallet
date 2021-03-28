@@ -21,13 +21,13 @@ export const SendStackScreen: FunctionComponent = () => {
 const SendScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
-  const accountInfo = accountStore.getAccount("secret-2");
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-  const queries = queriesStore.get("secret-2");
+  const queries = queriesStore.get(chainStore.current.chainId);
 
   const sendConfigs = useSendTxConfig(
     chainStore,
-    "secret-2",
+    chainStore.current.chainId,
     accountInfo.msgOpts.send,
     accountInfo.bech32Address,
     queries.getQueryBalances()

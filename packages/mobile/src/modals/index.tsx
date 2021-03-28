@@ -26,7 +26,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
 
   const [signer, setSigner] = useState("");
 
-  const current = chainStore.getChain("secret-2");
+  const current = chainStore.getChain(chainStore.current.chainId);
   // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
   const gasConfig = useGasConfig(chainStore, current.chainId, 1);
   const amountConfig = useSignDocAmountConfig(

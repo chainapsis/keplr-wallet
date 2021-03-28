@@ -1,6 +1,5 @@
 import { EmbedChainInfos } from "../config";
 import {
-  ChainStore,
   KeyRingStore,
   InteractionStore,
   QueriesStore,
@@ -12,6 +11,7 @@ import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
 import { RNEnv, RNRouter, RNMessageRequester } from "../router";
 import { InteractionModalStore } from "./interaction-modal";
+import { ChainStore } from "./chain";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -36,7 +36,7 @@ export class RootStore {
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
 
-    this.chainStore = new ChainStore(EmbedChainInfos);
+    this.chainStore = new ChainStore(EmbedChainInfos, new RNMessageRequester());
 
     this.keyRingStore = new KeyRingStore(
       this.chainStore,
