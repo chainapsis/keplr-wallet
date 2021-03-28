@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { Button, Input, Text } from "react-native-elements";
+import { Page } from "../../components/page";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
@@ -47,7 +48,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const sendConfigIsValid = sendConfigError == null;
 
   return (
-    <React.Fragment>
+    <Page>
       <Text h3>Name</Text>
       <Text>{accountInfo.name}</Text>
       <Text h3>Address</Text>
@@ -86,6 +87,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
           );
         }}
       />
-    </React.Fragment>
+    </Page>
   );
 });

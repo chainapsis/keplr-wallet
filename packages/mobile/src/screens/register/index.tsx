@@ -5,6 +5,7 @@ import { useStore } from "../../stores";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../common";
 import { useNavigation, StackActions } from "@react-navigation/native";
+import { Page } from "../../components/page";
 
 export const RegisterScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
@@ -23,7 +24,7 @@ export const RegisterScreen: FunctionComponent = observer(() => {
   const [mnemonic, setMnemonic] = useState("");
 
   return (
-    <React.Fragment>
+    <Page>
       <Input label="Name" value={name} onChangeText={setName} />
       <Input
         label="Password"
@@ -57,6 +58,6 @@ export const RegisterScreen: FunctionComponent = observer(() => {
           navigation.dispatch(StackActions.replace("Home"));
         }}
       />
-    </React.Fragment>
+    </Page>
   );
 });
