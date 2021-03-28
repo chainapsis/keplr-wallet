@@ -33,8 +33,6 @@ const SendScreen: FunctionComponent = observer(() => {
     queries.getQueryBalances()
   );
 
-  sendConfigs.feeConfig.setFeeType("average");
-
   const sendConfigError =
     sendConfigs.recipientConfig.getError() ??
     sendConfigs.amountConfig.getError() ??
