@@ -7,8 +7,14 @@ import { SafeAreaView, ScrollView } from "react-native";
  */
 export const Page: FunctionComponent = ({ children }) => {
   return (
-    <SafeAreaView>
-      <ScrollView>{children}</ScrollView>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView
+        style={{
+          flex: 1,
+        }}
+      >
+        {children}
+      </ScrollView>
     </SafeAreaView>
   );
 };
