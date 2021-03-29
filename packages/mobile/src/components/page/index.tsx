@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { SafeAreaView, ScrollView } from "react-native";
+import { SafeAreaView, ScrollView, View } from "react-native";
 
 /**
  * The container for each pages.
@@ -13,7 +13,7 @@ export const Page: FunctionComponent = ({ children }) => {
           flex: 1,
         }}
       >
-        {children}
+        <View style={{ padding: 10 }}>{children}</View>
       </ScrollView>
     </SafeAreaView>
   );
