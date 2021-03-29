@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/common",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
