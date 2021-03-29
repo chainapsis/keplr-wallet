@@ -216,7 +216,7 @@ export function renderMsgTransfer(
   };
 
   return {
-    icon: "fas fa-paper-plane",
+    icon: "fas fa-link",
     title: intl.formatMessage({
       id: "sign.list.message.cosmos-sdk/MsgTransfer.title",
     }),
