@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/extension",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": true,
