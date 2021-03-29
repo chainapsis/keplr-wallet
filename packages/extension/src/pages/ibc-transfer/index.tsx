@@ -134,8 +134,11 @@ export const IBCTransferPageChannel: FunctionComponent<{
         <Alert className={style.alert}>
           <i className="fas fa-exclamation-circle" />
           <div>
-            <h1>IBC is still experimental</h1>
-            <p>Only send small amounts until channels have stabilized</p>
+            <h1>IBC is production ready</h1>
+            <p>
+              However, all new technologies should be used with caution. We
+              recommend only transferring small amounts.
+            </p>
           </div>
         </Alert>
         <Button
