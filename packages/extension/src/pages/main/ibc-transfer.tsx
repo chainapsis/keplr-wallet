@@ -4,9 +4,23 @@ import { useHistory } from "react-router";
 
 import styleTransfer from "./ibc-transfer.module.scss";
 import classnames from "classnames";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../stores";
+import { Dec } from "@keplr-wallet/unit";
 
-export const IBCTransferView: FunctionComponent = () => {
+export const IBCTransferView: FunctionComponent = observer(() => {
   const history = useHistory();
+  const { accountStore, chainStore, queriesStore } = useStore();
+
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
+  const queryBalances = queries
+    .getQueryBalances()
+    .getQueryBech32Address(accountInfo.bech32Address);
+
+  const hasAssets =
+    queryBalances.balances.find((bal) => bal.balance.toDec().gt(new Dec(0))) !==
+    undefined;
 
   return (
     <div className={styleTransfer.containerInner}>
@@ -37,6 +51,8 @@ export const IBCTransferView: FunctionComponent = () => {
         className={styleTransfer.button}
         color="primary"
         size="sm"
+        disabled={!hasAssets}
+        data-loading={accountInfo.isSendingMsg === "ibcTransfer"}
         onClick={(e) => {
           e.preventDefault();
 
@@ -47,4 +63,4 @@ export const IBCTransferView: FunctionComponent = () => {
       </Button>
     </div>
   );
-};
+});

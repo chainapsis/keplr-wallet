@@ -45,7 +45,7 @@ export function renderAminoMessage(
     return renderMsgSend(currencies, intl, value.amount, value.to_address);
   }
 
-  if (msg.type === msgOpts.ibc.transfer.type) {
+  if (msg.type === msgOpts.ibcTransfer.type) {
     const value = msg.value as MsgTransfer["value"];
     return renderMsgTransfer(
       currencies,

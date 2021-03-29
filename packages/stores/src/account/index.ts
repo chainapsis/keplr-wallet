@@ -44,9 +44,7 @@ export interface MsgOpts {
     cw20: Pick<MsgOpt, "gas">;
     secret20: Pick<MsgOpt, "gas">;
   };
-  ibc: {
-    transfer: MsgOpt;
-  };
+  ibcTransfer: MsgOpt;
   delegate: MsgOpt;
   undelegate: MsgOpt;
   redelegate: MsgOpt;
@@ -106,11 +104,9 @@ export class AccountStoreInner {
           gas: 250000,
         },
       },
-      ibc: {
-        transfer: {
-          type: "cosmos-sdk/MsgTransfer",
-          gas: 120000,
-        },
+      ibcTransfer: {
+        type: "cosmos-sdk/MsgTransfer",
+        gas: 120000,
       },
       delegate: {
         type: "cosmos-sdk/MsgDelegate",
@@ -409,6 +405,10 @@ export class AccountStoreInner {
       .getQueryBlock()
       .getBlock("latest");
 
+    runInAction(() => {
+      this._isSendingMsg = "ibcTransfer";
+    });
+
     // Wait until fetching complete.
     await destinationBlockHeight.waitFreshResponse();
 
@@ -419,7 +419,7 @@ export class AccountStoreInner {
     }
 
     const msg = {
-      type: this.opts.msgOpts.ibc.transfer.type,
+      type: this.opts.msgOpts.ibcTransfer.type,
       value: {
         source_port: channel.portId,
         source_channel: channel.channelId,
@@ -445,7 +445,7 @@ export class AccountStoreInner {
       delete msg.value.timeout_height.revision_number;
     }
 
-    await this.sendMsgs("send", [msg], stdFee, memo, (tx) => {
+    await this.sendMsgs("ibcTransfer", [msg], stdFee, memo, (tx) => {
       if (tx.code == null || tx.code === 0) {
         // After succeeding to send token, refresh the balance.
         const queryBalance = this.queries

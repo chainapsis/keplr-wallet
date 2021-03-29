@@ -5,12 +5,12 @@ import { useState } from "react";
 
 export class IBCTransferGasConfig extends GasConfig {
   @observable.ref
-  protected msgOpts: MsgOpts["ibc"]["transfer"];
+  protected msgOpts: MsgOpts["ibcTransfer"];
 
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
-    msgOpts: MsgOpts["ibc"]["transfer"]
+    msgOpts: MsgOpts["ibcTransfer"]
   ) {
     super(chainGetter, initialChainId, msgOpts.gas);
 
@@ -20,7 +20,7 @@ export class IBCTransferGasConfig extends GasConfig {
   }
 
   @action
-  setMsgOpts(opts: MsgOpts["ibc"]["transfer"]) {
+  setMsgOpts(opts: MsgOpts["ibcTransfer"]) {
     this.msgOpts = opts;
   }
 
@@ -37,7 +37,7 @@ export class IBCTransferGasConfig extends GasConfig {
 export const useIBCTransferGasConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  msgOpts: MsgOpts["ibc"]["transfer"]
+  msgOpts: MsgOpts["ibcTransfer"]
 ) => {
   const [gasConfig] = useState(
     () => new IBCTransferGasConfig(chainGetter, chainId, msgOpts)

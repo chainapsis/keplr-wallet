@@ -39,7 +39,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibc.transfer,
+    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
     queries.getQueryBalances(),
     EthereumEndpoint
@@ -165,7 +165,9 @@ export const IBCTransferPageAmount: FunctionComponent<{
   gasConfig: IGasConfig;
   onSubmit: () => void;
 }> = observer(({ amountConfig, feeConfig, gasConfig, onSubmit }) => {
-  const { priceStore } = useStore();
+  const { accountStore, chainStore, priceStore } = useStore();
+
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const isValid =
     amountConfig.getError() == null &&
@@ -192,6 +194,7 @@ export const IBCTransferPageAmount: FunctionComponent<{
           color="primary"
           block
           disabled={!isValid}
+          data-loading={accountInfo.isSendingMsg === "ibcTransfer"}
           onClick={(e) => {
             e.preventDefault();
 

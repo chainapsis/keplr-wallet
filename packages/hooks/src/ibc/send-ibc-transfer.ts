@@ -21,7 +21,7 @@ import { useIBCRecipientConfig } from "./reciepient";
 export const useIBCTransferConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  msgOpts: MsgOpts["ibc"]["transfer"],
+  msgOpts: MsgOpts["ibcTransfer"],
   sender: string,
   queryBalances: ObservableQueryBalances,
   ensEndpoint?: string
