@@ -121,13 +121,12 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
       runInAction(() => {
         // TODO: Change the type from array to map.
         for (const currency of this._ibcCurrencies) {
-          if (
-            !ibcCurrencies.find(
-              (cur) =>
-                cur.coinMinimalDenom === currency.coinMinimalDenom &&
-                cur.coinDenom === currency.coinDenom
-            )
-          ) {
+          const exist = ibcCurrencies.find(
+            (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
+          );
+          // Don't remove the existing currency even if user doesn't have the ibc balances.
+          // Currenctly, it can't be handled if the currency become unexisting.
+          if (exist && exist.coinDenom !== currency.coinDenom) {
             this._ibcCurrencies = this._ibcCurrencies.filter(
               (cur) => cur.coinMinimalDenom !== currency.coinMinimalDenom
             );
