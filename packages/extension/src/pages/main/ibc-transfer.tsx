@@ -7,6 +7,7 @@ import classnames from "classnames";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Dec } from "@keplr-wallet/unit";
+import { FormattedMessage } from "react-intl";
 
 export const IBCTransferView: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -33,7 +34,7 @@ export const IBCTransferView: FunctionComponent = observer(() => {
             styleTransfer.paragraphMain
           )}
         >
-          IBC Transfer
+          <FormattedMessage id="main.ibc.transfer.title" />
         </p>
         <p
           className={classnames(
@@ -43,7 +44,7 @@ export const IBCTransferView: FunctionComponent = observer(() => {
             styleTransfer.paragraphSub
           )}
         >
-          Send tokens over IBC
+          <FormattedMessage id="main.ibc.transfer.paragraph" />
         </p>
       </div>
       <div style={{ flex: 1 }} />
@@ -59,7 +60,7 @@ export const IBCTransferView: FunctionComponent = observer(() => {
           history.push("/ibc-transfer");
         }}
       >
-        Transfer
+        <FormattedMessage id="main.ibc.transfer.button" />
       </Button>
     </div>
   );

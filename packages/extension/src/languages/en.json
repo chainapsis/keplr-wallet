@@ -19,6 +19,10 @@
   "main.stake.button.stake": "Stake",
   "main.stake.tooltip.no-asset": "No token in your account. Deposit some tokens to stake.",
 
+  "main.ibc.transfer.title": "IBC Transfer",
+  "main.ibc.transfer.paragraph": "Send tokens over IBC",
+  "main.ibc.transfer.button": "Transfer",
+
   "main.address.copied": "Address copied!",
 
   "main.menu.settings": "Settings",
@@ -187,6 +191,9 @@
   "send.input-button.balance": "Balance",
   "send.button.send": "Send",
 
+  "ibc.transfer.next": "Next",
+  "ibc.transfer.submit": "Submit",
+
   "fee.input.gas": "Gas",
   "fee.input.memo": "Memo (Optional)",
   "fee.input.fee": "Fee",
@@ -259,5 +266,14 @@
   "input.fee.toggle.set-gas.close": "Close",
 
   "confirm.yes": "Yes",
-  "confirm.no": "No"
+  "confirm.no": "No",
+
+  "component.form.coin-input.token.label": "Token",
+
+  "component.ibc.channel-registrar.chain-selector.label": "Destination Chain",
+  "component.ibc.channel-registrar.chain-selector.placeholder": "Select Chain",
+  "component.ibc.channel-registrar.chain-selector.button.add": "New IBC Transfer Channel",
+  "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
+  "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Destination Chain Channel ID",
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save"
 }

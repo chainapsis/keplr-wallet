@@ -16,12 +16,14 @@ import {
 
 import style from "./style.module.scss";
 import { Input } from "../input";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const IBCChannelRegistrarModal: FunctionComponent<{
   isOpen: boolean;
   closeModal: () => void;
   toggle: () => void;
 }> = observer(({ isOpen, closeModal, toggle }) => {
+  const intl = useIntl();
   const { chainStore, queriesStore, ibcChannelStore } = useStore();
 
   const [isChainDropdownOpen, setIsChainDropdownOpen] = useState(false);
@@ -41,7 +43,7 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
           <h1>Add IBC channel</h1>
           <FormGroup>
             <Label for="chain-dropdown" className="form-control-label">
-              Destination Chain
+              <FormattedMessage id="component.ibc.channel-registrar.chain-selector.label" />
             </Label>
             <ButtonDropdown
               id="chain-dropdown"
@@ -50,9 +52,11 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
               toggle={() => setIsChainDropdownOpen((value) => !value)}
             >
               <DropdownToggle caret>
-                {selectedChainId
-                  ? chainStore.getChain(selectedChainId).chainName
-                  : "Select Chain"}
+                {selectedChainId ? (
+                  chainStore.getChain(selectedChainId).chainName
+                ) : (
+                  <FormattedMessage id="component.ibc.channel-registrar.chain-selector.placeholder" />
+                )}
               </DropdownToggle>
               <DropdownMenu>
                 {chainStore.chainInfos.map((chainInfo) => {
@@ -79,8 +83,14 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
           </FormGroup>
           <Input
             type="text"
-            label="Channel ID"
-            placeholder="Destination Chain Channel ID"
+            label={intl.formatMessage({
+              id:
+                "component.ibc.channel-registrar.chain-selector.add.channel.label",
+            })}
+            placeholder={intl.formatMessage({
+              id:
+                "component.ibc.channel-registrar.chain-selector.add.channel.placeholder",
+            })}
             onChange={(e) => {
               e.preventDefault();
               setChannelId(e.target.value);
@@ -156,7 +166,7 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
               }
             }}
           >
-            Save
+            <FormattedMessage id="component.ibc.channel-registrar.chain-selector.add.channel.button" />
           </Button>
         </Form>
       </ModalBody>
