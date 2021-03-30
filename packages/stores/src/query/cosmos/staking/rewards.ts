@@ -179,6 +179,41 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
 
     return result;
   }
+
+  /**
+   * getDescendingPendingRewardValidatorAddresses returns the validator addresses in descending order by stakable asset.
+   */
+  // ComputeFn doesn't support the default argument.
+  readonly getDescendingPendingRewardValidatorAddresses = computedFn(
+    (maxValiadtors: number): string[] => {
+      if (!this.response) {
+        return [];
+      }
+
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+
+      const rewards = this.response.data.result.rewards?.slice() ?? [];
+      rewards.sort((reward1, reward2) => {
+        const amount1 = StoreUtils.getBalanceFromCurrency(
+          chainInfo.stakeCurrency,
+          reward1.reward ?? []
+        );
+
+        const amount2 = StoreUtils.getBalanceFromCurrency(
+          chainInfo.stakeCurrency,
+          reward2.reward ?? []
+        );
+
+        if (amount1.toDec().gt(amount2.toDec())) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+
+      return rewards.slice(0, maxValiadtors).map((r) => r.validator_address);
+    }
+  );
 }
 
 export class ObservableQueryRewards extends ObservableChainQueryMap<Rewards> {

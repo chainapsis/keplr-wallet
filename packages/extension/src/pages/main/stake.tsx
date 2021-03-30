@@ -42,8 +42,11 @@ export const StakeView: FunctionComponent = observer(() => {
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
+        // When the user delegated too many validators,
+        // it can't be sent to withdraw rewards from all validators due to the block gas limit.
+        // So, to prevent this problem, just send the msgs up to 8.
         await accountInfo.sendWithdrawDelegationRewardMsgs(
-          rewards.pendingRewardValidatorAddresses,
+          rewards.getDescendingPendingRewardValidatorAddresses(8),
           ""
         );
 
