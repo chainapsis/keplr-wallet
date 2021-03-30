@@ -211,7 +211,21 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
         }
       });
 
-      return rewards.slice(0, maxValiadtors).map((r) => r.validator_address);
+      return rewards
+        .filter((reward) => {
+          if (reward.reward) {
+            for (const r of reward.reward) {
+              const dec = new Dec(r.amount);
+              if (dec.truncate().gt(new Int(0))) {
+                return true;
+              }
+            }
+          }
+
+          return false;
+        })
+        .slice(0, maxValiadtors)
+        .map((r) => r.validator_address);
     }
   );
 }
