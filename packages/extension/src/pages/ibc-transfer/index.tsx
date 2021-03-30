@@ -186,7 +186,7 @@ export const IBCTransferPageAmount: FunctionComponent<{
       <div className={style.formInnerContainer}>
         <CoinInput
           label={intl.formatMessage({
-            id: "send.input.recipient",
+            id: "send.input.amount",
           })}
           amountConfig={amountConfig}
           feeConfig={feeConfig}
