@@ -10,6 +10,7 @@ import { ModalsRenderer } from "./modals";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { SendStackScreen } from "./screens/send";
+import { StakeStackScreen } from "./screens/stake";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContent } from "./components/drawer";
 
@@ -30,6 +31,7 @@ export const MainTabNavigation: FunctionComponent = () => {
     <Tab.Navigator>
       <Tab.Screen name="Home" component={HomeStackScreen} />
       <Tab.Screen name="Send" component={SendStackScreen} />
+      <Tab.Screen name="Stake" component={StakeStackScreen} />
     </Tab.Navigator>
   );
 };
