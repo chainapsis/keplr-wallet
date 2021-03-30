@@ -27,6 +27,8 @@ import {
 } from "./cosmos";
 import { ObservableQueryCosmosBalanceRegistry } from "./cosmos/balance";
 import { ObservableQuerySecret20ContractInfo } from "./secret-wasm/secret20-contract-info";
+import { ObservableQueryIrisMintingInfation } from "./cosmos/supply/iris-minting";
+import { ObservableQuerySifchainLiquidityAPY } from "./cosmos/supply/sifchain";
 
 export class Queries {
   protected readonly _queryBalances: ObservableQueryBalances;
@@ -52,7 +54,14 @@ export class Queries {
   protected readonly _querySecretContractCodeHash: ObservableQuerySecretContractCodeHash;
   protected readonly _querySecret20ContractInfo: ObservableQuerySecret20ContractInfo;
 
+  protected readonly _querySifchainAPY: ObservableQuerySifchainLiquidityAPY;
+
   constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
+    this._querySifchainAPY = new ObservableQuerySifchainLiquidityAPY(
+      kvStore,
+      chainId
+    );
+
     this._queryBalances = new ObservableQueryBalances(
       kvStore,
       chainId,
@@ -89,9 +98,13 @@ export class Queries {
       chainGetter
     );
     this._queryInflation = new ObservableQueryInflation(
+      chainId,
+      chainGetter,
       this._queryMint,
       this._queryPool,
-      this._querySupplyTotal
+      this._querySupplyTotal,
+      new ObservableQueryIrisMintingInfation(kvStore, chainId, chainGetter),
+      this._querySifchainAPY
     );
     this._queryRewards = new ObservableQueryRewards(
       kvStore,
@@ -234,6 +247,10 @@ export class Queries {
 
   getQuerySecret20ContractInfo(): DeepReadonly<ObservableQuerySecret20ContractInfo> {
     return this._querySecret20ContractInfo;
+  }
+
+  getQuerySifchainAPY(): DeepReadonly<ObservableQuerySifchainLiquidityAPY> {
+    return this._querySifchainAPY;
   }
 }
 
