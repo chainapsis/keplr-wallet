@@ -62,6 +62,7 @@
     "@babel/core": "^7.8.4",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/plugin-proposal-decorators": "^7.13.5",
+    "@babel/plugin-transform-flow-strip-types": "^7.13.0",
     "@babel/runtime": "^7.8.4",
     "@types/react-native": "^0.63.2",
     "@types/react-native-vector-icons": "^6.4.6",
