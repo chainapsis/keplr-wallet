@@ -1,8 +1,6 @@
 import React, { FunctionComponent, useMemo } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 import moment from "moment";
-// const moment = require("moment");
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -11,13 +9,60 @@ import { Text, Avatar, Card } from "react-native-elements";
 import { View } from "react-native";
 
 const BondStatus = Staking.BondStatus;
+type UnbondingDelegation = Staking.UnbondingDelegation;
+
+const UnbondingItem: FunctionComponent<{
+  thumbnail: string;
+  validator: Staking.Validator;
+  entry: {
+    creation_height: string;
+    completion_time: string;
+    initial_balance: string;
+    balance: string;
+  };
+  progress: number;
+}> = ({ thumbnail, validator, entry, progress }) => {
+  return (
+    <View>
+      <View style={{ flexDirection: "row" }}>
+        <Avatar
+          source={{ uri: thumbnail }}
+          size={40}
+          rounded
+          icon={{ name: "user", type: "font-awesome" }}
+        />
+        <View style={{ flex: 1 }}>
+          <Text
+            numberOfLines={1}
+            style={{
+              fontSize: 13,
+              flex: 1,
+            }}
+          >
+            {validator.description.moniker}
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text>{entry.balance}</Text>
+            <Text>{moment(entry.completion_time).fromNow()}</Text>
+          </View>
+        </View>
+      </View>
+      <Text> progress : {progress.toFixed(3)}</Text>
+    </View>
+  );
+};
 
 const UnbondingList: FunctionComponent<{
-  chainId: string;
-}> = observer(({ chainId }) => {
-  const { accountStore, queriesStore } = useStore();
+  unbondings: UnbondingDelegation[];
+}> = observer(({ unbondings }) => {
+  const { queriesStore, chainStore } = useStore();
 
-  const queries = queriesStore.get(chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
 
   const bondedValdiators = queries
     .getQueryValidators()
@@ -40,20 +85,17 @@ const UnbondingList: FunctionComponent<{
   ]);
 
   const stakingParams = queries.getQueryStakingParams();
-  const unbondings = queries
-    .getQueryUnbondingDelegations()
-    .getQueryBech32Address(accountStore.getAccount(chainId).bech32Address);
 
   return (
     <React.Fragment>
-      {unbondings.unbondingBalances.map((unbondingBalance) => {
+      {unbondings.map((unbonding) => {
         const validator = validators.find(
-          (val) => val.operator_address === unbondingBalance.validatorAddress
+          (val) => val.operator_address === unbonding.validator_address
         );
 
         if (!validator) {
           console.log(
-            `This can not be happened. Can't find the validator: ${unbondingBalance.validatorAddress}`
+            `This can not be happened. Can't find the validator: ${unbonding.validator_address}`
           );
           return;
         }
@@ -66,9 +108,9 @@ const UnbondingList: FunctionComponent<{
           unbondingValidators.getValidatorThumbnail(validator.operator_address);
 
         return (
-          <React.Fragment key={unbondingBalance.validatorAddress}>
-            {unbondingBalance.entries.map((entry, key) => {
-              const remainingComplete = moment(entry.completionTime).diff(
+          <React.Fragment key={unbonding.validator_address}>
+            {unbonding.entries.map((entry, key) => {
+              const remainingComplete = moment(entry.completion_time).diff(
                 moment(),
                 "seconds"
               );
@@ -85,37 +127,13 @@ const UnbondingList: FunctionComponent<{
               const progress = 100 - (remainingComplete / unbondingTime) * 100;
 
               return (
-                <View key={key}>
-                  <View style={{ flexDirection: "row" }}>
-                    <Avatar
-                      source={{ uri: thumbnail }}
-                      size={40}
-                      rounded
-                      icon={{ name: "user", type: "font-awesome" }}
-                    />
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        numberOfLines={1}
-                        style={{
-                          fontSize: 13,
-                          flex: 1,
-                        }}
-                      >
-                        {validator.description.moniker}
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Text>{entry.balance.trim(true).toString()}</Text>
-                        <Text>{moment(entry.completionTime).fromNow()}</Text>
-                      </View>
-                    </View>
-                  </View>
-                  <Text> progress : {progress.toFixed(3)}</Text>
-                </View>
+                <UnbondingItem
+                  key={key}
+                  progress={progress}
+                  entry={entry}
+                  validator={validator}
+                  thumbnail={thumbnail}
+                />
               );
             })}
           </React.Fragment>
@@ -125,9 +143,9 @@ const UnbondingList: FunctionComponent<{
   );
 });
 
-export const UnbondingCard: FunctionComponent<{ chainIds: string[] }> = ({
-  chainIds,
-}) => {
+export const UnbondingCard: FunctionComponent<{
+  unbondings: UnbondingDelegation[];
+}> = ({ unbondings }) => {
   return (
     <Card
       containerStyle={{
@@ -140,9 +158,7 @@ export const UnbondingCard: FunctionComponent<{ chainIds: string[] }> = ({
       <Card.Title h4 style={{ textAlign: "left", marginBottom: 0 }}>
         UnDelegating
       </Card.Title>
-      {chainIds.map((chainId) => {
-        return <UnbondingList key={chainId} chainId={chainId} />;
-      })}
+      <UnbondingList unbondings={unbondings} />
     </Card>
   );
 };

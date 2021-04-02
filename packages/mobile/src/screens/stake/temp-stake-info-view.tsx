@@ -1,25 +1,24 @@
 import React, { FunctionComponent } from "react";
-import { StakedCard } from "./staked-card";
+import { TotalStakedCard } from "./total-staked-card";
 import { UnbondingCard } from "./unbonding-card";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
-export const TempStakeInfoView: FunctionComponent<{
-  chainId: string;
-}> = observer(({ chainId }) => {
-  const { accountStore, queriesStore } = useStore();
+export const TempStakeInfoView: FunctionComponent = observer(() => {
+  const { accountStore, queriesStore, chainStore } = useStore();
 
-  const queries = queriesStore.get(chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
 
   const unbondings = queries
     .getQueryUnbondingDelegations()
-    .getQueryBech32Address(accountStore.getAccount(chainId).bech32Address)
-    .unbondings;
+    .getQueryBech32Address(
+      accountStore.getAccount(chainStore.current.chainId).bech32Address
+    ).unbondings;
 
   return (
     <React.Fragment>
-      <StakedCard chainId={chainId} />
-      {unbondings.length > 0 ? <UnbondingCard chainIds={[chainId]} /> : null}
+      <TotalStakedCard />
+      {unbondings.length > 0 ? <UnbondingCard unbondings={unbondings} /> : null}
     </React.Fragment>
   );
 });
