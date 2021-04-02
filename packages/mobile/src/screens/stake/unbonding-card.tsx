@@ -7,6 +7,7 @@ import { useStore } from "../../stores";
 import { Staking } from "@keplr-wallet/stores";
 import { Text, Avatar, Card } from "react-native-elements";
 import { View } from "react-native";
+import { ProgressBar } from "../../components/svg";
 
 const BondStatus = Staking.BondStatus;
 type UnbondingDelegation = Staking.UnbondingDelegation;
@@ -52,7 +53,7 @@ const UnbondingItem: FunctionComponent<{
           </View>
         </View>
       </View>
-      <Text> progress : {progress.toFixed(3)}</Text>
+      <ProgressBar progress={progress} />
     </View>
   );
 };
