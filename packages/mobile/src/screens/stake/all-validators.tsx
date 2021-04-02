@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo } from "react";
 
-import { Dec, DecUtils } from "@keplr-wallet/unit";
+import { Dec, DecUtils, CoinPretty, IntPretty } from "@keplr-wallet/unit";
 import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
 import { Text, Badge, Avatar, Card } from "react-native-elements";
@@ -9,7 +9,6 @@ import { useNavigation } from "@react-navigation/native";
 import { Staking } from "@keplr-wallet/stores";
 import { TouchableOpacity } from "react-native-gesture-handler";
 const BondStatus = Staking.BondStatus;
-type Validator = Staking.Validator;
 
 /*
  * To reduce the rendering count of table, split the validator's row component and memorize it.
@@ -20,20 +19,17 @@ type Validator = Staking.Validator;
 /* eslint-disable react/display-name */
 const Validator: FunctionComponent<{
   index: number;
-  validator: Validator;
+  validator: Staking.Validator;
   thumbnail: string;
+  power: CoinPretty | undefined;
+  inflation: IntPretty;
   isDelegated: boolean;
-}> = React.memo(({ index, validator, thumbnail, isDelegated }) => {
-  const navigation = useNavigation();
+}> = React.memo(
+  ({ index, validator, thumbnail, power, inflation, isDelegated }) => {
+    const navigation = useNavigation();
 
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        // navigation.navigate("Validator Details", { validator });
-        navigation.navigate("Details");
-      }}
-    >
-      <View
+    return (
+      <TouchableOpacity
         style={{
           borderTopWidth: 0.5,
           borderTopColor: "#CDCDCD",
@@ -41,6 +37,13 @@ const Validator: FunctionComponent<{
           paddingHorizontal: 16,
           flexDirection: "row",
           alignItems: "center",
+        }}
+        onPress={() => {
+          navigation.navigate("Validator Details", {
+            validator,
+            thumbnail,
+            power,
+          });
         }}
       >
         <Text
@@ -79,31 +82,40 @@ const Validator: FunctionComponent<{
           }}
         >
           {`${DecUtils.trim(
-            new Dec(validator.commission.commission_rates.rate)
-              .mul(DecUtils.getPrecisionDec(2))
+            inflation
+              .toDec()
+              .mul(
+                new Dec(1).sub(
+                  new Dec(validator.commission.commission_rates.rate)
+                )
+              )
               .toString(1)
           )}%`}
         </Text>
-      </View>
-    </TouchableOpacity>
-  );
-});
+      </TouchableOpacity>
+    );
+  }
+);
 
 export const AllValidators: FunctionComponent<{
-  chainId: string;
   blacklistValidators?: {
     [validatorAddress: string]: true | undefined;
   };
-}> = observer(({ chainId, blacklistValidators = {} }) => {
-  const { accountStore, queriesStore } = useStore();
-  const queries = queriesStore.get(chainId);
+}> = observer(({ blacklistValidators = {} }) => {
+  const { accountStore, queriesStore, chainStore } = useStore();
+  const queries = queriesStore.get(chainStore.current.chainId);
+
+  const inflation = queries.getQueryInflation().inflation;
+
   const bondedValidators = queries
     .getQueryValidators()
     .getQueryStatus(BondStatus.Bonded);
 
   const delegations = queries
     .getQueryDelegations()
-    .getQueryBech32Address(accountStore.getAccount(chainId).bech32Address);
+    .getQueryBech32Address(
+      accountStore.getAccount(chainStore.current.chainId).bech32Address
+    );
 
   const delegatedValidators = useMemo(() => {
     const map = new Map<string, boolean>();
@@ -147,12 +159,16 @@ export const AllValidators: FunctionComponent<{
           val.operator_address
         );
 
+        const power = bondedValidators.getValidatorShare(val.operator_address);
+
         return (
           <Validator
             key={key.toString()}
             index={key}
             validator={val}
             thumbnail={thumbnail}
+            inflation={inflation}
+            power={power}
             isDelegated={delegatedValidators.get(val.operator_address) != null}
           />
         );
