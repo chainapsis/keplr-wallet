@@ -44,6 +44,19 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
 
   const totalStakbleReward = rewards.stakableReward;
 
+  const sendWithdrawDelegatorRewardMsgs = async () => {
+    if (accountInfo.isReadyToSendMsgs) {
+      try {
+        await accountInfo.sendWithdrawDelegationRewardMsgs(
+          rewards.pendingRewardValidatorAddresses,
+          ""
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
+
   return (
     <Card
       containerStyle={{
@@ -102,9 +115,14 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
           <Button
             title="Clain Reward"
             containerStyle={{ width: "100%" }}
-            onPress={async (e) => {
-              e.preventDefault();
+            onPress={async () => {
+              await sendWithdrawDelegatorRewardMsgs();
             }}
+            disabled={
+              !accountInfo.isReadyToSendMsgs ||
+              rewards.pendingRewardValidatorAddresses.length === 0
+            }
+            loading={accountInfo.isSendingMsg === "withdrawRewards"}
           />
         </React.Fragment>
       )}
