@@ -15,8 +15,24 @@ export const ProgressBar: FunctionComponent<ProgressBarProps> = ({
       viewBox="0 0 100 4"
       preserveAspectRatio="none"
     >
-      <Rect rx="1.5" x="0" y="0" width="100" height="4" fill="#e9ecef" />
-      <Rect rx="1.5" x="0" y="0" width={progress} height="4" fill="#5e72e4" />
+      <Rect
+        rx="1.5"
+        ry="1.5"
+        x="0"
+        y="0"
+        width="100"
+        height="4"
+        fill="#e9ecef"
+      />
+      <Rect
+        rx="1.5"
+        ry="1.5"
+        x="0"
+        y="0"
+        width={progress}
+        height="4"
+        fill="#5e72e4"
+      />
     </Svg>
   );
 };
