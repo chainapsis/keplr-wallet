@@ -4,7 +4,7 @@ import { Dec, DecUtils, CoinPretty, IntPretty } from "@keplr-wallet/unit";
 import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
 import { Text, Badge, Avatar, Card } from "react-native-elements";
-import { View } from "react-native";
+import { View, FlatList } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Staking } from "@keplr-wallet/stores";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -16,15 +16,17 @@ const BondStatus = Staking.BondStatus;
  * So, it probably doens't make the unnecessary re-render.
  */
 
-/* eslint-disable react/display-name */
-const Validator: FunctionComponent<{
+type ValidatorProps = {
   index: number;
   validator: Staking.Validator;
   thumbnail: string;
   power: CoinPretty | undefined;
   inflation: IntPretty;
   isDelegated: boolean;
-}> = React.memo(
+};
+
+/* eslint-disable react/display-name */
+const Validator: FunctionComponent<ValidatorProps> = React.memo(
   ({ index, validator, thumbnail, power, inflation, isDelegated }) => {
     const navigation = useNavigation();
 
@@ -130,6 +132,41 @@ export const AllValidators: FunctionComponent<{
     (val) => !blacklistValidators[val.operator_address]
   );
 
+  const flatListValidatorData = useMemo(() => {
+    return renderableValidators.map((validator, index) => {
+      const thumbnail = bondedValidators.getValidatorThumbnail(
+        validator.operator_address
+      );
+
+      const power = bondedValidators.getValidatorShare(
+        validator.operator_address
+      );
+
+      return { index, validator, thumbnail, inflation, power };
+    });
+  }, [renderableValidators, bondedValidators, inflation]);
+
+  const renderValidator: FunctionComponent<{
+    item: {
+      index: number;
+      validator: Staking.Validator;
+      thumbnail: string;
+      inflation: IntPretty;
+      power: CoinPretty | undefined;
+    };
+  }> = ({ item }) => (
+    <Validator
+      index={item.index}
+      validator={item.validator}
+      thumbnail={item.thumbnail}
+      inflation={item.inflation}
+      power={item.power}
+      isDelegated={
+        delegatedValidators.get(item.validator.operator_address) != null
+      }
+    />
+  );
+
   return (
     <Card
       containerStyle={{
@@ -154,25 +191,11 @@ export const AllValidators: FunctionComponent<{
       {/* {bondedValidators.isFetching || delegations.isFetching ? (
           <Icon></Icon>
         ) : null} */}
-      {renderableValidators.map((val, key) => {
-        const thumbnail = bondedValidators.getValidatorThumbnail(
-          val.operator_address
-        );
-
-        const power = bondedValidators.getValidatorShare(val.operator_address);
-
-        return (
-          <Validator
-            key={key.toString()}
-            index={key}
-            validator={val}
-            thumbnail={thumbnail}
-            inflation={inflation}
-            power={power}
-            isDelegated={delegatedValidators.get(val.operator_address) != null}
-          />
-        );
-      })}
+      <FlatList
+        data={flatListValidatorData}
+        renderItem={renderValidator}
+        windowSize={5}
+      />
     </Card>
   );
 });
