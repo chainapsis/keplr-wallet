@@ -33,6 +33,7 @@
     "@react-navigation/stack": "^5.14.3",
     "buffer": "^6.0.3",
     "eventemitter3": "^4.0.7",
+    "expo-clipboard": "^1.0.1",
     "expo-random": "^11.0.0",
     "expo-standard-web-crypto": "^1.0.0",
     "http-browserify": "^1.7.0",
