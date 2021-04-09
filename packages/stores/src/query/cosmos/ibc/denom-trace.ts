@@ -40,7 +40,7 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
 
     const rawPathChunks: string[][] = [];
     for (let i = 0; i < rawPaths.length; i += 2) {
-      rawPathChunks.push(rawPaths.slice(i, 2));
+      rawPathChunks.push(rawPaths.slice(i, i + 2));
     }
 
     return rawPathChunks.map((chunk) => {

@@ -54,16 +54,20 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
                   .getDenomTrace(hash).denomTrace;
                 if (denomTrace) {
                   const paths = denomTrace.paths;
+                  // The previous chain id from current path.
+                  let chainIdBefore = this.chainId;
                   let counterpartyChainInfo: C | undefined;
                   let originChainInfo: C | undefined;
                   for (const path of paths) {
-                    const clientState = queries
+                    const clientState = this.queriesStore
+                      .get(chainIdBefore)
                       .getQueryIBCClientState()
                       .getClientState(path.portId, path.channelId);
                     if (
                       clientState.clientChainId &&
                       this.chainStore.hasChain(clientState.clientChainId)
                     ) {
+                      chainIdBefore = clientState.clientChainId;
                       originChainInfo = this.chainStore.getChain(
                         clientState.clientChainId
                       );
