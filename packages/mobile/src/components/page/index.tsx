@@ -11,6 +11,7 @@ export const Page: FunctionComponent = ({ children }) => {
       <ScrollView
         style={{
           flex: 1,
+          backgroundColor: "#fff",
         }}
       >
         <View style={{ padding: 10 }}>{children}</View>
