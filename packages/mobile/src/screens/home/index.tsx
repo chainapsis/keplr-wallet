@@ -1,12 +1,13 @@
 import React, { FunctionComponent, useLayoutEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { Button, Text } from "react-native-elements";
+import { Button, Card } from "react-native-elements";
 import { Page } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Feather";
-
+import { AccountView } from "./account";
+import { AssetView } from "./asset";
+import { TxButtonView } from "./tx-button";
 const HomeStack = createStackNavigator();
 
 export const HomeStackScreen: FunctionComponent = () => {
@@ -33,45 +34,13 @@ const HomeScreen: FunctionComponent = observer(() => {
     });
   }, [navigation]);
 
-  const { chainStore, accountStore, queriesStore } = useStore();
-
-  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
-
-  const queries = queriesStore.get(chainStore.current.chainId);
-
-  const delegated = queries
-    .getQueryDelegations()
-    .getQueryBech32Address(accountInfo.bech32Address)
-    .total.upperCase(true);
-
-  const unbonding = queries
-    .getQueryUnbondingDelegations()
-    .getQueryBech32Address(accountInfo.bech32Address)
-    .total.upperCase(true);
-
-  const stakedSum = delegated.add(unbonding);
-
-  const balances = queries
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address);
-  const stakable = balances.stakable;
-
   return (
     <Page>
-      <Text h3>Name</Text>
-      <Text>{accountInfo.name}</Text>
-      <Text h3>Address</Text>
-      <Text>{accountInfo.bech32Address}</Text>
-      <Text h3>Stakable</Text>
-      <Text>{stakable.balance.toString()}</Text>
-      <Text h3>Staked</Text>
-      <Text>{stakedSum.toString()}</Text>
-      <Button
-        title="Send"
-        onPress={() => {
-          navigation.navigate("Send");
-        }}
-      />
+      <Card>
+        <AccountView />
+        <AssetView />
+        <TxButtonView />
+      </Card>
     </Page>
   );
 });
