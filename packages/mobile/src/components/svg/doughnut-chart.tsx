@@ -68,78 +68,79 @@ export const DoughnutChart: FunctionComponent<DoughnutChartProps> = observer(
     const firstStartDegree = 180;
     const firstEndDegree = Math.floor(360 * firstRate) + firstStartDegree;
 
-    const firstProcess = useRef(new Animated.Value(0)).current;
-    const secondProcess = useRef(new Animated.Value(0)).current;
+    const firstProcess = useRef(new Animated.Value(0));
+    const secondProcess = useRef(new Animated.Value(0));
 
     const firstD = useMemo(() => {
       const firstDRange = [];
-      const firstIRange = [];
-      const firstSteps = 360 * firstRate;
-      for (let i = 0; i < firstSteps; i++) {
-        firstDRange.push(
-          describeArc(
-            centerLocation,
-            centerLocation,
-            radius,
-            firstStartDegree,
-            firstStartDegree + i
-          )
-        );
-        firstIRange.push(i / (firstSteps - 1));
-      }
+      firstDRange.push(
+        describeArc(
+          centerLocation,
+          centerLocation,
+          radius,
+          firstStartDegree,
+          firstStartDegree
+        )
+      );
+      firstDRange.push(
+        describeArc(
+          centerLocation,
+          centerLocation,
+          radius,
+          firstStartDegree,
+          firstStartDegree + 360 * firstRate
+        )
+      );
 
-      return firstRate
-        ? firstProcess.interpolate({
-            inputRange: firstIRange,
-            outputRange: firstDRange,
-          })
-        : null;
-    }, [firstProcess, firstRate]);
+      return firstProcess.current.interpolate({
+        inputRange: [0, 1],
+        outputRange: firstDRange,
+      });
+    }, [firstRate]);
 
     const secondD = useMemo(() => {
       const secondDRange = [];
-      const secondIRange = [];
-      const secondSteps = 360 * secondRate;
-      for (let i = 0; i < secondSteps; i++) {
-        secondDRange.push(
-          describeArc(
-            centerLocation,
-            centerLocation,
-            radius,
-            firstEndDegree,
-            firstEndDegree + i
-          )
-        );
-        secondIRange.push(i / (secondSteps - 1));
-      }
-      return secondRate
-        ? secondProcess.interpolate({
-            inputRange: secondIRange,
-            outputRange: secondDRange,
-          })
-        : null;
-    }, [firstEndDegree, secondProcess, secondRate]);
+      secondDRange.push(
+        describeArc(
+          centerLocation,
+          centerLocation,
+          radius,
+          firstEndDegree,
+          firstEndDegree
+        )
+      );
+      secondDRange.push(
+        describeArc(
+          centerLocation,
+          centerLocation,
+          radius,
+          firstEndDegree,
+          firstEndDegree + 360 * secondRate
+        )
+      );
+
+      return secondProcess.current.interpolate({
+        inputRange: [0, 1],
+        outputRange: secondDRange,
+      });
+    }, [firstEndDegree, secondRate]);
 
     useEffect(() => {
-      firstProcess.setValue(0);
-      secondProcess.setValue(0);
-
       Animated.parallel([
-        Animated.timing(firstProcess, {
+        Animated.timing(firstProcess.current, {
           toValue: 1,
-          duration: 1000,
+          duration: 0,
           useNativeDriver: true,
           easing: Easing.ease,
         }),
-        Animated.timing(secondProcess, {
+        Animated.timing(secondProcess.current, {
           toValue: 1,
-          duration: 1000,
+          duration: 0,
           useNativeDriver: true,
           easing: Easing.ease,
         }),
       ]).start();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]);
+    }, [firstRate, secondRate]);
 
     return (
       <Svg width="200" height="200" viewBox="0 0 100 100">
