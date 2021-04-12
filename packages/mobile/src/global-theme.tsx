@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { ThemeProvider } from "react-native-elements";
+import { Platform } from "react-native";
 
 const globalTheme = {
   colors: {
@@ -19,7 +20,46 @@ const globalTheme = {
     warning: "#fb6340",
     divider: "#e9ecef",
   },
-  Button: {},
+  Button: {
+    containerStyle: {
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 1.41,
+        },
+        android: {
+          elevation: 2,
+        },
+      }),
+    },
+  },
+  Card: {
+    containerStyle: {
+      marginHorizontal: 8,
+      marginVertical: 4,
+      borderRadius: 6,
+      borderWidth: 0,
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 1.41,
+        },
+        android: {
+          elevation: 2,
+        },
+      }),
+    },
+  },
 };
 
 export const GlobalThemeProvider: FunctionComponent = ({ children }) => {

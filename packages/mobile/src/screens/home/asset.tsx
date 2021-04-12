@@ -93,7 +93,7 @@ export const AssetView: FunctionComponent = observer(() => {
                 fontSize: 18,
                 color: theme.colors?.primary,
                 marginLeft: 7,
-                marginRight: 10,
+                marginRight: 7,
               }}
             >
               Available
@@ -101,7 +101,7 @@ export const AssetView: FunctionComponent = observer(() => {
             <Badge />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", marginLeft: 10 }}>
+            <Text style={{ fontSize: 18, fontWeight: "600", marginLeft: 7 }}>
               {stakable.locale(false).toString()}
             </Text>
           </View>
@@ -120,7 +120,7 @@ export const AssetView: FunctionComponent = observer(() => {
                 fontSize: 18,
                 color: theme.colors?.secondary,
                 marginLeft: 7,
-                marginRight: 10,
+                marginRight: 7,
               }}
             >
               Staked
@@ -128,7 +128,7 @@ export const AssetView: FunctionComponent = observer(() => {
             <Badge badgeStyle={{ backgroundColor: theme.colors?.secondary }} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", marginLeft: 10 }}>
+            <Text style={{ fontSize: 18, fontWeight: "600", marginLeft: 7 }}>
               {stakedSum.locale(false).toString()}
             </Text>
           </View>
