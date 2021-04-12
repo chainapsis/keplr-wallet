@@ -119,33 +119,31 @@ export const DoughnutChart: FunctionComponent<DoughnutChartProps> = ({
     });
   }, [firstRate, secondData]);
 
-  useEffect(() => {
-    if (firstData) {
-      Animated.timing(firstProcess.current, {
-        toValue: 1,
-        duration: 2000,
-        easing: Easing.ease,
-      }).start();
-    }
-    if (secondData) {
-      Animated.timing(secondProcess.current, {
-        toValue: 1,
-        duration: 2000,
-        easing: Easing.ease,
-      }).start();
-    }
-  }, [firstData, secondData]);
-
   const firstStartDegree = 180;
   const firstEndDegree = Animated.add(
-    Animated.floor(Animated.multiply(360, firstRate)),
+    Animated.multiply(359.9, firstRate),
     firstStartDegree
   );
   const secondEndDegree = Animated.add(
-    Animated.floor(Animated.multiply(360, secondRate)),
+    Animated.multiply(359.9, secondRate),
     firstEndDegree
   );
 
+  useEffect(() => {
+    firstProcess.current.setValue(0);
+    secondProcess.current.setValue(0);
+
+    Animated.timing(firstProcess.current, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.ease,
+    }).start();
+    Animated.timing(secondProcess.current, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.ease,
+    }).start();
+  }, [firstData, secondData]);
   return (
     <Svg width="200" height="200" viewBox="0 0 100 100">
       <Circle

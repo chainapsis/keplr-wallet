@@ -44,17 +44,14 @@ export const AssetView: FunctionComponent = observer(() => {
 
   // If fiat value is fetched, show the value that is multiplied with amount and fiat value.
   // If not, just show the amount of asset.
-  const data: number[] = useMemo(() => {
-    console.log("update data");
-    return [
-      stakablePrice
-        ? parseFloat(stakablePrice.toDec().toString())
-        : parseFloat(stakable.toDec().toString()),
-      stakedSumPrice
-        ? parseFloat(stakedSumPrice.toDec().toString())
-        : parseFloat(stakedSum.toDec().toString()),
-    ];
-  }, [stakable, stakablePrice, stakedSum, stakedSumPrice]);
+  const data: number[] = [
+    stakablePrice
+      ? parseFloat(stakablePrice.toDec().toString())
+      : parseFloat(stakable.toDec().toString()),
+    stakedSumPrice
+      ? parseFloat(stakedSumPrice.toDec().toString())
+      : parseFloat(stakedSum.toDec().toString()),
+  ];
 
   const { theme } = useTheme();
 
