@@ -9,7 +9,7 @@ import {
   useBIP44Option,
 } from "../advanced-bip44";
 import style from "../style.module.scss";
-import { Button, ButtonGroup, Form } from "reactstrap";
+import { Alert, Button, ButtonGroup, Form } from "reactstrap";
 import { Input, TextArea } from "../../../components/form";
 import { BackButton } from "../index";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
@@ -89,6 +89,19 @@ export const GenerateMnemonicModePage: FunctionComponent<{
 
   return (
     <div>
+      <Alert color="warning">
+        <h3 style={{ color: "white" }}>
+          <FormattedMessage id="register.create.warning.keep-your-mnemonic.header" />
+        </h3>
+        <ul>
+          <li>
+            <FormattedMessage id="register.create.warning.keep-your-mnemonic.paragraph1" />
+          </li>
+          <li>
+            <FormattedMessage id="register.create.warning.keep-your-mnemonic.paragraph2" />
+          </li>
+        </ul>
+      </Alert>
       <div className={style.title}>
         {intl.formatMessage({
           id: "register.create.title",
