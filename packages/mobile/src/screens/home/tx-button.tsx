@@ -2,10 +2,10 @@ import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Button, useTheme } from "react-native-elements";
 import { View } from "react-native";
 import { Dec } from "@keplr-wallet/unit";
 import { useNavigation } from "@react-navigation/native";
+import { WhiteButton } from "../..//components/buttons";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
@@ -22,24 +22,10 @@ export const TxButtonView: FunctionComponent = observer(() => {
     queryBalances.balances.find((bal) => bal.balance.toDec().gt(new Dec(0))) !==
     undefined;
 
-  const { theme } = useTheme();
-
   return (
     <View style={{ flexDirection: "row" }}>
-      <Button
-        containerStyle={{ flex: 1, marginRight: 10 }}
-        buttonStyle={{
-          borderWidth: 1,
-          borderColor: theme.colors?.primary,
-          borderRadius: 5,
-          backgroundColor: theme.colors?.white,
-          paddingVertical: 10,
-          paddingHorizontal: 20,
-        }}
-        titleStyle={{
-          color: theme.colors?.primary,
-          fontWeight: "500",
-        }}
+      <WhiteButton
+        containerStyle={{ marginRight: 7 }}
         title="Deposit"
         onPress={() => {}}
       />
@@ -48,22 +34,9 @@ export const TxButtonView: FunctionComponent = observer(() => {
         So, tooltip will not work as expected.
         To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
        */}
-      <Button
+      <WhiteButton
         containerStyle={{
-          flex: 1,
-          marginLeft: 10,
-        }}
-        buttonStyle={{
-          borderWidth: 1,
-          borderColor: theme.colors?.primary,
-          borderRadius: 5,
-          backgroundColor: theme.colors?.white,
-          paddingVertical: 10,
-          paddingHorizontal: 20,
-        }}
-        titleStyle={{
-          color: theme.colors?.primary,
-          fontWeight: "500",
+          marginLeft: 7,
         }}
         title="Send"
         disabled={!hasAssets}
