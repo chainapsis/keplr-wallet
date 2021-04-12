@@ -95,7 +95,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-6",
+    chainId: "kava-7",
     chainName: "Kava",
     stakeCurrency: {
       coinDenom: "KAVA",
