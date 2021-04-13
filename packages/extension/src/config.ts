@@ -387,8 +387,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/#/irishub/stake"
         : "http://localhost:8081/#/irishub/stake",
     bip44: {
+      coinType: 118,
+    },
+    alternativeBIP44s: [
+      {
       coinType: 566,
     },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("iaa"),
     currencies: [
       {
