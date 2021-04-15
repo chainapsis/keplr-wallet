@@ -43,6 +43,14 @@ import {
   IRIS_RPC_CONFIG,
   IRIS_REST_ENDPOINT,
   IRIS_REST_CONFIG,
+  REGEN_RPC_ENDPOINT,
+  REGEN_RPC_CONFIG,
+  REGEN_REST_ENDPOINT,
+  REGEN_REST_CONFIG,
+  SENTINEL_RPC_ENDPOINT,
+  SENTINEL_RPC_CONFIG,
+  SENTINEL_REST_ENDPOINT,
+  SENTINEL_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -95,7 +103,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-6",
+    chainId: "kava-7",
     chainName: "Kava",
     stakeCurrency: {
       coinDenom: "KAVA",
@@ -387,8 +395,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/#/irishub/stake"
         : "http://localhost:8081/#/irishub/stake",
     bip44: {
-      coinType: 566,
+      coinType: 118,
     },
+    alternativeBIP44s: [
+      {
+        coinType: 566,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("iaa"),
     currencies: [
       {
@@ -412,6 +425,99 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.4,
     },
     features: ["stargate"],
+  },
+  {
+    rpc: REGEN_RPC_ENDPOINT,
+    rpcConfig: REGEN_RPC_CONFIG,
+    rest: REGEN_REST_ENDPOINT,
+    restConfig: REGEN_REST_CONFIG,
+    chainId: "regen-1",
+    chainName: "Regen",
+    stakeCurrency: {
+      coinDenom: "REGEN",
+      coinMinimalDenom: "uregen",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/regen/stake"
+        : "http://localhost:8081/#/regen/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/regen/stake"
+        : "http://localhost:8081/#/regen/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("regen"),
+    currencies: [
+      {
+        coinDenom: "REGEN",
+        coinMinimalDenom: "uregen",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "REGEN",
+        coinMinimalDenom: "uregen",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0.025,
+      high: 0.04,
+    },
+    features: ["stargate"],
+  },
+
+  {
+    rpc: SENTINEL_RPC_ENDPOINT,
+    rpcConfig: SENTINEL_RPC_CONFIG,
+    rest: SENTINEL_REST_ENDPOINT,
+    restConfig: SENTINEL_REST_CONFIG,
+    chainId: "sentinelhub-1",
+    chainName: "Sentinel",
+    stakeCurrency: {
+      coinDenom: "DVPN",
+      coinMinimalDenom: "udvpn",
+      coinDecimals: 6,
+      coinGeckoId: "sentinel-group",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sentinel/stake"
+        : "http://localhost:8081/#/sentinel/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sentinel/stake"
+        : "http://localhost:8081/#/sentinel/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("sent"),
+    currencies: [
+      {
+        coinDenom: "DVPN",
+        coinMinimalDenom: "udvpn",
+        coinDecimals: 6,
+        coinGeckoId: "sentinel-group",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DVPN",
+        coinMinimalDenom: "udvpn",
+        coinDecimals: 6,
+        coinGeckoId: "sentinel-group",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.1,
+      average: 0.25,
+      high: 0.4,
+    },
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,

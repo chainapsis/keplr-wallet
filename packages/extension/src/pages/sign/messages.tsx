@@ -612,6 +612,10 @@ export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {
 };
 
 function clearDecimals(dec: string): string {
+  if (!dec.includes(".")) {
+    return dec;
+  }
+
   for (let i = dec.length - 1; i >= 0; i--) {
     if (dec[i] === "0") {
       dec = dec.slice(0, dec.length - 1);
