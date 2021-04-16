@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React, { FunctionComponent, useLayoutEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Button, Card } from "react-native-elements";
@@ -8,11 +9,14 @@ import Icon from "react-native-vector-icons/Feather";
 import { AccountView } from "./account";
 import { AssetView } from "./asset";
 import { TxButtonView } from "./tx-button";
+import { GradientBackground } from "../../components/svg";
 const HomeStack = createStackNavigator();
 
 export const HomeStackScreen: FunctionComponent = () => {
   return (
-    <HomeStack.Navigator>
+    <HomeStack.Navigator
+      screenOptions={{ headerBackground: () => <GradientBackground /> }}
+    >
       <HomeStack.Screen name="Home" component={HomeScreen} />
     </HomeStack.Navigator>
   );

@@ -40,8 +40,9 @@ const globalTheme = {
   },
   Card: {
     containerStyle: {
-      marginHorizontal: 8,
+      opacity: 0.9,
       marginVertical: 4,
+      marginHorizontal: 0,
       borderRadius: 6,
       borderWidth: 0,
       ...Platform.select({

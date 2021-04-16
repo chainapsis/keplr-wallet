@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import Svg, { Rect } from "react-native-svg";
+import Svg, { Rect, LinearGradient, Stop, Defs } from "react-native-svg";
 
 type ProgressBarProps = {
   progress: number;
@@ -15,6 +15,12 @@ export const ProgressBar: FunctionComponent<ProgressBarProps> = ({
       viewBox="0 0 100 4"
       preserveAspectRatio="none"
     >
+      <Defs>
+        <LinearGradient id="grad" x1="1" y1="0" x2="0" y2="0">
+          <Stop offset="0%" stopColor="#71C4FF" />
+          <Stop offset="100%" stopColor="#D378FE" />
+        </LinearGradient>
+      </Defs>
       <Rect
         rx="1.5"
         ry="1.5"
@@ -31,7 +37,7 @@ export const ProgressBar: FunctionComponent<ProgressBarProps> = ({
         y="0"
         width={progress}
         height="4"
-        fill="#5e72e4"
+        fill="url(#grad)"
       />
     </Svg>
   );

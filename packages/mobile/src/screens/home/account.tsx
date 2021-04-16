@@ -6,7 +6,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { WalletStatus } from "@keplr-wallet/stores";
 import Clipboard from "expo-clipboard";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { RectButton } from "react-native-gesture-handler";
 import { Text } from "react-native-elements";
 
 export const AccountView: FunctionComponent = observer(() => {
@@ -26,7 +26,7 @@ export const AccountView: FunctionComponent = observer(() => {
           ? accountInfo.name
           : "Loading..."}
       </Text>
-      <TouchableOpacity onPress={copyAddress}>
+      <RectButton rippleColor="#AAAAAA" onPress={copyAddress}>
         <Address
           maxCharacters={22}
           address={
@@ -36,7 +36,7 @@ export const AccountView: FunctionComponent = observer(() => {
               : "..."
           }
         />
-      </TouchableOpacity>
+      </RectButton>
     </View>
   );
 });

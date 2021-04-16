@@ -155,12 +155,9 @@ export const DoughnutChart: FunctionComponent<DoughnutChartProps> = ({
         fill="transparent"
       />
       <Defs>
-        <LinearGradient id="grad1" x1="0" y1="0" x2="1" y2="0">
-          <Stop offset="0" stopColor="#6FC5FF" />
-          <Stop offset="0.25" stopColor="#6C8AF3" />
-          <Stop offset="0.5" stopColor="#834DF5" />
-          <Stop offset="0.75" stopColor="#9A7CF1" />
-          <Stop offset="1" stopColor="#E482FE" />
+        <LinearGradient id="grad1" x1="1" y1="0" x2="0" y2="0">
+          <Stop offset="0%" stopColor="#71C4FF" />
+          <Stop offset="100%" stopColor="#D378FE" />
         </LinearGradient>
         <LinearGradient id="grad2" x1="0" y1="0" x2="1" y2="0">
           <Stop offset="0" stopColor="#F0C9FF" />

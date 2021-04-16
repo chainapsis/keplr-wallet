@@ -15,6 +15,7 @@ export const Address: FunctionComponent<AddressProps> = ({
 }) => {
   return (
     <View
+      accessible
       style={{
         borderRadius: 100,
         borderWidth: 1,

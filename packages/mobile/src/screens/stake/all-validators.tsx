@@ -5,9 +5,9 @@ import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
 import { Text, Badge, Avatar, Card } from "react-native-elements";
 import { View, FlatList } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { Staking } from "@keplr-wallet/stores";
-import { RectButton } from "react-native-gesture-handler";
 const BondStatus = Staking.BondStatus;
 
 /*
