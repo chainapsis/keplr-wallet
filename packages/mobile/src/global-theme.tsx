@@ -40,6 +40,7 @@ const globalTheme = {
   },
   Card: {
     containerStyle: {
+      opacity: 0.9,
       marginVertical: 4,
       marginHorizontal: 0,
       borderRadius: 6,
