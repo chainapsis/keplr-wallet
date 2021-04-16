@@ -19,3 +19,11 @@ export const Page: FunctionComponent = ({ children }) => {
     </SafeAreaView>
   );
 };
+
+export const FixedPage: FunctionComponent = ({ children }) => {
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>{children}</View>
+    </SafeAreaView>
+  );
+};
