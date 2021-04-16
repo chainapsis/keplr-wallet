@@ -9,7 +9,7 @@ import { View } from "react-native";
 
 type Validator = Staking.Validator;
 
-export const ValidatorDetailCard: FunctionComponent<{
+export const ValidatorDetailsCard: FunctionComponent<{
   validator: Validator;
   thumbnail: string;
   power: CoinPretty | undefined;
