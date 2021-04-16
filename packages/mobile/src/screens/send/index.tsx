@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -7,12 +8,15 @@ import { Page } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AddressInput, CoinInput } from "../../components/form";
 import { FeeButtons } from "../../components/form/fee-buttons";
+import { GradientBackground } from "../../components/svg";
 
 const SendStack = createStackNavigator();
 
 export const SendStackScreen: FunctionComponent = () => {
   return (
-    <SendStack.Navigator>
+    <SendStack.Navigator
+      screenOptions={{ headerBackground: () => <GradientBackground /> }}
+    >
       <SendStack.Screen name="Send" component={SendScreen} />
     </SendStack.Navigator>
   );
