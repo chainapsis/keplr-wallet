@@ -153,6 +153,7 @@ const VoteCheckbox: FunctionComponent<{
 
   return (
     <View
+      accessible
       style={{
         flexDirection: "row",
         alignItems: "center",

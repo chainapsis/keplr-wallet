@@ -26,31 +26,34 @@ const ProposalSummary: FunctionComponent<{
         });
       }}
     >
-      <Card>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 6,
-          }}
-        >
+      <View accessible>
+        <Card>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 6,
+            }}
+          >
+            <Text
+              style={{ fontWeight: "700", fontSize: 14 }}
+            >{`#${proposal.id}`}</Text>
+            <StateBadge proposalStatus={proposal.proposalStatus} />
+          </View>
+          <Text style={{ fontWeight: "700", fontSize: 14 }}>
+            {proposal.title}
+          </Text>
           <Text
-            style={{ fontWeight: "700", fontSize: 14 }}
-          >{`#${proposal.id}`}</Text>
-          <StateBadge proposalStatus={proposal.proposalStatus} />
-        </View>
-        <Text style={{ fontWeight: "700", fontSize: 14 }}>
-          {proposal.title}
-        </Text>
-        <Text
-          style={{ color: theme.colors?.grey1, fontSize: 11, marginTop: 6 }}
-        >
-          {proposal.proposalStatus === Governance.ProposalStatus.DEPOSIT_PERIOD
-            ? `Deposit End Time: ${parseTime(proposal.raw.deposit_end_time)}`
-            : `Voting End Time: ${parseTime(proposal.raw.voting_end_time)}`}
-        </Text>
-      </Card>
+            style={{ color: theme.colors?.grey1, fontSize: 11, marginTop: 6 }}
+          >
+            {proposal.proposalStatus ===
+            Governance.ProposalStatus.DEPOSIT_PERIOD
+              ? `Deposit End Time: ${parseTime(proposal.raw.deposit_end_time)}`
+              : `Voting End Time: ${parseTime(proposal.raw.voting_end_time)}`}
+          </Text>
+        </Card>
+      </View>
     </RectButton>
   );
 });
