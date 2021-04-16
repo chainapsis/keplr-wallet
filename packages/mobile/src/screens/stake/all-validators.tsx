@@ -32,15 +32,6 @@ const Validator: FunctionComponent<ValidatorProps> = React.memo(
 
     return (
       <RectButton
-        rippleColor="#AAAAAA"
-        style={{
-          borderTopWidth: 0.5,
-          borderTopColor: "#CDCDCD",
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          flexDirection: "row",
-          alignItems: "center",
-        }}
         onPress={() => {
           navigation.navigate("Validator Details", {
             validator,
@@ -48,53 +39,66 @@ const Validator: FunctionComponent<ValidatorProps> = React.memo(
             power,
           });
         }}
+        rippleColor="#AAAAAA"
       >
-        <Text
-          style={{
-            flex: 1,
-          }}
-        >
-          {index + 1}
-        </Text>
         <View
+          accessible
           style={{
-            flex: 8,
+            borderTopWidth: 0.5,
+            borderTopColor: "#CDCDCD",
+            paddingVertical: 12,
+            paddingHorizontal: 16,
             flexDirection: "row",
             alignItems: "center",
           }}
         >
-          <Avatar
-            source={{ uri: thumbnail }}
-            size={40}
-            rounded
-            icon={{ name: "user", type: "font-awesome" }}
-          />
           <Text
-            numberOfLines={1}
             style={{
-              fontSize: 13,
+              flex: 1,
             }}
           >
-            {validator.description.moniker}
+            {index + 1}
           </Text>
-          {isDelegated ? <Badge status="primary" /> : null}
-        </View>
-        <Text
-          style={{
-            flex: 1,
-          }}
-        >
-          {`${DecUtils.trim(
-            inflation
-              .toDec()
-              .mul(
-                new Dec(1).sub(
-                  new Dec(validator.commission.commission_rates.rate)
+          <View
+            style={{
+              flex: 8,
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <Avatar
+              source={{ uri: thumbnail }}
+              size={40}
+              rounded
+              icon={{ name: "user", type: "font-awesome" }}
+            />
+            <Text
+              numberOfLines={1}
+              style={{
+                fontSize: 13,
+              }}
+            >
+              {validator.description.moniker}
+            </Text>
+            {isDelegated ? <Badge status="primary" /> : null}
+          </View>
+          <Text
+            style={{
+              flex: 1,
+            }}
+          >
+            {`${DecUtils.trim(
+              inflation
+                .toDec()
+                .mul(
+                  new Dec(1).sub(
+                    new Dec(validator.commission.commission_rates.rate)
+                  )
                 )
-              )
-              .toString(1)
-          )}%`}
-        </Text>
+                .toString(1)
+            )}%`}
+          </Text>
+        </View>
       </RectButton>
     );
   }
