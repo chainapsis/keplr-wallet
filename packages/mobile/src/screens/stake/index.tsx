@@ -8,7 +8,7 @@ const StakeStack = createStackNavigator();
 
 export const StakeStackScreen: FunctionComponent = () => {
   return (
-    <StakeStack.Navigator>
+    <StakeStack.Navigator screenOptions={{ headerBackTitleVisible: false }}>
       <StakeStack.Screen name="Stake" component={StakeScreen} />
       <StakeStack.Screen
         name="Validator Details"
