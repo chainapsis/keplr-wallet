@@ -5,9 +5,9 @@ import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
 import { Text, Badge, Avatar, Card } from "react-native-elements";
 import { View, FlatList } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { Staking } from "@keplr-wallet/stores";
-import { TouchableOpacity } from "react-native-gesture-handler";
 const BondStatus = Staking.BondStatus;
 
 /*
@@ -31,7 +31,8 @@ const Validator: FunctionComponent<ValidatorProps> = React.memo(
     const navigation = useNavigation();
 
     return (
-      <TouchableOpacity
+      <RectButton
+        rippleColor="#AAAAAA"
         style={{
           borderTopWidth: 0.5,
           borderTopColor: "#CDCDCD",
@@ -94,7 +95,7 @@ const Validator: FunctionComponent<ValidatorProps> = React.memo(
               .toString(1)
           )}%`}
         </Text>
-      </TouchableOpacity>
+      </RectButton>
     );
   }
 );
