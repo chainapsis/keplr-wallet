@@ -316,6 +316,281 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "sifchain",
       },
+      {
+        coinDenom: "Tether USDT",
+        coinMinimalDenom: "cusdt",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "Ethereum",
+        coinMinimalDenom: "ceth",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Basic Attention Token",
+        coinMinimalDenom: "cbat",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Aragon",
+        coinMinimalDenom: "cant",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Bancor Network Token",
+        coinMinimalDenom: "cbnt",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "0x",
+        coinMinimalDenom: "czrx",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Chainlink",
+        coinMinimalDenom: "clink",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Decentraland",
+        coinMinimalDenom: "cmana",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Loopring",
+        coinMinimalDenom: "clrc",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Enjin Coin",
+        coinMinimalDenom: "cenj",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Synthetix Network Token",
+        coinMinimalDenom: "csnx",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "TrueUSD",
+        coinMinimalDenom: "ctusd",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Ocean Protocol",
+        coinMinimalDenom: "cocean",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Fantom",
+        coinMinimalDenom: "cftm",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "sUSD",
+        coinMinimalDenom: "csusd",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "USD Coin",
+        coinMinimalDenom: "cusdc",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "Crypto com Coin",
+        coinMinimalDenom: "ccro",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "Wrapped Bitcoin",
+        coinMinimalDenom: "cwbtc",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "Swipe",
+        coinMinimalDenom: "csxp",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Band Protocol",
+        coinMinimalDenom: "cband",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Dai Stablecoin",
+        coinMinimalDenom: "cdai",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Compound",
+        coinMinimalDenom: "ccomp",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "UMA",
+        coinMinimalDenom: "cuma",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Balancer",
+        coinMinimalDenom: "cbal",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Yearn finance",
+        coinMinimalDenom: "cyfi",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Serum",
+        coinMinimalDenom: "csrm",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "Cream",
+        coinMinimalDenom: "ccream",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "SAND",
+        coinMinimalDenom: "csand",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Sushi",
+        coinMinimalDenom: "csushi",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Empty Set Dollar",
+        coinMinimalDenom: "cesd",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Uniswap",
+        coinMinimalDenom: "cuni",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Aave",
+        coinMinimalDenom: "caave",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "BarnBridge",
+        coinMinimalDenom: "cbond",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Wrapped Filecoin",
+        coinMinimalDenom: "cwfil",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "The Graph",
+        coinMinimalDenom: "cgrt",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Tokenlon",
+        coinMinimalDenom: "clon",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "1inch",
+        coinMinimalDenom: "c1inch",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "THORChain ERC20",
+        coinMinimalDenom: "crune",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Secret ERC20",
+        coinMinimalDenom: "cwscrt",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "IoTeX",
+        coinMinimalDenom: "ciotx",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Reef Finance",
+        coinMinimalDenom: "creef",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "COCOS BCX",
+        coinMinimalDenom: "ccocos",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Keep Network",
+        coinMinimalDenom: "ckeep",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Origin Protocol",
+        coinMinimalDenom: "cogn",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "ODAOfi",
+        coinMinimalDenom: "cdaofi",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Linear",
+        coinMinimalDenom: "clina",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "12Ships",
+        coinMinimalDenom: "ctshp",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "B.20",
+        coinMinimalDenom: "cb20",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Akropolis",
+        coinMinimalDenom: "cakro",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Rio Fuel Token",
+        coinMinimalDenom: "crfuel",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Rally",
+        coinMinimalDenom: "crly",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Convergence",
+        coinMinimalDenom: "cconv",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Render Token",
+        coinMinimalDenom: "crndr",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "PAID Network",
+        coinMinimalDenom: "cpaid",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Tidal",
+        coinMinimalDenom: "ctidal",
+        coinDecimals: 18,
+      },
     ],
     feeCurrencies: [
       {

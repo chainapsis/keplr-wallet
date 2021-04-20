@@ -21,6 +21,8 @@ import { useIntl } from "react-intl";
 import { useConfirm } from "../../components/confirm";
 import { ChainUpdaterService } from "@keplr-wallet/background";
 import { IBCTransferView } from "./ibc-transfer";
+import { DenomHelper } from "@keplr-wallet/common";
+import { Dec } from "@keplr-wallet/unit";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -71,7 +73,14 @@ export const MainPage: FunctionComponent = observer(() => {
     .getQueryBalances()
     .getQueryBech32Address(accountInfo.bech32Address);
 
-  const tokens = queryBalances.unstakables;
+  const tokens = queryBalances.unstakables.filter((bal) => {
+    // Temporary implementation for trimming the 0 balanced native tokens.
+    // TODO: Remove this part.
+    if (new DenomHelper(bal.currency.coinMinimalDenom).type === "native") {
+      return bal.balance.toDec().gt(new Dec("0"));
+    }
+    return true;
+  });
 
   const hasTokens = tokens.length > 0;
 
