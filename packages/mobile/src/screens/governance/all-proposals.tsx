@@ -56,19 +56,36 @@ const ProposalSummary: FunctionComponent<{
           }}
         >
           <Text
-            style={{ fontWeight: "700", fontSize: 14 }}
+            style={{
+              fontWeight: "600",
+              fontSize: 16,
+              lineHeight: 18,
+              letterSpacing: 0.4,
+            }}
           >{`#${proposal.id}`}</Text>
           <StateBadge proposalStatus={proposal.proposalStatus} />
         </View>
-        <Text style={{ fontWeight: "700", fontSize: 14 }}>
+        <Text
+          style={{
+            fontWeight: "600",
+            fontSize: 16,
+            lineHeight: 18,
+            letterSpacing: 0.4,
+          }}
+        >
           {proposal.title}
         </Text>
         <Text
-          style={{ color: theme.colors?.grey1, fontSize: 11, marginTop: 6 }}
+          style={{
+            color: theme.colors?.grey1,
+            fontSize: 12,
+            lineHeight: 14,
+            marginTop: 6,
+          }}
         >
           {proposal.proposalStatus === Governance.ProposalStatus.DEPOSIT_PERIOD
-            ? `Deposit End Time: ${parseTime(proposal.raw.deposit_end_time)}`
-            : `Voting End Time: ${parseTime(proposal.raw.voting_end_time)}`}
+            ? `Deposit endtime: ${parseTime(proposal.raw.deposit_end_time)}`
+            : `Voting endtime: ${parseTime(proposal.raw.voting_end_time)}`}
         </Text>
       </View>
     </RectButton>

@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
-import { Button } from "react-native-elements";
+import { DefaultButton } from "../../components/buttons";
 import { Page } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AddressInput, CoinInput } from "../../components/form";
@@ -15,7 +15,10 @@ const SendStack = createStackNavigator();
 export const SendStackScreen: FunctionComponent = () => {
   return (
     <SendStack.Navigator
-      screenOptions={{ headerBackground: () => <GradientBackground /> }}
+      screenOptions={{
+        headerBackground: () => <GradientBackground />,
+        headerBackTitleVisible: false,
+      }}
     >
       <SendStack.Screen name="Send" component={SendScreen} />
     </SendStack.Navigator>
@@ -50,8 +53,8 @@ const SendScreen: FunctionComponent = observer(() => {
       <AddressInput recipientConfig={sendConfigs.recipientConfig} />
       <CoinInput amountConfig={sendConfigs.amountConfig} />
       <FeeButtons feeConfig={sendConfigs.feeConfig} priceStore={priceStore} />
-      <Button
-        title="Send"
+      <DefaultButton
+        title="Submit"
         disabled={!sendConfigIsValid || !accountInfo.isReadyToSendMsgs}
         loading={accountInfo.isSendingMsg === "send"}
         onPress={async () => {

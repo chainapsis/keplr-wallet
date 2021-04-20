@@ -20,8 +20,36 @@ const globalTheme = {
     warning: "#fb6340",
     divider: "#e9ecef",
   },
+  Text: { style: { color: "#1C3051" } },
   Button: {
     containerStyle: {
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 1.41,
+        },
+        android: {
+          elevation: 2,
+        },
+      }),
+    },
+  },
+  Input: {
+    labelStyle: { color: "#1C3051" },
+    containerStyle: { paddingHorizontal: 0 },
+    inputContainerStyle: {
+      backgroundColor: "#fff",
+      opacity: 0.9,
+      borderBottomWidth: 0,
+      borderRadius: 4,
+      marginTop: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
       ...Platform.select({
         ios: {
           shadowColor: "#000",
