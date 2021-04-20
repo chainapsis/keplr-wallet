@@ -77,7 +77,8 @@ export const SignPage: FunctionComponent = observer(() => {
         interactionInfo.interaction &&
         interactionInfo.interactionInternal &&
         signDoc.msgs.length === 1 &&
-        signDoc.msgs[0].type === "cosmos-sdk/MsgSend"
+        (signDoc.msgs[0].type === "cosmos-sdk/MsgSend" ||
+          signDoc.msgs[0].type === "cosmos-sdk/MsgTransfer")
       );
     }
     return false;
