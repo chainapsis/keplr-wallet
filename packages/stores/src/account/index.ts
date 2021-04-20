@@ -18,14 +18,14 @@ import {
   StdSignDoc,
 } from "@cosmjs/launchpad";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
-import { QueriesStore } from "../query";
-import { Queries } from "../query/queries";
+import { HasCosmosQueries, HasSecretQueries, QueriesStore } from "../query";
 
 import { BondStatus } from "../query/cosmos/staking/types";
 
 import { Buffer } from "buffer/";
 import { DeepPartial, DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
+import { QueriesSetBase } from "../query/queries";
 
 export enum WalletStatus {
   Loading = "Loading",
@@ -143,7 +143,9 @@ export class AccountStoreInner {
   constructor(
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore,
+    protected readonly queriesStore: QueriesStore<
+      QueriesSetBase & HasCosmosQueries & HasSecretQueries
+    >,
     protected readonly opts: AccountStoreInnerOpts
   ) {
     makeObservable(this);
@@ -255,8 +257,7 @@ export class AccountStoreInner {
 
       // After sending tx, the balances is probably changed due to the fee.
       for (const feeAmount of signDoc.fee.amount) {
-        const bal = this.queries
-          .getQueryBalances()
+        const bal = this.queries.queryBalances
           .getQueryBech32Address(this.bech32Address)
           .balances.find(
             (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
@@ -313,8 +314,7 @@ export class AccountStoreInner {
           (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
-              const queryBalance = this.queries
-                .getQueryBalances()
+              const queryBalance = this.queries.queryBalances
                 .getQueryBech32Address(this.bech32Address)
                 .balances.find((bal) => {
                   return (
@@ -352,8 +352,7 @@ export class AccountStoreInner {
           (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
-              const queryBalance = this.queries
-                .getQueryBalances()
+              const queryBalance = this.queries.queryBalances
                 .getQueryBech32Address(this.bech32Address)
                 .balances.find((bal) => {
                   return (
@@ -402,8 +401,7 @@ export class AccountStoreInner {
 
     const destinationBlockHeight = this.queriesStore
       .get(channel.counterpartyChainId)
-      .getQueryBlock()
-      .getBlock("latest");
+      .cosmos.queryBlock.getBlock("latest");
 
     runInAction(() => {
       this._isSendingMsg = "ibcTransfer";
@@ -448,8 +446,7 @@ export class AccountStoreInner {
     await this.sendMsgs("ibcTransfer", [msg], stdFee, memo, (tx) => {
       if (tx.code == null || tx.code === 0) {
         // After succeeding to send token, refresh the balance.
-        const queryBalance = this.queries
-          .getQueryBalances()
+        const queryBalance = this.queries.queryBalances
           .getQueryBech32Address(this.bech32Address)
           .balances.find((bal) => {
             return bal.currency.coinMinimalDenom === currency.coinMinimalDenom;
@@ -508,16 +505,13 @@ export class AccountStoreInner {
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to delegate, refresh the validators and delegations, rewards.
-          this.queries
-            .getQueryValidators()
+          this.queries.cosmos.queryValidators
             .getQueryStatus(BondStatus.Bonded)
             .fetch();
-          this.queries
-            .getQueryDelegations()
+          this.queries.cosmos.queryDelegations
             .getQueryBech32Address(this.bech32Address)
             .fetch();
-          this.queries
-            .getQueryRewards()
+          this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.bech32Address)
             .fetch();
         }
@@ -571,20 +565,16 @@ export class AccountStoreInner {
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to unbond, refresh the validators and delegations, unbonding delegations, rewards.
-          this.queries
-            .getQueryValidators()
+          this.queries.cosmos.queryValidators
             .getQueryStatus(BondStatus.Bonded)
             .fetch();
-          this.queries
-            .getQueryDelegations()
+          this.queries.cosmos.queryDelegations
             .getQueryBech32Address(this.bech32Address)
             .fetch();
-          this.queries
-            .getQueryUnbondingDelegations()
+          this.queries.cosmos.queryUnbondingDelegations
             .getQueryBech32Address(this.bech32Address)
             .fetch();
-          this.queries
-            .getQueryRewards()
+          this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.bech32Address)
             .fetch();
         }
@@ -641,16 +631,13 @@ export class AccountStoreInner {
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to redelegate, refresh the validators and delegations, rewards.
-          this.queries
-            .getQueryValidators()
+          this.queries.cosmos.queryValidators
             .getQueryStatus(BondStatus.Bonded)
             .fetch();
-          this.queries
-            .getQueryDelegations()
+          this.queries.cosmos.queryDelegations
             .getQueryBech32Address(this.bech32Address)
             .fetch();
-          this.queries
-            .getQueryRewards()
+          this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.bech32Address)
             .fetch();
         }
@@ -690,8 +677,7 @@ export class AccountStoreInner {
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to withdraw rewards, refresh rewards.
-          this.queries
-            .getQueryRewards()
+          this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.bech32Address)
             .fetch();
         }
@@ -748,9 +734,9 @@ export class AccountStoreInner {
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to vote, refresh the proposal.
-          const proposal = this.queries
-            .getQueryGovernance()
-            .proposals.find((proposal) => proposal.id === proposalId);
+          const proposal = this.queries.cosmos.queryGovernance.proposals.find(
+            (proposal) => proposal.id === proposalId
+          );
           if (proposal) {
             proposal.fetch();
           }
@@ -865,8 +851,7 @@ export class AccountStoreInner {
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object
   ): Promise<Uint8Array> {
-    const queryContractCodeHashResponse = await this.queries
-      .getQuerySecretContractCodeHash()
+    const queryContractCodeHashResponse = await this.queries.secret.querySecretContractCodeHash
       .getQueryContract(contractAddress)
       .waitResponse();
 
@@ -963,7 +948,9 @@ export class AccountStoreInner {
     return this._isSendingMsg;
   }
 
-  protected get queries(): Queries {
+  protected get queries(): QueriesSetBase &
+    HasCosmosQueries &
+    HasSecretQueries {
     return this.queriesStore.get(this.chainId);
   }
 }
@@ -971,7 +958,9 @@ export class AccountStoreInner {
 export class AccountStore extends HasMapStore<AccountStoreInner> {
   constructor(
     protected readonly chainGetter: ChainGetter,
-    protected readonly queriesStore: QueriesStore,
+    protected readonly queriesStore: QueriesStore<
+      QueriesSetBase & HasCosmosQueries & HasSecretQueries
+    >,
     protected readonly opts: AccountStoreOpts = {}
   ) {
     super((chainId: string) => {

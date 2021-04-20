@@ -2,13 +2,9 @@ import { autorun, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { ChainStore } from "../chain";
 import { DeepReadonly } from "utility-types";
-import {
-  ObservableQueryDenomTrace,
-  ObservableQueryIBCClientState,
-} from "../query";
+import { HasCosmosQueries, QueriesSetBase } from "../query";
 import { AccountStore } from "../account";
 import { HasMapStore } from "../common";
-import { ObservableQueryBalances } from "../query/balances";
 import { Balances } from "../query/cosmos/balance/types";
 import { computedFn } from "mobx-utils";
 
@@ -21,13 +17,7 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     protected readonly chainStore: ChainStore<C>,
     protected readonly accountStore: AccountStore,
     protected readonly queriesStore: {
-      get(
-        chainId: string
-      ): {
-        getQueryIBCClientState(): DeepReadonly<ObservableQueryIBCClientState>;
-        getQueryIBCDenomTrace(): DeepReadonly<ObservableQueryDenomTrace>;
-        getQueryBalances(): DeepReadonly<ObservableQueryBalances>;
-      };
+      get(chainId: string): QueriesSetBase & HasCosmosQueries;
     }
   ) {
     makeObservable(this);
@@ -40,18 +30,18 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
         const accountInfo = this.accountStore.getAccount(this.chainId);
         if (accountInfo.bech32Address.length > 0) {
           const queries = queriesStore.get(this.chainId);
-          const balances = queries
-            .getQueryBalances()
-            .getQueryBech32Address(accountInfo.bech32Address).stakable;
+          const balances = queries.queryBalances.getQueryBech32Address(
+            accountInfo.bech32Address
+          ).stakable;
 
           const response = balances.response;
           if (response) {
             for (const bal of (response.data as Balances).result) {
               if (bal.denom.startsWith("ibc/")) {
                 const hash = bal.denom.replace("ibc/", "");
-                const denomTrace = queries
-                  .getQueryIBCDenomTrace()
-                  .getDenomTrace(hash).denomTrace;
+                const denomTrace = queries.cosmos.queryIBCDenomTrace.getDenomTrace(
+                  hash
+                ).denomTrace;
                 if (denomTrace) {
                   const paths = denomTrace.paths;
                   // The previous chain id from current path.
@@ -61,8 +51,10 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
                   for (const path of paths) {
                     const clientState = this.queriesStore
                       .get(chainIdBefore)
-                      .getQueryIBCClientState()
-                      .getClientState(path.portId, path.channelId);
+                      .cosmos.queryIBCClientState.getClientState(
+                        path.portId,
+                        path.channelId
+                      );
                     if (
                       clientState.clientChainId &&
                       this.chainStore.hasChain(clientState.clientChainId)
@@ -171,13 +163,7 @@ export class IBCCurrencyRegsitrar<
     protected readonly chainStore: ChainStore<C>,
     protected readonly accountStore: AccountStore,
     protected readonly queriesStore: {
-      get(
-        chainId: string
-      ): {
-        getQueryIBCClientState(): DeepReadonly<ObservableQueryIBCClientState>;
-        getQueryIBCDenomTrace(): DeepReadonly<ObservableQueryDenomTrace>;
-        getQueryBalances(): DeepReadonly<ObservableQueryBalances>;
-      };
+      get(chainId: string): QueriesSetBase & HasCosmosQueries;
     }
   ) {
     super((chainId: string) => {

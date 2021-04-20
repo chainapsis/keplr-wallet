@@ -42,7 +42,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     chainStore.current.chainId,
     accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.getQueryBalances(),
+    queries.queryBalances,
     EthereumEndpoint
   );
 

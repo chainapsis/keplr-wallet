@@ -24,14 +24,14 @@ export const StakeView: FunctionComponent = observer(() => {
 
   const notification = useNotification();
 
-  const inflation = queries.getQueryInflation();
-  const rewards = queries
-    .getQueryRewards()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const inflation = queries.cosmos.queryInflation;
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
   const stakableReward = rewards.stakableReward;
-  const stakable = queries
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address).stakable;
+  const stakable = queries.queryBalances.getQueryBech32Address(
+    accountInfo.bech32Address
+  ).stakable;
 
   const isRewardExist = rewards.rewards.length > 0;
 

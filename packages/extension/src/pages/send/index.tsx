@@ -54,7 +54,7 @@ export const SendPage: FunctionComponent = observer(() => {
     current.chainId,
     accountInfo.msgOpts.send,
     accountInfo.bech32Address,
-    queriesStore.get(current.chainId).getQueryBalances(),
+    queriesStore.get(current.chainId).queryBalances,
     EthereumEndpoint
   );
 

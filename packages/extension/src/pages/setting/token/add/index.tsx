@@ -63,9 +63,9 @@ export const AddTokenPage: FunctionComponent = observer(() => {
   }, [chainStore, contractAddress, form, tokensStore.waitingSuggestedToken]);
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const queryContractInfo = queries
-    .getQuerySecret20ContractInfo()
-    .getQueryContract(contractAddress);
+  const queryContractInfo = queries.secret.querySecret20ContractInfo.getQueryContract(
+    contractAddress
+  );
 
   const tokenInfo = queryContractInfo.tokenInfo;
 

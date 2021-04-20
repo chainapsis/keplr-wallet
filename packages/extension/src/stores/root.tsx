@@ -14,6 +14,11 @@ import {
   ChainSuggestStore,
   IBCChannelStore,
   IBCCurrencyRegsitrar,
+  QueriesSetBase,
+  HasCosmosQueries,
+  HasSecretQueries,
+  mixInCosmosQueries,
+  mixInSecretQueries,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -37,7 +42,9 @@ export class RootStore {
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
-  public readonly queriesStore: QueriesStore;
+  public readonly queriesStore: QueriesStore<
+    QueriesSetBase & HasCosmosQueries & HasSecretQueries
+  >;
   public readonly accountStore: AccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
@@ -82,7 +89,8 @@ export class RootStore {
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
-      this.chainStore
+      this.chainStore,
+      mixInSecretQueries(mixInCosmosQueries(QueriesSetBase))
     );
 
     this.accountStore = new AccountStore(this.chainStore, this.queriesStore, {

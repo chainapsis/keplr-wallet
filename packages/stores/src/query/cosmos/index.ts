@@ -10,3 +10,5 @@ export * as Staking from "./staking/types";
 export * as Supply from "./supply/types";
 export * as Account from "./account/types";
 export * as IBC from "./ibc/types";
+
+export * from "./queries";

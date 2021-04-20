@@ -70,8 +70,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address);
+    .queryBalances.getQueryBech32Address(accountInfo.bech32Address);
 
   const tokens = queryBalances.unstakables.filter((bal) => {
     // Temporary implementation for trimming the 0 balanced native tokens.
