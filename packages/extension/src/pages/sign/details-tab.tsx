@@ -25,9 +25,9 @@ export const DetailsTab: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
 
-  hideFeeButtons: boolean | undefined;
+  disableInputs: boolean | undefined;
 }> = observer(
-  ({ signDocHelper, memoConfig, feeConfig, gasConfig, hideFeeButtons }) => {
+  ({ signDocHelper, memoConfig, feeConfig, gasConfig, disableInputs }) => {
     const { chainStore, priceStore, accountStore } = useStore();
     const intl = useIntl();
 
@@ -96,12 +96,27 @@ export const DetailsTab: FunctionComponent<{
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
           {renderedMsgs}
         </div>
-        <MemoInput
-          memoConfig={memoConfig}
-          label={intl.formatMessage({ id: "sign.info.memo" })}
-          rows={1}
-        />
-        {!hideFeeButtons ? (
+        {!disableInputs ? (
+          <MemoInput
+            memoConfig={memoConfig}
+            label={intl.formatMessage({ id: "sign.info.memo" })}
+            rows={1}
+          />
+        ) : (
+          <React.Fragment>
+            <Label for="memo" className="form-control-label">
+              <FormattedMessage id="sign.info.memo" />
+            </Label>
+            <div id="memo" style={{ marginBottom: "8px" }}>
+              <div style={{ color: memoConfig.memo ? undefined : "#AAAAAA" }}>
+                {memoConfig.memo
+                  ? memoConfig.memo
+                  : intl.formatMessage({ id: "sign.info.warning.empty-memo" })}
+              </div>
+            </div>
+          </React.Fragment>
+        )}
+        {!disableInputs ? (
           <FeeButtons
             feeConfig={feeConfig}
             gasConfig={gasConfig}

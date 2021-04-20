@@ -207,6 +207,7 @@
   "sign.list.messages.label": "Messages",
   "sign.info.fee": "Fee",
   "sign.info.memo": "Memo",
+  "sign.info.warning.empty-memo": "(Empty memo)",
   "sign.info.gas": "Gas",
   "sign.button.approve": "Approve",
   "sign.button.reject": "Reject",

@@ -111,7 +111,7 @@ export const SignPage: FunctionComponent = observer(() => {
     setIsLoadingSignDocInternalSend,
   ] = useState(false);
 
-  const hideFeeButtons = isSignDocInternalSend || isLoadingSignDocInternalSend;
+  const disableInputs = isSignDocInternalSend || isLoadingSignDocInternalSend;
 
   return (
     <HeaderLayout
@@ -167,7 +167,7 @@ export const SignPage: FunctionComponent = observer(() => {
               memoConfig={memoConfig}
               feeConfig={feeConfig}
               gasConfig={gasConfig}
-              hideFeeButtons={hideFeeButtons}
+              disableInputs={disableInputs}
             />
           ) : null}
         </div>
