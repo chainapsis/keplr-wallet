@@ -1,0 +1,16 @@
+**/*.scss
+**/*.html
+**/*.json
+**/*.png
+**/*.svg
+**/*.ttf
+**/*.secret
+**/*.md
+.DS_Store
+
+node_modules
+
+dist/*
+prod/*
+
+yarn.lock
