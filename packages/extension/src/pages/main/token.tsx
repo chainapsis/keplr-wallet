@@ -112,7 +112,7 @@ const TokenView: FunctionComponent<{
         <div className={styleToken.content}>
           <div className={styleToken.name}>{name}</div>
           <div className={styleToken.amount}>
-            {amount.toString()}
+            {amount.maxDecimals(6).toString()}
             {balance.isFetching ? (
               <i className="fas fa-spinner fa-spin ml-1" />
             ) : null}
