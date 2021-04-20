@@ -1,0 +1,14 @@
+@@ -1,11 +0,0 @@
+**/*.png
+**/*.svg
+**/*.ttf
+**/*.secret
+**/*.md
+.DS_Store
+
+node_modules
+
+dist/*
+prod/*
+
+yarn.lock
