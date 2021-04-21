@@ -825,7 +825,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 0,
       },
     ],
-    feeCurrencies: [],
+    feeCurrencies: [
+       {
+        coinDenom: "EUL",
+        coinMinimalDenom: "eul",
+        coinDecimals: 0,
+      },
+    ],
     beta: true,
   },
   {
