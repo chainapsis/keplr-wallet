@@ -11,6 +11,8 @@ import { UncontrolledTooltip } from "reactstrap";
 import { WrongViewingKeyError } from "@keplr-wallet/stores";
 import { useNotification } from "../../components/notification";
 import { useLoadingIndicator } from "../../components/loading-indicator";
+import { DenomHelper } from "@keplr-wallet/common";
+import { Dec } from "@keplr-wallet/unit";
 
 const TokenView: FunctionComponent<{
   balance: ObservableQueryBalanceInner;
@@ -110,7 +112,7 @@ const TokenView: FunctionComponent<{
         <div className={styleToken.content}>
           <div className={styleToken.name}>{name}</div>
           <div className={styleToken.amount}>
-            {amount.toString()}
+            {amount.maxDecimals(6).toString()}
             {balance.isFetching ? (
               <i className="fas fa-spinner fa-spin ml-1" />
             ) : null}
@@ -193,7 +195,15 @@ export const TokensView: FunctionComponent = observer(() => {
   const tokens = queriesStore
     .get(chainStore.current.chainId)
     .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address).unstakables;
+    .getQueryBech32Address(accountInfo.bech32Address)
+    .unstakables.filter((bal) => {
+      // Temporary implementation for trimming the 0 balanced native tokens.
+      // TODO: Remove this part.
+      if (new DenomHelper(bal.currency.coinMinimalDenom).type === "native") {
+        return bal.balance.toDec().gt(new Dec("0"));
+      }
+      return true;
+    });
 
   const history = useHistory();
 
