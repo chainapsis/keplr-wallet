@@ -1,7 +1,12 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useLayoutEffect, useEffect } from "react";
 import { Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigation,
+  useRoute,
+  getFocusedRouteNameFromRoute,
+} from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 import { RegisterScreen } from "./screens/register";
@@ -14,12 +19,16 @@ import { StakeStackScreen } from "./screens/stake";
 import { GovernanceStackScreen } from "./screens/governance";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContent } from "./components/drawer";
+import { Page } from "./components/page";
+import { alignItemsCenter, flex1, justifyContentCenter, sf } from "./styles";
 
 const SplashScreen: FunctionComponent = () => {
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Loading...</Text>
-    </View>
+    <Page>
+      <View style={sf([flex1, alignItemsCenter, justifyContentCenter])}>
+        <Text>Loading...</Text>
+      </View>
+    </Page>
   );
 };
 
@@ -27,13 +36,38 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
+export const MainNavigation: FunctionComponent = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  useEffect(() => {
+    const routeName = getFocusedRouteNameFromRoute(route);
+
+    if (routeName === "Home" || routeName === undefined) {
+      navigation.setOptions({ tabBarVisible: true });
+    } else {
+      navigation.setOptions({ tabBarVisible: false });
+    }
+  }, [navigation, route]);
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="Home" component={HomeStackScreen} />
+      <Stack.Screen name="Send" component={SendStackScreen} />
+      <Stack.Screen name="Stake" component={StakeStackScreen} />
+      <Stack.Screen name="Governance" component={GovernanceStackScreen} />
+    </Stack.Navigator>
+  );
+};
+
 export const MainTabNavigation: FunctionComponent = () => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeStackScreen} />
-      <Tab.Screen name="Send" component={SendStackScreen} />
-      <Tab.Screen name="Stake" component={StakeStackScreen} />
-      <Tab.Screen name="Governance" component={GovernanceStackScreen} />
+      <Tab.Screen name="Main" component={MainNavigation} />
+      {/* <Tab.Screen name="Setting" component={SettingStackScreen} /> */}
     </Tab.Navigator>
   );
 };
