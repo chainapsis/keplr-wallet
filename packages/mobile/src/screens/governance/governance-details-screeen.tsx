@@ -4,6 +4,7 @@ import { ScrollView } from "react-native";
 import { ProposalDetailsCard } from "./proposal-details-card";
 import { FixedPage } from "../../components/page";
 import { VotingButton } from "./voting-button";
+import { p2 } from "../../styles";
 
 export const GovernanceDetailsScreeen: FunctionComponent<{
   route: {
@@ -13,7 +14,7 @@ export const GovernanceDetailsScreeen: FunctionComponent<{
   const { proposalId } = route.params;
   return (
     <FixedPage>
-      <ScrollView style={{ padding: 10 }}>
+      <ScrollView style={p2}>
         <ProposalDetailsCard proposalId={proposalId} />
       </ScrollView>
       <VotingButton proposalId={proposalId} />

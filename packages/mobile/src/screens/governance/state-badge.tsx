@@ -1,44 +1,45 @@
 import React, { FunctionComponent } from "react";
-import { View } from "react-native";
-import { Text, useTheme } from "react-native-elements";
+import { StyleProp, View, ViewProps } from "react-native";
+import { Text, TextProps } from "react-native-elements";
 import { Governance } from "@keplr-wallet/stores";
+import { br2, caption2, px3, py1, sf } from "../../styles";
 
 export const StateBadge: FunctionComponent<{
   proposalStatus: Governance.ProposalStatus;
 }> = ({ proposalStatus }) => {
   const ProposalStatus = Governance.ProposalStatus;
 
-  const backgroundColor = (() => {
+  const backgroundColor: StyleProp<ViewProps> = (() => {
     switch (proposalStatus) {
       case ProposalStatus.DEPOSIT_PERIOD:
-        return "#aaedf9";
+        return { backgroundColor: "#aaedf9" };
       case ProposalStatus.VOTING_PERIOD:
-        return "#eaecfb";
+        return { backgroundColor: "#eaecfb" };
       case ProposalStatus.PASSED:
-        return "#b0eed3";
+        return { backgroundColor: "#b0eed3" };
       case ProposalStatus.REJECTED:
-        return "#fdd1da";
+        return { backgroundColor: "#fdd1da" };
       case ProposalStatus.FAILED:
-        return "#fdd1da";
+        return { backgroundColor: "#fdd1da" };
       default:
-        return "#fdd1da";
+        return { backgroundColor: "#fdd1da" };
     }
   })();
 
-  const textColor = (() => {
+  const fontColor: StyleProp<TextProps> = (() => {
     switch (proposalStatus) {
       case ProposalStatus.DEPOSIT_PERIOD:
-        return "#03acca";
+        return { color: "#03acca" };
       case ProposalStatus.VOTING_PERIOD:
-        return "#2643e9";
+        return { color: "#2643e9" };
       case ProposalStatus.PASSED:
-        return "#1aae6f";
+        return { color: "#1aae6f" };
       case ProposalStatus.REJECTED:
-        return "#f80031";
+        return { color: "#f80031" };
       case ProposalStatus.FAILED:
-        return "#f80031";
+        return { color: "#f80031" };
       default:
-        return "#f80031";
+        return { color: "#f80031" };
     }
   })();
 
@@ -60,15 +61,8 @@ export const StateBadge: FunctionComponent<{
   })();
 
   return (
-    <View
-      style={{
-        backgroundColor: backgroundColor,
-        borderRadius: 15,
-        paddingHorizontal: 10,
-        paddingVertical: 3,
-      }}
-    >
-      <Text style={{ color: textColor, fontWeight: "600" }}>{text}</Text>
+    <View style={sf([backgroundColor, br2, px3, py1])}>
+      <Text style={sf([fontColor, caption2])}>{text}</Text>
     </View>
   );
 };

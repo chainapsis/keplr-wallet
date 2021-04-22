@@ -3,11 +3,21 @@ import React, { FunctionComponent, useMemo } from "react";
 import { Dec, DecUtils, CoinPretty, IntPretty } from "@keplr-wallet/unit";
 import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
-import { Text, Badge, Avatar, Card } from "react-native-elements";
+import { Text, Badge, Avatar } from "react-native-elements";
 import { View, FlatList } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { Staking } from "@keplr-wallet/stores";
+import {
+  alignItemsCenter,
+  flex1,
+  flexDirectionRow,
+  fs13,
+  sf,
+  cardStyle,
+  bgcWhite,
+  shadow,
+} from "../../styles";
 const BondStatus = Staking.BondStatus;
 
 /*
@@ -52,52 +62,35 @@ const Validator: FunctionComponent<ValidatorProps> = React.memo(
             alignItems: "center",
           }}
         >
-          <Text
-            style={{
-              flex: 1,
-            }}
-          >
-            {index + 1}
-          </Text>
-          <View
-            style={{
-              flex: 8,
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
+          <View style={flex1}>
+            <Text>{index + 1}</Text>
+          </View>
+          <View style={sf([{ flex: 8 }, flexDirectionRow, alignItemsCenter])}>
             <Avatar
               source={{ uri: thumbnail }}
               size={40}
               rounded
               icon={{ name: "user", type: "font-awesome" }}
             />
-            <Text
-              numberOfLines={1}
-              style={{
-                fontSize: 13,
-              }}
-            >
+            <Text numberOfLines={1} style={fs13}>
               {validator.description.moniker}
             </Text>
             {isDelegated ? <Badge status="primary" /> : null}
           </View>
-          <Text
-            style={{
-              flex: 1,
-            }}
-          >
-            {`${DecUtils.trim(
-              inflation
-                .toDec()
-                .mul(
-                  new Dec(1).sub(
-                    new Dec(validator.commission.commission_rates.rate)
+          <View style={flex1}>
+            <Text>
+              {`${DecUtils.trim(
+                inflation
+                  .toDec()
+                  .mul(
+                    new Dec(1).sub(
+                      new Dec(validator.commission.commission_rates.rate)
+                    )
                   )
-                )
-                .toString(1)
-            )}%`}
-          </Text>
+                  .toString(1)
+              )}%`}
+            </Text>
+          </View>
         </View>
       </RectButton>
     );
@@ -173,25 +166,8 @@ export const AllValidators: FunctionComponent<{
   );
 
   return (
-    <Card
-      containerStyle={{
-        padding: 0,
-        marginHorizontal: 0,
-        marginVertical: 16,
-        borderRadius: 6,
-      }}
-    >
-      <Card.Title
-        h4
-        style={{
-          marginBottom: 0,
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          textAlign: "left",
-        }}
-      >
-        All Validators
-      </Card.Title>
+    <View style={sf([cardStyle, bgcWhite, shadow])}>
+      {/* <Text>All Validators</Text> */}
       {/* To Do Loading progress bar */}
       {/* {bondedValidators.isFetching || delegations.isFetching ? (
           <Icon></Icon>
@@ -201,6 +177,6 @@ export const AllValidators: FunctionComponent<{
         renderItem={renderValidator}
         windowSize={5}
       />
-    </Card>
+    </View>
   );
 });

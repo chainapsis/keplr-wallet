@@ -1,14 +1,30 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { Button, Text, useTheme } from "react-native-elements";
+import { Button, Text } from "react-native-elements";
 
 import { observer } from "mobx-react-lite";
-import { View } from "react-native";
+import { StyleProp, View, ViewProps } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { useStore } from "../../stores";
 import { Governance } from "@keplr-wallet/stores";
 import { WhiteButton, DefaultButton } from "../../components/buttons";
+import {
+  alignItemsCenter,
+  bgcWhite,
+  justifyContentCenter,
+  flexDirectionRow,
+  mr4,
+  sf,
+  bgcGray,
+  px4,
+  py4,
+  bbw1,
+  bcGray,
+  bgcPrimary,
+  br2,
+  buttonFont2,
+} from "../../styles";
 
-type VoteType = "Yes" | "Abstain" | "No" | "No With Veto";
+type VoteType = "Yes" | "Abstain" | "No" | "NoWithVeto";
 
 export const VotingButton: FunctionComponent<{
   proposalId: string;
@@ -88,12 +104,12 @@ export const VotingButton: FunctionComponent<{
           }
         />
       ) : (
-        <View style={{ borderRadius: 10, backgroundColor: "#fff" }}>
+        <View style={sf([br2, bgcWhite])}>
           <VoteOptionGroup
             active={voteActive}
             handleSetActive={setVoteActive}
           />
-          <View style={{ flexDirection: "row" }}>
+          <View style={flexDirectionRow}>
             <WhiteButton
               title="Cancel"
               color="warning"
@@ -126,7 +142,7 @@ const VoteOptionGroup: FunctionComponent<VoteOtionsGroupProps> = ({
   const [options] = useState<VoteType[]>([
     "Yes",
     "No",
-    "No With Veto",
+    "NoWithVeto",
     "Abstain",
   ]);
 
@@ -149,41 +165,38 @@ const VoteCheckbox: FunctionComponent<{
   active: boolean;
   optionText: string;
 }> = ({ active, optionText }) => {
-  const { theme } = useTheme();
+  const color: StyleProp<ViewProps> = active ? bgcPrimary : bgcGray;
 
   return (
     <View
       accessible
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingVertical: 18,
-        borderBottomWidth: 1,
-        borderColor: theme.colors?.greyOutline,
-      }}
+      style={sf([flexDirectionRow, alignItemsCenter, px4, py4, bbw1, bcGray])}
     >
       <View
-        style={{
-          width: 25,
-          height: 25,
-          borderRadius: 100,
-          backgroundColor: active ? theme.colors?.primary : theme.colors?.grey3,
-          justifyContent: "center",
-          alignItems: "center",
-          marginRight: 16,
-        }}
+        style={sf([
+          {
+            width: 25,
+            height: 25,
+            borderRadius: 100,
+          },
+          color,
+          justifyContentCenter,
+          alignItemsCenter,
+          mr4,
+        ])}
       >
         <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 100,
-            backgroundColor: "#fff",
-          }}
+          style={sf([
+            {
+              width: 10,
+              height: 10,
+              borderRadius: 100,
+            },
+            bgcWhite,
+          ])}
         />
       </View>
-      <Text style={{ fontSize: 14, fontWeight: "700" }}>{optionText}</Text>
+      <Text style={buttonFont2}>{optionText}</Text>
     </View>
   );
 };

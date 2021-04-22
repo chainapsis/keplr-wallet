@@ -5,6 +5,12 @@ import { useStore } from "../../stores";
 import { Text, Avatar, Card } from "react-native-elements";
 import { View } from "react-native";
 import { CoinPretty } from "@keplr-wallet/unit";
+import {
+  sf,
+  fs13,
+  flexDirectionRow,
+  justifyContentBetween,
+} from "../../styles";
 
 export const StakedDetailsCard: FunctionComponent<{
   thumbnail: string;
@@ -21,14 +27,7 @@ export const StakedDetailsCard: FunctionComponent<{
     .getQueryBech32Address(accountInfo.bech32Address);
 
   return (
-    <Card
-      containerStyle={{
-        padding: 16,
-        marginHorizontal: 0,
-        marginVertical: 16,
-        borderRadius: 6,
-      }}
-    >
+    <Card>
       <View>
         <Avatar
           source={{ uri: thumbnail }}
@@ -36,20 +35,15 @@ export const StakedDetailsCard: FunctionComponent<{
           rounded
           icon={{ name: "user", type: "font-awesome" }}
         />
-        <Text
-          numberOfLines={1}
-          style={{
-            fontSize: 13,
-          }}
-        >
+        <Text numberOfLines={1} style={fs13}>
           {validator.description.moniker}
         </Text>
       </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={sf([flexDirectionRow, justifyContentBetween])}>
         <Text>Staked</Text>
         <Text>{delegatedAmount.trim(true).toString()}</Text>
       </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={sf([flexDirectionRow, justifyContentBetween])}>
         <Text>Reward</Text>
         <Text>
           {rewards

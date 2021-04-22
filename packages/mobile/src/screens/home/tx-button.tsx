@@ -6,6 +6,7 @@ import { View } from "react-native";
 import { Dec } from "@keplr-wallet/unit";
 import { useNavigation } from "@react-navigation/native";
 import { WhiteButton } from "../..//components/buttons";
+import { flexDirectionRow, ml2, mr2 } from "../../styles";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
@@ -23,21 +24,15 @@ export const TxButtonView: FunctionComponent = observer(() => {
     undefined;
 
   return (
-    <View style={{ flexDirection: "row" }}>
-      <WhiteButton
-        containerStyle={{ marginRight: 7 }}
-        title="Deposit"
-        onPress={() => {}}
-      />
+    <View style={flexDirectionRow}>
+      <WhiteButton containerStyle={[mr2]} title="Deposit" onPress={() => {}} />
       {/*
         "Disabled" property in button tag will block the mouse enter/leave events.
         So, tooltip will not work as expected.
         To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
        */}
       <WhiteButton
-        containerStyle={{
-          marginLeft: 7,
-        }}
+        containerStyle={[ml2]}
         title="Send"
         disabled={!hasAssets}
         loading={accountInfo.isSendingMsg === "send"}

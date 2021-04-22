@@ -8,6 +8,13 @@ import { Staking } from "@keplr-wallet/stores";
 import { Text, Avatar, Card } from "react-native-elements";
 import { View } from "react-native";
 import { ProgressBar } from "../../components/svg";
+import {
+  sf,
+  flex1,
+  flexDirectionRow,
+  fs13,
+  justifyContentBetween,
+} from "../../styles";
 
 const BondStatus = Staking.BondStatus;
 type UnbondingDelegation = Staking.UnbondingDelegation;
@@ -25,29 +32,18 @@ const UnbondingItem: FunctionComponent<{
 }> = ({ thumbnail, validator, entry, progress }) => {
   return (
     <View>
-      <View style={{ flexDirection: "row" }}>
+      <View style={flexDirectionRow}>
         <Avatar
           source={{ uri: thumbnail }}
           size={40}
           rounded
           icon={{ name: "user", type: "font-awesome" }}
         />
-        <View style={{ flex: 1 }}>
-          <Text
-            numberOfLines={1}
-            style={{
-              fontSize: 13,
-              flex: 1,
-            }}
-          >
+        <View style={flex1}>
+          <Text numberOfLines={1} style={sf([flex1, fs13])}>
             {validator.description.moniker}
           </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
+          <View style={sf([flexDirectionRow, justifyContentBetween])}>
             <Text>{entry.balance}</Text>
             <Text>{moment(entry.completion_time).fromNow()}</Text>
           </View>
@@ -148,17 +144,8 @@ export const UnbondingCard: FunctionComponent<{
   unbondings: UnbondingDelegation[];
 }> = ({ unbondings }) => {
   return (
-    <Card
-      containerStyle={{
-        padding: 16,
-        marginHorizontal: 0,
-        marginVertical: 16,
-        borderRadius: 6,
-      }}
-    >
-      <Card.Title h4 style={{ textAlign: "left", marginBottom: 0 }}>
-        UnDelegating
-      </Card.Title>
+    <Card>
+      <Card.Title>UnDelegating</Card.Title>
       <UnbondingList unbondings={unbondings} />
     </Card>
   );

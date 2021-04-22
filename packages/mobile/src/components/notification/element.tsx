@@ -5,6 +5,13 @@ import { RectButton } from "react-native-gesture-handler";
 import { View } from "react-native";
 import { Dimensions } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
+import {
+  alignItemsCenter,
+  fcWhite,
+  flexDirectionRow,
+  justifyContentBetween,
+  sf,
+} from "../../styles";
 
 export interface NotificationElementProps {
   type: "primary" | "success" | "warning" | "error" | "secondary";
@@ -44,13 +51,9 @@ export const NotificationElement: FunctionComponent<
     >
       <View
         accessible
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+        style={sf([flexDirectionRow, justifyContentBetween, alignItemsCenter])}
       >
-        <Text style={{ color: "#fff" }}>{content}</Text>
+        <Text style={fcWhite}>{content}</Text>
         <Icon size={24} name="x" color="#fff" />
       </View>
     </RectButton>

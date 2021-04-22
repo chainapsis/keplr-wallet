@@ -5,12 +5,30 @@ import {
   ViewStyle,
   GestureResponderEvent,
 } from "react-native";
-import { Button, useTheme } from "react-native-elements";
+import { Button } from "react-native-elements";
+import {
+  bw1,
+  flex1,
+  br1,
+  px4,
+  sf,
+  bcPrimary,
+  fcPrimary,
+  bcSecondary,
+  fcSecondary,
+  bcWarining,
+  fcWarining,
+  bcError,
+  fcError,
+  bgcWhite,
+  buttonFont1,
+  py3,
+} from "../../styles";
 
 type WhiteButtonProps = {
-  containerStyle?: StyleProp<ViewStyle>;
-  buttonStyle?: StyleProp<ViewStyle>;
-  titleStyle?: StyleProp<TextStyle>;
+  containerStyle?: StyleProp<ViewStyle>[];
+  buttonStyle?: StyleProp<ViewStyle>[];
+  titleStyle?: StyleProp<TextStyle>[];
   disabled?: boolean;
   loading?: boolean;
   color?: "primary" | "secondary" | "error" | "warning";
@@ -19,52 +37,43 @@ type WhiteButtonProps = {
 };
 
 export const WhiteButton: FunctionComponent<WhiteButtonProps> = ({
-  containerStyle,
-  buttonStyle,
-  titleStyle,
+  containerStyle = [],
+  buttonStyle = [],
+  titleStyle = [],
   title,
   color,
   disabled,
   loading,
   onPress,
 }) => {
-  const { theme } = useTheme();
-
-  const themeColor = (() => {
+  const [borderColor, fontColor] = (() => {
     switch (color) {
       case "primary":
-        return theme.colors?.primary;
+        return [bcPrimary, fcPrimary];
       case "secondary":
-        return theme.colors?.secondary;
+        return [bcSecondary, fcSecondary];
       case "warning":
-        return theme.colors?.warning;
+        return [bcWarining, fcWarining];
       case "error":
-        return theme.colors?.error;
+        return [bcError, fcError];
       default:
-        return theme.colors?.primary;
+        return [bcPrimary, fcPrimary];
     }
   })();
 
   return (
     <Button
-      containerStyle={{
-        flex: 1,
-        ...(containerStyle as Record<string, unknown>),
-      }}
-      buttonStyle={{
-        borderWidth: 1,
-        borderColor: themeColor,
-        borderRadius: 8,
-        backgroundColor: theme.colors?.white,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        ...(buttonStyle as Record<string, unknown>),
-      }}
-      titleStyle={{
-        color: themeColor,
-        fontWeight: "500",
-        ...(titleStyle as Record<string, unknown>),
-      }}
+      containerStyle={sf([flex1, ...containerStyle])}
+      buttonStyle={sf([
+        borderColor,
+        bgcWhite,
+        bw1,
+        br1,
+        px4,
+        py3,
+        ...buttonStyle,
+      ])}
+      titleStyle={sf([fontColor, buttonFont1, ...titleStyle])}
       title={title}
       onPress={onPress}
       loading={loading}
