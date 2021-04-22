@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import {
   EmptyAmountError,
   IAmountConfig,
@@ -6,18 +6,76 @@ import {
   InvalidNumberAmountError,
   NagativeAmountError,
   ZeroAmountError,
+  IFeeConfig,
 } from "@keplr-wallet/hooks";
+
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { observer } from "mobx-react-lite";
-import { Input } from "react-native-elements";
+import { Input, Text } from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
 import RNPickerSelect from "react-native-picker-select";
+import { View } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useStore } from "../../stores";
+import {
+  bgcGray,
+  bgcWhite,
+  caption1,
+  fcGrey1,
+  flexDirectionRow,
+  justifyContentBetween,
+  sf,
+  subtitle2,
+  underline,
+} from "../../styles";
 
 export interface CoinInputProps {
   amountConfig: IAmountConfig;
+  feeConfig: IFeeConfig;
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = observer(
-  ({ amountConfig }) => {
+  ({ amountConfig, feeConfig }) => {
+    const { queriesStore } = useStore();
+    const queryBalances = queriesStore
+      .get(amountConfig.chainId)
+      .getQueryBalances()
+      .getQueryBech32Address(amountConfig.sender);
+
+    const queryBalance = queryBalances.balances.find(
+      (bal) =>
+        amountConfig.sendCurrency.coinMinimalDenom ===
+        bal.currency.coinMinimalDenom
+    );
+    const balance = queryBalance
+      ? queryBalance.balance
+      : new CoinPretty(amountConfig.sendCurrency, new Int(0));
+
+    const [isAllBalanceMode, setIsAllBalanceMode] = useState(false);
+    const toggleAllBalanceMode = () => setIsAllBalanceMode((value) => !value);
+
+    const fee = feeConfig.fee;
+    useEffect(() => {
+      if (isAllBalanceMode) {
+        // Get the actual sendable balance with considering the fee.
+        const sendableBalance =
+          balance.currency.coinMinimalDenom === fee?.currency.coinMinimalDenom
+            ? new CoinPretty(
+                balance.currency,
+                balance
+                  .toDec()
+                  .sub(fee.toDec())
+                  .mul(DecUtils.getPrecisionDec(balance.currency.coinDecimals))
+                  .truncate()
+              )
+            : balance;
+
+        amountConfig.setAmount(
+          sendableBalance.trim(true).locale(false).hideDenom(true).toString()
+        );
+      }
+    }, [balance, fee, isAllBalanceMode, amountConfig]);
+
     const error = amountConfig.getError();
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -42,6 +100,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
     return (
       <React.Fragment>
         <RNPickerSelect
+          disabled={isAllBalanceMode}
           onValueChange={(value) => {
             const currency = amountConfig.sendableCurrencies.find(
               (cur) => cur.coinMinimalDenom === value
@@ -59,17 +118,28 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
         >
           <Input
             label="Token"
+            disabled={isAllBalanceMode}
+            inputContainerStyle={isAllBalanceMode ? bgcGray : bgcWhite}
             value={amountConfig.sendCurrency.coinDenom}
             rightIcon={<Icon name="chevron-down" />}
           />
         </RNPickerSelect>
+        <View style={sf([flexDirectionRow, justifyContentBetween])}>
+          <Text style={subtitle2}>Amount</Text>
+          <TouchableOpacity onPress={toggleAllBalanceMode}>
+            <Text style={sf([fcGrey1, caption1, underline])}>
+              {`Balance: ${balance.trim(true).maxDecimals(6).toString()}`}
+            </Text>
+          </TouchableOpacity>
+        </View>
         <Input
-          label="Amount"
           value={amountConfig.amount}
           onChangeText={(value) => {
             amountConfig.setAmount(value);
           }}
           keyboardType="numeric"
+          disabled={isAllBalanceMode}
+          inputContainerStyle={isAllBalanceMode ? bgcGray : bgcWhite}
           errorMessage={errorText}
         />
       </React.Fragment>
