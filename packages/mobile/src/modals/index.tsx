@@ -11,6 +11,22 @@ import {
   useSignDocHelper,
 } from "@keplr-wallet/hooks";
 import { Button, Input, Text } from "react-native-elements";
+import {
+  bgcWhite,
+  flexDirectionRow,
+  justifyContentEnd,
+  m0,
+  pt4,
+  pb6,
+  px4,
+  sf,
+  h4,
+  alignItemsCenter,
+  justifyContentBetween,
+  fAlignCenter,
+} from "../styles";
+import { DefaultButton, WhiteButton } from "../components/buttons";
+import { TransactionDetails } from "./transaction-details";
 
 export const ModalsRenderer: FunctionComponent = observer(() => {
   const {
@@ -63,18 +79,21 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
     <React.Fragment>
       <Modal
         isVisible={interactionModalStore.lastUrl != null}
-        style={{ justifyContent: "flex-end", margin: 0 }}
+        style={sf([justifyContentEnd, m0])}
       >
         <View
-          style={{
-            height: 600,
-            backgroundColor: "#FFFFFF",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          style={sf([
+            { height: 600 },
+            bgcWhite,
+            px4,
+            pt4,
+            pb6,
+            justifyContentBetween,
+          ])}
         >
           {interactionModalStore.lastUrl === "/unlock" ? (
             <React.Fragment>
+              <Text style={sf([h4, fAlignCenter])}>Unlock</Text>
               <Input
                 label="Password"
                 autoCompleteType="password"
@@ -93,19 +112,39 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
           ) : null}
           {interactionModalStore.lastUrl === "/sign" ? (
             <React.Fragment>
-              <Text>{JSON.stringify(signDocHelper.signDocJson, null, 2)}</Text>
-              <Button
-                title="Approve"
-                onPress={async () => {
-                  if (signDocHelper.signDocWrapper) {
-                    await signInteractionStore.approveAndWaitEnd(
-                      signDocHelper.signDocWrapper
-                    );
-                  }
-
-                  interactionModalStore.popUrl();
-                }}
+              <Text style={sf([h4, fAlignCenter])}>Confirm Transaction</Text>
+              {/* <ScrollView>
+                <Text>
+                  {JSON.stringify(signDocHelper.signDocJson, null, 2)}
+                </Text>
+              </ScrollView> */}
+              <TransactionDetails
+                signDocHelper={signDocHelper}
+                memoConfig={memoConfig}
+                feeConfig={feeConfig}
+                gasConfig={gasConfig}
               />
+              <View style={flexDirectionRow}>
+                <WhiteButton
+                  title="Reject"
+                  color="error"
+                  onPress={async () => {
+                    await signInteractionStore.reject();
+                    interactionModalStore.popUrl();
+                  }}
+                />
+                <DefaultButton
+                  title="Approve"
+                  onPress={async () => {
+                    if (signDocHelper.signDocWrapper) {
+                      await signInteractionStore.approveAndWaitEnd(
+                        signDocHelper.signDocWrapper
+                      );
+                    }
+                    interactionModalStore.popUrl();
+                  }}
+                />
+              </View>
             </React.Fragment>
           ) : null}
         </View>
