@@ -3,7 +3,7 @@ import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
-import { AccountStore } from "../../account";
+import { AccountStoreInner } from "../../account";
 import { Keplr } from "@keplr-wallet/types";
 import Axios, { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
@@ -75,7 +75,8 @@ export class ObservableSecretContractChainQuery<
 
   @flow
   protected *initKeplr() {
-    this.keplr = yield* toGenerator(AccountStore.getKeplr());
+    // TODO: Use the `getKeplr()` from the account store's opts.
+    this.keplr = yield* toGenerator(AccountStoreInner.getKeplr());
   }
 
   @flow

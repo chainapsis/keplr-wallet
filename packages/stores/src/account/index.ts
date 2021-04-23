@@ -89,6 +89,8 @@ export class AccountStoreInner {
 
   protected pubKey: Uint8Array;
 
+  protected hasInited = false;
+
   static async getKeplr(): Promise<Keplr | undefined> {
     if (window.keplr) {
       return window.keplr;
@@ -167,6 +169,9 @@ export class AccountStoreInner {
   };
 
   constructor(
+    protected readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+    },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: QueriesStore<
@@ -201,10 +206,14 @@ export class AccountStoreInner {
       return;
     }
 
-    // If key store in the keplr extension is changed, this event will be dispatched.
-    window.addEventListener("keplr_keystorechange", () => this.init(), {
-      once: true,
-    });
+    // If the store has never been initialized, add the event listener.
+    if (!this.hasInited) {
+      // If key store in the keplr extension is changed, this event will be dispatched.
+      this.eventListener.addEventListener("keplr_keystorechange", () =>
+        this.init()
+      );
+    }
+    this.hasInited = true;
 
     // Set wallet status as loading whenever try to init.
     this._walletStatus = WalletStatus.Loading;
@@ -983,6 +992,9 @@ export class AccountStoreInner {
 
 export class AccountStore extends HasMapStore<AccountStoreInner> {
   constructor(
+    protected readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+    },
     protected readonly chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore<
       QueriesSetBase & HasCosmosQueries & HasSecretQueries
@@ -991,6 +1003,7 @@ export class AccountStore extends HasMapStore<AccountStoreInner> {
   ) {
     super((chainId: string) => {
       return new AccountStoreInner(
+        this.eventListener,
         this.chainGetter,
         chainId,
         this.queriesStore,

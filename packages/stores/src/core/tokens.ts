@@ -19,6 +19,9 @@ export class TokensStoreInner {
   protected _tokens: AppCurrency[] = [];
 
   constructor(
+    protected readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+    },
     protected readonly chainId: string,
     protected readonly requester: MessageRequester
   ) {
@@ -28,13 +31,13 @@ export class TokensStoreInner {
 
     // If key store in the keplr extension is unlocked, this event will be dispatched.
     // This is needed becuase the token such as secret20 exists according to the account.
-    window.addEventListener("keplr_keystoreunlock", () => {
+    this.eventListener.addEventListener("keplr_keystoreunlock", () => {
       this.refreshTokens();
     });
 
     // If key store in the keplr extension is changed, this event will be dispatched.
     // This is needed becuase the token such as secret20 exists according to the account.
-    window.addEventListener("keplr_keystorechange", () => {
+    this.eventListener.addEventListener("keplr_keystorechange", () => {
       this.refreshTokens();
     });
   }
@@ -70,12 +73,15 @@ export class TokensStore<
   C extends ChainInfo = ChainInfo
 > extends HasMapStore<TokensStoreInner> {
   constructor(
+    protected readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+    },
     protected readonly chainStore: ChainStore<C>,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
   ) {
     super((chainId: string) => {
-      return new TokensStoreInner(chainId, this.requester);
+      return new TokensStoreInner(this.eventListener, chainId, this.requester);
     });
     makeObservable(this);
 
