@@ -6,12 +6,24 @@ import {
   GestureResponderEvent,
 } from "react-native";
 import { Button } from "react-native-elements";
-import { bw1, flex1, br1, px4, sf, buttonFont1, py3 } from "../../styles";
+import {
+  bw1,
+  flex1,
+  br1,
+  px4,
+  sf,
+  buttonFont1,
+  py3,
+  fcWhite,
+  bgcPrimary200,
+} from "../../styles";
 
 type DefalutButtonProps = {
   containerStyle?: StyleProp<ViewStyle>[];
   buttonStyle?: StyleProp<ViewStyle>[];
   titleStyle?: StyleProp<TextStyle>[];
+  disabledStyle?: StyleProp<ViewStyle>[];
+  disabledTitleStyle?: StyleProp<TextStyle>[];
   disabled?: boolean;
   loading?: boolean;
   title: string;
@@ -20,8 +32,10 @@ type DefalutButtonProps = {
 
 export const DefaultButton: FunctionComponent<DefalutButtonProps> = ({
   containerStyle = [],
-  buttonStyle = [],
   titleStyle = [],
+  buttonStyle = [],
+  disabledStyle = [],
+  disabledTitleStyle = [],
   title,
   disabled,
   loading,
@@ -33,9 +47,11 @@ export const DefaultButton: FunctionComponent<DefalutButtonProps> = ({
       buttonStyle={sf([bw1, br1, px4, py3, ...buttonStyle])}
       titleStyle={sf([buttonFont1, ...titleStyle])}
       title={title}
+      disabled={disabled}
+      disabledStyle={sf([bgcPrimary200, ...disabledStyle])}
+      disabledTitleStyle={sf([fcWhite, ...disabledTitleStyle])}
       onPress={onPress}
       loading={loading}
-      disabled={disabled}
     />
   );
 };
