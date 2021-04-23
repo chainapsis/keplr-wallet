@@ -11,7 +11,7 @@ import { useStore } from "../../stores";
 import yaml from "js-yaml";
 
 import { Buffer } from "buffer/";
-import { AccountStore, CoinPrimitive } from "@keplr-wallet/stores";
+import { AccountStoreInner, CoinPrimitive } from "@keplr-wallet/stores";
 
 export interface MessageObj {
   readonly type: string;
@@ -535,7 +535,7 @@ export const WasmExecutionMsgView: FunctionComponent<{
           const nonce = cipherText.slice(0, 32);
           cipherText = cipherText.slice(64);
 
-          const keplr = await AccountStore.getKeplr();
+          const keplr = await AccountStoreInner.getKeplr();
           if (!keplr) {
             throw new Error("Can't get the keplr API");
           }

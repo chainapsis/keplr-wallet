@@ -25,7 +25,7 @@ import { BondStatus } from "../query/cosmos/staking/types";
 import { Buffer } from "buffer/";
 import { DeepPartial, DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
-import { QueriesSetBase } from "../query/queries";
+import { QueriesSetBase } from "../query";
 
 export enum WalletStatus {
   Loading = "Loading",
@@ -60,6 +60,7 @@ export interface MsgOpts {
 export interface AccountStoreInnerOpts {
   prefetching: boolean;
   suggestChain: boolean;
+  getKeplr: () => Promise<Keplr | undefined>;
   msgOpts: MsgOpts;
 }
 
@@ -88,9 +89,34 @@ export class AccountStoreInner {
 
   protected pubKey: Uint8Array;
 
+  static async getKeplr(): Promise<Keplr | undefined> {
+    if (window.keplr) {
+      return window.keplr;
+    }
+
+    if (document.readyState === "complete") {
+      return window.keplr;
+    }
+
+    return new Promise((resolve) => {
+      const documentStateChange = (event: Event) => {
+        if (
+          event.target &&
+          (event.target as Document).readyState === "complete"
+        ) {
+          resolve(window.keplr);
+          document.removeEventListener("readystatechange", documentStateChange);
+        }
+      };
+
+      document.addEventListener("readystatechange", documentStateChange);
+    });
+  }
+
   public static readonly defaultOpts: DeepReadonly<AccountStoreInnerOpts> = {
     prefetching: false,
     suggestChain: false,
+    getKeplr: AccountStoreInner.getKeplr,
     msgOpts: {
       send: {
         native: {
@@ -183,7 +209,7 @@ export class AccountStoreInner {
     // Set wallet status as loading whenever try to init.
     this._walletStatus = WalletStatus.Loading;
 
-    const keplr = yield* toGenerator(AccountStore.getKeplr());
+    const keplr = yield* toGenerator(this.opts.getKeplr());
     if (!keplr) {
       this._walletStatus = WalletStatus.NotExist;
       return;
@@ -775,7 +801,7 @@ export class AccountStoreInner {
         if (tx && "data" in tx && tx.data) {
           const dataOutputCipher = Buffer.from(tx.data as any, "base64");
 
-          const keplr = await AccountStore.getKeplr();
+          const keplr = await this.opts.getKeplr();
 
           if (!keplr) {
             throw new Error("Can't get the Keplr API");
@@ -863,7 +889,7 @@ export class AccountStoreInner {
 
     const contractCodeHash = queryContractCodeHashResponse.data.result;
 
-    const keplr = await AccountStore.getKeplr();
+    const keplr = await this.opts.getKeplr();
     if (!keplr) {
       throw new Error("Can't get the Keplr API");
     }
@@ -897,7 +923,7 @@ export class AccountStoreInner {
     );
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const keplr = (await AccountStore.getKeplr())!;
+    const keplr = (await this.opts.getKeplr())!;
 
     const signDoc = makeSignDoc(
       msgs,
@@ -992,29 +1018,5 @@ export class AccountStore extends HasMapStore<AccountStoreInner> {
 
   hasAccount(chainId: string): boolean {
     return this.has(chainId);
-  }
-
-  static async getKeplr(): Promise<Keplr | undefined> {
-    if (window.keplr) {
-      return window.keplr;
-    }
-
-    if (document.readyState === "complete") {
-      return window.keplr;
-    }
-
-    return new Promise((resolve) => {
-      const documentStateChange = (event: Event) => {
-        if (
-          event.target &&
-          (event.target as Document).readyState === "complete"
-        ) {
-          resolve(window.keplr);
-          document.removeEventListener("readystatechange", documentStateChange);
-        }
-      };
-
-      document.addEventListener("readystatechange", documentStateChange);
-    });
   }
 }
