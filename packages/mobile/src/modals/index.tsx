@@ -10,7 +10,7 @@ import {
   useSignDocAmountConfig,
   useSignDocHelper,
 } from "@keplr-wallet/hooks";
-import { Button, Input, Text } from "react-native-elements";
+import { Input, Text } from "react-native-elements";
 import {
   flexDirectionRow,
   justifyContentEnd,
@@ -23,6 +23,7 @@ import {
 import { DefaultButton, WhiteButton } from "../components/buttons";
 import { TransactionDetails } from "./transaction-details";
 import { Page } from "../components/page";
+import { useInteractionInfo } from "../hooks";
 
 export const ModalsRenderer: FunctionComponent = observer(() => {
   const {
@@ -33,6 +34,9 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
     keyRingStore,
     signInteractionStore,
   } = useStore();
+  const interactionInfo = useInteractionInfo(() => {
+    signInteractionStore.rejectAll();
+  });
 
   const [password, setPassword] = useState("");
 
@@ -56,8 +60,23 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
   );
   const memoConfig = useMemoConfig(chainStore, current.chainId);
 
+  const signDocWapper = signInteractionStore.waitingData?.data.signDocWrapper;
   const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
   amountConfig.setSignDocHelper(signDocHelper);
+
+  const isSignDocInternalSend = (() => {
+    if (signDocWapper && signDocWapper.mode === "amino") {
+      const signDoc = signDocWapper.aminoSignDoc;
+      return (
+        interactionInfo.interaction &&
+        interactionInfo.interactionInternal &&
+        signDoc.msgs.length === 1 &&
+        (signDoc.msgs[0].type === "cosmos-sdk/MsgSend" ||
+          signDoc.msgs[0].type === "cosmos-sdk/MsgTransfer")
+      );
+    }
+    return false;
+  })();
 
   useEffect(() => {
     if (signInteractionStore.waitingData) {
@@ -69,8 +88,12 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
     }
   }, [gasConfig, memoConfig, signDocHelper, signInteractionStore.waitingData]);
 
-  feeConfig.setFeeType("average");
+  const [
+    isLoadingSignDocInternalSend,
+    setIsLoadingSignDocInternalSend,
+  ] = useState(false);
 
+  const disableInputs = isSignDocInternalSend || isLoadingSignDocInternalSend;
   return (
     <React.Fragment>
       <Modal
@@ -89,7 +112,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                   value={password}
                   onChangeText={setPassword}
                 />
-                <Button
+                <DefaultButton
                   title="Unlock"
                   onPress={async () => {
                     await keyRingStore.unlock(password);
@@ -113,6 +136,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                   memoConfig={memoConfig}
                   feeConfig={feeConfig}
                   gasConfig={gasConfig}
+                  disableInputs={disableInputs}
                 />
                 <View style={flexDirectionRow}>
                   <WhiteButton
