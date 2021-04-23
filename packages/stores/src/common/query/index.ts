@@ -64,7 +64,10 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   private observedCount: number = 0;
 
-  private intervalId: number = -1;
+  // intervalId can be number or NodeJS's Timout object according to the environment.
+  // If environment is browser, intervalId should be number.
+  // If environment is NodeJS, intervalId should be NodeJS.Timeout.
+  private intervalId: number | NodeJS.Timeout | undefined = undefined;
 
   @observable.ref
   protected _instance: AxiosInstance;
@@ -139,7 +142,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this.fetch();
 
     if (this.options.fetchingInterval > 0) {
-      this.intervalId = window.setInterval(
+      this.intervalId = setInterval(
         this.intervalFetch,
         this.options.fetchingInterval
       );
@@ -149,8 +152,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   protected onStop() {
     this.cancel();
 
-    if (this.intervalId >= 0) {
-      window.clearInterval(this.intervalId);
+    if (this.intervalId != null) {
+      clearInterval(this.intervalId as NodeJS.Timeout);
     }
   }
 
