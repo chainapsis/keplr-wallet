@@ -17,7 +17,8 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
-    "mocha": "^8.2.1"
+    "mocha": "^8.2.1",
+    "@types/mocha": "^5.2.7"
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",

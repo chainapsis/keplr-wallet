@@ -20,7 +20,8 @@
     "@types/aes-js": "^3.1.0",
     "@types/ledgerhq__hw-transport-webusb": "^4.70.1",
     "@types/secp256k1": "^4.0.1",
-    "mocha": "^8.2.1"
+    "mocha": "^8.2.1",
+    "@types/mocha": "^5.2.7"
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
