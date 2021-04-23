@@ -6,7 +6,7 @@ import {
   NotLoadedFeeError,
 } from "@keplr-wallet/hooks";
 import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
-import { ButtonGroup, Text, useTheme } from "react-native-elements";
+import { ButtonGroup, Text } from "react-native-elements";
 import { View } from "react-native";
 import {
   alignItemsCenter,
@@ -16,7 +16,7 @@ import {
   fcWhite,
   fcGrey2,
   flex1,
-  fs16,
+  subtitle2,
   justifyContentCenter,
   sf,
   mx0,
@@ -112,6 +112,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
 
     return (
       <React.Fragment>
+        <Text style={subtitle2}>Fee</Text>
         <ButtonGroup
           containerStyle={sf([{ height: 90 }, mx0, mb0, shadow])}
           selectedIndex={selectedIndex}

@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { Button, Text } from "react-native-elements";
+import { Text } from "react-native-elements";
 
 import { observer } from "mobx-react-lite";
 import { StyleProp, View, ViewProps } from "react-native";
@@ -92,7 +92,7 @@ export const VotingButton: FunctionComponent<{
       }}
     >
       {isOpenVoteModal === false ? (
-        <Button
+        <DefaultButton
           title={statusText}
           onPress={() => {
             setOpenVoteModal(true);
@@ -117,7 +117,7 @@ export const VotingButton: FunctionComponent<{
             />
             <DefaultButton
               title="Confirm"
-              onPress={async (e) => {
+              onPress={async () => {
                 await sendGovVoteMsg();
               }}
               loading={accountInfo.isSendingMsg === "govVote"}

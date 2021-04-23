@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Text, Button, Image, Card } from "react-native-elements";
+import { Text, Image, Card } from "react-native-elements";
 import { View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { DefaultButton } from "../../components/buttons";
@@ -67,7 +67,7 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
         <React.Fragment>
           <View style={sf([flexDirectionRow, justifyContentBetween])}>
             <Card.Title>Staking</Card.Title>
-            <Button
+            <DefaultButton
               title={">"}
               onPress={() => {
                 navigate.navigate("Staking Details");
