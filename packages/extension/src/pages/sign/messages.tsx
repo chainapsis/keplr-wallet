@@ -611,7 +611,7 @@ export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {
   );
 };
 
-function clearDecimals(dec: string): string {
+export function clearDecimals(dec: string): string {
   if (!dec.includes(".")) {
     return dec;
   }
