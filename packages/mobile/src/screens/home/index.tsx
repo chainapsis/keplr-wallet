@@ -10,6 +10,7 @@ import { AccountView } from "./account";
 import { AssetView } from "./asset";
 import { TxButtonView } from "./tx-button";
 import { GradientBackground } from "../../components/svg";
+import { DefaultButton } from "../../components/buttons";
 const HomeStack = createStackNavigator();
 
 export const HomeStackScreen: FunctionComponent = () => {
@@ -44,6 +45,22 @@ const HomeScreen: FunctionComponent = observer(() => {
         <AccountView />
         <AssetView />
         <TxButtonView />
+      </Card>
+      <Card>
+        <DefaultButton
+          title="Stake"
+          onPress={() => {
+            navigation.navigate("Stake");
+          }}
+        />
+      </Card>
+      <Card>
+        <DefaultButton
+          title="Governance"
+          onPress={() => {
+            navigation.navigate("Governance");
+          }}
+        />
       </Card>
     </Page>
   );

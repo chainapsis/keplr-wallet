@@ -6,11 +6,12 @@ import {
   GestureResponderEvent,
 } from "react-native";
 import { Button } from "react-native-elements";
+import { bw1, flex1, br1, px4, sf, buttonFont1, py3 } from "../../styles";
 
 type DefalutButtonProps = {
-  containerStyle?: StyleProp<ViewStyle>;
-  buttonStyle?: StyleProp<ViewStyle>;
-  titleStyle?: StyleProp<TextStyle>;
+  containerStyle?: StyleProp<ViewStyle>[];
+  buttonStyle?: StyleProp<ViewStyle>[];
+  titleStyle?: StyleProp<TextStyle>[];
   disabled?: boolean;
   loading?: boolean;
   title: string;
@@ -18,9 +19,9 @@ type DefalutButtonProps = {
 };
 
 export const DefaultButton: FunctionComponent<DefalutButtonProps> = ({
-  containerStyle,
-  buttonStyle,
-  titleStyle,
+  containerStyle = [],
+  buttonStyle = [],
+  titleStyle = [],
   title,
   disabled,
   loading,
@@ -28,21 +29,9 @@ export const DefaultButton: FunctionComponent<DefalutButtonProps> = ({
 }) => {
   return (
     <Button
-      containerStyle={{
-        flex: 1,
-        ...(containerStyle as Record<string, unknown>),
-      }}
-      buttonStyle={{
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        ...(buttonStyle as Record<string, unknown>),
-      }}
-      titleStyle={{
-        fontWeight: "500",
-        ...(titleStyle as Record<string, unknown>),
-      }}
+      containerStyle={sf([flex1, ...containerStyle])}
+      buttonStyle={sf([bw1, br1, px4, py3, ...buttonStyle])}
+      titleStyle={sf([buttonFont1, ...titleStyle])}
       title={title}
       onPress={onPress}
       loading={loading}

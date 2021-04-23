@@ -1,10 +1,33 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { View } from "react-native";
-import { Text, Badge, useTheme } from "react-native-elements";
+import { Text, Badge } from "react-native-elements";
 import { DoughnutChart } from "../../components/svg";
+import {
+  fcSecondary,
+  flex1,
+  flexDirectionRow,
+  ml2,
+  mx2,
+  sf,
+  bgcSecondary,
+  flexDirectionRowReverse,
+  alignItemsCenter,
+  fAlignRight,
+  fcPrimary,
+  mt4,
+  relative,
+  py4,
+  absolute,
+  justifyContentCenter,
+  subtitle2,
+  h3,
+  mb1,
+  subtitle1,
+  body1,
+} from "../../styles";
 
 export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
@@ -53,82 +76,54 @@ export const AssetView: FunctionComponent = observer(() => {
       : parseFloat(stakedSum.toDec().toString()),
   ];
 
-  const { theme } = useTheme();
-
   return (
-    <View style={{ paddingVertical: 15 }}>
-      <View style={{ position: "relative", alignItems: "center" }}>
+    <View style={py4}>
+      <View style={sf([relative, alignItemsCenter])}>
         <DoughnutChart data={data} />
         <View
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          style={sf([
+            absolute,
+            alignItemsCenter,
+            justifyContentCenter,
+            {
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            },
+          ])}
         >
-          <Text h4>Total Balance</Text>
-          <Text h2>
+          <Text style={sf([subtitle2, mb1])}>Total Balance</Text>
+          <Text style={h3}>
             {totalPrice
               ? totalPrice.toString()
               : total.shrink(true).maxDecimals(6).toString()}
           </Text>
         </View>
       </View>
-      <View style={{ marginTop: 15 }}>
-        <View style={{ flexDirection: "row" }}>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row-reverse",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                textAlign: "right",
-                fontSize: 18,
-                color: theme.colors?.primary,
-                marginLeft: 7,
-                marginRight: 7,
-              }}
-            >
+      <View style={mt4}>
+        <View style={flexDirectionRow}>
+          <View style={sf([flex1, flexDirectionRowReverse, alignItemsCenter])}>
+            <Text style={sf([fAlignRight, fcPrimary, subtitle1, mx2])}>
               Available
             </Text>
             <Badge />
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", marginLeft: 7 }}>
+          <View style={flex1}>
+            <Text style={sf([body1, ml2])}>
               {stakable.locale(false).toString()}
             </Text>
           </View>
         </View>
-        <View style={{ flexDirection: "row" }}>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row-reverse",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                textAlign: "right",
-                fontSize: 18,
-                color: theme.colors?.secondary,
-                marginLeft: 7,
-                marginRight: 7,
-              }}
-            >
+        <View style={flexDirectionRow}>
+          <View style={sf([flex1, flexDirectionRowReverse, alignItemsCenter])}>
+            <Text style={sf([fAlignRight, fcSecondary, subtitle1, mx2])}>
               Staked
             </Text>
-            <Badge badgeStyle={{ backgroundColor: theme.colors?.secondary }} />
+            <Badge badgeStyle={bgcSecondary} />
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", marginLeft: 7 }}>
+          <View style={flex1}>
+            <Text style={sf([body1, ml2])}>
               {stakedSum.locale(false).toString()}
             </Text>
           </View>

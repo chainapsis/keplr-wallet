@@ -24,6 +24,7 @@
     "@keplr-wallet/router": "0.8.0",
     "@keplr-wallet/stores": "0.8.2-rc.0",
     "@keplr-wallet/types": "0.8.2-rc.0",
+    "@keplr-wallet/unit": "0.8.2-rc.0",
     "@react-native-async-storage/async-storage": "^1.14.1",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-picker/picker": "^1.12.0",

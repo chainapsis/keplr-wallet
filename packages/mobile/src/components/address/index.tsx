@@ -3,6 +3,7 @@ import React, { FunctionComponent } from "react";
 import { Text } from "react-native-elements";
 import { View } from "react-native";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { bcGray, br3, bw1, caption1, px4, sf } from "../../styles";
 
 export interface AddressProps {
   maxCharacters: number;
@@ -14,16 +15,10 @@ export const Address: FunctionComponent<AddressProps> = ({
   address,
 }) => {
   return (
-    <View
-      accessible
-      style={{
-        borderRadius: 100,
-        borderWidth: 1,
-        borderColor: "#e6e6e6",
-        paddingHorizontal: 16,
-      }}
-    >
-      <Text>{Bech32Address.shortenAddress(address, maxCharacters)}</Text>
+    <View accessible style={sf([bw1, bcGray, px4, br3])}>
+      <Text style={caption1}>
+        {Bech32Address.shortenAddress(address, maxCharacters)}
+      </Text>
     </View>
   );
 };

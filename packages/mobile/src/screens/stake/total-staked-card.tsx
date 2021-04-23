@@ -5,23 +5,22 @@ import { useStore } from "../../stores";
 import { Text, Button, Image, Card } from "react-native-elements";
 import { View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { DefaultButton } from "../../components/buttons";
+import {
+  flexDirectionRow,
+  justifyContentBetween,
+  sf,
+  alignItemsCenter,
+} from "../../styles";
 
 const NeedStakeView: FunctionComponent = () => {
   return (
-    <View
-      style={{
-        alignItems: "center",
-      }}
-    >
+    <View style={alignItemsCenter}>
       <Image
         source={{ uri: "" }}
         style={{ width: 80, height: 80, marginBottom: 5 }}
       />
-      <Button
-        containerStyle={{ width: "100%" }}
-        title="You Don't Stake Anything"
-        disabled={true}
-      />
+      <DefaultButton title="You Don't Stake Anything" disabled={true} />
     </View>
   );
 };
@@ -58,29 +57,16 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
   };
 
   return (
-    <Card
-      containerStyle={{
-        padding: 16,
-        marginHorizontal: 0,
-        marginVertical: 16,
-        borderRadius: 6,
-      }}
-    >
+    <Card>
       {delegations.delegations.length === 0 ? (
         <React.Fragment>
-          <Card.Title h4 style={{ textAlign: "left", marginBottom: 0 }}>
-            Staking
-          </Card.Title>
+          <Card.Title>Staking</Card.Title>
           <NeedStakeView />
         </React.Fragment>
       ) : (
         <React.Fragment>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <Card.Title h4 style={{ textAlign: "left", marginBottom: 0 }}>
-              Staking
-            </Card.Title>
+          <View style={sf([flexDirectionRow, justifyContentBetween])}>
+            <Card.Title>Staking</Card.Title>
             <Button
               title={">"}
               onPress={() => {
@@ -88,9 +74,7 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
               }}
             />
           </View>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
+          <View style={sf([flexDirectionRow, justifyContentBetween])}>
             <Text>Total Staked</Text>
             <Text>
               {delegations.total
@@ -100,9 +84,7 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
                 .toString()}
             </Text>
           </View>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
+          <View style={sf([flexDirectionRow, justifyContentBetween])}>
             <Text>Reward</Text>
             <Text>
               {totalStakbleReward
@@ -112,9 +94,8 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
                 .toString()}
             </Text>
           </View>
-          <Button
+          <DefaultButton
             title="Clain Reward"
-            containerStyle={{ width: "100%" }}
             onPress={async () => {
               await sendWithdrawDelegatorRewardMsgs();
             }}
