@@ -16,6 +16,10 @@ export const justifyContentBetween: StyleProp<ViewStyle> = {
   justifyContent: "space-between",
 };
 
+export const justifyContentAround: StyleProp<ViewStyle> = {
+  justifyContent: "space-around",
+};
+
 export const justifyContentEnd: StyleProp<ViewStyle> = {
   justifyContent: "flex-end",
 };

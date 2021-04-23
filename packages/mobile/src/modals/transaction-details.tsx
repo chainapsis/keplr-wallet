@@ -17,11 +17,19 @@ import {
   body3,
   flex1,
   flexDirectionRow,
-  h3,
+  sf,
   h6,
+  mb3,
   p3,
   subtitle1,
   subtitle2,
+  mb2,
+  cardStyle,
+  fcGrey1,
+  justifyContentAround,
+  bbw1,
+  bcGray,
+  px2,
 } from "../styles";
 import Icon from "react-native-vector-icons/Feather";
 
@@ -85,15 +93,18 @@ export const TransactionDetails: FunctionComponent<{
 
     return (
       <React.Fragment>
-        <ScrollView>{renderedMsgs}</ScrollView>
-        <View>
-          <Text style={subtitle2}>Memo</Text>
+        <Text style={sf([subtitle2, mb2])}>Messages</Text>
+        <ScrollView style={sf([cardStyle, px2, mb2])}>
+          {renderedMsgs}
+        </ScrollView>
+        <View style={mb3}>
+          <Text style={sf([subtitle2, mb2])}>Memo</Text>
           <Text style={subtitle1}>
             {memoConfig.memo ? memoConfig.memo : "(No memo)"}
           </Text>
         </View>
-        <View>
-          <Text style={subtitle2}>Fee</Text>
+        <View style={mb3}>
+          <Text style={sf([subtitle2, mb2])}>Fee</Text>
           <Text style={subtitle1}>
             {feeConfig.fee.maxDecimals(6).trim(true).toString()}
           </Text>
@@ -109,13 +120,13 @@ const Msg: FunctionComponent<{
   content: string;
 }> = ({ icon = "question", title, content }) => {
   return (
-    <View style={flexDirectionRow}>
+    <View style={sf([flexDirectionRow, bbw1, bcGray])}>
       <View style={p3}>
         <Icon name={icon} size={18} />
       </View>
-      <View style={flex1}>
+      <View style={sf([flex1, justifyContentAround])}>
         <Text style={h6}>{title}</Text>
-        <Text style={body3}>{content}</Text>
+        <Text style={sf([body3, fcGrey1])}>{content}</Text>
       </View>
     </View>
   );
