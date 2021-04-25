@@ -12,16 +12,14 @@
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
+    "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
     "@types/aes-js": "^3.1.0",
     "@types/ledgerhq__hw-transport-webusb": "^4.70.1",
-    "@types/secp256k1": "^4.0.1",
-    "mocha": "^8.2.1",
-    "@types/mocha": "^5.2.7"
+    "@types/secp256k1": "^4.0.1"
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",

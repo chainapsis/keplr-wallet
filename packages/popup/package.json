@@ -12,7 +12,7 @@
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "mocha -r ts-node/register 'src/**/*.spec.ts'",
+    "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   }

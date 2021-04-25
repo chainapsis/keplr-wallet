@@ -1,9 +1,7 @@
-import assert from "assert";
-import "mocha";
 import { Debouncer } from "./debouncer";
 
 describe("Test common utils", () => {
-  it("Test debouncer", async () => {
+  test("Test debouncer", async () => {
     let i = 0;
     const fn = (): Promise<number> => {
       i++;
@@ -17,9 +15,9 @@ describe("Test common utils", () => {
 
     // Non debounced fn should return the different results.
     let [r1, r2, r3] = await Promise.all([fn(), fn(), fn()]);
-    assert.strictEqual(r1, 1);
-    assert.strictEqual(r2, 2);
-    assert.strictEqual(r3, 3);
+    expect(r1).toBe(1);
+    expect(r2).toBe(2);
+    expect(r3).toBe(3);
 
     const debouncedFn = Debouncer.promise(fn);
     // debounced fn should return the same results.
@@ -28,8 +26,8 @@ describe("Test common utils", () => {
       debouncedFn(),
       debouncedFn(),
     ]);
-    assert.strictEqual(r1, 4);
-    assert.strictEqual(r2, 4);
-    assert.strictEqual(r3, 4);
+    expect(r1).toBe(4);
+    expect(r2).toBe(4);
+    expect(r3).toBe(4);
   });
 });

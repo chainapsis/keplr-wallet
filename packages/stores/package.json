@@ -12,14 +12,11 @@
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "mocha -r ts-node/register 'src/**/*.spec.ts'",
+    "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
-  "devDependencies": {
-    "mocha": "^8.2.1",
-    "@types/mocha": "^5.2.7"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",

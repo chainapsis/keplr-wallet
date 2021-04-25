@@ -1,5 +1,4 @@
 import assert from "assert";
-import "mocha";
 
 import { Buffer } from "buffer/";
 import { JSONUint8Array } from "./index";

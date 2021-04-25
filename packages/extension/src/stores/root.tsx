@@ -67,6 +67,11 @@ export class RootStore {
     );
 
     this.keyRingStore = new KeyRingStore(
+      {
+        dispatchEvent: (type: string) => {
+          window.dispatchEvent(new Event(type));
+        },
+      },
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
@@ -93,52 +98,57 @@ export class RootStore {
       mixInSecretQueries(mixInCosmosQueries(QueriesSetBase))
     );
 
-    this.accountStore = new AccountStore(this.chainStore, this.queriesStore, {
-      defaultOpts: {
-        // When the unlock request sent from external webpage,
-        // it will open the extension popup below the uri "/unlock".
-        // But, in this case, if the prefetching option is true, it will redirect
-        // the page to the "/unlock" with **interactionInternal=true**
-        // because prefetching will request the unlock from the internal.
-        // To prevent this problem, just check the first uri is "#/unlcok" and
-        // if it is "#/unlock", don't use the prefetching option.
-        prefetching: !window.location.href.includes("#/unlock"),
-      },
-      chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
-        // In certik, change the msg type of the MsgSend to "bank/MsgSend"
-        if (chainInfo.chainId.startsWith("shentu-")) {
-          return {
-            chainId: chainInfo.chainId,
-            msgOpts: {
-              send: {
-                native: {
-                  type: "bank/MsgSend",
+    this.accountStore = new AccountStore(
+      window,
+      this.chainStore,
+      this.queriesStore,
+      {
+        defaultOpts: {
+          // When the unlock request sent from external webpage,
+          // it will open the extension popup below the uri "/unlock".
+          // But, in this case, if the prefetching option is true, it will redirect
+          // the page to the "/unlock" with **interactionInternal=true**
+          // because prefetching will request the unlock from the internal.
+          // To prevent this problem, just check the first uri is "#/unlcok" and
+          // if it is "#/unlock", don't use the prefetching option.
+          prefetching: !window.location.href.includes("#/unlock"),
+        },
+        chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
+          // In certik, change the msg type of the MsgSend to "bank/MsgSend"
+          if (chainInfo.chainId.startsWith("shentu-")) {
+            return {
+              chainId: chainInfo.chainId,
+              msgOpts: {
+                send: {
+                  native: {
+                    type: "bank/MsgSend",
+                  },
                 },
               },
-            },
-          };
-        }
+            };
+          }
 
-        // In akash or sifchain, increase the default gas for sending
-        if (
-          chainInfo.chainId.startsWith("akashnet-") ||
-          chainInfo.chainId.startsWith("sifchain")
-        ) {
-          return {
-            chainId: chainInfo.chainId,
-            msgOpts: {
-              send: {
-                native: {
-                  gas: 120000,
+          // In akash or sifchain, increase the default gas for sending
+          if (
+            chainInfo.chainId.startsWith("akashnet-") ||
+            chainInfo.chainId.startsWith("sifchain")
+          ) {
+            return {
+              chainId: chainInfo.chainId,
+              msgOpts: {
+                send: {
+                  native: {
+                    gas: 120000,
+                  },
                 },
               },
-            },
-          };
-        }
+            };
+          }
 
-        return { chainId: chainInfo.chainId };
-      }),
-    });
+          return { chainId: chainInfo.chainId };
+        }),
+      }
+    );
 
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),
@@ -151,6 +161,7 @@ export class RootStore {
     );
 
     this.tokensStore = new TokensStore(
+      window,
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
