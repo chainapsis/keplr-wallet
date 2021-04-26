@@ -32,6 +32,7 @@ import {
   px2,
 } from "../styles";
 import Icon from "react-native-vector-icons/Feather";
+import { MemoInput, FeeButtons } from "../components/form";
 
 export const TransactionDetails: FunctionComponent<{
   signDocHelper: SignDocHelper;
@@ -97,18 +98,26 @@ export const TransactionDetails: FunctionComponent<{
         <ScrollView style={sf([cardStyle, px2, mb2])}>
           {renderedMsgs}
         </ScrollView>
-        <View style={mb3}>
-          <Text style={sf([subtitle2, mb2])}>Memo</Text>
-          <Text style={subtitle1}>
-            {memoConfig.memo ? memoConfig.memo : "(No memo)"}
-          </Text>
-        </View>
-        <View style={mb3}>
-          <Text style={sf([subtitle2, mb2])}>Fee</Text>
-          <Text style={subtitle1}>
-            {feeConfig.fee.maxDecimals(6).trim(true).toString()}
-          </Text>
-        </View>
+        {!disableInputs ? (
+          <MemoInput memoConfig={memoConfig} />
+        ) : (
+          <View style={mb3}>
+            <Text style={sf([subtitle2, mb2])}>Memo</Text>
+            <Text style={subtitle1}>
+              {memoConfig.memo ? memoConfig.memo : "(No memo)"}
+            </Text>
+          </View>
+        )}
+        {!disableInputs ? (
+          <FeeButtons feeConfig={feeConfig} priceStore={priceStore} />
+        ) : (
+          <View style={mb3}>
+            <Text style={sf([subtitle2, mb2])}>Fee</Text>
+            <Text style={subtitle1}>
+              {feeConfig.fee.maxDecimals(6).trim(true).toString()}
+            </Text>
+          </View>
+        )}
       </React.Fragment>
     );
   }

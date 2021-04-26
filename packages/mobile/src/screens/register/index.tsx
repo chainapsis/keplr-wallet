@@ -1,11 +1,12 @@
 import React, { FunctionComponent, useState } from "react";
-import { Button, Input } from "react-native-elements";
+import { Input } from "react-native-elements";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../common";
 import { useNavigation, StackActions } from "@react-navigation/native";
 import { Page } from "../../components/page";
+import { DefaultButton } from "../../components/buttons";
 
 export const RegisterScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
@@ -41,7 +42,7 @@ export const RegisterScreen: FunctionComponent = observer(() => {
         multiline={true}
         numberOfLines={5}
       />
-      <Button
+      <DefaultButton
         title="Create"
         onPress={async () => {
           await registerConfig.createMnemonic(name, mnemonic, password, {
@@ -50,9 +51,6 @@ export const RegisterScreen: FunctionComponent = observer(() => {
             addressIndex: 0,
           });
 
-          // TODO: Remove this!!
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
           accountStore.getAccount(chainId).init();
 
           navigation.dispatch(StackActions.replace("Home"));

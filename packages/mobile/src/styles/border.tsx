@@ -37,10 +37,92 @@ export const bcBlack: StyleProp<ViewStyle> = { borderColor: colors.black };
 
 export const bcWhite: StyleProp<ViewStyle> = { borderColor: colors.white };
 
-export const bcPrimary: StyleProp<ViewStyle> = { borderColor: colors.primary };
+export const bcPrimary: StyleProp<ViewStyle> = {
+  borderColor: colors.primary,
+};
+
+export const bcPrimary50: StyleProp<ViewStyle> = {
+  borderColor: colors.primary50,
+};
+
+export const bcPrimary100: StyleProp<ViewStyle> = {
+  borderColor: colors.primary100,
+};
+
+export const bcPrimary200: StyleProp<ViewStyle> = {
+  borderColor: colors.primary200,
+};
+
+export const bcPrimary300: StyleProp<ViewStyle> = {
+  borderColor: colors.primary300,
+};
+
+export const bcPrimary400: StyleProp<ViewStyle> = {
+  borderColor: colors.primary400,
+};
+
+export const bcPrimary500: StyleProp<ViewStyle> = {
+  borderColor: colors.primary500,
+};
+
+export const bcPrimary600: StyleProp<ViewStyle> = {
+  borderColor: colors.primary600,
+};
+
+export const bcPrimary700: StyleProp<ViewStyle> = {
+  borderColor: colors.primary700,
+};
+
+export const bcPrimary800: StyleProp<ViewStyle> = {
+  borderColor: colors.primary800,
+};
+
+export const bcPrimary900: StyleProp<ViewStyle> = {
+  borderColor: colors.primary900,
+};
 
 export const bcSecondary: StyleProp<ViewStyle> = {
   borderColor: colors.secondary,
+};
+
+export const bcSecondary50: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary50,
+};
+
+export const bcSecondary100: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary100,
+};
+
+export const bcSecondary200: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary200,
+};
+
+export const bcSecondary300: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary300,
+};
+
+export const bcSecondary400: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary400,
+};
+
+export const bcSecondary500: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary500,
+};
+
+export const bcSecondary600: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary600,
+};
+
+export const bcSecondary700: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary700,
+};
+
+export const bcSecondary800: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary800,
+};
+
+export const bcSecondary900: StyleProp<ViewStyle> = {
+  borderColor: colors.secondary900,
 };
 
 export const bcWarining: StyleProp<ViewStyle> = { borderColor: colors.warning };

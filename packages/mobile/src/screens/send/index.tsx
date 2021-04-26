@@ -1,17 +1,18 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { Text } from "react-native-elements";
 import { useStore } from "../../stores";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { DefaultButton } from "../../components/buttons";
 import { Page } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
-import { AddressInput, CoinInput } from "../../components/form";
-import { FeeButtons } from "../../components/form/fee-buttons";
+import {
+  AddressInput,
+  CoinInput,
+  MemoInput,
+  FeeButtons,
+} from "../../components/form";
 import { GradientBackground } from "../../components/svg";
-import { MemoInput } from "../../components/form/memo-input";
-import { subtitle2 } from "../../styles";
 
 const SendStack = createStackNavigator();
 
@@ -59,7 +60,6 @@ const SendScreen: FunctionComponent = observer(() => {
         feeConfig={sendConfigs.feeConfig}
       />
       <MemoInput memoConfig={sendConfigs.memoConfig} />
-      <Text style={subtitle2}>Fee</Text>
       <FeeButtons feeConfig={sendConfigs.feeConfig} priceStore={priceStore} />
       <DefaultButton
         title="Submit"

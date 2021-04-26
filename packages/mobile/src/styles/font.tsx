@@ -65,13 +65,103 @@ export const fcGrey5: StyleProp<TextStyle> = { color: colors.grey5 };
 
 export const fcPrimary: StyleProp<TextStyle> = { color: colors.primary };
 
-export const fcSecondary: StyleProp<TextStyle> = { color: colors.secondary };
+export const fcPrimary50: StyleProp<TextStyle> = {
+  color: colors.primary50,
+};
+
+export const fcPrimary100: StyleProp<TextStyle> = {
+  color: colors.primary100,
+};
+
+export const fcPrimary200: StyleProp<TextStyle> = {
+  color: colors.primary200,
+};
+
+export const fcPrimary300: StyleProp<TextStyle> = {
+  color: colors.primary300,
+};
+
+export const fcPrimary400: StyleProp<TextStyle> = {
+  color: colors.primary400,
+};
+
+export const fcPrimary500: StyleProp<TextStyle> = {
+  color: colors.primary500,
+};
+
+export const fcPrimary600: StyleProp<TextStyle> = {
+  color: colors.primary600,
+};
+
+export const fcPrimary700: StyleProp<TextStyle> = {
+  color: colors.primary700,
+};
+
+export const fcPrimary800: StyleProp<TextStyle> = {
+  color: colors.primary800,
+};
+
+export const fcPrimary900: StyleProp<TextStyle> = {
+  color: colors.primary900,
+};
+
+export const fcSecondary: StyleProp<TextStyle> = {
+  color: colors.secondary,
+};
+
+export const fcSecondary50: StyleProp<TextStyle> = {
+  color: colors.secondary50,
+};
+
+export const fcSecondary100: StyleProp<TextStyle> = {
+  color: colors.secondary100,
+};
+
+export const fcSecondary200: StyleProp<TextStyle> = {
+  color: colors.secondary200,
+};
+
+export const fcSecondary300: StyleProp<TextStyle> = {
+  color: colors.secondary300,
+};
+
+export const fcSecondary400: StyleProp<TextStyle> = {
+  color: colors.secondary400,
+};
+
+export const fcSecondary500: StyleProp<TextStyle> = {
+  color: colors.secondary500,
+};
+
+export const fcSecondary600: StyleProp<TextStyle> = {
+  color: colors.secondary600,
+};
+
+export const fcSecondary700: StyleProp<TextStyle> = {
+  color: colors.secondary700,
+};
+
+export const fcSecondary800: StyleProp<TextStyle> = {
+  color: colors.secondary800,
+};
+
+export const fcSecondary900: StyleProp<TextStyle> = {
+  color: colors.secondary900,
+};
 
 export const fcWarining: StyleProp<TextStyle> = { color: colors.warning };
 
 export const fcError: StyleProp<TextStyle> = { color: colors.error };
 
 export const fcSuccess: StyleProp<TextStyle> = { color: colors.success };
+
+export const fcHigh: StyleProp<TextStyle> = { color: colors.high };
+
+export const fcMedium: StyleProp<TextStyle> = { color: colors.medium };
+
+export const fcLow: StyleProp<TextStyle> = { color: colors.low };
+
+export const fcVerylow: StyleProp<TextStyle> = { color: colors.verylow };
 
 export const fAlignLeft: StyleProp<TextStyle> = { textAlign: "left" };
 

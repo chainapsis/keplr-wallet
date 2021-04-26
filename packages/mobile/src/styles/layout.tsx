@@ -163,8 +163,88 @@ export const bgcPrimary: StyleProp<ViewStyle> = {
   backgroundColor: colors.primary,
 };
 
+export const bgcPrimary50: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary50,
+};
+
+export const bgcPrimary100: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary100,
+};
+
+export const bgcPrimary200: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary200,
+};
+
+export const bgcPrimary300: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary300,
+};
+
+export const bgcPrimary400: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary400,
+};
+
+export const bgcPrimary500: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary500,
+};
+
+export const bgcPrimary600: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary600,
+};
+
+export const bgcPrimary700: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary700,
+};
+
+export const bgcPrimary800: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary800,
+};
+
+export const bgcPrimary900: StyleProp<ViewStyle> = {
+  backgroundColor: colors.primary900,
+};
+
 export const bgcSecondary: StyleProp<ViewStyle> = {
   backgroundColor: colors.secondary,
+};
+
+export const bgcSecondary50: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary50,
+};
+
+export const bgcSecondary100: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary100,
+};
+
+export const bgcSecondary200: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary200,
+};
+
+export const bgcSecondary300: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary300,
+};
+
+export const bgcSecondary400: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary400,
+};
+
+export const bgcSecondary500: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary500,
+};
+
+export const bgcSecondary600: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary600,
+};
+
+export const bgcSecondary700: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary700,
+};
+
+export const bgcSecondary800: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary800,
+};
+
+export const bgcSecondary900: StyleProp<ViewStyle> = {
+  backgroundColor: colors.secondary900,
 };
 
 export const bgcWarining: StyleProp<ViewStyle> = {
