@@ -14,9 +14,6 @@ import {
   ChainSuggestStore,
   IBCChannelStore,
   IBCCurrencyRegsitrar,
-  QueriesSetBase,
-  HasCosmosQueries,
-  HasSecretQueries,
   QueriesWithCosmosAndSecret,
   AccountWithCosmosAndSecret,
   getKeplrFromWindow,
@@ -43,9 +40,7 @@ export class RootStore {
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
-  public readonly queriesStore: QueriesStore<
-    QueriesSetBase & HasCosmosQueries & HasSecretQueries
-  >;
+  public readonly queriesStore: QueriesStore<QueriesWithCosmosAndSecret>;
   public readonly accountStore: AccountStore<AccountWithCosmosAndSecret>;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;

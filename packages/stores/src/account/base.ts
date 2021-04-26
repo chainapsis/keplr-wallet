@@ -47,7 +47,7 @@ export class AccountSetBase<MsgOpts, Queries> {
   protected _bech32Address: string = "";
 
   @observable
-  protected _isSendingMsg: string | "unknown" | false = false;
+  protected _isSendingMsg: string | boolean = false;
 
   public broadcastMode: "sync" | "async" | "block" = "sync";
 
@@ -317,7 +317,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     return this._bech32Address;
   }
 
-  get isSendingMsg(): string | "unknown" | false {
+  get isSendingMsg(): string | boolean {
     return this._isSendingMsg;
   }
 
