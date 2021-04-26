@@ -16,7 +16,9 @@
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@keplr-wallet/provider": "^0.8.6-rc.0"
+  },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
