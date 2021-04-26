@@ -17,8 +17,7 @@ import {
   QueriesSetBase,
   HasCosmosQueries,
   HasSecretQueries,
-  mixInCosmosQueries,
-  mixInSecretQueries,
+  QueriesWithCosmosAndSecret,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -95,7 +94,7 @@ export class RootStore {
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
       this.chainStore,
-      mixInSecretQueries(mixInCosmosQueries(QueriesSetBase))
+      QueriesWithCosmosAndSecret
     );
 
     this.accountStore = new AccountStore(

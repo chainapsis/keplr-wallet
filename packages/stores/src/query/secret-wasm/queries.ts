@@ -5,25 +5,23 @@ import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { ObservableQuerySecret20ContractInfo } from "./secret20-contract-info";
 import { DeepReadonly } from "utility-types";
 import { ObservableQuerySecret20BalanceRegistry } from "./secret20-balance";
+import { QueriesWithCosmos } from "../cosmos";
 
 export interface HasSecretQueries {
   secret: SecretQueries;
 }
 
-export const mixInSecretQueries = <
-  T extends new (...args: any[]) => QueriesSetBase
->(
-  base: T
-) => {
-  return class MixIn extends base implements HasSecretQueries {
-    public secret: SecretQueries;
+export class QueriesWithCosmosAndSecret
+  extends QueriesWithCosmos
+  implements HasSecretQueries {
+  public secret: SecretQueries;
 
-    constructor(...args: any[]) {
-      super(args[0], args[1], args[2]);
-      this.secret = new SecretQueries(this, args[0], args[1], args[2]);
-    }
-  };
-};
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
+    super(kvStore, chainId, chainGetter);
+
+    this.secret = new SecretQueries(this, kvStore, chainId, chainGetter);
+  }
+}
 
 export class SecretQueries {
   public readonly querySecretContractCodeHash: DeepReadonly<ObservableQuerySecretContractCodeHash>;

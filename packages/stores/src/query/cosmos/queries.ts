@@ -34,20 +34,17 @@ export interface HasCosmosQueries {
   cosmos: CosmosQueries;
 }
 
-export const mixInCosmosQueries = <
-  T extends new (...args: any[]) => QueriesSetBase
->(
-  base: T
-) => {
-  return class MixIn extends base implements HasCosmosQueries {
-    public cosmos: CosmosQueries;
+export class QueriesWithCosmos
+  extends QueriesSetBase
+  implements HasCosmosQueries {
+  public cosmos: CosmosQueries;
 
-    constructor(...args: any[]) {
-      super(args[0], args[1], args[2]);
-      this.cosmos = new CosmosQueries(this, args[0], args[1], args[2]);
-    }
-  };
-};
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
+    super(kvStore, chainId, chainGetter);
+
+    this.cosmos = new CosmosQueries(this, kvStore, chainId, chainGetter);
+  }
+}
 
 export class CosmosQueries {
   public readonly queryBlock: DeepReadonly<ObservableQueryBlock>;
