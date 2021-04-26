@@ -34,6 +34,10 @@ export interface AccountSetOpts<MsgOpts> {
   readonly autoInit: boolean;
   readonly getKeplr: () => Promise<Keplr | undefined>;
   readonly msgOpts: MsgOpts;
+  readonly wsObject?: new (
+    url: string,
+    protocols?: string | string[]
+  ) => WebSocket;
 }
 
 export class AccountSetBase<MsgOpts, Queries> {
@@ -205,7 +209,10 @@ export class AccountSetBase<MsgOpts, Queries> {
 
     const txTracer = new TendermintTxTracer(
       this.chainGetter.getChain(this.chainId).rpc,
-      "/websocket"
+      "/websocket",
+      {
+        wsObject: this.opts.wsObject,
+      }
     );
     txTracer.traceTx(txHash).then((tx) => {
       txTracer.close();
