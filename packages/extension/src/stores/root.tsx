@@ -111,6 +111,7 @@ export class RootStore {
           // if it is "#/unlock", don't use the prefetching option.
           prefetching: !window.location.href.includes("#/unlock"),
           suggestChain: false,
+          autoInit: true,
           getKeplr: getKeplrFromWindow,
         },
         chainOpts: this.chainStore.chainInfos.map((chainInfo) => {

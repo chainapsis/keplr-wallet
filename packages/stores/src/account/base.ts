@@ -16,9 +16,11 @@ import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
 import Axios, { AxiosInstance } from "axios";
 
 export enum WalletStatus {
+  NotInit = "NotInit",
   Loading = "Loading",
   Loaded = "Loaded",
   NotExist = "NotExist",
+  Rejected = "Rejected",
 }
 
 export interface MsgOpt {
@@ -29,6 +31,7 @@ export interface MsgOpt {
 export interface AccountSetOpts<MsgOpts> {
   readonly prefetching: boolean;
   readonly suggestChain: boolean;
+  readonly autoInit: boolean;
   readonly getKeplr: () => Promise<Keplr | undefined>;
   readonly msgOpts: MsgOpts;
 }
@@ -38,7 +41,7 @@ export class AccountSetBase<MsgOpts, Queries> {
   protected _walletVersion: string | undefined = undefined;
 
   @observable
-  protected _walletStatus: WalletStatus = WalletStatus.Loading;
+  protected _walletStatus: WalletStatus = WalletStatus.NotInit;
 
   @observable
   protected _name: string = "";
@@ -77,7 +80,9 @@ export class AccountSetBase<MsgOpts, Queries> {
 
     this.pubKey = new Uint8Array();
 
-    this.init();
+    if (opts.autoInit) {
+      this.init();
+    }
   }
 
   getKeplr(): Promise<Keplr | undefined> {
@@ -111,7 +116,7 @@ export class AccountSetBase<MsgOpts, Queries> {
   }
 
   @flow
-  protected *init() {
+  public *init() {
     // If wallet status is not exist, there is no need to try to init because it always fails.
     if (this.walletStatus === WalletStatus.NotExist) {
       return;
@@ -137,8 +142,12 @@ export class AccountSetBase<MsgOpts, Queries> {
 
     this._walletVersion = keplr.version;
 
-    // TODO: Handle not approved.
-    yield this.enable(keplr, this.chainId);
+    try {
+      yield this.enable(keplr, this.chainId);
+    } catch {
+      this._walletStatus = WalletStatus.Rejected;
+      return;
+    }
 
     const key = yield* toGenerator(keplr.getKey(this.chainId));
     this._bech32Address = key.bech32Address;
