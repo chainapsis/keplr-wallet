@@ -1,4 +1,4 @@
-import { ChainGetter, MsgOpts } from "@keplr-wallet/stores";
+import { ChainGetter, CosmosMsgOpts } from "@keplr-wallet/stores";
 import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
 import { useFeeConfig, useMemoConfig } from "../tx";
 import { useIBCAmountConfig } from "./amount";
@@ -21,7 +21,7 @@ import { useIBCRecipientConfig } from "./reciepient";
 export const useIBCTransferConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  msgOpts: MsgOpts["ibcTransfer"],
+  msgOpts: CosmosMsgOpts["ibcTransfer"],
   sender: string,
   queryBalances: ObservableQueryBalances,
   ensEndpoint?: string

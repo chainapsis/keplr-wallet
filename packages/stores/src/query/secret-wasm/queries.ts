@@ -6,6 +6,7 @@ import { ObservableQuerySecret20ContractInfo } from "./secret20-contract-info";
 import { DeepReadonly } from "utility-types";
 import { ObservableQuerySecret20BalanceRegistry } from "./secret20-balance";
 import { QueriesWithCosmos } from "../cosmos";
+import { Keplr } from "@keplr-wallet/types";
 
 export interface HasSecretQueries {
   secret: SecretQueries;
@@ -16,10 +17,21 @@ export class QueriesWithCosmosAndSecret
   implements HasSecretQueries {
   public secret: SecretQueries;
 
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
+  constructor(
+    kvStore: KVStore,
+    chainId: string,
+    chainGetter: ChainGetter,
+    apiGetter: () => Promise<Keplr | undefined>
+  ) {
     super(kvStore, chainId, chainGetter);
 
-    this.secret = new SecretQueries(this, kvStore, chainId, chainGetter);
+    this.secret = new SecretQueries(
+      this,
+      kvStore,
+      chainId,
+      chainGetter,
+      apiGetter
+    );
   }
 }
 
@@ -31,7 +43,8 @@ export class SecretQueries {
     base: QueriesSetBase,
     kvStore: KVStore,
     chainId: string,
-    chainGetter: ChainGetter
+    chainGetter: ChainGetter,
+    apiGetter: () => Promise<Keplr | undefined>
   ) {
     this.querySecretContractCodeHash = new ObservableQuerySecretContractCodeHash(
       kvStore,
@@ -42,6 +55,7 @@ export class SecretQueries {
     base.queryBalances.addBalanceRegistry(
       new ObservableQuerySecret20BalanceRegistry(
         kvStore,
+        apiGetter,
         this.querySecretContractCodeHash
       )
     );
@@ -50,6 +64,7 @@ export class SecretQueries {
       kvStore,
       chainId,
       chainGetter,
+      apiGetter,
       this.querySecretContractCodeHash
     );
   }

@@ -72,7 +72,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           onSubmit={async () => {
             if (ibcTransferConfigs.channelConfig.channel) {
               try {
-                await accountInfo.sendIBCTransferMsg(
+                await accountInfo.cosmos.sendIBCTransferMsg(
                   ibcTransferConfigs.channelConfig.channel,
                   ibcTransferConfigs.amountConfig.amount,
                   ibcTransferConfigs.amountConfig.sendCurrency,

@@ -18,6 +18,8 @@ import {
   HasCosmosQueries,
   HasSecretQueries,
   QueriesWithCosmosAndSecret,
+  AccountWithCosmosAndSecret,
+  getKeplrFromWindow,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -44,7 +46,7 @@ export class RootStore {
   public readonly queriesStore: QueriesStore<
     QueriesSetBase & HasCosmosQueries & HasSecretQueries
   >;
-  public readonly accountStore: AccountStore;
+  public readonly accountStore: AccountStore<AccountWithCosmosAndSecret>;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
@@ -94,11 +96,13 @@ export class RootStore {
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
       this.chainStore,
+      getKeplrFromWindow,
       QueriesWithCosmosAndSecret
     );
 
     this.accountStore = new AccountStore(
       window,
+      AccountWithCosmosAndSecret,
       this.chainStore,
       this.queriesStore,
       {
@@ -111,6 +115,8 @@ export class RootStore {
           // To prevent this problem, just check the first uri is "#/unlcok" and
           // if it is "#/unlock", don't use the prefetching option.
           prefetching: !window.location.href.includes("#/unlock"),
+          suggestChain: false,
+          getKeplr: getKeplrFromWindow,
         },
         chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
           // In certik, change the msg type of the MsgSend to "bank/MsgSend"

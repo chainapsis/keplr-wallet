@@ -3,7 +3,6 @@ import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { ChainStore } from "../chain";
 import { DeepReadonly } from "utility-types";
 import { HasCosmosQueries, QueriesSetBase } from "../query";
-import { AccountStore } from "../account";
 import { HasMapStore } from "../common";
 import { Balances } from "../query/cosmos/balance/types";
 import { computedFn } from "mobx-utils";
@@ -15,7 +14,14 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
   constructor(
     protected readonly chainId: string,
     protected readonly chainStore: ChainStore<C>,
-    protected readonly accountStore: AccountStore,
+    protected readonly accountStore: {
+      hasAccount(chainId: string): boolean;
+      getAccount(
+        chainId: string
+      ): {
+        bech32Address: string;
+      };
+    },
     protected readonly queriesStore: {
       get(chainId: string): QueriesSetBase & HasCosmosQueries;
     }
@@ -161,7 +167,14 @@ export class IBCCurrencyRegsitrar<
 > extends HasMapStore<IBCCurrencyRegsitrarInner<C>> {
   constructor(
     protected readonly chainStore: ChainStore<C>,
-    protected readonly accountStore: AccountStore,
+    protected readonly accountStore: {
+      hasAccount(chainId: string): boolean;
+      getAccount(
+        chainId: string
+      ): {
+        bech32Address: string;
+      };
+    },
     protected readonly queriesStore: {
       get(chainId: string): QueriesSetBase & HasCosmosQueries;
     }

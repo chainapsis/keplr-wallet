@@ -3,6 +3,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryBalances } from "./balances";
 import { ChainGetter } from "../common";
+import { Keplr } from "@keplr-wallet/types";
 
 export class QueriesSetBase {
   public readonly queryBalances: DeepReadonly<ObservableQueryBalances>;
@@ -23,10 +24,12 @@ export class QueriesStore<QueriesSet extends QueriesSetBase> {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainGetter: ChainGetter,
+    protected readonly apiGetter: () => Promise<Keplr | undefined>,
     protected readonly queriesCreator: new (
       kvStore: KVStore,
       chainId: string,
-      chainGetter: ChainGetter
+      chainGetter: ChainGetter,
+      apiGetter: () => Promise<Keplr | undefined>
     ) => QueriesSet
   ) {
     makeObservable(this);
@@ -37,7 +40,8 @@ export class QueriesStore<QueriesSet extends QueriesSetBase> {
       const queries = new this.queriesCreator(
         this.kvStore,
         chainId,
-        this.chainGetter
+        this.chainGetter,
+        this.apiGetter
       );
       runInAction(() => {
         this.queriesMap.set(chainId, queries);

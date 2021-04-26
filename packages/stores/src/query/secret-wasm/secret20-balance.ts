@@ -8,6 +8,7 @@ import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
 import { ObservableSecretContractChainQuery } from "./contract-query";
 import { CancelToken } from "axios";
 import { WrongViewingKeyError } from "./errors";
+import { Keplr } from "@keplr-wallet/types";
 
 export class ObservableQuerySecret20Balance extends ObservableSecretContractChainQuery<{
   balance: { amount: string };
@@ -19,6 +20,7 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
+    protected readonly apiGetter: () => Promise<Keplr | undefined>,
     protected readonly contractAddress: string,
     protected readonly bech32Address: string,
     protected readonly parent: ObservableQuerySecret20BalanceInner,
@@ -28,6 +30,7 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
       kvStore,
       chainId,
       chainGetter,
+      apiGetter,
       contractAddress,
       {},
       querySecretContractCodeHash
@@ -83,6 +86,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
+    protected readonly apiGetter: () => Promise<Keplr | undefined>,
     denomHelper: DenomHelper,
     protected readonly bech32Address: string,
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
@@ -102,6 +106,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
       kvStore,
       chainId,
       chainGetter,
+      this.apiGetter,
       denomHelper.contractAddress,
       bech32Address,
       this,
@@ -166,6 +171,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
 export class ObservableQuerySecret20BalanceRegistry implements BalanceRegistry {
   constructor(
     protected readonly kvStore: KVStore,
+    protected readonly apiGetter: () => Promise<Keplr | undefined>,
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {}
 
@@ -181,6 +187,7 @@ export class ObservableQuerySecret20BalanceRegistry implements BalanceRegistry {
         this.kvStore,
         chainId,
         chainGetter,
+        this.apiGetter,
         denomHelper,
         bech32Address,
         this.querySecretContractCodeHash

@@ -83,7 +83,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
 
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
-      accountInfo
+      accountInfo.secret
         .createSecret20ViewingKey(contractAddress, "", (_, viewingKey) => {
           loadingIndicator.setIsLoading("create-veiwing-key", false);
 
