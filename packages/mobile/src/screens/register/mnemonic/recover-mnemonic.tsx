@@ -8,7 +8,7 @@ import { FullPage } from "../../../components/page";
 import { Button } from "../../../components/buttons";
 import { useForm, Controller } from "react-hook-form";
 import { h2, mb2 } from "../../../styles";
-import { DefaultInput } from "../../../components/input";
+import { Input } from "../../../components/input";
 
 interface FormData {
   name: string;
@@ -57,7 +57,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
       <Controller
         control={control}
         render={({ field: { onChange, value } }) => (
-          <DefaultInput
+          <Input
             label="Mnemonic"
             labelStyle={[h2, mb2]}
             autoCapitalize="none"
@@ -81,7 +81,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
       <Controller
         control={control}
         render={({ field: { onChange, value } }) => (
-          <DefaultInput
+          <Input
             label="Name"
             value={value}
             onChangeText={onChange}
@@ -102,7 +102,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           <Controller
             control={control}
             render={({ field: { onChange, value } }) => (
-              <DefaultInput
+              <Input
                 label="Password"
                 autoCompleteType="password"
                 secureTextEntry={true}
@@ -124,7 +124,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           <Controller
             control={control}
             render={({ field: { onChange, value } }) => (
-              <DefaultInput
+              <Input
                 label="Confirm password"
                 autoCompleteType="password"
                 secureTextEntry={true}

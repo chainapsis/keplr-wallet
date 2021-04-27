@@ -36,7 +36,7 @@ import {
   m2,
 } from "../../../styles";
 import { ButtonGroup } from "react-native-elements";
-import { DefaultInput } from "../../../components/input";
+import { Input } from "../../../components/input";
 
 interface FormData {
   name: string;
@@ -166,7 +166,7 @@ export const GenerateMnemonicScreen: FunctionComponent = observer(() => {
       <Controller
         control={control}
         render={({ field: { onChange, value } }) => (
-          <DefaultInput
+          <Input
             label="Name"
             value={value}
             onChangeText={onChange}
@@ -187,7 +187,7 @@ export const GenerateMnemonicScreen: FunctionComponent = observer(() => {
           <Controller
             control={control}
             render={({ field: { onChange, value } }) => (
-              <DefaultInput
+              <Input
                 label="Password"
                 autoCompleteType="password"
                 secureTextEntry={true}
@@ -209,7 +209,7 @@ export const GenerateMnemonicScreen: FunctionComponent = observer(() => {
           <Controller
             control={control}
             render={({ field: { onChange, value } }) => (
-              <DefaultInput
+              <Input
                 label="Confirm password"
                 autoCompleteType="password"
                 secureTextEntry={true}
