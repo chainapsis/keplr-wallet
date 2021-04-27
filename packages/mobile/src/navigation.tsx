@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useLayoutEffect, useEffect } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
@@ -9,7 +9,7 @@ import {
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
-import { RegisterScreen } from "./screens/register";
+import { RegisterStackScreen } from "./screens/register";
 import { HomeStackScreen } from "./screens/home";
 import { ModalsRenderer } from "./modals";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -19,16 +19,13 @@ import { StakeStackScreen } from "./screens/stake";
 import { GovernanceStackScreen } from "./screens/governance";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContent } from "./components/drawer";
-import { Page } from "./components/page";
 import { alignItemsCenter, flex1, justifyContentCenter, sf } from "./styles";
 
 const SplashScreen: FunctionComponent = () => {
   return (
-    <Page>
-      <View style={sf([flex1, alignItemsCenter, justifyContentCenter])}>
-        <Text>Loading...</Text>
-      </View>
-    </Page>
+    <View style={sf([flex1, alignItemsCenter, justifyContentCenter])}>
+      <Text>Loading...</Text>
+    </View>
   );
 };
 
@@ -101,7 +98,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
             }}
           >
             <Stack.Screen name="Main" component={MainTabNavigationWithDrawer} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="Register" component={RegisterStackScreen} />
           </Stack.Navigator>
         )}
       </NavigationContainer>

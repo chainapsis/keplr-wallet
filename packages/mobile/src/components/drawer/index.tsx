@@ -6,7 +6,7 @@ import {
   DrawerContentScrollView,
 } from "@react-navigation/drawer";
 import { useStore } from "../../stores";
-import { Button } from "react-native-elements";
+import { Button as RNButton } from "react-native-elements";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 
 export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOptions>;
@@ -20,7 +20,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
       <DrawerContentScrollView {...props}>
         {chainStore.chainInfos.map((chainInfo) => {
           return (
-            <Button
+            <RNButton
               key={chainInfo.chainId}
               title={chainInfo.chainName}
               type="clear"

@@ -4,7 +4,7 @@ import { bw0, br1 } from "./border";
 import { body2, fcError } from "./font";
 import { bgcWhite, shadow, mx0, my1, m1 } from "./layout";
 
-export const sf = (style: StyleProp<ViewProps>[] | StyleProp<TextProps>[]) => {
+export const sf = (style: (StyleProp<ViewProps> | StyleProp<TextProps>)[]) => {
   return StyleSheet.flatten(style);
 };
 

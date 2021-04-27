@@ -7,8 +7,8 @@ import {
   InvalidBech32Error,
   IRecipientConfig,
 } from "@keplr-wallet/hooks";
-import { Input } from "react-native-elements";
 import { observer } from "mobx-react-lite";
+import { Input } from "../input";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;

@@ -1,13 +1,13 @@
 import React, { FunctionComponent } from "react";
 import { SafeAreaView, ScrollView, View } from "react-native";
-import { flex1, absoluteLayout, p2 } from "../../styles";
+import { flex1, absoluteLayout, p2, sf } from "../../styles";
 import { GradientBackground } from "../svg";
 
 /**
  * The container for each pages.
  * @constructor
  */
-export const Page: FunctionComponent = ({ children }) => {
+export const SafeAreaPage: FunctionComponent = ({ children }) => {
   return (
     <SafeAreaView style={flex1}>
       <View style={absoluteLayout}>
@@ -20,13 +20,24 @@ export const Page: FunctionComponent = ({ children }) => {
   );
 };
 
+export const FullPage: FunctionComponent = ({ children }) => {
+  return (
+    <View style={flex1}>
+      <View style={absoluteLayout}>
+        <GradientBackground />
+      </View>
+      <View style={sf([absoluteLayout, p2])}>{children}</View>
+    </View>
+  );
+};
+
 export const FixedPage: FunctionComponent = ({ children }) => {
   return (
     <SafeAreaView style={flex1}>
       <View style={absoluteLayout}>
         <GradientBackground />
       </View>
-      <View style={absoluteLayout}>{children}</View>
+      <View style={sf([absoluteLayout, p2])}>{children}</View>
     </SafeAreaView>
   );
 };

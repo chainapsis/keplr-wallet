@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { Page } from "../../components/page";
+import { SafeAreaPage } from "../../components/page";
 import { Staking } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -51,7 +51,7 @@ export const StakedDetailsScreen: FunctionComponent = observer(() => {
   );
 
   return (
-    <Page>
+    <SafeAreaPage>
       {delegatedValidators.map((validator, key) => {
         const thumbnail =
           bondedValdiators.getValidatorThumbnail(validator.operator_address) ||
@@ -73,6 +73,6 @@ export const StakedDetailsScreen: FunctionComponent = observer(() => {
           />
         );
       })}
-    </Page>
+    </SafeAreaPage>
   );
 });

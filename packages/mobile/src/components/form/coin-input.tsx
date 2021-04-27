@@ -11,7 +11,7 @@ import {
 
 import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { observer } from "mobx-react-lite";
-import { Input, Text } from "react-native-elements";
+import { Text } from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
 import RNPickerSelect from "react-native-picker-select";
 import { View } from "react-native";
@@ -28,6 +28,7 @@ import {
   subtitle2,
   underline,
 } from "../../styles";
+import { Input } from "../input";
 
 export interface CoinInputProps {
   amountConfig: IAmountConfig;
@@ -119,7 +120,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
           <Input
             label="Token"
             disabled={isAllBalanceMode}
-            inputContainerStyle={isAllBalanceMode ? bgcGray : bgcWhite}
+            inputContainerStyle={isAllBalanceMode ? [bgcGray] : [bgcWhite]}
             value={amountConfig.sendCurrency.coinDenom}
             rightIcon={<Icon name="chevron-down" />}
           />
@@ -139,7 +140,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
           }}
           keyboardType="numeric"
           disabled={isAllBalanceMode}
-          inputContainerStyle={isAllBalanceMode ? bgcGray : bgcWhite}
+          inputContainerStyle={isAllBalanceMode ? [bgcGray] : [bgcWhite]}
           errorMessage={errorText}
         />
       </React.Fragment>

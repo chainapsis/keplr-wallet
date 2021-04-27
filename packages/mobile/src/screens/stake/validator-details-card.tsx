@@ -12,7 +12,7 @@ import {
   sf,
   justifyContentBetween,
 } from "../../styles";
-import { DefaultButton } from "../../components/buttons";
+import { Button } from "../../components/buttons";
 
 type Validator = Staking.Validator;
 
@@ -81,8 +81,8 @@ export const ValidatorDetailsCard: FunctionComponent<{
         </Text>
       </View>
       <View style={flexDirectionRow}>
-        <DefaultButton title="Delegate" />
-        <DefaultButton title="Undelegate" />
+        <Button title="Delegate" />
+        <Button title="Undelegate" />
       </View>
     </Card>
   );

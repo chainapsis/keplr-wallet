@@ -27,3 +27,7 @@ export const justifyContentEnd: StyleProp<ViewStyle> = {
 export const alignItemsCenter: StyleProp<ViewStyle> = {
   alignItems: "center",
 };
+
+export const alignItemsEnd: StyleProp<ViewStyle> = {
+  alignItems: "flex-end",
+};

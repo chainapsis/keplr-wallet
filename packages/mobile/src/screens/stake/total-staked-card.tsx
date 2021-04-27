@@ -5,7 +5,7 @@ import { useStore } from "../../stores";
 import { Text, Image, Card } from "react-native-elements";
 import { View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { DefaultButton } from "../../components/buttons";
+import { Button } from "../../components/buttons";
 import {
   flexDirectionRow,
   justifyContentBetween,
@@ -20,7 +20,7 @@ const NeedStakeView: FunctionComponent = () => {
         source={{ uri: "" }}
         style={{ width: 80, height: 80, marginBottom: 5 }}
       />
-      <DefaultButton title="You Don't Stake Anything" disabled={true} />
+      <Button title="You Don't Stake Anything" disabled={true} />
     </View>
   );
 };
@@ -67,7 +67,7 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
         <React.Fragment>
           <View style={sf([flexDirectionRow, justifyContentBetween])}>
             <Card.Title>Staking</Card.Title>
-            <DefaultButton
+            <Button
               title={">"}
               onPress={() => {
                 navigate.navigate("Staking Details");
@@ -94,7 +94,7 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
                 .toString()}
             </Text>
           </View>
-          <DefaultButton
+          <Button
             title="Clain Reward"
             onPress={async () => {
               await sendWithdrawDelegatorRewardMsgs();

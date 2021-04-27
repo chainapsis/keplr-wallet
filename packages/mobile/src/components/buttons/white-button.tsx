@@ -1,11 +1,6 @@
 import React, { FunctionComponent } from "react";
-import {
-  StyleProp,
-  TextStyle,
-  ViewStyle,
-  GestureResponderEvent,
-} from "react-native";
-import { Button } from "react-native-elements";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
+import { Button as RNButton } from "react-native-elements";
 import {
   bw1,
   flex1,
@@ -29,33 +24,31 @@ import {
   fcSecondary200,
 } from "../../styles";
 
-type WhiteButtonProps = {
-  containerStyle?: StyleProp<ViewStyle>[];
-  buttonStyle?: StyleProp<ViewStyle>[];
-  titleStyle?: StyleProp<TextStyle>[];
-  disabledStyle?: StyleProp<ViewStyle>[];
-  disabledTitleStyle?: StyleProp<TextStyle>[];
-  disabled?: boolean;
-  loading?: boolean;
-  color?: "primary" | "secondary" | "error" | "warning";
-  title: string;
-  onPress?: (event: GestureResponderEvent) => void;
-};
+export const WhiteButton: FunctionComponent<
+  React.ComponentProps<typeof RNButton> & {
+    containerStyle?: StyleProp<ViewStyle>[];
+    buttonStyle?: StyleProp<ViewStyle>[];
+    titleStyle?: StyleProp<TextStyle>[];
+    disabledStyle?: StyleProp<ViewStyle>[];
+    disabledTitleStyle?: StyleProp<TextStyle>[];
+    color?: "primary" | "secondary" | "error" | "warning";
+  }
+> = (props) => {
+  const attributes = { ...props };
+  delete attributes.containerStyle;
+  delete attributes.buttonStyle;
+  delete attributes.titleStyle;
+  delete attributes.disabledStyle;
+  delete attributes.disabledTitleStyle;
 
-export const WhiteButton: FunctionComponent<WhiteButtonProps> = ({
-  containerStyle = [],
-  buttonStyle = [],
-  titleStyle = [],
-  disabledStyle = [],
-  disabledTitleStyle = [],
-  title,
-  color,
-  disabled,
-  loading,
-  onPress,
-}) => {
+  const containerStyle = props.containerStyle ?? [];
+  const buttonStyle = props.buttonStyle ?? [];
+  const titleStyle = props.titleStyle ?? [];
+  const disabledStyle = props.disabledStyle ?? [];
+  const disabledTitleStyle = props.disabledTitleStyle ?? [];
+
   const [borderColor, fontColor] = (() => {
-    switch (color) {
+    switch (props.color) {
       case "primary":
         return [bcPrimary, fcPrimary];
       case "secondary":
@@ -70,7 +63,7 @@ export const WhiteButton: FunctionComponent<WhiteButtonProps> = ({
   })();
 
   const [disabledBorderColor, disabledFontColor] = (() => {
-    switch (color) {
+    switch (props.color) {
       case "primary":
         return [bcPrimary200, fcPrimary200];
       case "secondary":
@@ -85,7 +78,8 @@ export const WhiteButton: FunctionComponent<WhiteButtonProps> = ({
   })();
 
   return (
-    <Button
+    <RNButton
+      {...attributes}
       containerStyle={sf([flex1, ...containerStyle])}
       buttonStyle={sf([
         borderColor,
@@ -97,12 +91,8 @@ export const WhiteButton: FunctionComponent<WhiteButtonProps> = ({
         ...buttonStyle,
       ])}
       titleStyle={sf([fontColor, buttonFont1, ...titleStyle])}
-      title={title}
-      disabled={disabled}
       disabledStyle={sf([disabledBorderColor, bgcWhite, ...disabledStyle])}
       disabledTitleStyle={sf([disabledFontColor, ...disabledTitleStyle])}
-      onPress={onPress}
-      loading={loading}
     />
   );
 };

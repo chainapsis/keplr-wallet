@@ -10,7 +10,7 @@ import {
   useSignDocAmountConfig,
   useSignDocHelper,
 } from "@keplr-wallet/hooks";
-import { Input, Text } from "react-native-elements";
+import { Text } from "react-native-elements";
 import {
   flexDirectionRow,
   justifyContentEnd,
@@ -20,10 +20,11 @@ import {
   fAlignCenter,
   my3,
 } from "../styles";
-import { DefaultButton, WhiteButton } from "../components/buttons";
+import { Button, WhiteButton } from "../components/buttons";
 import { TransactionDetails } from "./transaction-details";
-import { Page } from "../components/page";
+import { SafeAreaPage } from "../components/page";
 import { useInteractionInfo } from "../hooks";
+import { Input } from "../components/input";
 
 export const ModalsRenderer: FunctionComponent = observer(() => {
   const {
@@ -101,7 +102,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
         style={sf([justifyContentEnd, m0])}
       >
         <View style={{ height: 600 }}>
-          <Page>
+          <SafeAreaPage>
             {interactionModalStore.lastUrl === "/unlock" ? (
               <React.Fragment>
                 <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
@@ -112,7 +113,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                   value={password}
                   onChangeText={setPassword}
                 />
-                <DefaultButton
+                <Button
                   title="Unlock"
                   onPress={async () => {
                     await keyRingStore.unlock(password);
@@ -147,7 +148,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                       interactionModalStore.popUrl();
                     }}
                   />
-                  <DefaultButton
+                  <Button
                     title="Approve"
                     onPress={async () => {
                       if (signDocHelper.signDocWrapper) {
@@ -161,7 +162,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                 </View>
               </React.Fragment>
             ) : null}
-          </Page>
+          </SafeAreaPage>
         </View>
       </Modal>
     </React.Fragment>
