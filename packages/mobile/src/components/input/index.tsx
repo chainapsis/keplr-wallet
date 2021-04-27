@@ -3,71 +3,33 @@ import { Input as RNInput } from "react-native-elements";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { sf, bcError, bw1 } from "../../styles";
 
-interface InputProps {
-  label?: string;
-  value?: string;
-  errorMessage?: string;
-  secureTextEntry?: boolean;
-  autoCompleteType?:
-    | "name"
-    | "username"
-    | "password"
-    | "cc-csc"
-    | "cc-exp"
-    | "cc-exp-month"
-    | "cc-exp-year"
-    | "cc-number"
-    | "email"
-    | "postal-code"
-    | "street-address"
-    | "tel"
-    | "off"
-    | undefined;
-  numberOfLines?: number;
-  multiline?: boolean;
-  disabled?: boolean;
-  autoCapitalize?: "none" | "sentences" | "words" | "characters" | undefined;
-  onChangeText: ((text: string) => void) | undefined;
-  inputContainerStyle?: [];
-  labelStyle?: StyleProp<TextStyle>[];
-  errorStyle?: StyleProp<TextStyle>[];
-  inputStyle?: StyleProp<TextStyle>[];
-  disabledInputStyle?: StyleProp<ViewStyle>[];
-  rightIcon?: any;
-}
+export const Input: FunctionComponent<
+  React.ComponentProps<typeof RNInput> & {
+    inputContainerStyle?: StyleProp<ViewStyle>[];
+    labelStyle?: StyleProp<TextStyle>[];
+    errorStyle?: StyleProp<TextStyle>[];
+    inputStyle?: StyleProp<TextStyle>[];
+    disabledInputStyle?: StyleProp<ViewStyle>[];
+  }
+> = (props) => {
+  const attributes = { ...props };
+  delete attributes.inputContainerStyle;
+  delete attributes.labelStyle;
+  delete attributes.errorStyle;
+  delete attributes.inputStyle;
+  delete attributes.disabledInputStyle;
 
-export const Input: FunctionComponent<InputProps> = ({
-  label,
-  value,
-  errorMessage,
-  secureTextEntry,
-  autoCompleteType,
-  numberOfLines,
-  multiline,
-  disabled,
-  autoCapitalize,
-  onChangeText,
-  inputContainerStyle = [],
-  labelStyle = [],
-  errorStyle = [],
-  inputStyle = [],
-  disabledInputStyle = [],
-  rightIcon,
-}) => {
+  const inputContainerStyle = props.inputContainerStyle ?? [];
+  const labelStyle = props.labelStyle ?? [];
+  const errorStyle = props.errorStyle ?? [];
+  const inputStyle = props.inputStyle ?? [];
+  const disabledInputStyle = props.disabledInputStyle ?? [];
+
   return (
     <RNInput
-      label={label}
-      value={value}
-      errorMessage={errorMessage}
-      secureTextEntry={secureTextEntry}
-      autoCompleteType={autoCompleteType}
-      numberOfLines={numberOfLines}
-      multiline={multiline}
-      disabled={disabled}
-      autoCapitalize={autoCapitalize}
-      onChangeText={onChangeText}
+      {...attributes}
       inputContainerStyle={
-        errorMessage
+        props.errorMessage
           ? sf([bcError, bw1, ...inputContainerStyle])
           : sf([...inputContainerStyle])
       }
@@ -75,7 +37,6 @@ export const Input: FunctionComponent<InputProps> = ({
       errorStyle={sf([...errorStyle])}
       inputStyle={sf([...inputStyle])}
       disabledInputStyle={sf([...disabledInputStyle])}
-      rightIcon={rightIcon}
     />
   );
 };
