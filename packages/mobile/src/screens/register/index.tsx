@@ -1,61 +1,80 @@
-import React, { FunctionComponent, useState } from "react";
-import { Input } from "react-native-elements";
+/* eslint-disable react/display-name */
+import React, { FunctionComponent } from "react";
+import { Text } from "react-native-elements";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { useRegisterConfig } from "@keplr-wallet/hooks";
-import { getRandomBytesAsync } from "../../common";
-import { useNavigation, StackActions } from "@react-navigation/native";
-import { Page } from "../../components/page";
-import { DefaultButton } from "../../components/buttons";
+import { useNavigation } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { FullPage } from "../../components/page";
+import { DefaultButton, WhiteButton } from "../../components/buttons";
+import {
+  alignItemsCenter,
+  flex1,
+  h1,
+  justifyContentCenter,
+  sf,
+} from "../../styles";
+import { View } from "react-native";
+import { GradientBackground } from "../../components/svg";
+import {
+  GenerateMnemonicScreen,
+  VerifyMnemonicScreen,
+  RecoverMnemonicScreen,
+} from "./mnemonic";
+
+const RegisterStack = createStackNavigator();
+
+export const RegisterStackScreen: FunctionComponent = () => {
+  return (
+    <RegisterStack.Navigator
+      screenOptions={{
+        headerBackTitleVisible: false,
+        headerTitle: "",
+        headerBackground: () => <GradientBackground />,
+      }}
+    >
+      <RegisterStack.Screen name="Register" component={RegisterScreen} />
+      <RegisterStack.Screen name="Sign in" component={RecoverMnemonicScreen} />
+      <RegisterStack.Screen
+        name="New account"
+        component={GenerateMnemonicScreen}
+      />
+      <RegisterStack.Screen
+        name="Verify account"
+        component={VerifyMnemonicScreen}
+      />
+    </RegisterStack.Navigator>
+  );
+};
 
 export const RegisterScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
 
-  const chainId = "secret-2";
-  const { keyRingStore, accountStore } = useStore();
-
-  const registerConfig = useRegisterConfig(
-    keyRingStore,
-    [],
-    getRandomBytesAsync
-  );
-
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [mnemonic, setMnemonic] = useState("");
-
   return (
-    <Page>
-      <Input label="Name" value={name} onChangeText={setName} />
-      <Input
-        label="Password"
-        autoCompleteType="password"
-        secureTextEntry={true}
-        value={password}
-        onChangeText={setPassword}
-      />
-      <Input
-        label="Mnemonic"
-        autoCapitalize="none"
-        value={mnemonic}
-        onChangeText={setMnemonic}
-        multiline={true}
-        numberOfLines={5}
-      />
-      <DefaultButton
-        title="Create"
-        onPress={async () => {
-          await registerConfig.createMnemonic(name, mnemonic, password, {
-            account: 0,
-            change: 0,
-            addressIndex: 0,
-          });
-
-          accountStore.getAccount(chainId).init();
-
-          navigation.dispatch(StackActions.replace("Home"));
-        }}
-      />
-    </Page>
+    <FullPage>
+      <View style={flex1} />
+      <View style={sf([flex1, justifyContentCenter, alignItemsCenter])}>
+        <Text style={h1}>Keplr</Text>
+      </View>
+      <View style={flex1} />
+      <View style={flex1} />
+      <View style={flex1} />
+      <View style={flex1} />
+      <View style={flex1}>
+        <WhiteButton
+          title="Import Existing Account"
+          onPress={() => {
+            navigation.navigate("Sign in");
+          }}
+        />
+        <DefaultButton
+          title="Create New Account"
+          onPress={() => {
+            navigation.navigate("New account");
+          }}
+        />
+      </View>
+      <View style={flex1} />
+      <View style={flex1} />
+    </FullPage>
   );
 });
