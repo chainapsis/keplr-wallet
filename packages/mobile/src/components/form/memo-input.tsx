@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { IMemoConfig } from "@keplr-wallet/hooks";
-import { Input } from "react-native-elements";
 import { observer } from "mobx-react-lite";
+import { DefaultInput } from "../input";
 
 export interface MemoInputProps {
   memoConfig: IMemoConfig;
@@ -12,7 +12,7 @@ export interface MemoInputProps {
 export const MemoInput: FunctionComponent<MemoInputProps> = observer(
   ({ memoConfig, disabled = false }) => {
     return (
-      <Input
+      <DefaultInput
         label="Memo (optional)"
         onChangeText={(value) => {
           memoConfig.setMemo(value);

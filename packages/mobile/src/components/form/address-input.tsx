@@ -7,8 +7,8 @@ import {
   InvalidBech32Error,
   IRecipientConfig,
 } from "@keplr-wallet/hooks";
-import { Input } from "react-native-elements";
 import { observer } from "mobx-react-lite";
+import { DefaultInput } from "../input";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
@@ -38,7 +38,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     }, [error]);
 
     return (
-      <Input
+      <DefaultInput
         label="Recipient"
         onChangeText={(value) => {
           recipientConfig.setRawRecipient(value);

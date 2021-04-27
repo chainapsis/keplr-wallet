@@ -26,6 +26,7 @@ import {
   h6,
   caption1,
   my1,
+  mt2,
 } from "../../styles";
 
 export interface FeeButtonsProps {
@@ -88,7 +89,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             backgroundColor,
           ])}
         >
-          <Text style={sf([h6, titleColor])}>{label}</Text>
+          <Text style={sf([mt2, h6, titleColor])}>{label}</Text>
           {price ? (
             <Text style={sf([textColor, caption1, my1])}>{price}</Text>
           ) : null}
