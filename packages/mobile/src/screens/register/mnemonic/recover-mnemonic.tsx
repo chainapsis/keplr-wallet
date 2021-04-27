@@ -5,7 +5,7 @@ import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../../common";
 import { useNavigation } from "@react-navigation/native";
 import { FullPage } from "../../../components/page";
-import { DefaultButton } from "../../../components/buttons";
+import { Button } from "../../../components/buttons";
 import { useForm, Controller } from "react-hook-form";
 import { h2, mb2 } from "../../../styles";
 import { DefaultInput } from "../../../components/input";
@@ -153,7 +153,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           />
         </React.Fragment>
       ) : null}
-      <DefaultButton title="Import" onPress={handleSubmit(onSubmit)} />
+      <Button title="Import" onPress={handleSubmit(onSubmit)} />
     </FullPage>
   );
 });

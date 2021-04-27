@@ -5,7 +5,7 @@ import {
   ViewStyle,
   GestureResponderEvent,
 } from "react-native";
-import { Button } from "react-native-elements";
+import { Button as RNButton } from "react-native-elements";
 import {
   bw1,
   flex1,
@@ -30,7 +30,7 @@ type DefalutButtonProps = {
   onPress?: (event: GestureResponderEvent) => void;
 };
 
-export const DefaultButton: FunctionComponent<DefalutButtonProps> = ({
+export const Button: FunctionComponent<DefalutButtonProps> = ({
   containerStyle = [],
   titleStyle = [],
   buttonStyle = [],
@@ -42,7 +42,7 @@ export const DefaultButton: FunctionComponent<DefalutButtonProps> = ({
   onPress,
 }) => {
   return (
-    <Button
+    <RNButton
       containerStyle={sf([flex1, ...containerStyle])}
       buttonStyle={sf([bw1, br1, px4, py3, ...buttonStyle])}
       titleStyle={sf([buttonFont1, ...titleStyle])}

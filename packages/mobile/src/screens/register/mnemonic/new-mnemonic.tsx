@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo, useEffect, useState } from "react";
-import { Button, Card, Text } from "react-native-elements";
+import { Button as RNButton, Card, Text } from "react-native-elements";
 import { View } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
@@ -7,7 +7,7 @@ import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../../common";
 import { useNavigation } from "@react-navigation/native";
 import { FullPage } from "../../../components/page";
-import { DefaultButton } from "../../../components/buttons";
+import { Button } from "../../../components/buttons";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -238,7 +238,7 @@ export const GenerateMnemonicScreen: FunctionComponent = observer(() => {
           />
         </React.Fragment>
       ) : null}
-      <DefaultButton title="Next" onPress={handleSubmit(onSubmit)} />
+      <Button title="Next" onPress={handleSubmit(onSubmit)} />
     </FullPage>
   );
 });
@@ -297,7 +297,7 @@ export const VerifyMnemonicScreen: FunctionComponent<{
           <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
             {suggestedWords.map((word, i) => {
               return (
-                <Button
+                <RNButton
                   key={word + i.toString()}
                   containerStyle={m2}
                   onPress={() => {
@@ -320,7 +320,7 @@ export const VerifyMnemonicScreen: FunctionComponent<{
           <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
             {randomizedWords.map((word, i) => {
               return (
-                <Button
+                <RNButton
                   key={word + i.toString()}
                   containerStyle={m2}
                   onPress={() => {
@@ -339,7 +339,7 @@ export const VerifyMnemonicScreen: FunctionComponent<{
             })}
           </View>
         </Card>
-        <DefaultButton
+        <Button
           title="Generate"
           disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
           onPress={async () => {

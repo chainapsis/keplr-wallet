@@ -5,7 +5,7 @@ import {
   ViewStyle,
   GestureResponderEvent,
 } from "react-native";
-import { Button } from "react-native-elements";
+import { Button as RNButton } from "react-native-elements";
 import {
   bw1,
   flex1,
@@ -85,7 +85,7 @@ export const WhiteButton: FunctionComponent<WhiteButtonProps> = ({
   })();
 
   return (
-    <Button
+    <RNButton
       containerStyle={sf([flex1, ...containerStyle])}
       buttonStyle={sf([
         borderColor,

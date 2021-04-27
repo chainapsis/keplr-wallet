@@ -20,11 +20,11 @@ import {
   fAlignCenter,
   my3,
 } from "../styles";
-import { DefaultButton, WhiteButton } from "../components/buttons";
+import { Button, WhiteButton } from "../components/buttons";
 import { TransactionDetails } from "./transaction-details";
 import { SafeAreaPage } from "../components/page";
 import { useInteractionInfo } from "../hooks";
-import { DefaultInput } from "../components/input";
+import { Input } from "../components/input";
 
 export const ModalsRenderer: FunctionComponent = observer(() => {
   const {
@@ -106,14 +106,14 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
             {interactionModalStore.lastUrl === "/unlock" ? (
               <React.Fragment>
                 <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
-                <DefaultInput
+                <Input
                   label="Password"
                   autoCompleteType="password"
                   secureTextEntry={true}
                   value={password}
                   onChangeText={setPassword}
                 />
-                <DefaultButton
+                <Button
                   title="Unlock"
                   onPress={async () => {
                     await keyRingStore.unlock(password);
@@ -148,7 +148,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                       interactionModalStore.popUrl();
                     }}
                   />
-                  <DefaultButton
+                  <Button
                     title="Approve"
                     onPress={async () => {
                       if (signDocHelper.signDocWrapper) {

@@ -28,7 +28,7 @@ import {
   subtitle2,
   underline,
 } from "../../styles";
-import { DefaultInput } from "../input";
+import { Input } from "../input";
 
 export interface CoinInputProps {
   amountConfig: IAmountConfig;
@@ -117,7 +117,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             };
           })}
         >
-          <DefaultInput
+          <Input
             label="Token"
             disabled={isAllBalanceMode}
             inputContainerStyle={isAllBalanceMode ? [bgcGray] : [bgcWhite]}
@@ -133,7 +133,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             </Text>
           </TouchableOpacity>
         </View>
-        <DefaultInput
+        <Input
           value={amountConfig.amount}
           onChangeText={(value) => {
             amountConfig.setAmount(value);

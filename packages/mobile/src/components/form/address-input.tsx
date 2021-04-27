@@ -8,7 +8,7 @@ import {
   IRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { DefaultInput } from "../input";
+import { Input } from "../input";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
@@ -38,7 +38,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     }, [error]);
 
     return (
-      <DefaultInput
+      <Input
         label="Recipient"
         onChangeText={(value) => {
           recipientConfig.setRawRecipient(value);

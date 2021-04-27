@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { Input } from "react-native-elements";
+import { Input as RNInput } from "react-native-elements";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { sf, bcError, bw1 } from "../../styles";
 
@@ -36,7 +36,7 @@ interface InputProps {
   rightIcon?: any;
 }
 
-export const DefaultInput: FunctionComponent<InputProps> = ({
+export const Input: FunctionComponent<InputProps> = ({
   label,
   value,
   errorMessage,
@@ -55,7 +55,7 @@ export const DefaultInput: FunctionComponent<InputProps> = ({
   rightIcon,
 }) => {
   return (
-    <Input
+    <RNInput
       label={label}
       value={value}
       errorMessage={errorMessage}
