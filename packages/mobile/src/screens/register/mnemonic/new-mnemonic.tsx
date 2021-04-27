@@ -33,6 +33,7 @@ import {
   mb2,
   body2,
   h7,
+  m2,
 } from "../../../styles";
 import { ButtonGroup } from "react-native-elements";
 import { DefaultInput } from "../../../components/input";
@@ -298,6 +299,7 @@ export const VerifyMnemonicScreen: FunctionComponent<{
               return (
                 <Button
                   key={word + i.toString()}
+                  containerStyle={m2}
                   onPress={() => {
                     const word = suggestedWords[i];
                     setSuggestedWords(
@@ -320,6 +322,7 @@ export const VerifyMnemonicScreen: FunctionComponent<{
               return (
                 <Button
                   key={word + i.toString()}
+                  containerStyle={m2}
                   onPress={() => {
                     const word = randomizedWords[i];
                     setRandomizedWords(
