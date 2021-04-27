@@ -10,7 +10,7 @@ import {
   useSignDocAmountConfig,
   useSignDocHelper,
 } from "@keplr-wallet/hooks";
-import { Input, Text } from "react-native-elements";
+import { Text } from "react-native-elements";
 import {
   flexDirectionRow,
   justifyContentEnd,
@@ -22,8 +22,9 @@ import {
 } from "../styles";
 import { DefaultButton, WhiteButton } from "../components/buttons";
 import { TransactionDetails } from "./transaction-details";
-import { Page } from "../components/page";
+import { SafeAreaPage } from "../components/page";
 import { useInteractionInfo } from "../hooks";
+import { DefaultInput } from "../components/input";
 
 export const ModalsRenderer: FunctionComponent = observer(() => {
   const {
@@ -101,11 +102,11 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
         style={sf([justifyContentEnd, m0])}
       >
         <View style={{ height: 600 }}>
-          <Page>
+          <SafeAreaPage>
             {interactionModalStore.lastUrl === "/unlock" ? (
               <React.Fragment>
                 <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
-                <Input
+                <DefaultInput
                   label="Password"
                   autoCompleteType="password"
                   secureTextEntry={true}
@@ -161,7 +162,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                 </View>
               </React.Fragment>
             ) : null}
-          </Page>
+          </SafeAreaPage>
         </View>
       </Modal>
     </React.Fragment>

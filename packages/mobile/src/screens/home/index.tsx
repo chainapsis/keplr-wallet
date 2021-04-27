@@ -2,7 +2,7 @@
 import React, { FunctionComponent, useLayoutEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Button, Card } from "react-native-elements";
-import { Page } from "../../components/page";
+import { SafeAreaPage } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Feather";
@@ -40,7 +40,7 @@ const HomeScreen: FunctionComponent = observer(() => {
   }, [navigation]);
 
   return (
-    <Page>
+    <SafeAreaPage>
       <Card>
         <AccountView />
         <AssetView />
@@ -62,6 +62,6 @@ const HomeScreen: FunctionComponent = observer(() => {
           }}
         />
       </Card>
-    </Page>
+    </SafeAreaPage>
   );
 });

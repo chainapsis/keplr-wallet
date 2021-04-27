@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { DefaultButton } from "../../components/buttons";
-import { Page } from "../../components/page";
+import { SafeAreaPage } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
 import {
   AddressInput,
@@ -53,7 +53,7 @@ const SendScreen: FunctionComponent = observer(() => {
   const sendConfigIsValid = sendConfigError == null;
 
   return (
-    <Page>
+    <SafeAreaPage>
       <AddressInput recipientConfig={sendConfigs.recipientConfig} />
       <CoinInput
         amountConfig={sendConfigs.amountConfig}
@@ -78,6 +78,6 @@ const SendScreen: FunctionComponent = observer(() => {
           );
         }}
       />
-    </Page>
+    </SafeAreaPage>
   );
 });

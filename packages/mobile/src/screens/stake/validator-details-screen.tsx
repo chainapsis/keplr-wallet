@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { Page } from "../../components/page";
+import { SafeAreaPage } from "../../components/page";
 import { Staking } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
 import { ValidatorDetailsCard } from "./validator-details-card";
@@ -38,14 +38,14 @@ export const ValidatorDetailsScreen: FunctionComponent<ValidatorDetailsScreenPro
     );
 
     return (
-      <Page>
+      <SafeAreaPage>
         <ValidatorDetailsCard
           validator={validator}
           thumbnail={thumbnail}
           power={power}
         />
         {unbonding.length > 0 ? <UnbondingCard unbondings={unbonding} /> : null}
-      </Page>
+      </SafeAreaPage>
     );
   }
 );
