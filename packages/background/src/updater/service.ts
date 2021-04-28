@@ -50,6 +50,8 @@ export class ChainUpdaterService {
 
   async clearUpdatedProperty(chainId: string) {
     await this.kvStore.set(ChainIdHelper.parse(chainId).identifier, null);
+
+    this.chainsService.clearCachedChainInfos();
   }
 
   async tryUpdateChain(chainId: string) {
@@ -167,6 +169,8 @@ export class ChainUpdaterService {
       ...saved,
       ...chainInfo,
     });
+
+    this.chainsService.clearCachedChainInfos();
   }
 
   private async loadChainProperty(

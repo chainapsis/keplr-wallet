@@ -9,12 +9,15 @@ import { InteractionService } from "../interaction";
 import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import pDebounce from "p-debounce";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 
 @singleton()
 export class ChainsService {
   protected onChainRemovedHandlers: ChainRemovedHandler[] = [];
+
+  protected cachedChainInfos: ChainInfoWithEmbed[] | undefined;
 
   constructor(
     @inject(TYPES.ChainsStore)
@@ -27,7 +30,13 @@ export class ChainsService {
     protected readonly interactionKeeper: InteractionService
   ) {}
 
-  async getChainInfos(): Promise<ChainInfoWithEmbed[]> {
+  readonly getChainInfos: () => Promise<
+    ChainInfoWithEmbed[]
+  > = pDebounce.promise(async () => {
+    if (this.cachedChainInfos) {
+      return this.cachedChainInfos;
+    }
+
     const chainInfos = this.embedChainInfos.map((chainInfo) => {
       return {
         ...chainInfo,
@@ -77,7 +86,13 @@ export class ChainsService {
       })
     );
 
+    this.cachedChainInfos = result;
+
     return result;
+  });
+
+  clearCachedChainInfos() {
+    this.cachedChainInfos = undefined;
   }
 
   async getChainInfo(chainId: string): Promise<ChainInfoWithEmbed> {
@@ -148,6 +163,8 @@ export class ChainsService {
     savedChainInfos.push(chainInfo);
 
     await this.kvStore.set<ChainInfo[]>("chain-infos", savedChainInfos);
+
+    this.clearCachedChainInfos();
   }
 
   async removeChainInfo(chainId: string): Promise<void> {
@@ -177,6 +194,8 @@ export class ChainsService {
     for (const chainRemovedHandler of this.onChainRemovedHandlers) {
       chainRemovedHandler(chainId, ChainIdHelper.parse(chainId).identifier);
     }
+
+    this.clearCachedChainInfos();
   }
 
   addChainRemovedHandler(handler: ChainRemovedHandler) {
