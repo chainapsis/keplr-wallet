@@ -47,7 +47,6 @@ export const SetKeyRingScreen: FunctionComponent = observer(() => {
           />
         );
       })}
-      {loading ? <Text> Loading </Text> : null}
     </FullPageWithoutPadding>
   );
 });
