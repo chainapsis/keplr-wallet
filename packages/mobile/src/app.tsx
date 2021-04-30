@@ -6,16 +6,19 @@ import {
   NotificationProvider,
   NotificationStoreProvider,
 } from "./components/notification";
+import { LoadingIndicatorProvider } from "./components/loading-indicator";
 
 export const App: FunctionComponent = () => {
   return (
     <GlobalThemeProvider>
       <StoreProvider>
-        <NotificationStoreProvider>
-          <NotificationProvider>
-            <AppNavigation />
-          </NotificationProvider>
-        </NotificationStoreProvider>
+        <LoadingIndicatorProvider>
+          <NotificationStoreProvider>
+            <NotificationProvider>
+              <AppNavigation />
+            </NotificationProvider>
+          </NotificationStoreProvider>
+        </LoadingIndicatorProvider>
       </StoreProvider>
     </GlobalThemeProvider>
   );

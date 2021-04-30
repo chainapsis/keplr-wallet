@@ -17,6 +17,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { SendStackScreen } from "./screens/send";
 import { StakeStackScreen } from "./screens/stake";
 import { GovernanceStackScreen } from "./screens/governance";
+import { SettingStackScreen } from "./screens/setting";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContent } from "./components/drawer";
 import { alignItemsCenter, flex1, justifyContentCenter, sf } from "./styles";
@@ -64,7 +65,7 @@ export const MainTabNavigation: FunctionComponent = () => {
   return (
     <Tab.Navigator>
       <Tab.Screen name="Main" component={MainNavigation} />
-      {/* <Tab.Screen name="Setting" component={SettingStackScreen} /> */}
+      <Tab.Screen name="Setting" component={SettingStackScreen} />
     </Tab.Navigator>
   );
 };

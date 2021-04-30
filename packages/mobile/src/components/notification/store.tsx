@@ -22,76 +22,76 @@ export const useNotificationStore = () => {
 
 export class NotificationStore {
   @observable
-  public topLeftProperties: NotificationProperty[] = [];
+  public topProperties: NotificationProperty[] = [];
   @observable
-  public topCenterProperties: NotificationProperty[] = [];
+  public middleProperties: NotificationProperty[] = [];
   @observable
-  public topRightProperties: NotificationProperty[] = [];
+  public bottomProperties: NotificationProperty[] = [];
 
   constructor() {
     makeObservable(this);
   }
 
   @action
-  setTopLeftProperties(properties: NotificationProperty[]) {
-    this.topLeftProperties = properties;
+  setTopProperties(properties: NotificationProperty[]) {
+    this.topProperties = properties;
   }
 
   @action
-  setTopCenterProperties(properties: NotificationProperty[]) {
-    this.topCenterProperties = properties;
+  setMiddleProperties(properties: NotificationProperty[]) {
+    this.middleProperties = properties;
   }
 
   @action
-  setTopRightProperties(properties: NotificationProperty[]) {
-    this.topRightProperties = properties;
+  setBottomProperties(properties: NotificationProperty[]) {
+    this.bottomProperties = properties;
   }
 
   @action
-  pushTopLeftProperty(property: NotificationProperty) {
-    this.topLeftProperties.push(property);
+  pushTopProperty(property: NotificationProperty) {
+    this.topProperties.push(property);
   }
 
   @action
-  pushTopCenterProperty(property: NotificationProperty) {
-    this.topCenterProperties.push(property);
+  pushMiddleProperty(property: NotificationProperty) {
+    this.middleProperties.push(property);
   }
 
   @action
-  pushTopRightProperty(property: NotificationProperty) {
-    this.topRightProperties.push(property);
+  pushBottomProperty(property: NotificationProperty) {
+    this.bottomProperties.push(property);
   }
 
   @action
-  removeTopLeftProperty(id: string) {
-    const target = this.topLeftProperties.find((property) => {
+  removeTopProperty(id: string) {
+    const target = this.topProperties.find((property) => {
       return property.id === id;
     });
 
     if (target) {
-      (this.topLeftProperties as IObservableArray).remove(target);
+      (this.topProperties as IObservableArray).remove(target);
     }
   }
 
   @action
-  removeTopCenterProperty(id: string) {
-    const target = this.topCenterProperties.find((property) => {
+  removeMiddleProperty(id: string) {
+    const target = this.middleProperties.find((property) => {
       return property.id === id;
     });
 
     if (target) {
-      (this.topCenterProperties as IObservableArray).remove(target);
+      (this.middleProperties as IObservableArray).remove(target);
     }
   }
 
   @action
-  removeTopRightProperty(id: string) {
-    const target = this.topRightProperties.find((property) => {
+  removeBottomProperty(id: string) {
+    const target = this.bottomProperties.find((property) => {
       return property.id === id;
     });
 
     if (target) {
-      (this.topRightProperties as IObservableArray).remove(target);
+      (this.bottomProperties as IObservableArray).remove(target);
     }
   }
 }

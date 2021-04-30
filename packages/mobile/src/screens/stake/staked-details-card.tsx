@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { Staking } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Text, Avatar, Card } from "react-native-elements";
+import { Text, Image, Card } from "react-native-elements";
 import { View } from "react-native";
 import { CoinPretty } from "@keplr-wallet/unit";
 import {
@@ -29,11 +29,20 @@ export const StakedDetailsCard: FunctionComponent<{
   return (
     <Card>
       <View>
-        <Avatar
-          source={{ uri: thumbnail }}
-          size={40}
-          rounded
-          icon={{ name: "user", type: "font-awesome" }}
+        <Image
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: 100,
+            marginRight: 10,
+          }}
+          source={
+            thumbnail
+              ? {
+                  uri: thumbnail,
+                }
+              : require("../../assets/svg/icons8-person.png")
+          }
         />
         <Text numberOfLines={1} style={fs13}>
           {validator.description.moniker}

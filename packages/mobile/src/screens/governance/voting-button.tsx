@@ -104,7 +104,7 @@ export const VotingButton: FunctionComponent<{
           }
         />
       ) : (
-        <View style={sf([br2, bgcWhite])}>
+        <View style={sf([br2, { backgroundColor: "#fff" }])}>
           <VoteOptionGroup
             active={voteActive}
             handleSetActive={setVoteActive}

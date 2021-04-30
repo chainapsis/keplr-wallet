@@ -31,6 +31,17 @@ export const FullPage: FunctionComponent = ({ children }) => {
   );
 };
 
+export const FullPageWithoutPadding: FunctionComponent = ({ children }) => {
+  return (
+    <View style={flex1}>
+      <View style={absoluteLayout}>
+        <GradientBackground />
+      </View>
+      <View style={sf([absoluteLayout])}>{children}</View>
+    </View>
+  );
+};
+
 export const FixedPage: FunctionComponent = ({ children }) => {
   return (
     <SafeAreaView style={flex1}>

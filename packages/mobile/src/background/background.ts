@@ -1,5 +1,5 @@
 import { init } from "@keplr-wallet/background";
-import { RNEnv, RNMessageRequester, RNRouter } from "../router";
+import { RNEnv, RNRouter } from "../router";
 import { AsyncKVStore } from "../common";
 
 import { getRandomBytesAsync } from "../common";
@@ -13,7 +13,15 @@ const router = new RNRouter(RNEnv.produceEnv);
 init(
   router,
   (prefix: string) => new AsyncKVStore(prefix),
-  new RNMessageRequester(),
+  {
+    // TODO: The message requester in the background services is used to emit the event like "keystore_changed" to the webpage.
+    // But, it is not needed yet in the mobile environment.
+    // So, just let it return undefined always and do nothing.
+    // The message requester to the webpage should be implemented in future.
+    sendMessage: async (_port: string, _msg: any): Promise<any> => {
+      return undefined;
+    },
+  },
   EmbedChainInfos,
   [],
   getRandomBytesAsync
