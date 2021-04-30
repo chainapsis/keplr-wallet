@@ -12,7 +12,8 @@ import SimpleLineIconsIcon from "react-native-vector-icons/SimpleLineIcons";
 import { useStore } from "../../stores";
 import { ExportScreen } from "./export-screen";
 import { SetKeyRingScreen } from "./key-ring-screen";
-import { Button } from "react-native-elements";
+import { View } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
 
 const SettingStack = createStackNavigator();
 
@@ -32,10 +33,18 @@ export const SettingStackScreen: FunctionComponent = () => {
         name="Select Account"
         options={{
           headerRight: () => (
-            <Button onPress={() => navigation.navigate("Register")} title="+" />
+            <RectButton
+              style={mr2}
+              onPress={() => {
+                navigation.navigate("Register");
+              }}
+            >
+              <View accessible>
+                <FeatherIcon name="plus" size={30} />
+              </View>
+            </RectButton>
           ),
         }}
-        s
         component={SetKeyRingScreen}
       />
     </SettingStack.Navigator>

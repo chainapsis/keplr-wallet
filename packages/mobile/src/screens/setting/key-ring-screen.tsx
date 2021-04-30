@@ -8,7 +8,6 @@ import OcticonsIcon from "react-native-vector-icons/Octicons";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import { mr2, mx2 } from "../../styles";
 import { useLoadingIndicator } from "../../components/loading-indicator";
-import { Text } from "react-native-elements";
 
 export const SetKeyRingScreen: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
