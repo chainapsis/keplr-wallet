@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Text, Avatar, Card } from "react-native-elements";
+import { Text, Image, Card } from "react-native-elements";
 import { Staking } from "@keplr-wallet/stores";
 import { CoinPretty, DecUtils, Dec } from "@keplr-wallet/unit";
 import { View } from "react-native";
@@ -40,11 +40,20 @@ export const ValidatorDetailsCard: FunctionComponent<{
   return (
     <Card>
       <View style={flexDirectionRow}>
-        <Avatar
-          source={{ uri: thumbnail }}
-          size={40}
-          rounded
-          icon={{ name: "user", type: "font-awesome" }}
+        <Image
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: 100,
+            marginRight: 10,
+          }}
+          source={
+            thumbnail
+              ? {
+                  uri: thumbnail,
+                }
+              : require("../../assets/svg/icons8-person.png")
+          }
         />
         <Text>{validator.description.moniker}</Text>
       </View>

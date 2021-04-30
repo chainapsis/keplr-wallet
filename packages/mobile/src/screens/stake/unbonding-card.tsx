@@ -5,7 +5,7 @@ import moment from "moment";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Staking } from "@keplr-wallet/stores";
-import { Text, Avatar, Card } from "react-native-elements";
+import { Text, Image, Card } from "react-native-elements";
 import { View } from "react-native";
 import { ProgressBar } from "../../components/svg";
 import {
@@ -33,11 +33,20 @@ const UnbondingItem: FunctionComponent<{
   return (
     <View>
       <View style={flexDirectionRow}>
-        <Avatar
-          source={{ uri: thumbnail }}
-          size={40}
-          rounded
-          icon={{ name: "user", type: "font-awesome" }}
+        <Image
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: 100,
+            marginRight: 10,
+          }}
+          source={
+            thumbnail
+              ? {
+                  uri: thumbnail,
+                }
+              : require("../../assets/svg/icons8-person.png")
+          }
         />
         <View style={flex1}>
           <Text numberOfLines={1} style={sf([flex1, fs13])}>

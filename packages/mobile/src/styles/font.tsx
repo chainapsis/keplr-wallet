@@ -224,27 +224,27 @@ export const subtitle1: StyleProp<TextStyle> = {
 
 export const subtitle2: StyleProp<TextStyle> = {
   fontSize: 14,
-  lineHeight: 18,
+  lineHeight: 17,
   fontWeight: "500",
   letterSpacing: 0.3,
 };
 
 export const body1: StyleProp<TextStyle> = {
-  fontSize: 14,
+  fontSize: 16,
   lineHeight: 24,
   fontWeight: "400",
 };
 
 export const body2: StyleProp<TextStyle> = {
   fontSize: 14,
-  lineHeight: 20,
+  lineHeight: 17,
   fontWeight: "400",
   letterSpacing: 0.25,
 };
 
 export const body3: StyleProp<TextStyle> = {
   fontSize: 13,
-  lineHeight: 16,
+  lineHeight: 15,
   fontWeight: "400",
   letterSpacing: 0.4,
 };
@@ -264,7 +264,7 @@ export const buttonFont2: StyleProp<TextStyle> = {
 };
 
 export const caption1: StyleProp<TextStyle> = {
-  fontSize: 14,
+  fontSize: 12,
   lineHeight: 16,
   fontWeight: "400",
   letterSpacing: 0.4,
@@ -272,7 +272,7 @@ export const caption1: StyleProp<TextStyle> = {
 
 export const caption2: StyleProp<TextStyle> = {
   fontSize: 11,
-  lineHeight: 16,
+  lineHeight: 14,
   fontWeight: "400",
   letterSpacing: 0.4,
 };

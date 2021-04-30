@@ -3,7 +3,7 @@ import React, { FunctionComponent, useMemo } from "react";
 import { Dec, DecUtils, CoinPretty, IntPretty } from "@keplr-wallet/unit";
 import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
-import { Text, Badge, Avatar } from "react-native-elements";
+import { Text, Badge } from "react-native-elements";
 import { View, FlatList } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
@@ -17,7 +17,11 @@ import {
   cardStyle,
   bgcWhite,
   shadow,
+  justifyContentCenter,
+  body3,
+  subtitle2,
 } from "../../styles";
+import { Image } from "react-native-elements";
 const BondStatus = Staking.BondStatus;
 
 /*
@@ -62,23 +66,34 @@ const Validator: FunctionComponent<ValidatorProps> = React.memo(
             alignItems: "center",
           }}
         >
-          <View style={flex1}>
-            <Text>{index + 1}</Text>
+          <View style={sf([flex1, alignItemsCenter, justifyContentCenter])}>
+            <Text style={body3}>{index + 1}</Text>
           </View>
           <View style={sf([{ flex: 8 }, flexDirectionRow, alignItemsCenter])}>
-            <Avatar
-              source={{ uri: thumbnail }}
-              size={40}
-              rounded
-              icon={{ name: "user", type: "font-awesome" }}
+            <Image
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 100,
+                marginRight: 10,
+              }}
+              source={
+                thumbnail
+                  ? {
+                      uri: thumbnail,
+                    }
+                  : require("../../assets/svg/icons8-person.png")
+              }
             />
-            <Text numberOfLines={1} style={fs13}>
+            <Text numberOfLines={1} style={subtitle2}>
               {validator.description.moniker}
             </Text>
             {isDelegated ? <Badge status="primary" /> : null}
           </View>
-          <View style={flex1}>
-            <Text>
+          <View
+            style={sf([{ flex: 2 }, alignItemsCenter, justifyContentCenter])}
+          >
+            <Text style={body3}>
               {`${DecUtils.trim(
                 inflation
                   .toDec()
