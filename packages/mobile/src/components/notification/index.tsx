@@ -42,11 +42,11 @@ export const NotificationProvider: FunctionComponent = observer((props) => {
     }
 
     if (property.placement === "top-left") {
-      notificationStore.pushTopLeftProperty(property);
+      notificationStore.pushTopProperty(property);
     } else if (property.placement === "top-center") {
-      notificationStore.pushTopCenterProperty(property);
+      notificationStore.pushMiddleProperty(property);
     } else if (property.placement === "top-right") {
-      notificationStore.pushTopRightProperty(property);
+      notificationStore.pushBottomProperty(property);
     } else {
       throw new Error("Invalid placement for notification");
     }
@@ -55,9 +55,9 @@ export const NotificationProvider: FunctionComponent = observer((props) => {
   };
 
   const remove = (id: string) => {
-    notificationStore.removeTopLeftProperty(id);
-    notificationStore.removeTopCenterProperty(id);
-    notificationStore.removeTopRightProperty(id);
+    notificationStore.removeTopProperty(id);
+    notificationStore.removeMiddleProperty(id);
+    notificationStore.removeBottomProperty(id);
   };
 
   return (
@@ -69,34 +69,28 @@ export const NotificationProvider: FunctionComponent = observer((props) => {
     >
       {children}
       <NotificationContainer
-        properties={notificationStore.topLeftProperties.slice().reverse()}
-        initial={
-          {
-            // position: "absolute",
-            // bottom: 0,
-            // left: 0,
-          }
-        }
+        properties={notificationStore.topProperties.slice().reverse()}
+        initial={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
       />
       <NotificationContainer
-        properties={notificationStore.topCenterProperties.slice().reverse()}
-        initial={
-          {
-            // position: "absolute",
-            // bottom: 0,
-            // left: 0,
-          }
-        }
+        properties={notificationStore.middleProperties.slice().reverse()}
+        initial={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
       />
       <NotificationContainer
-        properties={notificationStore.topRightProperties.slice().reverse()}
-        initial={
-          {
-            // position: "absolute",
-            // bottom: 0,
-            // left: 0,
-          }
-        }
+        properties={notificationStore.bottomProperties.slice().reverse()}
+        initial={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+        }}
       />
     </NotificationContext.Provider>
   );

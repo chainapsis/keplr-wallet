@@ -26,8 +26,6 @@ export const NotificationElement: FunctionComponent<
 > = ({ type, content, duration, onDelete }) => {
   const { theme } = useTheme();
 
-  const width = 150;
-
   useEffect(() => {
     const timer = setTimeout(() => {
       onDelete();
@@ -41,12 +39,13 @@ export const NotificationElement: FunctionComponent<
       onPress={onDelete}
       style={{
         position: "absolute",
-        bottom: 100,
-        left: (Dimensions.get("window").width - width) / 2,
-        width: width,
-        opacity: 0.8,
+        top: 40,
+        left: 8,
+        width: Dimensions.get("window").width - 16,
+        marginRight: 8,
         padding: 15,
         backgroundColor: theme.colors?.[type],
+        borderRadius: 6,
       }}
     >
       <View
