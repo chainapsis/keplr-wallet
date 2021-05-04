@@ -1,4 +1,5 @@
 import bigInteger from "big-integer";
+import { Dec } from "./decimal";
 
 export class Int {
   private int: bigInteger.BigInteger;
@@ -73,6 +74,10 @@ export class Int {
 
   public neg(): Int {
     return new Int(this.int.negate());
+  }
+
+  public toDec(): Dec {
+    return new Dec(this);
   }
 }
 
@@ -149,5 +154,9 @@ export class Uint {
 
   public mod(i: Uint): Uint {
     return new Uint(this.uint.mod(i.uint));
+  }
+
+  public toDec(): Dec {
+    return new Dec(new Int(this.toString()));
   }
 }
