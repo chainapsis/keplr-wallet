@@ -3,13 +3,12 @@ import { TYPES } from "../types";
 
 import { ChainInfoSchema, ChainInfoWithEmbed } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
-import { KVStore } from "@keplr-wallet/common";
+import { KVStore, Debouncer } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
 import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import pDebounce from "p-debounce";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 
@@ -32,7 +31,7 @@ export class ChainsService {
 
   readonly getChainInfos: () => Promise<
     ChainInfoWithEmbed[]
-  > = pDebounce.promise(async () => {
+  > = Debouncer.promise(async () => {
     if (this.cachedChainInfos) {
       return this.cachedChainInfos;
     }
