@@ -6,7 +6,7 @@ import { useStore } from "../../../stores";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../../common";
 import { useNavigation } from "@react-navigation/native";
-import { FullPage } from "../../../components/page";
+import { FullPage, SafeAreaPage } from "../../../components/page";
 import { Button } from "../../../components/buttons";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
 import { useForm, Controller } from "react-hook-form";
@@ -34,6 +34,11 @@ import {
   body2,
   h7,
   m2,
+  br3,
+  py1,
+  justifyContentAround,
+  mr2,
+  bw1,
 } from "../../../styles";
 import { ButtonGroup } from "react-native-elements";
 import { Input } from "../../../components/input";
@@ -276,6 +281,24 @@ export const VerifyMnemonicScreen: FunctionComponent<{
     const [randomizedWords, setRandomizedWords] = useState<string[]>([]);
     const [suggestedWords, setSuggestedWords] = useState<string[]>([]);
 
+    const addWord = (i: number) => {
+      const word = suggestedWords[i];
+      setSuggestedWords(
+        suggestedWords.slice(0, i).concat(suggestedWords.slice(i + 1))
+      );
+      randomizedWords.push(word);
+      setRandomizedWords(randomizedWords.slice());
+    };
+
+    const removeWord = (i: number) => {
+      const word = randomizedWords[i];
+      setRandomizedWords(
+        randomizedWords.slice(0, i).concat(randomizedWords.slice(i + 1))
+      );
+      suggestedWords.push(word);
+      setSuggestedWords(suggestedWords.slice());
+    };
+
     useEffect(() => {
       // Set randomized words.
       const words = newMnemonicConfig.mnemonic.split(" ");
@@ -292,53 +315,81 @@ export const VerifyMnemonicScreen: FunctionComponent<{
     }, [newMnemonicConfig.mnemonic]);
 
     return (
-      <FullPage>
+      <SafeAreaPage>
+        <Text style={h2}>Mnemonic</Text>
         <Card>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+          <View
+            style={sf([
+              flexDirectionRow,
+              justifyContentAround,
+              { flexWrap: "wrap" },
+            ])}
+          >
             {suggestedWords.map((word, i) => {
               return (
-                <RNButton
+                <View
                   key={word + i.toString()}
-                  containerStyle={m2}
-                  onPress={() => {
-                    const word = suggestedWords[i];
-                    setSuggestedWords(
-                      suggestedWords
-                        .slice(0, i)
-                        .concat(suggestedWords.slice(i + 1))
-                    );
-                    randomizedWords.push(word);
-                    setRandomizedWords(randomizedWords.slice());
-                  }}
-                  title={word}
-                />
+                  style={sf([flexDirectionRow, alignItemsCenter])}
+                >
+                  <Text style={sf([mr2, fcPrimary])}>{i + 1}.</Text>
+                  <RNButton
+                    containerStyle={sf([m2, br3, { width: 110 }])}
+                    buttonStyle={py1}
+                    onPress={() => {
+                      addWord(i);
+                    }}
+                    title={word}
+                  />
+                </View>
               );
             })}
-          </View>
-        </Card>
-        <Card>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
             {randomizedWords.map((word, i) => {
               return (
-                <RNButton
+                <View
                   key={word + i.toString()}
-                  containerStyle={m2}
-                  onPress={() => {
-                    const word = randomizedWords[i];
-                    setRandomizedWords(
-                      randomizedWords
-                        .slice(0, i)
-                        .concat(randomizedWords.slice(i + 1))
-                    );
-                    suggestedWords.push(word);
-                    setSuggestedWords(suggestedWords.slice());
-                  }}
-                  title={word}
-                />
+                  style={sf([flexDirectionRow, alignItemsCenter])}
+                >
+                  <Text style={sf([mr2, fcPrimary])}>
+                    {suggestedWords.length + i + 1}.
+                  </Text>
+                  <View
+                    style={sf([
+                      m2,
+                      br3,
+                      py1,
+                      { width: 110, borderStyle: "dashed" },
+                      bw1,
+                      bcPrimary,
+                    ])}
+                  >
+                    <Text> </Text>
+                  </View>
+                </View>
               );
             })}
           </View>
         </Card>
+        <View
+          style={sf([
+            flexDirectionRow,
+            justifyContentAround,
+            { flexWrap: "wrap" },
+          ])}
+        >
+          {randomizedWords.map((word, i) => {
+            return (
+              <RNButton
+                key={word + i.toString()}
+                containerStyle={sf([m2, br3, { width: 110 }])}
+                buttonStyle={py1}
+                onPress={() => {
+                  removeWord(i);
+                }}
+                title={word}
+              />
+            );
+          })}
+        </View>
         <Button
           title="Generate"
           disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
@@ -362,7 +413,7 @@ export const VerifyMnemonicScreen: FunctionComponent<{
           }}
           loading={registerConfig.isLoading}
         />
-      </FullPage>
+      </SafeAreaPage>
     );
   }
 );
