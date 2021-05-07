@@ -22,7 +22,7 @@ import {
 } from "../styles";
 import { Button, WhiteButton } from "../components/buttons";
 import { TransactionDetails } from "./transaction-details";
-import { SafeAreaPage } from "../components/page";
+import { FullPage } from "../components/page";
 import { useInteractionInfo } from "../hooks";
 import { Input } from "../components/input";
 
@@ -102,7 +102,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
         style={sf([justifyContentEnd, m0])}
       >
         <View style={{ height: 600 }}>
-          <SafeAreaPage>
+          <FullPage>
             {interactionModalStore.lastUrl === "/unlock" ? (
               <React.Fragment>
                 <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
@@ -162,7 +162,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                 </View>
               </React.Fragment>
             ) : null}
-          </SafeAreaPage>
+          </FullPage>
         </View>
       </Modal>
     </React.Fragment>

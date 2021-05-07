@@ -4,7 +4,7 @@ import { Text } from "react-native-elements";
 import { observer } from "mobx-react-lite";
 import { useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { FullPage } from "../../components/page";
+import { FullFixedPage } from "../../components/page";
 import { Button, WhiteButton } from "../../components/buttons";
 import {
   alignItemsCenter,
@@ -50,7 +50,7 @@ export const RegisterScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
 
   return (
-    <FullPage>
+    <FullFixedPage>
       <View style={flex1} />
       <View style={sf([flex1, justifyContentCenter, alignItemsCenter])}>
         <Text style={h1}>Keplr</Text>
@@ -75,6 +75,6 @@ export const RegisterScreen: FunctionComponent = observer(() => {
       </View>
       <View style={flex1} />
       <View style={flex1} />
-    </FullPage>
+    </FullFixedPage>
   );
 });

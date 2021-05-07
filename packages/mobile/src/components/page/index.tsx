@@ -13,9 +13,18 @@ export const SafeAreaPage: FunctionComponent = ({ children }) => {
       <View style={absoluteLayout}>
         <GradientBackground />
       </View>
-      <ScrollView style={absoluteLayout}>
-        <View style={p2}>{children}</View>
-      </ScrollView>
+      <ScrollView style={sf([absoluteLayout, p2])}>{children}</ScrollView>
+    </SafeAreaView>
+  );
+};
+
+export const SafeAreaFixedPage: FunctionComponent = ({ children }) => {
+  return (
+    <SafeAreaView style={flex1}>
+      <View style={absoluteLayout}>
+        <GradientBackground />
+      </View>
+      <View style={sf([absoluteLayout, p2])}>{children}</View>
     </SafeAreaView>
   );
 };
@@ -26,12 +35,25 @@ export const FullPage: FunctionComponent = ({ children }) => {
       <View style={absoluteLayout}>
         <GradientBackground />
       </View>
+      <ScrollView style={sf([absoluteLayout, p2])}>{children}</ScrollView>
+    </View>
+  );
+};
+
+export const FullFixedPage: FunctionComponent = ({ children }) => {
+  return (
+    <View style={flex1}>
+      <View style={absoluteLayout}>
+        <GradientBackground />
+      </View>
       <View style={sf([absoluteLayout, p2])}>{children}</View>
     </View>
   );
 };
 
-export const FullPageWithoutPadding: FunctionComponent = ({ children }) => {
+export const FullFixedPageWithoutPadding: FunctionComponent = ({
+  children,
+}) => {
   return (
     <View style={flex1}>
       <View style={absoluteLayout}>
@@ -39,16 +61,5 @@ export const FullPageWithoutPadding: FunctionComponent = ({ children }) => {
       </View>
       <View style={sf([absoluteLayout])}>{children}</View>
     </View>
-  );
-};
-
-export const FixedPage: FunctionComponent = ({ children }) => {
-  return (
-    <SafeAreaView style={flex1}>
-      <View style={absoluteLayout}>
-        <GradientBackground />
-      </View>
-      <View style={sf([absoluteLayout, p2])}>{children}</View>
-    </SafeAreaView>
   );
 };

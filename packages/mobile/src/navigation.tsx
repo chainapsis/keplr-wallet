@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useRef } from "react";
 import { Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
@@ -6,6 +6,7 @@ import {
   useNavigation,
   useRoute,
   getFocusedRouteNameFromRoute,
+  NavigationContainerRef,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
@@ -19,6 +20,7 @@ import { StakeStackScreen } from "./screens/stake";
 import { GovernanceStackScreen } from "./screens/governance";
 import { SettingStackScreen } from "./screens/setting";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import analytics from "@react-native-firebase/analytics";
 import { DrawerContent } from "./components/drawer";
 import { alignItemsCenter, flex1, justifyContentCenter, sf } from "./styles";
 
@@ -83,10 +85,35 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
 
 export const AppNavigation: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
+  const navigationRef = useRef<NavigationContainerRef>();
+  const routeNameRef = useRef<string>();
 
   return (
     <React.Fragment>
-      <NavigationContainer>
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() =>
+          (routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name)
+        }
+        onStateChange={async () => {
+          const previousRouteName = routeNameRef.current;
+          const currentRouteName = navigationRef.current?.getCurrentRoute()
+            ?.name;
+
+          if (previousRouteName !== currentRouteName) {
+            // The line below uses the expo-firebase-analytics tracker
+            // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
+            // Change this line to use another Mobile analytics SDK
+            await analytics().logScreenView({
+              screen_name: currentRouteName,
+              screen_class: currentRouteName,
+            });
+          }
+
+          // Save the current route name for later comparison
+          routeNameRef.current = currentRouteName;
+        }}
+      >
         {keyRingStore.status === KeyRingStatus.NOTLOADED ? (
           <SplashScreen />
         ) : (

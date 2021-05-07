@@ -60,6 +60,16 @@
             ReferencedContainer = "container:mobile.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-FIRDebugEnabled"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-FIRAnalyticsDebugEnabled&#10;-FIRAnalyticsDebugEnabled&#10;-FIRAnalyticsDebugEnabled&#10;-FIRAnalyticsDebugEnabled&#10;-FIRAnalyticsDebugEnabled&#10;"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

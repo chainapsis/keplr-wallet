@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo, useEffect, useState } from "react";
-import { Button as RNButton, Card, Text } from "react-native-elements";
+import { Text } from "react-native-elements";
 import { View } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
@@ -33,7 +33,6 @@ import {
   mb2,
   body2,
   h7,
-  m2,
 } from "../../../styles";
 import { ButtonGroup } from "react-native-elements";
 import { Input } from "../../../components/input";
@@ -242,127 +241,3 @@ export const GenerateMnemonicScreen: FunctionComponent = observer(() => {
     </FullPage>
   );
 });
-
-export const VerifyMnemonicScreen: FunctionComponent<{
-  route: {
-    params: {
-      newMnemonicConfig: NewMnemonicConfig;
-    };
-  };
-}> = observer(
-  ({
-    route: {
-      params: { newMnemonicConfig },
-    },
-  }) => {
-    const navigation = useNavigation();
-
-    const { keyRingStore } = useStore();
-
-    const registerConfig = useRegisterConfig(
-      keyRingStore,
-      [],
-      getRandomBytesAsync
-    );
-
-    const wordsSlice = useMemo(() => {
-      const words = newMnemonicConfig.mnemonic.split(" ");
-      for (let i = 0; i < words.length; i++) {
-        words[i] = words[i].trim();
-      }
-      return words;
-    }, [newMnemonicConfig.mnemonic]);
-
-    const [randomizedWords, setRandomizedWords] = useState<string[]>([]);
-    const [suggestedWords, setSuggestedWords] = useState<string[]>([]);
-
-    useEffect(() => {
-      // Set randomized words.
-      const words = newMnemonicConfig.mnemonic.split(" ");
-      for (let i = 0; i < words.length; i++) {
-        words[i] = words[i].trim();
-      }
-      words.sort((word1, word2) => {
-        // Sort alpahbetically.
-        return word1 > word2 ? 1 : -1;
-      });
-      setRandomizedWords(words);
-      // Clear suggested words.
-      setSuggestedWords([]);
-    }, [newMnemonicConfig.mnemonic]);
-
-    return (
-      <FullPage>
-        <Card>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            {suggestedWords.map((word, i) => {
-              return (
-                <RNButton
-                  key={word + i.toString()}
-                  containerStyle={m2}
-                  onPress={() => {
-                    const word = suggestedWords[i];
-                    setSuggestedWords(
-                      suggestedWords
-                        .slice(0, i)
-                        .concat(suggestedWords.slice(i + 1))
-                    );
-                    randomizedWords.push(word);
-                    setRandomizedWords(randomizedWords.slice());
-                  }}
-                  title={word}
-                />
-              );
-            })}
-          </View>
-        </Card>
-        <Card>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            {randomizedWords.map((word, i) => {
-              return (
-                <RNButton
-                  key={word + i.toString()}
-                  containerStyle={m2}
-                  onPress={() => {
-                    const word = randomizedWords[i];
-                    setRandomizedWords(
-                      randomizedWords
-                        .slice(0, i)
-                        .concat(randomizedWords.slice(i + 1))
-                    );
-                    suggestedWords.push(word);
-                    setSuggestedWords(suggestedWords.slice());
-                  }}
-                  title={word}
-                />
-              );
-            })}
-          </View>
-        </Card>
-        <Button
-          title="Generate"
-          disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
-          onPress={async () => {
-            try {
-              await registerConfig.createMnemonic(
-                newMnemonicConfig.name,
-                newMnemonicConfig.mnemonic,
-                newMnemonicConfig.password,
-                {
-                  account: 0,
-                  change: 0,
-                  addressIndex: 0,
-                }
-              );
-
-              navigation.navigate("Main");
-            } catch {
-              registerConfig.clear();
-            }
-          }}
-          loading={registerConfig.isLoading}
-        />
-      </FullPage>
-    );
-  }
-);

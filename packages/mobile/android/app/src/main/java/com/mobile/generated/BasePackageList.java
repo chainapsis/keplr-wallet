@@ -1,4 +1,4 @@
-package com.mobile.generated;
+package com.chainapsis.keplr.generated;
 
 import java.util.Arrays;
 import java.util.List;
