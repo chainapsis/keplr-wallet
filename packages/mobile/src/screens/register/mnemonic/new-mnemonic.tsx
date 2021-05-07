@@ -1,12 +1,12 @@
 import React, { FunctionComponent, useMemo, useEffect, useState } from "react";
-import { Button as RNButton, Card, Text } from "react-native-elements";
+import { Text } from "react-native-elements";
 import { View } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../../common";
 import { useNavigation } from "@react-navigation/native";
-import { FullPage, SafeAreaPage } from "../../../components/page";
+import { FullPage } from "../../../components/page";
 import { Button } from "../../../components/buttons";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
 import { useForm, Controller } from "react-hook-form";
@@ -33,12 +33,6 @@ import {
   mb2,
   body2,
   h7,
-  m2,
-  br3,
-  py1,
-  justifyContentAround,
-  mr2,
-  bw1,
 } from "../../../styles";
 import { ButtonGroup } from "react-native-elements";
 import { Input } from "../../../components/input";
@@ -247,173 +241,3 @@ export const GenerateMnemonicScreen: FunctionComponent = observer(() => {
     </FullPage>
   );
 });
-
-export const VerifyMnemonicScreen: FunctionComponent<{
-  route: {
-    params: {
-      newMnemonicConfig: NewMnemonicConfig;
-    };
-  };
-}> = observer(
-  ({
-    route: {
-      params: { newMnemonicConfig },
-    },
-  }) => {
-    const navigation = useNavigation();
-
-    const { keyRingStore } = useStore();
-
-    const registerConfig = useRegisterConfig(
-      keyRingStore,
-      [],
-      getRandomBytesAsync
-    );
-
-    const wordsSlice = useMemo(() => {
-      const words = newMnemonicConfig.mnemonic.split(" ");
-      for (let i = 0; i < words.length; i++) {
-        words[i] = words[i].trim();
-      }
-      return words;
-    }, [newMnemonicConfig.mnemonic]);
-
-    const [randomizedWords, setRandomizedWords] = useState<string[]>([]);
-    const [suggestedWords, setSuggestedWords] = useState<string[]>([]);
-
-    const addWord = (i: number) => {
-      const word = suggestedWords[i];
-      setSuggestedWords(
-        suggestedWords.slice(0, i).concat(suggestedWords.slice(i + 1))
-      );
-      randomizedWords.push(word);
-      setRandomizedWords(randomizedWords.slice());
-    };
-
-    const removeWord = (i: number) => {
-      const word = randomizedWords[i];
-      setRandomizedWords(
-        randomizedWords.slice(0, i).concat(randomizedWords.slice(i + 1))
-      );
-      suggestedWords.push(word);
-      setSuggestedWords(suggestedWords.slice());
-    };
-
-    useEffect(() => {
-      // Set randomized words.
-      const words = newMnemonicConfig.mnemonic.split(" ");
-      for (let i = 0; i < words.length; i++) {
-        words[i] = words[i].trim();
-      }
-      words.sort((word1, word2) => {
-        // Sort alpahbetically.
-        return word1 > word2 ? 1 : -1;
-      });
-      setRandomizedWords(words);
-      // Clear suggested words.
-      setSuggestedWords([]);
-    }, [newMnemonicConfig.mnemonic]);
-
-    return (
-      <SafeAreaPage>
-        <Text style={h2}>Mnemonic</Text>
-        <Card>
-          <View
-            style={sf([
-              flexDirectionRow,
-              justifyContentAround,
-              { flexWrap: "wrap" },
-            ])}
-          >
-            {suggestedWords.map((word, i) => {
-              return (
-                <View
-                  key={word + i.toString()}
-                  style={sf([flexDirectionRow, alignItemsCenter])}
-                >
-                  <Text style={sf([mr2, fcPrimary])}>{i + 1}.</Text>
-                  <RNButton
-                    containerStyle={sf([m2, br3, { width: 110 }])}
-                    buttonStyle={py1}
-                    onPress={() => {
-                      addWord(i);
-                    }}
-                    title={word}
-                  />
-                </View>
-              );
-            })}
-            {randomizedWords.map((word, i) => {
-              return (
-                <View
-                  key={word + i.toString()}
-                  style={sf([flexDirectionRow, alignItemsCenter])}
-                >
-                  <Text style={sf([mr2, fcPrimary])}>
-                    {suggestedWords.length + i + 1}.
-                  </Text>
-                  <View
-                    style={sf([
-                      m2,
-                      br3,
-                      py1,
-                      { width: 110, borderStyle: "dashed" },
-                      bw1,
-                      bcPrimary,
-                    ])}
-                  >
-                    <Text> </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        </Card>
-        <View
-          style={sf([
-            flexDirectionRow,
-            justifyContentAround,
-            { flexWrap: "wrap" },
-          ])}
-        >
-          {randomizedWords.map((word, i) => {
-            return (
-              <RNButton
-                key={word + i.toString()}
-                containerStyle={sf([m2, br3, { width: 110 }])}
-                buttonStyle={py1}
-                onPress={() => {
-                  removeWord(i);
-                }}
-                title={word}
-              />
-            );
-          })}
-        </View>
-        <Button
-          title="Generate"
-          disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
-          onPress={async () => {
-            try {
-              await registerConfig.createMnemonic(
-                newMnemonicConfig.name,
-                newMnemonicConfig.mnemonic,
-                newMnemonicConfig.password,
-                {
-                  account: 0,
-                  change: 0,
-                  addressIndex: 0,
-                }
-              );
-
-              navigation.navigate("Main");
-            } catch {
-              registerConfig.clear();
-            }
-          }}
-          loading={registerConfig.isLoading}
-        />
-      </SafeAreaPage>
-    );
-  }
-);
