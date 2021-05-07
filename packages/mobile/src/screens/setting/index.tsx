@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { FullPageWithoutPadding } from "../../components/page";
+import { FullFixedPageWithoutPadding } from "../../components/page";
 import { mr2 } from "../../styles";
 import { GradientBackground } from "../../components/svg";
 import { SettingBox, SettingTitle } from "./setting-box";
@@ -57,7 +57,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   return (
-    <FullPageWithoutPadding>
+    <FullFixedPageWithoutPadding>
       <SettingBox
         isTop
         leftIcon={<FeatherIcon name="user" style={mr2} size={18} />}
@@ -79,6 +79,6 @@ export const SettingScreen: FunctionComponent = observer(() => {
           navigation.navigate("Private Key");
         }}
       />
-    </FullPageWithoutPadding>
+    </FullFixedPageWithoutPadding>
   );
 });

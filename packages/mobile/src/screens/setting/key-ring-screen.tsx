@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { FullPageWithoutPadding } from "../../components/page";
+import { FullFixedPageWithoutPadding } from "../../components/page";
 import { SettingBox, SettingTitle } from "./setting-box";
 import OcticonsIcon from "react-native-vector-icons/Octicons";
 import FeatherIcon from "react-native-vector-icons/Feather";
@@ -14,7 +14,7 @@ export const SetKeyRingScreen: FunctionComponent = observer(() => {
   const loadingIndicator = useLoadingIndicator();
 
   return (
-    <FullPageWithoutPadding>
+    <FullFixedPageWithoutPadding>
       <SettingTitle title="Accounts" />
       {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
         return (
@@ -46,6 +46,6 @@ export const SetKeyRingScreen: FunctionComponent = observer(() => {
           />
         );
       })}
-    </FullPageWithoutPadding>
+    </FullFixedPageWithoutPadding>
   );
 });
