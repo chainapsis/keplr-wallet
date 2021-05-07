@@ -64,6 +64,42 @@ describe("Test chain info schema", () => {
       await CurrencySchema.validateAsync(currency);
     });
 
+    await assert.doesNotReject(async () => {
+      const currency: Currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 6,
+        coinGeckoId: "test",
+        coinImageUrl: "http://test.com/test.jpg",
+      };
+
+      await CurrencySchema.validateAsync(currency);
+    });
+
+    await assert.rejects(async () => {
+      const currency: Currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 6,
+        coinGeckoId: "test",
+        coinImageUrl: "",
+      };
+
+      await CurrencySchema.validateAsync(currency);
+    }, "Should throw error if coin image url is empty string");
+
+    await assert.rejects(async () => {
+      const currency: Currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 6,
+        coinGeckoId: "test",
+        coinImageUrl: "test",
+      };
+
+      await CurrencySchema.validateAsync(currency);
+    }, "Should throw error if coin image url is not url");
+
     await assert.rejects(async () => {
       // @ts-ignore
       const currency: Currency = {

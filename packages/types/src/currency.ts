@@ -10,6 +10,7 @@ export interface Currency {
    * You can get id from https://api.coingecko.com/api/v3/coins/list.
    */
   readonly coinGeckoId?: string;
+  readonly coinImageUrl?: string;
 }
 
 /**
