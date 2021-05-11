@@ -29,9 +29,7 @@ export abstract class ObservableQueryBalanceInner<
     const denom = this.denomHelper.denom;
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.currencies.find(
-      (cur) => cur.coinMinimalDenom === denom
-    );
+    const currency = chainInfo.findCurrency(denom);
 
     // TODO: Infer the currency according to its denom (such if denom is `uatom` -> `Atom` with decimal 6)?
     if (!currency) {

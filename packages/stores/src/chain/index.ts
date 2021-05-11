@@ -157,6 +157,18 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
     }
   }
 
+  /**
+   * Currency를 반환한다.
+   * 만약 해당 Currency가 없다면 unknown currency에 추가한다.
+   * @param coinMinimalDenom
+   */
+  findCurrency(coinMinimalDenom: string): AppCurrency | undefined {
+    if (this.currencyMap.has(coinMinimalDenom)) {
+      return this.currencyMap.get(coinMinimalDenom);
+    }
+    this.addUnknownCurrencies(coinMinimalDenom);
+  }
+
   @action
   protected addOrReplaceCurrency(currency: AppCurrency) {
     if (this.currencyMap.has(currency.coinMinimalDenom)) {

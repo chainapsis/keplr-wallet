@@ -1,4 +1,4 @@
-import { ChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 
 export interface ChainGetter {
   // Return the chain info matched with chain id.
@@ -8,6 +8,7 @@ export interface ChainGetter {
     chainId: string
   ): ChainInfo & {
     addUnknownCurrencies(...coinMinimalDenoms: string[]): void;
+    findCurrency(coinMinimalDenom: string): AppCurrency | undefined;
   };
 }
 
