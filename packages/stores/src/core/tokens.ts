@@ -6,13 +6,12 @@ import {
   RemoveTokenMsg,
   SuggestTokenMsg,
 } from "@keplr-wallet/background";
-import { flow, makeObservable, observable } from "mobx";
+import { autorun, flow, makeObservable, observable } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import { ChainStore } from "../chain";
 import { InteractionStore } from "./interaction";
 import { toGenerator } from "@keplr-wallet/common";
-import { computedFn } from "mobx-utils";
 
 export class TokensStoreInner {
   @observable.ref
@@ -85,30 +84,13 @@ export class TokensStore<
     });
     makeObservable(this);
 
-    this.chainStore.registerChainInfoOverrider(this.overrideChainInfo);
+    this.chainStore.addSetChainInfoHandler((chainInfoInner) => {
+      autorun(() => {
+        const inner = this.getTokensOf(chainInfoInner.chainId);
+        chainInfoInner.addCurrencies(...inner.tokens);
+      });
+    });
   }
-
-  protected readonly overrideChainInfo = computedFn(
-    (chainInfo: DeepReadonly<C>): C => {
-      const inner = this.getTokensOf(chainInfo.chainId);
-
-      const currencies = chainInfo.currencies.slice();
-      for (const token of inner.tokens) {
-        const find = currencies.find(
-          (cur) => cur.coinMinimalDenom === token.coinMinimalDenom
-        );
-
-        if (!find) {
-          currencies.push(token);
-        }
-      }
-
-      return {
-        ...(chainInfo as C),
-        currencies,
-      };
-    }
-  );
 
   getTokensOf(chainId: string) {
     return this.get(chainId);
