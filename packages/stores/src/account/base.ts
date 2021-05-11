@@ -114,7 +114,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     const chainInfo = this.chainGetter.getChain(chainId);
 
     if (this.opts.suggestChain) {
-      await keplr.experimentalSuggestChain(chainInfo);
+      await keplr.experimentalSuggestChain(chainInfo.raw);
     }
     await keplr.enable(chainId);
   }
