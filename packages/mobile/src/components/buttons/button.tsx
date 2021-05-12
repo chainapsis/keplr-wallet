@@ -1,48 +1,42 @@
 import React, { FunctionComponent } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { Button as RNButton } from "react-native-elements";
-import {
-  bw1,
-  flex1,
-  br1,
-  px4,
-  sf,
-  buttonFont1,
-  py3,
-  fcWhite,
-  bgcPrimary200,
-} from "../../styles";
+import { BaseButton } from "./base-button";
+import { fcWhite, bgcPrimary200, bgcPrimary, buttonFont2 } from "../../styles";
 
 export const Button: FunctionComponent<
-  React.ComponentProps<typeof RNButton> & {
+  React.ComponentProps<typeof BaseButton> & {
     containerStyle?: StyleProp<ViewStyle>[];
+    wrapperStyle?: StyleProp<ViewStyle>[];
     buttonStyle?: StyleProp<ViewStyle>[];
     titleStyle?: StyleProp<TextStyle>[];
-    disabledStyle?: StyleProp<ViewStyle>[];
+    disabledButtonStyle?: StyleProp<ViewStyle>[];
     disabledTitleStyle?: StyleProp<TextStyle>[];
   }
 > = (props) => {
   const attributes = { ...props };
   delete attributes.containerStyle;
+  delete attributes.wrapperStyle;
   delete attributes.buttonStyle;
   delete attributes.titleStyle;
-  delete attributes.disabledStyle;
+  delete attributes.disabledButtonStyle;
   delete attributes.disabledTitleStyle;
 
   const containerStyle = props.containerStyle ?? [];
+  const wrapperStyle = props.wrapperStyle ?? [];
   const buttonStyle = props.buttonStyle ?? [];
   const titleStyle = props.titleStyle ?? [];
-  const disabledStyle = props.disabledStyle ?? [];
+  const disabledButtonStyle = props.disabledButtonStyle ?? [];
   const disabledTitleStyle = props.disabledTitleStyle ?? [];
 
   return (
-    <RNButton
+    <BaseButton
       {...attributes}
-      containerStyle={sf([flex1, ...containerStyle])}
-      buttonStyle={sf([bw1, br1, px4, py3, ...buttonStyle])}
-      titleStyle={sf([buttonFont1, ...titleStyle])}
-      disabledStyle={sf([bgcPrimary200, ...disabledStyle])}
-      disabledTitleStyle={sf([fcWhite, ...disabledTitleStyle])}
+      containerStyle={containerStyle}
+      wrapperStyle={wrapperStyle}
+      buttonStyle={[bgcPrimary, ...buttonStyle]}
+      titleStyle={[fcWhite, buttonFont2, ...titleStyle]}
+      disabledButtonStyle={[bgcPrimary200, ...disabledButtonStyle]}
+      disabledTitleStyle={[fcWhite, buttonFont2, ...disabledTitleStyle]}
     />
   );
 };
