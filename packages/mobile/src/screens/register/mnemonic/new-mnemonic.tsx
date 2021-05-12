@@ -12,7 +12,6 @@ import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
 import { useForm, Controller } from "react-hook-form";
 import {
   alignItemsCenter,
-  cardStyle,
   flexDirectionRow,
   h2,
   justifyContentCenter,
@@ -20,11 +19,8 @@ import {
   fcWhite,
   bgcWhite,
   alignItemsEnd,
-  fAlignCenter,
-  p2,
   justifyContentBetween,
   mb2,
-  body2,
   h7,
   bw1,
   bcPrimary300,
@@ -35,6 +31,7 @@ import {
 } from "../../../styles";
 import { Input } from "../../../components/input";
 import { RectButton } from "react-native-gesture-handler";
+import { SuggestedWordsView } from "../../../components/mnemonic";
 
 interface FormData {
   name: string;
@@ -106,19 +103,10 @@ const MnemonicCard: FunctionComponent<{
           })}
         </View>
       </View>
-      <View
-        style={sf([
-          cardStyle,
-          justifyContentCenter,
-          alignItemsCenter,
-          p2,
-          { height: 100 },
-        ])}
-      >
-        <Text style={sf([fAlignCenter, body2])} numberOfLines={5}>
-          {newMnemonicConfig.mnemonic}
-        </Text>
-      </View>
+      <SuggestedWordsView
+        newMnemonicConfig={newMnemonicConfig}
+        suggestedWords={newMnemonicConfig.mnemonic.split(" ")}
+      />
     </View>
   );
 });
