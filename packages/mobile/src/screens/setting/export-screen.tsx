@@ -7,7 +7,7 @@ import { useStore } from "../../stores";
 import { useForm, Controller } from "react-hook-form";
 import { flowResult } from "mobx";
 import { Input } from "../../components/input";
-import { Button } from "../../components/buttons";
+import { FlexButton } from "../../components/buttons";
 
 interface FormData {
   password: string;
@@ -77,7 +77,7 @@ export const ExportScreen: FunctionComponent = observer(() => {
               minLength: { value: 8, message: "At least 8" },
             }}
           />
-          <Button
+          <FlexButton
             loading={loading}
             title="Confirm"
             onPress={handleSubmit(onSubmit)}

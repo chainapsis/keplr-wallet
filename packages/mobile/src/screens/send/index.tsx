@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
-import { Button } from "../../components/buttons";
+import { FlexButton } from "../../components/buttons";
 import { SafeAreaPage } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
 import {
@@ -61,7 +61,7 @@ const SendScreen: FunctionComponent = observer(() => {
       />
       <MemoInput memoConfig={sendConfigs.memoConfig} />
       <FeeButtons feeConfig={sendConfigs.feeConfig} priceStore={priceStore} />
-      <Button
+      <FlexButton
         title="Submit"
         disabled={!sendConfigIsValid || !accountInfo.isReadyToSendMsgs}
         loading={accountInfo.isSendingMsg === "send"}

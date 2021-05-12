@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { Text } from "react-native-elements";
 import { View } from "react-native";
 import { observer } from "mobx-react-lite";
@@ -7,35 +7,31 @@ import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../../common";
 import { useNavigation } from "@react-navigation/native";
 import { FullPage } from "../../../components/page";
-import { Button } from "../../../components/buttons";
+import { FlexButton } from "../../../components/buttons";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
 import { useForm, Controller } from "react-hook-form";
 import {
   alignItemsCenter,
-  cardStyle,
   flexDirectionRow,
   h2,
   justifyContentCenter,
   sf,
-  bgcPrimary,
   fcWhite,
   bgcWhite,
-  mx0,
-  mb0,
-  shadow,
   alignItemsEnd,
-  fcPrimary,
-  bcPrimary,
-  fAlignCenter,
-  p2,
-  mt2,
   justifyContentBetween,
   mb2,
-  body2,
   h7,
+  bw1,
+  bcPrimary300,
+  py1,
+  px2,
+  bgcPrimary300,
+  fcPrimary300,
 } from "../../../styles";
-import { ButtonGroup } from "react-native-elements";
 import { Input } from "../../../components/input";
+import { RectButton } from "react-native-gesture-handler";
+import { SuggestedWordsView } from "../../../components/mnemonic";
 
 interface FormData {
   name: string;
@@ -61,19 +57,34 @@ const MnemonicCard: FunctionComponent<{
   const renderWordButton = (
     index: number,
     selectedIndex: 0 | 1 | undefined,
-    label: string
+    label: string,
+    onPress: () => void
   ) => {
     const [backgroundColor, textColor] =
-      index === selectedIndex ? [bgcPrimary, fcWhite] : [bgcWhite, fcPrimary];
+      index === selectedIndex
+        ? [bgcPrimary300, fcWhite]
+        : [bgcWhite, fcPrimary300];
 
     return (
-      <View
-        style={sf([alignItemsCenter, justifyContentCenter, backgroundColor])}
-      >
-        <Text style={sf([mt2, textColor, h7])}>{label}</Text>
-      </View>
+      <RectButton style={backgroundColor} onPress={onPress}>
+        <View
+          accessible
+          style={sf([alignItemsCenter, justifyContentCenter, py1, px2])}
+        >
+          <Text style={sf([textColor, h7])}>{label}</Text>
+        </View>
+      </RectButton>
     );
   };
+
+  const wordButtons = [
+    renderWordButton(0, selectedIndex, "12 Words", () => {
+      newMnemonicConfig.setNumWords(NumWords.WORDS12);
+    }),
+    renderWordButton(1, selectedIndex, "24 Words", () => {
+      newMnemonicConfig.setNumWords(NumWords.WORDS24);
+    }),
+  ];
 
   return (
     <View>
@@ -86,38 +97,16 @@ const MnemonicCard: FunctionComponent<{
         ])}
       >
         <Text style={h2}>Mnemonic</Text>
-        <ButtonGroup
-          containerStyle={sf([{ width: 170 }, mx0, mb0, shadow, bcPrimary])}
-          selectedIndex={selectedIndex}
-          onPress={(i) => {
-            switch (i) {
-              case 0:
-                newMnemonicConfig.setNumWords(NumWords.WORDS12);
-                break;
-              case 1:
-                newMnemonicConfig.setNumWords(NumWords.WORDS24);
-                break;
-            }
-          }}
-          buttons={[
-            renderWordButton(0, selectedIndex, "12 Words"),
-            renderWordButton(1, selectedIndex, "24 Words"),
-          ]}
-        />
+        <View style={sf([flexDirectionRow, bw1, bcPrimary300])}>
+          {wordButtons.map((button) => {
+            return button;
+          })}
+        </View>
       </View>
-      <View
-        style={sf([
-          cardStyle,
-          justifyContentCenter,
-          alignItemsCenter,
-          p2,
-          { height: 100 },
-        ])}
-      >
-        <Text style={sf([fAlignCenter, body2])} numberOfLines={5}>
-          {newMnemonicConfig.mnemonic}
-        </Text>
-      </View>
+      <SuggestedWordsView
+        newMnemonicConfig={newMnemonicConfig}
+        suggestedWords={newMnemonicConfig.mnemonic.split(" ")}
+      />
     </View>
   );
 });
@@ -237,7 +226,7 @@ export const GenerateMnemonicScreen: FunctionComponent = observer(() => {
           />
         </React.Fragment>
       ) : null}
-      <Button title="Next" onPress={handleSubmit(onSubmit)} />
+      <FlexButton title="Next" onPress={handleSubmit(onSubmit)} />
     </FullPage>
   );
 });

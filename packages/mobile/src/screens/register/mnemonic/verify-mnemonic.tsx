@@ -5,40 +5,21 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { Card, Text } from "react-native-elements";
-import { View } from "react-native";
+import { Text } from "react-native-elements";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../../common";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaPage } from "../../../components/page";
-import { Button } from "../../../components/buttons";
+import { FlexButton } from "../../../components/buttons";
 import { NewMnemonicConfig, NumWords } from "./hook";
-import { RectButton } from "react-native-gesture-handler";
+import { h2 } from "../../../styles";
 import {
-  alignItemsCenter,
-  flexDirectionRow,
-  h2,
-  justifyContentCenter,
-  sf,
-  bgcPrimary,
-  fcWhite,
-  fcPrimary,
-  bcPrimary,
-  m2,
-  py1,
-  justifyContentAround,
-  mr2,
-  bw1,
-  body3,
-  br2,
-  m1,
-  subtitle2,
-  bgcDarkGrey,
-  flex1,
-  bcGray,
-} from "../../../styles";
+  RandomizedWord,
+  RandomizedWordsView,
+  SuggestedWordsView,
+} from "../../../components/mnemonic";
 
 export const VerifyMnemonicScreen: FunctionComponent<{
   route: {
@@ -65,8 +46,6 @@ export const VerifyMnemonicScreen: FunctionComponent<{
     const totalWords =
       newMnemonicConfig.numWords === NumWords.WORDS24 ? 24 : 12;
 
-    const rowNum = newMnemonicConfig.numWords === NumWords.WORDS24 ? 8 : 6;
-
     const wordsSlice = useMemo(() => {
       const words = newMnemonicConfig.mnemonic.split(" ");
       for (let i = 0; i < words.length; i++) {
@@ -75,9 +54,9 @@ export const VerifyMnemonicScreen: FunctionComponent<{
       return words;
     }, [newMnemonicConfig.mnemonic]);
 
-    const [randomizedWords, setRandomizedWords] = useState<
-      { value: string; isSelected: boolean }[]
-    >([]);
+    const [randomizedWords, setRandomizedWords] = useState<RandomizedWord[]>(
+      []
+    );
     const [suggestedWords, setSuggestedWords] = useState<string[]>([]);
 
     const [currentCursor, setCurrentCursor] = useState<number>(0);
@@ -85,7 +64,6 @@ export const VerifyMnemonicScreen: FunctionComponent<{
     const setFirstCursor = useCallback(() => {
       setCurrentCursor(suggestedWords.findIndex((value) => value === ""));
     }, [suggestedWords]);
-
     const setCursor = (i: number) => {
       setCurrentCursor(i);
     };
@@ -154,150 +132,22 @@ export const VerifyMnemonicScreen: FunctionComponent<{
       }
     }, [currentCursor, setFirstCursor, suggestedWords]);
 
-    const SuggestedItem: FunctionComponent<{ i: number; word: string }> = ({
-      i,
-      word,
-    }) => {
-      return (
-        <View style={sf([flexDirectionRow, alignItemsCenter])}>
-          <Text style={sf([mr2, fcPrimary, subtitle2])}>{i + 1}.</Text>
-          {word !== "" ? (
-            <RectButton
-              onPress={() => {
-                unselectSuggestedWords(i);
-              }}
-              style={sf([bgcPrimary, m1, br2, py1, { width: 80 }])}
-            >
-              <View
-                accessible
-                style={sf([justifyContentCenter, alignItemsCenter])}
-              >
-                <Text style={sf([fcWhite, body3])}>{word}</Text>
-              </View>
-            </RectButton>
-          ) : (
-            <RectButton
-              onPress={() => {
-                setCursor(i);
-              }}
-              style={sf([
-                m2,
-                br2,
-                py1,
-                { width: 80, borderStyle: "dashed" },
-                bw1,
-                i === currentCursor ? bcPrimary : bcGray,
-              ])}
-            >
-              <View
-                accessible
-                style={sf([justifyContentCenter, alignItemsCenter])}
-              >
-                <Text style={sf([fcWhite, body3])}> </Text>
-              </View>
-            </RectButton>
-          )}
-        </View>
-      );
-    };
-
-    const RandomizedItem: FunctionComponent<{
-      i: number;
-      isSelected: boolean;
-      value: string;
-    }> = ({ isSelected, value, i }) => {
-      return isSelected ? (
-        <RectButton
-          onPress={() => {
-            unselectRandomizedWord(i);
-          }}
-          style={sf([bgcDarkGrey, m1, br2, py1, { width: 80 }])}
-        >
-          <View accessible style={sf([justifyContentCenter, alignItemsCenter])}>
-            <Text style={sf([fcWhite, body3])}>{value}</Text>
-          </View>
-        </RectButton>
-      ) : (
-        <RectButton
-          onPress={() => {
-            selectRandomizedWord(i);
-          }}
-          style={sf([bgcPrimary, m1, br2, py1, { width: 80 }])}
-        >
-          <View accessible style={sf([justifyContentCenter, alignItemsCenter])}>
-            <Text style={sf([fcWhite, body3])}>{value}</Text>
-          </View>
-        </RectButton>
-      );
-    };
-
     return (
       <SafeAreaPage>
         <Text style={h2}>Mnemonic</Text>
-        <Card>
-          <View style={sf([flexDirectionRow])}>
-            <View style={flex1}>
-              {suggestedWords
-                .filter((_, index) => index < rowNum)
-                .map((word, i) => {
-                  return (
-                    <SuggestedItem
-                      key={word + i.toString()}
-                      word={word}
-                      i={i}
-                    />
-                  );
-                })}
-            </View>
-            <View style={flex1}>
-              {suggestedWords
-                .filter((_, index) => index >= rowNum && index < rowNum * 2)
-                .map((word, i) => {
-                  return (
-                    <SuggestedItem
-                      key={word + i.toString()}
-                      word={word}
-                      i={i + rowNum}
-                    />
-                  );
-                })}
-            </View>
-            {newMnemonicConfig.numWords === NumWords.WORDS24 ? (
-              <View style={flex1}>
-                {suggestedWords
-                  .filter((_, index) => index >= rowNum * 2)
-                  .map((word, i) => {
-                    return (
-                      <SuggestedItem
-                        key={word + i.toString()}
-                        word={word}
-                        i={i + rowNum * 2}
-                      />
-                    );
-                  })}
-              </View>
-            ) : null}
-          </View>
-        </Card>
-        <View
-          style={sf([
-            flexDirectionRow,
-            justifyContentAround,
-            { flexWrap: "wrap" },
-          ])}
-        >
-          {randomizedWords.map((word, i) => {
-            return (
-              <RandomizedItem
-                key={word.value + i.toString()}
-                i={i}
-                isSelected={word.isSelected}
-                value={word.value}
-              />
-            );
-          })}
-        </View>
-        <Button
+        <SuggestedWordsView
+          newMnemonicConfig={newMnemonicConfig}
+          currentCursor={currentCursor}
+          suggestedWords={suggestedWords}
+          onSelect={setCursor}
+          onUnselect={unselectSuggestedWords}
+        />
+        <RandomizedWordsView
+          randomizedWords={randomizedWords}
+          onSelect={selectRandomizedWord}
+          onUnselect={unselectRandomizedWord}
+        />
+        <FlexButton
           title="Generate"
           disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
           onPress={async () => {

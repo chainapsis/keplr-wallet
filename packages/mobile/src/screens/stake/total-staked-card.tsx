@@ -5,7 +5,7 @@ import { useStore } from "../../stores";
 import { Text, Image, Card } from "react-native-elements";
 import { View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Button } from "../../components/buttons";
+import { FlexButton } from "../../components/buttons";
 import {
   flexDirectionRow,
   justifyContentBetween,
@@ -20,7 +20,7 @@ const NeedStakeView: FunctionComponent = () => {
         source={{ uri: "" }}
         style={{ width: 80, height: 80, marginBottom: 5 }}
       />
-      <Button title="You Don't Stake Anything" disabled={true} />
+      <FlexButton title="You Don't Stake Anything" disabled={true} />
     </View>
   );
 };
@@ -43,11 +43,15 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
 
   const totalStakbleReward = rewards.stakableReward;
 
-  const sendWithdrawDelegatorRewardMsgs = async () => {
+  const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
+        // When the user delegated too many validators,
+        // it can't be sent to withdraw rewards from all validators due to the block gas limit.
+        // So, to prevent this problem, just send the msgs up to 8.
         await accountInfo.sendWithdrawDelegationRewardMsgs(
           rewards.pendingRewardValidatorAddresses,
+          // rewards.getDescendingPendingRewardValidatorAddresses(8),
           ""
         );
       } catch (e) {
@@ -67,7 +71,7 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
         <React.Fragment>
           <View style={sf([flexDirectionRow, justifyContentBetween])}>
             <Card.Title>Staking</Card.Title>
-            <Button
+            <FlexButton
               title={">"}
               onPress={() => {
                 navigate.navigate("Staking Details");
@@ -94,10 +98,10 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
                 .toString()}
             </Text>
           </View>
-          <Button
+          <FlexButton
             title="Clain Reward"
             onPress={async () => {
-              await sendWithdrawDelegatorRewardMsgs();
+              await withdrawAllRewards();
             }}
             disabled={
               !accountInfo.isReadyToSendMsgs ||

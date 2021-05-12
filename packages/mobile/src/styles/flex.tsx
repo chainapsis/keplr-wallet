@@ -31,3 +31,7 @@ export const alignItemsCenter: StyleProp<ViewStyle> = {
 export const alignItemsEnd: StyleProp<ViewStyle> = {
   alignItems: "flex-end",
 };
+
+export const flexWrap: StyleProp<ViewStyle> = {
+  flexWrap: "wrap",
+};

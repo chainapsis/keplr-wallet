@@ -5,7 +5,7 @@ import { observer } from "mobx-react-lite";
 import { useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { FullFixedPage } from "../../components/page";
-import { Button, WhiteButton } from "../../components/buttons";
+import { FlexButton, FlexWhiteButton } from "../../components/buttons";
 import {
   alignItemsCenter,
   flex1,
@@ -60,13 +60,13 @@ export const RegisterScreen: FunctionComponent = observer(() => {
       <View style={flex1} />
       <View style={flex1} />
       <View style={flex1}>
-        <WhiteButton
+        <FlexWhiteButton
           title="Import Existing Account"
           onPress={() => {
             navigation.navigate("Sign in");
           }}
         />
-        <Button
+        <FlexButton
           title="Create New Account"
           onPress={() => {
             navigation.navigate("New account");

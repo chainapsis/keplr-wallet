@@ -12,7 +12,6 @@ import {
   alignItemsCenter,
   flex1,
   flexDirectionRow,
-  fs13,
   sf,
   cardStyle,
   bgcWhite,
@@ -191,6 +190,7 @@ export const AllValidators: FunctionComponent<{
         data={flatListValidatorData}
         renderItem={renderValidator}
         windowSize={5}
+        ListFooterComponent={<View style={{ height: 100 }} />}
       />
     </View>
   );

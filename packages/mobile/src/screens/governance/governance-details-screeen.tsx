@@ -4,7 +4,6 @@ import { ScrollView } from "react-native";
 import { ProposalDetailsCard } from "./proposal-details-card";
 import { SafeAreaFixedPage } from "../../components/page";
 import { VotingButton } from "./voting-button";
-import { p2 } from "../../styles";
 
 export const GovernanceDetailsScreeen: FunctionComponent<{
   route: {
@@ -14,7 +13,7 @@ export const GovernanceDetailsScreeen: FunctionComponent<{
   const { proposalId } = route.params;
   return (
     <SafeAreaFixedPage>
-      <ScrollView style={p2}>
+      <ScrollView>
         <ProposalDetailsCard proposalId={proposalId} />
       </ScrollView>
       <VotingButton proposalId={proposalId} />

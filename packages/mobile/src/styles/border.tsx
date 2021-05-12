@@ -1,6 +1,8 @@
 import { StyleProp, ViewStyle } from "react-native";
 import { colors } from "./colors";
 
+export const bDashed: StyleProp<ViewStyle> = { borderStyle: "dashed" };
+
 export const bw0: StyleProp<ViewStyle> = { borderWidth: 0 };
 
 export const bw1: StyleProp<ViewStyle> = { borderWidth: 1 };

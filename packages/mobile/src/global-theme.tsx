@@ -19,9 +19,6 @@ import {
 const globalTheme = {
   colors: colors,
   Text: { style: fcDefault },
-  Button: {
-    containerStyle: shadow,
-  },
   Input: {
     labelStyle: sf([fcDefault, subtitle2]),
     containerStyle: px0,

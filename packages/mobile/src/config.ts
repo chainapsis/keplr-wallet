@@ -65,6 +65,15 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "secret",
       },
+      {
+        coinDecimals: 6,
+        coinDenom: "SSCRT",
+        coinMinimalDenom:
+          "secret20:secret1k0jntykt7e4g3y88ltc60czgjuqdy4c9e8fzek:ssecret",
+        contractAddress: "secret1k0jntykt7e4g3y88ltc60czgjuqdy4c9e8fzek",
+        type: "secret20",
+        viewingKey: "api_key_pjGa9Ipg7qJRCfWl2rCpgGWXo4c3Pw7ByEjQGSl1g8E=",
+      },
     ],
     feeCurrencies: [
       {
