@@ -86,9 +86,8 @@ export const VotingButton: FunctionComponent<{
       style={{
         position: "absolute",
         bottom: 10,
-        left: 0,
+        left: 8,
         width: "100%",
-        paddingLeft: 10,
       }}
     >
       {isOpenVoteModal === false ? (
