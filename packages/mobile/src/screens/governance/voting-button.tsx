@@ -6,7 +6,7 @@ import { StyleProp, View, ViewProps } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { useStore } from "../../stores";
 import { Governance } from "@keplr-wallet/stores";
-import { WhiteButton, Button } from "../../components/buttons";
+import { FlexWhiteButton, FlexButton } from "../../components/buttons";
 import {
   alignItemsCenter,
   bgcWhite,
@@ -92,7 +92,7 @@ export const VotingButton: FunctionComponent<{
       }}
     >
       {isOpenVoteModal === false ? (
-        <Button
+        <FlexButton
           title={statusText}
           onPress={() => {
             setOpenVoteModal(true);
@@ -110,12 +110,12 @@ export const VotingButton: FunctionComponent<{
             handleSetActive={setVoteActive}
           />
           <View style={flexDirectionRow}>
-            <WhiteButton
+            <FlexWhiteButton
               title="Cancel"
               color="warning"
               onPress={() => handleCloseModal()}
             />
-            <Button
+            <FlexButton
               title="Confirm"
               onPress={async () => {
                 await sendGovVoteMsg();

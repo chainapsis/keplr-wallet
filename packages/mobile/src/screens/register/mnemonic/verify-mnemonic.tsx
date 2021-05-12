@@ -13,7 +13,7 @@ import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { getRandomBytesAsync } from "../../../common";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaPage } from "../../../components/page";
-import { Button } from "../../../components/buttons";
+import { FlexButton } from "../../../components/buttons";
 import { NewMnemonicConfig, NumWords } from "./hook";
 import { RectButton } from "react-native-gesture-handler";
 import {
@@ -297,7 +297,7 @@ export const VerifyMnemonicScreen: FunctionComponent<{
             );
           })}
         </View>
-        <Button
+        <FlexButton
           title="Generate"
           disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
           onPress={async () => {

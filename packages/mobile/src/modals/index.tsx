@@ -2,6 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../stores";
 import Modal from "react-native-modal";
+import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { View } from "react-native";
 import {
   useFeeConfig,
@@ -20,7 +21,7 @@ import {
   fAlignCenter,
   my3,
 } from "../styles";
-import { Button, WhiteButton } from "../components/buttons";
+import { FlexButton, FlexWhiteButton } from "../components/buttons";
 import { TransactionDetails } from "./transaction-details";
 import { FullPage } from "../components/page";
 import { useInteractionInfo } from "../hooks";
@@ -95,6 +96,49 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
   ] = useState(false);
 
   const disableInputs = isSignDocInternalSend || isLoadingSignDocInternalSend;
+
+  // RectButton in Modal only working in HOC on android
+  const UnlockButtonWithHoc = gestureHandlerRootHOC(() => {
+    return (
+      <FlexButton
+        title="Unlock"
+        onPress={async () => {
+          await keyRingStore.unlock(password);
+          interactionModalStore.popUrl();
+        }}
+      />
+    );
+  });
+
+  const ApproveButtonWithHoc = gestureHandlerRootHOC(() => {
+    return (
+      <FlexButton
+        title="Approve"
+        onPress={async () => {
+          if (signDocHelper.signDocWrapper) {
+            await signInteractionStore.approveAndWaitEnd(
+              signDocHelper.signDocWrapper
+            );
+          }
+          interactionModalStore.popUrl();
+        }}
+      />
+    );
+  });
+
+  const RejectButtonWithHoc = gestureHandlerRootHOC(() => {
+    return (
+      <FlexWhiteButton
+        title="Reject"
+        color="error"
+        onPress={async () => {
+          await signInteractionStore.reject();
+          interactionModalStore.popUrl();
+        }}
+      />
+    );
+  });
+
   return (
     <React.Fragment>
       <Modal
@@ -113,13 +157,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                   value={password}
                   onChangeText={setPassword}
                 />
-                <Button
-                  title="Unlock"
-                  onPress={async () => {
-                    await keyRingStore.unlock(password);
-                    interactionModalStore.popUrl();
-                  }}
-                />
+                <UnlockButtonWithHoc />
               </React.Fragment>
             ) : null}
             {interactionModalStore.lastUrl === "/sign" ? (
@@ -140,25 +178,8 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
                   disableInputs={disableInputs}
                 />
                 <View style={flexDirectionRow}>
-                  <WhiteButton
-                    title="Reject"
-                    color="error"
-                    onPress={async () => {
-                      await signInteractionStore.reject();
-                      interactionModalStore.popUrl();
-                    }}
-                  />
-                  <Button
-                    title="Approve"
-                    onPress={async () => {
-                      if (signDocHelper.signDocWrapper) {
-                        await signInteractionStore.approveAndWaitEnd(
-                          signDocHelper.signDocWrapper
-                        );
-                      }
-                      interactionModalStore.popUrl();
-                    }}
-                  />
+                  <RejectButtonWithHoc />
+                  <ApproveButtonWithHoc />
                 </View>
               </React.Fragment>
             ) : null}
