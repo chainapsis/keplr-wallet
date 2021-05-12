@@ -10,7 +10,12 @@ import { AccountView } from "./account";
 import { AssetView } from "./asset";
 import { TxButtonView } from "./tx-button";
 import { GradientBackground } from "../../components/svg";
-import { Button } from "../../components/buttons";
+import { StakingRewardsView } from "./staking-rewards";
+import { TokensView } from "./tokens";
+import { TotalStakedView } from "./total-staked";
+import { GovernanceView } from "./governance";
+import { mt4 } from "../../styles";
+
 const HomeStack = createStackNavigator();
 
 export const HomeStackScreen: FunctionComponent = () => {
@@ -41,27 +46,15 @@ const HomeScreen: FunctionComponent = observer(() => {
 
   return (
     <SafeAreaPage>
-      <Card>
+      <Card containerStyle={mt4}>
         <AccountView />
         <AssetView />
         <TxButtonView />
       </Card>
-      <Card>
-        <Button
-          title="Stake"
-          onPress={() => {
-            navigation.navigate("Stake");
-          }}
-        />
-      </Card>
-      <Card>
-        <Button
-          title="Governance"
-          onPress={() => {
-            navigation.navigate("Governance");
-          }}
-        />
-      </Card>
+      <TokensView />
+      <StakingRewardsView />
+      <TotalStakedView />
+      <GovernanceView />
     </SafeAreaPage>
   );
 });
