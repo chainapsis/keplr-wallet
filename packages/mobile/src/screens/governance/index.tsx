@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { SafeAreaPage } from "../../components/page";
+import { SafeAreaFixedPage } from "../../components/page";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AllProposals } from "./all-proposals";
 import { GovernanceDetailsScreeen } from "./governance-details-screeen";
@@ -28,8 +28,8 @@ export const GovernanceStackScreen: FunctionComponent = () => {
 
 const GovernanceScreen: FunctionComponent = observer(() => {
   return (
-    <SafeAreaPage>
+    <SafeAreaFixedPage>
       <AllProposals />
-    </SafeAreaPage>
+    </SafeAreaFixedPage>
   );
 });
