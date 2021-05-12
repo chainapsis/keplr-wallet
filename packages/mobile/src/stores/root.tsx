@@ -6,9 +6,11 @@ import {
   CoinGeckoPriceStore,
   AccountStore,
   SignInteractionStore,
+  TokensStore,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
+import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { RNEnv, RNRouter, RNMessageRequester } from "../router";
 import { InteractionModalStore } from "./interaction-modal";
 import { ChainStore } from "./chain";
@@ -24,6 +26,7 @@ export class RootStore {
   public readonly queriesStore: QueriesStore;
   public readonly accountStore: AccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
+  public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
   constructor() {
     const router = new RNRouter(RNEnv.produceEnv);
@@ -109,6 +112,12 @@ export class RootStore {
           locale: "ja-JP",
         },
       }
+    );
+
+    this.tokensStore = new TokensStore(
+      this.chainStore,
+      new RNMessageRequester(),
+      this.interactionStore
     );
 
     router.listen(APP_PORT);
