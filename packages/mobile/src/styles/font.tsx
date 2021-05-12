@@ -251,7 +251,7 @@ export const body3: StyleProp<TextStyle> = {
 
 export const buttonFont1: StyleProp<TextStyle> = {
   fontSize: 18,
-  lineHeight: 16,
+  lineHeight: 18,
   fontWeight: "500",
   letterSpacing: 0.2,
 };

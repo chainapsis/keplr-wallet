@@ -145,7 +145,7 @@ export const shadow: StyleProp<ViewStyle> = Platform.select({
     shadowRadius: 1.41,
   },
   android: {
-    elevation: 2,
+    elevation: 0,
   },
 });
 
@@ -275,4 +275,8 @@ export const absoluteLayout: StyleProp<ViewStyle> = {
   top: 0,
   width: "100%",
   height: "100%",
+};
+
+export const overflowHidden: StyleProp<ViewStyle> = {
+  overflow: "hidden",
 };
