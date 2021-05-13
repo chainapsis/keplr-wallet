@@ -6,3 +6,4 @@ export * from "./gas";
 export * from "./recipient";
 export * from "./send-gas";
 export * from "./send-tx";
+export * from "./basic-tx";

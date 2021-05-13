@@ -33,7 +33,7 @@ export enum WalletStatus {
   NotExist = "NotExist",
 }
 
-interface MsgOpt {
+export interface MsgOpt {
   type: string;
   gas: number;
 }
