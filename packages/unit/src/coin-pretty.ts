@@ -191,6 +191,20 @@ export class CoinPretty {
     return this.intPretty.toDec();
   }
 
+  toCoin(): {
+    denom: string;
+    amount: string;
+  } {
+    const amount = this.toDec()
+      .mul(DecUtils.getPrecisionDec(this.currency.coinDecimals))
+      .truncate();
+
+    return {
+      denom: this.currency.coinMinimalDenom,
+      amount: amount.toString(),
+    };
+  }
+
   toString(): string {
     let denom = this.denom;
     if (this._options.upperCase) {

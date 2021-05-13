@@ -75,4 +75,62 @@ describe("Test CoinPretty", () => {
       "0.0001212 ATOM"
     );
   });
+
+  it("Test toCoin() for CoinPretty", () => {
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        new Dec("0.1234")
+      ).toCoin()
+    ).toStrictEqual({
+      denom: "uatom",
+      amount: "0",
+    });
+
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        new Dec("12.1234")
+      ).toCoin()
+    ).toStrictEqual({
+      denom: "uatom",
+      amount: "12",
+    });
+
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        new Dec("123456.1234")
+      ).toCoin()
+    ).toStrictEqual({
+      denom: "uatom",
+      amount: "123456",
+    });
+
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        new Int("12345600")
+      ).toCoin()
+    ).toStrictEqual({
+      denom: "uatom",
+      amount: "12345600",
+    });
+  });
 });
