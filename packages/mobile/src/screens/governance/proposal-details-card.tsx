@@ -9,8 +9,6 @@ import { Governance } from "@keplr-wallet/stores";
 import {
   alignItemsCenter,
   caption2,
-  fAlignLeft,
-  fAlignRight,
   flex1,
   flexDirectionRow,
   h6,
