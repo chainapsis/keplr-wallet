@@ -16,7 +16,6 @@ import {
   fcWhite,
   fcPrimary,
   bcPrimary,
-  m2,
   py1,
   justifyContentAround,
   bw1,
@@ -68,37 +67,40 @@ export const SuggestedWordsView: FunctionComponent<{
               onPress={() => {
                 onUnselect ? onUnselect(i) : null;
               }}
-              style={sf([bgcPrimary, m1, br2, py1, { width: 80 }])}
+              style={sf([bgcPrimary, m1, br2, { width: 80 }])}
             >
               <View
                 accessible
-                style={sf([justifyContentCenter, alignItemsCenter])}
+                style={sf([justifyContentCenter, alignItemsCenter, py1])}
               >
                 <Text style={sf([fcWhite, body3])}>{word}</Text>
               </View>
             </RectButton>
           ) : (
-            <RectButton
-              onPress={() => {
-                onSelect ? onSelect(i) : null;
-              }}
+            <View
               style={sf([
-                m2,
+                m1,
                 br2,
-                py1,
                 bDashed,
                 bw1,
-                { width: 80 },
                 i === currentCursor ? bcPrimary : bcGray,
+                { width: 80 },
               ])}
             >
-              <View
-                accessible
-                style={sf([justifyContentCenter, alignItemsCenter])}
+              <RectButton
+                onPress={() => {
+                  onSelect ? onSelect(i) : null;
+                }}
+                style={sf([flex1, br2])}
               >
-                <Text style={sf([fcWhite, body3])}> </Text>
-              </View>
-            </RectButton>
+                <View
+                  accessible
+                  style={sf([justifyContentCenter, alignItemsCenter, py1])}
+                >
+                  <Text style={sf([fcWhite, body3])}> </Text>
+                </View>
+              </RectButton>
+            </View>
           )}
         </View>
       );

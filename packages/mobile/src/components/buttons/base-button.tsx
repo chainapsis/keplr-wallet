@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useCallback } from "react";
 import { StyleProp, TextStyle, ViewStyle, View } from "react-native";
 import { Text } from "react-native-elements";
 import { RectButton } from "react-native-gesture-handler";
@@ -44,11 +44,19 @@ export const BaseButton: FunctionComponent<
   const disabledButtonStyle = props.disabledButtonStyle ?? [];
   const disabledTitleStyle = props.disabledTitleStyle ?? [];
 
+  const onPress = props.onPress;
   const title = props.title;
   const disabled = props.disabled || false;
   const loading = props.loading || false;
 
-  const onPress = disabled ? undefined : props.onPress;
+  const handleOnPress = useCallback(
+    (pointerInside: boolean) => {
+      if (!loading && !disabled) {
+        onPress ? onPress(pointerInside) : null;
+      }
+    },
+    [disabled, loading, onPress]
+  );
 
   const currentButtonStyle = disabled ? disabledButtonStyle : buttonStyle;
   const currentTitleStyle = disabled ? disabledTitleStyle : titleStyle;
@@ -59,7 +67,7 @@ export const BaseButton: FunctionComponent<
     <View style={sf([shadow, overflowHidden, br1, ...containerStyle])}>
       <RectButton
         {...attributes}
-        onPress={onPress}
+        onPress={handleOnPress}
         style={sf([
           flex1,
           justifyContentCenter,
