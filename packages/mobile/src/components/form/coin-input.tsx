@@ -9,7 +9,7 @@ import {
   IFeeConfig,
 } from "@keplr-wallet/hooks";
 
-import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { CoinPretty, DecUtils, Int } from "@keplr-wallet/unit";
 import { observer } from "mobx-react-lite";
 import { Text } from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
@@ -33,10 +33,11 @@ import { Input } from "../input";
 export interface CoinInputProps {
   amountConfig: IAmountConfig;
   feeConfig: IFeeConfig;
+  disableToken?: boolean;
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = observer(
-  ({ amountConfig, feeConfig }) => {
+  ({ amountConfig, feeConfig, disableToken }) => {
     const { queriesStore } = useStore();
     const queryBalances = queriesStore
       .get(amountConfig.chainId)
@@ -100,31 +101,33 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
 
     return (
       <React.Fragment>
-        <RNPickerSelect
-          disabled={isAllBalanceMode}
-          onValueChange={(value) => {
-            const currency = amountConfig.sendableCurrencies.find(
-              (cur) => cur.coinMinimalDenom === value
-            );
-            amountConfig.setSendCurrency(currency);
-          }}
-          value={amountConfig.sendCurrency.coinMinimalDenom}
-          items={amountConfig.sendableCurrencies.map((currency) => {
-            return {
-              label: currency.coinDenom,
-              value: currency.coinMinimalDenom,
-              key: currency.coinMinimalDenom,
-            };
-          })}
-        >
-          <Input
-            label="Token"
+        {!disableToken ? (
+          <RNPickerSelect
             disabled={isAllBalanceMode}
-            inputContainerStyle={isAllBalanceMode ? [bgcGray] : [bgcWhite]}
-            value={amountConfig.sendCurrency.coinDenom}
-            rightIcon={<Icon name="chevron-down" />}
-          />
-        </RNPickerSelect>
+            onValueChange={(value) => {
+              const currency = amountConfig.sendableCurrencies.find(
+                (cur) => cur.coinMinimalDenom === value
+              );
+              amountConfig.setSendCurrency(currency);
+            }}
+            value={amountConfig.sendCurrency.coinMinimalDenom}
+            items={amountConfig.sendableCurrencies.map((currency) => {
+              return {
+                label: currency.coinDenom,
+                value: currency.coinMinimalDenom,
+                key: currency.coinMinimalDenom,
+              };
+            })}
+          >
+            <Input
+              label="Token"
+              disabled={isAllBalanceMode}
+              inputContainerStyle={isAllBalanceMode ? [bgcGray] : [bgcWhite]}
+              value={amountConfig.sendCurrency.coinDenom}
+              rightIcon={<Icon name="chevron-down" />}
+            />
+          </RNPickerSelect>
+        ) : null}
         <View style={sf([flexDirectionRow, justifyContentBetween])}>
           <Text style={subtitle2}>Amount</Text>
           <TouchableOpacity onPress={toggleAllBalanceMode}>
