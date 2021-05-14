@@ -12,8 +12,10 @@ import {
   sf,
   flex1,
   flexDirectionRow,
-  fs13,
-  justifyContentBetween,
+  h5,
+  subtitle2,
+  fcLow,
+  caption2,
 } from "../../styles";
 
 const BondStatus = Staking.BondStatus;
@@ -49,14 +51,16 @@ const UnbondingItem: FunctionComponent<{
           }
         />
         <View style={flex1}>
-          <Text numberOfLines={1} style={sf([flex1, fs13])}>
+          <Text numberOfLines={1} style={sf([subtitle2])}>
             {validator.description.moniker}
           </Text>
-          <View style={sf([flexDirectionRow, justifyContentBetween])}>
-            <Text>{entry.balance}</Text>
-            <Text>{moment(entry.completion_time).fromNow()}</Text>
-          </View>
         </View>
+      </View>
+      <View style={flexDirectionRow}>
+        <View style={flex1} />
+        <Text style={sf([fcLow, caption2])}>
+          {moment(entry.completion_time).fromNow()}
+        </Text>
       </View>
       <ProgressBar progress={progress} />
     </View>
@@ -120,7 +124,6 @@ const UnbondingList: FunctionComponent<{
                 moment(),
                 "seconds"
               );
-
               // Set unbonding time as 21 days by default.
               let unbondingTime = 3600 * 24 * 21;
               if (stakingParams.response) {
@@ -149,12 +152,12 @@ const UnbondingList: FunctionComponent<{
   );
 });
 
-export const UnbondingCard: FunctionComponent<{
+export const UnbondingView: FunctionComponent<{
   unbondings: UnbondingDelegation[];
 }> = ({ unbondings }) => {
   return (
     <Card>
-      <Card.Title>UnDelegating</Card.Title>
+      <Text style={h5}>UnDelegating</Text>
       <UnbondingList unbondings={unbondings} />
     </Card>
   );

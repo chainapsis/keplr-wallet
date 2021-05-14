@@ -5,12 +5,13 @@ import { useStore } from "../../stores";
 import { Text, Image, Card } from "react-native-elements";
 import { View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { FlexButton } from "../../components/buttons";
+import { FlexButton, FlexWhiteButton } from "../../components/buttons";
 import {
   flexDirectionRow,
   justifyContentBetween,
   sf,
   alignItemsCenter,
+  h5,
 } from "../../styles";
 
 const NeedStakeView: FunctionComponent = () => {
@@ -25,7 +26,7 @@ const NeedStakeView: FunctionComponent = () => {
   );
 };
 
-export const TotalStakedCard: FunctionComponent = observer(() => {
+export const TotalStakedView: FunctionComponent = observer(() => {
   const { accountStore, queriesStore, chainStore } = useStore();
   const navigate = useNavigation();
 
@@ -62,22 +63,11 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
 
   return (
     <Card>
+      <Text style={h5}>Staking</Text>
       {delegations.delegations.length === 0 ? (
-        <React.Fragment>
-          <Card.Title>Staking</Card.Title>
-          <NeedStakeView />
-        </React.Fragment>
+        <NeedStakeView />
       ) : (
         <React.Fragment>
-          <View style={sf([flexDirectionRow, justifyContentBetween])}>
-            <Card.Title>Staking</Card.Title>
-            <FlexButton
-              title={">"}
-              onPress={() => {
-                navigate.navigate("Staking Details");
-              }}
-            />
-          </View>
           <View style={sf([flexDirectionRow, justifyContentBetween])}>
             <Text>Total Staked</Text>
             <Text>
@@ -98,17 +88,25 @@ export const TotalStakedCard: FunctionComponent = observer(() => {
                 .toString()}
             </Text>
           </View>
-          <FlexButton
-            title="Clain Reward"
-            onPress={async () => {
-              await withdrawAllRewards();
-            }}
-            disabled={
-              !accountInfo.isReadyToSendMsgs ||
-              rewards.pendingRewardValidatorAddresses.length === 0
-            }
-            loading={accountInfo.isSendingMsg === "withdrawRewards"}
-          />
+          <View style={sf([flexDirectionRow, justifyContentBetween])}>
+            <FlexWhiteButton
+              title="Claim Reward"
+              onPress={async () => {
+                await withdrawAllRewards();
+              }}
+              disabled={
+                !accountInfo.isReadyToSendMsgs ||
+                rewards.pendingRewardValidatorAddresses.length === 0
+              }
+              loading={accountInfo.isSendingMsg === "withdrawRewards"}
+            />
+            <FlexButton
+              title="Staking Details"
+              onPress={() => {
+                navigate.navigate("Staking Details");
+              }}
+            />
+          </View>
         </React.Fragment>
       )}
     </Card>

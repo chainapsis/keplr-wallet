@@ -1,8 +1,10 @@
 import React, { FunctionComponent, useMemo } from "react";
-
-import { Dec, DecUtils, CoinPretty, IntPretty } from "@keplr-wallet/unit";
-import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
+import { SafeAreaFixedPage, SafeAreaPage } from "../../components/page";
+import { TotalStakedView } from "./total-staked";
+import { UnbondingView } from "./unbonding";
+import { useStore } from "../../stores";
+import { Dec, DecUtils, CoinPretty, IntPretty } from "@keplr-wallet/unit";
 import { Text, Badge } from "react-native-elements";
 import { View, FlatList } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
@@ -21,6 +23,26 @@ import {
   subtitle2,
 } from "../../styles";
 import { Image } from "react-native-elements";
+
+export const TempStakeInfoView: FunctionComponent = observer(() => {
+  const { accountStore, queriesStore, chainStore } = useStore();
+
+  const queries = queriesStore.get(chainStore.current.chainId);
+
+  const unbondings = queries
+    .getQueryUnbondingDelegations()
+    .getQueryBech32Address(
+      accountStore.getAccount(chainStore.current.chainId).bech32Address
+    ).unbondings;
+
+  return (
+    <React.Fragment>
+      <TotalStakedView />
+      {unbondings.length > 0 ? <UnbondingView unbondings={unbondings} /> : null}
+    </React.Fragment>
+  );
+});
+
 const BondStatus = Staking.BondStatus;
 
 /*
@@ -181,11 +203,6 @@ export const AllValidators: FunctionComponent<{
 
   return (
     <View style={sf([cardStyle, bgcWhite, shadow])}>
-      {/* <Text>All Validators</Text> */}
-      {/* To Do Loading progress bar */}
-      {/* {bondedValidators.isFetching || delegations.isFetching ? (
-          <Icon></Icon>
-        ) : null} */}
       <FlatList
         data={flatListValidatorData}
         renderItem={renderValidator}
@@ -193,5 +210,14 @@ export const AllValidators: FunctionComponent<{
         ListFooterComponent={<View style={{ height: 100 }} />}
       />
     </View>
+  );
+});
+
+export const ValidatorListScreen: FunctionComponent = observer(() => {
+  return (
+    <SafeAreaFixedPage>
+      <TempStakeInfoView />
+      <AllValidators />
+    </SafeAreaFixedPage>
   );
 });
