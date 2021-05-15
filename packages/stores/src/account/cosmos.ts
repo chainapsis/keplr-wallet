@@ -68,6 +68,7 @@ export class AccountWithCosmos
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
+      removeEventListener: (type: string, fn: () => unknown) => void;
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,

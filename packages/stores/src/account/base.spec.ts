@@ -24,6 +24,7 @@ describe("Test Account set base", () => {
       {
         // No need
         addEventListener: () => {},
+        removeEventListener: () => {},
       },
       chainStore,
       "test",
@@ -81,6 +82,7 @@ describe("Test Account set base", () => {
       {
         // No need
         addEventListener: () => {},
+        removeEventListener: () => {},
       },
       chainStore,
       "test",

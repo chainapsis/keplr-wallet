@@ -1,4 +1,11 @@
-import { computed, flow, makeObservable, observable, runInAction } from "mobx";
+import {
+  action,
+  computed,
+  flow,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import { AppCurrency, Keplr } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
@@ -74,6 +81,7 @@ export class AccountSetBase<MsgOpts, Queries> {
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
+      removeEventListener: (type: string, fn: () => unknown) => void;
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
@@ -119,6 +127,8 @@ export class AccountSetBase<MsgOpts, Queries> {
     await keplr.enable(chainId);
   }
 
+  private readonly handleInit = () => this.init();
+
   @flow
   public *init() {
     // If wallet status is not exist, there is no need to try to init because it always fails.
@@ -129,8 +139,9 @@ export class AccountSetBase<MsgOpts, Queries> {
     // If the store has never been initialized, add the event listener.
     if (!this.hasInited) {
       // If key store in the keplr extension is changed, this event will be dispatched.
-      this.eventListener.addEventListener("keplr_keystorechange", () =>
-        this.init()
+      this.eventListener.addEventListener(
+        "keplr_keystorechange",
+        this.handleInit
       );
     }
     this.hasInited = true;
@@ -160,6 +171,19 @@ export class AccountSetBase<MsgOpts, Queries> {
 
     // Set the wallet status as loaded after getting all necessary infos.
     this._walletStatus = WalletStatus.Loaded;
+  }
+
+  @action
+  public disconnect(): void {
+    this._walletStatus = WalletStatus.NotInit;
+    this.hasInited = false;
+    this.eventListener.removeEventListener(
+      "keplr_keystorechange",
+      this.handleInit
+    );
+    this._bech32Address = "";
+    this._name = "";
+    this.pubKey = new Uint8Array(0);
   }
 
   get walletVersion(): string | undefined {

@@ -21,10 +21,12 @@ export class AccountStore<
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
+      removeEventListener: (type: string, fn: () => unknown) => void;
     },
     protected readonly accountSetCreator: (new (
       eventListener: {
         addEventListener: (type: string, fn: () => unknown) => void;
+        removeEventListener: (type: string, fn: () => unknown) => void;
       },
       chainGetter: ChainGetter,
       chainId: string,
