@@ -2,7 +2,7 @@ import { ObservableChainQuery } from "./chain-query";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../common";
 import { computed, makeObservable, observable, runInAction } from "mobx";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
 import { HasMapStore } from "../common";
 import { computedFn } from "mobx-utils";
@@ -115,6 +115,9 @@ export class ObservableQueryBalancesInner {
     return this.getBalanceInner(chainInfo.stakeCurrency);
   }
 
+  /**
+   * 알려진 모든 Currency들의 balance를 반환환다.
+   */
   @computed
   get balances(): ObservableQueryBalanceInner[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
@@ -127,6 +130,15 @@ export class ObservableQueryBalancesInner {
     }
 
     return result;
+  }
+
+  /**
+   * 알려진 모든 Currency들 중 0 이상의 잔고를 가진 balance를 반환환다.
+   */
+  @computed
+  get positiveBalances(): ObservableQueryBalanceInner[] {
+    const balances = this.balances;
+    return balances.filter((bal) => bal.balance.toDec().gt(new Dec(0)));
   }
 
   @computed
