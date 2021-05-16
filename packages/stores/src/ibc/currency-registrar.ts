@@ -73,9 +73,9 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
       }
 
       if (originChainInfo) {
-        const currency = originChainInfo.findCurrency(denomTrace.denom);
+        const currency = originChainInfo.forceFindCurrency(denomTrace.denom);
 
-        if (currency && !("type" in currency)) {
+        if (!("type" in currency)) {
           return [
             {
               ...currency,
