@@ -17,6 +17,24 @@ interface FormData {
   confirmPassword: string;
 }
 
+function isPrivateKey(str: string): boolean {
+  if (str.startsWith("0x")) {
+    return true;
+  }
+
+  return str.length === 64;
+}
+
+function trimWordsStr(str: string): string {
+  str = str.trim();
+  // Split on the whitespace or new line.
+  const splited = str.split(/\s+/);
+  const words = splited
+    .map((word) => word.trim())
+    .filter((word) => word.trim().length > 0);
+  return words.join(" ");
+}
+
 export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
 
@@ -43,13 +61,30 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
   });
 
   const onSubmit = async ({ name, mnemonic, password }: FormData) => {
-    await registerConfig.createMnemonic(name, mnemonic, password, {
-      account: 0,
-      change: 0,
-      addressIndex: 0,
-    });
-
-    navigation.navigate("Main");
+    try {
+      if (!isPrivateKey(mnemonic)) {
+        await registerConfig.createMnemonic(
+          name,
+          trimWordsStr(mnemonic),
+          password,
+          {
+            account: 0,
+            change: 0,
+            addressIndex: 0,
+          }
+        );
+      } else {
+        const privateKey = Buffer.from(
+          mnemonic.trim().replace("0x", ""),
+          "hex"
+        );
+        await registerConfig.createPrivateKey(name, privateKey, password);
+      }
+      navigation.navigate("Main");
+    } catch (e) {
+      console.log(e.message ? e.message : e.toString());
+      registerConfig.clear();
+    }
   };
 
   return (

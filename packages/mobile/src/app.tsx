@@ -8,7 +8,9 @@ import {
 } from "./components/notification";
 import { LoadingIndicatorProvider } from "./components/loading-indicator";
 
-export const App: FunctionComponent = () => {
+import codePush from "react-native-code-push";
+
+export const App: FunctionComponent = codePush(() => {
   return (
     <GlobalThemeProvider>
       <StoreProvider>
@@ -22,4 +24,4 @@ export const App: FunctionComponent = () => {
       </StoreProvider>
     </GlobalThemeProvider>
   );
-};
+});

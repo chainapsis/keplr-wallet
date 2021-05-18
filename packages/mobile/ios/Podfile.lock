@@ -1,7 +1,31 @@
 PODS:
+  - appcenter-analytics (4.1.0):
+    - AppCenter/Analytics (~> 4.0)
+    - AppCenterReactNativeShared (~> 4.0)
+    - React-Core
+  - appcenter-core (4.1.0):
+    - AppCenterReactNativeShared (~> 4.0)
+    - React-Core
+  - appcenter-crashes (4.1.0):
+    - AppCenter/Crashes (~> 4.0)
+    - AppCenterReactNativeShared (~> 4.0)
+    - React-Core
+  - AppCenter/Analytics (4.1.1):
+    - AppCenter/Core
+  - AppCenter/Core (4.1.1)
+  - AppCenter/Crashes (4.1.1):
+    - AppCenter/Core
+  - AppCenterReactNativeShared (4.1.0):
+    - AppCenter/Core (= 4.1.1)
+  - Base64 (1.1.2)
   - boost-for-react-native (1.63.0)
   - CocoaAsyncSocket (7.6.5)
   - CocoaLibEvent (1.0.0)
+  - CodePush (7.0.1):
+    - Base64 (~> 1.1)
+    - JWT (~> 3.0.0-beta.12)
+    - React-Core
+    - SSZipArchive (~> 2.2.2)
   - DoubleConversion (1.1.6)
   - EXConstants (9.3.5):
     - UMConstantsInterface
@@ -159,6 +183,8 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (7.4.0):
     - GoogleUtilities/Logger
+  - JWT (3.0.0-beta.12):
+    - Base64 (~> 1.1.2)
   - nanopb (2.30908.0):
     - nanopb/decode (= 2.30908.0)
     - nanopb/encode (= 2.30908.0)
@@ -419,6 +445,7 @@ PODS:
     - React
   - RNVectorIcons (8.1.0):
     - React-Core
+  - SSZipArchive (2.2.3)
   - UMAppLoader (1.4.0)
   - UMBarCodeScannerInterface (5.4.0)
   - UMCameraInterface (5.4.0)
@@ -441,6 +468,10 @@ PODS:
     - Yoga (~> 1.14)
 
 DEPENDENCIES:
+  - appcenter-analytics (from `../../../node_modules/appcenter-analytics/ios`)
+  - appcenter-core (from `../../../node_modules/appcenter/ios`)
+  - appcenter-crashes (from `../../../node_modules/appcenter-crashes/ios`)
+  - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
@@ -520,6 +551,9 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppCenter
+    - AppCenterReactNativeShared
+    - Base64
     - boost-for-react-native
     - CocoaAsyncSocket
     - CocoaLibEvent
@@ -538,12 +572,22 @@ SPEC REPOS:
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleUtilities
+    - JWT
     - nanopb
     - OpenSSL-Universal
     - PromisesObjC
+    - SSZipArchive
     - YogaKit
 
 EXTERNAL SOURCES:
+  appcenter-analytics:
+    :path: "../../../node_modules/appcenter-analytics/ios"
+  appcenter-core:
+    :path: "../../../node_modules/appcenter/ios"
+  appcenter-crashes:
+    :path: "../../../node_modules/appcenter-crashes/ios"
+  CodePush:
+    :path: "../node_modules/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EXConstants:
@@ -656,9 +700,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AppCenter: cd53e3ed3563cc720bcb806c9731a12389b40d44
+  appcenter-analytics: aa074250b2cb182d6f7d67d9c236dd4606673ab5
+  appcenter-core: c97920e79eba2321a262d3733cb2a6f1097db539
+  appcenter-crashes: 804ae51c5d1742ce20fdb6a68b3d06208a404ad5
+  AppCenterReactNativeShared: 2d5a53b6cbd2fe7f63f0033e9f0a40757a4eacf5
+  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
+  CodePush: 9bb93f52a44ee80b72739d89dead9c7e86c3bd3a
   DoubleConversion: cde416483dac037923206447da6e1454df403714
   EXConstants: 54d0bf04319d1692c6c7bc03ca151ef7a71705a4
   EXFileSystem: 0e4974ab77bff04cda68d2886d070cbe64b93a6b
@@ -684,6 +735,7 @@ SPEC CHECKSUMS:
   GoogleAppMeasurement: fd19169c3034975cb934e865e5667bfdce59df7f
   GoogleDataTransport: cd9db2180fcecd8da1b561aea31e3e56cf834aa7
   GoogleUtilities: 284cddc7fffc14ae1907efb6f78ab95c1fccaedc
+  JWT: 9b5c05abbcc1a0e69c3c91e1655b3387fc7e581d
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   OpenSSL-Universal: ff34003318d5e1163e9529b08470708e389ffcdd
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
@@ -718,6 +770,7 @@ SPEC CHECKSUMS:
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e
   RNVectorIcons: 31cebfcf94e8cf8686eb5303ae0357da64d7a5a4
+  SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
   UMAppLoader: 92d044af52626af3d81a69796ad666fc7a9a7d78
   UMBarCodeScannerInterface: 3f6c1b09ef4b867ce752b8c0b3893bcf9cd85f32
   UMCameraInterface: d516032121192fee9a6c93bdfff0bb2cc7282796
@@ -734,6 +787,6 @@ SPEC CHECKSUMS:
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 034526b7ab4464c2e875f0fdcf65e0b04ec83560
+PODFILE CHECKSUM: 7e3285c54981e53f72e8e4f5aed660119c833694
 
 COCOAPODS: 1.10.1
