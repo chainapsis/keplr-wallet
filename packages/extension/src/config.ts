@@ -27,6 +27,10 @@ import {
   AKASH_RPC_CONFIG,
   AKASH_REST_ENDPOINT,
   AKASH_REST_CONFIG,
+  CRYPTO_ORG_RPC_ENDPOINT,
+  CRYPTO_ORG_RPC_CONFIG,
+  CRYPTO_ORG_REST_ENDPOINT,
+  CRYPTO_ORG_REST_CONFIG,
   IOV_RPC_ENDPOINT,
   IOV_RPC_CONFIG,
   IOV_REST_ENDPOINT,
@@ -233,6 +237,49 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uakt",
         coinDecimals: 6,
         coinGeckoId: "akash-network",
+      },
+    ],
+    features: ["stargate"],
+  },
+  {
+    rpc: CRYPTO_ORG_RPC_ENDPOINT,
+    rpcConfig: CRYPTO_ORG_RPC_CONFIG,
+    rest: CRYPTO_ORG_REST_ENDPOINT,
+    restConfig: CRYPTO_ORG_REST_CONFIG,
+    chainId: "crypto-org-chain-mainnet-1",
+    chainName: "Crypto.org",
+    stakeCurrency: {
+      coinDenom: "CRO",
+      coinMinimalDenom: "basecro",
+      coinDecimals: 8,
+      coinGeckoId: "crypto-com-chain",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/crypto-org/stake"
+        : "http://localhost:8081/#/crypto-org/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/crypto-org/stake"
+        : "http://localhost:8081/#/crypto-org/stake",
+    bip44: {
+      coinType: 394,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("cro"),
+    currencies: [
+      {
+        coinDenom: "CRO",
+        coinMinimalDenom: "basecro",
+        coinDecimals: 8,
+        coinGeckoId: "crypto-com-chain",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "CRO",
+        coinMinimalDenom: "basecro",
+        coinDecimals: 8,
+        coinGeckoId: "crypto-com-chain",
       },
     ],
     features: ["stargate"],
@@ -746,7 +793,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     features: ["stargate"],
   },
-
   {
     rpc: SENTINEL_RPC_ENDPOINT,
     rpcConfig: SENTINEL_RPC_CONFIG,
