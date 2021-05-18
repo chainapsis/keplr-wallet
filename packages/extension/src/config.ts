@@ -100,7 +100,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 118,
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: KAVA_RPC_ENDPOINT,
@@ -239,7 +239,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "akash-network",
       },
     ],
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: CRYPTO_ORG_RPC_ENDPOINT,
@@ -282,7 +282,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "crypto-com-chain",
       },
     ],
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: IOV_RPC_ENDPOINT,
@@ -746,7 +746,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.3,
       high: 0.4,
     },
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: REGEN_RPC_ENDPOINT,
