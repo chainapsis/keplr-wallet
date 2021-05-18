@@ -101,9 +101,9 @@ export const TotalStakedView: FunctionComponent = observer(() => {
               loading={accountInfo.isSendingMsg === "withdrawRewards"}
             />
             <FlexButton
-              title="Staking Details"
+              title="Staked List"
               onPress={() => {
-                navigate.navigate("Staking Details");
+                navigate.navigate("Staked List");
               }}
             />
           </View>
