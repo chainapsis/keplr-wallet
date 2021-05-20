@@ -1,7 +1,15 @@
 name: Test Unit
+
 on:
-  pull_request:
   push:
+    branches:
+      - master
+      - release/*
+
+  pull_request:
+    branches:
+      - master
+      - release/*
 
 jobs:
   test-lint:
@@ -9,25 +17,10 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: true
-          token: ${{ secrets.TOKEN }}
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: "12"
       - run: npm install --global yarn
       - run: sudo apt-get install libusb-1.0-0-dev
-      - run: echo "deb https://dl.bintray.com/sobolevn/deb git-secret main" | sudo tee -a /etc/apt/sources.list
-      - run: wget -qO - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | sudo apt-key add -
-      - run: sudo apt-get install apt-transport-https
-      - run: sudo apt-get update && sudo apt-get install git-secret
-      - run: printf $GPG_KEY | base64 --decode > private.key
-        env:
-          GPG_KEY: ${{ secrets.GPG_KEY }}
-      - run: gpg --import --no-tty --batch --yes ./private.key
-      - run: git-secret reveal -f -v -p $GPG_PASSPHRASE
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
       - run: yarn ci

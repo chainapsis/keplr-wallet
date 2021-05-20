@@ -1,7 +1,15 @@
 name: Test Lint
+
 on:
-  pull_request:
   push:
+    branches:
+      - master
+      - release/*
+
+  pull_request:
+    branches:
+      - master
+      - release/*
 
 jobs:
   test-lint:
@@ -12,6 +20,6 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: "12"
       - run: npm install --global yarn
       - run: yarn ci-lint
