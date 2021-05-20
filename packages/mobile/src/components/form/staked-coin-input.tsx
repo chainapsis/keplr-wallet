@@ -42,9 +42,9 @@ export const StakedCoinInput: FunctionComponent<StakedCoinInputProps> = observer
 
     const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-    const delegations = queries
-      .getQueryDelegations()
-      .getQueryBech32Address(accountInfo.bech32Address);
+    const delegations = queries.cosmos.queryDelegations.getQueryBech32Address(
+      accountInfo.bech32Address
+    );
 
     const delegationTo = delegations.getDelegationTo(validatorAddress);
 

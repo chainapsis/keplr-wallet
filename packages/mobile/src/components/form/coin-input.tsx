@@ -41,8 +41,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
     const { queriesStore } = useStore();
     const queryBalances = queriesStore
       .get(amountConfig.chainId)
-      .getQueryBalances()
-      .getQueryBech32Address(amountConfig.sender);
+      .queryBalances.getQueryBech32Address(amountConfig.sender);
 
     const queryBalance = queryBalances.balances.find(
       (bal) =>
