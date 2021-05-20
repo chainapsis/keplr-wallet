@@ -28,4 +28,5 @@ export const TYPES = {
 
   RNG: Symbol("RandomNumberGenerator"),
   CommonCrypto: Symbol("CommonCrypto"),
+  Notification: Symbol("Notification"),
 };

@@ -43,6 +43,15 @@ init(
         "hex"
       );
     },
+  },
+  {
+    create: (params: {
+      iconRelativeUrl?: string;
+      title: string;
+      message: string;
+    }) => {
+      console.log(`Notification: ${params.title}, ${params.message}`);
+    },
   }
 );
 

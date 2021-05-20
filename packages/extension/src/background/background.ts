@@ -36,6 +36,22 @@ init(
         params.dklen
       );
     },
+  },
+  {
+    create: (params: {
+      iconRelativeUrl?: string;
+      title: string;
+      message: string;
+    }) => {
+      browser.notifications.create({
+        type: "basic",
+        iconUrl: params.iconRelativeUrl
+          ? browser.runtime.getURL(params.iconRelativeUrl)
+          : undefined,
+        title: params.title,
+        message: params.message,
+      });
+    },
   }
 );
 
