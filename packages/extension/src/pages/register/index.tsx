@@ -96,6 +96,16 @@ export const RegisterPage: FunctionComponent = observer(() => {
       </div>
       {registerConfig.render()}
       {registerConfig.isFinalized ? <WelcomePage /> : null}
+      {registerConfig.isIntro ? (
+        <div className={style.subContent}>
+          <FormattedMessage
+            id="register.intro.sub-content"
+            values={{
+              br: <br />,
+            }}
+          />
+        </div>
+      ) : null}
     </EmptyLayout>
   );
 });

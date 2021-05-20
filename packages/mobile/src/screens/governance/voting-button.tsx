@@ -36,8 +36,7 @@ export const VotingButton: FunctionComponent<{
 
   const proposal = queriesStore
     .get(chainStore.current.chainId)
-    .getQueryGovernance()
-    .getProposal(proposalId);
+    .cosmos.queryGovernance.getProposal(proposalId);
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
@@ -53,7 +52,7 @@ export const VotingButton: FunctionComponent<{
     }
 
     try {
-      await accountInfo.sendGovVoteMsg(proposalId, voteActive, "");
+      await accountInfo.cosmos.sendGovVoteMsg(proposalId, voteActive, "");
     } catch (e) {}
   };
 

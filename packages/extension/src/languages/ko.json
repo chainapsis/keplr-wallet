@@ -19,6 +19,10 @@
   "main.stake.button.stake": "스테이킹",
   "main.stake.tooltip.no-asset": "계정에 자산이 없습니다. 자산을 입금해주세요.",
 
+  "main.ibc.transfer.title": "IBC 전송",
+  "main.ibc.transfer.paragraph": "토큰을 IBC를 통해 전송하세요",
+  "main.ibc.transfer.button": "전송",
+
   "main.address.copied": "주소가 복사되었습니다",
 
   "main.menu.settings": "설정",
@@ -128,6 +132,9 @@
   "register.create.textarea.mnemonic.place-holder": "니모닉 단어 또는 개인키를 입력하세요",
   "register.create.textarea.mnemonic.error.invalid": "잘못된 니모닉 단어입니다",
   "register.create.textarea.mnemonic.error.too-short": "니모닉 단어가 너무 적습니다",
+  "register.create.warning.keep-your-mnemonic.header": "니모닉 단어를 안전하게 보관하세요",
+  "register.create.warning.keep-your-mnemonic.paragraph1": "다른 사람이 니모닉 단어를 알게되면 자산을 뺏길 수 있습니다",
+  "register.create.warning.keep-your-mnemonic.paragraph2": "니모닉 단어를 잃어버리면 계정을 복구할 수 없습니다",
   "register.import.textarea.private-key.error.invalid": "잘못된 개인키 입니다",
   "register.import.textarea.private-key.error.invalid-length": "잘못된 길이의 개인키 입니다",
   "register.create.button.next": "다음",
@@ -178,6 +185,9 @@
   "send.input-button.balance": "잔고",
   "send.button.send": "보내기",
 
+  "ibc.transfer.next": "다음",
+  "ibc.transfer.submit": "보내기",
+
   "fee.input.gas": "가스",
   "fee.input.memo": "메모 (선택사항)",
   "fee.input.fee": "수수료",
@@ -188,6 +198,7 @@
   "sign.list.messages.label": "메세지",
   "sign.info.fee": "수수료",
   "sign.info.memo": "메모",
+  "sign.info.warning.empty-memo": "(빈 메모)",
   "sign.info.gas": "가스",
   "sign.button.approve": "허락",
   "sign.button.reject": "거부",
@@ -250,5 +261,14 @@
   "input.fee.toggle.set-gas.close": "닫기",
 
   "confirm.yes": "예",
-  "confirm.no": "아니요"
+  "confirm.no": "아니요",
+
+  "component.form.coin-input.token.label": "토큰",
+
+  "component.ibc.channel-registrar.chain-selector.label": "도착 체인",
+  "component.ibc.channel-registrar.chain-selector.placeholder": "체인을 선택하세요",
+  "component.ibc.channel-registrar.chain-selector.button.add": "IBC 전송 채널 추가",
+  "component.ibc.channel-registrar.chain-selector.add.channel.label": "채널 ID",
+  "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "채널 ID를 입력하세요",
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "저장"
 }

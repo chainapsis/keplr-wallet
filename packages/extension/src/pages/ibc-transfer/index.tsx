@@ -24,6 +24,7 @@ import {
 import { useStore } from "../../stores";
 import { EthereumEndpoint } from "../../config.ui";
 import { useNotification } from "../../components/notification";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -39,9 +40,9 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibc.transfer,
+    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.getQueryBalances(),
+    queries.queryBalances,
     EthereumEndpoint
   );
 
@@ -71,7 +72,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           onSubmit={async () => {
             if (ibcTransferConfigs.channelConfig.channel) {
               try {
-                await accountInfo.sendIBCTransferMsg(
+                await accountInfo.cosmos.sendIBCTransferMsg(
                   ibcTransferConfigs.channelConfig.channel,
                   ibcTransferConfigs.amountConfig.amount,
                   ibcTransferConfigs.amountConfig.sendCurrency,
@@ -107,6 +108,7 @@ export const IBCTransferPageChannel: FunctionComponent<{
   memoConfig: IMemoConfig;
   onNext: () => void;
 }> = observer(({ channelConfig, recipientConfig, memoConfig, onNext }) => {
+  const intl = useIntl();
   const isValid =
     channelConfig.getError() == null &&
     recipientConfig.getError() == null &&
@@ -119,14 +121,18 @@ export const IBCTransferPageChannel: FunctionComponent<{
       <div className={style.formInnerContainer}>
         <DestinationChainSelector ibcChannelConfig={channelConfig} />
         <AddressInput
-          label="Recipient"
+          label={intl.formatMessage({
+            id: "send.input.recipient",
+          })}
           recipientConfig={recipientConfig}
           memoConfig={memoConfig}
           ibcChannelConfig={channelConfig}
           disabled={!isChannelSet}
         />
         <MemoInput
-          label="Memo (Optional)"
+          label={intl.formatMessage({
+            id: "send.input.memo",
+          })}
           memoConfig={memoConfig}
           disabled={!isChannelSet}
         />
@@ -134,8 +140,11 @@ export const IBCTransferPageChannel: FunctionComponent<{
         <Alert className={style.alert}>
           <i className="fas fa-exclamation-circle" />
           <div>
-            <h1>IBC is still experimental</h1>
-            <p>Only send small amounts until channels have stabilized</p>
+            <h1>IBC is production ready</h1>
+            <p>
+              However, all new technologies should be used with caution. We
+              recommend only transferring small amounts.
+            </p>
           </div>
         </Alert>
         <Button
@@ -149,7 +158,7 @@ export const IBCTransferPageChannel: FunctionComponent<{
             onNext();
           }}
         >
-          Next
+          <FormattedMessage id="ibc.transfer.next" />
         </Button>
       </div>
     </form>
@@ -162,7 +171,10 @@ export const IBCTransferPageAmount: FunctionComponent<{
   gasConfig: IGasConfig;
   onSubmit: () => void;
 }> = observer(({ amountConfig, feeConfig, gasConfig, onSubmit }) => {
-  const { priceStore } = useStore();
+  const intl = useIntl();
+  const { accountStore, chainStore, priceStore } = useStore();
+
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const isValid =
     amountConfig.getError() == null &&
@@ -173,13 +185,17 @@ export const IBCTransferPageAmount: FunctionComponent<{
     <form className={style.formContainer}>
       <div className={style.formInnerContainer}>
         <CoinInput
-          label="Amount"
+          label={intl.formatMessage({
+            id: "send.input.amount",
+          })}
           amountConfig={amountConfig}
           feeConfig={feeConfig}
         />
         <div style={{ flex: 1 }} />
         <FeeButtons
-          label="Fee"
+          label={intl.formatMessage({
+            id: "send.input.fee",
+          })}
           feeConfig={feeConfig}
           gasConfig={gasConfig}
           priceStore={priceStore}
@@ -189,13 +205,14 @@ export const IBCTransferPageAmount: FunctionComponent<{
           color="primary"
           block
           disabled={!isValid}
+          data-loading={accountInfo.isSendingMsg === "ibcTransfer"}
           onClick={(e) => {
             e.preventDefault();
 
             onSubmit();
           }}
         >
-          Submit
+          <FormattedMessage id="ibc.transfer.submit" />
         </Button>
       </div>
     </form>

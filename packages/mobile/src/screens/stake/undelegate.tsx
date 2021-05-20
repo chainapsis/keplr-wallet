@@ -41,7 +41,7 @@ export const UndelegateScreen: FunctionComponent<UndelegateScreenProps> = observ
       chainStore.current.chainId,
       accountInfo.msgOpts.send,
       accountInfo.bech32Address,
-      queries.getQueryBalances()
+      queries.queryBalances
     );
 
     const undelegateConfigError =
@@ -69,7 +69,7 @@ export const UndelegateScreen: FunctionComponent<UndelegateScreenProps> = observ
           loading={accountInfo.isSendingMsg === "send"}
           onPress={async () => {
             if (accountInfo.isReadyToSendMsgs) {
-              await accountInfo.sendUndelegateMsg(
+              await accountInfo.cosmos.sendUndelegateMsg(
                 undelegateConfigs.amountConfig.amount,
                 validatorAddress,
                 undelegateConfigs.memoConfig.memo,

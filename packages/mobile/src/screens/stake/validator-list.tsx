@@ -29,11 +29,9 @@ export const TempStakeInfoView: FunctionComponent = observer(() => {
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const unbondings = queries
-    .getQueryUnbondingDelegations()
-    .getQueryBech32Address(
-      accountStore.getAccount(chainStore.current.chainId).bech32Address
-    ).unbondings;
+  const unbondings = queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+    accountStore.getAccount(chainStore.current.chainId).bech32Address
+  ).unbondings;
 
   return (
     <React.Fragment>
@@ -141,17 +139,15 @@ export const AllValidators: FunctionComponent<{
   const { accountStore, queriesStore, chainStore } = useStore();
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const inflation = queries.getQueryInflation().inflation;
+  const inflation = queries.cosmos.queryInflation.inflation;
 
-  const bondedValidators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Bonded);
+  const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Bonded
+  );
 
-  const delegations = queries
-    .getQueryDelegations()
-    .getQueryBech32Address(
-      accountStore.getAccount(chainStore.current.chainId).bech32Address
-    );
+  const delegations = queries.cosmos.queryDelegations.getQueryBech32Address(
+    accountStore.getAccount(chainStore.current.chainId).bech32Address
+  );
 
   const delegatedValidators = useMemo(() => {
     const map = new Map<string, boolean>();

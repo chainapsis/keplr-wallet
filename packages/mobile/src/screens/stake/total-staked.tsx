@@ -34,13 +34,13 @@ export const TotalStakedView: FunctionComponent = observer(() => {
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-  const delegations = queries
-    .getQueryDelegations()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const delegations = queries.cosmos.queryDelegations.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
-  const rewards = queries
-    .getQueryRewards()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   const totalStakbleReward = rewards.stakableReward;
 
@@ -50,7 +50,7 @@ export const TotalStakedView: FunctionComponent = observer(() => {
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
-        await accountInfo.sendWithdrawDelegationRewardMsgs(
+        await accountInfo.cosmos.sendWithdrawDelegationRewardMsgs(
           rewards.pendingRewardValidatorAddresses,
           // rewards.getDescendingPendingRewardValidatorAddresses(8),
           ""

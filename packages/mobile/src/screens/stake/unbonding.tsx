@@ -74,15 +74,15 @@ const UnbondingList: FunctionComponent<{
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const bondedValdiators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Bonded);
-  const unbondingValidators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Unbonding);
-  const unbondedValidators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Unbonded);
+  const bondedValdiators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Bonded
+  );
+  const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Unbonding
+  );
+  const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Unbonded
+  );
 
   const validators = useMemo(() => {
     return bondedValdiators.validators
@@ -94,7 +94,7 @@ const UnbondingList: FunctionComponent<{
     unbondedValidators.validators,
   ]);
 
-  const stakingParams = queries.getQueryStakingParams();
+  const stakingParams = queries.cosmos.queryStakingParams;
 
   return (
     <React.Fragment>

@@ -4,9 +4,24 @@ import { useHistory } from "react-router";
 
 import styleTransfer from "./ibc-transfer.module.scss";
 import classnames from "classnames";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../stores";
+import { Dec } from "@keplr-wallet/unit";
+import { FormattedMessage } from "react-intl";
 
-export const IBCTransferView: FunctionComponent = () => {
+export const IBCTransferView: FunctionComponent = observer(() => {
   const history = useHistory();
+  const { accountStore, chainStore, queriesStore } = useStore();
+
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
+  const queryBalances = queries.queryBalances.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
+
+  const hasAssets =
+    queryBalances.balances.find((bal) => bal.balance.toDec().gt(new Dec(0))) !==
+    undefined;
 
   return (
     <div className={styleTransfer.containerInner}>
@@ -19,7 +34,7 @@ export const IBCTransferView: FunctionComponent = () => {
             styleTransfer.paragraphMain
           )}
         >
-          IBC Transfer
+          <FormattedMessage id="main.ibc.transfer.title" />
         </p>
         <p
           className={classnames(
@@ -29,7 +44,7 @@ export const IBCTransferView: FunctionComponent = () => {
             styleTransfer.paragraphSub
           )}
         >
-          Send tokens over IBC
+          <FormattedMessage id="main.ibc.transfer.paragraph" />
         </p>
       </div>
       <div style={{ flex: 1 }} />
@@ -37,14 +52,16 @@ export const IBCTransferView: FunctionComponent = () => {
         className={styleTransfer.button}
         color="primary"
         size="sm"
+        disabled={!hasAssets}
+        data-loading={accountInfo.isSendingMsg === "ibcTransfer"}
         onClick={(e) => {
           e.preventDefault();
 
           history.push("/ibc-transfer");
         }}
       >
-        Transfer
+        <FormattedMessage id="main.ibc.transfer.button" />
       </Button>
     </div>
   );
-};
+});

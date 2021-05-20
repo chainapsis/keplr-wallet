@@ -15,9 +15,9 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
-  const queryBalances = queries
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const queryBalances = queries.queryBalances.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   const hasAssets =
     queryBalances.balances.find((bal) => bal.balance.toDec().gt(new Dec(0))) !==

@@ -104,15 +104,15 @@ export const ValidatorStakedView: FunctionComponent<{
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-  const delegations = queries
-    .getQueryDelegations()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const delegations = queries.cosmos.queryDelegations.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   const delegationTo = delegations.getDelegationTo(validator.operator_address);
 
-  const rewards = queries
-    .getQueryRewards()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   return (
     <Card>
@@ -173,11 +173,9 @@ export const ValidatorDetailsScreen: FunctionComponent<ValidatorDetailsScreenPro
 
     const queries = queriesStore.get(chainStore.current.chainId);
 
-    const unbondings = queries
-      .getQueryUnbondingDelegations()
-      .getQueryBech32Address(
-        accountStore.getAccount(chainStore.current.chainId).bech32Address
-      ).unbondings;
+    const unbondings = queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+      accountStore.getAccount(chainStore.current.chainId).bech32Address
+    ).unbondings;
 
     const unbonding = unbondings.filter(
       (val) => val.validator_address === validator.operator_address

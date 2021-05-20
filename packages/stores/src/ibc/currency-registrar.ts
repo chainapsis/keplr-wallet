@@ -1,154 +1,118 @@
-import { autorun, makeObservable, observable, runInAction } from "mobx";
+import { observable, runInAction } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import { ChainStore } from "../chain";
-import { DeepReadonly } from "utility-types";
-import {
-  ObservableQueryDenomTrace,
-  ObservableQueryIBCClientState,
-} from "../query";
-import { AccountStore } from "../account";
-import { HasMapStore } from "../common";
-import { ObservableQueryBalances } from "../query/balances";
-import { Balances } from "../query/cosmos/balance/types";
-import { computedFn } from "mobx-utils";
+import { ChainInfoInner, ChainStore } from "../chain";
+import { HasCosmosQueries, QueriesSetBase } from "../query";
+import { DenomHelper } from "@keplr-wallet/common";
 
 export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
-  @observable.shallow
-  protected _ibcCurrencies: AppCurrency[] = [];
-
   constructor(
-    protected readonly chainId: string,
+    protected readonly chainInfoInner: ChainInfoInner<C>,
     protected readonly chainStore: ChainStore<C>,
-    protected readonly accountStore: AccountStore,
-    protected readonly queriesStore: {
-      get(
+    protected readonly accountStore: {
+      hasAccount(chainId: string): boolean;
+      getAccount(
         chainId: string
       ): {
-        getQueryIBCClientState(): DeepReadonly<ObservableQueryIBCClientState>;
-        getQueryIBCDenomTrace(): DeepReadonly<ObservableQueryDenomTrace>;
-        getQueryBalances(): DeepReadonly<ObservableQueryBalances>;
+        bech32Address: string;
       };
+    },
+    protected readonly queriesStore: {
+      get(chainId: string): QueriesSetBase & HasCosmosQueries;
     }
-  ) {
-    makeObservable(this);
+  ) {}
 
-    autorun(() => {
-      const ibcCurrencies: AppCurrency[] = [];
+  registerUnknownCurrencies(
+    coinMinimalDenom: string
+  ): [AppCurrency | undefined, boolean] | undefined {
+    const denomHelper = new DenomHelper(coinMinimalDenom);
+    if (
+      denomHelper.type !== "native" ||
+      !denomHelper.denom.startsWith("ibc/")
+    ) {
+      // ibc/로 시작하는 토큰만 IBC 토큰으로 처리한다.
+      return;
+    }
 
-      // If account access is generated,
-      if (this.accountStore.hasAccount(this.chainId)) {
-        const accountInfo = this.accountStore.getAccount(this.chainId);
-        if (accountInfo.bech32Address.length > 0) {
-          const queries = queriesStore.get(this.chainId);
-          const balances = queries
-            .getQueryBalances()
-            .getQueryBech32Address(accountInfo.bech32Address).stakable;
+    const queries = this.queriesStore.get(this.chainInfoInner.chainId);
 
-          const response = balances.response;
-          if (response) {
-            for (const bal of (response.data as Balances).result) {
-              if (bal.denom.startsWith("ibc/")) {
-                const hash = bal.denom.replace("ibc/", "");
-                const denomTrace = queries
-                  .getQueryIBCDenomTrace()
-                  .getDenomTrace(hash).denomTrace;
-                if (denomTrace) {
-                  const paths = denomTrace.paths;
-                  let counterpartyChainInfo: C | undefined;
-                  let originChainInfo: C | undefined;
-                  for (const path of paths) {
-                    const clientState = queries
-                      .getQueryIBCClientState()
-                      .getClientState(path.portId, path.channelId);
-                    if (
-                      clientState.clientChainId &&
-                      this.chainStore.hasChain(clientState.clientChainId)
-                    ) {
-                      originChainInfo = this.chainStore.getChain(
-                        clientState.clientChainId
-                      );
-                      if (!counterpartyChainInfo) {
-                        counterpartyChainInfo = this.chainStore.getChain(
-                          clientState.clientChainId
-                        );
-                      }
-                    } else {
-                      originChainInfo = undefined;
-                      break;
-                    }
-                  }
+    const hash = denomHelper.denom.replace("ibc/", "");
+    const queryDenomTrace = queries.cosmos.queryIBCDenomTrace.getDenomTrace(
+      hash
+    );
+    const denomTrace = queryDenomTrace.denomTrace;
 
-                  if (originChainInfo) {
-                    const currency = originChainInfo.currencies.find((cur) => {
-                      return cur.coinMinimalDenom === denomTrace.denom;
-                    });
+    if (denomTrace) {
+      const paths = denomTrace.paths;
+      // The previous chain id from current path.
+      let chainIdBefore = this.chainInfoInner.chainId;
+      let counterpartyChainInfo: ChainInfoInner | undefined;
+      let originChainInfo: ChainInfoInner | undefined;
+      for (const path of paths) {
+        const clientState = this.queriesStore
+          .get(chainIdBefore)
+          .cosmos.queryIBCClientState.getClientState(
+            path.portId,
+            path.channelId
+          );
 
-                    if (currency && !("type" in currency)) {
-                      ibcCurrencies.push({
-                        ...currency,
-                        coinMinimalDenom: bal.denom,
-                        coinDenom: `${currency.coinDenom} (${
-                          counterpartyChainInfo
-                            ? counterpartyChainInfo.chainName
-                            : "Unknown"
-                        }/${paths[0].channelId})`,
-                        paths: paths,
-                        originChainId: originChainInfo.chainId,
-                        originCurrency: currency,
-                      });
-                    }
-                  } else {
-                    ibcCurrencies.push({
-                      coinDecimals: 0,
-                      coinMinimalDenom: bal.denom,
-                      coinDenom: `${denomTrace.denom} (${
-                        counterpartyChainInfo
-                          ? counterpartyChainInfo.chainName
-                          : "Unknown"
-                      }/${paths[0].channelId})`,
-                      paths: paths,
-                      originChainId: undefined,
-                      originCurrency: undefined,
-                    });
-                  }
-                }
-              }
-            }
+        if (
+          clientState.clientChainId &&
+          this.chainStore.hasChain(clientState.clientChainId)
+        ) {
+          chainIdBefore = clientState.clientChainId;
+          originChainInfo = this.chainStore.getChain(clientState.clientChainId);
+          if (!counterpartyChainInfo) {
+            counterpartyChainInfo = this.chainStore.getChain(
+              clientState.clientChainId
+            );
           }
+        } else {
+          originChainInfo = undefined;
+          break;
         }
       }
 
-      runInAction(() => {
-        // TODO: Change the type from array to map.
-        for (const currency of this._ibcCurrencies) {
-          if (
-            !ibcCurrencies.find(
-              (cur) =>
-                cur.coinMinimalDenom === currency.coinMinimalDenom &&
-                cur.coinDenom === currency.coinDenom
-            )
-          ) {
-            this._ibcCurrencies = this._ibcCurrencies.filter(
-              (cur) => cur.coinMinimalDenom !== currency.coinMinimalDenom
-            );
-          }
-        }
+      if (originChainInfo) {
+        const currency = originChainInfo.forceFindCurrency(denomTrace.denom);
 
-        for (const currency of ibcCurrencies) {
-          if (
-            !this._ibcCurrencies.find(
-              (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
-            )
-          ) {
-            this._ibcCurrencies.push(currency);
-          }
+        if (!("type" in currency)) {
+          return [
+            {
+              ...currency,
+              coinMinimalDenom: denomHelper.denom,
+              coinDenom: `${currency.coinDenom} (${
+                counterpartyChainInfo
+                  ? counterpartyChainInfo.chainName
+                  : "Unknown"
+              }/${paths[0].channelId})`,
+              paths: paths,
+              originChainId: originChainInfo.chainId,
+              originCurrency: currency,
+            },
+            true,
+          ];
         }
-      });
-    });
-  }
+      }
 
-  get ibcCurrencies(): AppCurrency[] {
-    return this._ibcCurrencies;
+      // 이 경우 그냥 raw한 값을 보여준다.
+      // 하지만 이후에 쿼리를 통해 얻은 currency를 계산하게 될 수 있으므로
+      // committed를 false로 반환해서 계속 observe되게 한다.
+      return [
+        {
+          coinDecimals: 0,
+          coinMinimalDenom: denomHelper.denom,
+          coinDenom: `${denomTrace.denom} (${
+            counterpartyChainInfo ? counterpartyChainInfo.chainName : "Unknown"
+          }/${paths[0].channelId})`,
+          paths: paths,
+          originChainId: undefined,
+          originCurrency: undefined,
+        },
+        false,
+      ];
+    }
+
+    return [undefined, !queryDenomTrace.isFetching];
   }
 }
 
@@ -161,48 +125,54 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
  * this will try to get the denom info by traversing the paths, and register the currency with the decimal and denom info.
  * But, if failed to traverse the paths, this will register the currency with 0 decimal and the minimal denom even though it is not suitable for human.
  */
-export class IBCCurrencyRegsitrar<
-  C extends ChainInfo = ChainInfo
-> extends HasMapStore<IBCCurrencyRegsitrarInner<C>> {
+export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
+  @observable.shallow
+  protected map: Map<string, IBCCurrencyRegsitrarInner<C>> = new Map();
+
   constructor(
     protected readonly chainStore: ChainStore<C>,
-    protected readonly accountStore: AccountStore,
-    protected readonly queriesStore: {
-      get(
+    protected readonly accountStore: {
+      hasAccount(chainId: string): boolean;
+      getAccount(
         chainId: string
       ): {
-        getQueryIBCClientState(): DeepReadonly<ObservableQueryIBCClientState>;
-        getQueryIBCDenomTrace(): DeepReadonly<ObservableQueryDenomTrace>;
-        getQueryBalances(): DeepReadonly<ObservableQueryBalances>;
+        bech32Address: string;
       };
+    },
+    protected readonly queriesStore: {
+      get(chainId: string): QueriesSetBase & HasCosmosQueries;
     }
   ) {
-    super((chainId: string) => {
-      return new IBCCurrencyRegsitrarInner<C>(
-        chainId,
-        this.chainStore,
-        this.accountStore,
-        this.queriesStore
-      );
-    });
-
-    this.chainStore.registerChainInfoOverrider(this.overrideChainInfo);
+    this.chainStore.addSetChainInfoHandler((chainInfoInner) =>
+      this.setChainInfoHandler(chainInfoInner)
+    );
   }
 
-  protected readonly overrideChainInfo = computedFn(
-    (chainInfo: DeepReadonly<C>): C => {
-      if (!chainInfo.features || !chainInfo.features.includes("stargate")) {
-        return chainInfo as C;
-      }
+  setChainInfoHandler(chainInfoInner: ChainInfoInner<C>): void {
+    const inner = this.get(chainInfoInner);
+    chainInfoInner.registerCurrencyRegistrar((coinMinimalDenom) =>
+      inner.registerUnknownCurrencies(coinMinimalDenom)
+    );
+  }
 
-      const inner = this.get(chainInfo.chainId);
-      if (inner.ibcCurrencies.length > 0) {
-        return {
-          ...(chainInfo as C),
-          currencies: chainInfo.currencies.concat(inner.ibcCurrencies),
-        };
-      }
-      return chainInfo as C;
+  protected get(
+    chainInfoInner: ChainInfoInner<C>
+  ): IBCCurrencyRegsitrarInner<C> {
+    if (!this.map.has(chainInfoInner.chainId)) {
+      runInAction(() => {
+        this.map.set(
+          chainInfoInner.chainId,
+          new IBCCurrencyRegsitrarInner<C>(
+            chainInfoInner,
+            this.chainStore,
+            this.accountStore,
+            this.queriesStore
+          )
+        );
+      });
     }
-  );
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.map.get(chainInfoInner.chainId)!;
+  }
 }

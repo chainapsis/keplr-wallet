@@ -166,7 +166,71 @@ export const AdvancedBIP44Option: FunctionComponent<{
                 }
               }}
             />
-            <div>{`'/${bip44Option.change}/${bip44Option.index}`}</div>
+            <div>{`'/`}</div>
+            <Input
+              type="number"
+              className="form-control-alternative"
+              style={{ width: "100px", textAlign: "right" }}
+              value={bip44Option.change.toString()}
+              onChange={(e) => {
+                e.preventDefault();
+
+                let value = e.target.value;
+                if (value) {
+                  if (value !== "0") {
+                    // Remove leading zeros
+                    for (let i = 0; i < value.length; i++) {
+                      if (value[i] === "0") {
+                        value = value.replace("0", "");
+                      } else {
+                        break;
+                      }
+                    }
+                  }
+                  const parsed = parseFloat(value);
+                  // Should be integer and positive.
+                  if (
+                    Number.isInteger(parsed) &&
+                    (parsed === 0 || parsed === 1)
+                  ) {
+                    bip44Option.setChange(parsed);
+                  }
+                } else {
+                  bip44Option.setChange(0);
+                }
+              }}
+            />
+            <div>/</div>
+            <Input
+              type="number"
+              className="form-control-alternative"
+              style={{ width: "100px", textAlign: "right" }}
+              value={bip44Option.index.toString()}
+              onChange={(e) => {
+                e.preventDefault();
+
+                let value = e.target.value;
+                if (value) {
+                  if (value !== "0") {
+                    // Remove leading zeros
+                    for (let i = 0; i < value.length; i++) {
+                      if (value[i] === "0") {
+                        value = value.replace("0", "");
+                      } else {
+                        break;
+                      }
+                    }
+                  }
+                  const parsed = parseFloat(value);
+                  // Should be integer and positive.
+                  if (Number.isInteger(parsed) && parsed >= 0) {
+                    bip44Option.setIndex(parsed);
+                  }
+                } else {
+                  bip44Option.setIndex(0);
+                }
+              }}
+            />
           </div>
         </FormGroup>
       ) : null}

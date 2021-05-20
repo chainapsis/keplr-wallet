@@ -18,13 +18,13 @@
 
   .header-menu-left {
     position: absolute;
-    height: 100%;
+    height: $header-height;
     top: 0;
   }
 
   .header-section {
     flex: 1;
-    height: 100%;
+    height: $header-height;
 
     display: flex;
     justify-content: center;
@@ -33,7 +33,7 @@
 
   .header-menu-right {
     position: absolute;
-    height: 100%;
+    height: $header-height;
     top: 0;
     right: 0;
   }

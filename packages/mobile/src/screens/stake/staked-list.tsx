@@ -25,9 +25,9 @@ export const StakedSummary: FunctionComponent<{
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const rewards = queries
-    .getQueryRewards()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   return (
     <Card>
@@ -73,21 +73,21 @@ export const StakedListScreen: FunctionComponent = observer(() => {
   const { accountStore, queriesStore, chainStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const bondedValdiators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Bonded);
-  const unbondingValidators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Unbonding);
-  const unbondedValidators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Unbonded);
+  const bondedValdiators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Bonded
+  );
+  const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Unbonding
+  );
+  const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Unbonded
+  );
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-  const delegations = queries
-    .getQueryDelegations()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const delegations = queries.cosmos.queryDelegations.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   const delegatedValidatorMap = useMemo(() => {
     const map = new Map<string, boolean>();

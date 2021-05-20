@@ -7,6 +7,8 @@ import {
   AccountStore,
   SignInteractionStore,
   TokensStore,
+  QueriesWithCosmosAndSecret,
+  AccountWithCosmosAndSecret,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -14,6 +16,8 @@ import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { RNEnv, RNRouter, RNMessageRequester } from "../router";
 import { InteractionModalStore } from "./interaction-modal";
 import { ChainStore } from "./chain";
+import EventEmitter from "eventemitter3";
+import { Keplr } from "@keplr-wallet/provider";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -23,13 +27,15 @@ export class RootStore {
   protected readonly interactionStore: InteractionStore;
   public readonly signInteractionStore: SignInteractionStore;
 
-  public readonly queriesStore: QueriesStore;
-  public readonly accountStore: AccountStore;
+  public readonly queriesStore: QueriesStore<QueriesWithCosmosAndSecret>;
+  public readonly accountStore: AccountStore<AccountWithCosmosAndSecret>;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
   constructor() {
     const router = new RNRouter(RNEnv.produceEnv);
+
+    const eventEmitter = new EventEmitter();
 
     this.interactionModalStore = new InteractionModalStore();
     // Order is important.
@@ -42,6 +48,11 @@ export class RootStore {
     this.chainStore = new ChainStore(EmbedChainInfos, new RNMessageRequester());
 
     this.keyRingStore = new KeyRingStore(
+      {
+        dispatchEvent: (type: string) => {
+          eventEmitter.emit(type);
+        },
+      },
       this.chainStore,
       new RNMessageRequester(),
       this.interactionStore
@@ -49,10 +60,37 @@ export class RootStore {
 
     this.queriesStore = new QueriesStore(
       new AsyncKVStore("store_queries"),
-      this.chainStore
+      this.chainStore,
+      async () => {
+        // TOOD: Set version for Keplr API
+        return new Keplr("", new RNMessageRequester());
+      },
+      QueriesWithCosmosAndSecret
     );
 
-    this.accountStore = new AccountStore(this.chainStore, this.queriesStore);
+    this.accountStore = new AccountStore(
+      {
+        addEventListener: (type: string, fn: () => void) => {
+          eventEmitter.addListener(type, fn);
+        },
+        removeEventListener: (type: string, fn: () => void) => {
+          eventEmitter.removeListener(type, fn);
+        },
+      },
+      AccountWithCosmosAndSecret,
+      this.chainStore,
+      this.queriesStore,
+      {
+        defaultOpts: {
+          prefetching: true,
+          suggestChain: false,
+          autoInit: true,
+          getKeplr: async () => {
+            return new Keplr("", new RNMessageRequester());
+          },
+        },
+      }
+    );
 
     this.priceStore = new CoinGeckoPriceStore(
       new AsyncKVStore("store_prices"),
@@ -115,6 +153,11 @@ export class RootStore {
     );
 
     this.tokensStore = new TokensStore(
+      {
+        addEventListener: (type: string, fn: () => void) => {
+          eventEmitter.addListener(type, fn);
+        },
+      },
       this.chainStore,
       new RNMessageRequester(),
       this.interactionStore

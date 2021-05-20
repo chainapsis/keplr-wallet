@@ -6,11 +6,10 @@ import { KeyRingService } from "../keyring";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
 import { Hash } from "@keplr-wallet/crypto";
-import { KVStore } from "@keplr-wallet/common";
+import { KVStore, Debouncer } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Env } from "@keplr-wallet/router";
-import pDebounce from "p-debounce";
 
 import { Buffer } from "buffer/";
 
@@ -136,7 +135,7 @@ export class SecretWasmService {
     if (!this.debouncerMap.has(debouncerKey)) {
       this.debouncerMap.set(
         debouncerKey,
-        pDebounce.promise(this.getSeedInner.bind(this))
+        Debouncer.promise(this.getSeedInner.bind(this))
       );
     }
 

@@ -133,6 +133,9 @@ export class KeyRingStore {
   protected selectablesMap: Map<string, KeyRingSelectablesStore> = new Map();
 
   constructor(
+    protected readonly eventDispatcher: {
+      dispatchEvent: (type: string) => void;
+    },
     protected readonly chainGetter: ChainGetter,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
@@ -234,7 +237,7 @@ export class KeyRingStore {
     );
 
     // Emit the key store changed event manually.
-    window.dispatchEvent(new Event("keplr_keystorechange"));
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
@@ -260,7 +263,7 @@ export class KeyRingStore {
       yield this.interactionStore.approve("unlock", interaction.id, {});
     }
 
-    window.dispatchEvent(new Event("keplr_keystoreunlock"));
+    this.eventDispatcher.dispatchEvent("keplr_keystoreunlock");
   }
 
   @flow
@@ -313,7 +316,7 @@ export class KeyRingStore {
     );
     // If selectedIndex and index are same, name could be changed, so dispatch keystore event
     if (selectedIndex === index) {
-      window.dispatchEvent(new Event("keplr_keystorechange"));
+      this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     }
   }
 
@@ -354,7 +357,7 @@ export class KeyRingStore {
     this.status = status;
 
     // Emit the key store changed event manually.
-    window.dispatchEvent(new Event("keplr_keystorechange"));
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 }

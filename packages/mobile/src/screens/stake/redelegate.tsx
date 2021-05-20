@@ -38,9 +38,9 @@ export const RedelegateValidatorScreen: FunctionComponent<RedelegateValidatorScr
       [validatorAddress: string]: true | undefined;
     } = {};
 
-    const bondedValidators = queries
-      .getQueryValidators()
-      .getQueryStatus(BondStatus.Bonded);
+    const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+      BondStatus.Bonded
+    );
 
     const redelegatable = useMemo(() => {
       if (!fromValidatorAddress) {
@@ -175,7 +175,7 @@ export const RedelegateScreen: FunctionComponent<RedelegateScreenProps> = observ
       chainStore.current.chainId,
       accountInfo.msgOpts.send,
       accountInfo.bech32Address,
-      queries.getQueryBalances()
+      queries.queryBalances
     );
 
     const redelegateConfigError =
@@ -203,7 +203,7 @@ export const RedelegateScreen: FunctionComponent<RedelegateScreenProps> = observ
           loading={accountInfo.isSendingMsg === "send"}
           onPress={async () => {
             if (accountInfo.isReadyToSendMsgs) {
-              await accountInfo.sendBeginRedelegateMsg(
+              await accountInfo.cosmos.sendBeginRedelegateMsg(
                 redelegateConfigs.amountConfig.amount,
                 fromValidatorAddress,
                 toValidatorAddress,

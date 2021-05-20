@@ -63,9 +63,9 @@ export const AddTokenPage: FunctionComponent = observer(() => {
   }, [chainStore, contractAddress, form, tokensStore.waitingSuggestedToken]);
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const queryContractInfo = queries
-    .getQuerySecret20ContractInfo()
-    .getQueryContract(contractAddress);
+  const queryContractInfo = queries.secret.querySecret20ContractInfo.getQueryContract(
+    contractAddress
+  );
 
   const tokenInfo = queryContractInfo.tokenInfo;
 
@@ -83,7 +83,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
 
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
-      accountInfo
+      accountInfo.secret
         .createSecret20ViewingKey(contractAddress, "", (_, viewingKey) => {
           loadingIndicator.setIsLoading("create-veiwing-key", false);
 

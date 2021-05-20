@@ -85,8 +85,7 @@ export const TokensView: FunctionComponent = observer(() => {
 
   const tokens = queriesStore
     .get(chainStore.current.chainId)
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address)
+    .queryBalances.getQueryBech32Address(accountInfo.bech32Address)
     .unstakables.filter((bal) => {
       // Temporary implementation for trimming the 0 balanced native tokens.
       // TODO: Remove this part.

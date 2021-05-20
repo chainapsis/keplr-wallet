@@ -28,14 +28,29 @@ export class DecUtils {
   private static precisions: { [precision: string]: Dec } = {};
 
   static getPrecisionDec(precision: number): Dec {
+    if (precision < -18) {
+      throw new Error("Too little precision");
+    }
+    if (precision > 18) {
+      throw new Error("Too much precision");
+    }
+
     if (DecUtils.precisions[precision.toString()]) {
       return DecUtils.precisions[precision.toString()];
     }
 
     let dec = new Dec(1);
-    for (let i = 0; i < precision; i++) {
-      dec = dec.mul(new Dec(10));
+
+    if (precision > 0) {
+      for (let i = 0; i < precision; i++) {
+        dec = dec.mul(new Dec(10));
+      }
+    } else if (precision < 0) {
+      for (let i = 0; i < -precision; i++) {
+        dec = dec.quo(new Dec(10));
+      }
     }
+
     DecUtils.precisions[precision.toString()] = dec;
     return dec;
   }

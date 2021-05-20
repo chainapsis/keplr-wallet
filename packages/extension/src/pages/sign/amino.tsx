@@ -1,6 +1,10 @@
 /* eslint-disable react/display-name */
 
-import { MsgOpts } from "@keplr-wallet/stores";
+import {
+  AccountSetOpts,
+  CosmosMsgOpts,
+  SecretMsgOpts,
+} from "@keplr-wallet/stores";
 import { Currency } from "@keplr-wallet/types";
 import { FormattedMessage, IntlShape } from "react-intl";
 import React from "react";
@@ -31,7 +35,7 @@ import {
 } from "./messages";
 
 export function renderAminoMessage(
-  msgOpts: MsgOpts,
+  msgOpts: AccountSetOpts<CosmosMsgOpts & SecretMsgOpts>["msgOpts"],
   msg: MessageObj,
   currencies: Currency[],
   intl: IntlShape
@@ -45,7 +49,7 @@ export function renderAminoMessage(
     return renderMsgSend(currencies, intl, value.amount, value.to_address);
   }
 
-  if (msg.type === msgOpts.ibc.transfer.type) {
+  if (msg.type === msgOpts.ibcTransfer.type) {
     const value = msg.value as MsgTransfer["value"];
     return renderMsgTransfer(
       currencies,

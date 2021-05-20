@@ -1,5 +1,4 @@
 import assert from "assert";
-import "mocha";
 
 import { ExtensionEnv } from "./extension";
 import { MessageSender } from "../types";

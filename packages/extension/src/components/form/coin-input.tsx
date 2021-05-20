@@ -24,7 +24,7 @@ import {
   IFeeConfig,
 } from "@keplr-wallet/hooks";
 import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useStore } from "../../stores";
 
 export interface CoinInputProps {
@@ -46,8 +46,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
     const { queriesStore } = useStore();
     const queryBalances = queriesStore
       .get(amountConfig.chainId)
-      .getQueryBalances()
-      .getQueryBech32Address(amountConfig.sender);
+      .queryBalances.getQueryBech32Address(amountConfig.sender);
 
     const queryBalance = queryBalances.balances.find(
       (bal) =>
@@ -128,7 +127,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             className="form-control-label"
             style={{ width: "100%" }}
           >
-            Token
+            <FormattedMessage id="component.form.coin-input.token.label" />
           </Label>
           <ButtonDropdown
             id={`selector-${randomId}`}

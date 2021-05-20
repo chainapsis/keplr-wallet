@@ -41,7 +41,7 @@ const SendScreen: FunctionComponent = observer(() => {
     chainStore.current.chainId,
     accountInfo.msgOpts.send,
     accountInfo.bech32Address,
-    queries.getQueryBalances()
+    queries.queryBalances
   );
 
   const sendConfigError =

@@ -28,11 +28,9 @@ export const ProposalDetailsCard: FunctionComponent<{
   const chainId = chainStore.current.chainId;
   const queries = queriesStore.get(chainId);
 
-  const governance = queries.getQueryGovernance();
+  const governance = queries.cosmos.queryGovernance;
 
   const proposal = governance.getProposal(proposalId);
-
-  const tally = proposal?.tally;
 
   return proposal ? (
     <Card containerStyle={{ paddingBottom: 60 }}>

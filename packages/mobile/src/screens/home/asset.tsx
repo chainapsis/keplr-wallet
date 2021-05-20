@@ -38,19 +38,17 @@ export const AssetView: FunctionComponent = observer(() => {
 
   const accountInfo = accountStore.getAccount(current.chainId);
 
-  const balanceStakableQuery = queries
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address).stakable;
+  const balanceStakableQuery = queries.queryBalances.getQueryBech32Address(
+    accountInfo.bech32Address
+  ).stakable;
 
   const stakable = balanceStakableQuery.balance;
 
-  const delegated = queries
-    .getQueryDelegations()
+  const delegated = queries.cosmos.queryDelegations
     .getQueryBech32Address(accountInfo.bech32Address)
     .total.upperCase(true);
 
-  const unbonding = queries
-    .getQueryUnbondingDelegations()
+  const unbonding = queries.cosmos.queryUnbondingDelegations
     .getQueryBech32Address(accountInfo.bech32Address)
     .total.upperCase(true);
 

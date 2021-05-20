@@ -67,7 +67,7 @@ export const AllProposals: FunctionComponent = observer(() => {
   const { queriesStore, chainStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const governance = queries.getQueryGovernance();
+  const governance = queries.cosmos.queryGovernance;
 
   const proposals = governance.proposals;
 

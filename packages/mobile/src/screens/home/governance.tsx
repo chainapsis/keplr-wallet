@@ -33,7 +33,7 @@ export const GovernanceView: FunctionComponent = observer(() => {
   const navigation = useNavigation();
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const governance = queries.getQueryGovernance();
+  const governance = queries.cosmos.queryGovernance;
 
   const lastProposal = governance.proposals[0] || null;
 

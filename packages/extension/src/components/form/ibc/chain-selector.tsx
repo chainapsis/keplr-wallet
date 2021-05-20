@@ -13,6 +13,7 @@ import { IBCChannelRegistrarModal } from "./channel-registrar";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { IIBCChannelConfig } from "@keplr-wallet/hooks";
+import { FormattedMessage } from "react-intl";
 
 export const DestinationChainSelector: FunctionComponent<{
   ibcChannelConfig: IIBCChannelConfig;
@@ -39,7 +40,7 @@ export const DestinationChainSelector: FunctionComponent<{
       />
       <FormGroup>
         <Label for={selectorId} className="form-control-label">
-          Destination Chain
+          <FormattedMessage id="component.ibc.channel-registrar.chain-selector.label" />
         </Label>
         <ButtonDropdown
           id={selectorId}
@@ -48,11 +49,12 @@ export const DestinationChainSelector: FunctionComponent<{
           toggle={() => setIsSelectorOpen((value) => !value)}
         >
           <DropdownToggle caret>
-            {ibcChannelConfig.channel
-              ? chainStore.getChain(
-                  ibcChannelConfig.channel.counterpartyChainId
-                ).chainName
-              : "Select Chain"}
+            {ibcChannelConfig.channel ? (
+              chainStore.getChain(ibcChannelConfig.channel.counterpartyChainId)
+                .chainName
+            ) : (
+              <FormattedMessage id="component.ibc.channel-registrar.chain-selector.placeholder" />
+            )}
           </DropdownToggle>
           <DropdownMenu>
             {ibcChannelInfo.getTransferChannels().map((channel) => {
@@ -87,8 +89,8 @@ export const DestinationChainSelector: FunctionComponent<{
                 setIsIBCregisterModalOpen(true);
               }}
             >
-              <i className="fas fa-plus-circle my-1 mr-1" /> New IBC Transfer
-              Channel
+              <i className="fas fa-plus-circle my-1 mr-1" />{" "}
+              <FormattedMessage id="component.ibc.channel-registrar.chain-selector.button.add" />
             </DropdownItem>
           </DropdownMenu>
         </ButtonDropdown>

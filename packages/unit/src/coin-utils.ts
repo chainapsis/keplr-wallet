@@ -114,17 +114,14 @@ export class CoinUtils {
   }
 
   static shrinkDecimals(
-    amount: Int,
-    baseDecimals: number,
+    dec: Dec,
     minDecimals: number,
     maxDecimals: number,
     locale: boolean = false
   ): string {
-    if (amount.equals(new Int(0))) {
+    if (dec.equals(new Dec(0))) {
       return "0";
     }
-
-    const dec = new Dec(amount, baseDecimals);
 
     const integer = dec.truncate();
     const fraction = dec.sub(new Dec(integer));

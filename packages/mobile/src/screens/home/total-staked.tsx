@@ -34,21 +34,21 @@ export const TotalStakedView: FunctionComponent = observer(() => {
   const navigate = useNavigation();
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const bondedValdiators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Bonded);
-  const unbondingValidators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Unbonding);
-  const unbondedValidators = queries
-    .getQueryValidators()
-    .getQueryStatus(BondStatus.Unbonded);
+  const bondedValdiators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Bonded
+  );
+  const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Unbonding
+  );
+  const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    BondStatus.Unbonded
+  );
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-  const delegations = queries
-    .getQueryDelegations()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const delegations = queries.cosmos.queryDelegations.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   const delegatedValidatorMap = useMemo(() => {
     const map = new Map<string, boolean>();

@@ -43,6 +43,14 @@ import {
   IRIS_RPC_CONFIG,
   IRIS_REST_ENDPOINT,
   IRIS_REST_CONFIG,
+  REGEN_RPC_ENDPOINT,
+  REGEN_RPC_CONFIG,
+  REGEN_REST_ENDPOINT,
+  REGEN_REST_CONFIG,
+  SENTINEL_RPC_ENDPOINT,
+  SENTINEL_RPC_CONFIG,
+  SENTINEL_REST_ENDPOINT,
+  SENTINEL_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -95,7 +103,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-6",
+    chainId: "kava-7",
     chainName: "Kava",
     stakeCurrency: {
       coinDenom: "KAVA",
@@ -308,6 +316,281 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "sifchain",
       },
+      {
+        coinDenom: "Tether USDT",
+        coinMinimalDenom: "cusdt",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "Ethereum",
+        coinMinimalDenom: "ceth",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Basic Attention Token",
+        coinMinimalDenom: "cbat",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Aragon",
+        coinMinimalDenom: "cant",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Bancor Network Token",
+        coinMinimalDenom: "cbnt",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "0x",
+        coinMinimalDenom: "czrx",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Chainlink",
+        coinMinimalDenom: "clink",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Decentraland",
+        coinMinimalDenom: "cmana",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Loopring",
+        coinMinimalDenom: "clrc",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Enjin Coin",
+        coinMinimalDenom: "cenj",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Synthetix Network Token",
+        coinMinimalDenom: "csnx",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "TrueUSD",
+        coinMinimalDenom: "ctusd",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Ocean Protocol",
+        coinMinimalDenom: "cocean",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Fantom",
+        coinMinimalDenom: "cftm",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "sUSD",
+        coinMinimalDenom: "csusd",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "USD Coin",
+        coinMinimalDenom: "cusdc",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "Crypto com Coin",
+        coinMinimalDenom: "ccro",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "Wrapped Bitcoin",
+        coinMinimalDenom: "cwbtc",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "Swipe",
+        coinMinimalDenom: "csxp",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Band Protocol",
+        coinMinimalDenom: "cband",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Dai Stablecoin",
+        coinMinimalDenom: "cdai",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Compound",
+        coinMinimalDenom: "ccomp",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "UMA",
+        coinMinimalDenom: "cuma",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Balancer",
+        coinMinimalDenom: "cbal",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Yearn finance",
+        coinMinimalDenom: "cyfi",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Serum",
+        coinMinimalDenom: "csrm",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "Cream",
+        coinMinimalDenom: "ccream",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "SAND",
+        coinMinimalDenom: "csand",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Sushi",
+        coinMinimalDenom: "csushi",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Empty Set Dollar",
+        coinMinimalDenom: "cesd",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Uniswap",
+        coinMinimalDenom: "cuni",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Aave",
+        coinMinimalDenom: "caave",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "BarnBridge",
+        coinMinimalDenom: "cbond",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Wrapped Filecoin",
+        coinMinimalDenom: "cwfil",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "The Graph",
+        coinMinimalDenom: "cgrt",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Tokenlon",
+        coinMinimalDenom: "clon",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "1inch",
+        coinMinimalDenom: "c1inch",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "THORChain ERC20",
+        coinMinimalDenom: "crune",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Secret ERC20",
+        coinMinimalDenom: "cwscrt",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "IoTeX",
+        coinMinimalDenom: "ciotx",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Reef Finance",
+        coinMinimalDenom: "creef",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "COCOS BCX",
+        coinMinimalDenom: "ccocos",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Keep Network",
+        coinMinimalDenom: "ckeep",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Origin Protocol",
+        coinMinimalDenom: "cogn",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "ODAOfi",
+        coinMinimalDenom: "cdaofi",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Linear",
+        coinMinimalDenom: "clina",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "12Ships",
+        coinMinimalDenom: "ctshp",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "B.20",
+        coinMinimalDenom: "cb20",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Akropolis",
+        coinMinimalDenom: "cakro",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Rio Fuel Token",
+        coinMinimalDenom: "crfuel",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Rally",
+        coinMinimalDenom: "crly",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Convergence",
+        coinMinimalDenom: "cconv",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Render Token",
+        coinMinimalDenom: "crndr",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "PAID Network",
+        coinMinimalDenom: "cpaid",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Tidal",
+        coinMinimalDenom: "ctidal",
+        coinDecimals: 18,
+      },
     ],
     feeCurrencies: [
       {
@@ -387,8 +670,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/#/irishub/stake"
         : "http://localhost:8081/#/irishub/stake",
     bip44: {
-      coinType: 566,
+      coinType: 118,
     },
+    alternativeBIP44s: [
+      {
+        coinType: 566,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("iaa"),
     currencies: [
       {
@@ -412,6 +700,99 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.4,
     },
     features: ["stargate"],
+  },
+  {
+    rpc: REGEN_RPC_ENDPOINT,
+    rpcConfig: REGEN_RPC_CONFIG,
+    rest: REGEN_REST_ENDPOINT,
+    restConfig: REGEN_REST_CONFIG,
+    chainId: "regen-1",
+    chainName: "Regen",
+    stakeCurrency: {
+      coinDenom: "REGEN",
+      coinMinimalDenom: "uregen",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/regen/stake"
+        : "http://localhost:8081/#/regen/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/regen/stake"
+        : "http://localhost:8081/#/regen/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("regen"),
+    currencies: [
+      {
+        coinDenom: "REGEN",
+        coinMinimalDenom: "uregen",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "REGEN",
+        coinMinimalDenom: "uregen",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0.025,
+      high: 0.04,
+    },
+    features: ["stargate"],
+  },
+
+  {
+    rpc: SENTINEL_RPC_ENDPOINT,
+    rpcConfig: SENTINEL_RPC_CONFIG,
+    rest: SENTINEL_REST_ENDPOINT,
+    restConfig: SENTINEL_REST_CONFIG,
+    chainId: "sentinelhub-1",
+    chainName: "Sentinel",
+    stakeCurrency: {
+      coinDenom: "DVPN",
+      coinMinimalDenom: "udvpn",
+      coinDecimals: 6,
+      coinGeckoId: "sentinel-group",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sentinel/stake"
+        : "http://localhost:8081/#/sentinel/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sentinel/stake"
+        : "http://localhost:8081/#/sentinel/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("sent"),
+    currencies: [
+      {
+        coinDenom: "DVPN",
+        coinMinimalDenom: "udvpn",
+        coinDecimals: 6,
+        coinGeckoId: "sentinel-group",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DVPN",
+        coinMinimalDenom: "udvpn",
+        coinDecimals: 6,
+        coinGeckoId: "sentinel-group",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.1,
+      average: 0.25,
+      high: 0.4,
+    },
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,

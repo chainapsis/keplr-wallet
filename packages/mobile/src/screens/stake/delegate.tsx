@@ -41,7 +41,7 @@ export const DelegateScreen: FunctionComponent<DelegateScreenProps> = observer(
       chainStore.current.chainId,
       accountInfo.msgOpts.send,
       accountInfo.bech32Address,
-      queries.getQueryBalances()
+      queries.queryBalances
     );
 
     const delegateConfigError =
@@ -69,7 +69,7 @@ export const DelegateScreen: FunctionComponent<DelegateScreenProps> = observer(
           loading={accountInfo.isSendingMsg === "send"}
           onPress={async () => {
             if (accountInfo.isReadyToSendMsgs) {
-              await accountInfo.sendDelegateMsg(
+              await accountInfo.cosmos.sendDelegateMsg(
                 delegateConfigs.amountConfig.amount,
                 validatorAddress,
                 delegateConfigs.memoConfig.memo,

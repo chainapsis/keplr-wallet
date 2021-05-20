@@ -1,8 +1,14 @@
-import { ChainGetter, MsgOpts } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  CosmosMsgOpts,
+  SecretMsgOpts,
+} from "@keplr-wallet/stores";
 import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
 import { useFeeConfig, useMemoConfig, useRecipientConfig } from "./index";
 import { useSendGasConfig } from "./send-gas";
 import { useAmountConfig } from "./amount";
+
+type MsgOpts = CosmosMsgOpts & SecretMsgOpts;
 
 export const useSendTxConfig = (
   chainGetter: ChainGetter,
