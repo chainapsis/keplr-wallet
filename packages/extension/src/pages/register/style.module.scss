@@ -39,8 +39,7 @@ $container-width: 420px;
     display: flex;
 
     .icon {
-      width: 80px;
-      height: 80px;
+      height: 100px;
     }
 
     .logo-inner-container {
@@ -53,7 +52,7 @@ $container-width: 420px;
       align-items: start;
 
       .logo {
-        height: 50px;
+        height: 100px;
       }
 
       .paragraph {
