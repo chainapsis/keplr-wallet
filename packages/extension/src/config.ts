@@ -282,6 +282,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "crypto-com-chain",
       },
     ],
+    gasPriceStep: {
+      low: 0.025,
+      average: 0.03,
+      high: 0.04,
+    },
     features: ["stargate", "ibc-transfer"],
   },
   {
