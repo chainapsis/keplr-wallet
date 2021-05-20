@@ -30,6 +30,7 @@ export * from "./permission";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { RNG } from "@keplr-wallet/crypto";
+import { CommonCrypto } from "./keyring";
 
 export function init(
   router: Router,
@@ -39,7 +40,8 @@ export function init(
   embedChainInfos: ChainInfo[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
-  rng: RNG
+  rng: RNG,
+  commonCrypto: CommonCrypto
 ) {
   container.register(TYPES.ChainsEmbedChainInfos, {
     useValue: embedChainInfos,
@@ -49,6 +51,7 @@ export function init(
     useValue: eventMsgRequester,
   });
   container.register(TYPES.RNG, { useValue: rng });
+  container.register(TYPES.CommonCrypto, { useValue: commonCrypto });
 
   container.register(TYPES.ChainsStore, { useValue: storeCreator("chains") });
   container.register(TYPES.InteractionStore, {

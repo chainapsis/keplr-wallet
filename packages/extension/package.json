@@ -57,7 +57,8 @@
     "reactstrap": "^8.4.1",
     "secretjs": "^0.10.2",
     "utility-types": "^3.10.0",
-    "webextension-polyfill": "^0.7.0"
+    "webextension-polyfill": "^0.7.0",
+    "scrypt-js": "^3.0.1"
   },
   "devDependencies": {
     "@types/chart.js": "^2.9.25",

@@ -27,4 +27,5 @@ export const TYPES = {
   EventMsgRequester: Symbol("EventMsgRequester"),
 
   RNG: Symbol("RandomNumberGenerator"),
+  CommonCrypto: Symbol("CommonCrypto"),
 };

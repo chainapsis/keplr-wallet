@@ -1,17 +1,13 @@
-import scrypt from "scrypt-js";
 import AES, { Counter } from "aes-js";
-import { BIP44HDPath, CoinTypeForChain } from "./types";
+import {
+  BIP44HDPath,
+  CoinTypeForChain,
+  ScryptParams,
+  CommonCrypto,
+} from "./types";
 import { Hash, RNG } from "@keplr-wallet/crypto";
 
 import { Buffer } from "buffer/";
-
-interface ScryptParams {
-  dklen: number;
-  salt: string;
-  n: number;
-  r: number;
-  p: number;
-}
 
 /**
  * This is similar to ethereum's key store.
@@ -44,6 +40,7 @@ export interface KeyStore {
 export class Crypto {
   public static async encrypt(
     rng: RNG,
+    crypto: CommonCrypto,
     type: "mnemonic" | "privateKey" | "ledger",
     text: string,
     password: string,
@@ -60,7 +57,7 @@ export class Crypto {
       r: 8,
       p: 1,
     };
-    const derivedKey = await Crypto.scrpyt(password, scryptParams);
+    const derivedKey = await crypto.scrypt(password, scryptParams);
     const buf = Buffer.from(text);
 
     random = new Uint8Array(16);
@@ -97,10 +94,11 @@ export class Crypto {
   }
 
   public static async decrypt(
+    crypto: CommonCrypto,
     keyStore: KeyStore,
     password: string
   ): Promise<Uint8Array> {
-    const derivedKey = await Crypto.scrpyt(password, keyStore.crypto.kdfparams);
+    const derivedKey = await crypto.scrypt(password, keyStore.crypto.kdfparams);
 
     const counter = new Counter(0);
     counter.setBytes(Buffer.from(keyStore.crypto.cipherparams.iv, "hex"));
@@ -118,22 +116,6 @@ export class Crypto {
 
     return Buffer.from(
       aesCtr.decrypt(Buffer.from(keyStore.crypto.ciphertext, "hex"))
-    );
-  }
-
-  private static async scrpyt(
-    text: string,
-    params: ScryptParams
-  ): Promise<Uint8Array> {
-    const buf = Buffer.from(text);
-
-    return await scrypt.scrypt(
-      buf,
-      Buffer.from(params.salt, "hex"),
-      params.n,
-      params.r,
-      params.p,
-      params.dklen
     );
   }
 }

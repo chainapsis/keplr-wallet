@@ -9,7 +9,7 @@ import {
 } from "./keyring";
 
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { BIP44HDPath } from "./types";
+import { BIP44HDPath, CommonCrypto } from "./types";
 
 import { KVStore } from "@keplr-wallet/common";
 
@@ -49,9 +49,17 @@ export class KeyRingService {
     @inject(LedgerService)
     ledgerService: LedgerService,
     @inject(TYPES.RNG)
-    protected readonly rng: RNG
+    protected readonly rng: RNG,
+    @inject(TYPES.CommonCrypto)
+    protected readonly crypto: CommonCrypto
   ) {
-    this.keyRing = new KeyRing(embedChainInfos, kvStore, ledgerService, rng);
+    this.keyRing = new KeyRing(
+      embedChainInfos,
+      kvStore,
+      ledgerService,
+      rng,
+      crypto
+    );
   }
 
   async restore(): Promise<{

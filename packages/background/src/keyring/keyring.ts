@@ -7,7 +7,7 @@ import {
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
 import { LedgerService } from "../ledger";
-import { BIP44HDPath } from "./types";
+import { BIP44HDPath, CommonCrypto } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Env } from "@keplr-wallet/router";
 
@@ -67,7 +67,8 @@ export class KeyRing {
     private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
     private readonly ledgerKeeper: LedgerService,
-    private readonly rng: RNG
+    private readonly rng: RNG,
+    private readonly crypto: CommonCrypto
   ) {
     this.loaded = false;
     this.keyStore = null;
@@ -204,6 +205,7 @@ export class KeyRing {
     this.mnemonic = mnemonic;
     this.keyStore = await KeyRing.CreateMnemonicKeyStore(
       this.rng,
+      this.crypto,
       mnemonic,
       password,
       await this.assignKeyStoreIdMeta(meta),
@@ -227,6 +229,7 @@ export class KeyRing {
     this.privateKey = privateKey;
     this.keyStore = await KeyRing.CreatePrivateKeyStore(
       this.rng,
+      this.crypto,
       privateKey,
       password,
       await this.assignKeyStoreIdMeta(meta)
@@ -255,6 +258,7 @@ export class KeyRing {
 
     const keyStore = await KeyRing.CreateLedgerKeyStore(
       this.rng,
+      this.crypto,
       this.ledgerPublicKey,
       password,
       await this.assignKeyStoreIdMeta(meta),
@@ -287,17 +291,21 @@ export class KeyRing {
     if (this.type === "mnemonic") {
       // If password is invalid, error will be thrown.
       this.mnemonic = Buffer.from(
-        await Crypto.decrypt(this.keyStore, password)
+        await Crypto.decrypt(this.crypto, this.keyStore, password)
       ).toString();
     } else if (this.type === "privateKey") {
       // If password is invalid, error will be thrown.
       this.privateKey = Buffer.from(
-        Buffer.from(await Crypto.decrypt(this.keyStore, password)).toString(),
+        Buffer.from(
+          await Crypto.decrypt(this.crypto, this.keyStore, password)
+        ).toString(),
         "hex"
       );
     } else if (this.type === "ledger") {
       this.ledgerPublicKey = Buffer.from(
-        Buffer.from(await Crypto.decrypt(this.keyStore, password)).toString(),
+        Buffer.from(
+          await Crypto.decrypt(this.crypto, this.keyStore, password)
+        ).toString(),
         "hex"
       );
     } else {
@@ -456,7 +464,7 @@ export class KeyRing {
       .concat(this.multiKeyStore.slice(index + 1));
 
     // Make sure that password is valid.
-    await Crypto.decrypt(keyStore, password);
+    await Crypto.decrypt(this.crypto, keyStore, password);
 
     if (this.keyStore) {
       // If key store is currently selected key store
@@ -641,10 +649,14 @@ export class KeyRing {
 
     if (keyStore.type === "mnemonic") {
       // If password is invalid, error will be thrown.
-      return Buffer.from(await Crypto.decrypt(keyStore, password)).toString();
+      return Buffer.from(
+        await Crypto.decrypt(this.crypto, keyStore, password)
+      ).toString();
     } else {
       // If password is invalid, error will be thrown.
-      return Buffer.from(await Crypto.decrypt(keyStore, password)).toString();
+      return Buffer.from(
+        await Crypto.decrypt(this.crypto, keyStore, password)
+      ).toString();
     }
   }
 
@@ -663,6 +675,7 @@ export class KeyRing {
 
     const keyStore = await KeyRing.CreateMnemonicKeyStore(
       this.rng,
+      this.crypto,
       mnemonic,
       this.password,
       await this.assignKeyStoreIdMeta(meta),
@@ -684,6 +697,7 @@ export class KeyRing {
 
     const keyStore = await KeyRing.CreatePrivateKeyStore(
       this.rng,
+      this.crypto,
       privateKey,
       this.password,
       await this.assignKeyStoreIdMeta(meta)
@@ -708,6 +722,7 @@ export class KeyRing {
 
     const keyStore = await KeyRing.CreateLedgerKeyStore(
       this.rng,
+      this.crypto,
       publicKey,
       this.password,
       await this.assignKeyStoreIdMeta(meta),
@@ -762,6 +777,7 @@ export class KeyRing {
 
   private static async CreateMnemonicKeyStore(
     rng: RNG,
+    crypto: CommonCrypto,
     mnemonic: string,
     password: string,
     meta: Record<string, string>,
@@ -769,6 +785,7 @@ export class KeyRing {
   ): Promise<KeyStore> {
     return await Crypto.encrypt(
       rng,
+      crypto,
       "mnemonic",
       mnemonic,
       password,
@@ -779,12 +796,14 @@ export class KeyRing {
 
   private static async CreatePrivateKeyStore(
     rng: RNG,
+    crypto: CommonCrypto,
     privateKey: Uint8Array,
     password: string,
     meta: Record<string, string>
   ): Promise<KeyStore> {
     return await Crypto.encrypt(
       rng,
+      crypto,
       "privateKey",
       Buffer.from(privateKey).toString("hex"),
       password,
@@ -794,6 +813,7 @@ export class KeyRing {
 
   private static async CreateLedgerKeyStore(
     rng: RNG,
+    crypto: CommonCrypto,
     publicKey: Uint8Array,
     password: string,
     meta: Record<string, string>,
@@ -801,6 +821,7 @@ export class KeyRing {
   ): Promise<KeyStore> {
     return await Crypto.encrypt(
       rng,
+      crypto,
       "ledger",
       Buffer.from(publicKey).toString("hex"),
       password,
