@@ -4,6 +4,15 @@ order: 4
 ---
 
 ### Suggest Chain
+
+*Warning: This is an experimental feature.*
+
+Keplr's 'suggest chain' feature allows front-ends to request adding new Cosmos-SDK based blockchains that isn't natively integrated to Keplr extension.  
+If the same chain is already added to Keplr, nothing will happen. If the user rejects the request, an error will be thrown.
+
+This allows all Cosmos-SDK blockchains to have permissionless, instant wallet and transaction signing support for front-ends.
+
+
 ```javascript
 interface ChainInfo {
     readonly rpc: string;
@@ -50,16 +59,20 @@ interface ChainInfo {
 experimentalSuggestChain(chainInfo: SuggestingChainInfo): Promise<void>
 ```
 
-*Warning: This is an experimental feature.*
+#### Usage examples and recommendations
 
-It allows a blockchain that isn't natively integrated by Keplr to be added to Keplr extension.  
-If the same chain is already added to Keplr, nothing will happen. If the user rejects the request, an error will be thrown.  
-  
-For Stargate Cosmos-SDK chains, it is recommended to put the `features` value as `stargate`.
-(However, even if the `stargate` isn't set, Keplr will query "/cosmos/base/tendermint/v1beta1/node_info" to check if it succeeds. If successful, Keplr will assume that a gRPC HTTP gateway available and automatically set it as Stargate).
-
-Keplr has a feature which automatically detects when the chain-id has changed, and automatically update to support new chain. However, it should be noted that this functionality will only work when the chain-id follows the `{identifier}-{version}` (ex. `cosmoshub-4`) format. Therefore, it is recommended that the chain follows the chain-id format.
-  
-If the chain supports Secret WASM contracts, you may input `secretwasm` as a value for `features` to enable Secret WASM support.
+| Key | Example Value | Note |
+|-|-|-|
+| `rpc` | 123.456.789.012:26657 | Address of RPC endpoint of the chain. Default port is 26657 |
+| `rest` | 123.456.789.012:1317 | Address of REST/API endpoint of the chain. Default port is 1317. Must be enabled in `app.toml` |
+| `chainId` | mychain-1 | Keplr has a feature which automatically detects when the chain-id has changed, and automatically update to support new chain. However, it should be noted that this functionality will only work when the chain-id follows the {identifier}-{version}(ex.cosmoshub-4) format. Therefore, it is recommended that the chain follows the chain-id format. |
+| `stakeCurrency` | ustake | Information on the staking token of the chain |
+| `walletUrlForStaking` | https://wallet.keplr.app/#/cosmoshub/stake | The URL for the staking interface frontend for the chain. If you don't have a staking interface built, you can use [Lunie Light](https://github.com/luniehq/lunie-light) which supports Keplr. |
+| `bip44.coinType` | 118 | BIP44 coin type for address derivation. We recommend using `118`(Cosmos Hub) as this would provide good Ledger hardware wallet compatibility by utilizing the Cosmos Ledger app. |
+| `bech32Config` | cosmos | Bech32 address prefix of the chain |
+| `currencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }, ]``` | (TBD) |
+| `feeCurrencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }, ]``` | List of fee tokens accepted by the chain's validator. |
+| `gasPriceStep` | ```{ low: 0.1, average: 0.25, high: 0.3, }``` | Three `gasPrice` values (low, average, high) to estimate transaction fee. |
+| `features` | [stargate] | `secretwasm` - Secret Network WASM smart contract transaction support `stargate` - For Cosmos SDK blockchains using cosmos-sdk v0.4+. (However, even if the `stargate` isn't set, Keplr will query "/cosmos/base/tendermint/v1beta1/node_info" to check if it succeeds. If successful, Keplr will assume that a gRPC HTTP gateway available and automatically set it as Stargate) `ibc-transfer` - For chains with ICS20 IBC transfers enabled `cosmwasm` - For CosmWasm smart contract support (currently broken, in the process of being fixed) |
   
 Keplr supports the basic the `x/bank` module's send feature and balance query. Also, it is able to show the staking reward percentage from the `supply` and `mint` module. (For Stargate chains, Keplr will find the supply through the `bank` module).
