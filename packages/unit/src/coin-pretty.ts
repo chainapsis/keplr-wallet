@@ -151,26 +151,52 @@ export class CoinPretty {
     return this.intPretty.isReady;
   }
 
-  add(target: Dec | { toDec(): Dec }): CoinPretty {
+  add(target: Dec | { toDec(): Dec } | CoinPretty): CoinPretty {
+    const isCoinPretty = target instanceof CoinPretty;
+    if (isCoinPretty) {
+      // If target is `CoinPretty` and it has different denom, do nothing.
+      if (
+        "currency" in target &&
+        this.currency.coinMinimalDenom !== target.currency.coinMinimalDenom
+      ) {
+        return this.clone();
+      }
+    }
+
     if ("toDec" in target) {
       target = target.toDec();
     }
 
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.add(
-      target.mul(DecUtils.getPrecisionDec(-this._currency.coinDecimals))
+      isCoinPretty
+        ? target
+        : target.mul(DecUtils.getPrecisionDec(-this._currency.coinDecimals))
     );
     return pretty;
   }
 
-  sub(target: Dec | { toDec(): Dec }): CoinPretty {
+  sub(target: Dec | { toDec(): Dec } | CoinPretty): CoinPretty {
+    const isCoinPretty = target instanceof CoinPretty;
+    if (isCoinPretty) {
+      // If target is `CoinPretty` and it has different denom, do nothing.
+      if (
+        "currency" in target &&
+        this.currency.coinMinimalDenom !== target.currency.coinMinimalDenom
+      ) {
+        return this.clone();
+      }
+    }
+
     if ("toDec" in target) {
       target = target.toDec();
     }
 
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.sub(
-      target.mul(DecUtils.getPrecisionDec(-this._currency.coinDecimals))
+      isCoinPretty
+        ? target
+        : target.mul(DecUtils.getPrecisionDec(-this._currency.coinDecimals))
     );
     return pretty;
   }
