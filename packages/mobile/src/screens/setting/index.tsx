@@ -14,6 +14,8 @@ import { ExportScreen } from "./export-screen";
 import { SetKeyRingScreen } from "./key-ring-screen";
 import { View } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
+import { EnrollLockScreen } from "./enroll-lock";
+import { useBioAuth } from "../../hooks/bio-auth";
 
 const SettingStack = createStackNavigator();
 
@@ -47,6 +49,7 @@ export const SettingStackScreen: FunctionComponent = () => {
         }}
         component={SetKeyRingScreen}
       />
+      <SettingStack.Screen name="Enroll Lock" component={EnrollLockScreen} />
     </SettingStack.Navigator>
   );
 };
@@ -55,6 +58,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
   const { accountStore, chainStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+  const bioAuth = useBioAuth();
 
   return (
     <FullFixedPageWithoutPadding>
@@ -77,6 +81,14 @@ export const SettingScreen: FunctionComponent = observer(() => {
         rightIcon={<SimpleLineIconsIcon name="arrow-right" size={18} />}
         onPress={() => {
           navigation.navigate("Private Key");
+        }}
+      />
+      <SettingBox
+        label="App Lock"
+        subText={bioAuth?.usingBioAuth ? "Enrolled" : "Not Enrolled"}
+        rightIcon={<SimpleLineIconsIcon name="arrow-right" size={18} />}
+        onPress={() => {
+          navigation.navigate("Enroll Lock");
         }}
       />
     </FullFixedPageWithoutPadding>
