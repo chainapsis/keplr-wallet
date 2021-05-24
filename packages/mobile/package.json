@@ -56,6 +56,7 @@
     "react-native-code-push": "^7.0.1",
     "react-native-elements": "^3.3.2",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-keychain": "^7.0.0",
     "react-native-modal": "^11.7.0",
     "react-native-picker-select": "^8.0.4",
     "react-native-reanimated": "^1.13.3",
