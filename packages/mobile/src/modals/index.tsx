@@ -25,7 +25,7 @@ import { FlexButton, FlexWhiteButton } from "../components/buttons";
 import { TransactionDetails } from "./transaction-details";
 import { FullPage } from "../components/page";
 import { useInteractionInfo } from "../hooks";
-import { Input } from "../components/input";
+import { UnlockView } from "./unlock";
 
 export const ModalsRenderer: FunctionComponent = observer(() => {
   const {
@@ -33,14 +33,11 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
     accountStore,
     queriesStore,
     interactionModalStore,
-    keyRingStore,
     signInteractionStore,
   } = useStore();
   const interactionInfo = useInteractionInfo(() => {
     signInteractionStore.rejectAll();
   });
-
-  const [password, setPassword] = useState("");
 
   const [signer, setSigner] = useState("");
 
@@ -98,18 +95,6 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
   const disableInputs = isSignDocInternalSend || isLoadingSignDocInternalSend;
 
   // RectButton in Modal only working in HOC on android
-  const UnlockButtonWithHoc = gestureHandlerRootHOC(() => {
-    return (
-      <FlexButton
-        title="Unlock"
-        onPress={async () => {
-          await keyRingStore.unlock(password);
-          interactionModalStore.popUrl();
-        }}
-      />
-    );
-  });
-
   const ApproveButtonWithHoc = gestureHandlerRootHOC(() => {
     return (
       <FlexButton
@@ -148,17 +133,7 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
         <View style={{ height: 600 }}>
           <FullPage>
             {interactionModalStore.lastUrl === "/unlock" ? (
-              <React.Fragment>
-                <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
-                <Input
-                  label="Password"
-                  autoCompleteType="password"
-                  secureTextEntry={true}
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <UnlockButtonWithHoc />
-              </React.Fragment>
+              <UnlockView />
             ) : null}
             {interactionModalStore.lastUrl === "/sign" ? (
               <React.Fragment>
