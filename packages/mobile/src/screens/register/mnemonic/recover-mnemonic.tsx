@@ -9,6 +9,7 @@ import { FlexButton } from "../../../components/buttons";
 import { useForm, Controller } from "react-hook-form";
 import { h2, mb2 } from "../../../styles";
 import { Input } from "../../../components/input";
+import * as Keychain from "react-native-keychain";
 
 interface FormData {
   name: string;
@@ -79,6 +80,12 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           "hex"
         );
         await registerConfig.createPrivateKey(name, privateKey, password);
+      }
+      if (password) {
+        await Keychain.setGenericPassword("keplr", password, {
+          accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
+          securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE,
+        });
       }
       navigation.navigate("Main");
     } catch (e) {
@@ -188,7 +195,12 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           />
         </React.Fragment>
       ) : null}
-      <FlexButton title="Import" onPress={handleSubmit(onSubmit)} />
+      <FlexButton
+        title="Import"
+        onPress={() => {
+          handleSubmit(onSubmit)();
+        }}
+      />
     </FullPage>
   );
 });

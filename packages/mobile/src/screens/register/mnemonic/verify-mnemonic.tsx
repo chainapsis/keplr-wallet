@@ -20,6 +20,7 @@ import {
   RandomizedWordsView,
   SuggestedWordsView,
 } from "../../../components/mnemonic";
+import * as Keychain from "react-native-keychain";
 
 export const VerifyMnemonicScreen: FunctionComponent<{
   route: {
@@ -162,6 +163,16 @@ export const VerifyMnemonicScreen: FunctionComponent<{
                   addressIndex: 0,
                 }
               );
+              if (newMnemonicConfig.password) {
+                await Keychain.setGenericPassword(
+                  "keplr",
+                  newMnemonicConfig.password,
+                  {
+                    accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
+                    securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE,
+                  }
+                );
+              }
               navigation.navigate("Main");
             } catch {
               registerConfig.clear();
