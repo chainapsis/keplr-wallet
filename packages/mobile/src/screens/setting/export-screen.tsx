@@ -80,7 +80,9 @@ export const ExportScreen: FunctionComponent = observer(() => {
           <FlexButton
             loading={loading}
             title="Confirm"
-            onPress={handleSubmit(onSubmit)}
+            onPress={() => {
+              handleSubmit(onSubmit)();
+            }}
           />
         </React.Fragment>
       )}

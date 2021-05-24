@@ -226,7 +226,12 @@ export const GenerateMnemonicScreen: FunctionComponent = observer(() => {
           />
         </React.Fragment>
       ) : null}
-      <FlexButton title="Next" onPress={handleSubmit(onSubmit)} />
+      <FlexButton
+        title="Next"
+        onPress={() => {
+          handleSubmit(onSubmit)();
+        }}
+      />
     </FullPage>
   );
 });
