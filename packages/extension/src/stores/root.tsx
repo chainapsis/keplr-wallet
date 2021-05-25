@@ -68,6 +68,7 @@ export class RootStore {
           window.dispatchEvent(new Event(type));
         },
       },
+      "scrypt",
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore

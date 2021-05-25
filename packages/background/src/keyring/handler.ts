@@ -142,6 +142,7 @@ const handleCreateMnemonicKeyMsg: (
   return async (_, msg) => {
     return {
       status: await service.createMnemonicKey(
+        msg.kdf,
         msg.mnemonic,
         msg.password,
         msg.meta,
@@ -156,6 +157,7 @@ const handleAddMnemonicKeyMsg: (
 ) => InternalHandler<AddMnemonicKeyMsg> = (service) => {
   return async (_, msg) => {
     return await service.addMnemonicKey(
+      msg.kdf,
       msg.mnemonic,
       msg.meta,
       msg.bip44HDPath
@@ -169,6 +171,7 @@ const handleCreatePrivateKeyMsg: (
   return async (_, msg) => {
     return {
       status: await service.createPrivateKey(
+        msg.kdf,
         msg.privateKey,
         msg.password,
         msg.meta
@@ -181,7 +184,7 @@ const handleAddPrivateKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddPrivateKeyMsg> = (service) => {
   return async (_, msg) => {
-    return await service.addPrivateKey(msg.privateKey, msg.meta);
+    return await service.addPrivateKey(msg.kdf, msg.privateKey, msg.meta);
   };
 };
 
@@ -192,6 +195,7 @@ const handleCreateLedgerKeyMsg: (
     return {
       status: await service.createLedgerKey(
         env,
+        msg.kdf,
         msg.password,
         msg.meta,
         msg.bip44HDPath
@@ -204,7 +208,7 @@ const handleAddLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddLedgerKeyMsg> = (service) => {
   return async (env, msg) => {
-    return await service.addLedgerKey(env, msg.meta, msg.bip44HDPath);
+    return await service.addLedgerKey(env, msg.kdf, msg.meta, msg.bip44HDPath);
   };
 };
 

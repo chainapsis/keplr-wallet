@@ -31,7 +31,7 @@ export interface KeyStore {
       iv: string;
     };
     ciphertext: string;
-    kdf: "scrypt";
+    kdf: "scrypt" | "sha256";
     kdfparams: ScryptParams;
     mac: string;
   };
@@ -41,6 +41,7 @@ export class Crypto {
   public static async encrypt(
     rng: RNG,
     crypto: CommonCrypto,
+    kdf: "scrypt" | "sha256",
     type: "mnemonic" | "privateKey" | "ledger",
     text: string,
     password: string,
@@ -57,7 +58,10 @@ export class Crypto {
       r: 8,
       p: 1,
     };
-    const derivedKey = await crypto.scrypt(password, scryptParams);
+    const derivedKey =
+      kdf === "scrypt"
+        ? await crypto.scrypt(password, scryptParams)
+        : Hash.sha256(Buffer.from(`${salt}/${password}`));
     const buf = Buffer.from(text);
 
     random = new Uint8Array(16);
@@ -86,7 +90,7 @@ export class Crypto {
           iv: iv.toString("hex"),
         },
         ciphertext: ciphertext.toString("hex"),
-        kdf: "scrypt",
+        kdf,
         kdfparams: scryptParams,
         mac: Buffer.from(mac).toString("hex"),
       },
@@ -98,7 +102,12 @@ export class Crypto {
     keyStore: KeyStore,
     password: string
   ): Promise<Uint8Array> {
-    const derivedKey = await crypto.scrypt(password, keyStore.crypto.kdfparams);
+    const derivedKey =
+      keyStore.crypto.kdf === "scrypt"
+        ? await crypto.scrypt(password, keyStore.crypto.kdfparams)
+        : Hash.sha256(
+            Buffer.from(`${keyStore.crypto.kdfparams.salt}/${password}`)
+          );
 
     const counter = new Counter(0);
     counter.setBytes(Buffer.from(keyStore.crypto.cipherparams.iv, "hex"));

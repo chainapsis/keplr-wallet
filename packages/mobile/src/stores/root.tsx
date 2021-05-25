@@ -53,6 +53,7 @@ export class RootStore {
           eventEmitter.emit(type);
         },
       },
+      "sha256",
       this.chainStore,
       new RNMessageRequester(),
       this.interactionStore

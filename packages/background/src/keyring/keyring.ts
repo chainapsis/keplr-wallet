@@ -193,6 +193,7 @@ export class KeyRing {
   }
 
   public async createMnemonicKey(
+    kdf: "scrypt" | "sha256",
     mnemonic: string,
     password: string,
     meta: Record<string, string>,
@@ -206,6 +207,7 @@ export class KeyRing {
     this.keyStore = await KeyRing.CreateMnemonicKeyStore(
       this.rng,
       this.crypto,
+      kdf,
       mnemonic,
       password,
       await this.assignKeyStoreIdMeta(meta),
@@ -218,6 +220,7 @@ export class KeyRing {
   }
 
   public async createPrivateKey(
+    kdf: "scrypt" | "sha256",
     privateKey: Uint8Array,
     password: string,
     meta: Record<string, string>
@@ -230,6 +233,7 @@ export class KeyRing {
     this.keyStore = await KeyRing.CreatePrivateKeyStore(
       this.rng,
       this.crypto,
+      kdf,
       privateKey,
       password,
       await this.assignKeyStoreIdMeta(meta)
@@ -242,6 +246,7 @@ export class KeyRing {
 
   public async createLedgerKey(
     env: Env,
+    kdf: "scrypt" | "sha256",
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
@@ -259,6 +264,7 @@ export class KeyRing {
     const keyStore = await KeyRing.CreateLedgerKeyStore(
       this.rng,
       this.crypto,
+      kdf,
       this.ledgerPublicKey,
       password,
       await this.assignKeyStoreIdMeta(meta),
@@ -665,6 +671,7 @@ export class KeyRing {
   }
 
   public async addMnemonicKey(
+    kdf: "scrypt" | "sha256",
     mnemonic: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
@@ -676,6 +683,7 @@ export class KeyRing {
     const keyStore = await KeyRing.CreateMnemonicKeyStore(
       this.rng,
       this.crypto,
+      kdf,
       mnemonic,
       this.password,
       await this.assignKeyStoreIdMeta(meta),
@@ -688,6 +696,7 @@ export class KeyRing {
   }
 
   public async addPrivateKey(
+    kdf: "scrypt" | "sha256",
     privateKey: Uint8Array,
     meta: Record<string, string>
   ): Promise<MultiKeyStoreInfoWithSelected> {
@@ -698,6 +707,7 @@ export class KeyRing {
     const keyStore = await KeyRing.CreatePrivateKeyStore(
       this.rng,
       this.crypto,
+      kdf,
       privateKey,
       this.password,
       await this.assignKeyStoreIdMeta(meta)
@@ -710,6 +720,7 @@ export class KeyRing {
 
   public async addLedgerKey(
     env: Env,
+    kdf: "scrypt" | "sha256",
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
   ): Promise<MultiKeyStoreInfoWithSelected> {
@@ -723,6 +734,7 @@ export class KeyRing {
     const keyStore = await KeyRing.CreateLedgerKeyStore(
       this.rng,
       this.crypto,
+      kdf,
       publicKey,
       this.password,
       await this.assignKeyStoreIdMeta(meta),
@@ -778,6 +790,7 @@ export class KeyRing {
   private static async CreateMnemonicKeyStore(
     rng: RNG,
     crypto: CommonCrypto,
+    kdf: "scrypt" | "sha256",
     mnemonic: string,
     password: string,
     meta: Record<string, string>,
@@ -786,6 +799,7 @@ export class KeyRing {
     return await Crypto.encrypt(
       rng,
       crypto,
+      kdf,
       "mnemonic",
       mnemonic,
       password,
@@ -797,6 +811,7 @@ export class KeyRing {
   private static async CreatePrivateKeyStore(
     rng: RNG,
     crypto: CommonCrypto,
+    kdf: "scrypt" | "sha256",
     privateKey: Uint8Array,
     password: string,
     meta: Record<string, string>
@@ -804,6 +819,7 @@ export class KeyRing {
     return await Crypto.encrypt(
       rng,
       crypto,
+      kdf,
       "privateKey",
       Buffer.from(privateKey).toString("hex"),
       password,
@@ -814,6 +830,7 @@ export class KeyRing {
   private static async CreateLedgerKeyStore(
     rng: RNG,
     crypto: CommonCrypto,
+    kdf: "scrypt" | "sha256",
     publicKey: Uint8Array,
     password: string,
     meta: Record<string, string>,
@@ -822,6 +839,7 @@ export class KeyRing {
     return await Crypto.encrypt(
       rng,
       crypto,
+      kdf,
       "ledger",
       Buffer.from(publicKey).toString("hex"),
       password,

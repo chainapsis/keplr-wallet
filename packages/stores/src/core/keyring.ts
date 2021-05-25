@@ -136,6 +136,7 @@ export class KeyRingStore {
     protected readonly eventDispatcher: {
       dispatchEvent: (type: string) => void;
     },
+    public readonly defaultKdf: "scrypt" | "sha256",
     protected readonly chainGetter: ChainGetter,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
@@ -150,9 +151,16 @@ export class KeyRingStore {
     mnemonic: string,
     password: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" = this.defaultKdf
   ) {
-    const msg = new CreateMnemonicKeyMsg(mnemonic, password, meta, bip44HDPath);
+    const msg = new CreateMnemonicKeyMsg(
+      kdf,
+      mnemonic,
+      password,
+      meta,
+      bip44HDPath
+    );
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -167,9 +175,10 @@ export class KeyRingStore {
   *createPrivateKey(
     privateKey: Uint8Array,
     password: string,
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    kdf: "scrypt" | "sha256" = this.defaultKdf
   ) {
-    const msg = new CreatePrivateKeyMsg(privateKey, password, meta);
+    const msg = new CreatePrivateKeyMsg(kdf, privateKey, password, meta);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -184,9 +193,10 @@ export class KeyRingStore {
   *createLedgerKey(
     password: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" = this.defaultKdf
   ) {
-    const msg = new CreateLedgerKeyMsg(password, meta, bip44HDPath);
+    const msg = new CreateLedgerKeyMsg(kdf, password, meta, bip44HDPath);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -201,25 +211,34 @@ export class KeyRingStore {
   *addMnemonicKey(
     mnemonic: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" = this.defaultKdf
   ) {
-    const msg = new AddMnemonicKeyMsg(mnemonic, meta, bip44HDPath);
+    const msg = new AddMnemonicKeyMsg(kdf, mnemonic, meta, bip44HDPath);
     this.multiKeyStoreInfo = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
   }
 
   @flow
-  *addPrivateKey(privateKey: Uint8Array, meta: Record<string, string>) {
-    const msg = new AddPrivateKeyMsg(privateKey, meta);
+  *addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>,
+    kdf: "scrypt" | "sha256" = this.defaultKdf
+  ) {
+    const msg = new AddPrivateKeyMsg(kdf, privateKey, meta);
     this.multiKeyStoreInfo = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
   }
 
   @flow
-  *addLedgerKey(meta: Record<string, string>, bip44HDPath: BIP44HDPath) {
-    const msg = new AddLedgerKeyMsg(meta, bip44HDPath);
+  *addLedgerKey(
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" = this.defaultKdf
+  ) {
+    const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath);
     this.multiKeyStoreInfo = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );

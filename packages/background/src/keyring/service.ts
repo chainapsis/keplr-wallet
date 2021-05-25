@@ -129,33 +129,42 @@ export class KeyRingService {
   }
 
   async createMnemonicKey(
+    kdf: "scrypt" | "sha256",
     mnemonic: string,
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
   ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createMnemonicKey(mnemonic, password, meta, bip44HDPath);
+    await this.keyRing.createMnemonicKey(
+      kdf,
+      mnemonic,
+      password,
+      meta,
+      bip44HDPath
+    );
     return this.keyRing.status;
   }
 
   async createPrivateKey(
+    kdf: "scrypt" | "sha256",
     privateKey: Uint8Array,
     password: string,
     meta: Record<string, string>
   ): Promise<KeyRingStatus> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createPrivateKey(privateKey, password, meta);
+    await this.keyRing.createPrivateKey(kdf, privateKey, password, meta);
     return this.keyRing.status;
   }
 
   async createLedgerKey(
     env: Env,
+    kdf: "scrypt" | "sha256",
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
   ): Promise<KeyRingStatus> {
-    await this.keyRing.createLedgerKey(env, password, meta, bip44HDPath);
+    await this.keyRing.createLedgerKey(env, kdf, password, meta, bip44HDPath);
     return this.keyRing.status;
   }
 
@@ -301,26 +310,29 @@ export class KeyRingService {
   }
 
   async addMnemonicKey(
+    kdf: "scrypt" | "sha256",
     mnemonic: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
   ): Promise<MultiKeyStoreInfoWithSelected> {
-    return this.keyRing.addMnemonicKey(mnemonic, meta, bip44HDPath);
+    return this.keyRing.addMnemonicKey(kdf, mnemonic, meta, bip44HDPath);
   }
 
   async addPrivateKey(
+    kdf: "scrypt" | "sha256",
     privateKey: Uint8Array,
     meta: Record<string, string>
   ): Promise<MultiKeyStoreInfoWithSelected> {
-    return this.keyRing.addPrivateKey(privateKey, meta);
+    return this.keyRing.addPrivateKey(kdf, privateKey, meta);
   }
 
   async addLedgerKey(
     env: Env,
+    kdf: "scrypt" | "sha256",
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
   ): Promise<MultiKeyStoreInfoWithSelected> {
-    return this.keyRing.addLedgerKey(env, meta, bip44HDPath);
+    return this.keyRing.addLedgerKey(env, kdf, meta, bip44HDPath);
   }
 
   public async changeKeyStoreFromMultiKeyStore(
