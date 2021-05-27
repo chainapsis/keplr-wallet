@@ -8,7 +8,7 @@ import { FullPage } from "../../../components/page";
 import { FlexButton } from "../../../components/buttons";
 import { useForm, Controller } from "react-hook-form";
 import { h2, mb2 } from "../../../styles";
-import { Input } from "../../../components/input";
+import { Input } from "../../../components/form";
 import * as Keychain from "react-native-keychain";
 
 interface FormData {

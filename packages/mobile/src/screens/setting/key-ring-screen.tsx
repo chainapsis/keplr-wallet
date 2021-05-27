@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { FullFixedPageWithoutPadding } from "../../components/page";
-import { SettingBox, SettingTitle } from "./setting-box";
+import { SettingBox, SettingTitle } from "../../components/setting";
 import OcticonsIcon from "react-native-vector-icons/Octicons";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import { mr2, mx2 } from "../../styles";

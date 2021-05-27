@@ -6,7 +6,7 @@ import {
   bbw1,
   bcGray,
   bgcWhite,
-  body3,
+  body1,
   btw1,
   fcGrey2,
   flex1,
@@ -22,6 +22,7 @@ import {
 } from "../../styles";
 import { RectButton } from "react-native-gesture-handler";
 import { Text } from "react-native-elements";
+import { Address } from "../address";
 
 interface SettingBoxProps {
   isTop?: boolean;
@@ -58,10 +59,10 @@ export const SettingBox: FunctionComponent<SettingBoxProps> = ({
       >
         <View style={sf([flex1, flexDirectionRow, alignItemsCenter])}>
           {leftIcon}
-          <Text style={subtitle2}>{label}</Text>
+          <Text style={body1}>{label}</Text>
         </View>
         <View style={sf([flexDirectionRow, alignItemsCenter])}>
-          <Text style={sf([body3, fcGrey2, mr2])}>{subText}</Text>
+          <Text style={sf([body1, fcGrey2, mr2])}>{subText}</Text>
           <RectButton onPress={rightIconOnPress ? rightIconOnPress : onPress}>
             <View accessible>{rightIcon}</View>
           </RectButton>
@@ -75,4 +76,52 @@ export const SettingTitle: FunctionComponent<{ title: string }> = ({
   title,
 }) => {
   return <Text style={sf([overline, fcGrey2, ml4, mt4])}>{title}</Text>;
+};
+
+export const AddressBook: FunctionComponent<{
+  isTop?: boolean;
+  rightIcon?: any;
+  onPress?: () => void;
+  rightIconOnPress?: () => void;
+  name: string;
+  memo?: string;
+  address: string;
+}> = ({
+  isTop = false,
+  rightIcon,
+  onPress,
+  rightIconOnPress,
+  name,
+  memo,
+  address,
+}) => {
+  return (
+    <RectButton rippleColor="#AAAAAA" onPress={onPress}>
+      <View
+        accessible
+        style={sf([
+          flexDirectionRow,
+          bgcWhite,
+          justifyContentBetween,
+          isTop ? btw1 : {},
+          bbw1,
+          bcGray,
+          p4,
+        ])}
+      >
+        <View style={sf([flex1])}>
+          <View style={sf([flexDirectionRow, alignItemsCenter])}>
+            <Text style={subtitle2}>{name}</Text>
+            {memo ? <Text style={subtitle2}>{memo}</Text> : null}
+          </View>
+          <Address address={address} maxCharacters={22} />
+        </View>
+        <View style={sf([flexDirectionRow, alignItemsCenter])}>
+          <RectButton onPress={rightIconOnPress ? rightIconOnPress : onPress}>
+            <View accessible>{rightIcon}</View>
+          </RectButton>
+        </View>
+      </View>
+    </RectButton>
+  );
 };
