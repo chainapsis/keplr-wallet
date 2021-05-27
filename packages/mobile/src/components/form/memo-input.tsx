@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { IMemoConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { Input } from "../input";
+import { Input } from "./input";
 
 export interface MemoInputProps {
   memoConfig: IMemoConfig;
