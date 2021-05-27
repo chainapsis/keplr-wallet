@@ -58,7 +58,12 @@ export const AddAddressModal: FunctionComponent<{
                 id: "setting.address-book.add-address.title",
               })
         }
-        onBackButton={closeModal}
+        onBackButton={() => {
+          // Clear the recipient and memo before closing
+          recipientConfig.setRawRecipient("");
+          memoConfig.setMemo("");
+          closeModal();
+        }}
       >
         <form
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
@@ -112,6 +117,9 @@ export const AddAddressModal: FunctionComponent<{
                 });
               }
 
+              // Clear the recipient and memo before closing
+              recipientConfig.setRawRecipient("");
+              memoConfig.setMemo("");
               closeModal();
             }}
           >
