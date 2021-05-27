@@ -14,14 +14,17 @@ import { StakingRewardsView } from "./staking-rewards";
 import { TokensView } from "./tokens";
 import { TotalStakedView } from "./total-staked";
 import { GovernanceView } from "./governance";
-import { mt4 } from "../../styles";
+import { sf, fcHigh, h3 } from "../../styles";
 
 const HomeStack = createStackNavigator();
 
 export const HomeStackScreen: FunctionComponent = () => {
   return (
     <HomeStack.Navigator
-      screenOptions={{ headerBackground: () => <GradientBackground /> }}
+      screenOptions={{
+        headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
+      }}
     >
       <HomeStack.Screen name="Home" component={HomeScreen} />
     </HomeStack.Navigator>
@@ -46,7 +49,7 @@ const HomeScreen: FunctionComponent = observer(() => {
 
   return (
     <SafeAreaPage>
-      <Card containerStyle={mt4}>
+      <Card>
         <AccountView />
         <AssetView />
         <TxButtonView />

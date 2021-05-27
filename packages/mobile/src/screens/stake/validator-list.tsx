@@ -17,7 +17,6 @@ import {
   sf,
   cardStyle,
   bgcWhite,
-  shadow,
   justifyContentCenter,
   body3,
   subtitle2,
@@ -198,7 +197,7 @@ export const AllValidators: FunctionComponent<{
   );
 
   return (
-    <View style={sf([cardStyle, bgcWhite, shadow])}>
+    <View style={sf([cardStyle, bgcWhite])}>
       <FlatList
         data={flatListValidatorData}
         renderItem={renderValidator}

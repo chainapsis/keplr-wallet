@@ -6,6 +6,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { AllProposals } from "./all-proposals";
 import { GovernanceDetailsScreeen } from "./governance-details-screeen";
 import { GradientBackground } from "../../components/svg";
+import { fcHigh, h3, sf } from "../../styles";
 
 const GovernaceStack = createStackNavigator();
 
@@ -15,6 +16,7 @@ export const GovernanceStackScreen: FunctionComponent = () => {
       screenOptions={{
         headerBackground: () => <GradientBackground />,
         headerBackTitleVisible: false,
+        headerTitleStyle: sf([h3, fcHigh]),
       }}
     >
       <GovernaceStack.Screen name="Governance" component={GovernanceScreen} />

@@ -8,6 +8,7 @@ import { DelegateScreen } from "./delegate";
 import { GradientBackground } from "../../components/svg";
 import { UndelegateScreen } from "./undelegate";
 import { RedelegateScreen, RedelegateValidatorScreen } from "./redelegate";
+import { fcHigh, h3, sf } from "../../styles";
 
 const StakeStack = createStackNavigator();
 
@@ -17,6 +18,7 @@ export const StakeStackScreen: FunctionComponent = () => {
       screenOptions={{
         headerBackground: () => <GradientBackground />,
         headerBackTitleVisible: false,
+        headerTitleStyle: sf([h3, fcHigh]),
       }}
     >
       <StakeStack.Screen

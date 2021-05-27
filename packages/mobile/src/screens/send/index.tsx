@@ -13,6 +13,7 @@ import {
   FeeButtons,
 } from "../../components/form";
 import { GradientBackground } from "../../components/svg";
+import { fcHigh, h3, sf } from "../../styles";
 
 const SendStack = createStackNavigator();
 
@@ -22,6 +23,7 @@ export const SendStackScreen: FunctionComponent = () => {
       screenOptions={{
         headerBackground: () => <GradientBackground />,
         headerBackTitleVisible: false,
+        headerTitleStyle: sf([h3, fcHigh]),
       }}
     >
       <SendStack.Screen name="Send" component={SendScreen} />

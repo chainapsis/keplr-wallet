@@ -6,13 +6,6 @@ import { useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { FullFixedPage } from "../../components/page";
 import { FlexButton, FlexWhiteButton } from "../../components/buttons";
-import {
-  alignItemsCenter,
-  flex1,
-  h1,
-  justifyContentCenter,
-  sf,
-} from "../../styles";
 import { View } from "react-native";
 import { GradientBackground } from "../../components/svg";
 import {
@@ -20,6 +13,15 @@ import {
   VerifyMnemonicScreen,
   RecoverMnemonicScreen,
 } from "./mnemonic";
+import {
+  fcHigh,
+  h3,
+  alignItemsCenter,
+  flex1,
+  h1,
+  justifyContentCenter,
+  sf,
+} from "../../styles";
 
 const RegisterStack = createStackNavigator();
 
@@ -30,6 +32,7 @@ export const RegisterStackScreen: FunctionComponent = () => {
         headerBackTitleVisible: false,
         headerTitle: "",
         headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
       }}
     >
       <RegisterStack.Screen name="Register" component={RegisterScreen} />

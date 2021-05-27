@@ -22,7 +22,6 @@ import {
   mt2,
   p4,
   sf,
-  shadow,
 } from "../../styles";
 
 const ProposalSummary: FunctionComponent<{
@@ -32,7 +31,7 @@ const ProposalSummary: FunctionComponent<{
 
   return (
     <RectButton
-      style={sf([cardStyle, p4, bgcWhite, shadow])}
+      style={sf([cardStyle, p4, bgcWhite])}
       rippleColor="#AAAAAA"
       onPress={() => {
         navigation.navigate("Governance Details", {
