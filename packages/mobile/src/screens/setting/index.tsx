@@ -4,9 +4,8 @@ import { observer } from "mobx-react-lite";
 import { useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { FullFixedPageWithoutPadding } from "../../components/page";
-import { mr2 } from "../../styles";
 import { GradientBackground } from "../../components/svg";
-import { SettingBox, SettingTitle } from "./setting-box";
+import { SettingBox, SettingTitle } from "../../components/setting";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import SimpleLineIconsIcon from "react-native-vector-icons/SimpleLineIcons";
 import { useStore } from "../../stores";
@@ -16,6 +15,7 @@ import { View } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { EnrollLockScreen } from "./enroll-lock";
 import { useBioAuth } from "../../hooks/bio-auth";
+import { fcHigh, h3, sf, mr2 } from "../../styles";
 
 const SettingStack = createStackNavigator();
 
@@ -27,6 +27,7 @@ export const SettingStackScreen: FunctionComponent = () => {
       screenOptions={{
         headerBackTitleVisible: false,
         headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
       }}
     >
       <SettingStack.Screen name="Setting" component={SettingScreen} />
@@ -56,7 +57,7 @@ export const SettingStackScreen: FunctionComponent = () => {
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
-  const { accountStore, chainStore } = useStore();
+  const { accountStore, chainStore, interactionModalStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const bioAuth = useBioAuth();
 
@@ -74,6 +75,13 @@ export const SettingScreen: FunctionComponent = observer(() => {
       <SettingTitle title="GENERAL" />
       <SettingBox label="Language" subText="English" isTop />
       <SettingBox label="Currency" subText="USD" />
+      <SettingBox
+        label="Address Book"
+        rightIcon={<SimpleLineIconsIcon name="arrow-right" size={18} />}
+        onPress={() => {
+          interactionModalStore.pushUrl("/address-book");
+        }}
+      />
       <SettingTitle title="SECURITY" />
       <SettingBox
         isTop
