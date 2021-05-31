@@ -7,7 +7,6 @@ import { m0, sf, flex1, justifyContentEnd } from "../styles";
 import { UnlockView } from "./unlock";
 import { SignView } from "./sign";
 import { DialogView } from "./dialog";
-import { AddressBookView } from "./address-book";
 
 export const ModalsRenderer: FunctionComponent = observer(() => {
   const { interactionModalStore } = useStore();
@@ -23,9 +22,6 @@ export const ModalsRenderer: FunctionComponent = observer(() => {
       {interactionModalStore.lastUrl === "/unlock" ? <UnlockView /> : null}
       {interactionModalStore.lastUrl === "/sign" ? <SignView /> : null}
       {interactionModalStore.lastUrl === "/dialog" ? <DialogView /> : null}
-      {interactionModalStore.lastUrl === "/address-book" ? (
-        <AddressBookView />
-      ) : null}
     </Modal>
   );
 });
