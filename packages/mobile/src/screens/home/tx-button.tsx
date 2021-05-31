@@ -16,7 +16,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
     interactionModalStore,
   } = useStore();
 
-  const navigate = useNavigation();
+  const navigation = useNavigation();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -48,7 +48,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         loading={accountInfo.isSendingMsg === "send"}
         onPress={() => {
           if (hasAssets) {
-            navigate.navigate("Send");
+            navigation.navigate("Send");
           }
         }}
       />

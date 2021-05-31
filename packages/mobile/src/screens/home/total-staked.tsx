@@ -31,7 +31,7 @@ const BondStatus = Staking.BondStatus;
 
 export const TotalStakedView: FunctionComponent = observer(() => {
   const { accountStore, queriesStore, chainStore } = useStore();
-  const navigate = useNavigation();
+  const navigation = useNavigation();
 
   const queries = queriesStore.get(chainStore.current.chainId);
   const bondedValdiators = queries.cosmos.queryValidators.getQueryStatus(
@@ -136,7 +136,7 @@ export const TotalStakedView: FunctionComponent = observer(() => {
         containerStyle={[mt1]}
         title="Staking Dashboard"
         onPress={() => {
-          navigate.navigate("Stake", { screen: "Validator List" });
+          navigation.navigate("Stake", { screen: "Validator List" });
         }}
       />
     </Card>
