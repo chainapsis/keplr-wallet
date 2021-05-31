@@ -10,6 +10,7 @@ import FeatherIcon from "react-native-vector-icons/Feather";
 import SimpleLineIconsIcon from "react-native-vector-icons/SimpleLineIcons";
 import { useStore } from "../../stores";
 import { ExportScreen } from "./export-screen";
+import { AddressBookScreen, AddAddressBookScreen } from "./address-book";
 import { SetKeyRingScreen } from "./key-ring-screen";
 import { View } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
@@ -51,13 +52,35 @@ export const SettingStackScreen: FunctionComponent = () => {
         component={SetKeyRingScreen}
       />
       <SettingStack.Screen name="Enroll Lock" component={EnrollLockScreen} />
+      <SettingStack.Screen
+        name="Address Book"
+        options={{
+          headerRight: () => (
+            <RectButton
+              style={mr2}
+              onPress={() => {
+                navigation.navigate("Add Address Book", { index: -1 });
+              }}
+            >
+              <View accessible>
+                <FeatherIcon name="plus" size={30} />
+              </View>
+            </RectButton>
+          ),
+        }}
+        component={AddressBookScreen}
+      />
+      <SettingStack.Screen
+        name="Add Address Book"
+        component={AddAddressBookScreen}
+      />
     </SettingStack.Navigator>
   );
 };
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
-  const { accountStore, chainStore, interactionModalStore } = useStore();
+  const { accountStore, chainStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const bioAuth = useBioAuth();
 
@@ -79,7 +102,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
         label="Address Book"
         rightIcon={<SimpleLineIconsIcon name="arrow-right" size={18} />}
         onPress={() => {
-          interactionModalStore.pushUrl("/address-book");
+          navigation.navigate("Address Book");
         }}
       />
       <SettingTitle title="SECURITY" />
