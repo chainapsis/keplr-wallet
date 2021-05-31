@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
@@ -14,6 +14,7 @@ import {
 } from "../../components/form";
 import { GradientBackground } from "../../components/svg";
 import { fcHigh, h3, sf } from "../../styles";
+import { useNavigation } from "@react-navigation/native";
 
 const SendStack = createStackNavigator();
 
@@ -31,7 +32,19 @@ export const SendStackScreen: FunctionComponent = () => {
   );
 };
 
-const SendScreen: FunctionComponent = observer(() => {
+type SendScreenProps = {
+  route: {
+    params: {
+      initAddress: string;
+      initMemo: string;
+    };
+  };
+};
+
+const SendScreen: FunctionComponent<SendScreenProps> = observer(({ route }) => {
+  const { initAddress, initMemo } = route.params;
+
+  const navigation = useNavigation();
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
@@ -54,9 +67,22 @@ const SendScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig.getError();
   const sendConfigIsValid = sendConfigError == null;
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      sendConfigs.recipientConfig.setRawRecipient(initAddress || "");
+      sendConfigs.memoConfig.setMemo(initMemo || "");
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation, route.params]);
+
   return (
     <SafeAreaPage>
-      <AddressInput recipientConfig={sendConfigs.recipientConfig} />
+      <AddressInput
+        recipientConfig={sendConfigs.recipientConfig}
+        hasAddressBook
+      />
       <CoinInput
         amountConfig={sendConfigs.amountConfig}
         feeConfig={sendConfigs.feeConfig}
