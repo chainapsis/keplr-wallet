@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { FunctionComponent, useLayoutEffect } from "react";
+import React, { FunctionComponent, useLayoutEffect, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Button as RNButton, Card } from "react-native-elements";
 import { SafeAreaPage } from "../../components/page";
@@ -15,6 +15,7 @@ import { TokensView } from "./tokens";
 import { TotalStakedView } from "./total-staked";
 import { GovernanceView } from "./governance";
 import { sf, fcHigh, h3 } from "../../styles";
+import { useStore } from "../../stores";
 
 const HomeStack = createStackNavigator();
 
@@ -33,6 +34,7 @@ export const HomeStackScreen: FunctionComponent = () => {
 
 const HomeScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
+  const { chainStore } = useStore();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -44,8 +46,15 @@ const HomeScreen: FunctionComponent = observer(() => {
           type="clear"
         />
       ),
+      title: chainStore.current.chainName,
     });
   }, [navigation]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: chainStore.current.chainName,
+    });
+  }, [chainStore.current.chainName]);
 
   return (
     <SafeAreaPage>
