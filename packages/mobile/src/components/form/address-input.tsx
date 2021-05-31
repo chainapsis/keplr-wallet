@@ -7,15 +7,28 @@ import {
   InvalidBech32Error,
   IRecipientConfig,
 } from "@keplr-wallet/hooks";
+import { View } from "react-native";
 import { observer } from "mobx-react-lite";
 import { Input } from "./input";
+import { RectButton } from "react-native-gesture-handler";
+import FeatherIcon from "react-native-vector-icons/Feather";
+import { useNavigation } from "@react-navigation/native";
+import {
+  alignItemsCenter,
+  flex1,
+  justifyContentCenter,
+  sf,
+} from "../../styles";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
+  hasAddressBook?: boolean;
 }
 
 export const AddressInput: FunctionComponent<AddressInputProps> = observer(
-  ({ recipientConfig }) => {
+  ({ recipientConfig, hasAddressBook }) => {
+    const navigation = useNavigation();
+
     const error = recipientConfig.getError();
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -43,6 +56,20 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
         onChangeText={(value) => {
           recipientConfig.setRawRecipient(value);
         }}
+        rightIcon={
+          hasAddressBook ? (
+            <RectButton
+              style={sf([flex1, justifyContentCenter, alignItemsCenter])}
+              onPress={() => {
+                navigation.navigate("Settings", { screen: "Address Book" });
+              }}
+            >
+              <View accessible>
+                <FeatherIcon name="book" size={20} />
+              </View>
+            </RectButton>
+          ) : null
+        }
         errorMessage={errorText}
       />
     );
