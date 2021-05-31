@@ -106,12 +106,18 @@ export const SignView: FunctionComponent = observer(() => {
           <FlexWhiteButtonWithHoc
             title="Approve"
             onPress={async () => {
-              if (signDocHelper.signDocWrapper) {
-                await signInteractionStore.approveAndWaitEnd(
-                  signDocHelper.signDocWrapper
-                );
+              try {
+                if (signDocHelper.signDocWrapper) {
+                  // TODO: ledger need await for user approve so it will be fixed
+                  signInteractionStore.approveAndWaitEnd(
+                    signDocHelper.signDocWrapper
+                  );
+                }
+              } catch (error) {
+                console.log(error);
+              } finally {
+                interactionModalStore.popUrl();
               }
-              interactionModalStore.popUrl();
             }}
           />
         </View>
