@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React, { FunctionComponent, useEffect, useRef } from "react";
 import { Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
@@ -21,8 +22,15 @@ import { GovernanceStackScreen } from "./screens/governance";
 import { SettingStackScreen } from "./screens/setting";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { DrawerContent } from "./components/drawer";
-import { alignItemsCenter, flex1, justifyContentCenter, sf } from "./styles";
+import {
+  alignItemsCenter,
+  flex1,
+  justifyContentCenter,
+  sf,
+  colors,
+} from "./styles";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -65,9 +73,29 @@ export const MainNavigation: FunctionComponent = () => {
 
 export const MainTabNavigation: FunctionComponent = () => {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName = "";
+
+          if (route.name === "Main") {
+            iconName = focused ? "ios-grid" : "ios-grid-outline";
+          } else if (route.name === "Settings") {
+            iconName = focused ? "settings" : "settings-outline";
+          }
+
+          // You can return any component that you like here!
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
+      tabBarOptions={{
+        activeTintColor: colors.primary,
+        inactiveTintColor: colors.grey0,
+        showLabel: false,
+      }}
+    >
       <Tab.Screen name="Main" component={MainNavigation} />
-      <Tab.Screen name="Setting" component={SettingStackScreen} />
+      <Tab.Screen name="Settings" component={SettingStackScreen} />
     </Tab.Navigator>
   );
 };
@@ -78,7 +106,7 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
       drawerType="slide"
       drawerContent={(props) => <DrawerContent {...props} />}
     >
-      <Drawer.Screen name="Main" component={MainTabNavigation} />
+      <Drawer.Screen name="MainTab" component={MainTabNavigation} />
     </Drawer.Navigator>
   );
 };
@@ -119,13 +147,18 @@ export const AppNavigation: FunctionComponent = observer(() => {
         ) : (
           <Stack.Navigator
             initialRouteName={
-              keyRingStore.status === KeyRingStatus.EMPTY ? "Register" : "Main"
+              keyRingStore.status === KeyRingStatus.EMPTY
+                ? "Register"
+                : "MainTabDrawer"
             }
             screenOptions={{
               headerShown: false,
             }}
           >
-            <Stack.Screen name="Main" component={MainTabNavigationWithDrawer} />
+            <Stack.Screen
+              name="MainTabDrawer"
+              component={MainTabNavigationWithDrawer}
+            />
             <Stack.Screen name="Register" component={RegisterStackScreen} />
           </Stack.Navigator>
         )}
