@@ -87,7 +87,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE,
         });
       }
-      navigation.navigate("Main");
+      navigation.navigate("MainTabDrawer");
     } catch (e) {
       console.log(e.message ? e.message : e.toString());
       registerConfig.clear();

@@ -156,12 +156,8 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
             onPress={() => {
               addressBookConfig.selectAddressAt(i);
               navigation.navigate("Send", {
-                routeName: "Send",
-                params: {
-                  initAddress: data.address,
-                  initMemo: data.memo,
-                },
-                key: Math.random() * 10000,
+                initAddress: data.address,
+                initMemo: data.memo,
               });
             }}
           />

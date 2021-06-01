@@ -25,6 +25,7 @@ export const SettingStackScreen: FunctionComponent = () => {
 
   return (
     <SettingStack.Navigator
+      initialRouteName="Setting"
       screenOptions={{
         headerBackTitleVisible: false,
         headerBackground: () => <GradientBackground />,

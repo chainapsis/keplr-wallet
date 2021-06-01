@@ -173,7 +173,7 @@ export const VerifyMnemonicScreen: FunctionComponent<{
                   }
                 );
               }
-              navigation.navigate("Main");
+              navigation.navigate("MainTabDrawer");
             } catch {
               registerConfig.clear();
             }
