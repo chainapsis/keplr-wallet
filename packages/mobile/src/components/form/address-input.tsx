@@ -9,16 +9,10 @@ import {
 } from "@keplr-wallet/hooks";
 import { View } from "react-native";
 import { observer } from "mobx-react-lite";
-import { Input } from "./input";
-import { RectButton } from "react-native-gesture-handler";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
-import {
-  alignItemsCenter,
-  flex1,
-  justifyContentCenter,
-  sf,
-} from "../../styles";
+import { Input } from "./input";
+import { colors } from "react-native-elements";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
@@ -53,23 +47,25 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     return (
       <Input
         label="Recipient"
+        value={recipientConfig.rawRecipient}
         onChangeText={(value) => {
           recipientConfig.setRawRecipient(value);
         }}
         rightIcon={
           hasAddressBook ? (
-            <RectButton
-              style={sf([flex1, justifyContentCenter, alignItemsCenter])}
-              onPress={() => {
-                navigation.navigate("Settings", { screen: "Address Book" });
-              }}
-            >
-              <View accessible>
-                <FeatherIcon name="book" size={20} />
-              </View>
-            </RectButton>
+            <View accessible>
+              <FeatherIcon name="book" size={20} color={colors.primary} />
+            </View>
           ) : null
         }
+        rightIconOnPress={
+          hasAddressBook
+            ? () => {
+                navigation.navigate("Address Book Modal Stack");
+              }
+            : undefined
+        }
+        hasLeftBorder={hasAddressBook}
         errorMessage={errorText}
       />
     );

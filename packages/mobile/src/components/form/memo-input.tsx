@@ -13,7 +13,8 @@ export const MemoInput: FunctionComponent<MemoInputProps> = observer(
   ({ memoConfig, disabled = false }) => {
     return (
       <Input
-        label="Memo (optional)"
+        label="Memo ( Optional )"
+        value={memoConfig.memo}
         onChangeText={(value) => {
           memoConfig.setMemo(value);
         }}
