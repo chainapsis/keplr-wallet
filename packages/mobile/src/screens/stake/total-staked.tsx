@@ -12,6 +12,7 @@ import {
   sf,
   alignItemsCenter,
   h5,
+  mb4,
 } from "../../styles";
 
 const NeedStakeView: FunctionComponent = () => {
@@ -62,7 +63,7 @@ export const TotalStakedView: FunctionComponent = observer(() => {
   };
 
   return (
-    <Card>
+    <Card containerStyle={mb4}>
       <Text style={h5}>Staking</Text>
       {delegations.delegations.length === 0 ? (
         <NeedStakeView />

@@ -21,6 +21,7 @@ import {
   subtitle2,
   body2,
   ml4,
+  mb4,
 } from "../../styles";
 import { FlexButton, FlexWhiteButton } from "../../components/buttons";
 import { useNavigation } from "@react-navigation/native";
@@ -33,7 +34,7 @@ export const ValidatorDetailsView: FunctionComponent<{
   const navigation = useNavigation();
 
   return (
-    <Card>
+    <Card containerStyle={mb4}>
       <View style={flexDirectionRow}>
         <Image
           style={{

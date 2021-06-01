@@ -26,6 +26,7 @@ import {
   buttonFont2,
   fcGrey4,
   mt3,
+  mt4,
 } from "../../styles";
 
 export const GovernanceView: FunctionComponent = observer(() => {
@@ -38,7 +39,7 @@ export const GovernanceView: FunctionComponent = observer(() => {
   const lastProposal = governance.proposals[0] || null;
 
   return (
-    <Card containerStyle={mt3}>
+    <Card containerStyle={mt4}>
       <RectButton
         rippleColor="#AAAAAA"
         onPress={() => {

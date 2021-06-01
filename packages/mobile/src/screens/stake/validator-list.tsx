@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
-import { SafeAreaFixedPage, SafeAreaPage } from "../../components/page";
+import { SafeAreaFixedPage } from "../../components/page";
 import { TotalStakedView } from "./total-staked";
 import { UnbondingView } from "./unbonding";
 import { useStore } from "../../stores";

@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { SafeAreaView, ScrollView, View } from "react-native";
-import { flex1, absoluteLayout, p3, sf } from "../../styles";
+import { flex1, absoluteLayout, px3, sf } from "../../styles";
 import { GradientBackground } from "../svg";
 
 /**
@@ -13,7 +13,7 @@ export const SafeAreaPage: FunctionComponent = ({ children }) => {
       <View style={absoluteLayout}>
         <GradientBackground />
       </View>
-      <ScrollView style={sf([absoluteLayout, p3])}>{children}</ScrollView>
+      <ScrollView style={sf([absoluteLayout, px3])}>{children}</ScrollView>
     </SafeAreaView>
   );
 };
@@ -24,7 +24,7 @@ export const SafeAreaFixedPage: FunctionComponent = ({ children }) => {
       <View style={absoluteLayout}>
         <GradientBackground />
       </View>
-      <View style={sf([absoluteLayout, p3])}>{children}</View>
+      <View style={sf([absoluteLayout, px3])}>{children}</View>
     </SafeAreaView>
   );
 };
@@ -35,7 +35,7 @@ export const FullPage: FunctionComponent = ({ children }) => {
       <View style={absoluteLayout}>
         <GradientBackground />
       </View>
-      <ScrollView style={sf([absoluteLayout, p3])}>{children}</ScrollView>
+      <ScrollView style={sf([absoluteLayout, px3])}>{children}</ScrollView>
     </View>
   );
 };
@@ -46,7 +46,7 @@ export const FullFixedPage: FunctionComponent = ({ children }) => {
       <View style={absoluteLayout}>
         <GradientBackground />
       </View>
-      <View style={sf([absoluteLayout, p3])}>{children}</View>
+      <View style={sf([absoluteLayout, px3])}>{children}</View>
     </View>
   );
 };

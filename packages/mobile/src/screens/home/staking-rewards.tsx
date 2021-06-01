@@ -12,7 +12,7 @@ import {
   fcHigh,
   subtitle2,
   fcLow,
-  mt3,
+  mt4,
 } from "../../styles";
 import { Button } from "../../components/buttons";
 
@@ -47,7 +47,7 @@ export const StakingRewardsView: FunctionComponent = observer(() => {
   };
 
   return (
-    <Card containerStyle={mt3}>
+    <Card containerStyle={mt4}>
       <View style={sf([flexDirectionRow, justifyContentBetween])}>
         <View style={sf([justifyContentBetween])}>
           <Text style={sf([h5, fcHigh])}>Staking Rewards</Text>

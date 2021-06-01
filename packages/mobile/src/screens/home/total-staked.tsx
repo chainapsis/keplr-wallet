@@ -6,7 +6,7 @@ import { Text, Card, Image } from "react-native-elements";
 import { View } from "react-native";
 import { Staking } from "@keplr-wallet/stores";
 import { useNavigation } from "@react-navigation/native";
-import { FlexButton } from "../../components/buttons";
+import { FlexWhiteButton } from "../../components/buttons";
 import {
   flexDirectionRow,
   justifyContentBetween,
@@ -25,6 +25,7 @@ import {
   bbw1,
   bcGray,
   py3,
+  mt4,
 } from "../../styles";
 
 const BondStatus = Staking.BondStatus;
@@ -75,7 +76,7 @@ export const TotalStakedView: FunctionComponent = observer(() => {
   );
 
   return (
-    <Card containerStyle={mt3}>
+    <Card containerStyle={mt4}>
       <Text style={sf([h5, fcHigh])}>My Delegations</Text>
       <View
         style={sf([flexDirectionRow, justifyContentBetween, py3, bbw1, bcGray])}
@@ -132,11 +133,11 @@ export const TotalStakedView: FunctionComponent = observer(() => {
           </View>
         );
       })}
-      <FlexButton
+      <FlexWhiteButton
         containerStyle={[mt1]}
         title="Staking Dashboard"
         onPress={() => {
-          navigation.navigate("Stake", { screen: "Validator List" });
+          navigation.navigate("Validator List");
         }}
       />
     </Card>
