@@ -28,7 +28,7 @@ import {
   fcLow,
   justifyContentAround,
   bbw1,
-  bcGrey,
+  bcWhiteGrey,
   px2,
 } from "../styles";
 import Icon from "react-native-vector-icons/Feather";
@@ -129,7 +129,7 @@ const Msg: FunctionComponent<{
   content: string;
 }> = ({ icon = "question", title, content }) => {
   return (
-    <View style={sf([flexDirectionRow, bbw1, bcGrey])}>
+    <View style={sf([flexDirectionRow, bbw1, bcWhiteGrey])}>
       <View style={p3}>
         <Icon name={icon} size={18} />
       </View>

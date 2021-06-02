@@ -25,9 +25,9 @@ import {
   subtitle2,
   bgcDarkGrey,
   flex1,
-  bcGrey,
   flexWrap,
   bDashed,
+  bcWhiteGrey,
 } from "../../styles";
 
 export interface RandomizedWord {
@@ -83,7 +83,7 @@ export const SuggestedWordsView: FunctionComponent<{
                 br2,
                 bDashed,
                 bw1,
-                i === currentCursor ? bcPrimary : bcGrey,
+                i === currentCursor ? bcPrimary : bcWhiteGrey,
                 { width: 80 },
               ])}
             >

@@ -65,7 +65,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               }
             : undefined
         }
-        hasLeftBorder={hasAddressBook}
+        hasCenterBorder={hasAddressBook}
         errorMessage={errorText}
       />
     );

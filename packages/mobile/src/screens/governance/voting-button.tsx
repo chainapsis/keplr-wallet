@@ -18,7 +18,7 @@ import {
   px4,
   py4,
   bbw1,
-  bcGrey,
+  bcWhiteGrey,
   bgcPrimary,
   br2,
   buttonFont2,
@@ -168,7 +168,14 @@ const VoteCheckbox: FunctionComponent<{
   return (
     <View
       accessible
-      style={sf([flexDirectionRow, alignItemsCenter, px4, py4, bbw1, bcGrey])}
+      style={sf([
+        flexDirectionRow,
+        alignItemsCenter,
+        px4,
+        py4,
+        bbw1,
+        bcWhiteGrey,
+      ])}
     >
       <View
         style={sf([

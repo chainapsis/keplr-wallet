@@ -13,17 +13,16 @@ import {
   flexDirectionRow,
   bgcWhite,
   p3,
-  bcGrey,
   mb1,
   br1,
   body2,
   my1,
   fcError,
   justifyContentEnd,
-  blw1,
   caption1,
   bgcGrey,
   bcWhiteGrey,
+  brw1,
 } from "../../styles";
 
 export const Input: FunctionComponent<
@@ -37,7 +36,7 @@ export const Input: FunctionComponent<
     disabledInputStyle?: StyleProp<ViewStyle>[];
     inputContainerStyle?: StyleProp<ViewStyle>[];
     disabledInputContainerStyle?: StyleProp<ViewStyle>[];
-    hasLeftBorder?: boolean;
+    hasCenterBorder?: boolean;
     rightIcon?: any;
     rightIconOnPress?: () => void;
   }
@@ -69,7 +68,7 @@ export const Input: FunctionComponent<
     ? disabledInputContainerStyle
     : inputContainerStyle;
 
-  const hasLeftBorder = props.hasLeftBorder ?? false;
+  const hasCenterBorder = props.hasCenterBorder ?? false;
   const rightIcon = props.rightIcon ?? null;
   const rightIconOnPress = props.rightIconOnPress ?? undefined;
 
@@ -90,10 +89,16 @@ export const Input: FunctionComponent<
           ...currentInputContainerStyle,
         ])}
       >
-        <View style={sf([flex1, p3])}>
+        <View
+          style={sf([
+            flex1,
+            hasCenterBorder ? brw1 : undefined,
+            errorMessage ? bcError : bcWhiteGrey,
+          ])}
+        >
           <TextInput
             {...attributes}
-            style={sf([body2, ...currentInputStyle])}
+            style={sf([p3, body2, ...currentInputStyle])}
           />
         </View>
         {rightIcon ? (
@@ -102,8 +107,6 @@ export const Input: FunctionComponent<
               accessible
               style={sf([
                 p3,
-                hasLeftBorder ? blw1 : undefined,
-                errorMessage ? bcError : bcWhiteGrey,
                 justifyContentEnd,
                 alignItemsCenter,
                 ...currentInputContainerStyle,

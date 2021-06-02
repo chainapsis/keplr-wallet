@@ -4,7 +4,7 @@ import { View } from "react-native";
 import {
   alignItemsCenter,
   bbw1,
-  bcGrey,
+  bcWhiteGrey,
   bgcWhite,
   body1,
   btw1,
@@ -53,7 +53,7 @@ export const SettingBox: FunctionComponent<SettingBoxProps> = ({
           justifyContentBetween,
           isTop ? btw1 : {},
           bbw1,
-          bcGrey,
+          bcWhiteGrey,
           p4,
         ])}
       >
@@ -105,7 +105,7 @@ export const AddressBook: FunctionComponent<{
           justifyContentBetween,
           isTop ? btw1 : {},
           bbw1,
-          bcGrey,
+          bcWhiteGrey,
           p4,
         ])}
       >
