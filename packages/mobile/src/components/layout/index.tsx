@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { View } from "react-native";
+import { View, ViewStyle, StyleProp } from "react-native";
 import {
   RectButton,
   gestureHandlerRootHOC,
@@ -12,6 +12,8 @@ import {
   justifyContentBetween,
   h3,
   fcHigh,
+  cardStyle,
+  p4,
 } from "../../styles";
 
 export const HeaderLayout: FunctionComponent<{
@@ -55,4 +57,19 @@ export const HeaderLayout: FunctionComponent<{
       </View>
     </React.Fragment>
   );
+};
+
+export const Card: FunctionComponent<{ style?: StyleProp<ViewStyle>[] }> = ({
+  children,
+  style,
+}) => {
+  const containerStyle = style ?? [];
+  return <View style={sf([cardStyle, p4, ...containerStyle])}>{children}</View>;
+};
+
+export const CardWithoutPadding: FunctionComponent<{
+  style?: StyleProp<ViewStyle>[];
+}> = ({ children, style }) => {
+  const containerStyle = style ?? [];
+  return <View style={sf([cardStyle, ...containerStyle])}>{children}</View>;
 };

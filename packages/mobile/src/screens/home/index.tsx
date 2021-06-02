@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent, useLayoutEffect, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { Button as RNButton, Card } from "react-native-elements";
+import { Button as RNButton } from "react-native-elements";
 import { SafeAreaPage } from "../../components/page";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Feather";
@@ -13,6 +13,7 @@ import { TokensView } from "./tokens";
 import { TotalStakedView } from "./total-staked";
 import { GovernanceView } from "./governance";
 import { useStore } from "../../stores";
+import { Card } from "../../components/layout";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();

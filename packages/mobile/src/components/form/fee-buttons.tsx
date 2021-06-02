@@ -13,7 +13,6 @@ import {
   bgcWhite,
   fcDefault,
   fcWhite,
-  fcGrey2,
   flex1,
   subtitle2,
   justifyContentCenter,
@@ -26,6 +25,7 @@ import {
   flexDirectionRow,
   py2,
   bgcPrimary300,
+  fcLow,
 } from "../../styles";
 import {
   RectButton,
@@ -82,7 +82,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
       const [backgroundColor, textColor, titleColor] =
         index === selectedIndex
           ? [bgcPrimary300, fcWhite, fcWhite]
-          : [bgcWhite, fcGrey2, fcDefault];
+          : [bgcWhite, fcLow, fcDefault];
 
       // RectButton in Modal only working in HOC on android
       const FeeButtonWithHOC = gestureHandlerRootHOC(() => (

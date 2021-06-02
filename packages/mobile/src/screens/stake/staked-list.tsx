@@ -3,15 +3,16 @@ import { SafeAreaPage } from "../../components/page";
 import { Staking } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Text, Image, Card } from "react-native-elements";
+import { Text, Image } from "react-native-elements";
 import { View } from "react-native";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { Card } from "../../components/layout";
 import {
   sf,
   fs13,
   flexDirectionRow,
   justifyContentBetween,
-  mb4,
+  mb3,
 } from "../../styles";
 
 const BondStatus = Staking.BondStatus;
@@ -31,7 +32,7 @@ export const StakedSummary: FunctionComponent<{
   );
 
   return (
-    <Card containerStyle={mb4}>
+    <Card style={[mb3]}>
       <View>
         <Image
           style={{

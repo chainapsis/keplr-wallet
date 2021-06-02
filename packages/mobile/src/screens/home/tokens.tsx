@@ -23,7 +23,8 @@ import {
   mt3,
 } from "../../styles";
 import { View } from "react-native";
-import { Text, Card } from "react-native-elements";
+import { Text } from "react-native-elements";
+import { Card } from "../../components/layout";
 
 const TokenView: FunctionComponent<{
   balance: ObservableQueryBalanceInner;

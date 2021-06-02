@@ -154,7 +154,7 @@ export const bgcWhite: StyleProp<ViewStyle> = {
   opacity: 0.9,
 };
 
-export const bgcGray: StyleProp<ViewStyle> = {
+export const bgcGrey: StyleProp<ViewStyle> = {
   backgroundColor: "#e9ecef",
   opacity: 1,
 };

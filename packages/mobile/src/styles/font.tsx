@@ -51,18 +51,9 @@ export const fcBlack: StyleProp<TextStyle> = { color: colors.black };
 
 export const fcWhite: StyleProp<TextStyle> = { color: colors.white };
 
-export const fcGrey0: StyleProp<TextStyle> = { color: colors.grey0 };
+export const fcGrey: StyleProp<TextStyle> = { color: colors.grey };
 
-export const fcGrey1: StyleProp<TextStyle> = { color: colors.grey1 };
-
-export const fcGrey2: StyleProp<TextStyle> = { color: colors.grey2 };
-
-export const fcGrey3: StyleProp<TextStyle> = { color: colors.grey3 };
-
-export const fcGrey4: StyleProp<TextStyle> = { color: colors.grey4 };
-
-export const fcGrey5: StyleProp<TextStyle> = { color: colors.grey5 };
-
+export const fcWhiteGrey: StyleProp<TextStyle> = { color: colors.whiteGrey };
 export const fcPrimary: StyleProp<TextStyle> = { color: colors.primary };
 
 export const fcPrimary50: StyleProp<TextStyle> = {

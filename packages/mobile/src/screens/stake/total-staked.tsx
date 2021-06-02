@@ -2,7 +2,8 @@ import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Text, Image, Card } from "react-native-elements";
+import { Text, Image } from "react-native-elements";
+import { Card } from "../../components/layout";
 import { View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FlexButton, FlexWhiteButton } from "../../components/buttons";
@@ -12,7 +13,7 @@ import {
   sf,
   alignItemsCenter,
   h5,
-  mb4,
+  mb3,
 } from "../../styles";
 
 const NeedStakeView: FunctionComponent = () => {
@@ -63,7 +64,7 @@ export const TotalStakedView: FunctionComponent = observer(() => {
   };
 
   return (
-    <Card containerStyle={mb4}>
+    <Card style={[mb3]}>
       <Text style={h5}>Staking</Text>
       {delegations.delegations.length === 0 ? (
         <NeedStakeView />

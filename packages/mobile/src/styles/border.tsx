@@ -133,4 +133,8 @@ export const bcError: StyleProp<ViewStyle> = { borderColor: colors.error };
 
 export const bcSuccess: StyleProp<ViewStyle> = { borderColor: colors.success };
 
-export const bcGray: StyleProp<ViewStyle> = { borderColor: colors.grey5 };
+export const bcGrey: StyleProp<ViewStyle> = { borderColor: colors.grey };
+
+export const bcWhiteGrey: StyleProp<ViewStyle> = {
+  borderColor: colors.whiteGrey,
+};

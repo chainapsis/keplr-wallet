@@ -1,5 +1,7 @@
 import React, { FunctionComponent } from "react";
-import { Text, Card } from "react-native-elements";
+import { Text } from "react-native-elements";
+import moment from "moment";
+import { CardWithoutPadding } from "../../components/layout";
 import { View } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { parseTime } from "../governance/governance-utils";
@@ -8,10 +10,10 @@ import { useStore } from "../../stores";
 import { Governance } from "@keplr-wallet/stores";
 import { useNavigation } from "@react-navigation/native";
 import { StateBadge } from "../governance/state-badge";
+import EntypoIcon from "react-native-vector-icons/Entypo";
 import {
   alignItemsCenter,
   caption2,
-  fcGrey1,
   flexDirectionRow,
   h6,
   justifyContentBetween,
@@ -21,12 +23,15 @@ import {
   h5,
   fcHigh,
   bbw1,
-  bcGray,
-  py3,
   buttonFont2,
-  fcGrey4,
-  mt3,
   mt4,
+  p4,
+  px4,
+  pt4,
+  pb3,
+  caption1,
+  bcWhiteGrey,
+  fcLow,
 } from "../../styles";
 
 export const GovernanceView: FunctionComponent = observer(() => {
@@ -39,29 +44,38 @@ export const GovernanceView: FunctionComponent = observer(() => {
   const lastProposal = governance.proposals[0] || null;
 
   return (
-    <Card containerStyle={mt4}>
+    <CardWithoutPadding style={[mt4]}>
       <RectButton
         rippleColor="#AAAAAA"
         onPress={() => {
           navigation.navigate("Governance");
         }}
       >
-        <View
-          accessible
-          style={sf([
-            flexDirectionRow,
-            justifyContentBetween,
-            alignItemsCenter,
-            py3,
-            bbw1,
-            bcGray,
-          ])}
-        >
-          <Text style={sf([h5, fcHigh])}>Governance</Text>
-          <Text style={sf([buttonFont2, fcGrey4])}>View All</Text>
+        <View accessible style={sf([px4, pt4])}>
+          <View
+            style={sf([
+              flexDirectionRow,
+              justifyContentBetween,
+              alignItemsCenter,
+              bbw1,
+              bcWhiteGrey,
+              pb3,
+            ])}
+          >
+            <Text style={sf([h5, fcHigh])}>Governance</Text>
+            <View
+              style={sf([
+                flexDirectionRow,
+                justifyContentBetween,
+                alignItemsCenter,
+              ])}
+            >
+              <Text style={sf([buttonFont2, fcLow])}>View All</Text>
+              <EntypoIcon name="chevron-right" size={22} color="#C6C6CD" />
+            </View>
+          </View>
         </View>
       </RectButton>
-
       {lastProposal ? (
         <RectButton
           rippleColor="#AAAAAA"
@@ -71,33 +85,53 @@ export const GovernanceView: FunctionComponent = observer(() => {
             });
           }}
         >
-          <View accessible>
+          <View accessible style={p4}>
             <View
               style={sf([
                 flexDirectionRow,
                 justifyContentBetween,
                 alignItemsCenter,
                 mb2,
-                mt3,
               ])}
             >
               <Text style={h6}>{`#${lastProposal.id}`}</Text>
               <StateBadge proposalStatus={lastProposal.proposalStatus} />
             </View>
             <Text style={h6}>{lastProposal.title}</Text>
-            <Text style={sf([fcGrey1, caption2, mt2])}>
-              {lastProposal.proposalStatus ===
-              Governance.ProposalStatus.DEPOSIT_PERIOD
-                ? `Deposit endtime: ${parseTime(
-                    lastProposal.raw.deposit_end_time
-                  )}`
-                : `Voting endtime: ${parseTime(
-                    lastProposal.raw.voting_end_time
-                  )}`}
-            </Text>
+            <View
+              style={sf([
+                flexDirectionRow,
+                justifyContentBetween,
+                alignItemsCenter,
+                mt2,
+              ])}
+            >
+              <Text style={sf([fcLow, caption2])}>
+                {lastProposal.proposalStatus ===
+                Governance.ProposalStatus.DEPOSIT_PERIOD
+                  ? `Deposit endtime: ${parseTime(
+                      lastProposal.raw.deposit_end_time
+                    )}`
+                  : `Voting endtime: ${parseTime(
+                      lastProposal.raw.voting_end_time
+                    )}`}
+              </Text>
+              <Text style={sf([caption1])}>
+                {lastProposal.proposalStatus ===
+                Governance.ProposalStatus.DEPOSIT_PERIOD
+                  ? moment(lastProposal.raw.deposit_end_time).diff(
+                      moment(),
+                      "days"
+                    )
+                  : moment(lastProposal.raw.voting_end_time).diff(
+                      moment(),
+                      "days"
+                    )}
+              </Text>
+            </View>
           </View>
         </RectButton>
       ) : null}
-    </Card>
+    </CardWithoutPadding>
   );
 });

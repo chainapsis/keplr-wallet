@@ -16,10 +16,10 @@ import { View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useStore } from "../../stores";
 import {
-  bgcGray,
+  bgcGrey,
   bgcWhite,
   caption1,
-  fcGrey1,
+  fcLow,
   flexDirectionRow,
   justifyContentBetween,
   sf,
@@ -108,7 +108,7 @@ export const StakedCoinInput: FunctionComponent<StakedCoinInputProps> = observer
         <View style={sf([flexDirectionRow, justifyContentBetween])}>
           <Text style={subtitle2}>Amount</Text>
           <TouchableOpacity onPress={toggleAllBalanceMode}>
-            <Text style={sf([fcGrey1, caption1, underline])}>
+            <Text style={sf([fcLow, caption1, underline])}>
               {`Staked: ${delegationTo.trim(true).toString()}`}
             </Text>
           </TouchableOpacity>
@@ -120,7 +120,7 @@ export const StakedCoinInput: FunctionComponent<StakedCoinInputProps> = observer
           }}
           keyboardType="numeric"
           disabled={isAllBalanceMode}
-          inputContainerStyle={isAllBalanceMode ? [bgcGray] : [bgcWhite]}
+          inputContainerStyle={isAllBalanceMode ? [bgcGrey] : [bgcWhite]}
           errorMessage={errorText}
         />
       </React.Fragment>

@@ -14,11 +14,11 @@ import {
   flexDirectionRow,
   mr4,
   sf,
-  bgcGray,
+  bgcGrey,
   px4,
   py4,
   bbw1,
-  bcGray,
+  bcGrey,
   bgcPrimary,
   br2,
   buttonFont2,
@@ -163,12 +163,12 @@ const VoteCheckbox: FunctionComponent<{
   active: boolean;
   optionText: string;
 }> = ({ active, optionText }) => {
-  const color: StyleProp<ViewProps> = active ? bgcPrimary : bgcGray;
+  const color: StyleProp<ViewProps> = active ? bgcPrimary : bgcGrey;
 
   return (
     <View
       accessible
-      style={sf([flexDirectionRow, alignItemsCenter, px4, py4, bbw1, bcGray])}
+      style={sf([flexDirectionRow, alignItemsCenter, px4, py4, bbw1, bcGrey])}
     >
       <View
         style={sf([

@@ -5,7 +5,8 @@ import moment from "moment";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Staking } from "@keplr-wallet/stores";
-import { Text, Image, Card } from "react-native-elements";
+import { Text, Image } from "react-native-elements";
+import { Card } from "../../components/layout";
 import { View } from "react-native";
 import { ProgressBar } from "../../components/svg";
 import {
@@ -16,7 +17,7 @@ import {
   subtitle2,
   fcLow,
   caption2,
-  mb4,
+  mb3,
 } from "../../styles";
 
 const BondStatus = Staking.BondStatus;
@@ -157,7 +158,7 @@ export const UnbondingView: FunctionComponent<{
   unbondings: UnbondingDelegation[];
 }> = ({ unbondings }) => {
   return (
-    <Card containerStyle={mb4}>
+    <Card style={[mb3]}>
       <Text style={h5}>UnDelegating</Text>
       <UnbondingList unbondings={unbondings} />
     </Card>

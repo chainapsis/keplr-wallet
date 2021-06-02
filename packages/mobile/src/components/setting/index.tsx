@@ -4,11 +4,11 @@ import { View } from "react-native";
 import {
   alignItemsCenter,
   bbw1,
-  bcGray,
+  bcGrey,
   bgcWhite,
   body1,
   btw1,
-  fcGrey2,
+  fcLow,
   flex1,
   flexDirectionRow,
   justifyContentBetween,
@@ -53,7 +53,7 @@ export const SettingBox: FunctionComponent<SettingBoxProps> = ({
           justifyContentBetween,
           isTop ? btw1 : {},
           bbw1,
-          bcGray,
+          bcGrey,
           p4,
         ])}
       >
@@ -62,7 +62,7 @@ export const SettingBox: FunctionComponent<SettingBoxProps> = ({
           <Text style={body1}>{label}</Text>
         </View>
         <View style={sf([flexDirectionRow, alignItemsCenter])}>
-          <Text style={sf([body1, fcGrey2, mr2])}>{subText}</Text>
+          <Text style={sf([body1, fcLow, mr2])}>{subText}</Text>
           <RectButton onPress={rightIconOnPress ? rightIconOnPress : onPress}>
             <View accessible>{rightIcon}</View>
           </RectButton>
@@ -75,7 +75,7 @@ export const SettingBox: FunctionComponent<SettingBoxProps> = ({
 export const SettingTitle: FunctionComponent<{ title: string }> = ({
   title,
 }) => {
-  return <Text style={sf([overline, fcGrey2, ml4, mt4])}>{title}</Text>;
+  return <Text style={sf([overline, fcLow, ml4, mt4])}>{title}</Text>;
 };
 
 export const AddressBook: FunctionComponent<{
@@ -105,7 +105,7 @@ export const AddressBook: FunctionComponent<{
           justifyContentBetween,
           isTop ? btw1 : {},
           bbw1,
-          bcGray,
+          bcGrey,
           p4,
         ])}
       >

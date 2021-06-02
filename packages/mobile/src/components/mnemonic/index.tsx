@@ -25,7 +25,7 @@ import {
   subtitle2,
   bgcDarkGrey,
   flex1,
-  bcGray,
+  bcGrey,
   flexWrap,
   bDashed,
 } from "../../styles";
@@ -83,7 +83,7 @@ export const SuggestedWordsView: FunctionComponent<{
                 br2,
                 bDashed,
                 bw1,
-                i === currentCursor ? bcPrimary : bcGray,
+                i === currentCursor ? bcPrimary : bcGrey,
                 { width: 80 },
               ])}
             >

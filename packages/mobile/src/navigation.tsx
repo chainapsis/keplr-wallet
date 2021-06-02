@@ -123,7 +123,7 @@ export const MainTabNavigation: FunctionComponent = () => {
       })}
       tabBarOptions={{
         activeTintColor: colors.primary,
-        inactiveTintColor: colors.grey0,
+        inactiveTintColor: colors.grey,
         showLabel: false,
       }}
     >

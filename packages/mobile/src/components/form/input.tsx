@@ -13,7 +13,7 @@ import {
   flexDirectionRow,
   bgcWhite,
   p3,
-  bcGray,
+  bcGrey,
   mb1,
   br1,
   body2,
@@ -22,7 +22,8 @@ import {
   justifyContentEnd,
   blw1,
   caption1,
-  bgcGray,
+  bgcGrey,
+  bcWhiteGrey,
 } from "../../styles";
 
 export const Input: FunctionComponent<
@@ -82,10 +83,10 @@ export const Input: FunctionComponent<
           flexDirectionRow,
           justifyContentCenter,
           alignItemsCenter,
-          disabled ? bgcGray : bgcWhite,
+          disabled ? bgcGrey : bgcWhite,
           bw1,
           br1,
-          errorMessage ? bcError : bcGray,
+          errorMessage ? bcError : bcWhiteGrey,
           ...currentInputContainerStyle,
         ])}
       >
@@ -102,7 +103,7 @@ export const Input: FunctionComponent<
               style={sf([
                 p3,
                 hasLeftBorder ? blw1 : undefined,
-                errorMessage ? bcError : bcGray,
+                errorMessage ? bcError : bcWhiteGrey,
                 justifyContentEnd,
                 alignItemsCenter,
                 ...currentInputContainerStyle,

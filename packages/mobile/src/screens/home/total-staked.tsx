@@ -2,11 +2,12 @@ import React, { FunctionComponent, useMemo } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Text, Card, Image } from "react-native-elements";
+import { Text, Image } from "react-native-elements";
 import { View } from "react-native";
 import { Staking } from "@keplr-wallet/stores";
 import { useNavigation } from "@react-navigation/native";
 import { FlexWhiteButton } from "../../components/buttons";
+import { Card } from "../../components/layout";
 import {
   flexDirectionRow,
   justifyContentBetween,
@@ -23,9 +24,10 @@ import {
   mt3,
   mt0,
   bbw1,
-  bcGray,
+  bcGrey,
   py3,
   mt4,
+  bcWhiteGrey,
 } from "../../styles";
 
 const BondStatus = Staking.BondStatus;
@@ -76,10 +78,16 @@ export const TotalStakedView: FunctionComponent = observer(() => {
   );
 
   return (
-    <Card containerStyle={mt4}>
+    <Card style={[mt4]}>
       <Text style={sf([h5, fcHigh])}>My Delegations</Text>
       <View
-        style={sf([flexDirectionRow, justifyContentBetween, py3, bbw1, bcGray])}
+        style={sf([
+          flexDirectionRow,
+          justifyContentBetween,
+          py3,
+          bbw1,
+          bcWhiteGrey,
+        ])}
       >
         <Text style={subtitle2}>Total Staked</Text>
         <Text style={subtitle2}>

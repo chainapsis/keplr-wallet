@@ -25,10 +25,10 @@ import {
   subtitle2,
   mb2,
   cardStyle,
-  fcGrey1,
+  fcLow,
   justifyContentAround,
   bbw1,
-  bcGray,
+  bcGrey,
   px2,
 } from "../styles";
 import Icon from "react-native-vector-icons/Feather";
@@ -129,13 +129,13 @@ const Msg: FunctionComponent<{
   content: string;
 }> = ({ icon = "question", title, content }) => {
   return (
-    <View style={sf([flexDirectionRow, bbw1, bcGray])}>
+    <View style={sf([flexDirectionRow, bbw1, bcGrey])}>
       <View style={p3}>
         <Icon name={icon} size={18} />
       </View>
       <View style={sf([flex1, justifyContentAround])}>
         <Text style={h6}>{title}</Text>
-        <Text style={sf([body3, fcGrey1])}>{content}</Text>
+        <Text style={sf([body3, fcLow])}>{content}</Text>
       </View>
     </View>
   );

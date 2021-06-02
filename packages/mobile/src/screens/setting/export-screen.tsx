@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { FullPage } from "../../components/page";
-import { Card } from "react-native-elements";
+import { Card } from "../../components/layout";
 import { Text } from "react-native-elements";
 import { useStore } from "../../stores";
 import { useForm, Controller } from "react-hook-form";

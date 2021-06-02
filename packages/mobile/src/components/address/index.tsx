@@ -5,7 +5,7 @@ import { View } from "react-native";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import {
   alignItemsCenter,
-  bcGray,
+  bcGrey,
   br3,
   bw1,
   caption1,
@@ -54,7 +54,7 @@ export const Address: FunctionComponent<AddressProps> = ({
     <RectButton rippleColor="#AAAAAA" onPress={copyAddress}>
       <View
         accessible
-        style={sf([bw1, bcGray, px2, br3, flexDirectionRow, alignItemsCenter])}
+        style={sf([bw1, bcGrey, px2, br3, flexDirectionRow, alignItemsCenter])}
       >
         <Text style={sf([caption1, mr2])}>
           {Bech32Address.shortenAddress(address, maxCharacters)}

@@ -14,7 +14,7 @@ import {
   py0,
   px3,
   py1,
-  bcGray,
+  bcGrey,
 } from "./styles";
 
 const globalTheme = {
@@ -23,7 +23,7 @@ const globalTheme = {
   Input: {
     labelStyle: sf([fcDefault, subtitle2]),
     containerStyle: sf([px0, py0]),
-    inputContainerStyle: sf([bgcWhite, bcGray, mt1, px3, py1, br1]),
+    inputContainerStyle: sf([bgcWhite, bcGrey, mt1, px3, py1, br1]),
     inputStyle: sf([fcDefault, body2]),
   },
   Card: {

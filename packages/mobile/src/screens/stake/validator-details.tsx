@@ -3,7 +3,7 @@ import { SafeAreaPage } from "../../components/page";
 import { UnbondingView } from "./unbonding";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Text, Image, Card } from "react-native-elements";
+import { Text, Image } from "react-native-elements";
 import { Staking } from "@keplr-wallet/stores";
 import { CoinPretty, DecUtils, Dec } from "@keplr-wallet/unit";
 import { View } from "react-native";
@@ -21,9 +21,10 @@ import {
   subtitle2,
   body2,
   ml4,
-  mb4,
+  mb3,
 } from "../../styles";
 import { FlexButton, FlexWhiteButton } from "../../components/buttons";
+import { Card } from "../../components/layout";
 import { useNavigation } from "@react-navigation/native";
 
 export const ValidatorDetailsView: FunctionComponent<{
@@ -34,7 +35,7 @@ export const ValidatorDetailsView: FunctionComponent<{
   const navigation = useNavigation();
 
   return (
-    <Card containerStyle={mb4}>
+    <Card style={[mb3]}>
       <View style={flexDirectionRow}>
         <Image
           style={{

@@ -18,10 +18,10 @@ import { View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useStore } from "../../stores";
 import {
-  bgcGray,
+  bgcGrey,
   bgcWhite,
   caption1,
-  fcGrey1,
+  fcLow,
   flexDirectionRow,
   justifyContentBetween,
   sf,
@@ -121,7 +121,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             <Input
               label="Token"
               disabled={isAllBalanceMode}
-              inputContainerStyle={isAllBalanceMode ? [bgcGray] : [bgcWhite]}
+              inputContainerStyle={isAllBalanceMode ? [bgcGrey] : [bgcWhite]}
               value={amountConfig.sendCurrency.coinDenom}
               rightIcon={<Icon name="chevron-down" />}
             />
@@ -130,7 +130,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
         <View style={sf([flexDirectionRow, justifyContentBetween])}>
           <Text style={subtitle2}>Amount</Text>
           <TouchableOpacity onPress={toggleAllBalanceMode}>
-            <Text style={sf([fcGrey1, caption1, underline])}>
+            <Text style={sf([fcLow, caption1, underline])}>
               {`Balance: ${balance.trim(true).maxDecimals(6).toString()}`}
             </Text>
           </TouchableOpacity>
@@ -142,7 +142,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
           }}
           keyboardType="numeric"
           disabled={isAllBalanceMode}
-          inputContainerStyle={isAllBalanceMode ? [bgcGray] : [bgcWhite]}
+          inputContainerStyle={isAllBalanceMode ? [bgcGrey] : [bgcWhite]}
           errorMessage={errorText}
         />
       </React.Fragment>

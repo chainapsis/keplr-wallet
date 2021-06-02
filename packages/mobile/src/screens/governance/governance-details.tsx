@@ -2,8 +2,9 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { ScrollView } from "react-native";
 import { SafeAreaFixedPage } from "../../components/page";
+import { Card } from "../../components/layout";
 import { VotingButton } from "./voting-button";
-import { Card, Text } from "react-native-elements";
+import { Text } from "react-native-elements";
 import { View } from "react-native";
 import { parseTime } from "./governance-utils";
 import { StateBadge } from "./state-badge";
@@ -11,16 +12,15 @@ import { useStore } from "../../stores";
 import { Governance } from "@keplr-wallet/stores";
 import {
   alignItemsCenter,
-  caption2,
+  body3,
   flex1,
   flexDirectionRow,
   h6,
+  h7,
   justifyContentBetween,
   mb1,
   mb2,
-  overline,
   sf,
-  subtitle2,
 } from "../../styles";
 
 export const ProposalDetailsCard: FunctionComponent<{
@@ -36,7 +36,7 @@ export const ProposalDetailsCard: FunctionComponent<{
   const proposal = governance.getProposal(proposalId);
 
   return proposal ? (
-    <Card containerStyle={{ paddingBottom: 60 }}>
+    <Card style={[{ paddingBottom: 60 }]}>
       <View
         style={sf([
           flexDirectionRow,
@@ -66,14 +66,12 @@ export const ProposalDetailsCard: FunctionComponent<{
         Governance.ProposalStatus.DEPOSIT_PERIOD ? (
           <React.Fragment>
             <View style={flex1}>
-              <Text style={sf([subtitle2, mb1])}>Submit Time</Text>
-              <Text style={overline}>
-                {parseTime(proposal.raw.submit_time)}
-              </Text>
+              <Text style={sf([h7, mb1])}>Submit Time</Text>
+              <Text style={body3}>{parseTime(proposal.raw.submit_time)}</Text>
             </View>
             <View style={flex1}>
-              <Text style={sf([subtitle2, mb1])}>Deposit End Time</Text>
-              <Text style={overline}>
+              <Text style={sf([h7, mb1])}>Deposit End Time</Text>
+              <Text style={body3}>
                 {parseTime(proposal.raw.deposit_end_time)}
               </Text>
             </View>
@@ -81,22 +79,22 @@ export const ProposalDetailsCard: FunctionComponent<{
         ) : (
           <React.Fragment>
             <View style={flex1}>
-              <Text style={sf([subtitle2, mb1])}>Voting Start Time</Text>
-              <Text style={overline}>
+              <Text style={sf([h7, mb1])}>Voting Start Time</Text>
+              <Text style={body3}>
                 {parseTime(proposal.raw.voting_start_time)}
               </Text>
             </View>
             <View style={flex1}>
-              <Text style={sf([subtitle2, mb1])}>Voting End Time</Text>
-              <Text style={overline}>
+              <Text style={sf([h7, mb1])}>Voting End Time</Text>
+              <Text style={body3}>
                 {parseTime(proposal.raw.voting_end_time)}
               </Text>
             </View>
           </React.Fragment>
         )}
       </View>
-      <Text style={sf([subtitle2, mb1])}>Description</Text>
-      <Text style={caption2}>{proposal.raw.content.value.description}</Text>
+      <Text style={sf([h7, mb1])}>Description</Text>
+      <Text style={body3}>{proposal.raw.content.value.description}</Text>
     </Card>
   ) : (
     // TO DO Loading

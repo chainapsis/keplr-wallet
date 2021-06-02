@@ -16,12 +16,12 @@ import {
   bgcWhite,
   caption2,
   cardStyle,
-  fcGrey1,
+  fcLow,
   flexDirectionRow,
   h6,
   justifyContentBetween,
   mb2,
-  mb4,
+  mb3,
   mt2,
   p4,
   sf,
@@ -34,7 +34,7 @@ const ProposalSummary: FunctionComponent<{
 
   return (
     <RectButton
-      style={sf([cardStyle, p4, bgcWhite, mb4])}
+      style={sf([cardStyle, p4, bgcWhite, mb3])}
       rippleColor="#AAAAAA"
       onPress={() => {
         navigation.navigate("Governance Details", {
@@ -55,7 +55,7 @@ const ProposalSummary: FunctionComponent<{
           <StateBadge proposalStatus={proposal.proposalStatus} />
         </View>
         <Text style={h6}>{proposal.title}</Text>
-        <Text style={sf([fcGrey1, caption2, mt2])}>
+        <Text style={sf([fcLow, caption2, mt2])}>
           {proposal.proposalStatus === Governance.ProposalStatus.DEPOSIT_PERIOD
             ? `Deposit endtime: ${parseTime(proposal.raw.deposit_end_time)}`
             : `Voting endtime: ${parseTime(proposal.raw.voting_end_time)}`}

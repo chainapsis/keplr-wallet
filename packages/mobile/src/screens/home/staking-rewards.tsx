@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Text, Card } from "react-native-elements";
+import { Text } from "react-native-elements";
 import { View } from "react-native";
 import {
   flexDirectionRow,
@@ -15,6 +15,7 @@ import {
   mt4,
 } from "../../styles";
 import { Button } from "../../components/buttons";
+import { Card } from "../../components/layout";
 
 export const StakingRewardsView: FunctionComponent = observer(() => {
   const { accountStore, queriesStore, chainStore } = useStore();
@@ -47,7 +48,7 @@ export const StakingRewardsView: FunctionComponent = observer(() => {
   };
 
   return (
-    <Card containerStyle={mt4}>
+    <Card style={[mt4]}>
       <View style={sf([flexDirectionRow, justifyContentBetween])}>
         <View style={sf([justifyContentBetween])}>
           <Text style={sf([h5, fcHigh])}>Staking Rewards</Text>
