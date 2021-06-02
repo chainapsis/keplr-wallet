@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { FullFixedPageWithoutPadding } from "../../components/page";
 import { useBioAuth } from "../../hooks/bio-auth";
-import { SettingBox, SettingTitle } from "./setting-box";
+import { SettingBox, SettingTitle } from "../../components/setting";
 import * as Keychain from "react-native-keychain";
 import FeatherIcon from "react-native-vector-icons/Feather";
 

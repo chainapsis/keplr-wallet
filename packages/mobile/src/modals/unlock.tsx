@@ -1,13 +1,14 @@
 import React, { FunctionComponent, useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../stores";
-import { gestureHandlerRootHOC } from "react-native-gesture-handler";
+import { View } from "react-native";
 import { Text } from "react-native-elements";
 import { sf, h4, fAlignCenter, my3 } from "../styles";
-import { FlexButton } from "../components/buttons";
-import { Input } from "../components/input";
+import { Input } from "../components/form";
 import * as Keychain from "react-native-keychain";
 import { useBioAuth } from "../hooks/bio-auth";
+import { FullFixedPage } from "../components/page";
+import { FlexButtonWithHoc } from "./common";
 
 const BioUnlock: FunctionComponent<{
   setIsFailed: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,7 +36,7 @@ const BioUnlock: FunctionComponent<{
     firstBioAuth();
   }, []);
 
-  return <Text style={sf([h4, fAlignCenter, my3])}>bio</Text>;
+  return null;
 });
 
 export const UnlockView: FunctionComponent = observer(() => {
@@ -46,23 +47,11 @@ export const UnlockView: FunctionComponent = observer(() => {
   const [password, setPassword] = useState("");
   const [isFailed, setIsFailed] = useState(false);
 
-  // RectButton in Modal only working in HOC on android
-  const UnlockButtonWithHoc = gestureHandlerRootHOC(() => {
-    return (
-      <FlexButton
-        title="Unlock"
-        onPress={async () => {
-          await keyRingStore.unlock(password);
-          interactionModalStore.popUrl();
-        }}
-      />
-    );
-  });
-
-  return bioAuth?.usingBioAuth === true && isFailed === false ? (
-    <BioUnlock setIsFailed={setIsFailed} />
-  ) : (
-    <React.Fragment>
+  return (
+    <FullFixedPage>
+      {bioAuth?.usingBioAuth === true && isFailed === false ? (
+        <BioUnlock setIsFailed={setIsFailed} />
+      ) : null}
       <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
       <Input
         label="Password"
@@ -71,7 +60,15 @@ export const UnlockView: FunctionComponent = observer(() => {
         value={password}
         onChangeText={setPassword}
       />
-      <UnlockButtonWithHoc />
-    </React.Fragment>
+      <View style={{ height: 45 }}>
+        <FlexButtonWithHoc
+          title="Unlock"
+          onPress={async () => {
+            await keyRingStore.unlock(password);
+            interactionModalStore.popUrl();
+          }}
+        />
+      </View>
+    </FullFixedPage>
   );
 });

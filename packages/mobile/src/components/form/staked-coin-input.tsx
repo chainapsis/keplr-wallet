@@ -26,7 +26,7 @@ import {
   subtitle2,
   underline,
 } from "../../styles";
-import { Input } from "../input";
+import { Input } from "./input";
 
 export interface StakedCoinInputProps {
   validatorAddress: string;

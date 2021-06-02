@@ -9,7 +9,6 @@ import {
   justifyContentCenter,
   overflowHidden,
   sf,
-  shadow,
 } from "../../styles";
 
 export const BaseButton: FunctionComponent<
@@ -64,7 +63,7 @@ export const BaseButton: FunctionComponent<
   return (
     // RectButton Style borderWidth and borderColor in android don't work
     // So Add Outermost View container for drawing White Flex Button
-    <View style={sf([shadow, overflowHidden, br1, ...containerStyle])}>
+    <View style={sf([overflowHidden, br1, ...containerStyle])}>
       <RectButton
         {...attributes}
         onPress={handleOnPress}

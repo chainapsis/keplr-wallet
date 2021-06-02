@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React, { FunctionComponent, useEffect, useRef } from "react";
 import { Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
@@ -11,18 +12,39 @@ import {
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 import { RegisterStackScreen } from "./screens/register";
-import { HomeStackScreen } from "./screens/home";
+import { HomeScreen } from "./screens/home";
 import { ModalsRenderer } from "./modals";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import { SendStackScreen } from "./screens/send";
-import { StakeStackScreen } from "./screens/stake";
-import { GovernanceStackScreen } from "./screens/governance";
+import { SendScreen, AddressBookModalStackScreen } from "./screens/send";
+import {
+  ValidatorListScreen,
+  ValidatorDetailsScreen,
+  StakedListScreen,
+  DelegateScreen,
+  RedelegateScreen,
+  UndelegateScreen,
+  RedelegateValidatorScreen,
+} from "./screens/stake";
+import {
+  GovernanceScreen,
+  GovernanceDetailsScreeen,
+} from "./screens/governance";
 import { SettingStackScreen } from "./screens/setting";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { DrawerContent } from "./components/drawer";
-import { alignItemsCenter, flex1, justifyContentCenter, sf } from "./styles";
+import {
+  alignItemsCenter,
+  flex1,
+  justifyContentCenter,
+  fcHigh,
+  h3,
+  colors,
+  sf,
+} from "./styles";
+import { GradientBackground } from "./components/svg";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -52,22 +74,61 @@ export const MainNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
+        headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
+        headerBackTitleVisible: false,
       }}
+      initialRouteName="Home"
     >
-      <Stack.Screen name="Home" component={HomeStackScreen} />
-      <Stack.Screen name="Send" component={SendStackScreen} />
-      <Stack.Screen name="Stake" component={StakeStackScreen} />
-      <Stack.Screen name="Governance" component={GovernanceStackScreen} />
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Send" component={SendScreen} />
+      <Stack.Screen name="Validator List" component={ValidatorListScreen} />
+      <Stack.Screen
+        name="Validator Details"
+        component={ValidatorDetailsScreen}
+      />
+      <Stack.Screen name="Staked List" component={StakedListScreen} />
+      <Stack.Screen name="Delegate" component={DelegateScreen} />
+      <Stack.Screen name="Undelegate" component={UndelegateScreen} />
+      <Stack.Screen name="Redelegate" component={RedelegateScreen} />
+      <Stack.Screen
+        name="Redelegate Validator"
+        component={RedelegateValidatorScreen}
+      />
+      <Stack.Screen name="Governance" component={GovernanceScreen} />
+      <Stack.Screen
+        name="Governance Details"
+        component={GovernanceDetailsScreeen}
+      />
     </Stack.Navigator>
   );
 };
 
 export const MainTabNavigation: FunctionComponent = () => {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName = "";
+
+          if (route.name === "Main") {
+            iconName = focused ? "ios-grid" : "ios-grid-outline";
+          } else if (route.name === "Settings") {
+            iconName = focused ? "settings" : "settings-outline";
+          }
+
+          // You can return any component that you like here!
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
+      tabBarOptions={{
+        activeTintColor: colors.primary,
+        inactiveTintColor: colors.grey0,
+        showLabel: false,
+      }}
+    >
       <Tab.Screen name="Main" component={MainNavigation} />
-      <Tab.Screen name="Setting" component={SettingStackScreen} />
+      <Tab.Screen name="Settings" component={SettingStackScreen} />
     </Tab.Navigator>
   );
 };
@@ -78,7 +139,7 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
       drawerType="slide"
       drawerContent={(props) => <DrawerContent {...props} />}
     >
-      <Drawer.Screen name="Main" component={MainTabNavigation} />
+      <Drawer.Screen name="MainTab" component={MainTabNavigation} />
     </Drawer.Navigator>
   );
 };
@@ -119,14 +180,24 @@ export const AppNavigation: FunctionComponent = observer(() => {
         ) : (
           <Stack.Navigator
             initialRouteName={
-              keyRingStore.status === KeyRingStatus.EMPTY ? "Register" : "Main"
+              keyRingStore.status === KeyRingStatus.EMPTY
+                ? "Register"
+                : "MainTabDrawer"
             }
             screenOptions={{
               headerShown: false,
             }}
+            mode="modal"
           >
-            <Stack.Screen name="Main" component={MainTabNavigationWithDrawer} />
+            <Stack.Screen
+              name="MainTabDrawer"
+              component={MainTabNavigationWithDrawer}
+            />
             <Stack.Screen name="Register" component={RegisterStackScreen} />
+            <Stack.Screen
+              name="Address Book Modal Stack"
+              component={AddressBookModalStackScreen}
+            />
           </Stack.Navigator>
         )}
       </NavigationContainer>

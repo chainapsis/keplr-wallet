@@ -6,7 +6,7 @@ import { Text } from "react-native-elements";
 import { useStore } from "../../stores";
 import { useForm, Controller } from "react-hook-form";
 import { flowResult } from "mobx";
-import { Input } from "../../components/input";
+import { Input } from "../../components/form";
 import { FlexButton } from "../../components/buttons";
 
 interface FormData {

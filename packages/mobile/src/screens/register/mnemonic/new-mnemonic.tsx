@@ -29,7 +29,7 @@ import {
   bgcPrimary300,
   fcPrimary300,
 } from "../../../styles";
-import { Input } from "../../../components/input";
+import { Input } from "../../../components/form";
 import { RectButton } from "react-native-gesture-handler";
 import { SuggestedWordsView } from "../../../components/mnemonic";
 

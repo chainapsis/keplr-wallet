@@ -5,13 +5,18 @@ import { useStore } from "../../stores";
 import { View } from "react-native";
 import { Dec } from "@keplr-wallet/unit";
 import { useNavigation } from "@react-navigation/native";
-import { FlexWhiteButton } from "../..//components/buttons";
-import { flexDirectionRow, ml2, mr2 } from "../../styles";
+import { FlexButton, FlexWhiteButton } from "../..//components/buttons";
+import { flexDirectionRow, ml3 } from "../../styles";
 
 export const TxButtonView: FunctionComponent = observer(() => {
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const {
+    accountStore,
+    chainStore,
+    queriesStore,
+    interactionModalStore,
+  } = useStore();
 
-  const navigate = useNavigation();
+  const navigation = useNavigation();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -26,23 +31,24 @@ export const TxButtonView: FunctionComponent = observer(() => {
   return (
     <View style={flexDirectionRow}>
       <FlexWhiteButton
-        containerStyle={[mr2]}
         title="Deposit"
-        onPress={() => {}}
+        onPress={() => {
+          interactionModalStore.pushUrl("/dialog");
+        }}
       />
       {/*
         "Disabled" property in button tag will block the mouse enter/leave events.
         So, tooltip will not work as expected.
         To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
        */}
-      <FlexWhiteButton
-        containerStyle={[ml2]}
+      <FlexButton
+        containerStyle={[ml3]}
         title="Send"
         disabled={!hasAssets}
         loading={accountInfo.isSendingMsg === "send"}
         onPress={() => {
           if (hasAssets) {
-            navigate.navigate("Send");
+            navigation.navigate("Send", { initAddress: "", initMemo: "" });
           }
         }}
       />

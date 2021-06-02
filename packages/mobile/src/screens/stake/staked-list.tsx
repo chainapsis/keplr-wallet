@@ -11,6 +11,7 @@ import {
   fs13,
   flexDirectionRow,
   justifyContentBetween,
+  mb4,
 } from "../../styles";
 
 const BondStatus = Staking.BondStatus;
@@ -30,7 +31,7 @@ export const StakedSummary: FunctionComponent<{
   );
 
   return (
-    <Card>
+    <Card containerStyle={mb4}>
       <View>
         <Image
           style={{

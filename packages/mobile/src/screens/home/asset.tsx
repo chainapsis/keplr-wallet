@@ -10,7 +10,6 @@ import {
   flex1,
   flexDirectionRow,
   ml2,
-  mx2,
   sf,
   bgcSecondary,
   flexDirectionRowReverse,
@@ -26,7 +25,7 @@ import {
   h3,
   mb1,
   subtitle1,
-  body1,
+  ml3,
 } from "../../styles";
 
 export const AssetView: FunctionComponent = observer(() => {
@@ -102,28 +101,24 @@ export const AssetView: FunctionComponent = observer(() => {
       <View style={mt4}>
         <View style={flexDirectionRow}>
           <View style={sf([flex1, flexDirectionRowReverse, alignItemsCenter])}>
-            <Text style={sf([fAlignRight, fcPrimary, subtitle1, mx2])}>
+            <Text style={sf([fAlignRight, fcPrimary, subtitle1, ml2])}>
               Available
             </Text>
             <Badge />
           </View>
-          <View style={flex1}>
-            <Text style={sf([body1, ml2])}>
-              {stakable.locale(false).toString()}
-            </Text>
+          <View style={sf([flex1, ml3])}>
+            <Text style={subtitle2}>{stakable.locale(false).toString()}</Text>
           </View>
         </View>
         <View style={flexDirectionRow}>
           <View style={sf([flex1, flexDirectionRowReverse, alignItemsCenter])}>
-            <Text style={sf([fAlignRight, fcSecondary, subtitle1, mx2])}>
+            <Text style={sf([fAlignRight, fcSecondary, subtitle1, ml2])}>
               Staked
             </Text>
             <Badge badgeStyle={bgcSecondary} />
           </View>
-          <View style={flex1}>
-            <Text style={sf([body1, ml2])}>
-              {stakedSum.locale(false).toString()}
-            </Text>
+          <View style={sf([flex1, ml3])}>
+            <Text style={subtitle2}>{stakedSum.locale(false).toString()}</Text>
           </View>
         </View>
       </View>

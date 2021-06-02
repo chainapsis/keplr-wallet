@@ -1,10 +1,12 @@
+/* eslint-disable react/display-name */
 import React, { FunctionComponent } from "react";
+import { observer } from "mobx-react-lite";
+import { SafeAreaFixedPage } from "../../components/page";
 import { Text } from "react-native-elements";
 import { View, FlatList } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { parseTime } from "./governance-utils";
 import { ObservableQueryProposal } from "@keplr-wallet/stores";
-import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { StateBadge } from "./state-badge";
 import { Governance } from "@keplr-wallet/stores";
@@ -19,10 +21,10 @@ import {
   h6,
   justifyContentBetween,
   mb2,
+  mb4,
   mt2,
   p4,
   sf,
-  shadow,
 } from "../../styles";
 
 const ProposalSummary: FunctionComponent<{
@@ -32,7 +34,7 @@ const ProposalSummary: FunctionComponent<{
 
   return (
     <RectButton
-      style={sf([cardStyle, p4, bgcWhite, shadow])}
+      style={sf([cardStyle, p4, bgcWhite, mb4])}
       rippleColor="#AAAAAA"
       onPress={() => {
         navigation.navigate("Governance Details", {
@@ -63,7 +65,7 @@ const ProposalSummary: FunctionComponent<{
   );
 });
 
-export const AllProposals: FunctionComponent = observer(() => {
+const AllProposals: FunctionComponent = observer(() => {
   const { queriesStore, chainStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -76,5 +78,13 @@ export const AllProposals: FunctionComponent = observer(() => {
   }> = ({ item }) => <ProposalSummary proposal={item} />;
   return (
     <FlatList data={proposals} renderItem={renderProposal} windowSize={5} />
+  );
+});
+
+export const GovernanceScreen: FunctionComponent = observer(() => {
+  return (
+    <SafeAreaFixedPage>
+      <AllProposals />
+    </SafeAreaFixedPage>
   );
 });

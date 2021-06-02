@@ -10,7 +10,7 @@ import { Text } from "react-native-elements";
 import { View, FlatList } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import { Staking } from "@keplr-wallet/stores";
-import { sf, cardStyle, bgcWhite, shadow, subtitle2 } from "../../styles";
+import { sf, cardStyle, bgcWhite, subtitle2 } from "../../styles";
 import { Image } from "react-native-elements";
 const BondStatus = Staking.BondStatus;
 
@@ -128,7 +128,7 @@ export const RedelegateValidatorScreen: FunctionComponent<RedelegateValidatorScr
 
     return (
       <SafeAreaFixedPage>
-        <View style={sf([cardStyle, bgcWhite, shadow])}>
+        <View style={sf([cardStyle, bgcWhite])}>
           <FlatList
             data={flatListValidatorData}
             renderItem={renderValidator}

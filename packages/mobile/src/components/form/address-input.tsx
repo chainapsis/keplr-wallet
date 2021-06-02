@@ -7,15 +7,22 @@ import {
   InvalidBech32Error,
   IRecipientConfig,
 } from "@keplr-wallet/hooks";
+import { View } from "react-native";
 import { observer } from "mobx-react-lite";
-import { Input } from "../input";
+import FeatherIcon from "react-native-vector-icons/Feather";
+import { useNavigation } from "@react-navigation/native";
+import { Input } from "./input";
+import { colors } from "react-native-elements";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
+  hasAddressBook?: boolean;
 }
 
 export const AddressInput: FunctionComponent<AddressInputProps> = observer(
-  ({ recipientConfig }) => {
+  ({ recipientConfig, hasAddressBook }) => {
+    const navigation = useNavigation();
+
     const error = recipientConfig.getError();
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -40,9 +47,25 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     return (
       <Input
         label="Recipient"
+        value={recipientConfig.rawRecipient}
         onChangeText={(value) => {
           recipientConfig.setRawRecipient(value);
         }}
+        rightIcon={
+          hasAddressBook ? (
+            <View accessible>
+              <FeatherIcon name="book" size={20} color={colors.primary} />
+            </View>
+          ) : null
+        }
+        rightIconOnPress={
+          hasAddressBook
+            ? () => {
+                navigation.navigate("Address Book Modal Stack");
+              }
+            : undefined
+        }
+        hasLeftBorder={hasAddressBook}
         errorMessage={errorText}
       />
     );

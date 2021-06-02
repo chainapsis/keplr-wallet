@@ -8,7 +8,7 @@ import { FullPage } from "../../../components/page";
 import { FlexButton } from "../../../components/buttons";
 import { useForm, Controller } from "react-hook-form";
 import { h2, mb2 } from "../../../styles";
-import { Input } from "../../../components/input";
+import { Input } from "../../../components/form";
 import * as Keychain from "react-native-keychain";
 
 interface FormData {
@@ -87,7 +87,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE,
         });
       }
-      navigation.navigate("Main");
+      navigation.navigate("MainTabDrawer");
     } catch (e) {
       console.log(e.message ? e.message : e.toString());
       registerConfig.clear();

@@ -182,29 +182,29 @@ export const h2: StyleProp<TextStyle> = {
 };
 
 export const h3: StyleProp<TextStyle> = {
-  fontSize: 20,
-  lineHeight: 24,
+  fontSize: 24,
+  lineHeight: 26,
   fontWeight: "600",
   letterSpacing: 0.18,
 };
 
 export const h4: StyleProp<TextStyle> = {
-  fontSize: 18,
+  fontSize: 20,
   lineHeight: 24,
   fontWeight: "600",
   letterSpacing: 0.5,
 };
 
 export const h5: StyleProp<TextStyle> = {
-  fontSize: 16,
-  lineHeight: 18,
+  fontSize: 18,
+  lineHeight: 20,
   fontWeight: "600",
   letterSpacing: 0.65,
 };
 
 export const h6: StyleProp<TextStyle> = {
-  fontSize: 15,
-  lineHeight: 18,
+  fontSize: 16,
+  lineHeight: 20,
   fontWeight: "600",
   letterSpacing: 0.6,
 };
@@ -218,47 +218,54 @@ export const h7: StyleProp<TextStyle> = {
 
 export const subtitle1: StyleProp<TextStyle> = {
   fontSize: 18,
-  lineHeight: 20,
+  lineHeight: 22,
   fontWeight: "500",
 };
 
 export const subtitle2: StyleProp<TextStyle> = {
   fontSize: 16,
-  lineHeight: 19,
+  lineHeight: 21,
   fontWeight: "500",
   letterSpacing: 0.3,
 };
 
 export const body1: StyleProp<TextStyle> = {
-  fontSize: 16,
+  fontSize: 18,
   lineHeight: 24,
   fontWeight: "400",
 };
 
 export const body2: StyleProp<TextStyle> = {
-  fontSize: 15,
-  lineHeight: 17,
+  fontSize: 16,
+  lineHeight: 22,
   fontWeight: "400",
   letterSpacing: 0.25,
 };
 
 export const body3: StyleProp<TextStyle> = {
   fontSize: 14,
-  lineHeight: 18,
+  lineHeight: 20,
   fontWeight: "400",
   letterSpacing: 0.4,
 };
 
 export const buttonFont1: StyleProp<TextStyle> = {
   fontSize: 18,
-  lineHeight: 18,
+  lineHeight: 20,
   fontWeight: "500",
   letterSpacing: 0.2,
 };
 
 export const buttonFont2: StyleProp<TextStyle> = {
   fontSize: 16,
-  lineHeight: 16,
+  lineHeight: 19,
+  fontWeight: "500",
+  letterSpacing: 0.2,
+};
+
+export const buttonFont3: StyleProp<TextStyle> = {
+  fontSize: 14,
+  lineHeight: 18,
   fontWeight: "500",
   letterSpacing: 0.2,
 };

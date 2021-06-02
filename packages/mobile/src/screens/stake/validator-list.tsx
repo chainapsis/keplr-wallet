@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
-import { SafeAreaFixedPage, SafeAreaPage } from "../../components/page";
+import { SafeAreaFixedPage } from "../../components/page";
 import { TotalStakedView } from "./total-staked";
 import { UnbondingView } from "./unbonding";
 import { useStore } from "../../stores";
@@ -17,7 +17,6 @@ import {
   sf,
   cardStyle,
   bgcWhite,
-  shadow,
   justifyContentCenter,
   body3,
   subtitle2,
@@ -198,7 +197,7 @@ export const AllValidators: FunctionComponent<{
   );
 
   return (
-    <View style={sf([cardStyle, bgcWhite, shadow])}>
+    <View style={sf([cardStyle, bgcWhite])}>
       <FlatList
         data={flatListValidatorData}
         renderItem={renderValidator}

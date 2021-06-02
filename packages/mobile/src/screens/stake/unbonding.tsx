@@ -16,6 +16,7 @@ import {
   subtitle2,
   fcLow,
   caption2,
+  mb4,
 } from "../../styles";
 
 const BondStatus = Staking.BondStatus;
@@ -156,7 +157,7 @@ export const UnbondingView: FunctionComponent<{
   unbondings: UnbondingDelegation[];
 }> = ({ unbondings }) => {
   return (
-    <Card>
+    <Card containerStyle={mb4}>
       <Text style={h5}>UnDelegating</Text>
       <UnbondingList unbondings={unbondings} />
     </Card>
