@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useState, useEffect } from "react";
+import React, {
+  FunctionComponent,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../stores";
 import { View } from "react-native";
@@ -15,14 +20,14 @@ const BioUnlock: FunctionComponent<{
 }> = observer(({ setIsFailed }) => {
   const { interactionModalStore, keyRingStore } = useStore();
 
-  const firstBioAuth = async () => {
+  const firstBioAuth = useCallback(async () => {
     try {
       const credentials = await Keychain.getGenericPassword({
         accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
       });
       if (credentials) {
         await keyRingStore.unlock(credentials.password);
-        interactionModalStore.popUrl();
+        interactionModalStore.popAll("/unlock");
       } else {
         console.log("No credentials stored");
       }
@@ -30,11 +35,11 @@ const BioUnlock: FunctionComponent<{
       console.log("Keychain couldn't be accessed!", error);
       setIsFailed(true);
     }
-  };
+  }, [interactionModalStore, keyRingStore, setIsFailed]);
 
   useEffect(() => {
     firstBioAuth();
-  }, []);
+  }, [firstBioAuth]);
 
   return null;
 });
@@ -65,7 +70,7 @@ export const UnlockView: FunctionComponent = observer(() => {
           title="Unlock"
           onPress={async () => {
             await keyRingStore.unlock(password);
-            interactionModalStore.popUrl();
+            interactionModalStore.popAll("/unlock");
           }}
         />
       </View>

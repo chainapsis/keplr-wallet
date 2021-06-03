@@ -37,4 +37,9 @@ export class InteractionModalStore {
   popUrl(): string | undefined {
     return this._urls.splice(this._urls.length - 1, 1)[0];
   }
+
+  @action
+  popAll(url: string) {
+    this._urls = this._urls.filter((currentUrl) => url !== currentUrl);
+  }
 }
