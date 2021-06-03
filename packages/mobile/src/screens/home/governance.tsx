@@ -34,6 +34,21 @@ import {
   fcLow,
 } from "../../styles";
 
+const leftRemaining: (endTime: string) => string = (endTime) => {
+  const leftDays = moment(endTime).diff(moment(), "days");
+
+  if (leftDays < 0) return "";
+  if (leftDays > 0) return `${leftDays} days left`;
+
+  const leftHours = moment(endTime).diff(moment(), "hours");
+
+  if (leftHours > 0) return `${leftHours} hours left`;
+
+  const leftMinutes = moment(endTime).diff(moment(), "minutes");
+
+  return `${leftMinutes} minutes left`;
+};
+
 export const GovernanceView: FunctionComponent = observer(() => {
   const { queriesStore, chainStore } = useStore();
   const navigation = useNavigation();
@@ -119,14 +134,8 @@ export const GovernanceView: FunctionComponent = observer(() => {
               <Text style={sf([caption1])}>
                 {lastProposal.proposalStatus ===
                 Governance.ProposalStatus.DEPOSIT_PERIOD
-                  ? moment(lastProposal.raw.deposit_end_time).diff(
-                      moment(),
-                      "days"
-                    )
-                  : moment(lastProposal.raw.voting_end_time).diff(
-                      moment(),
-                      "days"
-                    )}
+                  ? leftRemaining(lastProposal.raw.deposit_end_time)
+                  : leftRemaining(lastProposal.raw.voting_end_time)}
               </Text>
             </View>
           </View>
