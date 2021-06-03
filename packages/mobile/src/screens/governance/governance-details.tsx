@@ -10,9 +10,16 @@ import { parseTime } from "./governance-utils";
 import { StateBadge } from "./state-badge";
 import { useStore } from "../../stores";
 import { Governance } from "@keplr-wallet/stores";
+import { Dec } from "@keplr-wallet/unit";
 import {
   alignItemsCenter,
+  bcWhiteGrey,
+  bgcPrimary,
   body3,
+  br1,
+  bw1,
+  caption1,
+  fcLow,
   flex1,
   flexDirectionRow,
   h6,
@@ -20,8 +27,139 @@ import {
   justifyContentBetween,
   mb1,
   mb2,
+  mb3,
+  mr2,
+  mr3,
+  my4,
+  p2,
   sf,
 } from "../../styles";
+import { ProgressBar } from "../../components/svg";
+
+const VotingBox: FunctionComponent<{
+  label: string;
+  percent: string;
+  isLeft?: boolean;
+}> = ({ label, percent, isLeft }) => {
+  return (
+    <View
+      style={sf([
+        flex1,
+        flexDirectionRow,
+        alignItemsCenter,
+        p2,
+        br1,
+        bw1,
+        bcWhiteGrey,
+        isLeft ? mr3 : undefined,
+      ])}
+    >
+      <View style={sf([{ width: 5, height: "100%" }, bgcPrimary, mr2])} />
+      <View>
+        <Text style={sf([fcLow, caption1])}>{label}</Text>
+        <Text>{percent}%</Text>
+      </View>
+    </View>
+  );
+};
+
+const VotingGraphView: FunctionComponent<{
+  proposalId: string;
+}> = observer(({ proposalId }) => {
+  const { queriesStore, chainStore } = useStore();
+
+  const chainId = chainStore.current.chainId;
+  const queries = queriesStore.get(chainId);
+
+  const governance = queries.cosmos.queryGovernance;
+
+  const proposal = governance.getProposal(proposalId);
+
+  if (!proposal) {
+    throw new Error(`Unknown proposal: ${proposalId}`);
+  }
+
+  const tally = proposal.tally;
+
+  const total = tally.yes
+    .add(tally.no)
+    .add(tally.noWithVeto)
+    .add(tally.abstain);
+
+  return (
+    <View style={my4}>
+      <View style={mb3}>
+        <View style={sf([flexDirectionRow, justifyContentBetween, mb1])}>
+          <Text style={h7}>Turnout</Text>
+          <Text style={body3}>
+            {proposal.turnout.maxDecimals(2).toString()}%
+          </Text>
+        </View>
+        <ProgressBar
+          progress={Number(proposal.turnout.maxDecimals(2).toString())}
+        />
+      </View>
+      <View style={sf([flexDirectionRow, mb2])}>
+        <VotingBox
+          label="Yes"
+          percent={
+            tally.yes.toDec().equals(new Dec(0))
+              ? "0"
+              : tally.yes
+                  .quo(total)
+                  .maxDecimals(1)
+                  .trim(true)
+                  .decreasePrecision(2)
+                  .toString()
+          }
+          isLeft
+        />
+        <VotingBox
+          label="No"
+          percent={
+            tally.no.toDec().equals(new Dec(0))
+              ? "0"
+              : tally.no
+                  .quo(total)
+                  .maxDecimals(1)
+                  .trim(true)
+                  .decreasePrecision(2)
+                  .toString()
+          }
+        />
+      </View>
+      <View style={flexDirectionRow}>
+        <VotingBox
+          label="No With Veto"
+          percent={
+            tally.noWithVeto.toDec().equals(new Dec(0))
+              ? "0"
+              : tally.noWithVeto
+                  .quo(total)
+                  .maxDecimals(1)
+                  .trim(true)
+                  .decreasePrecision(2)
+                  .toString()
+          }
+          isLeft
+        />
+        <VotingBox
+          label="Abstain"
+          percent={
+            tally.abstain.toDec().equals(new Dec(0))
+              ? "0"
+              : tally.abstain
+                  .quo(total)
+                  .maxDecimals(1)
+                  .trim(true)
+                  .decreasePrecision(2)
+                  .toString()
+          }
+        />
+      </View>
+    </View>
+  );
+});
 
 export const ProposalDetailsCard: FunctionComponent<{
   proposalId: string;
@@ -49,18 +187,9 @@ export const ProposalDetailsCard: FunctionComponent<{
         <StateBadge proposalStatus={proposal.proposalStatus} />
       </View>
       <Text style={sf([h6, mb2])}>{proposal.title}</Text>
-      {/* {proposal.proposalStatus !== Governance.ProposalStatus.DEPOSIT_PERIOD ? (
-        <BarChart
-          labels={["Yes", "No", "NoWithVeto", "Abstain"]}
-          data={[
-            Number(tally?.yes.locale(false).toString()),
-            Number(tally?.no.locale(false).toString()),
-            Number(tally?.noWithVeto.locale(false).toString()),
-            Number(tally?.abstain.locale(false).toString()),
-          ]}
-          backgroundColors={["#5e72e4", "#fb6340", "#f5365c", "#212529"]}
-        />
-      ) : null} */}
+      {proposal.proposalStatus !== Governance.ProposalStatus.DEPOSIT_PERIOD ? (
+        <VotingGraphView proposalId={proposalId} />
+      ) : null}
       <View style={sf([flexDirectionRow, mb2])}>
         {proposal.proposalStatus ===
         Governance.ProposalStatus.DEPOSIT_PERIOD ? (
