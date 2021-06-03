@@ -122,9 +122,16 @@ export class AccountSetBase<MsgOpts, Queries> {
     const chainInfo = this.chainGetter.getChain(chainId);
 
     if (this.opts.suggestChain) {
-      await keplr.experimentalSuggestChain(chainInfo.raw);
+      await this.suggestChain(keplr, chainInfo);
     }
     await keplr.enable(chainId);
+  }
+
+  protected async suggestChain(
+    keplr: Keplr,
+    chainInfo: ReturnType<ChainGetter["getChain"]>
+  ): Promise<void> {
+    await keplr.experimentalSuggestChain(chainInfo.raw);
   }
 
   private readonly handleInit = () => this.init();
