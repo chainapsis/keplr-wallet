@@ -8,7 +8,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../stores";
 import { View } from "react-native";
 import { Text } from "react-native-elements";
-import { sf, h4, fAlignCenter, my3 } from "../styles";
+import { sf, h4, fAlignCenter, my3, flex1 } from "../styles";
 import { Input } from "../components/form";
 import * as Keychain from "react-native-keychain";
 import { useBioAuth } from "../hooks/bio-auth";
@@ -57,23 +57,27 @@ export const UnlockView: FunctionComponent = observer(() => {
       {bioAuth?.usingBioAuth === true && isFailed === false ? (
         <BioUnlock setIsFailed={setIsFailed} />
       ) : null}
-      <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
-      <Input
-        label="Password"
-        autoCompleteType="password"
-        secureTextEntry={true}
-        value={password}
-        onChangeText={setPassword}
-      />
-      <View style={{ height: 45 }}>
-        <FlexButtonWithHoc
-          title="Unlock"
-          onPress={async () => {
-            await keyRingStore.unlock(password);
-            interactionModalStore.popAll("/unlock");
-          }}
+      <View style={flex1} />
+      <View>
+        <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
+        <Input
+          label="Password"
+          autoCompleteType="password"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
         />
+        <View style={{ height: 45 }}>
+          <FlexButtonWithHoc
+            title="Unlock"
+            onPress={async () => {
+              await keyRingStore.unlock(password);
+              interactionModalStore.popAll("/unlock");
+            }}
+          />
+        </View>
       </View>
+      <View style={flex1} />
     </FullFixedPage>
   );
 });
