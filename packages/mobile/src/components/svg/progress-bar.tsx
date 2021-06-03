@@ -10,7 +10,7 @@ export const ProgressBar: FunctionComponent<ProgressBarProps> = ({
 }) => {
   return (
     <Svg
-      height="7px"
+      height="8px"
       width="100%"
       viewBox="0 0 100 4"
       preserveAspectRatio="none"

@@ -10,11 +10,10 @@ import { FlexButton, FlexWhiteButton } from "../..//components/buttons";
 import { Address } from "../../components/address";
 import {
   alignItemsCenter,
-  bgcWhite,
+  bgcWhiteWithoutOpacity,
   br1,
   flexDirectionRow,
   h3,
-  mb4,
   ml3,
   mt4,
   my4,
@@ -38,13 +37,13 @@ const QRCodeView: FunctionComponent<{ onCloseModal: () => void }> = observer(
         : "...";
 
     return (
-      <View style={sf([br1, bgcWhite, p4])}>
+      <View style={sf([br1, bgcWhiteWithoutOpacity, p4])}>
         <View style={alignItemsCenter}>
           <Text style={h3}>Scan QR Code</Text>
           <View style={my4}>
             <QRCode size={178} value={address} />
           </View>
-          <Address maxCharacters={22} address={address} hasNotification />
+          <Address maxCharacters={22} address={address} />
         </View>
         <View style={sf([{ height: 50 }, mt4])}>
           <FlexButtonWithHoc onPress={onCloseModal} title="Done" />
