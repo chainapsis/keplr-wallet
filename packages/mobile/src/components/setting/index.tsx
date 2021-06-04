@@ -82,6 +82,8 @@ export const AddressBook: FunctionComponent<{
   isTop?: boolean;
   rightIcon?: any;
   onPress?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   rightIconOnPress?: () => void;
   name: string;
   memo?: string;
@@ -90,6 +92,8 @@ export const AddressBook: FunctionComponent<{
   isTop = false,
   rightIcon,
   onPress,
+  onEdit,
+  onDelete,
   rightIconOnPress,
   name,
   memo,
@@ -115,6 +119,21 @@ export const AddressBook: FunctionComponent<{
             {memo ? <Text style={subtitle2}>{memo}</Text> : null}
           </View>
           <Address address={address} maxCharacters={22} />
+        </View>
+
+        {/* temporary delete address and edit address */}
+        <View>
+          {/* To Do => Edit Address */}
+          {/* <RectButton onPress={onEdit}>
+            <View accessible>
+              <Text>Edit</Text>
+            </View>
+          </RectButton> */}
+          <RectButton onPress={onDelete}>
+            <View accessible>
+              <Text>Delete</Text>
+            </View>
+          </RectButton>
         </View>
         <View style={sf([flexDirectionRow, alignItemsCenter])}>
           <RectButton onPress={rightIconOnPress ? rightIconOnPress : onPress}>

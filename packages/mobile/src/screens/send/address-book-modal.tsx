@@ -103,19 +103,20 @@ const AddAddressBookModalScreen: FunctionComponent<AddAddressModalScreenProps> =
       }
     );
 
-    useEffect(() => {
-      if (index >= 0) {
-        const data = addressBookConfig.addressBookDatas[index];
-        setName(data.name);
-        recipientConfig.setRawRecipient(data.address);
-        memoConfig.setMemo(data.memo);
-      }
-    }, [
-      addressBookConfig.addressBookDatas,
-      index,
-      memoConfig,
-      recipientConfig,
-    ]);
+    //  To Do  => Edit Address
+    // useEffect(() => {
+    //   if (index >= 0) {
+    //     const data = addressBookConfig.addressBookDatas[index];
+    //     setName(data.name);
+    //     recipientConfig.setRawRecipient(data.address);
+    //     memoConfig.setMemo(data.memo);
+    //   }
+    // }, [
+    //   addressBookConfig.addressBookDatas,
+    //   index,
+    //   memoConfig,
+    //   recipientConfig,
+    // ]);
 
     return (
       <FullFixedPage>
@@ -186,6 +187,15 @@ const AddressBookModalScreen: FunctionComponent = observer(() => {
     }
   );
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      addressBookConfig.loadAddressBookDatas();
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [addressBookConfig, navigation]);
+
   return (
     <FullFixedPageWithoutPadding>
       {addressBookConfig.addressBookDatas.map((data, i) => {
@@ -204,12 +214,18 @@ const AddressBookModalScreen: FunctionComponent = observer(() => {
             }
             data-index={i}
             onPress={() => {
-              addressBookConfig.selectAddressAt(i);
               navigation.navigate("Send", {
                 initAddress: data.address,
                 initMemo: data.memo,
               });
             }}
+            onDelete={() => {
+              addressBookConfig.removeAddressBook(i);
+            }}
+            // To Do => Edit Address
+            // onEdit={() => {
+            //   navigation.navigate("Add Address Book Modal", { index: i });
+            // }}
           />
         );
       })}
