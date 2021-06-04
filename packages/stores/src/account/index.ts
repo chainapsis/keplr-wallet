@@ -33,7 +33,7 @@ export enum WalletStatus {
   NotExist = "NotExist",
 }
 
-interface MsgOpt {
+export interface MsgOpt {
   type: string;
   gas: number;
 }
@@ -478,6 +478,7 @@ export class AccountStoreInner {
     amount: string,
     validatorAddress: string,
     memo: string = "",
+    stdFee?: StdFee,
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -500,7 +501,7 @@ export class AccountStoreInner {
     await this.sendMsgs(
       "delegate",
       [msg],
-      {
+      stdFee ?? {
         amount: [],
         gas: this.opts.msgOpts.delegate.gas.toString(),
       },
@@ -541,6 +542,7 @@ export class AccountStoreInner {
     amount: string,
     validatorAddress: string,
     memo: string = "",
+    stdFee?: StdFee,
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -563,9 +565,9 @@ export class AccountStoreInner {
     await this.sendMsgs(
       "undelegate",
       [msg],
-      {
+      stdFee ?? {
         amount: [],
-        gas: this.opts.msgOpts.undelegate.gas.toString(),
+        gas: this.opts.msgOpts.delegate.gas.toString(),
       },
       memo,
       (tx) => {
@@ -610,6 +612,7 @@ export class AccountStoreInner {
     srcValidatorAddress: string,
     dstValidatorAddress: string,
     memo: string = "",
+    stdFee?: StdFee,
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -633,9 +636,9 @@ export class AccountStoreInner {
     await this.sendMsgs(
       "redelegate",
       [msg],
-      {
+      stdFee ?? {
         amount: [],
-        gas: this.opts.msgOpts.redelegate.gas.toString(),
+        gas: this.opts.msgOpts.delegate.gas.toString(),
       },
       memo,
       (tx) => {
