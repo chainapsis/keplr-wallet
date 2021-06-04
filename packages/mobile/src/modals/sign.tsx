@@ -10,11 +10,11 @@ import {
   useSignDocHelper,
 } from "@keplr-wallet/hooks";
 import { Text } from "react-native-elements";
-import { flexDirectionRow, sf, h4, fAlignCenter, my3 } from "../styles";
+import { flexDirectionRow, sf, h4, fAlignCenter, my3, mr3 } from "../styles";
 import { TransactionDetails } from "./transaction-details";
 import { useInteractionInfo } from "../hooks";
 import { FullPage } from "../components/page";
-import { FlexWhiteButtonWithHoc } from "./common";
+import { FlexButtonWithHoc, FlexWhiteButtonWithHoc } from "./common";
 
 export const SignView: FunctionComponent = observer(() => {
   const {
@@ -97,13 +97,13 @@ export const SignView: FunctionComponent = observer(() => {
         <View style={flexDirectionRow}>
           <FlexWhiteButtonWithHoc
             title="Reject"
-            color="error"
+            containerStyle={[mr3]}
             onPress={async () => {
               await signInteractionStore.reject();
               interactionModalStore.popUrl();
             }}
           />
-          <FlexWhiteButtonWithHoc
+          <FlexButtonWithHoc
             title="Approve"
             onPress={async () => {
               try {
