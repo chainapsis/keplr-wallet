@@ -809,7 +809,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "DVPN",
       coinMinimalDenom: "udvpn",
       coinDecimals: 6,
-      coinGeckoId: "sentinel-group",
+      coinGeckoId: "sentinel",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -828,7 +828,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "DVPN",
         coinMinimalDenom: "udvpn",
         coinDecimals: 6,
-        coinGeckoId: "sentinel-group",
+        coinGeckoId: "sentinel",
       },
     ],
     feeCurrencies: [
@@ -836,7 +836,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "DVPN",
         coinMinimalDenom: "udvpn",
         coinDecimals: 6,
-        coinGeckoId: "sentinel-group",
+        coinGeckoId: "sentinel",
       },
     ],
     gasPriceStep: {
