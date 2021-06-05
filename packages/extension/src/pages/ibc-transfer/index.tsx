@@ -189,7 +189,6 @@ export const IBCTransferPageAmount: FunctionComponent<{
             id: "send.input.amount",
           })}
           amountConfig={amountConfig}
-          feeConfig={feeConfig}
         />
         <div style={{ flex: 1 }} />
         <FeeButtons
