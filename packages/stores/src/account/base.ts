@@ -74,7 +74,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     currency: AppCurrency,
     recipient: string,
     memo: string,
-    stdFee: StdFee,
+    stdFee: Partial<StdFee>,
     onFulfill?: (tx: any) => void
   ) => Promise<boolean>)[] = [];
 
@@ -111,7 +111,7 @@ export class AccountSetBase<MsgOpts, Queries> {
       currency: AppCurrency,
       recipient: string,
       memo: string,
-      stdFee: StdFee,
+      stdFee: Partial<StdFee>,
       onFulfill?: (tx: any) => void
     ) => Promise<boolean>
   ) {
@@ -276,7 +276,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     currency: AppCurrency,
     recipient: string,
     memo: string = "",
-    stdFee: StdFee,
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any) => void
   ) {
     for (let i = 0; i < this.sendTokenFns.length; i++) {
