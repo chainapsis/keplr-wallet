@@ -23,6 +23,10 @@ import {
   BETA_STRAIGHTEDGE_REST_CONFIG,
   BETA_STRAIGHTEDGE_RPC_ENDPOINT,
   BETA_STRAIGHTEDGE_RPC_CONFIG,
+  BETA_AGORIC_RPC_ENDPOINT,
+  BETA_AGORIC_RPC_CONFIG,
+  BETA_AGORIC_REST_ENDPOINT,
+  BETA_AGORIC_REST_CONFIG,
   AKASH_RPC_ENDPOINT,
   AKASH_RPC_CONFIG,
   AKASH_REST_ENDPOINT,
@@ -844,6 +848,56 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.4,
     },
+  },
+  {
+    rpc: BETA_AGORIC_RPC_ENDPOINT,
+    rpcConfig: BETA_AGORIC_RPC_CONFIG,
+    rest: BETA_AGORIC_REST_ENDPOINT,
+    restConfig: BETA_AGORIC_REST_CONFIG,
+    chainId: "agoric-1",
+    chainName: "Agoric",
+    stakeCurrency: {
+      coinDenom: "BLD",
+      coinMinimalDenom: "ubld",
+      coinDecimals: 6,
+      coinGeckoId: undefined,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/agoric/stake"
+        : "http://localhost:8081/#/agoric/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/agoric/stake"
+        : "http://localhost:8081/#/agoric/stake",
+    bip44: {
+      coinType: 564,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("agoric"),
+    currencies: [
+      {
+        coinDenom: "BLD",
+        coinMinimalDenom: "ubld",
+        coinDecimals: 6,
+        coinGeckoId: undefined,
+      },
+      {
+        coinDenom: "RUN",
+        coinMinimalDenom: "urun",
+        coinDecimals: 6,
+        coinGeckoId: undefined,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "RUN",
+        coinMinimalDenom: "urun",
+        coinDecimals: 6,
+        coinGeckoId: undefined,
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
+    beta: true,
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,

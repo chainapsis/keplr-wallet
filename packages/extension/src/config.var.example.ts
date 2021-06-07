@@ -29,6 +29,15 @@ export const IOV_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const IOV_REST_ENDPOINT = "";
 export const IOV_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const BETA_AGORIC_NETWORK_RPC_ENDPOINT = "";
+export const BETA_AGORIC_NETWORK_RPC_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+export const BETA_AGORIC_NETWORK_REST_ENDPOINT = "";
+export const BETA_AGORIC_NETWORK_REST_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+
 export const BETA_CYBER_NETWORK_RPC_ENDPOINT = "";
 export const BETA_CYBER_NETWORK_RPC_CONFIG:
   | AxiosRequestConfig
@@ -38,12 +47,12 @@ export const BETA_CYBER_NETWORK_REST_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
 
-export const STRAIGHTEDGE_RPC_ENDPOINT = "";
-export const STRAIGHTEDGE_RPC_CONFIG:
+export const BETA_STRAIGHTEDGE_RPC_ENDPOINT = "";
+export const BETA_STRAIGHTEDGE_RPC_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
-export const STRAIGHTEDGE_REST_ENDPOINT = "";
-export const STRAIGHTEDGE_REST_CONFIG:
+export const BETA_STRAIGHTEDGE_REST_ENDPOINT = "";
+export const BETA_STRAIGHTEDGE_REST_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
 
