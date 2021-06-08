@@ -21,6 +21,7 @@ import {
 } from "@cosmjs/launchpad";
 import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
 import Axios, { AxiosInstance } from "axios";
+import { Buffer } from "buffer/";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -266,6 +267,11 @@ export class AccountSetBase<MsgOpts, Queries> {
       }
 
       if (onFulfill) {
+        // Always add the tx hash data.
+        if (tx && !tx.hash) {
+          tx.hash = Buffer.from(txHash).toString("hex");
+        }
+
         onFulfill(tx);
       }
     });
