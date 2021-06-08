@@ -39,6 +39,10 @@ export interface MsgOpt {
 export interface AccountSetOpts<MsgOpts> {
   readonly prefetching: boolean;
   readonly suggestChain: boolean;
+  readonly suggestChainFn?: (
+    keplr: Keplr,
+    chainInfo: ReturnType<ChainGetter["getChain"]>
+  ) => Promise<void>;
   readonly autoInit: boolean;
   readonly getKeplr: () => Promise<Keplr | undefined>;
   readonly msgOpts: MsgOpts;
@@ -123,7 +127,11 @@ export class AccountSetBase<MsgOpts, Queries> {
     const chainInfo = this.chainGetter.getChain(chainId);
 
     if (this.opts.suggestChain) {
-      await this.suggestChain(keplr, chainInfo);
+      if (this.opts.suggestChainFn) {
+        await this.opts.suggestChainFn(keplr, chainInfo);
+      } else {
+        await this.suggestChain(keplr, chainInfo);
+      }
     }
     await keplr.enable(chainId);
   }
