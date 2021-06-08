@@ -7,3 +7,4 @@ export * from "./recipient";
 export * from "./amount";
 export * from "./send-gas";
 export * from "./send-tx";
+export * from "./chain";
