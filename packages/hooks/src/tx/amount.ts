@@ -104,12 +104,15 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         .getQueryBech32Address(this.sender)
         .getBalanceFromCurrency(this.sendCurrency);
 
+      const result = this.feeConfig?.fee
+        ? balance.sub(this.feeConfig.fee)
+        : balance;
+      if (result.toDec().lte(new Dec(0))) {
+        return "0";
+      }
+
       // Remember that the `CoinPretty`'s sub method do nothing if the currencies are different.
-      return (this.feeConfig?.fee ? balance.sub(this.feeConfig.fee) : balance)
-        .trim(true)
-        .locale(false)
-        .hideDenom(true)
-        .toString();
+      return result.trim(true).locale(false).hideDenom(true).toString();
     }
 
     return this._amount;
