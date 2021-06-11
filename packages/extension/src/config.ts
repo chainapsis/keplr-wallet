@@ -803,7 +803,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: SENTINEL_RPC_CONFIG,
     rest: SENTINEL_REST_ENDPOINT,
     restConfig: SENTINEL_REST_CONFIG,
-    chainId: "sentinelhub-1",
+    chainId: "sentinelhub-2",
     chainName: "Sentinel",
     stakeCurrency: {
       coinDenom: "DVPN",
@@ -844,6 +844,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.4,
     },
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
