@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/hooks",
-  "version": "0.8.8",
+  "version": "0.8.9-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -22,13 +22,13 @@
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@keplr-wallet/background": "^0.8.8",
+    "@keplr-wallet/background": "^0.8.9-rc.0",
     "@keplr-wallet/common": "^0.8.8",
     "@keplr-wallet/cosmos": "^0.8.8",
     "@keplr-wallet/crypto": "^0.8.8",
     "@keplr-wallet/ens": "^0.8.8",
     "@keplr-wallet/popup": "^0.8.8",
-    "@keplr-wallet/stores": "^0.8.8",
+    "@keplr-wallet/stores": "^0.8.9-rc.0",
     "@keplr-wallet/types": "^0.8.8",
     "@keplr-wallet/unit": "^0.8.8",
     "long": "^4.0.0",

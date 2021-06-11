@@ -803,13 +803,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: SENTINEL_RPC_CONFIG,
     rest: SENTINEL_REST_ENDPOINT,
     restConfig: SENTINEL_REST_CONFIG,
-    chainId: "sentinelhub-1",
+    chainId: "sentinelhub-2",
     chainName: "Sentinel",
     stakeCurrency: {
       coinDenom: "DVPN",
       coinMinimalDenom: "udvpn",
       coinDecimals: 6,
-      coinGeckoId: "sentinel-group",
+      coinGeckoId: "sentinel",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -828,7 +828,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "DVPN",
         coinMinimalDenom: "udvpn",
         coinDecimals: 6,
-        coinGeckoId: "sentinel-group",
+        coinGeckoId: "sentinel",
       },
     ],
     feeCurrencies: [
@@ -836,7 +836,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "DVPN",
         coinMinimalDenom: "udvpn",
         coinDecimals: 6,
-        coinGeckoId: "sentinel-group",
+        coinGeckoId: "sentinel",
       },
     ],
     gasPriceStep: {
@@ -844,6 +844,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.4,
     },
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
