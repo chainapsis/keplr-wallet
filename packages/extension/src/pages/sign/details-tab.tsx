@@ -34,9 +34,6 @@ export const DetailsTab: FunctionComponent<{
       useManualFee(feeConfig.isManual);
     }, [feeConfig.isManual]);
     const intl = useIntl();
-    console.log(feeConfig.isManual);
-    console.log(feeConfig);
-    console.log("Disable fee:" + manualFee);
     const language = useLanguage();
 
     const mode = signDocHelper.signDocWrapper
