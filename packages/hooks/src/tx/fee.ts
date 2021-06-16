@@ -62,7 +62,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   setFeeType(feeType: FeeType | undefined) {
     this._feeType = feeType;
     this._manualFee = undefined;
-    this._isManual = true;
+    if (feeType) {
+      this._isManual = false;
+    }
   }
 
   get isManual(): boolean {
@@ -76,6 +78,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   setManualFee(fee: CoinPrimitive) {
     this._manualFee = fee;
     this._feeType = undefined;
+    this._isManual = true;
   }
 
   get feeCurrencies(): Currency[] {

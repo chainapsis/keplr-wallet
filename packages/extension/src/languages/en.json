@@ -208,6 +208,8 @@
   "sign.info.fee": "Fee",
   "sign.info.memo": "Memo",
   "sign.info.warning.empty-memo": "(Empty memo)",
+  "sign.info.warning.supplied-fee": "<b>IMPORTANT</b> - This transaction already has a fee set:",
+  "sign.info.fee.override": "Click here if you want to override the supplied fee.",
   "sign.info.gas": "Gas",
   "sign.button.approve": "Approve",
   "sign.button.reject": "Reject",

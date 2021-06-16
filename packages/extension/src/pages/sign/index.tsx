@@ -112,7 +112,7 @@ export const SignPage: FunctionComponent = observer(() => {
   ] = useState(false);
 
   const disableInputs = isSignDocInternalSend || isLoadingSignDocInternalSend;
-  const disableFeeInputs = feeConfig.isManual;
+
   return (
     <HeaderLayout
       showChainName
@@ -168,7 +168,6 @@ export const SignPage: FunctionComponent = observer(() => {
               feeConfig={feeConfig}
               gasConfig={gasConfig}
               disableInputs={disableInputs}
-              disableFeeInputs={disableFeeInputs}
             />
           ) : null}
         </div>

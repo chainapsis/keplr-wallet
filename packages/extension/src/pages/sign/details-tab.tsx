@@ -1,10 +1,9 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import styleDetailsTab from "./details-tab.module.scss";
-import style from "./style.module.scss";
 
 import { renderAminoMessage } from "./amino";
 import { Msg } from "@cosmjs/launchpad";
@@ -17,7 +16,7 @@ import {
   SignDocHelper,
 } from "@keplr-wallet/hooks";
 import { useLanguage } from "../../languages";
-import { Badge, Label, Button } from "reactstrap";
+import { Badge, Label } from "reactstrap";
 import { renderDirectMessage } from "./direct";
 
 export const DetailsTab: FunctionComponent<{
@@ -27,19 +26,17 @@ export const DetailsTab: FunctionComponent<{
   gasConfig: IGasConfig;
 
   disableInputs: boolean | undefined;
-  disableFeeInputs: boolean;
 }> = observer(
-  ({
-    signDocHelper,
-    memoConfig,
-    feeConfig,
-    gasConfig,
-    disableInputs,
-    disableFeeInputs,
-  }) => {
+  ({ signDocHelper, memoConfig, feeConfig, gasConfig, disableInputs }) => {
     const { chainStore, priceStore, accountStore } = useStore();
+    const [manualFee, useManualFee] = useState(feeConfig.isManual);
+    useEffect(() => {
+      useManualFee(feeConfig.isManual);
+    }, [feeConfig.isManual]);
     const intl = useIntl();
-
+    console.log(feeConfig.isManual);
+    console.log(feeConfig);
+    console.log("Disable fee:" + manualFee);
     const language = useLanguage();
 
     const mode = signDocHelper.signDocWrapper
@@ -50,7 +47,7 @@ export const DetailsTab: FunctionComponent<{
         ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
         : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
       : [];
-    let _disableFeeInputs = disableFeeInputs;
+
     const renderedMsgs = (() => {
       if (mode === "amino") {
         return (msgs as readonly Msg[]).map((msg, i) => {
@@ -125,7 +122,7 @@ export const DetailsTab: FunctionComponent<{
             </div>
           </React.Fragment>
         )}
-        {!disableInputs && !_disableFeeInputs ? (
+        {!disableInputs && !manualFee ? (
           <FeeButtons
             feeConfig={feeConfig}
             gasConfig={gasConfig}
@@ -138,6 +135,15 @@ export const DetailsTab: FunctionComponent<{
             <Label for="fee-price" className="form-control-label">
               <FormattedMessage id="sign.info.fee" />
             </Label>
+            <div style={{ fontSize: "13px" }}>
+              <FormattedMessage
+                id="sign.info.warning.supplied-fee"
+                values={{
+                  // eslint-disable-next-line react/display-name
+                  b: (...chunks: any) => <b>{chunks}</b>,
+                }}
+              />
+            </div>
             <div id="fee-price">
               <div>
                 {feeConfig.fee.maxDecimals(6).trim(true).toString()}
@@ -152,22 +158,21 @@ export const DetailsTab: FunctionComponent<{
                     {priceStore
                       .calculatePrice(language.fiatCurrency, feeConfig.fee)
                       ?.toString()}
-
-                    <Button
-                      className={style.button}
-                      color="primary"
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        _disableFeeInputs = false;
-                      }}
-                    >
-                      {intl.formatMessage({
-                        id: "sign.button.approve",
-                      })}
-                    </Button>
                   </div>
                 ) : null}
               </div>
+            </div>
+
+            <div style={{ fontSize: "12px" }}>
+              <a
+                href="javascript:void(0)"
+                onClick={(e) => {
+                  e.preventDefault();
+                  useManualFee(false);
+                }}
+              >
+                <FormattedMessage id="sign.info.fee.override" />
+              </a>
             </div>
           </React.Fragment>
         ) : null}
