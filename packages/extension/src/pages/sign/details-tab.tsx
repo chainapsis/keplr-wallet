@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import styleDetailsTab from "./details-tab.module.scss";
+import style from "./style.module.scss";
 
 import { renderAminoMessage } from "./amino";
 import { Msg } from "@cosmjs/launchpad";
@@ -16,7 +17,7 @@ import {
   SignDocHelper,
 } from "@keplr-wallet/hooks";
 import { useLanguage } from "../../languages";
-import { Badge, Label } from "reactstrap";
+import { Badge, Label, Button } from "reactstrap";
 import { renderDirectMessage } from "./direct";
 
 export const DetailsTab: FunctionComponent<{
@@ -26,8 +27,16 @@ export const DetailsTab: FunctionComponent<{
   gasConfig: IGasConfig;
 
   disableInputs: boolean | undefined;
+  disableFeeInputs: boolean;
 }> = observer(
-  ({ signDocHelper, memoConfig, feeConfig, gasConfig, disableInputs }) => {
+  ({
+    signDocHelper,
+    memoConfig,
+    feeConfig,
+    gasConfig,
+    disableInputs,
+    disableFeeInputs,
+  }) => {
     const { chainStore, priceStore, accountStore } = useStore();
     const intl = useIntl();
 
@@ -41,7 +50,7 @@ export const DetailsTab: FunctionComponent<{
         ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
         : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
       : [];
-
+    let _disableFeeInputs = disableFeeInputs;
     const renderedMsgs = (() => {
       if (mode === "amino") {
         return (msgs as readonly Msg[]).map((msg, i) => {
@@ -116,7 +125,7 @@ export const DetailsTab: FunctionComponent<{
             </div>
           </React.Fragment>
         )}
-        {!disableInputs ? (
+        {!disableInputs && !_disableFeeInputs ? (
           <FeeButtons
             feeConfig={feeConfig}
             gasConfig={gasConfig}
@@ -143,6 +152,19 @@ export const DetailsTab: FunctionComponent<{
                     {priceStore
                       .calculatePrice(language.fiatCurrency, feeConfig.fee)
                       ?.toString()}
+
+                    <Button
+                      className={style.button}
+                      color="primary"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        _disableFeeInputs = false;
+                      }}
+                    >
+                      {intl.formatMessage({
+                        id: "sign.button.approve",
+                      })}
+                    </Button>
                   </div>
                 ) : null}
               </div>
