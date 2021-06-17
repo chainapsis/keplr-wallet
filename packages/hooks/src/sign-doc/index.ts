@@ -44,8 +44,12 @@ export class SignDocHelper {
           denom: fee.denom,
         };
       }),
-      granter: protoSignDoc.authInfo.fee?.granter,
-      payer: protoSignDoc.authInfo.fee?.payer,
+      granter: protoSignDoc.authInfo.fee?.granter
+        ? protoSignDoc.authInfo.fee?.granter
+        : null,
+      payer: protoSignDoc.authInfo.fee?.payer
+        ? protoSignDoc.authInfo.fee?.granter
+        : null,
     });
 
     const newSignDoc = cosmos.tx.v1beta1.SignDoc.create({
