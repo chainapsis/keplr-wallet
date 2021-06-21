@@ -5,10 +5,10 @@ import { PRIVILEGED_ORIGINS } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
-    rpc: "https://rpc-flavienworld.sandbox-london-b.fetch-ai.com",
-    rest: "https://rest-flavienworld.sandbox-london-b.fetch-ai.com",
-    chainId: "flavienworld-1",
-    chainName: "Flavien World",
+    rpc: "https://rpc-stargateworld.fetch.ai",
+    rest: "https://rest-stargateworld.fetch.ai",
+    chainId: "stargateworld-1",
+    chainName: "Stargate World",
     stakeCurrency: {
       coinDenom: "TESTFET",
       coinMinimalDenom: "atestfet",
