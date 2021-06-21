@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Fetch.ai",
   "description": "The Fetch.ai wallet, powered by Keplr, for interacting with an agent based world",
-  "version": "0.8.7",
+  "version": "0.1.0+keplr0.8.10",
   "icons": {
     "16": "assets/icon-16.png",
     "48": "assets/icon-48.png",
