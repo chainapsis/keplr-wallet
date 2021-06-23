@@ -91,7 +91,7 @@ export const SignPage: FunctionComponent = observer(() => {
       signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
       gasConfig.setGas(data.data.signDocWrapper.gas);
       memoConfig.setMemo(data.data.signDocWrapper.memo);
-      if (isSignDocInternalSend) {
+      if (isSignDocInternalSend || data.data.signDocWrapper.fees[0]) {
         feeConfig.setManualFee(data.data.signDocWrapper.fees[0]);
       }
       setSigner(data.data.signer);

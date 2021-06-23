@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -29,8 +29,11 @@ export const DetailsTab: FunctionComponent<{
 }> = observer(
   ({ signDocHelper, memoConfig, feeConfig, gasConfig, disableInputs }) => {
     const { chainStore, priceStore, accountStore } = useStore();
+    const [manualFee, useManualFee] = useState(feeConfig.isManual);
+    useEffect(() => {
+      useManualFee(feeConfig.isManual);
+    }, [feeConfig.isManual]);
     const intl = useIntl();
-
     const language = useLanguage();
 
     const mode = signDocHelper.signDocWrapper
@@ -116,7 +119,7 @@ export const DetailsTab: FunctionComponent<{
             </div>
           </React.Fragment>
         )}
-        {!disableInputs ? (
+        {!disableInputs && !manualFee ? (
           <FeeButtons
             feeConfig={feeConfig}
             gasConfig={gasConfig}
@@ -129,6 +132,15 @@ export const DetailsTab: FunctionComponent<{
             <Label for="fee-price" className="form-control-label">
               <FormattedMessage id="sign.info.fee" />
             </Label>
+            <div style={{ fontSize: "13px" }}>
+              <FormattedMessage
+                id="sign.info.warning.supplied-fee"
+                values={{
+                  // eslint-disable-next-line react/display-name
+                  b: (...chunks: any) => <b>{chunks}</b>,
+                }}
+              />
+            </div>
             <div id="fee-price">
               <div>
                 {feeConfig.fee.maxDecimals(6).trim(true).toString()}
@@ -146,6 +158,18 @@ export const DetailsTab: FunctionComponent<{
                   </div>
                 ) : null}
               </div>
+            </div>
+
+            <div style={{ fontSize: "12px" }}>
+              <a
+                href="javascript:void(0)"
+                onClick={(e) => {
+                  e.preventDefault();
+                  useManualFee(false);
+                }}
+              >
+                <FormattedMessage id="sign.info.fee.override" />
+              </a>
             </div>
           </React.Fragment>
         ) : null}
