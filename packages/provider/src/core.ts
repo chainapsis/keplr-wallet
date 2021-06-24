@@ -39,10 +39,15 @@ export class Keplr implements IKeplr {
   async enable(chainId: string): Promise<void> {
     await this.requester.sendMessage(
       BACKGROUND_PORT,
-      new EnableAccessMsg(chainId)
+      new EnableAccessMsg([chainId])
     );
   }
-
+  async permitMultiple(chainIds: string[]): Promise<void> {
+    await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new EnableAccessMsg(chainIds)
+    );
+  }
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
     const msg = new SuggestChainInfoMsg(chainInfo);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);

@@ -25,7 +25,7 @@ const handleGetPubkeyMsg: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
@@ -39,7 +39,7 @@ const handleReqeustEncryptMsg: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
@@ -59,7 +59,7 @@ const handleRequestDecryptMsg: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 

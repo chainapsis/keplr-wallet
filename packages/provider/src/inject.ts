@@ -153,7 +153,9 @@ export class InjectedKeplr implements IKeplr {
   async enable(chainId: string): Promise<void> {
     await this.requestMethod("enable", [chainId]);
   }
-
+  async permitMultiple(chainIds: string[]): Promise<void> {
+    await this.requestMethod("permitMultiple", [chainIds]);
+  }
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
     await this.requestMethod("experimentalSuggestChain", [chainInfo]);
   }

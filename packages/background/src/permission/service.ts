@@ -56,23 +56,29 @@ export class PermissionService {
 
   async checkOrGrantBasicAccessPermission(
     env: Env,
-    chainId: string,
+    chainIds: string[],
     origin: string
   ) {
     // Try to unlock the key ring before checking or granting the basic permission.
     await this.keyRingService.enable(env);
-
-    if (!this.hasPermisson(chainId, getBasicAccessPermissionType(), origin)) {
-      await this.grantBasicAccessPermission(env, chainId, [origin]);
+    const chainIdsToPermit = [];
+    for (const chainId of chainIds) {
+      if (!this.hasPermisson(chainId, getBasicAccessPermissionType(), origin)) {
+        chainIdsToPermit.push(chainId);
+      }
     }
-
-    await this.checkBasicAccessPermission(env, chainId, origin);
+    if (chainIdsToPermit.length > 0) {
+      await this.grantBasicAccessPermission(env, chainIdsToPermit, [origin]);
+    }
+    for (const chainId of chainIds) {
+      await this.checkBasicAccessPermission(env, chainId, origin);
+    }
   }
 
   async grantPermission(
     env: Env,
     url: string,
-    chainId: string,
+    chainIds: string[],
     type: string,
     origins: string[]
   ) {
@@ -81,7 +87,7 @@ export class PermissionService {
     }
 
     const permissionData: PermissionData = {
-      chainId,
+      chainIds,
       type,
       origins,
     };
@@ -92,22 +98,25 @@ export class PermissionService {
       INTERACTION_TYPE_PERMISSION,
       permissionData
     );
-
-    await this.addPermission(chainId, type, origins);
+    for (const chainId of chainIds) {
+      await this.addPermission(chainId, type, origins);
+    }
   }
 
   async grantBasicAccessPermission(
     env: Env,
-    chainId: string,
+    chainIds: string[],
     origins: string[]
   ) {
     // Make sure that the chain info is registered.
-    await this.chainsService.getChainInfo(chainId);
+    for (const chainId of chainIds) {
+      await this.chainsService.getChainInfo(chainId);
+    }
 
     await this.grantPermission(
       env,
       "/access",
-      chainId,
+      chainIds,
       getBasicAccessPermissionType(),
       origins
     );

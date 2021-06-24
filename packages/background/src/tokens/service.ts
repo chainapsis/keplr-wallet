@@ -293,7 +293,7 @@ export class TokensService {
       await this.permissionService.grantPermission(
         env,
         "/access/viewing-key",
-        chainId,
+        [chainId],
         type,
         [origin]
       );

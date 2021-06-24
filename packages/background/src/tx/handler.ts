@@ -21,7 +21,7 @@ const handleSendTxMsg: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 

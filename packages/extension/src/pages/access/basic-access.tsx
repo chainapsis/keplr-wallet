@@ -23,7 +23,11 @@ export const AccessPage: FunctionComponent = observer(() => {
   const ineractionInfo = useInteractionInfo(() => {
     permissionStore.rejectAll();
   });
-
+  const permissionOnly =
+    permissionStore.waitingBasicAccessPermissions.length > 0
+      ? permissionStore.waitingBasicAccessPermissions[0].data.chainIds.length >
+        1
+      : false;
   const current = chainStore.current;
 
   const isSecretWasm = useMemo(() => {
@@ -35,7 +39,7 @@ export const AccessPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (waitingPermission) {
-      chainStore.selectChain(waitingPermission.data.chainId);
+      chainStore.selectChain(waitingPermission.data.chainIds[0]);
     }
   }, [chainStore, waitingPermission]);
 
@@ -69,8 +73,12 @@ export const AccessPage: FunctionComponent = observer(() => {
               host,
               chainId:
                 waitingPermission &&
-                chainStore.hasChain(waitingPermission.data.chainId)
-                  ? chainStore.getChain(waitingPermission.data.chainId).chainId
+                waitingPermission.data.chainIds.every((x) =>
+                  chainStore.hasChain(x)
+                )
+                  ? waitingPermission.data.chainIds
+                      .map((x) => chainStore.getChain(x).chainId)
+                      .join(",")
                   : "loading...",
               // eslint-disable-next-line react/display-name
               b: (...chunks: any) => <b>{chunks}</b>,
@@ -142,8 +150,10 @@ export const AccessPage: FunctionComponent = observer(() => {
             }}
             disabled={
               !waitingPermission ||
-              ChainIdHelper.parse(chainStore.current.chainId).identifier !==
-                ChainIdHelper.parse(waitingPermission.data.chainId).identifier
+              (!permissionOnly &&
+                ChainIdHelper.parse(chainStore.current.chainId).identifier !==
+                  ChainIdHelper.parse(waitingPermission.data.chainIds[0])
+                    .identifier)
             }
             data-loading={permissionStore.isLoading}
           >

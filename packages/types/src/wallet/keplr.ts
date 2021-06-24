@@ -24,6 +24,7 @@ export interface Keplr {
 
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
+  permitMultiple(chainIds: string[]): Promise<void>;
   getKey(chainId: string): Promise<Key>;
   signAmino(
     chainId: string,

@@ -163,7 +163,7 @@ export class PermissionStore extends HasMapStore<
   get waitingBasicAccessPermissions(): {
     id: string;
     data: {
-      chainId: string;
+      chainIds: string[];
       origins: string[];
     };
   }[] {
@@ -175,7 +175,7 @@ export class PermissionStore extends HasMapStore<
         result.push({
           id: data.id,
           data: {
-            chainId: data.data.chainId,
+            chainIds: data.data.chainIds,
             origins: data.data.origins,
           },
         });
@@ -202,7 +202,7 @@ export class PermissionStore extends HasMapStore<
         result.push({
           id: data.id,
           data: {
-            chainId: data.data.chainId,
+            chainId: data.data.chainIds[0],
             contractAddress: splitSecret20ViewingKeyPermissionType(
               data.data.type
             ),

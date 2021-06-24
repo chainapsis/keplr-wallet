@@ -44,7 +44,7 @@ const handleSuggestTokenMsg: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
@@ -74,7 +74,7 @@ const handleGetSecret20ViewingKey: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 

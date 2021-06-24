@@ -234,7 +234,7 @@ const handleGetKeyMsg: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
@@ -259,7 +259,7 @@ const handleRequestSignAminoMsg: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
@@ -278,7 +278,7 @@ const handleRequestSignDirectMsg: (
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
