@@ -1,4 +1,10 @@
-import { ChainInfo, Keplr as IKeplr, Key } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  Keplr as IKeplr,
+  KeplrIntereactionOptions,
+  KeplrSignOptions,
+  Key,
+} from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   BroadcastMode,
@@ -27,9 +33,12 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 import { CosmJSOfflineSigner } from "./cosmjs";
+import deepmerge from "deepmerge";
 
 export class Keplr implements IKeplr {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
+
+  public defaultOptions: KeplrIntereactionOptions = {};
 
   constructor(
     public readonly version: string,
@@ -65,21 +74,29 @@ export class Keplr implements IKeplr {
   async signAmino(
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    const msg = new RequestSignAminoMsg(chainId, signer, signDoc);
+    const msg = new RequestSignAminoMsg(
+      chainId,
+      signer,
+      signDoc,
+      deepmerge(this.defaultOptions, signOptions)
+    );
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   async signDirect(
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.ISignDoc
+    signDoc: cosmos.tx.v1beta1.ISignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
     const msg = new RequestSignDirectMsg(
       chainId,
       signer,
-      cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish()
+      cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
+      deepmerge(this.defaultOptions, signOptions)
     );
     const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
 

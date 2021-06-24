@@ -19,8 +19,17 @@ export interface Key {
   readonly bech32Address: string;
 }
 
+export interface KeplrIntereactionOptions {
+  readonly sign?: KeplrSignOptions;
+}
+
+export interface KeplrSignOptions {
+  readonly preferNoSetFee?: boolean;
+}
+
 export interface Keplr {
   readonly version: string;
+  defaultOptions: KeplrIntereactionOptions;
 
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
@@ -28,7 +37,8 @@ export interface Keplr {
   signAmino(
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
   signDirect(
     chainId: string,
@@ -45,7 +55,8 @@ export interface Keplr {
 
       /** SignDoc accountNumber */
       accountNumber?: Long | null;
-    }
+    },
+    signOptions?: KeplrSignOptions
   ): Promise<DirectSignResponse>;
   sendTx(
     chainId: string,

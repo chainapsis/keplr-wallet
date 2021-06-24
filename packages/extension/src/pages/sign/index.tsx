@@ -70,20 +70,6 @@ export const SignPage: FunctionComponent = observer(() => {
   const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
   amountConfig.setSignDocHelper(signDocHelper);
 
-  const isSignDocInternalSend = (() => {
-    if (signDocWapper && signDocWapper.mode === "amino") {
-      const signDoc = signDocWapper.aminoSignDoc;
-      return (
-        interactionInfo.interaction &&
-        interactionInfo.interactionInternal &&
-        signDoc.msgs.length === 1 &&
-        (signDoc.msgs[0].type === "cosmos-sdk/MsgSend" ||
-          signDoc.msgs[0].type === "cosmos-sdk/MsgTransfer")
-      );
-    }
-    return false;
-  })();
-
   useEffect(() => {
     if (signInteractionStore.waitingData) {
       const data = signInteractionStore.waitingData;
@@ -91,7 +77,10 @@ export const SignPage: FunctionComponent = observer(() => {
       signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
       gasConfig.setGas(data.data.signDocWrapper.gas);
       memoConfig.setMemo(data.data.signDocWrapper.memo);
-      if (isSignDocInternalSend || data.data.signDocWrapper.fees[0]) {
+      if (
+        data.data.signOptions.preferNoSetFee &&
+        data.data.signDocWrapper.fees[0]
+      ) {
         feeConfig.setManualFee(data.data.signDocWrapper.fees[0]);
       }
       setSigner(data.data.signer);
@@ -103,15 +92,19 @@ export const SignPage: FunctionComponent = observer(() => {
     feeConfig,
     signDocHelper,
     signInteractionStore.waitingData,
-    isSignDocInternalSend,
   ]);
 
-  const [
-    isLoadingSignDocInternalSend,
-    setIsLoadingSignDocInternalSend,
-  ] = useState(false);
+  // If the preferNoSetFee in sign options is true,
+  // don't show the fee buttons by default
+  // But, the sign options would be removed right after the users click the approve button.
+  // Thus, without this state, the fee buttons would be shown after clicking the approve buttion.
+  const [isApprovingPreferNoSetFee, setIsApprovingPreferNoSetFee] = useState(
+    false
+  );
 
-  const disableInputs = isSignDocInternalSend || isLoadingSignDocInternalSend;
+  const preferNoSetFee =
+    signInteractionStore.waitingData?.data.signOptions.preferNoSetFee === true;
+  const disableInputs = preferNoSetFee || isApprovingPreferNoSetFee;
 
   return (
     <HeaderLayout
@@ -196,8 +189,8 @@ export const SignPage: FunctionComponent = observer(() => {
                 onClick={async (e) => {
                   e.preventDefault();
 
-                  if (isSignDocInternalSend) {
-                    setIsLoadingSignDocInternalSend(true);
+                  if (preferNoSetFee) {
+                    setIsApprovingPreferNoSetFee(true);
                   }
 
                   await signInteractionStore.reject();
@@ -228,8 +221,8 @@ export const SignPage: FunctionComponent = observer(() => {
                 onClick={async (e) => {
                   e.preventDefault();
 
-                  if (isSignDocInternalSend) {
-                    setIsLoadingSignDocInternalSend(true);
+                  if (preferNoSetFee) {
+                    setIsApprovingPreferNoSetFee(true);
                   }
 
                   if (signDocHelper.signDocWrapper) {

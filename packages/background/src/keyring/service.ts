@@ -15,7 +15,7 @@ import { KVStore } from "@keplr-wallet/common";
 
 import { ChainsService } from "../chains";
 import { LedgerService } from "../ledger";
-import { BIP44, ChainInfo } from "@keplr-wallet/types";
+import { BIP44, ChainInfo, KeplrSignOptions } from "@keplr-wallet/types";
 import { APP_PORT, Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
@@ -181,7 +181,8 @@ export class KeyRingService {
     env: Env,
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
 
@@ -203,6 +204,7 @@ export class KeyRingService {
         mode: "amino",
         signDoc,
         signer,
+        signOptions,
       }
     )) as StdSignDoc;
 
@@ -231,7 +233,8 @@ export class KeyRingService {
     env: Env,
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.SignDoc
+    signDoc: cosmos.tx.v1beta1.SignDoc,
+    signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
 
@@ -253,6 +256,7 @@ export class KeyRingService {
         mode: "direct",
         signDocBytes: cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
         signer,
+        signOptions,
       }
     )) as Uint8Array;
 

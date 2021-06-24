@@ -61,11 +61,16 @@ const TokenView: FunctionComponent<{
       const contractAddress = balance.currency.contractAddress;
       return new Promise((resolve) => {
         accountInfo
-          .createSecret20ViewingKey(contractAddress, "", (_, viewingKey) => {
-            loadingIndicator.setIsLoading("create-veiwing-key", false);
+          .createSecret20ViewingKey(
+            contractAddress,
+            "",
+            {},
+            (_, viewingKey) => {
+              loadingIndicator.setIsLoading("create-veiwing-key", false);
 
-            resolve(viewingKey);
-          })
+              resolve(viewingKey);
+            }
+          )
           .then(() => {
             loadingIndicator.setIsLoading("create-veiwing-key", true);
           });
