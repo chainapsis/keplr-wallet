@@ -194,7 +194,7 @@ export class InjectedKeplr implements IKeplr {
       chainId,
       signer,
       signDoc,
-      deepmerge(this.defaultOptions, signOptions),
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
   }
 
@@ -208,7 +208,7 @@ export class InjectedKeplr implements IKeplr {
       chainId,
       signer,
       signDoc,
-      deepmerge(this.defaultOptions, signOptions),
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
   }
 

@@ -81,7 +81,7 @@ export class Keplr implements IKeplr {
       chainId,
       signer,
       signDoc,
-      deepmerge(this.defaultOptions, signOptions)
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
     );
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
@@ -96,7 +96,7 @@ export class Keplr implements IKeplr {
       chainId,
       signer,
       cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
-      deepmerge(this.defaultOptions, signOptions)
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
     );
     const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
 
