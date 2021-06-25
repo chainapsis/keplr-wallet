@@ -42,9 +42,6 @@ export const SignPage: FunctionComponent = observer(() => {
     accountStore,
     queriesStore,
   } = useStore();
-  const interactionInfo = useInteractionInfo(() => {
-    signInteractionStore.rejectAll();
-  });
 
   const [signer, setSigner] = useState("");
 
@@ -99,7 +96,7 @@ export const SignPage: FunctionComponent = observer(() => {
   // But, the sign options would be removed right after the users click the approve/reject button.
   // Thus, without this state, the fee buttons/memo input would be shown after clicking the approve buttion.
   const [isProcessing, setIsProcessing] = useState(false);
-  const needsetIsProcessing =
+  const needSetIsProcessing =
     signInteractionStore.waitingData?.data.signOptions.preferNoSetFee ===
       true ||
     signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo === true;
@@ -110,6 +107,14 @@ export const SignPage: FunctionComponent = observer(() => {
   const preferNoSetMemo =
     signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo ===
       true || isProcessing;
+
+  const interactionInfo = useInteractionInfo(() => {
+    if (needSetIsProcessing) {
+      setIsProcessing(true);
+    }
+
+    signInteractionStore.rejectAll();
+  });
 
   return (
     <HeaderLayout
@@ -195,7 +200,7 @@ export const SignPage: FunctionComponent = observer(() => {
                 onClick={async (e) => {
                   e.preventDefault();
 
-                  if (needsetIsProcessing) {
+                  if (needSetIsProcessing) {
                     setIsProcessing(true);
                   }
 
@@ -227,7 +232,7 @@ export const SignPage: FunctionComponent = observer(() => {
                 onClick={async (e) => {
                   e.preventDefault();
 
-                  if (needsetIsProcessing) {
+                  if (needSetIsProcessing) {
                     setIsProcessing(true);
                   }
 
