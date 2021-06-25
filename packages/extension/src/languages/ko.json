@@ -199,6 +199,7 @@
   "sign.info.fee": "수수료",
   "sign.info.memo": "메모",
   "sign.info.warning.empty-memo": "(빈 메모)",
+  "sign.info.fee.override": "수수료 변경",
   "sign.info.gas": "가스",
   "sign.button.approve": "허락",
   "sign.button.reject": "거부",

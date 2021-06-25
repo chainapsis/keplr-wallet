@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -16,7 +16,7 @@ import {
   SignDocHelper,
 } from "@keplr-wallet/hooks";
 import { useLanguage } from "../../languages";
-import { Badge, Label } from "reactstrap";
+import { Badge, Button, Label } from "reactstrap";
 import { renderDirectMessage } from "./direct";
 
 export const DetailsTab: FunctionComponent<{
@@ -25,14 +25,21 @@ export const DetailsTab: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
 
-  disableInputs: boolean | undefined;
+  isInternal: boolean;
+
+  preferNoSetFee: boolean;
+  preferNoSetMemo: boolean;
 }> = observer(
-  ({ signDocHelper, memoConfig, feeConfig, gasConfig, disableInputs }) => {
+  ({
+    signDocHelper,
+    memoConfig,
+    feeConfig,
+    gasConfig,
+    isInternal,
+    preferNoSetFee,
+    preferNoSetMemo,
+  }) => {
     const { chainStore, priceStore, accountStore } = useStore();
-    const [manualFee, useManualFee] = useState(feeConfig.isManual);
-    useEffect(() => {
-      useManualFee(feeConfig.isManual);
-    }, [feeConfig.isManual]);
     const intl = useIntl();
     const language = useLanguage();
 
@@ -99,7 +106,7 @@ export const DetailsTab: FunctionComponent<{
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
           {renderedMsgs}
         </div>
-        {!disableInputs ? (
+        {!preferNoSetMemo ? (
           <MemoInput
             memoConfig={memoConfig}
             label={intl.formatMessage({ id: "sign.info.memo" })}
@@ -119,7 +126,7 @@ export const DetailsTab: FunctionComponent<{
             </div>
           </React.Fragment>
         )}
-        {!disableInputs && !manualFee ? (
+        {!preferNoSetFee || !feeConfig.isManual ? (
           <FeeButtons
             feeConfig={feeConfig}
             gasConfig={gasConfig}
@@ -132,15 +139,6 @@ export const DetailsTab: FunctionComponent<{
             <Label for="fee-price" className="form-control-label">
               <FormattedMessage id="sign.info.fee" />
             </Label>
-            <div style={{ fontSize: "13px" }}>
-              <FormattedMessage
-                id="sign.info.warning.supplied-fee"
-                values={{
-                  // eslint-disable-next-line react/display-name
-                  b: (...chunks: any) => <b>{chunks}</b>,
-                }}
-              />
-            </div>
             <div id="fee-price">
               <div>
                 {feeConfig.fee.maxDecimals(6).trim(true).toString()}
@@ -159,18 +157,30 @@ export const DetailsTab: FunctionComponent<{
                 ) : null}
               </div>
             </div>
-
-            <div style={{ fontSize: "12px" }}>
-              <a
-                href="javascript:void(0)"
-                onClick={(e) => {
-                  e.preventDefault();
-                  useManualFee(false);
-                }}
-              >
-                <FormattedMessage id="sign.info.fee.override" />
-              </a>
-            </div>
+            {
+              /*
+                Even if the "preferNoSetFee" option is turned on, it provides the way to edit the fee to users.
+                However, if the interaction is internal, you can be sure that the fee is set well inside Keplr.
+                Therefore, the button is not shown in this case.
+              */
+              !isInternal ? (
+                <div style={{ fontSize: "12px" }}>
+                  <Button
+                    color="link"
+                    size="sm"
+                    style={{
+                      padding: 0,
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      feeConfig.setFeeType("average");
+                    }}
+                  >
+                    <FormattedMessage id="sign.info.fee.override" />
+                  </Button>
+                </div>
+              ) : null
+            }
           </React.Fragment>
         ) : null}
       </div>

@@ -29,9 +29,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected _manualFee: CoinPrimitive | undefined = undefined;
 
-  @observable
-  protected _isManual: boolean = false;
-
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
@@ -62,14 +59,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   setFeeType(feeType: FeeType | undefined) {
     this._feeType = feeType;
     this._manualFee = undefined;
-    if (feeType) {
-      this._isManual = false;
-    }
   }
 
   get isManual(): boolean {
-    return this._isManual;
+    return this.feeType === undefined;
   }
+
   get feeType(): FeeType | undefined {
     return this._feeType;
   }
@@ -78,7 +73,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   setManualFee(fee: CoinPrimitive) {
     this._manualFee = fee;
     this._feeType = undefined;
-    this._isManual = true;
   }
 
   get feeCurrencies(): Currency[] {

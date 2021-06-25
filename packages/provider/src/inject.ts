@@ -1,4 +1,11 @@
-import { ChainInfo, Keplr, Keplr as IKeplr, Key } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  Keplr,
+  Keplr as IKeplr,
+  KeplrIntereactionOptions,
+  KeplrSignOptions,
+  Key,
+} from "@keplr-wallet/types";
 import { Result } from "@keplr-wallet/router";
 import {
   BroadcastMode,
@@ -15,6 +22,7 @@ import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
 import { CosmJSOfflineSigner } from "./cosmjs";
+import deepmerge from "deepmerge";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -50,6 +58,10 @@ export class InjectedKeplr implements IKeplr {
 
         if (message.method === "version") {
           throw new Error("Version is not function");
+        }
+
+        if (message.method === "defaultOptions") {
+          throw new Error("DefaultOptions is not function");
         }
 
         if (
@@ -148,6 +160,8 @@ export class InjectedKeplr implements IKeplr {
 
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
 
+  public defaultOptions: KeplrIntereactionOptions = {};
+
   constructor(public readonly version: string) {}
 
   async enable(chainId: string): Promise<void> {
@@ -173,17 +187,29 @@ export class InjectedKeplr implements IKeplr {
   async signAmino(
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    return await this.requestMethod("signAmino", [chainId, signer, signDoc]);
+    return await this.requestMethod("signAmino", [
+      chainId,
+      signer,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+    ]);
   }
 
   async signDirect(
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.ISignDoc
+    signDoc: cosmos.tx.v1beta1.ISignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    return await this.requestMethod("signDirect", [chainId, signer, signDoc]);
+    return await this.requestMethod("signDirect", [
+      chainId,
+      signer,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+    ]);
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
