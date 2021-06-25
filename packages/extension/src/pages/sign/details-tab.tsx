@@ -16,7 +16,7 @@ import {
   SignDocHelper,
 } from "@keplr-wallet/hooks";
 import { useLanguage } from "../../languages";
-import { Badge, Label } from "reactstrap";
+import { Badge, Button, Label } from "reactstrap";
 import { renderDirectMessage } from "./direct";
 
 export const DetailsTab: FunctionComponent<{
@@ -140,15 +140,6 @@ export const DetailsTab: FunctionComponent<{
             <Label for="fee-price" className="form-control-label">
               <FormattedMessage id="sign.info.fee" />
             </Label>
-            <div style={{ fontSize: "13px" }}>
-              <FormattedMessage
-                id="sign.info.warning.supplied-fee"
-                values={{
-                  // eslint-disable-next-line react/display-name
-                  b: (...chunks: any) => <b>{chunks}</b>,
-                }}
-              />
-            </div>
             <div id="fee-price">
               <div>
                 {feeConfig.fee.maxDecimals(6).trim(true).toString()}
@@ -167,17 +158,20 @@ export const DetailsTab: FunctionComponent<{
                 ) : null}
               </div>
             </div>
-
             <div style={{ fontSize: "12px" }}>
-              <a
-                href="javascript:void(0)"
+              <Button
+                color="link"
+                size="sm"
+                style={{
+                  padding: 0,
+                }}
                 onClick={(e) => {
                   e.preventDefault();
                   useManualFee(false);
                 }}
               >
                 <FormattedMessage id="sign.info.fee.override" />
-              </a>
+              </Button>
             </div>
           </React.Fragment>
         ) : null}
