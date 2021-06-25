@@ -129,135 +129,152 @@ export const SignPage: FunctionComponent = observer(() => {
       }
       style={{ background: "white" }}
     >
-      <div className={style.container}>
-        <div className={classnames(style.tabs)}>
-          <ul>
-            <li className={classnames({ active: tab === Tab.Details })}>
-              <a
-                className={style.tab}
-                onClick={() => {
-                  setTab(Tab.Details);
-                }}
-              >
-                {intl.formatMessage({
-                  id: "sign.tab.details",
-                })}
-              </a>
-            </li>
-            <li className={classnames({ active: tab === Tab.Data })}>
-              <a
-                className={style.tab}
-                onClick={() => {
-                  setTab(Tab.Data);
-                }}
-              >
-                {intl.formatMessage({
-                  id: "sign.tab.data",
-                })}
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div
-          className={classnames(style.tabContainer, {
-            [style.dataTab]: tab === Tab.Data,
-          })}
-        >
-          {tab === Tab.Data ? <DataTab signDocHelper={signDocHelper} /> : null}
-          {tab === Tab.Details ? (
-            <DetailsTab
-              signDocHelper={signDocHelper}
-              memoConfig={memoConfig}
-              feeConfig={feeConfig}
-              gasConfig={gasConfig}
-              preferNoSetFee={preferNoSetFee}
-              preferNoSetMemo={preferNoSetMemo}
-            />
-          ) : null}
-        </div>
-        <div style={{ flex: 1 }} />
-        <div className={style.buttons}>
-          {keyRingStore.keyRingType === "ledger" &&
-          signInteractionStore.isLoading ? (
-            <Button
-              className={style.button}
-              color="primary"
-              disabled={true}
-              outline
-            >
-              <FormattedMessage id="sign.button.confirm-ledger" />{" "}
-              <i className="fa fa-spinner fa-spin fa-fw" />
-            </Button>
-          ) : (
-            <React.Fragment>
-              <Button
-                className={style.button}
-                color="danger"
-                disabled={
-                  signDocWapper == null || signDocHelper.signDocWrapper == null
-                }
-                data-loading={signInteractionStore.isLoading}
-                onClick={async (e) => {
-                  e.preventDefault();
-
-                  if (needSetIsProcessing) {
-                    setIsProcessing(true);
-                  }
-
-                  await signInteractionStore.reject();
-
-                  if (
-                    interactionInfo.interaction &&
-                    !interactionInfo.interactionInternal
-                  ) {
-                    window.close();
-                  }
-                }}
-                outline
-              >
-                {intl.formatMessage({
-                  id: "sign.button.reject",
-                })}
-              </Button>
+      {signInteractionStore.waitingData || isProcessing ? (
+        <div className={style.container}>
+          <div className={classnames(style.tabs)}>
+            <ul>
+              <li className={classnames({ active: tab === Tab.Details })}>
+                <a
+                  className={style.tab}
+                  onClick={() => {
+                    setTab(Tab.Details);
+                  }}
+                >
+                  {intl.formatMessage({
+                    id: "sign.tab.details",
+                  })}
+                </a>
+              </li>
+              <li className={classnames({ active: tab === Tab.Data })}>
+                <a
+                  className={style.tab}
+                  onClick={() => {
+                    setTab(Tab.Data);
+                  }}
+                >
+                  {intl.formatMessage({
+                    id: "sign.tab.data",
+                  })}
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div
+            className={classnames(style.tabContainer, {
+              [style.dataTab]: tab === Tab.Data,
+            })}
+          >
+            {tab === Tab.Data ? (
+              <DataTab signDocHelper={signDocHelper} />
+            ) : null}
+            {tab === Tab.Details ? (
+              <DetailsTab
+                signDocHelper={signDocHelper}
+                memoConfig={memoConfig}
+                feeConfig={feeConfig}
+                gasConfig={gasConfig}
+                preferNoSetFee={preferNoSetFee}
+                preferNoSetMemo={preferNoSetMemo}
+              />
+            ) : null}
+          </div>
+          <div style={{ flex: 1 }} />
+          <div className={style.buttons}>
+            {keyRingStore.keyRingType === "ledger" &&
+            signInteractionStore.isLoading ? (
               <Button
                 className={style.button}
                 color="primary"
-                disabled={
-                  signDocWapper == null ||
-                  signDocHelper.signDocWrapper == null ||
-                  memoConfig.getError() != null ||
-                  feeConfig.getError() != null
-                }
-                data-loading={signInteractionStore.isLoading}
-                onClick={async (e) => {
-                  e.preventDefault();
-
-                  if (needSetIsProcessing) {
-                    setIsProcessing(true);
-                  }
-
-                  if (signDocHelper.signDocWrapper) {
-                    await signInteractionStore.approveAndWaitEnd(
-                      signDocHelper.signDocWrapper
-                    );
-                  }
-
-                  if (
-                    interactionInfo.interaction &&
-                    !interactionInfo.interactionInternal
-                  ) {
-                    window.close();
-                  }
-                }}
+                disabled={true}
+                outline
               >
-                {intl.formatMessage({
-                  id: "sign.button.approve",
-                })}
+                <FormattedMessage id="sign.button.confirm-ledger" />{" "}
+                <i className="fa fa-spinner fa-spin fa-fw" />
               </Button>
-            </React.Fragment>
-          )}
+            ) : (
+              <React.Fragment>
+                <Button
+                  className={style.button}
+                  color="danger"
+                  disabled={
+                    signDocWapper == null ||
+                    signDocHelper.signDocWrapper == null
+                  }
+                  data-loading={signInteractionStore.isLoading}
+                  onClick={async (e) => {
+                    e.preventDefault();
+
+                    if (needSetIsProcessing) {
+                      setIsProcessing(true);
+                    }
+
+                    await signInteractionStore.reject();
+
+                    if (
+                      interactionInfo.interaction &&
+                      !interactionInfo.interactionInternal
+                    ) {
+                      window.close();
+                    }
+                  }}
+                  outline
+                >
+                  {intl.formatMessage({
+                    id: "sign.button.reject",
+                  })}
+                </Button>
+                <Button
+                  className={style.button}
+                  color="primary"
+                  disabled={
+                    signDocWapper == null ||
+                    signDocHelper.signDocWrapper == null ||
+                    memoConfig.getError() != null ||
+                    feeConfig.getError() != null
+                  }
+                  data-loading={signInteractionStore.isLoading}
+                  onClick={async (e) => {
+                    e.preventDefault();
+
+                    if (needSetIsProcessing) {
+                      setIsProcessing(true);
+                    }
+
+                    if (signDocHelper.signDocWrapper) {
+                      await signInteractionStore.approveAndWaitEnd(
+                        signDocHelper.signDocWrapper
+                      );
+                    }
+
+                    if (
+                      interactionInfo.interaction &&
+                      !interactionInfo.interactionInternal
+                    ) {
+                      window.close();
+                    }
+                  }}
+                >
+                  {intl.formatMessage({
+                    id: "sign.button.approve",
+                  })}
+                </Button>
+              </React.Fragment>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <i className="fas fa-spinner fa-spin fa-2x text-gray" />
+        </div>
+      )}
     </HeaderLayout>
   );
 });
