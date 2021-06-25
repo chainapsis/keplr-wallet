@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -40,10 +40,6 @@ export const DetailsTab: FunctionComponent<{
     preferNoSetMemo,
   }) => {
     const { chainStore, priceStore, accountStore } = useStore();
-    const [manualFee, useManualFee] = useState(feeConfig.isManual);
-    useEffect(() => {
-      useManualFee(feeConfig.isManual);
-    }, [feeConfig.isManual]);
     const intl = useIntl();
     const language = useLanguage();
 
@@ -130,7 +126,7 @@ export const DetailsTab: FunctionComponent<{
             </div>
           </React.Fragment>
         )}
-        {!preferNoSetFee && !manualFee ? (
+        {!preferNoSetFee || !feeConfig.isManual ? (
           <FeeButtons
             feeConfig={feeConfig}
             gasConfig={gasConfig}
@@ -177,7 +173,7 @@ export const DetailsTab: FunctionComponent<{
                     }}
                     onClick={(e) => {
                       e.preventDefault();
-                      useManualFee(false);
+                      feeConfig.setFeeType("average");
                     }}
                   >
                     <FormattedMessage id="sign.info.fee.override" />
