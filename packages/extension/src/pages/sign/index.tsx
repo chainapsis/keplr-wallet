@@ -173,6 +173,10 @@ export const SignPage: FunctionComponent = observer(() => {
                 memoConfig={memoConfig}
                 feeConfig={feeConfig}
                 gasConfig={gasConfig}
+                isInternal={
+                  interactionInfo.interaction &&
+                  interactionInfo.interactionInternal
+                }
                 preferNoSetFee={preferNoSetFee}
                 preferNoSetMemo={preferNoSetMemo}
               />

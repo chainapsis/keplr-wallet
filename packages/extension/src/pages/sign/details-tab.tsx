@@ -25,14 +25,17 @@ export const DetailsTab: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
 
-  preferNoSetFee: boolean | undefined;
-  preferNoSetMemo: boolean | undefined;
+  isInternal: boolean;
+
+  preferNoSetFee: boolean;
+  preferNoSetMemo: boolean;
 }> = observer(
   ({
     signDocHelper,
     memoConfig,
     feeConfig,
     gasConfig,
+    isInternal,
     preferNoSetFee,
     preferNoSetMemo,
   }) => {
@@ -158,21 +161,30 @@ export const DetailsTab: FunctionComponent<{
                 ) : null}
               </div>
             </div>
-            <div style={{ fontSize: "12px" }}>
-              <Button
-                color="link"
-                size="sm"
-                style={{
-                  padding: 0,
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  useManualFee(false);
-                }}
-              >
-                <FormattedMessage id="sign.info.fee.override" />
-              </Button>
-            </div>
+            {
+              /*
+                Even if the "preferNoSetFee" option is turned on, it provides the way to edit the fee to users.
+                However, if the interaction is internal, you can be sure that the fee is set well inside Keplr.
+                Therefore, the button is not shown in this case.
+              */
+              !isInternal ? (
+                <div style={{ fontSize: "12px" }}>
+                  <Button
+                    color="link"
+                    size="sm"
+                    style={{
+                      padding: 0,
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      useManualFee(false);
+                    }}
+                  >
+                    <FormattedMessage id="sign.info.fee.override" />
+                  </Button>
+                </div>
+              ) : null
+            }
           </React.Fragment>
         ) : null}
       </div>
