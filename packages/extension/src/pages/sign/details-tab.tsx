@@ -25,9 +25,17 @@ export const DetailsTab: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
 
-  disableInputs: boolean | undefined;
+  preferNoSetFee: boolean | undefined;
+  preferNoSetMemo: boolean | undefined;
 }> = observer(
-  ({ signDocHelper, memoConfig, feeConfig, gasConfig, disableInputs }) => {
+  ({
+    signDocHelper,
+    memoConfig,
+    feeConfig,
+    gasConfig,
+    preferNoSetFee,
+    preferNoSetMemo,
+  }) => {
     const { chainStore, priceStore, accountStore } = useStore();
     const [manualFee, useManualFee] = useState(feeConfig.isManual);
     useEffect(() => {
@@ -99,7 +107,7 @@ export const DetailsTab: FunctionComponent<{
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
           {renderedMsgs}
         </div>
-        {!disableInputs ? (
+        {!preferNoSetMemo ? (
           <MemoInput
             memoConfig={memoConfig}
             label={intl.formatMessage({ id: "sign.info.memo" })}
@@ -119,7 +127,7 @@ export const DetailsTab: FunctionComponent<{
             </div>
           </React.Fragment>
         )}
-        {!disableInputs && !manualFee ? (
+        {!preferNoSetFee && !manualFee ? (
           <FeeButtons
             feeConfig={feeConfig}
             gasConfig={gasConfig}

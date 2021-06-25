@@ -94,17 +94,22 @@ export const SignPage: FunctionComponent = observer(() => {
     signInteractionStore.waitingData,
   ]);
 
-  // If the preferNoSetFee in sign options is true,
-  // don't show the fee buttons by default
-  // But, the sign options would be removed right after the users click the approve button.
-  // Thus, without this state, the fee buttons would be shown after clicking the approve buttion.
-  const [isApprovingPreferNoSetFee, setIsApprovingPreferNoSetFee] = useState(
-    false
-  );
+  // If the preferNoSetFee or preferNoSetMemo in sign options is true,
+  // don't show the fee buttons/memo input by default
+  // But, the sign options would be removed right after the users click the approve/reject button.
+  // Thus, without this state, the fee buttons/memo input would be shown after clicking the approve buttion.
+  const [isProcessing, setIsProcessing] = useState(false);
+  const needsetIsProcessing =
+    signInteractionStore.waitingData?.data.signOptions.preferNoSetFee ===
+      true ||
+    signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo === true;
 
   const preferNoSetFee =
-    signInteractionStore.waitingData?.data.signOptions.preferNoSetFee === true;
-  const disableInputs = preferNoSetFee || isApprovingPreferNoSetFee;
+    signInteractionStore.waitingData?.data.signOptions.preferNoSetFee ===
+      true || isProcessing;
+  const preferNoSetMemo =
+    signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo ===
+      true || isProcessing;
 
   return (
     <HeaderLayout
@@ -160,7 +165,8 @@ export const SignPage: FunctionComponent = observer(() => {
               memoConfig={memoConfig}
               feeConfig={feeConfig}
               gasConfig={gasConfig}
-              disableInputs={disableInputs}
+              preferNoSetFee={preferNoSetFee}
+              preferNoSetMemo={preferNoSetMemo}
             />
           ) : null}
         </div>
@@ -189,8 +195,8 @@ export const SignPage: FunctionComponent = observer(() => {
                 onClick={async (e) => {
                   e.preventDefault();
 
-                  if (preferNoSetFee) {
-                    setIsApprovingPreferNoSetFee(true);
+                  if (needsetIsProcessing) {
+                    setIsProcessing(true);
                   }
 
                   await signInteractionStore.reject();
@@ -221,8 +227,8 @@ export const SignPage: FunctionComponent = observer(() => {
                 onClick={async (e) => {
                   e.preventDefault();
 
-                  if (preferNoSetFee) {
-                    setIsApprovingPreferNoSetFee(true);
+                  if (needsetIsProcessing) {
+                    setIsProcessing(true);
                   }
 
                   if (signDocHelper.signDocWrapper) {

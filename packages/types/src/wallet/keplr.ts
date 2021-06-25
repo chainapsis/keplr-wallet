@@ -25,6 +25,7 @@ export interface KeplrIntereactionOptions {
 
 export interface KeplrSignOptions {
   readonly preferNoSetFee?: boolean;
+  readonly preferNoSetMemo?: boolean;
 }
 
 export interface Keplr {
