@@ -104,6 +104,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 stdFee,
                 {
                   preferNoSetFee: true,
+                  preferNoSetMemo: true,
                 }
               );
               history.replace("/");

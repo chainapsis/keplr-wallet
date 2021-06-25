@@ -81,6 +81,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   ibcTransferConfigs.feeConfig.toStdFee(),
                   {
                     preferNoSetFee: true,
+                    preferNoSetMemo: true,
                   }
                 );
                 history.push("/");
