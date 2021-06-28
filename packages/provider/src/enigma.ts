@@ -14,6 +14,10 @@ export class KeplrEnigmaUtils implements SecretUtils {
     return await this.keplr.getEnigmaPubKey(this.chainId);
   }
 
+  async getTxEncryptionKey(nonce: Uint8Array): Promise<Uint8Array> {
+    return await this.keplr.getEnigmaTxEncryptionKey(this.chainId, nonce);
+  }
+
   async encrypt(
     contractCodeHash: string,
     // eslint-disable-next-line @typescript-eslint/ban-types

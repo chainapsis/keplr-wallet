@@ -30,6 +30,6 @@
     "@keplr-wallet/unit": "^0.8.8",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
-    "secretjs": "^0.10.4"
+    "secretjs": "^0.13.0"
   }
 }

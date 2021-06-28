@@ -234,6 +234,16 @@ export class InjectedKeplr implements IKeplr {
     return await this.requestMethod("getEnigmaPubKey", [chainId]);
   }
 
+  async getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array
+  ): Promise<Uint8Array> {
+    return await this.requestMethod("getEnigmaTxEncryptionKey", [
+      chainId,
+      nonce,
+    ]);
+  }
+
   async enigmaEncrypt(
     chainId: string,
     contractCodeHash: string,

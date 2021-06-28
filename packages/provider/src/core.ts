@@ -25,6 +25,7 @@ import {
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
+  GetTxEncryptionKeyMsg,
 } from "@keplr-wallet/background";
 import { cosmos } from "@keplr-wallet/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
@@ -131,6 +132,16 @@ export class Keplr implements IKeplr {
     return await this.requester.sendMessage(
       BACKGROUND_PORT,
       new GetPubkeyMsg(chainId)
+    );
+  }
+
+  async getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array
+  ): Promise<Uint8Array> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetTxEncryptionKeyMsg(chainId, nonce)
     );
   }
 
