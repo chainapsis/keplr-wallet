@@ -45,10 +45,14 @@ export class Keplr implements IKeplr {
     protected readonly requester: MessageRequester
   ) {}
 
-  async enable(chainId: string): Promise<void> {
+  async enable(chainIds: string | string[]): Promise<void> {
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
     await this.requester.sendMessage(
       BACKGROUND_PORT,
-      new EnableAccessMsg(chainId)
+      new EnableAccessMsg(chainIds)
     );
   }
 

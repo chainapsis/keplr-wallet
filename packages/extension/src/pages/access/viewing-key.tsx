@@ -26,7 +26,9 @@ export const Secret20ViewingKeyAccessPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (waitingPermission) {
-      chainStore.selectChain(waitingPermission.data.chainId);
+      // XXX: You can only one chain id per the request.
+      //      This limit exists on the background service.
+      chainStore.selectChain(waitingPermission.data.chainIds[0]);
     }
   }, [chainStore, waitingPermission]);
 
@@ -126,7 +128,8 @@ export const Secret20ViewingKeyAccessPage: FunctionComponent = observer(() => {
             disabled={
               !waitingPermission ||
               ChainIdHelper.parse(chainStore.current.chainId).identifier !==
-                ChainIdHelper.parse(waitingPermission.data.chainId).identifier
+                ChainIdHelper.parse(waitingPermission.data.chainIds[0])
+                  .identifier
             }
             data-loading={permissionStore.isLoading}
           >

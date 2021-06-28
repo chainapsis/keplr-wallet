@@ -9,7 +9,7 @@ export function isBasicAccessPermissionType(type: string) {
 }
 
 export interface PermissionData {
-  chainId: string;
+  chainIds: string[];
   type: string;
   origins: string[];
 }
