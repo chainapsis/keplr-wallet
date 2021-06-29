@@ -304,7 +304,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: IOV_RPC_CONFIG,
     rest: IOV_REST_ENDPOINT,
     restConfig: IOV_REST_CONFIG,
-    chainId: "iov-mainnet-2",
+    chainId: "iov-mainnet-ibc",
     chainName: "Starname",
     stakeCurrency: {
       coinDenom: "IOV",
@@ -345,6 +345,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 2,
       high: 3,
     },
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: SIFCHAIN_RPC_ENDPOINT,
