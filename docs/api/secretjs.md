@@ -57,3 +57,6 @@ getSecret20ViewingKey(
 ```
 Returns the viewing key of a SNIP-20 token registered in Keplr.  
 If the SNIP-20 of the contract address doesn't exist, it will throw an error.
+
+### Interaction Options
+You can use Keplr native API’s to set interaction options even when using SecretJS. Please refer to [this section](./#interaction-options).
