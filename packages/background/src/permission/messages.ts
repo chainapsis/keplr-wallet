@@ -6,12 +6,12 @@ export class EnableAccessMsg extends Message<void> {
     return "enable-access";
   }
 
-  constructor(public readonly chainId: string) {
+  constructor(public readonly chainIds: string[]) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.chainId) {
+    if (!this.chainIds || this.chainIds.length === 0) {
       throw new Error("chain id not set");
     }
   }

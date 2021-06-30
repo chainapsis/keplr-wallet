@@ -78,7 +78,11 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   ibcTransferConfigs.amountConfig.sendCurrency,
                   ibcTransferConfigs.recipientConfig.recipient,
                   ibcTransferConfigs.memoConfig.memo,
-                  ibcTransferConfigs.feeConfig.toStdFee()
+                  ibcTransferConfigs.feeConfig.toStdFee(),
+                  {
+                    preferNoSetFee: true,
+                    preferNoSetMemo: true,
+                  }
                 );
                 history.push("/");
               } catch (e) {

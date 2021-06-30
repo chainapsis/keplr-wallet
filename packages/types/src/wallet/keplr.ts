@@ -19,8 +19,18 @@ export interface Key {
   readonly bech32Address: string;
 }
 
+export interface KeplrIntereactionOptions {
+  readonly sign?: KeplrSignOptions;
+}
+
+export interface KeplrSignOptions {
+  readonly preferNoSetFee?: boolean;
+  readonly preferNoSetMemo?: boolean;
+}
+
 export interface Keplr {
   readonly version: string;
+  defaultOptions: KeplrIntereactionOptions;
 
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
@@ -28,7 +38,8 @@ export interface Keplr {
   signAmino(
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
   signDirect(
     chainId: string,
@@ -45,7 +56,8 @@ export interface Keplr {
 
       /** SignDoc accountNumber */
       accountNumber?: Long | null;
-    }
+    },
+    signOptions?: KeplrSignOptions
   ): Promise<DirectSignResponse>;
   sendTx(
     chainId: string,
@@ -65,6 +77,10 @@ export interface Keplr {
   // Related to Enigma.
   // But, recommended to use `getEnigmaUtils` rather than using below.
   getEnigmaPubKey(chainId: string): Promise<Uint8Array>;
+  getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array
+  ): Promise<Uint8Array>;
   enigmaEncrypt(
     chainId: string,
     contractCodeHash: string,

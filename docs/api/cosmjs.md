@@ -52,5 +52,8 @@ Keplr's `OfflineSigner` implements the `OfflineDirectSigner` interface. Use `Sig
 ### Example
 Refer to the [keplr-example](https://github.com/chainapsis/keplr-example/blob/master/src/main.js) repository for example code on how to integrate Keplr with CosmJS.
 
+### Interaction Options
+You can use Keplr native API’s to set interaction options even when using CosmJS. Please refer to [this section](./#interaction-options).
+
 ### Adding a custom blockchain to Keplr
 If Keplr doesn't natively support your blockchain within the extension, please refer to the [Suggest chain](./suggest-chain) section.

@@ -2,7 +2,7 @@ import { CoinPrimitive, HasMapStore } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../common";
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
-import { AppCurrency, Keplr } from "@keplr-wallet/types";
+import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
 import {
   BaseAccount,
   ChainIdHelper,
@@ -217,6 +217,7 @@ export class AccountStoreInner {
     msgs: Msg[],
     fee: StdFee,
     memo: string = "",
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ) {
     runInAction(() => {
@@ -230,7 +231,8 @@ export class AccountStoreInner {
         msgs,
         fee,
         memo,
-        this.broadcastMode
+        this.broadcastMode,
+        signOptions
       );
       txHash = result.txHash;
       signDoc = result.signDoc;
@@ -279,6 +281,7 @@ export class AccountStoreInner {
     recipient: string,
     memo: string = "",
     stdFee: StdFee,
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ) {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
@@ -310,6 +313,7 @@ export class AccountStoreInner {
           ],
           stdFee,
           memo,
+          signOptions,
           (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
@@ -349,6 +353,7 @@ export class AccountStoreInner {
           [],
           stdFee,
           memo,
+          signOptions,
           (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
@@ -388,6 +393,7 @@ export class AccountStoreInner {
     recipient: string,
     memo: string = "",
     stdFee: StdFee,
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
@@ -445,25 +451,34 @@ export class AccountStoreInner {
       delete msg.value.timeout_height.revision_number;
     }
 
-    await this.sendMsgs("ibcTransfer", [msg], stdFee, memo, (tx) => {
-      if (tx.code == null || tx.code === 0) {
-        // After succeeding to send token, refresh the balance.
-        const queryBalance = this.queries
-          .getQueryBalances()
-          .getQueryBech32Address(this.bech32Address)
-          .balances.find((bal) => {
-            return bal.currency.coinMinimalDenom === currency.coinMinimalDenom;
-          });
+    await this.sendMsgs(
+      "ibcTransfer",
+      [msg],
+      stdFee,
+      memo,
+      signOptions,
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to send token, refresh the balance.
+          const queryBalance = this.queries
+            .getQueryBalances()
+            .getQueryBech32Address(this.bech32Address)
+            .balances.find((bal) => {
+              return (
+                bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+              );
+            });
 
-        if (queryBalance) {
-          queryBalance.fetch();
+          if (queryBalance) {
+            queryBalance.fetch();
+          }
+        }
+
+        if (onFulfill) {
+          onFulfill(tx);
         }
       }
-
-      if (onFulfill) {
-        onFulfill(tx);
-      }
-    });
+    );
   }
 
   /**
@@ -479,6 +494,7 @@ export class AccountStoreInner {
     validatorAddress: string,
     memo: string = "",
     stdFee?: StdFee,
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -506,6 +522,7 @@ export class AccountStoreInner {
         gas: this.opts.msgOpts.delegate.gas.toString(),
       },
       memo,
+      signOptions,
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to delegate, refresh the validators and delegations, rewards.
@@ -543,6 +560,7 @@ export class AccountStoreInner {
     validatorAddress: string,
     memo: string = "",
     stdFee?: StdFee,
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -570,6 +588,7 @@ export class AccountStoreInner {
         gas: this.opts.msgOpts.delegate.gas.toString(),
       },
       memo,
+      signOptions,
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to unbond, refresh the validators and delegations, unbonding delegations, rewards.
@@ -613,6 +632,7 @@ export class AccountStoreInner {
     dstValidatorAddress: string,
     memo: string = "",
     stdFee?: StdFee,
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -641,6 +661,7 @@ export class AccountStoreInner {
         gas: this.opts.msgOpts.delegate.gas.toString(),
       },
       memo,
+      signOptions,
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to redelegate, refresh the validators and delegations, rewards.
@@ -668,6 +689,7 @@ export class AccountStoreInner {
   async sendWithdrawDelegationRewardMsgs(
     validatorAddresses: string[],
     memo: string = "",
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ) {
     const msgs = validatorAddresses.map((validatorAddress) => {
@@ -690,6 +712,7 @@ export class AccountStoreInner {
         ).toString(),
       },
       memo,
+      signOptions,
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to withdraw rewards, refresh rewards.
@@ -710,6 +733,7 @@ export class AccountStoreInner {
     proposalId: string,
     option: "Yes" | "No" | "Abstain" | "NoWithVeto",
     memo: string = "",
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ) {
     const voteOption = (() => {
@@ -748,6 +772,7 @@ export class AccountStoreInner {
         gas: this.opts.msgOpts.govVote.gas.toString(),
       },
       memo,
+      signOptions,
       (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to vote, refresh the proposal.
@@ -769,6 +794,7 @@ export class AccountStoreInner {
   async createSecret20ViewingKey(
     contractAddress: string,
     memo: string = "",
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any, viewingKey: string) => void
   ) {
     const random = new Uint8Array(15);
@@ -787,6 +813,7 @@ export class AccountStoreInner {
         gas: this.opts.msgOpts.createSecret20ViewingKey.gas.toString(),
       },
       memo,
+      signOptions,
       async (tx) => {
         let viewingKey = "";
         if (tx && "data" in tx && tx.data) {
@@ -831,6 +858,7 @@ export class AccountStoreInner {
     sentFunds: CoinPrimitive[],
     fee: StdFee,
     memo: string = "",
+    signOptions: KeplrSignOptions = {},
     onFulfill?: (tx: any) => void
   ): Promise<Uint8Array> {
     const encryptedMsg = await (async () => {
@@ -858,7 +886,7 @@ export class AccountStoreInner {
       },
     };
 
-    await this.sendMsgs(type, [msg], fee, memo, onFulfill);
+    await this.sendMsgs(type, [msg], fee, memo, signOptions, onFulfill);
 
     return encryptedMsg;
   }
@@ -895,7 +923,8 @@ export class AccountStoreInner {
     msgs: Msg[],
     fee: StdFee,
     memo: string = "",
-    mode: "block" | "async" | "sync" = "async"
+    mode: "block" | "async" | "sync" = "async",
+    signOptions: KeplrSignOptions = {}
   ): Promise<{
     txHash: Uint8Array;
     signDoc: StdSignDoc;
@@ -929,7 +958,8 @@ export class AccountStoreInner {
     const signResponse = await keplr.signAmino(
       this.chainId,
       this.bech32Address,
-      signDoc
+      signDoc,
+      signOptions
     );
 
     const signedTx = makeStdTx(signResponse.signed, signResponse.signature);

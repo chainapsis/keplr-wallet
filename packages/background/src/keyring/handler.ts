@@ -267,7 +267,8 @@ const handleRequestSignAminoMsg: (
       env,
       msg.chainId,
       msg.signer,
-      msg.signDoc
+      msg.signDoc,
+      msg.signOptions
     );
   };
 };
@@ -288,7 +289,8 @@ const handleRequestSignDirectMsg: (
       env,
       msg.chainId,
       msg.signer,
-      signDoc
+      signDoc,
+      msg.signOptions
     );
 
     return {

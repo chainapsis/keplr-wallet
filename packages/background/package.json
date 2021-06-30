@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/background",
-  "version": "0.8.9",
+  "version": "0.8.11-rc.1",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -26,12 +26,12 @@
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@keplr-wallet/common": "^0.8.8",
-    "@keplr-wallet/cosmos": "^0.8.8",
-    "@keplr-wallet/crypto": "^0.8.8",
+    "@keplr-wallet/cosmos": "^0.8.11-rc.0",
+    "@keplr-wallet/crypto": "^0.8.11-rc.0",
     "@keplr-wallet/popup": "^0.8.8",
     "@keplr-wallet/router": "^0.8.8",
-    "@keplr-wallet/types": "^0.8.8",
-    "@keplr-wallet/unit": "^0.8.8",
+    "@keplr-wallet/types": "^0.8.11-rc.0",
+    "@keplr-wallet/unit": "^0.8.11-rc.0",
     "@ledgerhq/hw-transport-webhid": "^5.51.1",
     "@ledgerhq/hw-transport-webusb": "^5.53.1",
     "aes-js": "^3.1.2",
@@ -46,7 +46,7 @@
     "reflect-metadata": "^0.1.13",
     "scrypt-js": "^3.0.1",
     "secp256k1": "^4.0.2",
-    "secretjs": "^0.10.2",
+    "secretjs": "^0.13.0",
     "tsyringe": "^4.4.0"
   }
 }

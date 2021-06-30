@@ -101,7 +101,11 @@ export const SendPage: FunctionComponent = observer(() => {
                 sendConfigs.amountConfig.sendCurrency!,
                 sendConfigs.recipientConfig.recipient,
                 sendConfigs.memoConfig.memo,
-                stdFee
+                stdFee,
+                {
+                  preferNoSetFee: true,
+                  preferNoSetMemo: true,
+                }
               );
               history.replace("/");
             } catch (e) {
