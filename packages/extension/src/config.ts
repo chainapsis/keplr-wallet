@@ -117,6 +117,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "OSMO",
       coinMinimalDenom: "uosmo",
       coinDecimals: 6,
+      coinGeckoId: "osmosis",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -133,11 +134,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "OSMO",
         coinMinimalDenom: "uosmo",
         coinDecimals: 6,
+        coinGeckoId: "osmosis",
       },
       {
         coinDenom: "ION",
         coinMinimalDenom: "uion",
         coinDecimals: 6,
+        coinGeckoId: "ion",
       },
     ],
     feeCurrencies: [
@@ -145,6 +148,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "OSMO",
         coinMinimalDenom: "uosmo",
         coinDecimals: 6,
+        coinGeckoId: "osmosis",
       },
     ],
     gasPriceStep: {
