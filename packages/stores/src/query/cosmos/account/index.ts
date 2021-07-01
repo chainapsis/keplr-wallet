@@ -26,11 +26,15 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
       return "0";
     }
 
-    const account = BaseAccount.fromAminoJSON(
-      this.response.data,
-      this.bech32Address
-    );
-    return account.getSequence().toString();
+    try {
+      const account = BaseAccount.fromAminoJSON(
+        this.response.data,
+        this.bech32Address
+      );
+      return account.getSequence().toString();
+    } catch {
+      return "0";
+    }
   }
 }
 
