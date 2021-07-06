@@ -1,29 +1,15 @@
-# Keplr Browser Extension
+# Fetch.ai Browser Extension Wallet
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Twitter: chainapsis](https://img.shields.io/twitter/follow/chainapsis.svg?style=social)](https://twitter.com/chainapsis)
 
-> Keplr is a browser extension wallet for the Inter blockchain ecosystem.
->
-This repository is still under development  
+[Fetch.ai](https://fetch.ai)'s fork of the Keplr browser extension wallet by [chainapsis](https://github.com/chainapsis), which is designed to act as a generic wallet software for blockchains built using the [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk) and to support the inter-blockchain communication (IBC) protocol. 
 
-This repository containts submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Extension release. However, all primary features of the extension will work without the closed sourced submodules.  
+The wallet is configured for the Fetch.ai Stargate network with a planned launch date of the 29th of July, 2021. 
 
-## Dev
-Keplr extension repo uses git-secret to encrypt the endpoints and the api keys. So, you can't build this without creating your own config file. You should create your own `config.var.ts`, `config.ui.var.ts` files inside the `packages/extension/src` folder. Refer to the `config.var.example.ts`, ``config.ui.var.example.ts`` sample files to create your own configuration.
-```sh
-yarn dev
-``` 
-Extension's build output is placed in `packages/extension/dist`, and you can check out [this page](https://developer.chrome.com/extensions/getstarted) for installing the developing extension.  
-
-You can add your chain by adding the chain infomation into `chain-info.ts`. 
-
-## Example Files
-
-Refer to the [Keplr Example repository](https://github.com/chainapsis/keplr-example) for examples of how to integrate Keplr signing support for your web interface/application.
+Further information on the Keplr extension wallet can be found at the base [repo](https://github.com/chainapsis/keplr-extension).  
 
 ## Author
 
-👤 **Chainapsis**
+👤 **Fetch.ai**
 
-* Twitter: [@chainapsis](https://twitter.com/chainapsis)
-* Github: [@chainapsis](https://github.com/chainapsis)
+* Twitter: [@fetch_ai](https://twitter.com/Fetch_ai)
+* Github: [@fetchai](https://github.com/fetchai)
