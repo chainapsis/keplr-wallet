@@ -12,6 +12,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
+    "pod-install": "pod-install",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
@@ -82,6 +83,7 @@
     "@types/react-test-renderer": "^16.9.2",
     "get-yarn-workspaces": "^1.0.2",
     "metro-react-native-babel-preset": "^0.59.0",
+    "pod-install": "^0.1.23",
     "react-test-renderer": "16.13.1"
   },
   "jest": {
