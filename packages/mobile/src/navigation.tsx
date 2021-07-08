@@ -48,6 +48,7 @@ import {
   sf,
 } from "./styles";
 import { GradientBackground } from "./components/svg";
+import { BorderlessButton } from "react-native-gesture-handler";
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -126,6 +127,28 @@ export const MainTabNavigation: FunctionComponent = () => {
           // You can return any component that you like here!
           return <Ionicons name={iconName} size={size} color={color} />;
         },
+        tabBarButton: (props) => (
+          <View
+            style={{
+              display: "flex",
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore */}
+            <BorderlessButton
+              {...props}
+              activeOpacity={1}
+              style={{
+                height: "100%",
+                aspectRatio: 2,
+                maxWidth: "100%",
+              }}
+            />
+          </View>
+        ),
       })}
       tabBarOptions={{
         activeTintColor: colors.primary,
