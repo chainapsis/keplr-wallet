@@ -79,6 +79,7 @@ export const MainNavigation: FunctionComponent = () => {
       screenOptions={{
         headerBackground: () => <GradientBackground />,
         headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleAlign: "center",
         headerBackTitleVisible: false,
         ...TransitionPresets.SlideFromRightIOS,
       }}
