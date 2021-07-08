@@ -175,7 +175,7 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
 
 export const AppNavigation: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
-  const navigationRef = useRef<NavigationContainerRef>();
+  const navigationRef = useRef<NavigationContainerRef>(null);
   const routeNameRef = useRef<string>();
 
   return (
