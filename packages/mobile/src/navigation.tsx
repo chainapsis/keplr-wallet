@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent, useEffect, useRef } from "react";
-import { Text, View } from "react-native";
+import { StatusBar, Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
   NavigationContainer,
@@ -180,6 +180,11 @@ export const AppNavigation: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
+      <StatusBar
+        translucent={true}
+        backgroundColor="#FFFFFF00"
+        barStyle="dark-content"
+      />
       <NavigationContainer
         ref={navigationRef}
         onReady={() =>
