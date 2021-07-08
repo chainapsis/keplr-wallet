@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { View } from "react-native";
 import { Text, Badge } from "react-native-elements";
-import { DoughnutChart } from "../../components/svg";
+import { DoubleDoughnutChart } from "../../components/svg";
 import {
   fcSecondary,
   flex1,
@@ -64,7 +64,7 @@ export const AssetView: FunctionComponent = observer(() => {
 
   // If fiat value is fetched, show the value that is multiplied with amount and fiat value.
   // If not, just show the amount of asset.
-  const data: number[] = [
+  const data: [number, number] = [
     stakablePrice
       ? parseFloat(stakablePrice.toDec().toString())
       : parseFloat(stakable.toDec().toString()),
@@ -76,7 +76,7 @@ export const AssetView: FunctionComponent = observer(() => {
   return (
     <View style={py4}>
       <View style={sf([relative, alignItemsCenter])}>
-        <DoughnutChart data={data} />
+        <DoubleDoughnutChart data={data} />
         <View
           style={sf([
             absolute,
