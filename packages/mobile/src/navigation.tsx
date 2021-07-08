@@ -15,7 +15,10 @@ import { RegisterStackScreen } from "./screens/register";
 import { HomeScreen } from "./screens/home";
 import { ModalsRenderer } from "./modals";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
 import { SendScreen, AddressBookModalStackScreen } from "./screens/send";
 import {
   ValidatorListScreen,
@@ -77,8 +80,10 @@ export const MainNavigation: FunctionComponent = () => {
         headerBackground: () => <GradientBackground />,
         headerTitleStyle: sf([h3, fcHigh]),
         headerBackTitleVisible: false,
+        ...TransitionPresets.SlideFromRightIOS,
       }}
       initialRouteName="Home"
+      headerMode="screen"
     >
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Send" component={SendScreen} />
