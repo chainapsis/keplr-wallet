@@ -119,10 +119,6 @@ export class StyleBuilder<
     };
   }
 
-  // Overload the flatten method to set the return type as empty object if argument is empty.
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  flatten(): {};
-
   flatten<
     D extends StyleBuilderDefinitions<
       Custom,
@@ -134,7 +130,7 @@ export class StyleBuilder<
       Opacities
     >,
     K extends keyof D
-  >(...definitions: K[]): UnionToIntersection<D[K]>;
+  >(definitions: K[]): UnionToIntersection<D[K]>;
 
   flatten<
     D extends StyleBuilderDefinitions<
@@ -146,11 +142,37 @@ export class StyleBuilder<
       BorderRadiuses,
       Opacities
     >,
-    K extends keyof D
-  >(...definitions: K[]): UnionToIntersection<D[K]> {
+    K extends keyof D,
+    ConditionalK extends keyof D
+  >(
+    definitions: K[],
+    conditionalDefinitions: (ConditionalK | null | undefined | boolean)[]
+  ): UnionToIntersection<D[K]> & Partial<UnionToIntersection<D[ConditionalK]>>;
+
+  flatten<
+    D extends StyleBuilderDefinitions<
+      Custom,
+      Colors,
+      PaddingSizes,
+      MarginSizes,
+      BorderWidths,
+      BorderRadiuses,
+      Opacities
+    >,
+    K extends keyof D,
+    ConditionalK extends keyof D
+  >(
+    definitions: K[],
+    conditionalDefinitions: (ConditionalK | null | undefined | boolean)[] = []
+  ): UnionToIntersection<D[K]> & Partial<UnionToIntersection<D[ConditionalK]>> {
     const styles: any[] = [];
     for (const definition of definitions) {
       styles.push(this.get<D, K>(definition));
+    }
+    for (const definition of conditionalDefinitions) {
+      if (definition && definition !== true) {
+        styles.push(this.get<D, K>((definition as unknown) as K));
+      }
     }
     return StyleSheet.flatten(styles);
   }

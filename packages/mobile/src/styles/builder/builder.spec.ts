@@ -6,6 +6,9 @@ describe("Test style builder", () => {
       test: {
         fontSize: 20,
       },
+      test2: {
+        fontSize: 22,
+      },
     },
     colors: {
       primary: "#FFFFFF",
@@ -129,6 +132,57 @@ describe("Test style builder", () => {
   test("Test Custom", () => {
     expect(builder.get("test")).toStrictEqual({
       fontSize: 20,
+    });
+  });
+
+  test("Test Flatten", () => {
+    expect(builder.flatten(["test", "flex"])).toStrictEqual({
+      fontSize: 20,
+      display: "flex",
+    });
+  });
+
+  test("Test Conditional Flatten", () => {
+    expect(builder.flatten(["test"], [false])).toStrictEqual({
+      fontSize: 20,
+    });
+
+    expect(
+      builder.flatten(
+        ["test", "absolute", "test2"],
+        [null, undefined, false, true]
+      )
+    ).toStrictEqual({
+      position: "absolute",
+      fontSize: 22,
+    });
+
+    expect(
+      builder.flatten(["test", "absolute"], ["test2", undefined, false, true])
+    ).toStrictEqual({
+      position: "absolute",
+      fontSize: 22,
+    });
+
+    expect(
+      builder.flatten(["test", "absolute"], [null, undefined, "test2", true])
+    ).toStrictEqual({
+      position: "absolute",
+      fontSize: 22,
+    });
+
+    expect(
+      builder.flatten(["absolute"], [null, undefined, "test2", true])
+    ).toStrictEqual({
+      position: "absolute",
+      fontSize: 22,
+    });
+
+    expect(
+      builder.flatten(["absolute"], ["test", undefined, "test2", true])
+    ).toStrictEqual({
+      position: "absolute",
+      fontSize: 22,
     });
   });
 
