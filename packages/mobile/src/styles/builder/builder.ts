@@ -48,6 +48,8 @@ export class DefinitionKebabCase {
 export class StyleBuilder<
   Custom extends Record<string, unknown>,
   Colors extends Record<string, string>,
+  Widths extends Record<string, string | number>,
+  Heights extends Record<string, string | number>,
   PaddingSizes extends Record<string, string | number>,
   MarginSizes extends Record<string, string | number>,
   BorderWidths extends Record<string, number>,
@@ -97,6 +99,8 @@ export class StyleBuilder<
     protected readonly configs: {
       custom: Custom;
       colors: Colors;
+      widths: Widths;
+      heights: Heights;
       paddingSizes: PaddingSizes;
       marginSizes: MarginSizes;
       borderWidths: BorderWidths;
@@ -107,6 +111,8 @@ export class StyleBuilder<
     // TODO: Disable checking on the production environment.
     // Don't need to check the static styles because it is prioritized than dynamic styles.
     StyleBuilder.checkReservedWord(configs.colors);
+    StyleBuilder.checkReservedWord(configs.widths);
+    StyleBuilder.checkReservedWord(configs.heights);
     StyleBuilder.checkReservedWord(configs.paddingSizes);
     StyleBuilder.checkReservedWord(configs.marginSizes);
     StyleBuilder.checkReservedWord(configs.borderWidths);
@@ -123,6 +129,8 @@ export class StyleBuilder<
     D extends StyleBuilderDefinitions<
       Custom,
       Colors,
+      Widths,
+      Heights,
       PaddingSizes,
       MarginSizes,
       BorderWidths,
@@ -136,6 +144,8 @@ export class StyleBuilder<
     D extends StyleBuilderDefinitions<
       Custom,
       Colors,
+      Widths,
+      Heights,
       PaddingSizes,
       MarginSizes,
       BorderWidths,
@@ -153,6 +163,8 @@ export class StyleBuilder<
     D extends StyleBuilderDefinitions<
       Custom,
       Colors,
+      Widths,
+      Heights,
       PaddingSizes,
       MarginSizes,
       BorderWidths,
@@ -181,6 +193,8 @@ export class StyleBuilder<
     D extends StyleBuilderDefinitions<
       Custom,
       Colors,
+      Widths,
+      Heights,
       PaddingSizes,
       MarginSizes,
       BorderWidths,
@@ -211,6 +225,38 @@ export class StyleBuilder<
           return {
             backgroundColor: this.configs.colors[segment.flush()],
           };
+        }
+        throw new Error(`Failed to get style of ${definition}`);
+      case "width":
+        return {
+          width: this.configs.widths[segment.flush()],
+        };
+      case "height":
+        return {
+          height: this.configs.heights[segment.flush()],
+        };
+      case "min":
+        switch (segment.read()) {
+          case "width":
+            return {
+              minWidth: this.configs.widths[segment.flush()],
+            };
+          case "height":
+            return {
+              minHeight: this.configs.heights[segment.flush()],
+            };
+        }
+        throw new Error(`Failed to get style of ${definition}`);
+      case "max":
+        switch (segment.read()) {
+          case "width":
+            return {
+              maxWidth: this.configs.widths[segment.flush()],
+            };
+          case "height":
+            return {
+              maxHeight: this.configs.heights[segment.flush()],
+            };
         }
         throw new Error(`Failed to get style of ${definition}`);
       case "border":

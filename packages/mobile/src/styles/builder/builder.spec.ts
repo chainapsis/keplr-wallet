@@ -15,6 +15,14 @@ describe("Test style builder", () => {
       secondary: "#AAAAAA",
       "secondary-200": "#222222",
     },
+    widths: {
+      "10": 10,
+      full: "100%",
+    },
+    heights: {
+      "50": 50,
+      full: "100%",
+    },
     paddingSizes: {
       "10": 1,
       small: "2",
@@ -72,6 +80,14 @@ describe("Test style builder", () => {
           // Reserved word
           color: "should throw error",
         },
+        widths: {
+          "10": 10,
+          full: "100%",
+        },
+        heights: {
+          "50": 50,
+          full: "100%",
+        },
         paddingSizes: {
           "10": "1",
           small: "2",
@@ -104,6 +120,14 @@ describe("Test style builder", () => {
           secondary200: "#222222",
           // Reserved word
           ["asdf-solid"]: "should throw error",
+        },
+        widths: {
+          "10": 10,
+          full: "100%",
+        },
+        heights: {
+          "50": 50,
+          full: "100%",
         },
         paddingSizes: {
           "10": "1",
@@ -342,6 +366,46 @@ describe("Test style builder", () => {
     });
     expect(builder.get("border-color-secondary-200")).toStrictEqual({
       borderColor: "#222222",
+    });
+  });
+
+  test("Test Sizing", () => {
+    expect(builder.get("width-10")).toStrictEqual({
+      width: 10,
+    });
+    expect(builder.get("min-width-10")).toStrictEqual({
+      minWidth: 10,
+    });
+    expect(builder.get("max-width-10")).toStrictEqual({
+      maxWidth: 10,
+    });
+    expect(builder.get("width-full")).toStrictEqual({
+      width: "100%",
+    });
+    expect(builder.get("min-width-full")).toStrictEqual({
+      minWidth: "100%",
+    });
+    expect(builder.get("max-width-full")).toStrictEqual({
+      maxWidth: "100%",
+    });
+
+    expect(builder.get("height-50")).toStrictEqual({
+      height: 50,
+    });
+    expect(builder.get("min-height-50")).toStrictEqual({
+      minHeight: 50,
+    });
+    expect(builder.get("max-height-50")).toStrictEqual({
+      maxHeight: 50,
+    });
+    expect(builder.get("height-full")).toStrictEqual({
+      height: "100%",
+    });
+    expect(builder.get("min-height-full")).toStrictEqual({
+      minHeight: "100%",
+    });
+    expect(builder.get("max-height-full")).toStrictEqual({
+      maxHeight: "100%",
     });
   });
 

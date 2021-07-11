@@ -9,6 +9,8 @@ import { StyleBuilder } from "./builder";
 const createStyleContext = <
   Custom extends Record<string, unknown>,
   Colors extends Record<string, string>,
+  Widths extends Record<string, string | number>,
+  Heights extends Record<string, string | number>,
   PaddingSizes extends Record<string, string | number>,
   MarginSizes extends Record<string, string | number>,
   BorderWidths extends Record<string, number>,
@@ -20,6 +22,8 @@ const createStyleContext = <
         builder: StyleBuilder<
           Custom,
           Colors,
+          Widths,
+          Heights,
           PaddingSizes,
           MarginSizes,
           BorderWidths,
@@ -33,6 +37,8 @@ const createStyleContext = <
 export const createStyleProvider = <
   Custom extends Record<string, unknown>,
   Colors extends Record<string, string>,
+  Widths extends Record<string, string | number>,
+  Heights extends Record<string, string | number>,
   PaddingSizes extends Record<string, string | number>,
   MarginSizes extends Record<string, string | number>,
   BorderWidths extends Record<string, number>,
@@ -41,6 +47,8 @@ export const createStyleProvider = <
 >(configs: {
   custom: Custom;
   colors: Colors;
+  widths: Widths;
+  heights: Heights;
   paddingSizes: PaddingSizes;
   marginSizes: MarginSizes;
   borderWidths: BorderWidths;
@@ -51,6 +59,8 @@ export const createStyleProvider = <
   useStyle: () => StyleBuilder<
     Custom,
     Colors,
+    Widths,
+    Heights,
     PaddingSizes,
     MarginSizes,
     BorderWidths,
@@ -61,6 +71,8 @@ export const createStyleProvider = <
   const context = createStyleContext<
     Custom,
     Colors,
+    Widths,
+    Heights,
     PaddingSizes,
     MarginSizes,
     BorderWidths,

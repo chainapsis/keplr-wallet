@@ -175,6 +175,14 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     disabled: "#EEEEF3",
     divider: "#F5F5F5",
   },
+  widths: {
+    full: "100%",
+    half: "50%",
+  },
+  heights: {
+    full: "100%",
+    half: "50%",
+  },
   paddingSizes: {
     "0": 0,
     "1": 1,
