@@ -8,12 +8,13 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../stores";
 import { View } from "react-native";
 import { Text } from "react-native-elements";
-import { sf, h4, fAlignCenter, my3, flex1 } from "../styles";
+import { sf, h4, fAlignCenter, my3, flex1, useStyle } from "../styles";
 import { Input } from "../components/form";
 import * as Keychain from "react-native-keychain";
 import { useBioAuth } from "../hooks/bio-auth";
 import { FullFixedPage } from "../components/page";
 import { FlexButtonWithHoc } from "./common";
+import { TextInput } from "../components/staging/input";
 
 const BioUnlock: FunctionComponent<{
   setIsFailed: React.Dispatch<React.SetStateAction<boolean>>;
@@ -47,6 +48,8 @@ const BioUnlock: FunctionComponent<{
 export const UnlockView: FunctionComponent = observer(() => {
   const bioAuth = useBioAuth();
 
+  const style = useStyle();
+
   const { interactionModalStore, keyRingStore } = useStore();
 
   const [password, setPassword] = useState("");
@@ -58,6 +61,7 @@ export const UnlockView: FunctionComponent = observer(() => {
         <BioUnlock setIsFailed={setIsFailed} />
       ) : null}
       <View style={flex1} />
+      <TextInput label="Password" returnKeyType="done" />
       <View>
         <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
         <Input
