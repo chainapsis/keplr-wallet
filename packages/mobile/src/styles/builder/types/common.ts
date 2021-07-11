@@ -22,3 +22,5 @@ export type EnumTextTransform =
   | "capitalize"
   | "uppercase"
   | "lowercase";
+
+export type EnumTextAlign = "auto" | "left" | "right" | "center" | "justify";

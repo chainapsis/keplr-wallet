@@ -1,6 +1,7 @@
 import {
   EnumFontStyle,
   EnumFontWeight,
+  EnumTextAlign,
   EnumTextTransform,
   StaticStylesDefinitions,
 } from "./common";
@@ -50,6 +51,21 @@ export const StaticTextStyles = {
   },
   "normal-case": {
     textTransform: "none" as EnumTextTransform,
+  },
+  "text-auto": {
+    textAlign: "auto" as EnumTextAlign,
+  },
+  "text-left": {
+    textAlign: "left" as EnumTextAlign,
+  },
+  "text-right": {
+    textAlign: "right" as EnumTextAlign,
+  },
+  "text-center": {
+    textAlign: "center" as EnumTextAlign,
+  },
+  "text-justify": {
+    textAlign: "justify" as EnumTextAlign,
   },
 };
 

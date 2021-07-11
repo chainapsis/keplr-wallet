@@ -156,6 +156,12 @@ describe("Test style builder", () => {
       position: "relative",
     });
 
+    for (let i = 0; i <= 10; i++) {
+      expect(builder.get(`flex-${i}` as any)).toStrictEqual({
+        flex: i,
+      });
+    }
+
     expect(builder.get("flex-row")).toStrictEqual({
       flexDirection: "row",
     });
@@ -526,6 +532,22 @@ describe("Test style builder", () => {
     });
     expect(builder.get("normal-case")).toStrictEqual({
       textTransform: "none",
+    });
+
+    expect(builder.get("text-auto")).toStrictEqual({
+      textAlign: "auto",
+    });
+    expect(builder.get("text-left")).toStrictEqual({
+      textAlign: "left",
+    });
+    expect(builder.get("text-right")).toStrictEqual({
+      textAlign: "right",
+    });
+    expect(builder.get("text-center")).toStrictEqual({
+      textAlign: "center",
+    });
+    expect(builder.get("text-justify")).toStrictEqual({
+      textAlign: "justify",
     });
   });
 });
