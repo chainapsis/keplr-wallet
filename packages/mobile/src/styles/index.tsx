@@ -199,9 +199,9 @@ export const { StyleProvider, useStyle } = createStyleProvider({
   heights: {
     full: "100%",
     half: "50%",
-    "button-default": 44,
-    "button-large": 48,
-    "button-larger": 52,
+    "button-small": 44,
+    "button-default": 48,
+    "button-large": 52,
   },
   paddingSizes: {
     "0": 0,

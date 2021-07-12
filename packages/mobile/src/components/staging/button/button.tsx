@@ -8,7 +8,7 @@ import { LoadingSpinner } from "../spinner";
 export const Button: FunctionComponent<{
   color?: "primary" | "secondary";
   mode?: "fill" | "outline" | "text";
-  size?: "default" | "large" | "larger";
+  size?: "default" | "small" | "large";
   text: string;
   loading?: boolean;
 
@@ -92,7 +92,7 @@ export const Button: FunctionComponent<{
               ["text-button2", "text-center", "color-white"],
               [
                 mode !== "fill" && (`color-button-${color}` as any),
-                size === "larger" && "text-button1",
+                size === "large" && "text-button1",
                 loading && "display-none",
               ]
             ),
@@ -106,7 +106,7 @@ export const Button: FunctionComponent<{
             color={
               mode === "fill"
                 ? style.get("color-white").color
-                : style.get(`button-${color}` as any).color
+                : style.get(`color-button-${color}` as any).color
             }
             size={20}
           />
