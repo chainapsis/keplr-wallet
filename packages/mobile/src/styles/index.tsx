@@ -39,6 +39,7 @@ export const Colors = {
   "text-black-medium": "#2C4163",
   "text-black-low": "#83838F",
   "text-black-very-low": "#899BB6",
+  "text-black-very-very-low": "#C6C6CD",
   "border-gray": "#C6C6CD",
   "border-white": "#F5F5F5",
   white: "#fff",
