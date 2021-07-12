@@ -180,6 +180,8 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       // Belows are for the button props and may not be used as styles.
       "button-primary": Colors.primary,
       "button-secondary": Colors.secondary,
+      "button-primary-disabled": Colors["primary-200"],
+      "button-secondary-disabled": Colors["secondary-200"],
       // For Android, note that you can't set the opacity of the ripple color.
       "button-primary-fill-ripple": Colors["primary-600"],
       "button-primary-outline-ripple": Colors["primary-100"],

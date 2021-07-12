@@ -11,6 +11,7 @@ export const Button: FunctionComponent<{
   size?: "default" | "small" | "large";
   text: string;
   loading?: boolean;
+  disabled?: boolean;
 
   onPress?: () => void;
 
@@ -23,6 +24,7 @@ export const Button: FunctionComponent<{
   size = "default",
   text,
   loading = false,
+  disabled = false,
   onPress,
   containerStyle,
   buttonStyle,
@@ -32,7 +34,7 @@ export const Button: FunctionComponent<{
 
   const backgroundColorDefinition =
     mode === "fill"
-      ? `background-color-button-${color}`
+      ? `background-color-button-${color}${disabled ? "-disabled" : ""}`
       : mode === "outline"
       ? "background-color-white"
       : "background-color-transparent";
@@ -60,7 +62,10 @@ export const Button: FunctionComponent<{
           ],
           [
             mode === "outline" && "border-width-1",
-            mode === "outline" && (`border-color-button-${color}` as any),
+            mode === "outline" &&
+              (`border-color-button-${color}${
+                disabled ? "-disabled" : ""
+              }` as any),
           ]
         ),
         containerStyle,
@@ -81,7 +86,7 @@ export const Button: FunctionComponent<{
           buttonStyle,
         ])}
         onPress={onPress}
-        enabled={!loading}
+        enabled={!loading && !disabled}
         rippleColor={rippleColor}
         underlayColor={underlayColor}
         activeOpacity={1}
@@ -91,7 +96,10 @@ export const Button: FunctionComponent<{
             style.flatten(
               ["text-button2", "text-center", "color-white"],
               [
-                mode !== "fill" && (`color-button-${color}` as any),
+                mode !== "fill" &&
+                  (`color-button-${color}${
+                    disabled ? "-disabled" : ""
+                  }` as any),
                 size === "large" && "text-button1",
                 loading && "display-none",
               ]
@@ -106,7 +114,9 @@ export const Button: FunctionComponent<{
             color={
               mode === "fill"
                 ? style.get("color-white").color
-                : style.get(`color-button-${color}` as any).color
+                : style.get(
+                    `color-button-${color}${disabled ? "-disabled" : ""}` as any
+                  ).color
             }
             size={20}
           />
