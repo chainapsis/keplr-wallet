@@ -82,8 +82,8 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 export const DoubleDoughnutChart: FunctionComponent<{
   data: [number, number];
 }> = ({ data }) => {
-  const centerLocation = 50;
-  const radius = 46;
+  const centerLocation = 90;
+  const radius = 83;
 
   const firstProcess = useRef(new Animated.Value(0));
   const secondProcess = useRef(new Animated.Value(0));
@@ -132,13 +132,13 @@ export const DoubleDoughnutChart: FunctionComponent<{
   }, [firstEndDegree, secondEndDegree]);
 
   return (
-    <Svg width="200" height="200" viewBox="0 0 100 100">
+    <Svg width="180" height="180" viewBox="0 0 180 180">
       <Circle
         cx={centerLocation}
         cy={centerLocation}
         r={radius}
         stroke="#f4f5f7"
-        strokeWidth="7"
+        strokeWidth="14"
         fill="transparent"
       />
       <Defs>
@@ -160,7 +160,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
           secondEndDegreeAnimated
         )}
         stroke="url(#grad2)"
-        strokeWidth={7}
+        strokeWidth={14}
         strokeLinecap="round"
       />
       {/*
@@ -176,7 +176,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
             firstEndDegreeAnimated
           )}
           stroke="url(#grad1)"
-          strokeWidth={7}
+          strokeWidth={14}
           strokeLinecap="round"
         />
       ) : null}
