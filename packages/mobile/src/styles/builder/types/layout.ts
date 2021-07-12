@@ -1,14 +1,24 @@
-import { StaticStylesDefinitions } from "./common";
+import {
+  EnumAlignContent,
+  EnumAlignItems,
+  EnumAlignSelf,
+  EnumDisplay,
+  EnumFlexDirection,
+  EnumJustifyContent,
+  EnumOverflow,
+  EnumPosition,
+  StaticStylesDefinitions,
+} from "./common";
 
 export const StaticLayouts = {
   absolute: {
-    position: "absolute",
+    position: "absolute" as EnumPosition,
   },
   relative: {
-    position: "relative",
+    position: "relative" as EnumPosition,
   },
   "absolute-fill": {
-    position: "absolute",
+    position: "absolute" as EnumPosition,
     left: 0,
     right: 0,
     top: 0,
@@ -16,10 +26,10 @@ export const StaticLayouts = {
   },
 
   flex: {
-    display: "flex",
+    display: "flex" as EnumDisplay,
   },
   ["display-none"]: {
-    display: "none",
+    display: "none" as EnumDisplay,
   },
 
   ["flex-0"]: {
@@ -57,99 +67,99 @@ export const StaticLayouts = {
   },
 
   ["flex-row"]: {
-    flexDirection: "row",
+    flexDirection: "row" as EnumFlexDirection,
   },
   ["flex-row-reverse"]: {
-    flexDirection: "row-reverse",
+    flexDirection: "row-reverse" as EnumFlexDirection,
   },
   ["flex-column"]: {
-    flexDirection: "column",
+    flexDirection: "column" as EnumFlexDirection,
   },
   ["flex-column-reverse"]: {
-    flexDirection: "column-reverse",
+    flexDirection: "column-reverse" as EnumFlexDirection,
   },
 
   ["content-start"]: {
-    alignContent: "flex-start",
+    alignContent: "flex-start" as EnumAlignContent,
   },
   ["content-center"]: {
-    alignContent: "center",
+    alignContent: "center" as EnumAlignContent,
   },
   ["content-end"]: {
-    alignContent: "flex-end",
+    alignContent: "flex-end" as EnumAlignContent,
   },
   ["content-stretch"]: {
-    alignContent: "stretch",
+    alignContent: "stretch" as EnumAlignContent,
   },
   ["content-between"]: {
-    alignContent: "space-between",
+    alignContent: "space-between" as EnumAlignContent,
   },
   ["content-around"]: {
-    alignContent: "space-around",
+    alignContent: "space-around" as EnumAlignContent,
   },
 
   ["items-start"]: {
-    alignItems: "flex-start",
+    alignItems: "flex-start" as EnumAlignItems,
   },
   ["items-center"]: {
-    alignItems: "center",
+    alignItems: "center" as EnumAlignItems,
   },
   ["items-end"]: {
-    alignItems: "flex-end",
+    alignItems: "flex-end" as EnumAlignItems,
   },
   ["items-stretch"]: {
-    alignItems: "stretch",
+    alignItems: "stretch" as EnumAlignItems,
   },
   ["items-baseline"]: {
-    alignItems: "baseline",
+    alignItems: "baseline" as EnumAlignItems,
   },
 
   ["self-auto"]: {
-    alignSelf: "auto",
+    alignSelf: "auto" as EnumAlignSelf,
   },
   ["self-start"]: {
-    alignSelf: "flex-start",
+    alignSelf: "flex-start" as EnumAlignSelf,
   },
   ["self-center"]: {
-    alignSelf: "center",
+    alignSelf: "center" as EnumAlignSelf,
   },
   ["self-end"]: {
-    alignSelf: "flex-end",
+    alignSelf: "flex-end" as EnumAlignSelf,
   },
   ["self-stretch"]: {
-    alignSelf: "stretch",
+    alignSelf: "stretch" as EnumAlignSelf,
   },
   ["self-baseline"]: {
-    alignSelf: "baseline",
+    alignSelf: "baseline" as EnumAlignSelf,
   },
 
   ["justify-start"]: {
-    justifyContent: "flex-start",
+    justifyContent: "flex-start" as EnumJustifyContent,
   },
   ["justify-center"]: {
-    justifyContent: "center",
+    justifyContent: "center" as EnumJustifyContent,
   },
   ["justify-end"]: {
-    justifyContent: "flex-end",
+    justifyContent: "flex-end" as EnumJustifyContent,
   },
   ["justify-between"]: {
-    justifyContent: "space-between",
+    justifyContent: "space-between" as EnumJustifyContent,
   },
   ["justify-around"]: {
-    justifyContent: "space-around",
+    justifyContent: "space-around" as EnumJustifyContent,
   },
   ["justify-evenly"]: {
-    justifyContent: "space-evenly",
+    justifyContent: "space-evenly" as EnumJustifyContent,
   },
 
   ["overflow-visible"]: {
-    overflow: "visible",
+    overflow: "visible" as EnumOverflow,
   },
   ["overflow-hidden"]: {
-    overflow: "hidden",
+    overflow: "hidden" as EnumOverflow,
   },
   ["overflow-scroll"]: {
-    overflow: "scroll",
+    overflow: "scroll" as EnumOverflow,
   },
 };
 

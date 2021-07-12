@@ -2,6 +2,43 @@ export type StaticStylesDefinitions<S> = {
   [K in keyof S]: S[K];
 };
 
+export type EnumDisplay = "none" | "flex";
+export type EnumPosition = "absolute" | "relative";
+export type EnumFlexDirection =
+  | "row"
+  | "row-reverse"
+  | "column"
+  | "column-reverse";
+export type EnumAlignContent =
+  | "flex-start"
+  | "flex-end"
+  | "center"
+  | "stretch"
+  | "space-between"
+  | "space-around";
+export type EnumAlignItems =
+  | "flex-start"
+  | "flex-end"
+  | "center"
+  | "stretch"
+  | "baseline";
+export type EnumAlignSelf =
+  | "auto"
+  | "flex-start"
+  | "flex-end"
+  | "center"
+  | "stretch"
+  | "baseline";
+export type EnumJustifyContent =
+  | "flex-start"
+  | "flex-end"
+  | "center"
+  | "space-between"
+  | "space-around"
+  | "space-evenly";
+
+export type EnumOverflow = "visible" | "hidden" | "scroll";
+
 export type EnumFontStyle = "normal" | "italic";
 
 export type EnumFontWeight =
