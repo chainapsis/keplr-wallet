@@ -150,8 +150,7 @@ export const shadow: StyleProp<ViewStyle> = Platform.select({
 });
 
 export const bgcWhite: StyleProp<ViewStyle> = {
-  backgroundColor: "#fff",
-  opacity: 0.9,
+  backgroundColor: "rgba(255,255,255,0.9)",
 };
 
 export const bgcWhiteWithoutOpacity: StyleProp<ViewStyle> = {
