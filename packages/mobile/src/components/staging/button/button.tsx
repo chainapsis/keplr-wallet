@@ -59,6 +59,7 @@ export const Button: FunctionComponent<{
             backgroundColorDefinition as any,
             `height-button-${size}` as any,
             "border-radius-8",
+            "overflow-hidden",
           ],
           [
             mode === "outline" && "border-width-1",
@@ -73,16 +74,12 @@ export const Button: FunctionComponent<{
     >
       <RectButton
         style={StyleSheet.flatten([
-          style.flatten(
-            [
-              "flex",
-              "justify-center",
-              "items-center",
-              "border-radius-8",
-              "height-full",
-            ],
-            [mode !== "fill" && "border-radius-6"]
-          ),
+          style.flatten([
+            "flex",
+            "justify-center",
+            "items-center",
+            "height-full",
+          ]),
           buttonStyle,
         ])}
         onPress={onPress}
