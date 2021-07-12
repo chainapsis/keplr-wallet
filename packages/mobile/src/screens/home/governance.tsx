@@ -63,7 +63,7 @@ export const GovernanceView: FunctionComponent = observer(() => {
       <RectButton
         rippleColor="#AAAAAA"
         onPress={() => {
-          navigation.navigate("Governance");
+          navigation.navigate("Others", { screen: "Governance" });
         }}
       >
         <View accessible style={sf([px4, pt4])}>
@@ -95,8 +95,11 @@ export const GovernanceView: FunctionComponent = observer(() => {
         <RectButton
           rippleColor="#AAAAAA"
           onPress={() => {
-            navigation.navigate("Governance Details", {
-              proposalId: lastProposal.id,
+            navigation.navigate("Others", {
+              screen: "Governance Details",
+              params: {
+                proposalId: lastProposal.id,
+              },
             });
           }}
         >

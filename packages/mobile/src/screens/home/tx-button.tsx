@@ -102,7 +102,13 @@ export const TxButtonView: FunctionComponent = observer(() => {
         loading={accountInfo.isSendingMsg === "send"}
         onPress={() => {
           if (hasAssets) {
-            navigation.navigate("Send", { initAddress: "", initMemo: "" });
+            navigation.navigate("Others", {
+              screen: "Send",
+              params: {
+                initAddress: "",
+                initMemo: "",
+              },
+            });
           }
         }}
       />

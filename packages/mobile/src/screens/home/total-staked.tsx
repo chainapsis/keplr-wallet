@@ -144,7 +144,7 @@ export const TotalStakedView: FunctionComponent = observer(() => {
         containerStyle={[mt1]}
         title="Staking Dashboard"
         onPress={() => {
-          navigation.navigate("Validator List");
+          navigation.navigate("Others", { screen: "Validator List" });
         }}
       />
     </Card>

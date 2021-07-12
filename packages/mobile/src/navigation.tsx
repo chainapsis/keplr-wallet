@@ -1,12 +1,9 @@
 /* eslint-disable react/display-name */
-import React, { FunctionComponent, useEffect, useRef } from "react";
+import React, { FunctionComponent, useRef } from "react";
 import { StatusBar, Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
   NavigationContainer,
-  useNavigation,
-  useRoute,
-  getFocusedRouteNameFromRoute,
   NavigationContainerRef,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
@@ -19,7 +16,7 @@ import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { SendScreen, AddressBookModalStackScreen } from "./screens/send";
+import { SendScreen } from "./screens/send";
 import {
   ValidatorListScreen,
   ValidatorDetailsScreen,
@@ -63,18 +60,6 @@ const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
 export const MainNavigation: FunctionComponent = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-  useEffect(() => {
-    const routeName = getFocusedRouteNameFromRoute(route);
-
-    if (routeName === "Home" || routeName === undefined) {
-      navigation.setOptions({ tabBarVisible: true });
-    } else {
-      navigation.setOptions({ tabBarVisible: false });
-    }
-  }, [navigation, route]);
-
   return (
     <Stack.Navigator
       screenOptions={{
@@ -88,6 +73,22 @@ export const MainNavigation: FunctionComponent = () => {
       headerMode="screen"
     >
       <Stack.Screen name="Home" component={HomeScreen} />
+    </Stack.Navigator>
+  );
+};
+
+export const OtherNavigation: FunctionComponent = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleAlign: "center",
+        headerBackTitleVisible: false,
+        ...TransitionPresets.SlideFromRightIOS,
+      }}
+      headerMode="screen"
+    >
       <Stack.Screen name="Send" component={SendScreen} />
       <Stack.Screen name="Validator List" component={ValidatorListScreen} />
       <Stack.Screen
@@ -220,18 +221,19 @@ export const AppNavigation: FunctionComponent = observer(() => {
             }
             screenOptions={{
               headerShown: false,
+              headerTitleStyle: sf([h3, fcHigh]),
+              headerTitleAlign: "center",
+              headerBackTitleVisible: false,
+              ...TransitionPresets.SlideFromRightIOS,
             }}
-            mode="modal"
+            headerMode="screen"
           >
             <Stack.Screen
               name="MainTabDrawer"
               component={MainTabNavigationWithDrawer}
             />
             <Stack.Screen name="Register" component={RegisterStackScreen} />
-            <Stack.Screen
-              name="Address Book Modal Stack"
-              component={AddressBookModalStackScreen}
-            />
+            <Stack.Screen name="Others" component={OtherNavigation} />
           </Stack.Navigator>
         )}
       </NavigationContainer>
