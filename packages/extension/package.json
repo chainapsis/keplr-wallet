@@ -30,6 +30,7 @@
     "@keplr-wallet/stores": "^0.8.9",
     "@keplr-wallet/types": "^0.8.8",
     "@keplr-wallet/unit": "^0.8.8",
+    "@fetchai/eth-migration": "^0.8.8",
     "argon-dashboard-react": "^1.1.0",
     "axios": "^0.21.0",
     "bip39": "^3.0.2",

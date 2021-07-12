@@ -25,6 +25,11 @@ import {
 } from "./ledger";
 import { WelcomePage } from "./welcome";
 import { AdditionalSignInPrepend } from "../../config.ui";
+import {
+  MigrateEthereumAddressIntro,
+  MigrateEthereumAddressPage,
+  TypeMigrateEth,
+} from "./migration";
 
 export enum NunWords {
   WORDS12,
@@ -71,6 +76,12 @@ export const RegisterPage: FunctionComponent = observer(() => {
       type: TypeImportLedger,
       intro: ImportLedgerIntro,
       page: ImportLedgerPage,
+    },
+    // TODO: think about moving this into the configuration at some point
+    {
+      type: TypeMigrateEth,
+      intro: MigrateEthereumAddressIntro,
+      page: MigrateEthereumAddressPage,
     },
   ]);
 

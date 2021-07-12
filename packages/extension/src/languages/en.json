@@ -143,6 +143,16 @@
 
   "register.ledger.title": "Import ledger",
 
+  "register.eth-migrate.title": "Migrate from ETH",
+  "register.eth-migrate.metamask-private-key.title": "Migrate a Metamask Private Key",
+  "register.eth-migrate.metamask-ledger.title": "Migrate a Metamask Ledger Device",
+
+  "register.eth-migrate.eth-address": "Ethereum Address",
+  "register.eth-migrate.eth-address.error.required": "Your Ethereum Address is required",
+  "register.eth-migrate.eth-private-key": "Private Key",
+  "register.eth-migrate.eth-private-key.error.invalid": "Invalid private key",
+  "register.eth-migrate.eth-private-key.error.required": "Your private key is required",
+
   "register.verify.button.register": "Register",
 
   "register.welcome.title": "You’re all set!",
