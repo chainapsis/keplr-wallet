@@ -7,14 +7,12 @@ import React, {
 import { observer } from "mobx-react-lite";
 import { useStore } from "../stores";
 import { View } from "react-native";
-import { Text } from "react-native-elements";
-import { sf, h4, fAlignCenter, my3, flex1, useStyle } from "../styles";
-import { Input } from "../components/form";
 import * as Keychain from "react-native-keychain";
 import { useBioAuth } from "../hooks/bio-auth";
 import { FullFixedPage } from "../components/page";
-import { FlexButtonWithHoc } from "./common";
 import { TextInput } from "../components/staging/input";
+import { Button } from "../components/staging/button";
+import { useStyle } from "../styles";
 
 const BioUnlock: FunctionComponent<{
   setIsFailed: React.Dispatch<React.SetStateAction<boolean>>;
@@ -53,35 +51,42 @@ export const UnlockView: FunctionComponent = observer(() => {
   const { interactionModalStore, keyRingStore } = useStore();
 
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [isFailed, setIsFailed] = useState(false);
+
+  const tryUnlock = async () => {
+    try {
+      setIsLoading(true);
+      await keyRingStore.unlock(password);
+    } catch (e) {
+      console.log(e);
+      setIsFailed(true);
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+    interactionModalStore.popAll("/unlock");
+  };
 
   return (
     <FullFixedPage>
       {bioAuth?.usingBioAuth === true && isFailed === false ? (
         <BioUnlock setIsFailed={setIsFailed} />
       ) : null}
-      <View style={flex1} />
-      <TextInput label="Password" returnKeyType="done" />
+      <View style={style.flatten(["flex-1"])} />
       <View>
-        <Text style={sf([h4, fAlignCenter, my3])}>Unlock</Text>
-        <Input
+        <TextInput
           label="Password"
-          autoCompleteType="password"
+          returnKeyType="done"
           secureTextEntry={true}
           value={password}
+          error={isFailed ? "Invalid password" : undefined}
           onChangeText={setPassword}
+          onSubmitEditing={tryUnlock}
         />
-        <View style={{ height: 45 }}>
-          <FlexButtonWithHoc
-            title="Unlock"
-            onPress={async () => {
-              await keyRingStore.unlock(password);
-              interactionModalStore.popAll("/unlock");
-            }}
-          />
-        </View>
+        <Button text="Sign in" loading={isLoading} onPress={tryUnlock} />
       </View>
-      <View style={flex1} />
+      <View style={style.flatten(["flex-1"])} />
     </FullFixedPage>
   );
 });

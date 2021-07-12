@@ -13,6 +13,7 @@ export const TextInput: FunctionComponent<
   React.ComponentProps<typeof NativeTextInput> & {
     labelStyle?: TextStyle;
     containerStyle?: ViewStyle;
+    buttonContainerStyle?: ViewStyle;
     errorLabelStyle?: TextStyle;
 
     label: string;
@@ -25,7 +26,12 @@ export const TextInput: FunctionComponent<
   const style = useStyle();
 
   return (
-    <React.Fragment>
+    <View
+      style={StyleSheet.flatten([
+        style.flatten(["padding-bottom-16"]),
+        props.containerStyle,
+      ])}
+    >
       <Text
         style={StyleSheet.flatten([
           style.flatten([
@@ -54,7 +60,7 @@ export const TextInput: FunctionComponent<
               !(props.editable ?? true) && "background-color-disabled",
             ]
           ),
-          props.containerStyle,
+          props.buttonContainerStyle,
         ])}
       >
         <NativeTextInput
@@ -64,7 +70,7 @@ export const TextInput: FunctionComponent<
             style.get("color-text-black-low").color
           }
           style={StyleSheet.flatten([
-            style.flatten(["body2", "color-text-black-medium", "padding-y-0"]),
+            style.flatten(["body2", "color-text-black-medium", "padding-0"]),
             propsStyle,
           ])}
         />
@@ -79,6 +85,6 @@ export const TextInput: FunctionComponent<
           {props.error}
         </Text>
       ) : null}
-    </React.Fragment>
+    </View>
   );
 };
