@@ -16,7 +16,7 @@ export const Button: FunctionComponent<{
   onPress?: () => void;
 
   containerStyle?: ViewStyle;
-  buttonStyle?: ViewStyle;
+  style?: ViewStyle;
   textStyle?: TextStyle;
 }> = ({
   color = "primary",
@@ -27,7 +27,7 @@ export const Button: FunctionComponent<{
   disabled = false,
   onPress,
   containerStyle,
-  buttonStyle,
+  style: buttonStyle,
   textStyle,
 }) => {
   const style = useStyle();

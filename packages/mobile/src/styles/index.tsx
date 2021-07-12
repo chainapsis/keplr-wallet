@@ -201,6 +201,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
   heights: {
     full: "100%",
     half: "50%",
+    "1": 1,
     "button-small": 44,
     "button-default": 48,
     "button-large": 52,
@@ -216,6 +217,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "11": 11,
     "12": 12,
     "16": 16,
+    "24": 24,
     "32": 32,
     "64": 64,
   },
@@ -229,6 +231,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "8": 8,
     "12": 12,
     "16": 16,
+    "24": 24,
     "32": 32,
     "64": 64,
   },
