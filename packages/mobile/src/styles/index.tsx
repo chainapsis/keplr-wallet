@@ -215,11 +215,15 @@ export const { StyleProvider, useStyle } = createStyleProvider({
   widths: {
     full: "100%",
     half: "50%",
+    "8": 8,
+    "12": 12,
+    "16": 16,
   },
   heights: {
     full: "100%",
     half: "50%",
     "1": 1,
+    "address-chip": 20,
     "button-small": 44,
     "button-default": 48,
     "button-large": 52,

@@ -9,7 +9,7 @@ import {
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 import { RegisterStackScreen } from "./screens/register";
-import { HomeScreen } from "./screens/home";
+import { HomeScreen } from "./screens/home/staging";
 import { ModalsRenderer } from "./modals";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
