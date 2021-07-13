@@ -1,0 +1,61 @@
+import React, { FunctionComponent } from "react";
+import { useStyle } from "../../../styles";
+import { Text, View } from "react-native";
+
+export const Chip: FunctionComponent<{
+  color?: "primary" | "secondary" | "danger";
+  mode?: "highlight" | "fill" | "outline";
+  text: string;
+}> = ({ color = "primary", mode = "fill", text }) => {
+  const style = useStyle();
+
+  const backgroundColorDefinition = (() => {
+    switch (mode) {
+      case "fill":
+        return `background-color-chip-fill-${color}`;
+      case "outline":
+        return "background-color-white";
+      case "highlight":
+        return `background-color-${color}`;
+    }
+  })();
+
+  const textColorDefinition = (() => {
+    switch (mode) {
+      case "outline":
+      case "fill":
+        return `color-${color}`;
+      case "highlight":
+        return "color-white";
+    }
+  })();
+
+  return (
+    <View
+      style={style.flatten(
+        [
+          backgroundColorDefinition as any,
+          "padding-x-8",
+          "padding-y-2",
+          "border-radius-32",
+          "justify-center",
+          "items-center",
+        ],
+        [
+          mode === "outline" && "border-width-1",
+          mode === "outline" && (`border-color-${color}` as any),
+        ]
+      )}
+    >
+      <Text
+        style={style.flatten([
+          "text-overline",
+          "text-center",
+          textColorDefinition as any,
+        ])}
+      >
+        {text}
+      </Text>
+    </View>
+  );
+};
