@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { Card, CardBody } from "../../../components/staging/card";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
 import { AddressChip } from "../../../components/staging/address-chip";
@@ -9,6 +9,7 @@ import { DoubleDoughnutChart } from "../../../components/svg";
 import { Button } from "../../../components/staging/button";
 import { useNavigation } from "@react-navigation/native";
 import { Dot } from "../../../components/staging/dot";
+import { LoadingSpinner } from "../../../components/staging/spinner";
 
 export const AccountCard: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
@@ -79,6 +80,21 @@ export const AccountCard: FunctionComponent = observer(() => {
                   ? totalPrice.toString()
                   : total.shrink(true).maxDecimals(6).toString()}
               </Text>
+              {queryStakable.isFetching ? (
+                <View
+                  style={StyleSheet.flatten([
+                    style.flatten(["absolute"]),
+                    {
+                      bottom: 33,
+                    },
+                  ])}
+                >
+                  <LoadingSpinner
+                    color={style.get("color-text-black-low").color}
+                    size={22}
+                  />
+                </View>
+              ) : null}
             </View>
           </View>
           <View style={style.flatten(["width-full", "margin-bottom-16"])}>
