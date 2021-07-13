@@ -92,7 +92,7 @@ export const AccountCard: FunctionComponent<{
                   ])}
                 >
                   <LoadingSpinner
-                    color={style.get("color-text-black-low").color}
+                    color={style.get("color-loading-spinner").color}
                     size={22}
                   />
                 </View>

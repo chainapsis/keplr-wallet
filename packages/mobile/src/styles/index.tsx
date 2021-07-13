@@ -10,8 +10,8 @@ export * from "./colors";
 
 export const Colors = {
   primary: "#4762E7",
-  "primary-50": "#E3E7F7",
-  "primary-100": "#A9B6F5",
+  "primary-50": "#E2E8FF",
+  "primary-100": "#B3BEF7",
   "primary-200": "#8E9FF2",
   "primary-300": "#7388F0",
   "primary-400": "#4762E7",
@@ -21,7 +21,7 @@ export const Colors = {
   "primary-800": "#001A9A",
   "primary-900": "#00157D",
   secondary: "#FF63B4",
-  "secondary-50": "#EDD3E8",
+  "secondary-50": "#FCD1F4",
   "secondary-100": "#F3B1E1",
   "secondary-200": "#FA9DD9",
   "secondary-300": "#FF86CE",
@@ -40,7 +40,7 @@ export const Colors = {
   "danger-500": "#DD1E44",
   "danger-600": "#BC1638",
   "danger-700": "#9A0F2A",
-  "danger-800": "#9A0F2A",
+  "danger-800": "#810A22",
   "danger-900": "#65081B",
   icon: "#2C4163",
   card: "rgba(255,255,255,0.9)",
@@ -210,6 +210,14 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       "button-secondary-outline-underlay": Colors["secondary-50"],
       "button-danger-fill-underlay": Colors["danger-500"],
       "button-danger-outline-underlay": Colors["danger-50"],
+
+      // Belows are for the chip props and may not be used as styles.
+      "chip-fill-primary": Colors["primary-50"],
+      "chip-fill-secondary": Colors["secondary-50"],
+      "chip-fill-danger": Colors["danger-100"],
+
+      // Belows are for the loading spinner props and may not be used as styles.
+      "loading-spinner": Colors["text-black-low"],
     },
   },
   widths: {
@@ -227,6 +235,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "button-small": 44,
     "button-default": 48,
     "button-large": 52,
+    "governance-card-body-placeholder": 130,
   },
   paddingSizes: {
     "0": 0,
