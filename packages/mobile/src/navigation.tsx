@@ -41,8 +41,8 @@ import {
   justifyContentCenter,
   fcHigh,
   h3,
-  colors,
   sf,
+  useStyle,
 } from "./styles";
 import { GradientBackground } from "./components/svg";
 import { BorderlessButton } from "react-native-gesture-handler";
@@ -113,16 +113,18 @@ export const OtherNavigation: FunctionComponent = () => {
 };
 
 export const MainTabNavigation: FunctionComponent = () => {
+  const style = useStyle();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ color, size }) => {
           let iconName = "";
 
           if (route.name === "Main") {
-            iconName = focused ? "ios-grid" : "ios-grid-outline";
+            iconName = "ios-grid";
           } else if (route.name === "Settings") {
-            iconName = focused ? "settings" : "settings-outline";
+            iconName = "settings";
           }
 
           // You can return any component that you like here!
@@ -152,8 +154,13 @@ export const MainTabNavigation: FunctionComponent = () => {
         ),
       })}
       tabBarOptions={{
-        activeTintColor: colors.primary,
-        inactiveTintColor: colors.grey,
+        activeTintColor: style.get("color-primary").color,
+        inactiveTintColor: style.get("color-icon").color,
+        style: {
+          borderTopColor: style.get("border-color-border-white").borderColor,
+          shadowColor: style.get("color-transparent").color,
+          elevation: 0,
+        },
         showLabel: false,
       }}
     >
