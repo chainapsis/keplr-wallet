@@ -3,11 +3,15 @@ import { PageWithScrollView } from "../../../components/staging/page";
 import { AccountCard } from "./account-card";
 import { RefreshControl } from "react-native";
 import { useStore } from "../../../stores";
+import { StakingInfoCard } from "./staking-info-card";
+import { useStyle } from "../../../styles";
 
 export const HomeScreen: FunctionComponent = () => {
   const [refreshing, setRefreshing] = React.useState(false);
 
   const { chainStore, accountStore, queriesStore } = useStore();
+
+  const style = useStyle();
 
   const onRefresh = React.useCallback(async () => {
     const account = accountStore.getAccount(chainStore.current.chainId);
@@ -30,7 +34,8 @@ export const HomeScreen: FunctionComponent = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <AccountCard />
+      <AccountCard containerStyle={style.flatten(["margin-bottom-16"])} />
+      <StakingInfoCard />
     </PageWithScrollView>
   );
 };

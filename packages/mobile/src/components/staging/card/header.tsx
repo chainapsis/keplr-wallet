@@ -9,16 +9,24 @@ export const CardHeaderWithButton: FunctionComponent<{
   title: string;
   paragraph?: string;
   buttonText: string;
+
+  onPress?: () => void;
+
   buttonColor?: "primary" | "secondary" | "danger";
   buttonMode?: "fill" | "outline" | "text";
   buttonStyle?: ViewStyle;
+  buttonDisabled?: boolean;
+  buttonLoading?: boolean;
 }> = ({
   title,
   paragraph,
   buttonText,
+  onPress,
   buttonColor = "primary",
   buttonMode = "fill",
   buttonStyle,
+  buttonDisabled = false,
+  buttonLoading = false,
 }) => {
   const style = useStyle();
 
@@ -54,10 +62,13 @@ export const CardHeaderWithButton: FunctionComponent<{
             style.flatten(["padding-x-24"]),
             buttonStyle,
           ])}
+          onPress={onPress}
           size="small"
           text={buttonText}
           color={buttonColor}
           mode={buttonMode}
+          disabled={buttonDisabled}
+          loading={buttonLoading}
         />
       </View>
     </View>

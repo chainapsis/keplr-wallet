@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { Card, CardBody } from "../../../components/staging/card";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
 import { AddressChip } from "../../../components/staging/address-chip";
@@ -11,7 +11,9 @@ import { useNavigation } from "@react-navigation/native";
 import { Dot } from "../../../components/staging/dot";
 import { LoadingSpinner } from "../../../components/staging/spinner";
 
-export const AccountCard: FunctionComponent = observer(() => {
+export const AccountCard: FunctionComponent<{
+  containerStyle?: ViewStyle;
+}> = observer(({ containerStyle }) => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const style = useStyle();
@@ -50,7 +52,7 @@ export const AccountCard: FunctionComponent = observer(() => {
   ];
 
   return (
-    <Card>
+    <Card style={containerStyle}>
       <CardBody style={style.flatten(["padding-top-16"])}>
         <View style={style.flatten(["flex", "items-center"])}>
           <Text style={style.flatten(["h4", "margin-bottom-8"])}>
