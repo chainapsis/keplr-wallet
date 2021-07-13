@@ -87,7 +87,6 @@ export const CardHeaderFullButton: FunctionComponent<{
       style={style.flatten([
         "border-radius-top-left-8",
         "border-radius-top-right-8",
-        "overflow-hidden",
       ])}
     >
       <RectButton

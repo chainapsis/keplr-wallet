@@ -26,10 +26,8 @@ import {
   UndelegateScreen,
   RedelegateValidatorScreen,
 } from "./screens/stake";
-import {
-  GovernanceScreen,
-  GovernanceDetailsScreeen,
-} from "./screens/governance";
+import { GovernanceScreen } from "./screens/governance/staging";
+import { GovernanceDetailsScreeen } from "./screens/governance";
 import { SettingStackScreen } from "./screens/setting";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";

@@ -16,6 +16,7 @@ export const Card: FunctionComponent<{
           "border-radius-8",
           "border-width-1",
           "border-color-border-white",
+          "overflow-hidden",
         ]),
         propStyle,
       ])}
