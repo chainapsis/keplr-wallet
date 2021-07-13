@@ -2,7 +2,15 @@ export type StyleBuilderPaddingAllDefinitions<
   Sizes extends Record<string, string | number>
 > = {
   [K in keyof Sizes as `padding-${string & K}`]: {
-    padding: string | number;
+    // There is "padding" prop on the styling,
+    // but, the "flatten" method overlaps by latter prop
+    // in this case, "flatten" makes {padding:0}, {paddingBottom:4}, {padding:2} as {padding:2, paddingBottom:4}
+    // so the result style has the padding bottom.
+    // To prevent this problem, just use all padding props to set the padding.
+    paddingTop: string | number;
+    paddingBottom: string | number;
+    paddingLeft: string | number;
+    paddingRight: string | number;
   };
 };
 

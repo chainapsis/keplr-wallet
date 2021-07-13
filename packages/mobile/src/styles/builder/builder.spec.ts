@@ -489,10 +489,16 @@ describe("Test style builder", () => {
 
   test("Test Padding", () => {
     expect(builder.get("padding-10")).toStrictEqual({
-      padding: 1,
+      paddingTop: 1,
+      paddingBottom: 1,
+      paddingLeft: 1,
+      paddingRight: 1,
     });
     expect(builder.get("padding-small")).toStrictEqual({
-      padding: "2",
+      paddingTop: "2",
+      paddingBottom: "2",
+      paddingLeft: "2",
+      paddingRight: "2",
     });
     expect(builder.get("padding-left-10")).toStrictEqual({
       paddingLeft: 1,
@@ -538,10 +544,16 @@ describe("Test style builder", () => {
 
   test("Test Margin", () => {
     expect(builder.get("margin-1")).toStrictEqual({
-      margin: 3,
+      marginTop: 3,
+      marginBottom: 3,
+      marginLeft: 3,
+      marginRight: 3,
     });
     expect(builder.get("margin-medium")).toStrictEqual({
-      margin: "4",
+      marginTop: "4",
+      marginBottom: "4",
+      marginLeft: "4",
+      marginRight: "4",
     });
     expect(builder.get("margin-left-1")).toStrictEqual({
       marginLeft: 3,

@@ -378,8 +378,12 @@ export class StyleBuilder<
             };
         }
 
+        const padding = this.configs.paddingSizes[segment.flush()];
         return {
-          padding: this.configs.paddingSizes[segment.flush()],
+          paddingTop: padding,
+          paddingBottom: padding,
+          paddingLeft: padding,
+          paddingRight: padding,
         };
       case "margin":
         switch (segment.peek()) {
@@ -419,8 +423,12 @@ export class StyleBuilder<
             };
         }
 
+        const margin = this.configs.marginSizes[segment.flush()];
         return {
-          margin: this.configs.marginSizes[segment.flush()],
+          marginTop: margin,
+          marginBottom: margin,
+          marginLeft: margin,
+          marginRight: margin,
         };
       case "opacity":
         return {

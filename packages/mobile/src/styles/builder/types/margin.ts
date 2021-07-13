@@ -2,7 +2,15 @@ export type StyleBuilderMarginAllDefinitions<
   Sizes extends Record<string, string | number>
 > = {
   [K in keyof Sizes as `margin-${string & K}`]: {
-    margin: string | number;
+    // There is "margin" prop on the styling,
+    // but, the "flatten" method overlaps by latter prop
+    // in this case, "flatten" makes {margin:0}, {marginBottom:4}, {margin:2} as {margin:2, marginBottom:4}
+    // so the result style has the margin bottom.
+    // To prevent this problem, just use all margin props to set the margin.
+    marginTop: string | number;
+    marginBottom: string | number;
+    marginLeft: string | number;
+    marginRight: string | number;
   };
 };
 
