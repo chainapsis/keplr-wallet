@@ -6,7 +6,7 @@ import { StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import { LoadingSpinner } from "../spinner";
 
 export const Button: FunctionComponent<{
-  color?: "primary" | "secondary";
+  color?: "primary" | "secondary" | "danger";
   mode?: "fill" | "outline" | "text";
   size?: "default" | "small" | "large";
   text: string;

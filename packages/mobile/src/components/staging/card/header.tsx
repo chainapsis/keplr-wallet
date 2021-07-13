@@ -9,7 +9,7 @@ export const CardHeaderWithButton: FunctionComponent<{
   title: string;
   paragraph?: string;
   buttonText: string;
-  buttonColor?: "primary" | "secondary";
+  buttonColor?: "primary" | "secondary" | "danger";
   buttonMode?: "fill" | "outline" | "text";
   buttonStyle?: ViewStyle;
 }> = ({
