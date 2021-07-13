@@ -294,7 +294,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       const disposer = autorun(() => {
         if (!this.isFetching) {
           resolve(this.response);
-          disposer();
+          if (disposer) {
+            disposer();
+          }
         }
       });
     });
@@ -313,6 +315,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           this.fetch();
           onceCoerce = true;
         }
+      },
+      {
+        fireImmediately: true,
       }
     );
 
@@ -320,8 +325,12 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       const disposer = autorun(() => {
         if (!this.isFetching) {
           resolve(this.response);
-          reactionDisposer();
-          disposer();
+          if (reactionDisposer) {
+            reactionDisposer();
+          }
+          if (disposer) {
+            disposer();
+          }
         }
       });
     });
