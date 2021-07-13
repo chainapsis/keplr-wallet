@@ -66,7 +66,7 @@ export const StakingInfoCard: FunctionComponent<{
         buttonLoading={account.isSendingMsg === "withdrawRewards"}
       />
       <CardDivider />
-      <CardBody>
+      <CardBody style={style.flatten(["padding-top-12"])}>
         <Text style={style.flatten(["h5", "color-text-black-high"])}>
           My Delegation
         </Text>

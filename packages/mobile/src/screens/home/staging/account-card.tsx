@@ -53,7 +53,7 @@ export const AccountCard: FunctionComponent<{
 
   return (
     <Card style={containerStyle}>
-      <CardBody style={style.flatten(["padding-top-16"])}>
+      <CardBody>
         <View style={style.flatten(["flex", "items-center"])}>
           <Text style={style.flatten(["h4", "margin-bottom-8"])}>
             {account.name || "..."}
