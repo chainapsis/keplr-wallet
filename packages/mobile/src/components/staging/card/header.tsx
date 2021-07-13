@@ -78,37 +78,42 @@ export const CardHeaderWithButton: FunctionComponent<{
 export const CardHeaderFullButton: FunctionComponent<{
   title: string;
   buttonText: string;
-}> = ({ title, buttonText }) => {
+  onPress?: () => void;
+}> = ({ title, buttonText, onPress }) => {
   const style = useStyle();
 
   return (
-    <RectButton
+    <View
       style={style.flatten([
-        "padding-16",
-        "padding-bottom-12",
         "border-radius-top-left-8",
         "border-radius-top-right-8",
+        "overflow-hidden",
       ])}
     >
-      <View style={style.flatten(["flex", "flex-row", "items-center"])}>
-        <Text style={style.flatten(["h5", "color-text-black-high"])}>
-          {title}
-        </Text>
-        <View style={style.flatten(["flex-1"])} />
-        <Text
-          style={style.flatten([
-            "text-button2",
-            "color-text-black-very-very-low",
-            "margin-right-8",
-          ])}
-        >
-          {buttonText}
-        </Text>
-        <RightArrowIcon
-          color={style.get("color-text-black-very-very-low").color}
-          height={12}
-        />
-      </View>
-    </RectButton>
+      <RectButton
+        style={style.flatten(["padding-16", "padding-bottom-12"])}
+        onPress={onPress}
+      >
+        <View style={style.flatten(["flex", "flex-row", "items-center"])}>
+          <Text style={style.flatten(["h5", "color-text-black-high"])}>
+            {title}
+          </Text>
+          <View style={style.flatten(["flex-1"])} />
+          <Text
+            style={style.flatten([
+              "text-button2",
+              "color-text-black-very-very-low",
+              "margin-right-8",
+            ])}
+          >
+            {buttonText}
+          </Text>
+          <RightArrowIcon
+            color={style.get("color-text-black-very-very-low").color}
+            height={12}
+          />
+        </View>
+      </RectButton>
+    </View>
   );
 };

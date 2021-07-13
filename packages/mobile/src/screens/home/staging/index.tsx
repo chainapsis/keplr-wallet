@@ -5,6 +5,7 @@ import { RefreshControl } from "react-native";
 import { useStore } from "../../../stores";
 import { StakingInfoCard } from "./staking-info-card";
 import { useStyle } from "../../../styles";
+import { GovernanceCard } from "./governance-card";
 
 export const HomeScreen: FunctionComponent = () => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -35,7 +36,8 @@ export const HomeScreen: FunctionComponent = () => {
       }
     >
       <AccountCard containerStyle={style.flatten(["margin-bottom-16"])} />
-      <StakingInfoCard />
+      <StakingInfoCard containerStyle={style.flatten(["margin-bottom-16"])} />
+      <GovernanceCard containerStyle={style.flatten(["margin-bottom-16"])} />
     </PageWithScrollView>
   );
 };

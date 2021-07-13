@@ -98,7 +98,7 @@ export const Button: FunctionComponent<{
                     disabled ? "-disabled" : ""
                   }` as any),
                 size === "large" && "text-button1",
-                loading && "display-none",
+                loading && "opacity-transparent",
               ]
             ),
             textStyle,
@@ -107,16 +107,26 @@ export const Button: FunctionComponent<{
           {text}
         </Text>
         {loading ? (
-          <LoadingSpinner
-            color={
-              mode === "fill"
-                ? style.get("color-white").color
-                : style.get(
-                    `color-button-${color}${disabled ? "-disabled" : ""}` as any
-                  ).color
-            }
-            size={20}
-          />
+          <View
+            style={style.flatten([
+              "absolute-fill",
+              "justify-center",
+              "items-center",
+            ])}
+          >
+            <LoadingSpinner
+              color={
+                mode === "fill"
+                  ? style.get("color-white").color
+                  : style.get(
+                      `color-button-${color}${
+                        disabled ? "-disabled" : ""
+                      }` as any
+                    ).color
+              }
+              size={20}
+            />
+          </View>
         ) : null}
       </RectButton>
     </View>
