@@ -2,40 +2,45 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
-import { Governance } from "@keplr-wallet/stores/build/query/cosmos";
+import { Governance } from "@keplr-wallet/stores";
 import { Chip } from "../../../components/staging/chip";
 import { CardBody } from "../../../components/staging/card";
 import { RectButton } from "react-native-gesture-handler";
 import { Text, View } from "react-native";
 import { LoadingSpinner } from "../../../components/staging/spinner";
+import { useNavigation } from "@react-navigation/native";
+
+export const GovernanceProposalStatusChip: FunctionComponent<{
+  status: Governance.ProposalStatus;
+}> = ({ status }) => {
+  switch (status) {
+    case Governance.ProposalStatus.DEPOSIT_PERIOD:
+      return <Chip text="Deposit period" color="primary" mode="outline" />;
+    case Governance.ProposalStatus.VOTING_PERIOD:
+      return <Chip text="Voting period" color="primary" mode="highlight" />;
+    case Governance.ProposalStatus.PASSED:
+      return <Chip text="Passed" color="primary" mode="fill" />;
+    case Governance.ProposalStatus.REJECTED:
+      return <Chip text="Rejected" color="danger" mode="fill" />;
+    case Governance.ProposalStatus.FAILED:
+      return <Chip text="Failed" color="danger" mode="highlight" />;
+    default:
+      return <Chip text="Unspecified" color="danger" mode="highlight" />;
+  }
+};
 
 export const GovernanceCardBody: FunctionComponent<{
   proposalId: string;
 }> = observer(({ proposalId }) => {
   const { chainStore, queriesStore } = useStore();
 
+  const navigation = useNavigation();
+
   const style = useStyle();
 
   const queries = queriesStore.get(chainStore.current.chainId);
   const queryGovernance = queries.cosmos.queryGovernance;
   const proposal = queryGovernance.getProposal(proposalId);
-
-  const renderChip = (status: Governance.ProposalStatus) => {
-    switch (status) {
-      case Governance.ProposalStatus.DEPOSIT_PERIOD:
-        return <Chip text="Deposit period" color="primary" mode="outline" />;
-      case Governance.ProposalStatus.VOTING_PERIOD:
-        return <Chip text="Voting period" color="primary" mode="highlight" />;
-      case Governance.ProposalStatus.PASSED:
-        return <Chip text="Passed" color="primary" mode="fill" />;
-      case Governance.ProposalStatus.REJECTED:
-        return <Chip text="Rejected" color="danger" mode="fill" />;
-      case Governance.ProposalStatus.FAILED:
-        return <Chip text="Failed" color="danger" mode="highlight" />;
-      default:
-        return <Chip text="Unspecified" color="danger" mode="highlight" />;
-    }
-  };
 
   return (
     <CardBody
@@ -47,7 +52,14 @@ export const GovernanceCardBody: FunctionComponent<{
       ])}
     >
       {proposal ? (
-        <RectButton style={style.flatten(["padding-16"])}>
+        <RectButton
+          style={style.flatten(["padding-16"])}
+          onPress={() => {
+            navigation.navigate("Governance Details", {
+              proposalId: proposal.id,
+            });
+          }}
+        >
           <View
             style={style.flatten([
               "flex-row",
@@ -59,7 +71,7 @@ export const GovernanceCardBody: FunctionComponent<{
               style={style.flatten(["h5", "color-text-black-high"])}
             >{`#${proposal.id}`}</Text>
             <View style={style.flatten(["flex-1"])} />
-            {renderChip(proposal.proposalStatus)}
+            <GovernanceProposalStatusChip status={proposal.proposalStatus} />
           </View>
           <View style={style.flatten(["margin-bottom-8"])}>
             <Text style={style.flatten(["h6", "color-text-black-high"])}>

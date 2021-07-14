@@ -25,7 +25,12 @@ export const PageWithSectionList: FunctionComponent<
       <SafeAreaView style={style.get("flex-1")}>
         <SectionList
           style={StyleSheet.flatten([
-            style.flatten(["absolute-fill", "padding-12", "padding-top-0"]),
+            style.flatten([
+              "flex-1",
+              "padding-12",
+              "padding-top-0",
+              "overflow-visible",
+            ]),
             propStyle,
           ])}
           {...prop}

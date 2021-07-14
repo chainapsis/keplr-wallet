@@ -9,9 +9,11 @@ import {
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../svg";
 
-export const PageWithScrollView: FunctionComponent<ScrollViewProps> = (
-  prop
-) => {
+export const PageWithScrollView: FunctionComponent<
+  ScrollViewProps & {
+    fixed?: React.ReactNode;
+  }
+> = (prop) => {
   const style = useStyle();
 
   const propStyle = prop.style;
@@ -25,11 +27,22 @@ export const PageWithScrollView: FunctionComponent<ScrollViewProps> = (
       <SafeAreaView style={style.get("flex-1")}>
         <ScrollView
           style={StyleSheet.flatten([
-            style.flatten(["absolute-fill", "padding-12", "padding-top-0"]),
+            style.flatten([
+              "flex-1",
+              "padding-12",
+              "padding-top-0",
+              "overflow-visible",
+            ]),
             propStyle,
           ])}
           {...prop}
         />
+        <View
+          style={style.flatten(["absolute", "width-full", "height-full"])}
+          pointerEvents="box-none"
+        >
+          {prop.fixed}
+        </View>
       </SafeAreaView>
     </React.Fragment>
   );

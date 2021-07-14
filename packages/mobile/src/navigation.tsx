@@ -26,8 +26,10 @@ import {
   UndelegateScreen,
   RedelegateValidatorScreen,
 } from "./screens/stake";
-import { GovernanceScreen } from "./screens/governance/staging";
-import { GovernanceDetailsScreeen } from "./screens/governance";
+import {
+  GovernanceScreen,
+  GovernanceDetailsScreen,
+} from "./screens/governance/staging";
 import { SettingStackScreen } from "./screens/setting";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";
@@ -104,7 +106,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen name="Governance" component={GovernanceScreen} />
       <Stack.Screen
         name="Governance Details"
-        component={GovernanceDetailsScreeen}
+        component={GovernanceDetailsScreen}
       />
     </Stack.Navigator>
   );

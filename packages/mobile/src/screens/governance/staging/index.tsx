@@ -38,3 +38,4 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
 });
 
 export { GovernanceCardBody };
+export * from "./details";
