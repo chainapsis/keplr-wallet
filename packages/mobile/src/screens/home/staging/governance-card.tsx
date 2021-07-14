@@ -6,10 +6,11 @@ import {
 } from "../../../components/staging/card";
 import { ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { GovernanceCardBody } from "../../governance/staging";
 import { useStore } from "../../../stores";
 import { ObservableQueryProposal, Governance } from "@keplr-wallet/stores";
+import { navigateSmart } from "../../../navigation";
 
 export const GovernanceCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -40,6 +41,7 @@ export const GovernanceCard: FunctionComponent<{
   }
 
   const navigation = useNavigation();
+  const route = useRoute();
 
   return (
     <Card style={containerStyle}>
@@ -47,7 +49,7 @@ export const GovernanceCard: FunctionComponent<{
         title="Governance"
         buttonText="View All"
         onPress={() => {
-          navigation.navigate("Others", { screen: "Governance" });
+          navigateSmart(route, navigation, "Governance");
         }}
       />
       <CardDivider />
