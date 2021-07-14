@@ -14,6 +14,45 @@ import { Platform } from "react-native";
 
 import codePush from "react-native-code-push";
 
+if (Platform.OS === "android") {
+  // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
+
+  // Even though React Native supports the intl on android with "org.webkit:android-jsc-intl:+" option,
+  // it seems that android doesn't support all intl API and this bothers me.
+  // So, to reduce this problem on android, just use the javascript polyfill for intl.
+  require("@formatjs/intl-getcanonicallocales/polyfill");
+  require("@formatjs/intl-locale/polyfill");
+
+  require("@formatjs/intl-pluralrules/polyfill");
+  require("@formatjs/intl-pluralrules/locale-data/en.js");
+
+  require("@formatjs/intl-displaynames/polyfill");
+  require("@formatjs/intl-displaynames/locale-data/en.js");
+
+  // require("@formatjs/intl-listformat/polyfill");
+  // require("@formatjs/intl-listformat/locale-data/en.js");
+
+  require("@formatjs/intl-numberformat/polyfill");
+  require("@formatjs/intl-numberformat/locale-data/en.js");
+
+  require("@formatjs/intl-relativetimeformat/polyfill");
+  require("@formatjs/intl-relativetimeformat/locale-data/en.js");
+
+  require("@formatjs/intl-datetimeformat/polyfill");
+  require("@formatjs/intl-datetimeformat/locale-data/en.js");
+
+  require("@formatjs/intl-datetimeformat/add-golden-tz.js");
+
+  // https://formatjs.io/docs/polyfills/intl-datetimeformat/#default-timezone
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const RNLocalize = require("react-native-localize");
+  if ("__setDefaultTimeZone" in Intl.DateTimeFormat) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    Intl.DateTimeFormat.__setDefaultTimeZone(RNLocalize.getTimeZone());
+  }
+}
+
 export const App: FunctionComponent = codePush(() => {
   return (
     <GlobalThemeProvider>
@@ -21,15 +60,6 @@ export const App: FunctionComponent = codePush(() => {
         <StoreProvider>
           <IntlProvider
             locale="en"
-            timeZone={
-              // I'm not sure that the cause of this problem.
-              // But, in android, the intl's local time zone isn't set properly and always set as UTC.
-              // To prevent this problem, just set the time zone from localize module if the platform is android.
-              Platform.OS === "android"
-                ? // eslint-disable-next-line @typescript-eslint/no-var-requires
-                  require("react-native-localize").getTimeZone()
-                : undefined
-            }
             formats={{
               date: {
                 en: {

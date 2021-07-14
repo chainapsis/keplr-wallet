@@ -16,6 +16,14 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@formatjs/intl-datetimeformat": "^4.1.6",
+    "@formatjs/intl-displaynames": "^5.1.6",
+    "@formatjs/intl-getcanonicallocales": "^1.7.1",
+    "@formatjs/intl-listformat": "^6.2.6",
+    "@formatjs/intl-locale": "^2.4.33",
+    "@formatjs/intl-numberformat": "^7.1.5",
+    "@formatjs/intl-pluralrules": "^4.0.28",
+    "@formatjs/intl-relativetimeformat": "^9.1.7",
     "@keplr-wallet/background": "0.9.0-alpha.3",
     "@keplr-wallet/common": "0.9.0-alpha.3",
     "@keplr-wallet/cosmos": "0.9.0-alpha.3",
