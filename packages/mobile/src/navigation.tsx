@@ -5,8 +5,6 @@ import { KeyRingStatus } from "@keplr-wallet/background";
 import {
   NavigationContainer,
   NavigationContainerRef,
-  RouteProp,
-  NavigationProp,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
@@ -48,47 +46,30 @@ import {
 } from "./styles";
 import { GradientBackground } from "./components/svg";
 import { BorderlessButton } from "react-native-gesture-handler";
+import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 
-const NavigationConfig: {
-  [screenName: string]: {
-    upperScreenName: string;
-  };
-} = {
-  Home: {
-    upperScreenName: "MainTabDrawer",
-  },
-  Governance: {
-    upperScreenName: "Others",
-  },
-  "Governance Details": {
-    upperScreenName: "Others",
-  },
-};
+const {
+  SmartNavigatorProvider,
+  useSmartNavigation,
+} = createSmartNavigatorProvider(
+  new SmartNavigator({
+    Home: {
+      upperScreenName: "MainTabDrawer",
+    },
+    Governance: {
+      upperScreenName: "Others",
+    },
+    "Governance Details": {
+      upperScreenName: "Others",
+    },
+  }).withParams<{
+    "Governance Details": {
+      proposalId: string;
+    };
+  }>()
+);
 
-export const navigateSmart = (
-  route: RouteProp<any, any>,
-  navigation: NavigationProp<any>,
-  screenName: keyof typeof NavigationConfig,
-  params?: Record<any, any>
-) => {
-  const currentScreenName = route.name as string;
-
-  if (!(currentScreenName in NavigationConfig)) {
-    throw new Error(`Can't get the current screen info: ${currentScreenName}`);
-  }
-
-  const currentScreen = NavigationConfig[currentScreenName];
-  const targetScreen = NavigationConfig[screenName];
-
-  if (currentScreen.upperScreenName === targetScreen.upperScreenName) {
-    navigation.navigate(screenName, params);
-  } else {
-    navigation.navigate(targetScreen.upperScreenName, {
-      screen: screenName,
-      params,
-    });
-  }
-};
+export { useSmartNavigation };
 
 const SplashScreen: FunctionComponent = () => {
   return (
@@ -230,7 +211,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
   const routeNameRef = useRef<string>();
 
   return (
-    <React.Fragment>
+    <SmartNavigatorProvider>
       <StatusBar
         translucent={true}
         backgroundColor="#FFFFFF00"
@@ -288,6 +269,6 @@ export const AppNavigation: FunctionComponent = observer(() => {
         )}
       </NavigationContainer>
       <ModalsRenderer />
-    </React.Fragment>
+    </SmartNavigatorProvider>
   );
 });

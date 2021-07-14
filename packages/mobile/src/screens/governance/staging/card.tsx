@@ -8,10 +8,9 @@ import { CardBody } from "../../../components/staging/card";
 import { RectButton } from "react-native-gesture-handler";
 import { Text, View } from "react-native";
 import { LoadingSpinner } from "../../../components/staging/spinner";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
-import { navigateSmart } from "../../../navigation";
+import { useSmartNavigation } from "../../../navigation";
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: Governance.ProposalStatus;
@@ -37,8 +36,7 @@ export const GovernanceCardBody: FunctionComponent<{
 }> = observer(({ proposalId }) => {
   const { chainStore, queriesStore } = useStore();
 
-  const navigation = useNavigation();
-  const route = useRoute();
+  const navigation = useSmartNavigation();
 
   const style = useStyle();
 
@@ -145,7 +143,7 @@ export const GovernanceCardBody: FunctionComponent<{
         <RectButton
           style={style.flatten(["padding-16"])}
           onPress={() => {
-            navigateSmart(route, navigation, "Governance Details", {
+            navigation.navigateSmart("Governance Details", {
               proposalId: proposal.id,
             });
           }}
