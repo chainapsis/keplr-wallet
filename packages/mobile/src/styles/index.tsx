@@ -10,6 +10,7 @@ export * from "./colors";
 
 export const Colors = {
   primary: "#4762E7",
+  "primary-10": "#F1F3FC",
   "primary-50": "#E2E8FF",
   "primary-100": "#B3BEF7",
   "primary-200": "#8E9FF2",

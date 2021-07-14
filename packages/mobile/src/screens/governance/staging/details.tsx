@@ -17,7 +17,8 @@ import { dateToLocalString } from "./utils";
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
   percentage: IntPretty;
-}> = ({ vote, percentage }) => {
+  hightlight?: boolean;
+}> = ({ vote, percentage, hightlight = false }) => {
   const style = useStyle();
 
   const text = (() => {
@@ -35,13 +36,16 @@ export const TallyVoteInfoView: FunctionComponent<{
 
   return (
     <View
-      style={style.flatten([
-        "height-56",
-        "padding-8",
-        "border-radius-4",
-        "border-width-1",
-        "border-color-border-white",
-      ])}
+      style={style.flatten(
+        [
+          "height-56",
+          "padding-8",
+          "border-radius-4",
+          "border-width-1",
+          "border-color-border-white",
+        ],
+        [hightlight && "background-color-primary-10"]
+      )}
     >
       <View style={style.flatten(["flex-row", "height-full"])}>
         <View
@@ -74,13 +78,21 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
   containerStyle?: ViewStyle;
   proposalId: string;
 }> = observer(({ proposalId, containerStyle }) => {
-  const { chainStore, queriesStore } = useStore();
+  const { chainStore, queriesStore, accountStore } = useStore();
 
   const style = useStyle();
 
+  const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+
+  const voted = proposal
+    ? queries.cosmos.queryProposalVote.getVote(
+        proposal.id,
+        account.bech32Address
+      ).vote
+    : undefined;
 
   const intl = useIntl();
 
@@ -159,6 +171,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
                 <TallyVoteInfoView
                   vote="yes"
                   percentage={proposal.tallyRatio.yes}
+                  hightlight={voted === "Yes"}
                 />
               </View>
               <View style={style.flatten(["width-12"])} />
@@ -166,6 +179,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
                 <TallyVoteInfoView
                   vote="no"
                   percentage={proposal.tallyRatio.no}
+                  hightlight={voted === "No"}
                 />
               </View>
             </View>
@@ -174,6 +188,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
                 <TallyVoteInfoView
                   vote="noWithVeto"
                   percentage={proposal.tallyRatio.noWithVeto}
+                  hightlight={voted === "NoWithVeto"}
                 />
               </View>
               <View style={style.flatten(["width-12"])} />
@@ -181,6 +196,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
                 <TallyVoteInfoView
                   vote="abstain"
                   percentage={proposal.tallyRatio.abstain}
+                  hightlight={voted === "Abstain"}
                 />
               </View>
             </View>
