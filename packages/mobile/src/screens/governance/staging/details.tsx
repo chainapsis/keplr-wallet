@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../../components/staging/page";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
 import { Card, CardBody, CardDivider } from "../../../components/staging/card";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/staging/button";
@@ -119,6 +119,9 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
               "color-text-black-high",
               "margin-bottom-16",
             ])}
+            // Text selection is only supported well in android.
+            // In IOS, the whole text would be selected, this process is somewhat strange, so it is disabled in IOS.
+            selectable={Platform.OS === "android"}
           >
             {proposal.title}
           </Text>
@@ -229,7 +232,12 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
           >
             Description
           </Text>
-          <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+          <Text
+            style={style.flatten(["body3", "color-text-black-medium"])}
+            // Text selection is only supported well in android.
+            // In IOS, the whole text would be selected, this process is somewhat strange, so it is disabled in IOS.
+            selectable={Platform.OS === "android"}
+          >
             {proposal.description}
           </Text>
         </View>
