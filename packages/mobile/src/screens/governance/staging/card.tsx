@@ -138,14 +138,7 @@ export const GovernanceCardBody: FunctionComponent<{
   })();
 
   return (
-    <CardBody
-      style={style.flatten([
-        "padding-0",
-        "overflow-hidden",
-        "border-radius-bottom-left-8",
-        "border-radius-bottom-right-8",
-      ])}
-    >
+    <CardBody style={style.flatten(["padding-0", "overflow-hidden"])}>
       {proposal ? (
         <RectButton
           style={style.flatten(["padding-16"])}
