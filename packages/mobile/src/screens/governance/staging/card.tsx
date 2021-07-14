@@ -1,14 +1,16 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
-import { Governance } from "@keplr-wallet/stores";
+import { Governance, ObservableQueryProposal } from "@keplr-wallet/stores";
 import { Chip } from "../../../components/staging/chip";
 import { CardBody } from "../../../components/staging/card";
 import { RectButton } from "react-native-gesture-handler";
 import { Text, View } from "react-native";
 import { LoadingSpinner } from "../../../components/staging/spinner";
 import { useNavigation } from "@react-navigation/native";
+import { useIntl } from "react-intl";
+import { dateToLocalString } from "./utils";
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: Governance.ProposalStatus;
@@ -38,9 +40,102 @@ export const GovernanceCardBody: FunctionComponent<{
 
   const style = useStyle();
 
+  const intl = useIntl();
+
   const queries = queriesStore.get(chainStore.current.chainId);
   const queryGovernance = queries.cosmos.queryGovernance;
   const proposal = queryGovernance.getProposal(proposalId);
+
+  const renderProposalDateString = (proposal: ObservableQueryProposal) => {
+    switch (proposal.proposalStatus) {
+      case Governance.ProposalStatus.DEPOSIT_PERIOD:
+        return `Deposit End. ${dateToLocalString(
+          intl,
+          proposal.raw.deposit_end_time
+        )}`;
+      case Governance.ProposalStatus.VOTING_PERIOD:
+      case Governance.ProposalStatus.FAILED:
+      case Governance.ProposalStatus.PASSED:
+      case Governance.ProposalStatus.REJECTED:
+      case Governance.ProposalStatus.UNSPECIFIED:
+        return `Voting End. ${dateToLocalString(
+          intl,
+          proposal.raw.voting_end_time
+        )}`;
+    }
+  };
+
+  const [current] = useState(() => new Date().getTime());
+
+  // Relative time is not between the end time and actual current time.
+  // Relative time is between the end time and "the time that the component is mounted."
+  const proposalRelativeEndTimeString = (() => {
+    if (!proposal) {
+      return "";
+    }
+
+    switch (proposal.proposalStatus) {
+      case Governance.ProposalStatus.DEPOSIT_PERIOD:
+        const relativeDepositEndTime =
+          (new Date(proposal.raw.deposit_end_time).getTime() - current) / 1000;
+        const relativeDepositEndTimeDays = Math.floor(
+          relativeDepositEndTime / (3600 * 24)
+        );
+        const relativeDepositEndTimeHours = Math.ceil(
+          relativeDepositEndTime / 3600
+        );
+
+        if (relativeDepositEndTimeDays) {
+          return (
+            intl
+              .formatRelativeTime(relativeDepositEndTimeDays, "days", {
+                numeric: "always",
+              })
+              .replace("in ", "") + " left"
+          );
+        } else {
+          return (
+            intl
+              .formatRelativeTime(relativeDepositEndTimeHours, "hours", {
+                numeric: "always",
+              })
+              .replace("in ", "") + " left"
+          );
+        }
+      case Governance.ProposalStatus.VOTING_PERIOD:
+        const relativeVotingEndTime =
+          (new Date(proposal.raw.voting_end_time).getTime() - current) / 1000;
+        const relativeVotingEndTimeDays = Math.floor(
+          relativeVotingEndTime / (3600 * 24)
+        );
+        const relativeVotingEndTimeHours = Math.ceil(
+          relativeVotingEndTime / 3600
+        );
+
+        if (relativeVotingEndTimeDays) {
+          return (
+            intl
+              .formatRelativeTime(relativeVotingEndTimeDays, "days", {
+                numeric: "always",
+              })
+              .replace("in ", "") + " left"
+          );
+        } else {
+          return (
+            intl
+              .formatRelativeTime(relativeVotingEndTimeHours, "hours", {
+                numeric: "always",
+              })
+              .replace("in ", "") + " left"
+          );
+        }
+      case Governance.ProposalStatus.FAILED:
+      case Governance.ProposalStatus.PASSED:
+      case Governance.ProposalStatus.REJECTED:
+      case Governance.ProposalStatus.UNSPECIFIED:
+        return "";
+    }
+  })();
 
   return (
     <CardBody
@@ -78,7 +173,24 @@ export const GovernanceCardBody: FunctionComponent<{
               {proposal.title}
             </Text>
           </View>
-          {/* TODO: Show the voting end time */}
+          <View style={style.flatten(["flex-row", "items-center"])}>
+            <Text
+              style={style.flatten(["text-caption1", "color-text-black-low"])}
+            >
+              {renderProposalDateString(proposal)}
+            </Text>
+            <View style={style.flatten(["flex-1"])} />
+            {proposalRelativeEndTimeString ? (
+              <Text
+                style={style.flatten([
+                  "text-caption1",
+                  "color-text-black-medium",
+                ])}
+              >
+                {proposalRelativeEndTimeString}
+              </Text>
+            ) : null}
+          </View>
         </RectButton>
       ) : (
         <View

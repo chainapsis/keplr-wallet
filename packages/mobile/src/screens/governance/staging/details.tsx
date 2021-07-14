@@ -11,6 +11,8 @@ import { LoadingSpinner } from "../../../components/staging/spinner";
 import { Governance } from "@keplr-wallet/stores";
 import { GovernanceProposalStatusChip } from "./card";
 import { IntPretty } from "@keplr-wallet/unit";
+import { useIntl } from "react-intl";
+import { dateToLocalString } from "./utils";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -79,6 +81,8 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+
+  const intl = useIntl();
 
   return (
     <CardBody>
@@ -182,6 +186,24 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
             </View>
           </View>
           <CardDivider style={style.flatten(["margin-x-0", "margin-y-16"])} />
+          <View style={style.flatten(["flex-row", "margin-bottom-12"])}>
+            <View style={style.flatten(["flex-1"])}>
+              <Text style={style.flatten(["h7", "color-text-black-medium"])}>
+                Voting Start
+              </Text>
+              <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+                {dateToLocalString(intl, proposal.raw.voting_start_time)}
+              </Text>
+            </View>
+            <View style={style.flatten(["flex-1"])}>
+              <Text style={style.flatten(["h7", "color-text-black-medium"])}>
+                Voting End
+              </Text>
+              <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+                {dateToLocalString(intl, proposal.raw.voting_end_time)}
+              </Text>
+            </View>
+          </View>
           <Text
             style={style.flatten([
               "h7",

@@ -12,3 +12,5 @@ dist/*
 prod/*
 
 yarn.lock
+Podfile.lock
+build.gradle
