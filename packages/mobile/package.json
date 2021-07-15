@@ -11,6 +11,7 @@
     "clean": "rm -rf node_modules",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "android:connect": "adb reverse tcp:8081 tcp:8081",
     "start": "react-native start",
     "pod-install": "pod-install",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
