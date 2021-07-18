@@ -10,6 +10,7 @@ import {
 import { LoadingIndicatorProvider } from "./components/loading-indicator";
 import { BioAuthProvider } from "./hooks/bio-auth";
 import { IntlProvider } from "react-intl";
+import { ModalsProvider } from "./modals/staging/base";
 import { Platform } from "react-native";
 
 import codePush from "react-native-code-push";
@@ -77,15 +78,17 @@ export const App: FunctionComponent = codePush(() => {
               },
             }}
           >
-            <BioAuthProvider>
-              <LoadingIndicatorProvider>
-                <NotificationStoreProvider>
-                  <NotificationProvider>
-                    <AppNavigation />
-                  </NotificationProvider>
-                </NotificationStoreProvider>
-              </LoadingIndicatorProvider>
-            </BioAuthProvider>
+            <ModalsProvider>
+              <BioAuthProvider>
+                <LoadingIndicatorProvider>
+                  <NotificationStoreProvider>
+                    <NotificationProvider>
+                      <AppNavigation />
+                    </NotificationProvider>
+                  </NotificationStoreProvider>
+                </LoadingIndicatorProvider>
+              </BioAuthProvider>
+            </ModalsProvider>
           </IntlProvider>
         </StoreProvider>
       </StyleProvider>

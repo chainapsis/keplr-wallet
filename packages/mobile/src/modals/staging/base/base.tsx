@@ -6,33 +6,33 @@ import React, {
   useState,
 } from "react";
 import { SafeAreaView, View } from "react-native";
-import { useStyle } from "../../styles";
+import { useStyle } from "../../../styles";
 import Animated, { Easing } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface ModalBaseProps {
-  align: "top" | "center" | "bottom";
+  align?: "top" | "center" | "bottom";
   isOpen: boolean;
-  close: () => void;
   transitionDuration?: number;
   openTransitionDuration?: number;
   closeTransitionDuration?: number;
+  onOpenTransitionEnd?: () => void;
   onCloseTransitionEnd?: () => void;
 }
 
 export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   children,
-  align,
+  align = "bottom",
   isOpen,
-  transitionDuration = 500,
+  transitionDuration = 300,
   openTransitionDuration,
   closeTransitionDuration,
+  onOpenTransitionEnd,
   onCloseTransitionEnd,
 }) => {
   const style = useStyle();
 
-  const safeAreaInsets = useSafeAreaInsets();
-
+  const openTransitionRef = useRef(onOpenTransitionEnd);
+  openTransitionRef.current = onOpenTransitionEnd;
   const closeTransitionRef = useRef(onCloseTransitionEnd);
   closeTransitionRef.current = onCloseTransitionEnd;
 
@@ -62,25 +62,20 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
       case "top":
         return process.current.interpolate({
           inputRange: [0, 1],
-          outputRange: [(areaLayout?.height ?? 0) + safeAreaInsets.bottom, 0],
+          outputRange: [areaLayout?.height ?? 0, 0],
         });
       case "center":
         return process.current.interpolate({
           inputRange: [0, 1],
-          outputRange: [
-            (areaLayout?.height ?? 0) -
-              (layout?.y ?? 0) +
-              safeAreaInsets.bottom,
-            0,
-          ],
+          outputRange: [(areaLayout?.height ?? 0) - (layout?.y ?? 0)],
         });
       case "bottom":
         return process.current.interpolate({
           inputRange: [0, 1],
-          outputRange: [(layout?.height ?? 0) + safeAreaInsets.bottom, 0],
+          outputRange: [layout?.height ?? 0, 0],
         });
     }
-  }, [align, areaLayout, safeAreaInsets.bottom, layout]);
+  }, [align, areaLayout, layout]);
 
   useEffect(() => {
     if (isOpen) {
@@ -88,7 +83,11 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
         toValue: 1,
         duration: openTransitionDuration ?? transitionDuration,
         easing: Easing.out(Easing.cubic),
-      }).start();
+      }).start(() => {
+        if (openTransitionRef.current) {
+          openTransitionRef.current();
+        }
+      });
     } else {
       Animated.timing(process.current, {
         toValue: 0,
@@ -108,7 +107,10 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   ]);
 
   return (
-    <View style={style.flatten(["absolute-fill", "overflow-visible"])}>
+    <View
+      style={style.flatten(["absolute-fill", "overflow-visible"])}
+      pointerEvents="box-none"
+    >
       <SafeAreaView
         style={style.flatten(
           ["flex-1", "overflow-visible"],
@@ -118,6 +120,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
             align === "bottom" && "justify-end",
           ]
         )}
+        pointerEvents="box-none"
         onLayout={(e) => {
           setAreaLayout(e.nativeEvent.layout);
         }}

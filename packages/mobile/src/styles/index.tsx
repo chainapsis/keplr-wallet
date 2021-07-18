@@ -59,6 +59,7 @@ export const Colors = {
   disabled: "#EEEEF3",
   divider: "#F5F5F5",
   transparent: "rgba(255,255,255,0)",
+  "modal-backdrop": "rgba(9,18,50,0.4)",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider({
@@ -228,6 +229,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "8": 8,
     "12": 12,
     "16": 16,
+    "24": 24,
   },
   heights: {
     full: "100%",
@@ -237,7 +239,9 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "8": 8,
     "12": 12,
     "16": 16,
+    "24": 24,
     "56": 56,
+    "64": 64,
     "address-chip": 20,
     "button-small": 44,
     "button-default": 48,
@@ -256,7 +260,9 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "12": 12,
     "16": 16,
     "24": 24,
+    "28": 28,
     "32": 32,
+    "36": 36,
     "64": 64,
   },
   marginSizes: {

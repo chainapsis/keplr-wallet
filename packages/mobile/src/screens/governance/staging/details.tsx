@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../../components/staging/page";
 import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
@@ -13,6 +13,8 @@ import { GovernanceProposalStatusChip } from "./card";
 import { IntPretty } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
+import { registerModal } from "../../../modals/staging/base";
+import { RectButton } from "react-native-gesture-handler";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -251,8 +253,193 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
   );
 });
 
+export const GovernanceVoteModal: FunctionComponent<{
+  isOpen: boolean;
+  close: () => void;
+  proposalId: string;
+}> = registerModal(
+  observer(({ proposalId, close }) => {
+    const { chainStore, accountStore } = useStore();
+
+    const account = accountStore.getAccount(chainStore.current.chainId);
+
+    const style = useStyle();
+
+    const [vote, setVote] = useState<
+      "yes" | "no" | "noWithVeto" | "abstain" | "unspecified"
+    >("unspecified");
+
+    const renderBall = (selected: boolean) => {
+      if (selected) {
+        return (
+          <View
+            style={style.flatten([
+              "width-24",
+              "height-24",
+              "border-radius-32",
+              "background-color-primary",
+              "items-center",
+              "justify-center",
+            ])}
+          >
+            <View
+              style={style.flatten([
+                "width-12",
+                "height-12",
+                "border-radius-32",
+                "background-color-white",
+              ])}
+            />
+          </View>
+        );
+      } else {
+        return (
+          <View
+            style={style.flatten([
+              "width-24",
+              "height-24",
+              "border-radius-32",
+              "background-color-white",
+              "border-width-1",
+              "border-color-text-black-very-low",
+            ])}
+          />
+        );
+      }
+    };
+
+    return (
+      <View style={style.flatten(["padding-12"])}>
+        <View
+          style={style.flatten([
+            "border-radius-8",
+            "overflow-hidden",
+            "background-color-white",
+          ])}
+        >
+          <RectButton
+            style={style.flatten(
+              [
+                "height-64",
+                "padding-left-36",
+                "padding-right-28",
+                "flex-row",
+                "items-center",
+                "justify-between",
+              ],
+              [vote === "yes" && "background-color-primary-10"]
+            )}
+            enabled={vote !== "yes"}
+            onPress={() => setVote("yes")}
+          >
+            <Text
+              style={style.flatten(["subtitle1", "color-text-black-medium"])}
+            >
+              Yes
+            </Text>
+            {renderBall(vote === "yes")}
+          </RectButton>
+          <View
+            style={style.flatten(["height-1", "background-color-divider"])}
+          />
+          <RectButton
+            style={style.flatten(
+              [
+                "height-64",
+                "padding-left-36",
+                "padding-right-28",
+                "flex-row",
+                "items-center",
+                "justify-between",
+              ],
+              [vote === "no" && "background-color-primary-10"]
+            )}
+            enabled={vote !== "no"}
+            onPress={() => setVote("no")}
+          >
+            <Text
+              style={style.flatten(["subtitle1", "color-text-black-medium"])}
+            >
+              No
+            </Text>
+            {renderBall(vote === "no")}
+          </RectButton>
+          <View
+            style={style.flatten(["height-1", "background-color-divider"])}
+          />
+          <RectButton
+            style={style.flatten(
+              [
+                "height-64",
+                "padding-left-36",
+                "padding-right-28",
+                "flex-row",
+                "items-center",
+                "justify-between",
+              ],
+              [vote === "noWithVeto" && "background-color-primary-10"]
+            )}
+            enabled={vote !== "noWithVeto"}
+            onPress={() => setVote("noWithVeto")}
+          >
+            <Text
+              style={style.flatten(["subtitle1", "color-text-black-medium"])}
+            >
+              No With Veto
+            </Text>
+            {renderBall(vote === "noWithVeto")}
+          </RectButton>
+          <View
+            style={style.flatten(["height-1", "background-color-divider"])}
+          />
+          <RectButton
+            style={style.flatten(
+              [
+                "height-64",
+                "padding-left-36",
+                "padding-right-28",
+                "flex-row",
+                "items-center",
+                "justify-between",
+              ],
+              [vote === "abstain" && "background-color-primary-10"]
+            )}
+            enabled={vote !== "abstain"}
+            onPress={() => setVote("abstain")}
+          >
+            <Text
+              style={style.flatten(["subtitle1", "color-text-black-medium"])}
+            >
+              Abstain
+            </Text>
+            {renderBall(vote === "abstain")}
+          </RectButton>
+        </View>
+        <Button
+          containerStyle={style.flatten(["margin-top-12"])}
+          text="Vote"
+          size="large"
+          disabled={vote === "unspecified" || !account.isReadyToSendMsgs}
+          loading={account.isSendingMsg === "govVote"}
+          onPress={async () => {
+            if (vote !== "unspecified" && account.isReadyToSendMsgs) {
+              // TODO: Notify the result.
+              try {
+                await account.cosmos.sendGovVoteMsg(proposalId, "No");
+                close();
+              } catch (e) {
+                console.log(e);
+              }
+            }
+          }}
+        />
+      </View>
+    );
+  })
+);
+
 export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore } = useStore();
+  const { chainStore, queriesStore, accountStore } = useStore();
 
   const style = useStyle();
 
@@ -271,6 +458,7 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
   const proposalId = route.params.proposalId;
 
   const queries = queriesStore.get(chainStore.current.chainId);
+  const account = accountStore.getAccount(chainStore.current.chainId);
 
   const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
 
@@ -291,6 +479,8 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
     }
   })();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <PageWithScrollView
       fixed={
@@ -299,10 +489,24 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
           pointerEvents="box-none"
         >
           <View style={style.flatten(["flex-1"])} pointerEvents="box-none" />
-          <Button text={voteText} size="large" disabled={!voteEnabled} />
+          {!isModalOpen ? (
+            <Button
+              text={voteText}
+              size="large"
+              disabled={!voteEnabled || !account.isReadyToSendMsgs}
+              onPress={() => {
+                setIsModalOpen(true);
+              }}
+            />
+          ) : null}
         </View>
       }
     >
+      <GovernanceVoteModal
+        isOpen={isModalOpen}
+        close={() => setIsModalOpen(false)}
+        proposalId={proposalId}
+      />
       <Card style={style.flatten(["margin-bottom-12"])}>
         <GovernanceDetailsCardBody
           proposalId={proposalId}

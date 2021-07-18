@@ -2,7 +2,8 @@ import React, { useContext } from "react";
 
 export interface ModalStateContext {
   readonly key: string;
-  readonly close: () => void;
+  readonly isTransitionOpening: boolean;
+  readonly isTransitionClosing: boolean;
 }
 
 export const ModalContext = React.createContext<ModalStateContext | null>(null);
