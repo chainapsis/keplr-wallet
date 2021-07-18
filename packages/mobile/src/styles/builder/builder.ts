@@ -1,11 +1,6 @@
 import { StyleBuilderDefinitions, StaticStyles } from "./types";
 import { StyleSheet } from "react-native";
-
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-  k: infer I
-) => void
-  ? I
-  : never;
+import { UnionToIntersection } from "utility-types";
 
 export class DefinitionKebabCase {
   protected startIndex: number = -1;
