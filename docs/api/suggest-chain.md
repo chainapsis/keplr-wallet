@@ -70,11 +70,60 @@ experimentalSuggestChain(chainInfo: SuggestingChainInfo): Promise<void>
 | `stakeCurrency` | ```{     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }``` | Information on the staking token of the chain |
 | `walletUrlForStaking` | https://wallet.keplr.app/#/cosmoshub/stake | The URL for the staking interface frontend for the chain. If you don't have a staking interface built, you can use [Lunie Light](https://github.com/luniehq/lunie-light) which supports Keplr. |
 | `bip44.coinType` | 118 | BIP44 coin type for address derivation. We recommend using `118`(Cosmos Hub) as this would provide good Ledger hardware wallet compatibility by utilizing the Cosmos Ledger app. |
-| `bech32Config` | cosmos | Bech32 address prefix of the chain |
+| `bech32Config` | ```{ bech32PrefixAccAddr: "cosmos", bech32PrefixAccPub: "cosmos" + "pub", bech32PrefixValAddr: "cosmos" + "valoper", bech32PrefixValPub: "cosmos" + "valoperpub", bech32PrefixConsAddr: "cosmos" + "valcons", bech32PrefixConsPub: "cosmos" + "valconspub"}``` | Bech32 config using the address prefix of the chain |
 | `currencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }, ]``` | (TBD) |
 | `feeCurrencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }, ]``` | List of fee tokens accepted by the chain's validator. |
 | `gasPriceStep` | ```{ low: 0.01, average: 0.025, high: 0.03, }``` | Three `gasPrice` values (low, average, high) to estimate transaction fee. |
 | `features` | [stargate] | `secretwasm` - Secret Network WASM smart contract transaction support `stargate` - For Cosmos SDK blockchains using cosmos-sdk v0.4+. (However, even if the `stargate` isn't set, Keplr will query "/cosmos/base/tendermint/v1beta1/node_info" to check if it succeeds. If successful, Keplr will assume that a gRPC HTTP gateway available and automatically set it as Stargate) `ibc-transfer` - For IBC transfers (ICS 20) enabled chains. For Stargate (cosmos-sdk v0.40+) chains, Keplr will check the on-chain params and automatically enable IBC transfers if it’s available) `cosmwasm` - For CosmWasm smart contract support (currently broken, in the process of being fixed) |
 :::  
+
+Copy and paste example:
+```javascript
+await window.keplr.experimentalSuggestChain({
+    chainId: "mychain-1",
+    chainName: "my new chain",
+    rpc: "http://123.456.789.012:26657",
+    rest: "http://123.456.789.012:1317",
+    bip44: {
+        coinType: 118,
+    },
+    bech32Config: {
+        bech32PrefixAccAddr: "cosmos",
+        bech32PrefixAccPub: "cosmos" + "pub",
+        bech32PrefixValAddr: "cosmos" + "valoper",
+        bech32PrefixValPub: "cosmos" + "valoperpub",
+        bech32PrefixConsAddr: "cosmos" + "valcons",
+        bech32PrefixConsPub: "cosmos" + "valconspub",
+    },
+    currencies: [ 
+        { 
+            coinDenom: "ATOM", 
+            coinMinimalDenom: "uatom", 
+            coinDecimals: 6, 
+            coinGeckoId: "cosmos", 
+        }, 
+    ],
+    feeCurrencies: [
+        {
+            coinDenom: "ATOM",
+            coinMinimalDenom: "uatom",
+            coinDecimals: 6,
+            coinGeckoId: "cosmos",
+        },
+    ],
+    stakeCurrency: {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "uatom",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+    },
+    coinType: 118,
+    gasPriceStep: {
+        low: 0.01,
+        average: 0.025,
+        high: 0.03,
+    },
+});
+```
 
 Keplr supports the basic the `x/bank` module's send feature and balance query. Also, it is able to show the staking reward percentage from the `supply` and `mint` module. (For Stargate chains, Keplr will find the supply through the `bank` module).
