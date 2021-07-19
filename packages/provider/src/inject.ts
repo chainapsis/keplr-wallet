@@ -204,12 +204,23 @@ export class InjectedKeplr implements IKeplr {
     signDoc: cosmos.tx.v1beta1.ISignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    return await this.requestMethod("signDirect", [
+    const result = await this.requestMethod("signDirect", [
       chainId,
       signer,
       signDoc,
       deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
+
+    // IMPORTANT: Remember that the proto message is encoded by not the Uint8Json but the Message#toJson.
+    //            So the result is not properly decoded as Uint8Array
+    //            and even it has the long type by string without type conversion.
+    //            So, we have to decode it by the proto message.
+    const jsonSignDoc = result.signed as { [k: string]: any };
+    const decodedSignDoc = cosmos.tx.v1beta1.SignDoc.fromObject(jsonSignDoc);
+    return {
+      signed: decodedSignDoc,
+      signature: result.signature,
+    };
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
