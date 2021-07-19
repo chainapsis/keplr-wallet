@@ -13,6 +13,7 @@
     "ios": "react-native run-ios",
     "android:connect": "adb reverse tcp:8081 tcp:8081",
     "start": "react-native start",
+    "start:reset": "react-native start --reset-cache",
     "pod-install": "pod-install",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
