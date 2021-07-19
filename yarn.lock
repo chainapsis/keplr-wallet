@@ -15136,10 +15136,10 @@ secp256k1@^4.0.1, secp256k1@^4.0.2:
     node-addon-api "^2.0.0"
     node-gyp-build "^4.2.0"
 
-secretjs@^0.13.0:
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.13.0.tgz#306d0f3b34229660610fb28441bbdf11c9cf38b9"
-  integrity sha512-/wZzEftbaPllirhRxkG104chFosY1EvLFr+KNFN8eRy/4DoUx10rB49JuqiH0cVZNDc06alTZGLEqfGAjKXPjQ==
+secretjs@^0.16.0:
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.16.0.tgz#2f1171b31f493dbf21f911b18f56e880a71d8809"
+  integrity sha512-aWR+f6fiJ066RZc3LuB2BL09auZ8ue5PG3p7bL2pBpBQAx2mcBzQayHdpMgXxr7v4t0QSWPegWlg2ES+QVcNUA==
   dependencies:
     "@iov/crypto" "2.1.0"
     "@iov/encoding" "2.1.0"
