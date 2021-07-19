@@ -5,15 +5,17 @@ import { AppCurrency } from "@keplr-wallet/types";
 import { computed, makeObservable } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
 import { useState } from "react";
+import { IFeeConfig } from "../tx";
 
 export class IBCAmountConfig extends AmountConfig {
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
     sender: string,
+    feeConfig: IFeeConfig | undefined,
     queryBalances: ObservableQueryBalances
   ) {
-    super(chainGetter, initialChainId, sender, queryBalances);
+    super(chainGetter, initialChainId, sender, feeConfig, queryBalances);
 
     makeObservable(this);
   }
@@ -34,7 +36,14 @@ export const useIBCAmountConfig = (
   queryBalances: ObservableQueryBalances
 ) => {
   const [txConfig] = useState(
-    () => new IBCAmountConfig(chainGetter, chainId, sender, queryBalances)
+    () =>
+      new IBCAmountConfig(
+        chainGetter,
+        chainId,
+        sender,
+        undefined,
+        queryBalances
+      )
   );
   txConfig.setChain(chainId);
   txConfig.setQueryBalances(queryBalances);

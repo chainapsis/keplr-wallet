@@ -18,7 +18,19 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     },
     protected readonly queriesStore: {
       get(chainId: string): QueriesSetBase & HasCosmosQueries;
-    }
+    },
+    protected readonly coinDenomGenerator: (
+      denomTrace: {
+        denom: string;
+        paths: {
+          portId: string;
+          channelId: string;
+        }[];
+      },
+      originChainInfo: ChainInfoInner | undefined,
+      counterpartyChainInfo: ChainInfoInner | undefined,
+      originCurrency: AppCurrency | undefined
+    ) => string
   ) {}
 
   registerUnknownCurrencies(
@@ -80,11 +92,12 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
             {
               ...currency,
               coinMinimalDenom: denomHelper.denom,
-              coinDenom: `${currency.coinDenom} (${
-                counterpartyChainInfo
-                  ? counterpartyChainInfo.chainName
-                  : "Unknown"
-              }/${paths[0].channelId})`,
+              coinDenom: this.coinDenomGenerator(
+                denomTrace,
+                originChainInfo,
+                counterpartyChainInfo,
+                currency
+              ),
               paths: paths,
               originChainId: originChainInfo.chainId,
               originCurrency: currency,
@@ -101,9 +114,12 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
         {
           coinDecimals: 0,
           coinMinimalDenom: denomHelper.denom,
-          coinDenom: `${denomTrace.denom} (${
-            counterpartyChainInfo ? counterpartyChainInfo.chainName : "Unknown"
-          }/${paths[0].channelId})`,
+          coinDenom: this.coinDenomGenerator(
+            denomTrace,
+            originChainInfo,
+            counterpartyChainInfo,
+            undefined
+          ),
           paths: paths,
           originChainId: undefined,
           originCurrency: undefined,
@@ -129,6 +145,29 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
   @observable.shallow
   protected map: Map<string, IBCCurrencyRegsitrarInner<C>> = new Map();
 
+  static defaultCoinDenomGenerator(
+    denomTrace: {
+      denom: string;
+      paths: {
+        portId: string;
+        channelId: string;
+      }[];
+    },
+    _: ChainInfoInner | undefined,
+    counterpartyChainInfo: ChainInfoInner | undefined,
+    originCurrency: AppCurrency | undefined
+  ): string {
+    if (originCurrency) {
+      return `${originCurrency.coinDenom} (${
+        counterpartyChainInfo ? counterpartyChainInfo.chainName : "Unknown"
+      }/${denomTrace.paths[0].channelId})`;
+    } else {
+      return `${denomTrace.denom} (${
+        counterpartyChainInfo ? counterpartyChainInfo.chainName : "Unknown"
+      }/${denomTrace.paths[0].channelId})`;
+    }
+  }
+
   constructor(
     protected readonly chainStore: ChainStore<C>,
     protected readonly accountStore: {
@@ -141,7 +180,19 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
     },
     protected readonly queriesStore: {
       get(chainId: string): QueriesSetBase & HasCosmosQueries;
-    }
+    },
+    protected readonly coinDenomGenerator: (
+      denomTrace: {
+        denom: string;
+        paths: {
+          portId: string;
+          channelId: string;
+        }[];
+      },
+      originChainInfo: ChainInfoInner | undefined,
+      counterpartyChainInfo: ChainInfoInner | undefined,
+      originCurrency: AppCurrency | undefined
+    ) => string = IBCCurrencyRegsitrar.defaultCoinDenomGenerator
   ) {
     this.chainStore.addSetChainInfoHandler((chainInfoInner) =>
       this.setChainInfoHandler(chainInfoInner)
@@ -166,7 +217,8 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
             chainInfoInner,
             this.chainStore,
             this.accountStore,
-            this.queriesStore
+            this.queriesStore,
+            this.coinDenomGenerator
           )
         );
       });

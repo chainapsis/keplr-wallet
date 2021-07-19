@@ -4,5 +4,7 @@ export * from "./memo";
 export * from "./fee";
 export * from "./gas";
 export * from "./recipient";
+export * from "./amount";
 export * from "./send-gas";
 export * from "./send-tx";
+export * from "./chain";

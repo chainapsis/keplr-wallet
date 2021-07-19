@@ -38,6 +38,66 @@ describe("Test CoinPretty", () => {
     expect(pretty.maxDecimals(7).quo(new Dec("0.1")).toString()).toBe(
       "0.0123400 ATOM"
     );
+
+    expect(
+      pretty
+        .add(
+          new CoinPretty(
+            {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            new Int(1200000)
+          )
+        )
+        .toString()
+    ).toBe("1.201234 ATOM");
+    expect(
+      pretty
+        .sub(
+          new CoinPretty(
+            {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            new Int(1200000)
+          )
+        )
+        .toString()
+    ).toBe("-1.198766 ATOM");
+
+    // If target is `CoinPretty` and it has different denom, do nothing.
+    expect(
+      pretty
+        .add(
+          new CoinPretty(
+            {
+              coinDenom: "SCRT",
+              coinMinimalDenom: "uscrt",
+              coinDecimals: 6,
+            },
+            new Int(1200000)
+          )
+        )
+        .toString()
+    ).toBe("0.001234 ATOM");
+    // If target is `CoinPretty` and it has different denom, do nothing.
+    expect(
+      pretty
+        .sub(
+          new CoinPretty(
+            {
+              coinDenom: "SCRT",
+              coinMinimalDenom: "uscrt",
+              coinDecimals: 6,
+            },
+            new Int(1200000)
+          )
+        )
+        .toString()
+    ).toBe("0.001234 ATOM");
   });
 
   it("Basic test for CoinPretty 2", () => {
@@ -74,6 +134,35 @@ describe("Test CoinPretty", () => {
     expect(pretty.maxDecimals(7).quo(new Dec("0.1")).toString()).toBe(
       "0.0001212 ATOM"
     );
+
+    expect(
+      pretty
+        .add(
+          new CoinPretty(
+            {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            new Int(1200000)
+          )
+        )
+        .toString()
+    ).toBe("1.200012 ATOM");
+    expect(
+      pretty
+        .sub(
+          new CoinPretty(
+            {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            new Int(1200000)
+          )
+        )
+        .toString()
+    ).toBe("-1.199987 ATOM");
   });
 
   it("Test toCoin() for CoinPretty", () => {

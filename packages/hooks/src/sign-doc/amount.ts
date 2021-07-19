@@ -180,6 +180,18 @@ export class SignDocAmountConfig
     return undefined;
   }
 
+  setIsMax(_: boolean): void {
+    // noop
+  }
+  toggleIsMax(): void {
+    // noop
+  }
+
+  get isMax(): boolean {
+    // noop
+    return false;
+  }
+
   setAmount(): void {
     // noop
   }

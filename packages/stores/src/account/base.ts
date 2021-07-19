@@ -21,6 +21,7 @@ import {
 } from "@cosmjs/launchpad";
 import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
 import Axios, { AxiosInstance } from "axios";
+import { Buffer } from "buffer/";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -38,6 +39,10 @@ export interface MsgOpt {
 export interface AccountSetOpts<MsgOpts> {
   readonly prefetching: boolean;
   readonly suggestChain: boolean;
+  readonly suggestChainFn?: (
+    keplr: Keplr,
+    chainInfo: ReturnType<ChainGetter["getChain"]>
+  ) => Promise<void>;
   readonly autoInit: boolean;
   readonly getKeplr: () => Promise<Keplr | undefined>;
   readonly msgOpts: MsgOpts;
@@ -74,7 +79,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     currency: AppCurrency,
     recipient: string,
     memo: string,
-    stdFee: StdFee,
+    stdFee: Partial<StdFee>,
     onFulfill?: (tx: any) => void
   ) => Promise<boolean>)[] = [];
 
@@ -111,7 +116,7 @@ export class AccountSetBase<MsgOpts, Queries> {
       currency: AppCurrency,
       recipient: string,
       memo: string,
-      stdFee: StdFee,
+      stdFee: Partial<StdFee>,
       onFulfill?: (tx: any) => void
     ) => Promise<boolean>
   ) {
@@ -122,9 +127,20 @@ export class AccountSetBase<MsgOpts, Queries> {
     const chainInfo = this.chainGetter.getChain(chainId);
 
     if (this.opts.suggestChain) {
-      await keplr.experimentalSuggestChain(chainInfo.raw);
+      if (this.opts.suggestChainFn) {
+        await this.opts.suggestChainFn(keplr, chainInfo);
+      } else {
+        await this.suggestChain(keplr, chainInfo);
+      }
     }
     await keplr.enable(chainId);
+  }
+
+  protected async suggestChain(
+    keplr: Keplr,
+    chainInfo: ReturnType<ChainGetter["getChain"]>
+  ): Promise<void> {
+    await keplr.experimentalSuggestChain(chainInfo.raw);
   }
 
   private readonly handleInit = () => this.init();
@@ -259,6 +275,11 @@ export class AccountSetBase<MsgOpts, Queries> {
       }
 
       if (onFulfill) {
+        // Always add the tx hash data.
+        if (tx && !tx.hash) {
+          tx.hash = Buffer.from(txHash).toString("hex");
+        }
+
         onFulfill(tx);
       }
     });
@@ -269,7 +290,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     currency: AppCurrency,
     recipient: string,
     memo: string = "",
-    stdFee: StdFee,
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any) => void
   ) {
     for (let i = 0; i < this.sendTokenFns.length; i++) {

@@ -40,6 +40,10 @@ export const useSendTxConfig = (
     amountConfig,
     gasConfig
   );
+  // Due to the circular references between the amount config and gas/fee configs,
+  // set the fee config of the amount config after initing the gas/fee configs.
+  amountConfig.setFeeConfig(feeConfig);
+
   const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
 
   return {

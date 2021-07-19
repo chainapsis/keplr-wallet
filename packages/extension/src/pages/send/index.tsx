@@ -129,7 +129,6 @@ export const SendPage: FunctionComponent = observer(() => {
             />
             <CoinInput
               amountConfig={sendConfigs.amountConfig}
-              feeConfig={sendConfigs.feeConfig}
               label={intl.formatMessage({ id: "send.input.amount" })}
               balanceText={intl.formatMessage({
                 id: "send.input-button.balance",

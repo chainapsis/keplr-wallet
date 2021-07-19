@@ -52,6 +52,9 @@ export interface IAmountConfig extends ITxChainSetter {
   sendableCurrencies: AppCurrency[];
   sender: string;
   setSender(sender: string): void;
+  setIsMax(isMax: boolean): void;
+  toggleIsMax(): void;
+  isMax: boolean;
 
   getError(): Error | undefined;
 }

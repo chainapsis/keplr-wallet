@@ -6,7 +6,7 @@ import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
-import { DeepReadonly } from "utility-types";
+import { DeepReadonly, Optional } from "utility-types";
 
 export interface HasSecretAccount {
   secret: DeepReadonly<SecretAccount>;
@@ -77,7 +77,7 @@ export class SecretAccount {
     currency: AppCurrency,
     recipient: string,
     memo: string,
-    stdFee: StdFee,
+    stdFee: Partial<StdFee>,
     onFulfill?: (tx: any) => void
   ): Promise<boolean> {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
@@ -103,7 +103,10 @@ export class SecretAccount {
             },
           },
           [],
-          stdFee,
+          {
+            amount: stdFee.amount ?? [],
+            gas: stdFee.gas ?? this.base.msgOpts.send.secret20.gas.toString(),
+          },
           memo,
           (tx) => {
             if (tx.code == null || tx.code === 0) {
@@ -135,6 +138,7 @@ export class SecretAccount {
   async createSecret20ViewingKey(
     contractAddress: string,
     memo: string = "",
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any, viewingKey: string) => void
   ) {
     const random = new Uint8Array(15);
@@ -149,8 +153,10 @@ export class SecretAccount {
       },
       [],
       {
-        amount: [],
-        gas: this.base.msgOpts.createSecret20ViewingKey.gas.toString(),
+        amount: stdFee.amount ?? [],
+        gas:
+          stdFee.gas ??
+          this.base.msgOpts.createSecret20ViewingKey.gas.toString(),
       },
       memo,
       async (tx) => {
@@ -195,7 +201,7 @@ export class SecretAccount {
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object,
     sentFunds: CoinPrimitive[],
-    fee: StdFee,
+    stdFee: Optional<StdFee, "amount">,
     memo: string = "",
     onFulfill?: (tx: any) => void
   ): Promise<Uint8Array> {
@@ -223,7 +229,10 @@ export class SecretAccount {
 
         return [msg];
       },
-      fee,
+      {
+        amount: stdFee.amount ?? [],
+        gas: stdFee.gas,
+      },
       memo,
       onFulfill
     );

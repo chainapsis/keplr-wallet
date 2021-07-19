@@ -100,7 +100,7 @@ export class CosmosAccount {
     currency: AppCurrency,
     recipient: string,
     memo: string,
-    stdFee: StdFee,
+    stdFee: Partial<StdFee>,
     onFulfill?: (tx: any) => void
   ): Promise<boolean> {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
@@ -130,7 +130,10 @@ export class CosmosAccount {
               },
             },
           ],
-          stdFee,
+          {
+            amount: stdFee.amount ?? [],
+            gas: stdFee.gas ?? this.base.msgOpts.send.native.gas.toString(),
+          },
           memo,
           (tx) => {
             if (tx.code == null || tx.code === 0) {
@@ -169,7 +172,7 @@ export class CosmosAccount {
     currency: AppCurrency,
     recipient: string,
     memo: string = "",
-    stdFee: StdFee,
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any) => void
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
@@ -227,7 +230,10 @@ export class CosmosAccount {
 
         return [msg];
       },
-      stdFee,
+      {
+        amount: stdFee.amount ?? [],
+        gas: stdFee.gas ?? this.base.msgOpts.ibcTransfer.gas.toString(),
+      },
       memo,
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -264,6 +270,7 @@ export class CosmosAccount {
     amount: string,
     validatorAddress: string,
     memo: string = "",
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -287,8 +294,8 @@ export class CosmosAccount {
       "delegate",
       [msg],
       {
-        amount: [],
-        gas: this.base.msgOpts.delegate.gas.toString(),
+        amount: stdFee.amount ?? [],
+        gas: stdFee.gas ?? this.base.msgOpts.delegate.gas.toString(),
       },
       memo,
       (tx) => {
@@ -324,6 +331,7 @@ export class CosmosAccount {
     amount: string,
     validatorAddress: string,
     memo: string = "",
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -347,8 +355,8 @@ export class CosmosAccount {
       "undelegate",
       [msg],
       {
-        amount: [],
-        gas: this.base.msgOpts.undelegate.gas.toString(),
+        amount: stdFee.amount ?? [],
+        gas: stdFee.gas ?? this.base.msgOpts.undelegate.gas.toString(),
       },
       memo,
       (tx) => {
@@ -389,6 +397,7 @@ export class CosmosAccount {
     srcValidatorAddress: string,
     dstValidatorAddress: string,
     memo: string = "",
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any) => void
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -413,8 +422,8 @@ export class CosmosAccount {
       "redelegate",
       [msg],
       {
-        amount: [],
-        gas: this.base.msgOpts.redelegate.gas.toString(),
+        amount: stdFee.amount ?? [],
+        gas: stdFee.gas ?? this.base.msgOpts.redelegate.gas.toString(),
       },
       memo,
       (tx) => {
@@ -441,6 +450,7 @@ export class CosmosAccount {
   async sendWithdrawDelegationRewardMsgs(
     validatorAddresses: string[],
     memo: string = "",
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any) => void
   ) {
     const msgs = validatorAddresses.map((validatorAddress) => {
@@ -457,10 +467,12 @@ export class CosmosAccount {
       "withdrawRewards",
       msgs,
       {
-        amount: [],
-        gas: (
-          this.base.msgOpts.withdrawRewards.gas * validatorAddresses.length
-        ).toString(),
+        amount: stdFee.amount ?? [],
+        gas:
+          stdFee.gas ??
+          (
+            this.base.msgOpts.withdrawRewards.gas * validatorAddresses.length
+          ).toString(),
       },
       memo,
       (tx) => {
@@ -482,6 +494,7 @@ export class CosmosAccount {
     proposalId: string,
     option: "Yes" | "No" | "Abstain" | "NoWithVeto",
     memo: string = "",
+    stdFee: Partial<StdFee> = {},
     onFulfill?: (tx: any) => void
   ) {
     const voteOption = (() => {
@@ -516,8 +529,8 @@ export class CosmosAccount {
       "govVote",
       [msg],
       {
-        amount: [],
-        gas: this.base.msgOpts.govVote.gas.toString(),
+        amount: stdFee.amount ?? [],
+        gas: stdFee.gas ?? this.base.msgOpts.govVote.gas.toString(),
       },
       memo,
       (tx) => {
