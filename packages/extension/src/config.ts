@@ -59,6 +59,10 @@ import {
   SENTINEL_RPC_CONFIG,
   SENTINEL_REST_ENDPOINT,
   SENTINEL_REST_CONFIG,
+  PERSISTENCE_RPC_ENDPOINT,
+  PERSISTENCE_RPC_CONFIG,
+  PERSISTENCE_REST_ENDPOINT,
+  PERSISTENCE_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -812,6 +816,49 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04,
     },
     features: ["stargate"],
+  },
+  {
+    rpc: PERSISTENCE_RPC_ENDPOINT,
+    rpcConfig: PERSISTENCE_RPC_CONFIG,
+    rest: PERSISTENCE_REST_ENDPOINT,
+    restConfig: PERSISTENCE_REST_CONFIG,
+    chainId: "core-1",
+    chainName: "Persistence",
+    stakeCurrency: {
+      coinDenom: "XPRT",
+      coinMinimalDenom: "uxprt",
+      coinDecimals: 6,
+      coinGeckoId: "persistence",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/core/stake"
+        : "http://localhost:8081/#/core/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/core/stake"
+        : "http://localhost:8081/#/core/stake",
+    bip44: {
+      coinType: 750,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("persistence"),
+    currencies: [
+      {
+        coinDenom: "XPRT",
+        coinMinimalDenom: "uxprt",
+        coinDecimals: 6,
+        coinGeckoId: "persistence",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "XPRT",
+        coinMinimalDenom: "uxprt",
+        coinDecimals: 6,
+        coinGeckoId: "persistence",
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: SENTINEL_RPC_ENDPOINT,
