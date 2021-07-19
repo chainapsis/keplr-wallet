@@ -16,7 +16,7 @@ import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { SendScreen } from "./screens/send";
+import { SendScreen } from "./screens/send/staging";
 import {
   ValidatorListScreen,
   ValidatorDetailsScreen,

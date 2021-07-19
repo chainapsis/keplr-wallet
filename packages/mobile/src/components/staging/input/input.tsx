@@ -18,6 +18,8 @@ export const TextInput: FunctionComponent<
 
     label: string;
     error?: string;
+
+    paragraph?: React.ReactNode;
   }
 > = (props) => {
   const propsStyle = props.style;
@@ -75,15 +77,33 @@ export const TextInput: FunctionComponent<
           ])}
         />
       </View>
+      {props.paragraph && !props.error ? (
+        typeof props.paragraph === "string" ? (
+          <View>
+            <Text
+              style={StyleSheet.flatten([
+                style.flatten(["absolute", "text-caption1", "color-primary"]),
+                props.errorLabelStyle,
+              ])}
+            >
+              {props.paragraph}
+            </Text>
+          </View>
+        ) : (
+          props.paragraph
+        )
+      ) : null}
       {props.error ? (
-        <Text
-          style={StyleSheet.flatten([
-            style.flatten(["text-caption1", "color-error"]),
-            props.errorLabelStyle,
-          ])}
-        >
-          {props.error}
-        </Text>
+        <View>
+          <Text
+            style={StyleSheet.flatten([
+              style.flatten(["absolute", "text-caption1", "color-error"]),
+              props.errorLabelStyle,
+            ])}
+          >
+            {props.error}
+          </Text>
+        </View>
       ) : null}
     </View>
   );
