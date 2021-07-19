@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import {
   Modal as ReactModal,
+  Platform,
   StyleSheet,
   TouchableWithoutFeedback,
 } from "react-native";
@@ -119,7 +120,10 @@ export const ModalsProvider: FunctionComponent = observer(({ children }) => {
     <React.Fragment>
       {children}
       {globalModalRendererState.modals.length > 0 ? (
-        <ReactModal transparent={true}>
+        <ReactModal
+          transparent={true}
+          statusBarTranslucent={Platform.OS === "ios"}
+        >
           <ModalRenderersRoot />
         </ReactModal>
       ) : null}

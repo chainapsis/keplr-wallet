@@ -266,8 +266,8 @@ export const GovernanceVoteModal: FunctionComponent<{
     const style = useStyle();
 
     const [vote, setVote] = useState<
-      "yes" | "no" | "noWithVeto" | "abstain" | "unspecified"
-    >("unspecified");
+      "Yes" | "No" | "NoWithVeto" | "Abstain" | "Unspecified"
+    >("Unspecified");
 
     const renderBall = (selected: boolean) => {
       if (selected) {
@@ -327,17 +327,17 @@ export const GovernanceVoteModal: FunctionComponent<{
                 "items-center",
                 "justify-between",
               ],
-              [vote === "yes" && "background-color-primary-10"]
+              [vote === "Yes" && "background-color-primary-10"]
             )}
-            enabled={vote !== "yes"}
-            onPress={() => setVote("yes")}
+            enabled={vote !== "Yes"}
+            onPress={() => setVote("Yes")}
           >
             <Text
               style={style.flatten(["subtitle1", "color-text-black-medium"])}
             >
               Yes
             </Text>
-            {renderBall(vote === "yes")}
+            {renderBall(vote === "Yes")}
           </RectButton>
           <View
             style={style.flatten(["height-1", "background-color-divider"])}
@@ -352,17 +352,17 @@ export const GovernanceVoteModal: FunctionComponent<{
                 "items-center",
                 "justify-between",
               ],
-              [vote === "no" && "background-color-primary-10"]
+              [vote === "No" && "background-color-primary-10"]
             )}
-            enabled={vote !== "no"}
-            onPress={() => setVote("no")}
+            enabled={vote !== "No"}
+            onPress={() => setVote("No")}
           >
             <Text
               style={style.flatten(["subtitle1", "color-text-black-medium"])}
             >
               No
             </Text>
-            {renderBall(vote === "no")}
+            {renderBall(vote === "No")}
           </RectButton>
           <View
             style={style.flatten(["height-1", "background-color-divider"])}
@@ -377,17 +377,17 @@ export const GovernanceVoteModal: FunctionComponent<{
                 "items-center",
                 "justify-between",
               ],
-              [vote === "noWithVeto" && "background-color-primary-10"]
+              [vote === "NoWithVeto" && "background-color-primary-10"]
             )}
-            enabled={vote !== "noWithVeto"}
-            onPress={() => setVote("noWithVeto")}
+            enabled={vote !== "NoWithVeto"}
+            onPress={() => setVote("NoWithVeto")}
           >
             <Text
               style={style.flatten(["subtitle1", "color-text-black-medium"])}
             >
               No With Veto
             </Text>
-            {renderBall(vote === "noWithVeto")}
+            {renderBall(vote === "NoWithVeto")}
           </RectButton>
           <View
             style={style.flatten(["height-1", "background-color-divider"])}
@@ -402,30 +402,30 @@ export const GovernanceVoteModal: FunctionComponent<{
                 "items-center",
                 "justify-between",
               ],
-              [vote === "abstain" && "background-color-primary-10"]
+              [vote === "Abstain" && "background-color-primary-10"]
             )}
-            enabled={vote !== "abstain"}
-            onPress={() => setVote("abstain")}
+            enabled={vote !== "Abstain"}
+            onPress={() => setVote("Abstain")}
           >
             <Text
               style={style.flatten(["subtitle1", "color-text-black-medium"])}
             >
               Abstain
             </Text>
-            {renderBall(vote === "abstain")}
+            {renderBall(vote === "Abstain")}
           </RectButton>
         </View>
         <Button
           containerStyle={style.flatten(["margin-top-12"])}
           text="Vote"
           size="large"
-          disabled={vote === "unspecified" || !account.isReadyToSendMsgs}
+          disabled={vote === "Unspecified" || !account.isReadyToSendMsgs}
           loading={account.isSendingMsg === "govVote"}
           onPress={async () => {
-            if (vote !== "unspecified" && account.isReadyToSendMsgs) {
+            if (vote !== "Unspecified" && account.isReadyToSendMsgs) {
               // TODO: Notify the result.
               try {
-                await account.cosmos.sendGovVoteMsg(proposalId, "No");
+                await account.cosmos.sendGovVoteMsg(proposalId, vote);
                 close();
               } catch (e) {
                 console.log(e);
