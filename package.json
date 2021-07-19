@@ -10,6 +10,7 @@
     "dev": "lerna run dev --parallel",
     "clean": "lerna run clean; rm -rf node_modules",
     "build": "lerna run build",
+    "build:clean": "yarn clean && yarn install --frozen-lockfile && lerna run build",
     "test": "lerna run test",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
