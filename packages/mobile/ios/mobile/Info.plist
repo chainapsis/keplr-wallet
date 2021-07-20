@@ -25,7 +25,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CodePushDeploymentKey</key>
-	<string>AaDb_nB7zUcYFL4VrblaMl6ASCi0cBBRwjrb7</string>
+	<string>Bp7ApGEQu01igCf6axrsaAgi6Mc0X5oBgGjFI</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_DEACTIVATE</key>
 	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -38,11 +38,6 @@
 		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>codepush.appcenter.ms</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-			</dict>
 			<key>localhost</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
