@@ -10,6 +10,7 @@ import {
   AmountInput,
   MemoInput,
   CurrencySelector,
+  FeeButtons,
 } from "../../../components/staging/input";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/staging/button";
@@ -52,6 +53,12 @@ export const SendScreen: FunctionComponent = observer(() => {
       />
       <AmountInput label="Amount" amountConfig={sendConfigs.amountConfig} />
       <MemoInput label="Memo (Optional)" memoConfig={sendConfigs.memoConfig} />
+      <FeeButtons
+        label="Fee"
+        gasLabel="gas"
+        feeConfig={sendConfigs.feeConfig}
+        gasConfig={sendConfigs.gasConfig}
+      />
       <View style={style.flatten(["flex-1"])} />
       <Button
         text="Send"

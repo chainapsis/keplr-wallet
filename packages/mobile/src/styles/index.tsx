@@ -225,6 +225,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
   widths: {
     full: "100%",
     half: "50%",
+    "1": 1,
     "4": 4,
     "8": 8,
     "12": 12,
