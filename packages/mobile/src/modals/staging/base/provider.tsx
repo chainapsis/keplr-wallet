@@ -10,6 +10,7 @@ import {
   Platform,
   StyleSheet,
   TouchableWithoutFeedback,
+  ViewStyle,
 } from "react-native";
 import { action, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -26,6 +27,9 @@ export interface ModalOptions {
   readonly closeTransitionDuration?: number;
   readonly disableBackdrop?: boolean;
   readonly disableClosingOnBackdropPress?: boolean;
+
+  readonly containerStyle?: ViewStyle;
+  readonly disableSafeArea?: boolean;
 }
 
 export interface Modal {
@@ -238,6 +242,8 @@ export const ModalRenderer: FunctionComponent<{
         transitionDuration={modal.options.transitionDuration}
         openTransitionDuration={modal.options.openTransitionDuration}
         closeTransitionDuration={modal.options.closeTransitionDuration}
+        containerStyle={modal.options.containerStyle}
+        disableSafeArea={modal.options.disableSafeArea}
       >
         {React.createElement(modal.element, modal.props)}
       </ModalBase>

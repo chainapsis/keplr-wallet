@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { SafeAreaView, View } from "react-native";
+import { SafeAreaView, StyleSheet, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import Animated, { Easing } from "react-native-reanimated";
 
@@ -17,6 +17,9 @@ export interface ModalBaseProps {
   closeTransitionDuration?: number;
   onOpenTransitionEnd?: () => void;
   onCloseTransitionEnd?: () => void;
+
+  containerStyle?: ViewStyle;
+  disableSafeArea?: boolean;
 }
 
 export const ModalBase: FunctionComponent<ModalBaseProps> = ({
@@ -28,6 +31,8 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   closeTransitionDuration,
   onOpenTransitionEnd,
   onCloseTransitionEnd,
+  containerStyle,
+  disableSafeArea,
 }) => {
   const style = useStyle();
 
@@ -55,7 +60,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
     | undefined
   >();
 
-  const process = useRef(new Animated.Value(0));
+  const process = useRef(new Animated.Value<number>(0));
 
   const paddingTopAnimated = useMemo(() => {
     switch (align) {
@@ -79,25 +84,35 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      Animated.timing(process.current, {
-        toValue: 1,
-        duration: openTransitionDuration ?? transitionDuration,
-        easing: Easing.out(Easing.cubic),
-      }).start(() => {
-        if (openTransitionRef.current) {
-          openTransitionRef.current();
-        }
-      });
+      const duration = openTransitionDuration ?? transitionDuration;
+      if (duration) {
+        Animated.timing(process.current, {
+          toValue: 1,
+          duration,
+          easing: Easing.out(Easing.cubic),
+        }).start(() => {
+          if (openTransitionRef.current) {
+            openTransitionRef.current();
+          }
+        });
+      } else {
+        process.current.setValue(1);
+      }
     } else {
-      Animated.timing(process.current, {
-        toValue: 0,
-        duration: closeTransitionDuration ?? transitionDuration,
-        easing: Easing.out(Easing.cubic),
-      }).start(() => {
-        if (closeTransitionRef.current) {
-          closeTransitionRef.current();
-        }
-      });
+      const duration = closeTransitionDuration ?? transitionDuration;
+      if (duration) {
+        Animated.timing(process.current, {
+          toValue: 0,
+          duration,
+          easing: Easing.out(Easing.cubic),
+        }).start(() => {
+          if (closeTransitionRef.current) {
+            closeTransitionRef.current();
+          }
+        });
+      } else {
+        process.current.setValue(0);
+      }
     }
   }, [
     closeTransitionDuration,
@@ -111,32 +126,67 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
       style={style.flatten(["absolute-fill", "overflow-visible"])}
       pointerEvents="box-none"
     >
-      <SafeAreaView
-        style={style.flatten(
-          ["flex-1", "overflow-visible"],
-          [
-            align === "center" && "justify-center",
-            align === "top" && "justify-start",
-            align === "bottom" && "justify-end",
-          ]
-        )}
-        pointerEvents="box-none"
-        onLayout={(e) => {
-          setAreaLayout(e.nativeEvent.layout);
-        }}
-      >
-        <Animated.View
+      {!disableSafeArea ? (
+        <SafeAreaView
+          style={style.flatten(
+            ["flex-1", "overflow-visible"],
+            [
+              align === "center" && "justify-center",
+              align === "top" && "justify-start",
+              align === "bottom" && "justify-end",
+            ]
+          )}
+          pointerEvents="box-none"
           onLayout={(e) => {
-            setLayout(e.nativeEvent.layout);
-          }}
-          style={{
-            transform: [{ translateY: paddingTopAnimated }],
-            opacity: layout && areaLayout ? 1 : 0,
+            setAreaLayout(e.nativeEvent.layout);
           }}
         >
-          {children}
-        </Animated.View>
-      </SafeAreaView>
+          <Animated.View
+            onLayout={(e) => {
+              setLayout(e.nativeEvent.layout);
+            }}
+            style={StyleSheet.flatten([
+              {
+                transform: [{ translateY: paddingTopAnimated }],
+                opacity: layout && areaLayout ? 1 : 0,
+              },
+              containerStyle,
+            ])}
+          >
+            {children}
+          </Animated.View>
+        </SafeAreaView>
+      ) : (
+        <View
+          style={style.flatten(
+            ["flex-1", "overflow-visible"],
+            [
+              align === "center" && "justify-center",
+              align === "top" && "justify-start",
+              align === "bottom" && "justify-end",
+            ]
+          )}
+          pointerEvents="box-none"
+          onLayout={(e) => {
+            setAreaLayout(e.nativeEvent.layout);
+          }}
+        >
+          <Animated.View
+            onLayout={(e) => {
+              setLayout(e.nativeEvent.layout);
+            }}
+            style={StyleSheet.flatten([
+              {
+                transform: [{ translateY: paddingTopAnimated }],
+                opacity: layout && areaLayout ? 1 : 0,
+              },
+              containerStyle,
+            ])}
+          >
+            {children}
+          </Animated.View>
+        </View>
+      )}
     </View>
   );
 };

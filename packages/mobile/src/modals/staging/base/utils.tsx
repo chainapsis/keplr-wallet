@@ -1,14 +1,15 @@
 import React, { FunctionComponent, useEffect, useRef } from "react";
-import { globalModalRendererState } from "./provider";
+import { globalModalRendererState, ModalOptions } from "./provider";
 
 export const registerModal: <P>(
-  element: React.ElementType<P>
+  element: React.ElementType<P>,
+  options?: ModalOptions
 ) => FunctionComponent<
   P & {
     isOpen: boolean;
     close: () => void;
   }
-> = (element) => {
+> = (element, options) => {
   return (props) => {
     const key = useRef<string | undefined>();
 
@@ -28,7 +29,8 @@ export const registerModal: <P>(
           props.close,
           () => {
             key.current = undefined;
-          }
+          },
+          options
         );
       }
       if (!props.isOpen && key.current) {

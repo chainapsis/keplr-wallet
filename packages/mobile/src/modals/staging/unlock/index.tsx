@@ -1,12 +1,13 @@
 import React, { FunctionComponent, useState } from "react";
 import { registerModal } from "../base";
-import { View } from "react-native";
+import { SafeAreaView, View } from "react-native";
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../../components/svg";
 import { useStore } from "../../../stores";
 import { observer } from "mobx-react-lite";
 import { TextInput } from "../../../components/staging/input";
 import { Button } from "../../../components/staging/button";
+import delay from "delay";
 
 export const UnlockModal: FunctionComponent<{
   isOpen: boolean;
@@ -24,6 +25,11 @@ export const UnlockModal: FunctionComponent<{
     const tryUnlock = async () => {
       try {
         setIsLoading(true);
+        // Decryption needs slightly huge computation.
+        // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread
+        // before the actually decryption is complete.
+        // So to make sure that the loading state changes, just wait very short time.
+        await delay(10);
         await keyRingStore.unlock(password);
       } catch (e) {
         console.log(e);
@@ -36,25 +42,36 @@ export const UnlockModal: FunctionComponent<{
     };
 
     return (
-      <View style={style.flatten(["padding-12"])}>
+      <View style={style.flatten(["padding-12", "flex-1"])}>
         <View style={style.flatten(["absolute-fill"])}>
           <GradientBackground />
         </View>
-        <View style={style.flatten(["flex-1"])} />
-        <View>
-          <TextInput
-            label="Password"
-            returnKeyType="done"
-            secureTextEntry={true}
-            value={password}
-            error={isFailed ? "Invalid password" : undefined}
-            onChangeText={setPassword}
-            onSubmitEditing={tryUnlock}
-          />
-          <Button text="Sign in" loading={isLoading} onPress={tryUnlock} />
-        </View>
-        <View style={style.flatten(["flex-1"])} />
+        <SafeAreaView style={style.flatten(["flex-1"])}>
+          <View style={style.flatten(["flex-1"])} />
+          <View>
+            <TextInput
+              label="Password"
+              returnKeyType="done"
+              secureTextEntry={true}
+              value={password}
+              error={isFailed ? "Invalid password" : undefined}
+              onChangeText={setPassword}
+              onSubmitEditing={tryUnlock}
+            />
+            <Button text="Sign in" loading={isLoading} onPress={tryUnlock} />
+          </View>
+          <View style={style.flatten(["flex-1"])} />
+        </SafeAreaView>
       </View>
     );
-  })
+  }),
+  {
+    openTransitionDuration: 0,
+    disableBackdrop: true,
+    disableClosingOnBackdropPress: true,
+    disableSafeArea: true,
+    containerStyle: {
+      flex: 1,
+    },
+  }
 );

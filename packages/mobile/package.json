@@ -51,6 +51,7 @@
     "appcenter-analytics": "^4.1.0",
     "appcenter-crashes": "^4.1.0",
     "buffer": "^6.0.3",
+    "delay": "^5.0.0",
     "eventemitter3": "^4.0.7",
     "expo-clipboard": "^1.0.1",
     "expo-random": "^11.0.0",
