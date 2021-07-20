@@ -13,90 +13,98 @@ export const SelectorModal: FunctionComponent<{
   }[];
   selectedKey: string | undefined;
   setSelectedKey: (key: string | undefined) => void;
-}> = registerModal(({ close, items, selectedKey, setSelectedKey }) => {
-  const style = useStyle();
+  modalPersistent?: boolean;
+}> = registerModal(
+  ({ close, items, selectedKey, setSelectedKey, modalPersistent }) => {
+    const style = useStyle();
 
-  const renderBall = (selected: boolean) => {
-    if (selected) {
-      return (
-        <View
-          style={style.flatten([
-            "width-24",
-            "height-24",
-            "border-radius-32",
-            "background-color-primary",
-            "items-center",
-            "justify-center",
-          ])}
-        >
+    const renderBall = (selected: boolean) => {
+      if (selected) {
+        return (
           <View
             style={style.flatten([
-              "width-12",
-              "height-12",
+              "width-24",
+              "height-24",
+              "border-radius-32",
+              "background-color-primary",
+              "items-center",
+              "justify-center",
+            ])}
+          >
+            <View
+              style={style.flatten([
+                "width-12",
+                "height-12",
+                "border-radius-32",
+                "background-color-white",
+              ])}
+            />
+          </View>
+        );
+      } else {
+        return (
+          <View
+            style={style.flatten([
+              "width-24",
+              "height-24",
               "border-radius-32",
               "background-color-white",
+              "border-width-1",
+              "border-color-text-black-very-low",
             ])}
           />
-        </View>
-      );
-    } else {
-      return (
+        );
+      }
+    };
+
+    return (
+      <View style={style.flatten(["padding-12"])}>
         <View
           style={style.flatten([
-            "width-24",
-            "height-24",
-            "border-radius-32",
+            "border-radius-8",
+            "overflow-hidden",
             "background-color-white",
-            "border-width-1",
-            "border-color-text-black-very-low",
           ])}
-        />
-      );
-    }
-  };
-
-  return (
-    <View style={style.flatten(["padding-12"])}>
-      <View
-        style={style.flatten([
-          "border-radius-8",
-          "overflow-hidden",
-          "background-color-white",
-        ])}
-      >
-        {items.map((item) => {
-          return (
-            <RectButton
-              key={item.key}
-              style={style.flatten(
-                [
-                  "height-64",
-                  "padding-left-36",
-                  "padding-right-28",
-                  "flex-row",
-                  "items-center",
-                  "justify-between",
-                ],
-                [item.key === selectedKey && "background-color-primary-10"]
-              )}
-              onPress={() => {
-                setSelectedKey(item.key);
-                close();
-              }}
-            >
-              <Text
-                style={style.flatten(["subtitle1", "color-text-black-medium"])}
+        >
+          {items.map((item) => {
+            return (
+              <RectButton
+                key={item.key}
+                style={style.flatten(
+                  [
+                    "height-64",
+                    "padding-left-36",
+                    "padding-right-28",
+                    "flex-row",
+                    "items-center",
+                    "justify-between",
+                  ],
+                  [item.key === selectedKey && "background-color-primary-10"]
+                )}
+                onPress={() => {
+                  setSelectedKey(item.key);
+                  if (!modalPersistent) {
+                    close();
+                  }
+                }}
               >
-                {item.label}
-              </Text>
-              {renderBall(item.key === selectedKey)}
-            </RectButton>
-          );
-        })}
+                <Text
+                  style={style.flatten([
+                    "subtitle1",
+                    "color-text-black-medium",
+                  ])}
+                >
+                  {item.label}
+                </Text>
+                {renderBall(item.key === selectedKey)}
+              </RectButton>
+            );
+          })}
+        </View>
       </View>
-    </View>
-  );
-});
+    );
+  }
+);
 
 export const Selector: FunctionComponent<{
   labelStyle?: TextStyle;
@@ -114,6 +122,8 @@ export const Selector: FunctionComponent<{
 
   selectedKey: string | undefined;
   setSelectedKey: (key: string | undefined) => void;
+
+  modalPersistent?: boolean;
 }> = ({
   containerStyle,
   labelStyle,
@@ -124,6 +134,7 @@ export const Selector: FunctionComponent<{
   items,
   selectedKey,
   setSelectedKey,
+  modalPersistent,
 }) => {
   const style = useStyle();
 
@@ -141,6 +152,7 @@ export const Selector: FunctionComponent<{
         items={items}
         selectedKey={selectedKey}
         setSelectedKey={setSelectedKey}
+        modalPersistent={modalPersistent}
       />
       <View
         style={StyleSheet.flatten([
