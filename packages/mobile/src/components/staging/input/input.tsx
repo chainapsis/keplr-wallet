@@ -13,7 +13,7 @@ export const TextInput: FunctionComponent<
   React.ComponentProps<typeof NativeTextInput> & {
     labelStyle?: TextStyle;
     containerStyle?: ViewStyle;
-    buttonContainerStyle?: ViewStyle;
+    inputContainerStyle?: ViewStyle;
     errorLabelStyle?: TextStyle;
 
     label: string;
@@ -62,7 +62,7 @@ export const TextInput: FunctionComponent<
               !(props.editable ?? true) && "background-color-disabled",
             ]
           ),
-          props.buttonContainerStyle,
+          props.inputContainerStyle,
         ])}
       >
         <NativeTextInput

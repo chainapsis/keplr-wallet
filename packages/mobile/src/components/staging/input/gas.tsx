@@ -7,18 +7,18 @@ import { TextInput } from "./input";
 export const GasInput: FunctionComponent<{
   labelStyle?: TextStyle;
   containerStyle?: ViewStyle;
-  buttonContainerStyle?: ViewStyle;
+  inputContainerStyle?: ViewStyle;
 
   label: string;
 
   gasConfig: IGasConfig;
 }> = observer(
-  ({ labelStyle, containerStyle, buttonContainerStyle, label, gasConfig }) => {
+  ({ labelStyle, containerStyle, inputContainerStyle, label, gasConfig }) => {
     return (
       <TextInput
         labelStyle={labelStyle}
         containerStyle={containerStyle}
-        buttonContainerStyle={buttonContainerStyle}
+        inputContainerStyle={inputContainerStyle}
         label={label}
         value={gasConfig.gas.toString()}
         onChangeText={(text) => {

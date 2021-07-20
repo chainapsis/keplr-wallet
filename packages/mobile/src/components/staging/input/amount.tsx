@@ -14,7 +14,7 @@ import {
 export const AmountInput: FunctionComponent<{
   labelStyle?: TextStyle;
   containerStyle?: ViewStyle;
-  buttonContainerStyle?: ViewStyle;
+  inputContainerStyle?: ViewStyle;
   errorLabelStyle?: TextStyle;
 
   label: string;
@@ -24,7 +24,7 @@ export const AmountInput: FunctionComponent<{
   ({
     labelStyle,
     containerStyle,
-    buttonContainerStyle,
+    inputContainerStyle,
     errorLabelStyle,
     label,
     amountConfig,
@@ -55,7 +55,7 @@ export const AmountInput: FunctionComponent<{
         label={label}
         labelStyle={labelStyle}
         containerStyle={containerStyle}
-        buttonContainerStyle={buttonContainerStyle}
+        inputContainerStyle={inputContainerStyle}
         errorLabelStyle={errorLabelStyle}
         value={amountConfig.amount}
         onChangeText={(text) => {

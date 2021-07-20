@@ -7,7 +7,7 @@ import { TextInput } from "./input";
 export const MemoInput: FunctionComponent<{
   labelStyle?: TextStyle;
   containerStyle?: ViewStyle;
-  buttonContainerStyle?: ViewStyle;
+  inputContainerStyle?: ViewStyle;
   errorLabelStyle?: TextStyle;
 
   label: string;
@@ -17,7 +17,7 @@ export const MemoInput: FunctionComponent<{
   ({
     labelStyle,
     containerStyle,
-    buttonContainerStyle,
+    inputContainerStyle,
     errorLabelStyle,
     label,
     memoConfig,
@@ -27,7 +27,7 @@ export const MemoInput: FunctionComponent<{
         label={label}
         labelStyle={labelStyle}
         containerStyle={containerStyle}
-        buttonContainerStyle={buttonContainerStyle}
+        inputContainerStyle={inputContainerStyle}
         errorLabelStyle={errorLabelStyle}
         value={memoConfig.memo}
         onChangeText={(text) => {

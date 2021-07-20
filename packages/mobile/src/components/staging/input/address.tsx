@@ -17,7 +17,7 @@ import { useStyle } from "../../../styles";
 export const AddressInput: FunctionComponent<{
   labelStyle?: TextStyle;
   containerStyle?: ViewStyle;
-  buttonContainerStyle?: ViewStyle;
+  inputContainerStyle?: ViewStyle;
   errorLabelStyle?: TextStyle;
 
   label: string;
@@ -29,7 +29,7 @@ export const AddressInput: FunctionComponent<{
   ({
     labelStyle,
     containerStyle,
-    buttonContainerStyle,
+    inputContainerStyle,
     errorLabelStyle,
     label,
     recipientConfig,
@@ -68,7 +68,7 @@ export const AddressInput: FunctionComponent<{
         label={label}
         labelStyle={labelStyle}
         containerStyle={containerStyle}
-        buttonContainerStyle={buttonContainerStyle}
+        inputContainerStyle={inputContainerStyle}
         errorLabelStyle={errorLabelStyle}
         error={errorText}
         value={recipientConfig.rawRecipient}
