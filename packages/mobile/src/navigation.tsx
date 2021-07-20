@@ -268,7 +268,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
           </Stack.Navigator>
         )}
       </NavigationContainer>
-      <ModalsRenderer />
+      {/* <ModalsRenderer /> */}
     </SmartNavigatorProvider>
   );
 });

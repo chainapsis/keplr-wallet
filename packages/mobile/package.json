@@ -18,6 +18,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@formatjs/intl-datetimeformat": "^4.1.6",
     "@formatjs/intl-displaynames": "^5.1.6",
     "@formatjs/intl-getcanonicallocales": "^1.7.1",

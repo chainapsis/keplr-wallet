@@ -14,6 +14,7 @@ import { ModalsProvider } from "./modals/staging/base";
 import { Platform } from "react-native";
 
 import codePush from "react-native-code-push";
+import { InteractionModalsProivder } from "./providers/interaction-modals-provider";
 
 if (Platform.OS === "android") {
   // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
@@ -79,15 +80,17 @@ export const App: FunctionComponent = codePush(() => {
             }}
           >
             <ModalsProvider>
-              <BioAuthProvider>
-                <LoadingIndicatorProvider>
-                  <NotificationStoreProvider>
-                    <NotificationProvider>
-                      <AppNavigation />
-                    </NotificationProvider>
-                  </NotificationStoreProvider>
-                </LoadingIndicatorProvider>
-              </BioAuthProvider>
+              <InteractionModalsProivder>
+                <BioAuthProvider>
+                  <LoadingIndicatorProvider>
+                    <NotificationStoreProvider>
+                      <NotificationProvider>
+                        <AppNavigation />
+                      </NotificationProvider>
+                    </NotificationStoreProvider>
+                  </LoadingIndicatorProvider>
+                </BioAuthProvider>
+              </InteractionModalsProivder>
             </ModalsProvider>
           </IntlProvider>
         </StoreProvider>
