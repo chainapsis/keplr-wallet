@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { useStore } from "../../../stores";
 import { EthereumEndpoint } from "../../../config";
-import { PageWithView } from "../../../components/staging/page";
+import { PageWithScrollView } from "../../../components/staging/page";
 import { View } from "react-native";
 import {
   AddressInput,
@@ -41,7 +41,7 @@ export const SendScreen: FunctionComponent = observer(() => {
   const txStateIsValid = sendConfigError == null;
 
   return (
-    <PageWithView>
+    <PageWithScrollView contentContainerStyle={style.flatten(["flex-1"])}>
       <AddressInput
         label="Recipient"
         recipientConfig={sendConfigs.recipientConfig}
@@ -81,6 +81,6 @@ export const SendScreen: FunctionComponent = observer(() => {
           }
         }}
       />
-    </PageWithView>
+    </PageWithScrollView>
   );
 });
