@@ -7,11 +7,10 @@ export const PageWithView: FunctionComponent<
   ViewProps & {
     fixed?: React.ReactNode;
   }
-> = (prop) => {
+> = (props) => {
   const style = useStyle();
 
-  const propStyle = prop.style;
-  delete prop.style;
+  const { style: propStyle, ...restProps } = props;
 
   return (
     <React.Fragment>
@@ -29,7 +28,7 @@ export const PageWithView: FunctionComponent<
             ]),
             propStyle,
           ])}
-          {...prop}
+          {...restProps}
         />
       </SafeAreaView>
     </React.Fragment>

@@ -11,11 +11,10 @@ import { GradientBackground } from "../../svg";
 
 export const PageWithSectionList: FunctionComponent<
   SectionListProps<any, any>
-> = (prop) => {
+> = (props) => {
   const style = useStyle();
 
-  const propStyle = prop.style;
-  delete prop.style;
+  const { style: propStyle, ...restProps } = props;
 
   return (
     <React.Fragment>
@@ -33,7 +32,7 @@ export const PageWithSectionList: FunctionComponent<
             ]),
             propStyle,
           ])}
-          {...prop}
+          {...restProps}
         />
       </SafeAreaView>
     </React.Fragment>

@@ -13,11 +13,10 @@ export const PageWithScrollView: FunctionComponent<
   ScrollViewProps & {
     fixed?: React.ReactNode;
   }
-> = (prop) => {
+> = (props) => {
   const style = useStyle();
 
-  const propStyle = prop.style;
-  delete prop.style;
+  const { style: propStyle, fixed, ...restProps } = props;
 
   return (
     <React.Fragment>
@@ -35,13 +34,13 @@ export const PageWithScrollView: FunctionComponent<
             ]),
             propStyle,
           ])}
-          {...prop}
+          {...restProps}
         />
         <View
           style={style.flatten(["absolute", "width-full", "height-full"])}
           pointerEvents="box-none"
         >
-          {prop.fixed}
+          {fixed}
         </View>
       </SafeAreaView>
     </React.Fragment>
