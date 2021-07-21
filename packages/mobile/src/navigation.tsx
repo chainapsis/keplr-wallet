@@ -50,6 +50,7 @@ import {
   SettingSelectAccountScreen,
   SettingSelectAccountScreenHeaderRight,
 } from "./screens/setting/staging/screens/select-account";
+import { WebScreen } from "./screens/web";
 
 const {
   SmartNavigatorProvider,
@@ -182,10 +183,16 @@ export const MainTabNavigation: FunctionComponent = () => {
         tabBarIcon: ({ color, size }) => {
           let iconName = "";
 
-          if (route.name === "Main") {
-            iconName = "ios-grid";
-          } else if (route.name === "Settings") {
-            iconName = "settings";
+          switch (route.name) {
+            case "Main":
+              iconName = "ios-grid";
+              break;
+            case "Web":
+              iconName = "apps-outline";
+              break;
+            case "Settings":
+              iconName = "settings";
+              break;
           }
 
           // You can return any component that you like here!
@@ -226,6 +233,7 @@ export const MainTabNavigation: FunctionComponent = () => {
       }}
     >
       <Tab.Screen name="Main" component={MainNavigation} />
+      <Tab.Screen name="Web" component={WebScreen} />
       <Tab.Screen name="Settings" component={SettingStackScreen} />
     </Tab.Navigator>
   );

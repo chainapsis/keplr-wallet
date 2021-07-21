@@ -12,6 +12,3 @@ yarn-error.log
 
 build
 packages/extension/src/config.ui.var.tsx
-
-index.android.bundle
-*.hprof
