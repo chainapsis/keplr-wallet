@@ -10,7 +10,6 @@ import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
 import { RegisterStackScreen } from "./screens/register";
 import { HomeScreen } from "./screens/home/staging";
-import { ModalsRenderer } from "./modals";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createStackNavigator,
@@ -30,7 +29,6 @@ import {
   GovernanceScreen,
   GovernanceDetailsScreen,
 } from "./screens/governance/staging";
-import { SettingStackScreen } from "./screens/setting";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -47,12 +45,20 @@ import {
 import { GradientBackground } from "./components/svg";
 import { BorderlessButton } from "react-native-gesture-handler";
 import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
+import { SettingScreen } from "./screens/setting/staging";
+import {
+  SettingSelectAccountScreen,
+  SettingSelectAccountScreenHeaderRight,
+} from "./screens/setting/staging/screens/select-account";
 
 const {
   SmartNavigatorProvider,
   useSmartNavigation,
 } = createSmartNavigatorProvider(
   new SmartNavigator({
+    Register: {
+      upperScreenName: "Register",
+    },
     Home: {
       upperScreenName: "MainTabDrawer",
     },
@@ -61,6 +67,12 @@ const {
     },
     "Governance Details": {
       upperScreenName: "Others",
+    },
+    Setting: {
+      upperScreenName: "Settings",
+    },
+    SettingSelectAccount: {
+      upperScreenName: "Settings",
     },
   }).withParams<{
     "Governance Details": {
@@ -131,6 +143,31 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         name="Governance Details"
         component={GovernanceDetailsScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+export const SettingStackScreen: FunctionComponent = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleAlign: "center",
+        headerBackTitleVisible: false,
+        ...TransitionPresets.SlideFromRightIOS,
+      }}
+      headerMode="screen"
+    >
+      <Stack.Screen name="Setting" component={SettingScreen} />
+      <Stack.Screen
+        name="SettingSelectAccount"
+        options={{
+          title: "Select Account",
+          headerRight: SettingSelectAccountScreenHeaderRight,
+        }}
+        component={SettingSelectAccountScreen}
       />
     </Stack.Navigator>
   );

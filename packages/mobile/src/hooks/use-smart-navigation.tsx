@@ -79,7 +79,7 @@ export const createSmartNavigatorProvider = <
     useSmartNavigation: () => {
       const navigator = useContext(context);
       if (!navigator)
-        throw new Error("You probably forgot to use StyleProvider");
+        throw new Error("You probably forgot to use SmartNavigationProvider");
 
       const nativeNavigation = useNavigation();
       const nativeRoute = useRoute();

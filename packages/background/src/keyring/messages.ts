@@ -18,7 +18,6 @@ import { cosmos } from "@keplr-wallet/cosmos";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
-  type: string;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {
   public static type() {
@@ -73,7 +72,6 @@ export class DeleteKeyRingMsg extends Message<{
 }
 
 export class UpdateNameKeyRingMsg extends Message<{
-  status: KeyRingStatus;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {
   public static type() {
@@ -131,7 +129,10 @@ export class ShowKeyRingMsg extends Message<string> {
   }
 }
 
-export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreateMnemonicKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-mnemonic-key";
   }
@@ -182,7 +183,9 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddMnemonicKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-mnemonic-key";
   }
@@ -228,7 +231,10 @@ export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 }
 
-export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreatePrivateKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-private-key";
   }
@@ -269,7 +275,10 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreateLedgerKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-ledger-key";
   }
@@ -304,7 +313,9 @@ export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddPrivateKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-private-key";
   }
@@ -340,7 +351,9 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 }
 
-export class AddLedgerKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddLedgerKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-ledger-key";
   }
@@ -540,29 +553,9 @@ export class RequestSignDirectMsg extends Message<{
   }
 }
 
-export class GetKeyRingTypeMsg extends Message<string> {
-  public static type() {
-    return "get-keyring-type";
-  }
-
-  constructor() {
-    super();
-  }
-
-  validateBasic(): void {
-    // noop
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return GetKeyRingTypeMsg.type();
-  }
-}
-
-export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class GetMultiKeyStoreInfoMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "get-multi-key-store-info";
   }
@@ -584,7 +577,9 @@ export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfoWithSelect
   }
 }
 
-export class ChangeKeyRingMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class ChangeKeyRingMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "change-keyring";
   }

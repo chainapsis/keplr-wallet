@@ -10,7 +10,6 @@ import {
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
   ShowKeyRingMsg,
-  GetKeyRingTypeMsg,
   AddMnemonicKeyMsg,
   AddPrivateKeyMsg,
   GetMultiKeyStoreInfoMsg,
@@ -79,8 +78,6 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as RequestSignDirectMsg
         );
-      case GetKeyRingTypeMsg:
-        return handleGetKeyRingTypeMsg(service)(env, msg as GetKeyRingTypeMsg);
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
           env,
@@ -140,15 +137,13 @@ const handleCreateMnemonicKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreateMnemonicKeyMsg> = (service) => {
   return async (_, msg) => {
-    return {
-      status: await service.createMnemonicKey(
-        msg.kdf,
-        msg.mnemonic,
-        msg.password,
-        msg.meta,
-        msg.bip44HDPath
-      ),
-    };
+    return await service.createMnemonicKey(
+      msg.kdf,
+      msg.mnemonic,
+      msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
   };
 };
 
@@ -169,14 +164,12 @@ const handleCreatePrivateKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreatePrivateKeyMsg> = (service) => {
   return async (_, msg) => {
-    return {
-      status: await service.createPrivateKey(
-        msg.kdf,
-        msg.privateKey,
-        msg.password,
-        msg.meta
-      ),
-    };
+    return await service.createPrivateKey(
+      msg.kdf,
+      msg.privateKey,
+      msg.password,
+      msg.meta
+    );
   };
 };
 
@@ -192,15 +185,13 @@ const handleCreateLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreateLedgerKeyMsg> = (service) => {
   return async (env, msg) => {
-    return {
-      status: await service.createLedgerKey(
-        env,
-        msg.kdf,
-        msg.password,
-        msg.meta,
-        msg.bip44HDPath
-      ),
-    };
+    return await service.createLedgerKey(
+      env,
+      msg.kdf,
+      msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
   };
 };
 
@@ -302,19 +293,13 @@ const handleRequestSignDirectMsg: (
   };
 };
 
-const handleGetKeyRingTypeMsg: (
-  service: KeyRingService
-) => InternalHandler<GetKeyRingTypeMsg> = (service) => {
-  return () => {
-    return service.getKeyRingType();
-  };
-};
-
 const handleGetMultiKeyStoreInfoMsg: (
   service: KeyRingService
 ) => InternalHandler<GetMultiKeyStoreInfoMsg> = (service) => {
   return () => {
-    return service.getMultiKeyStoreInfo();
+    return {
+      multiKeyStoreInfo: service.getMultiKeyStoreInfo(),
+    };
   };
 };
 

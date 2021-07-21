@@ -10,7 +10,6 @@ import {
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
   ShowKeyRingMsg,
-  GetKeyRingTypeMsg,
   AddMnemonicKeyMsg,
   AddPrivateKeyMsg,
   GetMultiKeyStoreInfoMsg,
@@ -41,7 +40,6 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(GetKeyMsg);
   router.registerMessage(RequestSignAminoMsg);
   router.registerMessage(RequestSignDirectMsg);
-  router.registerMessage(GetKeyRingTypeMsg);
   router.registerMessage(GetMultiKeyStoreInfoMsg);
   router.registerMessage(ChangeKeyRingMsg);
   router.registerMessage(GetIsKeyStoreCoinTypeSetMsg);

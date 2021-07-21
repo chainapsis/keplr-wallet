@@ -64,13 +64,11 @@ export class KeyRingService {
 
   async restore(): Promise<{
     status: KeyRingStatus;
-    type: string;
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     await this.keyRing.restore();
     return {
       status: this.keyRing.status,
-      type: this.keyRing.type,
       multiKeyStoreInfo: this.keyRing.getMultiKeyStoreInfo(),
     };
   }
@@ -115,12 +113,10 @@ export class KeyRingService {
     name: string
   ): Promise<{
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-    status: KeyRingStatus;
   }> {
     const multiKeyStoreInfo = await this.keyRing.updateNameKeyRing(index, name);
     return {
       multiKeyStoreInfo,
-      status: this.keyRing.status,
     };
   }
 
@@ -134,16 +130,18 @@ export class KeyRingService {
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
-  ): Promise<KeyRingStatus> {
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
     // TODO: Check mnemonic checksum.
-    await this.keyRing.createMnemonicKey(
+    return await this.keyRing.createMnemonicKey(
       kdf,
       mnemonic,
       password,
       meta,
       bip44HDPath
     );
-    return this.keyRing.status;
   }
 
   async createPrivateKey(
@@ -151,10 +149,11 @@ export class KeyRingService {
     privateKey: Uint8Array,
     password: string,
     meta: Record<string, string>
-  ): Promise<KeyRingStatus> {
-    // TODO: Check mnemonic checksum.
-    await this.keyRing.createPrivateKey(kdf, privateKey, password, meta);
-    return this.keyRing.status;
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    return await this.keyRing.createPrivateKey(kdf, privateKey, password, meta);
   }
 
   async createLedgerKey(
@@ -163,9 +162,17 @@ export class KeyRingService {
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
-  ): Promise<KeyRingStatus> {
-    await this.keyRing.createLedgerKey(env, kdf, password, meta, bip44HDPath);
-    return this.keyRing.status;
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    return await this.keyRing.createLedgerKey(
+      env,
+      kdf,
+      password,
+      meta,
+      bip44HDPath
+    );
   }
 
   lock(): KeyRingStatus {
@@ -314,7 +321,9 @@ export class KeyRingService {
     mnemonic: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
-  ): Promise<MultiKeyStoreInfoWithSelected> {
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
     return this.keyRing.addMnemonicKey(kdf, mnemonic, meta, bip44HDPath);
   }
 
@@ -322,7 +331,9 @@ export class KeyRingService {
     kdf: "scrypt" | "sha256",
     privateKey: Uint8Array,
     meta: Record<string, string>
-  ): Promise<MultiKeyStoreInfoWithSelected> {
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
     return this.keyRing.addPrivateKey(kdf, privateKey, meta);
   }
 
@@ -331,13 +342,17 @@ export class KeyRingService {
     kdf: "scrypt" | "sha256",
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
-  ): Promise<MultiKeyStoreInfoWithSelected> {
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
     return this.keyRing.addLedgerKey(env, kdf, meta, bip44HDPath);
   }
 
   public async changeKeyStoreFromMultiKeyStore(
     index: number
-  ): Promise<MultiKeyStoreInfoWithSelected> {
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
     try {
       return await this.keyRing.changeKeyStoreFromMultiKeyStore(index);
     } finally {

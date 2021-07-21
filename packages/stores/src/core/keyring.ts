@@ -11,7 +11,6 @@ import {
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
   GetIsKeyStoreCoinTypeSetMsg,
-  GetKeyRingTypeMsg,
   GetMultiKeyStoreInfoMsg,
   KeyRingStatus,
   LockKeyRingMsg,
@@ -20,6 +19,7 @@ import {
   SetKeyStoreCoinTypeMsg,
   ShowKeyRingMsg,
   UnlockKeyRingMsg,
+  KeyRing,
 } from "@keplr-wallet/background";
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -124,9 +124,6 @@ export class KeyRingStore {
   status: KeyRingStatus = KeyRingStatus.NOTLOADED;
 
   @observable
-  keyRingType: string = "none";
-
-  @observable
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected = [];
 
   @observable.shallow
@@ -144,6 +141,19 @@ export class KeyRingStore {
     makeObservable(this);
 
     this.restore();
+  }
+
+  @computed
+  get keyRingType(): string {
+    const keyStore = this.multiKeyStoreInfo.find(
+      (keyStore) => keyStore.selected
+    );
+
+    if (!keyStore) {
+      return "none";
+    } else {
+      return KeyRing.getTypeOfKeyStore(keyStore);
+    }
   }
 
   @flow
@@ -165,10 +175,7 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
-
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
   @flow
@@ -183,10 +190,7 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
-
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
   @flow
@@ -201,10 +205,7 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
-
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
   @flow
@@ -215,9 +216,9 @@ export class KeyRingStore {
     kdf: "scrypt" | "sha256" = this.defaultKdf
   ) {
     const msg = new AddMnemonicKeyMsg(kdf, mnemonic, meta, bip44HDPath);
-    this.multiKeyStoreInfo = yield* toGenerator(
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    )).multiKeyStoreInfo;
   }
 
   @flow
@@ -227,9 +228,9 @@ export class KeyRingStore {
     kdf: "scrypt" | "sha256" = this.defaultKdf
   ) {
     const msg = new AddPrivateKeyMsg(kdf, privateKey, meta);
-    this.multiKeyStoreInfo = yield* toGenerator(
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    )).multiKeyStoreInfo;
   }
 
   @flow
@@ -239,21 +240,17 @@ export class KeyRingStore {
     kdf: "scrypt" | "sha256" = this.defaultKdf
   ) {
     const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath);
-    this.multiKeyStoreInfo = yield* toGenerator(
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    )).multiKeyStoreInfo;
   }
 
   @flow
   *changeKeyRing(index: number) {
     const msg = new ChangeKeyRingMsg(index);
-    this.multiKeyStoreInfo = yield* toGenerator(
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    )).multiKeyStoreInfo;
 
     // Emit the key store changed event manually.
     this.eventDispatcher.dispatchEvent("keplr_keystorechange");
@@ -297,7 +294,6 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
-    this.keyRingType = result.type;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
@@ -316,10 +312,8 @@ export class KeyRingStore {
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
 
-    // Possibly, key ring can be changed if deleting key store was selected one.
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    // Selected keystore may be changed if the selected one is deleted.
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
   }
 
   @flow
@@ -328,7 +322,6 @@ export class KeyRingStore {
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
     const selectedIndex = this.multiKeyStoreInfo.findIndex(
       (keyStore) => keyStore.selected
@@ -369,9 +362,9 @@ export class KeyRingStore {
       )
     );
 
-    this.multiKeyStoreInfo = yield* toGenerator(
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetMultiKeyStoreInfoMsg())
-    );
+    )).multiKeyStoreInfo;
 
     this.status = status;
 
