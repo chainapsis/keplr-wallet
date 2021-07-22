@@ -1,13 +1,8 @@
 import React, { FunctionComponent } from "react";
-import {
-  SafeAreaView,
-  SectionList,
-  SectionListProps,
-  StyleSheet,
-  View,
-} from "react-native";
+import { SafeAreaView, SectionListProps, StyleSheet, View } from "react-native";
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../svg";
+import { KeyboardAwareSectionList } from "react-native-keyboard-aware-scroll-view";
 
 export const PageWithSectionList: FunctionComponent<
   SectionListProps<any, any>
@@ -22,7 +17,7 @@ export const PageWithSectionList: FunctionComponent<
         <GradientBackground />
       </View>
       <SafeAreaView style={style.get("flex-1")}>
-        <SectionList
+        <KeyboardAwareSectionList
           style={StyleSheet.flatten([
             style.flatten([
               "flex-1",
@@ -32,6 +27,7 @@ export const PageWithSectionList: FunctionComponent<
             ]),
             propStyle,
           ])}
+          keyboardOpeningTime={0}
           {...restProps}
         />
       </SafeAreaView>

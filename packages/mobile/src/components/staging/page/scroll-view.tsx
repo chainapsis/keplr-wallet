@@ -1,13 +1,8 @@
 import React, { FunctionComponent } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  ScrollViewProps,
-  StyleSheet,
-  View,
-} from "react-native";
+import { SafeAreaView, ScrollViewProps, StyleSheet, View } from "react-native";
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../svg";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export const PageWithScrollView: FunctionComponent<
   ScrollViewProps & {
@@ -24,7 +19,7 @@ export const PageWithScrollView: FunctionComponent<
         <GradientBackground />
       </View>
       <SafeAreaView style={style.get("flex-1")}>
-        <ScrollView
+        <KeyboardAwareScrollView
           style={StyleSheet.flatten([
             style.flatten([
               "flex-1",
@@ -34,6 +29,7 @@ export const PageWithScrollView: FunctionComponent<
             ]),
             propStyle,
           ])}
+          keyboardOpeningTime={0}
           {...restProps}
         />
         <View

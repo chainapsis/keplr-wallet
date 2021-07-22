@@ -74,6 +74,7 @@
     "react-native-elements": "^3.3.2",
     "react-native-fs": "^2.18.0",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-keychain": "^7.0.0",
     "react-native-localize": "^2.1.1",
     "react-native-modal": "^11.7.0",
