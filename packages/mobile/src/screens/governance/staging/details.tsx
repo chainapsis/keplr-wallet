@@ -329,7 +329,6 @@ export const GovernanceVoteModal: FunctionComponent<{
               ],
               [vote === "Yes" && "background-color-primary-10"]
             )}
-            enabled={vote !== "Yes"}
             onPress={() => setVote("Yes")}
           >
             <Text
@@ -354,7 +353,6 @@ export const GovernanceVoteModal: FunctionComponent<{
               ],
               [vote === "No" && "background-color-primary-10"]
             )}
-            enabled={vote !== "No"}
             onPress={() => setVote("No")}
           >
             <Text
@@ -379,7 +377,6 @@ export const GovernanceVoteModal: FunctionComponent<{
               ],
               [vote === "NoWithVeto" && "background-color-primary-10"]
             )}
-            enabled={vote !== "NoWithVeto"}
             onPress={() => setVote("NoWithVeto")}
           >
             <Text
@@ -404,7 +401,6 @@ export const GovernanceVoteModal: FunctionComponent<{
               ],
               [vote === "Abstain" && "background-color-primary-10"]
             )}
-            enabled={vote !== "Abstain"}
             onPress={() => setVote("Abstain")}
           >
             <Text

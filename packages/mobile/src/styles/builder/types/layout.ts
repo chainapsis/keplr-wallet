@@ -66,6 +66,74 @@ export const StaticLayouts = {
     flex: 10,
   },
 
+  ["flex-grow-0"]: {
+    flexGrow: 0,
+  },
+  ["flex-grow-1"]: {
+    flexGrow: 1,
+  },
+  ["flex-grow-2"]: {
+    flexGrow: 2,
+  },
+  ["flex-grow-3"]: {
+    flexGrow: 3,
+  },
+  ["flex-grow-4"]: {
+    flexGrow: 4,
+  },
+  ["flex-grow-5"]: {
+    flexGrow: 5,
+  },
+  ["flex-grow-6"]: {
+    flexGrow: 6,
+  },
+  ["flex-grow-7"]: {
+    flexGrow: 7,
+  },
+  ["flex-grow-8"]: {
+    flexGrow: 8,
+  },
+  ["flex-grow-9"]: {
+    flexGrow: 9,
+  },
+  ["flex-grow-10"]: {
+    flexGrow: 10,
+  },
+
+  ["flex-shrink-0"]: {
+    flexShrink: 0,
+  },
+  ["flex-shrink-1"]: {
+    flexShrink: 1,
+  },
+  ["flex-shrink-2"]: {
+    flexShrink: 2,
+  },
+  ["flex-shrink-3"]: {
+    flexShrink: 3,
+  },
+  ["flex-shrink-4"]: {
+    flexShrink: 4,
+  },
+  ["flex-shrink-5"]: {
+    flexShrink: 5,
+  },
+  ["flex-shrink-6"]: {
+    flexShrink: 6,
+  },
+  ["flex-shrink-7"]: {
+    flexShrink: 7,
+  },
+  ["flex-shrink-8"]: {
+    flexShrink: 8,
+  },
+  ["flex-shrink-9"]: {
+    flexShrink: 9,
+  },
+  ["flex-shrink-10"]: {
+    flexShrink: 10,
+  },
+
   ["flex-row"]: {
     flexDirection: "row" as EnumFlexDirection,
   },
