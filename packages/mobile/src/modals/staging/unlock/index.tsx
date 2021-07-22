@@ -33,11 +33,11 @@ export const UnlockModal: FunctionComponent<{
         await keyRingStore.unlock(password);
       } catch (e) {
         console.log(e);
+        setIsLoading(false);
         setIsFailed(true);
         return;
-      } finally {
-        setIsLoading(false);
       }
+
       interactionModalStore.popAll("/unlock");
     };
 

@@ -234,7 +234,13 @@ export const MainTabNavigation: FunctionComponent = () => {
     >
       <Tab.Screen name="Main" component={MainNavigation} />
       <Tab.Screen name="Web" component={WebScreen} />
-      <Tab.Screen name="Settings" component={SettingStackScreen} />
+      <Tab.Screen
+        name="Settings"
+        component={SettingStackScreen}
+        options={{
+          unmountOnBlur: true,
+        }}
+      />
     </Tab.Navigator>
   );
 };
