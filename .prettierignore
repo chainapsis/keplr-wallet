@@ -14,3 +14,5 @@ prod/*
 yarn.lock
 Podfile.lock
 build.gradle
+
+injected-provider.bundle.js
