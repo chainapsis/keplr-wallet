@@ -116,7 +116,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
             index: 0,
             routes: [
               {
-                name: "MainTabDrawer",
+                name: "Register.End",
               },
             ],
           });

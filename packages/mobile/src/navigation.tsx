@@ -57,6 +57,7 @@ import {
   VerifyMnemonicScreen,
   RecoverMnemonicScreen,
 } from "./screens/register/staging/mnemonic";
+import { RegisterEndScreen } from "./screens/register/staging/end";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 
 const {
@@ -74,6 +75,9 @@ const {
       upperScreenName: "Register",
     },
     "Register.RecoverMnemonic": {
+      upperScreenName: "Register",
+    },
+    "Register.End": {
       upperScreenName: "Register",
     },
     Home: {
@@ -162,6 +166,13 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="Register.End"
+        component={RegisterEndScreen}
       />
     </Stack.Navigator>
   );
