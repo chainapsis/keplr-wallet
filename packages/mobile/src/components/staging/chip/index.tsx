@@ -4,7 +4,7 @@ import { Text, View } from "react-native";
 
 export const Chip: FunctionComponent<{
   color?: "primary" | "secondary" | "danger";
-  mode?: "highlight" | "fill" | "outline";
+  mode?: "fill" | "light" | "outline";
   text: string;
 }> = ({ color = "primary", mode = "fill", text }) => {
   const style = useStyle();
@@ -12,21 +12,21 @@ export const Chip: FunctionComponent<{
   const backgroundColorDefinition = (() => {
     switch (mode) {
       case "fill":
-        return `background-color-chip-fill-${color}`;
+        return `background-color-${color}`;
+      case "light":
+        return `background-color-chip-light-${color}`;
       case "outline":
         return "background-color-white";
-      case "highlight":
-        return `background-color-${color}`;
     }
   })();
 
   const textColorDefinition = (() => {
     switch (mode) {
-      case "outline":
       case "fill":
-        return `color-${color}`;
-      case "highlight":
         return "color-white";
+      case "outline":
+      case "light":
+        return `color-${color}`;
     }
   })();
 

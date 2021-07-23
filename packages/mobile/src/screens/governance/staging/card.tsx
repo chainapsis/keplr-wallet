@@ -19,15 +19,15 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
     case Governance.ProposalStatus.DEPOSIT_PERIOD:
       return <Chip text="Deposit period" color="primary" mode="outline" />;
     case Governance.ProposalStatus.VOTING_PERIOD:
-      return <Chip text="Voting period" color="primary" mode="highlight" />;
+      return <Chip text="Voting period" color="primary" mode="fill" />;
     case Governance.ProposalStatus.PASSED:
-      return <Chip text="Passed" color="primary" mode="fill" />;
+      return <Chip text="Passed" color="primary" mode="light" />;
     case Governance.ProposalStatus.REJECTED:
-      return <Chip text="Rejected" color="danger" mode="fill" />;
+      return <Chip text="Rejected" color="danger" mode="light" />;
     case Governance.ProposalStatus.FAILED:
-      return <Chip text="Failed" color="danger" mode="highlight" />;
+      return <Chip text="Failed" color="danger" mode="fill" />;
     default:
-      return <Chip text="Unspecified" color="danger" mode="highlight" />;
+      return <Chip text="Unspecified" color="danger" mode="fill" />;
   }
 };
 

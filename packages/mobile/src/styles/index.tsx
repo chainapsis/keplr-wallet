@@ -226,9 +226,9 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       "button-danger-outline-underlay": Colors["danger-50"],
 
       // Belows are for the chip props and may not be used as styles.
-      "chip-fill-primary": Colors["primary-50"],
-      "chip-fill-secondary": Colors["secondary-50"],
-      "chip-fill-danger": Colors["danger-100"],
+      "chip-light-primary": Colors["primary-50"],
+      "chip-light-secondary": Colors["secondary-50"],
+      "chip-light-danger": Colors["danger-100"],
 
       // Belows are for the loading spinner props and may not be used as styles.
       "loading-spinner": Colors["text-black-low"],
