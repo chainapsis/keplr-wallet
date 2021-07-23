@@ -9,8 +9,9 @@ import { useSmartNavigation } from "../../../../navigation";
 import { NewMnemonicConfig } from "./hook";
 import { RectButton } from "react-native-gesture-handler";
 import { RegisterConfig } from "@keplr-wallet/hooks";
+import { observer } from "mobx-react-lite";
 
-export const VerifyMnemonicScreen: FunctionComponent = () => {
+export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const route = useRoute<
     RouteProp<
       Record<
@@ -123,7 +124,7 @@ export const VerifyMnemonicScreen: FunctionComponent = () => {
       />
     </PageWithScrollView>
   );
-};
+});
 
 const WordButton: FunctionComponent<{
   word: string;

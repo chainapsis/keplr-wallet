@@ -55,6 +55,7 @@ import {
   NewMnemonicConfig,
   NewMnemonicScreen,
   VerifyMnemonicScreen,
+  RecoverMnemonicScreen,
 } from "./screens/register/staging/mnemonic";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 
@@ -70,6 +71,9 @@ const {
       upperScreenName: "Register",
     },
     "Register.VerifyMnemonic": {
+      upperScreenName: "Register",
+    },
+    "Register.RecoverMnemonic": {
       upperScreenName: "Register",
     },
     Home: {
@@ -94,6 +98,9 @@ const {
     "Register.VerifyMnemonic": {
       registerConfig: RegisterConfig;
       newMnemonicConfig: NewMnemonicConfig;
+    };
+    "Register.RecoverMnemonic": {
+      registerConfig: RegisterConfig;
     };
     "Governance Details": {
       proposalId: string;
@@ -151,6 +158,10 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
+      />
+      <Stack.Screen
+        name="Register.RecoverMnemonic"
+        component={RecoverMnemonicScreen}
       />
     </Stack.Navigator>
   );

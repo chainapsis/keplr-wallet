@@ -22,6 +22,9 @@ export const TextInput = React.forwardRef<
     error?: string;
 
     paragraph?: React.ReactNode;
+
+    topInInputContainer?: React.ReactNode;
+    bottomInInputContainer?: React.ReactNode;
   }
 >((props, ref) => {
   const { style: propsStyle, ...restProps } = props;
@@ -66,6 +69,7 @@ export const TextInput = React.forwardRef<
           props.inputContainerStyle,
         ])}
       >
+        {props.topInInputContainer}
         <NativeTextInput
           placeholderTextColor={
             props.placeholderTextColor ??
@@ -78,6 +82,7 @@ export const TextInput = React.forwardRef<
           {...restProps}
           ref={ref}
         />
+        {props.bottomInInputContainer}
       </View>
       {props.paragraph && !props.error ? (
         typeof props.paragraph === "string" ? (

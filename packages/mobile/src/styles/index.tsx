@@ -253,6 +253,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "12": 12,
     "16": 16,
     "24": 24,
+    "36": 36,
     "56": 56,
     "62": 62,
     "64": 64,

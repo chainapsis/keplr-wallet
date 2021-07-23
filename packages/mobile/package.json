@@ -52,6 +52,7 @@
     "appcenter": "^4.1.0",
     "appcenter-analytics": "^4.1.0",
     "appcenter-crashes": "^4.1.0",
+    "bip39": "^3.0.4",
     "buffer": "^6.0.3",
     "delay": "^5.0.0",
     "eventemitter3": "^4.0.7",

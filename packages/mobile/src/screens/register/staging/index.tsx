@@ -33,6 +33,11 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
         text="Import existing account"
         size="large"
         mode="light"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.RecoverMnemonic", {
+            registerConfig,
+          });
+        }}
       />
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
