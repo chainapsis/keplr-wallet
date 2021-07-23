@@ -62,6 +62,21 @@ export const IRIS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const IRIS_REST_ENDPOINT = "";
 export const IRIS_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const BETA_STRAIGHTEDGE_REST_ENDPOINT = "";
+export const BETA_STRAIGHTEDGE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const BETA_STRAIGHTEDGE_RPC_ENDPOINT = "";
+export const BETA_STRAIGHTEDGE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const CRYPTO_ORG_RPC_ENDPOINT = "";
+export const CRYPTO_ORG_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const CRYPTO_ORG_REST_ENDPOINT = "";
+export const CRYPTO_ORG_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const OSMOSIS_RPC_ENDPOINT = "";
+export const OSMOSIS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const OSMOSIS_REST_ENDPOINT = "";
+export const OSMOSIS_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const REGEN_RPC_ENDPOINT = "";
 export const REGEN_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const REGEN_REST_ENDPOINT = "";
