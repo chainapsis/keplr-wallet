@@ -8,6 +8,7 @@ import { observer } from "mobx-react-lite";
 import { TextInput } from "../../../components/staging/input";
 import { Button } from "../../../components/staging/button";
 import delay from "delay";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export const UnlockModal: FunctionComponent<{
   isOpen: boolean;
@@ -47,20 +48,24 @@ export const UnlockModal: FunctionComponent<{
           <GradientBackground />
         </View>
         <SafeAreaView style={style.flatten(["flex-1"])}>
-          <View style={style.flatten(["flex-1"])} />
-          <View>
-            <TextInput
-              label="Password"
-              returnKeyType="done"
-              secureTextEntry={true}
-              value={password}
-              error={isFailed ? "Invalid password" : undefined}
-              onChangeText={setPassword}
-              onSubmitEditing={tryUnlock}
-            />
-            <Button text="Sign in" loading={isLoading} onPress={tryUnlock} />
-          </View>
-          <View style={style.flatten(["flex-1"])} />
+          <KeyboardAwareScrollView
+            contentContainerStyle={style.get("flex-grow-1")}
+          >
+            <View style={style.flatten(["flex-1"])} />
+            <View>
+              <TextInput
+                label="Password"
+                returnKeyType="done"
+                secureTextEntry={true}
+                value={password}
+                error={isFailed ? "Invalid password" : undefined}
+                onChangeText={setPassword}
+                onSubmitEditing={tryUnlock}
+              />
+              <Button text="Sign in" loading={isLoading} onPress={tryUnlock} />
+            </View>
+            <View style={style.flatten(["flex-1"])} />
+          </KeyboardAwareScrollView>
         </SafeAreaView>
       </View>
     );
