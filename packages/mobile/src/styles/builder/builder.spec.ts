@@ -249,6 +249,15 @@ describe("Test style builder", () => {
     expect(builder.get("flex-row-reverse")).toStrictEqual({
       flexDirection: "row-reverse",
     });
+    expect(builder.get("flex-wrap")).toStrictEqual({
+      flexWrap: "wrap",
+    });
+    expect(builder.get("flex-wrap-reverse")).toStrictEqual({
+      flexWrap: "wrap-reverse",
+    });
+    expect(builder.get("flex-nowrap")).toStrictEqual({
+      flexWrap: "nowrap",
+    });
     expect(builder.get("flex-column-reverse")).toStrictEqual({
       flexDirection: "column-reverse",
     });

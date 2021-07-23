@@ -8,7 +8,6 @@ import {
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
-import { RegisterStackScreen } from "./screens/register";
 import { HomeScreen } from "./screens/home/staging";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
@@ -51,13 +50,26 @@ import {
   SettingSelectAccountScreenHeaderRight,
 } from "./screens/setting/staging/screens/select-account";
 import { WebScreen } from "./screens/web";
+import { RegisterIntroScreen } from "./screens/register/staging";
+import {
+  NewMnemonicConfig,
+  NewMnemonicScreen,
+  VerifyMnemonicScreen,
+} from "./screens/register/staging/mnemonic";
+import { RegisterConfig } from "@keplr-wallet/hooks";
 
 const {
   SmartNavigatorProvider,
   useSmartNavigation,
 } = createSmartNavigatorProvider(
   new SmartNavigator({
-    Register: {
+    "Register.Intro": {
+      upperScreenName: "Register",
+    },
+    "Register.NewMnemonic": {
+      upperScreenName: "Register",
+    },
+    "Register.VerifyMnemonic": {
       upperScreenName: "Register",
     },
     Home: {
@@ -76,6 +88,13 @@ const {
       upperScreenName: "Settings",
     },
   }).withParams<{
+    "Register.NewMnemonic": {
+      registerConfig: RegisterConfig;
+    };
+    "Register.VerifyMnemonic": {
+      registerConfig: RegisterConfig;
+      newMnemonicConfig: NewMnemonicConfig;
+    };
     "Governance Details": {
       proposalId: string;
     };
@@ -110,6 +129,29 @@ export const MainNavigation: FunctionComponent = () => {
       headerMode="screen"
     >
       <Stack.Screen name="Home" component={HomeScreen} />
+    </Stack.Navigator>
+  );
+};
+
+export const RegisterNavigation: FunctionComponent = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleAlign: "center",
+        headerBackTitleVisible: false,
+        ...TransitionPresets.SlideFromRightIOS,
+      }}
+      initialRouteName="Intro"
+      headerMode="screen"
+    >
+      <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
+      <Stack.Screen name="Register.NewMnemonic" component={NewMnemonicScreen} />
+      <Stack.Screen
+        name="Register.VerifyMnemonic"
+        component={VerifyMnemonicScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -314,7 +356,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
               name="MainTabDrawer"
               component={MainTabNavigationWithDrawer}
             />
-            <Stack.Screen name="Register" component={RegisterStackScreen} />
+            <Stack.Screen name="Register" component={RegisterNavigation} />
             <Stack.Screen name="Others" component={OtherNavigation} />
           </Stack.Navigator>
         )}

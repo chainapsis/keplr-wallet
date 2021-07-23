@@ -275,6 +275,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "11": 11,
     "12": 12,
     "16": 16,
+    "20": 20,
     "24": 24,
     "28": 28,
     "32": 32,
@@ -292,8 +293,10 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "12": 12,
     "14": 14,
     "16": 16,
+    "20": 20,
     "24": 24,
     "32": 32,
+    "40": 54,
     "64": 64,
   },
   borderWidths: {

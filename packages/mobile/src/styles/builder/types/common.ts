@@ -4,6 +4,7 @@ export type StaticStylesDefinitions<S> = {
 
 export type EnumDisplay = "none" | "flex";
 export type EnumPosition = "absolute" | "relative";
+export type EnumFlexWrap = "wrap" | "wrap-reverse" | "nowrap";
 export type EnumFlexDirection =
   | "row"
   | "row-reverse"
@@ -61,3 +62,5 @@ export type EnumTextTransform =
   | "lowercase";
 
 export type EnumTextAlign = "auto" | "left" | "right" | "center" | "justify";
+
+export type EnumBorderStyle = "solid" | "dotted" | "dashed";

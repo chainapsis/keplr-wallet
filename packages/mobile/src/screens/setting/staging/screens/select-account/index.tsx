@@ -31,7 +31,7 @@ export const SettingSelectAccountScreenHeaderRight: FunctionComponent<{
   return (
     <BorderlessButton
       onPress={() => {
-        smartNavigation.navigateSmart("Register", {});
+        smartNavigation.navigateSmart("Register.Intro", {});
       }}
     >
       <FeatherIcon name="plus" color={tintColor} size={30} />

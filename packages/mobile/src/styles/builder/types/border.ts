@@ -1,14 +1,14 @@
-import { StaticStylesDefinitions } from "./common";
+import { EnumBorderStyle, StaticStylesDefinitions } from "./common";
 
 export const StaticBorderStyles = {
   ["border-solid"]: {
-    borderStyle: "solid",
+    borderStyle: "solid" as EnumBorderStyle,
   },
   ["border-dotted"]: {
-    borderStyle: "dotted",
+    borderStyle: "dotted" as EnumBorderStyle,
   },
   ["border-dashed"]: {
-    borderStyle: "dashed",
+    borderStyle: "dashed" as EnumBorderStyle,
   },
 };
 

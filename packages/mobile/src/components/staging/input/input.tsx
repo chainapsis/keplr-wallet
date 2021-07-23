@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React from "react";
 import {
   StyleSheet,
   Text,
@@ -9,7 +9,9 @@ import {
 } from "react-native";
 import { useStyle } from "../../../styles";
 
-export const TextInput: FunctionComponent<
+// eslint-disable-next-line react/display-name
+export const TextInput = React.forwardRef<
+  NativeTextInput,
   React.ComponentProps<typeof NativeTextInput> & {
     labelStyle?: TextStyle;
     containerStyle?: ViewStyle;
@@ -21,9 +23,8 @@ export const TextInput: FunctionComponent<
 
     paragraph?: React.ReactNode;
   }
-> = (props) => {
-  const propsStyle = props.style;
-  delete props.style;
+>((props, ref) => {
+  const { style: propsStyle, ...restProps } = props;
 
   const style = useStyle();
 
@@ -66,7 +67,6 @@ export const TextInput: FunctionComponent<
         ])}
       >
         <NativeTextInput
-          {...props}
           placeholderTextColor={
             props.placeholderTextColor ??
             style.get("color-text-black-low").color
@@ -75,6 +75,8 @@ export const TextInput: FunctionComponent<
             style.flatten(["body2", "color-text-black-medium", "padding-0"]),
             propsStyle,
           ])}
+          {...restProps}
+          ref={ref}
         />
       </View>
       {props.paragraph && !props.error ? (
@@ -107,4 +109,4 @@ export const TextInput: FunctionComponent<
       ) : null}
     </View>
   );
-};
+});

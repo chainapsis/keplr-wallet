@@ -4,6 +4,7 @@ import {
   EnumAlignSelf,
   EnumDisplay,
   EnumFlexDirection,
+  EnumFlexWrap,
   EnumJustifyContent,
   EnumOverflow,
   EnumPosition,
@@ -132,6 +133,16 @@ export const StaticLayouts = {
   },
   ["flex-shrink-10"]: {
     flexShrink: 10,
+  },
+
+  ["flex-wrap"]: {
+    flexWrap: "wrap" as EnumFlexWrap,
+  },
+  ["flex-wrap-reverse"]: {
+    flexWrap: "wrap-reverse" as EnumFlexWrap,
+  },
+  ["flex-nowrap"]: {
+    flexWrap: "nowrap" as EnumFlexWrap,
   },
 
   ["flex-row"]: {
