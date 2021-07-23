@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { useStyle } from "../../../styles";
 import { RectButton } from "react-native-gesture-handler";
 import { Text } from "react-native-elements";
@@ -7,7 +7,7 @@ import { LoadingSpinner } from "../spinner";
 
 export const Button: FunctionComponent<{
   color?: "primary" | "secondary" | "danger";
-  mode?: "fill" | "outline" | "text";
+  mode?: "fill" | "light" | "outline" | "text";
   size?: "default" | "small" | "large";
   text: string;
   loading?: boolean;
@@ -32,24 +32,83 @@ export const Button: FunctionComponent<{
 }) => {
   const style = useStyle();
 
-  const backgroundColorDefinition =
-    mode === "fill"
-      ? `background-color-button-${color}${disabled ? "-disabled" : ""}`
-      : mode === "outline"
-      ? "background-color-white"
-      : "background-color-transparent";
+  const [isPressed, setIsPressed] = useState(false);
 
-  const rippleColor = style.get(
-    `color-button-${color}-${
-      mode === "fill" ? "fill" : "outline"
-    }-ripple` as any
-  ).color;
+  const backgroundColorDefinition = (() => {
+    switch (mode) {
+      case "fill":
+        return `background-color-button-${color}${disabled ? "-disabled" : ""}`;
+      case "light":
+        if (disabled) {
+          return `background-color-button-${color}-disabled`;
+        }
+        return `background-color-button-${color}-light`;
+      case "outline":
+        return "background-color-white";
+      default:
+        return "background-color-transparent";
+    }
+  })();
 
-  const underlayColor = style.get(
-    `color-button-${color}-${
-      mode === "fill" ? "fill" : "outline"
-    }-underlay` as any
-  ).color;
+  const textColorDefinition = (() => {
+    switch (mode) {
+      case "fill":
+        return "color-white";
+      case "light":
+        if (disabled) {
+          return "color-white";
+        }
+        if (isPressed) {
+          return `color-button-${color}-text-pressed`;
+        }
+        return `color-${color}`;
+      case "outline":
+      case "text":
+        if (disabled) {
+          return `color-button-${color}-disabled`;
+        }
+        if (isPressed) {
+          return `color-button-${color}-text-pressed`;
+        }
+        return `color-button-${color}`;
+    }
+  })();
+
+  const rippleColor = (() => {
+    switch (mode) {
+      case "fill":
+        return style.get(`color-button-${color}-fill-ripple` as any).color;
+      case "light":
+        return style.get(`color-button-${color}-light-ripple` as any).color;
+      default:
+        return style.get(`color-button-${color}-outline-ripple` as any).color;
+    }
+  })();
+
+  const underlayColor = (() => {
+    switch (mode) {
+      case "fill":
+        return style.get(`color-button-${color}-fill-underlay` as any).color;
+      case "light":
+        return style.get(`color-button-${color}-light-underlay` as any).color;
+      default:
+        return style.get(`color-button-${color}-outline-underlay` as any).color;
+    }
+  })();
+
+  const outlineBorderDefinition = (() => {
+    if (mode !== "outline") {
+      return undefined;
+    }
+
+    if (disabled) {
+      return `border-color-button-${color}-disabled`;
+    }
+    if (isPressed) {
+      return `border-color-button-${color}-text-pressed`;
+    }
+    return `border-color-button-${color}`;
+  })();
 
   return (
     <View
@@ -63,10 +122,7 @@ export const Button: FunctionComponent<{
           ],
           [
             mode === "outline" && "border-width-1",
-            mode === "outline" &&
-              (`border-color-button-${color}${
-                disabled ? "-disabled" : ""
-              }` as any),
+            outlineBorderDefinition as any,
           ]
         ),
         containerStyle,
@@ -83,6 +139,7 @@ export const Button: FunctionComponent<{
           buttonStyle,
         ])}
         onPress={onPress}
+        onActiveStateChange={(active) => setIsPressed(active)}
         enabled={!loading && !disabled}
         rippleColor={rippleColor}
         underlayColor={underlayColor}
@@ -91,12 +148,8 @@ export const Button: FunctionComponent<{
         <Text
           style={StyleSheet.flatten([
             style.flatten(
-              ["text-button2", "text-center", "color-white"],
+              ["text-button2", "text-center", textColorDefinition as any],
               [
-                mode !== "fill" &&
-                  (`color-button-${color}${
-                    disabled ? "-disabled" : ""
-                  }` as any),
                 size === "large" && "text-button1",
                 loading && "opacity-transparent",
               ]
@@ -116,7 +169,7 @@ export const Button: FunctionComponent<{
           >
             <LoadingSpinner
               color={
-                mode === "fill"
+                mode === "fill" || (mode === "light" && disabled)
                   ? style.get("color-white").color
                   : style.get(
                       `color-button-${color}${
