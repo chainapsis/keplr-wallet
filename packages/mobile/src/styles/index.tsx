@@ -44,7 +44,7 @@ export const Colors = {
   "danger-800": "#810A22",
   "danger-900": "#65081B",
   icon: "#2C4163",
-  card: "rgba(255,255,255,0.9)",
+  card: "rgba(255,255,255,0.95)",
   success: "#2DCE89",
   error: "#F5365C",
   "text-black-high": "#132340",

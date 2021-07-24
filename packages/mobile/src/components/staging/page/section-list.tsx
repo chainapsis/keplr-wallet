@@ -19,12 +19,7 @@ export const PageWithSectionList: FunctionComponent<
       <SafeAreaView style={style.get("flex-1")}>
         <KeyboardAwareSectionList
           style={StyleSheet.flatten([
-            style.flatten([
-              "flex-1",
-              "padding-12",
-              "padding-top-0",
-              "overflow-visible",
-            ]),
+            style.flatten(["flex-1", "padding-0", "overflow-visible"]),
             propStyle,
           ])}
           keyboardOpeningTime={0}

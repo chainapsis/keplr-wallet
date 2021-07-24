@@ -83,12 +83,7 @@ export const CardHeaderFullButton: FunctionComponent<{
   const style = useStyle();
 
   return (
-    <View
-      style={style.flatten([
-        "border-radius-top-left-8",
-        "border-radius-top-right-8",
-      ])}
-    >
+    <View>
       <RectButton
         style={style.flatten(["padding-16", "padding-bottom-12"])}
         onPress={onPress}

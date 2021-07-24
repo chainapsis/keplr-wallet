@@ -13,9 +13,6 @@ export const Card: FunctionComponent<{
         style.flatten([
           "width-full",
           "background-color-card",
-          "border-radius-8",
-          "border-width-1",
-          "border-color-border-white",
           "overflow-hidden",
         ]),
         propStyle,
