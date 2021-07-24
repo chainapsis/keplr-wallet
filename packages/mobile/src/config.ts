@@ -17,6 +17,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: "uatom",
       coinDecimals: 6,
       coinGeckoId: "cosmos",
+      coinImageUrl: "https://asset-icons.s3.us-west-2.amazonaws.com/atom.png",
     },
     bip44: {
       coinType: 118,
@@ -28,6 +29,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uatom",
         coinDecimals: 6,
         coinGeckoId: "cosmos",
+        coinImageUrl: "https://asset-icons.s3.us-west-2.amazonaws.com/atom.png",
       },
     ],
     feeCurrencies: [
@@ -36,6 +38,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uatom",
         coinDecimals: 6,
         coinGeckoId: "cosmos",
+        coinImageUrl: "https://asset-icons.s3.us-west-2.amazonaws.com/atom.png",
       },
     ],
     coinType: 118,
