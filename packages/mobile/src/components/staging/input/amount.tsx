@@ -10,6 +10,8 @@ import {
   NagativeAmountError,
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
+import { Button } from "../button";
+import { useStyle } from "../../../styles";
 
 export const AmountInput: FunctionComponent<{
   labelStyle?: TextStyle;
@@ -29,6 +31,8 @@ export const AmountInput: FunctionComponent<{
     label,
     amountConfig,
   }) => {
+    const style = useStyle();
+
     const error = amountConfig.getError();
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -61,6 +65,19 @@ export const AmountInput: FunctionComponent<{
         onChangeText={(text) => {
           amountConfig.setAmount(text);
         }}
+        inputRight={
+          <Button
+            text="MAX"
+            mode="light"
+            size="small"
+            style={style.flatten(["padding-x-5", "padding-y-3"])}
+            containerStyle={style.flatten(["height-24", "border-radius-4"])}
+            textStyle={style.flatten(["normal-case", "text-caption2"])}
+            onPress={() => {
+              amountConfig.setIsMax(!amountConfig.isMax);
+            }}
+          />
+        }
         error={errorText}
         keyboardType="numeric"
       />
