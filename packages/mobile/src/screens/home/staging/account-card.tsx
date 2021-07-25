@@ -159,6 +159,9 @@ export const AccountCard: FunctionComponent<{
               mode="light"
               size="small"
               containerStyle={style.flatten(["min-width-80"])}
+              onPress={() => {
+                smartNavigation.navigateSmart("Validator.List", {});
+              }}
             />
           </View>
         </View>

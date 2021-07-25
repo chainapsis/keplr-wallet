@@ -102,6 +102,9 @@ export const DelegationsCard: FunctionComponent<{
             text="Stake"
             size="small"
             containerStyle={style.flatten(["min-width-80"])}
+            onPress={() => {
+              smartNavigation.navigateSmart("Validator.List", {});
+            }}
           />
         </View>
       </CardBody>

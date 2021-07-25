@@ -16,7 +16,6 @@ import {
 } from "@react-navigation/stack";
 import { SendScreen } from "./screens/send/staging";
 import {
-  ValidatorListScreen,
   StakedListScreen,
   DelegateScreen,
   RedelegateScreen,
@@ -61,6 +60,7 @@ import { RegisterConfig } from "@keplr-wallet/hooks";
 import {
   StakingDashboardScreen,
   ValidatorDetailsScreen,
+  ValidatorListScreen,
 } from "./screens/stake/staging";
 
 const {
@@ -93,6 +93,9 @@ const {
       upperScreenName: "Others",
     },
     "Validator.Details": {
+      upperScreenName: "Others",
+    },
+    "Validator.List": {
       upperScreenName: "Others",
     },
     Governance: {
@@ -232,6 +235,7 @@ export const OtherNavigation: FunctionComponent = () => {
         name="Validator.Details"
         component={ValidatorDetailsScreen}
       />
+      <Stack.Screen name="Validator.List" component={ValidatorListScreen} />
     </Stack.Navigator>
   );
 };
