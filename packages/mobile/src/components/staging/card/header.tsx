@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { Button } from "../button";
 import { RectButton } from "react-native-gesture-handler";
@@ -13,8 +13,9 @@ export const CardHeaderWithButton: FunctionComponent<{
   onPress?: () => void;
 
   buttonColor?: "primary" | "secondary" | "danger";
-  buttonMode?: "fill" | "outline" | "text";
+  buttonMode?: "fill" | "light" | "outline" | "text";
   buttonStyle?: ViewStyle;
+  buttonContainerStyle?: ViewStyle;
   buttonDisabled?: boolean;
   buttonLoading?: boolean;
 }> = ({
@@ -25,6 +26,7 @@ export const CardHeaderWithButton: FunctionComponent<{
   buttonColor = "primary",
   buttonMode = "fill",
   buttonStyle,
+  buttonContainerStyle,
   buttonDisabled = false,
   buttonLoading = false,
 }) => {
@@ -58,10 +60,8 @@ export const CardHeaderWithButton: FunctionComponent<{
       <View style={style.flatten(["flex-1"])} />
       <View>
         <Button
-          style={StyleSheet.flatten([
-            style.flatten(["padding-x-24"]),
-            buttonStyle,
-          ])}
+          style={buttonStyle}
+          containerStyle={buttonContainerStyle}
           onPress={onPress}
           size="small"
           text={buttonText}

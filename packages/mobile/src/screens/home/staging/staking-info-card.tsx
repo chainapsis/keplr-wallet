@@ -50,7 +50,6 @@ export const StakingInfoCard: FunctionComponent<{
           .trim(true)
           .upperCase(true)
           .toString()}
-        buttonText="Claim"
         onPress={async () => {
           try {
             await account.cosmos.sendWithdrawDelegationRewardMsgs(
@@ -60,6 +59,9 @@ export const StakingInfoCard: FunctionComponent<{
             console.log(e);
           }
         }}
+        buttonText="Claim"
+        buttonMode="light"
+        buttonContainerStyle={style.flatten(["min-width-80"])}
         buttonDisabled={
           !account.isReadyToSendMsgs || stakingReward.toDec().equals(new Dec(0))
         }

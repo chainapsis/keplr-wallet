@@ -80,8 +80,9 @@ const describeArc = (
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 export const DoubleDoughnutChart: FunctionComponent<{
+  size?: number;
   data: [number, number];
-}> = ({ data }) => {
+}> = ({ data, size = 188 }) => {
   const centerLocation = 90;
   const radius = 83;
 
@@ -132,7 +133,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
   }, [firstEndDegree, secondEndDegree]);
 
   return (
-    <Svg width="180" height="180" viewBox="0 0 180 180">
+    <Svg width={size} height={size} viewBox="0 0 180 180">
       <Circle
         cx={centerLocation}
         cy={centerLocation}

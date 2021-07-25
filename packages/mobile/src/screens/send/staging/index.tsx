@@ -41,7 +41,10 @@ export const SendScreen: FunctionComponent = observer(() => {
   const txStateIsValid = sendConfigError == null;
 
   return (
-    <PageWithScrollView contentContainerStyle={style.get("flex-grow-1")}>
+    <PageWithScrollView
+      style={style.flatten(["padding-16"])}
+      contentContainerStyle={style.get("flex-grow-1")}
+    >
       <AddressInput
         label="Recipient"
         recipientConfig={sendConfigs.recipientConfig}

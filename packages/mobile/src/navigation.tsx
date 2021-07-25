@@ -83,6 +83,9 @@ const {
     Home: {
       upperScreenName: "MainTabDrawer",
     },
+    Send: {
+      upperScreenName: "Others",
+    },
     Governance: {
       upperScreenName: "Others",
     },

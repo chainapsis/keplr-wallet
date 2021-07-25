@@ -7,9 +7,12 @@ import { useStyle } from "../../../styles";
 import { AddressChip } from "../../../components/staging/address-chip";
 import { DoubleDoughnutChart } from "../../../components/svg";
 import { Button } from "../../../components/staging/button";
-import { useNavigation } from "@react-navigation/native";
-import { Dot } from "../../../components/staging/dot";
 import { LoadingSpinner } from "../../../components/staging/spinner";
+import {
+  StakedTokenSymbol,
+  TokenSymbol,
+} from "../../../components/staging/token-symbol";
+import { useSmartNavigation } from "../../../navigation";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -18,7 +21,7 @@ export const AccountCard: FunctionComponent<{
 
   const style = useStyle();
 
-  const navigation = useNavigation();
+  const smartNavigation = useSmartNavigation();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -99,96 +102,63 @@ export const AccountCard: FunctionComponent<{
               ) : null}
             </View>
           </View>
-          <View style={style.flatten(["width-full", "margin-bottom-16"])}>
-            <View
-              style={style.flatten([
-                "flex-row",
-                "items-end",
-                "margin-bottom-4",
-              ])}
-            >
-              <View
-                style={style.flatten(["flex-1", "flex-row", "justify-end"])}
-              >
-                <Dot
-                  containerStyle={style.flatten(["margin-right-8"])}
-                  size={6}
-                  color={style.get("color-primary").color}
-                />
-                <Text
-                  style={style.flatten([
-                    "text-right",
-                    "subtitle1",
-                    "color-primary",
-                  ])}
-                >
-                  Available
-                </Text>
-              </View>
-              {/* Dummy view for the gap between elements */}
-              <View style={style.flatten(["width-8"])} />
-              <Text
-                style={style.flatten([
-                  "flex-1",
-                  "subtitle2",
-                  "color-text-black-medium",
-                ])}
-              >
-                {stakable.trim(true).shrink(true).upperCase(true).toString()}
-              </Text>
-            </View>
-            <View style={style.flatten(["flex-row", "items-end"])}>
-              <View
-                style={style.flatten(["flex-1", "flex-row", "justify-end"])}
-              >
-                <Dot
-                  containerStyle={style.flatten(["margin-right-8"])}
-                  size={6}
-                  color={style.get("color-primary-200").color}
-                />
-                <Text
-                  style={style.flatten([
-                    "text-right",
-                    "subtitle1",
-                    "color-primary-200",
-                  ])}
-                >
-                  Staked
-                </Text>
-              </View>
-              {/* Dummy view for the gap between elements */}
-              <View style={style.flatten(["width-8"])} />
-              <Text
-                style={style.flatten([
-                  "flex-1",
-                  "subtitle2",
-                  "color-text-black-medium",
-                ])}
-              >
-                {stakedSum.trim(true).shrink(true).upperCase(true).toString()}
-              </Text>
-            </View>
-          </View>
-          <View style={style.flatten(["flex-row"])}>
-            <Button
-              containerStyle={style.flatten(["flex-1"])}
-              text="Deposit"
-              mode="outline"
+          <View
+            style={style.flatten([
+              "flex-row",
+              "items-center",
+              "margin-bottom-24",
+            ])}
+          >
+            <TokenSymbol
+              size={40}
+              currency={chainStore.current.stakeCurrency}
             />
-            {/* Dummy view for the gap between elements */}
-            <View style={style.flatten(["width-12"])} />
+            <View style={style.flatten(["margin-left-12"])}>
+              <Text
+                style={style.flatten([
+                  "body3",
+                  "color-primary",
+                  "margin-bottom-4",
+                ])}
+              >
+                Available
+              </Text>
+              <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+                {stakable.maxDecimals(6).trim(true).shrink(true).toString()}
+              </Text>
+            </View>
+            <View style={style.flatten(["flex-1"])} />
             <Button
-              containerStyle={style.flatten(["flex-1"])}
               text="Send"
+              size="small"
+              containerStyle={style.flatten(["min-width-80"])}
               onPress={() => {
-                navigation.navigate("Others", {
-                  screen: "Send",
-                  params: {
-                    initAddress: "",
-                    initMemo: "",
-                  },
-                });
+                smartNavigation.navigateSmart("Send", {});
               }}
+            />
+          </View>
+          <View style={style.flatten(["flex-row", "items-center"])}>
+            <StakedTokenSymbol size={40} />
+            <View style={style.flatten(["margin-left-12"])}>
+              <Text
+                style={style.flatten([
+                  "body3",
+                  "color-primary",
+                  "margin-bottom-4",
+                ])}
+              >
+                Staked
+              </Text>
+              <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+                {stakedSum.maxDecimals(6).trim(true).shrink(true).toString()}
+              </Text>
+            </View>
+            <View style={style.flatten(["flex-1"])} />
+            <Button
+              text="Stake"
+              mode="light"
+              size="small"
+              containerStyle={style.flatten(["min-width-80"])}
             />
           </View>
         </View>

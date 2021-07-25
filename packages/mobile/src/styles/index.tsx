@@ -243,6 +243,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "12": 12,
     "16": 16,
     "24": 24,
+    "80": 80,
   },
   heights: {
     full: "100%",
@@ -260,7 +261,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "80": 80,
     "214": 214,
     "address-chip": 20,
-    "button-small": 44,
+    "button-small": 36,
     "button-default": 48,
     "button-large": 52,
     "governance-card-body-placeholder": 130,
