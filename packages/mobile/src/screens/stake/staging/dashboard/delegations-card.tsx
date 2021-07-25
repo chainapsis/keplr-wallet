@@ -16,6 +16,7 @@ import {
 } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 import { RightArrowIcon } from "../../../../components/staging/icon";
 import { RectButton } from "react-native-gesture-handler";
+import { useSmartNavigation } from "../../../../navigation";
 
 export const DelegationsCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -65,6 +66,8 @@ export const DelegationsCard: FunctionComponent<{
   }, [validators]);
 
   const style = useStyle();
+
+  const smartNavigation = useSmartNavigation();
 
   return (
     <Card style={containerStyle}>
@@ -125,6 +128,11 @@ export const DelegationsCard: FunctionComponent<{
                 "padding-x-16",
                 "padding-y-10",
               ])}
+              onPress={() => {
+                smartNavigation.navigateSmart("Validator.Details", {
+                  validatorAddress: del.validator_address,
+                });
+              }}
             >
               <Image
                 style={style.flatten([

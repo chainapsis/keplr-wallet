@@ -17,7 +17,6 @@ import {
 import { SendScreen } from "./screens/send/staging";
 import {
   ValidatorListScreen,
-  ValidatorDetailsScreen,
   StakedListScreen,
   DelegateScreen,
   RedelegateScreen,
@@ -59,7 +58,10 @@ import {
 } from "./screens/register/staging/mnemonic";
 import { RegisterEndScreen } from "./screens/register/staging/end";
 import { RegisterConfig } from "@keplr-wallet/hooks";
-import { StakingDashboardScreen } from "./screens/stake/staging";
+import {
+  StakingDashboardScreen,
+  ValidatorDetailsScreen,
+} from "./screens/stake/staging";
 
 const {
   SmartNavigatorProvider,
@@ -90,6 +92,9 @@ const {
     "Staking.Dashboard": {
       upperScreenName: "Others",
     },
+    "Validator.Details": {
+      upperScreenName: "Others",
+    },
     Governance: {
       upperScreenName: "Others",
     },
@@ -112,6 +117,9 @@ const {
     };
     "Register.RecoverMnemonic": {
       registerConfig: RegisterConfig;
+    };
+    "Validator.Details": {
+      validatorAddress: string;
     };
     "Governance Details": {
       proposalId: string;
@@ -219,6 +227,10 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         name="Staking.Dashboard"
         component={StakingDashboardScreen}
+      />
+      <Stack.Screen
+        name="Validator.Details"
+        component={ValidatorDetailsScreen}
       />
     </Stack.Navigator>
   );
