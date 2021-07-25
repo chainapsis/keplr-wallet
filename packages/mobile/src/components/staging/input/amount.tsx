@@ -68,7 +68,7 @@ export const AmountInput: FunctionComponent<{
         inputRight={
           <Button
             text="MAX"
-            mode="light"
+            mode={amountConfig.isMax ? "fill" : "light"}
             size="small"
             style={style.flatten(["padding-x-5", "padding-y-3"])}
             containerStyle={style.flatten(["height-24", "border-radius-4"])}
