@@ -5,6 +5,7 @@ import { Card, CardBody } from "../../../../components/staging/card";
 import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../../styles";
 import { Button } from "../../../../components/staging/button";
+import { Dec } from "@keplr-wallet/unit";
 
 export const MyRewardCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -13,6 +14,10 @@ export const MyRewardCard: FunctionComponent<{
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
+
+  const queryReward = queries.cosmos.queryRewards.getQueryBech32Address(
+    account.bech32Address
+  );
 
   const pendingStakableReward = queries.cosmos.queryRewards.getQueryBech32Address(
     account.bech32Address
@@ -72,6 +77,20 @@ export const MyRewardCard: FunctionComponent<{
           containerStyle={style.flatten(["margin-top-12"])}
           text="Claim All rewards"
           mode="light"
+          onPress={async () => {
+            try {
+              await account.cosmos.sendWithdrawDelegationRewardMsgs(
+                queryReward.getDescendingPendingRewardValidatorAddresses(8)
+              );
+            } catch (e) {
+              console.log(e);
+            }
+          }}
+          disabled={
+            !account.isReadyToSendMsgs ||
+            pendingStakableReward.toDec().equals(new Dec(0))
+          }
+          loading={account.isSendingMsg === "withdrawRewards"}
         />
       </CardBody>
     </Card>
