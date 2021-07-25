@@ -59,6 +59,7 @@ import {
 } from "./screens/register/staging/mnemonic";
 import { RegisterEndScreen } from "./screens/register/staging/end";
 import { RegisterConfig } from "@keplr-wallet/hooks";
+import { StakingDashboardScreen } from "./screens/stake/staging";
 
 const {
   SmartNavigatorProvider,
@@ -84,6 +85,9 @@ const {
       upperScreenName: "MainTabDrawer",
     },
     Send: {
+      upperScreenName: "Others",
+    },
+    "Staking.Dashboard": {
       upperScreenName: "Others",
     },
     Governance: {
@@ -211,6 +215,10 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         name="Governance Details"
         component={GovernanceDetailsScreen}
+      />
+      <Stack.Screen
+        name="Staking.Dashboard"
+        component={StakingDashboardScreen}
       />
     </Stack.Navigator>
   );
