@@ -21,7 +21,7 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
-import { CosmJSOfflineSigner } from "./cosmjs";
+import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 
 export interface ProxyRequest {
@@ -225,6 +225,10 @@ export class InjectedKeplr implements IKeplr {
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
+  }
+
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+    return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
   async suggestToken(chainId: string, contractAddress: string): Promise<void> {
