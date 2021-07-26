@@ -3,8 +3,10 @@ import React, { FunctionComponent, useRef } from "react";
 import { StatusBar, Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
+  DrawerActions,
   NavigationContainer,
   NavigationContainerRef,
+  useNavigation,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
@@ -17,7 +19,6 @@ import {
 import { SendScreen } from "./screens/send/staging";
 import {
   StakedListScreen,
-  DelegateScreen,
   RedelegateScreen,
   UndelegateScreen,
   RedelegateValidatorScreen,
@@ -40,7 +41,10 @@ import {
   useStyle,
 } from "./styles";
 import { GradientBackground } from "./components/svg";
-import { BorderlessButton } from "react-native-gesture-handler";
+import {
+  BorderlessButton,
+  TouchableOpacity,
+} from "react-native-gesture-handler";
 import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 import { SettingScreen } from "./screens/setting/staging";
 import {
@@ -62,6 +66,7 @@ import {
   ValidatorDetailsScreen,
   ValidatorListScreen,
 } from "./screens/stake/staging";
+import { DoubleRightArrowIcon } from "./components/staging/icon";
 
 const {
   SmartNavigatorProvider,
@@ -145,19 +150,44 @@ const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
 export const MainNavigation: FunctionComponent = () => {
+  const style = useStyle();
+
+  const navigation = useNavigation();
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerBackground: () => <GradientBackground />,
-        headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleStyle: style.flatten(["h3", "color-black"]),
         headerTitleAlign: "center",
+        headerStyle: {
+          elevation: 0,
+          shadowOpacity: 0,
+        },
         headerBackTitleVisible: false,
         ...TransitionPresets.SlideFromRightIOS,
       }}
       initialRouteName="Home"
       headerMode="screen"
     >
-      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
+            <TouchableOpacity
+              style={style.flatten(["padding-8", "margin-left-4"])}
+              onPress={() => {
+                navigation.dispatch(DrawerActions.toggleDrawer());
+              }}
+            >
+              <DoubleRightArrowIcon
+                height={18}
+                color={style.get("color-primary").color}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+        name="Home"
+        component={HomeScreen}
+      />
     </Stack.Navigator>
   );
 };
