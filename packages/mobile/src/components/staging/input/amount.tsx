@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { TextInput } from "./input";
-import { TextStyle, ViewStyle } from "react-native";
+import { TextStyle, View, ViewStyle } from "react-native";
 import {
   EmptyAmountError,
   IAmountConfig,
@@ -66,17 +66,25 @@ export const AmountInput: FunctionComponent<{
           amountConfig.setAmount(text);
         }}
         inputRight={
-          <Button
-            text="MAX"
-            mode={amountConfig.isMax ? "fill" : "light"}
-            size="small"
-            style={style.flatten(["padding-x-5", "padding-y-3"])}
-            containerStyle={style.flatten(["height-24", "border-radius-4"])}
-            textStyle={style.flatten(["normal-case", "text-caption2"])}
-            onPress={() => {
-              amountConfig.setIsMax(!amountConfig.isMax);
-            }}
-          />
+          <View
+            style={style.flatten([
+              "height-1",
+              "overflow-visible",
+              "justify-center",
+            ])}
+          >
+            <Button
+              text="MAX"
+              mode={amountConfig.isMax ? "fill" : "light"}
+              size="small"
+              style={style.flatten(["padding-x-5", "padding-y-3"])}
+              containerStyle={style.flatten(["height-24", "border-radius-4"])}
+              textStyle={style.flatten(["normal-case", "text-caption2"])}
+              onPress={() => {
+                amountConfig.setIsMax(!amountConfig.isMax);
+              }}
+            />
+          </View>
         }
         error={errorText}
         keyboardType="numeric"
