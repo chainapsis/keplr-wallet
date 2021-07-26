@@ -249,6 +249,7 @@ const handleGetKeyMsg: (
         (await service.chainsService.getChainInfo(msg.chainId)).bech32Config
           .bech32PrefixAccAddr
       ),
+      isNanoLedger: key.isNanoLedger,
     };
   };
 };

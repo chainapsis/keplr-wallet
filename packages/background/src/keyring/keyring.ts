@@ -25,6 +25,7 @@ export interface Key {
   algo: string;
   pubKey: Uint8Array;
   address: Uint8Array;
+  isNanoLedger: boolean;
 }
 
 export type MultiKeyStoreInfoElem = Pick<
@@ -532,6 +533,7 @@ export class KeyRing {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
         address: pubKey.getAddress(),
+        isNanoLedger: true,
       };
     } else {
       const privKey = this.loadPrivKey(coinType);
@@ -541,6 +543,7 @@ export class KeyRing {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
         address: pubKey.getAddress(),
+        isNanoLedger: false,
       };
     }
   }
