@@ -65,6 +65,7 @@ import {
   StakingDashboardScreen,
   ValidatorDetailsScreen,
   ValidatorListScreen,
+  DelegateScreen,
 } from "./screens/stake/staging";
 import { DoubleRightArrowIcon } from "./components/staging/icon";
 
@@ -103,6 +104,9 @@ const {
     "Validator.List": {
       upperScreenName: "Others",
     },
+    Delegate: {
+      upperScreenName: "Others",
+    },
     Governance: {
       upperScreenName: "Others",
     },
@@ -127,6 +131,9 @@ const {
       registerConfig: RegisterConfig;
     };
     "Validator.Details": {
+      validatorAddress: string;
+    };
+    Delegate: {
       validatorAddress: string;
     };
     "Governance Details": {
@@ -245,7 +252,6 @@ export const OtherNavigation: FunctionComponent = () => {
         component={ValidatorDetailsScreen}
       />
       <Stack.Screen name="Staked List" component={StakedListScreen} />
-      <Stack.Screen name="Delegate" component={DelegateScreen} />
       <Stack.Screen name="Undelegate" component={UndelegateScreen} />
       <Stack.Screen name="Redelegate" component={RedelegateScreen} />
       <Stack.Screen
@@ -266,6 +272,7 @@ export const OtherNavigation: FunctionComponent = () => {
         component={ValidatorDetailsScreen}
       />
       <Stack.Screen name="Validator.List" component={ValidatorListScreen} />
+      <Stack.Screen name="Delegate" component={DelegateScreen} />
     </Stack.Navigator>
   );
 };

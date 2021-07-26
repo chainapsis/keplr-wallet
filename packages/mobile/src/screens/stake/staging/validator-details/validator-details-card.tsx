@@ -7,6 +7,7 @@ import { Image, Text, View } from "react-native";
 import { useStyle } from "../../../../styles";
 import { CoinPretty, Dec, IntPretty } from "@keplr-wallet/unit";
 import { Button } from "../../../../components/staging/button";
+import { useSmartNavigation } from "../../../../navigation";
 
 export const ValidatorDetailsCard: FunctionComponent<{
   validatorAddress: string;
@@ -36,6 +37,8 @@ export const ValidatorDetailsCard: FunctionComponent<{
     unbondedValidators.validators,
     validatorAddress,
   ]);
+
+  const smartNavigation = useSmartNavigation();
 
   const style = useStyle();
 
@@ -125,7 +128,14 @@ export const ValidatorDetailsCard: FunctionComponent<{
               {validator.description.details}
             </Text>
           </View>
-          <Button text="Stake" />
+          <Button
+            text="Stake"
+            onPress={() => {
+              smartNavigation.navigateSmart("Delegate", {
+                validatorAddress,
+              });
+            }}
+          />
         </CardBody>
       ) : null}
     </Card>

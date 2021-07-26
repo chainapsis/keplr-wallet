@@ -8,3 +8,4 @@ export * from "./amount";
 export * from "./send-gas";
 export * from "./send-tx";
 export * from "./chain";
+export * from "./delegate-tx";
