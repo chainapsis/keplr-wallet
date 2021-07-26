@@ -6,6 +6,7 @@ import { OfflineDirectSigner } from "@cosmjs/proto-signing";
 export function init(
   keplr: Keplr,
   getOfflineSigner: (chainId: string) => OfflineSigner & OfflineDirectSigner,
+  getOfflineSignerOnlyAmino: (chainId: string) => OfflineSigner,
   getEnigmaUtils: (chainId: string) => SecretUtils
 ) {
   // Give a priority to production build.
@@ -17,12 +18,16 @@ export function init(
     if (!window.getOfflineSigner) {
       window.getOfflineSigner = getOfflineSigner;
     }
+    if (!window.getOfflineSignerOnlyAmino) {
+      window.getOfflineSignerOnlyAmino = getOfflineSignerOnlyAmino;
+    }
     if (!window.getEnigmaUtils) {
       window.getEnigmaUtils = getEnigmaUtils;
     }
   } else {
     window.keplr = keplr;
     window.getOfflineSigner = getOfflineSigner;
+    window.getOfflineSignerOnlyAmino = getOfflineSignerOnlyAmino;
     window.getEnigmaUtils = getEnigmaUtils;
   }
 }
