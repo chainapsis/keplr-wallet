@@ -9,7 +9,7 @@ import { cosmos } from "@keplr-wallet/cosmos";
 import { OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
 
-export class CosmJSOfflineSigner implements OfflineSigner, OfflineDirectSigner {
+export class CosmJSOfflineSignerOnlyAmino implements OfflineSigner {
   constructor(
     protected readonly chainId: string,
     protected readonly keplr: Keplr
@@ -45,6 +45,25 @@ export class CosmJSOfflineSigner implements OfflineSigner, OfflineDirectSigner {
     return await this.keplr.signAmino(this.chainId, signerAddress, signDoc);
   }
 
+  // Fallback function for the legacy cosmjs implementation before the staragte.
+  async sign(
+    signerAddress: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.signAmino(signerAddress, signDoc);
+  }
+}
+
+export class CosmJSOfflineSigner
+  extends CosmJSOfflineSignerOnlyAmino
+  implements OfflineSigner, OfflineDirectSigner {
+  constructor(
+    protected readonly chainId: string,
+    protected readonly keplr: Keplr
+  ) {
+    super(chainId, keplr);
+  }
+
   async signDirect(
     signerAddress: string,
     signDoc: cosmos.tx.v1beta1.ISignDoc
@@ -60,13 +79,5 @@ export class CosmJSOfflineSigner implements OfflineSigner, OfflineDirectSigner {
     }
 
     return await this.keplr.signDirect(this.chainId, signerAddress, signDoc);
-  }
-
-  // Fallback function for the legacy cosmjs implementation before the staragte.
-  async sign(
-    signerAddress: string,
-    signDoc: StdSignDoc
-  ): Promise<AminoSignResponse> {
-    return await this.signAmino(signerAddress, signDoc);
   }
 }

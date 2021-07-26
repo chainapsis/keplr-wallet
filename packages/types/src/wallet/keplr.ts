@@ -66,6 +66,7 @@ export interface Keplr {
   ): Promise<Uint8Array>;
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner;
 
   suggestToken(chainId: string, contractAddress: string): Promise<void>;
   getSecret20ViewingKey(
