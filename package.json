@@ -69,6 +69,8 @@
     "ts-jest": "^26.5.5"
   },
   "resolutions": {
-    "@types/react": "^16.14.4"
+    "@types/react": "^16.14.4",
+    "@cosmjs/crypto": "^0.24.0-alpha.25",
+    "@iov/crypto": "2.1.0"
   }
 }
