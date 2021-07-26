@@ -76,6 +76,9 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       amount = "0" + amount;
     }
 
+    if (this.isMax) {
+      this.setIsMax(false);
+    }
     this._amount = amount;
   }
 
