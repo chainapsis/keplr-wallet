@@ -11,7 +11,10 @@ export const RegisterEndScreen: FunctionComponent = () => {
   const smartNavigation = useSmartNavigation();
 
   return (
-    <PageWithScrollView contentContainerStyle={style.get("flex-grow-1")}>
+    <PageWithScrollView
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-12", "padding-bottom-12"])}
+    >
       <View style={style.flatten(["flex-1"])} />
       <Button
         size="large"

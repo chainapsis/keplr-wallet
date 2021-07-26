@@ -61,7 +61,10 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   });
 
   return (
-    <PageWithScrollView contentContainerStyle={style.get("flex-grow-1")}>
+    <PageWithScrollView
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-12", "padding-bottom-12"])}
+    >
       <Text
         style={style.flatten([
           "h4",
