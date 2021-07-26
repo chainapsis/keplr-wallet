@@ -35,9 +35,10 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   const data = useMemo(() => {
-    const data = bondedValidators.validators.filter((val) =>
-      val.description.moniker?.toLowerCase().includes(search.toLowerCase())
-    );
+    let data = bondedValidators.validators;
+    if (search) {
+      data = data.filter((val) => val.description.moniker?.includes(search));
+    }
     switch (sort) {
       case "APY":
         data.sort((val1, val2) => {
