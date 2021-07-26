@@ -252,7 +252,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "80": 80,
     "214": 214,
     "address-chip": 20,
-    "button-small": 36,
+    "button-small": 38,
     "button-default": 48,
     "button-large": 52,
     "governance-card-body-placeholder": 130,
