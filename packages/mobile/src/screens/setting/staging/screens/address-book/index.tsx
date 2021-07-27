@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../../../../components/staging/page";
 import { RectButton, TouchableOpacity } from "react-native-gesture-handler";
 import { useStyle } from "../../../../../styles";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { useSmartNavigation } from "../../../../../navigation";
 import {
   IMemoConfig,
@@ -83,51 +83,60 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
     <PageWithScrollView>
       {addressBookConfig.addressBookDatas.map((data, i) => {
         return (
-          <RectButton
-            key={i.toString()}
-            style={style.flatten([
-              "background-color-white",
-              "padding-x-18",
-              "padding-y-14",
-            ])}
-            enabled={recipientConfig != null || memoConfig != null}
-            onPress={() => {
-              if (recipientConfig || memoConfig) {
-                addressBookConfig.selectAddressAt(i);
-                smartNavigation.goBack();
-              }
-            }}
-          >
-            <Text
+          <React.Fragment key={i.toString()}>
+            <RectButton
               style={style.flatten([
-                "subtitle2",
-                "color-text-black-medium",
-                "margin-bottom-4",
+                "background-color-white",
+                "padding-x-18",
+                "padding-y-14",
               ])}
+              enabled={recipientConfig != null || memoConfig != null}
+              onPress={() => {
+                if (recipientConfig || memoConfig) {
+                  addressBookConfig.selectAddressAt(i);
+                  smartNavigation.goBack();
+                }
+              }}
             >
-              {data.name}
-            </Text>
-            {data.memo ? (
               <Text
                 style={style.flatten([
-                  "body3",
-                  "color-text-black-low",
+                  "subtitle2",
+                  "color-text-black-medium",
                   "margin-bottom-4",
                 ])}
               >
-                {data.memo}
+                {data.name}
               </Text>
+              {data.memo ? (
+                <Text
+                  style={style.flatten([
+                    "body3",
+                    "color-text-black-low",
+                    "margin-bottom-4",
+                  ])}
+                >
+                  {data.memo}
+                </Text>
+              ) : null}
+              <Text
+                style={style.flatten([
+                  "text-caption1",
+                  "font-medium",
+                  "color-primary",
+                ])}
+              >
+                {Bech32Address.shortenAddress(data.address, 30)}
+              </Text>
+            </RectButton>
+            {addressBookConfig.addressBookDatas.length - 1 !== i ? (
+              <View
+                style={style.flatten([
+                  "height-1",
+                  "background-color-border-white",
+                ])}
+              />
             ) : null}
-            <Text
-              style={style.flatten([
-                "text-caption1",
-                "font-medium",
-                "color-primary",
-              ])}
-            >
-              {Bech32Address.shortenAddress(data.address, 30)}
-            </Text>
-          </RectButton>
+          </React.Fragment>
         );
       })}
     </PageWithScrollView>
