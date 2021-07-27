@@ -48,6 +48,7 @@ export const SendScreen: FunctionComponent = observer(() => {
       <AddressInput
         label="Recipient"
         recipientConfig={sendConfigs.recipientConfig}
+        memoConfig={sendConfigs.memoConfig}
       />
       <CurrencySelector
         label="Token"

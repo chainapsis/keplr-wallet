@@ -60,7 +60,12 @@ import {
   RecoverMnemonicScreen,
 } from "./screens/register/staging/mnemonic";
 import { RegisterEndScreen } from "./screens/register/staging/end";
-import { RegisterConfig } from "@keplr-wallet/hooks";
+import {
+  AddressBookConfig,
+  IMemoConfig,
+  IRecipientConfig,
+  RegisterConfig,
+} from "@keplr-wallet/hooks";
 import {
   StakingDashboardScreen,
   ValidatorDetailsScreen,
@@ -68,6 +73,10 @@ import {
   DelegateScreen,
 } from "./screens/stake/staging";
 import { DoubleRightArrowIcon } from "./components/staging/icon";
+import {
+  AddAddressBookScreen,
+  AddressBookScreen,
+} from "./screens/setting/staging/screens/address-book";
 
 const {
   SmartNavigatorProvider,
@@ -119,6 +128,12 @@ const {
     SettingSelectAccount: {
       upperScreenName: "Settings",
     },
+    AddressBook: {
+      upperScreenName: "AddressBooks",
+    },
+    AddAddressBook: {
+      upperScreenName: "AddressBooks",
+    },
   }).withParams<{
     "Register.NewMnemonic": {
       registerConfig: RegisterConfig;
@@ -138,6 +153,14 @@ const {
     };
     "Governance Details": {
       proposalId: string;
+    };
+    AddressBook: {
+      recipientConfig?: IRecipientConfig;
+      memoConfig?: IMemoConfig;
+    };
+    AddAddressBook: {
+      chainId: string;
+      addressBookConfig: AddressBookConfig;
     };
   }>()
 );
@@ -302,6 +325,24 @@ export const SettingStackScreen: FunctionComponent = () => {
   );
 };
 
+export const AddressBookStackScreen: FunctionComponent = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleAlign: "center",
+        headerBackTitleVisible: false,
+        ...TransitionPresets.SlideFromRightIOS,
+      }}
+      headerMode="screen"
+    >
+      <Stack.Screen name="AddressBook" component={AddressBookScreen} />
+      <Stack.Screen name="AddAddressBook" component={AddAddressBookScreen} />
+    </Stack.Navigator>
+  );
+};
+
 export const MainTabNavigation: FunctionComponent = () => {
   const style = useStyle();
 
@@ -444,6 +485,10 @@ export const AppNavigation: FunctionComponent = observer(() => {
             />
             <Stack.Screen name="Register" component={RegisterNavigation} />
             <Stack.Screen name="Others" component={OtherNavigation} />
+            <Stack.Screen
+              name="AddressBooks"
+              component={AddressBookStackScreen}
+            />
           </Stack.Navigator>
         )}
       </NavigationContainer>

@@ -5,6 +5,7 @@ import {
   ENSFailedToFetchError,
   ENSIsFetchingError,
   ENSNotSupportedError,
+  IMemoConfig,
   InvalidBech32Error,
   IRecipientConfig,
 } from "@keplr-wallet/hooks";
@@ -13,6 +14,9 @@ import { TextInput } from "./input";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 import { LoadingSpinner } from "../spinner";
 import { useStyle } from "../../../styles";
+import { AddressBookIcon } from "../icon";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useSmartNavigation } from "../../../navigation";
 
 export const AddressInput: FunctionComponent<{
   labelStyle?: TextStyle;
@@ -23,6 +27,7 @@ export const AddressInput: FunctionComponent<{
   label: string;
 
   recipientConfig: IRecipientConfig;
+  memoConfig: IMemoConfig;
 
   disableAddressBook?: boolean;
 }> = observer(
@@ -33,7 +38,11 @@ export const AddressInput: FunctionComponent<{
     errorLabelStyle,
     label,
     recipientConfig,
+    memoConfig,
+    disableAddressBook,
   }) => {
+    const smartNavigation = useSmartNavigation();
+
     const style = useStyle();
 
     const isENSAddress = ObservableEnsFetcher.isValidENS(
@@ -96,6 +105,32 @@ export const AddressInput: FunctionComponent<{
               recipientConfig.recipient
             )
           ) : undefined
+        }
+        inputRight={
+          disableAddressBook ? null : (
+            <View
+              style={style.flatten([
+                "height-1",
+                "overflow-visible",
+                "justify-center",
+              ])}
+            >
+              <TouchableOpacity
+                style={style.flatten(["padding-4"])}
+                onPress={() => {
+                  smartNavigation.navigateSmart("AddressBook", {
+                    recipientConfig,
+                    memoConfig,
+                  });
+                }}
+              >
+                <AddressBookIcon
+                  color={style.get("color-primary").color}
+                  height={18}
+                />
+              </TouchableOpacity>
+            </View>
+          )
         }
         autoCorrect={false}
         autoCapitalize="none"
