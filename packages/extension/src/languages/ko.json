@@ -99,6 +99,7 @@
   "setting.token.add.decimals": "소수점 자릿수",
   "setting.token.add.button.submit": "등록",
   "setting.token.add.secret20.checkbox.import-viewing-key": "(고급) 뷰잉키를 이미 가지고 계십니까?",
+  "setting.token.add.secret20.checkbox.use-suggested-viewing-key": "웹페이지가 제안한 뷰잉키를 사용하시겠습니까?",
   "setting.token.add.secret20.viewing-key": "뷰잉 키",
 
   "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",

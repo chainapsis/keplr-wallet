@@ -251,8 +251,16 @@ export class InjectedKeplr implements IKeplr {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  async suggestToken(chainId: string, contractAddress: string): Promise<void> {
-    return await this.requestMethod("suggestToken", [chainId, contractAddress]);
+  async suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ): Promise<void> {
+    return await this.requestMethod("suggestToken", [
+      chainId,
+      contractAddress,
+      viewingKey,
+    ]);
   }
 
   async getSecret20ViewingKey(

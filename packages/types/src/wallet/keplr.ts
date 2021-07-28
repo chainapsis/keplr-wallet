@@ -75,7 +75,11 @@ export interface Keplr {
     chainId: string
   ): Promise<OfflineSigner | OfflineDirectSigner>;
 
-  suggestToken(chainId: string, contractAddress: string): Promise<void>;
+  suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ): Promise<void>;
   getSecret20ViewingKey(
     chainId: string,
     contractAddress: string

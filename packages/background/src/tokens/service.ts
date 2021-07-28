@@ -46,7 +46,12 @@ export class TokensService {
     this.clearTokens(chainId);
   };
 
-  async suggestToken(env: Env, chainId: string, contractAddress: string) {
+  async suggestToken(
+    env: Env,
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ) {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
 
     const find = (await this.getTokens(chainId)).find(
@@ -68,6 +73,7 @@ export class TokensService {
     const params = {
       chainId,
       contractAddress,
+      viewingKey,
     };
 
     const appCurrency = await this.interactionService.waitApprove(
