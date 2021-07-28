@@ -6,6 +6,7 @@
 **/*.ttf
 **/*.secret
 **/*.md
+**/*.py
 .DS_Store
 
 node_modules
