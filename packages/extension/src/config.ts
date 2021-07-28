@@ -30,7 +30,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       {
         coinDenom: "TESTFET",
         coinMinimalDenom: "atestfet",
-        coinDecimals: 6,
+        coinDecimals: 18,
       },
     ],
     coinType: 118,
