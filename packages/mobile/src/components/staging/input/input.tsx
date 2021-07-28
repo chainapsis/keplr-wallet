@@ -101,7 +101,12 @@ export const TextInput = React.forwardRef<
           <View>
             <Text
               style={StyleSheet.flatten([
-                style.flatten(["absolute", "text-caption1", "color-primary"]),
+                style.flatten([
+                  "absolute",
+                  "text-caption2",
+                  "color-primary",
+                  "margin-left-4",
+                ]),
                 props.errorLabelStyle,
               ])}
             >
@@ -116,7 +121,12 @@ export const TextInput = React.forwardRef<
         <View>
           <Text
             style={StyleSheet.flatten([
-              style.flatten(["absolute", "text-caption1", "color-error"]),
+              style.flatten([
+                "absolute",
+                "text-caption2",
+                "color-error",
+                "margin-left-4",
+              ]),
               props.errorLabelStyle,
             ])}
           >
