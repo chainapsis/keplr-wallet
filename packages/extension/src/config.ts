@@ -7,7 +7,7 @@ export const EmbedChainInfos: ChainInfo[] = [
   {
     rpc: "https://rpc-stargateworld.fetch.ai",
     rest: "https://rest-stargateworld.fetch.ai",
-    chainId: "stargateworld-1",
+    chainId: "stargateworld-2",
     chainName: "Stargate World",
     stakeCurrency: {
       coinDenom: "TESTFET",
