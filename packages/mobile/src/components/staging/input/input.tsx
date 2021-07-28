@@ -82,9 +82,9 @@ export const TextInput = React.forwardRef<
             }
             style={StyleSheet.flatten([
               style.flatten([
-                "body2",
-                "color-text-black-medium",
                 "padding-0",
+                "body2-in-text-input",
+                "color-text-black-medium",
                 "flex-1",
               ]),
               propsStyle,

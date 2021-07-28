@@ -1,5 +1,6 @@
 import { createStyleProvider } from "./builder";
 import { EnumFontWeight, EnumTextTransform } from "./builder/types";
+import { Platform } from "react-native";
 
 export * from "./layout";
 export * from "./font";
@@ -173,6 +174,25 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       letterSpacing: 1,
       textTransform: "uppercase" as EnumTextTransform,
     },
+    // This style is for the text input and aims to mock the body2 style.
+    // In IOS, it is hard to position the input text to the middle vertically.
+    // So, to solve this problem, decrease the line height and add the additional vertical padding.
+    "body2-in-text-input": Platform.select({
+      ios: {
+        fontSize: 16,
+        lineHeight: 19,
+        fontWeight: "400" as EnumFontWeight,
+        letterSpacing: 0.25,
+        paddingTop: 1.5,
+        paddingBottom: 1.5,
+      },
+      android: {
+        fontSize: 16,
+        lineHeight: 22,
+        fontWeight: "400" as EnumFontWeight,
+        letterSpacing: 0.25,
+      },
+    }),
   },
   colors: {
     ...Colors,
