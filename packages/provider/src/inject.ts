@@ -72,7 +72,17 @@ export class InjectedKeplr implements IKeplr {
         }
 
         if (message.method === "getOfflineSigner") {
-          throw new Error("GetEnigmaUtils method can't be proxy request");
+          throw new Error("GetOfflineSigner method can't be proxy request");
+        }
+
+        if (message.method === "getOfflineSignerOnlyAmino") {
+          throw new Error(
+            "GetOfflineSignerOnlyAmino method can't be proxy request"
+          );
+        }
+
+        if (message.method === "getOfflineSignerAuto") {
+          throw new Error("GetOfflineSignerAuto method can't be proxy request");
         }
 
         if (message.method === "getEnigmaUtils") {
@@ -229,6 +239,16 @@ export class InjectedKeplr implements IKeplr {
 
   getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+  }
+
+  async getOfflineSignerAuto(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
+    const key = await this.getKey(chainId);
+    if (key.isNanoLedger) {
+      return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+    }
+    return new CosmJSOfflineSigner(chainId, this);
   }
 
   async suggestToken(chainId: string, contractAddress: string): Promise<void> {

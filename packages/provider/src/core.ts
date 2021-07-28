@@ -119,6 +119,16 @@ export class Keplr implements IKeplr {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
+  async getOfflineSignerAuto(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
+    const key = await this.getKey(chainId);
+    if (key.isNanoLedger) {
+      return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+    }
+    return new CosmJSOfflineSigner(chainId, this);
+  }
+
   async suggestToken(chainId: string, contractAddress: string): Promise<void> {
     const msg = new SuggestTokenMsg(chainId, contractAddress);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
