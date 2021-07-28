@@ -5,6 +5,38 @@ import { PRIVILEGED_ORIGINS } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
+    rpc: "https://rpc-andromeda.fetch.ai",
+    rest: "https://rest-andromeda.fetch.ai",
+    chainId: "andromeda-1",
+    chainName: "Andromeda",
+    stakeCurrency: {
+      coinDenom: "TESTFET",
+      coinMinimalDenom: "atestfet",
+      coinDecimals: 18,
+      coinGeckoId: "fetch-ai",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("fetch"),
+    currencies: [
+      {
+        coinDenom: "TESTFET",
+        coinMinimalDenom: "atestfet",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TESTFET",
+        coinMinimalDenom: "atestfet",
+        coinDecimals: 18,
+      },
+    ],
+    coinType: 118,
+    features: [],
+  },
+  {
     rpc: "https://rpc-stargateworld.fetch.ai",
     rest: "https://rest-stargateworld.fetch.ai",
     chainId: "stargateworld-2",
