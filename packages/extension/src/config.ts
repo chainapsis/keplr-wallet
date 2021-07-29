@@ -360,7 +360,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: SIFCHAIN_RPC_CONFIG,
     rest: SIFCHAIN_REST_ENDPOINT,
     restConfig: SIFCHAIN_REST_CONFIG,
-    chainId: "sifchain",
+    chainId: "sifchain-1",
     chainName: "Sifchain",
     stakeCurrency: {
       coinDenom: "ROWAN",
@@ -676,6 +676,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 1000000000000,
       high: 2000000000000,
     },
+    features: ["stargate"],
   },
   {
     rpc: CERTIK_RPC_ENDPOINT,
