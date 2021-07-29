@@ -33,7 +33,7 @@ import { SecretUtils } from "secretjs/types/enigmautils";
 import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
-import { CosmJSOfflineSigner } from "./cosmjs";
+import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 
 export class Keplr implements IKeplr {
@@ -115,8 +115,26 @@ export class Keplr implements IKeplr {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  async suggestToken(chainId: string, contractAddress: string): Promise<void> {
-    const msg = new SuggestTokenMsg(chainId, contractAddress);
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+    return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+  }
+
+  async getOfflineSignerAuto(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
+    const key = await this.getKey(chainId);
+    if (key.isNanoLedger) {
+      return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+    }
+    return new CosmJSOfflineSigner(chainId, this);
+  }
+
+  async suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ): Promise<void> {
+    const msg = new SuggestTokenMsg(chainId, contractAddress, viewingKey);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 

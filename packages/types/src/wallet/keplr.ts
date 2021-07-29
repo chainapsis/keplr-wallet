@@ -17,6 +17,10 @@ export interface Key {
   readonly pubKey: Uint8Array;
   readonly address: Uint8Array;
   readonly bech32Address: string;
+  // Indicate whether the selected account is from the nano ledger.
+  // Because current cosmos app in the nano ledger doesn't support the direct (proto) format msgs,
+  // this can be used to select the amino or direct signer.
+  readonly isNanoLedger: boolean;
 }
 
 export interface KeplrIntereactionOptions {
@@ -66,8 +70,16 @@ export interface Keplr {
   ): Promise<Uint8Array>;
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner;
+  getOfflineSignerAuto(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner>;
 
-  suggestToken(chainId: string, contractAddress: string): Promise<void>;
+  suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ): Promise<void>;
   getSecret20ViewingKey(
     chainId: string,
     contractAddress: string

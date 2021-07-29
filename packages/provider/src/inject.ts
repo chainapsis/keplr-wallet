@@ -21,7 +21,7 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
-import { CosmJSOfflineSigner } from "./cosmjs";
+import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 
 export interface ProxyRequest {
@@ -72,7 +72,17 @@ export class InjectedKeplr implements IKeplr {
         }
 
         if (message.method === "getOfflineSigner") {
-          throw new Error("GetEnigmaUtils method can't be proxy request");
+          throw new Error("GetOfflineSigner method can't be proxy request");
+        }
+
+        if (message.method === "getOfflineSignerOnlyAmino") {
+          throw new Error(
+            "GetOfflineSignerOnlyAmino method can't be proxy request"
+          );
+        }
+
+        if (message.method === "getOfflineSignerAuto") {
+          throw new Error("GetOfflineSignerAuto method can't be proxy request");
         }
 
         if (message.method === "getEnigmaUtils") {
@@ -227,8 +237,30 @@ export class InjectedKeplr implements IKeplr {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  async suggestToken(chainId: string, contractAddress: string): Promise<void> {
-    return await this.requestMethod("suggestToken", [chainId, contractAddress]);
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+    return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+  }
+
+  async getOfflineSignerAuto(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
+    const key = await this.getKey(chainId);
+    if (key.isNanoLedger) {
+      return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+    }
+    return new CosmJSOfflineSigner(chainId, this);
+  }
+
+  async suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ): Promise<void> {
+    return await this.requestMethod("suggestToken", [
+      chainId,
+      contractAddress,
+      viewingKey,
+    ]);
   }
 
   async getSecret20ViewingKey(

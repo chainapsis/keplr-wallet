@@ -48,7 +48,12 @@ const handleSuggestTokenMsg: (
       msg.origin
     );
 
-    await service.suggestToken(env, msg.chainId, msg.contractAddress);
+    await service.suggestToken(
+      env,
+      msg.chainId,
+      msg.contractAddress,
+      msg.viewingKey
+    );
   };
 };
 
