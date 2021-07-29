@@ -341,7 +341,13 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             htmlFor="viewing-key-checkbox"
             style={{ color: "#666666", paddingTop: "1px" }}
           >
-            <FormattedMessage id="setting.token.add.secret20.checkbox.import-viewing-key" />
+            <FormattedMessage
+              id={
+                tokensStore.waitingSuggestedToken?.data.viewingKey
+                  ? "setting.token.add.secret20.checkbox.use-suggested-viewing-key"
+                  : "setting.token.add.secret20.checkbox.import-viewing-key"
+              }
+            />
           </label>
         </div>
         <Button
