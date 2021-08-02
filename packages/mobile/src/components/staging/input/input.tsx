@@ -25,6 +25,9 @@ export const TextInput = React.forwardRef<
 
     topInInputContainer?: React.ReactNode;
     bottomInInputContainer?: React.ReactNode;
+
+    inputLeft?: React.ReactNode;
+    inputRight?: React.ReactNode;
   }
 >((props, ref) => {
   const { style: propsStyle, ...restProps } = props;
@@ -70,18 +73,27 @@ export const TextInput = React.forwardRef<
         ])}
       >
         {props.topInInputContainer}
-        <NativeTextInput
-          placeholderTextColor={
-            props.placeholderTextColor ??
-            style.get("color-text-black-low").color
-          }
-          style={StyleSheet.flatten([
-            style.flatten(["body2", "color-text-black-medium", "padding-0"]),
-            propsStyle,
-          ])}
-          {...restProps}
-          ref={ref}
-        />
+        <View style={style.flatten(["flex-row", "items-center"])}>
+          {props.inputLeft}
+          <NativeTextInput
+            placeholderTextColor={
+              props.placeholderTextColor ??
+              style.get("color-text-black-low").color
+            }
+            style={StyleSheet.flatten([
+              style.flatten([
+                "padding-0",
+                "body2-in-text-input",
+                "color-text-black-medium",
+                "flex-1",
+              ]),
+              propsStyle,
+            ])}
+            {...restProps}
+            ref={ref}
+          />
+          {props.inputRight}
+        </View>
         {props.bottomInInputContainer}
       </View>
       {props.paragraph && !props.error ? (
@@ -89,7 +101,12 @@ export const TextInput = React.forwardRef<
           <View>
             <Text
               style={StyleSheet.flatten([
-                style.flatten(["absolute", "text-caption1", "color-primary"]),
+                style.flatten([
+                  "absolute",
+                  "text-caption2",
+                  "color-primary",
+                  "margin-left-4",
+                ]),
                 props.errorLabelStyle,
               ])}
             >
@@ -104,7 +121,12 @@ export const TextInput = React.forwardRef<
         <View>
           <Text
             style={StyleSheet.flatten([
-              style.flatten(["absolute", "text-caption1", "color-error"]),
+              style.flatten([
+                "absolute",
+                "text-caption2",
+                "color-error",
+                "margin-left-4",
+              ]),
               props.errorLabelStyle,
             ])}
           >

@@ -3,8 +3,10 @@ import React, { FunctionComponent, useRef } from "react";
 import { StatusBar, Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
+  DrawerActions,
   NavigationContainer,
   NavigationContainerRef,
+  useNavigation,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
@@ -16,10 +18,7 @@ import {
 } from "@react-navigation/stack";
 import { SendScreen } from "./screens/send/staging";
 import {
-  ValidatorListScreen,
-  ValidatorDetailsScreen,
   StakedListScreen,
-  DelegateScreen,
   RedelegateScreen,
   UndelegateScreen,
   RedelegateValidatorScreen,
@@ -42,7 +41,10 @@ import {
   useStyle,
 } from "./styles";
 import { GradientBackground } from "./components/svg";
-import { BorderlessButton } from "react-native-gesture-handler";
+import {
+  BorderlessButton,
+  TouchableOpacity,
+} from "react-native-gesture-handler";
 import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 import { SettingScreen } from "./screens/setting/staging";
 import {
@@ -58,7 +60,23 @@ import {
   RecoverMnemonicScreen,
 } from "./screens/register/staging/mnemonic";
 import { RegisterEndScreen } from "./screens/register/staging/end";
-import { RegisterConfig } from "@keplr-wallet/hooks";
+import {
+  AddressBookConfig,
+  IMemoConfig,
+  IRecipientConfig,
+  RegisterConfig,
+} from "@keplr-wallet/hooks";
+import {
+  StakingDashboardScreen,
+  ValidatorDetailsScreen,
+  ValidatorListScreen,
+  DelegateScreen,
+} from "./screens/stake/staging";
+import { DoubleRightArrowIcon } from "./components/staging/icon";
+import {
+  AddAddressBookScreen,
+  AddressBookScreen,
+} from "./screens/setting/staging/screens/address-book";
 
 const {
   SmartNavigatorProvider,
@@ -83,6 +101,21 @@ const {
     Home: {
       upperScreenName: "MainTabDrawer",
     },
+    Send: {
+      upperScreenName: "Others",
+    },
+    "Staking.Dashboard": {
+      upperScreenName: "Others",
+    },
+    "Validator.Details": {
+      upperScreenName: "Others",
+    },
+    "Validator.List": {
+      upperScreenName: "Others",
+    },
+    Delegate: {
+      upperScreenName: "Others",
+    },
     Governance: {
       upperScreenName: "Others",
     },
@@ -95,6 +128,12 @@ const {
     SettingSelectAccount: {
       upperScreenName: "Settings",
     },
+    AddressBook: {
+      upperScreenName: "AddressBooks",
+    },
+    AddAddressBook: {
+      upperScreenName: "AddressBooks",
+    },
   }).withParams<{
     "Register.NewMnemonic": {
       registerConfig: RegisterConfig;
@@ -106,8 +145,22 @@ const {
     "Register.RecoverMnemonic": {
       registerConfig: RegisterConfig;
     };
+    "Validator.Details": {
+      validatorAddress: string;
+    };
+    Delegate: {
+      validatorAddress: string;
+    };
     "Governance Details": {
       proposalId: string;
+    };
+    AddressBook: {
+      recipientConfig?: IRecipientConfig;
+      memoConfig?: IMemoConfig;
+    };
+    AddAddressBook: {
+      chainId: string;
+      addressBookConfig: AddressBookConfig;
     };
   }>()
 );
@@ -127,19 +180,44 @@ const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
 export const MainNavigation: FunctionComponent = () => {
+  const style = useStyle();
+
+  const navigation = useNavigation();
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerBackground: () => <GradientBackground />,
-        headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleStyle: style.flatten(["h3", "color-black"]),
         headerTitleAlign: "center",
+        headerStyle: {
+          elevation: 0,
+          shadowOpacity: 0,
+        },
         headerBackTitleVisible: false,
         ...TransitionPresets.SlideFromRightIOS,
       }}
       initialRouteName="Home"
       headerMode="screen"
     >
-      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
+            <TouchableOpacity
+              style={style.flatten(["padding-8", "margin-left-4"])}
+              onPress={() => {
+                navigation.dispatch(DrawerActions.toggleDrawer());
+              }}
+            >
+              <DoubleRightArrowIcon
+                height={18}
+                color={style.get("color-primary").color}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+        name="Home"
+        component={HomeScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -197,7 +275,6 @@ export const OtherNavigation: FunctionComponent = () => {
         component={ValidatorDetailsScreen}
       />
       <Stack.Screen name="Staked List" component={StakedListScreen} />
-      <Stack.Screen name="Delegate" component={DelegateScreen} />
       <Stack.Screen name="Undelegate" component={UndelegateScreen} />
       <Stack.Screen name="Redelegate" component={RedelegateScreen} />
       <Stack.Screen
@@ -209,6 +286,16 @@ export const OtherNavigation: FunctionComponent = () => {
         name="Governance Details"
         component={GovernanceDetailsScreen}
       />
+      <Stack.Screen
+        name="Staking.Dashboard"
+        component={StakingDashboardScreen}
+      />
+      <Stack.Screen
+        name="Validator.Details"
+        component={ValidatorDetailsScreen}
+      />
+      <Stack.Screen name="Validator.List" component={ValidatorListScreen} />
+      <Stack.Screen name="Delegate" component={DelegateScreen} />
     </Stack.Navigator>
   );
 };
@@ -234,6 +321,24 @@ export const SettingStackScreen: FunctionComponent = () => {
         }}
         component={SettingSelectAccountScreen}
       />
+    </Stack.Navigator>
+  );
+};
+
+export const AddressBookStackScreen: FunctionComponent = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerBackground: () => <GradientBackground />,
+        headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleAlign: "center",
+        headerBackTitleVisible: false,
+        ...TransitionPresets.SlideFromRightIOS,
+      }}
+      headerMode="screen"
+    >
+      <Stack.Screen name="AddressBook" component={AddressBookScreen} />
+      <Stack.Screen name="AddAddressBook" component={AddAddressBookScreen} />
     </Stack.Navigator>
   );
 };
@@ -380,6 +485,10 @@ export const AppNavigation: FunctionComponent = observer(() => {
             />
             <Stack.Screen name="Register" component={RegisterNavigation} />
             <Stack.Screen name="Others" component={OtherNavigation} />
+            <Stack.Screen
+              name="AddressBooks"
+              component={AddressBookStackScreen}
+            />
           </Stack.Navigator>
         )}
       </NavigationContainer>

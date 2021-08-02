@@ -503,7 +503,7 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
         close={() => setIsModalOpen(false)}
         proposalId={proposalId}
       />
-      <Card style={style.flatten(["margin-bottom-12"])}>
+      <Card>
         <GovernanceDetailsCardBody
           proposalId={proposalId}
           containerStyle={{

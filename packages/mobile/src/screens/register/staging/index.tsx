@@ -18,7 +18,10 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
   const registerConfig = useRegisterConfig(keyRingStore, []);
 
   return (
-    <PageWithScrollView contentContainerStyle={style.get("flex-grow-1")}>
+    <PageWithScrollView
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-42"])}
+    >
       <View style={style.flatten(["flex-1"])} />
       {/* TODO: Add the logo here */}
       <View style={style.flatten(["flex-1"])} />

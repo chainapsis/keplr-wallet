@@ -2113,26 +2113,7 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@cosmjs/crypto@^0.20.0":
-  version "0.20.1"
-  resolved "https://registry.yarnpkg.com/@cosmjs/crypto/-/crypto-0.20.1.tgz#7765e7a0573818fbaa232e473d77742ff73e8446"
-  integrity sha512-tXsx9I8GfofovkQGbJMocwPgyqSD73DAUbsBCiMGy7No40Dz7Pdz0928lNR5EzRrZ8HaxvrTprVIPJ/thRmDcg==
-  dependencies:
-    "@cosmjs/encoding" "^0.20.1"
-    "@cosmjs/math" "^0.20.1"
-    "@cosmjs/utils" "^0.20.1"
-    bip39 "^3.0.2"
-    bn.js "^4.11.8"
-    elliptic "^6.4.0"
-    js-sha3 "^0.8.0"
-    libsodium-wrappers "^0.7.6"
-    pbkdf2 "^3.0.16"
-    ripemd160 "^2.0.2"
-    sha.js "^2.4.11"
-    type-tagger "^1.0.0"
-    unorm "^1.5.0"
-
-"@cosmjs/crypto@^0.24.0-alpha.25":
+"@cosmjs/crypto@^0.24.0-alpha.25", "@cosmjs/crypto@^0.24.1":
   version "0.24.0-alpha.25"
   resolved "https://registry.yarnpkg.com/@cosmjs/crypto/-/crypto-0.24.0-alpha.25.tgz#014d454ddf91ea0a323ccbd258fc5f297b843c38"
   integrity sha512-0+nAi2+Sdy300vPZFzCB0tPcF/T4fGZ3VgPTdR997uPm0xz4aBiAncuJGhkw/CR0VjLgTSk1IXVNnG7+xRtjsQ==
@@ -2150,25 +2131,7 @@
     sha.js "^2.4.11"
     unorm "^1.5.0"
 
-"@cosmjs/crypto@^0.24.1":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@cosmjs/crypto/-/crypto-0.24.1.tgz#62da59c32b26344f26b10dd31a02b93655586d04"
-  integrity sha512-GPhaWmQO06mXldKj/b+oKF5o3jMNfRKpAw+Q8XQhrD7ItinVPDMu8Xgl6frUXWTUdgpYwqpvqOcpm85QUsYV0Q==
-  dependencies:
-    "@cosmjs/encoding" "^0.24.1"
-    "@cosmjs/math" "^0.24.1"
-    "@cosmjs/utils" "^0.24.1"
-    bip39 "^3.0.2"
-    bn.js "^4.11.8"
-    elliptic "^6.5.3"
-    js-sha3 "^0.8.0"
-    libsodium-wrappers "^0.7.6"
-    pbkdf2 "^3.1.1"
-    ripemd160 "^2.0.2"
-    sha.js "^2.4.11"
-    unorm "^1.5.0"
-
-"@cosmjs/encoding@^0.20.0", "@cosmjs/encoding@^0.20.1":
+"@cosmjs/encoding@^0.20.0":
   version "0.20.1"
   resolved "https://registry.yarnpkg.com/@cosmjs/encoding/-/encoding-0.20.1.tgz#1d1162b3eca51b7244cd45102e313612cea77281"
   integrity sha512-aBp153iq2LD4GwDGwodDWZk/eyAUZ8J8bbiqZ1uK8rrylzm9Rdw84aa6JxykezJe+uBPtoI4lx9eH7VQXCGDXw==
@@ -2215,7 +2178,7 @@
     axios "^0.21.1"
     fast-deep-equal "^3.1.3"
 
-"@cosmjs/math@^0.20.0", "@cosmjs/math@^0.20.1":
+"@cosmjs/math@^0.20.0":
   version "0.20.1"
   resolved "https://registry.yarnpkg.com/@cosmjs/math/-/math-0.20.1.tgz#c3c2be821b8b5dbbb9b2c0401bd9f1472e821f2a"
   integrity sha512-xt7BmpSw2OVGM2+JhlJvKv9OJs9+3DqgVL6+byUDC355CSISrZhFjJg9GFko1EFssDXz5YgvBZR5FkifC0xazw==
@@ -2277,7 +2240,7 @@
     readonly-date "^1.0.0"
     xstream "^11.14.0"
 
-"@cosmjs/utils@^0.20.0", "@cosmjs/utils@^0.20.1":
+"@cosmjs/utils@^0.20.0":
   version "0.20.1"
   resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.20.1.tgz#4d239b7d93c15523cdf109f225cbf61326fb69cd"
   integrity sha512-xl9YnIrAAaBd6nFffwFbyrnKjqjD9zKGP8OBKxzyglxamHfqAS+PcJPEiaEpt+oUt7HAIOyhL3KK75Dh52hGvA==
@@ -2286,11 +2249,6 @@
   version "0.24.0-alpha.25"
   resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.24.0-alpha.25.tgz#25871033bb61dd21ec13a9fe042e80a64c165195"
   integrity sha512-3vhd1iur5kNLa+mtZfJd/A21Dvy11BuFgjvvmgoJ0djknzyJcnnp/AOk3EheN/mq+u9whUW9SfXcvVoT0gC7cA==
-
-"@cosmjs/utils@^0.24.1":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.24.1.tgz#0adfefe63b7f17222bc2bc12f71296f35e7ad378"
-  integrity sha512-VA3WFx1lMFb7esp9BqHWkDgMvHoA3D9w+uDRvWhVRpUpDc7RYHxMbWExASjz+gNblTCg556WJGzF64tXnf9tdQ==
 
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"
@@ -2871,7 +2829,7 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@iov/crypto@2.1.0":
+"@iov/crypto@2.1.0", "@iov/crypto@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@iov/crypto/-/crypto-2.1.0.tgz#10e91b6692e154958c11626dfd096a80e8a481a4"
   integrity sha512-jnb4XuK50admolm7fBxOcxfAW2TO+wYrZlhDWiMETItY/Y5gNNa1zaDSO2wNIjjfGng+8nQ1yqnNhqy7busV2Q==
@@ -2887,13 +2845,6 @@
     sha.js "^2.4.11"
     type-tagger "^1.0.0"
     unorm "^1.5.0"
-
-"@iov/crypto@^2.1.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@iov/crypto/-/crypto-2.5.0.tgz#bcb60819fa1a83ce1323f41c014b9a72ac999dd6"
-  integrity sha512-lEqrMRagPyv9S0KQG2c1OfacspHZUTyC2neyy/7mKSfOaJZABJiMzZEHi0Z/aCJOo34Wd/DQqfbaG9o2gtBKnw==
-  dependencies:
-    "@cosmjs/crypto" "^0.20.0"
 
 "@iov/encoding@2.1.0":
   version "2.1.0"

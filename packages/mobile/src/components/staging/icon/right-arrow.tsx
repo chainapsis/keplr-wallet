@@ -28,3 +28,33 @@ export const RightArrowIcon: FunctionComponent<{
     </Svg>
   );
 };
+
+export const DoubleRightArrowIcon: FunctionComponent<{
+  color: string;
+  height: number;
+}> = ({ color, height }) => {
+  return (
+    <Svg
+      viewBox="0 0 18 19"
+      style={{
+        height,
+        aspectRatio: 18 / 19,
+      }}
+    >
+      <Path
+        stroke={color}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M8.833 1.833l7.875 7.875-7.875 7.875"
+      />
+      <Path
+        stroke={color}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M1.833 1.833l7.875 7.875-7.875 7.875"
+      />
+    </Svg>
+  );
+};

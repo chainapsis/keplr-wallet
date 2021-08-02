@@ -4,13 +4,10 @@ import { observer } from "mobx-react-lite";
 import { PageWithSectionList } from "../../../components/staging/page";
 import { useStore } from "../../../stores";
 import { ObservableQueryProposal } from "@keplr-wallet/stores";
-import { Card } from "../../../components/staging/card";
-import { useStyle } from "../../../styles";
+import { Card, CardDivider } from "../../../components/staging/card";
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore } = useStore();
-
-  const style = useStyle();
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
@@ -26,9 +23,10 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
       keyExtractor={(item: ObservableQueryProposal) => {
         return item.id;
       }}
+      ItemSeparatorComponent={() => <CardDivider />}
       renderItem={({ item }: { item: ObservableQueryProposal }) => {
         return (
-          <Card style={style.flatten(["margin-bottom-12"])}>
+          <Card>
             <GovernanceCardBody proposalId={item.id} />
           </Card>
         );

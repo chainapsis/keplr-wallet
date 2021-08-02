@@ -9,7 +9,10 @@ export const CardBody: FunctionComponent<{
 
   return (
     <View
-      style={StyleSheet.flatten([style.flatten(["padding-16"]), propStyle])}
+      style={StyleSheet.flatten([
+        style.flatten(["padding-x-16", "padding-y-20"]),
+        propStyle,
+      ])}
     >
       {children}
     </View>

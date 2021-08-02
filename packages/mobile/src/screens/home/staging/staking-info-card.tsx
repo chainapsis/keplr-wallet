@@ -11,14 +11,14 @@ import { useStore } from "../../../stores";
 import { Dec } from "@keplr-wallet/unit";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/staging/button";
-import { useNavigation } from "@react-navigation/native";
+import { useSmartNavigation } from "../../../navigation";
 
 export const StakingInfoCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
-  const navigation = useNavigation();
+  const smartNavigation = useSmartNavigation();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -50,7 +50,6 @@ export const StakingInfoCard: FunctionComponent<{
           .trim(true)
           .upperCase(true)
           .toString()}
-        buttonText="Claim"
         onPress={async () => {
           try {
             await account.cosmos.sendWithdrawDelegationRewardMsgs(
@@ -60,6 +59,9 @@ export const StakingInfoCard: FunctionComponent<{
             console.log(e);
           }
         }}
+        buttonText="Claim"
+        buttonMode="light"
+        buttonContainerStyle={style.flatten(["min-width-80"])}
         buttonDisabled={
           !account.isReadyToSendMsgs || stakingReward.toDec().equals(new Dec(0))
         }
@@ -114,7 +116,7 @@ export const StakingInfoCard: FunctionComponent<{
           text="Staking Dashboard"
           mode="outline"
           onPress={() => {
-            navigation.navigate("Others", { screen: "Validator List" });
+            smartNavigation.navigateSmart("Staking.Dashboard", {});
           }}
         />
       </CardBody>

@@ -2,7 +2,6 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
 import { PageWithScrollView } from "../../../../../components/staging/page";
-import { useStyle } from "../../../../../styles";
 import { SettingItem } from "../../components";
 import Svg, { Path } from "react-native-svg";
 import { useSmartNavigation } from "../../../../../navigation";
@@ -42,10 +41,8 @@ export const SettingSelectAccountScreenHeaderRight: FunctionComponent<{
 export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
-  const style = useStyle();
-
   return (
-    <PageWithScrollView style={style.flatten(["padding-x-0"])}>
+    <PageWithScrollView>
       {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
         const name =
           (keyStore.meta ? keyStore.meta["name"] : undefined) ??

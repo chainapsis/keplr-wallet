@@ -50,6 +50,17 @@ export const Button: FunctionComponent<{
     }
   })();
 
+  const textDefinition = (() => {
+    switch (size) {
+      case "large":
+        return "text-button1";
+      case "small":
+        return "text-button3";
+      default:
+        return "text-button2";
+    }
+  })();
+
   const textColorDefinition = (() => {
     switch (mode) {
       case "fill":
@@ -135,6 +146,7 @@ export const Button: FunctionComponent<{
             "justify-center",
             "items-center",
             "height-full",
+            "padding-x-8",
           ]),
           buttonStyle,
         ])}
@@ -148,11 +160,8 @@ export const Button: FunctionComponent<{
         <Text
           style={StyleSheet.flatten([
             style.flatten(
-              ["text-button2", "text-center", textColorDefinition as any],
-              [
-                size === "large" && "text-button1",
-                loading && "opacity-transparent",
-              ]
+              [textDefinition, "text-center", textColorDefinition as any],
+              [loading && "opacity-transparent"]
             ),
             textStyle,
           ])}
