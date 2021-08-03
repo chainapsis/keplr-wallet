@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { registerModal } from "../base";
+import { CardModal } from "../card";
 import { ScrollView, Text, View } from "react-native";
 import { useStyle } from "../../../styles";
-import { GradientBackground } from "../../../components/svg";
 import { useInteractionInfo } from "../../../hooks";
 import { useStore } from "../../../stores";
 import { FeeButtons, MemoInput } from "../../../components/staging/input";
@@ -16,7 +16,6 @@ import {
 import { Button } from "../../../components/staging/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
 import { Msg } from "./msg";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
@@ -35,8 +34,6 @@ export const SignModal: FunctionComponent<{
     });
 
     const style = useStyle();
-
-    const safeAreaInsets = useSafeAreaInsets();
 
     const [signer, setSigner] = useState("");
 
@@ -139,107 +136,79 @@ export const SignModal: FunctionComponent<{
     })();
 
     return (
-      <View
-        style={style.flatten([
-          "background-color-white",
-          "border-radius-top-left-8",
-          "border-radius-top-right-8",
-          "padding-12",
-          "padding-top-16",
-          "overflow-hidden",
-        ])}
-      >
-        <View style={style.flatten(["absolute-fill"])}>
-          <GradientBackground />
-        </View>
-        <View
-          style={{
-            paddingBottom: safeAreaInsets.bottom,
-          }}
-        >
+      <CardModal title="Confirm Transaction">
+        <View style={style.flatten(["padding-bottom-16"])}>
           <Text
             style={style.flatten([
-              "h3",
-              "color-text-black-high",
-              "text-center",
-              "margin-bottom-14",
+              "subtitle2",
+              "color-text-black-medium",
+              "margin-bottom-3",
             ])}
           >
-            Confirm Transaction
+            Messages
           </Text>
-          <View style={style.flatten(["padding-bottom-16"])}>
-            <Text
-              style={style.flatten([
-                "subtitle2",
-                "color-text-black-medium",
-                "margin-bottom-3",
-              ])}
+          <View
+            style={style.flatten([
+              "border-radius-8",
+              "border-width-1",
+              "border-color-border-white",
+              "overflow-hidden",
+            ])}
+          >
+            <ScrollView
+              style={style.flatten(["max-height-214"])}
+              persistentScrollbar={true}
             >
-              Messages
-            </Text>
-            <View
-              style={style.flatten([
-                "border-radius-8",
-                "border-width-1",
-                "border-color-border-white",
-                "overflow-hidden",
-              ])}
-            >
-              <ScrollView
-                style={style.flatten(["max-height-214"])}
-                persistentScrollbar={true}
-              >
-                {renderedMsgs}
-              </ScrollView>
-            </View>
-          </View>
-          <MemoInput label="Memo" memoConfig={memoConfig} />
-          <FeeButtons
-            label="Fee"
-            gasLabel="Gas"
-            feeConfig={feeConfig}
-            gasConfig={gasConfig}
-          />
-          <View style={style.flatten(["flex-row"])}>
-            <Button
-              containerStyle={style.flatten(["flex-1"])}
-              text="Reject"
-              mode="outline"
-              disabled={
-                signDocWapper == null || signDocHelper.signDocWrapper == null
-              }
-              loading={signInteractionStore.isLoading}
-              onPress={async () => {
-                await signInteractionStore.reject();
-                interactionModalStore.popUrl();
-              }}
-            />
-            <View style={style.flatten(["width-12"])} />
-            <Button
-              containerStyle={style.flatten(["flex-1"])}
-              text="Approve"
-              disabled={
-                signDocWapper == null || signDocHelper.signDocWrapper == null
-              }
-              loading={signInteractionStore.isLoading}
-              onPress={async () => {
-                try {
-                  if (signDocHelper.signDocWrapper) {
-                    // TODO: ledger need await for user approve
-                    signInteractionStore.approveAndWaitEnd(
-                      signDocHelper.signDocWrapper
-                    );
-                  }
-                } catch (error) {
-                  console.log(error);
-                } finally {
-                  interactionModalStore.popUrl();
-                }
-              }}
-            />
+              {renderedMsgs}
+            </ScrollView>
           </View>
         </View>
-      </View>
+        <MemoInput label="Memo" memoConfig={memoConfig} />
+        <FeeButtons
+          label="Fee"
+          gasLabel="Gas"
+          feeConfig={feeConfig}
+          gasConfig={gasConfig}
+        />
+        <View style={style.flatten(["flex-row"])}>
+          <Button
+            containerStyle={style.flatten(["flex-1"])}
+            text="Reject"
+            mode="outline"
+            disabled={
+              signDocWapper == null || signDocHelper.signDocWrapper == null
+            }
+            loading={signInteractionStore.isLoading}
+            onPress={async () => {
+              await signInteractionStore.reject();
+              interactionModalStore.popUrl();
+            }}
+          />
+          <View style={style.flatten(["width-12"])} />
+          <Button
+            containerStyle={style.flatten(["flex-1"])}
+            text="Approve"
+            disabled={
+              signDocWapper == null || signDocHelper.signDocWrapper == null
+            }
+            loading={signInteractionStore.isLoading}
+            onPress={async () => {
+              try {
+                if (signDocHelper.signDocWrapper) {
+                  // TODO: ledger need await for user approve
+                  signInteractionStore.approveAndWaitEnd(
+                    signDocHelper.signDocWrapper
+                  );
+                }
+              } catch (error) {
+                console.log(error);
+              } finally {
+                interactionModalStore.popUrl();
+              }
+            }}
+          />
+        </View>
+      </CardModal>
     );
   },
   {
