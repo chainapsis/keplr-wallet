@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { registerModal } from "../base";
-import { SafeAreaView, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../../components/svg";
 import { useInteractionInfo } from "../../../hooks";
@@ -16,6 +16,7 @@ import {
 import { Button } from "../../../components/staging/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
 import { Msg } from "./msg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
@@ -34,6 +35,8 @@ export const SignModal: FunctionComponent<{
     });
 
     const style = useStyle();
+
+    const safeAreaInsets = useSafeAreaInsets();
 
     const [signer, setSigner] = useState("");
 
@@ -149,7 +152,11 @@ export const SignModal: FunctionComponent<{
         <View style={style.flatten(["absolute-fill"])}>
           <GradientBackground />
         </View>
-        <SafeAreaView>
+        <View
+          style={{
+            paddingBottom: safeAreaInsets.bottom,
+          }}
+        >
           <Text
             style={style.flatten([
               "h3",
@@ -231,7 +238,7 @@ export const SignModal: FunctionComponent<{
               }}
             />
           </View>
-        </SafeAreaView>
+        </View>
       </View>
     );
   },
