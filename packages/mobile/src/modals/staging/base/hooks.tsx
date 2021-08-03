@@ -4,6 +4,14 @@ export interface ModalStateContext {
   readonly key: string;
   readonly isTransitionOpening: boolean;
   readonly isTransitionClosing: boolean;
+
+  readonly align?: "top" | "center" | "bottom";
+  readonly isOpen: boolean;
+  readonly transitionVelocity?: number;
+  readonly openTransitionVelocity?: number;
+  readonly closeTransitionVelocity?: number;
+
+  readonly close: () => void;
 }
 
 export const ModalContext = React.createContext<ModalStateContext | null>(null);

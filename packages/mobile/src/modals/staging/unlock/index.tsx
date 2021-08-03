@@ -71,7 +71,8 @@ export const UnlockModal: FunctionComponent<{
     );
   }),
   {
-    openTransitionDuration: 0,
+    openTransitionVelocity: 0,
+    closeTransitionVelocity: 1500,
     disableBackdrop: true,
     disableClosingOnBackdropPress: true,
     disableSafeArea: true,

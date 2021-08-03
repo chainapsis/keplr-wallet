@@ -19,12 +19,13 @@ import { ModalContext } from "./hooks";
 import { useStyle } from "../../../styles";
 import Animated, { Easing } from "react-native-reanimated";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
+import { ModalTransisionProvider } from "./transition";
 
 export interface ModalOptions {
   readonly align?: "top" | "center" | "bottom";
-  readonly transitionDuration?: number;
-  readonly openTransitionDuration?: number;
-  readonly closeTransitionDuration?: number;
+  readonly transitionVelocity?: number;
+  readonly openTransitionVelocity?: number;
+  readonly closeTransitionVelocity?: number;
   readonly disableBackdrop?: boolean;
   readonly disableClosingOnBackdropPress?: boolean;
 
@@ -223,30 +224,50 @@ export const ModalRenderer: FunctionComponent<{
 
   return (
     <ModalContext.Provider
-      value={{
-        key: modal.key,
-        isTransitionClosing: !modal.isOpen,
-        isTransitionOpening: isOpenTransitioning,
-      }}
+      value={useMemo(() => {
+        return {
+          key: modal.key,
+          isTransitionClosing: !modal.isOpen,
+          isTransitionOpening: isOpenTransitioning,
+          align: modal.options.align,
+          isOpen: modal.props.isOpen,
+          transitionVelocity: modal.options.transitionVelocity,
+          openTransitionVelocity: modal.options.openTransitionVelocity,
+          closeTransitionVelocity: modal.options.closeTransitionVelocity,
+          close: modal.close,
+        };
+      }, [
+        isOpenTransitioning,
+        modal.close,
+        modal.isOpen,
+        modal.key,
+        modal.options.align,
+        modal.options.closeTransitionVelocity,
+        modal.options.openTransitionVelocity,
+        modal.options.transitionVelocity,
+        modal.props.isOpen,
+      ])}
     >
-      <ModalBase
-        align={modal.options.align}
-        isOpen={modal.isOpen}
-        onOpenTransitionEnd={() => {
-          setIsOpenTransitioning(false);
-        }}
-        onCloseTransitionEnd={() => {
-          globalModalRendererState.removeModal(modal.key);
-          modal.onCloseTransitionEnd();
-        }}
-        transitionDuration={modal.options.transitionDuration}
-        openTransitionDuration={modal.options.openTransitionDuration}
-        closeTransitionDuration={modal.options.closeTransitionDuration}
-        containerStyle={modal.options.containerStyle}
-        disableSafeArea={modal.options.disableSafeArea}
-      >
-        {React.createElement(modal.element, modal.props)}
-      </ModalBase>
+      <ModalTransisionProvider>
+        <ModalBase
+          align={modal.options.align}
+          isOpen={modal.isOpen}
+          onOpenTransitionEnd={() => {
+            setIsOpenTransitioning(false);
+          }}
+          onCloseTransitionEnd={() => {
+            globalModalRendererState.removeModal(modal.key);
+            modal.onCloseTransitionEnd();
+          }}
+          transitionVelocity={modal.options.transitionVelocity}
+          openTransitionVelocity={modal.options.openTransitionVelocity}
+          closeTransitionVelocity={modal.options.closeTransitionVelocity}
+          containerStyle={modal.options.containerStyle}
+          disableSafeArea={modal.options.disableSafeArea}
+        >
+          {React.createElement(modal.element, modal.props)}
+        </ModalBase>
+      </ModalTransisionProvider>
     </ModalContext.Provider>
   );
 });
