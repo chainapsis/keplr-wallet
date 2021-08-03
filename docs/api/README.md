@@ -129,10 +129,12 @@ If the webpage has permission and Keplr is unlocked, this function will return t
     pubKey: Uint8Array;
     address: Uint8Array;
     bech32Address: string;
+    isNanoLedger: boolean;
 }
 ```
 
-It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.
+It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.  
+`isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./cosmjs.md#types-of-offline-signers)
 
 ### Sign Amino
 
