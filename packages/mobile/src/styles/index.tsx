@@ -62,6 +62,7 @@ export const Colors = {
   divider: "#F5F5F5",
   transparent: "rgba(255,255,255,0)",
   "modal-backdrop": "rgba(9,18,50,0.4)",
+  "card-modal-handle": "#DCDCE3",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider({
@@ -251,6 +252,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "24": 24,
     "40": 40,
     "44": 44,
+    "58": 58,
     "80": 80,
     "160": 160,
   },
@@ -259,6 +261,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     half: "50%",
     "1": 1,
     "4": 4,
+    "5": 5,
     "8": 8,
     "12": 12,
     "16": 16,
@@ -290,6 +293,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "11": 11,
     "12": 12,
     "14": 14,
+    "15": 15,
     "16": 16,
     "18": 18,
     "20": 20,
@@ -311,6 +315,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "10": 10,
     "12": 12,
     "14": 14,
+    "15": 15,
     "16": 16,
     "20": 20,
     "24": 24,
