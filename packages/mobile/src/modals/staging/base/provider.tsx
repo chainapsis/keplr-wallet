@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import {
   Modal as ReactModal,
-  Platform,
   StyleSheet,
   TouchableWithoutFeedback,
   ViewStyle,
@@ -119,10 +118,7 @@ export const ModalsProvider: FunctionComponent = observer(({ children }) => {
     <React.Fragment>
       {children}
       {globalModalRendererState.modals.length > 0 ? (
-        <ReactModal
-          transparent={true}
-          statusBarTranslucent={Platform.OS === "ios"}
-        >
+        <ReactModal transparent={true} statusBarTranslucent={true}>
           <ModalRenderersRoot />
         </ReactModal>
       ) : null}
