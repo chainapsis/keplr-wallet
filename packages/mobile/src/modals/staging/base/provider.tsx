@@ -118,7 +118,25 @@ export const ModalsProvider: FunctionComponent = observer(({ children }) => {
     <React.Fragment>
       {children}
       {globalModalRendererState.modals.length > 0 ? (
-        <ReactModal transparent={true} statusBarTranslucent={true}>
+        <ReactModal
+          transparent={true}
+          statusBarTranslucent={true}
+          onRequestClose={() => {
+            // The topmost modal can be closed by the back button if this modal can be closed by pressing the backdrop.
+            if (globalModalRendererState.modals.length > 0) {
+              const topmost =
+                globalModalRendererState.modals[
+                  globalModalRendererState.modals.length - 1
+                ];
+              if (
+                !topmost.options.disableBackdrop &&
+                !topmost.options.disableClosingOnBackdropPress
+              ) {
+                topmost.close();
+              }
+            }
+          }}
+        >
           <ModalRenderersRoot />
         </ReactModal>
       ) : null}
