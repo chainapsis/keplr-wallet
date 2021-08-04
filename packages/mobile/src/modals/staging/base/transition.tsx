@@ -13,6 +13,7 @@ export type ModalTransition = {
   // If modal is open, set 1,
   // else, set -1.
   isOpen: Animated.Value<number>;
+  isInitialized: Animated.Value<number>;
   isPaused: Animated.Value<number>;
 
   // Used as local variable
@@ -27,7 +28,7 @@ export const ModalTransisionProvider: FunctionComponent = ({ children }) => {
   const [state] = useState(() => {
     return {
       clock: new Animated.Clock(),
-      startY: new Animated.Value<number>(),
+      startY: new Animated.Value(0),
 
       translateY: new Animated.Value(0),
       finished: new Animated.Value(0),
@@ -35,6 +36,7 @@ export const ModalTransisionProvider: FunctionComponent = ({ children }) => {
       frameTime: new Animated.Value(0),
 
       isOpen: new Animated.Value(1),
+      isInitialized: new Animated.Value(0),
       isPaused: new Animated.Value(0),
 
       duration: new Animated.Value(0),

@@ -10,11 +10,12 @@ export const InteractionModalsProivder: FunctionComponent = observer(
 
     return (
       <React.Fragment>
-        {interactionModalStore.urls.map((url) => {
+        {interactionModalStore.urlInfos.map(({ url, key }) => {
           switch (url) {
             case "/unlock":
               return (
                 <UnlockModal
+                  key={key}
                   isOpen={true}
                   close={() => {
                     // noop
@@ -25,6 +26,7 @@ export const InteractionModalsProivder: FunctionComponent = observer(
             case "/sign":
               return (
                 <SignModal
+                  key={key}
                   isOpen={true}
                   close={() => interactionModalStore.popUrl()}
                 />

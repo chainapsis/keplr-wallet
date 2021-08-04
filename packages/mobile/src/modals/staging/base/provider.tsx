@@ -212,30 +212,33 @@ const ModalBackdrop: FunctionComponent = () => {
   const opacity = useMemo(() => {
     return Animated.block([
       Animated.cond(
-        Animated.defined(modalTransition.startY),
+        Animated.and(
+          modalTransition.isInitialized,
+          Animated.greaterThan(Animated.abs(modalTransition.startY), 0)
+        ),
         [
-          Animated.cond(
-            Animated.greaterThan(Animated.abs(modalTransition.startY), 0),
-            Animated.min(
-              Animated.multiply(
-                Animated.sub(
-                  1,
-                  Animated.divide(
-                    modalTransition.translateY,
-                    Animated.abs(modalTransition.startY)
-                  )
-                ),
-                4 / 3
+          Animated.min(
+            Animated.multiply(
+              Animated.sub(
+                1,
+                Animated.divide(
+                  Animated.abs(modalTransition.translateY),
+                  Animated.abs(modalTransition.startY)
+                )
               ),
-              1
+              4 / 3
             ),
-            new Animated.Value(0)
+            1
           ),
         ],
         new Animated.Value(0)
       ),
     ]);
-  }, [modalTransition.startY, modalTransition.translateY]);
+  }, [
+    modalTransition.isInitialized,
+    modalTransition.startY,
+    modalTransition.translateY,
+  ]);
 
   return (
     <React.Fragment>

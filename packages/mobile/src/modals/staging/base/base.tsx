@@ -11,7 +11,7 @@ import { useStyle } from "../../../styles";
 import Animated, { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useModalTransision } from "./transition";
-import { DefaultVelocity } from "./const";
+import { DefaultVelocity, MinDuration } from "./const";
 
 export interface ModalBaseProps {
   align?: "top" | "center" | "bottom";
@@ -91,18 +91,23 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
         transition.startY.setValue(
           -((layout?.height ?? 0) + (disableSafeArea ? 0 : safeAreaInsets.top))
         );
-        return;
+        break;
       case "center":
         transition.startY.setValue(
           (containerLayout ? containerLayout.height / 2 : 0) +
             (layout ? layout.height / 2 : 0)
         );
-        return;
+        break;
       case "bottom":
         transition.startY.setValue(
           (layout?.height ?? 0) + (disableSafeArea ? 0 : safeAreaInsets.bottom)
         );
-        return;
+        break;
+    }
+
+    if (layout && containerLayout) {
+      // Initialization is complete.
+      transition.isInitialized.setValue(1);
     }
   }, [
     align,
@@ -112,6 +117,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
     safeAreaInsets.top,
     safeAreaInsets.bottom,
     transition.startY,
+    transition.isInitialized,
   ]);
 
   useEffect(() => {
@@ -123,23 +129,41 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   }, [isOpen, transition.isOpen]);
 
   const previousDiff = usePreviousDiff();
+  const [openCallbackOnce] = useState(() => new Animated.Value(0));
+  const [closeCallbackOnce] = useState(() => new Animated.Value(0));
+
+  const opacity = useMemo(() => {
+    // Opacity is used to hide the modal until initialization complete
+    // Actually, it is not used for animating.
+
+    return Animated.block([
+      Animated.cond(
+        Animated.and(
+          transition.isInitialized,
+          Animated.greaterThan(Animated.abs(transition.startY), 0)
+        ),
+        new Animated.Value(1),
+        new Animated.Value(0)
+      ),
+    ]);
+  }, [transition.isInitialized, transition.startY]);
 
   const translateY = useMemo(() => {
-    if (!layout || !containerLayout) {
-      return new Animated.Value(0);
-    }
-
     const openVelocity = openTransitionVelocity ?? transitionVelocity;
     const closeVelocity = closeTransitionVelocity ?? transitionVelocity;
 
     return Animated.block([
+      Animated.cond(Animated.not(transition.isInitialized), [
+        Animated.debug("not yet initialized", transition.isInitialized),
+      ]),
       Animated.cond(transition.isPaused, [
         Animated.debug("is paused", transition.isPaused),
         Animated.debug("translateY", transition.translateY),
       ]),
       Animated.cond(
         Animated.and(
-          Animated.defined(transition.startY),
+          Animated.greaterThan(Animated.abs(transition.startY), 0),
+          transition.isInitialized,
           Animated.not(transition.isPaused)
         ),
         [
@@ -170,12 +194,15 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                 Animated.greaterThan(openVelocity, 0),
                 Animated.set(
                   transition.duration,
-                  Animated.multiply(
-                    Animated.divide(
-                      Animated.abs(transition.startY),
-                      openVelocity
+                  Animated.max(
+                    Animated.multiply(
+                      Animated.divide(
+                        Animated.abs(transition.startY),
+                        openVelocity
+                      ),
+                      1000
                     ),
-                    1000
+                    MinDuration
                   )
                 ),
                 Animated.set(transition.duration, 0)
@@ -207,14 +234,17 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                 Animated.greaterThan(closeVelocity, 0),
                 Animated.set(
                   transition.duration,
-                  Animated.multiply(
-                    Animated.divide(
-                      Animated.abs(
-                        Animated.sub(transition.translateY, transition.startY)
+                  Animated.max(
+                    Animated.multiply(
+                      Animated.divide(
+                        Animated.abs(
+                          Animated.sub(transition.translateY, transition.startY)
+                        ),
+                        closeVelocity
                       ),
-                      closeVelocity
+                      1000
                     ),
-                    1000
+                    MinDuration
                   )
                 ),
                 Animated.set(transition.duration, 0)
@@ -256,12 +286,15 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                 ),
                 Animated.cond(
                   Animated.diff(transition.finished),
-                  Animated.call([], () => {
-                    console.log("modal callback open");
-                    if (openTransitionRef.current) {
-                      openTransitionRef.current();
-                    }
-                  })
+                  Animated.cond(Animated.not(openCallbackOnce), [
+                    Animated.set(openCallbackOnce, 1),
+                    Animated.call([], () => {
+                      console.log("modal transition complete callback open");
+                      if (openTransitionRef.current) {
+                        openTransitionRef.current();
+                      }
+                    }),
+                  ])
                 ),
                 Animated.debug(
                   "open duration clock is running",
@@ -283,12 +316,17 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                 ),
                 Animated.stopClock(transition.clock),
                 Animated.set(transition.translateY, 0),
-                Animated.call([], () => {
-                  console.log("modal callback open");
-                  if (openTransitionRef.current) {
-                    openTransitionRef.current();
-                  }
-                }),
+                Animated.cond(Animated.not(openCallbackOnce), [
+                  Animated.set(openCallbackOnce, 1),
+                  Animated.call([], () => {
+                    console.log(
+                      "modal transition complete callback open immediately"
+                    );
+                    if (openTransitionRef.current) {
+                      openTransitionRef.current();
+                    }
+                  }),
+                ]),
               ]
             ),
             Animated.cond(
@@ -318,12 +356,15 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                 ),
                 Animated.cond(
                   Animated.diff(transition.finished),
-                  Animated.call([], () => {
-                    console.log("modal callback close");
-                    if (closeTransitionRef.current) {
-                      closeTransitionRef.current();
-                    }
-                  })
+                  Animated.cond(Animated.not(closeCallbackOnce), [
+                    Animated.set(closeCallbackOnce, 1),
+                    Animated.call([], () => {
+                      console.log("modal transition complete callback close");
+                      if (closeTransitionRef.current) {
+                        closeTransitionRef.current();
+                      }
+                    }),
+                  ])
                 ),
                 Animated.debug(
                   "close duration clock is running",
@@ -348,12 +389,17 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                 ),
                 Animated.stopClock(transition.clock),
                 Animated.set(transition.translateY, transition.startY),
-                Animated.call([], () => {
-                  console.log("modal callback close");
-                  if (closeTransitionRef.current) {
-                    closeTransitionRef.current();
-                  }
-                }),
+                Animated.cond(Animated.not(closeCallbackOnce), [
+                  Animated.set(closeCallbackOnce, 1),
+                  Animated.call([], () => {
+                    console.log(
+                      "modal transition complete callback close immediately"
+                    );
+                    if (closeTransitionRef.current) {
+                      closeTransitionRef.current();
+                    }
+                  }),
+                ]),
               ]
             )
           ),
@@ -364,11 +410,10 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
       transition.translateY,
     ]);
   }, [
-    layout,
-    containerLayout,
     openTransitionVelocity,
     transitionVelocity,
     closeTransitionVelocity,
+    transition.isInitialized,
     transition.isPaused,
     transition.translateY,
     transition.startY,
@@ -408,7 +453,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
             style={StyleSheet.flatten([
               {
                 transform: [{ translateY }],
-                opacity: layout && containerLayout ? 1 : 0,
+                opacity,
               },
               containerStyle,
             ])}
@@ -438,7 +483,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
             style={StyleSheet.flatten([
               {
                 transform: [{ translateY }],
-                opacity: layout && containerLayout ? 1 : 0,
+                opacity,
               },
               containerStyle,
             ])}
