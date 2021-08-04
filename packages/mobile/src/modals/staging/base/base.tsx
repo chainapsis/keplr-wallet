@@ -424,6 +424,8 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
     transition.frameTime,
     transition.duration,
     previousDiff,
+    openCallbackOnce,
+    closeCallbackOnce,
   ]);
 
   return (
