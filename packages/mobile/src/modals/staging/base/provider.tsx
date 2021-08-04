@@ -1,10 +1,4 @@
-import React, {
-  FunctionComponent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import {
   Modal as ReactModal,
   Platform,
@@ -15,11 +9,11 @@ import {
 import { action, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
 import { ModalBase } from "./base";
-import { ModalContext } from "./hooks";
+import { ModalContext, useModalState } from "./hooks";
 import { useStyle } from "../../../styles";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
-import { ModalTransisionProvider } from "./transition";
+import { ModalTransisionProvider, useModalTransision } from "./transition";
 
 export interface ModalOptions {
   readonly align?: "top" | "center" | "bottom";
@@ -138,77 +132,8 @@ export const ModalsProvider: FunctionComponent = observer(({ children }) => {
 
 export const ModalRenderersRoot: FunctionComponent = gestureHandlerRootHOC(
   observer(() => {
-    let needBackdrop = false;
-    for (const modal of globalModalRendererState.modals) {
-      if (modal.isOpen && !modal.options.disableBackdrop) {
-        needBackdrop = true;
-        break;
-      }
-    }
-    let isBackdropClosing = false;
-    for (const modal of globalModalRendererState.modals) {
-      if (!modal.isOpen && !modal.options.disableBackdrop) {
-        isBackdropClosing = true;
-        break;
-      }
-    }
-
-    const backdropProcess = useRef(new Animated.Value(0));
-
-    const backdropAnimated = useMemo(() => {
-      return backdropProcess.current.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, 1],
-      });
-    }, []);
-
-    useEffect(() => {
-      if (needBackdrop) {
-        Animated.timing(backdropProcess.current, {
-          toValue: 1,
-          duration: 150,
-          easing: Easing.linear,
-        }).start();
-      } else {
-        Animated.timing(backdropProcess.current, {
-          toValue: 0,
-          duration: 150,
-          easing: Easing.linear,
-        }).start();
-      }
-    }, [needBackdrop]);
-
-    const style = useStyle();
-
     return (
       <React.Fragment>
-        {needBackdrop || isBackdropClosing ? (
-          <TouchableWithoutFeedback
-            onPress={() => {
-              if (globalModalRendererState.modals.length > 0) {
-                const last =
-                  globalModalRendererState.modals[
-                    globalModalRendererState.modals.length - 1
-                  ];
-                if (!last.options.disableClosingOnBackdropPress) {
-                  last.close();
-                }
-              }
-            }}
-          >
-            <Animated.View
-              style={StyleSheet.flatten([
-                style.flatten([
-                  "absolute-fill",
-                  "background-color-modal-backdrop",
-                ]),
-                {
-                  opacity: backdropAnimated,
-                },
-              ])}
-            />
-          </TouchableWithoutFeedback>
-        ) : null}
         {globalModalRendererState.modals.map((modal) => {
           return <ModalRenderer key={modal.key} modal={modal} />;
         })}
@@ -234,6 +159,9 @@ export const ModalRenderer: FunctionComponent<{
           transitionVelocity: modal.options.transitionVelocity,
           openTransitionVelocity: modal.options.openTransitionVelocity,
           closeTransitionVelocity: modal.options.closeTransitionVelocity,
+          disableBackdrop: modal.options.disableBackdrop,
+          disableClosingOnBackdropPress:
+            modal.options.disableClosingOnBackdropPress,
           close: modal.close,
         };
       }, [
@@ -243,12 +171,15 @@ export const ModalRenderer: FunctionComponent<{
         modal.key,
         modal.options.align,
         modal.options.closeTransitionVelocity,
+        modal.options.disableBackdrop,
+        modal.options.disableClosingOnBackdropPress,
         modal.options.openTransitionVelocity,
         modal.options.transitionVelocity,
         modal.props.isOpen,
       ])}
     >
       <ModalTransisionProvider>
+        <ModalBackdrop />
         <ModalBase
           align={modal.options.align}
           isOpen={modal.isOpen}
@@ -271,3 +202,63 @@ export const ModalRenderer: FunctionComponent<{
     </ModalContext.Provider>
   );
 });
+
+const ModalBackdrop: FunctionComponent = () => {
+  const style = useStyle();
+
+  const modal = useModalState();
+  const modalTransition = useModalTransision();
+
+  const opacity = useMemo(() => {
+    return Animated.block([
+      Animated.cond(
+        Animated.defined(modalTransition.startY),
+        [
+          Animated.cond(
+            Animated.greaterThan(Animated.abs(modalTransition.startY), 0),
+            Animated.min(
+              Animated.multiply(
+                Animated.sub(
+                  1,
+                  Animated.divide(
+                    modalTransition.translateY,
+                    Animated.abs(modalTransition.startY)
+                  )
+                ),
+                4 / 3
+              ),
+              1
+            ),
+            new Animated.Value(0)
+          ),
+        ],
+        new Animated.Value(0)
+      ),
+    ]);
+  }, [modalTransition.startY, modalTransition.translateY]);
+
+  return (
+    <React.Fragment>
+      {!modal.disableBackdrop ? (
+        <TouchableWithoutFeedback
+          disabled={modal.disableClosingOnBackdropPress}
+          onPress={() => {
+            modal.close();
+          }}
+        >
+          <Animated.View
+            style={StyleSheet.flatten([
+              style.flatten([
+                "absolute-fill",
+                "background-color-modal-backdrop",
+              ]),
+              {
+                opacity,
+              },
+            ])}
+          />
+        </TouchableWithoutFeedback>
+      ) : null}
+    </React.Fragment>
+  );
+};
