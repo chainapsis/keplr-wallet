@@ -1,10 +1,10 @@
 import {
   EnumFontStyle,
-  EnumFontWeight,
   EnumTextAlign,
   EnumTextTransform,
   StaticStylesDefinitions,
 } from "./common";
+import { getPlatformFontWeight } from "../utils";
 
 export const StaticTextStyles = {
   italic: {
@@ -13,33 +13,15 @@ export const StaticTextStyles = {
   "not-italic": {
     fontStyle: "normal" as EnumFontStyle,
   },
-  "font-thin": {
-    fontWeight: "100" as EnumFontWeight,
-  },
-  "font-extralight": {
-    fontWeight: "200" as EnumFontWeight,
-  },
-  "font-light": {
-    fontWeight: "300" as EnumFontWeight,
-  },
-  "font-normal": {
-    fontWeight: "400" as EnumFontWeight,
-  },
-  "font-medium": {
-    fontWeight: "500" as EnumFontWeight,
-  },
-  "font-semibold": {
-    fontWeight: "600" as EnumFontWeight,
-  },
-  "font-bold": {
-    fontWeight: "700" as EnumFontWeight,
-  },
-  "font-extrabold": {
-    fontWeight: "800" as EnumFontWeight,
-  },
-  "font-black": {
-    fontWeight: "900" as EnumFontWeight,
-  },
+  "font-thin": getPlatformFontWeight("100"),
+  "font-extralight": getPlatformFontWeight("200"),
+  "font-light": getPlatformFontWeight("300"),
+  "font-normal": getPlatformFontWeight("400"),
+  "font-medium": getPlatformFontWeight("500"),
+  "font-semibold": getPlatformFontWeight("600"),
+  "font-bold": getPlatformFontWeight("700"),
+  "font-extrabold": getPlatformFontWeight("800"),
+  "font-black": getPlatformFontWeight("900"),
   uppercase: {
     textTransform: "uppercase" as EnumTextTransform,
   },

@@ -1,6 +1,7 @@
 import { createStyleProvider } from "./builder";
-import { EnumFontWeight, EnumTextTransform } from "./builder/types";
+import { EnumTextTransform } from "./builder/types";
 import { Platform } from "react-native";
+import { getPlatformFontWeight } from "./builder/utils";
 
 export * from "./layout";
 export * from "./font";
@@ -70,110 +71,110 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     h1: {
       fontSize: 32,
       lineHeight: 56,
-      fontWeight: "700" as EnumFontWeight,
+      ...getPlatformFontWeight("700"),
     },
     h2: {
       fontSize: 28,
       lineHeight: 36,
-      fontWeight: "700" as EnumFontWeight,
+      ...getPlatformFontWeight("700"),
     },
     h3: {
       fontSize: 24,
       lineHeight: 26,
-      fontWeight: "600" as EnumFontWeight,
       letterSpacing: 0.18,
+      ...getPlatformFontWeight("600"),
     },
     h4: {
       fontSize: 20,
       lineHeight: 22,
-      fontWeight: "600" as EnumFontWeight,
       letterSpacing: 0.5,
+      ...getPlatformFontWeight("600"),
     },
     h5: {
       fontSize: 18,
       lineHeight: 20,
-      fontWeight: "600" as EnumFontWeight,
       letterSpacing: 0.65,
+      ...getPlatformFontWeight("600"),
     },
     h6: {
       fontSize: 16,
       lineHeight: 20,
-      fontWeight: "600" as EnumFontWeight,
       letterSpacing: 0.6,
+      ...getPlatformFontWeight("600"),
     },
     h7: {
       fontSize: 14,
       lineHeight: 18,
-      fontWeight: "600" as EnumFontWeight,
       letterSpacing: 0.4,
+      ...getPlatformFontWeight("600"),
     },
     subtitle1: {
       fontSize: 18,
       lineHeight: 22,
-      fontWeight: "500" as EnumFontWeight,
+      ...getPlatformFontWeight("500"),
     },
     subtitle2: {
       fontSize: 16,
       lineHeight: 21,
-      fontWeight: "500" as EnumFontWeight,
       letterSpacing: 0.3,
+      ...getPlatformFontWeight("500"),
     },
     body1: {
       fontSize: 18,
       lineHeight: 24,
-      fontWeight: "400" as EnumFontWeight,
+      ...getPlatformFontWeight("400"),
     },
     body2: {
       fontSize: 16,
       lineHeight: 22,
-      fontWeight: "400" as EnumFontWeight,
       letterSpacing: 0.25,
+      ...getPlatformFontWeight("400"),
     },
     body3: {
       fontSize: 14,
       lineHeight: 20,
-      fontWeight: "400" as EnumFontWeight,
       letterSpacing: 0.4,
+      ...getPlatformFontWeight("400"),
     },
     "text-button1": {
       fontSize: 18,
       lineHeight: 20,
-      fontWeight: "600" as EnumFontWeight,
       letterSpacing: 0.2,
       textTransform: "capitalize" as EnumTextTransform,
+      ...getPlatformFontWeight("600"),
     },
     "text-button2": {
       fontSize: 16,
       lineHeight: 19,
-      fontWeight: "600" as EnumFontWeight,
       letterSpacing: 0.2,
       textTransform: "capitalize" as EnumTextTransform,
+      ...getPlatformFontWeight("600"),
     },
     "text-button3": {
       fontSize: 14,
       lineHeight: 18,
-      fontWeight: "600" as EnumFontWeight,
       letterSpacing: 0.2,
       textTransform: "capitalize" as EnumTextTransform,
+      ...getPlatformFontWeight("600"),
     },
     "text-caption1": {
       fontSize: 13,
       lineHeight: 18,
-      fontWeight: "400" as EnumFontWeight,
       letterSpacing: 0.4,
+      ...getPlatformFontWeight("400"),
     },
     "text-caption2": {
       fontSize: 12,
       lineHeight: 18,
-      fontWeight: "400" as EnumFontWeight,
       letterSpacing: 0.4,
+      ...getPlatformFontWeight("400"),
     },
     "text-overline": {
       fontSize: 11,
       lineHeight: 16,
-      fontWeight: "400" as EnumFontWeight,
       letterSpacing: 1,
       textTransform: "uppercase" as EnumTextTransform,
+      ...getPlatformFontWeight("400"),
     },
     // This style is for the text input and aims to mock the body2 style.
     // In IOS, it is hard to position the input text to the middle vertically.
@@ -182,16 +183,16 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       ios: {
         fontSize: 16,
         lineHeight: 19,
-        fontWeight: "400" as EnumFontWeight,
         letterSpacing: 0.25,
         paddingTop: 1.5,
         paddingBottom: 1.5,
+        ...getPlatformFontWeight("400"),
       },
       android: {
         fontSize: 16,
         lineHeight: 22,
-        fontWeight: "400" as EnumFontWeight,
         letterSpacing: 0.25,
+        ...getPlatformFontWeight("400"),
       },
     }),
   },
