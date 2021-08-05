@@ -1,0 +1,53 @@
+import React, { FunctionComponent } from "react";
+import { observer } from "mobx-react-lite";
+import { useStyle } from "../../../styles";
+import { Card, CardHeaderWithButton } from "../../../components/staging/card";
+import { Dec } from "@keplr-wallet/unit";
+import { ViewStyle } from "react-native";
+import { useStore } from "../../../stores";
+
+export const MyRewardCard: FunctionComponent<{
+  containerStyle?: ViewStyle;
+}> = observer(({ containerStyle }) => {
+  const { chainStore, accountStore, queriesStore } = useStore();
+
+  const account = accountStore.getAccount(chainStore.current.chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
+
+  const style = useStyle();
+
+  const queryReward = queries.cosmos.queryRewards.getQueryBech32Address(
+    account.bech32Address
+  );
+  const stakingReward = queryReward.stakableReward;
+
+  return (
+    <Card style={containerStyle}>
+      <CardHeaderWithButton
+        title="My Reward"
+        paragraph={stakingReward
+          .shrink(true)
+          .maxDecimals(6)
+          .trim(true)
+          .upperCase(true)
+          .toString()}
+        onPress={async () => {
+          try {
+            await account.cosmos.sendWithdrawDelegationRewardMsgs(
+              queryReward.getDescendingPendingRewardValidatorAddresses(8)
+            );
+          } catch (e) {
+            console.log(e);
+          }
+        }}
+        buttonText="Claim"
+        buttonMode="light"
+        buttonContainerStyle={style.flatten(["min-width-80"])}
+        buttonDisabled={
+          !account.isReadyToSendMsgs || stakingReward.toDec().equals(new Dec(0))
+        }
+        buttonLoading={account.isSendingMsg === "withdrawRewards"}
+      />
+    </Card>
+  );
+});

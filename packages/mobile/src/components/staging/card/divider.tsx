@@ -10,7 +10,11 @@ export const CardDivider: FunctionComponent<{
   return (
     <View
       style={StyleSheet.flatten([
-        style.flatten(["height-1", "margin-x-16", "background-color-divider"]),
+        style.flatten([
+          "height-1",
+          "margin-x-card-horizontal",
+          "background-color-divider",
+        ]),
         propStyle,
       ])}
     />

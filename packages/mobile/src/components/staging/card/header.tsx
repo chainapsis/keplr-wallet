@@ -37,8 +37,9 @@ export const CardHeaderWithButton: FunctionComponent<{
       style={style.flatten([
         "flex",
         "flex-row",
-        "padding-16",
-        "padding-bottom-12",
+        "items-center",
+        "padding-x-card-horizontal",
+        "padding-y-card-vertical",
       ])}
     >
       <View style={style.flatten(["flex", "justify-center"])}>
@@ -77,7 +78,7 @@ export const CardHeaderWithButton: FunctionComponent<{
 
 export const CardHeaderFullButton: FunctionComponent<{
   title: string;
-  buttonText: string;
+  buttonText?: string;
   onPress?: () => void;
 }> = ({ title, buttonText, onPress }) => {
   const style = useStyle();
@@ -85,7 +86,10 @@ export const CardHeaderFullButton: FunctionComponent<{
   return (
     <View>
       <RectButton
-        style={style.flatten(["padding-16", "padding-bottom-12"])}
+        style={style.flatten([
+          "padding-x-card-horizontal",
+          "padding-y-card-vertical",
+        ])}
         onPress={onPress}
       >
         <View style={style.flatten(["flex", "flex-row", "items-center"])}>
@@ -93,15 +97,17 @@ export const CardHeaderFullButton: FunctionComponent<{
             {title}
           </Text>
           <View style={style.flatten(["flex-1"])} />
-          <Text
-            style={style.flatten([
-              "text-button2",
-              "color-text-black-very-very-low",
-              "margin-right-8",
-            ])}
-          >
-            {buttonText}
-          </Text>
+          {buttonText ? (
+            <Text
+              style={style.flatten([
+                "text-button2",
+                "color-text-black-very-very-low",
+                "margin-right-8",
+              ])}
+            >
+              {buttonText}
+            </Text>
+          ) : null}
           <RightArrowIcon
             color={style.get("color-text-black-very-very-low").color}
             height={12}

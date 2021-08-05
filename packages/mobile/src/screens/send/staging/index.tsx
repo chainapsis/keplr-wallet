@@ -42,7 +42,7 @@ export const SendScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
-      style={style.flatten(["padding-16"])}
+      style={style.flatten(["padding-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >
       <AddressInput

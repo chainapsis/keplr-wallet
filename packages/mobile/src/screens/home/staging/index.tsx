@@ -8,6 +8,7 @@ import { useStyle } from "../../../styles";
 import { GovernanceCard } from "./governance-card";
 import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
+import { MyRewardCard } from "./my-reward-card";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -45,9 +46,16 @@ export const HomeScreen: FunctionComponent = observer(() => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <AccountCard containerStyle={style.flatten(["margin-y-16"])} />
-      <StakingInfoCard containerStyle={style.flatten(["margin-bottom-16"])} />
-      <GovernanceCard containerStyle={style.flatten(["margin-bottom-16"])} />
+      <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
+      <MyRewardCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+      <StakingInfoCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+      <GovernanceCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
     </PageWithScrollView>
   );
 });

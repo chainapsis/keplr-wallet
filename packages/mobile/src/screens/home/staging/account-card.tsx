@@ -147,7 +147,7 @@ export const AccountCard: FunctionComponent<{
                   "margin-bottom-4",
                 ])}
               >
-                Staked
+                Staking
               </Text>
               <Text style={style.flatten(["h5", "color-text-black-medium"])}>
                 {stakedSum.maxDecimals(6).trim(true).shrink(true).toString()}

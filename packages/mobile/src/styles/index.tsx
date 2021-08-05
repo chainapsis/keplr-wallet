@@ -303,6 +303,11 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "36": 36,
     "42": 42,
     "64": 64,
+
+    page: 20,
+    "card-horizontal": 20,
+    "card-vertical": 20,
+    "card-gap": 12,
   },
   marginSizes: {
     "0": 0,
@@ -322,6 +327,11 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "32": 32,
     "40": 54,
     "64": 64,
+
+    page: 20,
+    "card-horizontal": 20,
+    "card-vertical": 20,
+    "card-gap": 12,
   },
   borderWidths: {
     "0": 0,

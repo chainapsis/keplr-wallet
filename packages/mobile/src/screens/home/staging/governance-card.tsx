@@ -39,15 +39,14 @@ export const GovernanceCard: FunctionComponent<{
     showingProposals.push(allProposals[0]);
   }
 
-  const navigation = useSmartNavigation();
+  const smartNavigation = useSmartNavigation();
 
   return (
     <Card style={containerStyle}>
       <CardHeaderFullButton
         title="Governance"
-        buttonText="View All"
         onPress={() => {
-          navigation.navigateSmart("Governance", undefined);
+          smartNavigation.navigateSmart("Governance", undefined);
         }}
       />
       <CardDivider />

@@ -9,8 +9,10 @@ export const StakingDashboardScreen: FunctionComponent = () => {
 
   return (
     <PageWithScrollView>
-      <MyRewardCard containerStyle={style.flatten(["margin-bottom-16"])} />
-      <DelegationsCard containerStyle={style.flatten(["margin-bottom-16"])} />
+      <MyRewardCard containerStyle={style.flatten(["margin-y-card-gap"])} />
+      <DelegationsCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
     </PageWithScrollView>
   );
 };

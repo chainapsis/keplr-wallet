@@ -141,7 +141,10 @@ export const GovernanceCardBody: FunctionComponent<{
     <CardBody style={style.flatten(["padding-0", "overflow-hidden"])}>
       {proposal ? (
         <RectButton
-          style={style.flatten(["padding-16"])}
+          style={style.flatten([
+            "padding-x-card-horizontal",
+            "padding-y-card-vertical",
+          ])}
           onPress={() => {
             navigation.navigateSmart("Governance Details", {
               proposalId: proposal.id,

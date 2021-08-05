@@ -481,7 +481,7 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       fixed={
         <View
-          style={style.flatten(["flex-1", "padding-12"])}
+          style={style.flatten(["flex-1", "padding-page"])}
           pointerEvents="box-none"
         >
           <View style={style.flatten(["flex-1"])} pointerEvents="box-none" />

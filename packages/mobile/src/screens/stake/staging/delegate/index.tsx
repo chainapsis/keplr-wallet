@@ -59,7 +59,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
-      style={style.flatten(["padding-16"])}
+      style={style.flatten(["padding-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >
       {/*
