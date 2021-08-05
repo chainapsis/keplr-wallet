@@ -1,2 +1,2 @@
 export const DefaultVelocity = 700;
-export const MinDuration = 200;
+export const MinDuration = 300;

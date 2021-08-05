@@ -240,7 +240,7 @@ const ModalBackdrop: FunctionComponent = () => {
                   Animated.abs(modalTransition.startY)
                 )
               ),
-              4 / 3
+              6 / 5
             ),
             1
           ),

@@ -137,7 +137,7 @@ export const SignModal: FunctionComponent<{
 
     return (
       <CardModal title="Confirm Transaction">
-        <View style={style.flatten(["padding-bottom-16"])}>
+        <View style={style.flatten(["margin-bottom-16"])}>
           <Text
             style={style.flatten([
               "subtitle2",
@@ -170,44 +170,27 @@ export const SignModal: FunctionComponent<{
           feeConfig={feeConfig}
           gasConfig={gasConfig}
         />
-        <View style={style.flatten(["flex-row"])}>
-          <Button
-            containerStyle={style.flatten(["flex-1"])}
-            text="Reject"
-            mode="outline"
-            disabled={
-              signDocWapper == null || signDocHelper.signDocWrapper == null
-            }
-            loading={signInteractionStore.isLoading}
-            onPress={async () => {
-              await signInteractionStore.reject();
-              interactionModalStore.popUrl();
-            }}
-          />
-          <View style={style.flatten(["width-12"])} />
-          <Button
-            containerStyle={style.flatten(["flex-1"])}
-            text="Approve"
-            disabled={
-              signDocWapper == null || signDocHelper.signDocWrapper == null
-            }
-            loading={signInteractionStore.isLoading}
-            onPress={async () => {
-              try {
-                if (signDocHelper.signDocWrapper) {
-                  // TODO: ledger need await for user approve
-                  signInteractionStore.approveAndWaitEnd(
-                    signDocHelper.signDocWrapper
-                  );
-                }
-              } catch (error) {
-                console.log(error);
-              } finally {
-                interactionModalStore.popUrl();
+        <Button
+          text="Approve"
+          disabled={
+            signDocWapper == null || signDocHelper.signDocWrapper == null
+          }
+          loading={signInteractionStore.isLoading}
+          onPress={async () => {
+            try {
+              if (signDocHelper.signDocWrapper) {
+                // TODO: ledger need await for user approve
+                signInteractionStore.approveAndWaitEnd(
+                  signDocHelper.signDocWrapper
+                );
               }
-            }}
-          />
-        </View>
+            } catch (error) {
+              console.log(error);
+            } finally {
+              interactionModalStore.popUrl();
+            }
+          }}
+        />
       </CardModal>
     );
   },

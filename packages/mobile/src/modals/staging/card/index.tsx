@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PanGestureHandler } from "react-native-gesture-handler";
@@ -10,7 +10,8 @@ import { DefaultVelocity } from "../base/const";
 // CONTRACT: Use with { disableSafeArea: true, align: "bottom" } modal options.
 export const CardModal: FunctionComponent<{
   title: string;
-}> = ({ title, children }) => {
+  childrenContainerStyle?: ViewStyle;
+}> = ({ title, children, childrenContainerStyle }) => {
   const style = useStyle();
   const safeAreaInsets = useSafeAreaInsets();
 
@@ -182,60 +183,60 @@ export const CardModal: FunctionComponent<{
 
   return (
     <View
-      style={style.flatten([
-        "background-color-white",
-        "border-radius-top-left-8",
-        "border-radius-top-right-8",
-        "padding-16",
-        "padding-top-0",
-        "overflow-hidden",
+      style={StyleSheet.flatten([
+        style.flatten([
+          "background-color-white",
+          "border-radius-top-left-8",
+          "border-radius-top-right-8",
+          "overflow-hidden",
+        ]),
+        {
+          paddingBottom: safeAreaInsets.bottom,
+        },
       ])}
     >
-      <View
-        style={{
-          paddingBottom: safeAreaInsets.bottom,
-        }}
+      <PanGestureHandler
+        onGestureEvent={onGestureEvent}
+        onHandlerStateChange={onGestureEvent}
       >
-        <PanGestureHandler
-          onGestureEvent={onGestureEvent}
-          onHandlerStateChange={onGestureEvent}
-        >
-          {/* Below view is not animated, but to let the gesture handler to accept the animated block, you should set the children of the gesture handler as the Animated.View */}
-          <Animated.View>
+        {/* Below view is not animated, but to let the gesture handler to accept the animated block, you should set the children of the gesture handler as the Animated.View */}
+        <Animated.View style={style.flatten(["padding-x-page"])}>
+          <View
+            style={style.flatten([
+              "items-center",
+              "margin-top-8",
+              "margin-bottom-16",
+            ])}
+          >
             <View
               style={style.flatten([
-                "items-center",
-                "margin-top-8",
-                "margin-bottom-15",
+                "width-58",
+                "height-5",
+                "border-radius-16",
+                "background-color-card-modal-handle",
               ])}
-            >
-              <View
-                style={style.flatten([
-                  "width-58",
-                  "height-5",
-                  "border-radius-16",
-                  "background-color-card-modal-handle",
-                ])}
-              />
-            </View>
-            <Text
-              style={style.flatten([
-                "h4",
-                "color-text-black-high",
-                "margin-bottom-15",
-              ])}
-            >
-              {title}
-            </Text>
-          </Animated.View>
-        </PanGestureHandler>
-        <View
-          style={style.flatten([
-            "margin-bottom-15",
-            "height-1",
-            "background-color-border-white",
-          ])}
-        />
+            />
+          </View>
+          <Text
+            style={style.flatten([
+              "h4",
+              "color-text-black-high",
+              "margin-bottom-16",
+            ])}
+          >
+            {title}
+          </Text>
+          <View
+            style={style.flatten(["height-1", "background-color-border-white"])}
+          />
+        </Animated.View>
+      </PanGestureHandler>
+      <View
+        style={StyleSheet.flatten([
+          style.flatten(["padding-page", "padding-top-16"]),
+          childrenContainerStyle,
+        ])}
+      >
         {children}
       </View>
     </View>

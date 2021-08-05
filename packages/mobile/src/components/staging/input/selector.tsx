@@ -58,7 +58,7 @@ export const SelectorModal: FunctionComponent<{
     };
 
     return (
-      <View style={style.flatten(["padding-12"])}>
+      <View style={style.flatten(["padding-page"])}>
         <View
           style={style.flatten([
             "border-radius-8",

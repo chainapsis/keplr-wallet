@@ -43,7 +43,7 @@ export const UnlockModal: FunctionComponent<{
     };
 
     return (
-      <View style={style.flatten(["padding-12", "flex-1"])}>
+      <View style={style.flatten(["padding-page", "flex-1"])}>
         <View style={style.flatten(["absolute-fill"])}>
           <GradientBackground />
         </View>
