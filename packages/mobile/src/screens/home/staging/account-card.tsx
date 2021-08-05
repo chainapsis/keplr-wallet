@@ -4,7 +4,7 @@ import { Card, CardBody } from "../../../components/staging/card";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
-import { AddressChip } from "../../../components/staging/address-chip";
+import { AddressCopyable } from "../../../components/staging/address-copyable";
 import { DoubleDoughnutChart } from "../../../components/svg";
 import { Button } from "../../../components/staging/button";
 import { LoadingSpinner } from "../../../components/staging/spinner";
@@ -61,7 +61,7 @@ export const AccountCard: FunctionComponent<{
           <Text style={style.flatten(["h4", "margin-bottom-8"])}>
             {account.name || "..."}
           </Text>
-          <AddressChip address={account.bech32Address} maxCharacters={22} />
+          <AddressCopyable address={account.bech32Address} maxCharacters={22} />
           <View style={style.flatten(["margin-y-16"])}>
             <DoubleDoughnutChart data={data} />
             <View

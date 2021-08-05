@@ -274,7 +274,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "64": 64,
     "80": 80,
     "214": 214,
-    "address-chip": 20,
+
     "button-small": 38,
     "button-default": 48,
     "button-large": 52,
