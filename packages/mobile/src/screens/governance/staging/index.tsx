@@ -23,12 +23,22 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
       keyExtractor={(item: ObservableQueryProposal) => {
         return item.id;
       }}
-      ItemSeparatorComponent={() => <CardDivider />}
-      renderItem={({ item }: { item: ObservableQueryProposal }) => {
+      renderItem={({
+        item,
+        index,
+        section,
+      }: {
+        item: ObservableQueryProposal;
+        index: number;
+        section: { data: unknown[] };
+      }) => {
         return (
-          <Card>
-            <GovernanceCardBody proposalId={item.id} />
-          </Card>
+          <React.Fragment>
+            <Card>
+              <GovernanceCardBody proposalId={item.id} />
+              {index === section.data.length - 1 ? null : <CardDivider />}
+            </Card>
+          </React.Fragment>
         );
       }}
     />
