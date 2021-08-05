@@ -43,13 +43,13 @@ export const CardHeaderWithButton: FunctionComponent<{
       ])}
     >
       <View style={style.flatten(["flex", "justify-center"])}>
-        <Text style={style.flatten(["h5", "color-text-black-high"])}>
+        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
           {title}
         </Text>
         {paragraph ? (
           <Text
             style={style.flatten([
-              "subtitle2",
+              "body2",
               "color-text-black-low",
               "margin-top-4",
             ])}
@@ -93,7 +93,7 @@ export const CardHeaderFullButton: FunctionComponent<{
         onPress={onPress}
       >
         <View style={style.flatten(["flex", "flex-row", "items-center"])}>
-          <Text style={style.flatten(["h5", "color-text-black-high"])}>
+          <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
             {title}
           </Text>
           <View style={style.flatten(["flex-1"])} />

@@ -46,11 +46,11 @@ export const StakingInfoCard: FunctionComponent<{
         <View
           style={style.flatten(["flex-row", "items-end", "margin-bottom-8"])}
         >
-          <Text style={style.flatten(["subtitle2", "color-text-black-medium"])}>
+          <Text style={style.flatten(["body2", "color-text-black-high"])}>
             Total Delegated
           </Text>
           <View style={style.flatten(["flex-1"])} />
-          <Text style={style.flatten(["subtitle2", "color-text-black-medium"])}>
+          <Text style={style.flatten(["body2", "color-text-black-high"])}>
             {delegated
               .shrink(true)
               .maxDecimals(6)
@@ -60,11 +60,11 @@ export const StakingInfoCard: FunctionComponent<{
           </Text>
         </View>
         <View style={style.flatten(["flex-row", "items-end"])}>
-          <Text style={style.flatten(["subtitle2", "color-text-black-medium"])}>
+          <Text style={style.flatten(["body2", "color-text-black-high"])}>
             Total Unbonding
           </Text>
           <View style={style.flatten(["flex-1"])} />
-          <Text style={style.flatten(["subtitle2", "color-text-black-medium"])}>
+          <Text style={style.flatten(["body2", "color-text-black-high"])}>
             {unbonding
               .shrink(true)
               .maxDecimals(6)
