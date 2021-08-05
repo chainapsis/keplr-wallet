@@ -144,6 +144,21 @@ export const Selector: FunctionComponent<{
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const {
+    backgroundColor: selectorContainerStyleBackgroundColor,
+    ...selectorContainerStyleObj
+  } = StyleSheet.flatten([
+    style.flatten([
+      "background-color-white",
+      "padding-x-11",
+      "padding-y-12",
+      "border-radius-4",
+      "border-width-1",
+      "border-color-border-white",
+    ]),
+    selectorContainerStyle,
+  ]);
+
   return (
     <React.Fragment>
       <SelectorModal
@@ -174,26 +189,28 @@ export const Selector: FunctionComponent<{
         </Text>
         <RectButton
           style={StyleSheet.flatten([
-            style.flatten([
-              "background-color-white",
-              "padding-x-11",
-              "padding-y-12",
-              "border-radius-4",
-              "border-width-1",
-              "border-color-border-white",
-            ]),
-            selectorContainerStyle,
+            style.flatten(["overflow-hidden"]),
+            {
+              backgroundColor: selectorContainerStyleBackgroundColor,
+              borderRadius: selectorContainerStyleObj.borderRadius,
+            },
           ])}
           onPress={() => setIsModalOpen(true)}
         >
-          <Text
-            style={StyleSheet.flatten([
-              style.flatten(["body2", "color-text-black-medium", "padding-0"]),
-              textStyle,
-            ])}
-          >
-            {selected ? selected.label : placeHolder ?? ""}
-          </Text>
+          <View style={selectorContainerStyleObj}>
+            <Text
+              style={StyleSheet.flatten([
+                style.flatten([
+                  "body2",
+                  "color-text-black-medium",
+                  "padding-0",
+                ]),
+                textStyle,
+              ])}
+            >
+              {selected ? selected.label : placeHolder ?? ""}
+            </Text>
+          </View>
         </RectButton>
       </View>
     </React.Fragment>
