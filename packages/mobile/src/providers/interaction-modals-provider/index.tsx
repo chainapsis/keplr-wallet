@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { SignModal } from "../../modals/staging/sign";
 import { UnlockModal } from "../../modals/staging/unlock";
+import { LedgerGranterModal } from "../../modals/staging/ledger";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
@@ -26,6 +27,14 @@ export const InteractionModalsProivder: FunctionComponent = observer(
             case "/sign":
               return (
                 <SignModal
+                  key={key}
+                  isOpen={true}
+                  close={() => interactionModalStore.popUrl()}
+                />
+              );
+            case "/ledger-grant":
+              return (
+                <LedgerGranterModal
                   key={key}
                   isOpen={true}
                   close={() => interactionModalStore.popUrl()}

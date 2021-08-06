@@ -82,5 +82,7 @@
 	<false/>
 	<key>XSAppIconAssets</key>
 	<string>Images.xcassets/AppIcon.appiconset</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+    <string>App uses Bluetooth to find, connect and communicate with Ledger Nano devices. Please grant access.</string>
 </dict>
 </plist>

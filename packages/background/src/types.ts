@@ -8,6 +8,7 @@ export const TYPES = {
   KeyRingStore: Symbol("KeyRingStore"),
 
   LedgerStore: Symbol("LedgerStore"),
+  LedgerOptions: Symbol("LedgerOptions"),
 
   PermissionStore: Symbol("PermissionStore"),
   PermissionServicePrivilegedOrigins: Symbol(

@@ -129,7 +129,7 @@ export class LedgerInitStore {
   }
 
   @flow
-  *resume() {
+  *resume(...initArgs: any[]) {
     this._isLoading = true;
 
     try {
@@ -140,7 +140,9 @@ export class LedgerInitStore {
       for (const data of datas) {
         if (data.data.event === "init-failed") {
           // Approve resuming the initing ledger.
-          yield this.interactionStore.approve("ledger-init", data.id, {});
+          yield this.interactionStore.approve("ledger-init", data.id, {
+            initArgs,
+          });
           break;
         }
       }

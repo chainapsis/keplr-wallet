@@ -77,6 +77,7 @@ import {
   AddAddressBookScreen,
   AddressBookScreen,
 } from "./screens/setting/staging/screens/address-book";
+import { NewLedgerScreen } from "./screens/register/staging/ledger";
 
 const {
   SmartNavigatorProvider,
@@ -93,6 +94,9 @@ const {
       upperScreenName: "Register",
     },
     "Register.RecoverMnemonic": {
+      upperScreenName: "Register",
+    },
+    "Register.NewLedger": {
       upperScreenName: "Register",
     },
     "Register.End": {
@@ -143,6 +147,9 @@ const {
       newMnemonicConfig: NewMnemonicConfig;
     };
     "Register.RecoverMnemonic": {
+      registerConfig: RegisterConfig;
+    };
+    "Register.NewLedger": {
       registerConfig: RegisterConfig;
     };
     "Validator.Details": {
@@ -245,6 +252,7 @@ export const RegisterNavigation: FunctionComponent = () => {
         name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
       />
+      <Stack.Screen name="Register.NewLedger" component={NewLedgerScreen} />
       <Stack.Screen
         options={{
           headerShown: false,

@@ -57,6 +57,11 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
         text="Import Ledger"
         size="large"
         mode="text"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.NewLedger", {
+            registerConfig,
+          });
+        }}
       />
     </PageWithScrollView>
   );

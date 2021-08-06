@@ -32,6 +32,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { RNG } from "@keplr-wallet/crypto";
 import { CommonCrypto } from "./keyring";
 import { Notification } from "./tx";
+import { LedgerOptions } from "./ledger/options";
 
 export function init(
   router: Router,
@@ -43,7 +44,8 @@ export function init(
   privilegedOrigins: string[],
   rng: RNG,
   commonCrypto: CommonCrypto,
-  notification: Notification
+  notification: Notification,
+  ledgerOptions: Partial<LedgerOptions> = {}
 ) {
   container.register(TYPES.ChainsEmbedChainInfos, {
     useValue: embedChainInfos,
@@ -62,6 +64,8 @@ export function init(
   });
   container.register(TYPES.KeyRingStore, { useValue: storeCreator("keyring") });
   container.register(TYPES.LedgerStore, { useValue: storeCreator("ledger") });
+  container.register(TYPES.LedgerOptions, { useValue: ledgerOptions });
+
   container.register(TYPES.PermissionStore, {
     useValue: storeCreator("permission"),
   });
