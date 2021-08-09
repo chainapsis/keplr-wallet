@@ -45,6 +45,10 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>App uses Bluetooth to find, connect and communicate with Ledger Nano devices. Please grant access.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>App uses Bluetooth to find, connect and communicate with Ledger Nano devices. Please grant access.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>$(PRODUCT_NAME) Authentication with TouchId or FaceID</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -82,7 +86,5 @@
 	<false/>
 	<key>XSAppIconAssets</key>
 	<string>Images.xcassets/AppIcon.appiconset</string>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-    <string>App uses Bluetooth to find, connect and communicate with Ledger Nano devices. Please grant access.</string>
 </dict>
 </plist>
