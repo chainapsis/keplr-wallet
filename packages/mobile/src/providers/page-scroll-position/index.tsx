@@ -1,9 +1,11 @@
 import React, { FunctionComponent, useContext, useState } from "react";
+import { Animated } from "react-native";
 
 export interface PageScrollPosition {
-  scrollY?: number;
+  getScrollYValueOf(key: string): Animated.Value | undefined;
 
-  setScrollY(value: number | undefined): void;
+  createScrollYValueOf(key: string, initialValue: number): void;
+  releaseScrollYValueOf(key: string): void;
 }
 
 export const PageScrollPositionContext = React.createContext<PageScrollPosition | null>(
@@ -11,10 +13,35 @@ export const PageScrollPositionContext = React.createContext<PageScrollPosition 
 );
 
 export const PageScrollPositionProvider: FunctionComponent = ({ children }) => {
-  const [scrollY, setScrollY] = useState<number | undefined>();
+  const [bucket, setBucket] = useState<{
+    [key: string]: Animated.Value | undefined;
+  }>({});
+
+  const getScrollYValueOf = (key: string): Animated.Value | undefined => {
+    if (key in bucket) {
+      return bucket[key];
+    }
+  };
+
+  const createScrollYValueOf = (key: string, initialValue: number) => {
+    const value = new Animated.Value(initialValue);
+    setBucket({
+      ...bucket,
+      [key]: value,
+    });
+  };
+
+  const releaseScrollYValueOf = (key: string) => {
+    delete bucket[key];
+    setBucket({
+      ...bucket,
+    });
+  };
 
   return (
-    <PageScrollPositionContext.Provider value={{ scrollY, setScrollY }}>
+    <PageScrollPositionContext.Provider
+      value={{ getScrollYValueOf, createScrollYValueOf, releaseScrollYValueOf }}
+    >
       {children}
     </PageScrollPositionContext.Provider>
   );

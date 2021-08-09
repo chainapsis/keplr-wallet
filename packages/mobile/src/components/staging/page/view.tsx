@@ -14,7 +14,15 @@ export const PageWithView: FunctionComponent<
 
   return (
     <React.Fragment>
-      <View style={style.get("absolute-fill")}>
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: -100,
+          bottom: -100,
+        }}
+      >
         <GradientBackground />
       </View>
       <SafeAreaView style={style.get("flex-1")}>

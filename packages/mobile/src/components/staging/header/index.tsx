@@ -1,8 +1,9 @@
 import React, { FunctionComponent } from "react";
 import { Header, StackHeaderProps } from "@react-navigation/stack";
-import { Platform, View } from "react-native";
+import { Animated, Platform } from "react-native";
 import { BlurView } from "@react-native-community/blur";
 import { usePageScrollPosition } from "../../../providers/page-scroll-position";
+import { useRoute } from "@react-navigation/native";
 
 export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
   if (Platform.OS !== "ios") {
@@ -10,14 +11,12 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
   }
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
+  const route = useRoute();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const pageScrollPosition = usePageScrollPosition();
 
-  const opacity = (() => {
-    if (!pageScrollPosition.scrollY || pageScrollPosition.scrollY < 0) {
-      return 1;
-    }
-    return 1 - Math.min(pageScrollPosition.scrollY / 75, 1);
-  })();
+  const scrollY =
+    pageScrollPosition.getScrollYValueOf(route.key) ?? new Animated.Value(0);
 
   return (
     <BlurView
@@ -25,7 +24,7 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
       blurAmount={30}
       reducedTransparencyFallbackColor="white"
     >
-      <View
+      <Animated.View
         style={{
           position: "absolute",
           top: 0,
@@ -33,7 +32,11 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
           left: 0,
           right: 0,
           backgroundColor: "white",
-          opacity,
+          opacity: scrollY.interpolate({
+            inputRange: [0, 75],
+            outputRange: [1, 0],
+            extrapolate: "clamp",
+          }),
         }}
       />
       <Header {...props} />

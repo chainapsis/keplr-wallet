@@ -1,9 +1,19 @@
-import React, { FunctionComponent, useEffect } from "react";
-import { SafeAreaView, ScrollViewProps, StyleSheet, View } from "react-native";
+import React, { FunctionComponent } from "react";
+import {
+  Animated,
+  SafeAreaView,
+  ScrollViewProps,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../svg";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { usePageScrollPosition } from "../../../providers/page-scroll-position";
+import { usePageRegisterScrollYValue } from "./utils";
+
+const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
+  KeyboardAwareScrollView
+);
 
 export const PageWithScrollView: FunctionComponent<
   ScrollViewProps & {
@@ -12,18 +22,9 @@ export const PageWithScrollView: FunctionComponent<
 > = (props) => {
   const style = useStyle();
 
-  const pageScrollPosition = usePageScrollPosition();
+  const scrollY = usePageRegisterScrollYValue();
 
-  useEffect(() => {
-    pageScrollPosition.setScrollY(0);
-
-    return () => {
-      pageScrollPosition.setScrollY(undefined);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const { style: propStyle, fixed, ...restProps } = props;
+  const { style: propStyle, fixed, onScroll, ...restProps } = props;
 
   return (
     <React.Fragment>
@@ -39,15 +40,20 @@ export const PageWithScrollView: FunctionComponent<
         <GradientBackground />
       </View>
       <SafeAreaView style={style.get("flex-1")}>
-        <KeyboardAwareScrollView
+        <AnimatedKeyboardAwareScrollView
           style={StyleSheet.flatten([
             style.flatten(["flex-1", "padding-0", "overflow-visible"]),
             propStyle,
           ])}
           keyboardOpeningTime={0}
-          onScroll={(e) => {
-            pageScrollPosition.setScrollY(e.nativeEvent.contentOffset.y);
-          }}
+          onScroll={Animated.event(
+            [
+              {
+                nativeEvent: { contentOffset: { y: scrollY } },
+              },
+            ],
+            { useNativeDriver: true, listener: onScroll }
+          )}
           {...restProps}
         />
         <View

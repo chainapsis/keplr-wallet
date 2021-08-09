@@ -5,9 +5,12 @@ import { PageWithSectionList } from "../../../components/staging/page";
 import { useStore } from "../../../stores";
 import { ObservableQueryProposal } from "@keplr-wallet/stores";
 import { Card, CardDivider } from "../../../components/staging/card";
+import { useStyle } from "../../../styles";
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore } = useStore();
+
+  const style = useStyle();
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
@@ -34,7 +37,15 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
       }) => {
         return (
           <React.Fragment>
-            <Card>
+            <Card
+              style={style.flatten(
+                [],
+                [
+                  index === 0 && "margin-top-card-gap",
+                  index === section.data.length - 1 && "margin-bottom-card-gap",
+                ]
+              )}
+            >
               <GovernanceCardBody proposalId={item.id} />
               {index === section.data.length - 1 ? null : <CardDivider />}
             </Card>

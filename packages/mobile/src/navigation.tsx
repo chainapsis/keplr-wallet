@@ -271,13 +271,22 @@ export const RegisterNavigation: FunctionComponent = () => {
 };
 
 export const OtherNavigation: FunctionComponent = () => {
+  const style = useStyle();
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerBackground: () => <GradientBackground />,
-        headerTitleStyle: sf([h3, fcHigh]),
+        headerTitleStyle: style.flatten(["h3", "color-black"]),
         headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "transparent",
+          elevation: 0,
+          shadowOpacity: 0,
+        },
         headerBackTitleVisible: false,
+        header: (props) => {
+          return <BlurredHeader {...props} />;
+        },
         ...TransitionPresets.SlideFromRightIOS,
       }}
       headerMode="screen"
