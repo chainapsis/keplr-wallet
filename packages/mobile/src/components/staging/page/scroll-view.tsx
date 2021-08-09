@@ -1,8 +1,9 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { SafeAreaView, ScrollViewProps, StyleSheet, View } from "react-native";
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../svg";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { usePageScrollPosition } from "../../../providers/page-scroll-position";
 
 export const PageWithScrollView: FunctionComponent<
   ScrollViewProps & {
@@ -11,11 +12,30 @@ export const PageWithScrollView: FunctionComponent<
 > = (props) => {
   const style = useStyle();
 
+  const pageScrollPosition = usePageScrollPosition();
+
+  useEffect(() => {
+    pageScrollPosition.setScrollY(0);
+
+    return () => {
+      pageScrollPosition.setScrollY(undefined);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { style: propStyle, fixed, ...restProps } = props;
 
   return (
     <React.Fragment>
-      <View style={style.get("absolute-fill")}>
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: -100,
+          bottom: -100,
+        }}
+      >
         <GradientBackground />
       </View>
       <SafeAreaView style={style.get("flex-1")}>
@@ -25,6 +45,9 @@ export const PageWithScrollView: FunctionComponent<
             propStyle,
           ])}
           keyboardOpeningTime={0}
+          onScroll={(e) => {
+            pageScrollPosition.setScrollY(e.nativeEvent.contentOffset.y);
+          }}
           {...restProps}
         />
         <View

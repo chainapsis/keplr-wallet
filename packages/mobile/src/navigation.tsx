@@ -78,6 +78,8 @@ import {
   AddressBookScreen,
 } from "./screens/setting/staging/screens/address-book";
 import { NewLedgerScreen } from "./screens/register/staging/ledger";
+import { PageScrollPositionProvider } from "./providers/page-scroll-position";
+import { BlurredHeader } from "./components/staging/header";
 
 const {
   SmartNavigatorProvider,
@@ -197,10 +199,14 @@ export const MainNavigation: FunctionComponent = () => {
         headerTitleStyle: style.flatten(["h3", "color-black"]),
         headerTitleAlign: "center",
         headerStyle: {
+          backgroundColor: "transparent",
           elevation: 0,
           shadowOpacity: 0,
         },
         headerBackTitleVisible: false,
+        header: (props) => {
+          return <BlurredHeader {...props} />;
+        },
         ...TransitionPresets.SlideFromRightIOS,
       }}
       initialRouteName="Home"
@@ -439,68 +445,70 @@ export const AppNavigation: FunctionComponent = observer(() => {
   const routeNameRef = useRef<string>();
 
   return (
-    <SmartNavigatorProvider>
-      <StatusBar
-        translucent={true}
-        backgroundColor="#FFFFFF00"
-        barStyle="dark-content"
-      />
-      <NavigationContainer
-        ref={navigationRef}
-        onReady={() =>
-          (routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name)
-        }
-        onStateChange={async () => {
-          const previousRouteName = routeNameRef.current;
-          const currentRouteName = navigationRef.current?.getCurrentRoute()
-            ?.name;
-
-          if (previousRouteName !== currentRouteName) {
-            // The line below uses the expo-firebase-analytics tracker
-            // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
-            // Change this line to use another Mobile analytics SDK
-            await analytics().logScreenView({
-              screen_name: currentRouteName,
-              screen_class: currentRouteName,
-            });
+    <PageScrollPositionProvider>
+      <SmartNavigatorProvider>
+        <StatusBar
+          translucent={true}
+          backgroundColor="#FFFFFF00"
+          barStyle="dark-content"
+        />
+        <NavigationContainer
+          ref={navigationRef}
+          onReady={() =>
+            (routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name)
           }
+          onStateChange={async () => {
+            const previousRouteName = routeNameRef.current;
+            const currentRouteName = navigationRef.current?.getCurrentRoute()
+              ?.name;
 
-          // Save the current route name for later comparison
-          routeNameRef.current = currentRouteName;
-        }}
-      >
-        {keyRingStore.status === KeyRingStatus.NOTLOADED ? (
-          <SplashScreen />
-        ) : (
-          <Stack.Navigator
-            initialRouteName={
-              keyRingStore.status === KeyRingStatus.EMPTY
-                ? "Register"
-                : "MainTabDrawer"
+            if (previousRouteName !== currentRouteName) {
+              // The line below uses the expo-firebase-analytics tracker
+              // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
+              // Change this line to use another Mobile analytics SDK
+              await analytics().logScreenView({
+                screen_name: currentRouteName,
+                screen_class: currentRouteName,
+              });
             }
-            screenOptions={{
-              headerShown: false,
-              headerTitleStyle: sf([h3, fcHigh]),
-              headerTitleAlign: "center",
-              headerBackTitleVisible: false,
-              ...TransitionPresets.SlideFromRightIOS,
-            }}
-            headerMode="screen"
-          >
-            <Stack.Screen
-              name="MainTabDrawer"
-              component={MainTabNavigationWithDrawer}
-            />
-            <Stack.Screen name="Register" component={RegisterNavigation} />
-            <Stack.Screen name="Others" component={OtherNavigation} />
-            <Stack.Screen
-              name="AddressBooks"
-              component={AddressBookStackScreen}
-            />
-          </Stack.Navigator>
-        )}
-      </NavigationContainer>
-      {/* <ModalsRenderer /> */}
-    </SmartNavigatorProvider>
+
+            // Save the current route name for later comparison
+            routeNameRef.current = currentRouteName;
+          }}
+        >
+          {keyRingStore.status === KeyRingStatus.NOTLOADED ? (
+            <SplashScreen />
+          ) : (
+            <Stack.Navigator
+              initialRouteName={
+                keyRingStore.status === KeyRingStatus.EMPTY
+                  ? "Register"
+                  : "MainTabDrawer"
+              }
+              screenOptions={{
+                headerShown: false,
+                headerTitleStyle: sf([h3, fcHigh]),
+                headerTitleAlign: "center",
+                headerBackTitleVisible: false,
+                ...TransitionPresets.SlideFromRightIOS,
+              }}
+              headerMode="screen"
+            >
+              <Stack.Screen
+                name="MainTabDrawer"
+                component={MainTabNavigationWithDrawer}
+              />
+              <Stack.Screen name="Register" component={RegisterNavigation} />
+              <Stack.Screen name="Others" component={OtherNavigation} />
+              <Stack.Screen
+                name="AddressBooks"
+                component={AddressBookStackScreen}
+              />
+            </Stack.Navigator>
+          )}
+        </NavigationContainer>
+        {/* <ModalsRenderer /> */}
+      </SmartNavigatorProvider>
+    </PageScrollPositionProvider>
   );
 });
