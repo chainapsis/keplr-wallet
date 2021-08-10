@@ -80,6 +80,7 @@ import {
 import { NewLedgerScreen } from "./screens/register/staging/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import { BlurredHeader } from "./components/staging/header";
+import { TokensScreen } from "./screens/tokens";
 
 const {
   SmartNavigatorProvider,
@@ -108,6 +109,9 @@ const {
       upperScreenName: "MainTabDrawer",
     },
     Send: {
+      upperScreenName: "Others",
+    },
+    Tokens: {
       upperScreenName: "Others",
     },
     "Staking.Dashboard": {
@@ -295,6 +299,7 @@ export const OtherNavigation: FunctionComponent = () => {
       headerMode="screen"
     >
       <Stack.Screen name="Send" component={SendScreen} />
+      <Stack.Screen name="Tokens" component={TokensScreen} />
       <Stack.Screen name="Validator List" component={ValidatorListScreen} />
       <Stack.Screen
         name="Validator Details"
