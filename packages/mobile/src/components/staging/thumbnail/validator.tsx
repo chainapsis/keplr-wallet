@@ -18,6 +18,8 @@ export const ValidatorThumbnail: FunctionComponent<{
           "overflow-hidden",
           "border-width-1",
           "border-color-border-white",
+          "items-center",
+          "justify-center",
         ]),
         {
           width: size,
