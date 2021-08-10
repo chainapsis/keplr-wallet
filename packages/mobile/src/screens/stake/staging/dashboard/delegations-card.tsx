@@ -6,7 +6,7 @@ import {
   CardBody,
   CardDivider,
 } from "../../../../components/staging/card";
-import { Image, Text, View, ViewStyle } from "react-native";
+import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../../styles";
 import { StakedTokenSymbol } from "../../../../components/staging/token-symbol";
 import { Button } from "../../../../components/staging/button";
@@ -17,6 +17,7 @@ import {
 import { RightArrowIcon } from "../../../../components/staging/icon";
 import { RectButton } from "react-native-gesture-handler";
 import { useSmartNavigation } from "../../../../navigation";
+import { ValidatorThumbnail } from "../../../../components/staging/thumbnail";
 
 export const DelegationsCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -116,9 +117,10 @@ export const DelegationsCard: FunctionComponent<{
             return null;
           }
 
-          const thumbnail = bondedValidators.getValidatorThumbnail(
-            val.operator_address
-          );
+          const thumbnail =
+            bondedValidators.getValidatorThumbnail(val.operator_address) ||
+            unbondingValidators.getValidatorThumbnail(val.operator_address) ||
+            unbondedValidators.getValidatorThumbnail(val.operator_address);
 
           const amount = queryDelegations.getDelegationTo(val.operator_address);
 
@@ -137,16 +139,10 @@ export const DelegationsCard: FunctionComponent<{
                 });
               }}
             >
-              <Image
-                style={style.flatten([
-                  "width-40",
-                  "height-40",
-                  "border-radius-64",
-                  "border-width-1",
-                  "border-color-border-white",
-                  "margin-right-16",
-                ])}
-                source={{ uri: thumbnail }}
+              <ValidatorThumbnail
+                style={style.flatten(["margin-right-16"])}
+                size={40}
+                url={thumbnail}
               />
               <Text
                 style={style.flatten([

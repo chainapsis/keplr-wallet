@@ -2,7 +2,7 @@ import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { PageWithSectionList } from "../../../../components/staging/page";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import {
   BondStatus,
   Validator,
@@ -16,6 +16,7 @@ import { useSmartNavigation } from "../../../../navigation";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { RightArrowIcon } from "../../../../components/staging/icon";
 import Svg, { Path } from "react-native-svg";
+import { ValidatorThumbnail } from "../../../../components/staging/thumbnail";
 
 type Sort = "APY" | "Voting Power" | "Name";
 
@@ -205,18 +206,10 @@ const ValidatorItem: FunctionComponent<{
           {index + 1}
         </Text>
       </View>
-      <Image
-        style={style.flatten([
-          "width-24",
-          "height-24",
-          "border-radius-32",
-          "margin-right-8",
-        ])}
-        source={{
-          uri: bondedValidators.getValidatorThumbnail(
-            validator.operator_address
-          ),
-        }}
+      <ValidatorThumbnail
+        style={style.flatten(["margin-right-8"])}
+        size={24}
+        url={bondedValidators.getValidatorThumbnail(validator.operator_address)}
       />
       <Text
         style={style.flatten([

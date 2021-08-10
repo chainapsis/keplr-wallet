@@ -3,11 +3,12 @@ import { observer } from "mobx-react-lite";
 import { Card, CardBody } from "../../../../components/staging/card";
 import { useStore } from "../../../../stores";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useStyle } from "../../../../styles";
 import { CoinPretty, Dec, IntPretty } from "@keplr-wallet/unit";
 import { Button } from "../../../../components/staging/button";
 import { useSmartNavigation } from "../../../../navigation";
+import { ValidatorThumbnail } from "../../../../components/staging/thumbnail";
 
 export const ValidatorDetailsCard: FunctionComponent<{
   validatorAddress: string;
@@ -42,6 +43,11 @@ export const ValidatorDetailsCard: FunctionComponent<{
 
   const style = useStyle();
 
+  const thumbnail =
+    bondedValidators.getValidatorThumbnail(validatorAddress) ||
+    unbondingValidators.getValidatorThumbnail(validatorAddress) ||
+    unbondedValidators.getValidatorThumbnail(validatorAddress);
+
   return (
     <Card>
       {validator ? (
@@ -53,18 +59,10 @@ export const ValidatorDetailsCard: FunctionComponent<{
               "margin-bottom-16",
             ])}
           >
-            <Image
-              style={style.flatten([
-                "width-44",
-                "height-44",
-                "border-radius-64",
-                "margin-right-12",
-              ])}
-              source={{
-                uri: queries.cosmos.queryValidators
-                  .getQueryStatus(BondStatus.Bonded)
-                  .getValidatorThumbnail(validator.operator_address),
-              }}
+            <ValidatorThumbnail
+              style={style.flatten(["margin-right-12"])}
+              size={44}
+              url={thumbnail}
             />
             <Text style={style.flatten(["h4", "color-text-black-medium"])}>
               {validator.description.moniker}
