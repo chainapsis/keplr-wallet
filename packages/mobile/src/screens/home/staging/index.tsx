@@ -9,6 +9,7 @@ import { GovernanceCard } from "./governance-card";
 import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { MyRewardCard } from "./my-reward-card";
+import { TokensCard } from "./tokens-card";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -40,6 +41,16 @@ export const HomeScreen: FunctionComponent = observer(() => {
     setRefreshing(false);
   }, [accountStore, chainStore, queriesStore]);
 
+  const queryBalances = queriesStore
+    .get(chainStore.current.chainId)
+    .queryBalances.getQueryBech32Address(
+      accountStore.getAccount(chainStore.current.chainId).bech32Address
+    );
+
+  const tokens = queryBalances.positiveNativeUnstakables.concat(
+    queryBalances.nonNativeBalances
+  );
+
   return (
     <PageWithScrollView
       refreshControl={
@@ -47,6 +58,11 @@ export const HomeScreen: FunctionComponent = observer(() => {
       }
     >
       <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
+      {tokens.length > 0 ? (
+        <TokensCard
+          containerStyle={style.flatten(["margin-bottom-card-gap"])}
+        />
+      ) : null}
       <MyRewardCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}
       />

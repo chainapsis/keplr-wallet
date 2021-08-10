@@ -141,6 +141,36 @@ export class ObservableQueryBalancesInner {
     return balances.filter((bal) => bal.balance.toDec().gt(new Dec(0)));
   }
 
+  /**
+   * Returns that the balances that are not native tokens.
+   * Native token means that the token that exists on the `bank` module.
+   */
+  @computed
+  get nonNativeBalances(): ObservableQueryBalanceInner[] {
+    const balances = this.balances;
+    return balances.filter(
+      (bal) => new DenomHelper(bal.currency.coinMinimalDenom).type !== "native"
+    );
+  }
+
+  /**
+   * Returns that the balances that are native tokens with greater than 0 balance.
+   * Native token means that the token that exists on the `bank` module.
+   */
+  @computed
+  get positiveNativeUnstakables(): ObservableQueryBalanceInner[] {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+
+    const balances = this.balances;
+    return balances.filter(
+      (bal) =>
+        new DenomHelper(bal.currency.coinMinimalDenom).type === "native" &&
+        bal.balance.toDec().gt(new Dec(0)) &&
+        bal.currency.coinMinimalDenom !==
+          chainInfo.stakeCurrency.coinMinimalDenom
+    );
+  }
+
   @computed
   get unstakables(): ObservableQueryBalanceInner[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);

@@ -154,6 +154,9 @@ const {
     "Register.NewLedger": {
       registerConfig: RegisterConfig;
     };
+    Send: {
+      currency?: string;
+    };
     "Validator.Details": {
       validatorAddress: string;
     };

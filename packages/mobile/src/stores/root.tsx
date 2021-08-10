@@ -10,6 +10,7 @@ import {
   QueriesWithCosmosAndSecret,
   AccountWithCosmosAndSecret,
   LedgerInitStore,
+  IBCCurrencyRegsitrar,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -33,6 +34,8 @@ export class RootStore {
   public readonly accountStore: AccountStore<AccountWithCosmosAndSecret>;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
+
+  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   constructor() {
     const router = new RNRouter(RNEnv.produceEnv);
@@ -168,6 +171,12 @@ export class RootStore {
       this.chainStore,
       new RNMessageRequester(),
       this.interactionStore
+    );
+
+    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
+      this.chainStore,
+      this.accountStore,
+      this.queriesStore
     );
 
     router.listen(APP_PORT);

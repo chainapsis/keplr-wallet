@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { useStore } from "../../../stores";
@@ -14,9 +14,22 @@ import {
 } from "../../../components/staging/input";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/staging/button";
+import { RouteProp, useRoute } from "@react-navigation/native";
 
 export const SendScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
+
+  const route = useRoute<
+    RouteProp<
+      Record<
+        string,
+        {
+          currency?: string;
+        }
+      >,
+      string
+    >
+  >();
 
   const style = useStyle();
 
@@ -31,6 +44,17 @@ export const SendScreen: FunctionComponent = observer(() => {
     queries.queryBalances,
     EthereumEndpoint
   );
+
+  useEffect(() => {
+    if (route.params.currency) {
+      const currency = sendConfigs.amountConfig.sendableCurrencies.find(
+        (cur) => cur.coinMinimalDenom === route.params.currency
+      );
+      if (currency) {
+        sendConfigs.amountConfig.setSendCurrency(currency);
+      }
+    }
+  }, [route.params.currency, sendConfigs.amountConfig]);
 
   const sendConfigError =
     sendConfigs.recipientConfig.getError() ??

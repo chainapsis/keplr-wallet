@@ -256,6 +256,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "58": 58,
     "80": 80,
     "160": 160,
+    "300": 300,
   },
   heights: {
     full: "100%",
@@ -308,6 +309,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     page: 20,
     "card-horizontal": 20,
     "card-vertical": 20,
+    "card-vertical-half": 10,
     "card-gap": 12,
   },
   marginSizes: {

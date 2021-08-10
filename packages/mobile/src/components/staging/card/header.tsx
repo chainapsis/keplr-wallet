@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { Text, View, ViewStyle } from "react-native";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { Button } from "../button";
 import { RectButton } from "react-native-gesture-handler";
@@ -76,19 +76,45 @@ export const CardHeaderWithButton: FunctionComponent<{
   );
 };
 
+export const CardHeader: FunctionComponent<{
+  containerStyle?: ViewStyle;
+
+  title: string;
+}> = ({ containerStyle, title }) => {
+  const style = useStyle();
+
+  return (
+    <View
+      style={StyleSheet.flatten([
+        style.flatten(["padding-x-card-horizontal", "padding-y-card-vertical"]),
+        containerStyle,
+      ])}
+    >
+      <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+        {title}
+      </Text>
+    </View>
+  );
+};
+
 export const CardHeaderFullButton: FunctionComponent<{
+  containerStyle?: ViewStyle;
+
   title: string;
   buttonText?: string;
   onPress?: () => void;
-}> = ({ title, buttonText, onPress }) => {
+}> = ({ containerStyle, title, buttonText, onPress }) => {
   const style = useStyle();
 
   return (
     <View>
       <RectButton
-        style={style.flatten([
-          "padding-x-card-horizontal",
-          "padding-y-card-vertical",
+        style={StyleSheet.flatten([
+          style.flatten([
+            "padding-x-card-horizontal",
+            "padding-y-card-vertical",
+          ]),
+          containerStyle,
         ])}
         onPress={onPress}
       >
