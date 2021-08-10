@@ -45,6 +45,40 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["stargate"],
   },
   {
+    rpc: "https://rpc-osmosis.keplr.app",
+    rest: "https://lcd-osmosis.keplr.app",
+    chainId: "osmosis-1",
+    chainName: "Osmosis",
+    stakeCurrency: {
+      coinDenom: "OSMO",
+      coinMinimalDenom: "uosmo",
+      coinDecimals: 6,
+      coinGeckoId: "osmosis",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("osmo"),
+    currencies: [
+      {
+        coinDenom: "OSMO",
+        coinMinimalDenom: "uosmo",
+        coinDecimals: 6,
+        coinGeckoId: "osmosis",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "OSMO",
+        coinMinimalDenom: "uosmo",
+        coinDecimals: 6,
+        coinGeckoId: "osmosis",
+      },
+    ],
+    coinType: 118,
+    features: ["stargate"],
+  },
+  {
     rpc: "https://rpc-secret.keplr.app",
     rest: "https://lcd-secret.keplr.app",
     chainId: "secret-2",
