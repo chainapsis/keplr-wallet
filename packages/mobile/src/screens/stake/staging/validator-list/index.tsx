@@ -38,7 +38,9 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const data = useMemo(() => {
     let data = bondedValidators.validators;
     if (search) {
-      data = data.filter((val) => val.description.moniker?.includes(search));
+      data = data.filter((val) =>
+        val.description.moniker?.toLowerCase().includes(search.toLowerCase())
+      );
     }
     switch (sort) {
       case "APY":
@@ -92,7 +94,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
             data,
           },
         ]}
-        stickySectionHeadersEnabled={true}
+        stickySectionHeadersEnabled={false}
         keyExtractor={(item: Validator) => item.operator_address}
         renderItem={({ item, index }: { item: Validator; index: number }) => {
           return (
