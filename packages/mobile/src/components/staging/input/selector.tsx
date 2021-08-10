@@ -1,5 +1,12 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
-import { StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
+import React, { FunctionComponent, useMemo, useRef, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native";
 import { useStyle } from "../../../styles";
 import { RectButton } from "react-native-gesture-handler";
 import { registerModal } from "../../../modals/staging/base";
@@ -11,11 +18,19 @@ export const SelectorModal: FunctionComponent<{
     label: string;
     key: string;
   }[];
+  maxItemsToShow?: number;
   selectedKey: string | undefined;
   setSelectedKey: (key: string | undefined) => void;
   modalPersistent?: boolean;
 }> = registerModal(
-  ({ close, items, selectedKey, setSelectedKey, modalPersistent }) => {
+  ({
+    close,
+    items,
+    selectedKey,
+    setSelectedKey,
+    maxItemsToShow,
+    modalPersistent,
+  }) => {
     const style = useStyle();
 
     const renderBall = (selected: boolean) => {
@@ -57,14 +72,50 @@ export const SelectorModal: FunctionComponent<{
       }
     };
 
+    const scrollViewRef = useRef<ScrollView | null>(null);
+    const initOnce = useRef<boolean>(false);
+
+    const onInit = () => {
+      if (!initOnce.current) {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.flashScrollIndicators();
+
+          if (maxItemsToShow) {
+            const selectedIndex = items.findIndex(
+              (item) => item.key === selectedKey
+            );
+
+            if (selectedIndex) {
+              const scrollViewHeight = maxItemsToShow * 64;
+
+              scrollViewRef.current.scrollTo({
+                y: selectedIndex * 64 - scrollViewHeight / 2 + 32,
+                animated: false,
+              });
+            }
+          }
+
+          initOnce.current = true;
+        }
+      }
+    };
+
     return (
       <View style={style.flatten(["padding-page"])}>
-        <View
-          style={style.flatten([
-            "border-radius-8",
-            "overflow-hidden",
-            "background-color-white",
+        <ScrollView
+          style={StyleSheet.flatten([
+            style.flatten([
+              "border-radius-8",
+              "overflow-hidden",
+              "background-color-white",
+            ]),
+            {
+              maxHeight: maxItemsToShow ? 64 * maxItemsToShow : undefined,
+            },
           ])}
+          ref={scrollViewRef}
+          persistentScrollbar={true}
+          onLayout={onInit}
         >
           {items.map((item) => {
             return (
@@ -100,7 +151,7 @@ export const SelectorModal: FunctionComponent<{
               </RectButton>
             );
           })}
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -114,6 +165,7 @@ export const Selector: FunctionComponent<{
 
   label: string;
   placeHolder?: string;
+  maxItemsToShow?: number;
 
   items: {
     label: string;
@@ -130,6 +182,7 @@ export const Selector: FunctionComponent<{
   selectorContainerStyle,
   textStyle,
   label,
+  maxItemsToShow,
   placeHolder,
   items,
   selectedKey,
@@ -167,6 +220,7 @@ export const Selector: FunctionComponent<{
         items={items}
         selectedKey={selectedKey}
         setSelectedKey={setSelectedKey}
+        maxItemsToShow={maxItemsToShow}
         modalPersistent={modalPersistent}
       />
       <View

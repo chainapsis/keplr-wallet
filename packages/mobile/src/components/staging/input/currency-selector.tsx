@@ -47,6 +47,7 @@ export const CurrencySelector: FunctionComponent<{
         textStyle={textStyle}
         label={label}
         placeHolder={placeHolder}
+        maxItemsToShow={4}
         items={items}
         selectedKey={selectedKey}
         setSelectedKey={setSelectedKey}
