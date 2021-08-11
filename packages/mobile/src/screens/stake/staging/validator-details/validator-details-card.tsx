@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { Card, CardBody } from "../../../../components/staging/card";
 import { useStore } from "../../../../stores";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
-import { Text, View } from "react-native";
+import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../../styles";
 import { CoinPretty, Dec, IntPretty } from "@keplr-wallet/unit";
 import { Button } from "../../../../components/staging/button";
@@ -11,8 +11,9 @@ import { useSmartNavigation } from "../../../../navigation";
 import { ValidatorThumbnail } from "../../../../components/staging/thumbnail";
 
 export const ValidatorDetailsCard: FunctionComponent<{
+  containerStyle?: ViewStyle;
   validatorAddress: string;
-}> = observer(({ validatorAddress }) => {
+}> = observer(({ containerStyle, validatorAddress }) => {
   const { chainStore, queriesStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -49,7 +50,7 @@ export const ValidatorDetailsCard: FunctionComponent<{
     unbondedValidators.getValidatorThumbnail(validatorAddress);
 
   return (
-    <Card>
+    <Card style={containerStyle}>
       {validator ? (
         <CardBody>
           <View

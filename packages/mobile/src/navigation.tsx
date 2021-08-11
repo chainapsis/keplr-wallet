@@ -17,12 +17,7 @@ import {
   TransitionPresets,
 } from "@react-navigation/stack";
 import { SendScreen } from "./screens/send/staging";
-import {
-  StakedListScreen,
-  RedelegateScreen,
-  UndelegateScreen,
-  RedelegateValidatorScreen,
-} from "./screens/stake";
+import { StakedListScreen, RedelegateValidatorScreen } from "./screens/stake";
 import {
   GovernanceScreen,
   GovernanceDetailsScreen,
@@ -81,6 +76,8 @@ import { NewLedgerScreen } from "./screens/register/staging/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import { BlurredHeader } from "./components/staging/header";
 import { TokensScreen } from "./screens/tokens";
+import { UndelegateScreen } from "./screens/stake/staging/undelegate";
+import { RedelegateScreen } from "./screens/stake/staging/redelegate";
 
 const {
   SmartNavigatorProvider,
@@ -126,6 +123,12 @@ const {
     Delegate: {
       upperScreenName: "Others",
     },
+    Undelegate: {
+      upperScreenName: "Others",
+    },
+    Redelegate: {
+      upperScreenName: "Others",
+    },
     Governance: {
       upperScreenName: "Others",
     },
@@ -164,7 +167,16 @@ const {
     "Validator.Details": {
       validatorAddress: string;
     };
+    "Validator.List": {
+      validatorSelector?: (validatorAddress: string) => void;
+    };
     Delegate: {
+      validatorAddress: string;
+    };
+    Undelegate: {
+      validatorAddress: string;
+    };
+    Redelegate: {
       validatorAddress: string;
     };
     "Governance Details": {
@@ -306,8 +318,6 @@ export const OtherNavigation: FunctionComponent = () => {
         component={ValidatorDetailsScreen}
       />
       <Stack.Screen name="Staked List" component={StakedListScreen} />
-      <Stack.Screen name="Undelegate" component={UndelegateScreen} />
-      <Stack.Screen name="Redelegate" component={RedelegateScreen} />
       <Stack.Screen
         name="Redelegate Validator"
         component={RedelegateValidatorScreen}
@@ -327,6 +337,8 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen name="Validator.List" component={ValidatorListScreen} />
       <Stack.Screen name="Delegate" component={DelegateScreen} />
+      <Stack.Screen name="Undelegate" component={UndelegateScreen} />
+      <Stack.Screen name="Redelegate" component={RedelegateScreen} />
     </Stack.Navigator>
   );
 };

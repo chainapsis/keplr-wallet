@@ -257,6 +257,8 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "80": 80,
     "160": 160,
     "300": 300,
+
+    "card-gap": 12,
   },
   heights: {
     full: "100%",

@@ -17,10 +17,23 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { RightArrowIcon } from "../../../../components/staging/icon";
 import Svg, { Path } from "react-native-svg";
 import { ValidatorThumbnail } from "../../../../components/staging/thumbnail";
+import { RouteProp, useRoute } from "@react-navigation/native";
 
 type Sort = "APY" | "Voting Power" | "Name";
 
 export const ValidatorListScreen: FunctionComponent = observer(() => {
+  const route = useRoute<
+    RouteProp<
+      Record<
+        string,
+        {
+          validatorSelector?: (validatorAddress: string) => void;
+        }
+      >,
+      string
+    >
+  >();
+
   const { chainStore, queriesStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -102,6 +115,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
               validatorAddress={item.operator_address}
               index={index}
               sort={sort}
+              onSelectValidator={route.params.validatorSelector}
             />
           );
         }}
@@ -174,7 +188,9 @@ const ValidatorItem: FunctionComponent<{
   validatorAddress: string;
   index: number;
   sort: Sort;
-}> = observer(({ validatorAddress, index, sort }) => {
+
+  onSelectValidator?: (validatorAddress: string) => void;
+}> = observer(({ validatorAddress, index, sort, onSelectValidator }) => {
   const { chainStore, queriesStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -198,9 +214,14 @@ const ValidatorItem: FunctionComponent<{
         "items-center",
       ])}
       onPress={() => {
-        smartNavigation.navigateSmart("Validator.Details", {
-          validatorAddress,
-        });
+        if (onSelectValidator) {
+          onSelectValidator(validatorAddress);
+          smartNavigation.goBack();
+        } else {
+          smartNavigation.navigateSmart("Validator.Details", {
+            validatorAddress,
+          });
+        }
       }}
     >
       <View style={style.flatten(["items-center", "width-40"])}>

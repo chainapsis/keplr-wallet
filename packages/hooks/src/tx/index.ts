@@ -9,3 +9,5 @@ export * from "./send-gas";
 export * from "./send-tx";
 export * from "./chain";
 export * from "./delegate-tx";
+export * from "./undelegate-tx";
+export * from "./redelegate-tx";

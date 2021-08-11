@@ -1,4 +1,9 @@
-import { useNavigation, useRoute } from "@react-navigation/native";
+import {
+  CommonActions,
+  StackActions,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import React, { createContext, FunctionComponent, useContext } from "react";
 
 export class SmartNavigator<
@@ -46,6 +51,38 @@ export class SmartNavigator<
       });
     }
   }
+
+  pushSmart<ScreenName extends keyof Config>(
+    route: ReturnType<typeof useRoute>,
+    navigation: ReturnType<typeof useNavigation>,
+    screenName: ScreenName,
+    params: Params[ScreenName] extends void ? undefined : Params[ScreenName]
+  ): void {
+    const currentScreenName = route.name as string;
+
+    if (!(currentScreenName in this.config)) {
+      throw new Error(
+        `Can't get the current screen info: ${currentScreenName}`
+      );
+    }
+
+    const currentScreen = this.config[currentScreenName];
+    const targetScreen = this.config[screenName];
+
+    if (currentScreen.upperScreenName === targetScreen.upperScreenName) {
+      navigation.dispatch(
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        StackActions.push(screenName as string, params as object | undefined)
+      );
+    } else {
+      navigation.dispatch(
+        StackActions.push(targetScreen.upperScreenName, {
+          screen: screenName,
+          params,
+        })
+      );
+    }
+  }
 }
 
 export const createSmartNavigatorProvider = <
@@ -62,6 +99,10 @@ export const createSmartNavigatorProvider = <
   SmartNavigatorProvider: FunctionComponent;
   useSmartNavigation: () => ReturnType<typeof useNavigation> & {
     navigateSmart: <ScreenName extends keyof Config>(
+      screenName: ScreenName,
+      params: Params[ScreenName] extends void ? undefined : Params[ScreenName]
+    ) => void;
+    pushSmart: <ScreenName extends keyof Config>(
       screenName: ScreenName,
       params: Params[ScreenName] extends void ? undefined : Params[ScreenName]
     ) => void;
@@ -92,6 +133,19 @@ export const createSmartNavigatorProvider = <
             : Params[ScreenName]
         ) => {
           navigator.navigateSmart(
+            nativeRoute,
+            nativeNavigation,
+            screenName,
+            params
+          );
+        },
+        pushSmart: <ScreenName extends keyof Config>(
+          screenName: ScreenName,
+          params: Params[ScreenName] extends void
+            ? undefined
+            : Params[ScreenName]
+        ) => {
+          navigator.pushSmart(
             nativeRoute,
             nativeNavigation,
             screenName,

@@ -189,13 +189,65 @@ export const Selector: FunctionComponent<{
   setSelectedKey,
   modalPersistent,
 }) => {
-  const style = useStyle();
-
   const selected = useMemo(() => {
     return items.find((item) => item.key === selectedKey);
   }, [items, selectedKey]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  return (
+    <React.Fragment>
+      <SelectorModal
+        isOpen={isModalOpen}
+        close={() => setIsModalOpen(false)}
+        items={items}
+        selectedKey={selectedKey}
+        setSelectedKey={setSelectedKey}
+        maxItemsToShow={maxItemsToShow}
+        modalPersistent={modalPersistent}
+      />
+      <SelectorButtonWithoutModal
+        labelStyle={labelStyle}
+        containerStyle={containerStyle}
+        selectorContainerStyle={selectorContainerStyle}
+        textStyle={textStyle}
+        label={label}
+        placeHolder={placeHolder}
+        selected={selected}
+        onPress={() => setIsModalOpen(true)}
+      />
+    </React.Fragment>
+  );
+};
+
+export const SelectorButtonWithoutModal: FunctionComponent<{
+  labelStyle?: TextStyle;
+  containerStyle?: ViewStyle;
+  selectorContainerStyle?: ViewStyle;
+  textStyle?: TextStyle;
+
+  label: string;
+  placeHolder?: string;
+
+  selected:
+    | {
+        label: string;
+        key: string;
+      }
+    | undefined;
+
+  onPress: () => void;
+}> = ({
+  containerStyle,
+  labelStyle,
+  selectorContainerStyle,
+  textStyle,
+  label,
+  placeHolder,
+  selected,
+  onPress,
+}) => {
+  const style = useStyle();
 
   const {
     backgroundColor: selectorContainerStyleBackgroundColor,
@@ -213,60 +265,48 @@ export const Selector: FunctionComponent<{
   ]);
 
   return (
-    <React.Fragment>
-      <SelectorModal
-        isOpen={isModalOpen}
-        close={() => setIsModalOpen(false)}
-        items={items}
-        selectedKey={selectedKey}
-        setSelectedKey={setSelectedKey}
-        maxItemsToShow={maxItemsToShow}
-        modalPersistent={modalPersistent}
-      />
-      <View
+    <View
+      style={StyleSheet.flatten([
+        style.flatten(["padding-bottom-16"]),
+        containerStyle,
+      ])}
+    >
+      <Text
         style={StyleSheet.flatten([
-          style.flatten(["padding-bottom-16"]),
-          containerStyle,
+          style.flatten([
+            "subtitle2",
+            "color-text-black-medium",
+            "margin-bottom-3",
+          ]),
+          labelStyle,
         ])}
       >
-        <Text
-          style={StyleSheet.flatten([
-            style.flatten([
-              "subtitle2",
-              "color-text-black-medium",
-              "margin-bottom-3",
-            ]),
-            labelStyle,
-          ])}
-        >
-          {label}
-        </Text>
-        <RectButton
-          style={StyleSheet.flatten([
-            style.flatten(["overflow-hidden"]),
-            {
-              backgroundColor: selectorContainerStyleBackgroundColor,
-              borderRadius: selectorContainerStyleObj.borderRadius,
-            },
-          ])}
-          onPress={() => setIsModalOpen(true)}
-        >
-          <View style={selectorContainerStyleObj}>
-            <Text
-              style={StyleSheet.flatten([
-                style.flatten([
-                  "body2",
-                  "color-text-black-medium",
-                  "padding-0",
-                ]),
-                textStyle,
-              ])}
-            >
-              {selected ? selected.label : placeHolder ?? ""}
-            </Text>
-          </View>
-        </RectButton>
-      </View>
-    </React.Fragment>
+        {label}
+      </Text>
+      <RectButton
+        style={StyleSheet.flatten([
+          style.flatten(["overflow-hidden"]),
+          {
+            backgroundColor: selectorContainerStyleBackgroundColor,
+            borderRadius: selectorContainerStyleObj.borderRadius,
+          },
+        ])}
+        onPress={onPress}
+      >
+        <View style={selectorContainerStyleObj}>
+          <Text
+            style={StyleSheet.flatten([
+              style.flatten(
+                ["body2", "color-text-black-medium", "padding-0"],
+                [!selected && "color-text-black-low"]
+              ),
+              textStyle,
+            ])}
+          >
+            {selected ? selected.label : placeHolder ?? ""}
+          </Text>
+        </View>
+      </RectButton>
+    </View>
   );
 };
