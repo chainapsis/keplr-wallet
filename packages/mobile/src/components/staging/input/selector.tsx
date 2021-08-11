@@ -102,56 +102,57 @@ export const SelectorModal: FunctionComponent<{
 
     return (
       <View style={style.flatten(["padding-page"])}>
-        <ScrollView
-          style={StyleSheet.flatten([
-            style.flatten([
-              "border-radius-8",
-              "overflow-hidden",
-              "background-color-white",
-            ]),
-            {
-              maxHeight: maxItemsToShow ? 64 * maxItemsToShow : undefined,
-            },
+        <View
+          style={style.flatten([
+            "border-radius-8",
+            "overflow-hidden",
+            "background-color-white",
           ])}
-          ref={scrollViewRef}
-          persistentScrollbar={true}
-          onLayout={onInit}
         >
-          {items.map((item) => {
-            return (
-              <RectButton
-                key={item.key}
-                style={style.flatten(
-                  [
-                    "height-64",
-                    "padding-left-36",
-                    "padding-right-28",
-                    "flex-row",
-                    "items-center",
-                    "justify-between",
-                  ],
-                  [item.key === selectedKey && "background-color-primary-10"]
-                )}
-                onPress={() => {
-                  setSelectedKey(item.key);
-                  if (!modalPersistent) {
-                    close();
-                  }
-                }}
-              >
-                <Text
-                  style={style.flatten([
-                    "subtitle1",
-                    "color-text-black-medium",
-                  ])}
+          <ScrollView
+            style={{
+              maxHeight: maxItemsToShow ? 64 * maxItemsToShow : undefined,
+            }}
+            ref={scrollViewRef}
+            persistentScrollbar={true}
+            onLayout={onInit}
+          >
+            {items.map((item) => {
+              return (
+                <RectButton
+                  key={item.key}
+                  style={style.flatten(
+                    [
+                      "height-64",
+                      "padding-left-36",
+                      "padding-right-28",
+                      "flex-row",
+                      "items-center",
+                      "justify-between",
+                    ],
+                    [item.key === selectedKey && "background-color-primary-10"]
+                  )}
+                  onPress={() => {
+                    setSelectedKey(item.key);
+                    if (!modalPersistent) {
+                      close();
+                    }
+                  }}
                 >
-                  {item.label}
-                </Text>
-                {renderBall(item.key === selectedKey)}
-              </RectButton>
-            );
-          })}
-        </ScrollView>
+                  <Text
+                    style={style.flatten([
+                      "subtitle1",
+                      "color-text-black-medium",
+                    ])}
+                  >
+                    {item.label}
+                  </Text>
+                  {renderBall(item.key === selectedKey)}
+                </RectButton>
+              );
+            })}
+          </ScrollView>
+        </View>
       </View>
     );
   }
