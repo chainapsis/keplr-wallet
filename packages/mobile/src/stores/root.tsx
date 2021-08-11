@@ -159,7 +159,8 @@ export class RootStore {
           maxDecimals: 0,
           locale: "ja-JP",
         },
-      }
+      },
+      "usd"
     );
 
     this.tokensStore = new TokensStore(

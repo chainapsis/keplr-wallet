@@ -69,9 +69,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
 
           const total = stakable.add(stakedSum);
 
-          const fiatCurrency = "usd";
-
-          const totalPrice = priceStore.calculatePrice(fiatCurrency, total);
+          const totalPrice = priceStore.calculatePrice(total);
           return (
             <RectButton
               key={chainInfo.chainId}

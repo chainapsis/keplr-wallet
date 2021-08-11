@@ -3,6 +3,7 @@ import { PageWithScrollView } from "../../../components/staging/page";
 import { RightArrow, SettingItem, SettingSectionTitle } from "./components";
 import { SettingSelectAccountItem } from "./items/select-account";
 import { useSmartNavigation } from "../../../navigation";
+import { SettingFiatCurrencyItem } from "./items/fiat-currency";
 
 export const SettingScreen: FunctionComponent = () => {
   const smartNavigation = useSmartNavigation();
@@ -11,11 +12,7 @@ export const SettingScreen: FunctionComponent = () => {
     <PageWithScrollView>
       <SettingSelectAccountItem />
       <SettingSectionTitle title="General" />
-      <SettingItem
-        label="Currency"
-        right={<RightArrow paragraph="USD" />}
-        topBorder={true}
-      />
+      <SettingFiatCurrencyItem topBorder={true} />
       <SettingItem
         label="Address Book"
         right={<RightArrow />}

@@ -95,13 +95,13 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
     }
 
     const lowFee = feeConfig.getFeeTypePretty("low");
-    const lowFeePrice = priceStore.calculatePrice("usd", lowFee);
+    const lowFeePrice = priceStore.calculatePrice(lowFee);
 
     const averageFee = feeConfig.getFeeTypePretty("average");
-    const averageFeePrice = priceStore.calculatePrice("usd", averageFee);
+    const averageFeePrice = priceStore.calculatePrice(averageFee);
 
     const highFee = feeConfig.getFeeTypePretty("high");
-    const highFeePrice = priceStore.calculatePrice("usd", highFee);
+    const highFeePrice = priceStore.calculatePrice(highFee);
 
     let isFeeLoading = false;
 

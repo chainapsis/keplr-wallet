@@ -45,9 +45,7 @@ export const AccountCard: FunctionComponent<{
 
   const total = stakable.add(stakedSum);
 
-  const fiatCurrency = "usd";
-
-  const totalPrice = priceStore.calculatePrice(fiatCurrency, total);
+  const totalPrice = priceStore.calculatePrice(total);
 
   const data: [number, number] = [
     parseFloat(stakable.toDec().toString()),
