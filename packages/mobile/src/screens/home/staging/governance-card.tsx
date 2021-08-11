@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import {
   Card,
   CardDivider,
@@ -19,25 +19,35 @@ export const GovernanceCard: FunctionComponent<{
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const allProposals = queries.cosmos.queryGovernance.proposals;
-  const showingProposals: ObservableQueryProposal[] = [];
+
   // Assume that the all proposals are descending order.
-  // And, show the recent proposals on voting period or deposit period.
-  // If, there are no proposals on voting period or deposit period,
-  // just show the recent proposal.
-  for (let i = 0; i < allProposals.length; i++) {
-    const proposal = allProposals[i];
-    if (
-      proposal.proposalStatus === Governance.ProposalStatus.VOTING_PERIOD ||
-      proposal.proposalStatus === Governance.ProposalStatus.DEPOSIT_PERIOD
-    ) {
-      showingProposals.push(proposal);
-    } else {
-      break;
+  // And, show the recent proposals on voting period.
+  // If, there are no proposals on voting period,
+  // just show the recent proposal with taking precedence to the non deposit period proposal.
+  const showingProposals = useMemo(() => {
+    const result: ObservableQueryProposal[] = [];
+    if (allProposals.length > 0) {
+      result.concat(
+        allProposals.filter(
+          (proposal) =>
+            proposal.proposalStatus === Governance.ProposalStatus.VOTING_PERIOD
+        )
+      );
+
+      if (result.length === 0) {
+        const nonDepositPeriodProposals = allProposals.filter(
+          (proposal) =>
+            proposal.proposalStatus !== Governance.ProposalStatus.DEPOSIT_PERIOD
+        );
+        if (nonDepositPeriodProposals.length > 0) {
+          result.push(nonDepositPeriodProposals[0]);
+        } else {
+          result.push(allProposals[0]);
+        }
+      }
     }
-  }
-  if (showingProposals.length === 0 && allProposals.length > 0) {
-    showingProposals.push(allProposals[0]);
-  }
+    return result;
+  }, [allProposals]);
 
   const smartNavigation = useSmartNavigation();
 
