@@ -66,3 +66,7 @@ index.android.bundle
 *.hprof
 
 injected-provider.bundle.js
+
+# Android build output
+*.apk
+*.aab
