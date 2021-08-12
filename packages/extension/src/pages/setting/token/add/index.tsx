@@ -94,18 +94,20 @@ export const AddTokenPage: FunctionComponent = observer(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpenSecret20ViewingKey, tokensStore.waitingSuggestedToken]);
 
-  const queries = queriesStore.get(chainStore.current.chainId);
-  const queryContractInfo = queries
-    .getQuerySecret20ContractInfo()
-    .getQueryContract(contractAddress);
-
-  const tokenInfo = queryContractInfo.tokenInfo;
-
   const isSecret20 =
     (chainStore.current.features ?? []).find(
       (feature) => feature === "secretwasm"
     ) != null;
 
+  const queries = queriesStore.get(chainStore.current.chainId);
+  const query = isSecret20 
+                ? queries.getQuerySecret20ContractInfo() 
+                : queries.getQueryCw20ContractInfo();
+  const queryContractInfo = query
+    .getQueryContract(contractAddress);
+
+  const tokenInfo = queryContractInfo.tokenInfo;
+  
   const notification = useNotification();
   const loadingIndicator = useLoadingIndicator();
 
