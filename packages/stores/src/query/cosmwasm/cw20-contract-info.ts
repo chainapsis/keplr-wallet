@@ -1,10 +1,11 @@
 import { Cw20ContractTokenInfo } from "./types";
 import { KVStore } from "@keplr-wallet/common";
-import { ObservableChainQuery, ObservableChainQueryMap } from "../chain-query";
+import { ObservableChainQueryMap } from "../chain-query";
 import { ChainGetter } from "../../common";
-import { computed, makeObservable } from "mobx";
+import { computed } from "mobx";
+import { ObservableCosmwasmContractChainQuery } from "./contract-query";
 
-export class ObservableQueryCw20ContactInfoInner extends ObservableChainQuery<Cw20ContractTokenInfo> {
+export class ObservableQueryCw20ContactInfoInner extends ObservableCosmwasmContractChainQuery<Cw20ContractTokenInfo> {
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -15,22 +16,18 @@ export class ObservableQueryCw20ContactInfoInner extends ObservableChainQuery<Cw
       kvStore,
       chainId,
       chainGetter,
-      `/wasm/v1beta1/contract/${contractAddress}/smart/eyJ0b2tlbl9pbmZvIjp7fX0=`
+      contractAddress,
+      {token_info: {}}
     );
-    makeObservable(this);
-  }
-
-  protected canFetch(): boolean {
-    return this.contractAddress.length > 0;
   }
   
   @computed
-  get tokenInfo(): Cw20ContractTokenInfo["data"] | undefined {
-    if (!this.response || !this.response.data.data) {
+  get tokenInfo(): Cw20ContractTokenInfo | undefined {
+    if (!this.response || !this.response.data) {
       return undefined;
     }
 
-    return this.response.data.data;
+    return this.response.data;
   }
 }
 

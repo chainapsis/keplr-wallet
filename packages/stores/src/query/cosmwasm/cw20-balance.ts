@@ -1,12 +1,12 @@
 import { computed, makeObservable, override } from "mobx";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
-import { ObservableChainQuery } from "../chain-query";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
 import { Cw20ContractBalance } from "./types";
+import { ObservableCosmwasmContractChainQuery } from "./contract-query";
 
-export class ObservableQueryCw20Balance extends ObservableChainQuery<Cw20ContractBalance> {
+export class ObservableQueryCw20Balance extends ObservableCosmwasmContractChainQuery<Cw20ContractBalance> {
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -18,23 +18,17 @@ export class ObservableQueryCw20Balance extends ObservableChainQuery<Cw20Contrac
       kvStore,
       chainId,
       chainGetter,
-      ''
+      contractAddress,
+      {
+        balance: { address: bech32Address },
+      }
     );
-
-    this.init();
-  }
-
-  protected init(): void {
-      const msg = JSON.stringify({
-          balance: { address: this.bech32Address },
-      });
-      const q = Buffer.from(msg).toString("base64");
-      const url = `/wasm/v1beta1/contract/${this.contractAddress}/smart/${q}`;
-      this.setUrl(url);
   }
 
   protected canFetch(): boolean {
-    return this.contractAddress.length > 0;
+    return (
+      super.canFetch() && this.bech32Address !== ""
+    );
   }
 }
 
@@ -94,14 +88,14 @@ export class ObservableQueryCw20BalanceInner extends ObservableQueryBalanceInner
 
     if (
       !this.queryCw20Balance.response ||
-      !this.queryCw20Balance.response.data.data?.balance
+      !this.queryCw20Balance.response.data.balance
     ) {
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
     return new CoinPretty(
       currency,
-      new Int(this.queryCw20Balance.response.data.data.balance)
+      new Int(this.queryCw20Balance.response.data.balance)
     );
   }
 }

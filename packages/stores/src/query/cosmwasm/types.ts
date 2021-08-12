@@ -1,15 +1,11 @@
 export type Cw20ContractBalance = {
-  data: {
-    balance: string
-  };
+  balance: string
 };
   
 export type Cw20ContractTokenInfo = {
-  data: {
-    decimals: number;
-    name: string;
-    symbol: string;
-    total_supply: string;
-  };
+  decimals: number;
+  name: string;
+  symbol: string;
+  total_supply: string;
 };
   
