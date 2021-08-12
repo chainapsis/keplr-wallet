@@ -4,8 +4,13 @@ import { RightArrow, SettingItem, SettingSectionTitle } from "./components";
 import { SettingSelectAccountItem } from "./items/select-account";
 import { useSmartNavigation } from "../../../navigation";
 import { SettingFiatCurrencyItem } from "./items/fiat-currency";
+import { SettingBiometricLockItem } from "./items/biometric-lock";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
 
-export const SettingScreen: FunctionComponent = () => {
+export const SettingScreen: FunctionComponent = observer(() => {
+  const { keychainStore } = useStore();
+
   const smartNavigation = useSmartNavigation();
 
   return (
@@ -20,6 +25,9 @@ export const SettingScreen: FunctionComponent = () => {
           smartNavigation.navigateSmart("AddressBook", {});
         }}
       />
+      {keychainStore.isBiometrySupported || keychainStore.isBiometryOn ? (
+        <SettingBiometricLockItem />
+      ) : null}
     </PageWithScrollView>
   );
-};
+});

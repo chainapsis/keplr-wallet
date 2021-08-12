@@ -833,6 +833,14 @@ export class KeyRing {
     return result;
   }
 
+  checkPassword(password: string): boolean {
+    if (!this.password) {
+      throw new Error("Keyring is locked");
+    }
+
+    return this.password === password;
+  }
+
   private static async CreateMnemonicKeyStore(
     rng: RNG,
     crypto: CommonCrypto,

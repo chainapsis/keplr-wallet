@@ -19,6 +19,7 @@ import {
   SetKeyStoreCoinTypeMsg,
   RestoreKeyRingMsg,
   GetIsKeyStoreCoinTypeSetMsg,
+  CheckPasswordMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -95,6 +96,8 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as SetKeyStoreCoinTypeMsg
         );
+      case CheckPasswordMsg:
+        return handleCheckPasswordMsg(service)(env, msg as CheckPasswordMsg);
       default:
         throw new Error("Unknown msg type");
     }
@@ -325,5 +328,13 @@ const handleSetKeyStoreCoinTypeMsg: (
   return async (_, msg) => {
     await service.setKeyStoreCoinType(msg.chainId, msg.coinType);
     return service.keyRingStatus;
+  };
+};
+
+const handleCheckPasswordMsg: (
+  service: KeyRingService
+) => InternalHandler<CheckPasswordMsg> = (service) => {
+  return (_, msg) => {
+    return service.checkPassword(msg.password);
   };
 };

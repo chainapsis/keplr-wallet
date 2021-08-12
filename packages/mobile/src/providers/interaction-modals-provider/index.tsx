@@ -9,21 +9,24 @@ export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
     const { interactionModalStore } = useStore();
 
+    // Ensure that only one unlock modal exists
+    const unlockInteractionExists =
+      interactionModalStore.urlInfos.find((url) => url.url === "/unlock") !=
+      null;
+
     return (
       <React.Fragment>
+        {unlockInteractionExists ? (
+          <UnlockModal
+            isOpen={true}
+            close={() => {
+              // noop
+              // Can't close without unlocking.
+            }}
+          />
+        ) : null}
         {interactionModalStore.urlInfos.map(({ url, key }) => {
           switch (url) {
-            case "/unlock":
-              return (
-                <UnlockModal
-                  key={key}
-                  isOpen={true}
-                  close={() => {
-                    // noop
-                    // Can't close without unlocking.
-                  }}
-                />
-              );
             case "/sign":
               return (
                 <SignModal

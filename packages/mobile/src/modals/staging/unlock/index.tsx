@@ -1,5 +1,5 @@
-import React, { FunctionComponent, useState } from "react";
-import { registerModal } from "../base";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import { registerModal, useModalState } from "../base";
 import { SafeAreaView, View } from "react-native";
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../../components/svg";
@@ -15,13 +15,44 @@ export const UnlockModal: FunctionComponent<{
   close: () => void;
 }> = registerModal(
   observer(() => {
-    const { keyRingStore, interactionModalStore } = useStore();
+    const { keyRingStore, interactionModalStore, keychainStore } = useStore();
 
     const style = useStyle();
+
+    const modalState = useModalState();
 
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isFailed, setIsFailed] = useState(false);
+
+    const tryKeychainOnce = useRef(false);
+    useEffect(() => {
+      if (
+        !tryKeychainOnce.current &&
+        !modalState.isTransitionOpening &&
+        keychainStore.isBiometryOn
+      ) {
+        tryKeychainOnce.current = true;
+        (async () => {
+          setIsLoading(true);
+          try {
+            // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread
+            // So to make sure that the loading state changes, just wait very short time.
+            await delay(10);
+            await keychainStore.tryUnlockWithBiometry();
+            interactionModalStore.popAll("/unlock");
+          } catch (e) {
+            console.log(e);
+            setIsLoading(false);
+          }
+        })();
+      }
+    }, [
+      interactionModalStore,
+      keychainStore,
+      keychainStore.isBiometryOn,
+      modalState.isTransitionOpening,
+    ]);
 
     const tryUnlock = async () => {
       try {

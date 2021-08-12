@@ -19,6 +19,7 @@ import {
   GetIsKeyStoreCoinTypeSetMsg,
   SetKeyStoreCoinTypeMsg,
   RestoreKeyRingMsg,
+  CheckPasswordMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -44,6 +45,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(ChangeKeyRingMsg);
   router.registerMessage(GetIsKeyStoreCoinTypeSetMsg);
   router.registerMessage(SetKeyStoreCoinTypeMsg);
+  router.registerMessage(CheckPasswordMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

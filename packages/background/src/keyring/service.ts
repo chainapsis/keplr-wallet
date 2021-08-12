@@ -364,6 +364,10 @@ export class KeyRingService {
     }
   }
 
+  public checkPassword(password: string): boolean {
+    return this.keyRing.checkPassword(password);
+  }
+
   getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
     return this.keyRing.getMultiKeyStoreInfo();
   }

@@ -52,26 +52,9 @@ export const SettingItem: FunctionComponent<{
 }) => {
   const style = useStyle();
 
-  return (
-    <View>
-      {topBorder ? (
-        <View
-          style={style.flatten(["height-1", "background-color-border-white"])}
-        />
-      ) : null}
-      <RectButton
-        style={StyleSheet.flatten([
-          style.flatten([
-            "background-color-white",
-            "height-62",
-            "padding-x-16",
-            "flex-row",
-            "items-center",
-          ]),
-          containerStyle,
-        ])}
-        onPress={onPress}
-      >
+  const renderChildren = () => {
+    return (
+      <React.Fragment>
         {left}
         <Text
           style={StyleSheet.flatten([
@@ -83,7 +66,50 @@ export const SettingItem: FunctionComponent<{
         </Text>
         <View style={style.flatten(["flex-1"])} />
         {right}
-      </RectButton>
+      </React.Fragment>
+    );
+  };
+
+  return (
+    <View>
+      {topBorder ? (
+        <View
+          style={style.flatten(["height-1", "background-color-border-white"])}
+        />
+      ) : null}
+      {onPress ? (
+        <RectButton
+          style={StyleSheet.flatten([
+            style.flatten([
+              "background-color-white",
+              "height-62",
+              "padding-x-16",
+              "flex-row",
+              "items-center",
+            ]),
+            containerStyle,
+          ])}
+          onPress={onPress}
+        >
+          {renderChildren()}
+        </RectButton>
+      ) : (
+        <View
+          style={StyleSheet.flatten([
+            style.flatten([
+              "background-color-white",
+              "height-62",
+              "padding-x-16",
+              "flex-row",
+              "items-center",
+            ]),
+            containerStyle,
+          ])}
+        >
+          {renderChildren()}
+        </View>
+      )}
+
       <View
         style={style.flatten(["height-1", "background-color-border-white"])}
       />

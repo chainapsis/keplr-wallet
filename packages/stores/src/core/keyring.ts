@@ -20,6 +20,7 @@ import {
   ShowKeyRingMsg,
   UnlockKeyRingMsg,
   KeyRing,
+  CheckPasswordMsg,
 } from "@keplr-wallet/background";
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -330,6 +331,13 @@ export class KeyRingStore {
     if (selectedIndex === index) {
       this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     }
+  }
+
+  async checkPassword(password: string): Promise<boolean> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new CheckPasswordMsg(password)
+    );
   }
 
   getKeyStoreSelectables(chainId: string): KeyRingSelectablesStore {

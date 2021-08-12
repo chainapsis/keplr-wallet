@@ -20,6 +20,7 @@ import { InteractionModalStore } from "./interaction-modal";
 import { ChainStore } from "./chain";
 import EventEmitter from "eventemitter3";
 import { Keplr } from "@keplr-wallet/provider";
+import { KeychainStore } from "./keychain";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -36,6 +37,8 @@ export class RootStore {
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+
+  public readonly keychainStore: KeychainStore;
 
   constructor() {
     const router = new RNRouter(RNEnv.produceEnv);
@@ -181,6 +184,11 @@ export class RootStore {
     );
 
     router.listen(APP_PORT);
+
+    this.keychainStore = new KeychainStore(
+      new AsyncKVStore("keychain"),
+      this.keyRingStore
+    );
   }
 }
 
