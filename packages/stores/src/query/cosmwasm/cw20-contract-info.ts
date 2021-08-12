@@ -19,6 +19,10 @@ export class ObservableQueryCw20ContactInfoInner extends ObservableChainQuery<Cw
     );
     makeObservable(this);
   }
+
+  protected canFetch(): boolean {
+    return this.contractAddress.length > 0;
+  }
   
   @computed
   get tokenInfo(): Cw20ContractTokenInfo["data"] | undefined {
