@@ -7,6 +7,10 @@ import {
   ObservableQuerySecret20BalanceRegistry,
   ObservableQuerySecretContractCodeHash,
 } from "./secret-wasm";
+import { 
+  ObservableQueryCw20ContractInfo,
+  ObservableQueryCw20BalanceRegistry 
+} from "./cosmwasm";
 import {
   ObservableQueryBlock,
   ObservableQuerySupplyTotal,
@@ -58,6 +62,7 @@ export class Queries {
 
   protected readonly _querySecretContractCodeHash: ObservableQuerySecretContractCodeHash;
   protected readonly _querySecret20ContractInfo: ObservableQuerySecret20ContractInfo;
+  protected readonly _queryCw20ContractInfo: ObservableQueryCw20ContractInfo;
 
   protected readonly _querySifchainAPY: ObservableQuerySifchainLiquidityAPY;
 
@@ -185,11 +190,21 @@ export class Queries {
         this._querySecretContractCodeHash
       )
     );
+    this._queryBalances.addBalanceRegistry(
+      new ObservableQueryCw20BalanceRegistry(
+        kvStore
+      )
+    );
     this._querySecret20ContractInfo = new ObservableQuerySecret20ContractInfo(
       kvStore,
       chainId,
       chainGetter,
       this._querySecretContractCodeHash
+    );
+    this._queryCw20ContractInfo = new ObservableQueryCw20ContractInfo(
+      kvStore,
+      chainId,
+      chainGetter
     );
   }
 
@@ -267,6 +282,10 @@ export class Queries {
 
   getQuerySecret20ContractInfo(): DeepReadonly<ObservableQuerySecret20ContractInfo> {
     return this._querySecret20ContractInfo;
+  }
+
+  getQueryCw20ContractInfo(): DeepReadonly<ObservableQueryCw20ContractInfo> {
+    return this._queryCw20ContractInfo;
   }
 
   getQuerySifchainAPY(): DeepReadonly<ObservableQuerySifchainLiquidityAPY> {
