@@ -100,14 +100,13 @@ export const AddTokenPage: FunctionComponent = observer(() => {
     ) != null;
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const query = isSecret20 
-                ? queries.getQuerySecret20ContractInfo() 
-                : queries.getQueryCw20ContractInfo();
-  const queryContractInfo = query
-    .getQueryContract(contractAddress);
+  const query = isSecret20
+    ? queries.getQuerySecret20ContractInfo()
+    : queries.getQueryCw20ContractInfo();
+  const queryContractInfo = query.getQueryContract(contractAddress);
 
   const tokenInfo = queryContractInfo.tokenInfo;
-  
+
   const notification = useNotification();
   const loadingIndicator = useLoadingIndicator();
 

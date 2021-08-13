@@ -14,21 +14,13 @@ export class ObservableQueryCw20Balance extends ObservableCosmwasmContractChainQ
     protected readonly contractAddress: string,
     protected readonly bech32Address: string
   ) {
-    super(
-      kvStore,
-      chainId,
-      chainGetter,
-      contractAddress,
-      {
-        balance: { address: bech32Address },
-      }
-    );
+    super(kvStore, chainId, chainGetter, contractAddress, {
+      balance: { address: bech32Address },
+    });
   }
 
   protected canFetch(): boolean {
-    return (
-      super.canFetch() && this.bech32Address !== ""
-    );
+    return super.canFetch() && this.bech32Address !== "";
   }
 }
 
@@ -101,9 +93,7 @@ export class ObservableQueryCw20BalanceInner extends ObservableQueryBalanceInner
 }
 
 export class ObservableQueryCw20BalanceRegistry implements BalanceRegistry {
-  constructor(
-    protected readonly kvStore: KVStore
-  ) {}
+  constructor(protected readonly kvStore: KVStore) {}
 
   getBalanceInner(
     chainId: string,

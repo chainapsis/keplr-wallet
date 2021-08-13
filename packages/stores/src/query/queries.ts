@@ -7,9 +7,9 @@ import {
   ObservableQuerySecret20BalanceRegistry,
   ObservableQuerySecretContractCodeHash,
 } from "./secret-wasm";
-import { 
+import {
   ObservableQueryCw20ContractInfo,
-  ObservableQueryCw20BalanceRegistry 
+  ObservableQueryCw20BalanceRegistry,
 } from "./cosmwasm";
 import {
   ObservableQueryBlock,
@@ -191,9 +191,7 @@ export class Queries {
       )
     );
     this._queryBalances.addBalanceRegistry(
-      new ObservableQueryCw20BalanceRegistry(
-        kvStore
-      )
+      new ObservableQueryCw20BalanceRegistry(kvStore)
     );
     this._querySecret20ContractInfo = new ObservableQuerySecret20ContractInfo(
       kvStore,

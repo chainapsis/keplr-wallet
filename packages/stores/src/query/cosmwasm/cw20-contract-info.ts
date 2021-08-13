@@ -12,15 +12,9 @@ export class ObservableQueryCw20ContactInfoInner extends ObservableCosmwasmContr
     chainGetter: ChainGetter,
     protected readonly contractAddress: string
   ) {
-    super(
-      kvStore,
-      chainId,
-      chainGetter,
-      contractAddress,
-      {token_info: {}}
-    );
+    super(kvStore, chainId, chainGetter, contractAddress, { token_info: {} });
   }
-  
+
   @computed
   get tokenInfo(): Cw20ContractTokenInfo | undefined {
     if (!this.response || !this.response.data) {

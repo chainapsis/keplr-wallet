@@ -36,19 +36,18 @@ export class ObservableCosmwasmContractChainQuery<
 
   @flow
   protected *init() {
-
     const msg = JSON.stringify(this.obj);
     const query = Buffer.from(msg).toString("base64");
 
     this.setUrl(
-        `/wasm/v1beta1/contract/${this.contractAddress}/smart/${query}`
+      `/wasm/v1beta1/contract/${this.contractAddress}/smart/${query}`
     );
   }
 
   protected async fetchResponse(
     cancelToken: CancelToken
   ): Promise<QueryResponse<T>> {
-    let response = await super.fetchResponse(cancelToken);
+    const response = await super.fetchResponse(cancelToken);
 
     const wasmResult = (response.data as unknown) as
       | {
