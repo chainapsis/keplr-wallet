@@ -6,11 +6,13 @@ import { GradientBackground } from "../../svg";
 export const PageWithView: FunctionComponent<
   ViewProps & {
     fixed?: React.ReactNode;
+
+    disableSafeArea?: boolean;
   }
 > = (props) => {
   const style = useStyle();
 
-  const { style: propStyle, ...restProps } = props;
+  const { style: propStyle, disableSafeArea, ...restProps } = props;
 
   return (
     <React.Fragment>
@@ -25,20 +27,25 @@ export const PageWithView: FunctionComponent<
       >
         <GradientBackground />
       </View>
-      <SafeAreaView style={style.get("flex-1")}>
+      {!disableSafeArea ? (
+        <SafeAreaView style={style.get("flex-1")}>
+          <View
+            style={StyleSheet.flatten([
+              style.flatten(["flex-1", "padding-0", "overflow-visible"]),
+              propStyle,
+            ])}
+            {...restProps}
+          />
+        </SafeAreaView>
+      ) : (
         <View
           style={StyleSheet.flatten([
-            style.flatten([
-              "flex-1",
-              "padding-12",
-              "padding-top-0",
-              "overflow-visible",
-            ]),
+            style.flatten(["flex-1", "padding-0", "overflow-visible"]),
             propStyle,
           ])}
           {...restProps}
         />
-      </SafeAreaView>
+      )}
     </React.Fragment>
   );
 };

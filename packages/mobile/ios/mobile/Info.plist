@@ -51,6 +51,8 @@
 	<string>App uses Bluetooth to find, connect and communicate with Ledger Nano devices. Please grant access.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>$(PRODUCT_NAME) Authentication with TouchId or FaceID</string>
+	<key>NSCameraUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to use the camera</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UIAppFonts</key>

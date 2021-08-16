@@ -78,6 +78,7 @@ import { BlurredHeader } from "./components/staging/header";
 import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/staging/undelegate";
 import { RedelegateScreen } from "./screens/stake/staging/redelegate";
+import { CameraScreen } from "./screens/camera";
 
 const {
   SmartNavigatorProvider,
@@ -109,6 +110,9 @@ const {
       upperScreenName: "Others",
     },
     Tokens: {
+      upperScreenName: "Others",
+    },
+    Camera: {
       upperScreenName: "Others",
     },
     "Staking.Dashboard": {
@@ -312,6 +316,13 @@ export const OtherNavigation: FunctionComponent = () => {
     >
       <Stack.Screen name="Send" component={SendScreen} />
       <Stack.Screen name="Tokens" component={TokensScreen} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="Camera"
+        component={CameraScreen}
+      />
       <Stack.Screen name="Validator List" component={ValidatorListScreen} />
       <Stack.Screen
         name="Validator Details"
