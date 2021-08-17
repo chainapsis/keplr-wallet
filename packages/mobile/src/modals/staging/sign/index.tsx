@@ -16,12 +16,13 @@ import {
 import { Button } from "../../../components/staging/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
 import { Msg } from "./msg";
+import { observer } from "mobx-react-lite";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
 }> = registerModal(
-  () => {
+  observer(() => {
     const {
       chainStore,
       accountStore,
@@ -193,7 +194,7 @@ export const SignModal: FunctionComponent<{
         />
       </CardModal>
     );
-  },
+  }),
   {
     transitionVelocity: 1500,
     disableSafeArea: true,

@@ -5,6 +5,7 @@ import { PermissionsAndroid, Platform, Text } from "react-native";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/staging/button";
 import { useStore } from "../../../stores";
+import { observer } from "mobx-react-lite";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import TransportBLE from "@ledgerhq/react-native-hw-transport-ble";
@@ -13,7 +14,7 @@ export const LedgerGranterModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
 }> = registerModal(
-  () => {
+  observer(() => {
     const style = useStyle();
 
     const { ledgerInitStore } = useStore();
@@ -120,7 +121,7 @@ export const LedgerGranterModal: FunctionComponent<{
         />
       </CardModal>
     );
-  },
+  }),
   {
     disableSafeArea: true,
   }
