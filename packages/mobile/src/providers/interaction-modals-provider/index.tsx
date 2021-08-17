@@ -4,10 +4,11 @@ import { useStore } from "../../stores";
 import { SignModal } from "../../modals/staging/sign";
 import { UnlockModal } from "../../modals/staging/unlock";
 import { LedgerGranterModal } from "../../modals/staging/ledger";
+import { WalletConnectApprovalModal } from "../../modals/staging/wallet-connect-approval";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
-    const { interactionModalStore } = useStore();
+    const { interactionModalStore, walletConnectStore } = useStore();
 
     // Ensure that only one unlock modal exists
     const unlockInteractionExists =
@@ -25,6 +26,16 @@ export const InteractionModalsProivder: FunctionComponent = observer(
             }}
           />
         ) : null}
+        {walletConnectStore.pendingProposalApprovals.map((approval) => {
+          return (
+            <WalletConnectApprovalModal
+              key={approval.key}
+              isOpen={true}
+              close={() => approval.reject()}
+              approval={approval}
+            />
+          );
+        })}
         {interactionModalStore.urlInfos.map(({ url, key }) => {
           switch (url) {
             case "/sign":

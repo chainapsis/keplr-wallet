@@ -7377,7 +7377,7 @@ browserify-aes@^1.0.0, browserify-aes@^1.0.4, browserify-aes@^1.2.0:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-browserify-cipher@^1.0.0:
+browserify-cipher@^1.0.0, browserify-cipher@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/browserify-cipher/-/browserify-cipher-1.0.1.tgz#8d6474c1b870bfdabcd3bcfcc1934a10e94f15f0"
   integrity sha512-sPhkz0ARKbf4rRQt2hTpAHqn47X3llLkUGn+xEJzLjwY8LRs2p0v7ljvI5EyoRO/mexrNunNECisZs+gw2zz1w==
@@ -10799,11 +10799,6 @@ expo-random@^11.0.0:
   integrity sha512-5x+F4KZlO2v9MZI79fvhuHUdSLCXAz1l8a6a7ABU+3/eBD5TIwtgBuu3YLtGldadVV7hX19HGfZy4GCO2R1dFA==
   dependencies:
     base64-js "^1.3.0"
-
-expo-standard-web-crypto@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/expo-standard-web-crypto/-/expo-standard-web-crypto-1.0.0.tgz#6a12b3b467da514054d656f947c4ba6048449b67"
-  integrity sha512-+x4k6BPAKx8wRxY+yPuF0PW1NVw88mbmW0/OyFUH0s9euit2/pRuMeq6EoyI+AiYSDelGyNZp0mLAoB017FR7Q==
 
 express@^4.14.0, express@^4.16.3, express@^4.17.1:
   version "4.17.1"
@@ -19025,6 +19020,14 @@ react-native-code-push@^7.0.1:
     plist "^3.0.2"
     semver "^7.3.2"
     xcode "3.0.1"
+
+"react-native-crypto-polyfill@file:./packages/mobile/crypto-polyfill":
+  version "0.0.1"
+  dependencies:
+    browserify-cipher "^1.0.1"
+    create-hash "^1.2.0"
+    create-hmac "^1.1.7"
+    expo-random "^11.0.0"
 
 react-native-elements@^3.3.2:
   version "3.3.2"

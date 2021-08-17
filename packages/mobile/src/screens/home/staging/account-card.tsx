@@ -131,7 +131,7 @@ export const AccountCard: FunctionComponent<{
               size="small"
               containerStyle={style.flatten(["min-width-80"])}
               onPress={() => {
-                smartNavigation.navigateSmart("Camera", {
+                smartNavigation.navigateSmart("Send", {
                   currency: chainStore.current.stakeCurrency.coinMinimalDenom,
                 });
               }}
