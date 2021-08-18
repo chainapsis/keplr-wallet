@@ -3,7 +3,6 @@ import { PageWithScrollView } from "../../components/staging/page";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
-import { AppCurrency } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
@@ -29,7 +28,6 @@ export const TokensScreen: FunctionComponent = observer(() => {
           return (
             <TokenItem
               key={token.currency.coinMinimalDenom}
-              currency={token.currency}
               balance={token.balance}
             />
           );
@@ -42,12 +40,23 @@ export const TokensScreen: FunctionComponent = observer(() => {
 export const TokenItem: FunctionComponent<{
   containerStyle?: ViewStyle;
 
-  currency: AppCurrency;
   balance: CoinPretty;
-}> = ({ containerStyle, currency, balance }) => {
+}> = ({ containerStyle, balance }) => {
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
+
+  // The IBC currency could have long denom (with the origin chain/channel information).
+  // Because it is shown in the title, there is no need to show such long denom twice in the actual balance.
+  const balanceCoinDenom = (() => {
+    if (
+      "originCurrency" in balance.currency &&
+      balance.currency.originCurrency
+    ) {
+      return balance.currency.originCurrency.coinDenom;
+    }
+    return balance.currency.coinDenom;
+  })();
 
   return (
     <RectButton
@@ -62,7 +71,7 @@ export const TokenItem: FunctionComponent<{
       ])}
       onPress={() => {
         smartNavigation.navigateSmart("Send", {
-          currency: currency.coinMinimalDenom,
+          currency: balance.currency.coinMinimalDenom,
         });
       }}
     >
@@ -84,7 +93,7 @@ export const TokenItem: FunctionComponent<{
             "uppercase",
           ])}
         >
-          {currency.coinDenom}
+          {balance.currency.coinDenom}
         </Text>
         <Text
           style={style.flatten([
@@ -95,12 +104,13 @@ export const TokenItem: FunctionComponent<{
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {balance
+          {`${balance
             .trim(true)
             .shrink(true)
             .maxDecimals(6)
             .upperCase(true)
-            .toString()}
+            .hideDenom(true)
+            .toString()} ${balanceCoinDenom}`}
         </Text>
       </View>
       <View style={style.get("flex-1")} />
