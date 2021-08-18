@@ -1,4 +1,4 @@
-import { polyfillWebCrypto } from "expo-standard-web-crypto";
+import { polyfillWebCrypto } from "react-native-crypto-polyfill";
 
 polyfillWebCrypto();
 // crypto is now globally defined
@@ -18,6 +18,7 @@ if (typeof process === "undefined") {
 }
 
 process.browser = false;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 if (typeof Buffer === "undefined") global.Buffer = require("buffer").Buffer;
 
 const isDev = typeof __DEV__ === "boolean" && __DEV__;
