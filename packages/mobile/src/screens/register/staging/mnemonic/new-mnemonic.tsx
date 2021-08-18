@@ -63,13 +63,15 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-12", "padding-bottom-12"])}
+      style={style.flatten(["padding-x-20", "padding-bottom-12"])}
     >
       <Text
         style={style.flatten([
-          "h4",
+          "h5",
           "color-text-black-medium",
-          "margin-top-40",
+          "margin-top-32",
+          "margin-bottom-4",
+          "text-center",
         ])}
       >
         Backup your mnemonic seed securely.
