@@ -8,7 +8,6 @@ import { getRandomBytesAsync } from "../common";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { EmbedChainInfos } from "../config";
-import { BleManager } from "react-native-ble-plx";
 import {
   getLastUsedLedgerDeviceId,
   setLastUsedLedgerDeviceId,
