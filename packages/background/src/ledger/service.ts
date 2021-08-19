@@ -189,8 +189,8 @@ export class LedgerService {
 
         try {
           const promises: Promise<unknown>[] = [
-            this.interactionService
-              .waitApprove(
+            (async () => {
+              const response = (await this.interactionService.waitApprove(
                 env,
                 "/ledger-grant",
                 "ledger-init",
@@ -202,18 +202,21 @@ export class LedgerService {
                   forceOpenWindow: true,
                   channel: "ledger",
                 }
-              )
-              .then((_response) => {
-                const response = _response as
-                  | {
-                      initArgs: any[];
-                    }
-                  | undefined;
+              )) as
+                | {
+                    abort?: boolean;
+                    initArgs?: any[];
+                  }
+                | undefined;
 
-                if (response?.initArgs) {
-                  initArgs = response.initArgs;
-                }
-              }),
+              if (response?.abort) {
+                throw new Error("Ledger init aborted");
+              }
+
+              if (response?.initArgs) {
+                initArgs = response.initArgs;
+              }
+            })(),
           ];
 
           promises.push(

@@ -8,6 +8,11 @@ import { getRandomBytesAsync } from "../common";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { EmbedChainInfos } from "../config";
+import { BleManager } from "react-native-ble-plx";
+import {
+  getLastUsedLedgerDeviceId,
+  setLastUsedLedgerDeviceId,
+} from "../utils/ledger";
 
 const router = new RNRouter(RNEnv.produceEnv);
 
@@ -57,8 +62,7 @@ init(
     defaultMode: "ble",
     transportIniters: {
       ble: async (deviceId?: string) => {
-        const kvStore = new AsyncKVStore("__keplr_ledger_nano_x");
-        const lastDeviceId = await kvStore.get<string>("last_device_id");
+        const lastDeviceId = await getLastUsedLedgerDeviceId();
 
         if (!deviceId && !lastDeviceId) {
           throw new Error("Device id is empty");
@@ -69,7 +73,7 @@ init(
         }
 
         if (deviceId && deviceId !== lastDeviceId) {
-          await kvStore.set<string>("last_device_id", deviceId);
+          await setLastUsedLedgerDeviceId(deviceId);
         }
 
         return await TransportBLE.open(deviceId);

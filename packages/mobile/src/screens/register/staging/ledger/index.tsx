@@ -49,24 +49,30 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
   const submit = handleSubmit(async () => {
     setIsCreating(true);
 
-    await registerConfig.createLedger(
-      getValues("name"),
-      getValues("password"),
-      {
-        account: 0,
-        change: 0,
-        addressIndex: 0,
-      }
-    );
-
-    smartNavigation.reset({
-      index: 0,
-      routes: [
+    try {
+      await registerConfig.createLedger(
+        getValues("name"),
+        getValues("password"),
         {
-          name: "Register.End",
-        },
-      ],
-    });
+          account: 0,
+          change: 0,
+          addressIndex: 0,
+        }
+      );
+
+      smartNavigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "Register.End",
+          },
+        ],
+      });
+    } catch (e) {
+      // Definitely, the error can be thrown when the ledger connection failed
+      console.log(e);
+      setIsCreating(false);
+    }
   });
 
   return (
