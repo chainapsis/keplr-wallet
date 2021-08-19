@@ -15,6 +15,12 @@ export const InteractionModalsProivder: FunctionComponent = observer(
       interactionModalStore.urlInfos.find((url) => url.url === "/unlock") !=
       null;
 
+    // Ensure that only one ledger grant modal exists
+    const grantLedgerNanoExists =
+      interactionModalStore.urlInfos.find(
+        (url) => url.url === "/ledger-grant"
+      ) != null;
+
     return (
       <React.Fragment>
         {unlockInteractionExists ? (
@@ -24,6 +30,12 @@ export const InteractionModalsProivder: FunctionComponent = observer(
               // noop
               // Can't close without unlocking.
             }}
+          />
+        ) : null}
+        {grantLedgerNanoExists ? (
+          <LedgerGranterModal
+            isOpen={true}
+            close={() => interactionModalStore.popUrl()}
           />
         ) : null}
         {walletConnectStore.pendingProposalApprovals.map((approval) => {
@@ -41,14 +53,6 @@ export const InteractionModalsProivder: FunctionComponent = observer(
             case "/sign":
               return (
                 <SignModal
-                  key={key}
-                  isOpen={true}
-                  close={() => interactionModalStore.popUrl()}
-                />
-              );
-            case "/ledger-grant":
-              return (
-                <LedgerGranterModal
                   key={key}
                   isOpen={true}
                   close={() => interactionModalStore.popUrl()}

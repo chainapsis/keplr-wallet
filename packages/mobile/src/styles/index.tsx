@@ -119,6 +119,12 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       letterSpacing: 0.3,
       ...getPlatformFontWeight("500"),
     },
+    subtitle3: {
+      fontSize: 14,
+      lineHeight: 21,
+      letterSpacing: 0.3,
+      ...getPlatformFontWeight("500"),
+    },
     body1: {
       fontSize: 18,
       lineHeight: 24,

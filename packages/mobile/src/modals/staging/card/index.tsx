@@ -10,8 +10,9 @@ import { DefaultVelocity } from "../base/const";
 // CONTRACT: Use with { disableSafeArea: true, align: "bottom" } modal options.
 export const CardModal: FunctionComponent<{
   title: string;
+  right?: React.ReactElement;
   childrenContainerStyle?: ViewStyle;
-}> = ({ title, children, childrenContainerStyle }) => {
+}> = ({ title, right, children, childrenContainerStyle }) => {
   const style = useStyle();
   const safeAreaInsets = useSafeAreaInsets();
 
@@ -217,15 +218,18 @@ export const CardModal: FunctionComponent<{
               ])}
             />
           </View>
-          <Text
+          <View
             style={style.flatten([
-              "h4",
-              "color-text-black-high",
+              "flex-row",
+              "items-center",
               "margin-bottom-16",
             ])}
           >
-            {title}
-          </Text>
+            <Text style={style.flatten(["h4", "color-text-black-high"])}>
+              {title}
+            </Text>
+            {right}
+          </View>
           <View
             style={style.flatten(["height-1", "background-color-border-white"])}
           />

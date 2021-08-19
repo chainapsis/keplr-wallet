@@ -12,8 +12,6 @@ import { InteractionService } from "../interaction";
 import { LedgerOptions } from "./options";
 import { Buffer } from "buffer/";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 
 @singleton()
