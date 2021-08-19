@@ -88,7 +88,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-20", "padding-bottom-12"])}
+      style={style.flatten(["padding-x-page", "padding-bottom-12"])}
     >
       <Controller
         control={control}
