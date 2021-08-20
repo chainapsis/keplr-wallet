@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useStyle } from "../../../styles";
 import { RectButton } from "react-native-gesture-handler";
 import { Text } from "react-native-elements";
@@ -10,6 +10,7 @@ export const Button: FunctionComponent<{
   mode?: "fill" | "light" | "outline" | "text";
   size?: "default" | "small" | "large";
   text: string;
+  icon?: ReactElement;
   loading?: boolean;
   disabled?: boolean;
 
@@ -23,6 +24,7 @@ export const Button: FunctionComponent<{
   mode = "fill",
   size = "default",
   text,
+  icon,
   loading = false,
   disabled = false,
   onPress,
@@ -142,7 +144,7 @@ export const Button: FunctionComponent<{
       <RectButton
         style={StyleSheet.flatten([
           style.flatten([
-            "flex",
+            "flex-row",
             "justify-center",
             "items-center",
             "height-full",
@@ -157,6 +159,14 @@ export const Button: FunctionComponent<{
         underlayColor={underlayColor}
         activeOpacity={1}
       >
+        <View
+          style={style.flatten(
+            ["height-1", "justify-center"],
+            [loading && "opacity-transparent"]
+          )}
+        >
+          <View>{icon}</View>
+        </View>
         <Text
           style={StyleSheet.flatten([
             style.flatten(

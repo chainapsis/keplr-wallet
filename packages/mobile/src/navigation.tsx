@@ -55,6 +55,8 @@ import {
   RecoverMnemonicScreen,
 } from "./screens/register/staging/mnemonic";
 import { RegisterEndScreen } from "./screens/register/staging/end";
+import { RegisterNewUserScreen } from "./screens/register/staging/new-user";
+import { RegisterNotNewUserScreen } from "./screens/register/staging/not-new-user";
 import {
   AddressBookConfig,
   IMemoConfig,
@@ -86,6 +88,12 @@ const {
 } = createSmartNavigatorProvider(
   new SmartNavigator({
     "Register.Intro": {
+      upperScreenName: "Register",
+    },
+    "Register.NewUser": {
+      upperScreenName: "Register",
+    },
+    "Register.NotNewUser": {
       upperScreenName: "Register",
     },
     "Register.NewMnemonic": {
@@ -276,6 +284,11 @@ export const RegisterNavigation: FunctionComponent = () => {
       headerMode="screen"
     >
       <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
+      <Stack.Screen name="Register.NewUser" component={RegisterNewUserScreen} />
+      <Stack.Screen
+        name="Register.NotNewUser"
+        component={RegisterNotNewUserScreen}
+      />
       <Stack.Screen name="Register.NewMnemonic" component={NewMnemonicScreen} />
       <Stack.Screen
         name="Register.VerifyMnemonic"
