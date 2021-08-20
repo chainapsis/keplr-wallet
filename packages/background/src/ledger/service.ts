@@ -59,7 +59,7 @@ export class LedgerService {
       } finally {
         // Notify UI Ledger pubkey derivation succeeded only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "get-pubkey",
             success: true,
           });
@@ -102,7 +102,7 @@ export class LedgerService {
         );
         // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "sign",
             success: true,
           });
@@ -111,7 +111,7 @@ export class LedgerService {
       } catch (e) {
         // Notify UI Ledger signing failed only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "sign",
             success: false,
           });
@@ -235,14 +235,10 @@ export class LedgerService {
                 }
               }
               if (!timeoutAborted) {
-                await this.interactionService.dispatchEvent(
-                  APP_PORT,
-                  "ledger-init",
-                  {
-                    event: "init-aborted",
-                    mode,
-                  }
-                );
+                this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+                  event: "init-aborted",
+                  mode,
+                });
                 throw new Error("Ledger init timeout");
               }
             })()

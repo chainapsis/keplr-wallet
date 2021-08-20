@@ -243,11 +243,7 @@ export class KeyRingService {
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
-      await this.interactionService.dispatchEvent(
-        APP_PORT,
-        "request-sign-end",
-        {}
-      );
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
   }
 
@@ -295,11 +291,7 @@ export class KeyRingService {
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
-      await this.interactionService.dispatchEvent(
-        APP_PORT,
-        "request-sign-end",
-        {}
-      );
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
   }
 
@@ -356,7 +348,7 @@ export class KeyRingService {
     try {
       return await this.keyRing.changeKeyStoreFromMultiKeyStore(index);
     } finally {
-      await this.interactionService.dispatchEvent(
+      this.interactionService.dispatchEvent(
         WEBPAGE_PORT,
         "keystore-changed",
         {}
