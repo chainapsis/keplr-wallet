@@ -1,11 +1,33 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import {
+  Keyboard,
+  KeyboardEvent,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
+} from "react-native";
 import { useStyle } from "../../../styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { useModalState, useModalTransision } from "../base";
-import Animated from "react-native-reanimated";
+import Animated, { Easing } from "react-native-reanimated";
 import { DefaultVelocity } from "../base/const";
+
+const useAnimatedValueSet = () => {
+  const [state] = useState(() => {
+    return {
+      clock: new Animated.Clock(),
+      finished: new Animated.Value(0),
+      time: new Animated.Value(0),
+      frameTime: new Animated.Value(0),
+      value: new Animated.Value(0),
+    };
+  });
+
+  return state;
+};
 
 // CONTRACT: Use with { disableSafeArea: true, align: "bottom" } modal options.
 export const CardModal: FunctionComponent<{
@@ -16,8 +38,96 @@ export const CardModal: FunctionComponent<{
   const style = useStyle();
   const safeAreaInsets = useSafeAreaInsets();
 
+  const [
+    softwareKeyboardBottomPadding,
+    setSoftwareKeyboardBottomPadding,
+  ] = useState(0);
+
+  useEffect(() => {
+    const onKeyboarFrame = (e: KeyboardEvent) => {
+      setSoftwareKeyboardBottomPadding(
+        e.endCoordinates.height - safeAreaInsets.bottom
+      );
+    };
+    const onKeyboardClearFrame = () => {
+      setSoftwareKeyboardBottomPadding(0);
+    };
+
+    if (Platform.OS !== "android") {
+      Keyboard.addListener("keyboardWillShow", onKeyboarFrame);
+      Keyboard.addListener("keyboardWillChangeFrame", onKeyboarFrame);
+      Keyboard.addListener("keyboardWillHide", onKeyboardClearFrame);
+
+      return () => {
+        Keyboard.removeListener("keyboardWillShow", onKeyboarFrame);
+        Keyboard.removeListener("keyboardWillChangeFrame", onKeyboarFrame);
+        Keyboard.removeListener("keyboardWillHide", onKeyboardClearFrame);
+      };
+    } else {
+      // "keyboardWillShow" as well as "keyboardWillHide" are not available on Android.
+      Keyboard.addListener("keyboardDidShow", onKeyboarFrame);
+      Keyboard.addListener("keyboardDidChangeFrame", onKeyboarFrame);
+      Keyboard.addListener("keyboardDidHide", onKeyboardClearFrame);
+
+      return () => {
+        Keyboard.removeListener("keyboardDidShow", onKeyboarFrame);
+        Keyboard.removeListener("keyboardDidChangeFrame", onKeyboarFrame);
+        Keyboard.removeListener("keyboardDidHide", onKeyboardClearFrame);
+      };
+    }
+  }, [safeAreaInsets.bottom]);
+
+  const animatedValueSet = useAnimatedValueSet();
+
   const modal = useModalState();
   const modalTransition = useModalTransision();
+
+  const animatedKeyboardPaddingBottom = useMemo(() => {
+    return Animated.block([
+      Animated.cond(
+        Animated.and(
+          Animated.neq(animatedValueSet.value, softwareKeyboardBottomPadding),
+          Animated.not(Animated.clockRunning(animatedValueSet.clock))
+        ),
+        [
+          Animated.debug(
+            "start clock for keyboard avoiding",
+            animatedValueSet.value
+          ),
+          Animated.set(animatedValueSet.finished, 0),
+          Animated.set(animatedValueSet.time, 0),
+          Animated.set(animatedValueSet.frameTime, 0),
+          Animated.startClock(animatedValueSet.clock),
+        ]
+      ),
+      Animated.timing(
+        animatedValueSet.clock,
+        {
+          finished: animatedValueSet.finished,
+          position: animatedValueSet.value,
+          time: animatedValueSet.time,
+          frameTime: animatedValueSet.frameTime,
+        },
+        {
+          toValue: softwareKeyboardBottomPadding,
+          duration: 175,
+          easing: Easing.linear,
+        }
+      ),
+      Animated.cond(
+        animatedValueSet.finished,
+        Animated.stopClock(animatedValueSet.clock)
+      ),
+      animatedValueSet.value,
+    ]);
+  }, [
+    animatedValueSet.clock,
+    animatedValueSet.finished,
+    animatedValueSet.frameTime,
+    animatedValueSet.time,
+    animatedValueSet.value,
+    softwareKeyboardBottomPadding,
+  ]);
 
   const [startTranslateY] = useState(() => new Animated.Value(0));
 
@@ -183,7 +293,7 @@ export const CardModal: FunctionComponent<{
   ]);
 
   return (
-    <View
+    <Animated.View
       style={StyleSheet.flatten([
         style.flatten([
           "background-color-white",
@@ -192,7 +302,10 @@ export const CardModal: FunctionComponent<{
           "overflow-hidden",
         ]),
         {
-          paddingBottom: safeAreaInsets.bottom,
+          paddingBottom: Animated.add(
+            safeAreaInsets.bottom,
+            animatedKeyboardPaddingBottom
+          ),
         },
       ])}
     >
@@ -243,6 +356,6 @@ export const CardModal: FunctionComponent<{
       >
         {children}
       </View>
-    </View>
+    </Animated.View>
   );
 };
