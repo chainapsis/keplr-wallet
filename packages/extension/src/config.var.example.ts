@@ -63,9 +63,13 @@ export const IRIS_REST_ENDPOINT = "";
 export const IRIS_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
 export const BETA_STRAIGHTEDGE_REST_ENDPOINT = "";
-export const BETA_STRAIGHTEDGE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const BETA_STRAIGHTEDGE_REST_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
 export const BETA_STRAIGHTEDGE_RPC_ENDPOINT = "";
-export const BETA_STRAIGHTEDGE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const BETA_STRAIGHTEDGE_RPC_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
 
 export const CRYPTO_ORG_RPC_ENDPOINT = "";
 export const CRYPTO_ORG_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
