@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { PermissionsAndroid, Platform, Text, View } from "react-native";
@@ -10,17 +10,46 @@ import TransportBLE from "@ledgerhq/react-native-hw-transport-ble";
 import { LoadingSpinner } from "../../../components/staging/spinner";
 import { RectButton } from "react-native-gesture-handler";
 import { Ledger, LedgerInitErrorOn } from "@keplr-wallet/background";
+import { getLastUsedLedgerDeviceId } from "../../../utils/ledger";
 
 export const LedgerGranterModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
 }> = registerModal(
   observer(() => {
+    const { ledgerInitStore, interactionModalStore } = useStore();
+
     const style = useStyle();
 
     const [bleManager] = useState(() => new BleManager());
 
+    const resumed = useRef(false);
     const [isAvailable, setIsAvailable] = useState(false);
+
+    useEffect(() => {
+      // If this modal appears, it's probably because there was a problem with the ledger connection.
+      // Ledger transport library for BLE seems to cache the transport internally.
+      // But this can be small problem when the ledger connection is failed.
+      // So, when this modal appears, try to disconnect the bluetooth connection for nano X.
+      getLastUsedLedgerDeviceId().then((deviceId) => {
+        if (deviceId) {
+          TransportBLE.disconnect(deviceId);
+        }
+      });
+    }, []);
+
+    useEffect(() => {
+      return () => {
+        // When the modal is closed without resuming, abort all the ledger init interactions.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (!resumed.current) {
+          interactionModalStore.popAll("/ledger-grant");
+          ledgerInitStore.abortAll();
+        }
+      };
+      // The ref of interaction modal store and ledger init store will never change.
+      // So this effect will be executed on unmounted.
+    }, [interactionModalStore, ledgerInitStore]);
 
     useEffect(() => {
       const subscription = bleManager.onStateChange((newState) => {
@@ -149,6 +178,11 @@ export const LedgerGranterModal: FunctionComponent<{
                   key={device.id}
                   deviceId={device.id}
                   name={device.name}
+                  onCanResume={async () => {
+                    resumed.current = true;
+                    interactionModalStore.popAll("/ledger-grant");
+                    await ledgerInitStore.resumeAll(device.id);
+                  }}
                 />
               );
             })}
@@ -169,9 +203,9 @@ export const LedgerGranterModal: FunctionComponent<{
 const LedgerNanoBLESelector: FunctionComponent<{
   deviceId: string;
   name: string;
-}> = observer(({ deviceId, name }) => {
-  const { ledgerInitStore, interactionModalStore } = useStore();
 
+  onCanResume: () => void;
+}> = ({ deviceId, name, onCanResume }) => {
   const style = useStyle();
 
   const [isConnecting, setIsConnecting] = useState(false);
@@ -196,6 +230,8 @@ const LedgerNanoBLESelector: FunctionComponent<{
         initErrorOn = LedgerInitErrorOn.Unknown;
       }
 
+      await TransportBLE.disconnect(deviceId);
+
       return false;
     } finally {
       setInitErrorOn(initErrorOn);
@@ -208,8 +244,7 @@ const LedgerNanoBLESelector: FunctionComponent<{
       style={style.flatten(["padding-y-12"])}
       onPress={async () => {
         if (await testLedgerConnection()) {
-          interactionModalStore.popAll("/ledger-grant");
-          await ledgerInitStore.resume(deviceId);
+          onCanResume();
         }
       }}
     >
@@ -240,4 +275,4 @@ const LedgerNanoBLESelector: FunctionComponent<{
       </View>
     </RectButton>
   );
-});
+};

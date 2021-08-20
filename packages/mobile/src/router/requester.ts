@@ -1,8 +1,11 @@
 import { Message, MessageRequester, Result } from "@keplr-wallet/router";
 import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
-import { RNRouter } from "./rn-router";
+import EventEmitter from "eventemitter3";
+import { RNRouterBackground, RNRouterUI } from "./rn-router";
 
-export class RNMessageRequester implements MessageRequester {
+export class RNMessageRequesterBase implements MessageRequester {
+  constructor(protected readonly eventEmitter: EventEmitter) {}
+
   async sendMessage<M extends Message<unknown>>(
     port: string,
     msg: M
@@ -10,13 +13,17 @@ export class RNMessageRequester implements MessageRequester {
     msg.validateBasic();
 
     // Set message's origin.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     msg["origin"] = "react-native://internal";
 
+    if (this.eventEmitter.listenerCount("message") === 0) {
+      throw new Error("There is no router to send");
+    }
+
     const result: Result = JSONUint8Array.unwrap(
       await new Promise((resolve) => {
-        RNRouter.EventEmitter.emit("message", {
+        this.eventEmitter.emit("message", {
           message: {
             port,
             type: msg.type(),
@@ -41,5 +48,17 @@ export class RNMessageRequester implements MessageRequester {
     }
 
     return result.return;
+  }
+}
+
+export class RNMessageRequesterInternal extends RNMessageRequesterBase {
+  constructor() {
+    super(RNRouterBackground.EventEmitter);
+  }
+}
+
+export class RNMessageRequesterInternalToUI extends RNMessageRequesterBase {
+  constructor() {
+    super(RNRouterUI.EventEmitter);
   }
 }

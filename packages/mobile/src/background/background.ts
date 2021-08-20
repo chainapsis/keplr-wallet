@@ -1,5 +1,9 @@
 import { init, ScryptParams } from "@keplr-wallet/background";
-import { RNEnv, RNRouter } from "../router";
+import {
+  RNEnv,
+  RNMessageRequesterInternalToUI,
+  RNRouterBackground,
+} from "../router";
 import { AsyncKVStore } from "../common";
 import scrypt from "react-native-scrypt";
 import { Buffer } from "buffer/";
@@ -8,22 +12,17 @@ import { getRandomBytesAsync } from "../common";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { EmbedChainInfos } from "../config";
+import {
+  getLastUsedLedgerDeviceId,
+  setLastUsedLedgerDeviceId,
+} from "../utils/ledger";
 
-const router = new RNRouter(RNEnv.produceEnv);
+const router = new RNRouterBackground(RNEnv.produceEnv);
 
-// TODO: Implement the KVStore for the react-native async storage.
 init(
   router,
   (prefix: string) => new AsyncKVStore(prefix),
-  {
-    // TODO: The message requester in the background services is used to emit the event like "keystore_changed" to the webpage.
-    // But, it is not needed yet in the mobile environment.
-    // So, just let it return undefined always and do nothing.
-    // The message requester to the webpage should be implemented in future.
-    sendMessage: async (_port: string, _msg: any): Promise<any> => {
-      return undefined;
-    },
-  },
+  new RNMessageRequesterInternalToUI(),
   EmbedChainInfos,
   [],
   getRandomBytesAsync,
@@ -57,8 +56,7 @@ init(
     defaultMode: "ble",
     transportIniters: {
       ble: async (deviceId?: string) => {
-        const kvStore = new AsyncKVStore("__keplr_ledger_nano_x");
-        const lastDeviceId = await kvStore.get<string>("last_device_id");
+        const lastDeviceId = await getLastUsedLedgerDeviceId();
 
         if (!deviceId && !lastDeviceId) {
           throw new Error("Device id is empty");
@@ -69,7 +67,7 @@ init(
         }
 
         if (deviceId && deviceId !== lastDeviceId) {
-          await kvStore.set<string>("last_device_id", deviceId);
+          await setLastUsedLedgerDeviceId(deviceId);
         }
 
         return await TransportBLE.open(deviceId);

@@ -59,7 +59,7 @@ export class LedgerService {
       } finally {
         // Notify UI Ledger pubkey derivation succeeded only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "get-pubkey",
             success: true,
           });
@@ -102,7 +102,7 @@ export class LedgerService {
         );
         // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "sign",
             success: true,
           });
@@ -111,7 +111,7 @@ export class LedgerService {
       } catch (e) {
         // Notify UI Ledger signing failed only when Ledger initialization is tried again.
         if (retryCount > 0) {
-          await this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
             event: "sign",
             success: false,
           });
@@ -189,8 +189,8 @@ export class LedgerService {
 
         try {
           const promises: Promise<unknown>[] = [
-            this.interactionService
-              .waitApprove(
+            (async () => {
+              const response = (await this.interactionService.waitApprove(
                 env,
                 "/ledger-grant",
                 "ledger-init",
@@ -202,18 +202,21 @@ export class LedgerService {
                   forceOpenWindow: true,
                   channel: "ledger",
                 }
-              )
-              .then((_response) => {
-                const response = _response as
-                  | {
-                      initArgs: any[];
-                    }
-                  | undefined;
+              )) as
+                | {
+                    abort?: boolean;
+                    initArgs?: any[];
+                  }
+                | undefined;
 
-                if (response?.initArgs) {
-                  initArgs = response.initArgs;
-                }
-              }),
+              if (response?.abort) {
+                throw new Error("Ledger init aborted");
+              }
+
+              if (response?.initArgs) {
+                initArgs = response.initArgs;
+              }
+            })(),
           ];
 
           promises.push(
@@ -232,14 +235,10 @@ export class LedgerService {
                 }
               }
               if (!timeoutAborted) {
-                await this.interactionService.dispatchEvent(
-                  APP_PORT,
-                  "ledger-init",
-                  {
-                    event: "init-aborted",
-                    mode,
-                  }
-                );
+                this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+                  event: "init-aborted",
+                  mode,
+                });
                 throw new Error("Ledger init timeout");
               }
             })()

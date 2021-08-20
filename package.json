@@ -17,6 +17,7 @@
       "**/unimodules-*",
       "**/native-base",
       "**/@react-native-async-storage/async-storage",
+      "**/@ledgerhq/react-native-hw-transport-ble",
       "**/jetifier"
     ]
   },
@@ -46,6 +47,7 @@
   "author": "chainapsis",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/node": "^16.6.2",
     "@types/webpack": "^4.39.1",
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",

@@ -151,6 +151,73 @@ export class LedgerInitStore {
     }
   }
 
+  @flow
+  *resumeAll(...initArgs: any[]) {
+    this._isLoading = true;
+
+    try {
+      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+        "ledger-init"
+      );
+
+      for (const data of datas) {
+        if (data.data.event === "init-failed") {
+          // Approve resuming the initing ledger.
+          yield this.interactionStore.approve("ledger-init", data.id, {
+            initArgs,
+          });
+        }
+      }
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *abort() {
+    this._isLoading = true;
+
+    try {
+      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+        "ledger-init"
+      );
+
+      for (const data of datas) {
+        if (data.data.event === "init-failed") {
+          // Approve resuming the initing ledger.
+          yield this.interactionStore.approve("ledger-init", data.id, {
+            abort: true,
+          });
+          break;
+        }
+      }
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *abortAll() {
+    this._isLoading = true;
+
+    try {
+      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+        "ledger-init"
+      );
+
+      for (const data of datas) {
+        if (data.data.event === "init-failed") {
+          // Approve resuming the initing ledger.
+          yield this.interactionStore.approve("ledger-init", data.id, {
+            abort: true,
+          });
+        }
+      }
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
   get isLoading(): boolean {
     return this._isLoading;
   }

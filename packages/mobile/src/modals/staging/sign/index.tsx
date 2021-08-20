@@ -180,8 +180,7 @@ export const SignModal: FunctionComponent<{
           onPress={async () => {
             try {
               if (signDocHelper.signDocWrapper) {
-                // TODO: ledger need await for user approve
-                signInteractionStore.approveAndWaitEnd(
+                await signInteractionStore.approveAndWaitEnd(
                   signDocHelper.signDocWrapper
                 );
               }
