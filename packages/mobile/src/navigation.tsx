@@ -219,14 +219,18 @@ export const MainNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTitleStyle: style.flatten(["h3", "color-black"]),
-        headerTitleAlign: "center",
+        headerTitleStyle: style.flatten(["h4", "color-black"]),
+        headerTitleContainerStyle: {
+          left: 50,
+          paddingBottom: 12,
+        },
+        headerTitleAlign: "left",
         headerStyle: {
           backgroundColor: "transparent",
           elevation: 0,
           shadowOpacity: 0,
         },
-        headerBackTitleVisible: false,
+        headerBackTitleVisible: true,
         header: (props) => {
           return <BlurredHeader {...props} />;
         },
@@ -239,7 +243,7 @@ export const MainNavigation: FunctionComponent = () => {
         options={{
           headerLeft: () => (
             <TouchableOpacity
-              style={style.flatten(["padding-8", "margin-left-4"])}
+              style={style.flatten(["margin-left-20", "margin-bottom-12"])}
               onPress={() => {
                 navigation.dispatch(DrawerActions.toggleDrawer());
               }}

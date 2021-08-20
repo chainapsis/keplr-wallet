@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, ReactElement } from "react";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { Button } from "../button";
@@ -9,6 +9,7 @@ export const CardHeaderWithButton: FunctionComponent<{
   title: string;
   paragraph?: string;
   buttonText: string;
+  icon?: ReactElement;
 
   onPress?: () => void;
 
@@ -22,6 +23,7 @@ export const CardHeaderWithButton: FunctionComponent<{
   title,
   paragraph,
   buttonText,
+  icon,
   onPress,
   buttonColor = "primary",
   buttonMode = "fill",
@@ -42,8 +44,9 @@ export const CardHeaderWithButton: FunctionComponent<{
         "padding-y-card-vertical",
       ])}
     >
+      {icon && <View style={style.flatten(["margin-right-12"])}>{icon}</View>}
       <View style={style.flatten(["flex", "justify-center"])}>
-        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+        <Text style={style.flatten(["h5", "color-text-black-very-high"])}>
           {title}
         </Text>
         {paragraph ? (
@@ -112,7 +115,8 @@ export const CardHeaderFullButton: FunctionComponent<{
         style={StyleSheet.flatten([
           style.flatten([
             "padding-x-card-horizontal",
-            "padding-y-card-vertical",
+            "padding-top-card-vertical",
+            "padding-bottom-card-vertical-half",
           ]),
           containerStyle,
         ])}
@@ -136,7 +140,7 @@ export const CardHeaderFullButton: FunctionComponent<{
           ) : null}
           <RightArrowIcon
             color={style.get("color-text-black-very-very-low").color}
-            height={12}
+            height={16}
           />
         </View>
       </RectButton>

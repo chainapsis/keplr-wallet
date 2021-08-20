@@ -63,4 +63,10 @@ export type EnumTextTransform =
 
 export type EnumTextAlign = "auto" | "left" | "right" | "center" | "justify";
 
+export type EnumTextDecorationLine =
+  | "none"
+  | "underline"
+  | "line-through"
+  | "underline line-through";
+
 export type EnumBorderStyle = "solid" | "dotted" | "dashed";

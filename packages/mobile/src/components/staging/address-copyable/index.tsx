@@ -15,7 +15,12 @@ export const AddressCopyable: FunctionComponent<{
   return (
     <RectButton
       style={StyleSheet.flatten([
-        style.flatten(["padding-x-8", "border-radius-32"]),
+        style.flatten([
+          "padding-x-12",
+          "padding-y-2",
+          "border-radius-12",
+          "background-color-primary-10",
+        ]),
         propStyle,
       ])}
       onPress={() => {
@@ -25,7 +30,7 @@ export const AddressCopyable: FunctionComponent<{
       underlayColor={style.get("color-button-primary-outline-underlay").color}
       activeOpacity={1}
     >
-      <Text style={style.flatten(["text-caption1", "color-primary-500"])}>
+      <Text style={style.flatten(["subtitle3", "color-primary-400"])}>
         {Bech32Address.shortenAddress(address, maxCharacters)}
       </Text>
     </RectButton>

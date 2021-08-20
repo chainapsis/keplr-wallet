@@ -1,5 +1,5 @@
 import { createStyleProvider } from "./builder";
-import { EnumTextTransform } from "./builder/types";
+import { EnumTextTransform, EnumTextDecorationLine } from "./builder/types";
 import { Platform } from "react-native";
 import { getPlatformFontWeight } from "./builder/utils";
 
@@ -182,6 +182,9 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       textTransform: "uppercase" as EnumTextTransform,
       ...getPlatformFontWeight("400"),
     },
+    "text-underline": {
+      textDecorationLine: "underline" as EnumTextDecorationLine,
+    },
     // This style is for the text input and aims to mock the body2 style.
     // In IOS, it is hard to position the input text to the middle vertically.
     // So, to solve this problem, decrease the line height and add the additional vertical padding.
@@ -261,6 +264,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "44": 44,
     "54": 54,
     "58": 58,
+    "72": 72,
     "80": 80,
     "160": 160,
     "300": 300,
@@ -338,6 +342,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "16": 16,
     "20": 20,
     "24": 24,
+    "28": 28,
     "32": 32,
     "40": 54,
     "64": 64,
