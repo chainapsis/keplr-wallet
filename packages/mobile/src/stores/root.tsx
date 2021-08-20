@@ -15,7 +15,7 @@ import {
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
-import { RNEnv, RNRouter, RNMessageRequester } from "../router";
+import { RNEnv, RNRouterUI, RNMessageRequesterInternal } from "../router";
 import { InteractionModalStore } from "./interaction-modal";
 import { ChainStore } from "./chain";
 import EventEmitter from "eventemitter3";
@@ -43,7 +43,7 @@ export class RootStore {
   public readonly walletConnectStore: WalletConnectStore;
 
   constructor() {
-    const router = new RNRouter(RNEnv.produceEnv);
+    const router = new RNRouterUI(RNEnv.produceEnv);
 
     const eventEmitter = new EventEmitter();
 
@@ -51,15 +51,18 @@ export class RootStore {
     // Order is important.
     this.interactionStore = new InteractionStore(
       router,
-      new RNMessageRequester()
+      new RNMessageRequesterInternal()
     );
     this.ledgerInitStore = new LedgerInitStore(
       this.interactionStore,
-      new RNMessageRequester()
+      new RNMessageRequesterInternal()
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
 
-    this.chainStore = new ChainStore(EmbedChainInfos, new RNMessageRequester());
+    this.chainStore = new ChainStore(
+      EmbedChainInfos,
+      new RNMessageRequesterInternal()
+    );
 
     this.keyRingStore = new KeyRingStore(
       {
@@ -69,7 +72,7 @@ export class RootStore {
       },
       "sha256",
       this.chainStore,
-      new RNMessageRequester(),
+      new RNMessageRequesterInternal(),
       this.interactionStore
     );
 
@@ -78,7 +81,7 @@ export class RootStore {
       this.chainStore,
       async () => {
         // TOOD: Set version for Keplr API
-        return new Keplr("", new RNMessageRequester());
+        return new Keplr("", new RNMessageRequesterInternal());
       },
       QueriesWithCosmosAndSecret
     );
@@ -101,7 +104,7 @@ export class RootStore {
           suggestChain: false,
           autoInit: true,
           getKeplr: async () => {
-            return new Keplr("", new RNMessageRequester());
+            return new Keplr("", new RNMessageRequesterInternal());
           },
         },
       }
@@ -175,7 +178,7 @@ export class RootStore {
         },
       },
       this.chainStore,
-      new RNMessageRequester(),
+      new RNMessageRequesterInternal(),
       this.interactionStore
     );
 

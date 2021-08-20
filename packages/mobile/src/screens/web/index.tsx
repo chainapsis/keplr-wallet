@@ -4,7 +4,7 @@ import { Platform, Text } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { useStyle } from "../../styles";
 import { Keplr } from "@keplr-wallet/provider";
-import { RNMessageRequester } from "../../router";
+import { RNMessageRequesterInternal } from "../../router";
 import { RNInjectedKeplr } from "../../injected/injected-provider";
 import RNFS from "react-native-fs";
 
@@ -32,7 +32,9 @@ export const WebScreen: FunctionComponent = () => {
   // TODO: Set the version properly.
   // IMPORTANT: Current message requester is for the internal usages.
   //            Don't use it in the production!!
-  const [keplr] = useState(() => new Keplr("0.0.1", new RNMessageRequester()));
+  const [keplr] = useState(
+    () => new Keplr("0.0.1", new RNMessageRequesterInternal())
+  );
   const [messageHandler] = useState(() =>
     RNInjectedKeplr.onMessageHandler(keplr)
   );

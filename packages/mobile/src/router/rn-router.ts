@@ -1,9 +1,19 @@
-import { MessageSender, Result, Router } from "@keplr-wallet/router";
+import {
+  EnvProducer,
+  MessageSender,
+  Result,
+  Router,
+} from "@keplr-wallet/router";
 
 import EventEmitter from "eventemitter3";
 
-export class RNRouter extends Router {
-  public static readonly EventEmitter: EventEmitter = new EventEmitter();
+export class RNRouterBase extends Router {
+  constructor(
+    protected readonly envProducer: EnvProducer,
+    protected readonly eventEmitter: EventEmitter
+  ) {
+    super(envProducer);
+  }
 
   listen(port: string): void {
     if (!port) {
@@ -11,12 +21,12 @@ export class RNRouter extends Router {
     }
 
     this.port = port;
-    RNRouter.EventEmitter.addListener("message", this.onMessage);
+    this.eventEmitter.addListener("message", this.onMessage);
   }
 
   unlisten(): void {
     this.port = "";
-    RNRouter.EventEmitter.removeListener("message", this.onMessage);
+    this.eventEmitter.removeListener("message", this.onMessage);
   }
 
   protected onMessage = async (params: {
@@ -51,4 +61,20 @@ export class RNRouter extends Router {
       }
     }
   };
+}
+
+export class RNRouterBackground extends RNRouterBase {
+  public static readonly EventEmitter: EventEmitter = new EventEmitter();
+
+  constructor(protected readonly envProducer: EnvProducer) {
+    super(envProducer, RNRouterBackground.EventEmitter);
+  }
+}
+
+export class RNRouterUI extends RNRouterBase {
+  public static readonly EventEmitter: EventEmitter = new EventEmitter();
+
+  constructor(protected readonly envProducer: EnvProducer) {
+    super(envProducer, RNRouterUI.EventEmitter);
+  }
 }

@@ -108,8 +108,7 @@ export const SignView: FunctionComponent = observer(() => {
             onPress={async () => {
               try {
                 if (signDocHelper.signDocWrapper) {
-                  // TODO: ledger need await for user approve so it will be fixed
-                  signInteractionStore.approveAndWaitEnd(
+                  await signInteractionStore.approveAndWaitEnd(
                     signDocHelper.signDocWrapper
                   );
                 }
