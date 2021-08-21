@@ -25,9 +25,9 @@ export const GovernanceCard: FunctionComponent<{
   // If, there are no proposals on voting period,
   // just show the recent proposal with taking precedence to the non deposit period proposal.
   const showingProposals = useMemo(() => {
-    const result: ObservableQueryProposal[] = [];
+    let result: ObservableQueryProposal[] = [];
     if (allProposals.length > 0) {
-      result.concat(
+      result = result.concat(
         allProposals.filter(
           (proposal) =>
             proposal.proposalStatus === Governance.ProposalStatus.VOTING_PERIOD
