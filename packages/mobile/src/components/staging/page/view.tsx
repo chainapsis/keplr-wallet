@@ -2,6 +2,7 @@ import React, { FunctionComponent } from "react";
 import { SafeAreaView, ViewProps, StyleSheet, View } from "react-native";
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../svg";
+import { useSetFocusedScreen } from "./utils";
 
 export const PageWithView: FunctionComponent<
   ViewProps & {
@@ -11,6 +12,8 @@ export const PageWithView: FunctionComponent<
   }
 > = (props) => {
   const style = useStyle();
+
+  useSetFocusedScreen();
 
   const { style: propStyle, disableSafeArea, ...restProps } = props;
 

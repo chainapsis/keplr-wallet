@@ -9,7 +9,7 @@ import {
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../svg";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { usePageRegisterScrollYValue } from "./utils";
+import { usePageRegisterScrollYValue, useSetFocusedScreen } from "./utils";
 
 const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
   KeyboardAwareScrollView
@@ -22,6 +22,7 @@ export const PageWithScrollView: FunctionComponent<
 > = (props) => {
   const style = useStyle();
 
+  useSetFocusedScreen();
   const scrollY = usePageRegisterScrollYValue();
 
   const { style: propStyle, fixed, onScroll, ...restProps } = props;

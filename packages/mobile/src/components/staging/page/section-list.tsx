@@ -9,7 +9,7 @@ import {
 import { useStyle } from "../../../styles";
 import { GradientBackground } from "../../svg";
 import { KeyboardAwareSectionList } from "react-native-keyboard-aware-scroll-view";
-import { usePageRegisterScrollYValue } from "./utils";
+import { usePageRegisterScrollYValue, useSetFocusedScreen } from "./utils";
 
 const AnimatedKeyboardAwareSectionList = Animated.createAnimatedComponent(
   KeyboardAwareSectionList
@@ -20,6 +20,7 @@ export const PageWithSectionList: FunctionComponent<
 > = (props) => {
   const style = useStyle();
 
+  useSetFocusedScreen();
   const scrollY = usePageRegisterScrollYValue();
 
   const { style: propStyle, onScroll, ...restProps } = props;

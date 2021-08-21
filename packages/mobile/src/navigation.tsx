@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent, useEffect, useRef } from "react";
 import { StatusBar, Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
@@ -22,7 +22,10 @@ import {
   GovernanceScreen,
   GovernanceDetailsScreen,
 } from "./screens/governance/staging";
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import {
+  createDrawerNavigator,
+  useIsDrawerOpen,
+} from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { DrawerContent } from "./components/drawer";
@@ -72,6 +75,10 @@ import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/staging/undelegate";
 import { RedelegateScreen } from "./screens/stake/staging/redelegate";
 import { CameraScreen } from "./screens/camera";
+import {
+  FocusedScreenProvider,
+  useFocusedScreen,
+} from "./providers/focused-screen";
 
 const {
   SmartNavigatorProvider,
@@ -386,6 +393,19 @@ export const AddressBookStackScreen: FunctionComponent = () => {
 export const MainTabNavigation: FunctionComponent = () => {
   const style = useStyle();
 
+  const navigation = useNavigation();
+
+  const focusedScreen = useFocusedScreen();
+  const isDrawerOpen = useIsDrawerOpen();
+
+  useEffect(() => {
+    // When the focused screen is not "Home" screen and the drawer is open,
+    // try to close the drawer forcely.
+    if (focusedScreen.name !== "Home" && isDrawerOpen) {
+      navigation.dispatch(DrawerActions.toggleDrawer());
+    }
+  }, [focusedScreen.name, isDrawerOpen, navigation]);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -455,10 +475,18 @@ export const MainTabNavigation: FunctionComponent = () => {
 };
 
 export const MainTabNavigationWithDrawer: FunctionComponent = () => {
+  const focused = useFocusedScreen();
+
   return (
     <Drawer.Navigator
       drawerType="slide"
       drawerContent={(props) => <DrawerContent {...props} />}
+      screenOptions={{
+        // If the focused screen is not "Home" screen,
+        // disable the gesture to open drawer.
+        swipeEnabled: focused.name === "Home",
+        gestureEnabled: focused.name === "Home",
+      }}
     >
       <Drawer.Screen name="MainTab" component={MainTabNavigation} />
     </Drawer.Navigator>
@@ -472,66 +500,68 @@ export const AppNavigation: FunctionComponent = observer(() => {
 
   return (
     <PageScrollPositionProvider>
-      <SmartNavigatorProvider>
-        <StatusBar
-          translucent={true}
-          backgroundColor="#FFFFFF00"
-          barStyle="dark-content"
-        />
-        <NavigationContainer
-          ref={navigationRef}
-          onReady={() =>
-            (routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name)
-          }
-          onStateChange={async () => {
-            const previousRouteName = routeNameRef.current;
-            const currentRouteName = navigationRef.current?.getCurrentRoute()
-              ?.name;
-
-            if (previousRouteName !== currentRouteName) {
-              // The line below uses the expo-firebase-analytics tracker
-              // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
-              // Change this line to use another Mobile analytics SDK
-              await analytics().logScreenView({
-                screen_name: currentRouteName,
-                screen_class: currentRouteName,
-              });
+      <FocusedScreenProvider>
+        <SmartNavigatorProvider>
+          <StatusBar
+            translucent={true}
+            backgroundColor="#FFFFFF00"
+            barStyle="dark-content"
+          />
+          <NavigationContainer
+            ref={navigationRef}
+            onReady={() =>
+              (routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name)
             }
+            onStateChange={async () => {
+              const previousRouteName = routeNameRef.current;
+              const currentRouteName = navigationRef.current?.getCurrentRoute()
+                ?.name;
 
-            // Save the current route name for later comparison
-            routeNameRef.current = currentRouteName;
-          }}
-        >
-          {keyRingStore.status === KeyRingStatus.NOTLOADED ? (
-            <SplashScreen />
-          ) : (
-            <Stack.Navigator
-              initialRouteName={
-                keyRingStore.status === KeyRingStatus.EMPTY
-                  ? "Register"
-                  : "MainTabDrawer"
+              if (previousRouteName !== currentRouteName) {
+                // The line below uses the expo-firebase-analytics tracker
+                // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
+                // Change this line to use another Mobile analytics SDK
+                await analytics().logScreenView({
+                  screen_name: currentRouteName,
+                  screen_class: currentRouteName,
+                });
               }
-              screenOptions={{
-                headerShown: false,
-                ...TransitionPresets.SlideFromRightIOS,
-              }}
-              headerMode="screen"
-            >
-              <Stack.Screen
-                name="MainTabDrawer"
-                component={MainTabNavigationWithDrawer}
-              />
-              <Stack.Screen name="Register" component={RegisterNavigation} />
-              <Stack.Screen name="Others" component={OtherNavigation} />
-              <Stack.Screen
-                name="AddressBooks"
-                component={AddressBookStackScreen}
-              />
-            </Stack.Navigator>
-          )}
-        </NavigationContainer>
-        {/* <ModalsRenderer /> */}
-      </SmartNavigatorProvider>
+
+              // Save the current route name for later comparison
+              routeNameRef.current = currentRouteName;
+            }}
+          >
+            {keyRingStore.status === KeyRingStatus.NOTLOADED ? (
+              <SplashScreen />
+            ) : (
+              <Stack.Navigator
+                initialRouteName={
+                  keyRingStore.status === KeyRingStatus.EMPTY
+                    ? "Register"
+                    : "MainTabDrawer"
+                }
+                screenOptions={{
+                  headerShown: false,
+                  ...TransitionPresets.SlideFromRightIOS,
+                }}
+                headerMode="screen"
+              >
+                <Stack.Screen
+                  name="MainTabDrawer"
+                  component={MainTabNavigationWithDrawer}
+                />
+                <Stack.Screen name="Register" component={RegisterNavigation} />
+                <Stack.Screen name="Others" component={OtherNavigation} />
+                <Stack.Screen
+                  name="AddressBooks"
+                  component={AddressBookStackScreen}
+                />
+              </Stack.Navigator>
+            )}
+          </NavigationContainer>
+          {/* <ModalsRenderer /> */}
+        </SmartNavigatorProvider>
+      </FocusedScreenProvider>
     </PageScrollPositionProvider>
   );
 });
