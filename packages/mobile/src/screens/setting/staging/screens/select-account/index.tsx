@@ -9,6 +9,9 @@ import FeatherIcon from "react-native-vector-icons/Feather";
 import { Text, View } from "react-native";
 import { useStyle } from "../../../../../styles";
 import { useSmartNavigation } from "../../../../../navigation";
+import { useLoadingScreen } from "../../../../../providers/loading-screen";
+import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
+import delay from "delay";
 
 const CheckIcon: FunctionComponent<{
   color: string;
@@ -66,6 +69,22 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
     );
   }, [keyRingStore.multiKeyStoreInfo]);
 
+  const loadingScreen = useLoadingScreen();
+
+  const selectKeyStore = async (
+    keyStore: MultiKeyStoreInfoWithSelectedElem
+  ) => {
+    const index = keyRingStore.multiKeyStoreInfo.indexOf(keyStore);
+    if (index >= 0) {
+      loadingScreen.setIsLoading(true);
+      // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread.
+      // So to make sure that the loading state changes, just wait very short time.
+      await delay(10);
+      await keyRingStore.changeKeyRing(index);
+      loadingScreen.setIsLoading(false);
+    }
+  };
+
   return (
     <PageWithScrollView>
       <View style={style.flatten(["background-color-white"])}>
@@ -86,10 +105,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
                       />
                     ) : undefined
                   }
-                  onPress={() => {
-                    keyRingStore.changeKeyRing(
-                      keyRingStore.multiKeyStoreInfo.indexOf(keyStore)
-                    );
+                  onPress={async () => {
+                    await selectKeyStore(keyStore);
                   }}
                 />
               );
@@ -113,10 +130,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
                       />
                     ) : undefined
                   }
-                  onPress={() => {
-                    keyRingStore.changeKeyRing(
-                      keyRingStore.multiKeyStoreInfo.indexOf(keyStore)
-                    );
+                  onPress={async () => {
+                    await selectKeyStore(keyStore);
                   }}
                 />
               );
@@ -140,10 +155,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
                       />
                     ) : undefined
                   }
-                  onPress={() => {
-                    keyRingStore.changeKeyRing(
-                      keyRingStore.multiKeyStoreInfo.indexOf(keyStore)
-                    );
+                  onPress={async () => {
+                    await selectKeyStore(keyStore);
                   }}
                 />
               );
@@ -167,10 +180,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
                       />
                     ) : undefined
                   }
-                  onPress={() => {
-                    keyRingStore.changeKeyRing(
-                      keyRingStore.multiKeyStoreInfo.indexOf(keyStore)
-                    );
+                  onPress={async () => {
+                    await selectKeyStore(keyStore);
                   }}
                 />
               );

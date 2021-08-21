@@ -16,6 +16,7 @@ import { Platform } from "react-native";
 import codePush from "react-native-code-push";
 import { InteractionModalsProivder } from "./providers/interaction-modals-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { LoadingScreenProvider } from "./providers/loading-screen";
 
 if (Platform.OS === "android") {
   // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
@@ -82,17 +83,19 @@ export const App: FunctionComponent = codePush(() => {
           >
             <SafeAreaProvider>
               <ModalsProvider>
-                <InteractionModalsProivder>
-                  <BioAuthProvider>
-                    <LoadingIndicatorProvider>
-                      <NotificationStoreProvider>
-                        <NotificationProvider>
-                          <AppNavigation />
-                        </NotificationProvider>
-                      </NotificationStoreProvider>
-                    </LoadingIndicatorProvider>
-                  </BioAuthProvider>
-                </InteractionModalsProivder>
+                <LoadingScreenProvider>
+                  <InteractionModalsProivder>
+                    <BioAuthProvider>
+                      <LoadingIndicatorProvider>
+                        <NotificationStoreProvider>
+                          <NotificationProvider>
+                            <AppNavigation />
+                          </NotificationProvider>
+                        </NotificationStoreProvider>
+                      </LoadingIndicatorProvider>
+                    </BioAuthProvider>
+                  </InteractionModalsProivder>
+                </LoadingScreenProvider>
               </ModalsProvider>
             </SafeAreaProvider>
           </IntlProvider>
