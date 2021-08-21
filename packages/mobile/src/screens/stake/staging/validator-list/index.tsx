@@ -10,7 +10,6 @@ import {
 import { useStyle } from "../../../../styles";
 import { SelectorModal, TextInput } from "../../../../components/staging/input";
 import { GradientBackground } from "../../../../components/svg";
-import { RectButton } from "react-native-gesture-handler";
 import { CardDivider } from "../../../../components/staging/card";
 import { useSmartNavigation } from "../../../../navigation";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
@@ -18,6 +17,7 @@ import { RightArrowIcon } from "../../../../components/staging/icon";
 import Svg, { Path } from "react-native-svg";
 import { ValidatorThumbnail } from "../../../../components/staging/thumbnail";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import { RectButton } from "../../../../components/staging/rect-button";
 
 type Sort = "APY" | "Voting Power" | "Name";
 

@@ -4,7 +4,6 @@ import { useStore } from "../../../../../stores";
 import { PageWithScrollView } from "../../../../../components/staging/page";
 import { SettingItem, SettingSectionTitle } from "../../components";
 import Svg, { Path } from "react-native-svg";
-import { RectButton } from "react-native-gesture-handler";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import { Text, View } from "react-native";
 import { useStyle } from "../../../../../styles";
@@ -12,6 +11,7 @@ import { useSmartNavigation } from "../../../../../navigation";
 import { useLoadingScreen } from "../../../../../providers/loading-screen";
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import delay from "delay";
+import { RectButton } from "../../../../../components/staging/rect-button";
 
 const CheckIcon: FunctionComponent<{
   color: string;

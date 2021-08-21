@@ -15,9 +15,9 @@ import {
   Validator,
 } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 import { RightArrowIcon } from "../../../../components/staging/icon";
-import { RectButton } from "react-native-gesture-handler";
 import { useSmartNavigation } from "../../../../navigation";
 import { ValidatorThumbnail } from "../../../../components/staging/thumbnail";
+import { RectButton } from "../../../../components/staging/rect-button";
 
 export const DelegationsCard: FunctionComponent<{
   containerStyle?: ViewStyle;

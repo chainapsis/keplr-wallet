@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { StyleSheet, Text, TextStyle, View, ViewProps } from "react-native";
 import { useStyle } from "../../../styles";
-import { RectButton } from "react-native-gesture-handler";
 import { observer } from "mobx-react-lite";
 import { action, makeObservable, observable } from "mobx";
 import {
@@ -14,6 +13,7 @@ import { GasInput } from "./gas";
 import { useStore } from "../../../stores";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 import { LoadingSpinner } from "../spinner";
+import { RectButton } from "../rect-button";
 
 export interface FeeButtonsProps {
   labelStyle?: TextStyle;

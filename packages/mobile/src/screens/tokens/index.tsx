@@ -6,9 +6,9 @@ import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
-import { RectButton } from "react-native-gesture-handler";
 import { RightArrowIcon } from "../../components/staging/icon";
 import { Card } from "../../components/staging/card";
+import { RectButton } from "../../components/staging/rect-button";
 
 export const TokensScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();

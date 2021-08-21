@@ -56,7 +56,10 @@ export type StyleBuilderBorderRadiusDefinitions<
   Radiuses extends Record<string, number>
 > = {
   [K in keyof Radiuses as `border-radius-${string & K}`]: {
-    borderRadius: number;
+    borderTopLeftRadius: number;
+    borderTopRightRadius: number;
+    borderBottomLeftRadius: number;
+    borderBottomRightRadius: number;
   };
 };
 

@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from "react";
 import { StyleSheet, Text, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
-import { RectButton } from "react-native-gesture-handler";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import Clipboard from "expo-clipboard";
+import { RectButton } from "../rect-button";
 
 export const AddressCopyable: FunctionComponent<{
   style?: ViewStyle;

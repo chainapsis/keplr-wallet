@@ -14,7 +14,7 @@ import { IntPretty } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
 import { registerModal } from "../../../modals/staging/base";
-import { RectButton } from "react-native-gesture-handler";
+import { RectButton } from "../../../components/staging/rect-button";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";

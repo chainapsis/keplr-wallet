@@ -8,8 +8,8 @@ import {
   ViewStyle,
 } from "react-native";
 import { useStyle } from "../../../styles";
-import { RectButton } from "react-native-gesture-handler";
 import { registerModal } from "../../../modals/staging/base";
+import { RectButton } from "../rect-button";
 
 export const SelectorModal: FunctionComponent<{
   isOpen: boolean;
@@ -250,21 +250,6 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
 }) => {
   const style = useStyle();
 
-  const {
-    backgroundColor: selectorContainerStyleBackgroundColor,
-    ...selectorContainerStyleObj
-  } = StyleSheet.flatten([
-    style.flatten([
-      "background-color-white",
-      "padding-x-11",
-      "padding-y-12",
-      "border-radius-4",
-      "border-width-1",
-      "border-color-border-white",
-    ]),
-    selectorContainerStyle,
-  ]);
-
   return (
     <View
       style={StyleSheet.flatten([
@@ -286,27 +271,29 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
       </Text>
       <RectButton
         style={StyleSheet.flatten([
-          style.flatten(["overflow-hidden"]),
-          {
-            backgroundColor: selectorContainerStyleBackgroundColor,
-            borderRadius: selectorContainerStyleObj.borderRadius,
-          },
+          style.flatten([
+            "background-color-white",
+            "padding-x-11",
+            "padding-y-12",
+            "border-radius-4",
+            "border-width-1",
+            "border-color-border-white",
+          ]),
+          selectorContainerStyle,
         ])}
         onPress={onPress}
       >
-        <View style={selectorContainerStyleObj}>
-          <Text
-            style={StyleSheet.flatten([
-              style.flatten(
-                ["body2", "color-text-black-medium", "padding-0"],
-                [!selected && "color-text-black-low"]
-              ),
-              textStyle,
-            ])}
-          >
-            {selected ? selected.label : placeHolder ?? ""}
-          </Text>
-        </View>
+        <Text
+          style={StyleSheet.flatten([
+            style.flatten(
+              ["body2", "color-text-black-medium", "padding-0"],
+              [!selected && "color-text-black-low"]
+            ),
+            textStyle,
+          ])}
+        >
+          {selected ? selected.label : placeHolder ?? ""}
+        </Text>
       </RectButton>
     </View>
   );

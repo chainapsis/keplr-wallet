@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../../../../components/staging/page";
-import { RectButton, TouchableOpacity } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { useStyle } from "../../../../../styles";
 import { Text, View } from "react-native";
 import { useSmartNavigation } from "../../../../../navigation";
@@ -15,6 +15,7 @@ import { useStore } from "../../../../../stores";
 import { PlusIcon } from "../../../../../components/staging/icon";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import { RectButton } from "../../../../../components/staging/rect-button";
 
 export const AddressBookScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();

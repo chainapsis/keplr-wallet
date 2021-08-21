@@ -2,8 +2,8 @@ import React, { FunctionComponent, ReactElement } from "react";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { Button } from "../button";
-import { RectButton } from "react-native-gesture-handler";
 import { RightArrowIcon } from "../icon";
+import { RectButton } from "../rect-button";
 
 export const CardHeaderWithButton: FunctionComponent<{
   title: string;
@@ -110,40 +110,38 @@ export const CardHeaderFullButton: FunctionComponent<{
   const style = useStyle();
 
   return (
-    <View>
-      <RectButton
-        style={StyleSheet.flatten([
-          style.flatten([
-            "padding-x-card-horizontal",
-            "padding-top-card-vertical",
-            "padding-bottom-card-vertical-half",
-          ]),
-          containerStyle,
-        ])}
-        onPress={onPress}
-      >
-        <View style={style.flatten(["flex", "flex-row", "items-center"])}>
-          <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
-            {title}
+    <RectButton
+      style={StyleSheet.flatten([
+        style.flatten([
+          "padding-x-card-horizontal",
+          "padding-top-card-vertical",
+          "padding-bottom-card-vertical-half",
+        ]),
+        containerStyle,
+      ])}
+      onPress={onPress}
+    >
+      <View style={style.flatten(["flex", "flex-row", "items-center"])}>
+        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+          {title}
+        </Text>
+        <View style={style.flatten(["flex-1"])} />
+        {buttonText ? (
+          <Text
+            style={style.flatten([
+              "text-button2",
+              "color-text-black-very-very-low",
+              "margin-right-8",
+            ])}
+          >
+            {buttonText}
           </Text>
-          <View style={style.flatten(["flex-1"])} />
-          {buttonText ? (
-            <Text
-              style={style.flatten([
-                "text-button2",
-                "color-text-black-very-very-low",
-                "margin-right-8",
-              ])}
-            >
-              {buttonText}
-            </Text>
-          ) : null}
-          <RightArrowIcon
-            color={style.get("color-text-black-very-very-low").color}
-            height={16}
-          />
-        </View>
-      </RectButton>
-    </View>
+        ) : null}
+        <RightArrowIcon
+          color={style.get("color-text-black-very-very-low").color}
+          height={16}
+        />
+      </View>
+    </RectButton>
   );
 };

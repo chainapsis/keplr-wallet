@@ -8,7 +8,6 @@ import {
 import { useStore } from "../../stores";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { View } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
 import { Text } from "react-native-elements";
 import {
   sf,
@@ -26,6 +25,7 @@ import {
   br3,
   mr3,
 } from "../../styles";
+import { RectButton } from "../staging/rect-button";
 
 export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOptions>;
 

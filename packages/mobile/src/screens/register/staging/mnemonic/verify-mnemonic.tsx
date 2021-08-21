@@ -7,9 +7,9 @@ import { Button } from "../../../../components/staging/button";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useSmartNavigation } from "../../../../navigation";
 import { NewMnemonicConfig } from "./hook";
-import { RectButton } from "react-native-gesture-handler";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
+import { RectButton } from "../../../../components/staging/rect-button";
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const route = useRoute<

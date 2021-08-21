@@ -329,8 +329,12 @@ export class StyleBuilder<
                 throw new Error(`Failed to get style of ${definition}`);
             }
 
+            const borderRadius = this.configs.borderRadiuses[segment.flush()];
             return {
-              borderRadius: this.configs.borderRadiuses[segment.flush()],
+              borderTopLeftRadius: borderRadius,
+              borderTopRightRadius: borderRadius,
+              borderBottomLeftRadius: borderRadius,
+              borderBottomRightRadius: borderRadius,
             };
         }
 

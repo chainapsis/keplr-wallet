@@ -1,9 +1,9 @@
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useStyle } from "../../../styles";
-import { RectButton } from "react-native-gesture-handler";
 import { Text } from "react-native-elements";
 import { StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import { LoadingSpinner } from "../spinner";
+import { RectButton } from "../rect-button";
 
 export const Button: FunctionComponent<{
   color?: "primary" | "secondary" | "danger";

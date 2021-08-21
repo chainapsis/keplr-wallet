@@ -8,9 +8,9 @@ import { observer } from "mobx-react-lite";
 import { BleManager, State } from "react-native-ble-plx";
 import TransportBLE from "@ledgerhq/react-native-hw-transport-ble";
 import { LoadingSpinner } from "../../../components/staging/spinner";
-import { RectButton } from "react-native-gesture-handler";
 import { Ledger, LedgerInitErrorOn } from "@keplr-wallet/background";
 import { getLastUsedLedgerDeviceId } from "../../../utils/ledger";
+import { RectButton } from "../../../components/staging/rect-button";
 
 export const LedgerGranterModal: FunctionComponent<{
   isOpen: boolean;

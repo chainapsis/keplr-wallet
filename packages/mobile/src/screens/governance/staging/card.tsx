@@ -5,12 +5,12 @@ import { useStyle } from "../../../styles";
 import { Governance, ObservableQueryProposal } from "@keplr-wallet/stores";
 import { Chip } from "../../../components/staging/chip";
 import { CardBody } from "../../../components/staging/card";
-import { RectButton } from "react-native-gesture-handler";
 import { Text, View } from "react-native";
 import { LoadingSpinner } from "../../../components/staging/spinner";
 import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
 import { useSmartNavigation } from "../../../navigation";
+import { RectButton } from "../../../components/staging/rect-button";
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: Governance.ProposalStatus;
