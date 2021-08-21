@@ -1,5 +1,4 @@
 import {
-  CommonActions,
   StackActions,
   useNavigation,
   useRoute,
