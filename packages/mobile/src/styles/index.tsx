@@ -271,6 +271,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "72": 72,
     "80": 80,
     "160": 160,
+    "240": 240,
     "300": 300,
 
     "card-gap": 12,

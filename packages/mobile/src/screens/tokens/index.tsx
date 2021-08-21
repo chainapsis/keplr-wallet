@@ -101,7 +101,7 @@ export const TokenItem: FunctionComponent<{
           style={style.flatten([
             "h5",
             "color-text-black-medium",
-            "max-width-300",
+            "max-width-240",
           ])}
           numberOfLines={1}
           ellipsizeMode="tail"
