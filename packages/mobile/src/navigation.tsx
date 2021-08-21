@@ -226,8 +226,7 @@ export const MainNavigation: FunctionComponent = () => {
         ...BlurredHeaderScreenOptionsPreset,
         headerTitleStyle: style.flatten(["h4", "color-text-black-high"]),
         headerTitleContainerStyle: {
-          left: 50,
-          paddingBottom: 12,
+          left: 52,
         },
         headerTitleAlign: "left",
       }}
@@ -238,13 +237,12 @@ export const MainNavigation: FunctionComponent = () => {
         options={{
           headerLeft: () => (
             <TouchableOpacity
-              style={style.flatten(["margin-left-20", "margin-bottom-12"])}
               onPress={() => {
                 navigation.dispatch(DrawerActions.toggleDrawer());
               }}
             >
               <DoubleRightArrowIcon
-                height={18}
+                height={16}
                 color={style.get("color-primary").color}
               />
             </TouchableOpacity>

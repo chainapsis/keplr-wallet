@@ -33,7 +33,7 @@ export const SettingSelectAccountScreenHeaderRight: FunctionComponent<{
         smartNavigation.navigateSmart("Register.Intro", {});
       }}
     >
-      <FeatherIcon name="plus" color={tintColor} size={30} />
+      <FeatherIcon name="plus" color={tintColor} size={24} />
     </BorderlessButton>
   );
 };

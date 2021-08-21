@@ -1,6 +1,7 @@
 import React from "react";
 import { TransitionPresets } from "@react-navigation/stack";
 import { GradientBackground } from "../../svg";
+import { HeaderBackButton } from "./back-button";
 
 export const PlainHeaderScreenOptionsPreset = {
   headerTitleAlign: "center" as "left" | "center",
@@ -13,5 +14,13 @@ export const PlainHeaderScreenOptionsPreset = {
   headerBackground: () => <GradientBackground />,
   headerBackTitleVisible: false,
   header: undefined,
+  headerLeftContainerStyle: {
+    marginLeft: 24,
+  },
+  headerRightContainerStyle: {
+    marginRight: 24,
+  },
+  // eslint-disable-next-line react/display-name
+  headerBackImage: () => <HeaderBackButton />,
   ...TransitionPresets.SlideFromRightIOS,
 };

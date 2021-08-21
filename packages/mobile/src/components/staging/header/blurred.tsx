@@ -8,6 +8,7 @@ import { Animated, Platform, View } from "react-native";
 import { BlurView } from "@react-native-community/blur";
 import { usePageScrollPosition } from "../../../providers/page-scroll-position";
 import { useRoute } from "@react-navigation/native";
+import { HeaderBackButton } from "./back-button";
 
 export const BlurredHeaderScreenOptionsPreset = {
   headerTitleAlign: "center" as "left" | "center",
@@ -22,6 +23,14 @@ export const BlurredHeaderScreenOptionsPreset = {
   header: (props: any) => {
     return <BlurredHeader {...props} />;
   },
+  headerLeftContainerStyle: {
+    marginLeft: 24,
+  },
+  headerRightContainerStyle: {
+    marginRight: 24,
+  },
+  // eslint-disable-next-line react/display-name
+  headerBackImage: () => <HeaderBackButton />,
   ...TransitionPresets.SlideFromRightIOS,
 };
 
