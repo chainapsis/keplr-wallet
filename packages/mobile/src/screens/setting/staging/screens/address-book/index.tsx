@@ -81,6 +81,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView>
+      <View style={style.flatten(["height-card-gap"])} />
       {addressBookConfig.addressBookDatas.map((data, i) => {
         return (
           <React.Fragment key={i.toString()}>

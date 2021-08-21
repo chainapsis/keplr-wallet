@@ -298,6 +298,8 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "button-default": 48,
     "button-large": 52,
     "governance-card-body-placeholder": 130,
+
+    "card-gap": 12,
   },
   paddingSizes: {
     "0": 0,
