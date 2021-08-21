@@ -33,10 +33,7 @@ import {
 } from "react-native-gesture-handler";
 import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 import { SettingScreen } from "./screens/setting/staging";
-import {
-  SettingSelectAccountScreen,
-  SettingSelectAccountScreenHeaderRight,
-} from "./screens/setting/staging/screens/select-account";
+import { SettingSelectAccountScreen } from "./screens/setting/staging/screens/select-account";
 import { WebScreen } from "./screens/web";
 import { RegisterIntroScreen } from "./screens/register/staging";
 import {
@@ -362,7 +359,6 @@ export const SettingStackScreen: FunctionComponent = () => {
         options={{
           title: "Select Account",
           ...BlurredHeaderScreenOptionsPreset,
-          headerRight: SettingSelectAccountScreenHeaderRight,
         }}
         component={SettingSelectAccountScreen}
       />
