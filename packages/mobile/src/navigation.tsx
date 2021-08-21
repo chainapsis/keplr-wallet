@@ -55,6 +55,8 @@ import {
   RecoverMnemonicScreen,
 } from "./screens/register/staging/mnemonic";
 import { RegisterEndScreen } from "./screens/register/staging/end";
+import { RegisterNewUserScreen } from "./screens/register/staging/new-user";
+import { RegisterNotNewUserScreen } from "./screens/register/staging/not-new-user";
 import {
   AddressBookConfig,
   IMemoConfig,
@@ -86,6 +88,12 @@ const {
 } = createSmartNavigatorProvider(
   new SmartNavigator({
     "Register.Intro": {
+      upperScreenName: "Register",
+    },
+    "Register.NewUser": {
+      upperScreenName: "Register",
+    },
+    "Register.NotNewUser": {
       upperScreenName: "Register",
     },
     "Register.NewMnemonic": {
@@ -219,14 +227,18 @@ export const MainNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTitleStyle: style.flatten(["h3", "color-black"]),
-        headerTitleAlign: "center",
+        headerTitleStyle: style.flatten(["h4", "color-black"]),
+        headerTitleContainerStyle: {
+          left: 50,
+          paddingBottom: 12,
+        },
+        headerTitleAlign: "left",
         headerStyle: {
           backgroundColor: "transparent",
           elevation: 0,
           shadowOpacity: 0,
         },
-        headerBackTitleVisible: false,
+        headerBackTitleVisible: true,
         header: (props) => {
           return <BlurredHeader {...props} />;
         },
@@ -239,7 +251,7 @@ export const MainNavigation: FunctionComponent = () => {
         options={{
           headerLeft: () => (
             <TouchableOpacity
-              style={style.flatten(["padding-8", "margin-left-4"])}
+              style={style.flatten(["margin-left-20", "margin-bottom-12"])}
               onPress={() => {
                 navigation.dispatch(DrawerActions.toggleDrawer());
               }}
@@ -272,6 +284,11 @@ export const RegisterNavigation: FunctionComponent = () => {
       headerMode="screen"
     >
       <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
+      <Stack.Screen name="Register.NewUser" component={RegisterNewUserScreen} />
+      <Stack.Screen
+        name="Register.NotNewUser"
+        component={RegisterNotNewUserScreen}
+      />
       <Stack.Screen name="Register.NewMnemonic" component={NewMnemonicScreen} />
       <Stack.Screen
         name="Register.VerifyMnemonic"

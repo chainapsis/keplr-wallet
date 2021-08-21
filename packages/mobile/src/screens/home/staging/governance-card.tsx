@@ -59,7 +59,6 @@ export const GovernanceCard: FunctionComponent<{
           smartNavigation.navigateSmart("Governance", undefined);
         }}
       />
-      <CardDivider />
       {/* TODO: Show the alternative component if any proposals don't exist */}
       {showingProposals.map((proposal, i) => {
         return (

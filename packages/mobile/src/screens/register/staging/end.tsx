@@ -13,7 +13,7 @@ export const RegisterEndScreen: FunctionComponent = () => {
   return (
     <PageWithScrollView
       contentContainerStyle={style.flatten(["flex-grow-1"])}
-      style={style.flatten(["padding-x-20", "padding-bottom-12"])}
+      style={style.flatten(["padding-x-page", "padding-bottom-12"])}
     >
       <View style={style.flatten(["flex", "items-center"])}>
         <Image

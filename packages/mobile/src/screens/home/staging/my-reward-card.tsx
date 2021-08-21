@@ -2,6 +2,7 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStyle } from "../../../styles";
 import { Card, CardHeaderWithButton } from "../../../components/staging/card";
+import { RewardIcon } from "../../../components/staging/icon";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewStyle } from "react-native";
 import { useStore } from "../../../stores";
@@ -40,9 +41,10 @@ export const MyRewardCard: FunctionComponent<{
             console.log(e);
           }
         }}
+        icon={<RewardIcon size={44} />}
         buttonText="Claim"
         buttonMode="light"
-        buttonContainerStyle={style.flatten(["min-width-80"])}
+        buttonContainerStyle={style.flatten(["min-width-72"])}
         buttonDisabled={
           !account.isReadyToSendMsgs || stakingReward.toDec().equals(new Dec(0))
         }

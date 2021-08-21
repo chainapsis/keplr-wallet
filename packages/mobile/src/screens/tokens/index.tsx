@@ -13,6 +13,8 @@ import { Card } from "../../components/staging/card";
 export const TokensScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();
 
+  const style = useStyle();
+
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(
@@ -23,7 +25,7 @@ export const TokensScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView>
-      <Card>
+      <Card style={style.flatten(["padding-bottom-14"])}>
         {tokens.map((token) => {
           return (
             <TokenItem
@@ -65,7 +67,7 @@ export const TokenItem: FunctionComponent<{
           "flex-row",
           "items-center",
           "padding-x-card-horizontal",
-          "padding-y-card-vertical-half",
+          "padding-y-14",
         ]),
         containerStyle,
       ])}
@@ -77,8 +79,8 @@ export const TokenItem: FunctionComponent<{
     >
       <View
         style={style.flatten([
-          "width-40",
-          "height-40",
+          "width-44",
+          "height-44",
           "border-radius-64",
           "background-color-border-white",
           "margin-right-12",
@@ -87,7 +89,7 @@ export const TokenItem: FunctionComponent<{
       <View>
         <Text
           style={style.flatten([
-            "body3",
+            "subtitle3",
             "color-text-black-low",
             "margin-bottom-4",
             "uppercase",
@@ -115,7 +117,7 @@ export const TokenItem: FunctionComponent<{
       </View>
       <View style={style.get("flex-1")} />
       <RightArrowIcon
-        height={12}
+        height={16}
         color={style.get("color-text-black-very-very-low").color}
       />
     </RectButton>

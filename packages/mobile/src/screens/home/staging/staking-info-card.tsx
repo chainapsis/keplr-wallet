@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite";
 import {
   Card,
   CardBody,
-  CardDivider,
   CardHeaderFullButton,
 } from "../../../components/staging/card";
 import { Text, View, ViewStyle } from "react-native";
@@ -41,8 +40,7 @@ export const StakingInfoCard: FunctionComponent<{
           smartNavigation.navigateSmart("Staking.Dashboard", {});
         }}
       />
-      <CardDivider />
-      <CardBody>
+      <CardBody style={style.flatten(["padding-top-card-vertical-half"])}>
         <View
           style={style.flatten(["flex-row", "items-end", "margin-bottom-8"])}
         >
