@@ -26,16 +26,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { DrawerContent } from "./components/drawer";
-import {
-  alignItemsCenter,
-  flex1,
-  justifyContentCenter,
-  fcHigh,
-  h3,
-  sf,
-  useStyle,
-} from "./styles";
-import { GradientBackground } from "./components/svg";
+import { useStyle } from "./styles";
 import {
   BorderlessButton,
   TouchableOpacity,
@@ -76,7 +67,10 @@ import {
 } from "./screens/setting/staging/screens/address-book";
 import { NewLedgerScreen } from "./screens/register/staging/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
-import { BlurredHeader } from "./components/staging/header";
+import {
+  BlurredHeaderScreenOptionsPreset,
+  PlainHeaderScreenOptionsPreset,
+} from "./components/staging/header";
 import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/staging/undelegate";
 import { RedelegateScreen } from "./screens/stake/staging/redelegate";
@@ -208,8 +202,10 @@ const {
 export { useSmartNavigation };
 
 const SplashScreen: FunctionComponent = () => {
+  const style = useStyle();
+
   return (
-    <View style={sf([flex1, alignItemsCenter, justifyContentCenter])}>
+    <View style={style.flatten(["flex-1", "items-center", "justify-center"])}>
       <Text>Loading...</Text>
     </View>
   );
@@ -227,22 +223,13 @@ export const MainNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTitleStyle: style.flatten(["h4", "color-black"]),
+        ...BlurredHeaderScreenOptionsPreset,
+        headerTitleStyle: style.flatten(["h4", "color-text-black-high"]),
         headerTitleContainerStyle: {
           left: 50,
           paddingBottom: 12,
         },
         headerTitleAlign: "left",
-        headerStyle: {
-          backgroundColor: "transparent",
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        headerBackTitleVisible: true,
-        header: (props) => {
-          return <BlurredHeader {...props} />;
-        },
-        ...TransitionPresets.SlideFromRightIOS,
       }}
       initialRouteName="Home"
       headerMode="screen"
@@ -271,14 +258,13 @@ export const MainNavigation: FunctionComponent = () => {
 };
 
 export const RegisterNavigation: FunctionComponent = () => {
+  const style = useStyle();
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerBackground: () => <GradientBackground />,
-        headerTitleStyle: sf([h3, fcHigh]),
-        headerTitleAlign: "center",
-        headerBackTitleVisible: false,
-        ...TransitionPresets.SlideFromRightIOS,
+        ...PlainHeaderScreenOptionsPreset,
+        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
       }}
       initialRouteName="Intro"
       headerMode="screen"
@@ -316,18 +302,8 @@ export const OtherNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTitleStyle: style.flatten(["h3", "color-black"]),
-        headerTitleAlign: "center",
-        headerStyle: {
-          backgroundColor: "transparent",
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        headerBackTitleVisible: false,
-        header: (props) => {
-          return <BlurredHeader {...props} />;
-        },
-        ...TransitionPresets.SlideFromRightIOS,
+        ...BlurredHeaderScreenOptionsPreset,
+        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
       }}
       headerMode="screen"
     >
@@ -372,14 +348,13 @@ export const OtherNavigation: FunctionComponent = () => {
 };
 
 export const SettingStackScreen: FunctionComponent = () => {
+  const style = useStyle();
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerBackground: () => <GradientBackground />,
-        headerTitleStyle: sf([h3, fcHigh]),
-        headerTitleAlign: "center",
-        headerBackTitleVisible: false,
-        ...TransitionPresets.SlideFromRightIOS,
+        ...PlainHeaderScreenOptionsPreset,
+        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
       }}
       headerMode="screen"
     >
@@ -388,6 +363,7 @@ export const SettingStackScreen: FunctionComponent = () => {
         name="SettingSelectAccount"
         options={{
           title: "Select Account",
+          ...BlurredHeaderScreenOptionsPreset,
           headerRight: SettingSelectAccountScreenHeaderRight,
         }}
         component={SettingSelectAccountScreen}
@@ -397,14 +373,13 @@ export const SettingStackScreen: FunctionComponent = () => {
 };
 
 export const AddressBookStackScreen: FunctionComponent = () => {
+  const style = useStyle();
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerBackground: () => <GradientBackground />,
-        headerTitleStyle: sf([h3, fcHigh]),
-        headerTitleAlign: "center",
-        headerBackTitleVisible: false,
-        ...TransitionPresets.SlideFromRightIOS,
+        ...BlurredHeaderScreenOptionsPreset,
+        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
       }}
       headerMode="screen"
     >
@@ -544,9 +519,6 @@ export const AppNavigation: FunctionComponent = observer(() => {
               }
               screenOptions={{
                 headerShown: false,
-                headerTitleStyle: sf([h3, fcHigh]),
-                headerTitleAlign: "center",
-                headerBackTitleVisible: false,
                 ...TransitionPresets.SlideFromRightIOS,
               }}
               headerMode="screen"
