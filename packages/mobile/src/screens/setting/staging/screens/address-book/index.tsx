@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../../../../components/staging/page";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { useStyle } from "../../../../../styles";
 import { Text, View } from "react-native";
 import { useSmartNavigation } from "../../../../../navigation";
@@ -16,6 +15,7 @@ import { PlusIcon } from "../../../../../components/staging/icon";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RectButton } from "../../../../../components/staging/rect-button";
+import { HeaderRightButton } from "../../../../../components/staging/header";
 
 export const AddressBookScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -62,8 +62,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
     smartNavigation.setOptions({
       // eslint-disable-next-line react/display-name
       headerRight: () => (
-        <TouchableOpacity
-          style={style.flatten(["padding-8", "margin-right-8"])}
+        <HeaderRightButton
           onPress={() => {
             smartNavigation.navigateSmart("AddAddressBook", {
               chainId: chainStore.current.chainId,
@@ -75,7 +74,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
             size={20}
             color={style.get("color-text-black-medium").color}
           />
-        </TouchableOpacity>
+        </HeaderRightButton>
       ),
     });
   }, [addressBookConfig, chainStore, smartNavigation, style]);

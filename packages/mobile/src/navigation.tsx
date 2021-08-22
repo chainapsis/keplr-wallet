@@ -30,10 +30,7 @@ import analytics from "@react-native-firebase/analytics";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { DrawerContent } from "./components/drawer";
 import { useStyle } from "./styles";
-import {
-  BorderlessButton,
-  TouchableOpacity,
-} from "react-native-gesture-handler";
+import { BorderlessButton } from "react-native-gesture-handler";
 import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 import { SettingScreen } from "./screens/setting/staging";
 import { SettingSelectAccountScreen } from "./screens/setting/staging/screens/select-account";
@@ -69,6 +66,7 @@ import { NewLedgerScreen } from "./screens/register/staging/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
   BlurredHeaderScreenOptionsPreset,
+  HeaderLeftButton,
   PlainHeaderScreenOptionsPreset,
 } from "./components/staging/header";
 import { TokensScreen } from "./screens/tokens";
@@ -240,7 +238,7 @@ export const MainNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           headerLeft: () => (
-            <TouchableOpacity
+            <HeaderLeftButton
               onPress={() => {
                 navigation.dispatch(DrawerActions.toggleDrawer());
               }}
@@ -249,7 +247,7 @@ export const MainNavigation: FunctionComponent = () => {
                 height={16}
                 color={style.get("color-primary").color}
               />
-            </TouchableOpacity>
+            </HeaderLeftButton>
           ),
         }}
         name="Home"
