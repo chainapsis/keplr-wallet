@@ -25,6 +25,7 @@ export const SendScreen: FunctionComponent = observer(() => {
         string,
         {
           currency?: string;
+          recipient?: string;
         }
       >,
       string
@@ -55,6 +56,12 @@ export const SendScreen: FunctionComponent = observer(() => {
       }
     }
   }, [route.params.currency, sendConfigs.amountConfig]);
+
+  useEffect(() => {
+    if (route.params.recipient) {
+      sendConfigs.recipientConfig.setRawRecipient(route.params.recipient);
+    }
+  }, [route.params.recipient, sendConfigs.recipientConfig]);
 
   const sendConfigError =
     sendConfigs.recipientConfig.getError() ??

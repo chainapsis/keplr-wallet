@@ -173,6 +173,7 @@ const {
     };
     Send: {
       currency?: string;
+      recipient?: string;
     };
     "Validator.Details": {
       validatorAddress: string;
