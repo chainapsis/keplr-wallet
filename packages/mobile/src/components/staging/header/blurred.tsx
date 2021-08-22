@@ -24,10 +24,10 @@ export const BlurredHeaderScreenOptionsPreset = {
     return <BlurredHeader {...props} />;
   },
   headerLeftContainerStyle: {
-    marginLeft: 12,
+    marginLeft: 10,
   },
   headerRightContainerStyle: {
-    marginRight: 12,
+    marginRight: 10,
   },
   // eslint-disable-next-line react/display-name
   headerLeft: (props: any) => <HeaderLeftBackButton {...props} />,

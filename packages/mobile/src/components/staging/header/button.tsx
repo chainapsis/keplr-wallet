@@ -15,7 +15,7 @@ export const HeaderLeftButton: FunctionComponent<StackHeaderLeftButtonProps> = (
     <View style={style.flatten(["absolute"])}>
       <TouchableOpacity
         onPress={onPress}
-        style={StyleSheet.flatten([style.flatten(["padding-12"])])}
+        style={StyleSheet.flatten([style.flatten(["padding-10"])])}
       >
         {children}
       </TouchableOpacity>
@@ -32,7 +32,7 @@ export const HeaderRightButton: FunctionComponent<{
     <View style={style.flatten(["absolute"])}>
       <TouchableOpacity
         onPress={onPress}
-        style={StyleSheet.flatten([style.flatten(["padding-12"])])}
+        style={StyleSheet.flatten([style.flatten(["padding-10"])])}
       >
         {children}
       </TouchableOpacity>
@@ -42,23 +42,16 @@ export const HeaderRightButton: FunctionComponent<{
 
 export const BackButtonIcon: FunctionComponent<{
   color: string;
-  height: number;
-}> = ({ color, height }) => {
+  size: number;
+}> = ({ color, size }) => {
   return (
-    <Svg
-      fill="none"
-      viewBox="0 0 10 18"
-      style={{
-        height,
-        aspectRatio: 10 / 18,
-      }}
-    >
+    <Svg width={size} height={size} fill="none" viewBox="0 0 28 28">
       <Path
         stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2"
-        d="M8.53 17L1 9l7.53-8"
+        d="M17.938 21.875L10.063 14l7.874-7.875"
       />
     </Svg>
   );
@@ -74,8 +67,8 @@ export const HeaderLeftBackButton: FunctionComponent<StackHeaderLeftButtonProps>
       {props.canGoBack ? (
         <HeaderLeftButton {...props}>
           <BackButtonIcon
+            size={28}
             color={style.get("color-text-black-high").color}
-            height={16}
           />
         </HeaderLeftButton>
       ) : null}

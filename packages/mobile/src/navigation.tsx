@@ -57,7 +57,7 @@ import {
   ValidatorListScreen,
   DelegateScreen,
 } from "./screens/stake/staging";
-import { DoubleRightArrowIcon } from "./components/staging/icon";
+import { OpenDrawerIcon, ScanIcon } from "./components/staging/icon";
 import {
   AddAddressBookScreen,
   AddressBookScreen,
@@ -67,6 +67,7 @@ import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
   BlurredHeaderScreenOptionsPreset,
   HeaderLeftButton,
+  HeaderRightButton,
   PlainHeaderScreenOptionsPreset,
 } from "./components/staging/header";
 import { TokensScreen } from "./screens/tokens";
@@ -244,11 +245,22 @@ export const MainNavigation: FunctionComponent = () => {
                 navigation.dispatch(DrawerActions.toggleDrawer());
               }}
             >
-              <DoubleRightArrowIcon
-                height={16}
+              <OpenDrawerIcon
+                size={28}
                 color={style.get("color-primary").color}
               />
             </HeaderLeftButton>
+          ),
+          headerRight: () => (
+            <HeaderRightButton
+              onPress={() => {
+                navigation.navigate("Others", {
+                  screen: "Camera",
+                });
+              }}
+            >
+              <ScanIcon size={28} color={style.get("color-primary").color} />
+            </HeaderRightButton>
           ),
         }}
         name="Home"
