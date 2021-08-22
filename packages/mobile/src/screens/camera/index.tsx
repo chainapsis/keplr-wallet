@@ -51,6 +51,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
           style={style.flatten(["absolute-fill"])}
           type={RNCamera.Constants.Type.back}
           barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
+          captureAudio={false}
           onBarCodeRead={async ({ data }) => {
             if (
               !oncePerRead.current &&
@@ -122,7 +123,11 @@ export const CameraScreen: FunctionComponent = observer(() => {
         chainId={showingAddressQRCodeChainId}
       />
       <SafeAreaView
-        style={style.flatten(["flex-1", "items-center", "justify-center"])}
+        style={style.flatten([
+          "absolute-fill",
+          "items-center",
+          "justify-center",
+        ])}
       >
         <View style={style.flatten(["margin-bottom-64"])}>
           <Svg width="217" height="217" fill="none" viewBox="0 0 217 217">
