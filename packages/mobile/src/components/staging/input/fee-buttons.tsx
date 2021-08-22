@@ -133,17 +133,18 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
             [
               "flex-1",
               "items-center",
-              "padding-y-16",
+              "padding-y-14",
               "background-color-white",
             ],
-            [selected && "background-color-primary"]
+            [selected && "background-color-primary-50"]
           )}
+          rippleColor={style.get("color-primary-100").color}
           onPress={onPress}
         >
           <Text
             style={style.flatten(
               ["h5", "color-text-black-medium"],
-              [selected && "color-white"]
+              [selected && "color-primary"]
             )}
           >
             {label}
@@ -151,8 +152,8 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
           {price ? (
             <Text
               style={style.flatten(
-                ["padding-top-2", "text-caption1", "color-text-black-low"],
-                [selected && "color-white"]
+                ["padding-top-2", "h7", "color-text-black-medium"],
+                [selected && "color-primary"]
               )}
             >
               {price.toString()}
@@ -160,8 +161,8 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
           ) : null}
           <Text
             style={style.flatten(
-              ["body3", "color-text-black-low"],
-              [selected && "color-white"]
+              ["padding-top-2", "text-caption1", "color-text-black-low"],
+              [selected && "color-primary"]
             )}
           >
             {amount.maxDecimals(6).trim(true).separator("").toString()}
