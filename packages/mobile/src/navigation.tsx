@@ -503,6 +503,7 @@ export const MainTabNavigation: FunctionComponent = () => {
         activeTintColor: style.get("color-primary").color,
         inactiveTintColor: style.get("color-icon").color,
         style: {
+          borderTopWidth: 0.5,
           borderTopColor: style.get("border-color-border-white").borderColor,
           shadowColor: style.get("color-transparent").color,
           elevation: 0,

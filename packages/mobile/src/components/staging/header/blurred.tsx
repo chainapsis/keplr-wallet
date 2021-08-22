@@ -4,11 +4,12 @@ import {
   StackHeaderProps,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { Animated, Platform, View } from "react-native";
+import { Animated, Platform, StyleSheet, View } from "react-native";
 import { BlurView } from "@react-native-community/blur";
 import { usePageScrollPosition } from "../../../providers/page-scroll-position";
 import { useRoute } from "@react-navigation/native";
 import { HeaderLeftBackButton } from "./button";
+import { useStyle } from "../../../styles";
 
 export const BlurredHeaderScreenOptionsPreset = {
   headerTitleAlign: "center" as "left" | "center",
@@ -36,21 +37,7 @@ export const BlurredHeaderScreenOptionsPreset = {
 
 export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
   if (Platform.OS !== "ios") {
-    return (
-      <View>
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: "white",
-          }}
-        />
-        <Header {...props} />
-      </View>
-    );
+    return <AndroidAlternativeBlurredHeader {...props} />;
   }
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -84,5 +71,31 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
       />
       <Header {...props} />
     </BlurView>
+  );
+};
+
+const AndroidAlternativeBlurredHeader: FunctionComponent<StackHeaderProps> = (
+  props
+) => {
+  const style = useStyle();
+
+  return (
+    <View>
+      <View
+        style={StyleSheet.flatten([
+          {
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: "white",
+            borderBottomWidth: 0.5,
+          },
+          style.flatten(["border-color-border-white"]),
+        ])}
+      />
+      <Header {...props} />
+    </View>
   );
 };
