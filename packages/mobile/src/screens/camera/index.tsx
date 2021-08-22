@@ -16,7 +16,7 @@ import { CardModal } from "../../modals/staging/card";
 import { AddressCopyable } from "../../components/staging/address-copyable";
 import QRCode from "react-native-qrcode-svg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 
 export const CameraScreen: FunctionComponent = observer(() => {
   const { chainStore, walletConnectStore } = useStore();
@@ -26,6 +26,8 @@ export const CameraScreen: FunctionComponent = observer(() => {
   const smartNavigation = useSmartNavigation();
 
   const oncePerRead = useRef(false);
+
+  const isFocused = useIsFocused();
 
   useFocusEffect(
     useCallback(() => {
@@ -44,64 +46,66 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView disableSafeArea={true}>
-      <RNCamera
-        style={style.flatten(["absolute-fill"])}
-        type={RNCamera.Constants.Type.back}
-        barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
-        onBarCodeRead={async ({ data }) => {
-          if (
-            !oncePerRead.current &&
-            !isSelectChainModalOpen &&
-            !isAddressQRCodeModalOpen
-          ) {
-            oncePerRead.current = true;
+      {isFocused ? (
+        <RNCamera
+          style={style.flatten(["absolute-fill"])}
+          type={RNCamera.Constants.Type.back}
+          barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
+          onBarCodeRead={async ({ data }) => {
+            if (
+              !oncePerRead.current &&
+              !isSelectChainModalOpen &&
+              !isAddressQRCodeModalOpen
+            ) {
+              oncePerRead.current = true;
 
-            try {
-              if (data.startsWith("wc:")) {
-                await walletConnectStore.pair(data);
+              try {
+                if (data.startsWith("wc:")) {
+                  await walletConnectStore.pair(data);
 
-                const beforeLength =
-                  walletConnectStore.pendingProposalApprovals.length;
-                // Wait until the pending proposal is actually added.
-                await new Promise<void>((resolve) => {
-                  const disposer = autorun(() => {
-                    if (
-                      beforeLength !==
-                      walletConnectStore.pendingProposalApprovals.length
-                    ) {
-                      resolve();
-                      if (disposer) {
-                        disposer();
+                  const beforeLength =
+                    walletConnectStore.pendingProposalApprovals.length;
+                  // Wait until the pending proposal is actually added.
+                  await new Promise<void>((resolve) => {
+                    const disposer = autorun(() => {
+                      if (
+                        beforeLength !==
+                        walletConnectStore.pendingProposalApprovals.length
+                      ) {
+                        resolve();
+                        if (disposer) {
+                          disposer();
+                        }
                       }
-                    }
+                    });
                   });
-                });
 
-                smartNavigation.navigateSmart("Home", {});
-              } else {
-                // Check that the data is bech32 address.
-                // If this is not valid bech32 address, it will throw an error.
-                Bech32Address.validate(data);
+                  smartNavigation.navigateSmart("Home", {});
+                } else {
+                  // Check that the data is bech32 address.
+                  // If this is not valid bech32 address, it will throw an error.
+                  Bech32Address.validate(data);
 
-                const prefix = data.slice(0, data.indexOf("1"));
-                const chainInfo = chainStore.chainInfos.find(
-                  (chainInfo) =>
-                    chainInfo.bech32Config.bech32PrefixAccAddr === prefix
-                );
-                if (chainInfo) {
-                  smartNavigation.pushSmart("Send", {
-                    chainId: chainInfo.chainId,
-                    recipient: data,
-                  });
+                  const prefix = data.slice(0, data.indexOf("1"));
+                  const chainInfo = chainStore.chainInfos.find(
+                    (chainInfo) =>
+                      chainInfo.bech32Config.bech32PrefixAccAddr === prefix
+                  );
+                  if (chainInfo) {
+                    smartNavigation.pushSmart("Send", {
+                      chainId: chainInfo.chainId,
+                      recipient: data,
+                    });
+                  }
                 }
+              } catch (e) {
+                console.log(e);
+                oncePerRead.current = false;
               }
-            } catch (e) {
-              console.log(e);
-              oncePerRead.current = false;
             }
-          }
-        }}
-      />
+          }}
+        />
+      ) : null}
       <ChainSelectorModal
         isOpen={isSelectChainModalOpen}
         close={() => setIsSelectChainModalOpen(false)}
