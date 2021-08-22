@@ -24,6 +24,7 @@ export const SendScreen: FunctionComponent = observer(() => {
       Record<
         string,
         {
+          chainId?: string;
           currency?: string;
           recipient?: string;
         }
@@ -34,12 +35,16 @@ export const SendScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const account = accountStore.getAccount(chainStore.current.chainId);
-  const queries = queriesStore.get(chainStore.current.chainId);
+  const chainId = route.params.chainId
+    ? route.params.chainId
+    : chainStore.current.chainId;
+
+  const account = accountStore.getAccount(chainId);
+  const queries = queriesStore.get(chainId);
 
   const sendConfigs = useSendTxConfig(
     chainStore,
-    chainStore.current.chainId,
+    chainId,
     account.msgOpts["send"],
     account.bech32Address,
     queries.queryBalances,

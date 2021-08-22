@@ -40,10 +40,14 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
 
   const smartNavigation = useSmartNavigation();
 
+  const chainId = recipientConfig
+    ? recipientConfig.chainId
+    : chainStore.current.chainId;
+
   const addressBookConfig = useAddressBookConfig(
     new AsyncKVStore("address_book"),
     chainStore,
-    chainStore.current.chainId,
+    chainId,
     {
       setRecipient: (recipient: string) => {
         if (recipientConfig) {
@@ -65,7 +69,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
         <HeaderRightButton
           onPress={() => {
             smartNavigation.navigateSmart("AddAddressBook", {
-              chainId: chainStore.current.chainId,
+              chainId,
               addressBookConfig,
             });
           }}
@@ -77,7 +81,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
         </HeaderRightButton>
       ),
     });
-  }, [addressBookConfig, chainStore, smartNavigation, style]);
+  }, [addressBookConfig, chainId, chainStore, smartNavigation, style]);
 
   return (
     <PageWithScrollView>

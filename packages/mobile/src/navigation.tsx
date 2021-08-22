@@ -172,6 +172,7 @@ const {
       registerConfig: RegisterConfig;
     };
     Send: {
+      chainId?: string;
       currency?: string;
       recipient?: string;
     };

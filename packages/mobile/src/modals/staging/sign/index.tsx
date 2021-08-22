@@ -38,23 +38,24 @@ export const SignModal: FunctionComponent<{
 
     const [signer, setSigner] = useState("");
 
-    const current = chainStore.getChain(chainStore.current.chainId);
+    const [chainId, setChainId] = useState(chainStore.current.chainId);
+
     // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
-    const gasConfig = useGasConfig(chainStore, current.chainId, 1);
+    const gasConfig = useGasConfig(chainStore, chainId, 1);
     const amountConfig = useSignDocAmountConfig(
       chainStore,
-      current.chainId,
-      accountStore.getAccount(current.chainId).msgOpts
+      chainId,
+      accountStore.getAccount(chainId).msgOpts
     );
     const feeConfig = useFeeConfig(
       chainStore,
-      current.chainId,
+      chainId,
       signer,
-      queriesStore.get(current.chainId).queryBalances,
+      queriesStore.get(chainId).queryBalances,
       amountConfig,
       gasConfig
     );
-    const memoConfig = useMemoConfig(chainStore, current.chainId);
+    const memoConfig = useMemoConfig(chainStore, chainId);
 
     const signDocWapper = signInteractionStore.waitingData?.data.signDocWrapper;
     const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
@@ -64,6 +65,7 @@ export const SignModal: FunctionComponent<{
       if (signInteractionStore.waitingData) {
         const data = signInteractionStore.waitingData;
         signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
+        setChainId(data.data.signDocWrapper.chainId);
         gasConfig.setGas(data.data.signDocWrapper.gas);
         memoConfig.setMemo(data.data.signDocWrapper.memo);
         setSigner(data.data.signer);
