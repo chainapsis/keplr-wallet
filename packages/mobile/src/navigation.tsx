@@ -77,6 +77,7 @@ import {
   FocusedScreenProvider,
   useFocusedScreen,
 } from "./providers/focused-screen";
+import Svg, { Path, Rect } from "react-native-svg";
 
 const {
   SmartNavigatorProvider,
@@ -407,23 +408,59 @@ export const MainTabNavigation: FunctionComponent = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
-          let iconName = "";
+        tabBarIcon: ({ color }) => {
+          const size = 24;
 
           switch (route.name) {
             case "Main":
-              iconName = "ios-grid";
-              break;
+              return (
+                <Svg width={size} height={size} fill="none" viewBox="0 0 24 24">
+                  <Rect
+                    width="8"
+                    height="8"
+                    x="3"
+                    y="3"
+                    fill={color}
+                    rx="1.5"
+                  />
+                  <Rect
+                    width="8"
+                    height="8"
+                    x="3"
+                    y="13"
+                    fill={color}
+                    rx="1.5"
+                  />
+                  <Rect
+                    width="8"
+                    height="8"
+                    x="13"
+                    y="3"
+                    fill={color}
+                    rx="1.5"
+                  />
+                  <Rect
+                    width="8"
+                    height="8"
+                    x="13"
+                    y="13"
+                    fill={color}
+                    rx="1.5"
+                  />
+                </Svg>
+              );
             case "Web":
-              iconName = "apps-outline";
-              break;
+              return <Ionicons name="apps-outline" size={size} color={color} />;
             case "Settings":
-              iconName = "settings";
-              break;
+              return (
+                <Svg width={size} height={size} fill="none" viewBox="0 0 24 24">
+                  <Path
+                    fill={color}
+                    d="M12 2c-.528 0-1.046.045-1.55.131l-.311 1.302c-.484 2.023-2.544 3.225-4.52 2.635l-1.084-.325A10.124 10.124 0 003 8.598l.805.781a3.663 3.663 0 010 5.242L3 15.402c.36 1.043.882 2.006 1.535 2.855l1.084-.325c1.976-.59 4.036.612 4.52 2.635l.31 1.302a9.187 9.187 0 003.101 0l.311-1.302c.484-2.023 2.544-3.225 4.52-2.635l1.084.325A10.124 10.124 0 0021 15.402l-.805-.781a3.663 3.663 0 010-5.242L21 8.598a10.113 10.113 0 00-1.535-2.855l-1.084.325c-1.976.59-4.036-.612-4.52-2.635l-.31-1.302A9.184 9.184 0 0012 2zm0 7.273c1.491 0 2.7 1.22 2.7 2.727 0 1.506-1.209 2.727-2.7 2.727S9.3 13.507 9.3 12c0-1.506 1.209-2.727 2.7-2.727z"
+                  />
+                </Svg>
+              );
           }
-
-          // You can return any component that you like here!
-          return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarButton: (props) => (
           <View
@@ -460,7 +497,7 @@ export const MainTabNavigation: FunctionComponent = () => {
       }}
     >
       <Tab.Screen name="Main" component={MainNavigation} />
-      <Tab.Screen name="Web" component={WebScreen} />
+      {__DEV__ ? <Tab.Screen name="Web" component={WebScreen} /> : null}
       <Tab.Screen
         name="Settings"
         component={SettingStackScreen}
