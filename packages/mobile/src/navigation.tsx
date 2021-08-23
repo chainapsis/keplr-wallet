@@ -45,6 +45,7 @@ import {
 import { RegisterEndScreen } from "./screens/register/staging/end";
 import { RegisterNewUserScreen } from "./screens/register/staging/new-user";
 import { RegisterNotNewUserScreen } from "./screens/register/staging/not-new-user";
+import { ResultScreen } from "./screens/result";
 import {
   AddressBookConfig,
   IMemoConfig,
@@ -156,6 +157,9 @@ const {
     },
     AddAddressBook: {
       upperScreenName: "AddressBooks",
+    },
+    Result: {
+      upperScreenName: "Result",
     },
   }).withParams<{
     "Register.NewMnemonic": {
@@ -474,6 +478,8 @@ export const MainTabNavigation: FunctionComponent = () => {
                   />
                 </Svg>
               );
+            case "Result":
+              return <Ionicons name="md-reload" size={size} color={color} />;
           }
         },
         tabBarButton: (props) => (
@@ -520,6 +526,7 @@ export const MainTabNavigation: FunctionComponent = () => {
           unmountOnBlur: true,
         }}
       />
+      {__DEV__ ? <Tab.Screen name="Result" component={ResultScreen} /> : null}
     </Tab.Navigator>
   );
 };

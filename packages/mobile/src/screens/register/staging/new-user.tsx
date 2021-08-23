@@ -29,7 +29,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
       <Button
         containerStyle={style.flatten(["margin-bottom-20"])}
         text="Sign In With Google"
-        icon={
+        leftIcon={
           <Image
             style={style.flatten(["width-20", "height-20", "margin-right-10"])}
             source={require("../../../assets/svg/icons8-google.png")}
