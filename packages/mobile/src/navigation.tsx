@@ -284,7 +284,13 @@ export const RegisterNavigation: FunctionComponent = () => {
       initialRouteName="Intro"
       headerMode="screen"
     >
-      <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="Register.Intro"
+        component={RegisterIntroScreen}
+      />
       <Stack.Screen name="Register.NewUser" component={RegisterNewUserScreen} />
       <Stack.Screen
         name="Register.NotNewUser"
