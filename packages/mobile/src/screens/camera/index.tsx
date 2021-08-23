@@ -9,7 +9,7 @@ import { autorun } from "mobx";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../components/staging/button";
 import Svg, { Path } from "react-native-svg";
-import { View } from "react-native";
+import { Share, View } from "react-native";
 import { ChainSelectorModal } from "../../components/chain-selector";
 import { registerModal } from "../../modals/staging/base";
 import { CardModal } from "../../modals/staging/card";
@@ -174,6 +174,21 @@ export const AddressQRCodeModal: FunctionComponent<{
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
           <View style={style.flatten(["margin-y-32"])}>
             <QRCode size={200} value={account.bech32Address} />
+          </View>
+          <View style={style.flatten(["flex-row"])}>
+            <Button
+              containerStyle={style.flatten(["flex-1"])}
+              text="Share Address"
+              mode="light"
+              size="large"
+              onPress={() => {
+                Share.share({
+                  message: account.bech32Address,
+                }).catch((e) => {
+                  console.log(e);
+                });
+              }}
+            />
           </View>
         </View>
       </CardModal>
