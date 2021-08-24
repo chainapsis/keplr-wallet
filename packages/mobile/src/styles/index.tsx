@@ -274,6 +274,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "80": 80,
     "160": 160,
     "240": 240,
+    "292": 292,
     "300": 300,
 
     "card-gap": 12,
@@ -299,6 +300,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "62": 62,
     "64": 64,
     "80": 80,
+    "90": 90,
     "214": 214,
     "600": 600,
 
@@ -359,6 +361,9 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "32": 32,
     "40": 54,
     "64": 64,
+    "106": 106,
+    "150": 150,
+    "288": 288,
 
     page: 20,
     "card-horizontal": 20,
