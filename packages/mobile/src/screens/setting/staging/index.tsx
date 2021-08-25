@@ -7,11 +7,20 @@ import { SettingFiatCurrencyItem } from "./items/fiat-currency";
 import { SettingBiometricLockItem } from "./items/biometric-lock";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { ViewPrivateInfoModal } from "../../../modals/staging/view-private-info";
 
 export const SettingScreen: FunctionComponent = observer(() => {
-  const { keychainStore } = useStore();
+  const { keychainStore, keyRingStore } = useStore();
+  const [
+    isViewPrivateInfoModalOpen,
+    setIsViewPrivateInfoModalOpen,
+  ] = React.useState(false);
 
   const smartNavigation = useSmartNavigation();
+
+  const viewPrivateInfoTitle = `View ${
+    keyRingStore.keyRingType === "mnemonic" ? "Mnemonic Seed" : "Private key"
+  }`;
 
   return (
     <PageWithScrollView>
@@ -25,9 +34,24 @@ export const SettingScreen: FunctionComponent = observer(() => {
           smartNavigation.navigateSmart("AddressBook", {});
         }}
       />
+      <SettingSectionTitle title="General" />
+      {keyRingStore.keyRingType !== "ledger" && (
+        <SettingItem
+          label={viewPrivateInfoTitle}
+          right={<RightArrow />}
+          onPress={() => {
+            setIsViewPrivateInfoModalOpen(true);
+          }}
+        />
+      )}
       {keychainStore.isBiometrySupported || keychainStore.isBiometryOn ? (
         <SettingBiometricLockItem />
       ) : null}
+      <ViewPrivateInfoModal
+        isOpen={isViewPrivateInfoModalOpen}
+        close={() => setIsViewPrivateInfoModalOpen(false)}
+        title={viewPrivateInfoTitle}
+      />
     </PageWithScrollView>
   );
 });

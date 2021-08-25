@@ -6,7 +6,7 @@ import { RegisterConfig } from "@keplr-wallet/hooks";
 import { useNewMnemonicConfig } from "./hook";
 import { PageWithScrollView } from "../../../../components/staging/page";
 import { useStyle } from "../../../../styles";
-import { WordChip } from "./components";
+import { WordChip } from "../../../../components/staging/mnemonic";
 import { Button } from "../../../../components/staging/button";
 import Clipboard from "expo-clipboard";
 import { TextInput } from "../../../../components/staging/input";
