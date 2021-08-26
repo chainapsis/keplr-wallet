@@ -196,8 +196,10 @@ export class RootStore {
     );
 
     this.walletConnectStore = new WalletConnectStore(
+      new AsyncKVStore("wallet_connect"),
       this.chainStore,
-      this.accountStore
+      this.accountStore,
+      new Keplr("", new RNMessageRequesterInternal())
     );
   }
 }

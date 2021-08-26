@@ -2,14 +2,14 @@ import React, { FunctionComponent } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { View } from "react-native";
-import { ProposalApproval } from "../../../stores/wallet-connect";
+import { SessionRequestApproval } from "../../../stores/wallet-connect";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/staging/button";
 
 export const WalletConnectApprovalModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
-  approval: ProposalApproval;
+  approval: SessionRequestApproval;
 }> = registerModal(
   ({ approval }) => {
     const style = useStyle();

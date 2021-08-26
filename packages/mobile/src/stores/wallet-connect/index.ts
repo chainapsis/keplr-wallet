@@ -1,118 +1,284 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import WalletConnectClient, { CLIENT_EVENTS } from "@walletconnect/client";
-import { SessionTypes } from "@walletconnect/types";
+import WalletConnect from "@walletconnect/client";
 import { AccountSetBase, AccountStore } from "@keplr-wallet/stores";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { ChainStore } from "../chain";
+import { Keplr } from "@keplr-wallet/types";
+import { Buffer } from "buffer/";
+import { KVStore } from "@keplr-wallet/common";
+
+export interface WalletConnectV1SessionRequest {
+  id: number;
+  jsonrpc: "2.0";
+  method: string;
+  params: [
+    {
+      peerId: string;
+      peerMeta?: {
+        name?: string;
+        description?: string;
+        icons?: string[];
+        url?: string;
+      };
+    }
+  ];
+}
+
+// Wallet connect v1.0 is not suitable for handling multiple chains.
+// When the session requested, you cannot receive information from multiple chains,
+// so open a session unconditionally and manage permissions through custom requests.
+// Frontend should request the "keplr_enable_wallet_connect_V1" method with "chains" params.
+// "chains" params should be in form of https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md
+export interface SessionRequestApproval {
+  key: string;
+  peerMeta: WalletConnectV1SessionRequest["params"][0]["peerMeta"];
+  params: [
+    {
+      chains: string[];
+    }
+  ];
+  resolve: () => void;
+  reject: () => void;
+}
 
 export abstract class WalletConnectManager {
-  @observable.ref
-  protected client?: WalletConnectClient = undefined;
+  @observable.shallow
+  protected clientMap: Map<string, WalletConnect> = new Map();
+
+  @observable.shallow
+  protected pendingClientMap: Map<string, WalletConnect> = new Map();
 
   protected constructor(
     protected readonly chainStore: ChainStore,
-    protected readonly accountStore: AccountStore<AccountSetBase<any, any>>
+    protected readonly accountStore: AccountStore<AccountSetBase<any, any>>,
+    protected readonly keplr: Keplr
   ) {
     makeObservable(this);
-
-    this.init();
   }
 
-  async init() {
-    const client = await WalletConnectClient.init({
-      controller: true,
-      relayProvider: "wss://relay.walletconnect.org",
+  hasClient(uri: string): boolean {
+    return this.clientMap.has(uri);
+  }
+
+  getClient(uri: string): WalletConnect | undefined {
+    return this.clientMap.get(uri);
+  }
+
+  async restoreClient(session: WalletConnect["session"]) {
+    const client = new WalletConnect({
       // TODO: Set metadata properly.
-      metadata: {
+      clientMeta: {
         name: "Keplr",
         description: "Wallet for interchain",
         url: "#",
         icons: ["https://walletconnect.org/walletconnect-logo.png"],
       },
-      storageOptions: {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        asyncStorage: AsyncStorage,
+      session,
+    });
+
+    client.on("call_request", (error, payload) => {
+      this.onCallRequest(client, error, payload);
+    });
+  }
+
+  async initClient(uri: string): Promise<WalletConnect> {
+    if (this.clientMap.has(uri)) {
+      throw new Error("Client already initialized");
+    }
+
+    if (this.pendingClientMap.has(uri)) {
+      throw new Error("Client is waiting session");
+    }
+
+    const client = new WalletConnect({
+      uri,
+      // TODO: Set metadata properly.
+      clientMeta: {
+        name: "Keplr",
+        description: "Wallet for interchain",
+        url: "#",
+        icons: ["https://walletconnect.org/walletconnect-logo.png"],
       },
     });
 
     runInAction(() => {
-      this.client = client;
+      this.pendingClientMap.set(uri, client);
     });
 
-    this.client!.on(CLIENT_EVENTS.session.proposal, this.onSessionProposal);
+    let resolver: () => void;
+    let rejector: (e: Error) => void;
+    const promise = new Promise<void>((resolve, reject) => {
+      resolver = resolve;
+      rejector = reject;
+    });
+
+    const timeout = setTimeout(() => {
+      rejector(new Error("Timeout"));
+    }, 10000);
+
+    const handler = (error: Error | null) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      client.approveSession({
+        // Unfortunately, wallet connect 1.0 cannot deliver the chain ids in the form we want,
+        // so we temporarily set the chain id to 99999 and send it.
+        // And, wallet connect v1.0 is not suitable for handling multiple chains.
+        // When the session requested, you cannot receive information from multiple chains,
+        // so open a session unconditionally and manage permissions through custom requests.
+        chainId: 99999,
+        accounts: [],
+      });
+      resolver();
+    };
+
+    client.on("session_request", handler);
+
+    try {
+      await promise;
+
+      client.off("session_request");
+
+      runInAction(() => {
+        this.clientMap.set(uri, client);
+      });
+
+      client.on("call_request", (error, payload) => {
+        this.onCallRequest(client, error, payload);
+      });
+
+      return client;
+    } finally {
+      runInAction(() => {
+        this.pendingClientMap.delete(uri);
+      });
+      clearTimeout(timeout);
+    }
   }
 
-  protected async waitInit(): Promise<void> {
-    if (this.client) {
+  protected readonly onCallRequest = async (
+    client: WalletConnect,
+    error: Error | null,
+    payload: any
+  ) => {
+    if (error) {
+      console.log(error);
       return;
     }
 
-    return new Promise<void>((resolve) => {
-      const disposer = autorun(() => {
-        if (this.client) {
-          resolve();
-          if (disposer) {
-            disposer();
-          }
-        }
-      });
-    });
-  }
-
-  async pair(uri: string) {
-    await this.waitInit();
-
-    await this.client!.pair({ uri });
-  }
-
-  protected readonly onSessionProposal = async (
-    proposal: SessionTypes.Proposal
-  ) => {
-    await this.waitInit();
+    const id = payload.id;
+    if (!id) {
+      console.log("Payload's id is empty", payload);
+      return;
+    }
 
     try {
-      const capiChainIds = proposal.permissions.blockchain.chains;
-      for (const capiChainId of capiChainIds) {
-        const { namespace, chainId } = this.parseCAIPChainId(capiChainId);
-        if (namespace !== "cosmos") {
-          throw new Error(`namespace (${namespace}) is not supported`);
+      switch (payload.method) {
+        case "keplr_enable_wallet_connect_V1": {
+          if (payload.params.length !== 1) {
+            throw new Error("Invalid parmas");
+          }
+          if (
+            !payload.params[0].chains ||
+            payload.params[0].chains.length === 0
+          ) {
+            throw new Error("Params have no chains");
+          }
+
+          const capiChainIds = payload.params[0].chains;
+          for (const capiChainId of capiChainIds) {
+            const { namespace, chainId } = this.parseCAIPChainId(capiChainId);
+            if (namespace !== "cosmos") {
+              throw new Error(`namespace (${namespace}) is not supported`);
+            }
+
+            if (!this.chainStore.hasChain(chainId)) {
+              throw new Error(`chain id (${chainId}) is not supported`);
+            }
+          }
+
+          const accounts: string[] = [];
+          for (const capiChainId of capiChainIds) {
+            const { chainId } = this.parseCAIPChainId(capiChainId);
+
+            accounts.push(
+              this.formatCAIPAccountId(
+                "cosmos",
+                chainId,
+                await this.getAddressFromAccountStore(chainId)
+              )
+            );
+          }
+
+          try {
+            await this.requestSessionProposalApproval(client, payload.params);
+            client.approveRequest({
+              id,
+              result: {
+                accounts,
+              },
+            });
+            await this.onSessionConnected(client.session);
+          } catch (e) {
+            console.log(e);
+            await client.killSession();
+            await this.onSessionDisconnected(client.session);
+          }
+          break;
         }
-
-        if (!this.chainStore.hasChain(chainId)) {
-          throw new Error(`chain id (${chainId}) is not supported`);
+        case "cosmos_getAccounts": {
+          if (payload.params.length !== 1) {
+            throw new Error("Invalid parmas");
+          }
+          if (!payload.params[0].chainId) {
+            throw new Error("Chain id is empty");
+          }
+          const chainId = payload.params[0].chainId;
+          const key = await this.keplr.getKey(chainId);
+          client.approveRequest({
+            id,
+            result: [
+              {
+                algo: key.algo,
+                address: key.bech32Address,
+                pubkey: Buffer.from(key.pubKey).toString("hex"),
+              },
+            ],
+          });
+          break;
         }
+        case "cosmos_signAmino":
+          if (payload.params.length !== 1) {
+            throw new Error("Invalid parmas");
+          }
+
+          const param = payload.params[0];
+          const result = await this.keplr.signAmino(
+            param.signDoc["chain_id"],
+            param.signerAddress,
+            param.signDoc
+          );
+          client.approveRequest({
+            id,
+            result: [
+              {
+                signature: Buffer.from(
+                  result.signature.signature,
+                  "base64"
+                ).toString("hex"),
+                signed: result.signed,
+              },
+            ],
+          });
+          break;
+        default:
+          throw new Error(`Unknown method (${payload.method})`);
       }
-
-      const accounts: string[] = [];
-      for (const capiChainId of capiChainIds) {
-        const { chainId } = this.parseCAIPChainId(capiChainId);
-
-        accounts.push(
-          this.formatCAIPAccountId(
-            "cosmos",
-            chainId,
-            await this.getAddressFromAccountStore(chainId)
-          )
-        );
-      }
-
-      await this.requestSessionProposalApproval(proposal);
-
-      await this.client!.approve({
-        proposal,
-        response: {
-          state: {
-            accounts,
-          },
-        },
-      });
     } catch (e) {
-      await this.client!.reject({
-        proposal,
-        // TODO: Format the error message
-        reason: {
-          code: 1,
+      client.rejectRequest({
+        id,
+        error: {
           message: e.message,
         },
       });
@@ -120,7 +286,14 @@ export abstract class WalletConnectManager {
   };
 
   protected abstract requestSessionProposalApproval(
-    proposal: SessionTypes.Proposal
+    client: WalletConnect,
+    params: SessionRequestApproval["params"]
+  ): Promise<void>;
+  protected abstract onSessionConnected(
+    session: WalletConnect["session"]
+  ): Promise<void>;
+  protected abstract onSessionDisconnected(
+    session: WalletConnect["session"]
   ): Promise<void>;
 
   // The address in the account store is the observable property,
@@ -182,32 +355,37 @@ export abstract class WalletConnectManager {
   }
 }
 
-export interface ProposalApproval {
-  key: string;
-  proposal: SessionTypes.Proposal;
-  resolve: () => void;
-  reject: () => void;
-}
-
 export class WalletConnectStore extends WalletConnectManager {
   @observable.shallow
-  protected _pendingProposalApprovals: ProposalApproval[] = [];
+  protected _pendingSessionRequestApprovals: SessionRequestApproval[] = [];
 
   constructor(
+    protected readonly kvStore: KVStore,
     protected readonly chainStore: ChainStore,
-    protected readonly accountStore: AccountStore<AccountSetBase<any, any>>
+    protected readonly accountStore: AccountStore<AccountSetBase<any, any>>,
+    protected readonly keplr: Keplr
   ) {
-    super(chainStore, accountStore);
+    super(chainStore, accountStore, keplr);
 
     makeObservable(this);
+
+    this.restore();
   }
 
-  get pendingProposalApprovals(): ProposalApproval[] {
-    return this._pendingProposalApprovals;
+  protected async restore(): Promise<void> {
+    const persistentSessions = await this.getPersistentSessions();
+    for (const session of persistentSessions) {
+      this.restoreClient(session);
+    }
+  }
+
+  get pendingSessionRequestApprovals(): SessionRequestApproval[] {
+    return this._pendingSessionRequestApprovals;
   }
 
   protected requestSessionProposalApproval(
-    proposal: SessionTypes.Proposal
+    client: WalletConnect,
+    params: SessionRequestApproval["params"]
   ): Promise<void> {
     let resolver: () => void;
     let rejector: (e: Error) => void;
@@ -216,11 +394,12 @@ export class WalletConnectStore extends WalletConnectManager {
       rejector = reject;
     });
 
-    const key = this.pendingProposalApprovals.length.toString();
+    const key = this.pendingSessionRequestApprovals.length.toString();
 
-    const approval: ProposalApproval = {
+    const approval: SessionRequestApproval = {
       key,
-      proposal,
+      peerMeta: client.peerMeta ? client.peerMeta : undefined,
+      params,
       resolve: () => {
         resolver();
         this.removeProposalApproval(key);
@@ -237,23 +416,60 @@ export class WalletConnectStore extends WalletConnectManager {
   }
 
   @action
-  protected pushProposalApproval(approval: ProposalApproval) {
+  protected pushProposalApproval(approval: SessionRequestApproval) {
     if (
-      !this.pendingProposalApprovals.find(
+      !this._pendingSessionRequestApprovals.find(
         (pending) => pending.key === approval.key
       )
     ) {
-      this._pendingProposalApprovals.push(approval);
+      this._pendingSessionRequestApprovals.push(approval);
     }
   }
 
   @action
   protected removeProposalApproval(key: string) {
-    const index = this.pendingProposalApprovals.findIndex(
+    const index = this._pendingSessionRequestApprovals.findIndex(
       (pending) => pending.key === key
     );
     if (index >= 0) {
-      this._pendingProposalApprovals.splice(index, 1);
+      this._pendingSessionRequestApprovals.splice(index, 1);
     }
+  }
+
+  protected async getPersistentSessions(): Promise<WalletConnect["session"][]> {
+    const result = await this.kvStore.get<WalletConnect["session"][]>(
+      "persistent_session_v1"
+    );
+    if (!result) {
+      return [];
+    }
+    return result;
+  }
+
+  protected async setPersistentSessions(
+    value: WalletConnect["session"][]
+  ): Promise<void> {
+    await this.kvStore.set("persistent_session_v1", value);
+  }
+
+  protected async onSessionConnected(
+    session: WalletConnect["session"]
+  ): Promise<void> {
+    const persistentSessions = await this.getPersistentSessions();
+
+    if (
+      !persistentSessions.find((persistent) => persistent.key === session.key)
+    ) {
+      persistentSessions.push(session);
+      await this.setPersistentSessions(persistentSessions);
+    }
+  }
+
+  protected async onSessionDisconnected(
+    session: WalletConnect["session"]
+  ): Promise<void> {
+    const persistentSessions = await this.getPersistentSessions();
+    persistentSessions.filter((persistent) => persistent.key !== session.key);
+    await this.setPersistentSessions(persistentSessions);
   }
 }
