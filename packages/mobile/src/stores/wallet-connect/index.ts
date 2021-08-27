@@ -121,6 +121,14 @@ export abstract class WalletConnectManager {
         return;
       }
 
+      if (!client.peerMeta?.url) {
+        client.rejectSession({
+          message: "Should provide the peer url",
+        });
+        resolver();
+        return;
+      }
+
       client.approveSession({
         // Unfortunately, wallet connect 1.0 cannot deliver the chain ids in the form we want,
         // so we temporarily set the chain id to 99999 and send it.
