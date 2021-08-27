@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import Icon from "react-native-vector-icons/Feather";
 import { PageWithScrollView } from "../../components/staging/page";
 import { useStyle } from "../../styles";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Linking } from "react-native";
 import { Button } from "../../components/staging/button";
 import { useSmartNavigation } from "../../navigation";
 
@@ -39,14 +39,7 @@ export const ResultScreen: FunctionComponent = () => {
         size="large"
         text="Confirm"
         onPress={() => {
-          smartNavigation.reset({
-            index: 0,
-            routes: [
-              {
-                name: "MainTabDrawer",
-              },
-            ],
-          });
+          smartNavigation.navigateSmart("Home", {});
         }}
       />
       <Button
@@ -61,6 +54,9 @@ export const ResultScreen: FunctionComponent = () => {
             size={20}
           />
         }
+        onPress={() => {
+          Linking.openURL("https://naver.com");
+        }}
       />
     </PageWithScrollView>
   );

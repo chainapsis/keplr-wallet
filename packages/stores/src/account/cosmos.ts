@@ -101,7 +101,12 @@ export class CosmosAccount {
     recipient: string,
     memo: string,
     stdFee: Partial<StdFee>,
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ): Promise<boolean> {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
@@ -135,7 +140,7 @@ export class CosmosAccount {
             gas: stdFee.gas ?? this.base.msgOpts.send.native.gas.toString(),
           },
           memo,
-          (tx) => {
+          this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
               const queryBalance = this.queries.queryBalances
@@ -150,11 +155,7 @@ export class CosmosAccount {
                 queryBalance.fetch();
               }
             }
-
-            if (onFulfill) {
-              onFulfill(tx);
-            }
-          }
+          })
         );
         return true;
     }

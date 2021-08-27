@@ -15,6 +15,8 @@ import {
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/staging/button";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import { useSmartNavigation } from "../../../navigation";
+import { Buffer } from "buffer/";
 
 export const SendScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
@@ -34,6 +36,8 @@ export const SendScreen: FunctionComponent = observer(() => {
   >();
 
   const style = useStyle();
+
+  const smartNavigation = useSmartNavigation();
 
   const chainId = route.params.chainId
     ? route.params.chainId
@@ -113,10 +117,19 @@ export const SendScreen: FunctionComponent = observer(() => {
                 sendConfigs.amountConfig.amount,
                 sendConfigs.amountConfig.sendCurrency,
                 sendConfigs.recipientConfig.recipient,
-                sendConfigs.memoConfig.memo
+                sendConfigs.memoConfig.memo,
+                {},
+                {
+                  onBroadcasted: (txHash) => {
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
+                    });
+                  },
+                }
               );
             } catch (e) {
               console.log(e);
+              smartNavigation.navigateSmart("Home", {});
             }
           }
         }}

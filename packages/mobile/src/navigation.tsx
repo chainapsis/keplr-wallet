@@ -80,6 +80,11 @@ import {
   useFocusedScreen,
 } from "./providers/focused-screen";
 import Svg, { Path, Rect } from "react-native-svg";
+import {
+  TxFailedResultScreen,
+  TxPendingResultScreen,
+  TxSuccessResultScreen,
+} from "./screens/tx-result";
 
 const {
   SmartNavigatorProvider,
@@ -159,7 +164,16 @@ const {
       upperScreenName: "AddressBooks",
     },
     Result: {
-      upperScreenName: "Result",
+      upperScreenName: "Others",
+    },
+    TxPendingResult: {
+      upperScreenName: "Others",
+    },
+    TxSuccessResult: {
+      upperScreenName: "Others",
+    },
+    TxFailedResult: {
+      upperScreenName: "Others",
     },
   }).withParams<{
     "Register.NewMnemonic": {
@@ -205,6 +219,18 @@ const {
     AddAddressBook: {
       chainId: string;
       addressBookConfig: AddressBookConfig;
+    };
+    TxPendingResult: {
+      chainId?: string;
+      txHash: string;
+    };
+    TxSuccessResult: {
+      chainId?: string;
+      txHash: string;
+    };
+    TxFailedResult: {
+      chainId?: string;
+      txHash: string;
     };
   }>()
 );
@@ -368,6 +394,38 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen name="Delegate" component={DelegateScreen} />
       <Stack.Screen name="Undelegate" component={UndelegateScreen} />
       <Stack.Screen name="Redelegate" component={RedelegateScreen} />
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+        name="Result"
+        component={ResultScreen}
+      />
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+        name="TxPendingResult"
+        component={TxPendingResultScreen}
+      />
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+        name="TxSuccessResult"
+        component={TxSuccessResultScreen}
+      />
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+        name="TxFailedResult"
+        component={TxFailedResultScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -484,8 +542,6 @@ export const MainTabNavigation: FunctionComponent = () => {
                   />
                 </Svg>
               );
-            case "Result":
-              return <Ionicons name="md-reload" size={size} color={color} />;
           }
         },
         tabBarButton: (props) => (
@@ -532,7 +588,6 @@ export const MainTabNavigation: FunctionComponent = () => {
           unmountOnBlur: true,
         }}
       />
-      {__DEV__ ? <Tab.Screen name="Result" component={ResultScreen} /> : null}
     </Tab.Navigator>
   );
 };

@@ -80,7 +80,12 @@ export class AccountSetBase<MsgOpts, Queries> {
     recipient: string,
     memo: string,
     stdFee: Partial<StdFee>,
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) => Promise<boolean>)[] = [];
 
   constructor(
@@ -117,7 +122,12 @@ export class AccountSetBase<MsgOpts, Queries> {
       recipient: string,
       memo: string,
       stdFee: Partial<StdFee>,
-      onFulfill?: (tx: any) => void
+      onTxEvents?:
+        | ((tx: any) => void)
+        | {
+            onBroadcasted?: (txHash: Uint8Array) => void;
+            onFulfill?: (tx: any) => void;
+          }
     ) => Promise<boolean>
   ) {
     this.sendTokenFns.push(fn);
@@ -268,42 +278,44 @@ export class AccountSetBase<MsgOpts, Queries> {
       onBroadcasted(txHash);
     }
 
-    const txTracer = new TendermintTxTracer(
-      this.chainGetter.getChain(this.chainId).rpc,
-      "/websocket",
-      {
-        wsObject: this.opts.wsObject,
-      }
-    );
-    txTracer.traceTx(txHash).then((tx) => {
-      txTracer.close();
+    if (onFulfill) {
+      const txTracer = new TendermintTxTracer(
+        this.chainGetter.getChain(this.chainId).rpc,
+        "/websocket",
+        {
+          wsObject: this.opts.wsObject,
+        }
+      );
+      txTracer.traceTx(txHash).then((tx) => {
+        txTracer.close();
 
-      runInAction(() => {
-        this._isSendingMsg = false;
+        runInAction(() => {
+          this._isSendingMsg = false;
+        });
+
+        // After sending tx, the balances is probably changed due to the fee.
+        for (const feeAmount of signDoc.fee.amount) {
+          const bal = this.queries.queryBalances
+            .getQueryBech32Address(this.bech32Address)
+            .balances.find(
+              (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
+            );
+
+          if (bal) {
+            bal.fetch();
+          }
+        }
+
+        if (onFulfill) {
+          // Always add the tx hash data.
+          if (tx && !tx.hash) {
+            tx.hash = Buffer.from(txHash).toString("hex");
+          }
+
+          onFulfill(tx);
+        }
       });
-
-      // After sending tx, the balances is probably changed due to the fee.
-      for (const feeAmount of signDoc.fee.amount) {
-        const bal = this.queries.queryBalances
-          .getQueryBech32Address(this.bech32Address)
-          .balances.find(
-            (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
-          );
-
-        if (bal) {
-          bal.fetch();
-        }
-      }
-
-      if (onFulfill) {
-        // Always add the tx hash data.
-        if (tx && !tx.hash) {
-          tx.hash = Buffer.from(txHash).toString("hex");
-        }
-
-        onFulfill(tx);
-      }
-    });
+    }
   }
 
   async sendToken(
@@ -312,12 +324,17 @@ export class AccountSetBase<MsgOpts, Queries> {
     recipient: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     for (let i = 0; i < this.sendTokenFns.length; i++) {
       const fn = this.sendTokenFns[i];
 
-      if (await fn(amount, currency, recipient, memo, stdFee, onFulfill)) {
+      if (await fn(amount, currency, recipient, memo, stdFee, onTxEvents)) {
         return;
       }
     }
