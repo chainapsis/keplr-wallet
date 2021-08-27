@@ -3512,6 +3512,172 @@
     "@babel/runtime" "^7.7.2"
     regenerator-runtime "^0.13.3"
 
+"@keplr-wallet/background@0.9.0-alpha.9":
+  version "0.9.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/background/-/background-0.9.0-alpha.9.tgz#a9b1d87d157df792e1fd03723047e6cb5541d96d"
+  integrity sha512-/2fqwFzS/SWSJW/MDrnufY1bmgGaZTmvvPOGa9lSqfF0Z92Q8e7vyar6sq+5hYhazXP+X8YNtHwrLf+7mDMFBw==
+  dependencies:
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@cosmjs/proto-signing" "^0.24.0-alpha.25"
+    "@keplr-wallet/common" "^0.9.0-alpha.9"
+    "@keplr-wallet/cosmos" "^0.9.0-alpha.9"
+    "@keplr-wallet/crypto" "^0.9.0-alpha.9"
+    "@keplr-wallet/popup" "^0.9.0-alpha.8"
+    "@keplr-wallet/router" "^0.9.0-alpha.8"
+    "@keplr-wallet/types" "^0.9.0-alpha.8"
+    "@keplr-wallet/unit" "^0.9.0-alpha.9"
+    "@ledgerhq/hw-transport-webhid" "^5.43.0"
+    "@ledgerhq/hw-transport-webusb" "^5.43.0"
+    aes-js "^3.1.2"
+    axios "^0.21.0"
+    big-integer "^1.6.48"
+    bip39 "^3.0.2"
+    buffer "^5.4.3"
+    delay "^4.4.0"
+    joi "^17.3.0"
+    ledger-cosmos-js "^2.1.8"
+    reflect-metadata "^0.1.13"
+    scrypt-js "^3.0.1"
+    secp256k1 "^4.0.2"
+    secretjs "^0.10.2"
+    tsyringe "^4.4.0"
+
+"@keplr-wallet/common@0.9.0-alpha.9":
+  version "0.9.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/common/-/common-0.9.0-alpha.9.tgz#3b21307ebf05ba524dddc4de52834ba4d96bfde3"
+  integrity sha512-i5sojC/v+gE2z6XPO5ytv2B4ob+SqipgS8H8RwC76h77bbsSKmwoxUsEkA3nwlO6aF5VlNJUlxjon96fvwIxzg==
+  dependencies:
+    "@keplr-wallet/crypto" "^0.9.0-alpha.9"
+    buffer "^6.0.3"
+    delay "^4.4.0"
+
+"@keplr-wallet/cosmos@0.9.0-alpha.9":
+  version "0.9.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/cosmos/-/cosmos-0.9.0-alpha.9.tgz#0b7c8d43b1bbea3d72e110bf1f8644188c2f1326"
+  integrity sha512-bO/DvcmknepKje6SXmMZfkqtqqVMUWoEVgT5vAVrF993N3VwefN6UVOxLfsYYWZSSQuVNQI5ncPGZvovK1LJAA==
+  dependencies:
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@keplr-wallet/types" "^0.9.0-alpha.8"
+    "@keplr-wallet/unit" "^0.9.0-alpha.9"
+    axios "^0.21.0"
+    bech32 "^1.1.4"
+    buffer "^6.0.3"
+    long "^4.0.0"
+    protobufjs "^6.10.2"
+
+"@keplr-wallet/crypto@0.9.0-alpha.9":
+  version "0.9.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/crypto/-/crypto-0.9.0-alpha.9.tgz#3fd84768c8bec7bfc0cb8f11f52f3f604c1b876f"
+  integrity sha512-5F1X8Yv7D3AvlC3cS4MEooq2QWfUYo03n6or1qkDEG5cCoYDW8oLf30MzoYEDGHmXecgmTLUK0sBwB29CiTepg==
+  dependencies:
+    bip32 "^2.0.6"
+    bip39 "^3.0.3"
+    buffer "^5.4.3"
+    crypto-js "^4.0.0"
+    elliptic "^6.5.3"
+    sha.js "^2.4.11"
+
+"@keplr-wallet/ens@0.9.0-alpha.8":
+  version "0.9.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/ens/-/ens-0.9.0-alpha.8.tgz#694b8499d474c29eef0f2c94f0bec0d00c95ecd7"
+  integrity sha512-0qdnp9m6FxSmcIBOKQCDrzJ9sikiLZD27NLJprbZ1Z0oLfJqVgxnL9qRKcCy7F0/6LYBW+hBOMS16YBN94KJOw==
+  dependencies:
+    "@ensdomains/resolver" "^0.2.4"
+    buffer "^5.4.3"
+    ethereum-ens "^0.8.0"
+    mobx "^6.1.7"
+    web3 "^1.2.6"
+
+"@keplr-wallet/hooks@0.9.0-alpha.9":
+  version "0.9.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/hooks/-/hooks-0.9.0-alpha.9.tgz#0a0e085f35ee20b66fc309748dea065aa274649b"
+  integrity sha512-gspCEJUzy9u51bKEa1Zs5jb9YBmVKGJCl2MLzMZDi+ZfTWUtu9619zO6Y75CbgtpGKY5MAz6cYeIiYgVwY/tKQ==
+  dependencies:
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@keplr-wallet/background" "^0.9.0-alpha.9"
+    "@keplr-wallet/common" "^0.9.0-alpha.9"
+    "@keplr-wallet/cosmos" "^0.9.0-alpha.9"
+    "@keplr-wallet/crypto" "^0.9.0-alpha.9"
+    "@keplr-wallet/ens" "^0.9.0-alpha.8"
+    "@keplr-wallet/popup" "^0.9.0-alpha.8"
+    "@keplr-wallet/stores" "^0.9.0-alpha.9"
+    "@keplr-wallet/types" "^0.9.0-alpha.8"
+    "@keplr-wallet/unit" "^0.9.0-alpha.9"
+    long "^4.0.0"
+    mobx "^6.1.7"
+    mobx-utils "^6.0.3"
+    react "^16.14.0"
+    react-router "^5.1.2"
+    utility-types "^3.10.0"
+
+"@keplr-wallet/provider@0.9.0-alpha.9":
+  version "0.9.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/provider/-/provider-0.9.0-alpha.9.tgz#82eed46376cd25cd1e647b15a85726b6ca163a9d"
+  integrity sha512-N9SY290//Nlbkuov9WtrZK42pbrDqWD3lxz4PmUD6adnkDulDzEHqnMkoOCzNkNl5DOxnUtuN/wa/HLguuh4Hg==
+  dependencies:
+    "@cosmjs/encoding" "^0.24.0-alpha.25"
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@cosmjs/proto-signing" "^0.24.0-alpha.25"
+    "@keplr-wallet/background" "^0.9.0-alpha.9"
+    "@keplr-wallet/cosmos" "^0.9.0-alpha.9"
+    "@keplr-wallet/router" "^0.9.0-alpha.8"
+    "@keplr-wallet/types" "^0.9.0-alpha.8"
+    "@keplr-wallet/unit" "^0.9.0-alpha.9"
+    buffer "^6.0.3"
+    secretjs "^0.10.4"
+
+"@keplr-wallet/router@0.9.0-alpha.8":
+  version "0.9.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/router/-/router-0.9.0-alpha.8.tgz#280d49a36be32d7e6f1d4fdace9770608ac9428b"
+  integrity sha512-sC51dDMrhq0PPGi5uywMio6dEYt2Zhe77Lbnacp3ozLTd2J7P6fXmAc8k6nstjeIjBJlFYzIUNSqY/KpvYaNbQ==
+  dependencies:
+    "@keplr-wallet/popup" "^0.9.0-alpha.8"
+    buffer "^6.0.3"
+    p-queue "^6.6.2"
+
+"@keplr-wallet/stores@0.9.0-alpha.9":
+  version "0.9.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/stores/-/stores-0.9.0-alpha.9.tgz#0f231f137b810a781b86ae26da9587aca71e8b1d"
+  integrity sha512-SKeH3BKUQT63nhG0dQpdpl8BIUhqosV58BP76f4gxKZgFuieVLEC2pEhcHFJ4/1Z7pIGfD0+hZ4AxbscD+IgxQ==
+  dependencies:
+    "@cosmjs/encoding" "^0.24.0-alpha.25"
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@cosmjs/tendermint-rpc" "^0.24.1"
+    "@keplr-wallet/background" "^0.9.0-alpha.9"
+    "@keplr-wallet/common" "^0.9.0-alpha.9"
+    "@keplr-wallet/cosmos" "^0.9.0-alpha.9"
+    "@keplr-wallet/crypto" "^0.9.0-alpha.9"
+    "@keplr-wallet/router" "^0.9.0-alpha.8"
+    "@keplr-wallet/types" "^0.9.0-alpha.8"
+    "@keplr-wallet/unit" "^0.9.0-alpha.9"
+    axios "^0.21.0"
+    buffer "^6.0.3"
+    deepmerge "^4.2.2"
+    mobx "^6.1.7"
+    mobx-utils "^6.0.3"
+    p-queue "^6.6.2"
+    utility-types "^3.10.0"
+
+"@keplr-wallet/types@0.9.0-alpha.8":
+  version "0.9.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.9.0-alpha.8.tgz#d513acc0f1504fa01d0b86cf8e8998efd8ad4435"
+  integrity sha512-e0/8ok5wUzWRUTL84ka79SSMunJcuwgA4o7I1DpPZdYsMe4Q13gEDChp8+fSsVWIO7zcIXaxlpsUGxlYqyB+MA==
+  dependencies:
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@cosmjs/proto-signing" "^0.24.0-alpha.25"
+    axios "^0.21.0"
+    long "^4.0.0"
+    secretjs "^0.10.4"
+
+"@keplr-wallet/unit@0.9.0-alpha.9":
+  version "0.9.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/unit/-/unit-0.9.0-alpha.9.tgz#1927c5fe96624219ab5efebc6c7bf169989844d3"
+  integrity sha512-bF73ZwPI5bOBqK/cJY5nOjLApKg/ZgfxSyFqa/pDbuSk2sjBlYTN0q7ztx4R+kD0dUAxMHyeSp6uSnclr7t+/Q==
+  dependencies:
+    "@keplr-wallet/types" "^0.9.0-alpha.8"
+    big-integer "^1.6.48"
+    utility-types "^3.10.0"
+
 "@ledgerhq/devices@^5.36.0":
   version "5.36.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-5.36.0.tgz#f4493bea44390325fcc7a2a0d03bba69fc1604ec"
@@ -3520,6 +3686,16 @@
     "@ledgerhq/errors" "^5.36.0"
     "@ledgerhq/logs" "^5.36.0"
     rxjs "^6.6.3"
+
+"@ledgerhq/devices@^5.51.1":
+  version "5.51.1"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-5.51.1.tgz#d741a4a5d8f17c2f9d282fd27147e6fe1999edb7"
+  integrity sha512-4w+P0VkbjzEXC7kv8T1GJ/9AVaP9I6uasMZ/JcdwZBS3qwvKo5A5z9uGhP5c7TvItzcmPb44b5Mw2kT+WjUuAA==
+  dependencies:
+    "@ledgerhq/errors" "^5.50.0"
+    "@ledgerhq/logs" "^5.50.0"
+    rxjs "6"
+    semver "^7.3.5"
 
 "@ledgerhq/devices@^6.3.0":
   version "6.3.0"
@@ -3536,10 +3712,25 @@
   resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-5.36.0.tgz#9d178b54116ae81b1fbdfa80afcd33981453be4c"
   integrity sha512-VS6aFzn3IDUmSLaX2kAPg5sQOc5m7IwvswAGvoMc3FCi9/a1dXWwtiYn5rWd1QjDJlTKSfCwmSpvUMp8FKoY2Q==
 
+"@ledgerhq/errors@^5.50.0":
+  version "5.50.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-5.50.0.tgz#e3a6834cb8c19346efca214c1af84ed28e69dad9"
+  integrity sha512-gu6aJ/BHuRlpU7kgVpy2vcYk6atjB4iauP2ymF7Gk0ez0Y/6VSMVSJvubeEQN+IV60+OBK0JgeIZG7OiHaw8ow==
+
 "@ledgerhq/errors@^6.2.0":
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-6.2.0.tgz#7dc2b3bf6bdedccdaa1b97dccacfa912c4fc22f8"
   integrity sha512-eO03x8HJmG60WtlrMuahigW/rwywFdcGzCnihta/MjkM8BD9A660cKVkyIuheCcpaB7UV/r+QsRl9abHbjjaag==
+
+"@ledgerhq/hw-transport-webhid@^5.43.0":
+  version "5.51.1"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-webhid/-/hw-transport-webhid-5.51.1.tgz#2050d65ef4ce179e8f43cd7245b811d8f05fdcfc"
+  integrity sha512-w/2qSU0vwFY+D/4ucuYRViO7iS3Uuxmj9sI/Iiqkoiax9Xppb0/6H5m3ffKv6iPMmRYbgwCgXorqx4SLLSD8Kg==
+  dependencies:
+    "@ledgerhq/devices" "^5.51.1"
+    "@ledgerhq/errors" "^5.50.0"
+    "@ledgerhq/hw-transport" "^5.51.1"
+    "@ledgerhq/logs" "^5.50.0"
 
 "@ledgerhq/hw-transport-webhid@^6.3.0":
   version "6.4.1"
@@ -3550,6 +3741,16 @@
     "@ledgerhq/errors" "^6.2.0"
     "@ledgerhq/hw-transport" "^6.3.0"
     "@ledgerhq/logs" "^6.2.0"
+
+"@ledgerhq/hw-transport-webusb@^5.43.0":
+  version "5.53.1"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-webusb/-/hw-transport-webusb-5.53.1.tgz#3df8c401417571e3bcacc378d8aca587214b05ae"
+  integrity sha512-A/f+xcrkIAZiJrvPpDvsrjxQX4cI2kbdiunQkwsYmOG3Bp4z89ZnsBiC7YBst4n2/g+QgTg0/KPVtODU5djooQ==
+  dependencies:
+    "@ledgerhq/devices" "^5.51.1"
+    "@ledgerhq/errors" "^5.50.0"
+    "@ledgerhq/hw-transport" "^5.51.1"
+    "@ledgerhq/logs" "^5.50.0"
 
 "@ledgerhq/hw-transport-webusb@^6.3.0":
   version "6.3.0"
@@ -3570,6 +3771,15 @@
     "@ledgerhq/errors" "^5.36.0"
     events "^3.2.0"
 
+"@ledgerhq/hw-transport@^5.51.1":
+  version "5.51.1"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-5.51.1.tgz#8dd14a8e58cbee4df0c29eaeef983a79f5f22578"
+  integrity sha512-6wDYdbWrw9VwHIcoDnqWBaDFyviyjZWv6H9vz9Vyhe4Qd7TIFmbTl/eWs6hZvtZBza9K8y7zD8ChHwRI4s9tSw==
+  dependencies:
+    "@ledgerhq/devices" "^5.51.1"
+    "@ledgerhq/errors" "^5.50.0"
+    events "^3.3.0"
+
 "@ledgerhq/hw-transport@^6.3.0":
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-6.3.0.tgz#4fc966b1a68c991c0a6b5384841f99c4f8304ce9"
@@ -3583,6 +3793,11 @@
   version "5.36.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-5.36.0.tgz#78721347162fb834d90effa1123b363dc46e3a52"
   integrity sha512-HnD/hByteUL1MsJu1lMinY9bNq8++5mWJ8qHCW9dLC9LbsvWIqwLwmZiGcW0D2tX9p0/C5ESuIpJ9B/d2dReuw==
+
+"@ledgerhq/logs@^5.50.0":
+  version "5.50.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-5.50.0.tgz#29c6419e8379d496ab6d0426eadf3c4d100cd186"
+  integrity sha512-swKHYCOZUGyVt4ge0u8a7AwNcA//h4nx5wIi0sruGye1IJ5Cva0GyK9L2/WdX+kWVTKp92ZiEo1df31lrWGPgA==
 
 "@ledgerhq/logs@^6.2.0":
   version "6.2.0"

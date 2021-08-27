@@ -173,7 +173,12 @@ export class CosmosAccount {
     recipient: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
       throw new Error("Only native token can be sent via IBC");
@@ -235,7 +240,7 @@ export class CosmosAccount {
         gas: stdFee.gas ?? this.base.msgOpts.ibcTransfer.gas.toString(),
       },
       memo,
-      (tx) => {
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to send token, refresh the balance.
           const queryBalance = this.queries.queryBalances
@@ -250,11 +255,7 @@ export class CosmosAccount {
             queryBalance.fetch();
           }
         }
-
-        if (onFulfill) {
-          onFulfill(tx);
-        }
-      }
+      })
     );
   }
 
@@ -549,6 +550,44 @@ export class CosmosAccount {
         }
       }
     );
+  }
+
+  protected txEventsWithPreOnFulfill(
+    onTxEvents:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
+      | undefined,
+    preOnFulfill?: (tx: any) => void
+  ):
+    | {
+        onBroadcasted?: (txHash: Uint8Array) => void;
+        onFulfill?: (tx: any) => void;
+      }
+    | undefined {
+    if (!onTxEvents) {
+      return;
+    }
+
+    const onBroadcasted =
+      typeof onTxEvents === "function" ? undefined : onTxEvents.onBroadcasted;
+    const onFulfill =
+      typeof onTxEvents === "function" ? onTxEvents : onTxEvents.onFulfill;
+
+    return {
+      onBroadcasted,
+      onFulfill: onFulfill
+        ? (tx: any) => {
+            if (preOnFulfill) {
+              preOnFulfill(tx);
+            }
+
+            onFulfill(tx);
+          }
+        : undefined,
+    };
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & HasCosmosQueries> {
