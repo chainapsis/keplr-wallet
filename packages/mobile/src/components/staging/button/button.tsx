@@ -10,7 +10,8 @@ export const Button: FunctionComponent<{
   mode?: "fill" | "light" | "outline" | "text";
   size?: "default" | "small" | "large";
   text: string;
-  icon?: ReactElement;
+  leftIcon?: ReactElement;
+  rightIcon?: ReactElement;
   loading?: boolean;
   disabled?: boolean;
 
@@ -24,7 +25,8 @@ export const Button: FunctionComponent<{
   mode = "fill",
   size = "default",
   text,
-  icon,
+  leftIcon,
+  rightIcon,
   loading = false,
   disabled = false,
   onPress,
@@ -165,7 +167,7 @@ export const Button: FunctionComponent<{
             [loading && "opacity-transparent"]
           )}
         >
-          <View>{icon}</View>
+          <View>{leftIcon}</View>
         </View>
         <Text
           style={StyleSheet.flatten([
@@ -178,6 +180,14 @@ export const Button: FunctionComponent<{
         >
           {text}
         </Text>
+        <View
+          style={style.flatten(
+            ["height-1", "justify-center"],
+            [loading && "opacity-transparent"]
+          )}
+        >
+          <View>{rightIcon}</View>
+        </View>
         {loading ? (
           <View
             style={style.flatten([
