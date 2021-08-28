@@ -278,44 +278,42 @@ export class AccountSetBase<MsgOpts, Queries> {
       onBroadcasted(txHash);
     }
 
-    if (onFulfill) {
-      const txTracer = new TendermintTxTracer(
-        this.chainGetter.getChain(this.chainId).rpc,
-        "/websocket",
-        {
-          wsObject: this.opts.wsObject,
-        }
-      );
-      txTracer.traceTx(txHash).then((tx) => {
-        txTracer.close();
+    const txTracer = new TendermintTxTracer(
+      this.chainGetter.getChain(this.chainId).rpc,
+      "/websocket",
+      {
+        wsObject: this.opts.wsObject,
+      }
+    );
+    txTracer.traceTx(txHash).then((tx) => {
+      txTracer.close();
 
-        runInAction(() => {
-          this._isSendingMsg = false;
-        });
-
-        // After sending tx, the balances is probably changed due to the fee.
-        for (const feeAmount of signDoc.fee.amount) {
-          const bal = this.queries.queryBalances
-            .getQueryBech32Address(this.bech32Address)
-            .balances.find(
-              (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
-            );
-
-          if (bal) {
-            bal.fetch();
-          }
-        }
-
-        if (onFulfill) {
-          // Always add the tx hash data.
-          if (tx && !tx.hash) {
-            tx.hash = Buffer.from(txHash).toString("hex");
-          }
-
-          onFulfill(tx);
-        }
+      runInAction(() => {
+        this._isSendingMsg = false;
       });
-    }
+
+      // After sending tx, the balances is probably changed due to the fee.
+      for (const feeAmount of signDoc.fee.amount) {
+        const bal = this.queries.queryBalances
+          .getQueryBech32Address(this.bech32Address)
+          .balances.find(
+            (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
+          );
+
+        if (bal) {
+          bal.fetch();
+        }
+      }
+
+      if (onFulfill) {
+        // Always add the tx hash data.
+        if (tx && !tx.hash) {
+          tx.hash = Buffer.from(txHash).toString("hex");
+        }
+
+        onFulfill(tx);
+      }
+    });
   }
 
   async sendToken(

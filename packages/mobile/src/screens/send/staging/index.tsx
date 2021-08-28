@@ -111,7 +111,6 @@ export const SendScreen: FunctionComponent = observer(() => {
         loading={account.isSendingMsg === "send"}
         onPress={async () => {
           if (account.isReadyToSendMsgs && txStateIsValid) {
-            // TODO: Notify the result.
             try {
               await account.sendToken(
                 sendConfigs.amountConfig.amount,
@@ -128,6 +127,9 @@ export const SendScreen: FunctionComponent = observer(() => {
                 }
               );
             } catch (e) {
+              if (e?.message === "Request rejected") {
+                return;
+              }
               console.log(e);
               smartNavigation.navigateSmart("Home", {});
             }

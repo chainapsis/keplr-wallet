@@ -15,8 +15,11 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { MessageRequester } from "@keplr-wallet/router";
 import { toGenerator } from "@keplr-wallet/common";
+import { AppChainInfo } from "../../config";
 
-export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
+export class ChainStore extends BaseChainStore<
+  ChainInfoWithEmbed & AppChainInfo
+> {
   @observable
   protected selectedChainId: string;
 

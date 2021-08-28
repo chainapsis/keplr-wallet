@@ -35,6 +35,8 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
 
+  const chainInfo = chainStore.getChain(chainId);
+
   return (
     <PageWithView
       style={style.flatten(["padding-x-42", "items-center", "justify-center"])}
@@ -69,25 +71,32 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           }}
         />
       </View>
-      <Button
-        containerStyle={style.flatten(["margin-top-30"])}
-        size="small"
-        text="View on mintscan"
-        mode="text"
-        rightIcon={
-          <View style={style.flatten(["margin-left-8"])}>
-            <RightArrowIcon
-              color={style.get("color-primary").color}
-              height={12}
-            />
-          </View>
-        }
-        onPress={() => {
-          Linking.openURL(
-            `https://www.mintscan.io/cosmos/txs/${txHash.toUpperCase()}`
-          );
-        }}
-      />
+      {chainInfo.raw.txExplorer ? (
+        <Button
+          containerStyle={style.flatten(["margin-top-30"])}
+          size="small"
+          text={`View on ${chainInfo.raw.txExplorer.name}`}
+          mode="text"
+          rightIcon={
+            <View style={style.flatten(["margin-left-8"])}>
+              <RightArrowIcon
+                color={style.get("color-primary").color}
+                height={12}
+              />
+            </View>
+          }
+          onPress={() => {
+            if (chainInfo.raw.txExplorer) {
+              Linking.openURL(
+                chainInfo.raw.txExplorer.txUrl.replace(
+                  "{txHash}",
+                  txHash.toUpperCase()
+                )
+              );
+            }
+          }}
+        />
+      ) : null}
     </PageWithView>
   );
 });
