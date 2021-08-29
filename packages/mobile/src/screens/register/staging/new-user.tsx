@@ -45,6 +45,11 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         }
         size="large"
         mode="light"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.TorusSignIn", {
+            registerConfig,
+          });
+        }}
       />
       <Text
         style={style.flatten([

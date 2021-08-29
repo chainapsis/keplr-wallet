@@ -85,6 +85,7 @@ import {
   TxPendingResultScreen,
   TxSuccessResultScreen,
 } from "./screens/tx-result";
+import { TorusSignInScreen } from "./screens/register/staging/torus";
 
 const {
   SmartNavigatorProvider,
@@ -110,6 +111,9 @@ const {
       upperScreenName: "Register",
     },
     "Register.NewLedger": {
+      upperScreenName: "Register",
+    },
+    "Register.TorusSignIn": {
       upperScreenName: "Register",
     },
     "Register.End": {
@@ -187,6 +191,9 @@ const {
       registerConfig: RegisterConfig;
     };
     "Register.NewLedger": {
+      registerConfig: RegisterConfig;
+    };
+    "Register.TorusSignIn": {
       registerConfig: RegisterConfig;
     };
     Send: {
@@ -336,6 +343,7 @@ export const RegisterNavigation: FunctionComponent = () => {
         component={RecoverMnemonicScreen}
       />
       <Stack.Screen name="Register.NewLedger" component={NewLedgerScreen} />
+      <Stack.Screen name="Register.TorusSignIn" component={TorusSignInScreen} />
       <Stack.Screen
         options={{
           headerShown: false,
