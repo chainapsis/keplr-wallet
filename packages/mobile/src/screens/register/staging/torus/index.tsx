@@ -83,7 +83,6 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         finalUrl.href,
         "app.keplr.oauth://"
       );
-      console.log(result);
       if (result.type !== "success") {
         throw new Error("Failed to get the oauth");
       }
