@@ -49,12 +49,12 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
         .traceTx(Buffer.from(txHash, "hex"))
         .then((tx) => {
           if (tx.code == null || tx.code === 0) {
-            smartNavigation.pushSmart("TxSuccessResult", {
+            smartNavigation.replaceSmart("TxSuccessResult", {
               chainId,
               txHash,
             });
           } else {
-            smartNavigation.pushSmart("TxFailedResult", {
+            smartNavigation.replaceSmart("TxFailedResult", {
               chainId,
               txHash,
             });

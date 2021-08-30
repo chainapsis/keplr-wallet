@@ -82,6 +82,38 @@ export class SmartNavigator<
       );
     }
   }
+
+  replaceSmart<ScreenName extends keyof Config>(
+    route: ReturnType<typeof useRoute>,
+    navigation: ReturnType<typeof useNavigation>,
+    screenName: ScreenName,
+    params: Params[ScreenName] extends void ? undefined : Params[ScreenName]
+  ): void {
+    const currentScreenName = route.name as string;
+
+    if (!(currentScreenName in this.config)) {
+      throw new Error(
+        `Can't get the current screen info: ${currentScreenName}`
+      );
+    }
+
+    const currentScreen = this.config[currentScreenName];
+    const targetScreen = this.config[screenName];
+
+    if (currentScreen.upperScreenName === targetScreen.upperScreenName) {
+      navigation.dispatch(
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        StackActions.replace(screenName as string, params as object | undefined)
+      );
+    } else {
+      navigation.dispatch(
+        StackActions.replace(targetScreen.upperScreenName, {
+          screen: screenName,
+          params,
+        })
+      );
+    }
+  }
 }
 
 export const createSmartNavigatorProvider = <
@@ -102,6 +134,10 @@ export const createSmartNavigatorProvider = <
       params: Params[ScreenName] extends void ? undefined : Params[ScreenName]
     ) => void;
     pushSmart: <ScreenName extends keyof Config>(
+      screenName: ScreenName,
+      params: Params[ScreenName] extends void ? undefined : Params[ScreenName]
+    ) => void;
+    replaceSmart: <ScreenName extends keyof Config>(
       screenName: ScreenName,
       params: Params[ScreenName] extends void ? undefined : Params[ScreenName]
     ) => void;
@@ -145,6 +181,19 @@ export const createSmartNavigatorProvider = <
             : Params[ScreenName]
         ) => {
           navigator.pushSmart(
+            nativeRoute,
+            nativeNavigation,
+            screenName,
+            params
+          );
+        },
+        replaceSmart: <ScreenName extends keyof Config>(
+          screenName: ScreenName,
+          params: Params[ScreenName] extends void
+            ? undefined
+            : Params[ScreenName]
+        ) => {
+          navigator.replaceSmart(
             nativeRoute,
             nativeNavigation,
             screenName,
