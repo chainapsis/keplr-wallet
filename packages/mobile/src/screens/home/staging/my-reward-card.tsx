@@ -56,7 +56,9 @@ export const MyRewardCard: FunctionComponent<{
             smartNavigation.navigateSmart("Home", {});
           }
         }}
-        icon={<RewardIcon size={44} />}
+        icon={
+          <RewardIcon size={44} color={style.get("color-secondary").color} />
+        }
         buttonText="Claim"
         buttonMode="light"
         buttonContainerStyle={style.flatten(["min-width-72"])}
