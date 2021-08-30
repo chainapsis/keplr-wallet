@@ -86,6 +86,7 @@ import {
   TxSuccessResultScreen,
 } from "./screens/tx-result";
 import { TorusSignInScreen } from "./screens/register/staging/torus";
+import { HeaderAddIcon } from "./components/staging/header/icon";
 
 const {
   SmartNavigatorProvider,
@@ -441,6 +442,8 @@ export const OtherNavigation: FunctionComponent = () => {
 export const SettingStackScreen: FunctionComponent = () => {
   const style = useStyle();
 
+  const navigation = useNavigation();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -454,6 +457,17 @@ export const SettingStackScreen: FunctionComponent = () => {
         name="SettingSelectAccount"
         options={{
           title: "Select Account",
+          headerRight: () => (
+            <HeaderRightButton
+              onPress={() => {
+                navigation.navigate("Register", {
+                  screen: "Register.Intro",
+                });
+              }}
+            >
+              <HeaderAddIcon />
+            </HeaderRightButton>
+          ),
           ...BlurredHeaderScreenOptionsPreset,
         }}
         component={SettingSelectAccountScreen}

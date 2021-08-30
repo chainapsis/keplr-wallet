@@ -1,28 +1,43 @@
 import React, { FunctionComponent } from "react";
-import { RightArrow, SettingItem } from "../components";
+import { KeyStoreItem, RightArrow } from "../components";
 import { useStyle } from "../../../../styles";
 import { useSmartNavigation } from "../../../../navigation";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
+import { View } from "react-native";
+import { getKeyStoreParagraph } from "../screens/select-account";
 
 export const SettingSelectAccountItem: FunctionComponent = observer(() => {
-  const { chainStore, accountStore } = useStore();
+  const { keyRingStore } = useStore();
 
-  const account = accountStore.getAccount(chainStore.current.chainId);
+  const selected = keyRingStore.multiKeyStoreInfo.find(
+    (keyStore) => keyStore.selected
+  )!;
 
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
 
   return (
-    <SettingItem
-      containerStyle={style.flatten(["height-80"])}
-      labelStyle={style.flatten(["h5", "color-text-black-medium"])}
-      label={account.name || "Keplr Account"}
-      right={<RightArrow />}
-      onPress={() => {
-        smartNavigation.navigateSmart("SettingSelectAccount", {});
-      }}
-    />
+    <React.Fragment>
+      <View
+        style={style.flatten(["height-1", "background-color-border-white"])}
+      />
+      <KeyStoreItem
+        containerStyle={style.flatten(["padding-left-10", "padding-right-16"])}
+        defaultRightWalletIconStyle={style.flatten(["margin-right-2"])}
+        label={selected.meta?.name || "Keplr Account"}
+        paragraph={getKeyStoreParagraph(selected)}
+        right={<RightArrow />}
+        topBorder={false}
+        bottomBorder={false}
+        onPress={() => {
+          smartNavigation.navigateSmart("SettingSelectAccount", {});
+        }}
+      />
+      <View
+        style={style.flatten(["height-1", "background-color-border-white"])}
+      />
+    </React.Fragment>
   );
 });
