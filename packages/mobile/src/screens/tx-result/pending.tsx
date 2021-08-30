@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect } from "react";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useIsFocused, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithView } from "../../components/staging/page";
@@ -36,34 +36,41 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
 
+  const isFocused = useIsFocused();
+
   useEffect(() => {
     const txHash = route.params.txHash;
     const chainInfo = chainStore.getChain(chainId);
+    let txTracer: TendermintTxTracer | undefined;
 
-    const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
-    txTracer
-      .traceTx(Buffer.from(txHash, "hex"))
-      .then((tx) => {
-        if (tx.code == null || tx.code === 0) {
-          smartNavigation.pushSmart("TxSuccessResult", {
-            chainId,
-            txHash,
-          });
-        } else {
-          smartNavigation.pushSmart("TxFailedResult", {
-            chainId,
-            txHash,
-          });
-        }
-      })
-      .catch((e) => {
-        console.log(`Failed to trace the tx (${txHash})`, e);
-      });
+    if (isFocused) {
+      txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+      txTracer
+        .traceTx(Buffer.from(txHash, "hex"))
+        .then((tx) => {
+          if (tx.code == null || tx.code === 0) {
+            smartNavigation.pushSmart("TxSuccessResult", {
+              chainId,
+              txHash,
+            });
+          } else {
+            smartNavigation.pushSmart("TxFailedResult", {
+              chainId,
+              txHash,
+            });
+          }
+        })
+        .catch((e) => {
+          console.log(`Failed to trace the tx (${txHash})`, e);
+        });
+    }
 
     return () => {
-      txTracer.close();
+      if (txTracer) {
+        txTracer.close();
+      }
     };
-  }, [chainId, chainStore, route.params.txHash, smartNavigation]);
+  }, [chainId, chainStore, isFocused, route.params.txHash, smartNavigation]);
 
   return (
     <PageWithView
