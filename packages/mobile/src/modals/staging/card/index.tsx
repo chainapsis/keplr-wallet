@@ -13,7 +13,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { useModalState, useModalTransision } from "../base";
 import Animated, { Easing } from "react-native-reanimated";
-import { DefaultAcceleration, DefaultVelocity } from "../base/const";
+import {
+  DefaultAcceleration,
+  DefaultCloseVelocity,
+  DefaultVelocity,
+} from "../base/const";
 
 const useAnimatedValueSet = () => {
   const [state] = useState(() => {
@@ -141,7 +145,7 @@ export const CardModal: FunctionComponent<{
     const closeVelocity =
       modal.closeTransitionVelocity ??
       modal.transitionVelocity ??
-      DefaultVelocity;
+      DefaultCloseVelocity;
     const acceleration = modal.transitionAcceleration ?? DefaultAcceleration;
 
     return Animated.event([

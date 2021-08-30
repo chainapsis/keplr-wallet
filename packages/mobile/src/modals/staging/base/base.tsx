@@ -11,7 +11,12 @@ import { useStyle } from "../../../styles";
 import Animated, { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useModalTransision } from "./transition";
-import { DefaultAcceleration, DefaultVelocity, MinDuration } from "./const";
+import {
+  DefaultAcceleration,
+  DefaultCloseVelocity,
+  DefaultVelocity,
+  MinDuration,
+} from "./const";
 
 export interface ModalBaseProps {
   align?: "top" | "center" | "bottom";
@@ -51,7 +56,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   isOpen,
   transitionVelocity = DefaultVelocity,
   openTransitionVelocity,
-  closeTransitionVelocity,
+  closeTransitionVelocity = DefaultCloseVelocity,
   transitionAcceleration = DefaultAcceleration,
   onOpenTransitionEnd,
   onCloseTransitionEnd,
@@ -394,7 +399,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                   {
                     toValue: transition.startY,
                     duration: transition.duration,
-                    easing: Easing.out(Easing.cubic),
+                    easing: Easing.out(Easing.quad),
                   }
                 ),
                 Animated.cond(
