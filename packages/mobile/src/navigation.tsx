@@ -591,7 +591,7 @@ export const MainTabNavigation: FunctionComponent = () => {
       })}
       tabBarOptions={{
         activeTintColor: style.get("color-primary").color,
-        inactiveTintColor: style.get("color-icon").color,
+        inactiveTintColor: style.get("color-text-black-very-very-low").color,
         style: {
           borderTopWidth: 0.5,
           borderTopColor: style.get("border-color-border-white").borderColor,
