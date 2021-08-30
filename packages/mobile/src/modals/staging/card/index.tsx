@@ -136,6 +136,7 @@ export const CardModal: FunctionComponent<{
   const [startTranslateY] = useState(() => new Animated.Value(0));
   const [openVelocityValue] = useState(() => new Animated.Value(0));
   const [closeVelocityValue] = useState(() => new Animated.Value(0));
+  const [velocityYAcceleration] = useState(() => new Animated.Value(1));
 
   const onGestureEvent = useMemo(() => {
     const openVelocity =
@@ -185,6 +186,19 @@ export const CardModal: FunctionComponent<{
                 Animated.cond(
                   Animated.lessOrEq(modalTransition.translateY, 0),
                   Animated.set(modalTransition.translateY, 0)
+                ),
+                // Set the velocityYAcceleration
+                Animated.set(
+                  velocityYAcceleration,
+                  // velocityYAcceleration should be between 1 ~ 2.
+                  // And, velocityYAcceleration is the velocityY / 1750
+                  Animated.max(
+                    1,
+                    Animated.min(
+                      2,
+                      Animated.divide(Animated.abs(velocityY), 1750)
+                    )
+                  )
                 ),
               ],
               // If the status is not active, and the "isPaused" is not yet changed to the 1,
@@ -242,6 +256,17 @@ export const CardModal: FunctionComponent<{
                           )
                         ),
                         Animated.set(
+                          openVelocityValue,
+                          Animated.multiply(
+                            openVelocityValue,
+                            velocityYAcceleration
+                          )
+                        ),
+                        Animated.debug(
+                          "velocityYAcceleration",
+                          velocityYAcceleration
+                        ),
+                        Animated.set(
                           modalTransition.duration,
                           Animated.multiply(
                             Animated.divide(
@@ -291,6 +316,17 @@ export const CardModal: FunctionComponent<{
                               )
                             )
                           )
+                        ),
+                        Animated.set(
+                          closeVelocityValue,
+                          Animated.multiply(
+                            closeVelocityValue,
+                            velocityYAcceleration
+                          )
+                        ),
+                        Animated.debug(
+                          "velocityYAcceleration",
+                          velocityYAcceleration
                         ),
                         Animated.set(
                           modalTransition.duration,
