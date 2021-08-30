@@ -38,7 +38,6 @@ export const SettingScreen: FunctionComponent = observer(() => {
       {keyRingStore.keyRingType !== "ledger" && (
         <SettingItem
           label={viewPrivateInfoTitle}
-          right={<RightArrow />}
           onPress={() => {
             setIsViewPrivateInfoModalOpen(true);
           }}
