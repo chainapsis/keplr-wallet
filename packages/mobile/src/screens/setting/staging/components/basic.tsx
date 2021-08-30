@@ -12,9 +12,9 @@ export const SettingSectionTitle: FunctionComponent<{
   return (
     <View
       style={style.flatten([
-        "padding-x-12",
-        "padding-top-12",
-        "padding-bottom-2",
+        "padding-x-20",
+        "padding-top-16",
+        "padding-bottom-4",
       ])}
     >
       <Text
@@ -103,7 +103,7 @@ export const SettingItem: FunctionComponent<{
             style.flatten([
               "background-color-white",
               "height-62",
-              "padding-x-16",
+              "padding-x-20",
               "flex-row",
               "items-center",
             ]),
@@ -119,7 +119,7 @@ export const SettingItem: FunctionComponent<{
             style.flatten([
               "background-color-white",
               "height-62",
-              "padding-x-16",
+              "padding-x-20",
               "flex-row",
               "items-center",
             ]),

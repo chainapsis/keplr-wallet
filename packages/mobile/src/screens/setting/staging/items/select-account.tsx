@@ -24,7 +24,7 @@ export const SettingSelectAccountItem: FunctionComponent = observer(() => {
         style={style.flatten(["height-1", "background-color-border-white"])}
       />
       <KeyStoreItem
-        containerStyle={style.flatten(["padding-left-10", "padding-right-16"])}
+        containerStyle={style.flatten(["padding-left-10"])}
         defaultRightWalletIconStyle={style.flatten(["margin-right-2"])}
         label={selected.meta?.name || "Keplr Account"}
         paragraph={getKeyStoreParagraph(selected)}
