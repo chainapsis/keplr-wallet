@@ -10,7 +10,6 @@ import {
   MultiKeyStoreInfoElem,
   MultiKeyStoreInfoWithSelectedElem,
 } from "@keplr-wallet/background";
-import delay from "delay";
 import { View } from "react-native";
 
 const CheckIcon: FunctionComponent<{
@@ -94,10 +93,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
   ) => {
     const index = keyRingStore.multiKeyStoreInfo.indexOf(keyStore);
     if (index >= 0) {
-      loadingScreen.setIsLoading(true);
-      // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread.
-      // So to make sure that the loading state changes, just wait very short time.
-      await delay(10);
+      await loadingScreen.openAsync();
       await keyRingStore.changeKeyRing(index);
       loadingScreen.setIsLoading(false);
     }
