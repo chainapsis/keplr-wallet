@@ -254,6 +254,7 @@ export const CardModal: FunctionComponent<{
                       ],
                       Animated.set(modalTransition.duration, 0)
                     ),
+                    Animated.set(modalTransition.durationSetOnExternal, 1),
                     Animated.set(modalTransition.isOpen, 1),
                   ],
                   [
@@ -309,6 +310,7 @@ export const CardModal: FunctionComponent<{
                       ],
                       Animated.set(modalTransition.duration, 0)
                     ),
+                    Animated.set(modalTransition.durationSetOnExternal, 1),
                     Animated.set(modalTransition.isOpen, 0),
                     Animated.call([], () => {
                       modal.close();
