@@ -11,14 +11,14 @@ export const OpenDrawerIcon: FunctionComponent<{
         stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="2"
+        strokeWidth="2.5"
         d="M12.833 5.833l7.875 7.875-7.875 7.875"
       />
       <Path
         stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="2"
+        strokeWidth="2.5"
         d="M5.833 5.833l7.875 7.875-7.875 7.875"
       />
     </Svg>
