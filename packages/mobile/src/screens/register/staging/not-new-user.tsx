@@ -1,7 +1,10 @@
 import React, { FunctionComponent } from "react";
+import { useHeaderHeight } from "@react-navigation/stack";
 import { PageWithScrollView } from "../../../components/staging/page";
+import { KeplrLogo } from "../../../components/staging/svg/keplr-logo";
+import { GoogleIcon } from "../../../components/staging/icon/google";
 import { useStyle } from "../../../styles";
-import { View, Text, Image } from "react-native";
+import { View, Text, Dimensions, Platform } from "react-native";
 import { Button } from "../../../components/staging/button";
 import { useSmartNavigation } from "../../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
@@ -17,31 +20,32 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
 
   const registerConfig = useRegisterConfig(keyRingStore, []);
 
+  const headerHeight = useHeaderHeight();
+
   return (
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-42"])}
+      style={{
+        ...style.flatten(["padding-x-42"]),
+        paddingTop:
+          Dimensions.get("window").height * 0.22 -
+          (Platform.OS === "android" ? headerHeight : 44),
+        paddingBottom: Dimensions.get("window").height * 0.11,
+      }}
     >
-      <View style={style.flatten(["flex", "items-center"])}>
-        <Image
-          style={style.flatten([
-            "width-292",
-            "height-90",
-            "margin-top-106",
-            "margin-bottom-288",
-          ])}
-          source={require("../../../assets/logo/keplr-logo-default.png")}
-        />
+      <View
+        style={style.flatten(["flex-grow-1", "items-center", "padding-x-18"])}
+      >
+        <KeplrLogo width="100%" />
       </View>
 
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
         text="Sign In With Google"
         icon={
-          <Image
-            style={style.flatten(["width-20", "height-20", "margin-right-10"])}
-            source={require("../../../assets/svg/icons8-google.png")}
-          />
+          <View style={style.flatten(["margin-right-6"])}>
+            <GoogleIcon />
+          </View>
         }
         size="large"
         mode="light"
@@ -71,8 +75,6 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
           });
         }}
       />
-
-      <View style={style.flatten(["flex-1"])} />
     </PageWithScrollView>
   );
 });
