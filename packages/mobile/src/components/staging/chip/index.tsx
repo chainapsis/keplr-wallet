@@ -16,7 +16,7 @@ export const Chip: FunctionComponent<{
       case "light":
         return `background-color-chip-light-${color}`;
       case "outline":
-        return "background-color-white";
+        return "background-color-transparent";
     }
   })();
 
