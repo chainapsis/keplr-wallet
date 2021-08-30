@@ -93,7 +93,12 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
 
       const redirectedUrl = new URL(result.url);
       const paramsString = redirectedUrl.hash;
-      const searchParams = new URLSearchParams(paramsString);
+      const searchParams = new URLSearchParams(
+        paramsString.startsWith("#") ? paramsString.slice(1) : paramsString
+      );
+      if (state !== searchParams.get("state")) {
+        throw new Error("State doesn't match");
+      }
       const idToken = searchParams.get("id_token");
       const accessToken = searchParams.get("access_token");
 
