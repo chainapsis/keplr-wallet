@@ -1,9 +1,10 @@
 import React, { FunctionComponent } from "react";
-import { StyleSheet, Text, ViewStyle } from "react-native";
+import { StyleSheet, Text, ViewStyle, View } from "react-native";
 import { useStyle } from "../../../styles";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import Clipboard from "expo-clipboard";
 import { RectButton } from "../rect-button";
+import { CopyIcon } from "../icon";
 
 export const AddressCopyable: FunctionComponent<{
   style?: ViewStyle;
@@ -16,10 +17,13 @@ export const AddressCopyable: FunctionComponent<{
     <RectButton
       style={StyleSheet.flatten([
         style.flatten([
-          "padding-x-12",
+          "padding-left-12",
+          "padding-right-8",
           "padding-y-2",
           "border-radius-12",
           "background-color-primary-10",
+          "flex-row",
+          "items-center",
         ]),
         propStyle,
       ])}
@@ -33,6 +37,9 @@ export const AddressCopyable: FunctionComponent<{
       <Text style={style.flatten(["subtitle3", "color-primary-400"])}>
         {Bech32Address.shortenAddress(address, maxCharacters)}
       </Text>
+      <View style={style.flatten(["margin-left-4"])}>
+        <CopyIcon color={style.get("color-primary").color} size={18} />
+      </View>
     </RectButton>
   );
 };
