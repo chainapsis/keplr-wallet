@@ -7,18 +7,15 @@ import { SettingFiatCurrencyItem } from "./items/fiat-currency";
 import { SettingBiometricLockItem } from "./items/biometric-lock";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { ViewPrivateInfoModal } from "../../../modals/staging/view-private-info";
+import { PasswordModal } from "../../../modals/staging/password";
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const { keychainStore, keyRingStore } = useStore();
-  const [
-    isViewPrivateInfoModalOpen,
-    setIsViewPrivateInfoModalOpen,
-  ] = React.useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = React.useState(false);
 
   const smartNavigation = useSmartNavigation();
 
-  const viewPrivateInfoTitle = `View ${
+  const passwordModalTitle = `View ${
     keyRingStore.keyRingType === "mnemonic" ? "Mnemonic Seed" : "Private key"
   }`;
 
@@ -37,19 +34,20 @@ export const SettingScreen: FunctionComponent = observer(() => {
       <SettingSectionTitle title="General" />
       {keyRingStore.keyRingType !== "ledger" && (
         <SettingItem
-          label={viewPrivateInfoTitle}
+          label={passwordModalTitle}
           onPress={() => {
-            setIsViewPrivateInfoModalOpen(true);
+            setIsPasswordModalOpen(true);
           }}
         />
       )}
       {keychainStore.isBiometrySupported || keychainStore.isBiometryOn ? (
         <SettingBiometricLockItem />
       ) : null}
-      <ViewPrivateInfoModal
-        isOpen={isViewPrivateInfoModalOpen}
-        close={() => setIsViewPrivateInfoModalOpen(false)}
-        title={viewPrivateInfoTitle}
+      <PasswordModal
+        isOpen={isPasswordModalOpen}
+        close={() => setIsPasswordModalOpen(false)}
+        title={passwordModalTitle}
+        smartNavigation={smartNavigation}
       />
     </PageWithScrollView>
   );
