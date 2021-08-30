@@ -11,13 +11,14 @@ import {
 } from "@keplr-wallet/hooks";
 import { AsyncKVStore } from "../../../../../common";
 import { useStore } from "../../../../../stores";
-import { PlusIcon, TrashCanIcon } from "../../../../../components/staging/icon";
+import { TrashCanIcon } from "../../../../../components/staging/icon";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RectButton } from "../../../../../components/staging/rect-button";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { HeaderRightButton } from "../../../../../components/staging/header";
 import { AddressDeleteModal } from "../../../../../modals/staging/address";
+import { HeaderAddIcon } from "../../../../../components/staging/header/icon";
 
 const addressBookItemComponent = {
   inTransaction: RectButton,
@@ -85,10 +86,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
             });
           }}
         >
-          <PlusIcon
-            size={20}
-            color={style.get("color-text-black-medium").color}
-          />
+          <HeaderAddIcon />
         </HeaderRightButton>
       ),
     });
