@@ -11,7 +11,7 @@ import { useStyle } from "../../../styles";
 import Animated, { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useModalTransision } from "./transition";
-import { DefaultVelocity, MinDuration } from "./const";
+import { DefaultAcceleration, DefaultVelocity, MinDuration } from "./const";
 
 export interface ModalBaseProps {
   align?: "top" | "center" | "bottom";
@@ -19,6 +19,8 @@ export interface ModalBaseProps {
   transitionVelocity?: number;
   openTransitionVelocity?: number;
   closeTransitionVelocity?: number;
+  // Acceleration based on 100
+  transitionAcceleration?: number;
   onOpenTransitionEnd?: () => void;
   onCloseTransitionEnd?: () => void;
 
@@ -50,6 +52,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   transitionVelocity = DefaultVelocity,
   openTransitionVelocity,
   closeTransitionVelocity,
+  transitionAcceleration = DefaultAcceleration,
   onOpenTransitionEnd,
   onCloseTransitionEnd,
   containerStyle,
@@ -148,6 +151,9 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
     ]);
   }, [transition.isInitialized, transition.startY]);
 
+  const [openVelocityValue] = useState(() => new Animated.Value(0));
+  const [closeVelocityValue] = useState(() => new Animated.Value(0));
+
   const translateY = useMemo(() => {
     const openVelocity = openTransitionVelocity ?? transitionVelocity;
     const closeVelocity = closeTransitionVelocity ?? transitionVelocity;
@@ -192,19 +198,34 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
               // Set the duration
               Animated.cond(
                 Animated.greaterThan(openVelocity, 0),
-                Animated.set(
-                  transition.duration,
-                  Animated.max(
-                    Animated.multiply(
-                      Animated.divide(
-                        Animated.abs(transition.startY),
-                        openVelocity
+                [
+                  Animated.set(
+                    openVelocityValue,
+                    Animated.max(
+                      openVelocity,
+                      Animated.multiply(
+                        openVelocity,
+                        Animated.pow(
+                          transitionAcceleration,
+                          Animated.divide(Animated.abs(transition.startY), 100)
+                        )
+                      )
+                    )
+                  ),
+                  Animated.set(
+                    transition.duration,
+                    Animated.max(
+                      Animated.multiply(
+                        Animated.divide(
+                          Animated.abs(transition.startY),
+                          openVelocityValue
+                        ),
+                        1000
                       ),
-                      1000
-                    ),
-                    MinDuration
-                  )
-                ),
+                      MinDuration
+                    )
+                  ),
+                ],
                 Animated.set(transition.duration, 0)
               ),
               Animated.debug(
@@ -232,21 +253,47 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
               // Set the duration
               Animated.cond(
                 Animated.greaterThan(closeVelocity, 0),
-                Animated.set(
-                  transition.duration,
-                  Animated.max(
-                    Animated.multiply(
-                      Animated.divide(
-                        Animated.abs(
-                          Animated.sub(transition.translateY, transition.startY)
+                [
+                  Animated.set(
+                    closeVelocityValue,
+                    Animated.max(
+                      closeVelocity,
+                      Animated.multiply(
+                        closeVelocity,
+                        Animated.pow(
+                          transitionAcceleration,
+                          Animated.divide(
+                            Animated.abs(
+                              Animated.sub(
+                                transition.translateY,
+                                transition.startY
+                              )
+                            ),
+                            100
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  Animated.set(
+                    transition.duration,
+                    Animated.max(
+                      Animated.multiply(
+                        Animated.divide(
+                          Animated.abs(
+                            Animated.sub(
+                              transition.translateY,
+                              transition.startY
+                            )
+                          ),
+                          closeVelocityValue
                         ),
-                        closeVelocity
+                        1000
                       ),
-                      1000
-                    ),
-                    MinDuration
-                  )
-                ),
+                      MinDuration
+                    )
+                  ),
+                ],
                 Animated.set(transition.duration, 0)
               ),
               Animated.debug(
@@ -424,6 +471,9 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
     transition.frameTime,
     transition.duration,
     previousDiff,
+    openVelocityValue,
+    transitionAcceleration,
+    closeVelocityValue,
     openCallbackOnce,
     closeCallbackOnce,
   ]);

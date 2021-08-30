@@ -197,7 +197,6 @@ export const SignModal: FunctionComponent<{
     );
   }),
   {
-    transitionVelocity: 1500,
     disableSafeArea: true,
   }
 );

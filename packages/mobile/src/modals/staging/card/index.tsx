@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { useModalState, useModalTransision } from "../base";
 import Animated, { Easing } from "react-native-reanimated";
-import { DefaultVelocity } from "../base/const";
+import { DefaultAcceleration, DefaultVelocity } from "../base/const";
 
 const useAnimatedValueSet = () => {
   const [state] = useState(() => {
@@ -130,6 +130,8 @@ export const CardModal: FunctionComponent<{
   ]);
 
   const [startTranslateY] = useState(() => new Animated.Value(0));
+  const [openVelocityValue] = useState(() => new Animated.Value(0));
+  const [closeVelocityValue] = useState(() => new Animated.Value(0));
 
   const onGestureEvent = useMemo(() => {
     const openVelocity =
@@ -140,6 +142,7 @@ export const CardModal: FunctionComponent<{
       modal.closeTransitionVelocity ??
       modal.transitionVelocity ??
       DefaultVelocity;
+    const acceleration = modal.transitionAcceleration ?? DefaultAcceleration;
 
     return Animated.event([
       {
@@ -217,16 +220,34 @@ export const CardModal: FunctionComponent<{
                     // Set the duration
                     Animated.cond(
                       Animated.greaterThan(openVelocity, 0),
-                      Animated.set(
-                        modalTransition.duration,
-                        Animated.multiply(
-                          Animated.divide(
-                            Animated.abs(modalTransition.translateY),
-                            openVelocity
-                          ),
-                          1000
-                        )
-                      ),
+                      [
+                        Animated.set(
+                          openVelocityValue,
+                          Animated.max(
+                            openVelocity,
+                            Animated.multiply(
+                              openVelocity,
+                              Animated.pow(
+                                acceleration,
+                                Animated.divide(
+                                  Animated.abs(modalTransition.translateY),
+                                  100
+                                )
+                              )
+                            )
+                          )
+                        ),
+                        Animated.set(
+                          modalTransition.duration,
+                          Animated.multiply(
+                            Animated.divide(
+                              Animated.abs(modalTransition.translateY),
+                              openVelocityValue
+                            ),
+                            1000
+                          )
+                        ),
+                      ],
                       Animated.set(modalTransition.duration, 0)
                     ),
                     Animated.set(modalTransition.isOpen, 1),
@@ -244,21 +265,44 @@ export const CardModal: FunctionComponent<{
                     // Set the duration
                     Animated.cond(
                       Animated.greaterThan(closeVelocity, 0),
-                      Animated.set(
-                        modalTransition.duration,
-                        Animated.multiply(
-                          Animated.divide(
-                            Animated.abs(
-                              Animated.sub(
-                                modalTransition.translateY,
-                                modalTransition.startY
+                      [
+                        Animated.set(
+                          closeVelocityValue,
+                          Animated.max(
+                            closeVelocity,
+                            Animated.multiply(
+                              closeVelocity,
+                              Animated.pow(
+                                acceleration,
+                                Animated.divide(
+                                  Animated.abs(
+                                    Animated.sub(
+                                      modalTransition.translateY,
+                                      modalTransition.startY
+                                    )
+                                  ),
+                                  100
+                                )
                               )
+                            )
+                          )
+                        ),
+                        Animated.set(
+                          modalTransition.duration,
+                          Animated.multiply(
+                            Animated.divide(
+                              Animated.abs(
+                                Animated.sub(
+                                  modalTransition.translateY,
+                                  modalTransition.startY
+                                )
+                              ),
+                              closeVelocityValue
                             ),
-                            closeVelocity
-                          ),
-                          1000
-                        )
-                      ),
+                            1000
+                          )
+                        ),
+                      ],
                       Animated.set(modalTransition.duration, 0)
                     ),
                     Animated.set(modalTransition.isOpen, 0),
