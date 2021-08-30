@@ -2,16 +2,16 @@ import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
 import { PageWithScrollView } from "../../../../../components/staging/page";
-import { SettingItem, SettingSectionTitle } from "../../components";
+import { KeyStoreItem, KeyStoreSectionTitle } from "../../components";
 import Svg, { Path } from "react-native-svg";
-import FeatherIcon from "react-native-vector-icons/Feather";
-import { Text, View } from "react-native";
 import { useStyle } from "../../../../../styles";
-import { useSmartNavigation } from "../../../../../navigation";
 import { useLoadingScreen } from "../../../../../providers/loading-screen";
-import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
-import delay from "delay";
-import { RectButton } from "../../../../../components/staging/rect-button";
+import {
+  MultiKeyStoreInfoElem,
+  MultiKeyStoreInfoWithSelectedElem,
+} from "@keplr-wallet/background";
+import { View } from "react-native";
+import { useSmartNavigation } from "../../../../../navigation";
 
 const CheckIcon: FunctionComponent<{
   color: string;
@@ -35,6 +35,26 @@ const CheckIcon: FunctionComponent<{
       />
     </Svg>
   );
+};
+
+export const getKeyStoreParagraph = (keyStore: MultiKeyStoreInfoElem) => {
+  const bip44HDPath = keyStore.bip44HDPath
+    ? keyStore.bip44HDPath
+    : {
+        account: 0,
+        change: 0,
+        addressIndex: 0,
+      };
+
+  return keyStore.type === "ledger"
+    ? `Ledger - m/44'/118'/${bip44HDPath.account}'${
+        bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
+          ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
+          : ""
+      }`
+    : keyStore.meta?.email
+    ? keyStore.meta.email
+    : undefined;
 };
 
 export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
@@ -76,139 +96,59 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
   ) => {
     const index = keyRingStore.multiKeyStoreInfo.indexOf(keyStore);
     if (index >= 0) {
-      loadingScreen.setIsLoading(true);
-      // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread.
-      // So to make sure that the loading state changes, just wait very short time.
-      await delay(10);
+      await loadingScreen.openAsync();
       await keyRingStore.changeKeyRing(index);
       loadingScreen.setIsLoading(false);
+
+      smartNavigation.navigateSmart("Home", {});
     }
+  };
+
+  const renderKeyStores = (
+    title: string,
+    keyStores: MultiKeyStoreInfoWithSelectedElem[]
+  ) => {
+    return (
+      <React.Fragment>
+        {keyStores.length > 0 ? (
+          <React.Fragment>
+            <KeyStoreSectionTitle title={title} />
+            {keyStores.map((keyStore, i) => {
+              return (
+                <KeyStoreItem
+                  key={i.toString()}
+                  label={keyStore.meta?.name || "Keplr Account"}
+                  paragraph={getKeyStoreParagraph(keyStore)}
+                  topBorder={i === 0}
+                  bottomBorder={keyStores.length - 1 !== i}
+                  right={
+                    keyStore.selected ? (
+                      <CheckIcon
+                        color={style.get("color-primary").color}
+                        height={16}
+                      />
+                    ) : undefined
+                  }
+                  onPress={async () => {
+                    await selectKeyStore(keyStore);
+                  }}
+                />
+              );
+            })}
+          </React.Fragment>
+        ) : null}
+      </React.Fragment>
+    );
   };
 
   return (
     <PageWithScrollView>
-      <View style={style.flatten(["background-color-white"])}>
-        {torusKeyStores.length > 0 ? (
-          <React.Fragment>
-            <SettingSectionTitle title={"torus".toUpperCase()} />
-            {torusKeyStores.map((keyStore, i) => {
-              return (
-                <SettingItem
-                  key={i.toString()}
-                  label={keyStore.meta?.name || "Keplr Account"}
-                  topBorder={i === 0}
-                  right={
-                    keyStore.selected ? (
-                      <CheckIcon
-                        color={style.get("color-primary").color}
-                        height={13}
-                      />
-                    ) : undefined
-                  }
-                  onPress={async () => {
-                    await selectKeyStore(keyStore);
-                  }}
-                />
-              );
-            })}
-          </React.Fragment>
-        ) : null}
-        {mnemonicKeyStores.length > 0 ? (
-          <React.Fragment>
-            <SettingSectionTitle title={"mnemonic seed".toUpperCase()} />
-            {mnemonicKeyStores.map((keyStore, i) => {
-              return (
-                <SettingItem
-                  key={i.toString()}
-                  label={keyStore.meta?.name || "Keplr Account"}
-                  topBorder={i === 0}
-                  right={
-                    keyStore.selected ? (
-                      <CheckIcon
-                        color={style.get("color-primary").color}
-                        height={13}
-                      />
-                    ) : undefined
-                  }
-                  onPress={async () => {
-                    await selectKeyStore(keyStore);
-                  }}
-                />
-              );
-            })}
-          </React.Fragment>
-        ) : null}
-        {ledgerKeyStores.length > 0 ? (
-          <React.Fragment>
-            <SettingSectionTitle title={"ledger".toUpperCase()} />
-            {ledgerKeyStores.map((keyStore, i) => {
-              return (
-                <SettingItem
-                  key={i.toString()}
-                  label={keyStore.meta?.name || "Keplr Account"}
-                  topBorder={i === 0}
-                  right={
-                    keyStore.selected ? (
-                      <CheckIcon
-                        color={style.get("color-primary").color}
-                        height={13}
-                      />
-                    ) : undefined
-                  }
-                  onPress={async () => {
-                    await selectKeyStore(keyStore);
-                  }}
-                />
-              );
-            })}
-          </React.Fragment>
-        ) : null}
-        {privateKeyStores.length > 0 ? (
-          <React.Fragment>
-            <SettingSectionTitle title={"private key".toUpperCase()} />
-            {privateKeyStores.map((keyStore, i) => {
-              return (
-                <SettingItem
-                  key={i.toString()}
-                  label={keyStore.meta?.name || "Keplr Account"}
-                  topBorder={i === 0}
-                  right={
-                    keyStore.selected ? (
-                      <CheckIcon
-                        color={style.get("color-primary").color}
-                        height={13}
-                      />
-                    ) : undefined
-                  }
-                  onPress={async () => {
-                    await selectKeyStore(keyStore);
-                  }}
-                />
-              );
-            })}
-          </React.Fragment>
-        ) : null}
-        <RectButton
-          style={style.flatten(["height-80", "justify-center", "padding-x-16"])}
-          onPress={() => {
-            smartNavigation.navigateSmart("Register.Intro", {});
-          }}
-        >
-          <View style={style.flatten(["flex-row"])}>
-            <Text
-              style={style.flatten(["h4", "color-text-black-very-very-low"])}
-            >
-              Add Account
-            </Text>
-            <View style={style.flatten(["flex-1"])} />
-            <FeatherIcon
-              name="plus"
-              color={style.get("color-text-black-very-very-low").color}
-              size={24}
-            />
-          </View>
-        </RectButton>
-      </View>
+      {renderKeyStores("torus", torusKeyStores)}
+      {renderKeyStores("mnemonic seed", mnemonicKeyStores)}
+      {renderKeyStores("ledger", ledgerKeyStores)}
+      {renderKeyStores("private key", privateKeyStores)}
+      {/* Margin bottom for last */}
+      <View style={style.get("height-16")} />
     </PageWithScrollView>
   );
 });

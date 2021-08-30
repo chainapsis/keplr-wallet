@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { PageWithScrollView } from "../../../components/staging/page";
 import { useStyle } from "../../../styles";
-import { View } from "react-native";
+import { View, Image } from "react-native";
 import { Button } from "../../../components/staging/button";
 import { useSmartNavigation } from "../../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
@@ -22,9 +22,17 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-42"])}
     >
-      <View style={style.flatten(["flex-1"])} />
-      {/* TODO: Add the logo here */}
-      <View style={style.flatten(["flex-1"])} />
+      <View style={style.flatten(["flex", "items-center"])}>
+        <Image
+          style={style.flatten([
+            "width-292",
+            "height-90",
+            "margin-top-150",
+            "margin-bottom-288",
+          ])}
+          source={require("../../../assets/logo/keplr-logo-default.png")}
+        />
+      </View>
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
         text="I'm A New User"

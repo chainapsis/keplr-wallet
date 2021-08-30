@@ -5,7 +5,6 @@ import { PageWithView } from "../../components/staging/page";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSmartNavigation } from "../../navigation";
-import { autorun } from "mobx";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../components/staging/button";
 import Svg, { Path } from "react-native-svg";
@@ -62,24 +61,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
               try {
                 if (data.startsWith("wc:")) {
-                  await walletConnectStore.pair(data);
-
-                  const beforeLength =
-                    walletConnectStore.pendingProposalApprovals.length;
-                  // Wait until the pending proposal is actually added.
-                  await new Promise<void>((resolve) => {
-                    const disposer = autorun(() => {
-                      if (
-                        beforeLength !==
-                        walletConnectStore.pendingProposalApprovals.length
-                      ) {
-                        resolve();
-                        if (disposer) {
-                          disposer();
-                        }
-                      }
-                    });
-                  });
+                  await walletConnectStore.initClient(data);
 
                   smartNavigation.navigateSmart("Home", {});
                 } else {

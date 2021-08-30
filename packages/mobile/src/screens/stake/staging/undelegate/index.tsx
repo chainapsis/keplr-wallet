@@ -19,6 +19,8 @@ import {
 } from "../../../../components/staging/card";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 import { ValidatorThumbnail } from "../../../../components/staging/thumbnail";
+import { Buffer } from "buffer";
+import { useSmartNavigation } from "../../../../navigation";
 
 export const UndelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -38,6 +40,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
   const style = useStyle();
+  const smartNavigation = useSmartNavigation();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -159,15 +162,26 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
         loading={account.isSendingMsg === "undelegate"}
         onPress={async () => {
           if (account.isReadyToSendMsgs && txStateIsValid) {
-            // TODO: Notify the result.
             try {
               await account.cosmos.sendUndelegateMsg(
                 sendConfigs.amountConfig.amount,
                 sendConfigs.recipientConfig.recipient,
-                sendConfigs.memoConfig.memo
+                sendConfigs.memoConfig.memo,
+                {},
+                {
+                  onBroadcasted: (txHash) => {
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
+                    });
+                  },
+                }
               );
             } catch (e) {
+              if (e?.message === "Request rejected") {
+                return;
+              }
               console.log(e);
+              smartNavigation.navigateSmart("Home", {});
             }
           }
         }}

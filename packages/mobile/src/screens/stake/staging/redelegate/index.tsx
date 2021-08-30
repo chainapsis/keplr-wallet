@@ -195,16 +195,27 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
         loading={account.isSendingMsg === "redelegate"}
         onPress={async () => {
           if (account.isReadyToSendMsgs && txStateIsValid) {
-            // TODO: Notify the result.
             try {
               await account.cosmos.sendBeginRedelegateMsg(
                 sendConfigs.amountConfig.amount,
                 sendConfigs.srcValidatorAddress,
                 sendConfigs.dstValidatorAddress,
-                sendConfigs.memoConfig.memo
+                sendConfigs.memoConfig.memo,
+                {},
+                {
+                  onBroadcasted: (txHash) => {
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
+                    });
+                  },
+                }
               );
             } catch (e) {
+              if (e?.message === "Request rejected") {
+                return;
+              }
               console.log(e);
+              smartNavigation.navigateSmart("Home", {});
             }
           }
         }}

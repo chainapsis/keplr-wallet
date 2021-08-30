@@ -61,7 +61,8 @@ export class RootStore {
 
     this.chainStore = new ChainStore(
       EmbedChainInfos,
-      new RNMessageRequesterInternal()
+      new RNMessageRequesterInternal(),
+      new AsyncKVStore("store_chains")
     );
 
     this.keyRingStore = new KeyRingStore(
@@ -191,13 +192,15 @@ export class RootStore {
     router.listen(APP_PORT);
 
     this.keychainStore = new KeychainStore(
-      new AsyncKVStore("keychain"),
+      new AsyncKVStore("store_keychain"),
       this.keyRingStore
     );
 
     this.walletConnectStore = new WalletConnectStore(
+      new AsyncKVStore("store_wallet_connect"),
       this.chainStore,
-      this.accountStore
+      this.accountStore,
+      new Keplr("", new RNMessageRequesterInternal())
     );
   }
 }

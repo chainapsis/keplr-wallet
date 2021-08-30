@@ -101,7 +101,12 @@ export class CosmosAccount {
     recipient: string,
     memo: string,
     stdFee: Partial<StdFee>,
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ): Promise<boolean> {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
@@ -135,7 +140,7 @@ export class CosmosAccount {
             gas: stdFee.gas ?? this.base.msgOpts.send.native.gas.toString(),
           },
           memo,
-          (tx) => {
+          this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
               const queryBalance = this.queries.queryBalances
@@ -150,11 +155,7 @@ export class CosmosAccount {
                 queryBalance.fetch();
               }
             }
-
-            if (onFulfill) {
-              onFulfill(tx);
-            }
-          }
+          })
         );
         return true;
     }
@@ -173,7 +174,12 @@ export class CosmosAccount {
     recipient: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
       throw new Error("Only native token can be sent via IBC");
@@ -235,7 +241,7 @@ export class CosmosAccount {
         gas: stdFee.gas ?? this.base.msgOpts.ibcTransfer.gas.toString(),
       },
       memo,
-      (tx) => {
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to send token, refresh the balance.
           const queryBalance = this.queries.queryBalances
@@ -250,11 +256,7 @@ export class CosmosAccount {
             queryBalance.fetch();
           }
         }
-
-        if (onFulfill) {
-          onFulfill(tx);
-        }
-      }
+      })
     );
   }
 
@@ -271,7 +273,12 @@ export class CosmosAccount {
     validatorAddress: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
 
@@ -298,7 +305,7 @@ export class CosmosAccount {
         gas: stdFee.gas ?? this.base.msgOpts.delegate.gas.toString(),
       },
       memo,
-      (tx) => {
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to delegate, refresh the validators and delegations, rewards.
           this.queries.cosmos.queryValidators
@@ -311,11 +318,7 @@ export class CosmosAccount {
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
         }
-
-        if (onFulfill) {
-          onFulfill(tx);
-        }
-      }
+      })
     );
   }
 
@@ -332,7 +335,12 @@ export class CosmosAccount {
     validatorAddress: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
 
@@ -359,7 +367,7 @@ export class CosmosAccount {
         gas: stdFee.gas ?? this.base.msgOpts.undelegate.gas.toString(),
       },
       memo,
-      (tx) => {
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to unbond, refresh the validators and delegations, unbonding delegations, rewards.
           this.queries.cosmos.queryValidators
@@ -375,11 +383,7 @@ export class CosmosAccount {
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
         }
-
-        if (onFulfill) {
-          onFulfill(tx);
-        }
-      }
+      })
     );
   }
 
@@ -398,7 +402,12 @@ export class CosmosAccount {
     dstValidatorAddress: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
 
@@ -426,7 +435,7 @@ export class CosmosAccount {
         gas: stdFee.gas ?? this.base.msgOpts.redelegate.gas.toString(),
       },
       memo,
-      (tx) => {
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to redelegate, refresh the validators and delegations, rewards.
           this.queries.cosmos.queryValidators
@@ -439,11 +448,7 @@ export class CosmosAccount {
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
         }
-
-        if (onFulfill) {
-          onFulfill(tx);
-        }
-      }
+      })
     );
   }
 
@@ -451,7 +456,12 @@ export class CosmosAccount {
     validatorAddresses: string[],
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     const msgs = validatorAddresses.map((validatorAddress) => {
       return {
@@ -475,18 +485,14 @@ export class CosmosAccount {
           ).toString(),
       },
       memo,
-      (tx) => {
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to withdraw rewards, refresh rewards.
           this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
         }
-
-        if (onFulfill) {
-          onFulfill(tx);
-        }
-      }
+      })
     );
   }
 
@@ -495,7 +501,12 @@ export class CosmosAccount {
     option: "Yes" | "No" | "Abstain" | "NoWithVeto",
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     const voteOption = (() => {
       if (
@@ -533,7 +544,7 @@ export class CosmosAccount {
         gas: stdFee.gas ?? this.base.msgOpts.govVote.gas.toString(),
       },
       memo,
-      (tx) => {
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to vote, refresh the proposal.
           const proposal = this.queries.cosmos.queryGovernance.proposals.find(
@@ -543,12 +554,49 @@ export class CosmosAccount {
             proposal.fetch();
           }
         }
-
-        if (onFulfill) {
-          onFulfill(tx);
-        }
-      }
+      })
     );
+  }
+
+  protected txEventsWithPreOnFulfill(
+    onTxEvents:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
+      | undefined,
+    preOnFulfill?: (tx: any) => void
+  ):
+    | {
+        onBroadcasted?: (txHash: Uint8Array) => void;
+        onFulfill?: (tx: any) => void;
+      }
+    | undefined {
+    if (!onTxEvents) {
+      return;
+    }
+
+    const onBroadcasted =
+      typeof onTxEvents === "function" ? undefined : onTxEvents.onBroadcasted;
+    const onFulfill =
+      typeof onTxEvents === "function" ? onTxEvents : onTxEvents.onFulfill;
+
+    return {
+      onBroadcasted,
+      onFulfill:
+        onFulfill || preOnFulfill
+          ? (tx: any) => {
+              if (preOnFulfill) {
+                preOnFulfill(tx);
+              }
+
+              if (onFulfill) {
+                onFulfill(tx);
+              }
+            }
+          : undefined,
+    };
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & HasCosmosQueries> {

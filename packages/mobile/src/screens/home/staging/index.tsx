@@ -33,10 +33,22 @@ export const HomeScreen: FunctionComponent = observer(() => {
     // Because the components share the states related to the queries,
     // fetching new query responses here would make query responses on all other components also refresh.
 
-    const queryStakable = queries.queryBalances.getQueryBech32Address(
-      account.bech32Address
-    ).stakable;
-    await queryStakable.waitFreshResponse();
+    await Promise.all([
+      ...queries.queryBalances
+        .getQueryBech32Address(account.bech32Address)
+        .balances.map((bal) => {
+          return bal.waitFreshResponse();
+        }),
+      queries.cosmos.queryRewards
+        .getQueryBech32Address(account.bech32Address)
+        .waitFreshResponse(),
+      queries.cosmos.queryDelegations
+        .getQueryBech32Address(account.bech32Address)
+        .waitFreshResponse(),
+      queries.cosmos.queryUnbondingDelegations
+        .getQueryBech32Address(account.bech32Address)
+        .waitFreshResponse(),
+    ]);
 
     setRefreshing(false);
   }, [accountStore, chainStore, queriesStore]);

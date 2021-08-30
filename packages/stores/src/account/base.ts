@@ -80,7 +80,12 @@ export class AccountSetBase<MsgOpts, Queries> {
     recipient: string,
     memo: string,
     stdFee: Partial<StdFee>,
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) => Promise<boolean>)[] = [];
 
   constructor(
@@ -117,7 +122,12 @@ export class AccountSetBase<MsgOpts, Queries> {
       recipient: string,
       memo: string,
       stdFee: Partial<StdFee>,
-      onFulfill?: (tx: any) => void
+      onTxEvents?:
+        | ((tx: any) => void)
+        | {
+            onBroadcasted?: (txHash: Uint8Array) => void;
+            onFulfill?: (tx: any) => void;
+          }
     ) => Promise<boolean>
   ) {
     this.sendTokenFns.push(fn);
@@ -218,7 +228,12 @@ export class AccountSetBase<MsgOpts, Queries> {
     msgs: Msg[] | (() => Promise<Msg[]> | Msg[]),
     fee: StdFee,
     memo: string = "",
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     runInAction(() => {
       this._isSendingMsg = type;
@@ -245,6 +260,22 @@ export class AccountSetBase<MsgOpts, Queries> {
       });
 
       throw e;
+    }
+
+    let onBroadcasted: ((txHash: Uint8Array) => void) | undefined;
+    let onFulfill: ((tx: any) => void) | undefined;
+
+    if (onTxEvents) {
+      if (typeof onTxEvents === "function") {
+        onFulfill = onTxEvents;
+      } else {
+        onBroadcasted = onTxEvents.onBroadcasted;
+        onFulfill = onTxEvents.onFulfill;
+      }
+    }
+
+    if (onBroadcasted) {
+      onBroadcasted(txHash);
     }
 
     const txTracer = new TendermintTxTracer(
@@ -291,12 +322,17 @@ export class AccountSetBase<MsgOpts, Queries> {
     recipient: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     for (let i = 0; i < this.sendTokenFns.length; i++) {
       const fn = this.sendTokenFns[i];
 
-      if (await fn(amount, currency, recipient, memo, stdFee, onFulfill)) {
+      if (await fn(amount, currency, recipient, memo, stdFee, onTxEvents)) {
         return;
       }
     }

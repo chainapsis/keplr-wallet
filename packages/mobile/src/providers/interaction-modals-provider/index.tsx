@@ -38,7 +38,7 @@ export const InteractionModalsProivder: FunctionComponent = observer(
             close={() => interactionModalStore.popUrl()}
           />
         ) : null}
-        {walletConnectStore.pendingProposalApprovals.map((approval) => {
+        {walletConnectStore.pendingSessionRequestApprovals.map((approval) => {
           return (
             <WalletConnectApprovalModal
               key={approval.key}

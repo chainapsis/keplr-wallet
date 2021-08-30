@@ -45,6 +45,7 @@ import {
 import { RegisterEndScreen } from "./screens/register/staging/end";
 import { RegisterNewUserScreen } from "./screens/register/staging/new-user";
 import { RegisterNotNewUserScreen } from "./screens/register/staging/not-new-user";
+import { ResultScreen } from "./screens/result";
 import {
   AddressBookConfig,
   IMemoConfig,
@@ -79,6 +80,13 @@ import {
   useFocusedScreen,
 } from "./providers/focused-screen";
 import Svg, { Path, Rect } from "react-native-svg";
+import {
+  TxFailedResultScreen,
+  TxPendingResultScreen,
+  TxSuccessResultScreen,
+} from "./screens/tx-result";
+import { TorusSignInScreen } from "./screens/register/staging/torus";
+import { HeaderAddIcon } from "./components/staging/header/icon";
 
 const {
   SmartNavigatorProvider,
@@ -106,11 +114,14 @@ const {
     "Register.NewLedger": {
       upperScreenName: "Register",
     },
+    "Register.TorusSignIn": {
+      upperScreenName: "Register",
+    },
     "Register.End": {
       upperScreenName: "Register",
     },
     Home: {
-      upperScreenName: "MainTabDrawer",
+      upperScreenName: "Main",
     },
     Send: {
       upperScreenName: "Others",
@@ -157,6 +168,18 @@ const {
     AddAddressBook: {
       upperScreenName: "AddressBooks",
     },
+    Result: {
+      upperScreenName: "Others",
+    },
+    TxPendingResult: {
+      upperScreenName: "Others",
+    },
+    TxSuccessResult: {
+      upperScreenName: "Others",
+    },
+    TxFailedResult: {
+      upperScreenName: "Others",
+    },
   }).withParams<{
     "Register.NewMnemonic": {
       registerConfig: RegisterConfig;
@@ -169,6 +192,9 @@ const {
       registerConfig: RegisterConfig;
     };
     "Register.NewLedger": {
+      registerConfig: RegisterConfig;
+    };
+    "Register.TorusSignIn": {
       registerConfig: RegisterConfig;
     };
     Send: {
@@ -201,6 +227,18 @@ const {
     AddAddressBook: {
       chainId: string;
       addressBookConfig: AddressBookConfig;
+    };
+    TxPendingResult: {
+      chainId?: string;
+      txHash: string;
+    };
+    TxSuccessResult: {
+      chainId?: string;
+      txHash: string;
+    };
+    TxFailedResult: {
+      chainId?: string;
+      txHash: string;
     };
   }>()
 );
@@ -284,7 +322,13 @@ export const RegisterNavigation: FunctionComponent = () => {
       initialRouteName="Intro"
       headerMode="screen"
     >
-      <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="Register.Intro"
+        component={RegisterIntroScreen}
+      />
       <Stack.Screen name="Register.NewUser" component={RegisterNewUserScreen} />
       <Stack.Screen
         name="Register.NotNewUser"
@@ -300,6 +344,7 @@ export const RegisterNavigation: FunctionComponent = () => {
         component={RecoverMnemonicScreen}
       />
       <Stack.Screen name="Register.NewLedger" component={NewLedgerScreen} />
+      <Stack.Screen name="Register.TorusSignIn" component={TorusSignInScreen} />
       <Stack.Screen
         options={{
           headerShown: false,
@@ -358,12 +403,46 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen name="Delegate" component={DelegateScreen} />
       <Stack.Screen name="Undelegate" component={UndelegateScreen} />
       <Stack.Screen name="Redelegate" component={RedelegateScreen} />
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+        name="Result"
+        component={ResultScreen}
+      />
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+        name="TxPendingResult"
+        component={TxPendingResultScreen}
+      />
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+        name="TxSuccessResult"
+        component={TxSuccessResultScreen}
+      />
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+        name="TxFailedResult"
+        component={TxFailedResultScreen}
+      />
     </Stack.Navigator>
   );
 };
 
 export const SettingStackScreen: FunctionComponent = () => {
   const style = useStyle();
+
+  const navigation = useNavigation();
 
   return (
     <Stack.Navigator
@@ -378,6 +457,17 @@ export const SettingStackScreen: FunctionComponent = () => {
         name="SettingSelectAccount"
         options={{
           title: "Select Account",
+          headerRight: () => (
+            <HeaderRightButton
+              onPress={() => {
+                navigation.navigate("Register", {
+                  screen: "Register.Intro",
+                });
+              }}
+            >
+              <HeaderAddIcon />
+            </HeaderRightButton>
+          ),
           ...BlurredHeaderScreenOptionsPreset,
         }}
         component={SettingSelectAccountScreen}
@@ -501,7 +591,7 @@ export const MainTabNavigation: FunctionComponent = () => {
       })}
       tabBarOptions={{
         activeTintColor: style.get("color-primary").color,
-        inactiveTintColor: style.get("color-icon").color,
+        inactiveTintColor: style.get("color-text-black-very-very-low").color,
         style: {
           borderTopWidth: 0.5,
           borderTopColor: style.get("border-color-border-white").borderColor,

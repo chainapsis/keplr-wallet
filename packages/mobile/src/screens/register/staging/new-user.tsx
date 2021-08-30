@@ -22,14 +22,22 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-42"])}
     >
-      <View style={style.flatten(["flex-1"])} />
-      {/* TODO: Add the logo here */}
-      <View style={style.flatten(["flex-1"])} />
+      <View style={style.flatten(["flex", "items-center"])}>
+        <Image
+          style={style.flatten([
+            "width-292",
+            "height-90",
+            "margin-top-106",
+            "margin-bottom-288",
+          ])}
+          source={require("../../../assets/logo/keplr-logo-default.png")}
+        />
+      </View>
 
       <Button
         containerStyle={style.flatten(["margin-bottom-20"])}
         text="Sign In With Google"
-        icon={
+        leftIcon={
           <Image
             style={style.flatten(["width-20", "height-20", "margin-right-10"])}
             source={require("../../../assets/svg/icons8-google.png")}
@@ -37,6 +45,11 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         }
         size="large"
         mode="light"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.TorusSignIn", {
+            registerConfig,
+          });
+        }}
       />
       <Text
         style={style.flatten([
@@ -47,31 +60,16 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
       >
         Powered by Torus
       </Text>
-      <View style={style.flatten(["flex-row", "flex-wrap"])}>
-        <Button
-          containerStyle={style.flatten(["flex-1"])}
-          text="12 Word"
-          size="large"
-          mode="light"
-          onPress={() => {
-            smartNavigation.navigateSmart("Register.NewMnemonic", {
-              registerConfig,
-            });
-          }}
-        />
-        <View style={style.flatten(["width-20"])} />
-        <Button
-          containerStyle={style.flatten(["flex-1"])}
-          text="24 Word"
-          size="large"
-          mode="light"
-          onPress={() => {
-            smartNavigation.navigateSmart("Register.NewMnemonic", {
-              registerConfig,
-            });
-          }}
-        />
-      </View>
+      <Button
+        text="Create New Seed"
+        size="large"
+        mode="light"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.NewMnemonic", {
+            registerConfig,
+          });
+        }}
+      />
 
       <View style={style.flatten(["flex-1"])} />
     </PageWithScrollView>

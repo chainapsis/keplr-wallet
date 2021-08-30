@@ -78,7 +78,12 @@ export class SecretAccount {
     recipient: string,
     memo: string,
     stdFee: Partial<StdFee>,
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ): Promise<boolean> {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
@@ -108,7 +113,7 @@ export class SecretAccount {
             gas: stdFee.gas ?? this.base.msgOpts.send.secret20.gas.toString(),
           },
           memo,
-          (tx) => {
+          this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
               const queryBalance = this.queries.queryBalances
@@ -123,11 +128,7 @@ export class SecretAccount {
                 queryBalance.fetch();
               }
             }
-
-            if (onFulfill) {
-              onFulfill(tx);
-            }
-          }
+          })
         );
         return true;
     }
@@ -203,7 +204,12 @@ export class SecretAccount {
     sentFunds: CoinPrimitive[],
     stdFee: Optional<StdFee, "amount">,
     memo: string = "",
-    onFulfill?: (tx: any) => void
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ): Promise<Uint8Array> {
     let encryptedMsg: Uint8Array;
 
@@ -234,7 +240,7 @@ export class SecretAccount {
         gas: stdFee.gas,
       },
       memo,
-      onFulfill
+      this.txEventsWithPreOnFulfill(onTxEvents)
     );
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -265,6 +271,44 @@ export class SecretAccount {
 
     const enigmaUtils = keplr.getEnigmaUtils(this.chainId);
     return await enigmaUtils.encrypt(contractCodeHash, obj);
+  }
+
+  protected txEventsWithPreOnFulfill(
+    onTxEvents:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
+      | undefined,
+    preOnFulfill?: (tx: any) => void
+  ):
+    | {
+        onBroadcasted?: (txHash: Uint8Array) => void;
+        onFulfill?: (tx: any) => void;
+      }
+    | undefined {
+    if (!onTxEvents) {
+      return;
+    }
+
+    const onBroadcasted =
+      typeof onTxEvents === "function" ? undefined : onTxEvents.onBroadcasted;
+    const onFulfill =
+      typeof onTxEvents === "function" ? onTxEvents : onTxEvents.onFulfill;
+
+    return {
+      onBroadcasted,
+      onFulfill: onFulfill
+        ? (tx: any) => {
+            if (preOnFulfill) {
+              preOnFulfill(tx);
+            }
+
+            onFulfill(tx);
+          }
+        : undefined,
+    };
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & HasSecretQueries> {

@@ -155,17 +155,23 @@ export class RegisterConfig {
   // Create or add the account based on the private key.
   // If the mode is "add", password will be ignored.
   @flow
-  *createPrivateKey(name: string, privateKey: Uint8Array, password: string) {
+  *createPrivateKey(
+    name: string,
+    privateKey: Uint8Array,
+    password: string,
+    email?: string
+  ) {
     this._isLoading = true;
     try {
+      const meta: Record<string, string> = { name };
+      if (email) {
+        meta.email = email;
+      }
+
       if (this.mode === "create") {
-        yield this.keyRingStore.createPrivateKey(privateKey, password, {
-          name,
-        });
+        yield this.keyRingStore.createPrivateKey(privateKey, password, meta);
       } else {
-        yield this.keyRingStore.addPrivateKey(privateKey, {
-          name,
-        });
+        yield this.keyRingStore.addPrivateKey(privateKey, meta);
       }
       this._isFinalized = true;
     } finally {
