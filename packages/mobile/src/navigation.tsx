@@ -121,7 +121,7 @@ const {
       upperScreenName: "Register",
     },
     Home: {
-      upperScreenName: "MainTabDrawer",
+      upperScreenName: "Main",
     },
     Send: {
       upperScreenName: "Others",

@@ -11,6 +11,7 @@ import {
   MultiKeyStoreInfoWithSelectedElem,
 } from "@keplr-wallet/background";
 import { View } from "react-native";
+import { useSmartNavigation } from "../../../../../navigation";
 
 const CheckIcon: FunctionComponent<{
   color: string;
@@ -61,6 +62,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
+  const smartNavigation = useSmartNavigation();
+
   const torusKeyStores = useMemo(() => {
     return keyRingStore.multiKeyStoreInfo.filter(
       (keyStore) =>
@@ -96,6 +99,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
       await loadingScreen.openAsync();
       await keyRingStore.changeKeyRing(index);
       loadingScreen.setIsLoading(false);
+
+      smartNavigation.navigateSmart("Home", {});
     }
   };
 
