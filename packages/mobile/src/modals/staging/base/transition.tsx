@@ -18,6 +18,7 @@ export type ModalTransition = {
 
   // Used as local variable
   duration: Animated.Value<number>;
+  durationSetOnExternal: Animated.Value<number>;
 };
 
 export const ModalTransisionContext = React.createContext<ModalTransition | null>(
@@ -40,6 +41,7 @@ export const ModalTransisionProvider: FunctionComponent = ({ children }) => {
       isPaused: new Animated.Value(0),
 
       duration: new Animated.Value(0),
+      durationSetOnExternal: new Animated.Value(0),
     };
   });
 
