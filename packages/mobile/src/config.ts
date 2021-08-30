@@ -6,7 +6,14 @@ export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
 export const EthereumEndpoint =
   "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";
 
-export const EmbedChainInfos: ChainInfo[] = [
+export interface AppChainInfo extends ChainInfo {
+  readonly txExplorer?: {
+    readonly name: string;
+    readonly txUrl: string;
+  };
+}
+
+export const EmbedChainInfos: AppChainInfo[] = [
   {
     rpc: "https://rpc-cosmoshub.keplr.app",
     rest: "https://lcd-cosmoshub.keplr.app",
@@ -43,6 +50,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 118,
     features: ["stargate"],
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/cosmos/txs/{txHash}",
+    },
   },
   {
     rpc: "https://rpc-osmosis.keplr.app",
@@ -77,6 +88,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 118,
     features: ["stargate"],
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/osmosis/txs/{txHash}",
+    },
   },
   {
     rpc: "https://rpc-secret.keplr.app",
@@ -130,5 +145,10 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.4,
     },
     features: ["secretwasm"],
+    txExplorer: {
+      name: "SecretNodes",
+      txUrl:
+        "https://secretnodes.com/secret/chains/secret-2/transactions/{txHash}",
+    },
   },
 ];

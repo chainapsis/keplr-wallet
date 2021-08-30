@@ -301,7 +301,7 @@ export class KeyRingStore {
   @flow
   *showKeyRing(index: number, password: string) {
     const msg = new ShowKeyRingMsg(index, password);
-    return yield this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return yield* toGenerator(this.requester.sendMessage(BACKGROUND_PORT, msg));
   }
 
   @flow

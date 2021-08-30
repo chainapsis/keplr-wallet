@@ -75,6 +75,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
               key={chainInfo.chainId}
               onPress={() => {
                 chainStore.selectChain(chainInfo.chainId);
+                chainStore.saveLastViewChainId();
                 navigation.dispatch(DrawerActions.closeDrawer());
               }}
             >

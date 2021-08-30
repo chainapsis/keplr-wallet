@@ -35,14 +35,15 @@ class Crypto {
   listCiphers = aes["listCiphers"];
 }
 const webCrypto = typeof crypto !== "undefined" ? crypto : new Crypto();
-// eslint-disable-next-line import/no-default-export
-export default webCrypto;
-export function polyfillWebCrypto() {
-  if (typeof crypto === "undefined") {
-    Object.defineProperty(window, "crypto", {
-      configurable: true,
-      enumerable: true,
-      get: () => webCrypto,
-    });
-  }
-}
+module.exports = {
+  ...webCrypto,
+  polyfillWebCrypto: () => {
+    if (typeof crypto === "undefined") {
+      Object.defineProperty(window, "crypto", {
+        configurable: true,
+        enumerable: true,
+        get: () => webCrypto,
+      });
+    }
+  },
+};

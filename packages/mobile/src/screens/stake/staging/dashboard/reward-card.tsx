@@ -6,6 +6,7 @@ import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../../styles";
 import { Button } from "../../../../components/staging/button";
 import { Dec } from "@keplr-wallet/unit";
+import { useSmartNavigation } from "../../../../navigation";
 
 export const MyRewardCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -26,6 +27,7 @@ export const MyRewardCard: FunctionComponent<{
   const apy = queries.cosmos.queryInflation.inflation;
 
   const style = useStyle();
+  const smartNavigation = useSmartNavigation();
 
   return (
     <Card style={containerStyle}>
@@ -80,10 +82,23 @@ export const MyRewardCard: FunctionComponent<{
           onPress={async () => {
             try {
               await account.cosmos.sendWithdrawDelegationRewardMsgs(
-                queryReward.getDescendingPendingRewardValidatorAddresses(8)
+                queryReward.getDescendingPendingRewardValidatorAddresses(8),
+                "",
+                {},
+                {
+                  onBroadcasted: (txHash) => {
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
+                    });
+                  },
+                }
               );
             } catch (e) {
+              if (e?.message === "Request rejected") {
+                return;
+              }
               console.log(e);
+              smartNavigation.navigateSmart("Home", {});
             }
           }}
           disabled={

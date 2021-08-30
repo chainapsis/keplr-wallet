@@ -15,6 +15,7 @@ import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
 import { registerModal } from "../../../modals/staging/base";
 import { RectButton } from "../../../components/staging/rect-button";
+import { useSmartNavigation } from "../../../navigation";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -257,8 +258,12 @@ export const GovernanceVoteModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
   proposalId: string;
+
+  // Modal can't use the `useSmartNavigation` hook directly.
+  // So need to get the props from the parent.
+  smartNavigation: ReturnType<typeof useSmartNavigation>;
 }> = registerModal(
-  observer(({ proposalId, close }) => {
+  observer(({ proposalId, close, smartNavigation }) => {
     const { chainStore, accountStore } = useStore();
 
     const account = accountStore.getAccount(chainStore.current.chainId);
@@ -419,12 +424,27 @@ export const GovernanceVoteModal: FunctionComponent<{
           loading={account.isSendingMsg === "govVote"}
           onPress={async () => {
             if (vote !== "Unspecified" && account.isReadyToSendMsgs) {
-              // TODO: Notify the result.
               try {
-                await account.cosmos.sendGovVoteMsg(proposalId, vote);
+                await account.cosmos.sendGovVoteMsg(
+                  proposalId,
+                  vote,
+                  "",
+                  {},
+                  {
+                    onBroadcasted: (txHash) => {
+                      smartNavigation.pushSmart("TxPendingResult", {
+                        txHash: Buffer.from(txHash).toString("hex"),
+                      });
+                    },
+                  }
+                );
                 close();
               } catch (e) {
+                if (e?.message === "Request rejected") {
+                  return;
+                }
                 console.log(e);
+                smartNavigation.navigateSmart("Home", {});
               }
             }
           }}
@@ -438,6 +458,7 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();
 
   const style = useStyle();
+  const smartNavigation = useSmartNavigation();
 
   const route = useRoute<
     RouteProp<
@@ -502,6 +523,7 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
         isOpen={isModalOpen}
         close={() => setIsModalOpen(false)}
         proposalId={proposalId}
+        smartNavigation={smartNavigation}
       />
       <Card style={style.flatten(["margin-top-card-gap"])}>
         <GovernanceDetailsCardBody

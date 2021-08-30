@@ -42,13 +42,18 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
       <Button
         containerStyle={style.flatten(["margin-bottom-20"])}
         text="Sign In With Google"
-        icon={
+        leftIcon={
           <View style={style.flatten(["margin-right-6"])}>
             <GoogleIcon />
           </View>
         }
         size="large"
         mode="light"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.TorusSignIn", {
+            registerConfig,
+          });
+        }}
       />
       <Text
         style={style.flatten([

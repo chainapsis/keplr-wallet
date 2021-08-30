@@ -5,8 +5,6 @@ import { ChainStore as BaseChainStore } from "@keplr-wallet/stores";
 import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithEmbed,
-  SetPersistentMemoryMsg,
-  GetPersistentMemoryMsg,
   GetChainInfosMsg,
   RemoveSuggestedChainInfoMsg,
   TryUpdateChainMsg,
@@ -14,9 +12,12 @@ import {
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { MessageRequester } from "@keplr-wallet/router";
-import { toGenerator } from "@keplr-wallet/common";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { AppChainInfo } from "../../config";
 
-export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
+export class ChainStore extends BaseChainStore<
+  ChainInfoWithEmbed & AppChainInfo
+> {
   @observable
   protected selectedChainId: string;
 
@@ -26,7 +27,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
 
   constructor(
     embedChainInfos: ChainInfo[],
-    protected readonly requester: MessageRequester
+    protected readonly requester: MessageRequester,
+    protected readonly kvStore: KVStore
   ) {
     super(
       embedChainInfos.map((chainInfo) => {
@@ -67,13 +69,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
     return this.chainInfos[0].raw;
   }
 
-  @flow
-  *saveLastViewChainId() {
-    // Save last view chain id to persistent background
-    const msg = new SetPersistentMemoryMsg({
-      lastViewChainId: this.selectedChainId,
-    });
-    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
+  async saveLastViewChainId() {
+    // Save last view chain id to kv store
+    await this.kvStore.set<string>("last_view_chain_id", this.selectedChainId);
   }
 
   @flow
@@ -81,15 +79,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
     this._isInitializing = true;
     yield this.getChainInfosFromBackground();
 
-    // Get last view chain id to persistent background
-    const msg = new GetPersistentMemoryMsg();
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    // Get last view chain id from kv store
+    const lastViewChainId = yield* toGenerator(
+      this.kvStore.get<string>("last_view_chain_id")
     );
 
     if (!this.deferChainIdSelect) {
-      if (result && result.lastViewChainId) {
-        this.selectChain(result.lastViewChainId);
+      if (lastViewChainId) {
+        this.selectChain(lastViewChainId);
       }
     }
     this._isInitializing = false;

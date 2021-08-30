@@ -13,6 +13,7 @@ import {
   MemoInput,
 } from "../../../../components/staging/input";
 import { Button } from "../../../../components/staging/button";
+import { useSmartNavigation } from "../../../../navigation";
 
 export const DelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -32,6 +33,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
   const style = useStyle();
+  const smartNavigation = useSmartNavigation();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -93,15 +95,26 @@ export const DelegateScreen: FunctionComponent = observer(() => {
         loading={account.isSendingMsg === "delegate"}
         onPress={async () => {
           if (account.isReadyToSendMsgs && txStateIsValid) {
-            // TODO: Notify the result.
             try {
               await account.cosmos.sendDelegateMsg(
                 sendConfigs.amountConfig.amount,
                 sendConfigs.recipientConfig.recipient,
-                sendConfigs.memoConfig.memo
+                sendConfigs.memoConfig.memo,
+                {},
+                {
+                  onBroadcasted: (txHash) => {
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
+                    });
+                  },
+                }
               );
             } catch (e) {
+              if (e?.message === "Request rejected") {
+                return;
+              }
               console.log(e);
+              smartNavigation.navigateSmart("Home", {});
             }
           }
         }}
