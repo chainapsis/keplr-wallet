@@ -18,6 +18,18 @@ export const BlurredBottomTabBar: FunctionComponent<
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const focusedScreen = useFocusedScreen();
 
+  const containerOpacity = (() => {
+    if (enabledScreens.length === 0) {
+      return 0.75;
+    }
+
+    if (focusedScreen.name && enabledScreens.includes(focusedScreen.name)) {
+      return 0.75;
+    }
+
+    return 1;
+  })();
+
   return (
     <BlurView
       style={{
@@ -36,10 +48,8 @@ export const BlurredBottomTabBar: FunctionComponent<
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor:
-            focusedScreen.name && enabledScreens.includes(focusedScreen.name)
-              ? undefined
-              : "white",
+          backgroundColor: "white",
+          opacity: containerOpacity,
         }}
       />
       <BottomTabBar
