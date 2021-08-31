@@ -16,7 +16,7 @@ import Animated, { Easing } from "react-native-reanimated";
 import {
   DefaultAcceleration,
   DefaultCloseVelocity,
-  DefaultVelocity,
+  DefaultOpenVelocity,
 } from "../base/const";
 
 const useAnimatedValueSet = () => {
@@ -38,7 +38,15 @@ export const CardModal: FunctionComponent<{
   title: string;
   right?: React.ReactElement;
   childrenContainerStyle?: ViewStyle;
-}> = ({ title, right, children, childrenContainerStyle }) => {
+
+  disableGesture?: boolean;
+}> = ({
+  title,
+  right,
+  children,
+  childrenContainerStyle,
+  disableGesture = false,
+}) => {
   const style = useStyle();
   const safeAreaInsets = useSafeAreaInsets();
 
@@ -142,7 +150,7 @@ export const CardModal: FunctionComponent<{
     const openVelocity =
       modal.openTransitionVelocity ??
       modal.transitionVelocity ??
-      DefaultVelocity;
+      DefaultOpenVelocity;
     const closeVelocity =
       modal.closeTransitionVelocity ??
       modal.transitionVelocity ??
@@ -398,24 +406,22 @@ export const CardModal: FunctionComponent<{
       <PanGestureHandler
         onGestureEvent={onGestureEvent}
         onHandlerStateChange={onGestureEvent}
+        enabled={!disableGesture}
       >
         {/* Below view is not animated, but to let the gesture handler to accept the animated block, you should set the children of the gesture handler as the Animated.View */}
         <Animated.View style={style.flatten(["padding-x-page"])}>
-          <View
-            style={style.flatten([
-              "items-center",
-              "margin-top-8",
-              "margin-bottom-16",
-            ])}
-          >
-            <View
-              style={style.flatten([
-                "width-58",
-                "height-5",
-                "border-radius-16",
-                "background-color-card-modal-handle",
-              ])}
-            />
+          <View style={style.flatten(["items-center", "margin-bottom-16"])}>
+            {!disableGesture ? (
+              <View
+                style={style.flatten([
+                  "margin-top-8",
+                  "width-58",
+                  "height-5",
+                  "border-radius-16",
+                  "background-color-card-modal-handle",
+                ])}
+              />
+            ) : null}
           </View>
           <View
             style={style.flatten([

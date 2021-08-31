@@ -14,8 +14,9 @@ import { useModalTransision } from "./transition";
 import {
   DefaultAcceleration,
   DefaultCloseVelocity,
-  DefaultVelocity,
-  MinDuration,
+  DefaultOpenVelocity,
+  OpenMinDuration,
+  CloseMinDuration,
 } from "./const";
 
 export interface ModalBaseProps {
@@ -54,9 +55,9 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   children,
   align = "bottom",
   isOpen,
-  transitionVelocity = DefaultVelocity,
+  transitionVelocity,
   openTransitionVelocity,
-  closeTransitionVelocity = DefaultCloseVelocity,
+  closeTransitionVelocity,
   transitionAcceleration = DefaultAcceleration,
   onOpenTransitionEnd,
   onCloseTransitionEnd,
@@ -160,8 +161,10 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   const [closeVelocityValue] = useState(() => new Animated.Value(0));
 
   const translateY = useMemo(() => {
-    const openVelocity = openTransitionVelocity ?? transitionVelocity;
-    const closeVelocity = closeTransitionVelocity ?? transitionVelocity;
+    const openVelocity =
+      openTransitionVelocity ?? transitionVelocity ?? DefaultOpenVelocity;
+    const closeVelocity =
+      closeTransitionVelocity ?? transitionVelocity ?? DefaultCloseVelocity;
 
     return Animated.block([
       Animated.cond(Animated.not(transition.isInitialized), [
@@ -233,7 +236,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                             ),
                             1000
                           ),
-                          MinDuration
+                          OpenMinDuration
                         )
                       ),
                     ],
@@ -306,7 +309,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                             ),
                             1000
                           ),
-                          MinDuration
+                          CloseMinDuration
                         )
                       ),
                     ],
