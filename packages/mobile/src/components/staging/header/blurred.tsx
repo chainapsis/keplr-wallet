@@ -51,7 +51,7 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
   return (
     <BlurView
       blurType="light"
-      blurAmount={60}
+      blurAmount={65}
       reducedTransparencyFallbackColor="white"
     >
       <Animated.View
@@ -64,7 +64,7 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
           backgroundColor: "white",
           opacity: scrollY.interpolate({
             inputRange: [0, 75],
-            outputRange: [1, 0],
+            outputRange: [1, 0.5],
             extrapolate: "clamp",
           }),
         }}
