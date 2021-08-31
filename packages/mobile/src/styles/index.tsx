@@ -212,6 +212,8 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       // Belows are for the button props and may not be used as styles.
       "rect-button-default-ripple": "#CCCCCC",
 
+      "drawer-rect-button-underlay": "#F1F3FC",
+
       // Belows are for the button props and may not be used as styles.
       "button-primary": Colors.primary,
       "button-secondary": Colors.secondary,
@@ -297,11 +299,13 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "36": 36,
     "40": 40,
     "44": 44,
+    "50": 50,
     "56": 56,
     "62": 62,
     "64": 64,
     "74": 74,
     "80": 80,
+    "84": 84,
     "87": 87,
     "90": 90,
     "214": 214,
