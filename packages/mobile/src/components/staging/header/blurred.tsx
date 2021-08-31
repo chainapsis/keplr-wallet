@@ -63,8 +63,8 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
           right: 0,
           backgroundColor: "white",
           opacity: scrollY.interpolate({
-            inputRange: [0, 75],
-            outputRange: [1, 0.5],
+            inputRange: [0, 35],
+            outputRange: [1, 0.65],
             extrapolate: "clamp",
           }),
         }}
