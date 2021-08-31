@@ -635,6 +635,9 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
         swipeEnabled: focused.name === "Home",
         gestureEnabled: focused.name === "Home",
       }}
+      gestureHandlerProps={{
+        hitSlop: {},
+      }}
     >
       <Drawer.Screen name="MainTab" component={MainTabNavigation} />
     </Drawer.Navigator>

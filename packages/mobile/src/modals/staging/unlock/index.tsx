@@ -104,6 +104,7 @@ export const UnlockModal: FunctionComponent<{
   {
     openTransitionVelocity: 0,
     closeTransitionVelocity: 1500,
+    transitionAcceleration: 1,
     disableBackdrop: true,
     disableClosingOnBackdropPress: true,
     disableSafeArea: true,

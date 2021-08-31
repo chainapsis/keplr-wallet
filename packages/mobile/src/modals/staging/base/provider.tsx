@@ -19,6 +19,8 @@ export interface ModalOptions {
   readonly transitionVelocity?: number;
   readonly openTransitionVelocity?: number;
   readonly closeTransitionVelocity?: number;
+  // Acceleration based on 100
+  readonly transitionAcceleration?: number;
   readonly disableBackdrop?: boolean;
   readonly disableClosingOnBackdropPress?: boolean;
 
@@ -173,6 +175,7 @@ export const ModalRenderer: FunctionComponent<{
           transitionVelocity: modal.options.transitionVelocity,
           openTransitionVelocity: modal.options.openTransitionVelocity,
           closeTransitionVelocity: modal.options.closeTransitionVelocity,
+          transitionAcceleration: modal.options.transitionAcceleration,
           disableBackdrop: modal.options.disableBackdrop,
           disableClosingOnBackdropPress:
             modal.options.disableClosingOnBackdropPress,
@@ -188,6 +191,7 @@ export const ModalRenderer: FunctionComponent<{
         modal.options.disableBackdrop,
         modal.options.disableClosingOnBackdropPress,
         modal.options.openTransitionVelocity,
+        modal.options.transitionAcceleration,
         modal.options.transitionVelocity,
         modal.props.isOpen,
       ])}
@@ -207,6 +211,7 @@ export const ModalRenderer: FunctionComponent<{
           transitionVelocity={modal.options.transitionVelocity}
           openTransitionVelocity={modal.options.openTransitionVelocity}
           closeTransitionVelocity={modal.options.closeTransitionVelocity}
+          transitionAcceleration={modal.options.transitionAcceleration}
           containerStyle={modal.options.containerStyle}
           disableSafeArea={modal.options.disableSafeArea}
         >

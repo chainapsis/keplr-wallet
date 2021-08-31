@@ -1,10 +1,11 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { observer } from "mobx-react-lite";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { useNewMnemonicConfig } from "./hook";
 import { PageWithScrollView } from "../../../../components/staging/page";
+import { CheckIcon } from "../../../../components/staging/icon";
 import { useStyle } from "../../../../styles";
 import { WordChip } from "../../../../components/staging/mnemonic";
 import { Button } from "../../../../components/staging/button";
@@ -12,6 +13,7 @@ import Clipboard from "expo-clipboard";
 import { TextInput } from "../../../../components/staging/input";
 import { Controller, useForm } from "react-hook-form";
 import { useSmartNavigation } from "../../../../navigation";
+import { useSimpleTimer } from "../../../../hooks";
 
 interface FormData {
   name: string;
@@ -184,6 +186,7 @@ const WordsCard: FunctionComponent<{
   words: string[];
 }> = ({ words }) => {
   const style = useStyle();
+  const { isTimedOut, setTimer } = useSimpleTimer();
 
   return (
     <View
@@ -204,11 +207,22 @@ const WordsCard: FunctionComponent<{
       })}
       <View style={style.flatten(["width-full"])}>
         <Button
-          textStyle={style.flatten(["text-button1"])}
+          textStyle={style.flatten([
+            "text-button1",
+            isTimedOut ? "color-success" : "color-primary",
+          ])}
           mode="text"
+          {...(isTimedOut && {
+            rightIcon: (
+              <View style={style.flatten(["margin-left-8"])}>
+                <CheckIcon />
+              </View>
+            ),
+          })}
           text="Copy to Clipboard"
           onPress={() => {
             Clipboard.setString(words.join(" "));
+            setTimer(3000);
           }}
         />
       </View>

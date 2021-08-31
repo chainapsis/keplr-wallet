@@ -70,6 +70,5 @@ export const AddressDeleteModal: FunctionComponent<{
   },
   {
     align: "center",
-    transitionVelocity: 3000,
   }
 );

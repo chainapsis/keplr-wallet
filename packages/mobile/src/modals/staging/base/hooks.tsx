@@ -10,6 +10,8 @@ export interface ModalStateContext {
   readonly transitionVelocity?: number;
   readonly openTransitionVelocity?: number;
   readonly closeTransitionVelocity?: number;
+  // Acceleration based on 100
+  readonly transitionAcceleration?: number;
   readonly disableBackdrop?: boolean;
   readonly disableClosingOnBackdropPress?: boolean;
 

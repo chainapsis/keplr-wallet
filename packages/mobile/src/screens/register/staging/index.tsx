@@ -1,7 +1,9 @@
 import React, { FunctionComponent } from "react";
+import { useHeaderHeight } from "@react-navigation/stack";
 import { PageWithScrollView } from "../../../components/staging/page";
+import { KeplrLogo } from "../../../components/staging/svg/keplr-logo";
 import { useStyle } from "../../../styles";
-import { View, Image } from "react-native";
+import { View, Dimensions } from "react-native";
 import { Button } from "../../../components/staging/button";
 import { useSmartNavigation } from "../../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
@@ -17,25 +19,25 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
 
   const registerConfig = useRegisterConfig(keyRingStore, []);
 
+  const headerHeight = useHeaderHeight();
+
   return (
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-42"])}
+      style={{
+        ...style.flatten(["padding-x-42"]),
+        paddingTop: Dimensions.get("window").height * 0.22 - headerHeight,
+        paddingBottom: Dimensions.get("window").height * 0.11,
+      }}
     >
-      <View style={style.flatten(["flex", "items-center"])}>
-        <Image
-          style={style.flatten([
-            "width-292",
-            "height-90",
-            "margin-top-150",
-            "margin-bottom-288",
-          ])}
-          source={require("../../../assets/logo/keplr-logo-default.png")}
-        />
+      <View
+        style={style.flatten(["flex-grow-1", "items-center", "padding-x-18"])}
+      >
+        <KeplrLogo width="100%" />
       </View>
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
-        text="I'm A New User"
+        text="Create A New Wallet"
         size="large"
         mode="light"
         onPress={() => {
@@ -46,7 +48,7 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
       />
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
-        text="I'm Not A New User"
+        text="Import Existing Wallet"
         size="large"
         onPress={() => {
           smartNavigation.navigateSmart("Register.NotNewUser", {
@@ -64,8 +66,6 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
           });
         }}
       />
-
-      <View style={style.flatten(["flex-1"])} />
     </PageWithScrollView>
   );
 });

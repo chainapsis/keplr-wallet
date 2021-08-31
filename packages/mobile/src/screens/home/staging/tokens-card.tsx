@@ -23,9 +23,9 @@ export const TokensCard: FunctionComponent<{
       accountStore.getAccount(chainStore.current.chainId).bech32Address
     );
 
-  const tokens = queryBalances.positiveNativeUnstakables.concat(
-    queryBalances.nonNativeBalances
-  );
+  const tokens = queryBalances.positiveNativeUnstakables
+    .concat(queryBalances.nonNativeBalances)
+    .slice(0, 2);
 
   return (
     <View style={containerStyle}>

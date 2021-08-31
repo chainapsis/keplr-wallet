@@ -11,7 +11,12 @@ import { useStyle } from "../../../styles";
 import Animated, { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useModalTransision } from "./transition";
-import { DefaultVelocity, MinDuration } from "./const";
+import {
+  DefaultAcceleration,
+  DefaultCloseVelocity,
+  DefaultVelocity,
+  MinDuration,
+} from "./const";
 
 export interface ModalBaseProps {
   align?: "top" | "center" | "bottom";
@@ -19,6 +24,8 @@ export interface ModalBaseProps {
   transitionVelocity?: number;
   openTransitionVelocity?: number;
   closeTransitionVelocity?: number;
+  // Acceleration based on 100
+  transitionAcceleration?: number;
   onOpenTransitionEnd?: () => void;
   onCloseTransitionEnd?: () => void;
 
@@ -49,7 +56,8 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
   isOpen,
   transitionVelocity = DefaultVelocity,
   openTransitionVelocity,
-  closeTransitionVelocity,
+  closeTransitionVelocity = DefaultCloseVelocity,
+  transitionAcceleration = DefaultAcceleration,
   onOpenTransitionEnd,
   onCloseTransitionEnd,
   containerStyle,
@@ -148,6 +156,9 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
     ]);
   }, [transition.isInitialized, transition.startY]);
 
+  const [openVelocityValue] = useState(() => new Animated.Value(0));
+  const [closeVelocityValue] = useState(() => new Animated.Value(0));
+
   const translateY = useMemo(() => {
     const openVelocity = openTransitionVelocity ?? transitionVelocity;
     const closeVelocity = closeTransitionVelocity ?? transitionVelocity;
@@ -189,30 +200,54 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                 Animated.set(transition.frameTime, 0),
                 Animated.startClock(transition.clock),
               ],
-              // Set the duration
               Animated.cond(
-                Animated.greaterThan(openVelocity, 0),
-                Animated.set(
-                  transition.duration,
-                  Animated.max(
-                    Animated.multiply(
-                      Animated.divide(
-                        Animated.abs(transition.startY),
-                        openVelocity
+                Animated.eq(transition.durationSetOnExternal, 0),
+                [
+                  // Set the duration
+                  Animated.cond(
+                    Animated.greaterThan(openVelocity, 0),
+                    [
+                      Animated.set(
+                        openVelocityValue,
+                        Animated.max(
+                          openVelocity,
+                          Animated.multiply(
+                            openVelocity,
+                            Animated.pow(
+                              transitionAcceleration,
+                              Animated.divide(
+                                Animated.abs(transition.startY),
+                                100
+                              )
+                            )
+                          )
+                        )
                       ),
-                      1000
-                    ),
-                    MinDuration
-                  )
-                ),
-                Animated.set(transition.duration, 0)
+                      Animated.set(
+                        transition.duration,
+                        Animated.max(
+                          Animated.multiply(
+                            Animated.divide(
+                              Animated.abs(transition.startY),
+                              openVelocityValue
+                            ),
+                            1000
+                          ),
+                          MinDuration
+                        )
+                      ),
+                    ],
+                    Animated.set(transition.duration, 0)
+                  ),
+                  Animated.debug(
+                    "open transition initialized",
+                    Animated.clockRunning(transition.clock)
+                  ),
+                  Animated.debug("transition startY", transition.startY),
+                  Animated.debug("transition duration is", transition.duration),
+                ],
+                Animated.debug("duration set on external", transition.duration)
               ),
-              Animated.debug(
-                "open transition initialized",
-                Animated.clockRunning(transition.clock)
-              ),
-              Animated.debug("transition startY", transition.startY),
-              Animated.debug("transition duration is", transition.duration),
             ]
           ),
           Animated.cond(
@@ -229,32 +264,63 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                 Animated.set(transition.frameTime, 0),
                 Animated.startClock(transition.clock),
               ],
-              // Set the duration
               Animated.cond(
-                Animated.greaterThan(closeVelocity, 0),
-                Animated.set(
-                  transition.duration,
-                  Animated.max(
-                    Animated.multiply(
-                      Animated.divide(
-                        Animated.abs(
-                          Animated.sub(transition.translateY, transition.startY)
-                        ),
-                        closeVelocity
+                Animated.eq(transition.durationSetOnExternal, 0), // Set the duration
+                [
+                  Animated.cond(
+                    Animated.greaterThan(closeVelocity, 0),
+                    [
+                      Animated.set(
+                        closeVelocityValue,
+                        Animated.max(
+                          closeVelocity,
+                          Animated.multiply(
+                            closeVelocity,
+                            Animated.pow(
+                              transitionAcceleration,
+                              Animated.divide(
+                                Animated.abs(
+                                  Animated.sub(
+                                    transition.translateY,
+                                    transition.startY
+                                  )
+                                ),
+                                100
+                              )
+                            )
+                          )
+                        )
                       ),
-                      1000
-                    ),
-                    MinDuration
-                  )
-                ),
-                Animated.set(transition.duration, 0)
+                      Animated.set(
+                        transition.duration,
+                        Animated.max(
+                          Animated.multiply(
+                            Animated.divide(
+                              Animated.abs(
+                                Animated.sub(
+                                  transition.translateY,
+                                  transition.startY
+                                )
+                              ),
+                              closeVelocityValue
+                            ),
+                            1000
+                          ),
+                          MinDuration
+                        )
+                      ),
+                    ],
+                    Animated.set(transition.duration, 0)
+                  ),
+                  Animated.debug(
+                    "close transition initialized",
+                    Animated.clockRunning(transition.clock)
+                  ),
+                  Animated.debug("transition startY", transition.startY),
+                  Animated.debug("transition duration is", transition.duration),
+                ],
+                Animated.debug("duration set on external", transition.duration)
               ),
-              Animated.debug(
-                "close transition initialized",
-                Animated.clockRunning(transition.clock)
-              ),
-              Animated.debug("transition startY", transition.startY),
-              Animated.debug("transition duration is", transition.duration),
             ]
           ),
           Animated.cond(
@@ -280,10 +346,10 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                     easing: Easing.out(Easing.cubic),
                   }
                 ),
-                Animated.cond(
-                  transition.finished,
-                  Animated.stopClock(transition.clock)
-                ),
+                Animated.cond(transition.finished, [
+                  Animated.stopClock(transition.clock),
+                  Animated.set(transition.durationSetOnExternal, 0),
+                ]),
                 Animated.cond(
                   Animated.diff(transition.finished),
                   Animated.cond(Animated.not(openCallbackOnce), [
@@ -315,6 +381,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                   transition.duration
                 ),
                 Animated.stopClock(transition.clock),
+                Animated.set(transition.durationSetOnExternal, 0),
                 Animated.set(transition.translateY, 0),
                 Animated.cond(Animated.not(openCallbackOnce), [
                   Animated.set(openCallbackOnce, 1),
@@ -347,13 +414,13 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                   {
                     toValue: transition.startY,
                     duration: transition.duration,
-                    easing: Easing.out(Easing.cubic),
+                    easing: Easing.out(Easing.quad),
                   }
                 ),
-                Animated.cond(
-                  transition.finished,
-                  Animated.stopClock(transition.clock)
-                ),
+                Animated.cond(transition.finished, [
+                  Animated.stopClock(transition.clock),
+                  Animated.set(transition.durationSetOnExternal, 0),
+                ]),
                 Animated.cond(
                   Animated.diff(transition.finished),
                   Animated.cond(Animated.not(closeCallbackOnce), [
@@ -388,6 +455,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                   transition.duration
                 ),
                 Animated.stopClock(transition.clock),
+                Animated.set(transition.durationSetOnExternal, 0),
                 Animated.set(transition.translateY, transition.startY),
                 Animated.cond(Animated.not(closeCallbackOnce), [
                   Animated.set(closeCallbackOnce, 1),
@@ -424,6 +492,9 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
     transition.frameTime,
     transition.duration,
     previousDiff,
+    openVelocityValue,
+    transitionAcceleration,
+    closeVelocityValue,
     openCallbackOnce,
     closeCallbackOnce,
   ]);
