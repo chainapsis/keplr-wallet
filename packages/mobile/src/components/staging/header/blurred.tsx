@@ -51,7 +51,7 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
   return (
     <BlurView
       blurType="light"
-      blurAmount={30}
+      blurAmount={60}
       reducedTransparencyFallbackColor="white"
     >
       <Animated.View

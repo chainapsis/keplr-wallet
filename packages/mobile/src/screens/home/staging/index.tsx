@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect } from "react";
-import { PageWithScrollView } from "../../../components/staging/page";
+import { PageWithScrollViewInBottomTabView } from "../../../components/staging/page";
 import { AccountCard } from "./account-card";
 import { RefreshControl } from "react-native";
 import { useStore } from "../../../stores";
@@ -64,7 +64,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   );
 
   return (
-    <PageWithScrollView
+    <PageWithScrollViewInBottomTabView
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -84,6 +84,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <GovernanceCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}
       />
-    </PageWithScrollView>
+    </PageWithScrollViewInBottomTabView>
   );
 });

@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { PageWithScrollView } from "../../../components/staging/page";
+import { PageWithScrollViewInBottomTabView } from "../../../components/staging/page";
 import { RightArrow, SettingItem, SettingSectionTitle } from "./components";
 import { SettingSelectAccountItem } from "./items/select-account";
 import { useSmartNavigation } from "../../../navigation";
@@ -14,7 +14,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
   const smartNavigation = useSmartNavigation();
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollViewInBottomTabView>
       <SettingSelectAccountItem />
       <SettingSectionTitle title="General" />
       <SettingFiatCurrencyItem topBorder={true} />
@@ -28,6 +28,6 @@ export const SettingScreen: FunctionComponent = observer(() => {
       {keychainStore.isBiometrySupported || keychainStore.isBiometryOn ? (
         <SettingBiometricLockItem />
       ) : null}
-    </PageWithScrollView>
+    </PageWithScrollViewInBottomTabView>
   );
 });

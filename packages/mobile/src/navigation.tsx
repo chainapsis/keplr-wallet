@@ -87,6 +87,7 @@ import {
 } from "./screens/tx-result";
 import { TorusSignInScreen } from "./screens/register/staging/torus";
 import { HeaderAddIcon } from "./components/staging/header/icon";
+import { BlurredBottomTabBar } from "./components/staging/bottom-tabbar";
 
 const {
   SmartNavigatorProvider,
@@ -600,6 +601,9 @@ export const MainTabNavigation: FunctionComponent = () => {
         },
         showLabel: false,
       }}
+      tabBar={(props) => (
+        <BlurredBottomTabBar {...props} enabledScreens={["Home"]} />
+      )}
     >
       <Tab.Screen name="Main" component={MainNavigation} />
       {__DEV__ ? <Tab.Screen name="Web" component={WebScreen} /> : null}

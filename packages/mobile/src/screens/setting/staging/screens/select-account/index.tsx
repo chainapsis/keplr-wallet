@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
-import { PageWithScrollView } from "../../../../../components/staging/page";
+import { PageWithScrollViewInBottomTabView } from "../../../../../components/staging/page";
 import { KeyStoreItem, KeyStoreSectionTitle } from "../../components";
 import Svg, { Path } from "react-native-svg";
 import { useStyle } from "../../../../../styles";
@@ -142,13 +142,13 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
   };
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollViewInBottomTabView>
       {renderKeyStores("torus", torusKeyStores)}
       {renderKeyStores("mnemonic seed", mnemonicKeyStores)}
       {renderKeyStores("ledger", ledgerKeyStores)}
       {renderKeyStores("private key", privateKeyStores)}
       {/* Margin bottom for last */}
       <View style={style.get("height-16")} />
-    </PageWithScrollView>
+    </PageWithScrollViewInBottomTabView>
   );
 });

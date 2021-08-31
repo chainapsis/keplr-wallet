@@ -18,6 +18,7 @@ const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
 export const PageWithScrollView: FunctionComponent<
   ScrollViewProps & {
     fixed?: React.ReactNode;
+    disableSafeArea?: boolean;
   }
 > = (props) => {
   const style = useStyle();
@@ -25,7 +26,15 @@ export const PageWithScrollView: FunctionComponent<
   useSetFocusedScreen();
   const scrollY = usePageRegisterScrollYValue();
 
-  const { style: propStyle, fixed, onScroll, ...restProps } = props;
+  const {
+    style: propStyle,
+    fixed,
+    onScroll,
+    disableSafeArea,
+    ...restProps
+  } = props;
+
+  const ContainerElement = disableSafeArea ? View : SafeAreaView;
 
   return (
     <React.Fragment>
@@ -40,7 +49,7 @@ export const PageWithScrollView: FunctionComponent<
       >
         <GradientBackground />
       </View>
-      <SafeAreaView style={style.get("flex-1")}>
+      <ContainerElement style={style.get("flex-1")}>
         <AnimatedKeyboardAwareScrollView
           style={StyleSheet.flatten([
             style.flatten(["flex-1", "padding-0", "overflow-visible"]),
@@ -63,7 +72,7 @@ export const PageWithScrollView: FunctionComponent<
         >
           {fixed}
         </View>
-      </SafeAreaView>
+      </ContainerElement>
     </React.Fragment>
   );
 };
