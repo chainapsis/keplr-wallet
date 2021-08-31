@@ -74,7 +74,7 @@ export const TurnOnBiometryModal: FunctionComponent<{
 
     return (
       <CardModal title="Biometry">
-        <Text style={style.flatten(["h6", "color-text-black-medium"])}>
+        <Text style={style.flatten(["body2", "color-text-black-medium"])}>
           Type password to turn on biometry
         </Text>
         <View style={style.get("height-40")} />
