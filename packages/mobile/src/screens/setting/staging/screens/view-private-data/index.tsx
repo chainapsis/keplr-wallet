@@ -1,11 +1,13 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { Text, View } from "react-native";
 import { useStyle } from "../../../../../styles";
+import { CheckIcon } from "../../../../../components/staging/icon";
 import { Button } from "../../../../../components/staging/button";
 import { observer } from "mobx-react-lite";
 import { WordChip } from "../../../../../components/staging/mnemonic";
 import Clipboard from "expo-clipboard";
 import { PageWithScrollView } from "../../../../../components/staging/page";
+import { useSimpleTimer } from "../../../../../hooks/use-simple-timer";
 
 export const ViewPrivateDataScreen: FunctionComponent<{
   route: {
@@ -21,6 +23,7 @@ export const ViewPrivateDataScreen: FunctionComponent<{
     },
   }) => {
     const style = useStyle();
+    const { isTimedOut, setTimer } = useSimpleTimer();
 
     const words = privateData.split(" ");
 
@@ -41,7 +44,7 @@ export const ViewPrivateDataScreen: FunctionComponent<{
           ])}
         >
           <View style={style.flatten(["flex-row", "flex-wrap"])}>
-            {privateDataType !== "mnemonic" ? (
+            {privateDataType === "mnemonic" ? (
               words.map((word, i) => {
                 return (
                   <WordChip key={i.toString()} index={i + 1} word={word} />
@@ -55,11 +58,22 @@ export const ViewPrivateDataScreen: FunctionComponent<{
           </View>
           <View style={style.flatten(["width-full"])}>
             <Button
-              textStyle={style.flatten(["text-button1"])}
+              textStyle={style.flatten([
+                "text-button1",
+                isTimedOut ? "color-success" : "color-primary",
+              ])}
+              {...(isTimedOut && {
+                rightIcon: (
+                  <View style={style.flatten(["margin-left-8"])}>
+                    <CheckIcon />
+                  </View>
+                ),
+              })}
               mode="text"
               text="Copy to Clipboard"
               onPress={() => {
                 Clipboard.setString(words.join(" "));
+                setTimer(3000);
               }}
             />
           </View>
