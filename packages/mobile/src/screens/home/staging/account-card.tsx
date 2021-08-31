@@ -109,6 +109,7 @@ export const AccountCard: FunctionComponent<{
           >
             <TokenSymbol
               size={44}
+              chainInfo={chainStore.current}
               currency={chainStore.current.stakeCurrency}
             />
             <View style={style.flatten(["margin-left-12"])}>

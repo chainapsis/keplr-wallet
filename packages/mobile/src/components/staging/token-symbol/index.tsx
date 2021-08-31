@@ -1,6 +1,6 @@
-import React, { FunctionComponent } from "react";
-import { Image, StyleSheet, View, ViewStyle } from "react-native";
-import { AppCurrency } from "@keplr-wallet/types";
+import React, { FunctionComponent, useMemo } from "react";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { AppCurrency, Currency } from "@keplr-wallet/types";
 import { useStyle } from "../../../styles";
 import {
   Circle,
@@ -10,6 +10,9 @@ import {
   Stop,
   Svg,
 } from "react-native-svg";
+import FastImage from "react-native-fast-image";
+import { Hash } from "@keplr-wallet/crypto";
+import { Buffer } from "buffer/";
 
 export const StakedTokenSymbol: FunctionComponent<{
   size: number;
@@ -35,13 +38,47 @@ export const TokenSymbol: FunctionComponent<{
   style?: ViewStyle;
 
   currency: AppCurrency;
+  chainInfo: {
+    stakeCurrency: Currency;
+  };
   size: number;
 
   imageScale?: number;
-}> = ({ style: propStyle, size, currency, imageScale = 0.6 }) => {
+}> = ({ style: propStyle, size, currency, chainInfo, imageScale = 0.6 }) => {
   const style = useStyle();
 
-  // TODO: Show the alternative img according to the currency, if the coinImageUrl is not undefiend.
+  const isStakeCurrency =
+    currency.coinMinimalDenom === chainInfo.stakeCurrency.coinMinimalDenom;
+
+  const deterministicNumber = useMemo(() => {
+    const bytes = Hash.sha256(Buffer.from(currency.coinMinimalDenom));
+    return (
+      (bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24)) >>> 0
+    );
+  }, [currency.coinMinimalDenom]);
+
+  const profileColor = useMemo(() => {
+    const colors = [
+      "sky-blue",
+      "mint",
+      "green",
+      "yellow-green",
+      "purple",
+      "red",
+      "orange",
+      "yellow",
+    ];
+
+    return colors[deterministicNumber % colors.length];
+  }, [deterministicNumber]);
+
+  console.log(
+    isStakeCurrency,
+    currency.coinMinimalDenom,
+    profileColor,
+    deterministicNumber
+  );
+
   return (
     <View
       style={StyleSheet.flatten([
@@ -50,25 +87,44 @@ export const TokenSymbol: FunctionComponent<{
           height: size,
           borderRadius: size,
         },
-        style.flatten([
-          "background-color-primary",
-          "padding-8",
-          "items-center",
-          "justify-center",
-          "overflow-hidden",
-          "items-center",
-          "justify-center",
-        ]),
+        style.flatten(
+          [
+            "items-center",
+            "justify-center",
+            "overflow-hidden",
+            "items-center",
+            "justify-center",
+            `background-color-profile-${profileColor}` as any,
+          ],
+          [isStakeCurrency && "background-color-primary"]
+        ),
         propStyle,
       ])}
     >
       {currency.coinImageUrl ? (
-        <Image
-          style={{ width: size * imageScale, height: size * imageScale }}
-          resizeMode="contain"
-          source={{ uri: currency.coinImageUrl }}
+        <FastImage
+          style={{
+            width: size * imageScale,
+            height: size * imageScale,
+          }}
+          resizeMode={FastImage.resizeMode.contain}
+          source={{
+            uri: currency.coinImageUrl,
+            cache: FastImage.cacheControl.web,
+          }}
         />
-      ) : null}
+      ) : (
+        <Text
+          style={{
+            textTransform: "uppercase",
+            fontSize: 22,
+            lineHeight: size,
+            color: "white",
+          }}
+        >
+          {currency.coinDenom[0]}
+        </Text>
+      )}
     </View>
   );
 };

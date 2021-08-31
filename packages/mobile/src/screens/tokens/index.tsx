@@ -9,6 +9,8 @@ import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/staging/icon";
 import { Card } from "../../components/staging/card";
 import { RectButton } from "../../components/staging/rect-button";
+import { Currency } from "@keplr-wallet/types";
+import { TokenSymbol } from "../../components/staging/token-symbol";
 
 export const TokensScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();
@@ -30,6 +32,7 @@ export const TokensScreen: FunctionComponent = observer(() => {
           return (
             <TokenItem
               key={token.currency.coinMinimalDenom}
+              chainInfo={chainStore.current}
               balance={token.balance}
             />
           );
@@ -42,8 +45,11 @@ export const TokensScreen: FunctionComponent = observer(() => {
 export const TokenItem: FunctionComponent<{
   containerStyle?: ViewStyle;
 
+  chainInfo: {
+    stakeCurrency: Currency;
+  };
   balance: CoinPretty;
-}> = ({ containerStyle, balance }) => {
+}> = ({ containerStyle, chainInfo, balance }) => {
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
@@ -77,14 +83,11 @@ export const TokenItem: FunctionComponent<{
         });
       }}
     >
-      <View
-        style={style.flatten([
-          "width-44",
-          "height-44",
-          "border-radius-64",
-          "background-color-border-white",
-          "margin-right-12",
-        ])}
+      <TokenSymbol
+        style={style.flatten(["margin-right-12"])}
+        size={44}
+        chainInfo={chainInfo}
+        currency={balance.currency}
       />
       <View>
         <Text
