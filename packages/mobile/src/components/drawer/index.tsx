@@ -12,6 +12,7 @@ import { Text } from "react-native-elements";
 import { useStyle } from "../../styles";
 import { RectButton } from "../staging/rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { VectorCharacter } from "../staging/vector-character";
 
 export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOptions>;
 
@@ -93,12 +94,20 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                       "width-44",
                       "height-44",
                       "border-radius-64",
+                      "items-center",
+                      "justify-center",
                       "background-color-primary-100",
                       "margin-right-16",
                     ],
                     [selected && "background-color-primary"]
                   )}
-                />
+                >
+                  <VectorCharacter
+                    char={chainInfo.chainName[0]}
+                    color="white"
+                    height={15}
+                  />
+                </View>
                 <View>
                   <Text
                     style={style.flatten([
@@ -107,7 +116,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                       "margin-bottom-4",
                     ])}
                   >
-                    {chainInfo.chainId}
+                    {chainInfo.chainName}
                   </Text>
                   <Text
                     style={style.flatten(["subtitle2", "color-text-black-low"])}

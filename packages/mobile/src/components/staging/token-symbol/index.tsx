@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { StyleSheet, View, ViewStyle } from "react-native";
 import { AppCurrency, Currency } from "@keplr-wallet/types";
 import { useStyle } from "../../../styles";
 import {
@@ -13,6 +13,7 @@ import {
 import FastImage from "react-native-fast-image";
 import { Hash } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
+import { VectorCharacter } from "../vector-character";
 
 export const StakedTokenSymbol: FunctionComponent<{
   size: number;
@@ -92,8 +93,6 @@ export const TokenSymbol: FunctionComponent<{
             "items-center",
             "justify-center",
             "overflow-hidden",
-            "items-center",
-            "justify-center",
             `background-color-profile-${profileColor}` as any,
           ],
           [isStakeCurrency && "background-color-primary"]
@@ -110,20 +109,14 @@ export const TokenSymbol: FunctionComponent<{
           resizeMode={FastImage.resizeMode.contain}
           source={{
             uri: currency.coinImageUrl,
-            cache: FastImage.cacheControl.web,
           }}
         />
       ) : (
-        <Text
-          style={{
-            textTransform: "uppercase",
-            fontSize: 22,
-            lineHeight: size,
-            color: "white",
-          }}
-        >
-          {currency.coinDenom[0]}
-        </Text>
+        <VectorCharacter
+          char={currency.coinDenom[0]}
+          height={Math.floor(size * 0.35)}
+          color="white"
+        />
       )}
     </View>
   );
