@@ -73,13 +73,6 @@ export const TokenSymbol: FunctionComponent<{
     return colors[deterministicNumber % colors.length];
   }, [deterministicNumber]);
 
-  console.log(
-    isStakeCurrency,
-    currency.coinMinimalDenom,
-    profileColor,
-    deterministicNumber
-  );
-
   return (
     <View
       style={StyleSheet.flatten([
