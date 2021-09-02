@@ -217,6 +217,8 @@ export const { StyleProvider, useStyle } = createStyleProvider({
   colors: {
     ...Colors,
     ...{
+      "splash-background": "#FBF8FF",
+
       // Belows are for the button props and may not be used as styles.
       "rect-button-default-ripple": "#CCCCCC",
 

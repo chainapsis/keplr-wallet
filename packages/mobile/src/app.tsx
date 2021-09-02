@@ -17,6 +17,7 @@ import codePush from "react-native-code-push";
 import { InteractionModalsProivder } from "./providers/interaction-modals-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LoadingScreenProvider } from "./providers/loading-screen";
+import * as SplashScreen from "expo-splash-screen";
 
 if (Platform.OS === "android") {
   // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
@@ -56,6 +57,14 @@ if (Platform.OS === "android") {
     Intl.DateTimeFormat.__setDefaultTimeZone(RNLocalize.getTimeZone());
   }
 }
+
+// Prevent native splash screen from autohiding.
+// UnlockScreen will hide the splash screen
+SplashScreen.preventAutoHideAsync()
+  .then((result) =>
+    console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`)
+  )
+  .catch(console.warn);
 
 export const App: FunctionComponent = codePush(() => {
   return (

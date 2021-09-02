@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent, useEffect, useRef } from "react";
-import { StatusBar, Text, View } from "react-native";
+import { StatusBar, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
   DrawerActions,
@@ -17,10 +17,10 @@ import {
   TransitionPresets,
 } from "@react-navigation/stack";
 import { SendScreen } from "./screens/send/staging";
-import { StakedListScreen, RedelegateValidatorScreen } from "./screens/stake";
+import { RedelegateValidatorScreen, StakedListScreen } from "./screens/stake";
 import {
-  GovernanceScreen,
   GovernanceDetailsScreen,
+  GovernanceScreen,
 } from "./screens/governance/staging";
 import {
   createDrawerNavigator,
@@ -39,8 +39,8 @@ import { RegisterIntroScreen } from "./screens/register/staging";
 import {
   NewMnemonicConfig,
   NewMnemonicScreen,
-  VerifyMnemonicScreen,
   RecoverMnemonicScreen,
+  VerifyMnemonicScreen,
 } from "./screens/register/staging/mnemonic";
 import { RegisterEndScreen } from "./screens/register/staging/end";
 import { RegisterNewUserScreen } from "./screens/register/staging/new-user";
@@ -53,10 +53,10 @@ import {
   RegisterConfig,
 } from "@keplr-wallet/hooks";
 import {
+  DelegateScreen,
   StakingDashboardScreen,
   ValidatorDetailsScreen,
   ValidatorListScreen,
-  DelegateScreen,
 } from "./screens/stake/staging";
 import { OpenDrawerIcon, ScanIcon } from "./components/staging/icon";
 import {
@@ -88,6 +88,7 @@ import {
 import { TorusSignInScreen } from "./screens/register/staging/torus";
 import { HeaderAddIcon } from "./components/staging/header/icon";
 import { BlurredBottomTabBar } from "./components/staging/bottom-tabbar";
+import { UnlockScreen } from "./screens/unlock";
 
 const {
   SmartNavigatorProvider,
@@ -245,16 +246,6 @@ const {
 );
 
 export { useSmartNavigation };
-
-const SplashScreen: FunctionComponent = () => {
-  const style = useStyle();
-
-  return (
-    <View style={style.flatten(["flex-1", "items-center", "justify-center"])}>
-      <Text>Loading...</Text>
-    </View>
-  );
-};
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -678,33 +669,31 @@ export const AppNavigation: FunctionComponent = observer(() => {
               routeNameRef.current = currentRouteName;
             }}
           >
-            {keyRingStore.status === KeyRingStatus.NOTLOADED ? (
-              <SplashScreen />
-            ) : (
-              <Stack.Navigator
-                initialRouteName={
-                  keyRingStore.status === KeyRingStatus.EMPTY
-                    ? "Register"
-                    : "MainTabDrawer"
-                }
-                screenOptions={{
-                  headerShown: false,
-                  ...TransitionPresets.SlideFromRightIOS,
-                }}
-                headerMode="screen"
-              >
-                <Stack.Screen
-                  name="MainTabDrawer"
-                  component={MainTabNavigationWithDrawer}
-                />
-                <Stack.Screen name="Register" component={RegisterNavigation} />
-                <Stack.Screen name="Others" component={OtherNavigation} />
-                <Stack.Screen
-                  name="AddressBooks"
-                  component={AddressBookStackScreen}
-                />
-              </Stack.Navigator>
-            )}
+            <Stack.Navigator
+              initialRouteName={
+                keyRingStore.status === KeyRingStatus.NOTLOADED ||
+                keyRingStore.status === KeyRingStatus.LOCKED
+                  ? "Unlock"
+                  : "MainTabDrawer"
+              }
+              screenOptions={{
+                headerShown: false,
+                ...TransitionPresets.SlideFromRightIOS,
+              }}
+              headerMode="screen"
+            >
+              <Stack.Screen name="Unlock" component={UnlockScreen} />
+              <Stack.Screen
+                name="MainTabDrawer"
+                component={MainTabNavigationWithDrawer}
+              />
+              <Stack.Screen name="Register" component={RegisterNavigation} />
+              <Stack.Screen name="Others" component={OtherNavigation} />
+              <Stack.Screen
+                name="AddressBooks"
+                component={AddressBookStackScreen}
+              />
+            </Stack.Navigator>
           </NavigationContainer>
           {/* <ModalsRenderer /> */}
         </SmartNavigatorProvider>
