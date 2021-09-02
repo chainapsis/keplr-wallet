@@ -311,7 +311,7 @@ export const RegisterNavigation: FunctionComponent = () => {
         ...PlainHeaderScreenOptionsPreset,
         headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
       }}
-      initialRouteName="Intro"
+      initialRouteName="Register.Intro"
       headerMode="screen"
     >
       <Stack.Screen
