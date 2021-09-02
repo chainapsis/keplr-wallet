@@ -2,7 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { PageWithScrollView } from "../../../../components/staging/page";
 import { Text, View } from "react-native";
 import { useStyle } from "../../../../styles";
-import { WordChip } from "./components";
+import { WordChip } from "../../../../components/staging/mnemonic";
 import { Button } from "../../../../components/staging/button";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useSmartNavigation } from "../../../../navigation";

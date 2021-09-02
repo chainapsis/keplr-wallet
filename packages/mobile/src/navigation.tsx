@@ -34,6 +34,7 @@ import { BorderlessButton } from "react-native-gesture-handler";
 import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 import { SettingScreen } from "./screens/setting/staging";
 import { SettingSelectAccountScreen } from "./screens/setting/staging/screens/select-account";
+import { ViewPrivateDataScreen } from "./screens/setting/staging/screens/view-private-data";
 import { WebScreen } from "./screens/web";
 import { RegisterIntroScreen } from "./screens/register/staging";
 import {
@@ -162,6 +163,9 @@ const {
       upperScreenName: "Settings",
     },
     SettingSelectAccount: {
+      upperScreenName: "Settings",
+    },
+    "Setting.ViewPrivateData": {
       upperScreenName: "Settings",
     },
     AddressBook: {
@@ -463,6 +467,10 @@ export const SettingStackScreen: FunctionComponent = () => {
           ...BlurredHeaderScreenOptionsPreset,
         }}
         component={SettingSelectAccountScreen}
+      />
+      <Stack.Screen
+        name="Setting.ViewPrivateData"
+        component={ViewPrivateDataScreen}
       />
     </Stack.Navigator>
   );
