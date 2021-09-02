@@ -100,6 +100,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         <View style={style.get("flex-5")} />
         <Image
           style={StyleSheet.flatten([style.flatten(["width-full"])])}
+          fadeDuration={0}
           resizeMode={FastImage.resizeMode.contain}
           source={require("../../assets/logo/splash-image.png")}
           onLoadEnd={async () => {

@@ -671,8 +671,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
           >
             <Stack.Navigator
               initialRouteName={
-                keyRingStore.status === KeyRingStatus.NOTLOADED ||
-                keyRingStore.status === KeyRingStatus.LOCKED
+                keyRingStore.status !== KeyRingStatus.UNLOCKED
                   ? "Unlock"
                   : "MainTabDrawer"
               }
