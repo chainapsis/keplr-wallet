@@ -17,7 +17,6 @@ import java.util.Arrays;
 
 import org.unimodules.adapters.react.ModuleRegistryAdapter;
 import org.unimodules.adapters.react.ReactModuleRegistryProvider;
-import org.unimodules.core.interfaces.SingletonModule;
 
 import com.microsoft.codepush.react.CodePush;
 

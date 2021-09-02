@@ -27,6 +27,7 @@
 		C15FB4A2265238C1007E541F /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = C15FB49E265238C1007E541F /* AppCenter-Config.plist */; };
 		C17473BB2641389E00D47EE5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C17473BA2641389E00D47EE5 /* GoogleService-Info.plist */; };
 		C1A1598326526EF9004ACC1F /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1A1598226526EF8004ACC1F /* Media.xcassets */; };
+		F440259FD5AC4BC59C04EFD2 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 28CAF3B0E76A4F7AACA3C6A1 /* SplashScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +79,7 @@
 		E8C4D832F1AB3C21F459078A /* Pods-mobile-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mobile-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-mobile-tvOSTests/Pods-mobile-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
+		28CAF3B0E76A4F7AACA3C6A1 /* SplashScreen.storyboard */ = {isa = PBXFileReference; name = "SplashScreen.storyboard"; path = "mobile/SplashScreen.storyboard"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = file.storyboard; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +145,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				28CAF3B0E76A4F7AACA3C6A1 /* SplashScreen.storyboard */,
 			);
 			name = mobile;
 			sourceTree = "<group>";
@@ -366,6 +369,7 @@
 				C15FB49F265238C1007E541F /* AppCenter-Config.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				C17473BB2641389E00D47EE5 /* GoogleService-Info.plist in Resources */,
+				F440259FD5AC4BC59C04EFD2 /* SplashScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
