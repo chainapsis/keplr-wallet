@@ -15,7 +15,7 @@
     "build:provider": "tsc --project tsconfig.provider.json && browserify build/injected/index.js -o build/injected/injected-provider.bundle.js && cp -rf build/injected/injected-provider.bundle.js android/app/src/main/assets/.",
     "start": "react-native start",
     "start:reset": "react-native start --reset-cache",
-    "generate:splash-image": "expo-splash-screen --background-color \"#FBF8FF\" --image-path ./src/assets/logo/splash-image.png --image-resize-mode contain --status-bar-translucent --status-bar-background-color \"#FBF8FF\" --status-bar-style dark-content",
+    "generate:splash-image": "expo-splash-screen --background-color \"#FBF8FF\" --image-path ./src/assets/logo/splash-screen-only-k.png --image-resize-mode contain --status-bar-translucent --status-bar-background-color \"#FBF8FF\" --status-bar-style dark-content",
     "pod-install": "pod-install",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
