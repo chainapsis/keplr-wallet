@@ -9,6 +9,8 @@ export const CheckIcon: FunctionComponent<{
   return (
     <Svg
       viewBox="0 0 16 16"
+      width={width}
+      height={height}
       style={{
         width,
         height,

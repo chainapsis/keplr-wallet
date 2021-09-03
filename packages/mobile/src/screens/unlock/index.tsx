@@ -81,6 +81,9 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       !routeToRegisterOnce.current &&
       keyRingStore.status === KeyRingStatus.EMPTY
     ) {
+      // Splash screen is not hided automatically. (See app.tsx)
+      console.log("Will hide splash screen");
+      SplashScreen.hideAsync();
       routeToRegisterOnce.current = true;
       navigation.dispatch(
         StackActions.replace("Register", {

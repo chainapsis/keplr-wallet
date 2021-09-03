@@ -298,14 +298,16 @@ export class KeyRingStore {
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
-  @flow
-  *showKeyRing(index: number, password: string) {
+  async showKeyRing(index: number, password: string) {
     const msg = new ShowKeyRingMsg(index, password);
-    return yield* toGenerator(this.requester.sendMessage(BACKGROUND_PORT, msg));
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   @flow
   *deleteKeyRing(index: number, password: string) {
+    const selectedIndex = this.multiKeyStoreInfo.findIndex(
+      (keyStore) => keyStore.selected
+    );
     const msg = new DeleteKeyRingMsg(index, password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
@@ -314,7 +316,10 @@ export class KeyRingStore {
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
 
     // Selected keystore may be changed if the selected one is deleted.
-    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+    if (selectedIndex === index) {
+      this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+      this.selectablesMap.forEach((selectables) => selectables.refresh());
+    }
   }
 
   @flow

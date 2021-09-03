@@ -32,6 +32,7 @@ export const SettingSectionTitle: FunctionComponent<{
 
 export const SettingItem: FunctionComponent<{
   containerStyle?: ViewStyle;
+  style?: ViewStyle;
   labelStyle?: TextStyle;
   paragraphStyle?: TextStyle;
 
@@ -45,6 +46,7 @@ export const SettingItem: FunctionComponent<{
   topBorder?: boolean;
 }> = ({
   containerStyle,
+  style: propStyle,
   labelStyle,
   paragraphStyle,
   label,
@@ -84,14 +86,18 @@ export const SettingItem: FunctionComponent<{
             </Text>
           ) : null}
         </View>
-        <View style={style.flatten(["flex-1"])} />
-        {right}
+        {right ? (
+          <React.Fragment>
+            <View style={style.flatten(["flex-1"])} />
+            {right}
+          </React.Fragment>
+        ) : null}
       </React.Fragment>
     );
   };
 
   return (
-    <View>
+    <View style={containerStyle}>
       {topBorder ? (
         <View
           style={style.flatten(["height-1", "background-color-border-white"])}
@@ -107,7 +113,7 @@ export const SettingItem: FunctionComponent<{
               "flex-row",
               "items-center",
             ]),
-            containerStyle,
+            propStyle,
           ])}
           onPress={onPress}
         >
@@ -123,7 +129,7 @@ export const SettingItem: FunctionComponent<{
               "flex-row",
               "items-center",
             ]),
-            containerStyle,
+            propStyle,
           ])}
         >
           {renderChildren()}

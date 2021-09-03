@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { Text, View } from "react-native";
-import { useStyle } from "../../../../../styles";
+import { useStyle } from "../../../styles";
 
 export const WordChip: FunctionComponent<{
   index: number;
