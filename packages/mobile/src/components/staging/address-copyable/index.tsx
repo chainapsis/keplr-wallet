@@ -4,8 +4,9 @@ import { useStyle } from "../../../styles";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import Clipboard from "expo-clipboard";
 import { RectButton } from "../rect-button";
-import { CopyIcon, CheckIcon } from "../icon";
+import { CopyIcon } from "../icon";
 import { useSimpleTimer } from "../../../hooks/use-simple-timer";
+import LottieView from "lottie-react-native";
 
 export const AddressCopyable: FunctionComponent<{
   style?: ViewStyle;
@@ -31,7 +32,7 @@ export const AddressCopyable: FunctionComponent<{
       ])}
       onPress={() => {
         Clipboard.setString(address);
-        setTimer(3000);
+        setTimer(2000);
       }}
       rippleColor={style.get("color-button-primary-outline-ripple").color}
       underlayColor={style.get("color-button-primary-outline-underlay").color}
@@ -43,7 +44,28 @@ export const AddressCopyable: FunctionComponent<{
       <View style={style.flatten(["margin-left-4", "width-20"])}>
         {isTimedOut ? (
           <View style={style.flatten(["margin-left-2"])}>
-            <CheckIcon color={style.get("color-primary").color} />
+            <View style={style.flatten(["width-20", "height-20"])}>
+              <View
+                style={{
+                  left: 0,
+                  right: 4,
+                  top: 0,
+                  bottom: 0,
+                  ...style.flatten([
+                    "absolute",
+                    "justify-center",
+                    "items-center",
+                  ]),
+                }}
+              >
+                <LottieView
+                  source={require("../../../assets/lottie/check.json")}
+                  autoPlay
+                  loop
+                  style={style.flatten(["width-58", "height-58"])}
+                />
+              </View>
+            </View>
           </View>
         ) : (
           <CopyIcon color={style.get("color-primary").color} size={19} />
