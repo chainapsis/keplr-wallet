@@ -17,7 +17,8 @@
     "start:reset": "react-native start --reset-cache",
     "generate:splash-image": "expo-splash-screen --background-color \"#FBF8FF\" --image-path ./src/assets/logo/splash-screen-only-k.png --image-resize-mode contain --status-bar-translucent --status-bar-background-color \"#FBF8FF\" --status-bar-style dark-content",
     "pod-install": "pod-install",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "postinstall": "sh ./scripts/fix-android-splash-screen-flash.sh"
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
@@ -64,7 +65,7 @@
     "eventemitter3": "^4.0.7",
     "expo-clipboard": "^1.0.1",
     "expo-random": "^11.0.0",
-    "expo-splash-screen": "^0.11.4",
+    "expo-splash-screen": "=0.11.4",
     "expo-web-browser": "^9.2.0",
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",

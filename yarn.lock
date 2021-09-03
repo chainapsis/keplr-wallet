@@ -10543,7 +10543,7 @@ expo-random@^11.0.0:
   dependencies:
     base64-js "^1.3.0"
 
-expo-splash-screen@^0.11.4:
+expo-splash-screen@=0.11.4:
   version "0.11.4"
   resolved "https://registry.yarnpkg.com/expo-splash-screen/-/expo-splash-screen-0.11.4.tgz#fe474748c132ed2e45f477b882e2cf8735d9db98"
   integrity sha512-WycJfWaBuj/W9KSgYTUHjm90VkwZ0Pv/EIqh2pW4/zw10AoSLHVgVA0CoC5R944iE42m6KWioax/0ydHU61qzA==
