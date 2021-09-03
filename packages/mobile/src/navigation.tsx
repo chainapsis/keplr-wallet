@@ -226,6 +226,10 @@ const {
     "Governance Details": {
       proposalId: string;
     };
+    "Setting.ViewPrivateData": {
+      privateData: string;
+      privateDataType: string;
+    };
     AddressBook: {
       recipientConfig?: IRecipientConfig;
       memoConfig?: IMemoConfig;

@@ -7,17 +7,14 @@ import { SettingFiatCurrencyItem } from "./items/fiat-currency";
 import { SettingBiometricLockItem } from "./items/biometric-lock";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { PasswordModal } from "../../../modals/staging/password";
+import { SettingRemoveAccountItem } from "./items/remove-account";
+import { canShowPrivateData } from "./screens/view-private-data";
+import { SettingViewPrivateDataItem } from "./items/view-private-data";
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const { keychainStore, keyRingStore } = useStore();
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = React.useState(false);
 
   const smartNavigation = useSmartNavigation();
-
-  const passwordModalTitle = `View ${
-    keyRingStore.keyRingType === "mnemonic" ? "Mnemonic Seed" : "Private key"
-  }`;
 
   return (
     <PageWithScrollViewInBottomTabView>
@@ -32,23 +29,15 @@ export const SettingScreen: FunctionComponent = observer(() => {
         }}
       />
       <SettingSectionTitle title="General" />
-      {keyRingStore.keyRingType !== "ledger" && (
-        <SettingItem
-          label={passwordModalTitle}
-          onPress={() => {
-            setIsPasswordModalOpen(true);
-          }}
-        />
+      {canShowPrivateData(keyRingStore.keyRingType) && (
+        <SettingViewPrivateDataItem topBorder={true} />
       )}
       {keychainStore.isBiometrySupported || keychainStore.isBiometryOn ? (
-        <SettingBiometricLockItem />
+        <SettingBiometricLockItem
+          topBorder={!canShowPrivateData(keyRingStore.keyRingType)}
+        />
       ) : null}
-      <PasswordModal
-        isOpen={isPasswordModalOpen}
-        close={() => setIsPasswordModalOpen(false)}
-        title={passwordModalTitle}
-        smartNavigation={smartNavigation}
-      />
+      <SettingRemoveAccountItem topBorder={true} />
     </PageWithScrollViewInBottomTabView>
   );
 });

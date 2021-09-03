@@ -12,7 +12,7 @@ export const SettingSelectAccountItem: FunctionComponent = observer(() => {
 
   const selected = keyRingStore.multiKeyStoreInfo.find(
     (keyStore) => keyStore.selected
-  )!;
+  );
 
   const style = useStyle();
 
@@ -26,8 +26,8 @@ export const SettingSelectAccountItem: FunctionComponent = observer(() => {
       <KeyStoreItem
         containerStyle={style.flatten(["padding-left-10"])}
         defaultRightWalletIconStyle={style.flatten(["margin-right-2"])}
-        label={selected.meta?.name || "Keplr Account"}
-        paragraph={getKeyStoreParagraph(selected)}
+        label={selected ? selected.meta?.name || "Keplr Account" : "No Account"}
+        paragraph={selected ? getKeyStoreParagraph(selected) : undefined}
         right={<RightArrow />}
         topBorder={false}
         bottomBorder={false}
