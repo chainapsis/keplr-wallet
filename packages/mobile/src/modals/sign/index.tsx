@@ -2,10 +2,10 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { ScrollView, Text, View } from "react-native";
-import { useStyle } from "../../../styles";
-import { useInteractionInfo } from "../../../hooks";
-import { useStore } from "../../../stores";
-import { FeeButtons, MemoInput } from "../../../components/staging/input";
+import { useStyle } from "../../styles";
+import { useInteractionInfo } from "../../hooks";
+import { useStore } from "../../stores";
+import { FeeButtons, MemoInput } from "../../components/staging/input";
 import {
   useFeeConfig,
   useGasConfig,
@@ -13,7 +13,7 @@ import {
   useSignDocAmountConfig,
   useSignDocHelper,
 } from "@keplr-wallet/hooks";
-import { Button } from "../../../components/staging/button";
+import { Button } from "../../components/staging/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
 import { Msg } from "./msg";
 import { observer } from "mobx-react-lite";

@@ -8,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { useStyle } from "../../../styles";
+import { useStyle } from "../../styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { useModalState, useModalTransision } from "../base";

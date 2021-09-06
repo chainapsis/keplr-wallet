@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { View, Text } from "react-native";
-import { useStyle } from "../../../styles";
+import { useStyle } from "../../styles";
 
 export const Msg: FunctionComponent<{
   title: string;

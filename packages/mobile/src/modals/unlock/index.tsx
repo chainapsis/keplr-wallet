@@ -1,12 +1,12 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { registerModal, useModalState } from "../base";
 import { SafeAreaView, View } from "react-native";
-import { useStyle } from "../../../styles";
-import { GradientBackground } from "../../../components/svg";
-import { useStore } from "../../../stores";
+import { useStyle } from "../../styles";
+import { GradientBackground } from "../../components/svg";
+import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
-import { TextInput } from "../../../components/staging/input";
-import { Button } from "../../../components/staging/button";
+import { TextInput } from "../../components/staging/input";
+import { Button } from "../../components/staging/button";
 import delay from "delay";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 

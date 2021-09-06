@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useRef } from "react";
-import { registerModal, useModalState } from "../../modals/staging/base";
+import { registerModal, useModalState } from "../../modals/base";
 import { LoadingSpinner } from "../../components/staging/spinner";
 import { View } from "react-native";
 import { useStyle } from "../../styles";

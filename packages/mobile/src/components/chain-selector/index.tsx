@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
-import { registerModal } from "../../modals/staging/base";
-import { CardModal } from "../../modals/staging/card";
+import { registerModal } from "../../modals/base";
+import { CardModal } from "../../modals/card";
 import { ScrollView, Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { observer } from "mobx-react-lite";

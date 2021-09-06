@@ -13,7 +13,7 @@ import { GovernanceProposalStatusChip } from "./card";
 import { IntPretty } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
-import { registerModal } from "../../modals/staging/base";
+import { registerModal } from "../../modals/base";
 import { RectButton } from "../../components/staging/rect-button";
 import { useSmartNavigation } from "../../navigation";
 

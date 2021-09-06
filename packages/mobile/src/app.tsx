@@ -10,7 +10,7 @@ import {
 import { LoadingIndicatorProvider } from "./components/loading-indicator";
 import { BioAuthProvider } from "./hooks/bio-auth";
 import { IntlProvider } from "react-intl";
-import { ModalsProvider } from "./modals/staging/base";
+import { ModalsProvider } from "./modals/base";
 import { Platform } from "react-native";
 
 import codePush from "react-native-code-push";

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { SettingItem } from "../components";
-import { PasswordInputModal } from "../../../modals/staging/password-input/modal";
+import { PasswordInputModal } from "../../../modals/password-input/modal";
 import { useStore } from "../../../stores";
 import { getPrivateDataTitle } from "../screens/view-private-data";
 import { useSmartNavigation } from "../../../navigation";

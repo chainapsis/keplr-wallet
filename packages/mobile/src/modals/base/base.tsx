@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { StyleSheet, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useStyle } from "../../../styles";
+import { useStyle } from "../../styles";
 import Animated, { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useModalTransision } from "./transition";

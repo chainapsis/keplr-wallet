@@ -2,15 +2,15 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { PermissionsAndroid, Platform, Text, View } from "react-native";
-import { useStyle } from "../../../styles";
-import { useStore } from "../../../stores";
+import { useStyle } from "../../styles";
+import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
 import { BleManager, State } from "react-native-ble-plx";
 import TransportBLE from "@ledgerhq/react-native-hw-transport-ble";
-import { LoadingSpinner } from "../../../components/staging/spinner";
+import { LoadingSpinner } from "../../components/staging/spinner";
 import { Ledger, LedgerInitErrorOn } from "@keplr-wallet/background";
-import { getLastUsedLedgerDeviceId } from "../../../utils/ledger";
-import { RectButton } from "../../../components/staging/rect-button";
+import { getLastUsedLedgerDeviceId } from "../../utils/ledger";
+import { RectButton } from "../../components/staging/rect-button";
 
 export const LedgerGranterModal: FunctionComponent<{
   isOpen: boolean;

@@ -4,7 +4,7 @@ import { Toggle } from "../../../components/staging/toggle";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import delay from "delay";
-import { PasswordInputModal } from "../../../modals/staging/password-input/modal";
+import { PasswordInputModal } from "../../../modals/password-input/modal";
 
 export const SettingBiometricLockItem: FunctionComponent<{
   topBorder?: boolean;

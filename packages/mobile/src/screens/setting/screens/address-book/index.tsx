@@ -17,7 +17,7 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { RectButton } from "../../../../components/staging/rect-button";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { HeaderRightButton } from "../../../../components/staging/header";
-import { AddressDeleteModal } from "../../../../modals/staging/address";
+import { AddressDeleteModal } from "../../../../modals/address";
 import { HeaderAddIcon } from "../../../../components/staging/header/icon";
 
 const addressBookItemComponent = {

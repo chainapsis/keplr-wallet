@@ -2,10 +2,10 @@ import React, { FunctionComponent } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { Image, Text, View } from "react-native";
-import { SessionRequestApproval } from "../../../stores/wallet-connect";
-import { useStyle } from "../../../styles";
-import { Button } from "../../../components/staging/button";
-import { WalletConnectIcon } from "../../../components/staging/icon";
+import { SessionRequestApproval } from "../../stores/wallet-connect";
+import { useStyle } from "../../styles";
+import { Button } from "../../components/staging/button";
+import { WalletConnectIcon } from "../../components/staging/icon";
 
 export const WalletConnectApprovalModal: FunctionComponent<{
   isOpen: boolean;
@@ -51,7 +51,7 @@ export const WalletConnectApprovalModal: FunctionComponent<{
           <Image
             style={style.flatten(["height-74", "margin-bottom-68"])}
             resizeMode="contain"
-            source={require("../../../assets/image/wallet-connection.png")}
+            source={require("../../assets/image/wallet-connection.png")}
           />
         </View>
         <View style={style.flatten(["flex-row"])}>

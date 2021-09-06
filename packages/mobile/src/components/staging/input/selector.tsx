@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { useStyle } from "../../../styles";
-import { registerModal } from "../../../modals/staging/base";
+import { registerModal } from "../../../modals/base";
 import { RectButton } from "../rect-button";
 
 export const SelectorModal: FunctionComponent<{
