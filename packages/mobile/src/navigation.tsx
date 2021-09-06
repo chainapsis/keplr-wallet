@@ -66,6 +66,7 @@ import { NewLedgerScreen } from "./screens/register/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
   BlurredHeaderScreenOptionsPreset,
+  getPlainHeaderScreenOptionsPresetWithBackgroundColor,
   HeaderLeftButton,
   HeaderRightButton,
   PlainHeaderScreenOptionsPreset,
@@ -445,7 +446,16 @@ export const SettingStackScreen: FunctionComponent = () => {
       }}
       headerMode="screen"
     >
-      <Stack.Screen name="Setting" component={SettingScreen} />
+      <Stack.Screen
+        options={{
+          ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
+            style.get("color-setting-screen-background").color
+          ),
+          headerTitleStyle: style.flatten(["h3", "color-text-black-high"]),
+        }}
+        name="Setting"
+        component={SettingScreen}
+      />
       <Stack.Screen
         name="SettingSelectAccount"
         options={{

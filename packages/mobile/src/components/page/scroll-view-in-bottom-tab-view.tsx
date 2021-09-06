@@ -6,6 +6,8 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 export const PageWithScrollViewInBottomTabView: FunctionComponent<
   ScrollViewProps & {
     fixed?: React.ReactNode;
+
+    backgroundColor?: string;
   }
 > = (props) => {
   const bottomTabBarHeight = useBottomTabBarHeight();

@@ -10,14 +10,19 @@ import { useStore } from "../../stores";
 import { SettingRemoveAccountItem } from "./items/remove-account";
 import { canShowPrivateData } from "./screens/view-private-data";
 import { SettingViewPrivateDataItem } from "./items/view-private-data";
+import { useStyle } from "../../styles";
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const { keychainStore, keyRingStore } = useStore();
 
+  const style = useStyle();
+
   const smartNavigation = useSmartNavigation();
 
   return (
-    <PageWithScrollViewInBottomTabView>
+    <PageWithScrollViewInBottomTabView
+      backgroundColor={style.get("color-setting-screen-background").color}
+    >
       <SettingSelectAccountItem />
       <SettingSectionTitle title="General" />
       <SettingFiatCurrencyItem topBorder={true} />

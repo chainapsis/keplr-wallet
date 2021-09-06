@@ -19,6 +19,8 @@ export const PageWithScrollView: FunctionComponent<
   ScrollViewProps & {
     fixed?: React.ReactNode;
     disableSafeArea?: boolean;
+
+    backgroundColor?: string;
   }
 > = (props) => {
   const style = useStyle();
@@ -31,6 +33,7 @@ export const PageWithScrollView: FunctionComponent<
     fixed,
     onScroll,
     disableSafeArea,
+    backgroundColor,
     ...restProps
   } = props;
 
@@ -47,7 +50,17 @@ export const PageWithScrollView: FunctionComponent<
           bottom: -100,
         }}
       >
-        <GradientBackground />
+        {backgroundColor ? (
+          <View
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundColor,
+            }}
+          />
+        ) : (
+          <GradientBackground />
+        )}
       </View>
       <ContainerElement style={style.get("flex-1")}>
         <AnimatedKeyboardAwareScrollView

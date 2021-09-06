@@ -66,6 +66,7 @@ export const Colors = {
   transparent: "rgba(255,255,255,0)",
   "modal-backdrop": "rgba(9,18,50,0.4)",
   "card-modal-handle": "#DCDCE3",
+  "setting-screen-background": "#FAFBFD",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider({
