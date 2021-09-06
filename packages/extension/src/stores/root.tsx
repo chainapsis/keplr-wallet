@@ -1,4 +1,5 @@
 import { ChainStore } from "./chain";
+import { AnalyticsStore } from "./analytics";
 import { EmbedChainInfos } from "../config";
 import { FiatCurrencies } from "../config.ui";
 import {
@@ -42,6 +43,8 @@ export class RootStore {
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
+  public readonly analyticsStore: AnalyticsStore;
+
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   constructor() {
@@ -49,6 +52,18 @@ export class RootStore {
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 
     // Order is important.
+    this.analyticsStore = new AnalyticsStore("KeplrExtension", {
+      amplitudeConfig: {
+        platform: "Extension",
+        includeUtm: true,
+        includeReferrer: true,
+        includeFbclid: true,
+        includeGclid: true,
+        saveEvents: true,
+        saveParamsReferrerOncePerSession: false,
+      },
+    });
+
     this.interactionStore = new InteractionStore(
       router,
       new InExtensionMessageRequester()
