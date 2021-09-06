@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from "react";
 import Svg, {
-  SvgProps,
   Path,
   Defs,
   RadialGradient,
@@ -30,9 +29,6 @@ export const KeplrLogo: FunctionComponent<{
         fillOpacity={0.68}
       />
       <Path
-        style={{
-          mixBlendMode: "overlay",
-        }}
         d="M69.095 0H17.817C8.377 0 .724 7.653.724 17.093V68.37c0 9.44 7.652 17.093 17.093 17.093h51.278c9.44 0 17.093-7.652 17.093-17.093V17.093C86.188 7.653 78.535 0 69.095 0z"
         fill="url(#prefix__paint2_radial)"
         fillOpacity={0.2}
