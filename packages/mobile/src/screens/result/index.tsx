@@ -1,9 +1,8 @@
 import React, { FunctionComponent } from "react";
-import Icon from "react-native-vector-icons/Feather";
-import { PageWithScrollView } from "../../components/staging/page";
+import { PageWithScrollView } from "../../components/page";
 import { useStyle } from "../../styles";
-import { View, Text, Image, Linking } from "react-native";
-import { Button } from "../../components/staging/button";
+import { View, Text, Linking } from "react-native";
+import { Button } from "../../components/button";
 import { useSmartNavigation } from "../../navigation";
 import LottieView from "lottie-react-native";
 
@@ -81,14 +80,6 @@ export const ResultScreen: FunctionComponent = () => {
         size="large"
         text="View on Mintscan"
         mode="text"
-        rightIcon={
-          <Icon
-            style={style.flatten(["height-20", "margin-left-2"])}
-            name="chevron-right"
-            color={style.get("color-primary").color}
-            size={20}
-          />
-        }
         onPress={() => {
           Linking.openURL("https://naver.com");
         }}

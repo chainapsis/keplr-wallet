@@ -10,42 +10,40 @@ import {
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
-import { HomeScreen } from "./screens/home/staging";
+import { HomeScreen } from "./screens/home";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { SendScreen } from "./screens/send/staging";
-import { RedelegateValidatorScreen, StakedListScreen } from "./screens/stake";
+import { SendScreen } from "./screens/send";
 import {
   GovernanceDetailsScreen,
   GovernanceScreen,
-} from "./screens/governance/staging";
+} from "./screens/governance";
 import {
   createDrawerNavigator,
   useIsDrawerOpen,
 } from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import { DrawerContent } from "./components/drawer";
 import { useStyle } from "./styles";
 import { BorderlessButton } from "react-native-gesture-handler";
 import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
-import { SettingScreen } from "./screens/setting/staging";
-import { SettingSelectAccountScreen } from "./screens/setting/staging/screens/select-account";
-import { ViewPrivateDataScreen } from "./screens/setting/staging/screens/view-private-data";
+import { SettingScreen } from "./screens/setting";
+import { SettingSelectAccountScreen } from "./screens/setting/screens/select-account";
+import { ViewPrivateDataScreen } from "./screens/setting/screens/view-private-data";
 import { WebScreen } from "./screens/web";
-import { RegisterIntroScreen } from "./screens/register/staging";
+import { RegisterIntroScreen } from "./screens/register";
 import {
   NewMnemonicConfig,
   NewMnemonicScreen,
   RecoverMnemonicScreen,
   VerifyMnemonicScreen,
-} from "./screens/register/staging/mnemonic";
-import { RegisterEndScreen } from "./screens/register/staging/end";
-import { RegisterNewUserScreen } from "./screens/register/staging/new-user";
-import { RegisterNotNewUserScreen } from "./screens/register/staging/not-new-user";
+} from "./screens/register/mnemonic";
+import { RegisterEndScreen } from "./screens/register/end";
+import { RegisterNewUserScreen } from "./screens/register/new-user";
+import { RegisterNotNewUserScreen } from "./screens/register/not-new-user";
 import { ResultScreen } from "./screens/result";
 import {
   AddressBookConfig,
@@ -58,23 +56,23 @@ import {
   StakingDashboardScreen,
   ValidatorDetailsScreen,
   ValidatorListScreen,
-} from "./screens/stake/staging";
-import { OpenDrawerIcon, ScanIcon } from "./components/staging/icon";
+} from "./screens/stake";
+import { OpenDrawerIcon, ScanIcon } from "./components/icon";
 import {
   AddAddressBookScreen,
   AddressBookScreen,
-} from "./screens/setting/staging/screens/address-book";
-import { NewLedgerScreen } from "./screens/register/staging/ledger";
+} from "./screens/setting/screens/address-book";
+import { NewLedgerScreen } from "./screens/register/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
   BlurredHeaderScreenOptionsPreset,
   HeaderLeftButton,
   HeaderRightButton,
   PlainHeaderScreenOptionsPreset,
-} from "./components/staging/header";
+} from "./components/header";
 import { TokensScreen } from "./screens/tokens";
-import { UndelegateScreen } from "./screens/stake/staging/undelegate";
-import { RedelegateScreen } from "./screens/stake/staging/redelegate";
+import { UndelegateScreen } from "./screens/stake/undelegate";
+import { RedelegateScreen } from "./screens/stake/redelegate";
 import { CameraScreen } from "./screens/camera";
 import {
   FocusedScreenProvider,
@@ -86,9 +84,9 @@ import {
   TxPendingResultScreen,
   TxSuccessResultScreen,
 } from "./screens/tx-result";
-import { TorusSignInScreen } from "./screens/register/staging/torus";
-import { HeaderAddIcon } from "./components/staging/header/icon";
-import { BlurredBottomTabBar } from "./components/staging/bottom-tabbar";
+import { TorusSignInScreen } from "./screens/register/torus";
+import { HeaderAddIcon } from "./components/header/icon";
+import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
 
 const {
@@ -381,11 +379,6 @@ export const OtherNavigation: FunctionComponent = () => {
         name="Validator Details"
         component={ValidatorDetailsScreen}
       />
-      <Stack.Screen name="Staked List" component={StakedListScreen} />
-      <Stack.Screen
-        name="Redelegate Validator"
-        component={RedelegateValidatorScreen}
-      />
       <Stack.Screen name="Governance" component={GovernanceScreen} />
       <Stack.Screen
         name="Governance Details"
@@ -558,7 +551,14 @@ export const MainTabNavigation: FunctionComponent = () => {
                 </Svg>
               );
             case "Web":
-              return <Ionicons name="apps-outline" size={size} color={color} />;
+              return (
+                <Svg width={size} height={size} fill="none" viewBox="0 0 24 24">
+                  <Path
+                    fill={color}
+                    d="M12 2c-.528 0-1.046.045-1.55.131l-.311 1.302c-.484 2.023-2.544 3.225-4.52 2.635l-1.084-.325A10.124 10.124 0 003 8.598l.805.781a3.663 3.663 0 010 5.242L3 15.402c.36 1.043.882 2.006 1.535 2.855l1.084-.325c1.976-.59 4.036.612 4.52 2.635l.31 1.302a9.187 9.187 0 003.101 0l.311-1.302c.484-2.023 2.544-3.225 4.52-2.635l1.084.325A10.124 10.124 0 0021 15.402l-.805-.781a3.663 3.663 0 010-5.242L21 8.598a10.113 10.113 0 00-1.535-2.855l-1.084.325c-1.976.59-4.036-.612-4.52-2.635l-.31-1.302A9.184 9.184 0 0012 2zm0 7.273c1.491 0 2.7 1.22 2.7 2.727 0 1.506-1.209 2.727-2.7 2.727S9.3 13.507 9.3 12c0-1.506 1.209-2.727 2.7-2.727z"
+                  />
+                </Svg>
+              );
             case "Settings":
               return (
                 <Svg width={size} height={size} fill="none" viewBox="0 0 24 24">

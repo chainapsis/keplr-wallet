@@ -3,13 +3,6 @@ import { EnumTextTransform, EnumTextDecorationLine } from "./builder/types";
 import { Platform } from "react-native";
 import { getPlatformFontWeight } from "./builder/utils";
 
-export * from "./layout";
-export * from "./font";
-export * from "./common";
-export * from "./flex";
-export * from "./border";
-export * from "./colors";
-
 export const Colors = {
   primary: "#4762E7",
   "primary-10": "#F1F3FC",
