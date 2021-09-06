@@ -1,17 +1,18 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithView } from "../../components/staging/page";
-import { Linking, Text, View } from "react-native";
+import { Linking, Text, View, Animated, Dimensions } from "react-native";
 import { Button } from "../../components/staging/button";
 import { useStyle } from "../../styles";
-import Svg, { Circle, Path } from "react-native-svg";
 import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/staging/icon";
+import LottieView from "lottie-react-native";
 
 export const TxFailedResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
+  const [failedAnimProgress] = React.useState(new Animated.Value(0));
 
   const route = useRoute<
     RouteProp<
@@ -37,26 +38,46 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
 
   const chainInfo = chainStore.getChain(chainId);
 
+  useEffect(() => {
+    const animateLottie = () => {
+      Animated.timing(failedAnimProgress, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: false,
+      }).start();
+    };
+
+    const timeoutId = setTimeout(animateLottie, 500);
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <PageWithView
-      style={style.flatten(["padding-x-42", "items-center", "justify-center"])}
+      style={{
+        paddingTop: Dimensions.get("window").height * 0.2,
+        paddingBottom: Dimensions.get("window").height * 0.2,
+        ...style.flatten(["padding-x-42", "items-center"]),
+      }}
     >
-      <Svg width="122" height="122" fill="none" viewBox="0 0 122 122">
-        <Circle
-          cx="61"
-          cy="61"
-          r="57"
-          stroke={style.get("color-danger").color}
-          strokeWidth="8"
-        />
-        <Path
-          stroke={style.get("color-danger").color}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="8"
-          d="M43.5 43l35 35M78.5 43l-35 35"
-        />
-      </Svg>
+      <View style={style.flatten(["width-122", "height-122"])}>
+        <View
+          style={{
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 10,
+            ...style.flatten(["absolute", "justify-center", "items-center"]),
+          }}
+        >
+          <LottieView
+            source={require("../../assets/lottie/failed.json")}
+            progress={failedAnimProgress}
+            style={style.flatten(["width-160"])}
+          />
+        </View>
+      </View>
       <Text style={style.flatten(["h2", "margin-top-87", "margin-bottom-32"])}>
         Failed
       </Text>

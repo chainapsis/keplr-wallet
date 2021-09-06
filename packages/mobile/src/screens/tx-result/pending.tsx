@@ -3,10 +3,9 @@ import { RouteProp, useIsFocused, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithView } from "../../components/staging/page";
-import { Text, View } from "react-native";
+import { Text, View, Dimensions } from "react-native";
 import { Button } from "../../components/staging/button";
 import { useStyle } from "../../styles";
-import Svg, { Circle, Rect } from "react-native-svg";
 import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/staging/icon";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
@@ -75,7 +74,11 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
-      style={style.flatten(["padding-x-42", "items-center", "justify-center"])}
+      style={{
+        paddingTop: Dimensions.get("window").height * 0.2,
+        paddingBottom: Dimensions.get("window").height * 0.2,
+        ...style.flatten(["padding-x-42", "items-center"]),
+      }}
     >
       <View
         style={style.flatten([

@@ -322,6 +322,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "90": 90,
     "122": 122,
     "214": 214,
+    "400": 400,
     "600": 600,
 
     "button-small": 38,

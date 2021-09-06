@@ -1,17 +1,19 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithView } from "../../components/staging/page";
-import { Linking, Text, View } from "react-native";
+import { Linking, Text, View, Dimensions, Animated } from "react-native";
 import { Button } from "../../components/staging/button";
 import { useStyle } from "../../styles";
-import Svg, { Circle, Path } from "react-native-svg";
 import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/staging/icon";
+import LottieView from "lottie-react-native";
 
 export const TxSuccessResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
+  const [successAnimProgress] = React.useState(new Animated.Value(0));
+  const [pangpareAnimProgress] = React.useState(new Animated.Value(0));
 
   const route = useRoute<
     RouteProp<
@@ -37,26 +39,67 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
 
   const chainInfo = chainStore.getChain(chainId);
 
+  useEffect(() => {
+    const animateLottie = () => {
+      Animated.timing(successAnimProgress, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: false,
+      }).start();
+      Animated.timing(pangpareAnimProgress, {
+        toValue: 1,
+        duration: 5000,
+        useNativeDriver: false,
+      }).start();
+    };
+
+    const timeoutId = setTimeout(animateLottie, 500);
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <PageWithView
-      style={style.flatten(["padding-x-42", "items-center", "justify-center"])}
+      style={{
+        paddingTop: Dimensions.get("window").height * 0.2,
+        paddingBottom: Dimensions.get("window").height * 0.2,
+        ...style.flatten(["padding-x-42", "items-center"]),
+      }}
     >
-      <Svg width="122" height="122" fill="none" viewBox="0 0 122 122">
-        <Circle
-          cx="61"
-          cy="61"
-          r="57"
-          stroke={style.get("color-success").color}
-          strokeWidth="8"
+      <View
+        style={{
+          left: 10,
+          right: 0,
+          top: 0,
+          bottom: 460,
+          ...style.flatten(["absolute", "justify-center", "items-center"]),
+        }}
+      >
+        <LottieView
+          source={require("../../assets/lottie/pangpare.json")}
+          progress={pangpareAnimProgress}
+          style={style.flatten(["width-full", "height-400"])}
         />
-        <Path
-          stroke={style.get("color-success").color}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="8"
-          d="M38.683 60.256l17.854 20.457 26.408-39.055"
-        />
-      </Svg>
+      </View>
+      <View style={style.flatten(["width-122", "height-122"])}>
+        <View
+          style={{
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 10,
+            backgroundColor: "#FBF8FF",
+            ...style.flatten(["absolute", "justify-center", "items-center"]),
+          }}
+        >
+          <LottieView
+            source={require("../../assets/lottie/success.json")}
+            progress={successAnimProgress}
+            style={style.flatten(["width-160"])}
+          />
+        </View>
+      </View>
       <Text style={style.flatten(["h2", "margin-top-87", "margin-bottom-32"])}>
         Success
       </Text>
