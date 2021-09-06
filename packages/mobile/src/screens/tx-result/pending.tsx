@@ -74,17 +74,22 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
+      disableSafeArea
       style={{
         paddingTop: Dimensions.get("window").height * 0.2,
         paddingBottom: Dimensions.get("window").height * 0.2,
-        ...style.flatten(["padding-x-42", "items-center"]),
+        ...style.flatten([
+          "padding-x-42",
+          "items-center",
+          "background-color-white",
+        ]),
       }}
     >
       <View
         style={style.flatten([
           "width-122",
           "height-122",
-          "border-width-6",
+          "border-width-8",
           "border-color-primary",
           "border-radius-64",
         ])}
@@ -124,10 +129,14 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       <Text style={style.flatten(["h2", "margin-top-87", "margin-bottom-32"])}>
         Pending
       </Text>
-      <Text style={style.flatten(["body1", "text-center"])}>
+      <Text
+        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
+      >
         Just wait a minute.
       </Text>
-      <Text style={style.flatten(["body1", "text-center"])}>
+      <Text
+        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
+      >
         Transaction will be committed.
       </Text>
       <Button

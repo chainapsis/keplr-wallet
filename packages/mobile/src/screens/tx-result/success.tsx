@@ -61,10 +61,15 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
+      disableSafeArea
       style={{
         paddingTop: Dimensions.get("window").height * 0.2,
         paddingBottom: Dimensions.get("window").height * 0.2,
-        ...style.flatten(["padding-x-42", "items-center"]),
+        ...style.flatten([
+          "padding-x-42",
+          "items-center",
+          "background-color-white",
+        ]),
       }}
     >
       <View
@@ -89,8 +94,12 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             right: 0,
             top: 0,
             bottom: 10,
-            backgroundColor: "#FBF8FF",
-            ...style.flatten(["absolute", "justify-center", "items-center"]),
+            ...style.flatten([
+              "absolute",
+              "justify-center",
+              "items-center",
+              "background-color-white",
+            ]),
           }}
         >
           <LottieView
@@ -103,8 +112,10 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
       <Text style={style.flatten(["h2", "margin-top-87", "margin-bottom-32"])}>
         Success
       </Text>
-      <Text style={style.flatten(["body1", "text-center"])}>
-        Congratuations !!
+      <Text
+        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
+      >
+        Congratulations!!
       </Text>
       <View style={style.flatten(["flex-row"])}>
         <Button

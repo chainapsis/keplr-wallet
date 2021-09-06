@@ -55,10 +55,15 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
+      disableSafeArea
       style={{
         paddingTop: Dimensions.get("window").height * 0.2,
         paddingBottom: Dimensions.get("window").height * 0.2,
-        ...style.flatten(["padding-x-42", "items-center"]),
+        ...style.flatten([
+          "padding-x-42",
+          "items-center",
+          "background-color-white",
+        ]),
       }}
     >
       <View style={style.flatten(["width-122", "height-122"])}>
@@ -81,7 +86,11 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
       <Text style={style.flatten(["h2", "margin-top-87", "margin-bottom-32"])}>
         Failed
       </Text>
-      <Text style={style.flatten(["body1", "text-center"])}>Oops !</Text>
+      <Text
+        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
+      >
+        Oops!
+      </Text>
       <View style={style.flatten(["flex-row"])}>
         <Button
           containerStyle={style.flatten(["margin-top-88", "flex-1"])}
