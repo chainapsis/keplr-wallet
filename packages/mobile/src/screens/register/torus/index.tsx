@@ -1,37 +1,26 @@
 import React, { FunctionComponent, useState } from "react";
-import { PageWithScrollView } from "../../../components/staging/page";
 import { observer } from "mobx-react-lite";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { useStyle } from "../../../styles";
 import { useSmartNavigation } from "../../../navigation";
 import { Controller, useForm } from "react-hook-form";
+import { PageWithScrollView } from "../../../components/staging/page";
 import { TextInput } from "../../../components/staging/input";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { Button } from "../../../components/staging/button";
-import Clipboard from "expo-clipboard";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bip39 = require("bip39");
-
-function trimWordsStr(str: string): string {
-  str = str.trim();
-  // Split on the whitespace or new line.
-  const splited = str.split(/\s+/);
-  const words = splited
-    .map((word) => word.trim())
-    .filter((word) => word.trim().length > 0);
-  return words.join(" ");
-}
+import * as WebBrowser from "expo-web-browser";
+import { Buffer } from "buffer/";
+import NodeDetailManager from "@toruslabs/fetch-node-details";
+import Torus from "@toruslabs/torus.js";
 
 interface FormData {
-  mnemonic: string;
   name: string;
   password: string;
   confirmPassword: string;
 }
 
-export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
+export const TorusSignInScreen: FunctionComponent = observer(() => {
   const route = useRoute<
     RouteProp<
       Record<
@@ -55,7 +44,6 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
     control,
     handleSubmit,
     setFocus,
-    setValue,
     getValues,
     formState: { errors },
   } = useForm<FormData>();
@@ -64,98 +52,144 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
   const submit = handleSubmit(async () => {
     setIsCreating(true);
-    await registerConfig.createMnemonic(
-      getValues("name"),
-      getValues("mnemonic"),
-      getValues("password"),
-      {
-        account: 0,
-        change: 0,
-        addressIndex: 0,
-      }
-    );
 
-    smartNavigation.reset({
-      index: 0,
-      routes: [
+    try {
+      const nonce: string = Math.floor(Math.random() * 10000).toString();
+      const state = encodeURIComponent(
+        Buffer.from(
+          JSON.stringify({
+            instanceId: nonce,
+            redirectToOpener: false,
+          })
+        ).toString("base64")
+      );
+
+      const finalUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+      finalUrl.searchParams.append("response_type", "token id_token");
+      finalUrl.searchParams.append(
+        "client_id",
+        "413984222848-8r7u4ip9i6htppalo6jopu5qbktto6mi.apps.googleusercontent.com"
+      );
+      finalUrl.searchParams.append("state", state);
+      finalUrl.searchParams.append("scope", "profile email openid");
+      finalUrl.searchParams.append("nonce", nonce);
+      finalUrl.searchParams.append("prompt", "consent select_account");
+      finalUrl.searchParams.append(
+        "redirect_uri",
+        "https://oauth.keplr.app/google.html"
+      );
+
+      const result = await WebBrowser.openAuthSessionAsync(
+        finalUrl.href,
+        "app.keplr.oauth://"
+      );
+      if (result.type !== "success") {
+        throw new Error("Failed to get the oauth");
+      }
+
+      if (!result.url.startsWith("app.keplr.oauth://google#")) {
+        throw new Error("Invalid redirection");
+      }
+
+      const redirectedUrl = new URL(result.url);
+      const paramsString = redirectedUrl.hash;
+      const searchParams = new URLSearchParams(
+        paramsString.startsWith("#") ? paramsString.slice(1) : paramsString
+      );
+      if (state !== searchParams.get("state")) {
+        throw new Error("State doesn't match");
+      }
+      const idToken = searchParams.get("id_token");
+      const accessToken = searchParams.get("access_token");
+
+      const userResponse = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
         {
-          name: "Register.End",
-        },
-      ],
-    });
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken || idToken}`,
+          },
+        }
+      );
+
+      if (userResponse.ok) {
+        const userInfo: {
+          picture: string;
+          email: string;
+          name: string;
+        } = await userResponse.json();
+
+        const { email } = userInfo;
+
+        const nodeDetailManager = new NodeDetailManager({
+          network: "mainnet",
+          proxyAddress: "0x638646503746d5456209e33a2ff5e3226d698bea",
+        });
+        const {
+          torusNodeEndpoints,
+          torusNodePub,
+          torusIndexes,
+        } = await nodeDetailManager.getNodeDetails();
+
+        const torus = new Torus({
+          enableLogging: __DEV__,
+          metadataHost: "https://metadata.tor.us",
+          allowHost: "https://signer.tor.us/api/allow",
+        });
+
+        const response = await torus.getPublicAddress(
+          torusNodeEndpoints,
+          torusNodePub,
+          {
+            verifier: "chainapsis-google",
+            verifierId: email.toLowerCase(),
+          },
+          true
+        );
+        const data = await torus.retrieveShares(
+          torusNodeEndpoints,
+          torusIndexes,
+          "chainapsis-google",
+          {
+            verifier_id: email.toLowerCase(),
+          },
+          (idToken || accessToken) as string
+        );
+        if (typeof response === "string")
+          throw new Error("must use extended pub key");
+        if (data.ethAddress.toLowerCase() !== response.address.toLowerCase()) {
+          throw new Error("data ethAddress does not match response address");
+        }
+
+        await registerConfig.createPrivateKey(
+          getValues("name"),
+          Buffer.from(data.privKey.toString(), "hex"),
+          getValues("password"),
+          email
+        );
+
+        smartNavigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Register.End",
+            },
+          ],
+        });
+      } else {
+        throw userResponse;
+      }
+    } catch (e) {
+      console.log(e);
+      setIsCreating(false);
+    }
   });
 
   return (
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-page", "padding-bottom-12"])}
+      style={style.flatten(["padding-x-12", "padding-bottom-12"])}
     >
-      <Controller
-        control={control}
-        rules={{
-          required: "Mnemonic is required",
-          validate: (value: string) => {
-            value = trimWordsStr(value);
-            if (value.split(" ").length < 8) {
-              return "Too short mnemonic";
-            }
-
-            if (!bip39.validateMnemonic(value)) {
-              return "Invalid mnemonic";
-            }
-          },
-        }}
-        render={({ field: { onChange, onBlur, value, ref } }) => {
-          return (
-            <TextInput
-              label="Mnemonic"
-              returnKeyType="next"
-              multiline={true}
-              numberOfLines={4}
-              inputContainerStyle={style.flatten([
-                "padding-x-20",
-                "padding-y-16",
-              ])}
-              bottomInInputContainer={
-                <View style={style.flatten(["flex-row"])}>
-                  <View style={style.flatten(["flex-1"])} />
-                  <Button
-                    containerStyle={style.flatten(["height-36"])}
-                    style={style.flatten(["padding-x-12"])}
-                    mode="text"
-                    text="Paste"
-                    onPress={async () => {
-                      const text = await Clipboard.getStringAsync();
-                      if (text) {
-                        setValue("mnemonic", text, {
-                          shouldValidate: true,
-                        });
-                      }
-                    }}
-                  />
-                </View>
-              }
-              style={StyleSheet.flatten([
-                style.flatten(["h6", "color-text-black-medium"]),
-                {
-                  minHeight: 20 * 4,
-                  textAlignVertical: "top",
-                },
-              ])}
-              onSubmitEditing={() => {
-                setFocus("name");
-              }}
-              error={errors.mnemonic?.message}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              ref={ref}
-            />
-          );
-        }}
-        name="mnemonic"
-        defaultValue=""
-      />
       <Controller
         control={control}
         rules={{

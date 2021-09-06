@@ -10,18 +10,17 @@ import {
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
-import { HomeScreen } from "./screens/home/staging";
+import { HomeScreen } from "./screens/home";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { SendScreen } from "./screens/send/staging";
-import { RedelegateValidatorScreen, StakedListScreen } from "./screens/stake";
+import { SendScreen } from "./screens/send";
 import {
   GovernanceDetailsScreen,
   GovernanceScreen,
-} from "./screens/governance/staging";
+} from "./screens/governance";
 import {
   createDrawerNavigator,
   useIsDrawerOpen,
@@ -32,20 +31,20 @@ import { DrawerContent } from "./components/drawer";
 import { useStyle } from "./styles";
 import { BorderlessButton } from "react-native-gesture-handler";
 import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
-import { SettingScreen } from "./screens/setting/staging";
-import { SettingSelectAccountScreen } from "./screens/setting/staging/screens/select-account";
-import { ViewPrivateDataScreen } from "./screens/setting/staging/screens/view-private-data";
+import { SettingScreen } from "./screens/setting";
+import { SettingSelectAccountScreen } from "./screens/setting/screens/select-account";
+import { ViewPrivateDataScreen } from "./screens/setting/screens/view-private-data";
 import { WebScreen } from "./screens/web";
-import { RegisterIntroScreen } from "./screens/register/staging";
+import { RegisterIntroScreen } from "./screens/register";
 import {
   NewMnemonicConfig,
   NewMnemonicScreen,
   RecoverMnemonicScreen,
   VerifyMnemonicScreen,
-} from "./screens/register/staging/mnemonic";
-import { RegisterEndScreen } from "./screens/register/staging/end";
-import { RegisterNewUserScreen } from "./screens/register/staging/new-user";
-import { RegisterNotNewUserScreen } from "./screens/register/staging/not-new-user";
+} from "./screens/register/mnemonic";
+import { RegisterEndScreen } from "./screens/register/end";
+import { RegisterNewUserScreen } from "./screens/register/new-user";
+import { RegisterNotNewUserScreen } from "./screens/register/not-new-user";
 import { ResultScreen } from "./screens/result";
 import {
   AddressBookConfig,
@@ -58,13 +57,13 @@ import {
   StakingDashboardScreen,
   ValidatorDetailsScreen,
   ValidatorListScreen,
-} from "./screens/stake/staging";
+} from "./screens/stake";
 import { OpenDrawerIcon, ScanIcon } from "./components/staging/icon";
 import {
   AddAddressBookScreen,
   AddressBookScreen,
-} from "./screens/setting/staging/screens/address-book";
-import { NewLedgerScreen } from "./screens/register/staging/ledger";
+} from "./screens/setting/screens/address-book";
+import { NewLedgerScreen } from "./screens/register/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
   BlurredHeaderScreenOptionsPreset,
@@ -73,8 +72,8 @@ import {
   PlainHeaderScreenOptionsPreset,
 } from "./components/staging/header";
 import { TokensScreen } from "./screens/tokens";
-import { UndelegateScreen } from "./screens/stake/staging/undelegate";
-import { RedelegateScreen } from "./screens/stake/staging/redelegate";
+import { UndelegateScreen } from "./screens/stake/undelegate";
+import { RedelegateScreen } from "./screens/stake/redelegate";
 import { CameraScreen } from "./screens/camera";
 import {
   FocusedScreenProvider,
@@ -86,7 +85,7 @@ import {
   TxPendingResultScreen,
   TxSuccessResultScreen,
 } from "./screens/tx-result";
-import { TorusSignInScreen } from "./screens/register/staging/torus";
+import { TorusSignInScreen } from "./screens/register/torus";
 import { HeaderAddIcon } from "./components/staging/header/icon";
 import { BlurredBottomTabBar } from "./components/staging/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
@@ -380,11 +379,6 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         name="Validator Details"
         component={ValidatorDetailsScreen}
-      />
-      <Stack.Screen name="Staked List" component={StakedListScreen} />
-      <Stack.Screen
-        name="Redelegate Validator"
-        component={RedelegateValidatorScreen}
       />
       <Stack.Screen name="Governance" component={GovernanceScreen} />
       <Stack.Screen

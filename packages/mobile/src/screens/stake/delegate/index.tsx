@@ -1,76 +1,55 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { useSendTxConfig } from "@keplr-wallet/hooks";
-import { useStore } from "../../stores";
-import { EthereumEndpoint } from "../../config";
-import { PageWithScrollView } from "../../components/staging/page";
-import { View } from "react-native";
-import {
-  AddressInput,
-  AmountInput,
-  MemoInput,
-  CurrencySelector,
-  FeeButtons,
-} from "../../components/staging/input";
-import { useStyle } from "../../styles";
-import { Button } from "../../components/staging/button";
+import { PageWithScrollView } from "../../../components/staging/page";
+import { useStyle } from "../../../styles";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { useSmartNavigation } from "../../navigation";
-import { Buffer } from "buffer/";
+import { View } from "react-native";
+import { useStore } from "../../../stores";
+import { useDelegateTxConfig } from "@keplr-wallet/hooks";
+import { EthereumEndpoint } from "../../../config";
+import {
+  AmountInput,
+  FeeButtons,
+  MemoInput,
+} from "../../../components/staging/input";
+import { Button } from "../../../components/staging/button";
+import { useSmartNavigation } from "../../../navigation";
 
-export const SendScreen: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
-
+export const DelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
     RouteProp<
       Record<
         string,
         {
-          chainId?: string;
-          currency?: string;
-          recipient?: string;
+          validatorAddress: string;
         }
       >,
       string
     >
   >();
 
-  const style = useStyle();
+  const validatorAddress = route.params.validatorAddress;
 
+  const { chainStore, accountStore, queriesStore } = useStore();
+
+  const style = useStyle();
   const smartNavigation = useSmartNavigation();
 
-  const chainId = route.params.chainId
-    ? route.params.chainId
-    : chainStore.current.chainId;
+  const account = accountStore.getAccount(chainStore.current.chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
 
-  const account = accountStore.getAccount(chainId);
-  const queries = queriesStore.get(chainId);
-
-  const sendConfigs = useSendTxConfig(
+  const sendConfigs = useDelegateTxConfig(
     chainStore,
-    chainId,
-    account.msgOpts["send"],
+    chainStore.current.chainId,
+    account.msgOpts["delegate"].gas,
     account.bech32Address,
     queries.queryBalances,
     EthereumEndpoint
   );
 
   useEffect(() => {
-    if (route.params.currency) {
-      const currency = sendConfigs.amountConfig.sendableCurrencies.find(
-        (cur) => cur.coinMinimalDenom === route.params.currency
-      );
-      if (currency) {
-        sendConfigs.amountConfig.setSendCurrency(currency);
-      }
-    }
-  }, [route.params.currency, sendConfigs.amountConfig]);
-
-  useEffect(() => {
-    if (route.params.recipient) {
-      sendConfigs.recipientConfig.setRawRecipient(route.params.recipient);
-    }
-  }, [route.params.recipient, sendConfigs.recipientConfig]);
+    sendConfigs.recipientConfig.setRawRecipient(validatorAddress);
+  }, [sendConfigs.recipientConfig, validatorAddress]);
 
   const sendConfigError =
     sendConfigs.recipientConfig.getError() ??
@@ -85,16 +64,21 @@ export const SendScreen: FunctionComponent = observer(() => {
       style={style.flatten(["padding-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >
-      <AddressInput
-        label="Recipient"
-        recipientConfig={sendConfigs.recipientConfig}
-        memoConfig={sendConfigs.memoConfig}
-      />
+      {/*
+        // The recipient validator is selected by the route params, so no need to show the address input.
+        <AddressInput
+          label="Recipient"
+          recipientConfig={sendConfigs.recipientConfig}
+        />
+      */}
+      {/*
+      Delegate tx only can be sent with just stake currency. So, it is not needed to show the currency selector because the stake currency is one.
       <CurrencySelector
         label="Token"
         placeHolder="Select Token"
         amountConfig={sendConfigs.amountConfig}
       />
+      */}
       <AmountInput label="Amount" amountConfig={sendConfigs.amountConfig} />
       <MemoInput label="Memo (Optional)" memoConfig={sendConfigs.memoConfig} />
       <FeeButtons
@@ -105,16 +89,15 @@ export const SendScreen: FunctionComponent = observer(() => {
       />
       <View style={style.flatten(["flex-1"])} />
       <Button
-        text="Send"
+        text="Stake"
         size="large"
         disabled={!account.isReadyToSendMsgs || !txStateIsValid}
-        loading={account.isSendingMsg === "send"}
+        loading={account.isSendingMsg === "delegate"}
         onPress={async () => {
           if (account.isReadyToSendMsgs && txStateIsValid) {
             try {
-              await account.sendToken(
+              await account.cosmos.sendDelegateMsg(
                 sendConfigs.amountConfig.amount,
-                sendConfigs.amountConfig.sendCurrency,
                 sendConfigs.recipientConfig.recipient,
                 sendConfigs.memoConfig.memo,
                 {},

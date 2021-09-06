@@ -2,15 +2,16 @@ import React, { FunctionComponent } from "react";
 import { useHeaderHeight } from "@react-navigation/stack";
 import { PageWithScrollView } from "../../components/staging/page";
 import { KeplrLogo } from "../../components/staging/svg/keplr-logo";
+import { GoogleIcon } from "../../components/staging/icon/google";
 import { useStyle } from "../../styles";
-import { View, Dimensions } from "react-native";
+import { View, Text, Dimensions, Platform } from "react-native";
 import { Button } from "../../components/staging/button";
 import { useSmartNavigation } from "../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
-export const RegisterIntroScreen: FunctionComponent = observer(() => {
+export const RegisterNewUserScreen: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
   const style = useStyle();
@@ -26,7 +27,9 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.get("flex-grow-1")}
       style={{
         ...style.flatten(["padding-x-42"]),
-        paddingTop: Dimensions.get("window").height * 0.22 - headerHeight,
+        paddingTop:
+          Dimensions.get("window").height * 0.22 -
+          (Platform.OS === "android" ? headerHeight : 44),
         paddingBottom: Dimensions.get("window").height * 0.11,
       }}
     >
@@ -35,33 +38,38 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
       >
         <KeplrLogo width="100%" />
       </View>
+
       <Button
-        containerStyle={style.flatten(["margin-bottom-16"])}
-        text="Create A New Wallet"
+        containerStyle={style.flatten(["margin-bottom-20"])}
+        text="Sign In With Google"
+        leftIcon={
+          <View style={style.flatten(["margin-right-6"])}>
+            <GoogleIcon />
+          </View>
+        }
         size="large"
         mode="light"
         onPress={() => {
-          smartNavigation.navigateSmart("Register.NewUser", {
+          smartNavigation.navigateSmart("Register.TorusSignIn", {
             registerConfig,
           });
         }}
       />
+      <Text
+        style={style.flatten([
+          "margin-bottom-20",
+          "text-center",
+          "color-text-black-low",
+        ])}
+      >
+        Powered by Torus
+      </Text>
       <Button
-        containerStyle={style.flatten(["margin-bottom-16"])}
-        text="Import Existing Wallet"
+        text="Create New Seed"
         size="large"
+        mode="light"
         onPress={() => {
-          smartNavigation.navigateSmart("Register.NotNewUser", {
-            registerConfig,
-          });
-        }}
-      />
-      <Button
-        text="Import Ledger"
-        size="large"
-        mode="text"
-        onPress={() => {
-          smartNavigation.navigateSmart("Register.NewLedger", {
+          smartNavigation.navigateSmart("Register.NewMnemonic", {
             registerConfig,
           });
         }}
