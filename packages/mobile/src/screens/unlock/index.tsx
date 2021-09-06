@@ -198,6 +198,19 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     }
   }, [isSplashEnd, keyRingStore.status, navigation]);
 
+  useEffect(() => {
+    // I don't know that the cause is.
+    // Sometimes, the unlock screen opened even though the keyring is unlocked when the window is resized on android.
+    // To solve this problem, just replace to the MainTabDrawer screen if the keyring is unlocked on the mounted.
+    if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
+      (async () => {
+        await hideSplashScreen();
+        navigation.dispatch(StackActions.replace("MainTabDrawer"));
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <React.Fragment>
       <View
