@@ -1,20 +1,20 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { PageWithScrollView } from "../../components/staging/page";
+import { PageWithScrollView } from "../../components/page";
 import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
-import { Card, CardBody, CardDivider } from "../../components/staging/card";
+import { Card, CardBody, CardDivider } from "../../components/card";
 import { useStyle } from "../../styles";
-import { Button } from "../../components/staging/button";
+import { Button } from "../../components/button";
 import { useStore } from "../../stores";
 import { useRoute, RouteProp } from "@react-navigation/native";
-import { LoadingSpinner } from "../../components/staging/spinner";
+import { LoadingSpinner } from "../../components/spinner";
 import { Governance } from "@keplr-wallet/stores";
 import { GovernanceProposalStatusChip } from "./card";
 import { IntPretty } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
 import { registerModal } from "../../modals/base";
-import { RectButton } from "../../components/staging/rect-button";
+import { RectButton } from "../../components/rect-button";
 import { useSmartNavigation } from "../../navigation";
 
 export const TallyVoteInfoView: FunctionComponent<{

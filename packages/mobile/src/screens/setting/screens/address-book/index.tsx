@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { PageWithScrollView } from "../../../../components/staging/page";
+import { PageWithScrollView } from "../../../../components/page";
 import { useStyle } from "../../../../styles";
 import { Text, View } from "react-native";
 import { useSmartNavigation } from "../../../../navigation";
@@ -11,14 +11,14 @@ import {
 } from "@keplr-wallet/hooks";
 import { AsyncKVStore } from "../../../../common";
 import { useStore } from "../../../../stores";
-import { TrashCanIcon } from "../../../../components/staging/icon";
+import { TrashCanIcon } from "../../../../components/icon";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { RectButton } from "../../../../components/staging/rect-button";
+import { RectButton } from "../../../../components/rect-button";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { HeaderRightButton } from "../../../../components/staging/header";
+import { HeaderRightButton } from "../../../../components/header";
 import { AddressDeleteModal } from "../../../../modals/address";
-import { HeaderAddIcon } from "../../../../components/staging/header/icon";
+import { HeaderAddIcon } from "../../../../components/header/icon";
 
 const addressBookItemComponent = {
   inTransaction: RectButton,

@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { useStyle } from "../../../styles";
 import { StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
-import { RightArrowIcon } from "../../../components/staging/icon";
-import { RectButton } from "../../../components/staging/rect-button";
+import { RightArrowIcon } from "../../../components/icon";
+import { RectButton } from "../../../components/rect-button";
 
 export const SettingSectionTitle: FunctionComponent<{
   title: string;

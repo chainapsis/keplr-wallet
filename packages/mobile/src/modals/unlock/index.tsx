@@ -5,8 +5,8 @@ import { useStyle } from "../../styles";
 import { GradientBackground } from "../../components/svg";
 import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
-import { TextInput } from "../../components/staging/input";
-import { Button } from "../../components/staging/button";
+import { TextInput } from "../../components/input";
+import { Button } from "../../components/button";
 import delay from "delay";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 

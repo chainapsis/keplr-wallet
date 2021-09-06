@@ -1,11 +1,11 @@
 import React, { FunctionComponent } from "react";
-import { Card, CardBody, CardHeader } from "../../components/staging/card";
+import { Card, CardBody, CardHeader } from "../../components/card";
 import { View, ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useStyle } from "../../styles";
 import { TokenItem } from "../tokens";
-import { Button } from "../../components/staging/button";
+import { Button } from "../../components/button";
 import { useSmartNavigation } from "../../navigation";
 
 export const TokensCard: FunctionComponent<{

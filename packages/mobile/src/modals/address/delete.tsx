@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { registerModal } from "../base";
 import { Text, View } from "react-native";
 import { useStyle } from "../../styles";
-import { Button } from "../../components/staging/button";
+import { Button } from "../../components/button";
 import { AddressBookConfig } from "@keplr-wallet/hooks";
 
 export const AddressDeleteModal: FunctionComponent<{

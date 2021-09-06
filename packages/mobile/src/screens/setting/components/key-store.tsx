@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { useStyle } from "../../../styles";
 import { StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
-import { RectButton } from "../../../components/staging/rect-button";
+import { RectButton } from "../../../components/rect-button";
 import Svg, { Path } from "react-native-svg";
 
 export const KeyStoreSectionTitle: FunctionComponent<{

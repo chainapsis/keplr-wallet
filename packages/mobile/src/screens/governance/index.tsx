@@ -1,10 +1,10 @@
 import React, { FunctionComponent } from "react";
 import { GovernanceCardBody } from "./card";
 import { observer } from "mobx-react-lite";
-import { PageWithSectionList } from "../../components/staging/page";
+import { PageWithSectionList } from "../../components/page";
 import { useStore } from "../../stores";
 import { ObservableQueryProposal } from "@keplr-wallet/stores";
-import { Card, CardDivider } from "../../components/staging/card";
+import { Card, CardDivider } from "../../components/card";
 import { useStyle } from "../../styles";
 
 export const GovernanceScreen: FunctionComponent = observer(() => {

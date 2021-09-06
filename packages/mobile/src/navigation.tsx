@@ -58,7 +58,7 @@ import {
   ValidatorDetailsScreen,
   ValidatorListScreen,
 } from "./screens/stake";
-import { OpenDrawerIcon, ScanIcon } from "./components/staging/icon";
+import { OpenDrawerIcon, ScanIcon } from "./components/icon";
 import {
   AddAddressBookScreen,
   AddressBookScreen,
@@ -70,7 +70,7 @@ import {
   HeaderLeftButton,
   HeaderRightButton,
   PlainHeaderScreenOptionsPreset,
-} from "./components/staging/header";
+} from "./components/header";
 import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/undelegate";
 import { RedelegateScreen } from "./screens/stake/redelegate";
@@ -86,8 +86,8 @@ import {
   TxSuccessResultScreen,
 } from "./screens/tx-result";
 import { TorusSignInScreen } from "./screens/register/torus";
-import { HeaderAddIcon } from "./components/staging/header/icon";
-import { BlurredBottomTabBar } from "./components/staging/bottom-tabbar";
+import { HeaderAddIcon } from "./components/header/icon";
+import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
 
 const {

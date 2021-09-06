@@ -5,17 +5,17 @@ import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 import { useRedelegateTxConfig } from "@keplr-wallet/hooks";
-import { PageWithScrollView } from "../../../components/staging/page";
-import { Card, CardBody, CardDivider } from "../../../components/staging/card";
+import { PageWithScrollView } from "../../../components/page";
+import { Card, CardBody, CardDivider } from "../../../components/card";
 import { Text, View } from "react-native";
-import { ValidatorThumbnail } from "../../../components/staging/thumbnail";
+import { ValidatorThumbnail } from "../../../components/thumbnail";
 import {
   AmountInput,
   FeeButtons,
   MemoInput,
   SelectorButtonWithoutModal,
-} from "../../../components/staging/input";
-import { Button } from "../../../components/staging/button";
+} from "../../../components/input";
+import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
 
 export const RedelegateScreen: FunctionComponent = observer(() => {

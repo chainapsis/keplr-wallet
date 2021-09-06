@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 import { SettingItem } from "../components";
-import { Toggle } from "../../../components/staging/toggle";
+import { Toggle } from "../../../components/toggle";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import delay from "delay";

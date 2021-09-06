@@ -10,9 +10,9 @@ import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { View } from "react-native";
 import { Text } from "react-native-elements";
 import { useStyle } from "../../styles";
-import { RectButton } from "../staging/rect-button";
+import { RectButton } from "../rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { VectorCharacter } from "../staging/vector-character";
+import { VectorCharacter } from "../vector-character";
 
 export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOptions>;
 

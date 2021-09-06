@@ -4,17 +4,13 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
 import { useUndelegateTxConfig } from "@keplr-wallet/hooks";
-import { PageWithScrollView } from "../../../components/staging/page";
-import {
-  AmountInput,
-  FeeButtons,
-  MemoInput,
-} from "../../../components/staging/input";
+import { PageWithScrollView } from "../../../components/page";
+import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Text, View } from "react-native";
-import { Button } from "../../../components/staging/button";
-import { Card, CardBody, CardDivider } from "../../../components/staging/card";
+import { Button } from "../../../components/button";
+import { Card, CardBody, CardDivider } from "../../../components/card";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
-import { ValidatorThumbnail } from "../../../components/staging/thumbnail";
+import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { Buffer } from "buffer";
 import { useSmartNavigation } from "../../../navigation";
 

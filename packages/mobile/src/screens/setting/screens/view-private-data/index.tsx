@@ -1,11 +1,11 @@
 import React, { FunctionComponent } from "react";
 import { Text, View } from "react-native";
 import { useStyle } from "../../../../styles";
-import { CheckIcon } from "../../../../components/staging/icon";
-import { Button } from "../../../../components/staging/button";
-import { WordChip } from "../../../../components/staging/mnemonic";
+import { CheckIcon } from "../../../../components/icon";
+import { Button } from "../../../../components/button";
+import { WordChip } from "../../../../components/mnemonic";
 import Clipboard from "expo-clipboard";
-import { PageWithScrollViewInBottomTabView } from "../../../../components/staging/page";
+import { PageWithScrollViewInBottomTabView } from "../../../../components/page";
 import { useSimpleTimer } from "../../../../hooks";
 import { RouteProp, useRoute } from "@react-navigation/native";
 

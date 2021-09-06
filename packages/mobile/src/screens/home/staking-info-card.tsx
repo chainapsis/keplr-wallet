@@ -1,10 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import {
-  Card,
-  CardBody,
-  CardHeaderFullButton,
-} from "../../components/staging/card";
+import { Card, CardBody, CardHeaderFullButton } from "../../components/card";
 import { Text, View, ViewStyle } from "react-native";
 import { useStore } from "../../stores";
 import { useStyle } from "../../styles";

@@ -1,10 +1,10 @@
 import React, { FunctionComponent } from "react";
 import { useHeaderHeight } from "@react-navigation/stack";
-import { PageWithScrollView } from "../../components/staging/page";
-import { KeplrLogo } from "../../components/staging/svg/keplr-logo";
+import { PageWithScrollView } from "../../components/page";
+import { KeplrLogo } from "../../components/svg";
 import { useStyle } from "../../styles";
 import { View, Dimensions } from "react-native";
-import { Button } from "../../components/staging/button";
+import { Button } from "../../components/button";
 import { useSmartNavigation } from "../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";

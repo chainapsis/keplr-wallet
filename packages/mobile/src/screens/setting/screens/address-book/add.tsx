@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
-import { PageWithScrollView } from "../../../../components/staging/page";
+import { PageWithScrollView } from "../../../../components/page";
 import { useStyle } from "../../../../styles";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import {
@@ -15,8 +15,8 @@ import {
   AddressInput,
   MemoInput,
   TextInput,
-} from "../../../../components/staging/input";
-import { Button } from "../../../../components/staging/button";
+} from "../../../../components/input";
+import { Button } from "../../../../components/button";
 import { useSmartNavigation } from "../../../../navigation";
 
 export const AddAddressBookScreen: FunctionComponent = observer(() => {

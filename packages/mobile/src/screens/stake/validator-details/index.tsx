@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { PageWithScrollView } from "../../../components/staging/page";
+import { PageWithScrollView } from "../../../components/page";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { ValidatorDetailsCard } from "./validator-details-card";
 import { useStyle } from "../../../styles";

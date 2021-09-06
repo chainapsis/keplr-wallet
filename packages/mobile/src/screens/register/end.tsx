@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
-import { PageWithScrollView } from "../../components/staging/page";
+import { PageWithScrollView } from "../../components/page";
 import { useStyle } from "../../styles";
 import { View, Text, Image } from "react-native";
-import { Button } from "../../components/staging/button";
+import { Button } from "../../components/button";
 import { useSmartNavigation } from "../../navigation";
 
 export const RegisterEndScreen: FunctionComponent = () => {

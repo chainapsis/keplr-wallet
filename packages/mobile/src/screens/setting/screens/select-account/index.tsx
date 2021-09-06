@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { PageWithScrollViewInBottomTabView } from "../../../../components/staging/page";
+import { PageWithScrollViewInBottomTabView } from "../../../../components/page";
 import { KeyStoreItem, KeyStoreSectionTitle } from "../../components";
 import Svg, { Path } from "react-native-svg";
 import { useStyle } from "../../../../styles";

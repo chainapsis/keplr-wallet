@@ -1,10 +1,10 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { Card, CardBody } from "../../../components/staging/card";
+import { Card, CardBody } from "../../../components/card";
 import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
-import { Button } from "../../../components/staging/button";
+import { Button } from "../../../components/button";
 import { Dec } from "@keplr-wallet/unit";
 import { useSmartNavigation } from "../../../navigation";
 

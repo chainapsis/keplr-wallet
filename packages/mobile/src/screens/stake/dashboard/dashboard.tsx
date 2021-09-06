@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { PageWithScrollView } from "../../../components/staging/page";
+import { PageWithScrollView } from "../../../components/page";
 import { MyRewardCard } from "./reward-card";
 import { DelegationsCard } from "./delegations-card";
 import { useStyle } from "../../../styles";

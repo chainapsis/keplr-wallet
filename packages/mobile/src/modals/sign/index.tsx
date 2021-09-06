@@ -5,7 +5,7 @@ import { ScrollView, Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { useInteractionInfo } from "../../hooks";
 import { useStore } from "../../stores";
-import { FeeButtons, MemoInput } from "../../components/staging/input";
+import { FeeButtons, MemoInput } from "../../components/input";
 import {
   useFeeConfig,
   useGasConfig,
@@ -13,7 +13,7 @@ import {
   useSignDocAmountConfig,
   useSignDocHelper,
 } from "@keplr-wallet/hooks";
-import { Button } from "../../components/staging/button";
+import { Button } from "../../components/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
 import { Msg } from "./msg";
 import { observer } from "mobx-react-lite";

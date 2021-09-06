@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { PageWithScrollViewInBottomTabView } from "../../components/staging/page";
+import { PageWithScrollViewInBottomTabView } from "../../components/page";
 import { RightArrow, SettingItem, SettingSectionTitle } from "./components";
 import { SettingSelectAccountItem } from "./items/select-account";
 import { useSmartNavigation } from "../../navigation";

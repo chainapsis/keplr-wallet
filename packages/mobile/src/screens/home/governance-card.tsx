@@ -1,9 +1,5 @@
 import React, { FunctionComponent, useMemo } from "react";
-import {
-  Card,
-  CardDivider,
-  CardHeaderFullButton,
-} from "../../components/staging/card";
+import { Card, CardDivider, CardHeaderFullButton } from "../../components/card";
 import { ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
 import { GovernanceCardBody } from "../governance";

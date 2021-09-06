@@ -4,8 +4,8 @@ import { CardModal } from "../card";
 import { Image, Text, View } from "react-native";
 import { SessionRequestApproval } from "../../stores/wallet-connect";
 import { useStyle } from "../../styles";
-import { Button } from "../../components/staging/button";
-import { WalletConnectIcon } from "../../components/staging/icon";
+import { Button } from "../../components/button";
+import { WalletConnectIcon } from "../../components/icon";
 
 export const WalletConnectApprovalModal: FunctionComponent<{
   isOpen: boolean;

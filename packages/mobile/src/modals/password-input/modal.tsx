@@ -3,8 +3,8 @@ import { registerModal } from "../base";
 import { Text } from "react-native";
 import { useStyle } from "../../styles";
 import { CardModal } from "../card";
-import { TextInput } from "../../components/staging/input";
-import { Button } from "../../components/staging/button";
+import { TextInput } from "../../components/input";
+import { Button } from "../../components/button";
 
 export const PasswordInputModal: FunctionComponent<{
   isOpen: boolean;

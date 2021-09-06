@@ -1,11 +1,11 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
-import { Card, CardBody, CardHeader } from "../../../components/staging/card";
+import { Card, CardBody, CardHeader } from "../../../components/card";
 import { Text, View, ViewStyle } from "react-native";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
-import { ValidatorThumbnail } from "../../../components/staging/thumbnail";
+import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 import { useIntl } from "react-intl";
 

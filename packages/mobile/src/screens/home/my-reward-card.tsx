@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStyle } from "../../styles";
-import { Card, CardHeaderWithButton } from "../../components/staging/card";
-import { RewardIcon } from "../../components/staging/icon";
+import { Card, CardHeaderWithButton } from "../../components/card";
+import { RewardIcon } from "../../components/icon";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewStyle } from "react-native";
 import { useStore } from "../../stores";

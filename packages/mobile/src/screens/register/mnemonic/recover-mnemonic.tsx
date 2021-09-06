@@ -1,14 +1,14 @@
 import React, { FunctionComponent, useState } from "react";
-import { PageWithScrollView } from "../../../components/staging/page";
+import { PageWithScrollView } from "../../../components/page";
 import { observer } from "mobx-react-lite";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { useStyle } from "../../../styles";
 import { useSmartNavigation } from "../../../navigation";
 import { Controller, useForm } from "react-hook-form";
-import { TextInput } from "../../../components/staging/input";
+import { TextInput } from "../../../components/input";
 import { StyleSheet, View } from "react-native";
-import { Button } from "../../../components/staging/button";
+import { Button } from "../../../components/button";
 import Clipboard from "expo-clipboard";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

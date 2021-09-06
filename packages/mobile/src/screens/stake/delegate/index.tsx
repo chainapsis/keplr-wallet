@@ -1,18 +1,14 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { PageWithScrollView } from "../../../components/staging/page";
+import { PageWithScrollView } from "../../../components/page";
 import { useStyle } from "../../../styles";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { View } from "react-native";
 import { useStore } from "../../../stores";
 import { useDelegateTxConfig } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../../config";
-import {
-  AmountInput,
-  FeeButtons,
-  MemoInput,
-} from "../../../components/staging/input";
-import { Button } from "../../../components/staging/button";
+import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
+import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
 
 export const DelegateScreen: FunctionComponent = observer(() => {

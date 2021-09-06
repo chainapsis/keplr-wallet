@@ -1,17 +1,14 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { Card, CardBody } from "../../components/staging/card";
+import { Card, CardBody } from "../../components/card";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStore } from "../../stores";
 import { useStyle } from "../../styles";
-import { AddressCopyable } from "../../components/staging/address-copyable";
+import { AddressCopyable } from "../../components/address-copyable";
 import { DoubleDoughnutChart } from "../../components/svg";
-import { Button } from "../../components/staging/button";
-import { LoadingSpinner } from "../../components/staging/spinner";
-import {
-  StakedTokenSymbol,
-  TokenSymbol,
-} from "../../components/staging/token-symbol";
+import { Button } from "../../components/button";
+import { LoadingSpinner } from "../../components/spinner";
+import { StakedTokenSymbol, TokenSymbol } from "../../components/token-symbol";
 import { useSmartNavigation } from "../../navigation";
 
 export const AccountCard: FunctionComponent<{

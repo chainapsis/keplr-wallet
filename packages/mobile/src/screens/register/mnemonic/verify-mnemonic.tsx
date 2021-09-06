@@ -1,15 +1,15 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { PageWithScrollView } from "../../../components/staging/page";
+import { PageWithScrollView } from "../../../components/page";
 import { Text, View } from "react-native";
 import { useStyle } from "../../../styles";
-import { WordChip } from "../../../components/staging/mnemonic";
-import { Button } from "../../../components/staging/button";
+import { WordChip } from "../../../components/mnemonic";
+import { Button } from "../../../components/button";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useSmartNavigation } from "../../../navigation";
 import { NewMnemonicConfig } from "./hook";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { RectButton } from "../../../components/staging/rect-button";
+import { RectButton } from "../../../components/rect-button";
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const route = useRoute<

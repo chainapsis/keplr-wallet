@@ -1,23 +1,23 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { PageWithSectionList } from "../../../components/staging/page";
+import { PageWithSectionList } from "../../../components/page";
 import { Text, View } from "react-native";
 import {
   BondStatus,
   Validator,
 } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 import { useStyle } from "../../../styles";
-import { SelectorModal, TextInput } from "../../../components/staging/input";
+import { SelectorModal, TextInput } from "../../../components/input";
 import { GradientBackground } from "../../../components/svg";
-import { CardDivider } from "../../../components/staging/card";
+import { CardDivider } from "../../../components/card";
 import { useSmartNavigation } from "../../../navigation";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
-import { RightArrowIcon } from "../../../components/staging/icon";
+import { RightArrowIcon } from "../../../components/icon";
 import Svg, { Path } from "react-native-svg";
-import { ValidatorThumbnail } from "../../../components/staging/thumbnail";
+import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { RectButton } from "../../../components/staging/rect-button";
+import { RectButton } from "../../../components/rect-button";
 
 type Sort = "APY" | "Voting Power" | "Name";
 

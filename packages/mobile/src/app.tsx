@@ -3,12 +3,6 @@ import { StoreProvider } from "./stores";
 import { StyleProvider } from "./styles";
 import { AppNavigation } from "./navigation";
 import { GlobalThemeProvider } from "./global-theme";
-import {
-  NotificationProvider,
-  NotificationStoreProvider,
-} from "./components/notification";
-import { LoadingIndicatorProvider } from "./components/loading-indicator";
-import { BioAuthProvider } from "./hooks/bio-auth";
 import { IntlProvider } from "react-intl";
 import { ModalsProvider } from "./modals/base";
 import { Platform } from "react-native";
@@ -94,15 +88,7 @@ export const App: FunctionComponent = codePush(() => {
               <ModalsProvider>
                 <LoadingScreenProvider>
                   <InteractionModalsProivder>
-                    <BioAuthProvider>
-                      <LoadingIndicatorProvider>
-                        <NotificationStoreProvider>
-                          <NotificationProvider>
-                            <AppNavigation />
-                          </NotificationProvider>
-                        </NotificationStoreProvider>
-                      </LoadingIndicatorProvider>
-                    </BioAuthProvider>
+                    <AppNavigation />
                   </InteractionModalsProivder>
                 </LoadingScreenProvider>
               </ModalsProvider>

@@ -1,19 +1,19 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { Card, CardBody, CardDivider } from "../../../components/staging/card";
+import { Card, CardBody, CardDivider } from "../../../components/card";
 import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
-import { StakedTokenSymbol } from "../../../components/staging/token-symbol";
-import { Button } from "../../../components/staging/button";
+import { StakedTokenSymbol } from "../../../components/token-symbol";
+import { Button } from "../../../components/button";
 import {
   BondStatus,
   Validator,
 } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
-import { RightArrowIcon } from "../../../components/staging/icon";
+import { RightArrowIcon } from "../../../components/icon";
 import { useSmartNavigation } from "../../../navigation";
-import { ValidatorThumbnail } from "../../../components/staging/thumbnail";
-import { RectButton } from "../../../components/staging/rect-button";
+import { ValidatorThumbnail } from "../../../components/thumbnail";
+import { RectButton } from "../../../components/rect-button";
 
 export const DelegationsCard: FunctionComponent<{
   containerStyle?: ViewStyle;

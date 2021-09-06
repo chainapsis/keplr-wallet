@@ -1,16 +1,16 @@
 import React, { FunctionComponent } from "react";
-import { PageWithScrollView } from "../../components/staging/page";
+import { PageWithScrollView } from "../../components/page";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
-import { RightArrowIcon } from "../../components/staging/icon";
-import { Card } from "../../components/staging/card";
-import { RectButton } from "../../components/staging/rect-button";
+import { RightArrowIcon } from "../../components/icon";
+import { Card } from "../../components/card";
+import { RectButton } from "../../components/rect-button";
 import { Currency } from "@keplr-wallet/types";
-import { TokenSymbol } from "../../components/staging/token-symbol";
+import { TokenSymbol } from "../../components/token-symbol";
 
 export const TokensScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();

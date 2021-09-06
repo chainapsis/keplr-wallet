@@ -5,10 +5,10 @@ import { RegisterConfig } from "@keplr-wallet/hooks";
 import { useStyle } from "../../../styles";
 import { useSmartNavigation } from "../../../navigation";
 import { Controller, useForm } from "react-hook-form";
-import { PageWithScrollView } from "../../../components/staging/page";
-import { TextInput } from "../../../components/staging/input";
+import { PageWithScrollView } from "../../../components/page";
+import { TextInput } from "../../../components/input";
 import { View } from "react-native";
-import { Button } from "../../../components/staging/button";
+import { Button } from "../../../components/button";
 
 interface FormData {
   name: string;
