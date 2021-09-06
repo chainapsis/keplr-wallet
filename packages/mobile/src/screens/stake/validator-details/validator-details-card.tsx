@@ -78,7 +78,7 @@ export const ValidatorDetailsCard: FunctionComponent<{
                   "margin-bottom-4",
                 ])}
               >
-                Commision
+                Commission
               </Text>
               <Text style={style.flatten(["body3", "color-text-black-medium"])}>
                 {new IntPretty(

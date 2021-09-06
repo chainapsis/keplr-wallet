@@ -16,7 +16,7 @@ export const SettingBiometricLockItem: FunctionComponent<{
   return (
     <React.Fragment>
       <PasswordInputModal
-        title="Turn On Biometry"
+        title="Enable Biometric Authentication"
         isOpen={isOpenModal}
         close={() => setIsOpenModal(false)}
         onEnterPassword={async (password) => {
@@ -27,7 +27,7 @@ export const SettingBiometricLockItem: FunctionComponent<{
         }}
       />
       <SettingItem
-        label="Biometric"
+        label="Use biometric authentication"
         right={
           <Toggle
             on={keychainStore.isBiometryOn}

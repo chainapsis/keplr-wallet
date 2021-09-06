@@ -20,7 +20,7 @@ export const SettingRemoveAccountItem: FunctionComponent<{
   return (
     <React.Fragment>
       <SettingItem
-        label="Remove Account"
+        label="Delete this wallet"
         onPress={() => {
           setIsOpenModal(true);
         }}

@@ -27,7 +27,7 @@ export const MyRewardCard: FunctionComponent<{
   return (
     <Card style={containerStyle}>
       <CardHeaderWithButton
-        title="My Reward"
+        title="My rewards"
         paragraph={stakingReward
           .shrink(true)
           .maxDecimals(6)

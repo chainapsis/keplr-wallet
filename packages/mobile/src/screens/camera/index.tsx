@@ -123,7 +123,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
           </Svg>
         </View>
         <Button
-          text="Show My QRCode"
+          text="Show my QR code"
           mode="light"
           size="large"
           containerStyle={style.flatten(["border-radius-64", "opacity-90"])}
@@ -151,7 +151,7 @@ export const AddressQRCodeModal: FunctionComponent<{
     const style = useStyle();
 
     return (
-      <CardModal title="Scan QRcode">
+      <CardModal title="Scan QR code">
         <View style={style.flatten(["items-center"])}>
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
           <View style={style.flatten(["margin-y-32"])}>

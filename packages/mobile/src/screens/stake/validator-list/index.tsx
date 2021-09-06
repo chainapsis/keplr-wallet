@@ -95,7 +95,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         isOpen={isSortModalOpen}
         items={[
           { label: "APY", key: "APY" },
-          { label: "Voting Power", key: "Voting Power" },
+          { label: "AMOUNT STAKED", key: "Voting Power" },
           { label: "Name", key: "Name" },
         ]}
         selectedKey={sort}

@@ -145,7 +145,7 @@ export const LedgerGranterModal: FunctionComponent<{
 
     return (
       <CardModal
-        title="Grant Ledger Nano X"
+        title="Pair Hardware Wallet"
         right={
           isFinding ? (
             <View style={style.flatten(["margin-left-8"])}>
@@ -170,7 +170,10 @@ export const LedgerGranterModal: FunctionComponent<{
         {isAvailable ? (
           <React.Fragment>
             <Text style={style.flatten(["subtitle3", "color-text-black-high"])}>
-              Check the connection wiht the Ledger Nano X
+              1. Open the Cosmos app on your Ledger device
+            </Text>
+            <Text style={style.flatten(["subtitle3", "color-text-black-high"])}>
+              2. Select the hardware wallet you’d like to pair
             </Text>
             {devices.map((device) => {
               return (

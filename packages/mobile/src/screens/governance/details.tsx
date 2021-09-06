@@ -33,7 +33,7 @@ export const TallyVoteInfoView: FunctionComponent<{
       case "abstain":
         return "Abstain";
       case "noWithVeto":
-        return "No With Veto";
+        return "No with veto";
     }
   })();
 
@@ -387,7 +387,7 @@ export const GovernanceVoteModal: FunctionComponent<{
             <Text
               style={style.flatten(["subtitle1", "color-text-black-medium"])}
             >
-              No With Veto
+              No with veto
             </Text>
             {renderBall(vote === "NoWithVeto")}
           </RectButton>

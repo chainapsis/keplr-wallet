@@ -76,7 +76,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
           "text-center",
         ])}
       >
-        Backup your mnemonic seed securely.
+        Beckup your mnemonic securely
       </Text>
       <WordsCard words={words} />
       <Controller
@@ -87,7 +87,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
         render={({ field: { onChange, onBlur, value, ref } }) => {
           return (
             <TextInput
-              label="Account Name"
+              label="Wallet nickname"
               returnKeyType={mode === "add" ? "done" : "next"}
               onSubmitEditing={() => {
                 if (mode === "add") {
@@ -143,7 +143,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
           <Controller
             control={control}
             rules={{
-              required: "Confirm Password is required",
+              required: "Confirm password is required",
               validate: (value: string) => {
                 if (value.length < 8) {
                   return "Password must be longer than 8 characters";
@@ -157,7 +157,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
             render={({ field: { onChange, onBlur, value, ref } }) => {
               return (
                 <TextInput
-                  label="Confirm Password"
+                  label="Confirm password"
                   returnKeyType="done"
                   secureTextEntry={true}
                   onSubmitEditing={() => {
@@ -219,7 +219,7 @@ const WordsCard: FunctionComponent<{
               </View>
             ),
           })}
-          text="Copy to Clipboard"
+          text="Copy to clipboard"
           onPress={() => {
             Clipboard.setString(words.join(" "));
             setTimer(3000);

@@ -198,7 +198,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         render={({ field: { onChange, onBlur, value, ref } }) => {
           return (
             <TextInput
-              label="Account Name"
+              label="Wallet nickname"
               returnKeyType={mode === "add" ? "done" : "next"}
               onSubmitEditing={() => {
                 if (mode === "add") {
@@ -254,7 +254,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
           <Controller
             control={control}
             rules={{
-              required: "Confirm Password is required",
+              required: "Confirm password is required",
               validate: (value: string) => {
                 if (value.length < 8) {
                   return "Password must be longer than 8 characters";
@@ -268,7 +268,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
             render={({ field: { onChange, onBlur, value, ref } }) => {
               return (
                 <TextInput
-                  label="Confirm Password"
+                  label="Confirm password"
                   returnKeyType="done"
                   secureTextEntry={true}
                   onSubmitEditing={() => {

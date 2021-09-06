@@ -41,7 +41,7 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
 
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
-        text="Sign In With Google"
+        text="Sign in with Google"
         leftIcon={
           <View style={style.flatten(["margin-right-6"])}>
             <GoogleIcon />
@@ -66,12 +66,12 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
       </Text>
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
-        text="Scan extension QRcode"
+        text="Import from Keplr Extension"
         size="large"
         mode="light"
       />
       <Button
-        text="Import Existing Account"
+        text="Import existing wallet"
         size="large"
         mode="light"
         onPress={() => {

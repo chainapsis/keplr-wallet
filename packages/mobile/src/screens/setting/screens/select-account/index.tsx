@@ -145,7 +145,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
     <PageWithScrollViewInBottomTabView>
       {renderKeyStores("torus", torusKeyStores)}
       {renderKeyStores("mnemonic seed", mnemonicKeyStores)}
-      {renderKeyStores("ledger", ledgerKeyStores)}
+      {renderKeyStores("hardware wallet", ledgerKeyStores)}
       {renderKeyStores("private key", privateKeyStores)}
       {/* Margin bottom for last */}
       <View style={style.get("height-16")} />

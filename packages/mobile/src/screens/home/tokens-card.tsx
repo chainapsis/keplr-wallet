@@ -48,7 +48,7 @@ export const TokensCard: FunctionComponent<{
       </Card>
       <Button
         mode="text"
-        text="View All Tokens"
+        text="View all tokens"
         textStyle={style.flatten(["color-text-black-low", "text-underline"])}
         onPress={() => {
           smartNavigation.navigateSmart("Tokens", {});

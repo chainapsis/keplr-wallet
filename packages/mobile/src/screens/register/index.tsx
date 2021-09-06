@@ -37,7 +37,7 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
       </View>
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
-        text="Create A New Wallet"
+        text="Create a new wallet"
         size="large"
         mode="light"
         onPress={() => {
@@ -48,7 +48,7 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
       />
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
-        text="Import Existing Wallet"
+        text="Import existing wallet"
         size="large"
         onPress={() => {
           smartNavigation.navigateSmart("Register.NotNewUser", {

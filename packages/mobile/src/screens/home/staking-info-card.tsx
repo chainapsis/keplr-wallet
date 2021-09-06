@@ -31,7 +31,7 @@ export const StakingInfoCard: FunctionComponent<{
   return (
     <Card style={containerStyle}>
       <CardHeaderFullButton
-        title="My Staking"
+        title="Staking"
         onPress={() => {
           smartNavigation.navigateSmart("Staking.Dashboard", {});
         }}
@@ -41,7 +41,7 @@ export const StakingInfoCard: FunctionComponent<{
           style={style.flatten(["flex-row", "items-end", "margin-bottom-8"])}
         >
           <Text style={style.flatten(["body2", "color-text-black-high"])}>
-            Total Delegated
+            Total staking
           </Text>
           <View style={style.flatten(["flex-1"])} />
           <Text style={style.flatten(["body2", "color-text-black-high"])}>
@@ -55,7 +55,7 @@ export const StakingInfoCard: FunctionComponent<{
         </View>
         <View style={style.flatten(["flex-row", "items-end"])}>
           <Text style={style.flatten(["body2", "color-text-black-high"])}>
-            Total Unbonding
+            Total unstaking
           </Text>
           <View style={style.flatten(["flex-1"])} />
           <Text style={style.flatten(["body2", "color-text-black-high"])}>

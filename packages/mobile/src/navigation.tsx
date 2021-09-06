@@ -328,22 +328,49 @@ export const RegisterNavigation: FunctionComponent = () => {
         name="Register.Intro"
         component={RegisterIntroScreen}
       />
-      <Stack.Screen name="Register.NewUser" component={RegisterNewUserScreen} />
+      <Stack.Screen
+        options={{
+          title: "Create a New Wallet",
+        }}
+        name="Register.NewUser"
+        component={RegisterNewUserScreen}
+      />
       <Stack.Screen
         name="Register.NotNewUser"
         component={RegisterNotNewUserScreen}
       />
-      <Stack.Screen name="Register.NewMnemonic" component={NewMnemonicScreen} />
+      <Stack.Screen
+        options={{
+          title: "Create New Mnemonic",
+        }}
+        name="Register.NewMnemonic"
+        component={NewMnemonicScreen}
+      />
       <Stack.Screen
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
       />
       <Stack.Screen
+        options={{
+          title: "Import existing wallet",
+        }}
         name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
       />
-      <Stack.Screen name="Register.NewLedger" component={NewLedgerScreen} />
-      <Stack.Screen name="Register.TorusSignIn" component={TorusSignInScreen} />
+      <Stack.Screen
+        options={{
+          title: "Import Hardware Wallet",
+        }}
+        name="Register.NewLedger"
+        component={NewLedgerScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Sign in with Google",
+        }}
+        name="Register.TorusSignIn"
+        component={TorusSignInScreen}
+      />
       <Stack.Screen
         options={{
           headerShown: false,
@@ -382,19 +409,40 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen name="Governance" component={GovernanceScreen} />
       <Stack.Screen
+        options={{
+          title: "Proposal",
+        }}
         name="Governance Details"
         component={GovernanceDetailsScreen}
       />
       <Stack.Screen
+        options={{
+          title: "Staking Dashboard",
+        }}
         name="Staking.Dashboard"
         component={StakingDashboardScreen}
       />
       <Stack.Screen
+        options={{
+          title: "Validator Details",
+        }}
         name="Validator.Details"
         component={ValidatorDetailsScreen}
       />
-      <Stack.Screen name="Validator.List" component={ValidatorListScreen} />
-      <Stack.Screen name="Delegate" component={DelegateScreen} />
+      <Stack.Screen
+        options={{
+          title: "All Active Validators",
+        }}
+        name="Validator.List"
+        component={ValidatorListScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Stake",
+        }}
+        name="Delegate"
+        component={DelegateScreen}
+      />
       <Stack.Screen name="Undelegate" component={UndelegateScreen} />
       <Stack.Screen name="Redelegate" component={RedelegateScreen} />
       <Stack.Screen
@@ -448,6 +496,7 @@ export const SettingStackScreen: FunctionComponent = () => {
     >
       <Stack.Screen
         options={{
+          title: "Settings",
           ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
             style.get("color-setting-screen-background").color
           ),
@@ -495,7 +544,13 @@ export const AddressBookStackScreen: FunctionComponent = () => {
       headerMode="screen"
     >
       <Stack.Screen name="AddressBook" component={AddressBookScreen} />
-      <Stack.Screen name="AddAddressBook" component={AddAddressBookScreen} />
+      <Stack.Screen
+        options={{
+          title: "New Address Book",
+        }}
+        name="AddAddressBook"
+        component={AddAddressBookScreen}
+      />
     </Stack.Navigator>
   );
 };

@@ -27,7 +27,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
       <SettingSectionTitle title="General" />
       <SettingFiatCurrencyItem topBorder={true} />
       <SettingItem
-        label="Address Book"
+        label="Address book"
         right={<RightArrow />}
         onPress={() => {
           smartNavigation.navigateSmart("AddressBook", {});

@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { Text, View } from "react-native";
 import { useStyle } from "../../../../styles";
 import { CheckIcon } from "../../../../components/icon";
@@ -7,10 +7,10 @@ import { WordChip } from "../../../../components/mnemonic";
 import Clipboard from "expo-clipboard";
 import { PageWithScrollViewInBottomTabView } from "../../../../components/page";
 import { useSimpleTimer } from "../../../../hooks";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 
 export const getPrivateDataTitle = (keyRingType: string) => {
-  return `View ${keyRingType === "mnemonic" ? "Mnemonic Seed" : "Private key"}`;
+  return `View ${keyRingType === "mnemonic" ? "mnemonic seed" : "private key"}`;
 };
 
 export const canShowPrivateData = (keyRingType: string): boolean => {
@@ -33,6 +33,16 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
     >
   >();
 
+  const navigation = useNavigation();
+  useEffect(() => {
+    navigation.setOptions({
+      title:
+        route.params.privateDataType === "mnemonic"
+          ? "View Mnemonic Seed"
+          : "View Private Key",
+    });
+  }, [navigation, route.params.privateDataType]);
+
   const { isTimedOut, setTimer } = useSimpleTimer();
 
   const privateData = route.params.privateData;
@@ -44,9 +54,6 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
     <PageWithScrollViewInBottomTabView
       style={style.flatten(["padding-x-page"])}
     >
-      <Text style={style.flatten(["h4", "margin-y-24", "text-center"])}>
-        Guide Sentence
-      </Text>
       <View
         style={style.flatten([
           "padding-top-24",

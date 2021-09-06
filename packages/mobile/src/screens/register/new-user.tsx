@@ -41,7 +41,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
 
       <Button
         containerStyle={style.flatten(["margin-bottom-20"])}
-        text="Sign In With Google"
+        text="Sign in with Google"
         leftIcon={
           <View style={style.flatten(["margin-right-6"])}>
             <GoogleIcon />
@@ -65,7 +65,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         Powered by Torus
       </Text>
       <Button
-        text="Create New Seed"
+        text="Create new mnemonic"
         size="large"
         mode="light"
         onPress={() => {

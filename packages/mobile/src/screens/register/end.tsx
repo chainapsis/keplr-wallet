@@ -27,10 +27,10 @@ export const RegisterEndScreen: FunctionComponent = () => {
         />
 
         <Text style={style.flatten(["h1", "margin-bottom-16"])}>
-          You’re all set !
+          You’re all set!
         </Text>
         <Text style={style.flatten(["subtitle1", "text-center"])}>
-          Open the extension and sign in to begin your interchain journey
+          Your cosmic interchain journey now begins.
         </Text>
       </View>
       <View style={style.flatten(["flex-1"])} />

@@ -49,7 +49,7 @@ export const GovernanceCardBody: FunctionComponent<{
   const renderProposalDateString = (proposal: ObservableQueryProposal) => {
     switch (proposal.proposalStatus) {
       case Governance.ProposalStatus.DEPOSIT_PERIOD:
-        return `Deposit End. ${dateToLocalString(
+        return `Voting ends: ${dateToLocalString(
           intl,
           proposal.raw.deposit_end_time
         )}`;
@@ -58,7 +58,7 @@ export const GovernanceCardBody: FunctionComponent<{
       case Governance.ProposalStatus.PASSED:
       case Governance.ProposalStatus.REJECTED:
       case Governance.ProposalStatus.UNSPECIFIED:
-        return `Voting End. ${dateToLocalString(
+        return `Voting ends: ${dateToLocalString(
           intl,
           proposal.raw.voting_end_time
         )}`;

@@ -39,7 +39,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                 "margin-left-24",
               ])}
             >
-              Chain
+              Networks
             </Text>
           </View>
           {chainStore.chainInfos.map((chainInfo) => {

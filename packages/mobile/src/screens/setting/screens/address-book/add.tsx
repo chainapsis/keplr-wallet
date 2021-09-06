@@ -54,7 +54,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
       style={style.flatten(["padding-16"])}
     >
       <TextInput
-        label="Name"
+        label="Nickname"
         value={name}
         onChangeText={(text) => setName(text)}
       />
@@ -64,7 +64,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
         memoConfig={memoConfig}
         disableAddressBook={true}
       />
-      <MemoInput label="Default Memo" memoConfig={memoConfig} />
+      <MemoInput label="Default memo (optional)" memoConfig={memoConfig} />
       <View style={style.flatten(["flex-1"])} />
       <Button
         text="Save"
