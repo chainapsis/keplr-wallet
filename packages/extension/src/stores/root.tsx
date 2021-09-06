@@ -52,18 +52,6 @@ export class RootStore {
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 
     // Order is important.
-    this.analyticsStore = new AnalyticsStore("KeplrExtension", {
-      amplitudeConfig: {
-        platform: "Extension",
-        includeUtm: true,
-        includeReferrer: true,
-        includeFbclid: true,
-        includeGclid: true,
-        saveEvents: true,
-        saveParamsReferrerOncePerSession: false,
-      },
-    });
-
     this.interactionStore = new InteractionStore(
       router,
       new InExtensionMessageRequester()
@@ -167,6 +155,23 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       this.queriesStore
+    );
+
+    this.analyticsStore = new AnalyticsStore(
+      "KeplrExtension",
+      {
+        amplitudeConfig: {
+          platform: "Extension",
+          includeUtm: true,
+          includeReferrer: true,
+          includeFbclid: true,
+          includeGclid: true,
+          saveEvents: true,
+          saveParamsReferrerOncePerSession: false,
+        },
+      },
+      this.accountStore,
+      this.keyRingStore
     );
 
     router.listen(APP_PORT);

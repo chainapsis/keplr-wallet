@@ -1,5 +1,6 @@
 import Amplitude from "amplitude-js";
 import { makeObservable, observable } from "mobx";
+import { AccountStore, KeyRingStore } from "@keplr-wallet/stores";
 
 import { sha256 } from "sha.js";
 
@@ -15,24 +16,38 @@ export interface EventProperties {
   proposalTitle?: string;
   linkTitle?: string;
   linkUrl?: string;
+  registerType?: "seed" | "google" | "ledger" | "qr";
+  accountType?: "mnemonic" | "privateKey" | "ledger";
+}
+export interface UserProperties {
+  registerType?: "seed" | "google" | "ledger" | "qr";
+  accountType?: "mnemonic" | "privateKey" | "ledger";
 }
 
 export class AnalyticsStore {
   @observable
   protected _isInitialized: boolean = false;
-  protected appName: string = "Unknown";
+  protected _mainChainId: string = "cosmoshub-4";
+
   protected amplitudeAnalytics?: Amplitude.AmplitudeClient;
+
+  constructor(
+    protected readonly appName: string,
+    protected readonly configs: AnalyticsConfigs,
+    protected readonly accountStore: AccountStore,
+    protected readonly keyRingStore: KeyRingStore
+  ) {
+    makeObservable(this);
+
+    this.initializeAnalytics(configs);
+  }
 
   get isInitialized(): boolean {
     return this._isInitialized;
   }
 
-  constructor(appName: string, configs: AnalyticsConfigs) {
-    makeObservable(this);
-
-    this.appName = appName;
-
-    this.initializeAnalytics(configs);
+  get mainChainId(): string {
+    return this._mainChainId;
   }
 
   initializeAnalytics(configs: AnalyticsConfigs): void {
@@ -53,14 +68,28 @@ export class AnalyticsStore {
   // For example, the address will be different according to the chains (cosmoshub, secret, kava...),
   // but we want to classify the user without considering the chains.
   // So, I recommend to use only the address of the main chain (probably cosmoshub).
-  setAddressAsId(address: string): void {
+  setUserId(bech32Address?: string): void {
+    const accountInfo = this.accountStore.getAccount(this.mainChainId);
+
+    if (!this.amplitudeAnalytics || (!bech32Address && !accountInfo)) {
+      return;
+    }
+
+    const hashed = new sha256()
+      .update(bech32Address ? bech32Address : accountInfo.bech32Address)
+      .digest("hex");
+    this.amplitudeAnalytics.setUserId(hashed);
+  }
+
+  setUserProperties(userProperties: UserProperties): void {
     if (!this.amplitudeAnalytics) {
       return;
     }
 
-    const hashed = new sha256().update(address).digest("hex");
-
-    this.amplitudeAnalytics.setUserId(hashed);
+    this.amplitudeAnalytics.setUserProperties({
+      accountType: this.keyRingStore.keyRingType,
+      ...userProperties,
+    });
   }
 
   logEvent(
