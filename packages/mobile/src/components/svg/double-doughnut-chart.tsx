@@ -1,11 +1,13 @@
 import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
 import {
   Circle,
+  ClipPath,
   Defs,
   LinearGradient,
   Path,
   Stop,
   Svg,
+  Use,
 } from "react-native-svg";
 import Animated, { Easing } from "react-native-reanimated";
 
@@ -19,7 +21,7 @@ const polarToCartesian = (
   y: Animated.Adaptable<number>;
 } => {
   const angleInRadians = Animated.divide(
-    Animated.multiply(Animated.sub(angleInDegrees, 90), Math.PI),
+    Animated.multiply(Animated.add(angleInDegrees, 90), Math.PI),
     180
   );
 
@@ -42,16 +44,28 @@ const describeArc = (
   startAngle: Animated.Adaptable<number>,
   endAngle: Animated.Adaptable<number>
 ) => {
-  const start = polarToCartesian(x, y, radius, endAngle);
-  const end = polarToCartesian(x, y, radius, startAngle);
+  const start = polarToCartesian(x, y, radius, startAngle);
+  const end = polarToCartesian(x, y, radius, endAngle);
 
   const largeArcFlag = Animated.cond(
-    Animated.lessOrEq(Animated.sub(endAngle, startAngle), 180),
+    Animated.lessThan(Animated.sub(endAngle, startAngle), 180),
     0,
     1
   );
 
   const d = [
+    "M",
+    " ",
+    x,
+    " ",
+    y,
+    " ",
+    "L",
+    " ",
+    start.x,
+    " ",
+    start.y,
+    " ",
     "M",
     " ",
     start.x,
@@ -68,17 +82,25 @@ const describeArc = (
     " ",
     largeArcFlag,
     " ",
-    0,
+    1,
     " ",
     end.x,
     " ",
     end.y,
+    " ",
+    "L",
+    " ",
+    x,
+    " ",
+    y,
   ];
 
   return Animated.concat(...d);
 };
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
 export const DoubleDoughnutChart: FunctionComponent<{
   size?: number;
   data: [number, number];
@@ -92,32 +114,18 @@ export const DoubleDoughnutChart: FunctionComponent<{
   const firstData = data[0];
   const secondData = data[1];
 
-  const firstStartDegree = 180;
-
   const firstEndDegree = useMemo(() => {
-    const rate = firstData ? firstData / (firstData + secondData) : 0;
-    return 359.9 * rate + firstStartDegree;
+    const sum = firstData + secondData;
+    const rate = sum > 0 ? firstData / sum : 0;
+    return 359.9 * rate;
   }, [firstData, secondData]);
 
   const secondEndDegree = useMemo(() => {
-    const firstRate = firstData ? firstData / (firstData + secondData) : 0;
-    const rate = secondData && secondData > 0 ? 1 - firstRate : 0;
+    const sum = firstData + secondData;
+    const firstRate = sum > 0 ? firstData / sum : 0;
+    const rate = secondData > 0 ? 1 - firstRate : 0;
     return 359.9 * rate + firstEndDegree;
   }, [firstData, firstEndDegree, secondData]);
-
-  const firstEndDegreeAnimated = useMemo(() => {
-    return firstProcess.current.interpolate({
-      inputRange: [0, firstEndDegree],
-      outputRange: [0, firstEndDegree],
-    });
-  }, [firstEndDegree]);
-
-  const secondEndDegreeAnimated = useMemo(() => {
-    return secondProcess.current.interpolate({
-      inputRange: [0, secondEndDegree],
-      outputRange: [0, secondEndDegree],
-    });
-  }, [secondEndDegree]);
 
   useEffect(() => {
     Animated.timing(firstProcess.current, {
@@ -131,6 +139,26 @@ export const DoubleDoughnutChart: FunctionComponent<{
       easing: Easing.out(Easing.cubic),
     }).start();
   }, [firstEndDegree, secondEndDegree]);
+
+  const capRadius = centerLocation - radius;
+  const firstStartCapPosition = polarToCartesian(
+    centerLocation,
+    centerLocation,
+    radius,
+    0
+  );
+  const firstEndCapPosition = polarToCartesian(
+    centerLocation,
+    centerLocation,
+    radius,
+    firstProcess.current
+  );
+  const secondEndCapPosition = polarToCartesian(
+    centerLocation,
+    centerLocation,
+    radius,
+    secondProcess.current
+  );
 
   return (
     <Svg width={size} height={size} viewBox="0 0 180 180">
@@ -148,39 +176,102 @@ export const DoubleDoughnutChart: FunctionComponent<{
           <Stop offset="100%" stopColor="#D378FE" />
         </LinearGradient>
         <LinearGradient id="grad2" x1="0" y1="0" x2="1" y2="0">
-          <Stop offset="0" stopColor="#F0C9FF" />
-          <Stop offset="1" stopColor="#D4EEFF" />
+          <Stop offset="0%" stopColor="#F0C9FF" />
+          <Stop offset="100%" stopColor="#D4EEFF" />
         </LinearGradient>
+        <ClipPath id="first-arc-clip">
+          <AnimatedPath
+            d={describeArc(
+              centerLocation,
+              centerLocation,
+              centerLocation,
+              0,
+              firstProcess.current
+            )}
+            fill="white"
+          />
+          <AnimatedCircle
+            cx={firstStartCapPosition.x}
+            cy={firstStartCapPosition.y}
+            r={Animated.cond(
+              Animated.lessOrEq(firstProcess.current, 0.1),
+              0,
+              capRadius
+            )}
+            fill="white"
+          />
+          <AnimatedCircle
+            cx={firstEndCapPosition.x}
+            cy={firstEndCapPosition.y}
+            r={Animated.cond(
+              Animated.lessOrEq(firstProcess.current, 0.1),
+              0,
+              capRadius
+            )}
+            fill="white"
+          />
+        </ClipPath>
+        <ClipPath id="second-arc-clip">
+          <AnimatedPath
+            d={describeArc(
+              centerLocation,
+              centerLocation,
+              centerLocation,
+              firstProcess.current,
+              secondProcess.current
+            )}
+            fill="white"
+          />
+          <AnimatedCircle
+            cx={firstEndCapPosition.x}
+            cy={firstEndCapPosition.y}
+            r={Animated.cond(
+              Animated.lessOrEq(secondProcess.current, 0.1),
+              0,
+              capRadius
+            )}
+            fill="white"
+          />
+          <AnimatedCircle
+            cx={secondEndCapPosition.x}
+            cy={secondEndCapPosition.y}
+            r={Animated.cond(
+              Animated.lessOrEq(secondProcess.current, 0.1),
+              0,
+              capRadius
+            )}
+            fill="white"
+          />
+        </ClipPath>
       </Defs>
-      <AnimatedPath
-        d={describeArc(
-          centerLocation,
-          centerLocation,
-          radius,
-          firstEndDegreeAnimated,
-          secondEndDegreeAnimated
-        )}
-        stroke="url(#grad2)"
-        strokeWidth={14}
-        strokeLinecap="round"
+      <Circle
+        id="second-arc"
+        cx={centerLocation}
+        cy={centerLocation}
+        r={radius}
       />
-      {/*
-         For a design element, the first arc is on a higher layer
-       */}
-      {firstEndDegree !== firstStartDegree ? (
-        <AnimatedPath
-          d={describeArc(
-            centerLocation,
-            centerLocation,
-            radius,
-            firstStartDegree,
-            firstEndDegreeAnimated
-          )}
-          stroke="url(#grad1)"
-          strokeWidth={14}
-          strokeLinecap="round"
-        />
-      ) : null}
+      <Use
+        clipPath="url(#second-arc-clip)"
+        xlinkHref="#second-arc"
+        fill="transparent"
+        stroke="url(#grad2)"
+        strokeWidth="14"
+        clipRule="nonzero"
+      />
+      <Circle
+        id="first-arc"
+        cx={centerLocation}
+        cy={centerLocation}
+        r={radius}
+      />
+      <Use
+        clipPath="url(#first-arc-clip)"
+        xlinkHref="#first-arc"
+        fill="transparent"
+        stroke="url(#grad1)"
+        strokeWidth="14"
+        clipRule="nonzero"
+      />
     </Svg>
   );
 };
