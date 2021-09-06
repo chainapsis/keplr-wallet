@@ -1,7 +1,6 @@
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useStyle } from "../../styles";
-import { Text } from "react-native-elements";
-import { StyleSheet, TextStyle, View, ViewStyle } from "react-native";
+import { Text, StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import { LoadingSpinner } from "../spinner";
 import { RectButton } from "../rect-button";
 

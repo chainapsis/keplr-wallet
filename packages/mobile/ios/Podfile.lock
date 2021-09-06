@@ -415,8 +415,6 @@ PODS:
     - React-Core
   - RNCMaskedView (0.1.10):
     - React
-  - RNCPicker (1.12.0):
-    - React-Core
   - RNFastImage (8.3.7):
     - React-Core
     - SDWebImage (~> 5.8)
@@ -511,7 +509,6 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
-  - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - "RNFBAnalytics (from `../node_modules/@react-native-firebase/analytics`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
@@ -644,8 +641,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCMaskedView:
     :path: "../node_modules/@react-native-community/masked-view"
-  RNCPicker:
-    :path: "../node_modules/@react-native-picker/picker"
   RNFastImage:
     :path: "../node_modules/react-native-fast-image"
   RNFBAnalytics:
@@ -744,7 +739,6 @@ SPEC CHECKSUMS:
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
   RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
-  RNCPicker: a3f85bfd04ab192fe9a8fe7485b5ef4f80e59022
   RNFastImage: a7384db75df352500261e8e8f1ac2026def26102
   RNFBAnalytics: 1190435dcd25d7403d28ceb4342c0d1e050843de
   RNFBApp: 996860ad6832996faba79ef3f6ec2d3ea5870dd9

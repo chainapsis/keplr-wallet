@@ -4447,11 +4447,6 @@
     opencollective-postinstall "^2.0.1"
     superstruct "^0.6.2"
 
-"@react-native-picker/picker@^1.12.0", "@react-native-picker/picker@^1.8.3":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@react-native-picker/picker/-/picker-1.12.0.tgz#215d7c950935c8f1a834af0832a93122b4bab0f1"
-  integrity sha512-LxtFcuQ/jxsNwH9byM4mMSusqGfaj0LHXTh6fJgvIKOBjAWwV+FjWHszQSPCbnycdezirf8dFLhF9phcNuE8CA==
-
 "@react-navigation/bottom-tabs@^5.11.8":
   version "5.11.8"
   resolved "https://registry.yarnpkg.com/@react-navigation/bottom-tabs/-/bottom-tabs-5.11.8.tgz#0af8d5859b1ad781bdd86e8236ceaed60dc355fe"
@@ -8086,7 +8081,7 @@ color-support@^1.1.3:
   resolved "https://registry.yarnpkg.com/color-support/-/color-support-1.1.3.tgz#93834379a1cc9a0c61f82f52f0d04322251bd5a2"
   integrity sha512-qiBjkpbMLO/HL68y+lh4q0/O1MZFj2RX6X/KmMa3+gJD3z+WwI1ZzDHysvqHGS3mP6mznPckpXmw1nI9cJjyRg==
 
-color@^3.0.0, color@^3.1.2, color@^3.1.3:
+color@^3.0.0, color@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/color/-/color-3.1.3.tgz#ca67fb4e7b97d611dcde39eceed422067d91596e"
   integrity sha512-xgXAcTHa2HeFCGLE9Xs/R82hujGtu9Jd9x4NW3T34+OMs7VoPsjwzRczKHvTAHeJwWFwX5j15+MgAppE8ztObQ==
@@ -15713,7 +15708,7 @@ moment@2.24.0:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
 
-moment@^2.10.2, moment@^2.22.1, moment@^2.29.1:
+moment@^2.10.2, moment@^2.22.1:
   version "2.29.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
   integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
@@ -16508,7 +16503,7 @@ open@^7.0.2:
     is-docker "^2.0.0"
     is-wsl "^2.1.1"
 
-opencollective-postinstall@^2.0.1, opencollective-postinstall@^2.0.3:
+opencollective-postinstall@^2.0.1:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/opencollective-postinstall/-/opencollective-postinstall-2.0.3.tgz#7a0fff978f6dbfa4d006238fbac98ed4198c3259"
   integrity sha512-8AV/sCtuzUeTo8gQK5qDZzARrulB3egtLzFgteqB2tcT4Mw7B8Kt7JcDHmltjz6FOAHsvTevk70gZEbhM4ZS9Q==
@@ -18566,13 +18561,6 @@ react-modal@^3.11.1:
     react-lifecycles-compat "^3.0.0"
     warning "^4.0.3"
 
-react-native-animatable@1.3.3:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/react-native-animatable/-/react-native-animatable-1.3.3.tgz#a13a4af8258e3bb14d0a9d839917e9bb9274ec8a"
-  integrity sha512-2ckIxZQAsvWn25Ho+DK3d1mXIgj7tITkrS4pYDvx96WyOttSvzzFeQnM2od0+FUMzILbdHDsDEqZvnz1DYNQ1w==
-  dependencies:
-    prop-types "^15.7.2"
-
 react-native-ble-plx@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/react-native-ble-plx/-/react-native-ble-plx-1.0.1.tgz#6ab5f3a5f9937b6a6410929dc222368f6e4dd1de"
@@ -18610,20 +18598,6 @@ react-native-code-push@^7.0.1:
     create-hash "^1.2.0"
     create-hmac "^1.1.7"
     expo-random "^11.0.0"
-
-react-native-elements@^3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/react-native-elements/-/react-native-elements-3.3.2.tgz#42cc05c90a5c85c8aee95ce363bce0c5a39fe633"
-  integrity sha512-bDWQt0WEuJEOrwzSYx0mVBV3aoRtJAsK0Kc2sioMsshSEhPOZK17Ccx+EvLBSpZ9uWxPyx42Z7hUH/8dQNu67g==
-  dependencies:
-    "@types/react-native-vector-icons" "^6.4.6"
-    color "^3.1.2"
-    deepmerge "^4.2.2"
-    hoist-non-react-statics "^3.3.2"
-    lodash.isequal "^4.5.0"
-    opencollective-postinstall "^2.0.3"
-    react-native-ratings "^7.3.0"
-    react-native-size-matters "^0.3.1"
 
 react-native-fast-image@^8.3.7:
   version "8.3.7"
@@ -18672,22 +18646,6 @@ react-native-localize@^2.1.1:
   resolved "https://registry.yarnpkg.com/react-native-localize/-/react-native-localize-2.1.1.tgz#da8f8776991d2b748708c408db05152602cefb38"
   integrity sha512-+uyz2/b0vyLq19fcb7r1qU1gqmzbp3aC6EMTvOVXwfBuiN+aJXR/fDdFOJJ8D7+bLccKeuS2zBDrazh+ZayX/g==
 
-react-native-modal@^11.7.0:
-  version "11.7.0"
-  resolved "https://registry.yarnpkg.com/react-native-modal/-/react-native-modal-11.7.0.tgz#6637d757eeac6eda85f7017a9dfdee0c0fe3a34c"
-  integrity sha512-0AeAugUrn12DaJK+k2XGmt8ZIUyWgl1nRdipfwHZDnzFSM8g1oqpf7rHxjOqhimHtmzSj4xJ//ZOn1DWe9aC5Q==
-  dependencies:
-    prop-types "^15.6.2"
-    react-native-animatable "1.3.3"
-
-react-native-picker-select@^8.0.4:
-  version "8.0.4"
-  resolved "https://registry.yarnpkg.com/react-native-picker-select/-/react-native-picker-select-8.0.4.tgz#3f7f1f42df69b06e7d2c10338288332a6c40fd10"
-  integrity sha512-orBjPIwBkV5oipyVw263YNMI56f6Kj3p/ejabZoCYYNSG3AiLVVhC2RqsxMgDA7IayyURAW+AlV+mDJyVqLBkg==
-  dependencies:
-    "@react-native-picker/picker" "^1.8.3"
-    lodash.isequal "^4.5.0"
-
 react-native-qrcode-svg@^6.1.1:
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/react-native-qrcode-svg/-/react-native-qrcode-svg-6.1.1.tgz#19dd15545b1cbcfc1b2738af170e9fd0f1d4d8a0"
@@ -18695,14 +18653,6 @@ react-native-qrcode-svg@^6.1.1:
   dependencies:
     prop-types "^15.7.2"
     qrcode "^1.4.4"
-
-react-native-ratings@^7.3.0:
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/react-native-ratings/-/react-native-ratings-7.6.0.tgz#db5aedddf1ff5f87d618a62e0ec6da1ba2cba8d1"
-  integrity sha512-o2vlevSPszL3zgj8J0L3A/fWJ/z0TyjgmTFXJOGH64HA9l+gaegRLTxjmNNaW3qyoKEr/nis7WCdquRVv+gCtA==
-  dependencies:
-    lodash "^4.17.15"
-    prop-types "^15.7.2"
 
 react-native-reanimated@^1.13.3:
   version "1.13.3"
@@ -18735,11 +18685,6 @@ react-native-scrypt@^1.2.1:
   dependencies:
     "@types/node" "^14.14.35"
     buffer "^5.6.0"
-
-react-native-size-matters@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/react-native-size-matters/-/react-native-size-matters-0.3.1.tgz#24d0cfc335a2c730f6d58bd7b43ea5a41be4b49f"
-  integrity sha512-mKOfBLIBFBcs9br1rlZDvxD5+mAl8Gfr5CounwJtxI6Z82rGrMO+Kgl9EIg3RMVf3G855a85YVqHJL2f5EDRlw==
 
 react-native-svg@^12.1.1:
   version "12.1.1"
