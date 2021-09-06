@@ -5,6 +5,7 @@ import { useStyle } from "../../styles";
 import { View, Text, Image, Linking } from "react-native";
 import { Button } from "../../components/staging/button";
 import { useSmartNavigation } from "../../navigation";
+import LottieView from "lottie-react-native";
 
 export const ResultScreen: FunctionComponent = () => {
   const style = useStyle();
@@ -13,21 +14,55 @@ export const ResultScreen: FunctionComponent = () => {
 
   return (
     <PageWithScrollView
-      contentContainerStyle={style.flatten(["flex-grow-1"])}
+      contentContainerStyle={style.flatten(["flex-grow-1", "justify-center"])}
       style={style.flatten(["padding-x-42", "padding-bottom-12"])}
     >
       <View style={style.flatten(["flex", "items-center"])}>
-        <Image
-          style={{
-            width: 122,
-            height: 122,
-            marginTop: 154,
-            marginBottom: 87,
-          }}
-          source={require("../../assets/svg/success.png")}
-        />
+        <View
+          style={style.flatten([
+            "width-122",
+            "height-122",
+            "border-width-6",
+            "border-color-primary",
+            "border-radius-64",
+            "margin-bottom-92",
+          ])}
+        >
+          <View
+            style={{
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 10,
+              ...style.flatten(["absolute", "justify-center", "items-center"]),
+            }}
+          >
+            <LottieView
+              source={require("../../assets/lottie/pending.json")}
+              colorFilters={[
+                {
+                  keypath: "#dot01",
+                  color: style.get("color-primary").color,
+                },
+                {
+                  keypath: "#dot02",
+                  color: style.get("color-primary").color,
+                },
+                {
+                  keypath: "#dot03",
+                  color: style.get("color-primary").color,
+                },
+              ]}
+              autoPlay
+              loop
+              style={style.flatten(["width-160"])}
+            />
+          </View>
+        </View>
 
-        <Text style={style.flatten(["h2", "margin-bottom-32"])}>Success</Text>
+        <Text style={style.flatten(["h2", "margin-bottom-32", "text-center"])}>
+          Pending
+        </Text>
         <Text
           style={style.flatten(["body1", "text-center", "margin-bottom-64"])}
         >

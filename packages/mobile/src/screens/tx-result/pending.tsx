@@ -3,14 +3,14 @@ import { RouteProp, useIsFocused, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithView } from "../../components/staging/page";
-import { Text, View } from "react-native";
+import { Text, View, Dimensions } from "react-native";
 import { Button } from "../../components/staging/button";
 import { useStyle } from "../../styles";
-import Svg, { Circle, Rect } from "react-native-svg";
 import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/staging/icon";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
+import LottieView from "lottie-react-native";
 
 export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -74,41 +74,53 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
-      style={style.flatten(["padding-x-42", "items-center", "justify-center"])}
+      style={{
+        paddingTop: Dimensions.get("window").height * 0.2,
+        paddingBottom: Dimensions.get("window").height * 0.2,
+        ...style.flatten(["padding-x-42", "items-center"]),
+      }}
     >
-      <Svg width="122" height="122" fill="none" viewBox="0 0 122 122">
-        <Circle
-          cx="61"
-          cy="61"
-          r="57"
-          stroke={style.get("color-primary").color}
-          strokeWidth="8"
-        />
-        <Rect
-          width="12"
-          height="12"
-          x="55"
-          y="56"
-          fill={style.get("color-primary").color}
-          rx="6"
-        />
-        <Rect
-          width="12"
-          height="12"
-          x="35"
-          y="56"
-          fill={style.get("color-primary").color}
-          rx="6"
-        />
-        <Rect
-          width="12"
-          height="12"
-          x="74"
-          y="56"
-          fill={style.get("color-primary").color}
-          rx="6"
-        />
-      </Svg>
+      <View
+        style={style.flatten([
+          "width-122",
+          "height-122",
+          "border-width-6",
+          "border-color-primary",
+          "border-radius-64",
+        ])}
+      >
+        <View
+          style={{
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 10,
+            ...style.flatten(["absolute", "justify-center", "items-center"]),
+          }}
+        >
+          <LottieView
+            source={require("../../assets/lottie/pending.json")}
+            colorFilters={[
+              {
+                keypath: "#dot01",
+                color: style.get("color-primary").color,
+              },
+              {
+                keypath: "#dot02",
+                color: style.get("color-primary").color,
+              },
+              {
+                keypath: "#dot03",
+                color: style.get("color-primary").color,
+              },
+            ]}
+            autoPlay
+            loop
+            style={style.flatten(["width-160"])}
+          />
+        </View>
+      </View>
+
       <Text style={style.flatten(["h2", "margin-top-87", "margin-bottom-32"])}>
         Pending
       </Text>
