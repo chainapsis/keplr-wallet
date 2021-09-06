@@ -64,7 +64,7 @@ export const Colors = {
   disabled: "#EEEEF3",
   divider: "#F5F5F5",
   transparent: "rgba(255,255,255,0)",
-  "modal-backdrop": "rgba(9,18,50,0.4)",
+  "modal-backdrop": "rgba(9,18,50,0.6)",
   "card-modal-handle": "#DCDCE3",
   "setting-screen-background": "#FAFBFD",
 };
