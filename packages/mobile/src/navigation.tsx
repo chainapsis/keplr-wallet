@@ -26,7 +26,6 @@ import {
   useIsDrawerOpen,
 } from "@react-navigation/drawer";
 import analytics from "@react-native-firebase/analytics";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import { DrawerContent } from "./components/drawer";
 import { useStyle } from "./styles";
 import { BorderlessButton } from "react-native-gesture-handler";
@@ -552,7 +551,14 @@ export const MainTabNavigation: FunctionComponent = () => {
                 </Svg>
               );
             case "Web":
-              return <Ionicons name="apps-outline" size={size} color={color} />;
+              return (
+                <Svg width={size} height={size} fill="none" viewBox="0 0 24 24">
+                  <Path
+                    fill={color}
+                    d="M12 2c-.528 0-1.046.045-1.55.131l-.311 1.302c-.484 2.023-2.544 3.225-4.52 2.635l-1.084-.325A10.124 10.124 0 003 8.598l.805.781a3.663 3.663 0 010 5.242L3 15.402c.36 1.043.882 2.006 1.535 2.855l1.084-.325c1.976-.59 4.036.612 4.52 2.635l.31 1.302a9.187 9.187 0 003.101 0l.311-1.302c.484-2.023 2.544-3.225 4.52-2.635l1.084.325A10.124 10.124 0 0021 15.402l-.805-.781a3.663 3.663 0 010-5.242L21 8.598a10.113 10.113 0 00-1.535-2.855l-1.084.325c-1.976.59-4.036-.612-4.52-2.635l-.31-1.302A9.184 9.184 0 0012 2zm0 7.273c1.491 0 2.7 1.22 2.7 2.727 0 1.506-1.209 2.727-2.7 2.727S9.3 13.507 9.3 12c0-1.506 1.209-2.727 2.7-2.727z"
+                  />
+                </Svg>
+              );
             case "Settings":
               return (
                 <Svg width={size} height={size} fill="none" viewBox="0 0 24 24">
