@@ -43,7 +43,13 @@ export const SettingScreen: FunctionComponent = observer(() => {
         />
       ) : null}
       <SettingSectionTitle title="Others" />
-      <SettingItem label="Keplr version" topBorder={true} />
+      <SettingItem
+        label="Keplr version"
+        topBorder={true}
+        onPress={() => {
+          smartNavigation.navigateSmart("Setting.Version", {});
+        }}
+      />
       <SettingRemoveAccountItem topBorder={true} />
     </PageWithScrollViewInBottomTabView>
   );

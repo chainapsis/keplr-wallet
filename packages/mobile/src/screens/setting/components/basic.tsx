@@ -74,11 +74,7 @@ export const SettingItem: FunctionComponent<{
           {paragraph ? (
             <Text
               style={StyleSheet.flatten([
-                style.flatten([
-                  "subtitle3",
-                  "color-text-black-low",
-                  "margin-top-4",
-                ]),
+                style.flatten(["subtitle3", "color-text-black-low"]),
                 paragraphStyle,
               ])}
             >

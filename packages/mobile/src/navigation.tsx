@@ -89,6 +89,7 @@ import { TorusSignInScreen } from "./screens/register/torus";
 import { HeaderAddIcon } from "./components/header/icon";
 import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
+import { KeplrVersionScreen } from "./screens/setting/screens/version";
 
 const {
   SmartNavigatorProvider,
@@ -165,6 +166,9 @@ const {
       upperScreenName: "Settings",
     },
     "Setting.ViewPrivateData": {
+      upperScreenName: "Settings",
+    },
+    "Setting.Version": {
       upperScreenName: "Settings",
     },
     AddressBook: {
@@ -530,6 +534,13 @@ export const SettingStackScreen: FunctionComponent = () => {
       <Stack.Screen
         name="Setting.ViewPrivateData"
         component={ViewPrivateDataScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Version",
+        }}
+        name="Setting.Version"
+        component={KeplrVersionScreen}
       />
     </Stack.Navigator>
   );
