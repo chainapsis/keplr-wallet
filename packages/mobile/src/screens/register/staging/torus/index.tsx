@@ -13,6 +13,7 @@ import * as WebBrowser from "expo-web-browser";
 import { Buffer } from "buffer/";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import Torus from "@toruslabs/torus.js";
+import { useStore } from "../../../../stores";
 
 interface FormData {
   name: string;
@@ -34,6 +35,8 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
   >();
 
   const style = useStyle();
+
+  const { analyticsStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
@@ -167,6 +170,13 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
           getValues("password"),
           email
         );
+        analyticsStore.setUserId();
+        analyticsStore.setUserProperties({
+          registerType: "google",
+        });
+        analyticsStore.logEvent("OAuth sign in finished", {
+          accountType: "privateKey",
+        });
 
         smartNavigation.reset({
           index: 0,

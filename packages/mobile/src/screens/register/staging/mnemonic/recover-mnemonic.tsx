@@ -10,6 +10,7 @@ import { TextInput } from "../../../../components/staging/input";
 import { StyleSheet, View } from "react-native";
 import { Button } from "../../../../components/staging/button";
 import Clipboard from "expo-clipboard";
+import { useStore } from "../../../../stores";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -46,6 +47,8 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
+  const { analyticsStore } = useStore();
+
   const smartNavigation = useSmartNavigation();
 
   const registerConfig: RegisterConfig = route.params.registerConfig;
@@ -74,6 +77,13 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         addressIndex: 0,
       }
     );
+    analyticsStore.setUserId();
+    analyticsStore.setUserProperties({
+      registerType: "seed",
+    });
+    analyticsStore.logEvent("Import account finished", {
+      accountType: "mnemonic",
+    });
 
     smartNavigation.reset({
       index: 0,

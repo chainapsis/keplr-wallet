@@ -12,7 +12,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 
 export const RegisterNewUserScreen: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -50,6 +50,9 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         size="large"
         mode="light"
         onPress={() => {
+          analyticsStore.logEvent("OAuth sign in started", {
+            registerType: "google",
+          });
           smartNavigation.navigateSmart("Register.TorusSignIn", {
             registerConfig,
           });
@@ -69,6 +72,9 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         size="large"
         mode="light"
         onPress={() => {
+          analyticsStore.logEvent("Create account started", {
+            registerType: "seed",
+          });
           smartNavigation.navigateSmart("Register.NewMnemonic", {
             registerConfig,
           });

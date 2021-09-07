@@ -9,9 +9,10 @@ import { useSmartNavigation } from "../../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { useLogScreenView } from "../../../hooks";
 
 export const RegisterIntroScreen: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -20,6 +21,8 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
   const registerConfig = useRegisterConfig(keyRingStore, []);
 
   const headerHeight = useHeaderHeight();
+
+  useLogScreenView("Register");
 
   return (
     <PageWithScrollView
@@ -61,6 +64,9 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
         size="large"
         mode="text"
         onPress={() => {
+          analyticsStore.logEvent("Import account started", {
+            registerType: "ledger",
+          });
           smartNavigation.navigateSmart("Register.NewLedger", {
             registerConfig,
           });

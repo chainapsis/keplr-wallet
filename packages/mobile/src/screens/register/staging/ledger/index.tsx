@@ -9,6 +9,7 @@ import { PageWithScrollView } from "../../../../components/staging/page";
 import { TextInput } from "../../../../components/staging/input";
 import { View } from "react-native";
 import { Button } from "../../../../components/staging/button";
+import { useStore } from "../../../../stores";
 
 interface FormData {
   name: string;
@@ -30,6 +31,8 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
   >();
 
   const style = useStyle();
+
+  const { analyticsStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
@@ -59,6 +62,13 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
           addressIndex: 0,
         }
       );
+      analyticsStore.setUserId();
+      analyticsStore.setUserProperties({
+        registerType: "ledger",
+      });
+      analyticsStore.logEvent("Import account finished", {
+        accountType: "ledger",
+      });
 
       smartNavigation.reset({
         index: 0,
