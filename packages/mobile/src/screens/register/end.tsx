@@ -41,7 +41,7 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <PageWithView style={style.flatten(["padding-x-48"])}>
+    <PageWithView style={style.flatten(["padding-x-42"])}>
       <View style={style.get("flex-2")} />
       <View style={style.flatten(["flex-4"])}>
         <Text
