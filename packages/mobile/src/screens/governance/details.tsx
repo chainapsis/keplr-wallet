@@ -314,7 +314,7 @@ export const GovernanceVoteModal: FunctionComponent<{
     };
 
     return (
-      <View style={style.flatten(["padding-12"])}>
+      <View style={style.flatten(["padding-page"])}>
         <View
           style={style.flatten([
             "border-radius-8",
@@ -528,9 +528,27 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
       <Card style={style.flatten(["margin-top-card-gap"])}>
         <GovernanceDetailsCardBody
           proposalId={proposalId}
-          containerStyle={{
-            marginBottom: style.get("height-button-large").height,
-          }}
+          containerStyle={(() => {
+            let marginBottom = 0;
+
+            const buttonHeight = style.get("height-button-large").height;
+            if (typeof buttonHeight === "string") {
+              marginBottom += parseFloat(buttonHeight);
+            } else {
+              marginBottom += buttonHeight;
+            }
+
+            const padding = style.get("padding-page").paddingBottom;
+            if (typeof padding === "string") {
+              marginBottom += parseFloat(padding);
+            } else {
+              marginBottom += padding;
+            }
+
+            return {
+              marginBottom,
+            };
+          })()}
         />
       </Card>
     </PageWithScrollView>
