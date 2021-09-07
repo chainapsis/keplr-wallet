@@ -81,7 +81,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-12", "padding-bottom-12"])}
+      style={style.flatten(["padding-x-page"])}
     >
       <Controller
         control={control}
@@ -182,6 +182,8 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
       ) : null}
       <View style={style.flatten(["flex-1"])} />
       <Button text="Next" size="large" loading={isCreating} onPress={submit} />
+      {/* Mock element for bottom padding */}
+      <View style={style.flatten(["height-12"])} />
     </PageWithScrollView>
   );
 });

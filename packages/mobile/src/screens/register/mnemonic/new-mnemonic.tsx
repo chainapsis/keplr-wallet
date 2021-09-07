@@ -65,7 +65,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-page", "padding-bottom-12"])}
+      style={style.flatten(["padding-x-page"])}
     >
       <Text
         style={style.flatten([
@@ -178,6 +178,8 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
       ) : null}
       <View style={style.flatten(["flex-1"])} />
       <Button text="Next" size="large" onPress={submit} />
+      {/* Mock element for bottom padding */}
+      <View style={style.flatten(["height-12"])} />
     </PageWithScrollView>
   );
 });
