@@ -5,7 +5,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import Clipboard from "expo-clipboard";
 import { RectButton } from "../rect-button";
 import { CopyIcon } from "../icon";
-import { useSimpleTimer } from "../../hooks/use-simple-timer";
+import { useSimpleTimer } from "../../hooks";
 import LottieView from "lottie-react-native";
 
 export const AddressCopyable: FunctionComponent<{
@@ -46,22 +46,21 @@ export const AddressCopyable: FunctionComponent<{
           <View style={style.flatten(["margin-left-2"])}>
             <View style={style.flatten(["width-20", "height-20"])}>
               <View
-                style={{
-                  left: 0,
-                  right: 4,
-                  top: 0,
-                  bottom: 0,
-                  ...style.flatten([
-                    "absolute",
-                    "justify-center",
-                    "items-center",
-                  ]),
-                }}
+                style={StyleSheet.flatten([
+                  style.flatten(["absolute", "justify-center", "items-center"]),
+                  {
+                    left: 0,
+                    right: 4,
+                    top: 0,
+                    bottom: 0,
+                  },
+                ])}
               >
                 <LottieView
                   source={require("../../assets/lottie/check.json")}
                   autoPlay
-                  loop
+                  speed={2}
+                  loop={false}
                   style={style.flatten(["width-58", "height-58"])}
                 />
               </View>
