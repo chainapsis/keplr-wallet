@@ -176,7 +176,10 @@ export const SignModal: FunctionComponent<{
         <Button
           text="Approve"
           disabled={
-            signDocWapper == null || signDocHelper.signDocWrapper == null
+            signDocWapper == null ||
+            signDocHelper.signDocWrapper == null ||
+            memoConfig.getError() != null ||
+            feeConfig.getError() != null
           }
           loading={signInteractionStore.isLoading}
           onPress={async () => {
