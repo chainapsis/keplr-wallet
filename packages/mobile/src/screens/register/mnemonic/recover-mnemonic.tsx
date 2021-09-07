@@ -80,6 +80,9 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
       routes: [
         {
           name: "Register.End",
+          params: {
+            password: getValues("password"),
+          },
         },
       ],
     });

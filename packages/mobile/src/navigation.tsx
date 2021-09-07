@@ -202,6 +202,9 @@ const {
     "Register.TorusSignIn": {
       registerConfig: RegisterConfig;
     };
+    "Register.End": {
+      password?: string;
+    };
     Send: {
       chainId?: string;
       currency?: string;

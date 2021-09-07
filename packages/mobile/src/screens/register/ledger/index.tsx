@@ -65,6 +65,9 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
         routes: [
           {
             name: "Register.End",
+            params: {
+              password: getValues("password"),
+            },
           },
         ],
       });

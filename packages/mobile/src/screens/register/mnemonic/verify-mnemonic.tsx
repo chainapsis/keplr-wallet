@@ -122,6 +122,9 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
             routes: [
               {
                 name: "Register.End",
+                params: {
+                  password: newMnemonicConfig.password,
+                },
               },
             ],
           });

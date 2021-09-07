@@ -9,7 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 export const SettingRemoveAccountItem: FunctionComponent<{
   topBorder?: boolean;
 }> = observer(({ topBorder }) => {
-  const { keyRingStore } = useStore();
+  const { keychainStore, keyRingStore } = useStore();
 
   const style = useStyle();
 
@@ -42,6 +42,8 @@ export const SettingRemoveAccountItem: FunctionComponent<{
             await keyRingStore.deleteKeyRing(index, password);
 
             if (keyRingStore.multiKeyStoreInfo.length === 0) {
+              await keychainStore.turnOffBiometry();
+
               navigation.reset({
                 index: 0,
                 routes: [
