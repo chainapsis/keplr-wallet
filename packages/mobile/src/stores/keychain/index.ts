@@ -96,6 +96,19 @@ export class KeychainStore {
   }
 
   @flow
+  *reset() {
+    if (this.isBiometryOn) {
+      const result = yield* toGenerator(
+        Keychain.resetGenericPassword(KeychainStore.defaultOptions)
+      );
+      if (result) {
+        this._isBiometryOn = false;
+        yield this.save();
+      }
+    }
+  }
+
+  @flow
   protected *init() {
     // No need to await.
     this.restore();

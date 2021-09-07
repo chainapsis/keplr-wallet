@@ -42,7 +42,7 @@ export const SettingRemoveAccountItem: FunctionComponent<{
             await keyRingStore.deleteKeyRing(index, password);
 
             if (keyRingStore.multiKeyStoreInfo.length === 0) {
-              await keychainStore.turnOffBiometry();
+              await keychainStore.reset();
 
               navigation.reset({
                 index: 0,
