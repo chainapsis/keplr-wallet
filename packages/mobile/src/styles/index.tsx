@@ -3,13 +3,6 @@ import { EnumTextTransform, EnumTextDecorationLine } from "./builder/types";
 import { Platform } from "react-native";
 import { getPlatformFontWeight } from "./builder/utils";
 
-export * from "./layout";
-export * from "./font";
-export * from "./common";
-export * from "./flex";
-export * from "./border";
-export * from "./colors";
-
 export const Colors = {
   primary: "#4762E7",
   "primary-10": "#F1F3FC",
@@ -71,8 +64,9 @@ export const Colors = {
   disabled: "#EEEEF3",
   divider: "#F5F5F5",
   transparent: "rgba(255,255,255,0)",
-  "modal-backdrop": "rgba(9,18,50,0.4)",
+  "modal-backdrop": "rgba(9,18,50,0.6)",
   "card-modal-handle": "#DCDCE3",
+  "setting-screen-background": "#FAFBFD",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider({
@@ -354,6 +348,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "32": 32,
     "36": 36,
     "42": 42,
+    "48": 48,
     "52": 52,
     "64": 64,
 
@@ -381,8 +376,9 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "28": 28,
     "30": 30,
     "32": 32,
-    "40": 54,
+    "40": 40,
     "44": 44,
+    "48": 48,
     "64": 64,
     "68": 68,
     "87": 87,

@@ -1,83 +1,71 @@
-/* eslint-disable react/display-name */
 import React, { FunctionComponent } from "react";
-import { Text } from "react-native-elements";
+import { useHeaderHeight } from "@react-navigation/stack";
+import { PageWithScrollView } from "../../components/page";
+import { KeplrLogo } from "../../components/svg";
+import { useStyle } from "../../styles";
+import { View, Dimensions } from "react-native";
+import { Button } from "../../components/button";
+import { useSmartNavigation } from "../../navigation";
+import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { useNavigation } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import { FullFixedPage } from "../../components/page";
-import { FlexButton, FlexWhiteButton } from "../../components/buttons";
-import { View } from "react-native";
-import { GradientBackground } from "../../components/svg";
-import {
-  GenerateMnemonicScreen,
-  VerifyMnemonicScreen,
-  RecoverMnemonicScreen,
-} from "./mnemonic";
-import {
-  fcHigh,
-  h3,
-  alignItemsCenter,
-  flex1,
-  h1,
-  justifyContentCenter,
-  sf,
-} from "../../styles";
+import { useStore } from "../../stores";
 
-const RegisterStack = createStackNavigator();
+export const RegisterIntroScreen: FunctionComponent = observer(() => {
+  const { keyRingStore } = useStore();
 
-export const RegisterStackScreen: FunctionComponent = () => {
+  const style = useStyle();
+
+  const smartNavigation = useSmartNavigation();
+
+  const registerConfig = useRegisterConfig(keyRingStore, []);
+
+  const headerHeight = useHeaderHeight();
+
   return (
-    <RegisterStack.Navigator
-      screenOptions={{
-        headerBackTitleVisible: false,
-        headerTitle: "",
-        headerBackground: () => <GradientBackground />,
-        headerTitleStyle: sf([h3, fcHigh]),
+    <PageWithScrollView
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={{
+        ...style.flatten(["padding-x-42"]),
+        paddingTop: Dimensions.get("window").height * 0.22 - headerHeight,
+        paddingBottom: Dimensions.get("window").height * 0.11,
       }}
     >
-      <RegisterStack.Screen name="Register" component={RegisterScreen} />
-      <RegisterStack.Screen name="Sign in" component={RecoverMnemonicScreen} />
-      <RegisterStack.Screen
-        name="New account"
-        component={GenerateMnemonicScreen}
-      />
-      <RegisterStack.Screen
-        name="Verify account"
-        component={VerifyMnemonicScreen}
-      />
-    </RegisterStack.Navigator>
-  );
-};
-
-export const RegisterScreen: FunctionComponent = observer(() => {
-  const navigation = useNavigation();
-
-  return (
-    <FullFixedPage>
-      <View style={flex1} />
-      <View style={sf([flex1, justifyContentCenter, alignItemsCenter])}>
-        <Text style={h1}>Keplr</Text>
+      <View
+        style={style.flatten(["flex-grow-1", "items-center", "padding-x-18"])}
+      >
+        <KeplrLogo width="100%" />
       </View>
-      <View style={flex1} />
-      <View style={flex1} />
-      <View style={flex1} />
-      <View style={flex1} />
-      <View style={flex1}>
-        <FlexWhiteButton
-          title="Import Existing Account"
-          onPress={() => {
-            navigation.navigate("Sign in");
-          }}
-        />
-        <FlexButton
-          title="Create New Account"
-          onPress={() => {
-            navigation.navigate("New account");
-          }}
-        />
-      </View>
-      <View style={flex1} />
-      <View style={flex1} />
-    </FullFixedPage>
+      <Button
+        containerStyle={style.flatten(["margin-bottom-16"])}
+        text="Create a new wallet"
+        size="large"
+        mode="light"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.NewUser", {
+            registerConfig,
+          });
+        }}
+      />
+      <Button
+        containerStyle={style.flatten(["margin-bottom-16"])}
+        text="Import existing wallet"
+        size="large"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.NotNewUser", {
+            registerConfig,
+          });
+        }}
+      />
+      <Button
+        text="Import Ledger"
+        size="large"
+        mode="text"
+        onPress={() => {
+          smartNavigation.navigateSmart("Register.NewLedger", {
+            registerConfig,
+          });
+        }}
+      />
+    </PageWithScrollView>
   );
 });

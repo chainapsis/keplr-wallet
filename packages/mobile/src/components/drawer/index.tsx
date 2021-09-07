@@ -7,12 +7,11 @@ import {
 } from "@react-navigation/drawer";
 import { useStore } from "../../stores";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { View } from "react-native";
-import { Text } from "react-native-elements";
+import { Text, View } from "react-native";
 import { useStyle } from "../../styles";
-import { RectButton } from "../staging/rect-button";
+import { RectButton } from "../rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { VectorCharacter } from "../staging/vector-character";
+import { VectorCharacter } from "../vector-character";
 
 export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOptions>;
 
@@ -40,7 +39,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                 "margin-left-24",
               ])}
             >
-              Chain
+              Networks
             </Text>
           </View>
           {chainStore.chainInfos.map((chainInfo) => {

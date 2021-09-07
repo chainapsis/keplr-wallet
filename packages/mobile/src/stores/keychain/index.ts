@@ -10,6 +10,14 @@ export class KeychainStore {
   @observable
   protected _isBiometryOn: boolean = false;
 
+  protected static defaultOptions: Keychain.Options = {
+    authenticationPrompt: {
+      title: "Biometric Authentication",
+    },
+    accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+  };
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly keyRingStore: KeyRingStore
@@ -34,9 +42,7 @@ export class KeychainStore {
     }
 
     const credentials = yield* toGenerator(
-      Keychain.getGenericPassword({
-        accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
-      })
+      Keychain.getGenericPassword(KeychainStore.defaultOptions)
     );
     if (credentials) {
       yield this.keyRingStore.unlock(credentials.password);
@@ -50,10 +56,11 @@ export class KeychainStore {
     const valid = yield* toGenerator(this.keyRingStore.checkPassword(password));
     if (valid) {
       const result = yield* toGenerator(
-        Keychain.setGenericPassword("keplr", password, {
-          accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-          accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
-        })
+        Keychain.setGenericPassword(
+          "keplr",
+          password,
+          KeychainStore.defaultOptions
+        )
       );
       if (result) {
         this._isBiometryOn = true;
@@ -68,9 +75,7 @@ export class KeychainStore {
   *turnOffBiometry() {
     if (this.isBiometryOn) {
       const credentials = yield* toGenerator(
-        Keychain.getGenericPassword({
-          accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
-        })
+        Keychain.getGenericPassword(KeychainStore.defaultOptions)
       );
       if (credentials) {
         if (
@@ -78,7 +83,9 @@ export class KeychainStore {
             this.keyRingStore.checkPassword(credentials.password)
           )
         ) {
-          const result = yield* toGenerator(Keychain.resetGenericPassword());
+          const result = yield* toGenerator(
+            Keychain.resetGenericPassword(KeychainStore.defaultOptions)
+          );
           if (result) {
             this._isBiometryOn = false;
             yield this.save();
@@ -89,11 +96,26 @@ export class KeychainStore {
   }
 
   @flow
+  *reset() {
+    if (this.isBiometryOn) {
+      const result = yield* toGenerator(
+        Keychain.resetGenericPassword(KeychainStore.defaultOptions)
+      );
+      if (result) {
+        this._isBiometryOn = false;
+        yield this.save();
+      }
+    }
+  }
+
+  @flow
   protected *init() {
     // No need to await.
     this.restore();
 
-    const type = yield* toGenerator(Keychain.getSupportedBiometryType());
+    const type = yield* toGenerator(
+      Keychain.getSupportedBiometryType(KeychainStore.defaultOptions)
+    );
     this._isBiometrySupported = type != null;
   }
 

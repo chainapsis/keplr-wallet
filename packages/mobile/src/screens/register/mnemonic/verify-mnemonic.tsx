@@ -1,186 +1,197 @@
-import React, {
-  FunctionComponent,
-  useMemo,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
-import { Text } from "react-native-elements";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { PageWithScrollView } from "../../../components/page";
+import { Text, View } from "react-native";
+import { useStyle } from "../../../styles";
+import { WordChip } from "../../../components/mnemonic";
+import { Button } from "../../../components/button";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { useSmartNavigation } from "../../../navigation";
+import { NewMnemonicConfig } from "./hook";
+import { RegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
-import { useRegisterConfig } from "@keplr-wallet/hooks";
-import { getRandomBytesAsync } from "../../../common";
-import { useNavigation } from "@react-navigation/native";
-import { SafeAreaPage } from "../../../components/page";
-import { FlexButton } from "../../../components/buttons";
-import { NewMnemonicConfig, NumWords } from "./hook";
-import { h2 } from "../../../styles";
-import {
-  RandomizedWord,
-  RandomizedWordsView,
-  SuggestedWordsView,
-} from "../../../components/mnemonic";
-import * as Keychain from "react-native-keychain";
+import { RectButton } from "../../../components/rect-button";
 
-export const VerifyMnemonicScreen: FunctionComponent<{
-  route: {
-    params: {
-      newMnemonicConfig: NewMnemonicConfig;
+export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
+  const route = useRoute<
+    RouteProp<
+      Record<
+        string,
+        {
+          registerConfig: RegisterConfig;
+          newMnemonicConfig: NewMnemonicConfig;
+        }
+      >,
+      string
+    >
+  >();
+
+  const style = useStyle();
+
+  const smartNavigation = useSmartNavigation();
+
+  const registerConfig = route.params.registerConfig;
+  const newMnemonicConfig = route.params.newMnemonicConfig;
+
+  const [candidateWords, setCandidateWords] = useState<string[]>([]);
+
+  useEffect(() => {
+    const words = newMnemonicConfig.mnemonic.split(" ");
+    const randomSortedWords = words.slice().sort(() => {
+      return Math.random() > 0.5 ? 1 : -1;
+    });
+
+    const candidateWords = randomSortedWords.slice(0, 5);
+    setCandidateWords(candidateWords);
+  }, [newMnemonicConfig.mnemonic]);
+
+  const words = newMnemonicConfig.mnemonic.split(" ");
+
+  const wordSet = words.map((word) => {
+    return {
+      word,
+      dashed: false,
+      empty: candidateWords.includes(word),
     };
-  };
-}> = observer(
-  ({
-    route: {
-      params: { newMnemonicConfig },
-    },
-  }) => {
-    const navigation = useNavigation();
+  });
 
-    const { keyRingStore } = useStore();
-
-    const registerConfig = useRegisterConfig(
-      keyRingStore,
-      [],
-      getRandomBytesAsync
-    );
-
-    const totalWords =
-      newMnemonicConfig.numWords === NumWords.WORDS24 ? 24 : 12;
-
-    const wordsSlice = useMemo(() => {
-      const words = newMnemonicConfig.mnemonic.split(" ");
-      for (let i = 0; i < words.length; i++) {
-        words[i] = words[i].trim();
-      }
-      return words;
-    }, [newMnemonicConfig.mnemonic]);
-
-    const [randomizedWords, setRandomizedWords] = useState<RandomizedWord[]>(
-      []
-    );
-    const [suggestedWords, setSuggestedWords] = useState<string[]>([]);
-
-    const [currentCursor, setCurrentCursor] = useState<number>(0);
-
-    const setFirstCursor = useCallback(() => {
-      setCurrentCursor(suggestedWords.findIndex((value) => value === ""));
-    }, [suggestedWords]);
-    const setCursor = (i: number) => {
-      setCurrentCursor(i);
-    };
-
-    const unselectSuggestedWords = (i: number) => {
-      const word = suggestedWords[i];
-      const unselectIndex = randomizedWords.findIndex(
-        (value) => value.value === word
-      );
-
-      randomizedWords[unselectIndex].isSelected = false;
-      setRandomizedWords(randomizedWords.slice());
-
-      suggestedWords[i] = "";
-      setSuggestedWords(suggestedWords.slice());
-
-      setCurrentCursor(i);
-    };
-
-    const selectRandomizedWord = (i: number) => {
-      const word = randomizedWords[i].value;
-      randomizedWords[i].isSelected = true;
-      setRandomizedWords(randomizedWords.slice());
-
-      suggestedWords[currentCursor] = word;
-      setSuggestedWords(suggestedWords.slice());
-
-      setFirstCursor();
-    };
-
-    const unselectRandomizedWord = (i: number) => {
-      const word = randomizedWords[i].value;
-      randomizedWords[i].isSelected = false;
-      setRandomizedWords(randomizedWords.slice());
-
-      const unselectIndex = suggestedWords.findIndex((value) => value === word);
-      suggestedWords[unselectIndex] = "";
-      setSuggestedWords(suggestedWords.slice());
-
-      setCurrentCursor(unselectIndex);
-    };
-
-    useEffect(() => {
-      // Set randomized words.
-      const words = newMnemonicConfig.mnemonic.split(" ");
-      for (let i = 0; i < words.length; i++) {
-        words[i] = words[i].trim();
-      }
-      words.sort((word1, word2) => {
-        // Sort alpahbetically.
-        return word1 > word2 ? 1 : -1;
-      });
-
-      setRandomizedWords(
-        words.map((value) => {
-          return { value, isSelected: false };
-        })
-      );
-      // Clear suggested words.
-      setSuggestedWords(Array.from({ length: totalWords }, () => ""));
-    }, [newMnemonicConfig.mnemonic, totalWords]);
-
-    useEffect(() => {
-      if (suggestedWords[currentCursor] !== "") {
-        setFirstCursor();
-      }
-    }, [currentCursor, setFirstCursor, suggestedWords]);
-
-    return (
-      <SafeAreaPage>
-        <Text style={h2}>Mnemonic</Text>
-        <SuggestedWordsView
-          newMnemonicConfig={newMnemonicConfig}
-          currentCursor={currentCursor}
-          suggestedWords={suggestedWords}
-          onSelect={setCursor}
-          onUnselect={unselectSuggestedWords}
-        />
-        <RandomizedWordsView
-          randomizedWords={randomizedWords}
-          onSelect={selectRandomizedWord}
-          onUnselect={unselectRandomizedWord}
-        />
-        <FlexButton
-          title="Generate"
-          disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
-          onPress={async () => {
-            try {
-              await registerConfig.createMnemonic(
-                newMnemonicConfig.name,
-                newMnemonicConfig.mnemonic,
-                newMnemonicConfig.password,
-                {
-                  account: 0,
-                  change: 0,
-                  addressIndex: 0,
-                }
-              );
-              if (newMnemonicConfig.password) {
-                await Keychain.setGenericPassword(
-                  "keplr",
-                  newMnemonicConfig.password,
-                  {
-                    accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
-                    securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE,
-                  }
-                );
-              }
-              navigation.navigate("MainTabDrawer");
-            } catch {
-              registerConfig.clear();
-            }
-          }}
-          loading={registerConfig.isLoading}
-        />
-      </SafeAreaPage>
-    );
+  const firstEmptyWordSet = wordSet.find((set) => set.empty);
+  if (firstEmptyWordSet) {
+    firstEmptyWordSet.dashed = true;
   }
-);
+
+  const [isCreating, setIsCreating] = useState(false);
+
+  return (
+    <PageWithScrollView
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-page"])}
+    >
+      <Text
+        style={style.flatten([
+          "h5",
+          "color-text-black-medium",
+          "margin-top-32",
+          "margin-bottom-4",
+          "text-center",
+        ])}
+      >
+        Backup your mnemonic seed securely.
+      </Text>
+      <WordsCard wordSet={wordSet} />
+      <View style={style.flatten(["flex-row", "flex-wrap"])}>
+        {candidateWords.map((word, i) => {
+          return (
+            <WordButton
+              key={i.toString()}
+              word={word}
+              onPress={() => {
+                if (!firstEmptyWordSet || firstEmptyWordSet.word !== word) {
+                  return;
+                }
+
+                const newCadidateWords = candidateWords.filter(
+                  (_word) => _word !== word
+                );
+                setCandidateWords(newCadidateWords);
+              }}
+            />
+          );
+        })}
+      </View>
+      <View style={style.flatten(["flex-1"])} />
+      <Button
+        text="Next"
+        size="large"
+        loading={isCreating}
+        disabled={wordSet.find((set) => set.empty) != null}
+        onPress={async () => {
+          setIsCreating(true);
+          await registerConfig.createMnemonic(
+            newMnemonicConfig.name,
+            newMnemonicConfig.mnemonic,
+            newMnemonicConfig.password,
+            {
+              account: 0,
+              change: 0,
+              addressIndex: 0,
+            }
+          );
+
+          smartNavigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Register.End",
+                params: {
+                  password: newMnemonicConfig.password,
+                },
+              },
+            ],
+          });
+        }}
+      />
+      {/* Mock element for bottom padding */}
+      <View style={style.flatten(["height-12"])} />
+    </PageWithScrollView>
+  );
+});
+
+const WordButton: FunctionComponent<{
+  word: string;
+  onPress: () => void;
+}> = ({ word, onPress }) => {
+  const style = useStyle();
+
+  return (
+    <RectButton
+      style={style.flatten([
+        "background-color-primary",
+        "padding-x-12",
+        "padding-y-4",
+        "margin-right-12",
+        "margin-bottom-12",
+        "border-radius-8",
+      ])}
+      onPress={onPress}
+    >
+      <Text style={style.flatten(["subtitle2", "color-white"])}>{word}</Text>
+    </RectButton>
+  );
+};
+
+const WordsCard: FunctionComponent<{
+  wordSet: {
+    word: string;
+    empty: boolean;
+    dashed: boolean;
+  }[];
+}> = ({ wordSet }) => {
+  const style = useStyle();
+
+  return (
+    <View
+      style={style.flatten([
+        "margin-top-14",
+        "margin-bottom-20",
+        "padding-y-24",
+        "padding-x-28",
+        "background-color-white",
+        "border-radius-8",
+        "flex-row",
+        "flex-wrap",
+      ])}
+    >
+      {wordSet.map((word, i) => {
+        return (
+          <WordChip
+            key={i.toString()}
+            index={i + 1}
+            word={word.word}
+            empty={word.empty}
+            dashedBorder={word.dashed}
+          />
+        );
+      })}
+    </View>
+  );
+};

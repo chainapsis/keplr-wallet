@@ -2,15 +2,8 @@ import React, { FunctionComponent } from "react";
 import { StoreProvider } from "./stores";
 import { StyleProvider } from "./styles";
 import { AppNavigation } from "./navigation";
-import { GlobalThemeProvider } from "./global-theme";
-import {
-  NotificationProvider,
-  NotificationStoreProvider,
-} from "./components/notification";
-import { LoadingIndicatorProvider } from "./components/loading-indicator";
-import { BioAuthProvider } from "./hooks/bio-auth";
 import { IntlProvider } from "react-intl";
-import { ModalsProvider } from "./modals/staging/base";
+import { ModalsProvider } from "./modals/base";
 import { Platform } from "react-native";
 
 import codePush from "react-native-code-push";
@@ -68,48 +61,38 @@ SplashScreen.preventAutoHideAsync()
 
 export const App: FunctionComponent = codePush(() => {
   return (
-    <GlobalThemeProvider>
-      <StyleProvider>
-        <StoreProvider>
-          <IntlProvider
-            locale="en"
-            formats={{
-              date: {
-                en: {
-                  // Prefer not showing the year.
-                  // If the year is different with current time, recommend to show the year.
-                  // However, this recomendation should be handled in the component logic.
-                  // year: "numeric",
-                  month: "short",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  hour12: false,
-                  minute: "2-digit",
-                  timeZoneName: "short",
-                },
+    <StyleProvider>
+      <StoreProvider>
+        <IntlProvider
+          locale="en"
+          formats={{
+            date: {
+              en: {
+                // Prefer not showing the year.
+                // If the year is different with current time, recommend to show the year.
+                // However, this recomendation should be handled in the component logic.
+                // year: "numeric",
+                month: "short",
+                day: "2-digit",
+                hour: "2-digit",
+                hour12: false,
+                minute: "2-digit",
+                timeZoneName: "short",
               },
-            }}
-          >
-            <SafeAreaProvider>
-              <ModalsProvider>
-                <LoadingScreenProvider>
-                  <InteractionModalsProivder>
-                    <BioAuthProvider>
-                      <LoadingIndicatorProvider>
-                        <NotificationStoreProvider>
-                          <NotificationProvider>
-                            <AppNavigation />
-                          </NotificationProvider>
-                        </NotificationStoreProvider>
-                      </LoadingIndicatorProvider>
-                    </BioAuthProvider>
-                  </InteractionModalsProivder>
-                </LoadingScreenProvider>
-              </ModalsProvider>
-            </SafeAreaProvider>
-          </IntlProvider>
-        </StoreProvider>
-      </StyleProvider>
-    </GlobalThemeProvider>
+            },
+          }}
+        >
+          <SafeAreaProvider>
+            <ModalsProvider>
+              <LoadingScreenProvider>
+                <InteractionModalsProivder>
+                  <AppNavigation />
+                </InteractionModalsProivder>
+              </LoadingScreenProvider>
+            </ModalsProvider>
+          </SafeAreaProvider>
+        </IntlProvider>
+      </StoreProvider>
+    </StyleProvider>
   );
 });

@@ -1,18 +1,18 @@
 import React, { FunctionComponent, useCallback, useRef, useState } from "react";
 import { RNCamera } from "react-native-camera";
 import { useStyle } from "../../styles";
-import { PageWithView } from "../../components/staging/page";
+import { PageWithView } from "../../components/page";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSmartNavigation } from "../../navigation";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "../../components/staging/button";
+import { Button } from "../../components/button";
 import Svg, { Path } from "react-native-svg";
 import { Share, View } from "react-native";
 import { ChainSelectorModal } from "../../components/chain-selector";
-import { registerModal } from "../../modals/staging/base";
-import { CardModal } from "../../modals/staging/card";
-import { AddressCopyable } from "../../components/staging/address-copyable";
+import { registerModal } from "../../modals/base";
+import { CardModal } from "../../modals/card";
+import { AddressCopyable } from "../../components/address-copyable";
 import QRCode from "react-native-qrcode-svg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
@@ -123,7 +123,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
           </Svg>
         </View>
         <Button
-          text="Show My QRCode"
+          text="Show my QR code"
           mode="light"
           size="large"
           containerStyle={style.flatten(["border-radius-64", "opacity-90"])}
@@ -151,7 +151,7 @@ export const AddressQRCodeModal: FunctionComponent<{
     const style = useStyle();
 
     return (
-      <CardModal title="Scan QRcode">
+      <CardModal title="Scan QR code">
         <View style={style.flatten(["items-center"])}>
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
           <View style={style.flatten(["margin-y-32"])}>

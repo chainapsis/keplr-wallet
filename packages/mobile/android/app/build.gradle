@@ -2,7 +2,6 @@ apply plugin: "com.android.application"
 apply plugin: 'com.google.gms.google-services' // <- Add this line
 
 apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
-apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 import com.android.build.OutputFile
 
@@ -137,7 +136,7 @@ android {
         applicationId "com.chainapsis.keplr"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
+        versionCode 4
         versionName "1.0"
 
         missingDimensionStrategy 'react-native-camera', 'general'
