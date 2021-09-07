@@ -9,7 +9,16 @@ import { PageWithScrollViewInBottomTabView } from "../../../../components/page";
 import { useSimpleTimer } from "../../../../hooks";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 
-export const getPrivateDataTitle = (keyRingType: string) => {
+export const getPrivateDataTitle = (
+  keyRingType: string,
+  capitalize?: boolean
+) => {
+  if (capitalize) {
+    return `View ${
+      keyRingType === "mnemonic" ? "Mnemonic Seed" : "Private Key"
+    }`;
+  }
+
   return `View ${keyRingType === "mnemonic" ? "mnemonic seed" : "private key"}`;
 };
 
@@ -36,10 +45,7 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
   const navigation = useNavigation();
   useEffect(() => {
     navigation.setOptions({
-      title:
-        route.params.privateDataType === "mnemonic"
-          ? "View Mnemonic Seed"
-          : "View Private Key",
+      title: getPrivateDataTitle(route.params.privateDataType, true),
     });
   }, [navigation, route.params.privateDataType]);
 

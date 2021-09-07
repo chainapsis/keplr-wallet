@@ -27,7 +27,7 @@ export const SettingViewPrivateDataItem: FunctionComponent<{
       <PasswordInputModal
         isOpen={isOpenModal}
         close={() => setIsOpenModal(false)}
-        title={getPrivateDataTitle(keyRingStore.keyRingType)}
+        title={getPrivateDataTitle(keyRingStore.keyRingType, true)}
         onEnterPassword={async (password) => {
           const index = keyRingStore.multiKeyStoreInfo.findIndex(
             (keyStore) => keyStore.selected

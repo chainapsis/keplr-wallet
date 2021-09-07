@@ -33,7 +33,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
           smartNavigation.navigateSmart("AddressBook", {});
         }}
       />
-      <SettingSectionTitle title="General" />
+      <SettingSectionTitle title="Security" />
       {canShowPrivateData(keyRingStore.keyRingType) && (
         <SettingViewPrivateDataItem topBorder={true} />
       )}
@@ -42,6 +42,8 @@ export const SettingScreen: FunctionComponent = observer(() => {
           topBorder={!canShowPrivateData(keyRingStore.keyRingType)}
         />
       ) : null}
+      <SettingSectionTitle title="Others" />
+      <SettingItem label="Keplr version" topBorder={true} />
       <SettingRemoveAccountItem topBorder={true} />
     </PageWithScrollViewInBottomTabView>
   );
