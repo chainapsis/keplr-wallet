@@ -59,7 +59,7 @@ SplashScreen.preventAutoHideAsync()
   )
   .catch(console.warn);
 
-export const App: FunctionComponent = codePush(() => {
+const AppBody: FunctionComponent = () => {
   return (
     <StyleProvider>
       <StoreProvider>
@@ -95,4 +95,6 @@ export const App: FunctionComponent = codePush(() => {
       </StoreProvider>
     </StyleProvider>
   );
-});
+};
+
+export const App: FunctionComponent = __DEV__ ? AppBody : codePush(AppBody);
