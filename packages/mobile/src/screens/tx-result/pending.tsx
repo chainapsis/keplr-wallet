@@ -76,8 +76,8 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
     <PageWithView
       disableSafeArea
       style={{
-        paddingTop: Dimensions.get("window").height * 0.2,
-        paddingBottom: Dimensions.get("window").height * 0.2,
+        paddingTop: Dimensions.get("window").height * 0.23,
+        paddingBottom: Dimensions.get("window").height * 0.23,
         ...style.flatten([
           "padding-x-42",
           "items-center",
@@ -126,23 +126,19 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
         </View>
       </View>
 
-      <Text style={style.flatten(["h2", "margin-top-87", "margin-bottom-32"])}>
-        Pending
+      <Text style={style.flatten(["h2", "margin-top-102", "margin-bottom-32"])}>
+        Transaction pending
       </Text>
       <Text
         style={style.flatten(["body1", "text-center", "color-text-black-low"])}
       >
-        Just wait a minute.
-      </Text>
-      <Text
-        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
-      >
-        Transaction will be committed.
+        Transaction has been broadcasted to the blockchain and pending
+        confirmation.
       </Text>
       <Button
         containerStyle={style.flatten(["margin-top-92"])}
-        size="small"
-        text="Go To Home"
+        size="default"
+        text="Go to homescreen"
         mode="text"
         rightIcon={
           <View style={style.flatten(["margin-left-8"])}>

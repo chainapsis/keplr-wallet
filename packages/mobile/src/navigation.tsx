@@ -44,7 +44,6 @@ import {
 import { RegisterEndScreen } from "./screens/register/end";
 import { RegisterNewUserScreen } from "./screens/register/new-user";
 import { RegisterNotNewUserScreen } from "./screens/register/not-new-user";
-import { ResultScreen } from "./screens/result";
 import {
   AddressBookConfig,
   IMemoConfig,
@@ -448,14 +447,6 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen name="Undelegate" component={UndelegateScreen} />
       <Stack.Screen name="Redelegate" component={RedelegateScreen} />
-      <Stack.Screen
-        options={{
-          gestureEnabled: false,
-          headerShown: false,
-        }}
-        name="Result"
-        component={ResultScreen}
-      />
       <Stack.Screen
         options={{
           gestureEnabled: false,

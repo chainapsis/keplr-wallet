@@ -57,8 +57,8 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
     <PageWithView
       disableSafeArea
       style={{
-        paddingTop: Dimensions.get("window").height * 0.2,
-        paddingBottom: Dimensions.get("window").height * 0.2,
+        paddingTop: Dimensions.get("window").height * 0.23,
+        paddingBottom: Dimensions.get("window").height * 0.23,
         ...style.flatten([
           "padding-x-42",
           "items-center",
@@ -72,7 +72,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
             left: 0,
             right: 0,
             top: 0,
-            bottom: 10,
+            bottom: 0,
             ...style.flatten(["absolute", "justify-center", "items-center"]),
           }}
         >
@@ -83,17 +83,22 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           />
         </View>
       </View>
-      <Text style={style.flatten(["h2", "margin-top-87", "margin-bottom-32"])}>
-        Failed
+      <Text style={style.flatten(["h2", "margin-top-82", "margin-bottom-32"])}>
+        Transaction failed
       </Text>
       <Text
         style={style.flatten(["body1", "text-center", "color-text-black-low"])}
       >
-        Oops!
+        Transaction unsuccessful.
+      </Text>
+      <Text
+        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
+      >
+        Please check the block explorer for more information.
       </Text>
       <View style={style.flatten(["flex-row"])}>
         <Button
-          containerStyle={style.flatten(["margin-top-88", "flex-1"])}
+          containerStyle={style.flatten(["margin-top-58", "flex-1"])}
           size="large"
           text="Confirm"
           onPress={() => {
@@ -103,8 +108,8 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
       </View>
       {chainInfo.raw.txExplorer ? (
         <Button
-          containerStyle={style.flatten(["margin-top-30"])}
-          size="small"
+          containerStyle={style.flatten(["margin-top-21"])}
+          size="default"
           text={`View on ${chainInfo.raw.txExplorer.name}`}
           mode="text"
           rightIcon={
