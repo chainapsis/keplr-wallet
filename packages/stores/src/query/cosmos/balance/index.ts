@@ -66,6 +66,8 @@ export class ObservableQueryBalanceNative extends ObservableQueryBalanceInner {
 export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances> {
   protected bech32Address: string;
 
+  protected duplicatedFetchCheck: boolean = false;
+
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -75,11 +77,28 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
     super(kvStore, chainId, chainGetter, `/bank/balances/${bech32Address}`);
 
     this.bech32Address = bech32Address;
+
+    makeObservable(this);
   }
 
   protected canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
+  }
+
+  @override
+  *fetch() {
+    if (!this.duplicatedFetchCheck) {
+      // Because the native "bank" module's balance shares the querying result,
+      // it is inefficient to fetching duplicately in the same loop.
+      // So, if the fetching requests are in the same tick, this prevent to refetch the result and use the prior fetching.
+      this.duplicatedFetchCheck = true;
+      setTimeout(() => {
+        this.duplicatedFetchCheck = false;
+      }, 1);
+
+      yield* super.fetch();
+    }
   }
 
   protected setResponse(response: Readonly<QueryResponse<Balances>>) {
