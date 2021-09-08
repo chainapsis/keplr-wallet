@@ -18,6 +18,7 @@ import Svg, { Path } from "react-native-svg";
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RectButton } from "../../../components/rect-button";
+import { useLogScreenView } from "../../../hooks";
 
 type Sort = "APY" | "Voting Power" | "Name";
 
@@ -85,6 +86,11 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
 
     return data;
   }, [bondedValidators.validators, search, sort]);
+
+  useLogScreenView("Validator list", {
+    chainId: chainStore.current.chainId,
+    chainName: chainStore.current.chainName,
+  });
 
   return (
     <React.Fragment>

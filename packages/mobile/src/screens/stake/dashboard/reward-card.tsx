@@ -11,7 +11,7 @@ import { useSmartNavigation } from "../../../navigation";
 export const MyRewardCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -81,6 +81,11 @@ export const MyRewardCard: FunctionComponent<{
           mode="light"
           onPress={async () => {
             try {
+              analyticsStore.logEvent("Claim reward started", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+              });
+
               await account.cosmos.sendWithdrawDelegationRewardMsgs(
                 queryReward.getDescendingPendingRewardValidatorAddresses(8),
                 "",
@@ -89,6 +94,14 @@ export const MyRewardCard: FunctionComponent<{
                   onBroadcasted: (txHash) => {
                     smartNavigation.pushSmart("TxPendingResult", {
                       txHash: Buffer.from(txHash).toString("hex"),
+                    });
+                  },
+                  onFulfill: (tx) => {
+                    const isSuccess = tx.code == null || tx.code === 0;
+                    analyticsStore.logEvent("Claim reward finished", {
+                      chainId: chainStore.current.chainId,
+                      chainName: chainStore.current.chainName,
+                      isSuccess,
                     });
                   },
                 }

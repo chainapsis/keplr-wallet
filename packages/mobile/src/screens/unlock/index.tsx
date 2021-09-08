@@ -25,6 +25,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import { KeychainStore } from "../../stores/keychain";
+import { AnalyticsStore } from "../../stores/analytics";
 
 let splashScreenHided = false;
 async function hideSplashScreen() {
@@ -84,7 +85,7 @@ const useAutoBiomtric = (keychainStore: KeychainStore, tryEnabled: boolean) => {
  * @constructor
  */
 export const UnlockScreen: FunctionComponent = observer(() => {
-  const { keyRingStore, keychainStore } = useStore();
+  const { keyRingStore, keychainStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -108,6 +109,9 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       (async () => {
         await hideSplashScreen();
 
+        analyticsStore.logEvent("Account unlocked", {
+          authType: "biometrics",
+        });
         navigation.dispatch(StackActions.replace("MainTabDrawer"));
       })();
     }
@@ -150,6 +154,9 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
       await hideSplashScreen();
 
+      analyticsStore.logEvent("Account unlocked", {
+        authType: "biometrics",
+      });
       navigation.dispatch(StackActions.replace("MainTabDrawer"));
     } catch (e) {
       console.log(e);
@@ -169,6 +176,9 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
       await hideSplashScreen();
 
+      analyticsStore.logEvent("Account unlocked", {
+        authType: "password",
+      });
       navigation.dispatch(StackActions.replace("MainTabDrawer"));
     } catch (e) {
       console.log(e);

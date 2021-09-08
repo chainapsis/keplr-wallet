@@ -11,6 +11,7 @@ import { SettingRemoveAccountItem } from "./items/remove-account";
 import { canShowPrivateData } from "./screens/view-private-data";
 import { SettingViewPrivateDataItem } from "./items/view-private-data";
 import { useStyle } from "../../styles";
+import { useLogScreenView } from "../../hooks";
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const { keychainStore, keyRingStore } = useStore();
@@ -18,6 +19,8 @@ export const SettingScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
+
+  useLogScreenView("Setting");
 
   return (
     <PageWithScrollViewInBottomTabView

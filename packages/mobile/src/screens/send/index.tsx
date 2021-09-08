@@ -19,7 +19,7 @@ import { useSmartNavigation } from "../../navigation";
 import { Buffer } from "buffer/";
 
 export const SendScreen: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
 
   const route = useRoute<
     RouteProp<
@@ -122,6 +122,15 @@ export const SendScreen: FunctionComponent = observer(() => {
                   onBroadcasted: (txHash) => {
                     smartNavigation.pushSmart("TxPendingResult", {
                       txHash: Buffer.from(txHash).toString("hex"),
+                    });
+                  },
+                  onFulfill: (tx) => {
+                    const isSuccess = tx.code == null || tx.code === 0;
+                    analyticsStore.logEvent("Send token finished", {
+                      chainId: chainStore.current.chainId,
+                      chainName: chainStore.current.chainName,
+                      feeType: sendConfigs.feeConfig.feeType,
+                      isSuccess,
                     });
                   },
                 }
