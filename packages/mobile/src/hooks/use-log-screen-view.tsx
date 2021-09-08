@@ -7,16 +7,11 @@ export const useLogScreenView = (
   screenName: string,
   eventProperties?: EventProperties
 ): void => {
-  const { chainStore, analyticsStore, priceStore } = useStore();
+  const { analyticsStore, priceStore } = useStore();
 
   useFocusEffect(
     useCallback(() => {
       if (analyticsStore.isInitialized) {
-        if (eventProperties && eventProperties.chainId) {
-          const { chainId } = eventProperties;
-          const chainInfo = chainStore.getChain(chainId);
-          eventProperties.chainName = chainInfo.chainName;
-        }
         analyticsStore.setUserId();
         analyticsStore.setUserProperties({
           currency: priceStore.defaultVsCurrency,
