@@ -67,11 +67,12 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"])}
     >
+      {/* Mock for flexible margin top */}
+      <View style={style.flatten(["max-height-32", "flex-1"])} />
       <Text
         style={style.flatten([
           "h5",
           "color-text-black-medium",
-          "margin-top-32",
           "margin-bottom-4",
           "text-center",
         ])}
