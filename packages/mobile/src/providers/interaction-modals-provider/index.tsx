@@ -1,10 +1,10 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { SignModal } from "../../modals/staging/sign";
-import { UnlockModal } from "../../modals/staging/unlock";
-import { LedgerGranterModal } from "../../modals/staging/ledger";
-import { WalletConnectApprovalModal } from "../../modals/staging/wallet-connect-approval";
+import { SignModal } from "../../modals/sign";
+import { UnlockModal } from "../../modals/unlock";
+import { LedgerGranterModal } from "../../modals/ledger";
+import { WalletConnectApprovalModal } from "../../modals/wallet-connect-approval";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {

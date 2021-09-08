@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
-import { PageWithView } from "../../components/staging/page";
+import { PageWithView } from "../../components/page";
 import { Platform, Text } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { useStyle } from "../../styles";

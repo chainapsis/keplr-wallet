@@ -1,30 +1,19 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
+import { PageWithScrollView } from "../../../components/page";
 import { observer } from "mobx-react-lite";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { RegisterConfig } from "@keplr-wallet/hooks";
+import { useStyle } from "../../../styles";
+import { useSmartNavigation } from "../../../navigation";
+import { Controller, useForm } from "react-hook-form";
+import { TextInput } from "../../../components/input";
+import { StyleSheet, View } from "react-native";
+import { Button } from "../../../components/button";
+import Clipboard from "expo-clipboard";
 import { useStore } from "../../../stores";
-import { useRegisterConfig } from "@keplr-wallet/hooks";
-import { getRandomBytesAsync } from "../../../common";
-import { useNavigation } from "@react-navigation/native";
-import { FullPage } from "../../../components/page";
-import { FlexButton } from "../../../components/buttons";
-import { useForm, Controller } from "react-hook-form";
-import { h2, mb2 } from "../../../styles";
-import { Input } from "../../../components/form";
-import * as Keychain from "react-native-keychain";
 
-interface FormData {
-  name: string;
-  mnemonic: string;
-  password: string;
-  confirmPassword: string;
-}
-
-function isPrivateKey(str: string): boolean {
-  if (str.startsWith("0x")) {
-    return true;
-  }
-
-  return str.length === 64;
-}
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bip39 = require("bip39");
 
 function trimWordsStr(str: string): string {
   str = str.trim();
@@ -36,171 +25,251 @@ function trimWordsStr(str: string): string {
   return words.join(" ");
 }
 
+interface FormData {
+  mnemonic: string;
+  name: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
-  const navigation = useNavigation();
+  const route = useRoute<
+    RouteProp<
+      Record<
+        string,
+        {
+          registerConfig: RegisterConfig;
+        }
+      >,
+      string
+    >
+  >();
 
-  const { keyRingStore } = useStore();
+  const style = useStyle();
 
-  const registerConfig = useRegisterConfig(
-    keyRingStore,
-    [],
-    getRandomBytesAsync
-  );
+  const { analyticsStore } = useStore();
+
+  const smartNavigation = useSmartNavigation();
+
+  const registerConfig: RegisterConfig = route.params.registerConfig;
+  const [mode] = useState(registerConfig.mode);
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    setFocus,
+    setValue,
     getValues,
-  } = useForm<FormData>({
-    defaultValues: {
-      name: "",
-      mnemonic: "",
-      password: "",
-      confirmPassword: "",
-    },
+    formState: { errors },
+  } = useForm<FormData>();
+
+  const [isCreating, setIsCreating] = useState(false);
+
+  const submit = handleSubmit(async () => {
+    setIsCreating(true);
+    await registerConfig.createMnemonic(
+      getValues("name"),
+      getValues("mnemonic"),
+      getValues("password"),
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0,
+      }
+    );
+    analyticsStore.setUserId();
+    analyticsStore.setUserProperties({
+      registerType: "seed",
+    });
+    analyticsStore.logEvent("Import account finished", {
+      accountType: "mnemonic",
+    });
+
+    smartNavigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "Register.End",
+          params: {
+            password: getValues("password"),
+          },
+        },
+      ],
+    });
   });
 
-  const onSubmit = async ({ name, mnemonic, password }: FormData) => {
-    try {
-      if (!isPrivateKey(mnemonic)) {
-        await registerConfig.createMnemonic(
-          name,
-          trimWordsStr(mnemonic),
-          password,
-          {
-            account: 0,
-            change: 0,
-            addressIndex: 0,
-          }
-        );
-      } else {
-        const privateKey = Buffer.from(
-          mnemonic.trim().replace("0x", ""),
-          "hex"
-        );
-        await registerConfig.createPrivateKey(name, privateKey, password);
-      }
-      if (password) {
-        await Keychain.setGenericPassword("keplr", password, {
-          accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
-          securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE,
-        });
-      }
-      navigation.navigate("MainTabDrawer");
-    } catch (e) {
-      console.log(e.message ? e.message : e.toString());
-      registerConfig.clear();
-    }
-  };
-
   return (
-    <FullPage>
+    <PageWithScrollView
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-page"])}
+    >
       <Controller
         control={control}
-        render={({ field: { onChange, value } }) => (
-          <Input
-            label="Mnemonic"
-            labelStyle={[h2, mb2]}
-            autoCapitalize="none"
-            value={value}
-            multiline={true}
-            numberOfLines={5}
-            onChangeText={onChange}
-            inputContainerStyle={[{ height: 150 }]}
-            errorMessage={
-              errors.mnemonic && errors.mnemonic.message
-                ? errors.mnemonic.message
-                : undefined
+        rules={{
+          required: "Mnemonic is required",
+          validate: (value: string) => {
+            value = trimWordsStr(value);
+            if (value.split(" ").length < 8) {
+              return "Too short mnemonic";
             }
-          />
-        )}
+
+            if (!bip39.validateMnemonic(value)) {
+              return "Invalid mnemonic";
+            }
+          },
+        }}
+        render={({ field: { onChange, onBlur, value, ref } }) => {
+          return (
+            <TextInput
+              label="Mnemonic seed"
+              returnKeyType="next"
+              multiline={true}
+              numberOfLines={4}
+              inputContainerStyle={style.flatten([
+                "padding-x-20",
+                "padding-y-16",
+              ])}
+              bottomInInputContainer={
+                <View style={style.flatten(["flex-row"])}>
+                  <View style={style.flatten(["flex-1"])} />
+                  <Button
+                    containerStyle={style.flatten(["height-36"])}
+                    style={style.flatten(["padding-x-12"])}
+                    mode="text"
+                    text="Paste"
+                    onPress={async () => {
+                      const text = await Clipboard.getStringAsync();
+                      if (text) {
+                        setValue("mnemonic", text, {
+                          shouldValidate: true,
+                        });
+                      }
+                    }}
+                  />
+                </View>
+              }
+              style={StyleSheet.flatten([
+                style.flatten(["h6", "color-text-black-medium"]),
+                {
+                  minHeight: 20 * 4,
+                  textAlignVertical: "top",
+                },
+              ])}
+              onSubmitEditing={() => {
+                setFocus("name");
+              }}
+              error={errors.mnemonic?.message}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              ref={ref}
+            />
+          );
+        }}
         name="mnemonic"
-        rules={{
-          required: { value: true, message: "Mnemonic is required" },
-        }}
+        defaultValue=""
       />
       <Controller
         control={control}
-        render={({ field: { onChange, value } }) => (
-          <Input
-            label="Name"
-            value={value}
-            onChangeText={onChange}
-            errorMessage={
-              errors.name && errors.name.message
-                ? errors.name.message
-                : undefined
-            }
-          />
-        )}
-        name="name"
         rules={{
-          required: { value: true, message: "Name is required" },
+          required: "Name is required",
         }}
+        render={({ field: { onChange, onBlur, value, ref } }) => {
+          return (
+            <TextInput
+              label="Wallet nickname"
+              returnKeyType={mode === "add" ? "done" : "next"}
+              onSubmitEditing={() => {
+                if (mode === "add") {
+                  submit();
+                }
+                if (mode === "create") {
+                  setFocus("password");
+                }
+              }}
+              error={errors.name?.message}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              ref={ref}
+            />
+          );
+        }}
+        name="name"
+        defaultValue=""
       />
-      {registerConfig.mode === "create" ? (
+      {mode === "create" ? (
         <React.Fragment>
           <Controller
             control={control}
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Password"
-                autoCompleteType="password"
-                secureTextEntry={true}
-                value={value}
-                onChangeText={onChange}
-                errorMessage={
-                  errors.password && errors.password.message
-                    ? errors.password.message
-                    : undefined
-                }
-              />
-            )}
-            name="password"
             rules={{
-              required: { value: true, message: "Password is required" },
-              minLength: { value: 8, message: "At least 8" },
+              required: "Password is required",
+              validate: (value: string) => {
+                if (value.length < 8) {
+                  return "Password must be longer than 8 characters";
+                }
+              },
             }}
+            render={({ field: { onChange, onBlur, value, ref } }) => {
+              return (
+                <TextInput
+                  label="Password"
+                  returnKeyType="next"
+                  secureTextEntry={true}
+                  onSubmitEditing={() => {
+                    setFocus("confirmPassword");
+                  }}
+                  error={errors.password?.message}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  ref={ref}
+                />
+              );
+            }}
+            name="password"
+            defaultValue=""
           />
           <Controller
             control={control}
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Confirm password"
-                autoCompleteType="password"
-                secureTextEntry={true}
-                value={value}
-                onChangeText={onChange}
-                errorMessage={
-                  errors.confirmPassword && errors.confirmPassword.message
-                    ? errors.confirmPassword.message
-                    : undefined
-                }
-              />
-            )}
-            name="confirmPassword"
             rules={{
-              required: {
-                value: true,
-                message: "Confirm Password is required",
-              },
-              minLength: { value: 8, message: "At least 8" },
-              validate: (confirmPassword: string): string | undefined => {
-                if (confirmPassword !== getValues()["password"]) {
-                  return "password is not matched";
+              required: "Confirm password is required",
+              validate: (value: string) => {
+                if (value.length < 8) {
+                  return "Password must be longer than 8 characters";
+                }
+
+                if (getValues("password") !== value) {
+                  return "Password doesn't match";
                 }
               },
             }}
+            render={({ field: { onChange, onBlur, value, ref } }) => {
+              return (
+                <TextInput
+                  label="Confirm password"
+                  returnKeyType="done"
+                  secureTextEntry={true}
+                  onSubmitEditing={() => {
+                    submit();
+                  }}
+                  error={errors.confirmPassword?.message}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  ref={ref}
+                />
+              );
+            }}
+            name="confirmPassword"
+            defaultValue=""
           />
         </React.Fragment>
       ) : null}
-      <FlexButton
-        title="Import"
-        onPress={() => {
-          handleSubmit(onSubmit)();
-        }}
-      />
-    </FullPage>
+      <View style={style.flatten(["flex-1"])} />
+      <Button text="Next" size="large" loading={isCreating} onPress={submit} />
+      {/* Mock element for bottom padding */}
+      <View style={style.flatten(["height-12"])} />
+    </PageWithScrollView>
   );
 });

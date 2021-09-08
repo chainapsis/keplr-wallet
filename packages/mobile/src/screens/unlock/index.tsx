@@ -17,8 +17,8 @@ import Animated, { Easing } from "react-native-reanimated";
 import { observer } from "mobx-react-lite";
 import { useStyle } from "../../styles";
 import * as SplashScreen from "expo-splash-screen";
-import { TextInput } from "../../components/staging/input";
-import { Button } from "../../components/staging/button";
+import { TextInput } from "../../components/input";
+import { Button } from "../../components/button";
 import delay from "delay";
 import { useStore } from "../../stores";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -197,6 +197,19 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       })();
     }
   }, [isSplashEnd, keyRingStore.status, navigation]);
+
+  useEffect(() => {
+    // I don't know that the cause is.
+    // Sometimes, the unlock screen opened even though the keyring is unlocked when the window is resized on android.
+    // To solve this problem, just replace to the MainTabDrawer screen if the keyring is unlocked on the mounted.
+    if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
+      (async () => {
+        await hideSplashScreen();
+        navigation.dispatch(StackActions.replace("MainTabDrawer"));
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <React.Fragment>

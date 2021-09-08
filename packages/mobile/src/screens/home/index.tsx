@@ -1,55 +1,92 @@
-/* eslint-disable react/display-name */
-import React, { FunctionComponent, useLayoutEffect, useEffect } from "react";
-import { observer } from "mobx-react-lite";
-import { Button as RNButton } from "react-native-elements";
-import { SafeAreaPage } from "../../components/page";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
-import Icon from "react-native-vector-icons/Feather";
-import { AccountView } from "./account";
-import { AssetView } from "./asset";
-import { TxButtonView } from "./tx-button";
-import { StakingRewardsView } from "./staking-rewards";
-import { TokensView } from "./tokens";
-import { TotalStakedView } from "./total-staked";
-import { GovernanceView } from "./governance";
+import React, { FunctionComponent, useEffect } from "react";
+import { PageWithScrollViewInBottomTabView } from "../../components/page";
+import { AccountCard } from "./account-card";
+import { RefreshControl } from "react-native";
 import { useStore } from "../../stores";
-import { Card } from "../../components/layout";
+import { StakingInfoCard } from "./staking-info-card";
+import { useStyle } from "../../styles";
+import { GovernanceCard } from "./governance-card";
+import { useNavigation } from "@react-navigation/native";
+import { observer } from "mobx-react-lite";
+import { MyRewardCard } from "./my-reward-card";
+import { TokensCard } from "./tokens-card";
+import { useLogScreenView } from "../../hooks";
 
 export const HomeScreen: FunctionComponent = observer(() => {
-  const navigation = useNavigation();
-  const { chainStore } = useStore();
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      // eslint-disable-next-line react/display-name
-      headerLeft: () => (
-        <RNButton
-          onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
-          icon={<Icon name="menu" size={18} />}
-          type="clear"
-        />
-      ),
-      title: chainStore.current.chainName,
-    });
-  }, [navigation]);
+  const { chainStore, accountStore, queriesStore } = useStore();
+
+  const style = useStyle();
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     navigation.setOptions({
       title: chainStore.current.chainName,
     });
-  }, [chainStore.current.chainName]);
+  }, [chainStore, chainStore.current.chainName, navigation]);
+
+  const onRefresh = React.useCallback(async () => {
+    const account = accountStore.getAccount(chainStore.current.chainId);
+    const queries = queriesStore.get(chainStore.current.chainId);
+
+    // Because the components share the states related to the queries,
+    // fetching new query responses here would make query responses on all other components also refresh.
+
+    await Promise.all([
+      ...queries.queryBalances
+        .getQueryBech32Address(account.bech32Address)
+        .balances.map((bal) => {
+          return bal.waitFreshResponse();
+        }),
+      queries.cosmos.queryRewards
+        .getQueryBech32Address(account.bech32Address)
+        .waitFreshResponse(),
+      queries.cosmos.queryDelegations
+        .getQueryBech32Address(account.bech32Address)
+        .waitFreshResponse(),
+      queries.cosmos.queryUnbondingDelegations
+        .getQueryBech32Address(account.bech32Address)
+        .waitFreshResponse(),
+    ]);
+
+    setRefreshing(false);
+  }, [accountStore, chainStore, queriesStore]);
+
+  const queryBalances = queriesStore
+    .get(chainStore.current.chainId)
+    .queryBalances.getQueryBech32Address(
+      accountStore.getAccount(chainStore.current.chainId).bech32Address
+    );
+
+  const tokens = queryBalances.positiveNativeUnstakables.concat(
+    queryBalances.nonNativeBalances
+  );
+
+  useLogScreenView("Home Dashboard");
 
   return (
-    <SafeAreaPage>
-      <Card>
-        <AccountView />
-        <AssetView />
-        <TxButtonView />
-      </Card>
-      <TokensView />
-      <StakingRewardsView />
-      <TotalStakedView />
-      <GovernanceView />
-    </SafeAreaPage>
+    <PageWithScrollViewInBottomTabView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
+      {tokens.length > 0 ? (
+        <TokensCard
+          containerStyle={style.flatten(["margin-bottom-card-gap"])}
+        />
+      ) : null}
+      <MyRewardCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+      <StakingInfoCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+      <GovernanceCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+    </PageWithScrollViewInBottomTabView>
   );
 });

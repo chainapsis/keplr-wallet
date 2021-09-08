@@ -27,6 +27,7 @@
     "dev": "lerna run dev --parallel",
     "clean": "lerna run clean; rm -rf node_modules",
     "build": "lerna run build",
+    "build:libs": "lerna run build --ignore @keplr-wallet/extension",
     "test": "lerna run test --parallel",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",

@@ -1,20 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export const useSimpleTimer = () => {
-  const [timeoutId, setTimeoutId] = useState(0);
+  const [timeoutId, setTimeoutId] = useState<
+    ReturnType<typeof setTimeout> | undefined
+  >();
 
   const isTimedOut = !!timeoutId;
 
   useEffect(() => {
-    if (!!timeoutId) {
-      return () => clearTimeout(timeoutId);
-    }
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [timeoutId]);
 
-  const setTimer = (timeout: number) => {
-    const timeoutId = setTimeout(() => setTimeoutId(0), timeout);
+  const setTimer = useCallback((timeout: number) => {
+    const timeoutId = setTimeout(() => setTimeoutId(undefined), timeout);
     setTimeoutId(timeoutId);
-  };
+  }, []);
 
   return {
     isTimedOut,
