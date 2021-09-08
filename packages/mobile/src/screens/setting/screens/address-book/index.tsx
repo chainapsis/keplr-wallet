@@ -19,6 +19,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { HeaderRightButton } from "../../../../components/header";
 import { AddressDeleteModal } from "../../../../modals/address";
 import { HeaderAddIcon } from "../../../../components/header/icon";
+import { useLogScreenView } from "../../../../hooks";
 
 const addressBookItemComponent = {
   inTransaction: RectButton,
@@ -26,7 +27,7 @@ const addressBookItemComponent = {
 };
 
 export const AddressBookScreen: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
   const [isAddressDeleteModalOpen, setIsAddressDeleteModalOpen] = useState(
     false
   );
@@ -80,6 +81,10 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
       headerRight: () => (
         <HeaderRightButton
           onPress={() => {
+            analyticsStore.logEvent("Add address started", {
+              chainId: chainStore.current.chainId,
+              chainName: chainStore.current.chainName,
+            });
             smartNavigation.navigateSmart("AddAddressBook", {
               chainId,
               addressBookConfig,
@@ -95,6 +100,12 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
   const isInTransaction = recipientConfig != null || memoConfig != null;
   const AddressBookItem =
     addressBookItemComponent[isInTransaction ? "inTransaction" : "inSetting"];
+
+  useLogScreenView("Address book", {
+    chainId: chainStore.current.chainId,
+    chainName: chainStore.current.chainName,
+    fromScreen: isInTransaction ? "Transaction" : "Setting",
+  });
 
   return (
     <PageWithScrollView>

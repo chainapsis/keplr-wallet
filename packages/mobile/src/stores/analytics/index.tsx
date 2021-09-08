@@ -26,6 +26,7 @@ export interface EventProperties extends Record<string, unknown> {
   accountType?: "mnemonic" | "privateKey" | "ledger";
   feeType?: FeeType | undefined;
   authType?: "biometrics" | "password";
+  fromScreen?: string;
 }
 export interface UserProperties {
   registerType?: "seed" | "google" | "ledger" | "qr";
