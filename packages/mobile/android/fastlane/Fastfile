@@ -49,6 +49,10 @@ platform :android do
     f.close
   end
 
+  lane :deploy_codepush do
+    sh("cd ../.. && appcenter codepush release-react -a keplr-chainapsis.com/Keplr-Android-Dev -d Production")
+  end
+
   desc "Deploy a new version to the Google Play"
   lane :deploy do |options|
     json_key = ENV["PLAYSTORE_JSON_KEY_FILE"]
