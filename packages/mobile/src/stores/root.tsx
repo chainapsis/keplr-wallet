@@ -22,6 +22,7 @@ import EventEmitter from "eventemitter3";
 import { Keplr } from "@keplr-wallet/provider";
 import { KeychainStore } from "./keychain";
 import { WalletConnectStore } from "./wallet-connect";
+import { AnalyticsStore } from "./analytics";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -41,6 +42,7 @@ export class RootStore {
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
+  public readonly analyticsStore: AnalyticsStore;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -201,6 +203,12 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       new Keplr("", new RNMessageRequesterInternal())
+    );
+
+    this.analyticsStore = new AnalyticsStore(
+      "KeplrMobile",
+      this.accountStore,
+      this.keyRingStore
     );
   }
 }

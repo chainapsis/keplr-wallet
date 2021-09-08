@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { MyRewardCard } from "./my-reward-card";
 import { TokensCard } from "./tokens-card";
+import { useLogScreenView } from "../../hooks";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -62,6 +63,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const tokens = queryBalances.positiveNativeUnstakables.concat(
     queryBalances.nonNativeBalances
   );
+
+  useLogScreenView("Home Dashboard");
 
   return (
     <PageWithScrollViewInBottomTabView

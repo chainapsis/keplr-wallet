@@ -10,6 +10,7 @@ import { NewMnemonicConfig } from "./hook";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { RectButton } from "../../../components/rect-button";
+import { useStore } from "../../../stores";
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -26,6 +27,8 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   >();
 
   const style = useStyle();
+
+  const { analyticsStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
@@ -116,6 +119,13 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
               addressIndex: 0,
             }
           );
+          analyticsStore.setUserId();
+          analyticsStore.setUserProperties({
+            registerType: "seed",
+          });
+          analyticsStore.logEvent("Create account finished", {
+            accountType: "mnemonic",
+          });
 
           smartNavigation.reset({
             index: 0,

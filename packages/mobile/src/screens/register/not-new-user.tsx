@@ -12,7 +12,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -51,6 +51,9 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
         size="large"
         mode="light"
         onPress={() => {
+          analyticsStore.logEvent("OAuth sign in started", {
+            registerType: "google",
+          });
           smartNavigation.navigateSmart("Register.TorusSignIn", {
             registerConfig,
           });
@@ -70,12 +73,20 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
         text="Import from Keplr Extension"
         size="large"
         mode="light"
+        onPress={() => {
+          analyticsStore.logEvent("Import account started", {
+            registerType: "qr",
+          });
+        }}
       />
       <Button
         text="Import existing wallet"
         size="large"
         mode="light"
         onPress={() => {
+          analyticsStore.logEvent("Import account started", {
+            registerType: "seed",
+          });
           smartNavigation.navigateSmart("Register.RecoverMnemonic", {
             registerConfig,
           });
