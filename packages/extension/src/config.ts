@@ -63,6 +63,10 @@ import {
   PERSISTENCE_RPC_CONFIG,
   PERSISTENCE_REST_ENDPOINT,
   PERSISTENCE_REST_CONFIG,
+  IXO_RPC_ENDPOINT,
+  IXO_RPC_CONFIG,
+  IXO_REST_ENDPOINT,
+  IXO_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -909,7 +913,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     features: ["stargate", "ibc-transfer"],
   },
-
   {
     rpc: KAVA_RPC_ENDPOINT,
     rpcConfig: KAVA_RPC_CONFIG,
@@ -952,6 +955,48 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 459,
   },
+
+  {
+    rpc: IXO_RPC_ENDPOINT,
+    rpcConfig: IXO_RPC_CONFIG,
+    rest: IXO_REST_ENDPOINT,
+    restConfig: IXO_REST_CONFIG,
+    chainId: "impacthub-3",
+    chainName: "IXO",
+    stakeCurrency: {
+      coinDenom: "IXO",
+      coinMinimalDenom: "uixo",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/ixo/stake"
+        : "http://localhost:8081/#/ixo/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/ixo/stake"
+        : "http://localhost:8081/#/ixo/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("ixo"),
+    currencies: [
+      {
+        coinDenom: "IXO",
+        coinMinimalDenom: "uixo",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IXO",
+        coinMinimalDenom: "uixo",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate"],
+  },
+
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
     rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,
