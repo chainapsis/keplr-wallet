@@ -42,12 +42,9 @@ export class BaseAccount implements Account {
       obj = obj.result;
     }
 
-    const type = obj.type;
-    if (!type) {
-      throw new Error(`Account's type is unknown: ${JSON.stringify(obj)}`);
-    }
+    const type = obj.type || "";
 
-    let value = obj.value;
+    let value = "value" in obj ? obj.value : obj;
 
     // If the account is the vesting account that embeds the base vesting account,
     // the actual base account exists under the base vesting account.
