@@ -47,8 +47,23 @@ platform :android do
     f.close
   end
 
-  lane :deploy_codepush do
-    sh("cd ../.. && appcenter codepush release-react -a keplr-chainapsis.com/Keplr-Android-Dev -d Production")
+  lane :deploy_codepush do |options|
+    if options[:target_version]
+      target_version = options[:target_version]
+    else
+      target_version = prompt(text: "Enter the target version\n(Ex. 1.0.0): ")
+    end
+
+    re = /\d+.\d+.\d+/
+    version_nums = target_version[re, 0]
+
+    if version_nums.length != 5
+      UI.error("Invalid version #{target_version}")
+    end
+
+    UI.message("Code push will be deployed for Android #{target_version}")
+
+    sh("cd ../.. && appcenter codepush release-react -a #{ENV["ANDROID_APPCENTER_APP_NAME"]} -d Production -t #{target_version}")
   end
 
   desc "Deploy a new version to the Google Play"
