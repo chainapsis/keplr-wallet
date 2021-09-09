@@ -687,7 +687,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: CERTIK_RPC_CONFIG,
     rest: CERTIK_REST_ENDPOINT,
     restConfig: CERTIK_REST_CONFIG,
-    chainId: "shentu-1",
+    chainId: "shentu-2.1",
     chainName: "Certik",
     stakeCurrency: {
       coinDenom: "CTK",
@@ -723,6 +723,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "certik",
       },
     ],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: IRIS_RPC_ENDPOINT,
