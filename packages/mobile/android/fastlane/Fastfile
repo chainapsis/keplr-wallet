@@ -36,8 +36,6 @@ platform :android do
       UI.error("Invalid version #{version}")
     end
 
-
-
     path = "../app/build.gradle"
     re = /versionName\s+("[\d.]+")/
 

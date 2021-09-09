@@ -70,3 +70,9 @@ injected-provider.bundle.js
 # Android build output
 *.apk
 *.aab
+
+*.p12
+*.cer
+*.certSigningRequest
+*.zip
+*.mobileprovision
