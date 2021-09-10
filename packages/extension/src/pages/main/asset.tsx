@@ -167,7 +167,7 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
           <div className={styleAsset.small}>
             {totalPrice
               ? totalPrice.toString()
-              : total.shrink(true).maxDecimals(6).toString()}
+              : total.shrink(true).trim(true).maxDecimals(6).toString()}
           </div>
           <div className={styleAsset.indicatorIcon}>
             <React.Fragment>
