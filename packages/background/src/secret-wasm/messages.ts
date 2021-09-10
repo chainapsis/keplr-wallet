@@ -109,3 +109,39 @@ export class RequestDecryptMsg extends Message<Uint8Array> {
     return RequestDecryptMsg.type();
   }
 }
+
+export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
+  public static type() {
+    return "get-tx-encryption-key-msg";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly nonce: Uint8Array
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.nonce) {
+      // Nonce of zero length is permitted.
+      throw new Error("nonce is null");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetTxEncryptionKeyMsg.type();
+  }
+}

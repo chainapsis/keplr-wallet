@@ -7,6 +7,11 @@ import { ObservableChainQuery } from "../../chain-query";
 import { ChainGetter } from "../../../common";
 import { ObservableQueryIrisMintingInfation } from "./iris-minting";
 import { ObservableQuerySifchainLiquidityAPY } from "./sifchain";
+import {
+  ObservableQueryOsmosisEpochProvisions,
+  ObservableQueryOsmosisEpochs,
+  ObservableQueryOsmosisMintParmas,
+} from "./osmosis";
 
 export class ObservableQueryInflation {
   constructor(
@@ -16,7 +21,10 @@ export class ObservableQueryInflation {
     protected readonly _queryPool: ObservableChainQuery<StakingPool>,
     protected readonly _querySupplyTotal: ObservableQuerySupplyTotal,
     protected readonly _queryIrisMint: ObservableQueryIrisMintingInfation,
-    protected readonly _querySifchainAPY: ObservableQuerySifchainLiquidityAPY
+    protected readonly _querySifchainAPY: ObservableQuerySifchainLiquidityAPY,
+    protected readonly _queryOsmosisEpochs: ObservableQueryOsmosisEpochs,
+    protected readonly _queryOsmosisEpochProvisions: ObservableQueryOsmosisEpochProvisions,
+    protected readonly _queryOsmosisMintParams: ObservableQueryOsmosisMintParmas
   ) {
     makeObservable(this);
   }
@@ -55,6 +63,45 @@ export class ObservableQueryInflation {
         return new IntPretty(
           new Dec(this._querySifchainAPY.liquidityAPY.toString())
         );
+      } else if (chainInfo.chainId.startsWith("osmosis")) {
+        /*
+          XXX: Temporary and unfinished implementation for the osmosis staking APY.
+               Osmosis has different minting method.
+               It mints the fixed token per epoch with deduction feature on the range of epoch.
+               And, it actually doesn't mint the token, it has the locked token that will be inflated.
+               So, currently, using the result of `supply total` to calculate the APY is actually not valid
+               because it included the locked token that is not yet inflated.
+               So, for now, just assume that the curreny supply is 100,000,000.
+         */
+        const mintParams = this._queryOsmosisMintParams;
+        if (mintParams.epochIdentifier) {
+          const epochDuration = this._queryOsmosisEpochs.getEpoch(
+            mintParams.epochIdentifier
+          ).duration;
+          if (epochDuration) {
+            const epochProvision = this._queryOsmosisEpochProvisions
+              .epochProvisions;
+            if (
+              epochProvision &&
+              this._querySupplyTotal.getQueryStakeDenom().response
+            ) {
+              const mintingEpochProvision = new Dec(
+                epochProvision
+                  .toDec()
+                  .mul(mintParams.distributionProportions.staking)
+                  .truncate()
+                  .toString()
+              );
+              const yearMintingProvision = mintingEpochProvision.mul(
+                new Dec(((365 * 24 * 3600) / epochDuration).toString())
+              );
+              const total = DecUtils.getPrecisionDec(8);
+              dec = yearMintingProvision
+                .quo(total)
+                .mul(DecUtils.getPrecisionDec(2));
+            }
+          }
+        }
       } else {
         dec = new Dec(this._queryMint.response?.data.result ?? "0").mul(
           DecUtils.getPrecisionDec(2)
@@ -73,6 +120,11 @@ export class ObservableQueryInflation {
           this._queryPool.response.data.result.bonded_tokens
         );
         const totalStr = (() => {
+          if (chainInfo.chainId.startsWith("osmosis")) {
+            // For osmosis, for now, just assume that the curreny supply is 100,000,000 with 6 decimals.
+            return DecUtils.getPrecisionDec(8 + 6).toString();
+          }
+
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const response = this._querySupplyTotal.getQueryStakeDenom().response!
             .data.result;

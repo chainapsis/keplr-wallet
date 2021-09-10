@@ -16,3 +16,7 @@ Podfile.lock
 build.gradle
 
 injected-provider.bundle.js
+
+.gitsecret/*
+*.styl
+.github/*

@@ -125,6 +125,18 @@ export const FeeButtonsInner: FunctionComponent<
 
     const language = useLanguage();
 
+    // For chains without feeCurrencies, Keplr assumes tx doesn’t need to include information about the fee and the fee button does not have to be rendered.
+    // The architecture is designed so that fee button is not rendered if the parental component doesn’t have a feeCurrency.
+    // However, because there may be situations where the fee buttons is rendered before the chain information is changed,
+    // and the fee button is an observer, and the sequence of rendering the observer may not appear stabilized,
+    // so only handling the rendering in the parent component may not be sufficient
+    // Therefore, this line double checks to ensure that the fee buttons is not rendered if fee currency doesn’t exist.
+    // But because this component uses hooks, using a hook in the line below can cause an error.
+    // Note that hooks should be used above this line, and only rendering-related logic should exist below this line.
+    if (!feeConfig.feeCurrency) {
+      return <React.Fragment />;
+    }
+
     const fiatCurrency = language.fiatCurrency;
 
     const lowFee = feeConfig.getFeeTypePretty("low");

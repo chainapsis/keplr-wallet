@@ -7,6 +7,10 @@ import {
   COSMOS_REST_ENDPOINT,
   COSMOS_RPC_CONFIG,
   COSMOS_RPC_ENDPOINT,
+  OSMOSIS_REST_CONFIG,
+  OSMOSIS_REST_ENDPOINT,
+  OSMOSIS_RPC_CONFIG,
+  OSMOSIS_RPC_ENDPOINT,
   KAVA_REST_CONFIG,
   KAVA_REST_ENDPOINT,
   KAVA_RPC_CONFIG,
@@ -27,6 +31,10 @@ import {
   AKASH_RPC_CONFIG,
   AKASH_REST_ENDPOINT,
   AKASH_REST_CONFIG,
+  CRYPTO_ORG_RPC_ENDPOINT,
+  CRYPTO_ORG_RPC_CONFIG,
+  CRYPTO_ORG_REST_ENDPOINT,
+  CRYPTO_ORG_REST_CONFIG,
   IOV_RPC_ENDPOINT,
   IOV_RPC_CONFIG,
   IOV_REST_ENDPOINT,
@@ -51,6 +59,14 @@ import {
   SENTINEL_RPC_CONFIG,
   SENTINEL_REST_ENDPOINT,
   SENTINEL_REST_CONFIG,
+  PERSISTENCE_RPC_ENDPOINT,
+  PERSISTENCE_RPC_CONFIG,
+  PERSISTENCE_REST_ENDPOINT,
+  PERSISTENCE_REST_CONFIG,
+  IXO_RPC_ENDPOINT,
+  IXO_RPC_CONFIG,
+  IXO_REST_ENDPOINT,
+  IXO_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -96,49 +112,59 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 118,
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
   },
   {
-    rpc: KAVA_RPC_ENDPOINT,
-    rpcConfig: KAVA_RPC_CONFIG,
-    rest: KAVA_REST_ENDPOINT,
-    restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-7",
-    chainName: "Kava",
+    rpc: OSMOSIS_RPC_ENDPOINT,
+    rpcConfig: OSMOSIS_RPC_CONFIG,
+    rest: OSMOSIS_REST_ENDPOINT,
+    restConfig: OSMOSIS_REST_CONFIG,
+    chainId: "osmosis-1",
+    chainName: "Osmosis",
     stakeCurrency: {
-      coinDenom: "KAVA",
-      coinMinimalDenom: "ukava",
+      coinDenom: "OSMO",
+      coinMinimalDenom: "uosmo",
       coinDecimals: 6,
-      coinGeckoId: "kava",
+      coinGeckoId: "osmosis",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava/stake"
-        : "http://localhost:8081/#/kava/stake",
+        ? "https://app.osmosis.zone"
+        : "https://app.osmosis.zone",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava/stake"
-        : "http://localhost:8081/#/kava/stake",
-    bip44: { coinType: 459 },
-    alternativeBIP44s: [{ coinType: 118 }],
-    bech32Config: Bech32Address.defaultBech32Config("kava"),
+        ? "https://wallet.keplr.app/#/osmosis/stake"
+        : "http://localhost:8081/#/osmosis/stake",
+    bip44: { coinType: 118 },
+    bech32Config: Bech32Address.defaultBech32Config("osmo"),
     currencies: [
       {
-        coinDenom: "KAVA",
-        coinMinimalDenom: "ukava",
+        coinDenom: "OSMO",
+        coinMinimalDenom: "uosmo",
         coinDecimals: 6,
-        coinGeckoId: "kava",
+        coinGeckoId: "osmosis",
+      },
+      {
+        coinDenom: "ION",
+        coinMinimalDenom: "uion",
+        coinDecimals: 6,
+        coinGeckoId: "ion",
       },
     ],
     feeCurrencies: [
       {
-        coinDenom: "KAVA",
-        coinMinimalDenom: "ukava",
+        coinDenom: "OSMO",
+        coinMinimalDenom: "uosmo",
         coinDecimals: 6,
-        coinGeckoId: "kava",
+        coinGeckoId: "osmosis",
       },
     ],
-    coinType: 459,
+    gasPriceStep: {
+      low: 0,
+      average: 0.025,
+      high: 0.035,
+    },
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: SECRET_NETWORK_RPC_ENDPOINT,
@@ -235,14 +261,62 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "akash-network",
       },
     ],
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
+  },
+  {
+    rpc: CRYPTO_ORG_RPC_ENDPOINT,
+    rpcConfig: CRYPTO_ORG_RPC_CONFIG,
+    rest: CRYPTO_ORG_REST_ENDPOINT,
+    restConfig: CRYPTO_ORG_REST_CONFIG,
+    chainId: "crypto-org-chain-mainnet-1",
+    chainName: "Crypto.org",
+    stakeCurrency: {
+      coinDenom: "CRO",
+      coinMinimalDenom: "basecro",
+      coinDecimals: 8,
+      coinGeckoId: "crypto-com-chain",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/crypto-org/stake"
+        : "http://localhost:8081/#/crypto-org/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/crypto-org/stake"
+        : "http://localhost:8081/#/crypto-org/stake",
+    bip44: {
+      coinType: 394,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("cro"),
+    currencies: [
+      {
+        coinDenom: "CRO",
+        coinMinimalDenom: "basecro",
+        coinDecimals: 8,
+        coinGeckoId: "crypto-com-chain",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "CRO",
+        coinMinimalDenom: "basecro",
+        coinDecimals: 8,
+        coinGeckoId: "crypto-com-chain",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.025,
+      average: 0.03,
+      high: 0.04,
+    },
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: IOV_RPC_ENDPOINT,
     rpcConfig: IOV_RPC_CONFIG,
     rest: IOV_REST_ENDPOINT,
     restConfig: IOV_REST_CONFIG,
-    chainId: "iov-mainnet-2",
+    chainId: "iov-mainnet-ibc",
     chainName: "Starname",
     stakeCurrency: {
       coinDenom: "IOV",
@@ -283,13 +357,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 2,
       high: 3,
     },
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: SIFCHAIN_RPC_ENDPOINT,
     rpcConfig: SIFCHAIN_RPC_CONFIG,
     rest: SIFCHAIN_REST_ENDPOINT,
     restConfig: SIFCHAIN_REST_CONFIG,
-    chainId: "sifchain",
+    chainId: "sifchain-1",
     chainName: "Sifchain",
     stakeCurrency: {
       coinDenom: "ROWAN",
@@ -605,13 +680,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 1000000000000,
       high: 2000000000000,
     },
+    features: ["stargate"],
   },
   {
     rpc: CERTIK_RPC_ENDPOINT,
     rpcConfig: CERTIK_RPC_CONFIG,
     rest: CERTIK_REST_ENDPOINT,
     restConfig: CERTIK_REST_CONFIG,
-    chainId: "shentu-1",
+    chainId: "shentu-2.1",
     chainName: "Certik",
     stakeCurrency: {
       coinDenom: "CTK",
@@ -647,6 +723,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "certik",
       },
     ],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: IRIS_RPC_ENDPOINT,
@@ -699,7 +776,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.3,
       high: 0.4,
     },
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: REGEN_RPC_ENDPOINT,
@@ -739,26 +816,68 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
     ],
+    features: ["stargate"],
+  },
+  {
+    rpc: PERSISTENCE_RPC_ENDPOINT,
+    rpcConfig: PERSISTENCE_RPC_CONFIG,
+    rest: PERSISTENCE_REST_ENDPOINT,
+    restConfig: PERSISTENCE_REST_CONFIG,
+    chainId: "core-1",
+    chainName: "Persistence",
+    stakeCurrency: {
+      coinDenom: "XPRT",
+      coinMinimalDenom: "uxprt",
+      coinDecimals: 6,
+      coinGeckoId: "persistence",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/core/stake"
+        : "http://localhost:8081/#/core/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/core/stake"
+        : "http://localhost:8081/#/core/stake",
+    bip44: {
+      coinType: 750,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("persistence"),
+    currencies: [
+      {
+        coinDenom: "XPRT",
+        coinMinimalDenom: "uxprt",
+        coinDecimals: 6,
+        coinGeckoId: "persistence",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "XPRT",
+        coinMinimalDenom: "uxprt",
+        coinDecimals: 6,
+        coinGeckoId: "persistence",
+      },
+    ],
     gasPriceStep: {
       low: 0,
       average: 0.025,
       high: 0.04,
     },
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
   },
-
   {
     rpc: SENTINEL_RPC_ENDPOINT,
     rpcConfig: SENTINEL_RPC_CONFIG,
     rest: SENTINEL_REST_ENDPOINT,
     restConfig: SENTINEL_REST_CONFIG,
-    chainId: "sentinelhub-1",
+    chainId: "sentinelhub-2",
     chainName: "Sentinel",
     stakeCurrency: {
       coinDenom: "DVPN",
       coinMinimalDenom: "udvpn",
       coinDecimals: 6,
-      coinGeckoId: "sentinel-group",
+      coinGeckoId: "sentinel",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -777,7 +896,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "DVPN",
         coinMinimalDenom: "udvpn",
         coinDecimals: 6,
-        coinGeckoId: "sentinel-group",
+        coinGeckoId: "sentinel",
       },
     ],
     feeCurrencies: [
@@ -785,7 +904,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "DVPN",
         coinMinimalDenom: "udvpn",
         coinDecimals: 6,
-        coinGeckoId: "sentinel-group",
+        coinGeckoId: "sentinel",
       },
     ],
     gasPriceStep: {
@@ -793,7 +912,92 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.4,
     },
+    features: ["stargate", "ibc-transfer"],
   },
+  {
+    rpc: KAVA_RPC_ENDPOINT,
+    rpcConfig: KAVA_RPC_CONFIG,
+    rest: KAVA_REST_ENDPOINT,
+    restConfig: KAVA_REST_CONFIG,
+    chainId: "kava-7",
+    chainName: "Kava",
+    stakeCurrency: {
+      coinDenom: "KAVA",
+      coinMinimalDenom: "ukava",
+      coinDecimals: 6,
+      coinGeckoId: "kava",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/kava/stake"
+        : "http://localhost:8081/#/kava/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/kava/stake"
+        : "http://localhost:8081/#/kava/stake",
+    bip44: { coinType: 459 },
+    alternativeBIP44s: [{ coinType: 118 }],
+    bech32Config: Bech32Address.defaultBech32Config("kava"),
+    currencies: [
+      {
+        coinDenom: "KAVA",
+        coinMinimalDenom: "ukava",
+        coinDecimals: 6,
+        coinGeckoId: "kava",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "KAVA",
+        coinMinimalDenom: "ukava",
+        coinDecimals: 6,
+        coinGeckoId: "kava",
+      },
+    ],
+    coinType: 459,
+  },
+
+  {
+    rpc: IXO_RPC_ENDPOINT,
+    rpcConfig: IXO_RPC_CONFIG,
+    rest: IXO_REST_ENDPOINT,
+    restConfig: IXO_REST_CONFIG,
+    chainId: "impacthub-3",
+    chainName: "ixo",
+    stakeCurrency: {
+      coinDenom: "IXO",
+      coinMinimalDenom: "uixo",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/ixo/stake"
+        : "http://localhost:8081/#/ixo/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/ixo/stake"
+        : "http://localhost:8081/#/ixo/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("ixo"),
+    currencies: [
+      {
+        coinDenom: "IXO",
+        coinMinimalDenom: "uixo",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IXO",
+        coinMinimalDenom: "uixo",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate"],
+  },
+
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
     rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,

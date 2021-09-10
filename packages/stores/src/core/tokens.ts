@@ -100,6 +100,7 @@ export class TokensStore<
     const datas = this.interactionStore.getDatas<{
       chainId: string;
       contractAddress: string;
+      viewingKey?: string;
     }>(SuggestTokenMsg.type());
 
     if (datas.length > 0) {

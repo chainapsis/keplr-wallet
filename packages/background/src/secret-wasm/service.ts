@@ -57,6 +57,24 @@ export class SecretWasmService {
     return utils.pubkey;
   }
 
+  async getTxEncryptionKey(
+    env: Env,
+    chainId: string,
+    nonce: Uint8Array
+  ): Promise<Uint8Array> {
+    const chainInfo = await this.chainsService.getChainInfo(chainId);
+
+    const keyRingType = await this.keyRingService.getKeyRingType();
+    if (keyRingType === "none") {
+      throw new Error("Key ring is not initialized");
+    }
+
+    const seed = await this.getSeed(env, chainInfo);
+
+    const utils = this.getEnigmaUtils(chainInfo, seed);
+    return utils.getTxEncryptionKey(nonce);
+  }
+
   async encrypt(
     env: Env,
     chainId: string,

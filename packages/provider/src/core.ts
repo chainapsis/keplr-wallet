@@ -1,4 +1,10 @@
-import { ChainInfo, Keplr as IKeplr, Key } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  Keplr as IKeplr,
+  KeplrIntereactionOptions,
+  KeplrSignOptions,
+  Key,
+} from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   BroadcastMode,
@@ -19,6 +25,7 @@ import {
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
+  GetTxEncryptionKeyMsg,
 } from "@keplr-wallet/background";
 import { cosmos } from "@keplr-wallet/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
@@ -26,20 +33,27 @@ import { SecretUtils } from "secretjs/types/enigmautils";
 import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
-import { CosmJSOfflineSigner } from "./cosmjs";
+import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
+import deepmerge from "deepmerge";
 
 export class Keplr implements IKeplr {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
+
+  public defaultOptions: KeplrIntereactionOptions = {};
 
   constructor(
     public readonly version: string,
     protected readonly requester: MessageRequester
   ) {}
 
-  async enable(chainId: string): Promise<void> {
+  async enable(chainIds: string | string[]): Promise<void> {
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
     await this.requester.sendMessage(
       BACKGROUND_PORT,
-      new EnableAccessMsg(chainId)
+      new EnableAccessMsg(chainIds)
     );
   }
 
@@ -65,21 +79,29 @@ export class Keplr implements IKeplr {
   async signAmino(
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    const msg = new RequestSignAminoMsg(chainId, signer, signDoc);
+    const msg = new RequestSignAminoMsg(
+      chainId,
+      signer,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    );
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   async signDirect(
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.ISignDoc
+    signDoc: cosmos.tx.v1beta1.ISignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
     const msg = new RequestSignDirectMsg(
       chainId,
       signer,
-      cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish()
+      cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
     );
     const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
 
@@ -93,8 +115,26 @@ export class Keplr implements IKeplr {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  async suggestToken(chainId: string, contractAddress: string): Promise<void> {
-    const msg = new SuggestTokenMsg(chainId, contractAddress);
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+    return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+  }
+
+  async getOfflineSignerAuto(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
+    const key = await this.getKey(chainId);
+    if (key.isNanoLedger) {
+      return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+    }
+    return new CosmJSOfflineSigner(chainId, this);
+  }
+
+  async suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ): Promise<void> {
+    const msg = new SuggestTokenMsg(chainId, contractAddress, viewingKey);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
@@ -110,6 +150,16 @@ export class Keplr implements IKeplr {
     return await this.requester.sendMessage(
       BACKGROUND_PORT,
       new GetPubkeyMsg(chainId)
+    );
+  }
+
+  async getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array
+  ): Promise<Uint8Array> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetTxEncryptionKeyMsg(chainId, nonce)
     );
   }
 

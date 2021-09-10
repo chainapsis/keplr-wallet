@@ -3,6 +3,7 @@ import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { StdSignDoc } from "@cosmjs/launchpad";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
+import { KeplrSignOptions } from "@keplr-wallet/types";
 
 export class SignInteractionStore {
   @observable
@@ -30,19 +31,25 @@ export class SignInteractionStore {
           mode: "amino";
           signer: string;
           signDoc: StdSignDoc;
+          signOptions: KeplrSignOptions;
         }
       | {
           chainId: string;
           mode: "direct";
           signer: string;
           signDocBytes: Uint8Array;
+          signOptions: KeplrSignOptions;
         }
     >("request-sign");
   }
 
   @computed
   get waitingData():
-    | InteractionWaitingData<{ signer: string; signDocWrapper: SignDocWrapper }>
+    | InteractionWaitingData<{
+        signer: string;
+        signDocWrapper: SignDocWrapper;
+        signOptions: KeplrSignOptions;
+      }>
     | undefined {
     const datas = this.waitingDatas;
 
@@ -59,7 +66,11 @@ export class SignInteractionStore {
     return {
       id: data.id,
       type: data.type,
-      data: { signer: data.data.signer, signDocWrapper: wrapper },
+      data: {
+        signer: data.data.signer,
+        signDocWrapper: wrapper,
+        signOptions: data.data.signOptions,
+      },
     };
   }
 

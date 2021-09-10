@@ -8,7 +8,7 @@ import {
 import { BIP44HDPath } from "./types";
 
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { BIP44, Key } from "@keplr-wallet/types";
+import { BIP44, KeplrSignOptions, Key } from "@keplr-wallet/types";
 
 import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
@@ -465,7 +465,8 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
   constructor(
     public readonly chainId: string,
     public readonly signer: string,
-    public readonly signDoc: StdSignDoc
+    public readonly signDoc: StdSignDoc,
+    public readonly signOptions: KeplrSignOptions = {}
   ) {
     super();
   }
@@ -486,6 +487,10 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
       throw new Error(
         "Chain id in the message is not matched with the requested chain id"
       );
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
     }
   }
 
@@ -514,7 +519,8 @@ export class RequestSignDirectMsg extends Message<{
   constructor(
     public readonly chainId: string,
     public readonly signer: string,
-    public readonly signDocBytes: Uint8Array
+    public readonly signDocBytes: Uint8Array,
+    public readonly signOptions: KeplrSignOptions = {}
   ) {
     super();
   }
@@ -537,6 +543,10 @@ export class RequestSignDirectMsg extends Message<{
       throw new Error(
         "Chain id in the message is not matched with the requested chain id"
       );
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
     }
   }
 

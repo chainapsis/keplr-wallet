@@ -1,9 +1,7 @@
-import React, { FunctionComponent, useEffect, useMemo } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 
 import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { Button } from "reactstrap";
-
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -24,19 +22,18 @@ export const AccessPage: FunctionComponent = observer(() => {
     permissionStore.rejectAll();
   });
 
-  const current = chainStore.current;
-
-  const isSecretWasm = useMemo(() => {
-    if (current.features) {
-      return current.features.indexOf("secretwasm") >= 0;
+  const isSecretWasmIncluded = useMemo(() => {
+    if (waitingPermission) {
+      for (const chainId of waitingPermission.data.chainIds) {
+        if (chainStore.hasChain(chainId)) {
+          const chainInfo = chainStore.getChain(chainId);
+          if (chainInfo.features && chainInfo.features.includes("secretwasm")) {
+            return true;
+          }
+        }
+      }
     }
     return false;
-  }, [current]);
-
-  useEffect(() => {
-    if (waitingPermission) {
-      chainStore.selectChain(waitingPermission.data.chainId);
-    }
   }, [chainStore, waitingPermission]);
 
   const host = useMemo(() => {
@@ -45,10 +42,18 @@ export const AccessPage: FunctionComponent = observer(() => {
         .map((origin) => {
           return new URL(origin).host;
         })
-        .join(",");
+        .join(", ");
     } else {
       return "";
     }
+  }, [waitingPermission]);
+
+  const chainIds = useMemo(() => {
+    if (!waitingPermission) {
+      return "";
+    }
+
+    return waitingPermission.data.chainIds.join(", ");
   }, [waitingPermission]);
 
   return (
@@ -67,11 +72,7 @@ export const AccessPage: FunctionComponent = observer(() => {
             id="access.paragraph"
             values={{
               host,
-              chainId:
-                waitingPermission &&
-                chainStore.hasChain(waitingPermission.data.chainId)
-                  ? chainStore.getChain(waitingPermission.data.chainId).chainId
-                  : "loading...",
+              chainId: chainIds,
               // eslint-disable-next-line react/display-name
               b: (...chunks: any) => <b>{chunks}</b>,
             }}
@@ -87,7 +88,7 @@ export const AccessPage: FunctionComponent = observer(() => {
           <li>
             <FormattedMessage id="access.permission.tx-request" />
           </li>
-          {isSecretWasm ? (
+          {isSecretWasmIncluded ? (
             <li>
               <FormattedMessage id="access.permission.secret" />
             </li>
@@ -140,11 +141,7 @@ export const AccessPage: FunctionComponent = observer(() => {
                 }
               }
             }}
-            disabled={
-              !waitingPermission ||
-              ChainIdHelper.parse(chainStore.current.chainId).identifier !==
-                ChainIdHelper.parse(waitingPermission.data.chainId).identifier
-            }
+            disabled={!waitingPermission}
             data-loading={permissionStore.isLoading}
           >
             <FormattedMessage id="access.button.approve" />

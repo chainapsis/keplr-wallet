@@ -45,7 +45,7 @@
     "ledger-cosmos-js": "^2.1.8",
     "reflect-metadata": "^0.1.13",
     "secp256k1": "^4.0.2",
-    "secretjs": "^0.10.2",
+    "secretjs": "^0.16.0",
     "tsyringe": "^4.4.0"
   }
 }

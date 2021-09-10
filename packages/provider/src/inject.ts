@@ -1,4 +1,11 @@
-import { ChainInfo, Keplr, Keplr as IKeplr, Key } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  Keplr,
+  Keplr as IKeplr,
+  KeplrIntereactionOptions,
+  KeplrSignOptions,
+  Key,
+} from "@keplr-wallet/types";
 import { Result } from "@keplr-wallet/router";
 import {
   BroadcastMode,
@@ -14,7 +21,8 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
-import { CosmJSOfflineSigner } from "./cosmjs";
+import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
+import deepmerge from "deepmerge";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -52,6 +60,10 @@ export class InjectedKeplr implements IKeplr {
           throw new Error("Version is not function");
         }
 
+        if (message.method === "defaultOptions") {
+          throw new Error("DefaultOptions is not function");
+        }
+
         if (
           !keplr[message.method] ||
           typeof keplr[message.method] !== "function"
@@ -60,7 +72,17 @@ export class InjectedKeplr implements IKeplr {
         }
 
         if (message.method === "getOfflineSigner") {
-          throw new Error("GetEnigmaUtils method can't be proxy request");
+          throw new Error("GetOfflineSigner method can't be proxy request");
+        }
+
+        if (message.method === "getOfflineSignerOnlyAmino") {
+          throw new Error(
+            "GetOfflineSignerOnlyAmino method can't be proxy request"
+          );
+        }
+
+        if (message.method === "getOfflineSignerAuto") {
+          throw new Error("GetOfflineSignerAuto method can't be proxy request");
         }
 
         if (message.method === "getEnigmaUtils") {
@@ -148,6 +170,8 @@ export class InjectedKeplr implements IKeplr {
 
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
 
+  public defaultOptions: KeplrIntereactionOptions = {};
+
   constructor(public readonly version: string) {}
 
   async enable(chainId: string): Promise<void> {
@@ -173,25 +197,70 @@ export class InjectedKeplr implements IKeplr {
   async signAmino(
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    return await this.requestMethod("signAmino", [chainId, signer, signDoc]);
+    return await this.requestMethod("signAmino", [
+      chainId,
+      signer,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+    ]);
   }
 
   async signDirect(
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.ISignDoc
+    signDoc: cosmos.tx.v1beta1.ISignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    return await this.requestMethod("signDirect", [chainId, signer, signDoc]);
+    const result = await this.requestMethod("signDirect", [
+      chainId,
+      signer,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+    ]);
+
+    // IMPORTANT: Remember that the proto message is encoded by not the Uint8Json but the Message#toJson.
+    //            So the result is not properly decoded as Uint8Array
+    //            and even it has the long type by string without type conversion.
+    //            So, we have to decode it by the proto message.
+    const jsonSignDoc = result.signed as { [k: string]: any };
+    const decodedSignDoc = cosmos.tx.v1beta1.SignDoc.fromObject(jsonSignDoc);
+    return {
+      signed: decodedSignDoc,
+      signature: result.signature,
+    };
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  async suggestToken(chainId: string, contractAddress: string): Promise<void> {
-    return await this.requestMethod("suggestToken", [chainId, contractAddress]);
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+    return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+  }
+
+  async getOfflineSignerAuto(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
+    const key = await this.getKey(chainId);
+    if (key.isNanoLedger) {
+      return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+    }
+    return new CosmJSOfflineSigner(chainId, this);
+  }
+
+  async suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ): Promise<void> {
+    return await this.requestMethod("suggestToken", [
+      chainId,
+      contractAddress,
+      viewingKey,
+    ]);
   }
 
   async getSecret20ViewingKey(
@@ -206,6 +275,16 @@ export class InjectedKeplr implements IKeplr {
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
     return await this.requestMethod("getEnigmaPubKey", [chainId]);
+  }
+
+  async getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array
+  ): Promise<Uint8Array> {
+    return await this.requestMethod("getEnigmaTxEncryptionKey", [
+      chainId,
+      nonce,
+    ]);
   }
 
   async enigmaEncrypt(

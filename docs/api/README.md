@@ -97,10 +97,12 @@ Then, you can add the `@keplr-wallet/types` window to a global window object and
 ### Enable Connection
 
 ```javascript
-enable(chainId: string): Promise<void>
+enable(chainIds: string | string[]): Promise<void>
 ```
 
-The `window.keplr.enable(chainId)` method requests the extension to be unlocked if it's currently locked. If the user hasn't given permission to the webpage, it will ask the user to give permission for the webpage to access Keplr.
+The `window.keplr.enable(chainIds)` method requests the extension to be unlocked if it's currently locked. If the user hasn't given permission to the webpage, it will ask the user to give permission for the webpage to access Keplr.
+
+`enable` method can receive one or more chain-id as an array. When the array of chain-id is passed, you can request permissions for all chains that have not yet been authorized at once.
 
 If the user cancels the unlock or rejects the permission, an error will be thrown.
 
@@ -127,10 +129,12 @@ If the webpage has permission and Keplr is unlocked, this function will return t
     pubKey: Uint8Array;
     address: Uint8Array;
     bech32Address: string;
+    isNanoLedger: boolean;
 }
 ```
 
-It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.
+It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.  
+`isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./cosmjs.md#types-of-offline-signers)
 
 ### Sign Amino
 
@@ -173,6 +177,34 @@ sendTx(
 This function requests Keplr to delegates the broadcasting of the transaction to Keplr's LCD endpoints (rather than the webpage broadcasting the transaction).
 This method returns the transaction hash if it succeeds to broadcast, if else the method will throw an error.
 When Keplr broadcasts the transaction, Keplr will send the notification on the transaction's progress.
+
+### Interaction Options
+
+```javascript
+export interface KeplrIntereactionOptions {
+  readonly sign?: KeplrSignOptions;
+}
+
+export interface KeplrSignOptions {
+  readonly preferNoSetFee?: boolean;
+  readonly preferNoSetMemo?: boolean;
+}
+```
+Keplr v0.8.11+ offers additional options to customize interactions between the frontend website and Keplr extension.
+
+If `preferNoSetFee` is set to true, Keplr will prioritize the frontend-suggested fee rather than overriding the tx fee setting of the signing page.
+
+If `preferNoSetMemo` is set to true, Keplr will not override the memo and set fix memo as the front-end set memo.
+
+You can set the values as follows:
+```javascript
+window.keplr.defaultOptions = {
+    sign: {
+        preferNoSetFee: true,
+        preferNoSetMemo: true,
+    }
+}
+```
 
 ## Custom event
 

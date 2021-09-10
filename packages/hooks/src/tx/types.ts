@@ -31,7 +31,7 @@ export interface IFeeConfig extends ITxChainSetter {
   fee: CoinPretty | undefined;
   getFeeTypePretty(feeType: FeeType): CoinPretty;
   getFeePrimitive(): CoinPrimitive | undefined;
-
+  isManual: boolean;
   getError(): Error | undefined;
 }
 

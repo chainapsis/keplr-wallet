@@ -35,7 +35,7 @@ const handleEnableAccessMsg: (
   return async (env, msg) => {
     return await service.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      msg.chainIds,
       msg.origin
     );
   };

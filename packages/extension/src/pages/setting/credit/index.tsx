@@ -23,6 +23,16 @@ export const CreditPage: FunctionComponent = () => {
     >
       <div className={style.container}>
         <PageButton
+          title="Entity Funding Support"
+          paragraph="Provided by ICF"
+          onClick={(e) => {
+            e.preventDefault();
+            browser.tabs.create({
+              url: "https://interchain.io",
+            });
+          }}
+        />
+        <PageButton
           title="Cosmos Hub node"
           paragraph="Provided by Figment Networks Datahub"
           onClick={(e) => {

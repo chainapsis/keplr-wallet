@@ -247,6 +247,7 @@ const handleGetKeyMsg: (
         (await service.chainsService.getChainInfo(msg.chainId)).bech32Config
           .bech32PrefixAccAddr
       ),
+      isNanoLedger: key.isNanoLedger,
     };
   };
 };
@@ -265,7 +266,8 @@ const handleRequestSignAminoMsg: (
       env,
       msg.chainId,
       msg.signer,
-      msg.signDoc
+      msg.signDoc,
+      msg.signOptions
     );
   };
 };
@@ -286,7 +288,8 @@ const handleRequestSignDirectMsg: (
       env,
       msg.chainId,
       msg.signer,
-      signDoc
+      signDoc,
+      msg.signOptions
     );
 
     return {

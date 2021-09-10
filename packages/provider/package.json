@@ -26,6 +26,7 @@
     "@keplr-wallet/types": "^0.9.0-alpha.10",
     "@keplr-wallet/unit": "^0.9.0-alpha.10",
     "buffer": "^6.0.3",
+    "deepmerge": "^4.2.2",
     "secretjs": "^0.10.4"
   }
 }
