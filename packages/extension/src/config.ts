@@ -963,7 +963,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: IXO_REST_ENDPOINT,
     restConfig: IXO_REST_CONFIG,
     chainId: "impacthub-3",
-    chainName: "IXO",
+    chainName: "ixo",
     stakeCurrency: {
       coinDenom: "IXO",
       coinMinimalDenom: "uixo",
