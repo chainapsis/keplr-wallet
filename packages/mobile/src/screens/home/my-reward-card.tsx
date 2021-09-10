@@ -40,6 +40,7 @@ export const MyRewardCard: FunctionComponent<{
               queryReward.getDescendingPendingRewardValidatorAddresses(8),
               "",
               {},
+              {},
               {
                 onBroadcasted: (txHash) => {
                   smartNavigation.pushSmart("TxPendingResult", {

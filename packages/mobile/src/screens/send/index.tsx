@@ -117,7 +117,11 @@ export const SendScreen: FunctionComponent = observer(() => {
                 sendConfigs.amountConfig.sendCurrency,
                 sendConfigs.recipientConfig.recipient,
                 sendConfigs.memoConfig.memo,
-                {},
+                sendConfigs.feeConfig.toStdFee(),
+                {
+                  preferNoSetFee: true,
+                  preferNoSetMemo: true,
+                },
                 {
                   onBroadcasted: (txHash) => {
                     smartNavigation.pushSmart("TxPendingResult", {

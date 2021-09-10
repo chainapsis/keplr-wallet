@@ -6,7 +6,7 @@ import {
   observable,
   runInAction,
 } from "mobx";
-import { AppCurrency, Keplr } from "@keplr-wallet/types";
+import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
 import { QueriesSetBase, QueriesStore } from "../query";
@@ -80,6 +80,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     recipient: string,
     memo: string,
     stdFee: Partial<StdFee>,
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -122,6 +123,7 @@ export class AccountSetBase<MsgOpts, Queries> {
       recipient: string,
       memo: string,
       stdFee: Partial<StdFee>,
+      signOptions?: KeplrSignOptions,
       onTxEvents?:
         | ((tx: any) => void)
         | {
@@ -226,8 +228,9 @@ export class AccountSetBase<MsgOpts, Queries> {
   async sendMsgs(
     type: string | "unknown",
     msgs: Msg[] | (() => Promise<Msg[]> | Msg[]),
-    fee: StdFee,
     memo: string = "",
+    fee: StdFee,
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -250,6 +253,7 @@ export class AccountSetBase<MsgOpts, Queries> {
         msgs,
         fee,
         memo,
+        signOptions,
         this.broadcastMode
       );
       txHash = result.txHash;
@@ -322,6 +326,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     recipient: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -332,7 +337,17 @@ export class AccountSetBase<MsgOpts, Queries> {
     for (let i = 0; i < this.sendTokenFns.length; i++) {
       const fn = this.sendTokenFns[i];
 
-      if (await fn(amount, currency, recipient, memo, stdFee, onTxEvents)) {
+      if (
+        await fn(
+          amount,
+          currency,
+          recipient,
+          memo,
+          stdFee,
+          signOptions,
+          onTxEvents
+        )
+      ) {
         return;
       }
     }
@@ -347,6 +362,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     msgs: Msg[],
     fee: StdFee,
     memo: string = "",
+    signOptions?: KeplrSignOptions,
     mode: "block" | "async" | "sync" = "async"
   ): Promise<{
     txHash: Uint8Array;
@@ -381,7 +397,8 @@ export class AccountSetBase<MsgOpts, Queries> {
     const signResponse = await keplr.signAmino(
       this.chainId,
       this.bech32Address,
-      signDoc
+      signDoc,
+      signOptions
     );
 
     const signedTx = makeStdTx(signResponse.signed, signResponse.signature);

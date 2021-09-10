@@ -430,6 +430,7 @@ export const GovernanceVoteModal: FunctionComponent<{
                   vote,
                   "",
                   {},
+                  {},
                   {
                     onBroadcasted: (txHash) => {
                       smartNavigation.pushSmart("TxPendingResult", {

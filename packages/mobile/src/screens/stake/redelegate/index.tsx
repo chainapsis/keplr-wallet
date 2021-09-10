@@ -197,7 +197,11 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
                 sendConfigs.srcValidatorAddress,
                 sendConfigs.dstValidatorAddress,
                 sendConfigs.memoConfig.memo,
-                {},
+                sendConfigs.feeConfig.toStdFee(),
+                {
+                  preferNoSetMemo: true,
+                  preferNoSetFee: true,
+                },
                 {
                   onBroadcasted: (txHash) => {
                     smartNavigation.pushSmart("TxPendingResult", {

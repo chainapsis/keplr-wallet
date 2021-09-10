@@ -96,7 +96,11 @@ export const DelegateScreen: FunctionComponent = observer(() => {
                 sendConfigs.amountConfig.amount,
                 sendConfigs.recipientConfig.recipient,
                 sendConfigs.memoConfig.memo,
-                {},
+                sendConfigs.feeConfig.toStdFee(),
+                {
+                  preferNoSetMemo: true,
+                  preferNoSetFee: true,
+                },
                 {
                   onBroadcasted: (txHash) => {
                     smartNavigation.pushSmart("TxPendingResult", {

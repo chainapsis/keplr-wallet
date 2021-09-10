@@ -1,5 +1,5 @@
 import { AccountSetBase, AccountSetOpts, MsgOpt } from "./base";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
@@ -101,6 +101,7 @@ export class CosmosAccount {
     recipient: string,
     memo: string,
     stdFee: Partial<StdFee>,
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -135,11 +136,12 @@ export class CosmosAccount {
               },
             },
           ],
+          memo,
           {
             amount: stdFee.amount ?? [],
             gas: stdFee.gas ?? this.base.msgOpts.send.native.gas.toString(),
           },
-          memo,
+          signOptions,
           this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
@@ -174,6 +176,7 @@ export class CosmosAccount {
     recipient: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -236,11 +239,12 @@ export class CosmosAccount {
 
         return [msg];
       },
+      memo,
       {
         amount: stdFee.amount ?? [],
         gas: stdFee.gas ?? this.base.msgOpts.ibcTransfer.gas.toString(),
       },
-      memo,
+      signOptions,
       this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to send token, refresh the balance.
@@ -273,6 +277,7 @@ export class CosmosAccount {
     validatorAddress: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -300,11 +305,12 @@ export class CosmosAccount {
     await this.base.sendMsgs(
       "delegate",
       [msg],
+      memo,
       {
         amount: stdFee.amount ?? [],
         gas: stdFee.gas ?? this.base.msgOpts.delegate.gas.toString(),
       },
-      memo,
+      signOptions,
       this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to delegate, refresh the validators and delegations, rewards.
@@ -335,6 +341,7 @@ export class CosmosAccount {
     validatorAddress: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -362,11 +369,12 @@ export class CosmosAccount {
     await this.base.sendMsgs(
       "undelegate",
       [msg],
+      memo,
       {
         amount: stdFee.amount ?? [],
         gas: stdFee.gas ?? this.base.msgOpts.undelegate.gas.toString(),
       },
-      memo,
+      signOptions,
       this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to unbond, refresh the validators and delegations, unbonding delegations, rewards.
@@ -402,6 +410,7 @@ export class CosmosAccount {
     dstValidatorAddress: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -430,11 +439,12 @@ export class CosmosAccount {
     await this.base.sendMsgs(
       "redelegate",
       [msg],
+      memo,
       {
         amount: stdFee.amount ?? [],
         gas: stdFee.gas ?? this.base.msgOpts.redelegate.gas.toString(),
       },
-      memo,
+      signOptions,
       this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to redelegate, refresh the validators and delegations, rewards.
@@ -456,6 +466,7 @@ export class CosmosAccount {
     validatorAddresses: string[],
     memo: string = "",
     stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -476,6 +487,7 @@ export class CosmosAccount {
     await this.base.sendMsgs(
       "withdrawRewards",
       msgs,
+      memo,
       {
         amount: stdFee.amount ?? [],
         gas:
@@ -484,7 +496,7 @@ export class CosmosAccount {
             this.base.msgOpts.withdrawRewards.gas * validatorAddresses.length
           ).toString(),
       },
-      memo,
+      signOptions,
       this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to withdraw rewards, refresh rewards.
@@ -501,6 +513,7 @@ export class CosmosAccount {
     option: "Yes" | "No" | "Abstain" | "NoWithVeto",
     memo: string = "",
     stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -539,11 +552,12 @@ export class CosmosAccount {
     await this.base.sendMsgs(
       "govVote",
       [msg],
+      memo,
       {
         amount: stdFee.amount ?? [],
         gas: stdFee.gas ?? this.base.msgOpts.govVote.gas.toString(),
       },
-      memo,
+      signOptions,
       this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to vote, refresh the proposal.

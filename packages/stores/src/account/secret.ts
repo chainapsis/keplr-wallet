@@ -5,7 +5,7 @@ import { ChainGetter, CoinPrimitive } from "../common";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepReadonly, Optional } from "utility-types";
 
 export interface HasSecretAccount {
@@ -78,6 +78,7 @@ export class SecretAccount {
     recipient: string,
     memo: string,
     stdFee: Partial<StdFee>,
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -108,11 +109,12 @@ export class SecretAccount {
             },
           },
           [],
+          memo,
           {
             amount: stdFee.amount ?? [],
             gas: stdFee.gas ?? this.base.msgOpts.send.secret20.gas.toString(),
           },
-          memo,
+          signOptions,
           this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
@@ -140,6 +142,7 @@ export class SecretAccount {
     contractAddress: string,
     memo: string = "",
     stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
     onFulfill?: (tx: any, viewingKey: string) => void
   ) {
     const random = new Uint8Array(15);
@@ -153,13 +156,14 @@ export class SecretAccount {
         create_viewing_key: { entropy },
       },
       [],
+      memo,
       {
         amount: stdFee.amount ?? [],
         gas:
           stdFee.gas ??
           this.base.msgOpts.createSecret20ViewingKey.gas.toString(),
       },
-      memo,
+      signOptions,
       async (tx) => {
         let viewingKey = "";
         if (tx && "data" in tx && tx.data) {
@@ -202,8 +206,9 @@ export class SecretAccount {
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object,
     sentFunds: CoinPrimitive[],
-    stdFee: Optional<StdFee, "amount">,
     memo: string = "",
+    stdFee: Optional<StdFee, "amount">,
+    signOptions?: KeplrSignOptions,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -235,11 +240,12 @@ export class SecretAccount {
 
         return [msg];
       },
+      memo,
       {
         amount: stdFee.amount ?? [],
         gas: stdFee.gas,
       },
-      memo,
+      signOptions,
       this.txEventsWithPreOnFulfill(onTxEvents)
     );
 
