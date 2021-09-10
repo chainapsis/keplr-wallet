@@ -33,6 +33,10 @@ export class RNInjectedKeplr extends InjectedKeplr {
         throw new Error("Version is not function");
       }
 
+      if (message.method === "defaultOptions") {
+        throw new Error("DefaultOptions is not function");
+      }
+
       if (
         !keplr[message.method] ||
         typeof keplr[message.method] !== "function"
@@ -41,7 +45,17 @@ export class RNInjectedKeplr extends InjectedKeplr {
       }
 
       if (message.method === "getOfflineSigner") {
-        throw new Error("GetEnigmaUtils method can't be proxy request");
+        throw new Error("GetOfflineSigner method can't be proxy request");
+      }
+
+      if (message.method === "getOfflineSignerOnlyAmino") {
+        throw new Error(
+          "GetOfflineSignerOnlyAmino method can't be proxy request"
+        );
+      }
+
+      if (message.method === "getOfflineSignerAuto") {
+        throw new Error("GetOfflineSignerAuto method can't be proxy request");
       }
 
       if (message.method === "getEnigmaUtils") {

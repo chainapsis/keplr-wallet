@@ -29,6 +29,11 @@ import { ObservableQuerySifchainLiquidityAPY } from "./supply/sifchain";
 import { ObservableQueryCosmosBalanceRegistry } from "./balance";
 import { ObservableQueryIrisMintingInfation } from "./supply/iris-minting";
 import { DeepReadonly } from "utility-types";
+import {
+  ObservableQueryOsmosisEpochProvisions,
+  ObservableQueryOsmosisEpochs,
+  ObservableQueryOsmosisMintParmas,
+} from "./supply/osmosis";
 
 export interface HasCosmosQueries {
   cosmos: CosmosQueries;
@@ -108,6 +113,13 @@ export class CosmosQueries {
       chainId,
       chainGetter
     );
+
+    const osmosisMintParams = new ObservableQueryOsmosisMintParmas(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
     this.queryInflation = new ObservableQueryInflation(
       chainId,
       chainGetter,
@@ -115,7 +127,15 @@ export class CosmosQueries {
       this.queryPool,
       this.querySupplyTotal,
       new ObservableQueryIrisMintingInfation(kvStore, chainId, chainGetter),
-      this.querySifchainAPY
+      this.querySifchainAPY,
+      new ObservableQueryOsmosisEpochs(kvStore, chainId, chainGetter),
+      new ObservableQueryOsmosisEpochProvisions(
+        kvStore,
+        chainId,
+        chainGetter,
+        osmosisMintParams
+      ),
+      osmosisMintParams
     );
     this.queryRewards = new ObservableQueryRewards(
       kvStore,

@@ -1,4 +1,9 @@
-import { Keplr, Key } from "@keplr-wallet/types";
+import {
+  Keplr,
+  KeplrIntereactionOptions,
+  KeplrSignOptions,
+  Key,
+} from "@keplr-wallet/types";
 import {
   AminoSignResponse,
   BroadcastMode,
@@ -16,6 +21,8 @@ import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
 
 export class MockKeplr implements Keplr {
   readonly version: string = "0.0.1";
+
+  public defaultOptions: KeplrIntereactionOptions = {};
 
   public readonly walletMap: {
     [chainId: string]: Secp256k1HdWallet | undefined;
@@ -91,6 +98,7 @@ export class MockKeplr implements Keplr {
       pubKey: cosmJsKeys[0].pubkey,
       address: Bech32Address.fromBech32(cosmJsKeys[0].address).address,
       bech32Address: cosmJsKeys[0].address,
+      isNanoLedger: false,
     };
   }
 
@@ -113,7 +121,8 @@ export class MockKeplr implements Keplr {
   async signAmino(
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    _?: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     const hdWallet = await this.getHdWallet(chainId);
 
@@ -130,6 +139,23 @@ export class MockKeplr implements Keplr {
   }
 
   suggestToken(): Promise<void> {
+    throw new Error("Not implemented");
+  }
+
+  getEnigmaTxEncryptionKey(
+    _chainId: string,
+    _nonce: Uint8Array
+  ): Promise<Uint8Array> {
+    throw new Error("Not implemented");
+  }
+
+  getOfflineSignerAuto(
+    _chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
+    throw new Error("Not implemented");
+  }
+
+  getOfflineSignerOnlyAmino(_chainId: string): OfflineSigner {
     throw new Error("Not implemented");
   }
 }
