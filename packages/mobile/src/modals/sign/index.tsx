@@ -3,9 +3,8 @@ import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { ScrollView, Text, View } from "react-native";
 import { useStyle } from "../../styles";
-import { useInteractionInfo } from "../../hooks";
 import { useStore } from "../../stores";
-import { FeeButtons, MemoInput } from "../../components/input";
+import { MemoInput } from "../../components/input";
 import {
   useFeeConfig,
   useGasConfig,
@@ -17,12 +16,16 @@ import { Button } from "../../components/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
 import { Msg } from "./msg";
 import { observer } from "mobx-react-lite";
+import { useUnmount } from "../../hooks";
+import { FeeInSign } from "./fee";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
+
+  interactionKey: string;
 }> = registerModal(
-  observer(() => {
+  observer(({ interactionKey }) => {
     const {
       chainStore,
       accountStore,
@@ -30,7 +33,7 @@ export const SignModal: FunctionComponent<{
       interactionModalStore,
       signInteractionStore,
     } = useStore();
-    useInteractionInfo(() => {
+    useUnmount(() => {
       signInteractionStore.rejectAll();
     });
 
@@ -68,9 +71,18 @@ export const SignModal: FunctionComponent<{
         setChainId(data.data.signDocWrapper.chainId);
         gasConfig.setGas(data.data.signDocWrapper.gas);
         memoConfig.setMemo(data.data.signDocWrapper.memo);
+        if (
+          data.data.signOptions.preferNoSetFee &&
+          data.data.signDocWrapper.fees[0]
+        ) {
+          feeConfig.setManualFee(data.data.signDocWrapper.fees[0]);
+        } else {
+          feeConfig.setFeeType("average");
+        }
         setSigner(data.data.signer);
       }
     }, [
+      feeConfig,
       gasConfig,
       memoConfig,
       signDocHelper,
@@ -141,14 +153,15 @@ export const SignModal: FunctionComponent<{
     return (
       <CardModal title="Confirm Transaction">
         <View style={style.flatten(["margin-bottom-16"])}>
-          <Text
-            style={style.flatten([
-              "subtitle2",
-              "color-text-black-medium",
-              "margin-bottom-3",
-            ])}
-          >
-            Messages
+          <Text style={style.flatten(["margin-bottom-3"])}>
+            <Text style={style.flatten(["subtitle2", "color-primary"])}>
+              {`${msgs.length.toString()} `}
+            </Text>
+            <Text
+              style={style.flatten(["subtitle2", "color-text-black-medium"])}
+            >
+              Messages
+            </Text>
           </Text>
           <View
             style={style.flatten([
@@ -167,11 +180,11 @@ export const SignModal: FunctionComponent<{
           </View>
         </View>
         <MemoInput label="Memo" memoConfig={memoConfig} />
-        <FeeButtons
-          label="Fee"
-          gasLabel="Gas"
+        <FeeInSign
+          interactionKey={interactionKey}
           feeConfig={feeConfig}
           gasConfig={gasConfig}
+          signOptions={signInteractionStore.waitingData?.data.signOptions}
         />
         <Button
           text="Approve"

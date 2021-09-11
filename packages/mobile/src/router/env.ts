@@ -9,7 +9,7 @@ export class RNEnv {
     return {
       isInternalMsg,
       requestInteraction: async (url, msg) => {
-        InteractionModalStore.pushUrl(url);
+        InteractionModalStore.pushUrl(url, isInternalMsg);
         return await new RNMessageRequesterInternalToUI().sendMessage(
           APP_PORT,
           msg

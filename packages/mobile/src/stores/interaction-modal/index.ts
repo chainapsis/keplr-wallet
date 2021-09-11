@@ -1,12 +1,21 @@
 import { action, computed, makeObservable, observable } from "mobx";
-
 import EventEmitter from "eventemitter3";
+import { computedFn } from "mobx-utils";
+
+type UrlInfo = {
+  url: string;
+  key: string;
+  isInternal: boolean;
+};
 
 export class InteractionModalStore {
   protected static EventEmitter = new EventEmitter();
 
-  public static pushUrl(url: string) {
-    InteractionModalStore.EventEmitter.emit("push", url);
+  public static pushUrl(url: string, isInternal: boolean) {
+    InteractionModalStore.EventEmitter.emit("push", {
+      url,
+      isInternal,
+    });
   }
 
   protected static lastKey: number = 0;
@@ -17,31 +26,33 @@ export class InteractionModalStore {
   }
 
   @observable.shallow
-  protected _urlInfos: {
-    url: string;
-    key: string;
-  }[] = [];
+  protected _urlInfos: UrlInfo[] = [];
 
   constructor() {
     makeObservable(this);
 
-    InteractionModalStore.EventEmitter.addListener("push", (url: string) => {
-      this.pushUrl(url);
-    });
+    InteractionModalStore.EventEmitter.addListener(
+      "push",
+      (data: { url: string; isInternal: boolean }) => {
+        this.pushUrl(data.url, data.isInternal);
+      }
+    );
   }
 
   @computed
-  get urlInfos(): {
-    url: string;
-    key: string;
-  }[] {
+  get urlInfos(): UrlInfo[] {
     return this._urlInfos;
   }
 
+  getUrlInfo = computedFn((key: string) => {
+    return this.urlInfos.find((info) => info.key === key);
+  });
+
   @action
-  pushUrl(url: string) {
+  pushUrl(url: string, isInternal: boolean) {
     this._urlInfos.push({
       url,
+      isInternal,
       key: InteractionModalStore.getKey(),
     });
   }

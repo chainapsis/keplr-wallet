@@ -54,6 +54,7 @@ export const InteractionModalsProivder: FunctionComponent = observer(
               return (
                 <SignModal
                   key={key}
+                  interactionKey={key}
                   isOpen={true}
                   close={() => interactionModalStore.popUrl()}
                 />
