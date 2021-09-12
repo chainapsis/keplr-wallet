@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { IFeeConfig, IGasConfig } from "@keplr-wallet/hooks";
+import { IFeeConfig, IGasConfig, NotLoadedFeeError } from "@keplr-wallet/hooks";
 import { Text, View } from "react-native";
 import { useStore } from "../../stores";
 import { useStyle } from "../../styles";
@@ -10,8 +10,9 @@ import { KeplrSignOptions } from "@keplr-wallet/types";
 import { RightArrowIcon } from "../../components/icon";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
-import { FeeButtons } from "../../components/input";
+import { FeeButtons, getFeeErrorText } from "../../components/input";
 import { Button } from "../../components/button";
+import { LoadingSpinner } from "../../components/spinner";
 
 const FeeButtonsModal: FunctionComponent<{
   isOpen: boolean;
@@ -73,6 +74,19 @@ export const FeeInSign: FunctionComponent<{
   // prevent the user to edit the fee.
   const canFeeEditable = !isInternal || !preferNoSetFee;
 
+  let isFeeLoading = false;
+
+  const error = feeConfig.getError();
+  const errorText: string | undefined = (() => {
+    if (error) {
+      if (error.constructor === NotLoadedFeeError) {
+        isFeeLoading = true;
+      }
+
+      return getFeeErrorText(error);
+    }
+  })();
+
   const [isSetFeeModalOpen, setIsSetFeeModalOpen] = useState(false);
 
   return (
@@ -83,7 +97,7 @@ export const FeeInSign: FunctionComponent<{
         feeConfig={feeConfig}
         gasConfig={gasConfig}
       />
-      <View style={style.flatten(["margin-bottom-28"])}>
+      <View style={style.flatten(["padding-bottom-28"])}>
         <View
           style={style.flatten(["flex-row", "items-center", "margin-bottom-4"])}
         >
@@ -122,6 +136,39 @@ export const FeeInSign: FunctionComponent<{
             ) : null}
           </TouchableOpacity>
         </View>
+        {isFeeLoading ? (
+          <View>
+            <View
+              style={style.flatten([
+                "absolute",
+                "height-16",
+                "justify-center",
+                "margin-top-2",
+                "margin-left-4",
+              ])}
+            >
+              <LoadingSpinner
+                size={14}
+                color={style.get("color-loading-spinner").color}
+              />
+            </View>
+          </View>
+        ) : null}
+        {!isFeeLoading && errorText ? (
+          <View>
+            <Text
+              style={style.flatten([
+                "absolute",
+                "text-caption1",
+                "color-error",
+                "margin-top-2",
+                "margin-left-4",
+              ])}
+            >
+              {errorText}
+            </Text>
+          </View>
+        ) : null}
       </View>
     </React.Fragment>
   );

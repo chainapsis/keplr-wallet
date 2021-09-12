@@ -63,6 +63,17 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
   }
 );
 
+export const getFeeErrorText = (error: Error): string | undefined => {
+  switch (error.constructor) {
+    case InsufficientFeeError:
+      return "Insufficient available balance for transaction fee";
+    case NotLoadedFeeError:
+      return undefined;
+    default:
+      return "Unknown error";
+  }
+};
+
 export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
   ({
     labelStyle,
@@ -108,15 +119,11 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
     const error = feeConfig.getError();
     const errorText: string | undefined = (() => {
       if (error) {
-        switch (error.constructor) {
-          case InsufficientFeeError:
-            return "Insufficient available balance for transaction fee";
-          case NotLoadedFeeError:
-            isFeeLoading = true;
-            return undefined;
-          default:
-            return "Unknown error";
+        if (error.constructor === NotLoadedFeeError) {
+          isFeeLoading = true;
         }
+
+        return getFeeErrorText(error);
       }
     })();
 
