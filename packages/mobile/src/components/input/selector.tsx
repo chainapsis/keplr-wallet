@@ -253,14 +253,14 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
   return (
     <View
       style={StyleSheet.flatten([
-        style.flatten(["padding-bottom-16"]),
+        style.flatten(["padding-bottom-28"]),
         containerStyle,
       ])}
     >
       <Text
         style={StyleSheet.flatten([
           style.flatten([
-            "subtitle2",
+            "subtitle3",
             "color-text-black-medium",
             "margin-bottom-3",
           ]),

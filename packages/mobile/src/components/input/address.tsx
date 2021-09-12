@@ -93,6 +93,8 @@ export const AddressInput: FunctionComponent<{
                     "absolute",
                     "height-16",
                     "justify-center",
+                    "margin-top-2",
+                    "margin-left-4",
                   ])}
                 >
                   <LoadingSpinner

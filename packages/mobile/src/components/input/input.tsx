@@ -38,14 +38,14 @@ export const TextInput = React.forwardRef<
   return (
     <View
       style={StyleSheet.flatten([
-        style.flatten(["padding-bottom-16"]),
+        style.flatten(["padding-bottom-28"]),
         props.containerStyle,
       ])}
     >
       <Text
         style={StyleSheet.flatten([
           style.flatten([
-            "subtitle2",
+            "subtitle3",
             "color-text-black-medium",
             "margin-bottom-3",
           ]),
@@ -114,6 +114,7 @@ export const TextInput = React.forwardRef<
                   "absolute",
                   "text-caption2",
                   "color-primary",
+                  "margin-top-2",
                   "margin-left-4",
                 ]),
                 props.errorLabelStyle,
@@ -134,6 +135,7 @@ export const TextInput = React.forwardRef<
                 "absolute",
                 "text-caption2",
                 "color-error",
+                "margin-top-2",
                 "margin-left-4",
               ]),
               props.errorLabelStyle,

@@ -174,14 +174,14 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
     return (
       <View
         style={StyleSheet.flatten([
-          style.flatten(["padding-bottom-16"]),
+          style.flatten(["padding-bottom-28"]),
           containerStyle,
         ])}
       >
         <Text
           style={StyleSheet.flatten([
             style.flatten([
-              "subtitle2",
+              "subtitle3",
               "color-text-black-medium",
               "margin-bottom-3",
             ]),
@@ -240,7 +240,13 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
         {isFeeLoading ? (
           <View>
             <View
-              style={style.flatten(["absolute", "height-16", "justify-center"])}
+              style={style.flatten([
+                "absolute",
+                "height-16",
+                "justify-center",
+                "margin-top-2",
+                "margin-left-4",
+              ])}
             >
               <LoadingSpinner
                 size={14}
@@ -253,7 +259,13 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
           <View>
             <Text
               style={StyleSheet.flatten([
-                style.flatten(["absolute", "text-caption1", "color-error"]),
+                style.flatten([
+                  "absolute",
+                  "text-caption1",
+                  "color-error",
+                  "margin-top-2",
+                  "margin-left-4",
+                ]),
                 errorLabelStyle,
               ])}
             >

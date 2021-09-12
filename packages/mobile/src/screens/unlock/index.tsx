@@ -235,6 +235,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
           <View style={style.get("flex-3")} />
           <View style={style.flatten(["padding-x-page"])}>
             <TextInput
+              containerStyle={style.flatten(["padding-bottom-40"])}
               label="Password"
               returnKeyType="done"
               secureTextEntry={true}

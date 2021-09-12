@@ -154,11 +154,11 @@ export const SignModal: FunctionComponent<{
       <CardModal title="Confirm Transaction">
         <View style={style.flatten(["margin-bottom-16"])}>
           <Text style={style.flatten(["margin-bottom-3"])}>
-            <Text style={style.flatten(["subtitle2", "color-primary"])}>
+            <Text style={style.flatten(["subtitle3", "color-primary"])}>
               {`${msgs.length.toString()} `}
             </Text>
             <Text
-              style={style.flatten(["subtitle2", "color-text-black-medium"])}
+              style={style.flatten(["subtitle3", "color-text-black-medium"])}
             >
               Messages
             </Text>
