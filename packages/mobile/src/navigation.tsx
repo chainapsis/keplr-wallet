@@ -484,6 +484,8 @@ export const SettingStackScreen: FunctionComponent = () => {
 
   const navigation = useNavigation();
 
+  const { analyticsStore } = useStore();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -510,6 +512,7 @@ export const SettingStackScreen: FunctionComponent = () => {
           headerRight: () => (
             <HeaderRightButton
               onPress={() => {
+                analyticsStore.logEvent("Add additional account started");
                 navigation.navigate("Register", {
                   screen: "Register.Intro",
                 });

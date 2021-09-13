@@ -11,7 +11,7 @@ import { useSmartNavigation } from "../../navigation";
 export const MyRewardCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -35,6 +35,11 @@ export const MyRewardCard: FunctionComponent<{
           .upperCase(true)
           .toString()}
         onPress={async () => {
+          analyticsStore.logEvent("Claim reward started", {
+            chainId: chainStore.current.chainId,
+            chainName: chainStore.current.chainName,
+          });
+
           try {
             await account.cosmos.sendWithdrawDelegationRewardMsgs(
               queryReward.getDescendingPendingRewardValidatorAddresses(8),

@@ -5,23 +5,33 @@ import {
   AccountSetBase,
   KeyRingStore,
 } from "@keplr-wallet/stores";
+import { FeeType } from "@keplr-wallet/hooks";
 
 import { sha256 } from "sha.js";
 
 export interface EventProperties extends Record<string, unknown> {
   chainId?: string;
   chainName?: string;
+  toChainId?: string;
+  toChainName?: string;
   validatorName?: string;
+  toValidatorName?: string;
+  amount?: string;
+  denom?: string;
   proposalId?: string;
   proposalTitle?: string;
   linkTitle?: string;
   linkUrl?: string;
   registerType?: "seed" | "google" | "ledger" | "qr";
   accountType?: "mnemonic" | "privateKey" | "ledger";
+  feeType?: FeeType | undefined;
+  authType?: "biometrics" | "password";
+  fromScreen?: string;
 }
 export interface UserProperties {
   registerType?: "seed" | "google" | "ledger" | "qr";
   accountType?: "mnemonic" | "privateKey" | "ledger";
+  currency: string;
 }
 
 export class AnalyticsStore {

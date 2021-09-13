@@ -16,6 +16,7 @@ import { dateToLocalString } from "./utils";
 import { registerModal } from "../../modals/base";
 import { RectButton } from "../../components/rect-button";
 import { useSmartNavigation } from "../../navigation";
+import { useLogScreenView } from "../../hooks";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -264,9 +265,17 @@ export const GovernanceVoteModal: FunctionComponent<{
   smartNavigation: ReturnType<typeof useSmartNavigation>;
 }> = registerModal(
   observer(({ proposalId, close, smartNavigation }) => {
-    const { chainStore, accountStore } = useStore();
+    const {
+      chainStore,
+      accountStore,
+      analyticsStore,
+      queriesStore,
+    } = useStore();
 
     const account = accountStore.getAccount(chainStore.current.chainId);
+    const queries = queriesStore.get(chainStore.current.chainId);
+
+    const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
 
     const style = useStyle();
 
@@ -437,6 +446,16 @@ export const GovernanceVoteModal: FunctionComponent<{
                         txHash: Buffer.from(txHash).toString("hex"),
                       });
                     },
+                    onFulfill: (tx) => {
+                      const isSuccess = tx.code == null || tx.code === 0;
+                      analyticsStore.logEvent("Vote finished", {
+                        chainId: chainStore.current.chainId,
+                        chainName: chainStore.current.chainName,
+                        proposalId,
+                        proposalTitle: proposal?.title,
+                        isSuccess,
+                      });
+                    },
                   }
                 );
                 close();
@@ -456,7 +475,7 @@ export const GovernanceVoteModal: FunctionComponent<{
 );
 
 export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore, accountStore } = useStore();
+  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
@@ -499,6 +518,13 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useLogScreenView("Proposal detail", {
+    chainId: chainStore.current.chainId,
+    chainName: chainStore.current.chainName,
+    proposalId,
+    proposalTitle: proposal?.title,
+  });
+
   return (
     <PageWithScrollView
       fixed={
@@ -513,6 +539,12 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
               size="large"
               disabled={!voteEnabled || !account.isReadyToSendMsgs}
               onPress={() => {
+                analyticsStore.logEvent("Vote started", {
+                  chainId: chainStore.current.chainId,
+                  chainName: chainStore.current.chainName,
+                  proposalId,
+                  proposalTitle: proposal?.title,
+                });
                 setIsModalOpen(true);
               }}
             />
