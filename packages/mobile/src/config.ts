@@ -77,6 +77,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "osmosis",
       },
+      {
+        coinDenom: "ION",
+        coinMinimalDenom: "uion",
+        coinDecimals: 6,
+        coinGeckoId: "ion",
+      },
     ],
     feeCurrencies: [
       {
