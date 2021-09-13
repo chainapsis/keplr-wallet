@@ -195,11 +195,7 @@ export class PermissionService {
     return origins;
   }
 
-  protected async addPermission(
-    chainIds: string[],
-    type: string,
-    origins: string[]
-  ) {
+  async addPermission(chainIds: string[], type: string, origins: string[]) {
     for (const chainId of chainIds) {
       let permissionsInChain = this.permissionMap[
         ChainIdHelper.parse(chainId).identifier

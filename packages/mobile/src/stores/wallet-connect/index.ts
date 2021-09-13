@@ -1,10 +1,18 @@
 import WalletConnect from "@walletconnect/client";
-import { AccountSetBase, AccountStore } from "@keplr-wallet/stores";
+import {
+  AccountSetBase,
+  AccountStore,
+  KeyRingStore,
+  PermissionStore,
+} from "@keplr-wallet/stores";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { ChainStore } from "../chain";
-import { Keplr } from "@keplr-wallet/types";
+import { Keplr } from "@keplr-wallet/provider";
 import { Buffer } from "buffer/";
 import { KVStore } from "@keplr-wallet/common";
+import { WCMessageRequester } from "./msg-requester";
+import { RNRouterBackground } from "../../router";
+import { KeyRingStatus } from "@keplr-wallet/background";
 
 export interface WalletConnectV1SessionRequest {
   id: number;
@@ -50,7 +58,7 @@ export abstract class WalletConnectManager {
   protected constructor(
     protected readonly chainStore: ChainStore,
     protected readonly accountStore: AccountStore<AccountSetBase<any, any>>,
-    protected readonly keplr: Keplr
+    protected readonly keyRingStore: KeyRingStore
   ) {
     makeObservable(this);
   }
@@ -78,9 +86,48 @@ export abstract class WalletConnectManager {
     client.on("call_request", (error, payload) => {
       this.onCallRequest(client, error, payload);
     });
+
+    client.on("disconnect", (error) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      this.onSessionDisconnected(session);
+    });
+  }
+
+  protected async waitInitStores(): Promise<void> {
+    // Wait until the chain store and account store is ready.
+    if (this.chainStore.isInitializing) {
+      await new Promise<void>((resolve) => {
+        const disposer = autorun(() => {
+          if (!this.chainStore.isInitializing) {
+            resolve();
+            if (disposer) {
+              disposer();
+            }
+          }
+        });
+      });
+    }
+
+    if (this.keyRingStore.status !== KeyRingStatus.UNLOCKED) {
+      await new Promise<void>((resolve) => {
+        const disposer = autorun(() => {
+          if (this.keyRingStore.status === KeyRingStatus.UNLOCKED) {
+            resolve();
+            if (disposer) {
+              disposer();
+            }
+          }
+        });
+      });
+    }
   }
 
   async initClient(uri: string): Promise<WalletConnect> {
+    await this.waitInitStores();
+
     if (this.clientMap.has(uri)) {
       throw new Error("Client already initialized");
     }
@@ -120,6 +167,15 @@ export abstract class WalletConnectManager {
         console.log(error);
         return;
       }
+
+      client.on("disconnect", (error) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+
+        this.onSessionDisconnected(client.session);
+      });
 
       if (!client.peerMeta?.url) {
         client.rejectSession({
@@ -181,6 +237,8 @@ export abstract class WalletConnectManager {
       return;
     }
 
+    await this.waitInitStores();
+
     try {
       switch (payload.method) {
         case "keplr_enable_wallet_connect_V1": {
@@ -195,6 +253,7 @@ export abstract class WalletConnectManager {
           }
 
           const capiChainIds = payload.params[0].chains;
+          const chainIds: string[] = [];
           for (const capiChainId of capiChainIds) {
             const { namespace, chainId } = this.parseCAIPChainId(capiChainId);
             if (namespace !== "cosmos") {
@@ -204,6 +263,8 @@ export abstract class WalletConnectManager {
             if (!this.chainStore.hasChain(chainId)) {
               throw new Error(`chain id (${chainId}) is not supported`);
             }
+
+            chainIds.push(chainId);
           }
 
           const accounts: string[] = [];
@@ -227,11 +288,10 @@ export abstract class WalletConnectManager {
                 accounts,
               },
             });
-            await this.onSessionConnected(client.session);
+            await this.onSessionConnected(chainIds, client.session);
           } catch (e) {
             console.log(e);
             await client.killSession();
-            await this.onSessionDisconnected(client.session);
           }
           break;
         }
@@ -242,8 +302,17 @@ export abstract class WalletConnectManager {
           if (!payload.params[0].chainId) {
             throw new Error("Chain id is empty");
           }
+
+          const keplr = new Keplr(
+            "",
+            new WCMessageRequester(
+              RNRouterBackground.EventEmitter,
+              client.session.key
+            )
+          );
+
           const chainId = payload.params[0].chainId;
-          const key = await this.keplr.getKey(chainId);
+          const key = await keplr.getKey(chainId);
           client.approveRequest({
             id,
             result: [
@@ -256,13 +325,21 @@ export abstract class WalletConnectManager {
           });
           break;
         }
-        case "cosmos_signAmino":
+        case "cosmos_signAmino": {
           if (payload.params.length !== 1) {
             throw new Error("Invalid parmas");
           }
 
+          const keplr = new Keplr(
+            "",
+            new WCMessageRequester(
+              RNRouterBackground.EventEmitter,
+              client.session.key
+            )
+          );
+
           const param = payload.params[0];
-          const result = await this.keplr.signAmino(
+          const result = await keplr.signAmino(
             param.signDoc["chain_id"],
             param.signerAddress,
             param.signDoc
@@ -280,6 +357,7 @@ export abstract class WalletConnectManager {
             ],
           });
           break;
+        }
         default:
           throw new Error(`Unknown method (${payload.method})`);
       }
@@ -298,6 +376,7 @@ export abstract class WalletConnectManager {
     params: SessionRequestApproval["params"]
   ): Promise<void>;
   protected abstract onSessionConnected(
+    chainIds: string[],
     session: WalletConnect["session"]
   ): Promise<void>;
   protected abstract onSessionDisconnected(
@@ -371,9 +450,10 @@ export class WalletConnectStore extends WalletConnectManager {
     protected readonly kvStore: KVStore,
     protected readonly chainStore: ChainStore,
     protected readonly accountStore: AccountStore<AccountSetBase<any, any>>,
-    protected readonly keplr: Keplr
+    protected readonly keyRingStore: KeyRingStore,
+    protected readonly permissionStore: PermissionStore
   ) {
-    super(chainStore, accountStore, keplr);
+    super(chainStore, accountStore, keyRingStore);
 
     makeObservable(this);
 
@@ -461,6 +541,7 @@ export class WalletConnectStore extends WalletConnectManager {
   }
 
   protected async onSessionConnected(
+    chainIds: string[],
     session: WalletConnect["session"]
   ): Promise<void> {
     const persistentSessions = await this.getPersistentSessions();
@@ -470,6 +551,12 @@ export class WalletConnectStore extends WalletConnectManager {
     ) {
       persistentSessions.push(session);
       await this.setPersistentSessions(persistentSessions);
+
+      for (const chainId of chainIds) {
+        await this.permissionStore
+          .getBasicAccessInfo(chainId)
+          .addOrigin(WCMessageRequester.getVirtualSessionURL(session.key));
+      }
     }
   }
 
@@ -479,5 +566,11 @@ export class WalletConnectStore extends WalletConnectManager {
     const persistentSessions = await this.getPersistentSessions();
     persistentSessions.filter((persistent) => persistent.key !== session.key);
     await this.setPersistentSessions(persistentSessions);
+
+    for (const chainInfo of this.chainStore.chainInfos) {
+      await this.permissionStore
+        .getBasicAccessInfo(chainInfo.chainId)
+        .removeOrigin(WCMessageRequester.getVirtualSessionURL(session.key));
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { Router } from "@keplr-wallet/router";
 import { PermissionService } from "./service";
 import {
+  AddPermissionOrigin,
   EnableAccessMsg,
   GetPermissionOriginsMsg,
   RemovePermissionOrigin,
@@ -11,6 +12,7 @@ import { getHandler } from "./handler";
 export function init(router: Router, service: PermissionService): void {
   router.registerMessage(EnableAccessMsg);
   router.registerMessage(GetPermissionOriginsMsg);
+  router.registerMessage(AddPermissionOrigin);
   router.registerMessage(RemovePermissionOrigin);
 
   router.addHandler(ROUTE, getHandler(service));

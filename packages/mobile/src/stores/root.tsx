@@ -11,6 +11,7 @@ import {
   AccountWithCosmosAndSecret,
   LedgerInitStore,
   IBCCurrencyRegsitrar,
+  PermissionStore,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -30,6 +31,7 @@ export class RootStore {
 
   public readonly interactionModalStore: InteractionModalStore;
   protected readonly interactionStore: InteractionStore;
+  public readonly permissionStore: PermissionStore;
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly signInteractionStore: SignInteractionStore;
 
@@ -53,6 +55,10 @@ export class RootStore {
     // Order is important.
     this.interactionStore = new InteractionStore(
       router,
+      new RNMessageRequesterInternal()
+    );
+    this.permissionStore = new PermissionStore(
+      this.interactionStore,
       new RNMessageRequesterInternal()
     );
     this.ledgerInitStore = new LedgerInitStore(
@@ -202,7 +208,8 @@ export class RootStore {
       new AsyncKVStore("store_wallet_connect"),
       this.chainStore,
       this.accountStore,
-      new Keplr("", new RNMessageRequesterInternal())
+      this.keyRingStore,
+      this.permissionStore
     );
 
     this.analyticsStore = new AnalyticsStore(

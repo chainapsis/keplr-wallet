@@ -60,6 +60,42 @@ export class GetPermissionOriginsMsg extends Message<string[]> {
   }
 }
 
+export class AddPermissionOrigin extends Message<void> {
+  public static type() {
+    return "add-permission-origin";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly permissionType: string,
+    public readonly permissionOrigin: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.permissionType) {
+      throw new Error("empty permission type");
+    }
+
+    if (!this.permissionOrigin) {
+      throw new Error("empty permission origin");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AddPermissionOrigin.type();
+  }
+}
+
 export class RemovePermissionOrigin extends Message<void> {
   public static type() {
     return "remove-permission-origin";
