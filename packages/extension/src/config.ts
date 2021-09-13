@@ -971,12 +971,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/ixo/stake"
-        : "http://localhost:8081/#/ixo/stake",
+        ? "https://wallet.keplr.app/#/impacthub/stake"
+        : "http://localhost:8081/#/impacthub/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/ixo/stake"
-        : "http://localhost:8081/#/ixo/stake",
+        ? "https://wallet.keplr.app/#/impacthub/stake"
+        : "http://localhost:8081/#/impacthub/stake",
     bip44: {
       coinType: 118,
     },
