@@ -1,0 +1,33 @@
+{
+  "name": "@keplr-wallet/wc-client",
+  "version": "0.9.0-alpha.10",
+  "main": "build/index.js",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules; rm -rf build",
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "jest --passWithNoTests",
+    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+  },
+  "dependencies": {
+    "@cosmjs/launchpad": "^0.24.0-alpha.25",
+    "@cosmjs/proto-signing": "^0.24.0-alpha.25",
+    "@keplr-wallet/provider": "^0.9.0-alpha.10",
+    "@keplr-wallet/types": "^0.9.0-alpha.10",
+    "@keplr-wallet/common": "^0.9.0-alpha.10",
+    "@walletconnect/types": "^1.6.4",
+    "@walletconnect/utils": "^1.6.4",
+    "deepmerge": "^4.2.2",
+    "secretjs": "^0.16.0",
+    "buffer": "^6.0.3"
+  },
+  "devDependencies": {
+  }
+}
