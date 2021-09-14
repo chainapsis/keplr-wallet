@@ -72,7 +72,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
                   Bech32Address.validate(data);
 
                   const prefix = data.slice(0, data.indexOf("1"));
-                  const chainInfo = chainStore.chainInfos.find(
+                  const chainInfo = chainStore.chainInfosInUI.find(
                     (chainInfo) =>
                       chainInfo.bech32Config.bech32PrefixAccAddr === prefix
                   );
@@ -94,7 +94,9 @@ export const CameraScreen: FunctionComponent = observer(() => {
       <ChainSelectorModal
         isOpen={isSelectChainModalOpen}
         close={() => setIsSelectChainModalOpen(false)}
-        chainIds={chainStore.chainInfos.map((chainInfo) => chainInfo.chainId)}
+        chainIds={chainStore.chainInfosInUI.map(
+          (chainInfo) => chainInfo.chainId
+        )}
         onSelectChain={(chainId) => {
           setShowingAddressQRCodeChainId(chainId);
           setIsAddressQRCodeModalOpen(true);

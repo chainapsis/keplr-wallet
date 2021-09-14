@@ -52,6 +52,12 @@ export class ChainStore extends BaseChainStore<
     return this._isInitializing;
   }
 
+  get chainInfosInUI() {
+    return this.chainInfos.filter((chainInfo) => {
+      return !chainInfo.raw.hideInUI;
+    });
+  }
+
   @action
   selectChain(chainId: string) {
     if (this._isInitializing) {

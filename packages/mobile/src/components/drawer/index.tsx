@@ -48,7 +48,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
               Networks
             </Text>
           </View>
-          {chainStore.chainInfos.map((chainInfo) => {
+          {chainStore.chainInfosInUI.map((chainInfo) => {
             const selected = chainStore.current.chainId === chainInfo.chainId;
 
             const queries = queriesStore.get(chainInfo.chainId);
