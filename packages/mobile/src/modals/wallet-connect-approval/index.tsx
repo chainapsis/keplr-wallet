@@ -1,18 +1,33 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { Image, Text, View } from "react-native";
-import { SessionRequestApproval } from "../../stores/wallet-connect";
 import { useStyle } from "../../styles";
 import { Button } from "../../components/button";
 import { WalletConnectIcon } from "../../components/icon";
+import { useStore } from "../../stores";
+import { PermissionData } from "@keplr-wallet/background";
+import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
 
 export const WalletConnectApprovalModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
-  approval: SessionRequestApproval;
+  id: string;
+  data: PermissionData;
 }> = registerModal(
-  ({ approval }) => {
+  ({ id, data }) => {
+    const { permissionStore, walletConnectStore } = useStore();
+
+    const session = useMemo(() => {
+      if (data.origins.length !== 1) {
+        throw new Error("Invalid origins");
+      }
+
+      return walletConnectStore.getSession(
+        WCMessageRequester.getSessionIdFromVirtualURL(data.origins[0])
+      )!;
+    }, [data.origins, walletConnectStore]);
+
     const style = useStyle();
 
     return (
@@ -25,7 +40,7 @@ export const WalletConnectApprovalModal: FunctionComponent<{
               "font-semibold",
             ])}
           >
-            {approval.peerMeta!.url}
+            {session.peerMeta!.url}
           </Text>
           <Text style={style.flatten(["body1", "color-text-black-medium"])}>
             {" is requesting to connect to your Keplr account on "}
@@ -37,11 +52,7 @@ export const WalletConnectApprovalModal: FunctionComponent<{
               "font-semibold",
             ])}
           >
-            {approval.params[0].chains
-              .map((chain) => {
-                return chain.slice(chain.indexOf(":") + 1);
-              })
-              .join(", ") + "."}
+            {data.chainIds.join(", ") + "."}
           </Text>
         </Text>
         <View style={style.flatten(["items-center"])}>
@@ -61,7 +72,7 @@ export const WalletConnectApprovalModal: FunctionComponent<{
             mode="outline"
             color="danger"
             onPress={() => {
-              approval.reject();
+              permissionStore.reject(id);
             }}
           />
           <View style={style.get("width-page-pad")} />
@@ -69,7 +80,7 @@ export const WalletConnectApprovalModal: FunctionComponent<{
             containerStyle={style.get("flex-1")}
             text="Approve"
             onPress={() => {
-              approval.resolve();
+              permissionStore.approve(id);
             }}
           />
         </View>

@@ -1,11 +1,6 @@
 import WalletConnect from "@walletconnect/client";
-import {
-  AccountSetBase,
-  AccountStore,
-  KeyRingStore,
-  PermissionStore,
-} from "@keplr-wallet/stores";
-import { action, autorun, makeObservable, observable, runInAction } from "mobx";
+import { KeyRingStore, PermissionStore } from "@keplr-wallet/stores";
+import { autorun, makeObservable, observable, runInAction } from "mobx";
 import { ChainStore } from "../chain";
 import { Keplr } from "@keplr-wallet/provider";
 import { Buffer } from "buffer/";
@@ -13,6 +8,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { WCMessageRequester } from "./msg-requester";
 import { RNRouterBackground } from "../../router";
 import { KeyRingStatus } from "@keplr-wallet/background";
+import { computedFn } from "mobx-utils";
 
 export interface WalletConnectV1SessionRequest {
   id: number;
@@ -57,7 +53,6 @@ export abstract class WalletConnectManager {
 
   protected constructor(
     protected readonly chainStore: ChainStore,
-    protected readonly accountStore: AccountStore<AccountSetBase<any, any>>,
     protected readonly keyRingStore: KeyRingStore
   ) {
     makeObservable(this);
@@ -194,6 +189,7 @@ export abstract class WalletConnectManager {
         chainId: 99999,
         accounts: [],
       });
+      this.onSessionConnected(client.session);
       resolver();
     };
 
@@ -239,122 +235,69 @@ export abstract class WalletConnectManager {
 
     await this.waitInitStores();
 
+    const keplr = new Keplr(
+      "",
+      new WCMessageRequester(
+        RNRouterBackground.EventEmitter,
+        client.session.key
+      )
+    );
+
     try {
       switch (payload.method) {
-        case "keplr_enable_wallet_connect_V1": {
-          if (payload.params.length !== 1) {
+        case "keplr_enable_wallet_connect_v1": {
+          if (payload.params.length === 0) {
             throw new Error("Invalid parmas");
           }
-          if (
-            !payload.params[0].chains ||
-            payload.params[0].chains.length === 0
-          ) {
-            throw new Error("Params have no chains");
-          }
-
-          const capiChainIds = payload.params[0].chains;
-          const chainIds: string[] = [];
-          for (const capiChainId of capiChainIds) {
-            const { namespace, chainId } = this.parseCAIPChainId(capiChainId);
-            if (namespace !== "cosmos") {
-              throw new Error(`namespace (${namespace}) is not supported`);
+          for (const param of payload.params) {
+            if (typeof param !== "string") {
+              throw new Error("Invalid parmas");
             }
-
-            if (!this.chainStore.hasChain(chainId)) {
-              throw new Error(`chain id (${chainId}) is not supported`);
-            }
-
-            chainIds.push(chainId);
           }
-
-          const accounts: string[] = [];
-          for (const capiChainId of capiChainIds) {
-            const { chainId } = this.parseCAIPChainId(capiChainId);
-
-            accounts.push(
-              this.formatCAIPAccountId(
-                "cosmos",
-                chainId,
-                await this.getAddressFromAccountStore(chainId)
-              )
-            );
-          }
-
-          try {
-            await this.requestSessionProposalApproval(client, payload.params);
-            client.approveRequest({
-              id,
-              result: {
-                accounts,
-              },
-            });
-            await this.onSessionConnected(chainIds, client.session);
-          } catch (e) {
-            console.log(e);
-            await client.killSession();
-          }
+          await keplr.enable(payload.params);
+          client.approveRequest({
+            id,
+            result: [],
+          });
           break;
         }
-        case "cosmos_getAccounts": {
+        case "keplr_get_key_wallet_connect_v1": {
           if (payload.params.length !== 1) {
             throw new Error("Invalid parmas");
           }
-          if (!payload.params[0].chainId) {
-            throw new Error("Chain id is empty");
+          if (typeof payload.params[0] !== "string") {
+            throw new Error("Invalid parmas");
           }
-
-          const keplr = new Keplr(
-            "",
-            new WCMessageRequester(
-              RNRouterBackground.EventEmitter,
-              client.session.key
-            )
-          );
-
-          const chainId = payload.params[0].chainId;
-          const key = await keplr.getKey(chainId);
+          const key = await keplr.getKey(payload.params[0]);
           client.approveRequest({
             id,
             result: [
               {
+                name: key.name,
                 algo: key.algo,
-                address: key.bech32Address,
-                pubkey: Buffer.from(key.pubKey).toString("hex"),
+                pubKey: Buffer.from(key.pubKey).toString("hex"),
+                address: Buffer.from(key.address).toString("hex"),
+                bech32Address: key.bech32Address,
+                isNanoLedger: key.isNanoLedger,
               },
             ],
           });
           break;
         }
-        case "cosmos_signAmino": {
-          if (payload.params.length !== 1) {
+        case "keplr_sign_amino_wallet_connect_v1": {
+          if (payload.params.length !== 3 && payload.params.length !== 4) {
             throw new Error("Invalid parmas");
           }
 
-          const keplr = new Keplr(
-            "",
-            new WCMessageRequester(
-              RNRouterBackground.EventEmitter,
-              client.session.key
-            )
-          );
-
-          const param = payload.params[0];
           const result = await keplr.signAmino(
-            param.signDoc["chain_id"],
-            param.signerAddress,
-            param.signDoc
+            payload.params[0],
+            payload.params[1],
+            payload.params[2],
+            payload.params[3]
           );
           client.approveRequest({
             id,
-            result: [
-              {
-                signature: Buffer.from(
-                  result.signature.signature,
-                  "base64"
-                ).toString("hex"),
-                signed: result.signed,
-              },
-            ],
+            result: [result],
           });
           break;
         }
@@ -371,156 +314,44 @@ export abstract class WalletConnectManager {
     }
   };
 
-  protected abstract requestSessionProposalApproval(
-    client: WalletConnect,
-    params: SessionRequestApproval["params"]
-  ): Promise<void>;
   protected abstract onSessionConnected(
-    chainIds: string[],
     session: WalletConnect["session"]
   ): Promise<void>;
   protected abstract onSessionDisconnected(
     session: WalletConnect["session"]
   ): Promise<void>;
-
-  // The address in the account store is the observable property,
-  // and it is not fetched until the account is actually used.
-  // Thus, just getting the bech32Address is not enough and it can be just the empty string.
-  // So, you need to observe the bech32Address before actually it is fetched.
-  protected async getAddressFromAccountStore(chainId: string): Promise<string> {
-    if (!this.chainStore.hasChain(chainId)) {
-      throw new Error(`chain id (${chainId}) is not supported`);
-    }
-
-    const account = this.accountStore.getAccount(chainId);
-    if (account.bech32Address) {
-      return account.bech32Address;
-    }
-
-    return new Promise<string>((resolve) => {
-      const disposer = autorun(() => {
-        if (account.bech32Address) {
-          resolve(account.bech32Address);
-          if (disposer) {
-            disposer();
-          }
-        }
-      });
-    });
-  }
-
-  protected parseCAIPChainId(
-    caipChainId: string
-  ): {
-    namespace: string;
-    chainId: string;
-  } {
-    const [namespace, chainId] = caipChainId.split(":");
-    return {
-      namespace,
-      chainId,
-    };
-  }
-
-  protected formatCAIPChainId(namespace: string, chainId: string) {
-    return `${namespace}:${chainId}`;
-  }
-
-  protected formatCAIPAccountId(
-    namespace: string,
-    chainId: string,
-    address: string
-  ) {
-    return `${namespace}:${chainId}:${address}`;
-  }
-
-  protected parseCAIPAccountId(
-    caipAccount: string
-  ): { namespace: string; chainId: string; address: string } {
-    const [namespace, chainId, address] = caipAccount.split(":");
-    return { namespace, chainId, address };
-  }
 }
 
 export class WalletConnectStore extends WalletConnectManager {
   @observable.shallow
-  protected _pendingSessionRequestApprovals: SessionRequestApproval[] = [];
+  protected sessions: WalletConnect["session"][] = [];
 
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainStore: ChainStore,
-    protected readonly accountStore: AccountStore<AccountSetBase<any, any>>,
     protected readonly keyRingStore: KeyRingStore,
     protected readonly permissionStore: PermissionStore
   ) {
-    super(chainStore, accountStore, keyRingStore);
+    super(chainStore, keyRingStore);
 
     makeObservable(this);
 
     this.restore();
   }
 
+  getSession = computedFn((sessionId: string) => {
+    return this.sessions.find((session) => session.key === sessionId);
+  });
+
   protected async restore(): Promise<void> {
     const persistentSessions = await this.getPersistentSessions();
-    for (const session of persistentSessions) {
-      this.restoreClient(session);
-    }
-  }
 
-  get pendingSessionRequestApprovals(): SessionRequestApproval[] {
-    return this._pendingSessionRequestApprovals;
-  }
-
-  protected requestSessionProposalApproval(
-    client: WalletConnect,
-    params: SessionRequestApproval["params"]
-  ): Promise<void> {
-    let resolver: () => void;
-    let rejector: (e: Error) => void;
-    const promise = new Promise<void>((resolve, reject) => {
-      resolver = resolve;
-      rejector = reject;
+    runInAction(() => {
+      this.sessions = persistentSessions;
     });
 
-    const key = this.pendingSessionRequestApprovals.length.toString();
-
-    const approval: SessionRequestApproval = {
-      key,
-      peerMeta: client.peerMeta ? client.peerMeta : undefined,
-      params,
-      resolve: () => {
-        resolver();
-        this.removeProposalApproval(key);
-      },
-      reject: () => {
-        rejector(new Error("Rejected"));
-        this.removeProposalApproval(key);
-      },
-    };
-
-    this.pushProposalApproval(approval);
-
-    return promise;
-  }
-
-  @action
-  protected pushProposalApproval(approval: SessionRequestApproval) {
-    if (
-      !this._pendingSessionRequestApprovals.find(
-        (pending) => pending.key === approval.key
-      )
-    ) {
-      this._pendingSessionRequestApprovals.push(approval);
-    }
-  }
-
-  @action
-  protected removeProposalApproval(key: string) {
-    const index = this._pendingSessionRequestApprovals.findIndex(
-      (pending) => pending.key === key
-    );
-    if (index >= 0) {
-      this._pendingSessionRequestApprovals.splice(index, 1);
+    for (const session of persistentSessions) {
+      this.restoreClient(session);
     }
   }
 
@@ -541,31 +372,26 @@ export class WalletConnectStore extends WalletConnectManager {
   }
 
   protected async onSessionConnected(
-    chainIds: string[],
     session: WalletConnect["session"]
   ): Promise<void> {
-    const persistentSessions = await this.getPersistentSessions();
+    const sessions = this.sessions;
 
-    if (
-      !persistentSessions.find((persistent) => persistent.key === session.key)
-    ) {
-      persistentSessions.push(session);
-      await this.setPersistentSessions(persistentSessions);
-
-      for (const chainId of chainIds) {
-        await this.permissionStore
-          .getBasicAccessInfo(chainId)
-          .addOrigin(WCMessageRequester.getVirtualSessionURL(session.key));
-      }
+    if (!sessions.find((persistent) => persistent.key === session.key)) {
+      runInAction(() => {
+        sessions.push(session);
+      });
+      await this.setPersistentSessions(sessions);
     }
   }
 
   protected async onSessionDisconnected(
     session: WalletConnect["session"]
   ): Promise<void> {
-    const persistentSessions = await this.getPersistentSessions();
-    persistentSessions.filter((persistent) => persistent.key !== session.key);
-    await this.setPersistentSessions(persistentSessions);
+    const sessions = this.sessions;
+    runInAction(() => {
+      sessions.filter((persistent) => persistent.key !== session.key);
+    });
+    await this.setPersistentSessions(sessions);
 
     for (const chainInfo of this.chainStore.chainInfos) {
       await this.permissionStore

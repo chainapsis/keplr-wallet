@@ -207,7 +207,6 @@ export class RootStore {
     this.walletConnectStore = new WalletConnectStore(
       new AsyncKVStore("store_wallet_connect"),
       this.chainStore,
-      this.accountStore,
       this.keyRingStore,
       this.permissionStore
     );
