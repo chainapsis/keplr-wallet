@@ -16,6 +16,8 @@ import { AddressCopyable } from "../../components/address-copyable";
 import QRCode from "react-native-qrcode-svg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { CloseIcon } from "../../components/icon";
 
 export const CameraScreen: FunctionComponent = observer(() => {
   const { chainStore, walletConnectStore } = useStore();
@@ -104,17 +106,39 @@ export const CameraScreen: FunctionComponent = observer(() => {
         close={() => setIsAddressQRCodeModalOpen(false)}
         chainId={showingAddressQRCodeChainId}
       />
-      <SafeAreaView
-        style={style.flatten([
-          "absolute-fill",
-          "items-center",
-          "justify-center",
-        ])}
-      >
+      <SafeAreaView style={style.flatten(["absolute-fill", "items-center"])}>
+        <View style={style.flatten(["flex-row"])}>
+          <View style={style.get("flex-1")} />
+          <TouchableOpacity
+            onPress={() => {
+              smartNavigation.goBack();
+            }}
+          >
+            <View
+              style={style.flatten([
+                "width-38",
+                "height-38",
+                "border-radius-64",
+                "background-color-primary-50",
+                "opacity-90",
+                "margin-top-8",
+                "margin-right-16",
+                "items-center",
+                "justify-center",
+              ])}
+            >
+              <CloseIcon
+                size={28}
+                color={style.get("color-primary-300").color}
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+        <View style={style.get("flex-1")} />
         <View style={style.flatten(["margin-bottom-64"])}>
           <Svg width="217" height="217" fill="none" viewBox="0 0 217 217">
             <Path
-              stroke={style.get("color-primary-300").color}
+              stroke={style.get("color-primary").color}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="6"
@@ -133,6 +157,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
             setIsSelectChainModalOpen(true);
           }}
         />
+        <View style={style.get("flex-1")} />
       </SafeAreaView>
     </PageWithView>
   );
