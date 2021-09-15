@@ -5,14 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  Dimensions,
-  Image,
-  Platform,
-  StatusBar,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Dimensions, Image, StatusBar, StyleSheet, View } from "react-native";
 import Animated, { Easing } from "react-native-reanimated";
 import { observer } from "mobx-react-lite";
 import { useStyle } from "../../styles";
@@ -25,6 +18,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import { KeychainStore } from "../../stores/keychain";
+import { AccountStore } from "@keplr-wallet/stores";
+import { autorun } from "mobx";
 
 let splashScreenHided = false;
 async function hideSplashScreen() {
@@ -34,6 +29,26 @@ async function hideSplashScreen() {
       splashScreenHided = true;
     }
   }
+}
+
+async function waitAccountLoad(
+  accountStore: AccountStore<any, any, any, any>,
+  chainId: string
+): Promise<void> {
+  if (accountStore.getAccount(chainId).bech32Address) {
+    return;
+  }
+
+  return new Promise((resolve) => {
+    const disposer = autorun(() => {
+      if (accountStore.getAccount(chainId).bech32Address) {
+        resolve();
+        if (disposer) {
+          disposer();
+        }
+      }
+    });
+  });
 }
 
 /*
@@ -84,7 +99,13 @@ const useAutoBiomtric = (keychainStore: KeychainStore, tryEnabled: boolean) => {
  * @constructor
  */
 export const UnlockScreen: FunctionComponent = observer(() => {
-  const { keyRingStore, keychainStore, analyticsStore } = useStore();
+  const {
+    keyRingStore,
+    keychainStore,
+    accountStore,
+    chainStore,
+    analyticsStore,
+  } = useStore();
 
   const style = useStyle();
 
@@ -96,11 +117,19 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     () => new Animated.Value(1)
   );
 
+  const navigateToHomeOnce = useRef(false);
+  const navigateToHome = useCallback(async () => {
+    if (!navigateToHomeOnce.current) {
+      // Wait the account of selected chain is loaded.
+      await waitAccountLoad(accountStore, chainStore.current.chainId);
+      navigation.dispatch(StackActions.replace("MainTabDrawer"));
+    }
+    navigateToHomeOnce.current = true;
+  }, [accountStore, chainStore, navigation]);
+
   const autoBiometryStatus = useAutoBiomtric(
     keychainStore,
-    keyRingStore.status === KeyRingStatus.LOCKED &&
-      // If the platform is on android, try to unlock by biometric right after the splash animation ends.
-      (Platform.OS === "android" ? isSplashEnd : true)
+    keyRingStore.status === KeyRingStatus.LOCKED && isSplashEnd
   );
 
   useEffect(() => {
@@ -111,10 +140,16 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         analyticsStore.logEvent("Account unlocked", {
           authType: "biometrics",
         });
-        navigation.dispatch(StackActions.replace("MainTabDrawer"));
+        navigateToHome();
       })();
     }
-  }, [analyticsStore, autoBiometryStatus, isSplashEnd, navigation]);
+  }, [
+    analyticsStore,
+    autoBiometryStatus,
+    isSplashEnd,
+    navigateToHome,
+    navigation,
+  ]);
 
   useEffect(() => {
     if (
@@ -156,12 +191,12 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       analyticsStore.logEvent("Account unlocked", {
         authType: "biometrics",
       });
-      navigation.dispatch(StackActions.replace("MainTabDrawer"));
+      navigateToHome();
     } catch (e) {
       console.log(e);
       setIsBiometricLoading(false);
     }
-  }, [analyticsStore, keychainStore, navigation]);
+  }, [analyticsStore, keychainStore, navigateToHome]);
 
   const tryUnlock = async () => {
     try {
@@ -178,7 +213,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       analyticsStore.logEvent("Account unlocked", {
         authType: "password",
       });
-      navigation.dispatch(StackActions.replace("MainTabDrawer"));
+      navigateToHome();
     } catch (e) {
       console.log(e);
       setIsLoading(false);
@@ -214,7 +249,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
       (async () => {
         await hideSplashScreen();
-        navigation.dispatch(StackActions.replace("MainTabDrawer"));
+        navigateToHome();
       })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
