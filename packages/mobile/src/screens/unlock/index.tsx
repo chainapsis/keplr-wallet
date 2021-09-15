@@ -25,7 +25,6 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import { KeychainStore } from "../../stores/keychain";
-import { AnalyticsStore } from "../../stores/analytics";
 
 let splashScreenHided = false;
 async function hideSplashScreen() {
@@ -115,7 +114,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         navigation.dispatch(StackActions.replace("MainTabDrawer"));
       })();
     }
-  }, [autoBiometryStatus, isSplashEnd, navigation]);
+  }, [analyticsStore, autoBiometryStatus, isSplashEnd, navigation]);
 
   useEffect(() => {
     if (
@@ -162,7 +161,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       console.log(e);
       setIsBiometricLoading(false);
     }
-  }, [keychainStore, navigation]);
+  }, [analyticsStore, keychainStore, navigation]);
 
   const tryUnlock = async () => {
     try {
