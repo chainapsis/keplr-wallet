@@ -90,13 +90,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                     height={15}
                   />
                 </View>
-                <Text
-                  style={style.flatten([
-                    "h4",
-                    "color-text-black-medium",
-                    "margin-bottom-4",
-                  ])}
-                >
+                <Text style={style.flatten(["h4", "color-text-black-medium"])}>
                   {chainInfo.chainName}
                 </Text>
               </RectButton>
