@@ -97,7 +97,7 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
         this.duplicatedFetchCheck = false;
       }, 1);
 
-      yield* super.fetch();
+      yield super.fetch();
     }
   }
 
