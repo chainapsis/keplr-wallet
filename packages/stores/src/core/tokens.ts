@@ -21,6 +21,7 @@ export class TokensStoreInner {
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
     },
+    protected readonly chainStore: ChainStore<any>,
     protected readonly chainId: string,
     protected readonly requester: MessageRequester
   ) {
@@ -47,10 +48,22 @@ export class TokensStoreInner {
 
   @flow
   *refreshTokens() {
-    const msg = new GetTokensMsg(this.chainId);
-    this._tokens = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    const chainInfo = this.chainStore.getChain(this.chainId);
+
+    if (
+      chainInfo.features &&
+      // Tokens service is only needed for secretwasm and cosmwasm,
+      // so, there is no need to fetch the registered token if the chain doesn't support the secretwasm and cosmwasm.
+      (chainInfo.features.includes("secretwasm") ||
+        chainInfo.features.includes("cosmwasm"))
+    ) {
+      const msg = new GetTokensMsg(this.chainId);
+      this._tokens = yield* toGenerator(
+        this.requester.sendMessage(BACKGROUND_PORT, msg)
+      );
+    } else {
+      this._tokens = [];
+    }
   }
 
   @flow
@@ -80,7 +93,12 @@ export class TokensStore<
     protected readonly interactionStore: InteractionStore
   ) {
     super((chainId: string) => {
-      return new TokensStoreInner(this.eventListener, chainId, this.requester);
+      return new TokensStoreInner(
+        this.eventListener,
+        this.chainStore,
+        chainId,
+        this.requester
+      );
     });
     makeObservable(this);
 
