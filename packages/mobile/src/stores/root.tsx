@@ -109,7 +109,7 @@ export class RootStore {
       this.queriesStore,
       {
         defaultOpts: {
-          prefetching: true,
+          prefetching: false,
           suggestChain: false,
           autoInit: true,
           getKeplr: async () => {
