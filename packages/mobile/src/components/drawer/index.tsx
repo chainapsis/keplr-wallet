@@ -17,13 +17,7 @@ export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOption
 
 export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
   (props) => {
-    const {
-      chainStore,
-      accountStore,
-      queriesStore,
-      priceStore,
-      analyticsStore,
-    } = useStore();
+    const { chainStore, analyticsStore } = useStore();
     const navigation = useNavigation();
 
     const safeAreaInsets = useSafeAreaInsets();
@@ -51,29 +45,6 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
           {chainStore.chainInfosInUI.map((chainInfo) => {
             const selected = chainStore.current.chainId === chainInfo.chainId;
 
-            const queries = queriesStore.get(chainInfo.chainId);
-
-            const accountInfo = accountStore.getAccount(chainInfo.chainId);
-
-            const balanceStakableQuery = queries.queryBalances.getQueryBech32Address(
-              accountInfo.bech32Address
-            ).stakable;
-
-            const stakable = balanceStakableQuery.balance;
-
-            const delegated = queries.cosmos.queryDelegations
-              .getQueryBech32Address(accountInfo.bech32Address)
-              .total.upperCase(true);
-
-            const unbonding = queries.cosmos.queryUnbondingDelegations
-              .getQueryBech32Address(accountInfo.bech32Address)
-              .total.upperCase(true);
-
-            const stakedSum = delegated.add(unbonding);
-
-            const total = stakable.add(stakedSum);
-
-            const totalPrice = priceStore.calculatePrice(total);
             return (
               <RectButton
                 key={chainInfo.chainId}
@@ -119,24 +90,15 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                     height={15}
                   />
                 </View>
-                <View>
-                  <Text
-                    style={style.flatten([
-                      "h4",
-                      "color-text-black-medium",
-                      "margin-bottom-4",
-                    ])}
-                  >
-                    {chainInfo.chainName}
-                  </Text>
-                  <Text
-                    style={style.flatten(["subtitle2", "color-text-black-low"])}
-                  >
-                    {totalPrice
-                      ? totalPrice.toString()
-                      : total.maxDecimals(6).trim(true).shrink(true).toString()}
-                  </Text>
-                </View>
+                <Text
+                  style={style.flatten([
+                    "h4",
+                    "color-text-black-medium",
+                    "margin-bottom-4",
+                  ])}
+                >
+                  {chainInfo.chainName}
+                </Text>
               </RectButton>
             );
           })}
