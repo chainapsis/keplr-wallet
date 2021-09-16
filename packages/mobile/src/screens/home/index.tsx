@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import { PageWithScrollViewInBottomTabView } from "../../components/page";
 import { AccountCard } from "./account-card";
 import { RefreshControl } from "react-native";
@@ -6,7 +6,6 @@ import { useStore } from "../../stores";
 import { StakingInfoCard } from "./staking-info-card";
 import { useStyle } from "../../styles";
 import { GovernanceCard } from "./governance-card";
-import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { MyRewardCard } from "./my-reward-card";
 import { TokensCard } from "./tokens-card";
@@ -18,14 +17,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
   const style = useStyle();
-
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    navigation.setOptions({
-      title: chainStore.current.chainName,
-    });
-  }, [chainStore, chainStore.current.chainName, navigation]);
 
   const onRefresh = React.useCallback(async () => {
     const account = accountStore.getAccount(chainStore.current.chainId);

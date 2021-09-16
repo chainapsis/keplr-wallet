@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent, useEffect, useRef } from "react";
-import { StatusBar, View } from "react-native";
+import { StatusBar, Text, View } from "react-native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import {
   DrawerActions,
@@ -264,6 +264,35 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
+const HomeScreenHeaderLeft: FunctionComponent = observer(() => {
+  const { chainStore } = useStore();
+
+  const style = useStyle();
+
+  const navigation = useNavigation();
+
+  return (
+    <HeaderLeftButton
+      onPress={() => {
+        navigation.dispatch(DrawerActions.toggleDrawer());
+      }}
+    >
+      <View style={style.flatten(["flex-row", "items-center"])}>
+        <OpenDrawerIcon size={28} color={style.get("color-primary").color} />
+        <Text
+          style={style.flatten([
+            "h4",
+            "color-text-black-high",
+            "margin-left-4",
+          ])}
+        >
+          {chainStore.current.chainName}
+        </Text>
+      </View>
+    </HeaderLeftButton>
+  );
+});
+
 export const MainNavigation: FunctionComponent = () => {
   const style = useStyle();
 
@@ -273,29 +302,14 @@ export const MainNavigation: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h4", "color-text-black-high"]),
-        headerTitleContainerStyle: {
-          left: 52,
-        },
-        headerTitleAlign: "left",
+        headerTitle: "",
       }}
       initialRouteName="Home"
       headerMode="screen"
     >
       <Stack.Screen
         options={{
-          headerLeft: () => (
-            <HeaderLeftButton
-              onPress={() => {
-                navigation.dispatch(DrawerActions.toggleDrawer());
-              }}
-            >
-              <OpenDrawerIcon
-                size={28}
-                color={style.get("color-primary").color}
-              />
-            </HeaderLeftButton>
-          ),
+          headerLeft: () => <HomeScreenHeaderLeft />,
           headerRight: () => (
             <HeaderRightButton
               onPress={() => {
