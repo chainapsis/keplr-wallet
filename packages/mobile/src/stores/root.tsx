@@ -192,6 +192,8 @@ export class RootStore {
     );
 
     this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
+      new AsyncKVStore("store_test_ibc_currency_registrar"),
+      24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
       this.queriesStore
