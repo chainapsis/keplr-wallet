@@ -28,18 +28,26 @@ import {
   useRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../../config.ui";
+import { useLogScreenView } from "../../../hooks";
 
 export const AddressBookPage: FunctionComponent<{
   onBackButton?: () => void;
   hideChainDropdown?: boolean;
   selectHandler?: AddressBookSelectHandler;
   ibcChannelConfig?: IIBCChannelConfig;
+  isInTransaction?: boolean;
 }> = observer(
-  ({ onBackButton, hideChainDropdown, selectHandler, ibcChannelConfig }) => {
+  ({
+    onBackButton,
+    hideChainDropdown,
+    selectHandler,
+    ibcChannelConfig,
+    isInTransaction,
+  }) => {
     const intl = useIntl();
     const history = useHistory();
 
-    const { chainStore } = useStore();
+    const { chainStore, analyticsStore } = useStore();
     const current = chainStore.current;
 
     const [selectedChainId, setSelectedChainId] = useState(
@@ -126,6 +134,12 @@ export const AddressBookPage: FunctionComponent<{
       ];
     };
 
+    useLogScreenView("Address book", {
+      chainId: chainStore.current.chainId,
+      chainName: chainStore.current.chainName,
+      fromScreen: isInTransaction ? "Transaction" : "Setting",
+    });
+
     return (
       <HeaderLayout
         showChainName={false}
@@ -158,6 +172,7 @@ export const AddressBookPage: FunctionComponent<{
               memoConfig={memoConfig}
               addressBookConfig={addressBookConfig}
               index={addAddressModalIndex}
+              chainId={selectedChainId}
             />
           </ModalBody>
         </Modal>
@@ -200,6 +215,10 @@ export const AddressBookPage: FunctionComponent<{
                   e.stopPropagation();
 
                   setAddAddressModalOpen(true);
+                  analyticsStore.logEvent("Add address started", {
+                    chainId: selectedChainId,
+                    chainName: chainStore.getChain(selectedChainId).chainName,
+                  });
                 }}
               >
                 <i

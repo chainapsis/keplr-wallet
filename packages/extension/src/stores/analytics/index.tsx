@@ -1,6 +1,7 @@
 import Amplitude from "amplitude-js";
 import { makeObservable, observable } from "mobx";
 import { AccountStore, KeyRingStore } from "@keplr-wallet/stores";
+import { FeeType } from "@keplr-wallet/hooks";
 
 import { sha256 } from "sha.js";
 
@@ -11,6 +12,8 @@ export interface AnalyticsConfigs {
 export interface EventProperties {
   chainId?: string;
   chainName?: string;
+  toChainId?: string;
+  toChainName?: string;
   validatorName?: string;
   proposalId?: string;
   proposalTitle?: string;
@@ -18,10 +21,17 @@ export interface EventProperties {
   linkUrl?: string;
   registerType?: "seed" | "google" | "ledger" | "qr";
   accountType?: "mnemonic" | "privateKey" | "ledger";
+  authType?: "biometrics" | "password";
+  feeType?: FeeType | undefined;
+  isSuccess?: boolean;
+  isIbc?: boolean;
+  fromScreen?: "Transaction" | "Setting";
 }
 export interface UserProperties {
   registerType?: "seed" | "google" | "ledger" | "qr";
   accountType?: "mnemonic" | "privateKey" | "ledger";
+  currency?: string;
+  language?: string;
 }
 
 export class AnalyticsStore {
