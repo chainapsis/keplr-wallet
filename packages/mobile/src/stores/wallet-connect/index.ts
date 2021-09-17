@@ -1,6 +1,12 @@
 import WalletConnect from "@walletconnect/client";
 import { KeyRingStore, PermissionStore } from "@keplr-wallet/stores";
-import { autorun, makeObservable, observable, runInAction } from "mobx";
+import {
+  autorun,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import { ChainStore } from "../chain";
 import { Keplr } from "@keplr-wallet/provider";
 import { Buffer } from "buffer/";
@@ -78,17 +84,23 @@ export abstract class WalletConnectManager {
       session,
     });
 
-    client.on("call_request", (error, payload) => {
-      this.onCallRequest(client, error, payload);
-    });
+    if (client.connected) {
+      this.onSessionConnected(client);
 
-    client.on("disconnect", (error) => {
-      if (error) {
-        console.log(error);
-        return;
-      }
-      this.onSessionDisconnected(session);
-    });
+      client.on("call_request", (error, payload) => {
+        this.onCallRequest(client, error, payload);
+      });
+
+      client.on("disconnect", (error) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        this.onSessionDisconnected(client);
+      });
+    } else {
+      this.onSessionDisconnected(client);
+    }
   }
 
   protected async waitInitStores(): Promise<void> {
@@ -169,7 +181,7 @@ export abstract class WalletConnectManager {
           return;
         }
 
-        this.onSessionDisconnected(client.session);
+        this.onSessionDisconnected(client);
       });
 
       if (!client.peerMeta?.url) {
@@ -189,7 +201,7 @@ export abstract class WalletConnectManager {
         chainId: 99999,
         accounts: [],
       });
-      this.onSessionConnected(client.session);
+      this.onSessionConnected(client);
       resolver();
     };
 
@@ -314,17 +326,15 @@ export abstract class WalletConnectManager {
     }
   };
 
-  protected abstract onSessionConnected(
-    session: WalletConnect["session"]
-  ): Promise<void>;
+  protected abstract onSessionConnected(client: WalletConnect): Promise<void>;
   protected abstract onSessionDisconnected(
-    session: WalletConnect["session"]
+    client: WalletConnect
   ): Promise<void>;
 }
 
 export class WalletConnectStore extends WalletConnectManager {
   @observable.shallow
-  protected sessions: WalletConnect["session"][] = [];
+  protected _clients: WalletConnect[] = [];
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -343,15 +353,29 @@ export class WalletConnectStore extends WalletConnectManager {
     return this.sessions.find((session) => session.key === sessionId);
   });
 
+  @computed
+  get sessions(): WalletConnect["session"][] {
+    return this._clients.map((client) => {
+      return client.session;
+    });
+  }
+
   protected async restore(): Promise<void> {
     const persistentSessions = await this.getPersistentSessions();
 
-    runInAction(() => {
-      this.sessions = persistentSessions;
-    });
-
     for (const session of persistentSessions) {
       this.restoreClient(session);
+    }
+  }
+
+  async disconnect(sessionId: string): Promise<void> {
+    const client = this._clients.find(
+      (client) => client.session.key === sessionId
+    );
+    if (client) {
+      await client.killSession({
+        message: "User requests disconnection",
+      });
     }
   }
 
@@ -371,32 +395,43 @@ export class WalletConnectStore extends WalletConnectManager {
     await this.kvStore.set("persistent_session_v1", value);
   }
 
-  protected async onSessionConnected(
-    session: WalletConnect["session"]
-  ): Promise<void> {
-    const sessions = this.sessions;
+  protected async onSessionConnected(client: WalletConnect): Promise<void> {
+    const clients = this._clients;
 
-    if (!sessions.find((persistent) => persistent.key === session.key)) {
+    if (
+      !clients.find(
+        (persistent) => persistent.session.key === client.session.key
+      )
+    ) {
       runInAction(() => {
-        sessions.push(session);
+        clients.push(client);
       });
-      await this.setPersistentSessions(sessions);
+      await this.setPersistentSessions(
+        clients.map((client) => {
+          return client.session;
+        })
+      );
     }
   }
 
-  protected async onSessionDisconnected(
-    session: WalletConnect["session"]
-  ): Promise<void> {
-    const sessions = this.sessions;
+  protected async onSessionDisconnected(client: WalletConnect): Promise<void> {
     runInAction(() => {
-      sessions.filter((persistent) => persistent.key !== session.key);
+      this._clients = this._clients.filter(
+        (persistent) => persistent.session.key !== client.session.key
+      );
     });
-    await this.setPersistentSessions(sessions);
+    await this.setPersistentSessions(
+      this._clients.map((client) => {
+        return client.session;
+      })
+    );
 
     for (const chainInfo of this.chainStore.chainInfos) {
       await this.permissionStore
         .getBasicAccessInfo(chainInfo.chainId)
-        .removeOrigin(WCMessageRequester.getVirtualSessionURL(session.key));
+        .removeOrigin(
+          WCMessageRequester.getVirtualSessionURL(client.session.key)
+        );
     }
   }
 }

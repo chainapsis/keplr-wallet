@@ -85,10 +85,14 @@ import {
   TxSuccessResultScreen,
 } from "./screens/tx-result";
 import { TorusSignInScreen } from "./screens/register/torus";
-import { HeaderAddIcon } from "./components/header/icon";
+import {
+  HeaderAddIcon,
+  HeaderWalletConnectIcon,
+} from "./components/header/icon";
 import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
 import { KeplrVersionScreen } from "./screens/setting/screens/version";
+import { ManageWalletConnectScreen } from "./screens/manage-wallet-connect";
 
 const {
   SmartNavigatorProvider,
@@ -132,6 +136,9 @@ const {
       upperScreenName: "Others",
     },
     Camera: {
+      upperScreenName: "Others",
+    },
+    ManageWalletConnect: {
       upperScreenName: "Others",
     },
     "Staking.Dashboard": {
@@ -293,11 +300,43 @@ const HomeScreenHeaderLeft: FunctionComponent = observer(() => {
   );
 });
 
-export const MainNavigation: FunctionComponent = () => {
+const HomeScreenHeaderRight: FunctionComponent = observer(() => {
+  const { walletConnectStore } = useStore();
+
   const style = useStyle();
 
   const navigation = useNavigation();
 
+  return (
+    <React.Fragment>
+      <HeaderRightButton
+        onPress={() => {
+          navigation.navigate("Others", {
+            screen: "Camera",
+          });
+        }}
+      >
+        <ScanIcon size={28} color={style.get("color-primary").color} />
+      </HeaderRightButton>
+      {walletConnectStore.sessions.length > 0 ? (
+        <HeaderRightButton
+          style={{
+            right: 42,
+          }}
+          onPress={() => {
+            navigation.navigate("Others", {
+              screen: "ManageWalletConnect",
+            });
+          }}
+        >
+          <HeaderWalletConnectIcon />
+        </HeaderRightButton>
+      ) : null}
+    </React.Fragment>
+  );
+});
+
+export const MainNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -310,17 +349,7 @@ export const MainNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           headerLeft: () => <HomeScreenHeaderLeft />,
-          headerRight: () => (
-            <HeaderRightButton
-              onPress={() => {
-                navigation.navigate("Others", {
-                  screen: "Camera",
-                });
-              }}
-            >
-              <ScanIcon size={28} color={style.get("color-primary").color} />
-            </HeaderRightButton>
-          ),
+          headerRight: () => <HomeScreenHeaderRight />,
         }}
         name="Home"
         component={HomeScreen}
@@ -421,6 +450,13 @@ export const OtherNavigation: FunctionComponent = () => {
         }}
         name="Camera"
         component={CameraScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Wallet Connect",
+        }}
+        name="ManageWalletConnect"
+        component={ManageWalletConnectScreen}
       />
       <Stack.Screen name="Validator List" component={ValidatorListScreen} />
       <Stack.Screen

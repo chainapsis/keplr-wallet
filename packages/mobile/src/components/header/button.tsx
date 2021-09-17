@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { StackHeaderLeftButtonProps } from "@react-navigation/stack";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ViewStyle } from "react-native";
 import { useStyle } from "../../styles";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { HeaderBackButtonIcon } from "./icon";
@@ -25,11 +25,12 @@ export const HeaderLeftButton: FunctionComponent<StackHeaderLeftButtonProps> = (
 
 export const HeaderRightButton: FunctionComponent<{
   onPress?: () => void;
-}> = ({ children, onPress }) => {
+  style?: ViewStyle;
+}> = ({ children, style: propStyle, onPress }) => {
   const style = useStyle();
 
   return (
-    <View style={style.flatten(["absolute"])}>
+    <View style={StyleSheet.flatten([style.flatten(["absolute"]), propStyle])}>
       <TouchableOpacity
         onPress={onPress}
         style={StyleSheet.flatten([style.flatten(["padding-10"])])}
