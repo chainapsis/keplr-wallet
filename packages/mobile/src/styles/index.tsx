@@ -215,6 +215,8 @@ export const { StyleProvider, useStyle } = createStyleProvider({
 
       // Belows are for the button props and may not be used as styles.
       "rect-button-default-ripple": "#CCCCCC",
+      // Active opacity is 0.04 by default.
+      "rect-button-default-underlay": Colors["text-black-medium"],
 
       "drawer-rect-button-underlay": "#F1F3FC",
 
