@@ -10,6 +10,7 @@ import { observer } from "mobx-react-lite";
 import { MyRewardCard } from "./my-reward-card";
 import { TokensCard } from "./tokens-card";
 import { useLogScreenView } from "../../hooks";
+import { BIP44Selectable } from "./bip44-selectable";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -66,6 +67,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
+      <BIP44Selectable />
       <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
       {tokens.length > 0 ? (
         <TokensCard

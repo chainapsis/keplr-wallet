@@ -281,6 +281,7 @@ export class KeyRingStore {
     }
 
     this.eventDispatcher.dispatchEvent("keplr_keystoreunlock");
+    this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
   @flow
