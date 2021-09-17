@@ -94,7 +94,7 @@ export const RectButton: FunctionComponent<
           rippleColor || style.get("color-rect-button-default-ripple").color
         }
         underlayColor={style.get("color-rect-button-default-underlay").color}
-        activeOpacity={0.04}
+        activeOpacity={0.055}
         {...rest}
       >
         {children}
