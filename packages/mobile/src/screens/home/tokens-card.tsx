@@ -1,12 +1,12 @@
 import React, { FunctionComponent } from "react";
 import { Card, CardBody, CardHeader } from "../../components/card";
-import { View, ViewStyle } from "react-native";
+import { Text, View, ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useStyle } from "../../styles";
 import { TokenItem } from "../tokens";
-import { Button } from "../../components/button";
 import { useSmartNavigation } from "../../navigation";
+import { RectButton } from "../../components/rect-button";
 
 export const TokensCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -46,14 +46,22 @@ export const TokensCard: FunctionComponent<{
           })}
         </CardBody>
       </Card>
-      <Button
-        mode="text"
-        text="View all tokens"
-        textStyle={style.flatten(["color-text-black-low", "text-underline"])}
+      <RectButton
+        style={style.flatten(["items-center", "padding-y-11"])}
         onPress={() => {
           smartNavigation.navigateSmart("Tokens", {});
         }}
-      />
+      >
+        <Text
+          style={style.flatten([
+            "text-button3",
+            "color-text-black-low",
+            "text-underline",
+          ])}
+        >
+          View all tokens
+        </Text>
+      </RectButton>
     </View>
   );
 });
