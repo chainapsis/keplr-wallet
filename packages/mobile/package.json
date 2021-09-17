@@ -121,6 +121,7 @@
     "get-yarn-workspaces": "^1.0.2",
     "metro-react-native-babel-preset": "^0.59.0",
     "pod-install": "^0.1.27",
+    "react-native-svg-transformer": "^0.14.3",
     "react-test-renderer": "16.13.1"
   },
   "jest": {

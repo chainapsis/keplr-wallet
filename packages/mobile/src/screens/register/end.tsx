@@ -8,6 +8,9 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Toggle } from "../../components/toggle";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import WelcomeRocket from "../../assets/svg/welcome-rocket.svg";
 
 export const RegisterEndScreen: FunctionComponent = observer(() => {
   const { keychainStore, keyRingStore } = useStore();
@@ -44,18 +47,29 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
     <PageWithView style={style.flatten(["padding-x-42"])}>
       <View style={style.get("flex-2")} />
       <View style={style.flatten(["flex-4"])}>
-        <Text
-          style={style.flatten([
-            "h2",
-            "color-text-black-medium",
-            "margin-bottom-20",
-          ])}
-        >
-          You’re all set!
-        </Text>
-        <Text style={style.flatten(["subtitle1", "color-text-black-low"])}>
-          Your cosmic interchain journey now begins.
-        </Text>
+        <View style={style.flatten(["items-center"])}>
+          <View style={style.flatten(["margin-bottom-18"])}>
+            <WelcomeRocket width={358} height={254} />
+          </View>
+          <Text
+            style={style.flatten([
+              "h2",
+              "color-text-black-medium",
+              "margin-bottom-20",
+            ])}
+          >
+            You’re all set!
+          </Text>
+          <Text
+            style={style.flatten([
+              "subtitle1",
+              "color-text-black-low",
+              "text-center",
+            ])}
+          >
+            Your cosmic interchain journey now begins.
+          </Text>
+        </View>
       </View>
       <View style={style.get("flex-1")} />
       {password && keychainStore.isBiometrySupported ? (
