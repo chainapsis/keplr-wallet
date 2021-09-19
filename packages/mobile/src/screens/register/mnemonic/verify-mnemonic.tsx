@@ -35,7 +35,13 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const registerConfig = route.params.registerConfig;
   const newMnemonicConfig = route.params.newMnemonicConfig;
 
-  const [candidateWords, setCandidateWords] = useState<string[]>([]);
+  const [candidateWords, setCandidateWords] = useState<
+    {
+      word: string;
+      usedIndex: number;
+    }[]
+  >([]);
+  const [wordSet, setWordSet] = useState<(string | undefined)[]>([]);
 
   useEffect(() => {
     const words = newMnemonicConfig.mnemonic.split(" ");
@@ -44,23 +50,25 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
     });
 
     const candidateWords = randomSortedWords.slice(0, 5);
-    setCandidateWords(candidateWords);
+    setCandidateWords(
+      candidateWords.map((word) => {
+        return {
+          word,
+          usedIndex: -1,
+        };
+      })
+    );
+
+    setWordSet(
+      newMnemonicConfig.mnemonic.split(" ").map((word) => {
+        return candidateWords.includes(word) ? undefined : word;
+      })
+    );
   }, [newMnemonicConfig.mnemonic]);
 
-  const words = newMnemonicConfig.mnemonic.split(" ");
-
-  const wordSet = words.map((word) => {
-    return {
-      word,
-      dashed: false,
-      empty: candidateWords.includes(word),
-    };
-  });
-
-  const firstEmptyWordSet = wordSet.find((set) => set.empty);
-  if (firstEmptyWordSet) {
-    firstEmptyWordSet.dashed = true;
-  }
+  const firstEmptyWordSetIndex = wordSet.findIndex(
+    (word) => word === undefined
+  );
 
   const [isCreating, setIsCreating] = useState(false);
 
@@ -80,22 +88,42 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
       >
         Backup your mnemonic seed securely.
       </Text>
-      <WordsCard wordSet={wordSet} />
+      <WordsCard
+        wordSet={wordSet.map((word, i) => {
+          return {
+            word: word ?? "",
+            empty: word === undefined,
+            dashed: i === firstEmptyWordSetIndex,
+          };
+        })}
+      />
       <View style={style.flatten(["flex-row", "flex-wrap"])}>
-        {candidateWords.map((word, i) => {
+        {candidateWords.map(({ word, usedIndex }, i) => {
           return (
             <WordButton
               key={i.toString()}
               word={word}
+              used={usedIndex >= 0}
               onPress={() => {
-                if (!firstEmptyWordSet || firstEmptyWordSet.word !== word) {
-                  return;
-                }
+                const newWordSet = wordSet.slice();
+                const newCandiateWords = candidateWords.slice();
+                if (usedIndex < 0) {
+                  if (firstEmptyWordSetIndex < 0) {
+                    return;
+                  }
 
-                const newCadidateWords = candidateWords.filter(
-                  (_word) => _word !== word
-                );
-                setCandidateWords(newCadidateWords);
+                  newWordSet[firstEmptyWordSetIndex] = word;
+                  setWordSet(newWordSet);
+
+                  newCandiateWords[i].usedIndex = firstEmptyWordSetIndex;
+                  setCandidateWords(newCandiateWords);
+                } else {
+                  newWordSet[usedIndex] = undefined;
+                  setWordSet(newWordSet);
+
+                  newCandiateWords[i].usedIndex = -1;
+                  setCandidateWords(newCandiateWords);
+                }
               }}
             />
           );
@@ -106,7 +134,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
         text="Next"
         size="large"
         loading={isCreating}
-        disabled={wordSet.find((set) => set.empty) != null}
+        disabled={wordSet.join(" ") !== newMnemonicConfig.mnemonic}
         onPress={async () => {
           setIsCreating(true);
           await registerConfig.createMnemonic(
@@ -148,20 +176,24 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
 const WordButton: FunctionComponent<{
   word: string;
+  used: boolean;
   onPress: () => void;
-}> = ({ word, onPress }) => {
+}> = ({ word, used, onPress }) => {
   const style = useStyle();
 
   return (
     <RectButton
-      style={style.flatten([
-        "background-color-primary",
-        "padding-x-12",
-        "padding-y-4",
-        "margin-right-12",
-        "margin-bottom-12",
-        "border-radius-8",
-      ])}
+      style={style.flatten(
+        [
+          "background-color-primary",
+          "padding-x-12",
+          "padding-y-4",
+          "margin-right-12",
+          "margin-bottom-12",
+          "border-radius-8",
+        ],
+        [used && "background-color-primary-100"]
+      )}
       onPress={onPress}
     >
       <Text style={style.flatten(["subtitle2", "color-white"])}>{word}</Text>
