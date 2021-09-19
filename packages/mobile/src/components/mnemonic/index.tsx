@@ -6,9 +6,11 @@ export const WordChip: FunctionComponent<{
   index: number;
   word: string;
 
+  hideWord?: boolean;
+
   empty?: boolean;
   dashedBorder?: boolean;
-}> = ({ index, word, empty, dashedBorder }) => {
+}> = ({ index, word, hideWord, empty, dashedBorder }) => {
   const style = useStyle();
 
   return (
@@ -30,7 +32,7 @@ export const WordChip: FunctionComponent<{
       <Text
         style={style.flatten(
           ["subtitle2", "color-primary"],
-          [empty && "color-primary-100"]
+          [empty && "color-primary-100", hideWord && "opacity-transparent"]
         )}
       >
         {empty ? `${index}.           ` : `${index}. ${word}`}

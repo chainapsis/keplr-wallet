@@ -1,7 +1,7 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { observer } from "mobx-react-lite";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useIsFocused, useRoute } from "@react-navigation/native";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { useNewMnemonicConfig } from "./hook";
 import { PageWithScrollView } from "../../../components/page";
@@ -191,6 +191,25 @@ const WordsCard: FunctionComponent<{
   const style = useStyle();
   const { isTimedOut, setTimer } = useSimpleTimer();
 
+  /*
+    On IOS, user can peek the words by right side gesture from the verifying mnemonic screen.
+    To prevent this, hide the words if the screen lost the focus.
+   */
+  const [hideWord, setHideWord] = useState(false);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      setHideWord(false);
+    } else {
+      const timeout = setTimeout(() => {
+        setHideWord(true);
+      }, 500);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isFocused]);
+
   return (
     <View
       style={style.flatten([
@@ -206,7 +225,14 @@ const WordsCard: FunctionComponent<{
       ])}
     >
       {words.map((word, i) => {
-        return <WordChip key={i.toString()} index={i + 1} word={word} />;
+        return (
+          <WordChip
+            key={i.toString()}
+            index={i + 1}
+            word={word}
+            hideWord={hideWord}
+          />
+        );
       })}
       <View style={style.flatten(["width-full"])}>
         <Button
