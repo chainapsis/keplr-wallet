@@ -13,8 +13,12 @@ import { Buffer } from "buffer/";
 import { KVStore } from "@keplr-wallet/common";
 import { WCMessageRequester } from "./msg-requester";
 import { RNRouterBackground } from "../../router";
-import { KeyRingStatus } from "@keplr-wallet/background";
+import {
+  getBasicAccessPermissionType,
+  KeyRingStatus,
+} from "@keplr-wallet/background";
 import { computedFn } from "mobx-utils";
+import { Key } from "@keplr-wallet/types";
 
 export interface WalletConnectV1SessionRequest {
   id: number;
@@ -229,6 +233,13 @@ export abstract class WalletConnectManager {
     }
   }
 
+  protected createKeplrAPI(sessionId: string) {
+    return new Keplr(
+      "",
+      new WCMessageRequester(RNRouterBackground.EventEmitter, sessionId)
+    );
+  }
+
   protected readonly onCallRequest = async (
     client: WalletConnect,
     error: Error | null,
@@ -247,13 +258,7 @@ export abstract class WalletConnectManager {
 
     await this.waitInitStores();
 
-    const keplr = new Keplr(
-      "",
-      new WCMessageRequester(
-        RNRouterBackground.EventEmitter,
-        client.session.key
-      )
-    );
+    const keplr = this.createKeplrAPI(client.session.key);
 
     try {
       switch (payload.method) {
@@ -338,6 +343,10 @@ export class WalletConnectStore extends WalletConnectManager {
 
   constructor(
     protected readonly kvStore: KVStore,
+    protected readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+      removeEventListener: (type: string, fn: () => unknown) => void;
+    },
     protected readonly chainStore: ChainStore,
     protected readonly keyRingStore: KeyRingStore,
     protected readonly permissionStore: PermissionStore
@@ -347,6 +356,89 @@ export class WalletConnectStore extends WalletConnectManager {
     makeObservable(this);
 
     this.restore();
+
+    /*
+     Unfortunately, keplr can handle the one key at the same time.
+     So, if the other key was selected when the wallet connect connected and the frontend uses that account
+     after the user changes the key on Keplr, the requests can't be handled properly.
+     To reduce this problem, Keplr send the "keplr_keystore_may_changed_event_wallet_connect_v1" to the connected clients
+     whenever the app is unlocked or user changes the key.
+     */
+    this.eventListener.addEventListener("keplr_keystoreunlock", () =>
+      this.sendAccountMayChangedEventToClients()
+    );
+    this.eventListener.addEventListener("keplr_keystorechange", () =>
+      this.sendAccountMayChangedEventToClients()
+    );
+  }
+
+  protected async sendAccountMayChangedEventToClients() {
+    await this.waitInitStores();
+
+    const keyForChainCache: Record<string, Key> = {};
+    for (const client of this._clients) {
+      let keys:
+        | {
+            name: string;
+            algo: string;
+            isNanoLedger: boolean;
+            keys: {
+              chainIdentifier: string;
+              // Hex encoded
+              pubKey: string;
+              // Hex encoded
+              address: string;
+              bech32Address: string;
+            }[];
+          }
+        | undefined;
+
+      const keplr = this.createKeplrAPI(client.session.key);
+
+      const permittedChains = await this.permissionStore.getOriginPermittedChains(
+        WCMessageRequester.getVirtualSessionURL(client.session.key),
+        getBasicAccessPermissionType()
+      );
+
+      for (const chain of permittedChains) {
+        const key = keyForChainCache[chain] ?? (await keplr.getKey(chain));
+        if (!keyForChainCache[chain]) {
+          keyForChainCache[chain] = key;
+        }
+
+        if (!keys) {
+          keys = {
+            name: key.name,
+            algo: key.algo,
+            isNanoLedger: key.isNanoLedger,
+            keys: [
+              {
+                chainIdentifier: chain,
+                pubKey: Buffer.from(key.pubKey).toString("hex"),
+                address: Buffer.from(key.address).toString("hex"),
+                bech32Address: key.bech32Address,
+              },
+            ],
+          };
+        } else {
+          keys.keys.push({
+            chainIdentifier: chain,
+            pubKey: Buffer.from(key.pubKey).toString("hex"),
+            address: Buffer.from(key.address).toString("hex"),
+            bech32Address: key.bech32Address,
+          });
+        }
+      }
+
+      if (keys) {
+        client.sendCustomRequest({
+          id: Math.floor(Math.random() * 100000),
+          jsonrpc: "2.0",
+          method: "keplr_keystore_may_changed_event_wallet_connect_v1",
+          params: [keys],
+        });
+      }
+    }
   }
 
   getSession = computedFn((sessionId: string) => {

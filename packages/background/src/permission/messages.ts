@@ -66,14 +66,14 @@ export class GetOriginPermittedChainsMsg extends Message<string[]> {
   }
 
   constructor(
-    public readonly origin: string,
+    public readonly permissionOrigin: string,
     public readonly permissionType: string
   ) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.origin) {
+    if (!this.permissionOrigin) {
       throw new Error("origin not set");
     }
 

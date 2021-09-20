@@ -65,7 +65,10 @@ const handleGetOriginPermittedChainsMsg: (
   service: PermissionService
 ) => InternalHandler<GetOriginPermittedChainsMsg> = (service) => {
   return (_, msg) => {
-    return service.getOriginPermittedChains(msg.origin, msg.permissionType);
+    return service.getOriginPermittedChains(
+      msg.permissionOrigin,
+      msg.permissionType
+    );
   };
 };
 

@@ -208,6 +208,14 @@ export class RootStore {
 
     this.walletConnectStore = new WalletConnectStore(
       new AsyncKVStore("store_wallet_connect"),
+      {
+        addEventListener: (type: string, fn: () => void) => {
+          eventEmitter.addListener(type, fn);
+        },
+        removeEventListener: (type: string, fn: () => void) => {
+          eventEmitter.removeListener(type, fn);
+        },
+      },
       this.chainStore,
       this.keyRingStore,
       this.permissionStore
