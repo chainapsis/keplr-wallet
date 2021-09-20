@@ -1,13 +1,13 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { Button } from "../../components/button";
-import { WalletConnectIcon } from "../../components/icon";
 import { useStore } from "../../stores";
 import { PermissionData } from "@keplr-wallet/background";
 import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
+import { WCAppLogoAndName } from "../../components/wallet-connect";
 
 export const WalletConnectApprovalModal: FunctionComponent<{
   isOpen: boolean;
@@ -28,43 +28,40 @@ export const WalletConnectApprovalModal: FunctionComponent<{
       )!;
     }, [data.origins, walletConnectStore]);
 
+    const appName =
+      session.peerMeta?.name || session.peerMeta?.url || "unknown";
+
     const style = useStyle();
 
     return (
       <CardModal title="Wallet Connect">
-        <Text style={style.flatten(["margin-bottom-44"])}>
+        <WCAppLogoAndName
+          containerStyle={style.flatten(["margin-y-20"])}
+          peerMeta={session.peerMeta}
+        />
+        <Text style={style.flatten(["margin-bottom-40", "text-center"])}>
           <Text
             style={style.flatten([
               "body1",
-              "color-text-black-medium",
+              "color-text-black-low",
               "font-semibold",
             ])}
           >
-            {session.peerMeta!.url}
+            {appName}
           </Text>
-          <Text style={style.flatten(["body1", "color-text-black-medium"])}>
+          <Text style={style.flatten(["body1", "color-text-black-low"])}>
             {" is requesting to connect to your Keplr account on "}
           </Text>
           <Text
             style={style.flatten([
               "body1",
-              "color-text-black-medium",
+              "color-text-black-low",
               "font-semibold",
             ])}
           >
             {data.chainIds.join(", ") + "."}
           </Text>
         </Text>
-        <View style={style.flatten(["items-center"])}>
-          <View style={style.flatten(["margin-bottom-8"])}>
-            <WalletConnectIcon height={32} />
-          </View>
-          <Image
-            style={style.flatten(["height-74", "margin-bottom-68"])}
-            resizeMode="contain"
-            source={require("../../assets/image/wallet-connection.png")}
-          />
-        </View>
         <View style={style.flatten(["flex-row"])}>
           <Button
             containerStyle={style.get("flex-1")}

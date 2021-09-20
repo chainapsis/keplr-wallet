@@ -27,6 +27,7 @@ export class SignInteractionStore {
   protected get waitingDatas() {
     return this.interactionStore.getDatas<
       | {
+          msgOrigin: string;
           chainId: string;
           mode: "amino";
           signer: string;
@@ -34,6 +35,7 @@ export class SignInteractionStore {
           signOptions: KeplrSignOptions;
         }
       | {
+          msgOrigin: string;
           chainId: string;
           mode: "direct";
           signer: string;
@@ -46,6 +48,7 @@ export class SignInteractionStore {
   @computed
   get waitingData():
     | InteractionWaitingData<{
+        msgOrigin: string;
         signer: string;
         signDocWrapper: SignDocWrapper;
         signOptions: KeplrSignOptions;
@@ -67,6 +70,7 @@ export class SignInteractionStore {
       id: data.id,
       type: data.type,
       data: {
+        msgOrigin: data.data.msgOrigin,
         signer: data.data.signer,
         signDocWrapper: wrapper,
         signOptions: data.data.signOptions,

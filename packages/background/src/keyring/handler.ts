@@ -264,6 +264,7 @@ const handleRequestSignAminoMsg: (
 
     return await service.requestSignAmino(
       env,
+      msg.origin,
       msg.chainId,
       msg.signer,
       msg.signDoc,
@@ -286,6 +287,7 @@ const handleRequestSignDirectMsg: (
 
     const response = await service.requestSignDirect(
       env,
+      msg.origin,
       msg.chainId,
       msg.signer,
       signDoc,

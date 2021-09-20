@@ -203,6 +203,7 @@ export class KeyRingService {
 
   async requestSignAmino(
     env: Env,
+    msgOrigin: string,
     chainId: string,
     signer: string,
     signDoc: StdSignDoc,
@@ -224,6 +225,7 @@ export class KeyRingService {
       "/sign",
       "request-sign",
       {
+        msgOrigin,
         chainId,
         mode: "amino",
         signDoc,
@@ -251,6 +253,7 @@ export class KeyRingService {
 
   async requestSignDirect(
     env: Env,
+    msgOrigin: string,
     chainId: string,
     signer: string,
     signDoc: cosmos.tx.v1beta1.SignDoc,
@@ -272,6 +275,7 @@ export class KeyRingService {
       "/sign",
       "request-sign",
       {
+        msgOrigin,
         chainId,
         mode: "direct",
         signDocBytes: cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),

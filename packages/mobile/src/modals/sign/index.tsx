@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { ScrollView, Text, View } from "react-native";
@@ -18,6 +18,9 @@ import { Msg } from "./msg";
 import { observer } from "mobx-react-lite";
 import { useUnmount } from "../../hooks";
 import { FeeInSign } from "./fee";
+import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
+import { WCAppLogoAndName } from "../../components/wallet-connect";
+import WalletConnect from "@walletconnect/client";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
@@ -30,12 +33,19 @@ export const SignModal: FunctionComponent<{
       chainStore,
       accountStore,
       queriesStore,
+      walletConnectStore,
       interactionModalStore,
       signInteractionStore,
     } = useStore();
     useUnmount(() => {
       signInteractionStore.rejectAll();
     });
+
+    // Check that the request is from the wallet connect.
+    // If this is undefiend, the request is not from the wallet connect.
+    const [wcSession, setWCSession] = useState<
+      WalletConnect["session"] | undefined
+    >();
 
     const style = useStyle();
 
@@ -80,6 +90,18 @@ export const SignModal: FunctionComponent<{
           feeConfig.setFeeType("average");
         }
         setSigner(data.data.signer);
+
+        if (
+          data.data.msgOrigin &&
+          WCMessageRequester.isVirtualSessionURL(data.data.msgOrigin)
+        ) {
+          const sessionId = WCMessageRequester.getSessionIdFromVirtualURL(
+            data.data.msgOrigin
+          );
+          setWCSession(walletConnectStore.getSession(sessionId));
+        } else {
+          setWCSession(undefined);
+        }
       }
     }, [
       feeConfig,
@@ -87,6 +109,7 @@ export const SignModal: FunctionComponent<{
       memoConfig,
       signDocHelper,
       signInteractionStore.waitingData,
+      walletConnectStore,
     ]);
 
     const mode = signDocHelper.signDocWrapper
@@ -152,6 +175,12 @@ export const SignModal: FunctionComponent<{
 
     return (
       <CardModal title="Confirm Transaction">
+        {wcSession ? (
+          <WCAppLogoAndName
+            containerStyle={style.flatten(["margin-y-14"])}
+            peerMeta={wcSession.peerMeta}
+          />
+        ) : null}
         <View style={style.flatten(["margin-bottom-16"])}>
           <Text style={style.flatten(["margin-bottom-3"])}>
             <Text style={style.flatten(["subtitle3", "color-primary"])}>
