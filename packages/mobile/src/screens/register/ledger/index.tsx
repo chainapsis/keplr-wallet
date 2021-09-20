@@ -10,6 +10,7 @@ import { TextInput } from "../../../components/input";
 import { View } from "react-native";
 import { useStore } from "../../../stores";
 import { Button } from "../../../components/button";
+import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
 
 interface FormData {
   name: string;
@@ -37,6 +38,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
   const smartNavigation = useSmartNavigation();
 
   const registerConfig: RegisterConfig = route.params.registerConfig;
+  const bip44Option = useBIP44Option(118);
   const [mode] = useState(registerConfig.mode);
 
   const {
@@ -56,11 +58,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
       await registerConfig.createLedger(
         getValues("name"),
         getValues("password"),
-        {
-          account: 0,
-          change: 0,
-          addressIndex: 0,
-        }
+        bip44Option.bip44HDPath
       );
       analyticsStore.setUserId();
       analyticsStore.setUserProperties({
@@ -102,6 +100,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
           return (
             <TextInput
               label="Wallet nickname"
+              containerStyle={style.flatten(["padding-bottom-6"])}
               returnKeyType={mode === "add" ? "done" : "next"}
               onSubmitEditing={() => {
                 if (mode === "add") {
@@ -122,6 +121,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
         name="name"
         defaultValue=""
       />
+      <BIP44AdvancedButton bip44Option={bip44Option} />
       {mode === "create" ? (
         <React.Fragment>
           <Controller

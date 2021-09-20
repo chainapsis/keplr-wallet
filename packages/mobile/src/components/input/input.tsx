@@ -19,7 +19,7 @@ export const TextInput = React.forwardRef<
     inputContainerStyle?: ViewStyle;
     errorLabelStyle?: TextStyle;
 
-    label: string;
+    label?: string;
     error?: string;
 
     paragraph?: React.ReactNode;
@@ -42,18 +42,20 @@ export const TextInput = React.forwardRef<
         props.containerStyle,
       ])}
     >
-      <Text
-        style={StyleSheet.flatten([
-          style.flatten([
-            "subtitle3",
-            "color-text-black-medium",
-            "margin-bottom-3",
-          ]),
-          props.labelStyle,
-        ])}
-      >
-        {props.label}
-      </Text>
+      {props.label ? (
+        <Text
+          style={StyleSheet.flatten([
+            style.flatten([
+              "subtitle3",
+              "color-text-black-medium",
+              "margin-bottom-3",
+            ]),
+            props.labelStyle,
+          ])}
+        >
+          {props.label}
+        </Text>
+      ) : null}
       <View
         style={StyleSheet.flatten([
           style.flatten(

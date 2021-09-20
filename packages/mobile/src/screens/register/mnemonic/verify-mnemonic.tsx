@@ -11,6 +11,7 @@ import { RegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { RectButton } from "../../../components/rect-button";
 import { useStore } from "../../../stores";
+import { BIP44HDPath } from "@keplr-wallet/background";
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -20,6 +21,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
         {
           registerConfig: RegisterConfig;
           newMnemonicConfig: NewMnemonicConfig;
+          bip44HDPath: BIP44HDPath;
         }
       >,
       string
@@ -141,11 +143,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
             newMnemonicConfig.name,
             newMnemonicConfig.mnemonic,
             newMnemonicConfig.password,
-            {
-              account: 0,
-              change: 0,
-              addressIndex: 0,
-            }
+            route.params.bip44HDPath
           );
           analyticsStore.setUserId();
           analyticsStore.setUserProperties({

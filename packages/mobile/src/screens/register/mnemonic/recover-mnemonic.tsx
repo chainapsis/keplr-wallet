@@ -11,6 +11,7 @@ import { StyleSheet, View } from "react-native";
 import { Button } from "../../../components/button";
 import Clipboard from "expo-clipboard";
 import { useStore } from "../../../stores";
+import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -52,6 +53,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
   const smartNavigation = useSmartNavigation();
 
   const registerConfig: RegisterConfig = route.params.registerConfig;
+  const bip44Option = useBIP44Option();
   const [mode] = useState(registerConfig.mode);
 
   const {
@@ -71,11 +73,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
       getValues("name"),
       getValues("mnemonic"),
       getValues("password"),
-      {
-        account: 0,
-        change: 0,
-        addressIndex: 0,
-      }
+      bip44Option.bip44HDPath
     );
     analyticsStore.setUserId();
     analyticsStore.setUserProperties({
@@ -178,6 +176,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           return (
             <TextInput
               label="Wallet nickname"
+              containerStyle={style.flatten(["padding-bottom-6"])}
               returnKeyType={mode === "add" ? "done" : "next"}
               onSubmitEditing={() => {
                 if (mode === "add") {
@@ -198,6 +197,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         name="name"
         defaultValue=""
       />
+      <BIP44AdvancedButton bip44Option={bip44Option} />
       {mode === "create" ? (
         <React.Fragment>
           <Controller

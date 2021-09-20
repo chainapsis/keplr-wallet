@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent, useEffect, useRef } from "react";
 import { StatusBar, Text, View } from "react-native";
-import { KeyRingStatus } from "@keplr-wallet/background";
+import { BIP44HDPath, KeyRingStatus } from "@keplr-wallet/background";
 import {
   DrawerActions,
   NavigationContainer,
@@ -202,6 +202,7 @@ const {
     "Register.VerifyMnemonic": {
       registerConfig: RegisterConfig;
       newMnemonicConfig: NewMnemonicConfig;
+      bip44HDPath: BIP44HDPath;
     };
     "Register.RecoverMnemonic": {
       registerConfig: RegisterConfig;

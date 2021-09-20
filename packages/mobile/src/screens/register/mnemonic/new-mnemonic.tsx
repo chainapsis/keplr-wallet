@@ -14,6 +14,7 @@ import { TextInput } from "../../../components/input";
 import { Controller, useForm } from "react-hook-form";
 import { useSmartNavigation } from "../../../navigation";
 import { useSimpleTimer } from "../../../hooks";
+import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
 
 interface FormData {
   name: string;
@@ -39,6 +40,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   const smartNavigation = useSmartNavigation();
 
   const registerConfig: RegisterConfig = route.params.registerConfig;
+  const bip44Option = useBIP44Option();
 
   const newMnemonicConfig = useNewMnemonicConfig(registerConfig);
   const [mode] = useState(registerConfig.mode);
@@ -59,6 +61,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
     smartNavigation.navigateSmart("Register.VerifyMnemonic", {
       registerConfig,
       newMnemonicConfig,
+      bip44HDPath: bip44Option.bip44HDPath,
     });
   });
 
@@ -89,6 +92,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
           return (
             <TextInput
               label="Wallet nickname"
+              containerStyle={style.flatten(["padding-bottom-6"])}
               returnKeyType={mode === "add" ? "done" : "next"}
               onSubmitEditing={() => {
                 if (mode === "add") {
@@ -109,6 +113,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
         name="name"
         defaultValue=""
       />
+      <BIP44AdvancedButton bip44Option={bip44Option} />
       {mode === "create" ? (
         <React.Fragment>
           <Controller
