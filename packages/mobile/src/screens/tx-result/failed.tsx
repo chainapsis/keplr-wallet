@@ -3,12 +3,13 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithView } from "../../components/page";
-import { Linking, Text, View, Animated, Dimensions } from "react-native";
+import { Text, View, Animated, Dimensions } from "react-native";
 import { Button } from "../../components/button";
 import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/icon";
 import LottieView from "lottie-react-native";
+import * as WebBrowser from "expo-web-browser";
 
 export const TxFailedResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -122,7 +123,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           }
           onPress={() => {
             if (chainInfo.raw.txExplorer) {
-              Linking.openURL(
+              WebBrowser.openBrowserAsync(
                 chainInfo.raw.txExplorer.txUrl.replace(
                   "{txHash}",
                   txHash.toUpperCase()
