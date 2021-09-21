@@ -15,7 +15,7 @@ import { BIP44Selectable } from "./bip44-selectable";
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const style = useStyle();
 
@@ -27,6 +27,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     // fetching new query responses here would make query responses on all other components also refresh.
 
     await Promise.all([
+      priceStore.waitFreshResponse(),
       ...queries.queryBalances
         .getQueryBech32Address(account.bech32Address)
         .balances.map((bal) => {
