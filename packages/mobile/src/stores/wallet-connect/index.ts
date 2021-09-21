@@ -19,6 +19,7 @@ import {
 } from "@keplr-wallet/background";
 import { computedFn } from "mobx-utils";
 import { Key } from "@keplr-wallet/types";
+import { Linking } from "react-native";
 
 export interface WalletConnectV1SessionRequest {
   id: number;
@@ -356,6 +357,7 @@ export class WalletConnectStore extends WalletConnectManager {
     makeObservable(this);
 
     this.restore();
+    this.initDeepLink();
 
     /*
      Unfortunately, keplr can handle the one key at the same time.
@@ -370,6 +372,34 @@ export class WalletConnectStore extends WalletConnectManager {
     this.eventListener.addEventListener("keplr_keystorechange", () =>
       this.sendAccountMayChangedEventToClients()
     );
+  }
+
+  protected async initDeepLink() {
+    const initialURL = await Linking.getInitialURL();
+    if (initialURL) {
+      this.processDeepLinkURL(initialURL);
+    }
+
+    Linking.addEventListener("url", (e) => {
+      this.processDeepLinkURL(e.url);
+    });
+  }
+
+  protected processDeepLinkURL(_url: string) {
+    try {
+      const url = new URL(_url);
+      if (url.protocol === "keplrwallet:" && url.host === "wcV1") {
+        let params = url.search;
+        if (params) {
+          if (params.startsWith("?")) {
+            params = params.slice(1);
+          }
+          this.initClient(params);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   protected async sendAccountMayChangedEventToClients() {
