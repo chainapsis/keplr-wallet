@@ -44,6 +44,11 @@ export interface AccountSetOpts<MsgOpts> {
     chainInfo: ReturnType<ChainGetter["getChain"]>
   ) => Promise<void>;
   readonly autoInit: boolean;
+  readonly preTxEvents?: {
+    onBroadcastFailed?: (e?: Error) => void;
+    onBroadcasted?: (txHash: Uint8Array) => void;
+    onFulfill?: (tx: any) => void;
+  };
   readonly getKeplr: () => Promise<Keplr | undefined>;
   readonly msgOpts: MsgOpts;
   readonly wsObject?: new (
@@ -84,6 +89,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     onTxEvents?:
       | ((tx: any) => void)
       | {
+          onBroadcastFailed?: (e?: Error) => void;
           onBroadcasted?: (txHash: Uint8Array) => void;
           onFulfill?: (tx: any) => void;
         }
@@ -234,6 +240,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     onTxEvents?:
       | ((tx: any) => void)
       | {
+          onBroadcastFailed?: (e?: Error) => void;
           onBroadcasted?: (txHash: Uint8Array) => void;
           onFulfill?: (tx: any) => void;
         }
@@ -263,6 +270,18 @@ export class AccountSetBase<MsgOpts, Queries> {
         this._isSendingMsg = false;
       });
 
+      if (this.opts.preTxEvents?.onBroadcastFailed) {
+        this.opts.preTxEvents.onBroadcastFailed(e);
+      }
+
+      if (
+        onTxEvents &&
+        "onBroadcastFailed" in onTxEvents &&
+        onTxEvents.onBroadcastFailed
+      ) {
+        onTxEvents.onBroadcastFailed(e);
+      }
+
       throw e;
     }
 
@@ -278,6 +297,9 @@ export class AccountSetBase<MsgOpts, Queries> {
       }
     }
 
+    if (this.opts.preTxEvents?.onBroadcasted) {
+      this.opts.preTxEvents.onBroadcasted(txHash);
+    }
     if (onBroadcasted) {
       onBroadcasted(txHash);
     }
@@ -309,12 +331,16 @@ export class AccountSetBase<MsgOpts, Queries> {
         }
       }
 
-      if (onFulfill) {
-        // Always add the tx hash data.
-        if (tx && !tx.hash) {
-          tx.hash = Buffer.from(txHash).toString("hex");
-        }
+      // Always add the tx hash data.
+      if (tx && !tx.hash) {
+        tx.hash = Buffer.from(txHash).toString("hex");
+      }
 
+      if (this.opts.preTxEvents?.onFulfill) {
+        this.opts.preTxEvents.onFulfill(tx);
+      }
+
+      if (onFulfill) {
         onFulfill(tx);
       }
     });
