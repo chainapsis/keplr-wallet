@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { ScrollView, Text, View } from "react-native";
@@ -217,6 +217,7 @@ export const SignModal: FunctionComponent<{
         />
         <Button
           text="Approve"
+          size="large"
           disabled={
             signDocWapper == null ||
             signDocHelper.signDocWrapper == null ||
