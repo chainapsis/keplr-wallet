@@ -140,16 +140,9 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         analyticsStore.logEvent("Account unlocked", {
           authType: "biometrics",
         });
-        navigateToHome();
       })();
     }
-  }, [
-    analyticsStore,
-    autoBiometryStatus,
-    isSplashEnd,
-    navigateToHome,
-    navigation,
-  ]);
+  }, [analyticsStore, autoBiometryStatus, isSplashEnd, navigation]);
 
   useEffect(() => {
     if (
@@ -191,12 +184,11 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       analyticsStore.logEvent("Account unlocked", {
         authType: "biometrics",
       });
-      navigateToHome();
     } catch (e) {
       console.log(e);
       setIsBiometricLoading(false);
     }
-  }, [analyticsStore, keychainStore, navigateToHome]);
+  }, [analyticsStore, keychainStore]);
 
   const tryUnlock = async () => {
     try {
@@ -213,7 +205,6 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       analyticsStore.logEvent("Account unlocked", {
         authType: "password",
       });
-      navigateToHome();
     } catch (e) {
       console.log(e);
       setIsLoading(false);
@@ -243,17 +234,13 @@ export const UnlockScreen: FunctionComponent = observer(() => {
   }, [isSplashEnd, keyRingStore.status, navigation]);
 
   useEffect(() => {
-    // I don't know that the cause is.
-    // Sometimes, the unlock screen opened even though the keyring is unlocked when the window is resized on android.
-    // To solve this problem, just replace to the MainTabDrawer screen if the keyring is unlocked on the mounted.
     if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
       (async () => {
         await hideSplashScreen();
         navigateToHome();
       })();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [keyRingStore.status, navigateToHome]);
 
   return (
     <React.Fragment>
