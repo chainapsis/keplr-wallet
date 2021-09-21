@@ -66,7 +66,7 @@ export type KeplrKeystoreMayChangedEventParam = {
   }[];
 };
 
-export class KeplrWalletConnect implements Keplr {
+export class KeplrWalletConnectV1 implements Keplr {
   constructor(
     public readonly connector: IConnector,
     public readonly options: {
