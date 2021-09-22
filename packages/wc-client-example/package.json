@@ -14,6 +14,7 @@
     "@keplr-wallet/stores": "^0.9.0-alpha.14",
     "@keplr-wallet/types": "^0.9.0-alpha.14",
     "@keplr-wallet/wc-client": "^0.9.0-alpha.14",
+    "@keplr-wallet/wc-qrcode-modal": "^0.9.0-alpha.14",
     "@walletconnect/client": "^1.6.5",
     "@walletconnect/qrcode-modal": "^1.6.5",
     "axios": "^0.21.4",
