@@ -1,13 +1,11 @@
 import React from "react";
 import ReactDom from "react-dom";
-import { IQRCodeModalOptions } from "@walletconnect/types";
 import { Modal, ModalUIOptions } from "./modal";
 
 export class KeplrQRCodeModalV1 {
   constructor(protected readonly uiOptions?: ModalUIOptions) {}
 
-  open(uri: string, cb: any, qrcodeModalOptions?: IQRCodeModalOptions) {
-    console.log(uri, cb, qrcodeModalOptions);
+  open(uri: string, cb: any) {
     const wrapper = document.createElement("div");
     wrapper.setAttribute("id", "keplr-qrcode-modal-v1");
     document.body.appendChild(wrapper);
