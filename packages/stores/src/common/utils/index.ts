@@ -1,6 +1,6 @@
 import { Currency } from "@keplr-wallet/types";
 import { CoinPrimitive } from "../types";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 
 export class StoreUtils {
   public static getBalancesFromCurrencies(
@@ -13,13 +13,10 @@ export class StoreUtils {
     for (const bal of bals) {
       const currency = currenciesMap[bal.denom];
       if (currency) {
-        let amount = bal.amount;
-        // Some querying result have the dec amount. But, it is usually negligible.
-        if (amount.includes(".")) {
-          amount = amount.slice(0, amount.indexOf("."));
+        const amount = new Dec(bal.amount);
+        if (amount.truncate().gt(new Int(0))) {
+          result.push(new CoinPretty(currency, amount));
         }
-
-        result.push(new CoinPretty(currency, new Int(amount)));
       }
     }
 
