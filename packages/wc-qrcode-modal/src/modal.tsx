@@ -54,12 +54,6 @@ export const Modal: FunctionComponent<{
   const [checkMobile] = useState(() => isMobile());
   const [checkAndroid] = useState(() => isAndroid());
 
-  saveMobileLinkInfo({
-    name: "Keplr",
-    href:
-      "intent://wcV1#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;",
-  });
-
   const navigateToAppURL = useMemo(() => {
     if (checkMobile) {
       if (checkAndroid) {

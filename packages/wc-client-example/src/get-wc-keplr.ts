@@ -40,7 +40,6 @@ export function getWCKeplr(): Promise<Keplr> {
       bridge: "https://bridge.walletconnect.org", // Required
       signingMethods: [
         "keplr_enable_wallet_connect_v1",
-        "keplr_get_key_wallet_connect_v1",
         "keplr_sign_amino_wallet_connect_v1",
       ],
       qrcodeModal: new KeplrQRCodeModalV1(),
