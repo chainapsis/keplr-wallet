@@ -34,93 +34,81 @@ export const MyRewardCard: FunctionComponent<{
       <CardBody>
         <Text
           style={style.flatten([
-            "h4",
-            "color-text-black-very-high",
+            "body3",
+            "color-text-black-medium",
             "margin-bottom-12",
           ])}
         >
-          My Reward
+          My Pending Reward
         </Text>
-        <View style={style.flatten(["flex-row"])}>
-          <View style={style.flatten(["flex-1"])}>
+        <View style={style.flatten(["flex-row", "items-end"])}>
+          <View>
             <Text
               style={style.flatten([
-                "body3",
-                "color-text-black-low",
-                "uppercase",
+                "h3",
+                "color-text-black-medium",
+                "margin-bottom-20",
               ])}
             >
-              My Pending Reward
-            </Text>
-            <Text style={style.flatten(["h3", "color-text-black-high"])}>
               {pendingStakableReward
                 .maxDecimals(4)
                 .shrink(true)
                 .trim(true)
                 .toString()}
             </Text>
-          </View>
-          <View style={style.flatten(["flex-1"])}>
-            <Text
-              style={style.flatten([
-                "body3",
-                "color-text-black-low",
-                "uppercase",
-              ])}
-            >
-              Live Staking Reward
-            </Text>
-            <Text style={style.flatten(["h3", "color-text-black-high"])}>
-              {`${apy.maxDecimals(2).trim(true).toString()}% / year`}
+            <Text style={style.flatten(["h7", "color-primary"])}>
+              {`${apy.maxDecimals(2).trim(true).toString()}% per year`}
             </Text>
           </View>
-        </View>
-        <Button
-          containerStyle={style.flatten(["margin-top-12"])}
-          text="Claim All rewards"
-          mode="light"
-          onPress={async () => {
-            try {
-              analyticsStore.logEvent("Claim reward started", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-              });
+          <View style={style.flatten(["flex-1"])} />
+          <Button
+            size="small"
+            text="Claim"
+            mode="light"
+            containerStyle={style.flatten(["min-width-72"])}
+            onPress={async () => {
+              try {
+                analyticsStore.logEvent("Claim reward started", {
+                  chainId: chainStore.current.chainId,
+                  chainName: chainStore.current.chainName,
+                });
 
-              await account.cosmos.sendWithdrawDelegationRewardMsgs(
-                queryReward.getDescendingPendingRewardValidatorAddresses(8),
-                "",
-                {},
-                {},
-                {
-                  onBroadcasted: (txHash) => {
-                    smartNavigation.pushSmart("TxPendingResult", {
-                      txHash: Buffer.from(txHash).toString("hex"),
-                    });
-                  },
-                  onFulfill: (tx) => {
-                    const isSuccess = tx.code == null || tx.code === 0;
-                    analyticsStore.logEvent("Claim reward finished", {
-                      chainId: chainStore.current.chainId,
-                      chainName: chainStore.current.chainName,
-                      isSuccess,
-                    });
-                  },
+                await account.cosmos.sendWithdrawDelegationRewardMsgs(
+                  queryReward.getDescendingPendingRewardValidatorAddresses(8),
+                  "",
+                  {},
+                  {},
+                  {
+                    onBroadcasted: (txHash) => {
+                      smartNavigation.pushSmart("TxPendingResult", {
+                        txHash: Buffer.from(txHash).toString("hex"),
+                      });
+                    },
+                    onFulfill: (tx) => {
+                      const isSuccess = tx.code == null || tx.code === 0;
+                      analyticsStore.logEvent("Claim reward finished", {
+                        chainId: chainStore.current.chainId,
+                        chainName: chainStore.current.chainName,
+                        isSuccess,
+                      });
+                    },
+                  }
+                );
+              } catch (e) {
+                if (e?.message === "Request rejected") {
+                  return;
                 }
-              );
-            } catch (e) {
-              if (e?.message === "Request rejected") {
-                return;
+                console.log(e);
+                smartNavigation.navigateSmart("Home", {});
               }
-              console.log(e);
-              smartNavigation.navigateSmart("Home", {});
+            }}
+            disabled={
+              !account.isReadyToSendMsgs ||
+              pendingStakableReward.toDec().equals(new Dec(0))
             }
-          }}
-          disabled={
-            !account.isReadyToSendMsgs ||
-            pendingStakableReward.toDec().equals(new Dec(0))
-          }
-          loading={account.isSendingMsg === "withdrawRewards"}
-        />
+            loading={account.isSendingMsg === "withdrawRewards"}
+          />
+        </View>
       </CardBody>
     </Card>
   );

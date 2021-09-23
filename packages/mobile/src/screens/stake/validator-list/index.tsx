@@ -134,7 +134,13 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
               >
                 <GradientBackground />
               </View>
-              <View style={style.flatten(["padding-12", "padding-bottom-4"])}>
+              <View
+                style={style.flatten([
+                  "padding-x-20",
+                  "padding-top-12",
+                  "padding-bottom-4",
+                ])}
+              >
                 <TextInput
                   label="Search"
                   placeholder="Search"
@@ -216,7 +222,7 @@ const ValidatorItem: FunctionComponent<{
       style={style.flatten([
         "flex-row",
         "background-color-white",
-        "height-56",
+        "height-72",
         "items-center",
       ])}
       onPress={() => {
@@ -230,19 +236,21 @@ const ValidatorItem: FunctionComponent<{
         }
       }}
     >
-      <View style={style.flatten(["items-center", "width-40"])}>
+      <View
+        style={style.flatten(["items-center", "width-40", "margin-left-4"])}
+      >
         <Text style={style.flatten(["body3", "color-text-black-medium"])}>
           {index + 1}
         </Text>
       </View>
       <ValidatorThumbnail
         style={style.flatten(["margin-right-8"])}
-        size={24}
+        size={40}
         url={bondedValidators.getValidatorThumbnail(validator.operator_address)}
       />
       <Text
         style={style.flatten([
-          "subtitle2",
+          "h6",
           "color-text-black-medium",
           "max-width-160",
         ])}
@@ -266,7 +274,7 @@ const ValidatorItem: FunctionComponent<{
         </Text>
       ) : null}
       {sort === "Voting Power" ? (
-        <Text style={style.flatten(["body3", "color-text-black-low"])}>
+        <Text style={style.flatten(["body2", "color-text-black-low"])}>
           {new CoinPretty(
             chainStore.current.stakeCurrency,
             new Dec(validator.tokens)

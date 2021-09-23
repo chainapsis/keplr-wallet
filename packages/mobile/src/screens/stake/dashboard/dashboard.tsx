@@ -2,6 +2,7 @@ import React, { FunctionComponent } from "react";
 import { PageWithScrollView } from "../../../components/page";
 import { MyRewardCard } from "./reward-card";
 import { DelegationsCard } from "./delegations-card";
+import { UndelegationsCard } from "./undelegations-card";
 import { useStyle } from "../../../styles";
 import { useLogScreenView } from "../../../hooks";
 import { useStore } from "../../../stores";
@@ -19,6 +20,9 @@ export const StakingDashboardScreen: FunctionComponent = () => {
     <PageWithScrollView>
       <MyRewardCard containerStyle={style.flatten(["margin-y-card-gap"])} />
       <DelegationsCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+      <UndelegationsCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}
       />
     </PageWithScrollView>

@@ -68,27 +68,27 @@ export const DelegationsCard: FunctionComponent<{
 
   return (
     <Card style={containerStyle}>
-      <CardBody>
+      <CardBody style={style.flatten(["padding-bottom-28"])}>
         <Text
           style={style.flatten([
             "h4",
             "color-text-black-very-high",
-            "margin-bottom-20",
+            "margin-bottom-28",
           ])}
         >
-          My Delegations
+          My Staking
         </Text>
         <View style={style.flatten(["flex-row", "items-center"])}>
-          <StakedTokenSymbol size={40} />
-          <View style={style.flatten(["margin-left-12"])}>
+          <StakedTokenSymbol size={44} />
+          <View style={style.flatten(["margin-left-16"])}>
             <Text
               style={style.flatten([
-                "body3",
-                "color-secondary",
+                "subtitle3",
+                "color-primary",
                 "margin-bottom-4",
               ])}
             >
-              Staked
+              Staking
             </Text>
             <Text style={style.flatten(["h5", "color-text-black-medium"])}>
               {staked.maxDecimals(6).trim(true).shrink(true).toString()}
@@ -98,77 +98,81 @@ export const DelegationsCard: FunctionComponent<{
           <Button
             text="Stake"
             size="small"
-            containerStyle={style.flatten(["min-width-80"])}
+            containerStyle={style.flatten(["min-width-72"])}
             onPress={() => {
               smartNavigation.navigateSmart("Validator.List", {});
             }}
           />
         </View>
       </CardBody>
-      <CardDivider />
-      <CardBody style={style.flatten(["padding-x-0", "padding-y-10"])}>
-        {delegations.map((del) => {
-          const val = validatorsMap.get(del.validator_address);
-          if (!val) {
-            return null;
-          }
+      {delegations && delegations.length > 0 && <CardDivider />}
+      {delegations && delegations.length > 0 && (
+        <CardBody style={style.flatten(["padding-x-0", "padding-y-14"])}>
+          {delegations.map((del) => {
+            const val = validatorsMap.get(del.validator_address);
+            if (!val) {
+              return null;
+            }
 
-          const thumbnail =
-            bondedValidators.getValidatorThumbnail(val.operator_address) ||
-            unbondingValidators.getValidatorThumbnail(val.operator_address) ||
-            unbondedValidators.getValidatorThumbnail(val.operator_address);
+            const thumbnail =
+              bondedValidators.getValidatorThumbnail(val.operator_address) ||
+              unbondingValidators.getValidatorThumbnail(val.operator_address) ||
+              unbondedValidators.getValidatorThumbnail(val.operator_address);
 
-          const amount = queryDelegations.getDelegationTo(val.operator_address);
+            const amount = queryDelegations.getDelegationTo(
+              val.operator_address
+            );
 
-          return (
-            <RectButton
-              key={del.validator_address}
-              style={style.flatten([
-                "flex-row",
-                "items-center",
-                "padding-x-16",
-                "padding-y-10",
-              ])}
-              onPress={() => {
-                smartNavigation.navigateSmart("Validator.Details", {
-                  validatorAddress: del.validator_address,
-                });
-              }}
-            >
-              <ValidatorThumbnail
-                style={style.flatten(["margin-right-16"])}
-                size={40}
-                url={thumbnail}
-              />
-              <Text
+            return (
+              <RectButton
+                key={del.validator_address}
                 style={style.flatten([
-                  "h5",
-                  "color-text-black-medium",
-                  "max-width-160",
+                  "flex-row",
+                  "items-center",
+                  "padding-x-20",
+                  "padding-y-14",
                 ])}
-                numberOfLines={1}
-                ellipsizeMode="tail"
+                onPress={() => {
+                  smartNavigation.navigateSmart("Validator.Details", {
+                    validatorAddress: del.validator_address,
+                  });
+                }}
               >
-                {val.description.moniker}
-              </Text>
-              <View style={style.flatten(["flex-1"])} />
-              <Text
-                style={style.flatten([
-                  "body1",
-                  "color-text-black-low",
-                  "margin-right-12",
-                ])}
-              >
-                {amount.maxDecimals(4).trim(true).shrink(true).toString()}
-              </Text>
-              <RightArrowIcon
-                height={12}
-                color={style.get("color-text-black-low").color}
-              />
-            </RectButton>
-          );
-        })}
-      </CardBody>
+                <ValidatorThumbnail
+                  style={style.flatten(["margin-right-16"])}
+                  size={40}
+                  url={thumbnail}
+                />
+                <Text
+                  style={style.flatten([
+                    "h6",
+                    "color-text-black-medium",
+                    "max-width-160",
+                  ])}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {val.description.moniker}
+                </Text>
+                <View style={style.flatten(["flex-1"])} />
+                <Text
+                  style={style.flatten([
+                    "body1",
+                    "color-text-black-low",
+                    "margin-right-12",
+                  ])}
+                >
+                  {amount.maxDecimals(4).trim(true).shrink(true).toString()}
+                </Text>
+                <RightArrowIcon
+                  height={12}
+                  color={style.get("color-text-black-low").color}
+                />
+              </RectButton>
+            );
+          })}
+        </CardBody>
+      )}
     </Card>
   );
 });
