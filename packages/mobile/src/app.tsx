@@ -43,12 +43,14 @@ if (Platform.OS === "android") {
 
   // https://formatjs.io/docs/polyfills/intl-datetimeformat/#default-timezone
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const RNLocalize = require("react-native-localize");
-  if ("__setDefaultTimeZone" in Intl.DateTimeFormat) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    Intl.DateTimeFormat.__setDefaultTimeZone(RNLocalize.getTimeZone());
-  }
+  // const RNLocalize = require("react-native-localize");
+  // if ("__setDefaultTimeZone" in Intl.DateTimeFormat) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // Intl.DateTimeFormat.__setDefaultTimeZone(RNLocalize.getTimeZone());
+  // }
+  // On android, setting the timezone makes that the hour in date looks weird if the hour exceeds 24. Ex) 00:10 AM -> 24:10 AM.
+  // Disable the timezone until finding the solution.
 }
 
 // Prevent native splash screen from autohiding.
