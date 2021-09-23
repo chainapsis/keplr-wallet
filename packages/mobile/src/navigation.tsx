@@ -386,6 +386,9 @@ export const RegisterNavigation: FunctionComponent = () => {
         component={RegisterNewUserScreen}
       />
       <Stack.Screen
+        options={{
+          title: "Import Existing Wallet",
+        }}
         name="Register.NotNewUser"
         component={RegisterNotNewUserScreen}
       />
@@ -397,6 +400,9 @@ export const RegisterNavigation: FunctionComponent = () => {
         component={NewMnemonicScreen}
       />
       <Stack.Screen
+        options={{
+          title: "Verify Mnemonic",
+        }}
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
       />
@@ -443,8 +449,20 @@ export const OtherNavigation: FunctionComponent = () => {
       }}
       headerMode="screen"
     >
-      <Stack.Screen name="Send" component={SendScreen} />
-      <Stack.Screen name="Tokens" component={TokensScreen} />
+      <Stack.Screen
+        options={{
+          title: "Send",
+        }}
+        name="Send"
+        component={SendScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Tokens",
+        }}
+        name="Tokens"
+        component={TokensScreen}
+      />
       <Stack.Screen
         options={{
           headerShown: false,
@@ -459,12 +477,27 @@ export const OtherNavigation: FunctionComponent = () => {
         name="ManageWalletConnect"
         component={ManageWalletConnectScreen}
       />
-      <Stack.Screen name="Validator List" component={ValidatorListScreen} />
       <Stack.Screen
+        options={{
+          title: "Validator List",
+        }}
+        name="Validator List"
+        component={ValidatorListScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Validator Details",
+        }}
         name="Validator Details"
         component={ValidatorDetailsScreen}
       />
-      <Stack.Screen name="Governance" component={GovernanceScreen} />
+      <Stack.Screen
+        options={{
+          title: "Governance",
+        }}
+        name="Governance"
+        component={GovernanceScreen}
+      />
       <Stack.Screen
         options={{
           title: "Proposal",
@@ -500,8 +533,20 @@ export const OtherNavigation: FunctionComponent = () => {
         name="Delegate"
         component={DelegateScreen}
       />
-      <Stack.Screen name="Undelegate" component={UndelegateScreen} />
-      <Stack.Screen name="Redelegate" component={RedelegateScreen} />
+      <Stack.Screen
+        options={{
+          title: "Unstake",
+        }}
+        name="Undelegate"
+        component={UndelegateScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Switch Validator",
+        }}
+        name="Redelegate"
+        component={RedelegateScreen}
+      />
       <Stack.Screen
         options={{
           gestureEnabled: false,
