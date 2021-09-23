@@ -39,6 +39,15 @@ export const DelegatedCard: FunctionComponent<{
   return (
     <Card style={containerStyle}>
       <CardBody>
+        <Text
+          style={style.flatten([
+            "h4",
+            "color-text-black-very-high",
+            "margin-bottom-12",
+          ])}
+        >
+          My Staking
+        </Text>
         <View
           style={style.flatten(["flex-row", "items-center", "margin-bottom-4"])}
         >
