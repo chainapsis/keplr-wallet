@@ -31,7 +31,7 @@ export interface EventProperties extends Record<string, unknown> {
 export interface UserProperties {
   registerType?: "seed" | "google" | "ledger" | "qr";
   accountType?: "mnemonic" | "privateKey" | "ledger";
-  currency: string;
+  currency?: string;
 }
 
 export class AnalyticsStore {
