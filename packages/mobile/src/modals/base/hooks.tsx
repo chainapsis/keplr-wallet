@@ -14,6 +14,9 @@ export interface ModalStateContext {
   readonly transitionAcceleration?: number;
   readonly disableBackdrop?: boolean;
   readonly disableClosingOnBackdropPress?: boolean;
+  readonly transparentBackdrop?: boolean;
+  readonly backdropMaxOpacity?: number;
+  readonly blurBackdropOnIOS?: boolean;
 
   readonly close: () => void;
 }
