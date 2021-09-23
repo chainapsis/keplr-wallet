@@ -12,6 +12,7 @@ import { canShowPrivateData } from "./screens/view-private-data";
 import { SettingViewPrivateDataItem } from "./items/view-private-data";
 import { useStyle } from "../../styles";
 import { useLogScreenView } from "../../hooks";
+import { View } from "react-native";
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const { keychainStore, keyRingStore } = useStore();
@@ -54,6 +55,8 @@ export const SettingScreen: FunctionComponent = observer(() => {
         }}
       />
       <SettingRemoveAccountItem topBorder={true} />
+      {/* Mock element for padding bottom */}
+      <View style={style.get("height-16")} />
     </PageWithScrollViewInBottomTabView>
   );
 });
