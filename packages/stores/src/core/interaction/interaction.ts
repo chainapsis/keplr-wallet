@@ -96,6 +96,21 @@ export class InteractionStore implements InteractionForegroundHandler {
     );
   }
 
+  /**
+   * Approve the interaction without removing the data on the store.
+   * Actually, this method is used for the sign interaction to wait the actual signing ends.
+   * You should make sure that remove the data manually.
+   * @param id
+   * @param result
+   */
+  @flow
+  *approveWithoutRemovingData(id: string, result: unknown) {
+    yield this.msgRequester.sendMessage(
+      BACKGROUND_PORT,
+      new ApproveInteractionMsg(id, result)
+    );
+  }
+
   @flow
   *reject(type: string, id: string) {
     this.removeData(type, id);

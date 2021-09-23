@@ -110,19 +110,17 @@ export class SignInteractionStore {
     }
 
     this._isLoading = true;
+    const id = this.waitingDatas[0].id;
     try {
       const newSignDoc =
         newSignDocWrapper.mode === "amino"
           ? newSignDocWrapper.aminoSignDoc
           : newSignDocWrapper.protoSignDoc.toBytes();
 
-      yield this.interactionStore.approve(
-        "request-sign",
-        this.waitingDatas[0].id,
-        newSignDoc
-      );
+      yield this.interactionStore.approveWithoutRemovingData(id, newSignDoc);
     } finally {
       yield this.waitEnd();
+      this.interactionStore.removeData("request-sign", id);
 
       this._isLoading = false;
     }
