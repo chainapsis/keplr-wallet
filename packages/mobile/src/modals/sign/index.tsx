@@ -21,6 +21,8 @@ import { FeeInSign } from "./fee";
 import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
 import { WCAppLogoAndName } from "../../components/wallet-connect";
 import WalletConnect from "@walletconnect/client";
+import { renderAminoMessage } from "./amino";
+import { renderDirectMessage } from "./direct";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
@@ -124,14 +126,32 @@ export const SignModal: FunctionComponent<{
     const renderedMsgs = (() => {
       if (mode === "amino") {
         return (msgs as readonly AminoMsg[]).map((msg, i) => {
+          const account = accountStore.getAccount(chainId);
+          const chainInfo = chainStore.getChain(chainId);
+          const { title, content, scrollViewHorizontal } = renderAminoMessage(
+            account.msgOpts,
+            msg,
+            chainInfo.currencies
+          );
+
           return (
             <View key={i.toString()}>
-              <Msg title={msg.type}>
-                <Text
-                  style={style.flatten(["body3", "color-text-black-medium"])}
-                >
-                  TODO: Amino msg format
-                </Text>
+              <Msg title={title}>
+                {scrollViewHorizontal ? (
+                  <ScrollView horizontal={true}>
+                    <Text
+                      style={style.flatten(["body3", "color-text-black-low"])}
+                    >
+                      {content}
+                    </Text>
+                  </ScrollView>
+                ) : (
+                  <Text
+                    style={style.flatten(["body3", "color-text-black-low"])}
+                  >
+                    {content}
+                  </Text>
+                )}
               </Msg>
               {msgs.length - 1 !== i ? (
                 <View
@@ -147,13 +167,17 @@ export const SignModal: FunctionComponent<{
         });
       } else if (mode === "direct") {
         return (msgs as any[]).map((msg, i) => {
+          const chainInfo = chainStore.getChain(chainId);
+          const { title, content } = renderDirectMessage(
+            msg,
+            chainInfo.currencies
+          );
+
           return (
             <View key={i.toString()}>
-              <Msg title="Proto Msg">
-                <Text
-                  style={style.flatten(["body3", "color-text-black-medium"])}
-                >
-                  TODO: Proto msg format
+              <Msg title={title}>
+                <Text style={style.flatten(["body3", "color-text-black-low"])}>
+                  {content}
                 </Text>
               </Msg>
               {msgs.length - 1 !== i ? (
