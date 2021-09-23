@@ -128,6 +128,21 @@ export class LedgerInitStore {
     return false;
   }
 
+  @computed
+  get isInitNeeded(): boolean {
+    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+      "ledger-init"
+    );
+
+    for (const data of datas) {
+      if (data.data.event === "init-failed") {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   @flow
   *resume(...initArgs: any[]) {
     this._isLoading = true;

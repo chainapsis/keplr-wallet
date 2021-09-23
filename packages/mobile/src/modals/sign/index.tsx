@@ -27,16 +27,13 @@ import { renderDirectMessage } from "./direct";
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
-
-  interactionKey: string;
 }> = registerModal(
-  observer(({ interactionKey }) => {
+  observer(() => {
     const {
       chainStore,
       accountStore,
       queriesStore,
       walletConnectStore,
-      interactionModalStore,
       signInteractionStore,
     } = useStore();
     useUnmount(() => {
@@ -76,9 +73,12 @@ export const SignModal: FunctionComponent<{
     const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
     amountConfig.setSignDocHelper(signDocHelper);
 
+    const [isInternal, setIsInternal] = useState(false);
+
     useEffect(() => {
       if (signInteractionStore.waitingData) {
         const data = signInteractionStore.waitingData;
+        setIsInternal(data.isInternal);
         signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
         setChainId(data.data.signDocWrapper.chainId);
         gasConfig.setGas(data.data.signDocWrapper.gas);
@@ -234,10 +234,10 @@ export const SignModal: FunctionComponent<{
         </View>
         <MemoInput label="Memo" memoConfig={memoConfig} />
         <FeeInSign
-          interactionKey={interactionKey}
           feeConfig={feeConfig}
           gasConfig={gasConfig}
           signOptions={signInteractionStore.waitingData?.data.signOptions}
+          isInternal={isInternal}
         />
         <Button
           text="Approve"
@@ -258,8 +258,6 @@ export const SignModal: FunctionComponent<{
               }
             } catch (error) {
               console.log(error);
-            } finally {
-              interactionModalStore.popUrl();
             }
           }}
         />

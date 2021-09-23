@@ -27,7 +27,7 @@ export class InteractionStore implements InteractionForegroundHandler {
   @observable.shallow
   protected events: Map<
     string,
-    Omit<InteractionWaitingData, "id">[]
+    Omit<InteractionWaitingData, "id" | "isInternal">[]
   > = new Map();
 
   constructor(
@@ -46,10 +46,14 @@ export class InteractionStore implements InteractionForegroundHandler {
 
   getEvents<T = unknown>(
     type: string
-  ): Omit<InteractionWaitingData<T>, "id">[] {
+  ): Omit<InteractionWaitingData<T>, "id" | "isInternal">[] {
     return (
-      toJS(this.events.get(type) as Omit<InteractionWaitingData<T>, "id">[]) ??
-      []
+      toJS(
+        this.events.get(type) as Omit<
+          InteractionWaitingData<T>,
+          "id" | "isInternal"
+        >[]
+      ) ?? []
     );
   }
 
@@ -69,7 +73,7 @@ export class InteractionStore implements InteractionForegroundHandler {
   }
 
   @action
-  onEventDataReceived(data: Omit<InteractionWaitingData, "id">) {
+  onEventDataReceived(data: Omit<InteractionWaitingData, "id" | "isInternal">) {
     if (!this.events.has(data.type)) {
       this.events.set(
         data.type,

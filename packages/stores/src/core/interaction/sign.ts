@@ -69,6 +69,7 @@ export class SignInteractionStore {
     return {
       id: data.id,
       type: data.type,
+      isInternal: data.isInternal,
       data: {
         msgOrigin: data.data.msgOrigin,
         signer: data.data.signer,

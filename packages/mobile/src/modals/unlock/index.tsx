@@ -1,3 +1,5 @@
+export {};
+/*
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { registerModal, useModalState } from "../base";
 import { SafeAreaView, View } from "react-native";
@@ -113,3 +115,4 @@ export const UnlockModal: FunctionComponent<{
     },
   }
 );
+ */

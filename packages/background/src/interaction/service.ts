@@ -53,7 +53,11 @@ export class InteractionService {
     }
 
     // TODO: Add timeout?
-    const interactionWaitingData = await this.addDataToMap(type, data);
+    const interactionWaitingData = await this.addDataToMap(
+      type,
+      env.isInternalMsg,
+      data
+    );
 
     const msg = new PushInteractionDataMsg(interactionWaitingData);
 
@@ -83,6 +87,8 @@ export class InteractionService {
       this.resolverMap.get(id)!.onApprove(result);
       this.resolverMap.delete(id);
     }
+
+    this.removeDataFromMap(id);
   }
 
   reject(id: string) {
@@ -91,10 +97,13 @@ export class InteractionService {
       this.resolverMap.get(id)!.onReject(new Error("Request rejected"));
       this.resolverMap.delete(id);
     }
+
+    this.removeDataFromMap(id);
   }
 
   protected async addDataToMap(
     type: string,
+    isInternal: boolean,
     data: unknown
   ): Promise<InteractionWaitingData> {
     const bytes = new Uint8Array(8);
@@ -107,6 +116,7 @@ export class InteractionService {
     const interactionWaitingData: InteractionWaitingData = {
       id,
       type,
+      isInternal,
       data,
     };
 

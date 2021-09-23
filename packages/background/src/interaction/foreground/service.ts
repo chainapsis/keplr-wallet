@@ -8,7 +8,7 @@ export class InteractionForegroundService {
     this.handler.onInteractionDataReceived(data);
   }
 
-  pushEvent(data: Omit<InteractionWaitingData, "id">): void {
+  pushEvent(data: Omit<InteractionWaitingData, "id" | "isInternal">): void {
     this.handler.onEventDataReceived(data);
   }
 }

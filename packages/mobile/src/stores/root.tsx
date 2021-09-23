@@ -17,7 +17,6 @@ import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { RNEnv, RNRouterUI, RNMessageRequesterInternal } from "../router";
-import { InteractionModalStore } from "./interaction-modal";
 import { ChainStore } from "./chain";
 import EventEmitter from "eventemitter3";
 import { Keplr } from "@keplr-wallet/provider";
@@ -29,7 +28,6 @@ export class RootStore {
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
 
-  public readonly interactionModalStore: InteractionModalStore;
   protected readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
   public readonly ledgerInitStore: LedgerInitStore;
@@ -51,7 +49,6 @@ export class RootStore {
 
     const eventEmitter = new EventEmitter();
 
-    this.interactionModalStore = new InteractionModalStore();
     // Order is important.
     this.interactionStore = new InteractionStore(
       router,

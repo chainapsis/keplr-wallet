@@ -31,7 +31,9 @@ export class PushEventDataMsg extends Message<void> {
     return "push-event-data";
   }
 
-  constructor(public readonly data: Omit<InteractionWaitingData, "id">) {
+  constructor(
+    public readonly data: Omit<InteractionWaitingData, "id" | "isInternal">
+  ) {
     super();
   }
 

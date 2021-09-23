@@ -11,13 +11,14 @@ import { LoadingSpinner } from "../../components/spinner";
 import { Ledger, LedgerInitErrorOn } from "@keplr-wallet/background";
 import { getLastUsedLedgerDeviceId } from "../../utils/ledger";
 import { RectButton } from "../../components/rect-button";
+import { useUnmount } from "../../hooks";
 
 export const LedgerGranterModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
 }> = registerModal(
   observer(() => {
-    const { ledgerInitStore, interactionModalStore } = useStore();
+    const { ledgerInitStore } = useStore();
 
     const style = useStyle();
 
@@ -38,18 +39,13 @@ export const LedgerGranterModal: FunctionComponent<{
       });
     }, []);
 
-    useEffect(() => {
-      return () => {
-        // When the modal is closed without resuming, abort all the ledger init interactions.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        if (!resumed.current) {
-          interactionModalStore.popAll("/ledger-grant");
-          ledgerInitStore.abortAll();
-        }
-      };
-      // The ref of interaction modal store and ledger init store will never change.
-      // So this effect will be executed on unmounted.
-    }, [interactionModalStore, ledgerInitStore]);
+    useUnmount(() => {
+      // When the modal is closed without resuming, abort all the ledger init interactions.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      if (!resumed.current) {
+        ledgerInitStore.abortAll();
+      }
+    });
 
     useEffect(() => {
       const subscription = bleManager.onStateChange((newState) => {
@@ -183,7 +179,6 @@ export const LedgerGranterModal: FunctionComponent<{
                   name={device.name}
                   onCanResume={async () => {
                     resumed.current = true;
-                    interactionModalStore.popAll("/ledger-grant");
                     await ledgerInitStore.resumeAll(device.id);
                   }}
                 />

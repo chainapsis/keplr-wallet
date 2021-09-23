@@ -48,19 +48,17 @@ const FeeButtonsModal: FunctionComponent<{
 );
 
 export const FeeInSign: FunctionComponent<{
-  interactionKey: string;
+  isInternal: boolean;
 
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
 
   signOptions?: KeplrSignOptions;
-}> = observer(({ interactionKey, signOptions, feeConfig, gasConfig }) => {
-  const { chainStore, priceStore, interactionModalStore } = useStore();
+}> = observer(({ isInternal, signOptions, feeConfig, gasConfig }) => {
+  const { chainStore, priceStore } = useStore();
 
   const style = useStyle();
 
-  const urlInfo = interactionModalStore.getUrlInfo(interactionKey);
-  const isInternal = urlInfo?.isInternal ?? false;
   const preferNoSetFee = signOptions?.preferNoSetFee ?? false;
 
   const fee =
