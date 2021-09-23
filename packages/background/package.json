@@ -39,7 +39,7 @@
     "axios": "^0.21.0",
     "big-integer": "^1.6.48",
     "bip39": "^3.0.2",
-    "buffer": "^5.4.3",
+    "buffer": "^6.0.3",
     "delay": "^4.4.0",
     "joi": "^17.3.0",
     "ledger-cosmos-js": "^2.1.8",

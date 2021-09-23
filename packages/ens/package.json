@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@ensdomains/resolver": "^0.2.4",
-    "buffer": "^5.4.3",
+    "buffer": "^6.0.3",
     "ethereum-ens": "^0.8.0",
     "mobx": "^6.1.7",
     "web3": "^1.2.6"

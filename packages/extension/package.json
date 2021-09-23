@@ -33,7 +33,7 @@
     "argon-dashboard-react": "^1.1.0",
     "axios": "^0.21.0",
     "bip39": "^3.0.2",
-    "buffer": "^5.4.3",
+    "buffer": "^6.0.3",
     "chart.js": "^2.9.3",
     "classnames": "^2.2.6",
     "delay": "^4.4.0",

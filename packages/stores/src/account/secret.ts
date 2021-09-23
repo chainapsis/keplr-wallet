@@ -1,6 +1,6 @@
 import { AccountSetBase, AccountSetOpts, MsgOpt } from "./base";
 import { HasSecretQueries, QueriesSetBase, QueriesStore } from "../query";
-import { Buffer } from "buffer";
+import { Buffer } from "buffer/";
 import { ChainGetter, CoinPrimitive } from "../common";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
