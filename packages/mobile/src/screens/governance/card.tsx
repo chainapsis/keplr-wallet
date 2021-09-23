@@ -93,7 +93,7 @@ export const GovernanceCardBody: FunctionComponent<{
               })
               .replace("in ", "") + " left"
           );
-        } else {
+        } else if (relativeDepositEndTimeHours) {
           return (
             intl
               .formatRelativeTime(relativeDepositEndTimeHours, "hours", {
@@ -102,6 +102,7 @@ export const GovernanceCardBody: FunctionComponent<{
               .replace("in ", "") + " left"
           );
         }
+        return "";
       case Governance.ProposalStatus.VOTING_PERIOD:
         const relativeVotingEndTime =
           (new Date(proposal.raw.voting_end_time).getTime() - current) / 1000;
@@ -120,7 +121,7 @@ export const GovernanceCardBody: FunctionComponent<{
               })
               .replace("in ", "") + " left"
           );
-        } else {
+        } else if (relativeVotingEndTimeHours) {
           return (
             intl
               .formatRelativeTime(relativeVotingEndTimeHours, "hours", {
@@ -129,6 +130,7 @@ export const GovernanceCardBody: FunctionComponent<{
               .replace("in ", "") + " left"
           );
         }
+        return "";
       case Governance.ProposalStatus.FAILED:
       case Governance.ProposalStatus.PASSED:
       case Governance.ProposalStatus.REJECTED:
