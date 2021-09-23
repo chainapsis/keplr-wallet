@@ -47,15 +47,33 @@ export const getKeyStoreParagraph = (keyStore: MultiKeyStoreInfoElem) => {
         addressIndex: 0,
       };
 
-  return keyStore.type === "ledger"
-    ? `Ledger - m/44'/118'/${bip44HDPath.account}'${
+  switch (keyStore.type) {
+    case "ledger":
+      return `Ledger - m/44'/118'/${bip44HDPath.account}'${
         bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
           ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
           : ""
-      }`
-    : keyStore.meta?.email
-    ? keyStore.meta.email
-    : undefined;
+      }`;
+    case "mnemonic":
+      if (
+        bip44HDPath.account !== 0 ||
+        bip44HDPath.change !== 0 ||
+        bip44HDPath.addressIndex !== 0
+      ) {
+        return `Mnemonic - m/44'/-/${bip44HDPath.account}'${
+          bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
+            ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
+            : ""
+        }`;
+      }
+      return;
+    case "privateKey":
+      // Torus key
+      if (keyStore.meta?.email) {
+        return keyStore.meta.email;
+      }
+      return;
+  }
 };
 
 export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
