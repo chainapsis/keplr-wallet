@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import FastImage, { ImageStyle } from "react-native-fast-image";
 import { useStyle } from "../../styles";
 import { VectorCharacter } from "../vector-character";
+import { WCAppLogo } from "./app-logo";
 
 export const WCAppLogoAndName: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -16,13 +17,6 @@ export const WCAppLogoAndName: FunctionComponent<{
 
   const appName = peerMeta?.name || peerMeta?.url || "unknown";
 
-  const icons = peerMeta?.icons;
-  const logoUrl = useMemo(() => {
-    if (icons && icons.length > 0) {
-      return icons[icons.length - 1];
-    }
-  }, [icons]);
-
   return (
     <View
       style={StyleSheet.flatten([
@@ -30,40 +24,17 @@ export const WCAppLogoAndName: FunctionComponent<{
         containerStyle,
       ])}
     >
-      {logoUrl ? (
-        <FastImage
-          style={StyleSheet.flatten([
-            style.flatten(["width-44", "height-44", "margin-bottom-16"]),
-            logoStyle,
-          ])}
-          resizeMode={FastImage.resizeMode.contain}
-          source={{
-            uri: logoUrl,
-            cache: FastImage.cacheControl.web,
-          }}
-        />
-      ) : (
-        <View
-          style={StyleSheet.flatten([
-            style.flatten([
-              "width-44",
-              "height-44",
-              "margin-bottom-16",
-              "border-radius-64",
-              "justify-center",
-              "items-center",
-              "background-color-text-black-very-very-low",
-            ]),
-            altLogoStyle,
-          ])}
-        >
-          <VectorCharacter
-            height={20}
-            color={style.get("color-white").color}
-            char={appName[0]}
-          />
-        </View>
-      )}
+      <WCAppLogo
+        peerMeta={peerMeta}
+        logoStyle={StyleSheet.flatten([
+          style.flatten(["margin-bottom-16"]),
+          logoStyle,
+        ])}
+        altLogoStyle={StyleSheet.flatten([
+          style.flatten(["margin-bottom-16"]),
+          altLogoStyle,
+        ])}
+      />
       <Text style={style.flatten(["h6", "color-text-black-medium"])}>
         {appName}
       </Text>

@@ -13,3 +13,4 @@ export * from "./check";
 export * from "./close";
 export * from "./alert";
 export * from "./refresh";
+export * from "./unconnect";
