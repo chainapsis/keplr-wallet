@@ -67,6 +67,10 @@ import {
   IXO_RPC_CONFIG,
   IXO_REST_ENDPOINT,
   IXO_REST_CONFIG,
+  EMONEY_RPC_ENDPOINT,
+  EMONEY_RPC_CONFIG,
+  EMONEY_REST_ENDPOINT,
+  EMONEY_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -687,7 +691,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: CERTIK_RPC_CONFIG,
     rest: CERTIK_REST_ENDPOINT,
     restConfig: CERTIK_REST_CONFIG,
-    chainId: "shentu-2.1",
+    chainId: "shentu-2.2",
     chainName: "Certik",
     stakeCurrency: {
       coinDenom: "CTK",
@@ -956,7 +960,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 459,
   },
-
   {
     rpc: IXO_RPC_ENDPOINT,
     rpcConfig: IXO_RPC_CONFIG,
@@ -997,7 +1000,59 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["stargate"],
   },
-
+  {
+    rpc: EMONEY_RPC_ENDPOINT,
+    rpcConfig: EMONEY_RPC_CONFIG,
+    rest: EMONEY_REST_ENDPOINT,
+    restConfig: EMONEY_REST_CONFIG,
+    chainId: "emoney-3",
+    chainName: "e-Money",
+    stakeCurrency: {
+      coinDenom: "NGM",
+      coinMinimalDenom: "ungm",
+      coinDecimals: 6,
+      coinGeckoId: "e-money",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/emoney/stake"
+        : "http://localhost:8080/#/emoney/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/emoney/stake"
+        : "http://localhost:8080/#/emoney/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("emoney"),
+    currencies: [
+      {
+        coinDenom: "NGM",
+        coinMinimalDenom: "ungm",
+        coinDecimals: 6,
+        coinGeckoId: "e-money",
+      },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "NGM",
+        coinMinimalDenom: "ungm",
+        coinDecimals: 6,
+        coinGeckoId: "e-money",
+      },
+    ],
+    gasPriceStep: {
+      low: 1,
+      average: 1,
+      high: 1,
+    },
+    features: ["stargate", "ibc-transfer"],
+  },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
     rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,
