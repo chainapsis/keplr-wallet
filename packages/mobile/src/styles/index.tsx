@@ -279,6 +279,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "40": 40,
     "44": 44,
     "54": 54,
+    "56": 56,
     "58": 58,
     "72": 72,
     "80": 80,
@@ -294,6 +295,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
   heights: {
     full: "100%",
     half: "50%",
+    "0.5": 0.5,
     "1": 1,
     "4": 4,
     "5": 5,
@@ -351,6 +353,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "20": 20,
     "22": 22,
     "24": 24,
+    "25.5": 25.5,
     "28": 28,
     "32": 32,
     "36": 36,

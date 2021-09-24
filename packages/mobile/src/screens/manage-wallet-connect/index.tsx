@@ -2,7 +2,6 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithScrollView } from "../../components/page";
-import { RectButton } from "../../components/rect-button";
 import { Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { WCAppLogo } from "../../components/wallet-connect";
@@ -16,55 +15,71 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView>
-      <View style={style.flatten(["height-card-gap"])} />
-      {walletConnectStore.sessions.map((session) => {
+      <View style={style.get("height-card-gap")} />
+      {walletConnectStore.sessions.map((session, i) => {
         const appName =
           session.peerMeta?.name || session.peerMeta?.url || "unknown";
 
         return (
-          <View
-            key={session.key}
-            style={style.flatten([
-              "flex-row",
-              "items-center",
-              "justify-between",
-              "background-color-white",
-              "padding-right-10",
-              "padding-y-22",
-            ])}
-          >
+          <React.Fragment key={session.key}>
+            <View
+              style={style.flatten(["height-0.5", "background-color-divider"])}
+            />
             <View
               style={style.flatten([
-                "padding-left-20",
                 "flex-row",
                 "items-center",
+                "background-color-white",
+                "padding-y-25.5",
               ])}
             >
-              <WCAppLogo peerMeta={session.peerMeta} />
-              <Text
+              <WCAppLogo
+                logoStyle={style.flatten(["margin-left-20"])}
+                altLogoStyle={style.flatten(["margin-left-20"])}
+                peerMeta={session.peerMeta}
+              />
+              <View style={style.flatten(["flex-1", "margin-left-16"])}>
+                <Text
+                  style={style.flatten([
+                    "subtitle2",
+                    "color-text-black-medium",
+                  ])}
+                >
+                  {appName}
+                </Text>
+              </View>
+              <View
                 style={style.flatten([
-                  "margin-left-16",
-                  "subtitle2",
-                  "color-text-black-medium",
+                  "height-1",
+                  "overflow-visible",
+                  "justify-center",
                 ])}
               >
-                {appName}
-              </Text>
+                <TouchableOpacity
+                  style={style.flatten(["padding-x-16", "padding-y-24"])}
+                  onPress={() => {
+                    walletConnectStore.disconnect(session.key);
+                  }}
+                >
+                  <UnconnectIcon
+                    color={style.get("color-text-black-very-very-low").color}
+                    height={25}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-            <TouchableOpacity
-              style={style.flatten(["padding-10"])}
-              onPress={() => {
-                walletConnectStore.disconnect(session.key);
-              }}
-            >
-              <UnconnectIcon
-                color={style.get("color-text-black-very-very-low").color}
-                height={30}
+            {walletConnectStore.sessions.length - 1 === i ? (
+              <View
+                style={style.flatten([
+                  "height-0.5",
+                  "background-color-divider",
+                ])}
               />
-            </TouchableOpacity>
-          </View>
+            ) : null}
+          </React.Fragment>
         );
       })}
+      <View style={style.get("height-card-gap")} />
     </PageWithScrollView>
   );
 });

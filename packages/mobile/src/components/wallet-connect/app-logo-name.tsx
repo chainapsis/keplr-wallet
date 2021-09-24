@@ -1,9 +1,8 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent } from "react";
 import WalletConnect from "@walletconnect/client";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
-import FastImage, { ImageStyle } from "react-native-fast-image";
+import { ImageStyle } from "react-native-fast-image";
 import { useStyle } from "../../styles";
-import { VectorCharacter } from "../vector-character";
 import { WCAppLogo } from "./app-logo";
 
 export const WCAppLogoAndName: FunctionComponent<{

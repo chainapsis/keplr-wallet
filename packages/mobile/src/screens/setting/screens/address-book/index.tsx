@@ -96,7 +96,14 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
         </HeaderRightButton>
       ),
     });
-  }, [addressBookConfig, chainId, chainStore, smartNavigation, style]);
+  }, [
+    addressBookConfig,
+    analyticsStore,
+    chainId,
+    chainStore,
+    smartNavigation,
+    style,
+  ]);
 
   const isInTransaction = recipientConfig != null || memoConfig != null;
   const AddressBookItem =

@@ -2,9 +2,9 @@ import React, { FunctionComponent } from "react";
 import Svg, { Path } from "react-native-svg";
 
 export const UnconnectIcon: FunctionComponent<{
-  color?: string;
+  color: string;
   height: number;
-}> = ({ color = "#C6C6CD", height }) => {
+}> = ({ color, height }) => {
   return (
     <Svg
       viewBox="0 0 24 25"
