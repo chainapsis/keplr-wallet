@@ -61,7 +61,12 @@ export const PasswordInputModal: FunctionComponent<{
           secureTextEntry={true}
           onSubmitEditing={submitPassword}
         />
-        <Button text="Approve" loading={isLoading} onPress={submitPassword} />
+        <Button
+          text="Approve"
+          size="large"
+          loading={isLoading}
+          onPress={submitPassword}
+        />
       </CardModal>
     );
   },
