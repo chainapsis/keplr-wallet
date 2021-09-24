@@ -20,6 +20,7 @@ import { HeaderRightButton } from "../../../../components/header";
 import { AddressDeleteModal } from "../../../../modals/address";
 import { HeaderAddIcon } from "../../../../components/header/icon";
 import { useLogScreenView } from "../../../../hooks";
+import { AddressBookIcon } from "../../../../components/icon";
 
 const addressBookItemComponent = {
   inTransaction: RectButton,
@@ -107,7 +108,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
     fromScreen: isInTransaction ? "Transaction" : "Setting",
   });
 
-  return (
+  return addressBookConfig.addressBookDatas.length > 0 ? (
     <PageWithScrollView>
       <View style={style.flatten(["height-card-gap"])} />
       {addressBookConfig.addressBookDatas.map((data, i) => {
@@ -196,6 +197,27 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
         addressBookConfig={addressBookConfig}
         addressIndex={deletingAddressIndex}
       />
+    </PageWithScrollView>
+  ) : (
+    <PageWithScrollView
+      contentContainerStyle={style.flatten(["flex-grow-1"])}
+      scrollEnabled={false}
+    >
+      <View style={style.flatten(["flex-1"])} />
+      <View style={style.flatten(["justify-center", "items-center"])}>
+        <View style={style.flatten(["margin-bottom-21"])}>
+          <AddressBookIcon
+            color={style.get("color-text-black-very-very-low").color}
+            height={56}
+          />
+        </View>
+        <Text
+          style={style.flatten(["subtitle2", "color-text-black-very-very-low"])}
+        >
+          No address book entry
+        </Text>
+      </View>
+      <View style={style.flatten(["margin-top-68", "flex-1"])} />
     </PageWithScrollView>
   );
 });
