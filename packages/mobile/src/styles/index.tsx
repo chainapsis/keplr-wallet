@@ -28,6 +28,7 @@ export const Colors = {
   "secondary-800": "#762C64",
   "secondary-900": "#471D40",
   danger: "#F5365C",
+  "danger-10": "#FFF1F4",
   "danger-50": "#FFD8E0",
   "danger-100": "#FFBCC9",
   "danger-200": "#FC91A6",

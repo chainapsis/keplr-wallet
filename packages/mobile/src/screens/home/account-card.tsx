@@ -6,6 +6,7 @@ import { useStore } from "../../stores";
 import { useStyle } from "../../styles";
 import { AddressCopyable } from "../../components/address-copyable";
 import { DoubleDoughnutChart } from "../../components/svg";
+import { AlertIcon, RefreshIcon } from "../../components/icon";
 import { Button } from "../../components/button";
 import { LoadingSpinner } from "../../components/spinner";
 import { StakedTokenSymbol, TokenSymbol } from "../../components/token-symbol";
@@ -63,7 +64,7 @@ export const AccountCard: FunctionComponent<{
             {account.name || "..."}
           </Text>
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
-          <View style={style.flatten(["margin-top-28", "margin-bottom-32"])}>
+          <View style={style.flatten(["margin-top-28", "margin-bottom-12"])}>
             <DoubleDoughnutChart data={data} />
             <View
               style={style.flatten([
@@ -103,6 +104,42 @@ export const AccountCard: FunctionComponent<{
               ) : null}
             </View>
           </View>
+        </View>
+      </CardBody>
+      <View
+        style={style.flatten([
+          "flex-row",
+          "justify-between",
+          "items-center",
+          "background-color-danger-10",
+          "margin-bottom-12",
+          "padding-24",
+        ])}
+      >
+        <View style={style.flatten(["flex-row", "items-center"])}>
+          <AlertIcon color={style.get("color-danger").color} size={24} />
+          <Text
+            style={style.flatten([
+              "margin-left-12",
+              "subtitle2",
+              "color-danger",
+            ])}
+          >
+            ERR_INTERNET_DISCONNECTED
+          </Text>
+        </View>
+        <View
+          style={style.flatten([
+            "background-color-danger-50",
+            "padding-8",
+            "border-radius-64",
+          ])}
+        >
+          <RefreshIcon color={style.get("color-danger").color} size={24} />
+        </View>
+      </View>
+      <CardBody>
+        <View style={style.flatten(["flex", "items-center"])}>
           <View
             style={style.flatten([
               "flex-row",
