@@ -37,7 +37,7 @@ export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
 
   const unbondings = queries.cosmos.queryUnbondingDelegations
     .getQueryBech32Address(account.bech32Address)
-    .unbondingBalances.filter(
+    .unbondingBalances.find(
       (unbonding) => unbonding.validatorAddress === validatorAddress
     );
 
@@ -67,7 +67,7 @@ export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
           validatorAddress={validatorAddress}
         />
       ) : null}
-      {unbondings.length > 0 ? (
+      {unbondings ? (
         <UnbondingCard validatorAddress={validatorAddress} />
       ) : null}
     </PageWithScrollView>

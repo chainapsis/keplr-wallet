@@ -39,7 +39,7 @@ export const MyRewardCard: FunctionComponent<{
             "margin-bottom-12",
           ])}
         >
-          My Pending Reward
+          My Pending Rewards
         </Text>
         <View style={style.flatten(["flex-row", "items-end"])}>
           <View>
@@ -51,9 +51,10 @@ export const MyRewardCard: FunctionComponent<{
               ])}
             >
               {pendingStakableReward
-                .maxDecimals(4)
                 .shrink(true)
+                .maxDecimals(6)
                 .trim(true)
+                .upperCase(true)
                 .toString()}
             </Text>
             <Text style={style.flatten(["h7", "color-primary"])}>

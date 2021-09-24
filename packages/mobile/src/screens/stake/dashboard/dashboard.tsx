@@ -8,8 +8,16 @@ import { useLogScreenView } from "../../../hooks";
 import { useStore } from "../../../stores";
 
 export const StakingDashboardScreen: FunctionComponent = () => {
+  const { chainStore, accountStore, queriesStore } = useStore();
+
   const style = useStyle();
-  const { chainStore } = useStore();
+
+  const account = accountStore.getAccount(chainStore.current.chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
+
+  const unbondings = queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+    account.bech32Address
+  ).unbondingBalances;
 
   useLogScreenView("Staking dashboard", {
     chainId: chainStore.current.chainId,
@@ -22,9 +30,11 @@ export const StakingDashboardScreen: FunctionComponent = () => {
       <DelegationsCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}
       />
-      <UndelegationsCard
-        containerStyle={style.flatten(["margin-bottom-card-gap"])}
-      />
+      {unbondings.length > 0 ? (
+        <UndelegationsCard
+          containerStyle={style.flatten(["margin-bottom-card-gap"])}
+        />
+      ) : null}
     </PageWithScrollView>
   );
 };
