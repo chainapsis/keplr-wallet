@@ -13,6 +13,7 @@ import Axios, { AxiosInstance, CancelToken, CancelTokenSource } from "axios";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { DeepReadonly } from "utility-types";
 import { HasMapStore } from "../map";
+import EventEmitter from "eventemitter3";
 
 export type QueryOptions = {
   // millisec
@@ -357,6 +358,18 @@ export class ObservableQuery<
   T = unknown,
   E = unknown
 > extends ObservableQueryBase<T, E> {
+  protected static eventListener: EventEmitter = new EventEmitter();
+
+  public static refreshAllObserved() {
+    ObservableQuery.eventListener.emit("refresh");
+  }
+
+  public static refreshAllObservedIfError() {
+    ObservableQuery.eventListener.emit("refresh", {
+      ifError: true,
+    });
+  }
+
   @observable
   protected _url: string = "";
 
@@ -371,6 +384,29 @@ export class ObservableQuery<
 
     this.setUrl(url);
   }
+
+  protected onStart() {
+    super.onStart();
+
+    ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
+  }
+
+  protected onStop() {
+    super.onStop();
+
+    ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
+  }
+
+  protected readonly refreshHandler = (data: any) => {
+    const ifError = data?.ifError;
+    if (ifError) {
+      if (this.error) {
+        this.fetch();
+      }
+    } else {
+      this.fetch();
+    }
+  };
 
   get url(): string {
     return this._url;

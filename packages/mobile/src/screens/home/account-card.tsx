@@ -6,11 +6,11 @@ import { useStore } from "../../stores";
 import { useStyle } from "../../styles";
 import { AddressCopyable } from "../../components/address-copyable";
 import { DoubleDoughnutChart } from "../../components/svg";
-import { AlertIcon, RefreshIcon } from "../../components/icon";
 import { Button } from "../../components/button";
 import { LoadingSpinner } from "../../components/spinner";
 import { StakedTokenSymbol, TokenSymbol } from "../../components/token-symbol";
 import { useSmartNavigation } from "../../navigation";
+import { NetworkErrorView } from "./network-error-view";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -58,13 +58,13 @@ export const AccountCard: FunctionComponent<{
 
   return (
     <Card style={containerStyle}>
-      <CardBody>
+      <CardBody style={style.flatten(["padding-bottom-0"])}>
         <View style={style.flatten(["flex", "items-center"])}>
           <Text style={style.flatten(["h4", "margin-bottom-8"])}>
             {account.name || "..."}
           </Text>
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
-          <View style={style.flatten(["margin-top-28", "margin-bottom-12"])}>
+          <View style={style.flatten(["margin-top-28", "margin-bottom-16"])}>
             <DoubleDoughnutChart data={data} />
             <View
               style={style.flatten([
@@ -106,39 +106,8 @@ export const AccountCard: FunctionComponent<{
           </View>
         </View>
       </CardBody>
-      <View
-        style={style.flatten([
-          "flex-row",
-          "justify-between",
-          "items-center",
-          "background-color-danger-10",
-          "margin-bottom-12",
-          "padding-24",
-        ])}
-      >
-        <View style={style.flatten(["flex-row", "items-center"])}>
-          <AlertIcon color={style.get("color-danger").color} size={24} />
-          <Text
-            style={style.flatten([
-              "margin-left-12",
-              "subtitle2",
-              "color-danger",
-            ])}
-          >
-            ERR_INTERNET_DISCONNECTED
-          </Text>
-        </View>
-        <View
-          style={style.flatten([
-            "background-color-danger-50",
-            "padding-8",
-            "border-radius-64",
-          ])}
-        >
-          <RefreshIcon color={style.get("color-danger").color} size={24} />
-        </View>
-      </View>
-      <CardBody>
+      <NetworkErrorView />
+      <CardBody style={style.flatten(["padding-top-16"])}>
         <View style={style.flatten(["flex", "items-center"])}>
           <View
             style={style.flatten([

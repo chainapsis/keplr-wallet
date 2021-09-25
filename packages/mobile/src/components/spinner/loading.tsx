@@ -1,6 +1,7 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent } from "react";
 import Svg, { Circle } from "react-native-svg";
-import Animated, { Clock, Easing } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
+import { useSpinAnimated } from "./hooks";
 
 export const SVGLoadingIcon: FunctionComponent<{
   color: string;
@@ -57,48 +58,10 @@ export const SVGLoadingIcon: FunctionComponent<{
 export const LoadingSpinner: FunctionComponent<{
   color: string;
   size: number;
-}> = ({ color, size }) => {
-  const [spinClock] = useState(() => new Clock());
-  const [spinClockState] = useState(() => {
-    return {
-      finished: new Animated.Value(0),
-      position: new Animated.Value(0),
-      time: new Animated.Value(0),
-      frameTime: new Animated.Value(0),
-    };
-  });
-  const [animConfig] = useState(() => {
-    return {
-      duration: 1200,
-      toValue: 360,
-      easing: Easing.linear,
-    };
-  });
 
-  // Loop infinitely
-  const spinAnimated = useMemo(() => {
-    return Animated.block([
-      // start right away
-      Animated.startClock(spinClock),
-      // process state
-      Animated.timing(spinClock, spinClockState, animConfig),
-      // when over (processed by timing at the end)
-      Animated.cond(spinClockState.finished, [
-        // we stop
-        Animated.stopClock(spinClock),
-        // set flag ready to be restarted
-        Animated.set(spinClockState.finished, 0),
-        // same value as the initial defined in the state creation
-        Animated.set(spinClockState.position, 0),
-        // very important to reset this ones
-        Animated.set(spinClockState.time, 0),
-        Animated.set(spinClockState.frameTime, 0),
-        // and we restart
-        Animated.startClock(spinClock),
-      ]),
-      spinClockState.position,
-    ]);
-  }, [animConfig, spinClock, spinClockState]);
+  enabled?: boolean;
+}> = ({ color, size, enabled }) => {
+  const spinAnimated = useSpinAnimated(enabled ?? true);
 
   return (
     <Animated.View
@@ -107,10 +70,7 @@ export const LoadingSpinner: FunctionComponent<{
         height: size,
         transform: [
           {
-            rotate: Animated.divide(
-              Animated.multiply(spinAnimated, Math.PI),
-              180
-            ),
+            rotate: spinAnimated,
           },
         ],
       }}
