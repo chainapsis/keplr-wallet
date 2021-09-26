@@ -3,7 +3,7 @@ import { TransportIniter } from "./options";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CosmosApp: any = require("ledger-cosmos-js").default;
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
-
+import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { signatureImport } from "secp256k1";
 
 export enum LedgerInitErrorOn {
@@ -11,6 +11,14 @@ export enum LedgerInitErrorOn {
   App,
   Unknown,
 }
+
+export const LedgerWebUSBIniter: TransportIniter = async () => {
+  return await TransportWebUSB.create();
+};
+
+export const LedgerWebHIDIniter: TransportIniter = async () => {
+  return await TransportWebHID.create();
+};
 
 export class LedgerInitError extends Error {
   constructor(public readonly errorOn: LedgerInitErrorOn, message?: string) {

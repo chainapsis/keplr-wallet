@@ -159,7 +159,8 @@ export class RootStore {
       }>((obj, fiat) => {
         obj[fiat.currency] = fiat;
         return obj;
-      }, {})
+      }, {}),
+      "usd"
     );
 
     this.tokensStore = new TokensStore(
@@ -170,6 +171,8 @@ export class RootStore {
     );
 
     this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
+      new ExtensionKVStore("store_ibc_curreny_registrar"),
+      24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
       this.queriesStore
