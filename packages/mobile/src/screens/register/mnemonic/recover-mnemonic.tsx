@@ -141,6 +141,8 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                         setValue("mnemonic", text, {
                           shouldValidate: true,
                         });
+
+                        setFocus("name");
                       }
                     }}
                   />
