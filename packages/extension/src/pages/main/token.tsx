@@ -65,6 +65,7 @@ const TokenView: FunctionComponent<{
             contractAddress,
             "",
             {},
+            {},
             (_, viewingKey) => {
               loadingIndicator.setIsLoading("create-veiwing-key", false);
 

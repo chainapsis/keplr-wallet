@@ -139,10 +139,10 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
 
   const total = stakable.add(stakedSum);
 
-  const stakablePrice = priceStore.calculatePrice(fiatCurrency, stakable);
-  const stakedSumPrice = priceStore.calculatePrice(fiatCurrency, stakedSum);
+  const stakablePrice = priceStore.calculatePrice(stakable, fiatCurrency);
+  const stakedSumPrice = priceStore.calculatePrice(stakedSum, fiatCurrency);
 
-  const totalPrice = priceStore.calculatePrice(fiatCurrency, total);
+  const totalPrice = priceStore.calculatePrice(total, fiatCurrency);
 
   // If fiat value is fetched, show the value that is multiplied with amount and fiat value.
   // If not, just show the amount of asset.

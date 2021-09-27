@@ -77,6 +77,9 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
           analyticsStore.logEvent("Import account started", {
             registerType: "qr",
           });
+          smartNavigation.navigateSmart("Register.ImportFromExtension.Intro", {
+            registerConfig,
+          });
         }}
       />
       <Button

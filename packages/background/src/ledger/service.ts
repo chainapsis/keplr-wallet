@@ -1,7 +1,7 @@
 import { delay as diDelay, inject, singleton } from "tsyringe";
 import { TYPES } from "../types";
 
-import { Ledger } from "./ledger";
+import { Ledger, LedgerWebHIDIniter, LedgerWebUSBIniter } from "./ledger";
 
 import delay from "delay";
 
@@ -11,8 +11,6 @@ import { KVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
 import { LedgerOptions } from "./options";
 import { Buffer } from "buffer/";
-import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
-import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 
 @singleton()
 export class LedgerService {
@@ -34,14 +32,10 @@ export class LedgerService {
     };
 
     if (!this.options.transportIniters["webusb"]) {
-      this.options.transportIniters["webusb"] = async () => {
-        return await TransportWebUSB.create();
-      };
+      this.options.transportIniters["webusb"] = LedgerWebUSBIniter;
     }
     if (!this.options.transportIniters["webhid"]) {
-      this.options.transportIniters["webhid"] = async () => {
-        return await TransportWebHID.create();
-      };
+      this.options.transportIniters["webhid"] = LedgerWebHIDIniter;
     }
   }
 

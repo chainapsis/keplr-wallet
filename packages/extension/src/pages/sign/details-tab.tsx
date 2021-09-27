@@ -143,15 +143,15 @@ export const DetailsTab: FunctionComponent<{
               <div>
                 {feeConfig.fee.maxDecimals(6).trim(true).toString()}
                 {priceStore.calculatePrice(
-                  language.fiatCurrency,
-                  feeConfig.fee
+                  feeConfig.fee,
+                  language.fiatCurrency
                 ) ? (
                   <div
                     className="ml-2"
                     style={{ display: "inline-block", fontSize: "12px" }}
                   >
                     {priceStore
-                      .calculatePrice(language.fiatCurrency, feeConfig.fee)
+                      .calculatePrice(feeConfig.fee, language.fiatCurrency)
                       ?.toString()}
                   </div>
                 ) : null}

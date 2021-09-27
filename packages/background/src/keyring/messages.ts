@@ -5,7 +5,7 @@ import {
   KeyRingStatus,
   MultiKeyStoreInfoWithSelected,
 } from "./keyring";
-import { BIP44HDPath } from "./types";
+import { BIP44HDPath, ExportKeyRingData } from "./types";
 
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { BIP44, KeplrSignOptions, Key } from "@keplr-wallet/types";
@@ -708,5 +708,29 @@ export class CheckPasswordMsg extends Message<boolean> {
 
   type(): string {
     return CheckPasswordMsg.type();
+  }
+}
+
+export class ExportKeyRingDatasMsg extends Message<ExportKeyRingData[]> {
+  public static type() {
+    return "export-keyring-datas";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ExportKeyRingDatasMsg.type();
   }
 }

@@ -20,6 +20,7 @@ import {
   RestoreKeyRingMsg,
   GetIsKeyStoreCoinTypeSetMsg,
   CheckPasswordMsg,
+  ExportKeyRingDatasMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -98,6 +99,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         );
       case CheckPasswordMsg:
         return handleCheckPasswordMsg(service)(env, msg as CheckPasswordMsg);
+      case ExportKeyRingDatasMsg:
+        return handleExportKeyRingDatasMsg(service)(
+          env,
+          msg as ExportKeyRingDatasMsg
+        );
       default:
         throw new Error("Unknown msg type");
     }
@@ -341,5 +347,13 @@ const handleCheckPasswordMsg: (
 ) => InternalHandler<CheckPasswordMsg> = (service) => {
   return (_, msg) => {
     return service.checkPassword(msg.password);
+  };
+};
+
+const handleExportKeyRingDatasMsg: (
+  service: KeyRingService
+) => InternalHandler<ExportKeyRingDatasMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.exportKeyRingDatas(msg.password);
   };
 };

@@ -61,6 +61,8 @@
   "setting.address-book.confirm.delete-address.paragraph": "Are you sure you want to delete this address?",
   "setting.address-book.button.save": "Save",
 
+  "setting.export-to-mobile": "Export to mobile",
+
   "setting.credit": "Special thanks",
 
   "setting.keyring": "Select Account",

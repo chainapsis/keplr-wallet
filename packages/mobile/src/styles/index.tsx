@@ -68,6 +68,7 @@ export const Colors = {
   "modal-backdrop": "rgba(9,18,50,0.6)",
   "card-modal-handle": "#DCDCE3",
   "setting-screen-background": "#FAFBFD",
+  "camera-loading-background": "rgba(255,255,255,0.95)",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider({
@@ -334,6 +335,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "governance-card-body-placeholder": 130,
 
     "card-gap": 12,
+    "page-pad": 20,
   },
   paddingSizes: {
     "0": 0,
@@ -357,6 +359,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "25.5": 25.5,
     "26": 26,
     "28": 28,
+    "31": 31,
     "32": 32,
     "36": 36,
     "40": 40,
@@ -391,8 +394,10 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "28": 28,
     "30": 30,
     "32": 32,
+    "34": 34,
     "40": 40,
     "44": 44,
+    "46": 46,
     "48": 48,
     "58": 58,
     "64": 64,

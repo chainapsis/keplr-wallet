@@ -5,9 +5,7 @@ import { PageWithView } from "../../components/page";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSmartNavigation } from "../../navigation";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../components/button";
-import Svg, { Path } from "react-native-svg";
 import { Share, View } from "react-native";
 import { ChainSelectorModal } from "../../components/chain-selector";
 import { registerModal } from "../../modals/base";
@@ -15,9 +13,8 @@ import { CardModal } from "../../modals/card";
 import { AddressCopyable } from "../../components/address-copyable";
 import QRCode from "react-native-qrcode-svg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { useFocusEffect, useIsFocused } from "@react-navigation/native";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { CloseIcon } from "../../components/icon";
+import { useFocusEffect } from "@react-navigation/native";
+import { FullScreenCameraView } from "../../components/camera";
 
 export const CameraScreen: FunctionComponent = observer(() => {
   const { chainStore, walletConnectStore } = useStore();
@@ -27,8 +24,6 @@ export const CameraScreen: FunctionComponent = observer(() => {
   const smartNavigation = useSmartNavigation();
 
   const oncePerRead = useRef(false);
-
-  const isFocused = useIsFocused();
 
   useFocusEffect(
     useCallback(() => {
@@ -47,50 +42,64 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView disableSafeArea={true}>
-      {isFocused ? (
-        <RNCamera
-          style={style.flatten(["absolute-fill"])}
-          type={RNCamera.Constants.Type.back}
-          barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
-          captureAudio={false}
-          onBarCodeRead={async ({ data }) => {
-            if (
-              !oncePerRead.current &&
-              !isSelectChainModalOpen &&
-              !isAddressQRCodeModalOpen
-            ) {
-              oncePerRead.current = true;
+      <FullScreenCameraView
+        type={RNCamera.Constants.Type.back}
+        barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
+        captureAudio={false}
+        onBarCodeRead={async ({ data }) => {
+          if (
+            !oncePerRead.current &&
+            !isSelectChainModalOpen &&
+            !isAddressQRCodeModalOpen
+          ) {
+            oncePerRead.current = true;
 
-              try {
-                if (data.startsWith("wc:")) {
-                  await walletConnectStore.initClient(data);
+            try {
+              if (data.startsWith("wc:")) {
+                await walletConnectStore.initClient(data);
 
-                  smartNavigation.navigateSmart("Home", {});
-                } else {
-                  // Check that the data is bech32 address.
-                  // If this is not valid bech32 address, it will throw an error.
-                  Bech32Address.validate(data);
+                smartNavigation.navigateSmart("Home", {});
+              } else {
+                // Check that the data is bech32 address.
+                // If this is not valid bech32 address, it will throw an error.
+                Bech32Address.validate(data);
 
-                  const prefix = data.slice(0, data.indexOf("1"));
-                  const chainInfo = chainStore.chainInfosInUI.find(
-                    (chainInfo) =>
-                      chainInfo.bech32Config.bech32PrefixAccAddr === prefix
-                  );
-                  if (chainInfo) {
-                    smartNavigation.pushSmart("Send", {
-                      chainId: chainInfo.chainId,
-                      recipient: data,
-                    });
-                  }
+                const prefix = data.slice(0, data.indexOf("1"));
+                const chainInfo = chainStore.chainInfosInUI.find(
+                  (chainInfo) =>
+                    chainInfo.bech32Config.bech32PrefixAccAddr === prefix
+                );
+                if (chainInfo) {
+                  smartNavigation.pushSmart("Send", {
+                    chainId: chainInfo.chainId,
+                    recipient: data,
+                  });
                 }
-              } catch (e) {
-                console.log(e);
-                oncePerRead.current = false;
               }
+            } catch (e) {
+              console.log(e);
+              oncePerRead.current = false;
             }
-          }}
-        />
-      ) : null}
+          }
+        }}
+        containerBottom={
+          <Button
+            text="Show my QR code"
+            mode="light"
+            size="large"
+            containerStyle={style.flatten([
+              "margin-top-64",
+              "border-radius-64",
+              "opacity-90",
+            ])}
+            style={style.flatten(["padding-x-52"])}
+            textStyle={style.flatten(["normal-case"])}
+            onPress={() => {
+              setIsSelectChainModalOpen(true);
+            }}
+          />
+        }
+      />
       <ChainSelectorModal
         isOpen={isSelectChainModalOpen}
         close={() => setIsSelectChainModalOpen(false)}
@@ -108,59 +117,6 @@ export const CameraScreen: FunctionComponent = observer(() => {
         close={() => setIsAddressQRCodeModalOpen(false)}
         chainId={showingAddressQRCodeChainId}
       />
-      <SafeAreaView style={style.flatten(["absolute-fill", "items-center"])}>
-        <View style={style.flatten(["flex-row"])}>
-          <View style={style.get("flex-1")} />
-          <TouchableOpacity
-            onPress={() => {
-              smartNavigation.goBack();
-            }}
-          >
-            <View
-              style={style.flatten([
-                "width-38",
-                "height-38",
-                "border-radius-64",
-                "background-color-primary-50",
-                "opacity-90",
-                "margin-top-8",
-                "margin-right-16",
-                "items-center",
-                "justify-center",
-              ])}
-            >
-              <CloseIcon
-                size={28}
-                color={style.get("color-primary-300").color}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-        <View style={style.get("flex-1")} />
-        <View style={style.flatten(["margin-bottom-64"])}>
-          <Svg width="217" height="217" fill="none" viewBox="0 0 217 217">
-            <Path
-              stroke={style.get("color-primary").color}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="6"
-              d="M34 3H3v31M3 183v31h31M183 3h31v31M214 183v31h-31"
-            />
-          </Svg>
-        </View>
-        <Button
-          text="Show my QR code"
-          mode="light"
-          size="large"
-          containerStyle={style.flatten(["border-radius-64", "opacity-90"])}
-          style={style.flatten(["padding-x-52"])}
-          textStyle={style.flatten(["normal-case"])}
-          onPress={() => {
-            setIsSelectChainModalOpen(true);
-          }}
-        />
-        <View style={style.get("flex-1")} />
-      </SafeAreaView>
     </PageWithView>
   );
 });

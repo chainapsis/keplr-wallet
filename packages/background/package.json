@@ -33,6 +33,7 @@
     "@keplr-wallet/router": "^0.9.0-alpha.14",
     "@keplr-wallet/types": "^0.9.0-alpha.14",
     "@keplr-wallet/unit": "^0.9.0-alpha.14",
+    "@ledgerhq/hw-transport": "^6.3.0",
     "@ledgerhq/hw-transport-webhid": "^6.3.0",
     "@ledgerhq/hw-transport-webusb": "^6.3.0",
     "aes-js": "^3.1.2",

@@ -9,7 +9,7 @@ import {
 } from "./keyring";
 
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { BIP44HDPath, CommonCrypto } from "./types";
+import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 
 import { KVStore } from "@keplr-wallet/common";
 
@@ -404,5 +404,9 @@ export class KeyRingService {
     }
 
     return result;
+  }
+
+  async exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
+    return await this.keyRing.exportKeyRingDatas(password);
   }
 }

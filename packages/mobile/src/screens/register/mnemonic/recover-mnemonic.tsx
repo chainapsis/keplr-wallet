@@ -141,6 +141,8 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                         setValue("mnemonic", text, {
                           shouldValidate: true,
                         });
+
+                        setFocus("name");
                       }
                     }}
                   />
@@ -269,7 +271,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
       <View style={style.flatten(["flex-1"])} />
       <Button text="Next" size="large" loading={isCreating} onPress={submit} />
       {/* Mock element for bottom padding */}
-      <View style={style.flatten(["height-12"])} />
+      <View style={style.flatten(["height-page-pad"])} />
     </PageWithScrollView>
   );
 });
