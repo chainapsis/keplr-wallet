@@ -75,16 +75,14 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
   return (
     <PageWithView
       disableSafeArea
-      style={{
-        paddingTop: Dimensions.get("window").height * 0.23,
-        paddingBottom: Dimensions.get("window").height * 0.23,
-        ...style.flatten([
-          "padding-x-42",
-          "items-center",
-          "background-color-white",
-        ]),
-      }}
+      style={style.flatten([
+        "flex-grow-1",
+        Dimensions.get("window").width > 375 ? "padding-x-42" : "padding-x-20",
+        "items-center",
+        "background-color-white",
+      ])}
     >
+      <View style={style.flatten(["flex-3"])} />
       <View
         style={style.flatten([
           "width-122",
@@ -126,32 +124,43 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
         </View>
       </View>
 
-      <Text style={style.flatten(["h2", "margin-top-102", "margin-bottom-32"])}>
+      <Text style={style.flatten(["h2", "margin-top-82", "margin-bottom-32"])}>
         Transaction pending
       </Text>
-      <Text
-        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
+      <View style={style.flatten(["min-height-66"])}>
+        <Text
+          style={style.flatten([
+            "body1",
+            "text-center",
+            "color-text-black-low",
+          ])}
+        >
+          Transaction has been broadcasted to the blockchain and pending
+          confirmation.
+        </Text>
+      </View>
+
+      <View
+        style={style.flatten(["height-116", "margin-top-58", "justify-center"])}
       >
-        Transaction has been broadcasted to the blockchain and pending
-        confirmation.
-      </Text>
-      <Button
-        containerStyle={style.flatten(["margin-top-92"])}
-        size="default"
-        text="Go to homescreen"
-        mode="text"
-        rightIcon={
-          <View style={style.flatten(["margin-left-8"])}>
-            <RightArrowIcon
-              color={style.get("color-primary").color}
-              height={12}
-            />
-          </View>
-        }
-        onPress={() => {
-          smartNavigation.navigateSmart("Home", {});
-        }}
-      />
+        <Button
+          size="default"
+          text="Go to homescreen"
+          mode="text"
+          rightIcon={
+            <View style={style.flatten(["margin-left-8"])}>
+              <RightArrowIcon
+                color={style.get("color-primary").color}
+                height={12}
+              />
+            </View>
+          }
+          onPress={() => {
+            smartNavigation.navigateSmart("Home", {});
+          }}
+        />
+      </View>
+      <View style={style.flatten(["flex-2"])} />
     </PageWithView>
   );
 });

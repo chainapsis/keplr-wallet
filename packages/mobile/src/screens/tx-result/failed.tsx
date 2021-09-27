@@ -57,16 +57,14 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
   return (
     <PageWithView
       disableSafeArea
-      style={{
-        paddingTop: Dimensions.get("window").height * 0.23,
-        paddingBottom: Dimensions.get("window").height * 0.23,
-        ...style.flatten([
-          "padding-x-42",
-          "items-center",
-          "background-color-white",
-        ]),
-      }}
+      style={style.flatten([
+        "flex-grow-1",
+        Dimensions.get("window").width > 375 ? "padding-x-42" : "padding-x-20",
+        "items-center",
+        "background-color-white",
+      ])}
     >
+      <View style={style.flatten(["flex-3"])} />
       <View style={style.flatten(["width-122", "height-122"])}>
         <View
           style={{
@@ -87,52 +85,67 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
       <Text style={style.flatten(["h2", "margin-top-82", "margin-bottom-32"])}>
         Transaction failed
       </Text>
-      <Text
-        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
-      >
-        Transaction unsuccessful.
-      </Text>
-      <Text
-        style={style.flatten(["body1", "text-center", "color-text-black-low"])}
-      >
-        Please check the block explorer for more information.
-      </Text>
-      <View style={style.flatten(["flex-row"])}>
-        <Button
-          containerStyle={style.flatten(["margin-top-58", "flex-1"])}
-          size="large"
-          text="Confirm"
-          onPress={() => {
-            smartNavigation.navigateSmart("Home", {});
-          }}
-        />
+
+      <View style={style.flatten(["min-height-66"])}>
+        <Text
+          style={style.flatten([
+            "body1",
+            "text-center",
+            "color-text-black-low",
+          ])}
+        >
+          Transaction unsuccessful.
+        </Text>
+        <Text
+          style={style.flatten([
+            "body1",
+            "text-center",
+            "color-text-black-low",
+          ])}
+        >
+          Please check the block explorer for more information.
+        </Text>
       </View>
-      {chainInfo.raw.txExplorer ? (
-        <Button
-          containerStyle={style.flatten(["margin-top-21"])}
-          size="default"
-          text={`View on ${chainInfo.raw.txExplorer.name}`}
-          mode="text"
-          rightIcon={
-            <View style={style.flatten(["margin-left-8"])}>
-              <RightArrowIcon
-                color={style.get("color-primary").color}
-                height={12}
-              />
-            </View>
-          }
-          onPress={() => {
-            if (chainInfo.raw.txExplorer) {
-              WebBrowser.openBrowserAsync(
-                chainInfo.raw.txExplorer.txUrl.replace(
-                  "{txHash}",
-                  txHash.toUpperCase()
-                )
-              );
+
+      <View style={style.flatten(["height-116", "margin-top-58"])}>
+        <View style={style.flatten(["flex-row", "width-full"])}>
+          <Button
+            containerStyle={style.flatten(["flex-1"])}
+            size="large"
+            text="Confirm"
+            onPress={() => {
+              smartNavigation.navigateSmart("Home", {});
+            }}
+          />
+        </View>
+        {chainInfo.raw.txExplorer ? (
+          <Button
+            containerStyle={style.flatten(["margin-top-16"])}
+            size="default"
+            text={`View on ${chainInfo.raw.txExplorer.name}`}
+            mode="text"
+            rightIcon={
+              <View style={style.flatten(["margin-left-8"])}>
+                <RightArrowIcon
+                  color={style.get("color-primary").color}
+                  height={12}
+                />
+              </View>
             }
-          }}
-        />
-      ) : null}
+            onPress={() => {
+              if (chainInfo.raw.txExplorer) {
+                WebBrowser.openBrowserAsync(
+                  chainInfo.raw.txExplorer.txUrl.replace(
+                    "{txHash}",
+                    txHash.toUpperCase()
+                  )
+                );
+              }
+            }}
+          />
+        ) : null}
+      </View>
+      <View style={style.flatten(["flex-2"])} />
     </PageWithView>
   );
 });
