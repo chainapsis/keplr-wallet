@@ -19,3 +19,14 @@ export interface ScryptParams {
   r: number;
   p: number;
 }
+
+export interface ExportKeyRingData {
+  type: "mnemonic" | "privateKey";
+  // If the type is private key, the key is encoded as hex.
+  key: string;
+  coinTypeForChain: CoinTypeForChain;
+  bip44HDPath: BIP44HDPath;
+  meta: {
+    [key: string]: string;
+  };
+}

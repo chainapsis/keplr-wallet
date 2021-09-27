@@ -7,7 +7,7 @@ import {
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
 import { LedgerService } from "../ledger";
-import { BIP44HDPath, CommonCrypto } from "./types";
+import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Env } from "@keplr-wallet/router";
 
@@ -842,6 +842,65 @@ export class KeyRing {
     }
 
     return this.password === password;
+  }
+
+  async exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
+    if (!this.password) {
+      throw new Error("Keyring is locked");
+    }
+
+    if (this.password !== password) {
+      throw new Error("Invalid password");
+    }
+
+    const result: ExportKeyRingData[] = [];
+
+    for (const keyStore of this.multiKeyStore) {
+      const type = keyStore.type ?? "mnemonic";
+
+      switch (type) {
+        case "mnemonic": {
+          const mnemonic = Buffer.from(
+            await Crypto.decrypt(this.crypto, keyStore, password)
+          ).toString();
+
+          result.push({
+            bip44HDPath: keyStore.bip44HDPath ?? {
+              account: 0,
+              change: 0,
+              addressIndex: 0,
+            },
+            coinTypeForChain: keyStore.coinTypeForChain,
+            key: mnemonic,
+            meta: keyStore.meta ?? {},
+            type: "mnemonic",
+          });
+
+          break;
+        }
+        case "privateKey": {
+          const privateKey = Buffer.from(
+            await Crypto.decrypt(this.crypto, keyStore, password)
+          ).toString();
+
+          result.push({
+            bip44HDPath: keyStore.bip44HDPath ?? {
+              account: 0,
+              change: 0,
+              addressIndex: 0,
+            },
+            coinTypeForChain: keyStore.coinTypeForChain,
+            key: privateKey,
+            meta: keyStore.meta ?? {},
+            type: "privateKey",
+          });
+
+          break;
+        }
+      }
+    }
+
+    return result;
   }
 
   private static async CreateMnemonicKeyStore(

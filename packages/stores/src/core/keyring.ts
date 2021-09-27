@@ -21,6 +21,8 @@ import {
   UnlockKeyRingMsg,
   KeyRing,
   CheckPasswordMsg,
+  ExportKeyRingData,
+  ExportKeyRingDatasMsg,
 } from "@keplr-wallet/background";
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -385,5 +387,12 @@ export class KeyRingStore {
     // Emit the key store changed event manually.
     this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     this.selectablesMap.forEach((selectables) => selectables.refresh());
+  }
+
+  async exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new ExportKeyRingDatasMsg(password)
+    );
   }
 }

@@ -58,7 +58,10 @@
     "scrypt-js": "^3.0.1",
     "secretjs": "^0.16.0",
     "utility-types": "^3.10.0",
-    "webextension-polyfill": "^0.7.0"
+    "webextension-polyfill": "^0.7.0",
+    "qrcode.react": "^1.0.1",
+    "@walletconnect/client": "^1.6.4",
+    "aes-js": "^3.1.2"
   },
   "devDependencies": {
     "@types/chart.js": "^2.9.25",

@@ -93,6 +93,7 @@ import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
 import { KeplrVersionScreen } from "./screens/setting/screens/version";
 import { ManageWalletConnectScreen } from "./screens/manage-wallet-connect";
+import { ImportFromExtensionScreen } from "./screens/register/import-from-extension";
 
 const {
   SmartNavigatorProvider,
@@ -121,6 +122,9 @@ const {
       upperScreenName: "Register",
     },
     "Register.TorusSignIn": {
+      upperScreenName: "Register",
+    },
+    "Register.ImportFromExtension": {
       upperScreenName: "Register",
     },
     "Register.End": {
@@ -211,6 +215,9 @@ const {
       registerConfig: RegisterConfig;
     };
     "Register.TorusSignIn": {
+      registerConfig: RegisterConfig;
+    };
+    "Register.ImportFromExtension": {
       registerConfig: RegisterConfig;
     };
     "Register.End": {
@@ -426,6 +433,13 @@ export const RegisterNavigation: FunctionComponent = () => {
         }}
         name="Register.TorusSignIn"
         component={TorusSignInScreen}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="Register.ImportFromExtension"
+        component={ImportFromExtensionScreen}
       />
       <Stack.Screen
         options={{

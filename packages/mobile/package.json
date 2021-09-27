@@ -110,7 +110,8 @@
     "stream-browserify": "^3.0.0",
     "string_decoder": "^1.3.0",
     "text-encoding": "^0.7.0",
-    "utility-types": "^3.10.0"
+    "utility-types": "^3.10.0",
+    "aes-js": "^3.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
