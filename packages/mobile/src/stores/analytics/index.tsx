@@ -32,6 +32,7 @@ export interface UserProperties {
   registerType?: "seed" | "google" | "ledger" | "qr";
   accountType?: "mnemonic" | "privateKey" | "ledger";
   currency?: string;
+  hasMobileAccount?: boolean;
 }
 
 export class AnalyticsStore {
@@ -82,6 +83,7 @@ export class AnalyticsStore {
       .update(bech32Address ? bech32Address : accountInfo.bech32Address)
       .digest("hex");
     this.amplitudeAnalytics.setUserId(hashed);
+    this.setUserProperties({ hasMobileAccount: true });
   }
 
   setUserProperties(userProperties?: UserProperties): void {
