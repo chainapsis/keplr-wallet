@@ -1,7 +1,11 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent, useEffect, useRef } from "react";
 import { StatusBar, Text, View } from "react-native";
-import { BIP44HDPath, KeyRingStatus } from "@keplr-wallet/background";
+import {
+  BIP44HDPath,
+  ExportKeyRingData,
+  KeyRingStatus,
+} from "@keplr-wallet/background";
 import {
   DrawerActions,
   NavigationContainer,
@@ -93,7 +97,11 @@ import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
 import { KeplrVersionScreen } from "./screens/setting/screens/version";
 import { ManageWalletConnectScreen } from "./screens/manage-wallet-connect";
-import { ImportFromExtensionScreen } from "./screens/register/import-from-extension";
+import {
+  ImportFromExtensionIntroScreen,
+  ImportFromExtensionScreen,
+  ImportFromExtensionSetPasswordScreen,
+} from "./screens/register/import-from-extension";
 
 const {
   SmartNavigatorProvider,
@@ -124,7 +132,13 @@ const {
     "Register.TorusSignIn": {
       upperScreenName: "Register",
     },
+    "Register.ImportFromExtension.Intro": {
+      upperScreenName: "Register",
+    },
     "Register.ImportFromExtension": {
+      upperScreenName: "Register",
+    },
+    "Register.ImportFromExtension.SetPassword": {
       upperScreenName: "Register",
     },
     "Register.End": {
@@ -217,8 +231,15 @@ const {
     "Register.TorusSignIn": {
       registerConfig: RegisterConfig;
     };
+    "Register.ImportFromExtension.Intro": {
+      registerConfig: RegisterConfig;
+    };
     "Register.ImportFromExtension": {
       registerConfig: RegisterConfig;
+    };
+    "Register.ImportFromExtension.SetPassword": {
+      registerConfig: RegisterConfig;
+      exportKeyRingDatas: ExportKeyRingData[];
     };
     "Register.End": {
       password?: string;
@@ -436,10 +457,25 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          // Only show the back button.
+          title: "",
+        }}
+        name="Register.ImportFromExtension.Intro"
+        component={ImportFromExtensionIntroScreen}
+      />
+      <Stack.Screen
+        options={{
           headerShown: false,
         }}
         name="Register.ImportFromExtension"
         component={ImportFromExtensionScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Import Extension",
+        }}
+        name="Register.ImportFromExtension.SetPassword"
+        component={ImportFromExtensionSetPasswordScreen}
       />
       <Stack.Screen
         options={{

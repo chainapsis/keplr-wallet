@@ -12,6 +12,9 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { registerExportedKeyRingDatas } from "./utils";
 
+export * from "./intro";
+export * from "./set-password";
+
 export interface QRCodeSharedData {
   // The uri for the wallet connect
   wcURI: string;
@@ -122,7 +125,15 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
           ],
         });
       } else {
-        // TODO
+        // If there is no account,
+        // should set the password.
+        smartNavigation.replaceSmart(
+          "Register.ImportFromExtension.SetPassword",
+          {
+            registerConfig: route.params.registerConfig,
+            exportKeyRingDatas: exportedKeyRingDatas,
+          }
+        );
       }
     } catch (e) {
       console.log(e);
