@@ -167,7 +167,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
         }}
       />
       {/* Mock element for bottom padding */}
-      <View style={style.flatten(["height-12"])} />
+      <View style={style.flatten(["height-page-pad"])} />
     </PageWithScrollView>
   );
 });

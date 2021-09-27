@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { PageWithView } from "../../../components/page";
+import { PageWithScrollView } from "../../../components/page";
 import { View } from "react-native";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/button";
@@ -72,80 +72,78 @@ export const ImportFromExtensionSetPasswordScreen: FunctionComponent = () => {
   });
 
   return (
-    <PageWithView>
-      <View style={style.flatten(["padding-page", "flex-grow-1"])}>
-        <Controller
-          control={control}
-          rules={{
-            required: "Password is required",
-            validate: (value: string) => {
-              if (value.length < 8) {
-                return "Password must be longer than 8 characters";
-              }
-            },
-          }}
-          render={({ field: { onChange, onBlur, value, ref } }) => {
-            return (
-              <TextInput
-                label="Password"
-                returnKeyType="next"
-                secureTextEntry={true}
-                onSubmitEditing={() => {
-                  setFocus("confirmPassword");
-                }}
-                error={errors.password?.message}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                ref={ref}
-              />
-            );
-          }}
-          name="password"
-          defaultValue=""
-        />
-        <Controller
-          control={control}
-          rules={{
-            required: "Confirm password is required",
-            validate: (value: string) => {
-              if (value.length < 8) {
-                return "Password must be longer than 8 characters";
-              }
+    <PageWithScrollView
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-page"])}
+    >
+      <Controller
+        control={control}
+        rules={{
+          required: "Password is required",
+          validate: (value: string) => {
+            if (value.length < 8) {
+              return "Password must be longer than 8 characters";
+            }
+          },
+        }}
+        render={({ field: { onChange, onBlur, value, ref } }) => {
+          return (
+            <TextInput
+              label="Password"
+              returnKeyType="next"
+              secureTextEntry={true}
+              onSubmitEditing={() => {
+                setFocus("confirmPassword");
+              }}
+              error={errors.password?.message}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              ref={ref}
+            />
+          );
+        }}
+        name="password"
+        defaultValue=""
+      />
+      <Controller
+        control={control}
+        rules={{
+          required: "Confirm password is required",
+          validate: (value: string) => {
+            if (value.length < 8) {
+              return "Password must be longer than 8 characters";
+            }
 
-              if (getValues("password") !== value) {
-                return "Password doesn't match";
-              }
-            },
-          }}
-          render={({ field: { onChange, onBlur, value, ref } }) => {
-            return (
-              <TextInput
-                label="Confirm password"
-                returnKeyType="done"
-                secureTextEntry={true}
-                onSubmitEditing={() => {
-                  submit();
-                }}
-                error={errors.confirmPassword?.message}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                ref={ref}
-              />
-            );
-          }}
-          name="confirmPassword"
-          defaultValue=""
-        />
-        <View style={style.get("flex-1")} />
-        <Button
-          text="Next"
-          size="large"
-          loading={isCreating}
-          onPress={submit}
-        />
-      </View>
-    </PageWithView>
+            if (getValues("password") !== value) {
+              return "Password doesn't match";
+            }
+          },
+        }}
+        render={({ field: { onChange, onBlur, value, ref } }) => {
+          return (
+            <TextInput
+              label="Confirm password"
+              returnKeyType="done"
+              secureTextEntry={true}
+              onSubmitEditing={() => {
+                submit();
+              }}
+              error={errors.confirmPassword?.message}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              ref={ref}
+            />
+          );
+        }}
+        name="confirmPassword"
+        defaultValue=""
+      />
+      <View style={style.get("flex-1")} />
+      <Button text="Next" size="large" loading={isCreating} onPress={submit} />
+      {/* Mock element for bottom padding */}
+      <View style={style.flatten(["height-page-pad"])} />
+    </PageWithScrollView>
   );
 };

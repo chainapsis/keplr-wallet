@@ -354,7 +354,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         disabled={!privateKey || !email}
       />
       {/* Mock element for bottom padding */}
-      <View style={style.flatten(["height-12"])} />
+      <View style={style.flatten(["height-page-pad"])} />
     </PageWithScrollView>
   );
 });

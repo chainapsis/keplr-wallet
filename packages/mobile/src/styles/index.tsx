@@ -335,6 +335,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "governance-card-body-placeholder": 130,
 
     "card-gap": 12,
+    "page-pad": 20,
   },
   paddingSizes: {
     "0": 0,
