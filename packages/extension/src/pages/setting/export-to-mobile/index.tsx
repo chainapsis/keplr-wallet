@@ -173,7 +173,7 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
       connector.on("display_uri", (error, payload) => {
         if (error) {
           console.log(error);
-          history.push("/");
+          history.replace("/");
           connector.killSession();
           return;
         }
@@ -199,7 +199,7 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
       connector.on("connect", (error) => {
         if (error) {
           console.log(error);
-          history.push("/");
+          history.replace("/");
           connector.killSession();
         } else {
           loadingIndicator.setIsLoading("export-to-mobile", true);
@@ -211,7 +211,7 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
                 "keplr_request_export_keyring_datas_wallet_connect_v1"
             ) {
               console.log(error, payload?.method);
-              history.push("/");
+              history.replace("/");
               connector.killSession();
               loadingIndicator.setIsLoading("export-to-mobile", false);
             } else {
@@ -264,7 +264,7 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
                   result: [response],
                 });
 
-                history.push("/");
+                history.replace("/");
                 connector.killSession();
                 loadingIndicator.setIsLoading("export-to-mobile", false);
               })();
