@@ -16,6 +16,9 @@ import useForm from "react-hook-form";
 import { Input } from "../../../components/form";
 import { ExportKeyRingData } from "@keplr-wallet/background";
 import AES, { Counter } from "aes-js";
+import { AddressBookConfigMap, AddressBookData } from "@keplr-wallet/hooks";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { toJS } from "mobx";
 
 export interface QRCodeSharedData {
   // The uri for the wallet connect
@@ -33,6 +36,7 @@ export interface WCExportKeyRingDatasResponse {
     // Hex encoded
     iv: string;
   };
+  addressBooks: { [chainId: string]: AddressBookData[] | undefined };
 }
 
 export const ExportToMobilePage: FunctionComponent = () => {
@@ -133,10 +137,17 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
 
 export const WalletConnectToExportKeyRingView: FunctionComponent<{
   exportKeyRingDatas: ExportKeyRingData[];
-}> = ({ exportKeyRingDatas }) => {
+}> = observer(({ exportKeyRingDatas }) => {
+  const { chainStore } = useStore();
+
   const history = useHistory();
 
   const loadingIndicator = useLoadingIndicator();
+
+  const [addressBookConfigMap] = useState(
+    () =>
+      new AddressBookConfigMap(new ExtensionKVStore("address-book"), chainStore)
+  );
 
   const [connector, setConnector] = useState<WalletConnect | undefined>();
   const [qrCodeData, setQRCodeData] = useState<QRCodeSharedData | undefined>();
@@ -217,22 +228,46 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
                 counter
               );
 
-              const response: WCExportKeyRingDatasResponse = {
-                encrypted: {
-                  ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString("hex"),
-                  // Hex encoded
-                  iv: iv.toString("hex"),
-                },
-              };
+              (async () => {
+                const addressBooks: {
+                  [chainId: string]: AddressBookData[] | undefined;
+                } = {};
 
-              connector.approveRequest({
-                id: payload.id,
-                result: [response],
-              });
+                if (payload.params && payload.params.length > 0) {
+                  for (const chainId of payload.params[0].addressBookChainIds ??
+                    []) {
+                    const addressBookConfig = addressBookConfigMap.getAddressBookConfig(
+                      chainId
+                    );
 
-              history.push("/");
-              connector.killSession();
-              loadingIndicator.setIsLoading("export-to-mobile", false);
+                    await addressBookConfig.waitLoaded();
+
+                    addressBooks[chainId] = toJS(
+                      addressBookConfig.addressBookDatas
+                    ) as AddressBookData[];
+                  }
+                }
+
+                const response: WCExportKeyRingDatasResponse = {
+                  encrypted: {
+                    ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString(
+                      "hex"
+                    ),
+                    // Hex encoded
+                    iv: iv.toString("hex"),
+                  },
+                  addressBooks,
+                };
+
+                connector.approveRequest({
+                  id: payload.id,
+                  result: [response],
+                });
+
+                history.push("/");
+                connector.killSession();
+                loadingIndicator.setIsLoading("export-to-mobile", false);
+              })();
             }
           });
         }
@@ -246,4 +281,4 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
       <QRCode size={300} value={qrCodeData ? JSON.stringify(qrCodeData) : ""} />
     </div>
   );
-};
+});

@@ -96,7 +96,8 @@ export class RegisterConfig {
     name: string,
     mnemonic: string,
     password: string,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    meta: Record<string, string> = {}
   ) {
     this._isLoading = true;
     try {
@@ -106,6 +107,7 @@ export class RegisterConfig {
           password,
           {
             name,
+            ...meta,
           },
           bip44HDPath
         );
@@ -114,6 +116,7 @@ export class RegisterConfig {
           mnemonic,
           {
             name,
+            ...meta,
           },
           bip44HDPath
         );
@@ -159,19 +162,23 @@ export class RegisterConfig {
     name: string,
     privateKey: Uint8Array,
     password: string,
-    email?: string
+    email?: string,
+    meta: Record<string, string> = {}
   ) {
     this._isLoading = true;
     try {
-      const meta: Record<string, string> = { name };
-      if (email) {
-        meta.email = email;
-      }
-
       if (this.mode === "create") {
-        yield this.keyRingStore.createPrivateKey(privateKey, password, meta);
+        yield this.keyRingStore.createPrivateKey(privateKey, password, {
+          name,
+          ...(email ? { email } : {}),
+          ...meta,
+        });
       } else {
-        yield this.keyRingStore.addPrivateKey(privateKey, meta);
+        yield this.keyRingStore.addPrivateKey(privateKey, {
+          name,
+          ...(email ? { email } : {}),
+          ...meta,
+        });
       }
       this._isFinalized = true;
     } finally {

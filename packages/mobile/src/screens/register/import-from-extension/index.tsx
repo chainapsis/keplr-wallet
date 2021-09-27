@@ -9,8 +9,16 @@ import { ExportKeyRingData } from "@keplr-wallet/background";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { RegisterConfig } from "@keplr-wallet/hooks";
-import { registerExportedKeyRingDatas } from "./utils";
+import {
+  AddressBookConfigMap,
+  AddressBookData,
+  RegisterConfig,
+} from "@keplr-wallet/hooks";
+import {
+  registerExportedAddressBooks,
+  registerExportedKeyRingDatas,
+} from "./utils";
+import { AsyncKVStore } from "../../../common";
 
 export * from "./intro";
 export * from "./set-password";
@@ -31,10 +39,15 @@ export interface WCExportKeyRingDatasResponse {
     // Hex encoded
     iv: string;
   };
+  addressBooks: { [chainId: string]: AddressBookData[] | undefined };
 }
 
 export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const { chainStore, keyRingStore } = useStore();
+
+  const [addressBookConfigMap] = useState(
+    () => new AddressBookConfigMap(new AsyncKVStore("address_book"), chainStore)
+  );
 
   const route = useRoute<
     RouteProp<
@@ -89,6 +102,13 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
         await connector.sendCustomRequest({
           id: Math.floor(Math.random() * 100000),
           method: "keplr_request_export_keyring_datas_wallet_connect_v1",
+          params: [
+            {
+              addressBookChainIds: chainStore.chainInfosInUI.map(
+                (chainInfo) => chainInfo.chainId
+              ),
+            },
+          ],
         })
       )[0] as WCExportKeyRingDatasResponse;
 
@@ -110,9 +130,15 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
       if (keyRingStore.multiKeyStoreInfo.length > 0) {
         // If already has accounts,
         await registerExportedKeyRingDatas(
+          keyRingStore,
           route.params.registerConfig,
           exportedKeyRingDatas,
           ""
+        );
+
+        await registerExportedAddressBooks(
+          addressBookConfigMap,
+          result.addressBooks
         );
 
         smartNavigation.reset({
@@ -132,6 +158,7 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
           {
             registerConfig: route.params.registerConfig,
             exportKeyRingDatas: exportedKeyRingDatas,
+            addressBooks: result.addressBooks,
           }
         );
       }
