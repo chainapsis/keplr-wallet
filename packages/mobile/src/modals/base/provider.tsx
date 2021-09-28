@@ -1,9 +1,10 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import {
-  Modal as ReactModal,
+  BackHandler,
   Platform,
   StyleSheet,
   TouchableWithoutFeedback,
+  View,
   ViewStyle,
 } from "react-native";
 import { action, makeObservable, observable } from "mobx";
@@ -12,7 +13,6 @@ import { ModalBase } from "./base";
 import { ModalContext, useModalState } from "./hooks";
 import { useStyle } from "../../styles";
 import Animated from "react-native-reanimated";
-import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { ModalTransisionProvider, useModalTransision } from "./transition";
 import { BlurView } from "@react-native-community/blur";
 
@@ -121,47 +121,67 @@ export class ModalsRendererState {
 export const globalModalRendererState = new ModalsRendererState();
 
 export const ModalsProvider: FunctionComponent = observer(({ children }) => {
+  const hasOpenedModal =
+    globalModalRendererState.modals.find((modal) => modal.isOpen) != null;
+
+  useEffect(() => {
+    if (hasOpenedModal) {
+      const handler = () => {
+        const openedModals = globalModalRendererState.modals.filter(
+          (modal) => modal.isOpen
+        );
+        // The topmost modal can be closed by the back button if this modal can be closed by pressing the backdrop.
+        if (openedModals.length > 0) {
+          const topmost = openedModals[openedModals.length - 1];
+          if (
+            !topmost.options.disableBackdrop &&
+            !topmost.options.disableClosingOnBackdropPress
+          ) {
+            topmost.close();
+          }
+
+          return true;
+        }
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", handler);
+
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", handler);
+      };
+    }
+  }, [hasOpenedModal]);
+
   return (
     <React.Fragment>
       {children}
       {globalModalRendererState.modals.length > 0 ? (
-        <ReactModal
-          transparent={true}
-          statusBarTranslucent={true}
-          onRequestClose={() => {
-            // The topmost modal can be closed by the back button if this modal can be closed by pressing the backdrop.
-            if (globalModalRendererState.modals.length > 0) {
-              const topmost =
-                globalModalRendererState.modals[
-                  globalModalRendererState.modals.length - 1
-                ];
-              if (
-                !topmost.options.disableBackdrop &&
-                !topmost.options.disableClosingOnBackdropPress
-              ) {
-                topmost.close();
-              }
-            }
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
           }}
+          pointerEvents="box-none"
         >
           <ModalRenderersRoot />
-        </ReactModal>
+        </View>
       ) : null}
     </React.Fragment>
   );
 });
 
-export const ModalRenderersRoot: FunctionComponent = gestureHandlerRootHOC(
-  observer(() => {
-    return (
-      <React.Fragment>
-        {globalModalRendererState.modals.map((modal) => {
-          return <ModalRenderer key={modal.key} modal={modal} />;
-        })}
-      </React.Fragment>
-    );
-  })
-) as FunctionComponent;
+export const ModalRenderersRoot: FunctionComponent = observer(() => {
+  return (
+    <React.Fragment>
+      {globalModalRendererState.modals.map((modal) => {
+        return <ModalRenderer key={modal.key} modal={modal} />;
+      })}
+    </React.Fragment>
+  );
+}) as FunctionComponent;
 
 export const ModalRenderer: FunctionComponent<{
   modal: Modal;

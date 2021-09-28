@@ -65,6 +65,7 @@ export const CardModal: FunctionComponent<{
       setSoftwareKeyboardBottomPadding(0);
     };
 
+    // No need to do this on android
     if (Platform.OS !== "android") {
       Keyboard.addListener("keyboardWillShow", onKeyboarFrame);
       Keyboard.addListener("keyboardWillChangeFrame", onKeyboarFrame);
@@ -74,17 +75,6 @@ export const CardModal: FunctionComponent<{
         Keyboard.removeListener("keyboardWillShow", onKeyboarFrame);
         Keyboard.removeListener("keyboardWillChangeFrame", onKeyboarFrame);
         Keyboard.removeListener("keyboardWillHide", onKeyboardClearFrame);
-      };
-    } else {
-      // "keyboardWillShow" as well as "keyboardWillHide" are not available on Android.
-      Keyboard.addListener("keyboardDidShow", onKeyboarFrame);
-      Keyboard.addListener("keyboardDidChangeFrame", onKeyboarFrame);
-      Keyboard.addListener("keyboardDidHide", onKeyboardClearFrame);
-
-      return () => {
-        Keyboard.removeListener("keyboardDidShow", onKeyboarFrame);
-        Keyboard.removeListener("keyboardDidChangeFrame", onKeyboarFrame);
-        Keyboard.removeListener("keyboardDidHide", onKeyboardClearFrame);
       };
     }
   }, [safeAreaInsets.bottom]);

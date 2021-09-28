@@ -4,7 +4,7 @@ import { StyleProvider } from "./styles";
 import { AppNavigation } from "./navigation";
 import { IntlProvider } from "react-intl";
 import { ModalsProvider } from "./modals/base";
-import { Platform } from "react-native";
+import { Platform, StatusBar } from "react-native";
 
 import codePush from "react-native-code-push";
 import { InteractionModalsProivder } from "./providers/interaction-modals-provider";
@@ -84,6 +84,11 @@ const AppBody: FunctionComponent = () => {
             },
           }}
         >
+          <StatusBar
+            translucent={true}
+            backgroundColor="#FFFFFF00"
+            barStyle="dark-content"
+          />
           <SafeAreaProvider>
             <ModalsProvider>
               <LoadingScreenProvider>

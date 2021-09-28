@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { FunctionComponent, useEffect, useRef } from "react";
-import { StatusBar, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import {
   BIP44HDPath,
   ExportKeyRingData,
@@ -871,11 +871,6 @@ export const AppNavigation: FunctionComponent = observer(() => {
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
-          <StatusBar
-            translucent={true}
-            backgroundColor="#FFFFFF00"
-            barStyle="dark-content"
-          />
           <NavigationContainer
             ref={navigationRef}
             onReady={() =>
