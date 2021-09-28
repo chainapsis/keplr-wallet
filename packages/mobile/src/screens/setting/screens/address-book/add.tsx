@@ -51,8 +51,9 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-16"])}
+      style={style.flatten(["padding-x-page"])}
     >
+      <View style={style.flatten(["height-page-pad"])} />
       <TextInput
         label="Nickname"
         value={name}
@@ -94,6 +95,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
           }
         }}
       />
+      <View style={style.flatten(["height-page-pad"])} />
     </PageWithScrollView>
   );
 });

@@ -45,40 +45,33 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView style={style.flatten(["padding-x-42"])}>
-      <View style={style.get("flex-2")} />
-      <View style={style.flatten(["flex-4"])}>
-        <View style={style.flatten(["items-center"])}>
-          <View style={style.flatten(["margin-bottom-18"])}>
-            <WelcomeRocket width={358} height={254} />
-          </View>
-          <Text
-            style={style.flatten([
-              "h2",
-              "color-text-black-medium",
-              "margin-bottom-20",
-            ])}
-          >
-            You’re all set!
-          </Text>
-          <Text
-            style={style.flatten([
-              "subtitle1",
-              "color-text-black-low",
-              "text-center",
-            ])}
-          >
-            Your cosmic interchain journey now begins.
-          </Text>
-        </View>
-      </View>
       <View style={style.get("flex-1")} />
+      <View style={style.flatten(["items-center"])}>
+        <WelcomeRocket width={358} height={254} />
+
+        <Text
+          style={style.flatten([
+            "h2",
+            "color-text-black-medium",
+            "margin-top-18",
+          ])}
+        >
+          You’re all set!
+        </Text>
+        <Text
+          style={style.flatten([
+            "subtitle1",
+            "color-text-black-low",
+            "text-center",
+            "margin-top-10",
+          ])}
+        >
+          Your cosmic interchain journey now begins.
+        </Text>
+      </View>
       {password && keychainStore.isBiometrySupported ? (
         <View
-          style={style.flatten([
-            "flex-row",
-            "margin-bottom-48",
-            "items-center",
-          ])}
+          style={style.flatten(["flex-row", "margin-top-58", "items-center"])}
         >
           <Text style={style.flatten(["subtitle1", "color-text-black-medium"])}>
             Enable Biometric
@@ -91,6 +84,7 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
         </View>
       ) : null}
       <Button
+        containerStyle={style.flatten(["margin-top-44"])}
         size="large"
         text="Done"
         loading={isLoading}
@@ -122,7 +116,7 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
           }
         }}
       />
-      <View style={style.get("flex-2")} />
+      <View style={style.get("flex-1")} />
     </PageWithView>
   );
 });

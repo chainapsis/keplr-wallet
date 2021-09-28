@@ -64,9 +64,10 @@ export const DelegateScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
-      style={style.flatten(["padding-page"])}
+      style={style.flatten(["padding-x-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >
+      <View style={style.flatten(["height-page-pad"])} />
       {/*
         // The recipient validator is selected by the route params, so no need to show the address input.
         <AddressInput
@@ -136,6 +137,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
           }
         }}
       />
+      <View style={style.flatten(["height-page-pad"])} />
     </PageWithScrollView>
   );
 });
