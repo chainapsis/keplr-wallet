@@ -82,9 +82,10 @@ export const SendScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
-      style={style.flatten(["padding-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-page"])}
     >
+      <View style={style.flatten(["height-page-pad"])} />
       <AddressInput
         label="Recipient"
         recipientConfig={sendConfigs.recipientConfig}
@@ -149,6 +150,7 @@ export const SendScreen: FunctionComponent = observer(() => {
           }
         }}
       />
+      <View style={style.flatten(["height-page-pad"])} />
     </PageWithScrollView>
   );
 });

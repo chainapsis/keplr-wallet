@@ -106,9 +106,10 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
-      style={style.flatten(["padding-page"])}
+      style={style.flatten(["padding-x-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >
+      <View style={style.flatten(["height-page-pad"])} />
       <Card style={style.flatten(["margin-bottom-12", "border-radius-8"])}>
         <CardBody>
           <View style={style.flatten(["flex-row", "items-center"])}>
@@ -231,6 +232,7 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
           }
         }}
       />
+      <View style={style.flatten(["height-page-pad"])} />
     </PageWithScrollView>
   );
 });
