@@ -50,6 +50,7 @@ import { RegisterNewUserScreen } from "./screens/register/new-user";
 import { RegisterNotNewUserScreen } from "./screens/register/not-new-user";
 import {
   AddressBookConfig,
+  AddressBookData,
   IMemoConfig,
   IRecipientConfig,
   RegisterConfig,
@@ -240,6 +241,7 @@ const {
     "Register.ImportFromExtension.SetPassword": {
       registerConfig: RegisterConfig;
       exportKeyRingDatas: ExportKeyRingData[];
+      addressBooks: { [chainId: string]: AddressBookData[] | undefined };
     };
     "Register.End": {
       password?: string;

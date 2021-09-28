@@ -1,4 +1,4 @@
-import { flow, makeObservable, observable, toJS } from "mobx";
+import { autorun, flow, makeObservable, observable, toJS } from "mobx";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainGetter, HasMapStore } from "@keplr-wallet/stores";
@@ -19,6 +19,8 @@ export interface AddressBookData {
 export class AddressBookConfig {
   @observable
   protected _addressBookDatas: AddressBookData[] = [];
+  @observable
+  protected _isLoaded: boolean = false;
 
   protected _selectHandler?: AddressBookSelectHandler;
 
@@ -30,6 +32,10 @@ export class AddressBookConfig {
     makeObservable(this);
 
     this.loadAddressBookDatas();
+  }
+
+  get isLoaded(): boolean {
+    return this._isLoaded;
   }
 
   get addressBookDatas(): DeepReadonly<AddressBookData[]> {
@@ -99,6 +105,25 @@ export class AddressBookConfig {
     } else {
       this._addressBookDatas = datas;
     }
+
+    this._isLoaded = true;
+  }
+
+  async waitLoaded(): Promise<void> {
+    if (this._isLoaded) {
+      return;
+    }
+
+    return new Promise<void>((resolve) => {
+      const disposer = autorun(() => {
+        if (this._isLoaded) {
+          resolve();
+          if (disposer) {
+            disposer();
+          }
+        }
+      });
+    });
   }
 
   static keyForChainInfo(chainInfo: ChainInfo): string {
