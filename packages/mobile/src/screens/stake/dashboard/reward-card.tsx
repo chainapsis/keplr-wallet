@@ -105,7 +105,8 @@ export const MyRewardCard: FunctionComponent<{
             }}
             disabled={
               !account.isReadyToSendMsgs ||
-              pendingStakableReward.toDec().equals(new Dec(0))
+              pendingStakableReward.toDec().equals(new Dec(0)) ||
+              queryReward.pendingRewardValidatorAddresses.length === 0
             }
             loading={account.isSendingMsg === "withdrawRewards"}
           />

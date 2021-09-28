@@ -69,7 +69,9 @@ export const MyRewardCard: FunctionComponent<{
         buttonMode="light"
         buttonContainerStyle={style.flatten(["min-width-72"])}
         buttonDisabled={
-          !account.isReadyToSendMsgs || stakingReward.toDec().equals(new Dec(0))
+          !account.isReadyToSendMsgs ||
+          stakingReward.toDec().equals(new Dec(0)) ||
+          queryReward.pendingRewardValidatorAddresses.length === 0
         }
         buttonLoading={account.isSendingMsg === "withdrawRewards"}
       />
