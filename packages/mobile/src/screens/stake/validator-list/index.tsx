@@ -92,6 +92,22 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     chainName: chainStore.current.chainName,
   });
 
+  const items = useMemo(() => {
+    return [
+      { label: "APY", key: "APY" },
+      { label: "AMOUNT STAKED", key: "Voting Power" },
+      { label: "Name", key: "Name" },
+    ];
+  }, []);
+
+  const sortItem = useMemo(() => {
+    const item = items.find((item) => item.key === sort);
+    if (!item) {
+      throw new Error(`Can't find the item for sort (${sort})`);
+    }
+    return item;
+  }, [items, sort]);
+
   return (
     <React.Fragment>
       <SelectorModal
@@ -99,11 +115,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           setIsSortModalOpen(false);
         }}
         isOpen={isSortModalOpen}
-        items={[
-          { label: "APY", key: "APY" },
-          { label: "AMOUNT STAKED", key: "Voting Power" },
-          { label: "Name", key: "Name" },
-        ]}
+        items={items}
         selectedKey={sort}
         setSelectedKey={(key) => setSort(key as Sort)}
       />
@@ -170,7 +182,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                             "margin-right-4",
                           ])}
                         >
-                          {sort}
+                          {sortItem.label}
                         </Text>
                         <Svg
                           width="6"
