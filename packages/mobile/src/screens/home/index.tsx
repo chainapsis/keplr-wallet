@@ -1,7 +1,7 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { PageWithScrollViewInBottomTabView } from "../../components/page";
 import { AccountCard } from "./account-card";
-import { RefreshControl } from "react-native";
+import { RefreshControl, ScrollView } from "react-native";
 import { useStore } from "../../stores";
 import { StakingInfoCard } from "./staking-info-card";
 import { useStyle } from "../../styles";
@@ -18,6 +18,14 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const style = useStyle();
+
+  const [scrollViewRef, setScrollViewRef] = React.useState<
+    ScrollView | undefined
+  >();
+
+  useEffect(() => {
+    scrollViewRef && scrollViewRef.scrollTo({ y: 0 });
+  }, [chainStore.current.chainId]);
 
   const onRefresh = React.useCallback(async () => {
     const account = accountStore.getAccount(chainStore.current.chainId);
@@ -67,6 +75,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
+      setScrollViewRef={setScrollViewRef}
     >
       <BIP44Selectable />
       <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />

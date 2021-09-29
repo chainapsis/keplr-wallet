@@ -3,6 +3,7 @@ import {
   Animated,
   SafeAreaView,
   ScrollViewProps,
+  ScrollView,
   StyleSheet,
   View,
 } from "react-native";
@@ -19,8 +20,10 @@ export const PageWithScrollView: FunctionComponent<
   ScrollViewProps & {
     fixed?: React.ReactNode;
     disableSafeArea?: boolean;
-
     backgroundColor?: string;
+    setScrollViewRef?: React.Dispatch<
+      React.SetStateAction<ScrollView | undefined>
+    >;
   }
 > = (props) => {
   const style = useStyle();
@@ -34,6 +37,7 @@ export const PageWithScrollView: FunctionComponent<
     onScroll,
     disableSafeArea,
     backgroundColor,
+    setScrollViewRef,
     ...restProps
   } = props;
 
@@ -64,6 +68,9 @@ export const PageWithScrollView: FunctionComponent<
       </View>
       <ContainerElement style={style.get("flex-1")}>
         <AnimatedKeyboardAwareScrollView
+          innerRef={(ref) =>
+            setScrollViewRef && setScrollViewRef((ref as Element) as ScrollView)
+          }
           style={StyleSheet.flatten([
             style.flatten(["flex-1", "padding-0", "overflow-visible"]),
             propStyle,
