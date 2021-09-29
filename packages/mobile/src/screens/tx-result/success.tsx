@@ -113,7 +113,12 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
         Transaction successful
       </Text>
 
-      <View style={style.flatten(["min-height-66"])}>
+      <View
+        style={{
+          height: style.get("body1").lineHeight * 3,
+          overflow: "visible",
+        }}
+      >
         <Text
           style={style.flatten([
             "body1",

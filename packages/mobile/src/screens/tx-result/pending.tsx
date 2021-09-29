@@ -127,7 +127,12 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       <Text style={style.flatten(["h2", "margin-top-82", "margin-bottom-32"])}>
         Transaction pending
       </Text>
-      <View style={style.flatten(["min-height-66"])}>
+      <View
+        style={{
+          height: style.get("body1").lineHeight * 3,
+          overflow: "visible",
+        }}
+      >
         <Text
           style={style.flatten([
             "body1",
