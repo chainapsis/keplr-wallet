@@ -12,6 +12,7 @@ import { useStyle } from "../../styles";
 import { RectButton } from "../rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VectorCharacter } from "../vector-character";
+import FastImage from "react-native-fast-image";
 
 export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOptions>;
 
@@ -84,11 +85,24 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                     [selected && "background-color-primary"]
                   )}
                 >
-                  <VectorCharacter
-                    char={chainInfo.chainName[0]}
-                    color="white"
-                    height={15}
-                  />
+                  {chainInfo.raw.chainSymbolImageUrl ? (
+                    <FastImage
+                      style={{
+                        width: 33,
+                        height: 33,
+                      }}
+                      resizeMode={FastImage.resizeMode.contain}
+                      source={{
+                        uri: chainInfo.raw.chainSymbolImageUrl,
+                      }}
+                    />
+                  ) : (
+                    <VectorCharacter
+                      char={chainInfo.chainName[0]}
+                      color="white"
+                      height={15}
+                    />
+                  )}
                 </View>
                 <Text style={style.flatten(["h4", "color-text-black-medium"])}>
                   {chainInfo.chainName}

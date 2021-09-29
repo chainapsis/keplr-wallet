@@ -7,6 +7,7 @@ export const EthereumEndpoint =
   "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";
 
 export interface AppChainInfo extends ChainInfo {
+  readonly chainSymbolImageUrl?: string;
   readonly hideInUI?: boolean;
   readonly txExplorer?: {
     readonly name: string;
@@ -25,7 +26,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: "uatom",
       coinDecimals: 6,
       coinGeckoId: "cosmos",
-      coinImageUrl: "https://asset-icons.s3.us-west-2.amazonaws.com/atom.png",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/atom.png",
     },
     bip44: {
       coinType: 118,
@@ -37,7 +38,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uatom",
         coinDecimals: 6,
         coinGeckoId: "cosmos",
-        coinImageUrl: "https://asset-icons.s3.us-west-2.amazonaws.com/atom.png",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/atom.png",
       },
     ],
     feeCurrencies: [
@@ -46,11 +47,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uatom",
         coinDecimals: 6,
         coinGeckoId: "cosmos",
-        coinImageUrl: "https://asset-icons.s3.us-west-2.amazonaws.com/atom.png",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/atom.png",
       },
     ],
     coinType: 118,
     features: ["stargate", "ibc-transfer"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/atom.png",
     txExplorer: {
       name: "Mintscan",
       txUrl: "https://www.mintscan.io/cosmos/txs/{txHash}",
@@ -66,6 +68,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: "uosmo",
       coinDecimals: 6,
       coinGeckoId: "osmosis",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/osmosis.png",
     },
     bip44: {
       coinType: 118,
@@ -77,6 +80,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uosmo",
         coinDecimals: 6,
         coinGeckoId: "osmosis",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/osmosis.png",
       },
       {
         coinDenom: "ION",
@@ -91,6 +95,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uosmo",
         coinDecimals: 6,
         coinGeckoId: "osmosis",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/osmosis.png",
       },
     ],
     coinType: 118,
@@ -100,6 +105,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       high: 0.04,
     },
     features: ["stargate", "ibc-transfer"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/osmosis.png",
     txExplorer: {
       name: "Mintscan",
       txUrl: "https://www.mintscan.io/osmosis/txs/{txHash}",
@@ -664,6 +670,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: "uregen",
       coinDecimals: 6,
       coinGeckoId: "regen",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/regen.png",
     },
     bip44: {
       coinType: 118,
@@ -675,6 +682,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uregen",
         coinDecimals: 6,
         coinGeckoId: "regen",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/regen.png",
       },
     ],
     feeCurrencies: [
@@ -683,9 +691,11 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uregen",
         coinDecimals: 6,
         coinGeckoId: "regen",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/regen.png",
       },
     ],
-    features: ["stargate"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/regen.png",
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: "https://rpc-persistence.keplr.app",
@@ -771,47 +781,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       high: 0.4,
     },
     features: ["stargate", "ibc-transfer"],
-    hideInUI: true,
-  },
-  {
-    rpc: "https://rpc-kava.keplr.app",
-    rest: "https://lcd-kava.keplr.app",
-    chainId: "kava-7",
-    chainName: "Kava",
-    stakeCurrency: {
-      coinDenom: "KAVA",
-      coinMinimalDenom: "ukava",
-      coinDecimals: 6,
-      coinGeckoId: "kava",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava/stake"
-        : "http://localhost:8081/#/kava/stake",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/kava/stake"
-        : "http://localhost:8081/#/kava/stake",
-    bip44: { coinType: 459 },
-    alternativeBIP44s: [{ coinType: 118 }],
-    bech32Config: Bech32Address.defaultBech32Config("kava"),
-    currencies: [
-      {
-        coinDenom: "KAVA",
-        coinMinimalDenom: "ukava",
-        coinDecimals: 6,
-        coinGeckoId: "kava",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "KAVA",
-        coinMinimalDenom: "ukava",
-        coinDecimals: 6,
-        coinGeckoId: "kava",
-      },
-    ],
-    coinType: 459,
     hideInUI: true,
   },
   {
