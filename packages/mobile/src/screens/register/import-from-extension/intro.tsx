@@ -30,7 +30,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
   return (
     <PageWithView>
       <View style={style.flatten(["padding-page", "flex-grow-1"])}>
-        <View style={style.get("flex-1")} />
+        <View style={style.get("flex-2")} />
         <View style={style.flatten(["items-center"])}>
           <View style={style.flatten(["padding-left-10"])}>
             <ImportFromExtensionSvg />
@@ -57,7 +57,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
             mobile device.
           </Text>
         </View>
-        <View style={style.get("flex-1")} />
+        <View style={style.get("flex-3")} />
         <Button
           text="Next"
           size="large"
