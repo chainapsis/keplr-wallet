@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { forwardRef } from "react";
 import {
   Animated,
   SafeAreaView,
@@ -16,16 +16,17 @@ const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
   KeyboardAwareScrollView
 );
 
-export const PageWithScrollView: FunctionComponent<
-  ScrollViewProps & {
-    fixed?: React.ReactNode;
-    disableSafeArea?: boolean;
-    backgroundColor?: string;
-    setScrollViewRef?: React.Dispatch<
-      React.SetStateAction<ScrollView | undefined>
-    >;
-  }
-> = (props) => {
+// eslint-disable-next-line react/display-name
+export const PageWithScrollView = forwardRef<
+  ScrollView,
+  React.PropsWithChildren<
+    ScrollViewProps & {
+      fixed?: React.ReactNode;
+      disableSafeArea?: boolean;
+      backgroundColor?: string;
+    }
+  >
+>((props, ref) => {
   const style = useStyle();
 
   useSetFocusedScreen();
@@ -37,7 +38,6 @@ export const PageWithScrollView: FunctionComponent<
     onScroll,
     disableSafeArea,
     backgroundColor,
-    setScrollViewRef,
     ...restProps
   } = props;
 
@@ -68,9 +68,16 @@ export const PageWithScrollView: FunctionComponent<
       </View>
       <ContainerElement style={style.get("flex-1")}>
         <AnimatedKeyboardAwareScrollView
-          innerRef={(ref) =>
-            setScrollViewRef && setScrollViewRef((ref as Element) as ScrollView)
-          }
+          innerRef={(_ref) => {
+            if (ref) {
+              // I don't know why the _ref's type is JSX.Element
+              if (typeof ref === "function") {
+                ref(_ref as any);
+              } else {
+                ref.current = _ref as any;
+              }
+            }
+          }}
           style={StyleSheet.flatten([
             style.flatten(["flex-1", "padding-0", "overflow-visible"]),
             propStyle,
@@ -95,4 +102,4 @@ export const PageWithScrollView: FunctionComponent<
       </ContainerElement>
     </React.Fragment>
   );
-};
+});

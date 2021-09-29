@@ -1,17 +1,18 @@
-import React, { FunctionComponent } from "react";
+import React from "react";
 import { PageWithScrollView } from "./scroll-view";
 import { ScrollViewProps, ScrollView, StyleSheet } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
-export const PageWithScrollViewInBottomTabView: FunctionComponent<
-  ScrollViewProps & {
-    fixed?: React.ReactNode;
-    backgroundColor?: string;
-    setScrollViewRef?: React.Dispatch<
-      React.SetStateAction<ScrollView | undefined>
-    >;
-  }
-> = (props) => {
+// eslint-disable-next-line react/display-name
+export const PageWithScrollViewInBottomTabView = React.forwardRef<
+  ScrollView,
+  React.PropsWithChildren<
+    ScrollViewProps & {
+      fixed?: React.ReactNode;
+      backgroundColor?: string;
+    }
+  >
+>((props, ref) => {
   const bottomTabBarHeight = useBottomTabBarHeight();
 
   const { style, ...rest } = props;
@@ -21,6 +22,7 @@ export const PageWithScrollViewInBottomTabView: FunctionComponent<
       disableSafeArea={true}
       {...rest}
       style={StyleSheet.flatten([{ marginBottom: bottomTabBarHeight }, style])}
+      ref={ref}
     />
   );
-};
+});
