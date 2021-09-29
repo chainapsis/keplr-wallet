@@ -7,11 +7,14 @@ import { useStyle } from "../../styles";
 import { WCAppLogo } from "../../components/wallet-connect";
 import { UnconnectIcon } from "../../components/icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useConfirmModal } from "../../providers/confirm-modal";
 
 export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
   const { walletConnectStore } = useStore();
 
   const style = useStyle();
+
+  const confirmModal = useConfirmModal();
 
   return (
     <PageWithScrollView>
@@ -57,8 +60,18 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
               >
                 <TouchableOpacity
                   style={style.flatten(["padding-x-16", "padding-y-24"])}
-                  onPress={() => {
-                    walletConnectStore.disconnect(session.key);
+                  onPress={async () => {
+                    if (
+                      await confirmModal.confirm({
+                        title: "Disconnect link",
+                        paragraph:
+                          "Are you sure you want to disconnect this link?",
+                        yesButtonText: "Disconnect",
+                        noButtonText: "Cancel",
+                      })
+                    ) {
+                      await walletConnectStore.disconnect(session.key);
+                    }
                   }}
                 >
                   <UnconnectIcon
