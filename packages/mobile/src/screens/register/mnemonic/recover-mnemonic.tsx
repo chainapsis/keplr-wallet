@@ -12,9 +12,18 @@ import { Button } from "../../../components/button";
 import Clipboard from "expo-clipboard";
 import { useStore } from "../../../stores";
 import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
+import { Buffer } from "buffer/";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
+
+function isPrivateKey(str: string): boolean {
+  if (str.startsWith("0x")) {
+    return true;
+  }
+
+  return str.length === 64;
+}
 
 function trimWordsStr(str: string): string {
   str = str.trim();
@@ -69,12 +78,25 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
   const submit = handleSubmit(async () => {
     setIsCreating(true);
-    await registerConfig.createMnemonic(
-      getValues("name"),
-      getValues("mnemonic"),
-      getValues("password"),
-      bip44Option.bip44HDPath
-    );
+
+    const mnemonic = trimWordsStr(getValues("mnemonic"));
+
+    if (!isPrivateKey(mnemonic)) {
+      await registerConfig.createMnemonic(
+        getValues("name"),
+        mnemonic,
+        getValues("password"),
+        bip44Option.bip44HDPath
+      );
+    } else {
+      const privateKey = Buffer.from(mnemonic.trim().replace("0x", ""), "hex");
+      await registerConfig.createPrivateKey(
+        getValues("name"),
+        privateKey,
+        getValues("password")
+      );
+    }
+
     analyticsStore.setUserId();
     analyticsStore.setUserProperties({
       registerType: "seed",
@@ -107,12 +129,30 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           required: "Mnemonic is required",
           validate: (value: string) => {
             value = trimWordsStr(value);
-            if (value.split(" ").length < 8) {
-              return "Too short mnemonic";
-            }
+            if (!isPrivateKey(value)) {
+              if (value.split(" ").length < 8) {
+                return "Too short mnemonic";
+              }
 
-            if (!bip39.validateMnemonic(value)) {
-              return "Invalid mnemonic";
+              if (!bip39.validateMnemonic(value)) {
+                return "Invalid mnemonic";
+              }
+            } else {
+              value = value.replace("0x", "");
+              if (value.length !== 64) {
+                return "Invalid length of private key";
+              }
+
+              try {
+                if (
+                  Buffer.from(value, "hex").toString("hex").toLowerCase() !==
+                  value.toLowerCase()
+                ) {
+                  return "Invalid private key";
+                }
+              } catch {
+                return "Invalid private key";
+              }
             }
           },
         }}
