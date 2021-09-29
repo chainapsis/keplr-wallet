@@ -63,7 +63,7 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
                 >
                   <UnconnectIcon
                     color={style.get("color-text-black-very-very-low").color}
-                    height={25}
+                    height={28}
                   />
                 </TouchableOpacity>
               </View>
