@@ -96,8 +96,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
     coinType: 118,
     gasPriceStep: {
       low: 0,
-      average: 0,
-      high: 0.025,
+      average: 0.025,
+      high: 0.04,
     },
     features: ["stargate", "ibc-transfer"],
     txExplorer: {
@@ -148,6 +148,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       high: 0.3,
     },
     features: ["secretwasm"],
+    hideInUI: true,
   },
   {
     rpc: "https://rpc-akash.keplr.app",
@@ -578,7 +579,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
   {
     rpc: "https://rpc-certik.keplr.app",
     rest: "https://lcd-certik.keplr.app",
-    chainId: "shentu-2.1",
+    chainId: "shentu-2.2",
     chainName: "Certik",
     stakeCurrency: {
       coinDenom: "CTK",
@@ -662,6 +663,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "REGEN",
       coinMinimalDenom: "uregen",
       coinDecimals: 6,
+      coinGeckoId: "regen",
     },
     bip44: {
       coinType: 118,
@@ -672,6 +674,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "REGEN",
         coinMinimalDenom: "uregen",
         coinDecimals: 6,
+        coinGeckoId: "regen",
       },
     ],
     feeCurrencies: [
@@ -679,10 +682,10 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "REGEN",
         coinMinimalDenom: "uregen",
         coinDecimals: 6,
+        coinGeckoId: "regen",
       },
     ],
     features: ["stargate"],
-    hideInUI: true,
   },
   {
     rpc: "https://rpc-persistence.keplr.app",
@@ -813,7 +816,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
   },
   {
     rpc: "https://rpc-impacthub.keplr.app",
-    rest: "https://lcd-impacthub.keplr.app/",
+    rest: "https://lcd-impacthub.keplr.app",
     chainId: "impacthub-3",
     chainName: "ixo",
     stakeCurrency: {
@@ -848,6 +851,58 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ["stargate"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc-emoney.keplr.app",
+    rest: "https://lcd-emoney.keplr.app",
+    chainId: "emoney-3",
+    chainName: "e-Money",
+    stakeCurrency: {
+      coinDenom: "NGM",
+      coinMinimalDenom: "ungm",
+      coinDecimals: 6,
+      coinGeckoId: "e-money",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/emoney/stake"
+        : "http://localhost:8080/#/emoney/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/emoney/stake"
+        : "http://localhost:8080/#/emoney/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("emoney"),
+    currencies: [
+      {
+        coinDenom: "NGM",
+        coinMinimalDenom: "ungm",
+        coinDecimals: 6,
+        coinGeckoId: "e-money",
+      },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "NGM",
+        coinMinimalDenom: "ungm",
+        coinDecimals: 6,
+        coinGeckoId: "e-money",
+      },
+    ],
+    gasPriceStep: {
+      low: 1,
+      average: 1,
+      high: 1,
+    },
+    features: ["stargate", "ibc-transfer"],
     hideInUI: true,
   },
 ];
