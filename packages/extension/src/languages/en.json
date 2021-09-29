@@ -61,7 +61,11 @@
   "setting.address-book.confirm.delete-address.paragraph": "Are you sure you want to delete this address?",
   "setting.address-book.button.save": "Save",
 
-  "setting.export-to-mobile": "Export to mobile",
+  "setting.export-to-mobile": "Link Keplr Mobile",
+  "setting.export-to-mobile.input.password": "Password",
+  "setting.export-to-mobile.input.password.error.required": "Password is required",
+  "setting.export-to-mobile.input.password.error.invalid": "Invalid password",
+  "setting.export-to-mobile.button.confirm": "Confirm",
 
   "setting.credit": "Special thanks",
 

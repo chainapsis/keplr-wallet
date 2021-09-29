@@ -92,6 +92,86 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
 
   return (
     <div className={style.container}>
+      <div
+        style={{
+          display: "flex",
+          padding: "16px",
+          background: "#FFFFFF",
+          border: "1px solid #9092B6",
+          borderRadius: "4px",
+        }}
+      >
+        <img
+          style={{
+            width: "32px",
+            height: "32px",
+            marginRight: "12px",
+          }}
+          src={require("../../../public/assets/svg/info-mark.svg")}
+          alt="info"
+        />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <h3
+            style={{
+              marginBottom: "4px",
+              fontWeight: "bold",
+              fontSize: "16px",
+              lineHeight: "22px",
+              color: "#32325D",
+            }}
+          >
+            Only scan on Keplr Mobile
+          </h3>
+          <div
+            style={{
+              fontSize: "12px",
+              lineHeight: "16px",
+              color: "#32325D",
+            }}
+          >
+            Scanning the QR code outside of Keplr Mobile can lead to loss of
+            funds
+          </div>
+        </div>
+      </div>
+      <div style={{ flex: 1 }} />
+      <img
+        style={{
+          marginLeft: "80px",
+          marginRight: "80px",
+        }}
+        src={require("../../../public/assets/svg/export-to-mobile.svg")}
+        alt="export-to-mobile"
+      />
+      <div
+        style={{
+          padding: "0 20px",
+          textAlign: "center",
+          marginTop: "14px",
+          fontSize: "16px",
+          lineHeight: "22px",
+        }}
+      >
+        Scan QR code to export accounts to Keplr Mobile
+      </div>
+      {keyRingStore.multiKeyStoreInfo.length > 2 ? (
+        <div
+          style={{
+            marginTop: "8px",
+            fontSize: "14px",
+            lineHeight: "22px",
+            textAlign: "center",
+            color: "#7F7F7F",
+          }}
+        >
+          The process may take several minutes
+        </div>
+      ) : null}
       <div style={{ flex: 1 }} />
       <Form
         onSubmit={handleSubmit(async (data) => {
@@ -278,7 +358,32 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
 
   return (
     <div className={style.container}>
-      <QRCode size={300} value={qrCodeData ? JSON.stringify(qrCodeData) : ""} />
+      <div style={{ flex: 1 }} />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <QRCode
+          size={260}
+          value={qrCodeData ? JSON.stringify(qrCodeData) : ""}
+        />
+        <div
+          style={{
+            marginTop: "40px",
+            fontSize: "16px",
+            lineHeight: "22px",
+            textAlign: "center",
+            color: "#172B4D",
+          }}
+        >
+          Scan this QR code on Keplr Mobile to export your accounts.
+        </div>
+      </div>
+      <div style={{ flex: 1 }} />
     </div>
   );
 });
