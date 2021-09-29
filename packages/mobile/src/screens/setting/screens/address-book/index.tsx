@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../../../components/page";
 import { useStyle } from "../../../../styles";
@@ -17,10 +17,10 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { RectButton } from "../../../../components/rect-button";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { HeaderRightButton } from "../../../../components/header";
-import { AddressDeleteModal } from "../../../../modals/address";
 import { HeaderAddIcon } from "../../../../components/header/icon";
 import { useLogScreenView } from "../../../../hooks";
 import { AddressBookIcon } from "../../../../components/icon";
+import { useConfirmModal } from "../../../../providers/confirm-modal";
 
 const addressBookItemComponent = {
   inTransaction: RectButton,
@@ -29,10 +29,8 @@ const addressBookItemComponent = {
 
 export const AddressBookScreen: FunctionComponent = observer(() => {
   const { chainStore, analyticsStore } = useStore();
-  const [isAddressDeleteModalOpen, setIsAddressDeleteModalOpen] = useState(
-    false
-  );
-  const [deletingAddressIndex, setDeletingAddressIndex] = useState(0);
+
+  const confirmModal = useConfirmModal();
 
   const route = useRoute<
     RouteProp<
@@ -175,9 +173,18 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                 </View>
                 <TouchableOpacity
                   style={style.flatten(["padding-left-8", "padding-y-12"])}
-                  onPress={() => {
-                    setDeletingAddressIndex(i);
-                    setIsAddressDeleteModalOpen(true);
+                  onPress={async () => {
+                    if (
+                      await confirmModal.confirm({
+                        title: "Delete Address",
+                        paragraph:
+                          "Are you sure you want to delete this address?",
+                        yesButtonText: "Delete",
+                        noButtonText: "Cancel",
+                      })
+                    ) {
+                      await addressBookConfig.removeAddressBook(i);
+                    }
                   }}
                 >
                   <TrashCanIcon
@@ -198,12 +205,6 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
           </React.Fragment>
         );
       })}
-      <AddressDeleteModal
-        isOpen={isAddressDeleteModalOpen}
-        close={() => setIsAddressDeleteModalOpen(false)}
-        addressBookConfig={addressBookConfig}
-        addressIndex={deletingAddressIndex}
-      />
     </PageWithScrollView>
   ) : (
     <PageWithScrollView

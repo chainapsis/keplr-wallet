@@ -1,17 +1,31 @@
 import React, { FunctionComponent } from "react";
-import { registerModal } from "../base";
-import { Text, View } from "react-native";
+import { registerModal } from "../../modals/base";
 import { useStyle } from "../../styles";
+import { Text, View } from "react-native";
 import { Button } from "../../components/button";
-import { AddressBookConfig } from "@keplr-wallet/hooks";
 
-export const AddressDeleteModal: FunctionComponent<{
+export const ConfirmModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
-  addressBookConfig: AddressBookConfig;
-  addressIndex: number;
+
+  title: string;
+  paragraph?: string;
+
+  yesButtonText: string;
+  noButtonText: string;
+
+  onSelectYes: () => void;
+  onSelectNo: () => void;
 }> = registerModal(
-  ({ close, addressBookConfig, addressIndex }) => {
+  ({
+    close,
+    title,
+    paragraph,
+    yesButtonText,
+    noButtonText,
+    onSelectYes,
+    onSelectNo,
+  }) => {
     const style = useStyle();
 
     return (
@@ -33,33 +47,36 @@ export const AddressDeleteModal: FunctionComponent<{
               "margin-bottom-8",
             ])}
           >
-            Delete Address
+            {title}
           </Text>
-          <Text
-            style={style.flatten([
-              "body2",
-              "color-text-black-medium",
-              "margin-bottom-16",
-              "text-center",
-            ])}
-          >
-            Are you sure you want to delete this address?
-          </Text>
+          {paragraph ? (
+            <Text
+              style={style.flatten([
+                "body2",
+                "color-text-black-medium",
+                "margin-bottom-16",
+                "text-center",
+              ])}
+            >
+              {paragraph}
+            </Text>
+          ) : null}
           <View style={style.flatten(["flex-row"])}>
             <Button
               containerStyle={style.flatten(["flex-1"])}
-              text="Cancel"
+              text={noButtonText}
               mode="outline"
               onPress={() => {
+                onSelectNo();
                 close();
               }}
             />
             <View style={style.flatten(["width-12"])} />
             <Button
               containerStyle={style.flatten(["flex-1"])}
-              text="Delete"
+              text={yesButtonText}
               onPress={() => {
-                addressBookConfig.removeAddressBook(addressIndex);
+                onSelectYes();
                 close();
               }}
             />

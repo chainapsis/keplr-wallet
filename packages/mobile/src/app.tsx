@@ -11,6 +11,7 @@ import { InteractionModalsProivder } from "./providers/interaction-modals-provid
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LoadingScreenProvider } from "./providers/loading-screen";
 import * as SplashScreen from "expo-splash-screen";
+import { ConfirmModalProvider } from "./providers/confirm-modal";
 
 if (Platform.OS === "android") {
   // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
@@ -92,9 +93,11 @@ const AppBody: FunctionComponent = () => {
           <SafeAreaProvider>
             <ModalsProvider>
               <LoadingScreenProvider>
-                <InteractionModalsProivder>
-                  <AppNavigation />
-                </InteractionModalsProivder>
+                <ConfirmModalProvider>
+                  <InteractionModalsProivder>
+                    <AppNavigation />
+                  </InteractionModalsProivder>
+                </ConfirmModalProvider>
               </LoadingScreenProvider>
             </ModalsProvider>
           </SafeAreaProvider>
