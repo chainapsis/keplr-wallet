@@ -2,10 +2,6 @@ import React, { FunctionComponent, useState } from "react";
 import { FullScreenCameraView } from "../../../components/camera";
 import { RNCamera } from "react-native-camera";
 import { useSmartNavigation } from "../../../navigation";
-import WalletConnect from "@walletconnect/client";
-import AES, { Counter } from "aes-js";
-import { Buffer } from "buffer/";
-import { ExportKeyRingData } from "@keplr-wallet/background";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -15,9 +11,11 @@ import {
   RegisterConfig,
 } from "@keplr-wallet/hooks";
 import {
+  parseQRCodeDataForImportFromMobile,
+  importFromMobile,
   registerExportedAddressBooks,
   registerExportedKeyRingDatas,
-} from "./utils";
+} from "../../../utils/import-from-mobile";
 import { AsyncKVStore } from "../../../common";
 
 export * from "./intro";
@@ -71,74 +69,27 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
     }
 
     try {
-      const sharedData = JSON.parse(data) as Partial<QRCodeSharedData>;
-      if (!sharedData.wcURI || !sharedData.sharedPassword) {
-        throw new Error("Invalid qr code");
-      }
+      const sharedData = parseQRCodeDataForImportFromMobile(data);
 
       setIsLoading(true);
 
-      const connector = new WalletConnect({
-        uri: sharedData.wcURI,
-      });
-
-      if (connector.connected) {
-        await connector.killSession();
-      }
-
-      await new Promise<void>((resolve, reject) => {
-        connector.on("session_request", (error) => {
-          if (error) {
-            reject(error);
-          } else {
-            connector.approveSession({ accounts: [], chainId: 77777 });
-
-            resolve();
-          }
-        });
-      });
-
-      const result = (
-        await connector.sendCustomRequest({
-          id: Math.floor(Math.random() * 100000),
-          method: "keplr_request_export_keyring_datas_wallet_connect_v1",
-          params: [
-            {
-              addressBookChainIds: chainStore.chainInfosInUI.map(
-                (chainInfo) => chainInfo.chainId
-              ),
-            },
-          ],
-        })
-      )[0] as WCExportKeyRingDatasResponse;
-
-      const counter = new Counter(0);
-      counter.setBytes(Buffer.from(result.encrypted.iv, "hex"));
-      const aesCtr = new AES.ModeOfOperation.ctr(
-        Buffer.from(sharedData.sharedPassword, "hex"),
-        counter
+      const imported = await importFromMobile(
+        sharedData,
+        chainStore.chainInfosInUI.map((chainInfo) => chainInfo.chainId)
       );
-
-      const decrypted = aesCtr.decrypt(
-        Buffer.from(result.encrypted.ciphertext, "hex")
-      );
-
-      const exportedKeyRingDatas = JSON.parse(
-        Buffer.from(decrypted).toString()
-      ) as ExportKeyRingData[];
 
       if (keyRingStore.multiKeyStoreInfo.length > 0) {
         // If already has accounts,
         await registerExportedKeyRingDatas(
           keyRingStore,
           route.params.registerConfig,
-          exportedKeyRingDatas,
+          imported.KeyRingDatas,
           ""
         );
 
         await registerExportedAddressBooks(
           addressBookConfigMap,
-          result.addressBooks
+          imported.addressBooks
         );
 
         smartNavigation.reset({
@@ -157,8 +108,8 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
           "Register.ImportFromExtension.SetPassword",
           {
             registerConfig: route.params.registerConfig,
-            exportKeyRingDatas: exportedKeyRingDatas,
-            addressBooks: result.addressBooks,
+            exportKeyRingDatas: imported.KeyRingDatas,
+            addressBooks: imported.addressBooks,
           }
         );
       }

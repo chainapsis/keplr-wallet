@@ -1,12 +1,103 @@
-import { ExportKeyRingData } from "@keplr-wallet/background";
 import {
-  AddressBookConfigMap,
   AddressBookData,
+  AddressBookConfigMap,
   RegisterConfig,
 } from "@keplr-wallet/hooks";
+import WalletConnect from "@walletconnect/client";
+import AES, { Counter } from "aes-js";
 import { Buffer } from "buffer/";
+import { ExportKeyRingData } from "@keplr-wallet/background";
 import { KeyRingStore } from "@keplr-wallet/stores";
 import { Hash } from "@keplr-wallet/crypto";
+
+export interface QRCodeSharedData {
+  // The uri for the wallet connect
+  wcURI: string;
+  // The temporary password for encrypt/descrypt the key datas.
+  // This must not be shared the other than the extension and mobile.
+  sharedPassword: string;
+}
+
+export interface WCExportKeyRingDatasResponse {
+  encrypted: {
+    // ExportKeyRingData[]
+    // Json format and hex encoded
+    ciphertext: string;
+    // Hex encoded
+    iv: string;
+  };
+  addressBooks: { [chainId: string]: AddressBookData[] | undefined };
+}
+
+export function parseQRCodeDataForImportFromMobile(
+  data: string
+): QRCodeSharedData {
+  const sharedData = JSON.parse(data) as QRCodeSharedData;
+  if (!sharedData.wcURI || !sharedData.sharedPassword) {
+    throw new Error("Invalid qr code");
+  }
+  return sharedData;
+}
+
+export async function importFromMobile(
+  sharedData: QRCodeSharedData,
+  chainIdsForAddressBook: string[]
+): Promise<{
+  KeyRingDatas: ExportKeyRingData[];
+  addressBooks: { [chainId: string]: AddressBookData[] | undefined };
+}> {
+  const connector = new WalletConnect({
+    uri: sharedData.wcURI,
+  });
+
+  if (connector.connected) {
+    await connector.killSession();
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    connector.on("session_request", (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        connector.approveSession({ accounts: [], chainId: 77777 });
+
+        resolve();
+      }
+    });
+  });
+
+  const result = (
+    await connector.sendCustomRequest({
+      id: Math.floor(Math.random() * 100000),
+      method: "keplr_request_export_keyring_datas_wallet_connect_v1",
+      params: [
+        {
+          addressBookChainIds: chainIdsForAddressBook,
+        },
+      ],
+    })
+  )[0] as WCExportKeyRingDatasResponse;
+
+  const counter = new Counter(0);
+  counter.setBytes(Buffer.from(result.encrypted.iv, "hex"));
+  const aesCtr = new AES.ModeOfOperation.ctr(
+    Buffer.from(sharedData.sharedPassword, "hex"),
+    counter
+  );
+
+  const decrypted = aesCtr.decrypt(
+    Buffer.from(result.encrypted.ciphertext, "hex")
+  );
+
+  const exportedKeyRingDatas = JSON.parse(
+    Buffer.from(decrypted).toString()
+  ) as ExportKeyRingData[];
+
+  return {
+    KeyRingDatas: exportedKeyRingDatas,
+    addressBooks: result.addressBooks,
+  };
+}
 
 function sortedObject(obj: any): any {
   if (typeof obj !== "object" || obj === null) {
@@ -102,15 +193,15 @@ export async function registerExportedKeyRingDatas(
       );
 
       /*
-      Due to the current structure, it is slightly difficult to set the coin type for each account, so we omit it for now.
-      This is not a big problem because users can choose their account from the coin types anyway.
-      for (const chain of Object.keys(exportKeyRingData.coinTypeForChain)) {
-        await keyRingStore.setKeyStoreCoinType(
-          chain,
-          exportKeyRingData.coinTypeForChain[chain]
-        );
-      }
-       */
+        Due to the current structure, it is slightly difficult to set the coin type for each account, so we omit it for now.
+        This is not a big problem because users can choose their account from the coin types anyway.
+        for (const chain of Object.keys(exportKeyRingData.coinTypeForChain)) {
+          await keyRingStore.setKeyStoreCoinType(
+            chain,
+            exportKeyRingData.coinTypeForChain[chain]
+          );
+        }
+      */
     }
 
     if (exportKeyRingData.type === "privateKey") {
