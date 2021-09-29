@@ -80,7 +80,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
           "text-center",
         ])}
       >
-        Beckup your mnemonic securely
+        Backup your mnemonic securely
       </Text>
       <WordsCard words={words} />
       <Controller
