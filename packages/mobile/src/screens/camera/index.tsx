@@ -159,7 +159,6 @@ export const CameraScreen: FunctionComponent = observer(() => {
               "opacity-90",
             ])}
             style={style.flatten(["padding-x-52"])}
-            textStyle={style.flatten(["normal-case"])}
             onPress={() => {
               setIsSelectChainModalOpen(true);
             }}
