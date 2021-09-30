@@ -567,6 +567,12 @@ export class CosmosAccount {
           if (proposal) {
             proposal.fetch();
           }
+
+          const vote = this.queries.cosmos.queryProposalVote.getVote(
+            proposalId,
+            this.base.bech32Address
+          );
+          vote.fetch();
         }
       })
     );
