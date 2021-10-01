@@ -3,7 +3,7 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithView } from "../../components/page";
-import { Text, View, Animated, Dimensions } from "react-native";
+import { Text, View, Animated, StyleSheet } from "react-native";
 import { Button } from "../../components/button";
 import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
@@ -59,7 +59,6 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
       disableSafeArea
       style={style.flatten([
         "flex-grow-1",
-        Dimensions.get("window").width > 375 ? "padding-x-42" : "padding-x-20",
         "items-center",
         "background-color-white",
       ])}
@@ -82,37 +81,44 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           />
         </View>
       </View>
-      <Text style={style.flatten(["h2", "margin-top-82", "margin-bottom-32"])}>
+
+      <Text
+        style={style.flatten([
+          "h2",
+          "color-text-black-medium",
+          "margin-top-82",
+          "margin-bottom-32",
+        ])}
+      >
         Transaction failed
       </Text>
 
+      {/* To match the height of text with other tx result screens,
+         set the explicit height to upper view*/}
       <View
-        style={{
-          height: style.get("body1").lineHeight * 3,
-          overflow: "visible",
-        }}
+        style={StyleSheet.flatten([
+          style.flatten(["padding-x-36"]),
+          {
+            height: style.get("body2").lineHeight * 3,
+            overflow: "visible",
+          },
+        ])}
       >
         <Text
           style={style.flatten([
-            "body1",
+            "body2",
             "text-center",
             "color-text-black-low",
           ])}
         >
-          Transaction unsuccessful.
-        </Text>
-        <Text
-          style={style.flatten([
-            "body1",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
-          Please check the block explorer for more information.
+          Transaction unsuccessful. Please check the block explorer for more
+          information.
         </Text>
       </View>
 
-      <View style={style.flatten(["height-116", "margin-top-58"])}>
+      <View
+        style={style.flatten(["padding-x-48", "height-116", "margin-top-58"])}
+      >
         <View style={style.flatten(["flex-row", "width-full"])}>
           <Button
             containerStyle={style.flatten(["flex-1"])}

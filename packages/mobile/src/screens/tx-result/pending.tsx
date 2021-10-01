@@ -3,7 +3,7 @@ import { RouteProp, useIsFocused, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PageWithView } from "../../components/page";
-import { Text, View, Dimensions } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import { Button } from "../../components/button";
 import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
@@ -77,7 +77,6 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       disableSafeArea
       style={style.flatten([
         "flex-grow-1",
-        Dimensions.get("window").width > 375 ? "padding-x-42" : "padding-x-20",
         "items-center",
         "background-color-white",
       ])}
@@ -124,18 +123,31 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
         </View>
       </View>
 
-      <Text style={style.flatten(["h2", "margin-top-82", "margin-bottom-32"])}>
+      <Text
+        style={style.flatten([
+          "h2",
+          "color-text-black-medium",
+          "margin-top-82",
+          "margin-bottom-32",
+        ])}
+      >
         Transaction pending
       </Text>
+
+      {/* To match the height of text with other tx result screens,
+         set the explicit height to upper view*/}
       <View
-        style={{
-          height: style.get("body1").lineHeight * 3,
-          overflow: "visible",
-        }}
+        style={StyleSheet.flatten([
+          style.flatten(["padding-x-66"]),
+          {
+            height: style.get("body2").lineHeight * 3,
+            overflow: "visible",
+          },
+        ])}
       >
         <Text
           style={style.flatten([
-            "body1",
+            "body2",
             "text-center",
             "color-text-black-low",
           ])}
@@ -146,24 +158,32 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       </View>
 
       <View
-        style={style.flatten(["height-116", "margin-top-58", "justify-center"])}
+        style={style.flatten([
+          "padding-x-48",
+          "height-116",
+          "margin-top-58",
+          "justify-center",
+        ])}
       >
-        <Button
-          size="default"
-          text="Go to homescreen"
-          mode="text"
-          rightIcon={
-            <View style={style.flatten(["margin-left-8"])}>
-              <RightArrowIcon
-                color={style.get("color-primary").color}
-                height={12}
-              />
-            </View>
-          }
-          onPress={() => {
-            smartNavigation.navigateSmart("Home", {});
-          }}
-        />
+        <View style={style.flatten(["flex-row", "width-full"])}>
+          <Button
+            containerStyle={style.flatten(["flex-1"])}
+            size="default"
+            text="Go to homescreen"
+            mode="text"
+            rightIcon={
+              <View style={style.flatten(["margin-left-8"])}>
+                <RightArrowIcon
+                  color={style.get("color-primary").color}
+                  height={12}
+                />
+              </View>
+            }
+            onPress={() => {
+              smartNavigation.navigateSmart("Home", {});
+            }}
+          />
+        </View>
       </View>
       <View style={style.flatten(["flex-2"])} />
     </PageWithView>

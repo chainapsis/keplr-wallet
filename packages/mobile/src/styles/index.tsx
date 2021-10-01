@@ -368,6 +368,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "48": 48,
     "52": 52,
     "64": 64,
+    "66": 66,
 
     page: 20,
     "card-horizontal": 20,
