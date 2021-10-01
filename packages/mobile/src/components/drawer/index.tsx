@@ -88,8 +88,8 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                   {chainInfo.raw.chainSymbolImageUrl ? (
                     <FastImage
                       style={{
-                        width: 33,
-                        height: 33,
+                        width: 32,
+                        height: 32,
                       }}
                       resizeMode={FastImage.resizeMode.contain}
                       source={{

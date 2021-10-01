@@ -45,7 +45,13 @@ export const TokenSymbol: FunctionComponent<{
   size: number;
 
   imageScale?: number;
-}> = ({ style: propStyle, size, currency, chainInfo, imageScale = 3 / 4 }) => {
+}> = ({
+  style: propStyle,
+  size,
+  currency,
+  chainInfo,
+  imageScale = 32 / 44,
+}) => {
   const style = useStyle();
 
   const isStakeCurrency =
