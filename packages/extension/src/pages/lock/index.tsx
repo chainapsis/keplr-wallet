@@ -32,7 +32,7 @@ export const LockPage: FunctionComponent = observer(() => {
     },
   });
 
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
   const [loading, setLoading] = useState(false);
 
   const interactionInfo = useInteractionInfo(() => {
@@ -47,6 +47,9 @@ export const LockPage: FunctionComponent = observer(() => {
           setLoading(true);
           try {
             await keyRingStore.unlock(data.password);
+            analyticsStore.logEvent("Account unlocked", {
+              authType: "password",
+            });
             if (interactionInfo.interaction) {
               if (!interactionInfo.interactionInternal) {
                 // XXX: If the connection doesn't have the permission,

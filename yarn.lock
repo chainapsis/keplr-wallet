@@ -7,6 +7,24 @@
   resolved "https://registry.yarnpkg.com/@amplitude/react-native/-/react-native-2.4.0.tgz#0b75b088245500b4b60c89dc36fc07e1ac34cafb"
   integrity sha512-xbmaHRB4iKX8V6ElG9Yl7ikELiGW2XOkdMimWqTLR6zUIpjEwN+PSZ9+gPyexX15qnPDg52O58X5zyAL2Y/hzQ==
 
+"@amplitude/types@^1.8.2":
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/@amplitude/types/-/types-1.8.2.tgz#34315ba822de569c1d02a7c001913b7ac2fbc04c"
+  integrity sha512-VY0EDZyTes8yDHqCEFYC3nhFxfdlx5ah8YTWvCZoM+BklRO8PHE177H3kpKqs5TKG+M62ToNAiOQ7s/KDYgc6Q==
+
+"@amplitude/ua-parser-js@0.7.24":
+  version "0.7.24"
+  resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.24.tgz#2ce605af7d2c38d4a01313fb2385df55fbbd69aa"
+  integrity sha512-VbQuJymJ20WEw0HtI2np7EdC3NJGUWi8+Xdbc7uk8WfMIF308T0howpzkQ3JFMN7ejnrcSM/OyNGveeE3TP3TA==
+
+"@amplitude/utils@^1.0.5":
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/@amplitude/utils/-/utils-1.8.2.tgz#77a614e0921ee5b57b994bb82dc3f9a81a0e493d"
+  integrity sha512-b15pp5K/O/9xGjX61iNWob1GLJCP64/jp0+WklPzIJaZFPFe+gS5vi/PJmt7vDt+pCBqVvGLyKv7hX0/OLM9IA==
+  dependencies:
+    "@amplitude/types" "^1.8.2"
+    tslib "^1.9.3"
+
 "@babel/code-frame@7.8.3":
   version "7.8.3"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.8.3.tgz#33e25903d7481181534e12ec0a25f16b6fcf419e"
@@ -5537,6 +5555,11 @@
   resolved "https://registry.yarnpkg.com/@types/aes-js/-/aes-js-3.1.1.tgz#34b3978122310c135de4b377270d1d65676fae28"
   integrity sha512-SDSGgXT3LRCH6qMWk8OHT1vLSVNuHNvCpKCx2/TYtQMbMGGgxJC9fspwSkQjqzRagrWnCrxuLL3jMNXLXHHvSw==
 
+"@types/amplitude-js@^8.0.1":
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/@types/amplitude-js/-/amplitude-js-8.0.1.tgz#97406436b0ba3b14eba87b01a63b56681364654d"
+  integrity sha512-JrVJ/G8bXEz/b12xKOsSWbQ4C4i4AlPalQprJBCXhUG0loWtPNfV/8Uj53mL0OHa3hfI5javocIsgF33k6cOVQ==
+
 "@types/anymatch@*":
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/@types/anymatch/-/anymatch-1.3.1.tgz#336badc1beecb9dacc38bea2cf32adf627a8421a"
@@ -6848,6 +6871,16 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
   integrity sha1-SlKCrBZHKek2Gbz9OtFR+BfOkfU=
+
+amplitude-js@^8.5.0:
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/amplitude-js/-/amplitude-js-8.5.0.tgz#17f75ca84f5ebee7dab212f4a0a100d606dbd989"
+  integrity sha512-qRt5JghdluTGyaSGJ4Ae1DKX5ObZj46OJPTlI66ewxFCyOPbkxeO22LybIfxDoL6ZylnXVIuICNp0BbzZ6A4tg==
+  dependencies:
+    "@amplitude/ua-parser-js" "0.7.24"
+    "@amplitude/utils" "^1.0.5"
+    blueimp-md5 "^2.10.0"
+    query-string "5"
 
 anser@^1.4.9:
   version "1.4.10"
@@ -19717,6 +19750,15 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
+query-string@5, query-string@^5.0.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/query-string/-/query-string-5.1.1.tgz#a78c012b71c17e05f2e3fa2319dd330682efb3cb"
+  integrity sha512-gjWOsm2SoGlgLEdAGt7a6slVOk9mGiXmPFMqrEhLQ68rhQuBnpfs3+EmlvqKyxnCo9/PPlF+9MtY02S1aFg+Jw==
+  dependencies:
+    decode-uri-component "^0.2.0"
+    object-assign "^4.1.0"
+    strict-uri-encode "^1.0.0"
+
 query-string@6.13.5:
   version "6.13.5"
   resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.13.5.tgz#99e95e2fb7021db90a6f373f990c0c814b3812d8"
@@ -19731,15 +19773,6 @@ query-string@^4.1.0:
   resolved "https://registry.yarnpkg.com/query-string/-/query-string-4.3.4.tgz#bbb693b9ca915c232515b228b1a02b609043dbeb"
   integrity sha1-u7aTucqRXCMlFbIosaArYJBD2+s=
   dependencies:
-    object-assign "^4.1.0"
-    strict-uri-encode "^1.0.0"
-
-query-string@^5.0.1:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/query-string/-/query-string-5.1.1.tgz#a78c012b71c17e05f2e3fa2319dd330682efb3cb"
-  integrity sha512-gjWOsm2SoGlgLEdAGt7a6slVOk9mGiXmPFMqrEhLQ68rhQuBnpfs3+EmlvqKyxnCo9/PPlF+9MtY02S1aFg+Jw==
-  dependencies:
-    decode-uri-component "^0.2.0"
     object-assign "^4.1.0"
     strict-uri-encode "^1.0.0"
 

@@ -31,7 +31,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const [phase, setPhase] = useState<"channel" | "amount">("channel");
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
@@ -45,6 +45,15 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     queries.queryBalances,
     EthereumEndpoint
   );
+
+  const toChainId =
+    (ibcTransferConfigs &&
+      ibcTransferConfigs.channelConfig &&
+      ibcTransferConfigs.channelConfig.channel &&
+      ibcTransferConfigs.channelConfig.channel.counterpartyChainId) ||
+    "";
+  const toChainName =
+    (toChainId && chainStore.getChain(toChainId).chainName) || "";
 
   return (
     <HeaderLayout
@@ -82,6 +91,17 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   {
                     preferNoSetFee: true,
                     preferNoSetMemo: true,
+                  },
+                  (tx: any) => {
+                    const isSuccess = tx.code == null || tx.code === 0;
+                    analyticsStore.logEvent("Send token finished", {
+                      chainId: chainStore.current.chainId,
+                      chainName: chainStore.current.chainName,
+                      feeType: ibcTransferConfigs.feeConfig.feeType,
+                      toChainId,
+                      toChainName,
+                      isSuccess,
+                    });
                   }
                 );
                 history.push("/");

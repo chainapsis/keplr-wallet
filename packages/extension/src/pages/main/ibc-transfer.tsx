@@ -11,7 +11,7 @@ import { FormattedMessage } from "react-intl";
 
 export const IBCTransferView: FunctionComponent = observer(() => {
   const history = useHistory();
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -57,6 +57,11 @@ export const IBCTransferView: FunctionComponent = observer(() => {
         onClick={(e) => {
           e.preventDefault();
 
+          analyticsStore.logEvent("Send token started", {
+            chainId: chainStore.current.chainId,
+            chainName: chainStore.current.chainName,
+            isIbc: true,
+          });
           history.push("/ibc-transfer");
         }}
       >

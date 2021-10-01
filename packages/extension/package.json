@@ -32,6 +32,7 @@
     "@keplr-wallet/unit": "^0.9.0-rc.2",
     "@walletconnect/client": "^1.6.4",
     "aes-js": "^3.1.2",
+    "amplitude-js": "^8.5.0",
     "argon-dashboard-react": "^1.1.0",
     "axios": "^0.21.0",
     "bip39": "^3.0.2",
@@ -60,10 +61,12 @@
     "reactstrap": "^8.4.1",
     "scrypt-js": "^3.0.1",
     "secretjs": "^0.16.0",
+    "sha.js": "^2.4.11",
     "utility-types": "^3.10.0",
     "webextension-polyfill": "^0.7.0"
   },
   "devDependencies": {
+    "@types/amplitude-js": "^8.0.1",
     "@types/chart.js": "^2.9.25",
     "@types/chrome": "0.0.88",
     "@types/classnames": "^2.2.9",
@@ -74,6 +77,7 @@
     "@types/react-modal": "^3.10.0",
     "@types/react-router-dom": "^5.1.2",
     "@types/reactstrap": "^8.4.2",
+    "@types/sha.js": "^2.4.0",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.0.4",
     "css-loader": "^3.2.0",
