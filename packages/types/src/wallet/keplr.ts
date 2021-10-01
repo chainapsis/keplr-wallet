@@ -37,7 +37,7 @@ export interface Keplr {
   defaultOptions: KeplrIntereactionOptions;
 
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
-  enable(chainId: string): Promise<void>;
+  enable(chainIds: string | string[]): Promise<void>;
   getKey(chainId: string): Promise<Key>;
   signAmino(
     chainId: string,

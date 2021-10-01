@@ -1,8 +1,8 @@
 import { IntPretty, IntPrettyOptions } from "./int-pretty";
-import { Int } from "./int";
 import { Dec } from "./decimal";
 import { AppCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
+import { DecUtils } from "./dec-utils";
 
 export type CoinPrettyOptions = {
   separator: string;
@@ -23,17 +23,23 @@ export class CoinPretty {
 
   constructor(
     protected _currency: AppCurrency,
-    protected amount: Int | Dec | IntPretty
+    protected amount: Dec | { toDec(): Dec }
   ) {
-    if (amount instanceof IntPretty) {
-      this.intPretty = amount;
-    } else {
-      this.intPretty = new IntPretty(amount);
+    if ("toDec" in this.amount) {
+      this.amount = this.amount.toDec();
     }
 
-    this.intPretty = this.intPretty
-      .maxDecimals(_currency.coinDecimals)
-      .precision(_currency.coinDecimals);
+    this.intPretty = new IntPretty(this.amount);
+
+    if (this.intPretty.options.precision === 0) {
+      this.intPretty = this.intPretty
+        .maxDecimals(_currency.coinDecimals)
+        .precision(_currency.coinDecimals);
+    } else {
+      this.intPretty = this.intPretty
+        .maxDecimals(_currency.coinDecimals)
+        .mul(DecUtils.getPrecisionDec(-_currency.coinDecimals));
+    }
   }
 
   get options(): DeepReadonly<IntPrettyOptions & CoinPrettyOptions> {
@@ -92,6 +98,18 @@ export class CoinPretty {
     return pretty;
   }
 
+  increasePrecision(delta: number): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.increasePrecision(delta);
+    return pretty;
+  }
+
+  decreasePrecision(delta: number): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.decreasePrecision(delta);
+    return pretty;
+  }
+
   maxDecimals(max: number): CoinPretty {
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.maxDecimals(max);
@@ -133,14 +151,84 @@ export class CoinPretty {
     return this.intPretty.isReady;
   }
 
-  add(target: CoinPretty): CoinPretty {
+  add(target: Dec | { toDec(): Dec } | CoinPretty): CoinPretty {
+    const isCoinPretty = target instanceof CoinPretty;
+    if (isCoinPretty) {
+      // If target is `CoinPretty` and it has different denom, do nothing.
+      if (
+        "currency" in target &&
+        this.currency.coinMinimalDenom !== target.currency.coinMinimalDenom
+      ) {
+        return this.clone();
+      }
+    }
+
+    if ("toDec" in target) {
+      target = target.toDec();
+    }
+
     const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.add(target.intPretty);
+    pretty.intPretty = pretty.intPretty.add(
+      isCoinPretty
+        ? target
+        : target.mul(DecUtils.getPrecisionDec(-this._currency.coinDecimals))
+    );
+    return pretty;
+  }
+
+  sub(target: Dec | { toDec(): Dec } | CoinPretty): CoinPretty {
+    const isCoinPretty = target instanceof CoinPretty;
+    if (isCoinPretty) {
+      // If target is `CoinPretty` and it has different denom, do nothing.
+      if (
+        "currency" in target &&
+        this.currency.coinMinimalDenom !== target.currency.coinMinimalDenom
+      ) {
+        return this.clone();
+      }
+    }
+
+    if ("toDec" in target) {
+      target = target.toDec();
+    }
+
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.sub(
+      isCoinPretty
+        ? target
+        : target.mul(DecUtils.getPrecisionDec(-this._currency.coinDecimals))
+    );
+    return pretty;
+  }
+
+  mul(target: Dec | { toDec(): Dec }): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.mul(target);
+    return pretty;
+  }
+
+  quo(target: Dec | { toDec(): Dec }): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.quo(target);
     return pretty;
   }
 
   toDec(): Dec {
     return this.intPretty.toDec();
+  }
+
+  toCoin(): {
+    denom: string;
+    amount: string;
+  } {
+    const amount = this.toDec()
+      .mul(DecUtils.getPrecisionDec(this.currency.coinDecimals))
+      .truncate();
+
+    return {
+      denom: this.currency.coinMinimalDenom,
+      amount: amount.toString(),
+    };
   }
 
   toString(): string {

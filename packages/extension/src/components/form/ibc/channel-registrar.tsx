@@ -113,13 +113,11 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
 
               const queries = queriesStore.get(chainStore.current.chainId);
 
-              const channel = await queries
-                .getQueryIBCCChannel()
+              const channel = await queries.cosmos.queryIBCChannel
                 .getTransferChannel(channelId)
                 .waitFreshResponse();
 
-              const clientState = await queries
-                .getQueryIBCClientState()
+              const clientState = await queries.cosmos.queryIBCClientState
                 .getClientStateOnTransferPort(channelId)
                 .waitFreshResponse();
 

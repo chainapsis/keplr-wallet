@@ -21,12 +21,12 @@ const BIP44Selectable: FunctionComponent<{
   const { chainStore, queriesStore } = useStore();
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const account = queries
-    .getQueryAccount()
-    .getQueryBech32Address(selectable.bech32Address);
-  const stakable = queries
-    .getQueryBalances()
-    .getQueryBech32Address(selectable.bech32Address).stakable;
+  const account = queries.cosmos.queryAccount.getQueryBech32Address(
+    selectable.bech32Address
+  );
+  const stakable = queries.queryBalances.getQueryBech32Address(
+    selectable.bech32Address
+  ).stakable;
 
   return (
     <div
@@ -115,9 +115,9 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
       // Wait to fetch the balances of the accounts.
       const queryBalancesWaiter = selectables.selectables
         .map((selectable) => {
-          return queries
-            .getQueryBalances()
-            .getQueryBech32Address(selectable.bech32Address).balances;
+          return queries.queryBalances.getQueryBech32Address(
+            selectable.bech32Address
+          ).balances;
         })
         .map((bals) => {
           return bals.map((bal) => {
@@ -132,9 +132,9 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
       // Wait to fetch the account.
       const queryAccountsWaiter = selectables.selectables
         .map((selectable) => {
-          return queries
-            .getQueryAccount()
-            .getQueryBech32Address(selectable.bech32Address);
+          return queries.cosmos.queryAccount.getQueryBech32Address(
+            selectable.bech32Address
+          );
         })
         .map((account) => {
           return account.waitFreshResponse();
@@ -146,9 +146,9 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
 
         // Check that the others have some balances/
         const hasBalances = others.find((other) => {
-          const balances = queries
-            .getQueryBalances()
-            .getQueryBech32Address(other.bech32Address).balances;
+          const balances = queries.queryBalances.getQueryBech32Address(
+            other.bech32Address
+          ).balances;
           for (let i = 0; i < balances.length; i++) {
             const bal = balances[i];
 
@@ -162,9 +162,9 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
 
         // Check that the others have sent txs.
         const hasSequence = others.find((other) => {
-          const account = queries
-            .getQueryAccount()
-            .getQueryBech32Address(other.bech32Address);
+          const account = queries.cosmos.queryAccount.getQueryBech32Address(
+            other.bech32Address
+          );
           return account.sequence !== "0";
         });
 

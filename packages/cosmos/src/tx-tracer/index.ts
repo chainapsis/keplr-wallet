@@ -134,8 +134,14 @@ export class TendermintTxTracer {
                 .get(obj.id)!
                 .rejector(new Error(obj.error.data || obj.error.message));
             } else {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              this.pendingQueries.get(obj.id)!.resolver(obj.result);
+              // XXX: I'm not sure why this happens, but somtimes the form of tx id delivered under the "tx_result" field.
+              if (obj.result?.tx_result) {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                this.pendingQueries.get(obj.id)!.resolver(obj.result.tx_result);
+              } else {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                this.pendingQueries.get(obj.id)!.resolver(obj.result);
+              }
             }
 
             this.pendingQueries.delete(obj.id);

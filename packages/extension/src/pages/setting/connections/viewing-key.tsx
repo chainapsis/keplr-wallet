@@ -22,8 +22,9 @@ export const SettingSecret20ViewingKeyConnectionsPage: FunctionComponent = obser
 
     const tokenInfo = queriesStore
       .get(chainStore.current.chainId)
-      .getQuerySecret20ContractInfo()
-      .getQueryContract(match.params.contractAddress);
+      .secret.querySecret20ContractInfo.getQueryContract(
+        match.params.contractAddress
+      );
 
     const accessInfo = permissionStore.getSecret20ViewingKeyAccessInfo(
       chainStore.current.chainId,

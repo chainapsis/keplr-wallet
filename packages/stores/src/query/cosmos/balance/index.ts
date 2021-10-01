@@ -1,5 +1,5 @@
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter, QueryResponse } from "../../../common";
 import { computed, makeObservable, override } from "mobx";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { StoreUtils } from "../../../common";
@@ -66,6 +66,8 @@ export class ObservableQueryBalanceNative extends ObservableQueryBalanceInner {
 export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances> {
   protected bech32Address: string;
 
+  protected duplicatedFetchCheck: boolean = false;
+
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -75,11 +77,39 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
     super(kvStore, chainId, chainGetter, `/bank/balances/${bech32Address}`);
 
     this.bech32Address = bech32Address;
+
+    makeObservable(this);
   }
 
   protected canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
+  }
+
+  @override
+  *fetch() {
+    if (!this.duplicatedFetchCheck) {
+      // Because the native "bank" module's balance shares the querying result,
+      // it is inefficient to fetching duplicately in the same loop.
+      // So, if the fetching requests are in the same tick, this prevent to refetch the result and use the prior fetching.
+      this.duplicatedFetchCheck = true;
+      setTimeout(() => {
+        this.duplicatedFetchCheck = false;
+      }, 1);
+
+      yield super.fetch();
+    }
+  }
+
+  protected setResponse(response: Readonly<QueryResponse<Balances>>) {
+    super.setResponse(response);
+
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    // 반환된 response 안의 denom을 등록하도록 시도한다.
+    // 어차피 이미 등록되어 있으면 밑의 메소드가 아무 행동도 안하기 때문에 괜찮다.
+    // computed를 줄이기 위해서 배열로 한번에 설정하는게 낫다.
+    const denoms = response.data.result.map((coin) => coin.denom);
+    chainInfo.addUnknownCurrencies(...denoms);
   }
 }
 

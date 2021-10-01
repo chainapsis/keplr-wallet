@@ -76,7 +76,7 @@ export const ChainList: FunctionComponent = observer(() => {
   return (
     <div className={style.chainListContainer}>
       {mainChainList.map((chainInfo) => (
-        <ChainElement key={chainInfo.chainId} chainInfo={chainInfo} />
+        <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}
       {betaChainList.length > 0 ? (
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -106,7 +106,7 @@ export const ChainList: FunctionComponent = observer(() => {
         </div>
       ) : null}
       {betaChainList.map((chainInfo) => (
-        <ChainElement key={chainInfo.chainId} chainInfo={chainInfo} />
+        <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}
     </div>
   );

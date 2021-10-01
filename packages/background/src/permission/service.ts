@@ -195,11 +195,26 @@ export class PermissionService {
     return origins;
   }
 
-  protected async addPermission(
-    chainIds: string[],
-    type: string,
-    origins: string[]
-  ) {
+  getOriginPermittedChains(origin: string, type: string): string[] {
+    const chains: string[] = [];
+
+    for (const chain of Object.keys(this.permissionMap)) {
+      const permissionInChain = this.permissionMap[chain];
+
+      const originMap =
+        (permissionInChain ? permissionInChain[type] : undefined) ?? {};
+
+      for (const _origin of Object.keys(originMap)) {
+        if (_origin === origin && originMap[_origin]) {
+          chains.push(chain);
+        }
+      }
+    }
+
+    return chains;
+  }
+
+  async addPermission(chainIds: string[], type: string, origins: string[]) {
     for (const chainId of chainIds) {
       let permissionsInChain = this.permissionMap[
         ChainIdHelper.parse(chainId).identifier

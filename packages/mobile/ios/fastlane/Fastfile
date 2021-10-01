@@ -1,0 +1,94 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  lane :deploy_codepush do |options|
+    if options[:target_version]
+      target_version = options[:target_version]
+    else
+      target_version = prompt(text: "Enter the target version\n(Ex. 1.0.0): ")
+    end
+
+    re = /\d+.\d+.\d+/
+    version_nums = target_version[re, 0]
+
+    if version_nums.length != 5
+      UI.error("Invalid version #{target_version}")
+    end
+
+    UI.message("Code push will be deployed for IOS #{target_version}")
+
+    sh("cd ../.. && appcenter codepush release-react -a #{ENV["IOS_APPCENTER_APP_NAME"]} -d Production -t #{target_version}")
+  end
+
+  desc "Push a new beta build to TestFlight"
+  lane :beta do |options|
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPLE_KEY_ID"],
+      issuer_id: ENV["APPLE_ISSUER_ID"],
+      key_filepath: ENV["APPLE_KEY_FILEPATH"],
+      duration: 1200,
+      in_house: false
+    )
+
+    apple_id = ENV["APPLE_ID"]
+    itc_team_id = ENV["ITC_TEAM_ID"]
+    team_id = ENV["TEAM_ID"]
+
+    if options[:version]
+      version = options[:version]
+    else
+      version = prompt(text: "Enter the version type or specific version\n(Ex. 1.0.0): ")
+    end
+
+    re = /\d+.\d+.\d+/
+    version_nums = version[re, 0]
+
+    if version_nums.length != 5
+      UI.error("Invalid version #{version}")
+    end
+
+    # Should set the MATCH_KEYCHAIN_PASSWORD env to prevent interaction if you need.
+    cert(
+      team_id: team_id,
+    )
+    sigh(
+      force: true,
+      team_id: team_id,
+    )
+
+    increment_version_number(
+      xcodeproj: "mobile.xcodeproj",
+      version_number: version,
+    )
+
+    build_number = latest_testflight_build_number(
+      team_id: team_id,
+    ) + 1
+    UI.message("Build number will be #{build_number}")
+    increment_build_number(
+      xcodeproj: "mobile.xcodeproj",
+      build_number: build_number,
+    )
+    build_app(workspace: "mobile.xcworkspace", scheme: "mobile")
+    upload_to_testflight(
+      apple_id: apple_id,
+      team_id: team_id,
+      skip_submission: true
+    )
+  end
+end

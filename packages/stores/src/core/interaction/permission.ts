@@ -9,6 +9,8 @@ import {
   isSecret20ViewingKeyPermissionType,
   splitSecret20ViewingKeyPermissionType,
   getSecret20ViewingKeyPermissionType,
+  AddPermissionOrigin,
+  GetOriginPermittedChainsMsg,
 } from "@keplr-wallet/background";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { HasMapStore } from "../../common";
@@ -75,6 +77,19 @@ export class BasicAccessPermissionInnerStore {
 
   get origins(): string[] {
     return this._origins;
+  }
+
+  @flow
+  *addOrigin(origin: string) {
+    yield this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new AddPermissionOrigin(
+        this.chainId,
+        getBasicAccessPermissionType(),
+        origin
+      )
+    );
+    yield this.refreshOrigins();
   }
 
   @flow
@@ -145,6 +160,16 @@ export class PermissionStore extends HasMapStore<
       contractAddress: "",
     });
     return this.get(key) as BasicAccessPermissionInnerStore;
+  }
+
+  async getOriginPermittedChains(
+    origin: string,
+    type: string
+  ): Promise<string[]> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetOriginPermittedChainsMsg(origin, type)
+    );
   }
 
   getSecret20ViewingKeyAccessInfo(

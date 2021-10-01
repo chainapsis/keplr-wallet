@@ -54,7 +54,7 @@ export const SendPage: FunctionComponent = observer(() => {
     current.chainId,
     accountInfo.msgOpts.send,
     accountInfo.bech32Address,
-    queriesStore.get(current.chainId).getQueryBalances(),
+    queriesStore.get(current.chainId).queryBalances,
     EthereumEndpoint
   );
 
@@ -133,7 +133,6 @@ export const SendPage: FunctionComponent = observer(() => {
             />
             <CoinInput
               amountConfig={sendConfigs.amountConfig}
-              feeConfig={sendConfigs.feeConfig}
               label={intl.formatMessage({ id: "send.input.amount" })}
               balanceText={intl.formatMessage({
                 id: "send.input-button.balance",

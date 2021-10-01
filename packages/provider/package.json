@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/provider",
-  "version": "0.8.15",
+  "version": "0.9.0-rc.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -12,22 +12,19 @@
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
+    "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
-  },
-  "devDependencies": {
-    "mocha": "^8.2.1"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
-    "@keplr-wallet/background": "^0.8.15",
-    "@keplr-wallet/cosmos": "^0.8.15",
-    "@keplr-wallet/router": "^0.8.8",
-    "@keplr-wallet/types": "^0.8.13",
-    "@keplr-wallet/unit": "^0.8.13",
+    "@keplr-wallet/background": "^0.9.0-rc.2",
+    "@keplr-wallet/cosmos": "^0.9.0-rc.2",
+    "@keplr-wallet/router": "^0.9.0-rc.2",
+    "@keplr-wallet/types": "^0.9.0-rc.2",
+    "@keplr-wallet/unit": "^0.9.0-rc.2",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "secretjs": "^0.16.0"

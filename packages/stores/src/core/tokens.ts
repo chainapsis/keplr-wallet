@@ -6,19 +6,22 @@ import {
   RemoveTokenMsg,
   SuggestTokenMsg,
 } from "@keplr-wallet/background";
-import { flow, makeObservable, observable } from "mobx";
+import { autorun, flow, makeObservable, observable } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import { ChainStore } from "../chain";
 import { InteractionStore } from "./interaction";
 import { toGenerator } from "@keplr-wallet/common";
-import { computedFn } from "mobx-utils";
 
 export class TokensStoreInner {
   @observable.ref
   protected _tokens: AppCurrency[] = [];
 
   constructor(
+    protected readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+    },
+    protected readonly chainStore: ChainStore<any>,
     protected readonly chainId: string,
     protected readonly requester: MessageRequester
   ) {
@@ -28,13 +31,13 @@ export class TokensStoreInner {
 
     // If key store in the keplr extension is unlocked, this event will be dispatched.
     // This is needed becuase the token such as secret20 exists according to the account.
-    window.addEventListener("keplr_keystoreunlock", () => {
+    this.eventListener.addEventListener("keplr_keystoreunlock", () => {
       this.refreshTokens();
     });
 
     // If key store in the keplr extension is changed, this event will be dispatched.
     // This is needed becuase the token such as secret20 exists according to the account.
-    window.addEventListener("keplr_keystorechange", () => {
+    this.eventListener.addEventListener("keplr_keystorechange", () => {
       this.refreshTokens();
     });
   }
@@ -45,10 +48,22 @@ export class TokensStoreInner {
 
   @flow
   *refreshTokens() {
-    const msg = new GetTokensMsg(this.chainId);
-    this._tokens = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    const chainInfo = this.chainStore.getChain(this.chainId);
+
+    if (
+      chainInfo.features &&
+      // Tokens service is only needed for secretwasm and cosmwasm,
+      // so, there is no need to fetch the registered token if the chain doesn't support the secretwasm and cosmwasm.
+      (chainInfo.features.includes("secretwasm") ||
+        chainInfo.features.includes("cosmwasm"))
+    ) {
+      const msg = new GetTokensMsg(this.chainId);
+      this._tokens = yield* toGenerator(
+        this.requester.sendMessage(BACKGROUND_PORT, msg)
+      );
+    } else {
+      this._tokens = [];
+    }
   }
 
   @flow
@@ -70,39 +85,30 @@ export class TokensStore<
   C extends ChainInfo = ChainInfo
 > extends HasMapStore<TokensStoreInner> {
   constructor(
+    protected readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+    },
     protected readonly chainStore: ChainStore<C>,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
   ) {
     super((chainId: string) => {
-      return new TokensStoreInner(chainId, this.requester);
+      return new TokensStoreInner(
+        this.eventListener,
+        this.chainStore,
+        chainId,
+        this.requester
+      );
     });
     makeObservable(this);
 
-    this.chainStore.registerChainInfoOverrider(this.overrideChainInfo);
+    this.chainStore.addSetChainInfoHandler((chainInfoInner) => {
+      autorun(() => {
+        const inner = this.getTokensOf(chainInfoInner.chainId);
+        chainInfoInner.addCurrencies(...inner.tokens);
+      });
+    });
   }
-
-  protected readonly overrideChainInfo = computedFn(
-    (chainInfo: DeepReadonly<C>): C => {
-      const inner = this.getTokensOf(chainInfo.chainId);
-
-      const currencies = chainInfo.currencies.slice();
-      for (const token of inner.tokens) {
-        const find = currencies.find(
-          (cur) => cur.coinMinimalDenom === token.coinMinimalDenom
-        );
-
-        if (!find) {
-          currencies.push(token);
-        }
-      }
-
-      return {
-        ...(chainInfo as C),
-        currencies,
-      };
-    }
-  );
 
   getTokensOf(chainId: string) {
     return this.get(chainId);

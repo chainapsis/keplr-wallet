@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/crypto",
-  "version": "0.8.15",
+  "version": "0.9.0-rc.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -12,21 +12,20 @@
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
+    "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
-    "@keplr-wallet/cosmos": "^0.8.15",
+    "@keplr-wallet/cosmos": "^0.9.0-rc.2",
     "@types/crypto-js": "^4.0.1",
     "@types/elliptic": "^6.4.12",
-    "@types/sha.js": "^2.4.0",
-    "mocha": "^8.2.1"
+    "@types/sha.js": "^2.4.0"
   },
   "dependencies": {
     "bip32": "^2.0.6",
     "bip39": "^3.0.3",
-    "buffer": "^5.4.3",
+    "buffer": "^6.0.3",
     "crypto-js": "^4.0.0",
     "elliptic": "^6.5.3",
     "sha.js": "^2.4.11"

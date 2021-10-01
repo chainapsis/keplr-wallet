@@ -10,7 +10,6 @@ import {
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
   ShowKeyRingMsg,
-  GetKeyRingTypeMsg,
   AddMnemonicKeyMsg,
   AddPrivateKeyMsg,
   GetMultiKeyStoreInfoMsg,
@@ -20,6 +19,8 @@ import {
   SetKeyStoreCoinTypeMsg,
   RestoreKeyRingMsg,
   GetIsKeyStoreCoinTypeSetMsg,
+  CheckPasswordMsg,
+  ExportKeyRingDatasMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -79,8 +80,6 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as RequestSignDirectMsg
         );
-      case GetKeyRingTypeMsg:
-        return handleGetKeyRingTypeMsg(service)(env, msg as GetKeyRingTypeMsg);
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
           env,
@@ -97,6 +96,13 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleSetKeyStoreCoinTypeMsg(service)(
           env,
           msg as SetKeyStoreCoinTypeMsg
+        );
+      case CheckPasswordMsg:
+        return handleCheckPasswordMsg(service)(env, msg as CheckPasswordMsg);
+      case ExportKeyRingDatasMsg:
+        return handleExportKeyRingDatasMsg(service)(
+          env,
+          msg as ExportKeyRingDatasMsg
         );
       default:
         throw new Error("Unknown msg type");
@@ -140,14 +146,13 @@ const handleCreateMnemonicKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreateMnemonicKeyMsg> = (service) => {
   return async (_, msg) => {
-    return {
-      status: await service.createMnemonicKey(
-        msg.mnemonic,
-        msg.password,
-        msg.meta,
-        msg.bip44HDPath
-      ),
-    };
+    return await service.createMnemonicKey(
+      msg.kdf,
+      msg.mnemonic,
+      msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
   };
 };
 
@@ -156,6 +161,7 @@ const handleAddMnemonicKeyMsg: (
 ) => InternalHandler<AddMnemonicKeyMsg> = (service) => {
   return async (_, msg) => {
     return await service.addMnemonicKey(
+      msg.kdf,
       msg.mnemonic,
       msg.meta,
       msg.bip44HDPath
@@ -167,13 +173,12 @@ const handleCreatePrivateKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreatePrivateKeyMsg> = (service) => {
   return async (_, msg) => {
-    return {
-      status: await service.createPrivateKey(
-        msg.privateKey,
-        msg.password,
-        msg.meta
-      ),
-    };
+    return await service.createPrivateKey(
+      msg.kdf,
+      msg.privateKey,
+      msg.password,
+      msg.meta
+    );
   };
 };
 
@@ -181,7 +186,7 @@ const handleAddPrivateKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddPrivateKeyMsg> = (service) => {
   return async (_, msg) => {
-    return await service.addPrivateKey(msg.privateKey, msg.meta);
+    return await service.addPrivateKey(msg.kdf, msg.privateKey, msg.meta);
   };
 };
 
@@ -189,14 +194,13 @@ const handleCreateLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreateLedgerKeyMsg> = (service) => {
   return async (env, msg) => {
-    return {
-      status: await service.createLedgerKey(
-        env,
-        msg.password,
-        msg.meta,
-        msg.bip44HDPath
-      ),
-    };
+    return await service.createLedgerKey(
+      env,
+      msg.kdf,
+      msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
   };
 };
 
@@ -204,7 +208,7 @@ const handleAddLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddLedgerKeyMsg> = (service) => {
   return async (env, msg) => {
-    return await service.addLedgerKey(env, msg.meta, msg.bip44HDPath);
+    return await service.addLedgerKey(env, msg.kdf, msg.meta, msg.bip44HDPath);
   };
 };
 
@@ -266,6 +270,7 @@ const handleRequestSignAminoMsg: (
 
     return await service.requestSignAmino(
       env,
+      msg.origin,
       msg.chainId,
       msg.signer,
       msg.signDoc,
@@ -288,6 +293,7 @@ const handleRequestSignDirectMsg: (
 
     const response = await service.requestSignDirect(
       env,
+      msg.origin,
       msg.chainId,
       msg.signer,
       signDoc,
@@ -301,19 +307,13 @@ const handleRequestSignDirectMsg: (
   };
 };
 
-const handleGetKeyRingTypeMsg: (
-  service: KeyRingService
-) => InternalHandler<GetKeyRingTypeMsg> = (service) => {
-  return () => {
-    return service.getKeyRingType();
-  };
-};
-
 const handleGetMultiKeyStoreInfoMsg: (
   service: KeyRingService
 ) => InternalHandler<GetMultiKeyStoreInfoMsg> = (service) => {
   return () => {
-    return service.getMultiKeyStoreInfo();
+    return {
+      multiKeyStoreInfo: service.getMultiKeyStoreInfo(),
+    };
   };
 };
 
@@ -339,5 +339,21 @@ const handleSetKeyStoreCoinTypeMsg: (
   return async (_, msg) => {
     await service.setKeyStoreCoinType(msg.chainId, msg.coinType);
     return service.keyRingStatus;
+  };
+};
+
+const handleCheckPasswordMsg: (
+  service: KeyRingService
+) => InternalHandler<CheckPasswordMsg> = (service) => {
+  return (_, msg) => {
+    return service.checkPassword(msg.password);
+  };
+};
+
+const handleExportKeyRingDatasMsg: (
+  service: KeyRingService
+) => InternalHandler<ExportKeyRingDatasMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.exportKeyRingDatas(msg.password);
   };
 };

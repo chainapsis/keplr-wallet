@@ -1,39 +1,37 @@
-import assert from "assert";
-import "mocha";
 import { Dec } from "./decimal";
 import { Int } from "./int";
 
 describe("Test decimals", () => {
   it("dec should be parsed from str properly", () => {
     let dec = new Dec("10.009");
-    assert.strictEqual(dec.toString(), "10.009000000000000000");
-    assert.strictEqual(dec.toString(2), "10.00");
+    expect(dec.toString()).toBe("10.009000000000000000");
+    expect(dec.toString(2)).toBe("10.00");
 
     dec = new Dec("-123.45678900");
-    assert.strictEqual(dec.toString(), "-123.456789000000000000");
-    assert.strictEqual(dec.toString(3), "-123.456");
+    expect(dec.toString()).toBe("-123.456789000000000000");
+    expect(dec.toString(3)).toBe("-123.456");
 
     dec = new Dec("10");
-    assert.strictEqual(dec.toString(), "10.000000000000000000");
+    expect(dec.toString()).toBe("10.000000000000000000");
 
-    assert.throws(() => {
+    expect(() => {
       new Dec("");
-    });
-    assert.throws(() => {
+    }).toThrow();
+    expect(() => {
       new Dec("0.-75");
-    });
-    assert.throws(() => {
+    }).toThrow();
+    expect(() => {
       new Dec("0.489234893284938249348923849283408");
-    });
-    assert.throws(() => {
+    }).toThrow();
+    expect(() => {
       new Dec("foobar");
-    });
-    assert.throws(() => {
+    }).toThrow();
+    expect(() => {
       new Dec("0.foobar");
-    });
-    assert.throws(() => {
+    }).toThrow();
+    expect(() => {
       new Dec("foobar.0");
-    });
+    }).toThrow();
   });
 
   it("dec should be caculated properly", () => {
@@ -133,51 +131,30 @@ describe("Test decimals", () => {
       const resMul = test.d1.mul(test.d2);
       const resMulTruncate = test.d1.mulTruncate(test.d2);
 
-      assert.strictEqual(
-        resAdd.toString(),
-        test.expAdd.toString(),
-        "invalid result of add"
-      );
-      assert.strictEqual(
-        resSub.toString(),
-        test.expSub.toString(),
-        "invalid result of sub"
-      );
-      assert.strictEqual(
-        resMul.toString(),
-        test.expMul.toString(),
-        "invalid result of mul"
-      );
-      assert.strictEqual(
-        resMulTruncate.toString(),
-        test.expMulTruncate.toString(),
-        "invalid result of mul"
-      );
+      // invalid result of add
+      expect(resAdd.toString()).toBe(test.expAdd.toString());
+      // invalid result of sub
+      expect(resSub.toString()).toBe(test.expSub.toString());
+      // invalid result of mul
+      expect(resMul.toString()).toBe(test.expMul.toString());
+      // invalid result of mul
+      expect(resMulTruncate.toString()).toBe(test.expMulTruncate.toString());
 
       if (test.d2.isZero()) {
-        assert.throws(() => {
+        expect(() => {
           test.d1.quo(test.d2);
-        });
+        }).toThrow();
       } else {
         const resQuo = test.d1.quo(test.d2);
         const resQuoRoundUp = test.d1.quoRoundUp(test.d2);
         const resQuoTruncate = test.d1.quoTruncate(test.d2);
 
-        assert.strictEqual(
-          resQuo.toString(),
-          test.expQuo.toString(),
-          "invalid result of quo"
-        );
-        assert.strictEqual(
-          resQuoRoundUp.toString(),
-          test.expQuoRoundUp.toString(),
-          "invalid result of quo round up"
-        );
-        assert.strictEqual(
-          resQuoTruncate.toString(),
-          test.expQuoTruncate.toString(),
-          "invalid result of quo truncate"
-        );
+        // invalid result of quo
+        expect(resQuo.toString()).toBe(test.expQuo.toString());
+        // invalid result of quo round up
+        expect(resQuoRoundUp.toString()).toBe(test.expQuoRoundUp.toString());
+        // invalid result of quo truncate
+        expect(resQuoTruncate.toString()).toBe(test.expQuoTruncate.toString());
       }
     }
   });
@@ -223,10 +200,10 @@ describe("Test decimals", () => {
 
     for (const test of tests) {
       const resNeg = test.d1.neg().round();
-      assert.strictEqual(resNeg.toString(), test.exp.neg().toString());
+      expect(resNeg.toString()).toBe(test.exp.neg().toString());
 
       const resPos = test.d1.round();
-      assert.strictEqual(resPos.toString(), test.exp.toString());
+      expect(resPos.toString()).toBe(test.exp.toString());
     }
   });
 
@@ -271,10 +248,10 @@ describe("Test decimals", () => {
 
     for (const test of tests) {
       const resNeg = test.d1.neg().truncate();
-      assert.strictEqual(resNeg.toString(), test.exp.neg().toString());
+      expect(resNeg.toString()).toBe(test.exp.neg().toString());
 
       const resPos = test.d1.truncate();
-      assert.strictEqual(resPos.toString(), test.exp.toString());
+      expect(resPos.toString()).toBe(test.exp.toString());
     }
   });
 
@@ -348,7 +325,7 @@ describe("Test decimals", () => {
 
     for (const test of tests) {
       const res = test.d1.toString(test.precision);
-      assert.strictEqual(res, test.exp);
+      expect(res).toBe(test.exp);
     }
   });
 });

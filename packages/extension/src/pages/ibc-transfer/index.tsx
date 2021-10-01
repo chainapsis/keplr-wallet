@@ -42,7 +42,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     chainStore.current.chainId,
     accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.getQueryBalances(),
+    queries.queryBalances,
     EthereumEndpoint
   );
 
@@ -72,7 +72,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           onSubmit={async () => {
             if (ibcTransferConfigs.channelConfig.channel) {
               try {
-                await accountInfo.sendIBCTransferMsg(
+                await accountInfo.cosmos.sendIBCTransferMsg(
                   ibcTransferConfigs.channelConfig.channel,
                   ibcTransferConfigs.amountConfig.amount,
                   ibcTransferConfigs.amountConfig.sendCurrency,
@@ -193,7 +193,6 @@ export const IBCTransferPageAmount: FunctionComponent<{
             id: "send.input.amount",
           })}
           amountConfig={amountConfig}
-          feeConfig={feeConfig}
         />
         <div style={{ flex: 1 }} />
         <FeeButtons
