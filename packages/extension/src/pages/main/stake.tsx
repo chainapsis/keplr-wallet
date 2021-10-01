@@ -53,6 +53,7 @@ export const StakeView: FunctionComponent = observer(() => {
           rewards.getDescendingPendingRewardValidatorAddresses(8),
           "",
           undefined,
+          undefined,
           (tx: any) => {
             const isSuccess = tx.code == null || tx.code === 0;
             analyticsStore.logEvent("Claim reward finished", {

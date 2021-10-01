@@ -45,7 +45,7 @@ export class AnalyticsStore {
   constructor(
     protected readonly appName: string,
     protected readonly configs: AnalyticsConfigs,
-    protected readonly accountStore: AccountStore,
+    protected readonly accountStore: AccountStore<any, any, any, any>,
     protected readonly keyRingStore: KeyRingStore
   ) {
     makeObservable(this);
