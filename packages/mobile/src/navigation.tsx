@@ -438,7 +438,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          title: "Import existing wallet",
+          title: "Import Existing Wallet",
         }}
         name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
@@ -524,7 +524,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          title: "Wallet Connect",
+          title: "WalletConnect",
         }}
         name="ManageWalletConnect"
         component={ManageWalletConnectScreen}
@@ -699,7 +699,13 @@ export const AddressBookStackScreen: FunctionComponent = () => {
       }}
       headerMode="screen"
     >
-      <Stack.Screen name="AddressBook" component={AddressBookScreen} />
+      <Stack.Screen
+        options={{
+          title: "Address Book",
+        }}
+        name="AddressBook"
+        component={AddressBookScreen}
+      />
       <Stack.Screen
         options={{
           title: "New Address Book",

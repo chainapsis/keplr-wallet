@@ -41,7 +41,7 @@ export const StakingInfoCard: FunctionComponent<{
           style={style.flatten(["flex-row", "items-end", "margin-bottom-8"])}
         >
           <Text style={style.flatten(["body2", "color-text-black-high"])}>
-            Total staking
+            Total staked
           </Text>
           <View style={style.flatten(["flex-1"])} />
           <Text style={style.flatten(["body2", "color-text-black-high"])}>

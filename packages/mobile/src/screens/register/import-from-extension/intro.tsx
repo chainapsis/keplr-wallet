@@ -48,13 +48,23 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
           <Text
             style={style.flatten([
               "body1",
-              "color-text-black-medium",
+              "color-text-black-low",
               "text-center",
               "margin-x-18",
+              "margin-bottom-24",
             ])}
           >
-            The ‘sync with mobile’ feature connects your Keplr account with your
-            mobile device.
+            {`Import your account by going to\n‘Settings > Link Keplr Mobile’ on Keplr Extension and scanning the QR code`}
+          </Text>
+          <Text
+            style={style.flatten([
+              "body3",
+              "color-text-black-low",
+              "text-center",
+              "margin-x-38",
+            ])}
+          >
+            Note: Ledger accounts need to be imported seaprately
           </Text>
         </View>
         <View style={style.get("flex-3")} />

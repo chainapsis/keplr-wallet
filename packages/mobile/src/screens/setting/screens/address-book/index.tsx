@@ -176,10 +176,10 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                   onPress={async () => {
                     if (
                       await confirmModal.confirm({
-                        title: "Delete Address",
+                        title: "Remove Address",
                         paragraph:
-                          "Are you sure you want to delete this address?",
-                        yesButtonText: "Delete",
+                          "Are you sure you want to remove this address?",
+                        yesButtonText: "Remove",
                         noButtonText: "Cancel",
                       })
                     ) {
@@ -222,7 +222,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
         <Text
           style={style.flatten(["subtitle2", "color-text-black-very-very-low"])}
         >
-          No address book entry
+          Address book is empty
         </Text>
       </View>
       <View style={style.flatten(["margin-top-68", "flex-1"])} />

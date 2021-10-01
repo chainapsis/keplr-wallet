@@ -88,7 +88,7 @@ export const DelegationsCard: FunctionComponent<{
                 "margin-bottom-4",
               ])}
             >
-              Staking
+              Staked
             </Text>
             <Text style={style.flatten(["h5", "color-text-black-medium"])}>
               {staked.maxDecimals(6).trim(true).shrink(true).toString()}

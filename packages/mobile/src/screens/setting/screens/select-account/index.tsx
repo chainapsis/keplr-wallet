@@ -165,7 +165,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollViewInBottomTabView>
-      {renderKeyStores("torus", torusKeyStores)}
+      {renderKeyStores("google account", torusKeyStores)}
       {renderKeyStores("mnemonic seed", mnemonicKeyStores)}
       {renderKeyStores("hardware wallet", ledgerKeyStores)}
       {renderKeyStores("private key", privateKeyStores)}

@@ -284,7 +284,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
             {keychainStore.isBiometryOn ? (
               <Button
                 containerStyle={style.flatten(["margin-top-40"])}
-                text="Try Biometric"
+                text="Use Biometric Authentication"
                 mode="text"
                 loading={isBiometricLoading}
                 onPress={tryBiometric}

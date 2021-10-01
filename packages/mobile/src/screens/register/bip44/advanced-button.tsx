@@ -98,8 +98,7 @@ export const BIP44SelectModal: FunctionComponent<{
             "margin-bottom-18",
           ])}
         >
-          For users who wish to customize their derivation path, enter your
-          derivation path below:
+          Set custom address derivation path by modifying the indexes below:
         </Text>
         <View
           style={style.flatten([

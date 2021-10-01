@@ -60,7 +60,7 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
         }}
       />
       <Button
-        text="Import Ledger"
+        text="Import Ledger Nano X"
         size="large"
         mode="text"
         onPress={() => {

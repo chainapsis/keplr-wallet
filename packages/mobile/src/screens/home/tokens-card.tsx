@@ -56,6 +56,7 @@ export const TokensCard: FunctionComponent<{
           style={style.flatten([
             "text-button3",
             "color-text-black-low",
+            "normal-case",
             "text-underline",
           ])}
         >

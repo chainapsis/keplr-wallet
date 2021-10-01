@@ -63,9 +63,9 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
                   onPress={async () => {
                     if (
                       await confirmModal.confirm({
-                        title: "Disconnect link",
+                        title: "Disconnect Session",
                         paragraph:
-                          "Are you sure you want to disconnect this link?",
+                          "Are you sure you want to end this WalletConnect session?",
                         yesButtonText: "Disconnect",
                         noButtonText: "Cancel",
                       })

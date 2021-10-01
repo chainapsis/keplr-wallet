@@ -95,7 +95,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const items = useMemo(() => {
     return [
       { label: "APY", key: "APY" },
-      { label: "AMOUNT STAKED", key: "Voting Power" },
+      { label: "Amount Staked", key: "Voting Power" },
       { label: "Name", key: "Name" },
     ];
   }, []);
@@ -180,6 +180,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                             "text-overline",
                             "color-text-black-low",
                             "margin-right-4",
+                            "uppercase",
                           ])}
                         >
                           {sortItem.label}
