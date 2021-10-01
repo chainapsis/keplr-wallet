@@ -87,6 +87,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uion",
         coinDecimals: 6,
         coinGeckoId: "ion",
+        coinImageUrl:
+          "https://dhj8dql1kzq2v.cloudfront.net/white/osmosis-ion.png",
       },
     ],
     feeCurrencies: [
