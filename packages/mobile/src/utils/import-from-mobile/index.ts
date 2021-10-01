@@ -173,7 +173,10 @@ export async function registerExportedKeyRingDatas(
     // Below date will be added to the key store's meta.
     // This data is used to distinguish that the key store is imported from the extension and it is not duplicated.
     const exportKeyRingDataDuplicationCheckKey = Buffer.from(
-      Hash.sha256(Buffer.from(sortedJsonStringify(exportKeyRingData)))
+      Hash.sha256(Buffer.from(sortedJsonStringify(exportKeyRingData))).slice(
+        0,
+        8
+      )
     ).toString("hex");
 
     if (duplicationCheck.get(exportKeyRingDataDuplicationCheckKey)) {
