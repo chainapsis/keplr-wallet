@@ -231,6 +231,7 @@ const {
     };
     "Register.TorusSignIn": {
       registerConfig: RegisterConfig;
+      type: "google" | "apple";
     };
     "Register.ImportFromExtension.Intro": {
       registerConfig: RegisterConfig;

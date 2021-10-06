@@ -19,6 +19,9 @@ export const Button: FunctionComponent<{
   containerStyle?: ViewStyle;
   style?: ViewStyle;
   textStyle?: TextStyle;
+
+  rippleColor?: string;
+  underlayColor?: string;
 }> = ({
   color = "primary",
   mode = "fill",
@@ -32,6 +35,8 @@ export const Button: FunctionComponent<{
   containerStyle,
   style: buttonStyle,
   textStyle,
+  rippleColor: propRippleColor,
+  underlayColor: propUnderlayColor,
 }) => {
   const style = useStyle();
 
@@ -89,6 +94,10 @@ export const Button: FunctionComponent<{
   })();
 
   const rippleColor = (() => {
+    if (propRippleColor) {
+      return propRippleColor;
+    }
+
     switch (mode) {
       case "fill":
         return style.get(`color-button-${color}-fill-ripple` as any).color;
@@ -100,6 +109,10 @@ export const Button: FunctionComponent<{
   })();
 
   const underlayColor = (() => {
+    if (propUnderlayColor) {
+      return propUnderlayColor;
+    }
+
     switch (mode) {
       case "fill":
         return style.get(`color-button-${color}-fill-underlay` as any).color;

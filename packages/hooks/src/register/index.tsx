@@ -162,7 +162,6 @@ export class RegisterConfig {
     name: string,
     privateKey: Uint8Array,
     password: string,
-    email?: string,
     meta: Record<string, string> = {}
   ) {
     this._isLoading = true;
@@ -170,13 +169,11 @@ export class RegisterConfig {
       if (this.mode === "create") {
         yield this.keyRingStore.createPrivateKey(privateKey, password, {
           name,
-          ...(email ? { email } : {}),
           ...meta,
         });
       } else {
         yield this.keyRingStore.addPrivateKey(privateKey, {
           name,
-          ...(email ? { email } : {}),
           ...meta,
         });
       }

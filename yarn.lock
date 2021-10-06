@@ -11645,6 +11645,13 @@ expect@^26.6.2:
     jest-message-util "^26.6.2"
     jest-regex-util "^26.0.0"
 
+expo-apple-authentication@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/expo-apple-authentication/-/expo-apple-authentication-3.2.1.tgz#c35e2151163a590f91da07a450c6d0c2213cb407"
+  integrity sha512-BF98D5mszbbIVsdTEoo4AK4PaBbmpVaQ/MkseYY+kHKdiNl8BKAdlNrInnMYZZaOekPrKMJaJRaXZzrZH9CB3g==
+  dependencies:
+    "@expo/config-plugins" "^3.0.0"
+
 expo-asset@~8.3.3:
   version "8.3.3"
   resolved "https://registry.yarnpkg.com/expo-asset/-/expo-asset-8.3.3.tgz#b54ab9999efb3d2086329fc5b1bed04fede8f682"

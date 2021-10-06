@@ -208,14 +208,12 @@ export async function registerExportedKeyRingDatas(
     }
 
     if (exportKeyRingData.type === "privateKey") {
-      const email = exportKeyRingData.meta["email"];
-
       await registerConfig.createPrivateKey(
         name,
         Buffer.from(exportKeyRingData.key, "hex"),
         password,
-        email,
         {
+          ...exportKeyRingData.meta,
           exportKeyRingDataDuplicationCheckKey,
         }
       );

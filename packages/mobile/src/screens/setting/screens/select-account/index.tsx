@@ -85,10 +85,27 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
 
   useLogScreenView("Select account");
 
-  const torusKeyStores = useMemo(() => {
+  const googleTorusKeyStores = useMemo(() => {
     return keyRingStore.multiKeyStoreInfo.filter(
       (keyStore) =>
-        keyStore.type === "privateKey" && keyStore.meta && keyStore.meta.email
+        keyStore.type === "privateKey" &&
+        keyStore.meta &&
+        keyStore.meta.email &&
+        // In prior version, only the google sign in option exists.
+        // But, now, there are two types of sign in (google, apple).
+        // `socialType` in meta is introduced to determine which social sign in was used.
+        // If there is no `socialType` field in meta, just assume that it was google sign in.
+        (!keyStore.meta.socialType || keyStore.meta.socialType === "googgle")
+    );
+  }, [keyRingStore.multiKeyStoreInfo]);
+
+  const appleTorusKeyStores = useMemo(() => {
+    return keyRingStore.multiKeyStoreInfo.filter(
+      (keyStore) =>
+        keyStore.type === "privateKey" &&
+        keyStore.meta &&
+        keyStore.meta.email &&
+        keyStore.meta.socialType === "apple"
     );
   }, [keyRingStore.multiKeyStoreInfo]);
 
@@ -165,7 +182,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollViewInBottomTabView>
-      {renderKeyStores("google account", torusKeyStores)}
+      {renderKeyStores("google account", googleTorusKeyStores)}
+      {renderKeyStores("apple id", appleTorusKeyStores)}
       {renderKeyStores("mnemonic seed", mnemonicKeyStores)}
       {renderKeyStores("hardware wallet", ledgerKeyStores)}
       {renderKeyStores("private key", privateKeyStores)}

@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { useHeaderHeight } from "@react-navigation/stack";
 import { PageWithScrollView } from "../../components/page";
 import { KeplrLogo } from "../../components/svg";
-import { GoogleIcon } from "../../components/icon/google";
+import { GoogleIcon, AppleIcon } from "../../components/icon";
 import { useStyle } from "../../styles";
 import { View, Text, Dimensions, Platform, StyleSheet } from "react-native";
 import { Button } from "../../components/button";
@@ -40,6 +40,35 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
       >
         <KeplrLogo width="100%" />
       </View>
+      {Platform.OS === "ios" ? (
+        <Button
+          containerStyle={style.flatten([
+            "margin-bottom-20",
+            "border-width-1",
+            "border-color-divider",
+          ])}
+          text="Sign in with Apple"
+          leftIcon={
+            <View style={style.flatten(["margin-right-6", "margin-bottom-4"])}>
+              <AppleIcon />
+            </View>
+          }
+          style={style.flatten(["background-color-white"])}
+          textStyle={style.flatten(["color-black"])}
+          underlayColor="#00000020"
+          size="large"
+          mode="light"
+          onPress={() => {
+            analyticsStore.logEvent("OAuth sign in started", {
+              registerType: "apple",
+            });
+            smartNavigation.navigateSmart("Register.TorusSignIn", {
+              registerConfig,
+              type: "apple",
+            });
+          }}
+        />
+      ) : null}
       <Button
         containerStyle={style.flatten(["margin-bottom-20"])}
         text="Sign in with Google"
@@ -56,6 +85,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
           });
           smartNavigation.navigateSmart("Register.TorusSignIn", {
             registerConfig,
+            type: "google",
           });
         }}
       />

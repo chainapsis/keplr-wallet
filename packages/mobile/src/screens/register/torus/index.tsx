@@ -15,6 +15,7 @@ import NodeDetailManager from "@toruslabs/fetch-node-details";
 import Torus from "@toruslabs/torus.js";
 import { useStore } from "../../../stores";
 import { useLoadingScreen } from "../../../providers/loading-screen";
+import * as AppleAuthentication from "expo-apple-authentication";
 
 interface FormData {
   name: string;
@@ -170,6 +171,107 @@ const useTorusGoogleSignIn = (): {
   };
 };
 
+// CONTRACT: Only supported on IOS
+const useTorusAppleSignIn = (): {
+  privateKey: Uint8Array | undefined;
+  email: string | undefined;
+} => {
+  const [privateKey, setPrivateKey] = useState<Uint8Array | undefined>();
+  const [email, setEmail] = useState<string | undefined>();
+
+  const loadingScreen = useLoadingScreen();
+  const naviagtion = useNavigation();
+
+  useEffect(() => {
+    loadingScreen.setIsLoading(true);
+
+    (async () => {
+      try {
+        const credential = await AppleAuthentication.signInAsync({
+          requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
+        });
+
+        if (!credential.identityToken) {
+          throw new Error("Token is not provided");
+        }
+
+        const identityTokenSplit = credential.identityToken.split(".");
+        if (identityTokenSplit.length !== 3) {
+          throw new Error("Invalid token");
+        }
+
+        const payload = JSON.parse(
+          Buffer.from(identityTokenSplit[1], "base64").toString()
+        );
+
+        const email = payload.email as string | undefined;
+        if (!email) {
+          throw new Error("Email is not provided");
+        }
+        const sub = payload.sub as string | undefined;
+        if (!sub) {
+          throw new Error("Subject is not provided");
+        }
+
+        const nodeDetailManager = new NodeDetailManager({
+          network: "mainnet",
+          proxyAddress: "0x638646503746d5456209e33a2ff5e3226d698bea",
+        });
+        const {
+          torusNodeEndpoints,
+          torusNodePub,
+          torusIndexes,
+        } = await nodeDetailManager.getNodeDetails();
+
+        const torus = new Torus({
+          enableLogging: __DEV__,
+          metadataHost: "https://metadata.tor.us",
+          allowHost: "https://signer.tor.us/api/allow",
+        });
+
+        const response = await torus.getPublicAddress(
+          torusNodeEndpoints,
+          torusNodePub,
+          {
+            verifier: "chainapsis-apple",
+            verifierId: sub,
+          },
+          true
+        );
+        const data = await torus.retrieveShares(
+          torusNodeEndpoints,
+          torusIndexes,
+          "chainapsis-apple",
+          {
+            verifier_id: sub,
+          },
+          credential.identityToken
+        );
+        if (typeof response === "string")
+          throw new Error("must use extended pub key");
+        if (data.ethAddress.toLowerCase() !== response.address.toLowerCase()) {
+          throw new Error("data ethAddress does not match response address");
+        }
+
+        setPrivateKey(Buffer.from(data.privKey.toString(), "hex"));
+        setEmail(email);
+      } catch (e) {
+        console.log(e);
+        naviagtion.goBack();
+      } finally {
+        loadingScreen.setIsLoading(false);
+      }
+    })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return {
+    privateKey,
+    email,
+  };
+};
+
 export const TorusSignInScreen: FunctionComponent = observer(() => {
   const route = useRoute<
     RouteProp<
@@ -177,6 +279,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         string,
         {
           registerConfig: RegisterConfig;
+          type: "google" | "apple";
         }
       >,
       string
@@ -192,7 +295,12 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
   const registerConfig: RegisterConfig = route.params.registerConfig;
   const [mode] = useState(registerConfig.mode);
 
-  const { privateKey, email } = useTorusGoogleSignIn();
+  // Below uses the hook conditionally.
+  // This is a silly way, but `route.params.type` never changed in the logic.
+  const { privateKey, email } =
+    route.params.type === "apple"
+      ? useTorusAppleSignIn()
+      : useTorusGoogleSignIn();
 
   const {
     control,
@@ -216,7 +324,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         getValues("name"),
         privateKey,
         getValues("password"),
-        email
+        { email, socialType: route.params.type }
       );
       analyticsStore.setUserId();
       analyticsStore.setUserProperties({

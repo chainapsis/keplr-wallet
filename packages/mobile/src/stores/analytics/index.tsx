@@ -22,14 +22,14 @@ export interface EventProperties extends Record<string, unknown> {
   proposalTitle?: string;
   linkTitle?: string;
   linkUrl?: string;
-  registerType?: "seed" | "google" | "ledger" | "qr";
+  registerType?: "seed" | "google" | "apple" | "ledger" | "qr";
   accountType?: "mnemonic" | "privateKey" | "ledger";
   feeType?: FeeType | undefined;
   authType?: "biometrics" | "password";
   fromScreen?: string;
 }
 export interface UserProperties {
-  registerType?: "seed" | "google" | "ledger" | "qr";
+  registerType?: "seed" | "google" | "apple" | "ledger" | "qr";
   accountType?: "mnemonic" | "privateKey" | "ledger";
   currency?: string;
   hasMobileAccount?: boolean;
