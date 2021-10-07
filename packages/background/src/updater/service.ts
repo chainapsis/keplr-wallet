@@ -71,7 +71,7 @@ export class ChainUpdaterService {
     const result = await instance.get<{
       result: {
         node_info: {
-          network: "osmosis-1";
+          network: string;
         };
       };
     }>("/status");
