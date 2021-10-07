@@ -138,7 +138,7 @@ export class CreateMnemonicKeyMsg extends Message<{
   }
 
   constructor(
-    public readonly kdf: "scrypt" | "sha256",
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly mnemonic: string,
     public readonly password: string,
     public readonly meta: Record<string, string>,
@@ -148,7 +148,11 @@ export class CreateMnemonicKeyMsg extends Message<{
   }
 
   validateBasic(): void {
-    if (this.kdf !== "scrypt" && this.kdf !== "sha256") {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
       throw new Error("Invalid kdf");
     }
 
@@ -191,7 +195,7 @@ export class AddMnemonicKeyMsg extends Message<{
   }
 
   constructor(
-    public readonly kdf: "scrypt" | "sha256",
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly mnemonic: string,
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
@@ -200,7 +204,11 @@ export class AddMnemonicKeyMsg extends Message<{
   }
 
   validateBasic(): void {
-    if (this.kdf !== "scrypt" && this.kdf !== "sha256") {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
       throw new Error("Invalid kdf");
     }
 
@@ -240,7 +248,7 @@ export class CreatePrivateKeyMsg extends Message<{
   }
 
   constructor(
-    public readonly kdf: "scrypt" | "sha256",
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly privateKey: Uint8Array,
     public readonly password: string,
     public readonly meta: Record<string, string>
@@ -249,7 +257,11 @@ export class CreatePrivateKeyMsg extends Message<{
   }
 
   validateBasic(): void {
-    if (this.kdf !== "scrypt" && this.kdf !== "sha256") {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
       throw new Error("Invalid kdf");
     }
 
@@ -284,7 +296,7 @@ export class CreateLedgerKeyMsg extends Message<{
   }
 
   constructor(
-    public readonly kdf: "scrypt" | "sha256",
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly password: string,
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
@@ -293,7 +305,11 @@ export class CreateLedgerKeyMsg extends Message<{
   }
 
   validateBasic(): void {
-    if (this.kdf !== "scrypt" && this.kdf !== "sha256") {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
       throw new Error("Invalid kdf");
     }
 
@@ -321,7 +337,7 @@ export class AddPrivateKeyMsg extends Message<{
   }
 
   constructor(
-    public readonly kdf: "scrypt" | "sha256",
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly privateKey: Uint8Array,
     public readonly meta: Record<string, string>
   ) {
@@ -329,7 +345,11 @@ export class AddPrivateKeyMsg extends Message<{
   }
 
   validateBasic(): void {
-    if (this.kdf !== "scrypt" && this.kdf !== "sha256") {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
       throw new Error("Invalid kdf");
     }
 
@@ -359,7 +379,7 @@ export class AddLedgerKeyMsg extends Message<{
   }
 
   constructor(
-    public readonly kdf: "scrypt" | "sha256",
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
   ) {
@@ -367,7 +387,11 @@ export class AddLedgerKeyMsg extends Message<{
   }
 
   validateBasic(): void {
-    if (this.kdf !== "scrypt" && this.kdf !== "sha256") {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
       throw new Error("Invalid kdf");
     }
 

@@ -76,7 +76,7 @@ export class RootStore {
           eventEmitter.emit(type);
         },
       },
-      "sha256",
+      "pbkdf2",
       this.chainStore,
       new RNMessageRequesterInternal(),
       this.interactionStore

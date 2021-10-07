@@ -125,7 +125,7 @@ export class KeyRingService {
   }
 
   async createMnemonicKey(
-    kdf: "scrypt" | "sha256",
+    kdf: "scrypt" | "sha256" | "pbkdf2",
     mnemonic: string,
     password: string,
     meta: Record<string, string>,
@@ -145,7 +145,7 @@ export class KeyRingService {
   }
 
   async createPrivateKey(
-    kdf: "scrypt" | "sha256",
+    kdf: "scrypt" | "sha256" | "pbkdf2",
     privateKey: Uint8Array,
     password: string,
     meta: Record<string, string>
@@ -158,7 +158,7 @@ export class KeyRingService {
 
   async createLedgerKey(
     env: Env,
-    kdf: "scrypt" | "sha256",
+    kdf: "scrypt" | "sha256" | "pbkdf2",
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
@@ -317,7 +317,7 @@ export class KeyRingService {
   }
 
   async addMnemonicKey(
-    kdf: "scrypt" | "sha256",
+    kdf: "scrypt" | "sha256" | "pbkdf2",
     mnemonic: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
@@ -328,7 +328,7 @@ export class KeyRingService {
   }
 
   async addPrivateKey(
-    kdf: "scrypt" | "sha256",
+    kdf: "scrypt" | "sha256" | "pbkdf2",
     privateKey: Uint8Array,
     meta: Record<string, string>
   ): Promise<{
@@ -339,7 +339,7 @@ export class KeyRingService {
 
   async addLedgerKey(
     env: Env,
-    kdf: "scrypt" | "sha256",
+    kdf: "scrypt" | "sha256" | "pbkdf2",
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
   ): Promise<{

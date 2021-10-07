@@ -136,7 +136,7 @@ export class KeyRingStore {
     protected readonly eventDispatcher: {
       dispatchEvent: (type: string) => void;
     },
-    public readonly defaultKdf: "scrypt" | "sha256",
+    public readonly defaultKdf: "scrypt" | "sha256" | "pbkdf2",
     protected readonly chainGetter: ChainGetter,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
@@ -165,7 +165,7 @@ export class KeyRingStore {
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
-    kdf: "scrypt" | "sha256" = this.defaultKdf
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
     const msg = new CreateMnemonicKeyMsg(
       kdf,
@@ -186,7 +186,7 @@ export class KeyRingStore {
     privateKey: Uint8Array,
     password: string,
     meta: Record<string, string>,
-    kdf: "scrypt" | "sha256" = this.defaultKdf
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
     const msg = new CreatePrivateKeyMsg(kdf, privateKey, password, meta);
     const result = yield* toGenerator(
@@ -201,7 +201,7 @@ export class KeyRingStore {
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
-    kdf: "scrypt" | "sha256" = this.defaultKdf
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
     const msg = new CreateLedgerKeyMsg(kdf, password, meta, bip44HDPath);
     const result = yield* toGenerator(
@@ -216,7 +216,7 @@ export class KeyRingStore {
     mnemonic: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
-    kdf: "scrypt" | "sha256" = this.defaultKdf
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
     const msg = new AddMnemonicKeyMsg(kdf, mnemonic, meta, bip44HDPath);
     this.multiKeyStoreInfo = (yield* toGenerator(
@@ -228,7 +228,7 @@ export class KeyRingStore {
   *addPrivateKey(
     privateKey: Uint8Array,
     meta: Record<string, string>,
-    kdf: "scrypt" | "sha256" = this.defaultKdf
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
     const msg = new AddPrivateKeyMsg(kdf, privateKey, meta);
     this.multiKeyStoreInfo = (yield* toGenerator(
@@ -240,7 +240,7 @@ export class KeyRingStore {
   *addLedgerKey(
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
-    kdf: "scrypt" | "sha256" = this.defaultKdf
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
     const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath);
     this.multiKeyStoreInfo = (yield* toGenerator(
