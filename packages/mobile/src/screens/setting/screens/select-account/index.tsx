@@ -95,7 +95,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
         // But, now, there are two types of sign in (google, apple).
         // `socialType` in meta is introduced to determine which social sign in was used.
         // If there is no `socialType` field in meta, just assume that it was google sign in.
-        (!keyStore.meta.socialType || keyStore.meta.socialType === "googgle")
+        (!keyStore.meta.socialType || keyStore.meta.socialType === "google")
     );
   }, [keyRingStore.multiKeyStoreInfo]);
 
@@ -182,8 +182,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollViewInBottomTabView>
-      {renderKeyStores("google account", googleTorusKeyStores)}
       {renderKeyStores("apple id", appleTorusKeyStores)}
+      {renderKeyStores("google account", googleTorusKeyStores)}
       {renderKeyStores("mnemonic seed", mnemonicKeyStores)}
       {renderKeyStores("hardware wallet", ledgerKeyStores)}
       {renderKeyStores("private key", privateKeyStores)}
