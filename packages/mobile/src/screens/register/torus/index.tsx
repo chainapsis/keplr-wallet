@@ -292,6 +292,15 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
 
   const smartNavigation = useSmartNavigation();
 
+  useEffect(() => {
+    smartNavigation.setOptions({
+      title:
+        route.params.type === "apple"
+          ? "Sign in with Apple"
+          : "Sign in with Google",
+    });
+  }, [route.params.type, smartNavigation]);
+
   const registerConfig: RegisterConfig = route.params.registerConfig;
   const [mode] = useState(registerConfig.mode);
 

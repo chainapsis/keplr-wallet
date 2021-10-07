@@ -451,13 +451,7 @@ export const RegisterNavigation: FunctionComponent = () => {
         name="Register.NewLedger"
         component={NewLedgerScreen}
       />
-      <Stack.Screen
-        options={{
-          title: "Sign in with Google",
-        }}
-        name="Register.TorusSignIn"
-        component={TorusSignInScreen}
-      />
+      <Stack.Screen name="Register.TorusSignIn" component={TorusSignInScreen} />
       <Stack.Screen
         options={{
           // Only show the back button.
