@@ -17,15 +17,15 @@ export const RefreshIcon: FunctionComponent<{
       }}
     >
       <Path
-        d="M19.245 12.313a7.821 7.821 0 11-2.117-5.351"
         stroke={color}
-        strokeWidth={2}
         strokeLinecap="round"
+        strokeWidth="2"
+        d="M19.843 12.071a7.821 7.821 0 11-2.117-5.351"
       />
       <Path
-        d="M18.266 4.098l.048 4.097-4.097-.52 4.05-3.577z"
         fill={color}
         stroke={color}
+        d="M18.824 4.098l.048 4.097-4.097-.52 4.049-3.577z"
       />
     </Svg>
   );
