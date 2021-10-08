@@ -22,7 +22,14 @@ function isPrivateKey(str: string): boolean {
     return true;
   }
 
-  return str.length === 64;
+  if (str.length === 64) {
+    try {
+      return Buffer.from(str, "hex").length === 32;
+    } catch {
+      return false;
+    }
+  }
+  return false;
 }
 
 function trimWordsStr(str: string): string {
