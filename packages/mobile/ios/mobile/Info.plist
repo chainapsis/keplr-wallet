@@ -58,15 +58,13 @@
 		</dict>
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>App uses Bluetooth to find, connect and communicate with Ledger Nano devices. Please grant access.</string>
+	<string>App uses bluetooth to find, connect and communicate with Ledger Nano devices</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>App uses Bluetooth to find, connect and communicate with Ledger Nano devices. Please grant access.</string>
+	<string>App uses bluetooth to find, connect and communicate with Ledger Nano devices</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to use the camera</string>
+	<string>App uses camera to scan address, extension, and WalletConnect QR code</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>$(PRODUCT_NAME) Authentication with TouchId or FaceID</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>App uses Face ID to unlock wallet</string>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
