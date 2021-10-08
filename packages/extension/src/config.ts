@@ -793,6 +793,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "REGEN",
       coinMinimalDenom: "uregen",
       coinDecimals: 6,
+      coinGeckoId: "regen",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -811,6 +812,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "REGEN",
         coinMinimalDenom: "uregen",
         coinDecimals: 6,
+        coinGeckoId: "regen",
       },
     ],
     feeCurrencies: [
@@ -818,6 +820,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "REGEN",
         coinMinimalDenom: "uregen",
         coinDecimals: 6,
+        coinGeckoId: "regen",
       },
     ],
     features: ["stargate"],
