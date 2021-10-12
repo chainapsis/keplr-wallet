@@ -192,7 +192,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
 
     this._isFetching = true;
-    this.cancelToken = Axios.CancelToken.source();
 
     // If there is no existing response, try to load saved reponse.
     if (!this._response) {
@@ -209,6 +208,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         staled: true,
       });
     }
+
+    this.cancelToken = Axios.CancelToken.source();
 
     try {
       const response = yield* toGenerator(
