@@ -157,6 +157,18 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
     }
   }
 
+  @action
+  removeCurrencies(...coinMinimalDenoms: string[]) {
+    const map = new Map<string, boolean>();
+    for (const coinMinimalDenom of coinMinimalDenoms) {
+      map.set(coinMinimalDenom, true);
+    }
+
+    this.registeredCurrencies = this.registeredCurrencies.filter(
+      (currency) => !map.get(currency.coinMinimalDenom)
+    );
+  }
+
   /**
    * Currency를 반환한다.
    * 만약 해당 Currency가 없다면 unknown currency에 추가한다.

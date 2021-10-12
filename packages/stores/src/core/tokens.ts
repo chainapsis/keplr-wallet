@@ -12,6 +12,7 @@ import { DeepReadonly } from "utility-types";
 import { ChainStore } from "../chain";
 import { InteractionStore } from "./interaction";
 import { toGenerator } from "@keplr-wallet/common";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class TokensStoreInner {
   @observable.ref
@@ -84,6 +85,8 @@ export class TokensStoreInner {
 export class TokensStore<
   C extends ChainInfo = ChainInfo
 > extends HasMapStore<TokensStoreInner> {
+  protected prevTokens: Map<string, AppCurrency[]> = new Map();
+
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
@@ -104,8 +107,23 @@ export class TokensStore<
 
     this.chainStore.addSetChainInfoHandler((chainInfoInner) => {
       autorun(() => {
+        const chainIdentifier = ChainIdHelper.parse(chainInfoInner.chainId);
+
+        // Tokens should be changed whenever the account changed.
+        // But, the added currencies are not removed automatically.
+        // So, we should remove the prev token currencies from the chain info.
+        const prevToken = this.prevTokens.get(chainIdentifier.identifier) ?? [];
+        chainInfoInner.removeCurrencies(
+          ...prevToken.map((token) => token.coinMinimalDenom)
+        );
+
         const inner = this.getTokensOf(chainInfoInner.chainId);
         chainInfoInner.addCurrencies(...inner.tokens);
+
+        this.prevTokens.set(
+          chainIdentifier.identifier,
+          inner.tokens as AppCurrency[]
+        );
       });
     });
   }
