@@ -64,7 +64,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
               "margin-x-38",
             ])}
           >
-            Note: Ledger accounts need to be imported seaprately
+            Note: Ledger accounts need to be imported separately
           </Text>
         </View>
         <View style={style.get("flex-3")} />
