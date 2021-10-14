@@ -103,8 +103,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
     coinType: 118,
     gasPriceStep: {
       low: 0,
-      average: 0.025,
-      high: 0.04,
+      average: 0,
+      high: 0.025,
     },
     features: ["stargate", "ibc-transfer"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/osmo.png",

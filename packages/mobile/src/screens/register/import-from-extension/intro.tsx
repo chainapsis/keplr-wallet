@@ -54,7 +54,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
               "margin-bottom-24",
             ])}
           >
-            {`Import your account by going to\n‘Settings > Link Keplr Mobile’ on Keplr Extension and scanning the QR code`}
+            {`Import your account(s) by going to\n‘Settings > Link Keplr Mobile’ on Keplr Extension and scanning the QR code`}
           </Text>
           <Text
             style={style.flatten([
