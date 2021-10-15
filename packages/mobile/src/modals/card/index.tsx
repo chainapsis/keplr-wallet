@@ -35,7 +35,7 @@ const useAnimatedValueSet = () => {
 
 // CONTRACT: Use with { disableSafeArea: true, align: "bottom" } modal options.
 export const CardModal: FunctionComponent<{
-  title: string;
+  title?: string;
   right?: React.ReactElement;
   childrenContainerStyle?: ViewStyle;
 
@@ -413,21 +413,28 @@ export const CardModal: FunctionComponent<{
               />
             ) : null}
           </View>
-          <View
-            style={style.flatten([
-              "flex-row",
-              "items-center",
-              "margin-bottom-16",
-            ])}
-          >
-            <Text style={style.flatten(["h4", "color-text-black-high"])}>
-              {title}
-            </Text>
-            {right}
-          </View>
-          <View
-            style={style.flatten(["height-1", "background-color-border-white"])}
-          />
+          {title ? (
+            <React.Fragment>
+              <View
+                style={style.flatten([
+                  "flex-row",
+                  "items-center",
+                  "margin-bottom-16",
+                ])}
+              >
+                <Text style={style.flatten(["h4", "color-text-black-high"])}>
+                  {title}
+                </Text>
+                {right}
+              </View>
+              <View
+                style={style.flatten([
+                  "height-1",
+                  "background-color-border-white",
+                ])}
+              />
+            </React.Fragment>
+          ) : null}
         </Animated.View>
       </PanGestureHandler>
       <View
