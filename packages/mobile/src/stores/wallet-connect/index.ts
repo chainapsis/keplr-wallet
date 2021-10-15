@@ -80,12 +80,11 @@ export abstract class WalletConnectManager {
 
   async restoreClient(session: WalletConnect["session"]) {
     const client = new WalletConnect({
-      // TODO: Set metadata properly.
       clientMeta: {
         name: "Keplr",
         description: "Wallet for interchain",
         url: "#",
-        icons: ["https://walletconnect.org/walletconnect-logo.png"],
+        icons: ["https://dhj8dql1kzq2v.cloudfront.net/keplr-256x256.png"],
       },
       session,
     });
@@ -151,12 +150,11 @@ export abstract class WalletConnectManager {
 
     const client = new WalletConnect({
       uri,
-      // TODO: Set metadata properly.
       clientMeta: {
         name: "Keplr",
         description: "Wallet for interchain",
         url: "#",
-        icons: ["https://walletconnect.org/walletconnect-logo.png"],
+        icons: ["https://dhj8dql1kzq2v.cloudfront.net/keplr-256x256.png"],
       },
     });
 
