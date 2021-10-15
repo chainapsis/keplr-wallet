@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import {
+  AppState,
   BackHandler,
   Platform,
   StyleSheet,
@@ -119,6 +120,23 @@ export class ModalsRendererState {
 }
 
 export const globalModalRendererState = new ModalsRendererState();
+
+/*
+ If the animation only works when the app is foreground.
+ It let the modal to be stoped during closing on background.
+ And when the app becomes foregound,the closing resumes.
+ It looks strange and it make hard to estimate the modal unmounted.
+ So, to prevent this problem, if the state is not in foreground, forcely remove the modals.
+ */
+AppState.addEventListener("change", (state) => {
+  if (state !== "active" && state !== "inactive") {
+    for (const modal of globalModalRendererState.modals) {
+      if (!modal.isOpen) {
+        globalModalRendererState.removeModal(modal.key);
+      }
+    }
+  }
+});
 
 export const ModalsProvider: FunctionComponent = observer(({ children }) => {
   const hasOpenedModal =

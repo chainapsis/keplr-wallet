@@ -357,6 +357,18 @@ export class WalletConnectStore extends WalletConnectManager {
   protected _needGoBackToBrowser: boolean = false;
 
   /*
+   XXX: Fairly hacky part.
+        In Android, it seems posible that JS works, but all views deleted.
+        This case seems to happen when the window size of the app is forcibly changed or the app is exited.
+        But there doesn't seem to be an API that can detect this.
+        The reason this is a problem is that the stores are all built with a singleton concept.
+        Even if the view is initialized and recreated, this store is not recreated.
+        In this case, the url handler of the deep link does not work and must be called through initialURL().
+        To solve this problem, we leave the detection of the activity state to another component.
+        If a component that cannot be unmounted is unmounted, it means the activity is killed.
+   */
+  protected _isAndroidActivityKilled = false;
+  /*
    When the "keplrwallet://wcV1" deep link requested, this field should be set true.
    And when the app state becomes not active state, this field should be set false.
    This field is only needed on the handler side, so don't need to be observable.
@@ -412,23 +424,32 @@ export class WalletConnectStore extends WalletConnectManager {
   }
 
   protected async initDeepLink() {
-    const initialURL = await Linking.getInitialURL();
-    if (initialURL) {
-      this.processDeepLinkURL(initialURL);
-    }
+    await this.checkInitialURL();
 
     Linking.addEventListener("url", (e) => {
       this.processDeepLinkURL(e.url);
     });
 
     AppState.addEventListener("change", (state) => {
-      if (state !== "active") {
+      if (state === "active") {
+        if (this._isAndroidActivityKilled) {
+          // If the android activity restored, the deep link url handler will not work.
+          // We should recheck the initial URL()
+          this.checkInitialURL();
+        }
+        this._isAndroidActivityKilled = false;
+      } else {
         this.appOpenedFromDeepLink = false;
-        runInAction(() => {
-          this._needGoBackToBrowser = false;
-        });
+        this.clearNeedGoBackToBrowser();
       }
     });
+  }
+
+  protected async checkInitialURL() {
+    const initialURL = await Linking.getInitialURL();
+    if (initialURL) {
+      this.processDeepLinkURL(initialURL);
+    }
   }
 
   protected processDeepLinkURL(_url: string) {
@@ -450,12 +471,17 @@ export class WalletConnectStore extends WalletConnectManager {
     }
   }
 
+  onAndroidActivityKilled() {
+    this._isAndroidActivityKilled = true;
+  }
+
   protected onCallBeforeRequested() {
     super.onCallBeforeRequested();
 
     this.wcCallCount++;
   }
 
+  @action
   protected onCallAfterRequested() {
     super.onCallAfterRequested();
 

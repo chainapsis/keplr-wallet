@@ -493,6 +493,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
     transition.finished,
     transition.time,
     transition.frameTime,
+    transition.durationSetOnExternal,
     transition.duration,
     previousDiff,
     openVelocityValue,
