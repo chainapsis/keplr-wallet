@@ -1,4 +1,8 @@
-import { IConnector } from "@walletconnect/types";
+import {
+  IConnector,
+  IJsonRpcRequest,
+  IRequestOptions,
+} from "@walletconnect/types";
 import {
   ChainInfo,
   Keplr,
@@ -72,6 +76,10 @@ export class KeplrWalletConnectV1 implements Keplr {
     public readonly options: {
       kvStore?: KVStore;
       sendTx?: Keplr["sendTx"];
+      onBeforeSendRequest?: (
+        request: Partial<IJsonRpcRequest>,
+        options?: IRequestOptions
+      ) => Promise<void>;
     } = {}
   ) {
     if (!options.kvStore) {
@@ -172,6 +180,17 @@ export class KeplrWalletConnectV1 implements Keplr {
     ]);
   }
 
+  protected async sendCustomRequest(
+    request: Partial<IJsonRpcRequest>,
+    options?: IRequestOptions
+  ): Promise<any> {
+    if (this.options.onBeforeSendRequest) {
+      await this.options.onBeforeSendRequest(request, options);
+    }
+
+    return await this.connector.sendCustomRequest(request, options);
+  }
+
   async enable(chainIds: string | string[]): Promise<void> {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
@@ -190,7 +209,7 @@ export class KeplrWalletConnectV1 implements Keplr {
       return;
     }
 
-    await this.connector.sendCustomRequest({
+    await this.sendCustomRequest({
       id: payloadId(),
       jsonrpc: "2.0",
       method: "keplr_enable_wallet_connect_v1",
@@ -273,7 +292,7 @@ export class KeplrWalletConnectV1 implements Keplr {
     }
 
     const response = (
-      await this.connector.sendCustomRequest({
+      await this.sendCustomRequest({
         id: payloadId(),
         jsonrpc: "2.0",
         method: "keplr_get_key_wallet_connect_v1",
@@ -389,7 +408,7 @@ export class KeplrWalletConnectV1 implements Keplr {
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
     return (
-      await this.connector.sendCustomRequest({
+      await this.sendCustomRequest({
         id: payloadId(),
         jsonrpc: "2.0",
         method: "keplr_sign_amino_wallet_connect_v1",
