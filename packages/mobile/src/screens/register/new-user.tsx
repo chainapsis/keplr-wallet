@@ -10,6 +10,7 @@ import { useSmartNavigation } from "../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const RegisterNewUserScreen: FunctionComponent = observer(() => {
   const { keyRingStore, analyticsStore } = useStore();
@@ -20,7 +21,9 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
 
   const registerConfig = useRegisterConfig(keyRingStore, []);
 
+  const safeAreaInsets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const actualHeightHeight = headerHeight - safeAreaInsets.top;
 
   return (
     <PageWithScrollView
@@ -29,8 +32,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         style.flatten(["padding-x-42"]),
         {
           paddingTop:
-            Dimensions.get("window").height * 0.22 -
-            (Platform.OS === "android" ? headerHeight : 44),
+            Dimensions.get("window").height * 0.22 - actualHeightHeight,
           paddingBottom: Dimensions.get("window").height * 0.11,
         },
       ])}

@@ -10,6 +10,7 @@ import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useLogScreenView } from "../../hooks";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const RegisterIntroScreen: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
@@ -20,7 +21,9 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
 
   const registerConfig = useRegisterConfig(keyRingStore, []);
 
+  const safeAreaInsets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const actualHeightHeight = headerHeight - safeAreaInsets.top;
 
   useLogScreenView("Register");
 
@@ -29,7 +32,7 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.get("flex-grow-1")}
       style={{
         ...style.flatten(["padding-x-42"]),
-        paddingTop: Dimensions.get("window").height * 0.22 - headerHeight,
+        paddingTop: Dimensions.get("window").height * 0.22 - actualHeightHeight,
         paddingBottom: Dimensions.get("window").height * 0.11,
       }}
     >

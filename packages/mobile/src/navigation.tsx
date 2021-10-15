@@ -404,7 +404,7 @@ export const RegisterNavigation: FunctionComponent = () => {
     >
       <Stack.Screen
         options={{
-          headerShown: false,
+          title: "",
         }}
         name="Register.Intro"
         component={RegisterIntroScreen}
