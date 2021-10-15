@@ -201,7 +201,7 @@ export class KeplrWalletConnectV1 implements Keplr {
   }
 
   protected getKeyHasEnabled() {
-    return `${this.connector.session.key}-enabled`;
+    return `${this.connector.session.handshakeTopic}-enabled`;
   }
 
   protected async getHasEnabledChainIds(): Promise<string[]> {
@@ -294,7 +294,7 @@ export class KeplrWalletConnectV1 implements Keplr {
   }
 
   protected getKeyLastSeenKey() {
-    return `${this.connector.session.key}-key`;
+    return `${this.connector.session.handshakeTopic}-key`;
   }
 
   protected async getLastSeenKey(
