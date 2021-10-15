@@ -1,6 +1,7 @@
 import WalletConnect from "@walletconnect/client";
 import { KeyRingStore, PermissionStore } from "@keplr-wallet/stores";
 import {
+  action,
   autorun,
   computed,
   makeObservable,
@@ -19,7 +20,7 @@ import {
 } from "@keplr-wallet/background";
 import { computedFn } from "mobx-utils";
 import { Key } from "@keplr-wallet/types";
-import { Linking } from "react-native";
+import { AppState, Linking } from "react-native";
 
 export interface WalletConnectV1SessionRequest {
   id: number;
@@ -262,6 +263,8 @@ export abstract class WalletConnectManager {
     const keplr = this.createKeplrAPI(client.session.key);
 
     try {
+      this.onCallBeforeRequested();
+
       switch (payload.method) {
         case "keplr_enable_wallet_connect_v1": {
           if (payload.params.length === 0) {
@@ -329,6 +332,8 @@ export abstract class WalletConnectManager {
           message: e.message,
         },
       });
+    } finally {
+      this.onCallAfterRequested();
     }
   };
 
@@ -336,11 +341,34 @@ export abstract class WalletConnectManager {
   protected abstract onSessionDisconnected(
     client: WalletConnect
   ): Promise<void>;
+  protected onCallBeforeRequested(): void {
+    // should override this if needed.
+  }
+  protected onCallAfterRequested(): void {
+    // should override this if needed.
+  }
 }
 
 export class WalletConnectStore extends WalletConnectManager {
   @observable.shallow
   protected _clients: WalletConnect[] = [];
+
+  @observable
+  protected _needGoBackToBrowser: boolean = false;
+
+  /*
+   When the "keplrwallet://wcV1" deep link requested, this field should be set true.
+   And when the app state becomes not active state, this field should be set false.
+   This field is only needed on the handler side, so don't need to be observable.
+   */
+  protected appOpenedFromDeepLink: boolean = false;
+  /*
+   This means that how many wc call request is processing.
+   When the call requested, should increase this.
+   And when the requested call is completed, should decrease this.
+   This field is only needed on the handler side, so don't need to be observable.
+   */
+  protected wcCallCount: number = 0;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -374,6 +402,15 @@ export class WalletConnectStore extends WalletConnectManager {
     );
   }
 
+  /**
+   needGoBackToBrowser indicates that all requests from the wallet connect are processed when the request is from the deep link.
+   This store doesn't show any indicator to user or close the app.
+   The other component (maybe provider) should act according to this field.
+   */
+  get needGoBackToBrowser(): boolean {
+    return this._needGoBackToBrowser;
+  }
+
   protected async initDeepLink() {
     const initialURL = await Linking.getInitialURL();
     if (initialURL) {
@@ -383,12 +420,23 @@ export class WalletConnectStore extends WalletConnectManager {
     Linking.addEventListener("url", (e) => {
       this.processDeepLinkURL(e.url);
     });
+
+    AppState.addEventListener("change", (state) => {
+      if (state !== "active") {
+        this.appOpenedFromDeepLink = false;
+        runInAction(() => {
+          this._needGoBackToBrowser = false;
+        });
+      }
+    });
   }
 
   protected processDeepLinkURL(_url: string) {
     try {
       const url = new URL(_url);
       if (url.protocol === "keplrwallet:" && url.host === "wcV1") {
+        this.appOpenedFromDeepLink = true;
+
         let params = url.search;
         if (params) {
           if (params.startsWith("?")) {
@@ -400,6 +448,33 @@ export class WalletConnectStore extends WalletConnectManager {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  protected onCallBeforeRequested() {
+    super.onCallBeforeRequested();
+
+    this.wcCallCount++;
+  }
+
+  protected onCallAfterRequested() {
+    super.onCallAfterRequested();
+
+    this.wcCallCount--;
+    if (
+      this.wcCallCount == 0 &&
+      this.appOpenedFromDeepLink &&
+      AppState.currentState === "active"
+    ) {
+      this._needGoBackToBrowser = true;
+    }
+  }
+
+  /**
+   clearNeedGoBackToBrowser is used in the component to set the needGoBackToBrowser as false.
+   */
+  @action
+  clearNeedGoBackToBrowser() {
+    this._needGoBackToBrowser = false;
   }
 
   protected async sendAccountMayChangedEventToClients() {

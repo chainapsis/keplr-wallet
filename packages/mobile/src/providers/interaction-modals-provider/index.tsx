@@ -1,10 +1,12 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { SignModal } from "../../modals/sign";
 import { LedgerGranterModal } from "../../modals/ledger";
 import { WalletConnectApprovalModal } from "../../modals/wallet-connect-approval";
 import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
+import { WCGoBackToBrowserModal } from "../../modals/wc-go-back-to-browser";
+import { BackHandler, Platform } from "react-native";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
@@ -12,10 +14,25 @@ export const InteractionModalsProivder: FunctionComponent = observer(
       ledgerInitStore,
       permissionStore,
       signInteractionStore,
+      walletConnectStore,
     } = useStore();
+
+    useEffect(() => {
+      if (walletConnectStore.needGoBackToBrowser && Platform.OS === "android") {
+        BackHandler.exitApp();
+      }
+    }, [walletConnectStore.needGoBackToBrowser]);
 
     return (
       <React.Fragment>
+        {walletConnectStore.needGoBackToBrowser && Platform.OS === "ios" ? (
+          <WCGoBackToBrowserModal
+            isOpen={walletConnectStore.needGoBackToBrowser}
+            close={() => {
+              walletConnectStore.clearNeedGoBackToBrowser();
+            }}
+          />
+        ) : null}
         {/*unlockInteractionExists ? (
           <UnlockModal
             isOpen={true}
