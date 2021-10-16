@@ -363,6 +363,14 @@ export class WalletConnectStore extends WalletConnectManager {
   @observable.shallow
   protected _clients: WalletConnect[] = [];
 
+  /*
+   Indicate that there is a pending client that was requested from the deep link.
+   Creating session take some time, but this store can't show the indicator.
+   Component can show the indicator on behalf of this store if needed.
+   */
+  @observable
+  protected _isPendingClientFromDeepLink: boolean = false;
+
   @observable
   protected _needGoBackToBrowser: boolean = false;
 
@@ -426,6 +434,10 @@ export class WalletConnectStore extends WalletConnectManager {
     );
   }
 
+  get isPendingClientFromDeepLink(): boolean {
+    return this._isPendingClientFromDeepLink;
+  }
+
   /**
    needGoBackToBrowser indicates that all requests from the wallet connect are processed when the request is from the deep link.
    This store doesn't show any indicator to user or close the app.
@@ -473,10 +485,20 @@ export class WalletConnectStore extends WalletConnectManager {
             params = params.slice(1);
           }
           if (this.canInitClient(params)) {
-            this.initClient(params).then((client) => {
-              this.deepLinkClientKeyMap[client.key] = true;
-              this.saveDeepLinkClientKeyMap(this.deepLinkClientKeyMap);
+            runInAction(() => {
+              this._isPendingClientFromDeepLink = true;
             });
+
+            this.initClient(params)
+              .then((client) => {
+                this.deepLinkClientKeyMap[client.key] = true;
+                this.saveDeepLinkClientKeyMap(this.deepLinkClientKeyMap);
+              })
+              .finally(() => {
+                runInAction(() => {
+                  this._isPendingClientFromDeepLink = false;
+                });
+              });
           }
         }
       }

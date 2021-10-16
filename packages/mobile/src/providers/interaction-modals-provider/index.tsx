@@ -7,10 +7,13 @@ import { WalletConnectApprovalModal } from "../../modals/wallet-connect-approval
 import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
 import { WCGoBackToBrowserModal } from "../../modals/wc-go-back-to-browser";
 import { BackHandler, Platform } from "react-native";
+import { LoadingScreenModal } from "../loading-screen/modal";
+import { KeyRingStatus } from "@keplr-wallet/background";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
     const {
+      keyRingStore,
       ledgerInitStore,
       permissionStore,
       signInteractionStore,
@@ -25,6 +28,20 @@ export const InteractionModalsProivder: FunctionComponent = observer(
 
     return (
       <React.Fragment>
+        {/*
+         When the wallet connect client from the deep link is creating, show the loading indicator.
+         The user should be able to type password to unlock or create the account if there is no account.
+         So, we shouldn't show the loading indicator if the keyring is not unlocked.
+         */}
+        {keyRingStore.status === KeyRingStatus.UNLOCKED &&
+        walletConnectStore.isPendingClientFromDeepLink ? (
+          <LoadingScreenModal
+            isOpen={true}
+            close={() => {
+              // noop
+            }}
+          />
+        ) : null}
         {walletConnectStore.needGoBackToBrowser && Platform.OS === "ios" ? (
           <WCGoBackToBrowserModal
             isOpen={walletConnectStore.needGoBackToBrowser}
