@@ -198,6 +198,8 @@ export class KeplrWalletConnectV1 implements Keplr {
     if (this.options.onAfterSendRequest) {
       await this.options.onAfterSendRequest(res, request, options);
     }
+
+    return res;
   }
 
   async enable(chainIds: string | string[]): Promise<void> {
