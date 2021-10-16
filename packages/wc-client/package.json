@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/wc-client",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
