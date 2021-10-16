@@ -137,6 +137,18 @@ export abstract class WalletConnectManager {
     }
   }
 
+  isClientInitialized(uri: string): boolean {
+    return this.clientMap.has(uri);
+  }
+
+  isClientPending(uri: string): boolean {
+    return this.pendingClientMap.has(uri);
+  }
+
+  canInitClient(uri: string): boolean {
+    return !this.isClientInitialized(uri) && !this.isClientPending(uri);
+  }
+
   async initClient(uri: string): Promise<WalletConnect> {
     await this.waitInitStores();
 
@@ -261,7 +273,7 @@ export abstract class WalletConnectManager {
     const keplr = this.createKeplrAPI(client.session.key);
 
     try {
-      this.onCallBeforeRequested();
+      this.onCallBeforeRequested(client);
 
       switch (payload.method) {
         case "keplr_enable_wallet_connect_v1": {
@@ -331,7 +343,7 @@ export abstract class WalletConnectManager {
         },
       });
     } finally {
-      this.onCallAfterRequested();
+      this.onCallAfterRequested(client);
     }
   };
 
@@ -339,10 +351,10 @@ export abstract class WalletConnectManager {
   protected abstract onSessionDisconnected(
     client: WalletConnect
   ): Promise<void>;
-  protected onCallBeforeRequested(): void {
+  protected onCallBeforeRequested(_: WalletConnect): void {
     // should override this if needed.
   }
-  protected onCallAfterRequested(): void {
+  protected onCallAfterRequested(_: WalletConnect): void {
     // should override this if needed.
   }
 }
@@ -367,18 +379,20 @@ export class WalletConnectStore extends WalletConnectManager {
    */
   protected _isAndroidActivityKilled = false;
   /*
-   When the "keplrwallet://wcV1" deep link requested, this field should be set true.
-   And when the app state becomes not active state, this field should be set false.
-   This field is only needed on the handler side, so don't need to be observable.
-   */
-  protected appOpenedFromDeepLink: boolean = false;
-  /*
    This means that how many wc call request is processing.
    When the call requested, should increase this.
    And when the requested call is completed, should decrease this.
    This field is only needed on the handler side, so don't need to be observable.
    */
   protected wcCallCount: number = 0;
+  /*
+   Check that there is a wallet connect call from the client that was connected by deep link.
+   */
+  protected isPendingWcCallFromDeepLinkClient = false;
+  /*
+   Save the clients that was connected by the deep link.
+   */
+  protected deepLinkClientKeyMap: Record<string, true | undefined> = {};
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -437,7 +451,6 @@ export class WalletConnectStore extends WalletConnectManager {
         }
         this._isAndroidActivityKilled = false;
       } else {
-        this.appOpenedFromDeepLink = false;
         this.clearNeedGoBackToBrowser();
       }
     });
@@ -454,14 +467,17 @@ export class WalletConnectStore extends WalletConnectManager {
     try {
       const url = new URL(_url);
       if (url.protocol === "keplrwallet:" && url.host === "wcV1") {
-        this.appOpenedFromDeepLink = true;
-
         let params = url.search;
         if (params) {
           if (params.startsWith("?")) {
             params = params.slice(1);
           }
-          this.initClient(params);
+          if (this.canInitClient(params)) {
+            this.initClient(params).then((client) => {
+              this.deepLinkClientKeyMap[client.key] = true;
+              this.saveDeepLinkClientKeyMap(this.deepLinkClientKeyMap);
+            });
+          }
         }
       }
     } catch (e) {
@@ -473,23 +489,27 @@ export class WalletConnectStore extends WalletConnectManager {
     this._isAndroidActivityKilled = true;
   }
 
-  protected onCallBeforeRequested() {
-    super.onCallBeforeRequested();
+  protected onCallBeforeRequested(client: WalletConnect) {
+    super.onCallBeforeRequested(client);
 
     this.wcCallCount++;
+
+    if (this.deepLinkClientKeyMap[client.session.key]) {
+      this.isPendingWcCallFromDeepLinkClient = true;
+    }
   }
 
   @action
-  protected onCallAfterRequested() {
-    super.onCallAfterRequested();
+  protected onCallAfterRequested(client: WalletConnect) {
+    super.onCallAfterRequested(client);
 
     this.wcCallCount--;
-    if (
-      this.wcCallCount == 0 &&
-      this.appOpenedFromDeepLink &&
-      AppState.currentState === "active"
-    ) {
-      this._needGoBackToBrowser = true;
+    if (this.wcCallCount == 0 && this.isPendingWcCallFromDeepLinkClient) {
+      this.isPendingWcCallFromDeepLinkClient = false;
+
+      if (AppState.currentState === "active") {
+        this._needGoBackToBrowser = true;
+      }
     }
   }
 
@@ -582,6 +602,13 @@ export class WalletConnectStore extends WalletConnectManager {
   }
 
   protected async restore(): Promise<void> {
+    const deepLinkClientMap = await this.kvStore.get<
+      Record<string, true | undefined>
+    >("deep_link_client_keys");
+    if (deepLinkClientMap) {
+      this.deepLinkClientKeyMap = deepLinkClientMap;
+    }
+
     const persistentSessions = await this.getPersistentSessions();
 
     for (const session of persistentSessions) {
@@ -616,6 +643,13 @@ export class WalletConnectStore extends WalletConnectManager {
     await this.kvStore.set("persistent_session_v1", value);
   }
 
+  protected async saveDeepLinkClientKeyMap(
+    keys: Record<string, true | undefined>
+  ): Promise<void> {
+    this.deepLinkClientKeyMap = keys;
+    await this.kvStore.set("deep_link_client_keys", keys);
+  }
+
   protected async onSessionConnected(client: WalletConnect): Promise<void> {
     const clients = this._clients;
 
@@ -636,6 +670,12 @@ export class WalletConnectStore extends WalletConnectManager {
   }
 
   protected async onSessionDisconnected(client: WalletConnect): Promise<void> {
+    if (this.deepLinkClientKeyMap[client.session.key]) {
+      delete this.deepLinkClientKeyMap[client.session.key];
+
+      await this.saveDeepLinkClientKeyMap(this.deepLinkClientKeyMap);
+    }
+
     runInAction(() => {
       this._clients = this._clients.filter(
         (persistent) => persistent.session.key !== client.session.key
