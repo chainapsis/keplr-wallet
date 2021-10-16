@@ -79,7 +79,12 @@ export class KeplrWalletConnectV1 implements Keplr {
       onBeforeSendRequest?: (
         request: Partial<IJsonRpcRequest>,
         options?: IRequestOptions
-      ) => Promise<void>;
+      ) => Promise<void> | void;
+      onAfterSendRequest?: (
+        response: any,
+        request: Partial<IJsonRpcRequest>,
+        options?: IRequestOptions
+      ) => Promise<void> | void;
     } = {}
   ) {
     if (!options.kvStore) {
@@ -188,7 +193,11 @@ export class KeplrWalletConnectV1 implements Keplr {
       await this.options.onBeforeSendRequest(request, options);
     }
 
-    return await this.connector.sendCustomRequest(request, options);
+    const res = await this.connector.sendCustomRequest(request, options);
+
+    if (this.options.onAfterSendRequest) {
+      await this.options.onAfterSendRequest(res, request, options);
+    }
   }
 
   async enable(chainIds: string | string[]): Promise<void> {
