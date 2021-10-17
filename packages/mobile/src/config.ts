@@ -928,4 +928,66 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["stargate", "ibc-transfer"],
     hideInUI: true,
   },
+  {
+    rpc: "https://rpc-juno.itastakers.com",
+    rest: "https://lcd-juno.itastakers.com",
+    chainId: "juno-1",
+    chainName: "Juno",
+    stakeCurrency: {
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("juno"),
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc-microtick.keplr.app",
+    rest: "https://lcd-microtick.keplr.app",
+    chainId: "microtick-1",
+    chainName: "Microtick",
+    stakeCurrency: {
+      coinDenom: "TICK",
+      coinMinimalDenom: "utick",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("micro"),
+    currencies: [
+      {
+        coinDenom: "TICK",
+        coinMinimalDenom: "utick",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TICK",
+        coinMinimalDenom: "utick",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
+    hideInUI: true,
+  },
 ];
