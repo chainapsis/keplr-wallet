@@ -40,7 +40,7 @@ export class ObservableCosmwasmContractChainQuery<
     const query = Buffer.from(msg).toString("base64");
 
     this.setUrl(
-      `/wasm/v1beta1/contract/${this.contractAddress}/smart/${query}`
+      `/wasm/v1/contract/${this.contractAddress}/smart/${query}`
     );
   }
 
