@@ -62,18 +62,20 @@ export const AddTokenPage: FunctionComponent = observer(() => {
     }
   }, [chainStore, contractAddress, form, tokensStore.waitingSuggestedToken]);
 
-  const queries = queriesStore.get(chainStore.current.chainId);
-  const queryContractInfo = queries.secret.querySecret20ContractInfo.getQueryContract(
-    contractAddress
-  );
-
-  const tokenInfo = queryContractInfo.tokenInfo;
-
   const isSecret20 =
     (chainStore.current.features ?? []).find(
       (feature) => feature === "secretwasm"
     ) != null;
 
+  const queries = queriesStore.get(chainStore.current.chainId);
+  const query = isSecret20
+    ? queries.secret.querySecret20ContractInfo
+    : queries.cosmwasm.querycw20ContractInfo;
+  const queryContractInfo = query.getQueryContract(
+    contractAddress
+  );
+
+  const tokenInfo = queryContractInfo.tokenInfo;
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] = useState(
     false
   );
