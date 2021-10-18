@@ -24,12 +24,7 @@ export class QueriesWithCosmosAndSecretAndCosmwasm
   ) {
     super(kvStore, chainId, chainGetter, apiGetter);
 
-    this.cosmwasm = new CosmwasmQueries(
-      this,
-      kvStore,
-      chainId,
-      chainGetter
-    );
+    this.cosmwasm = new CosmwasmQueries(this, kvStore, chainId, chainGetter);
   }
 }
 

@@ -39,9 +39,7 @@ export class ObservableCosmwasmContractChainQuery<
     const msg = JSON.stringify(this.obj);
     const query = Buffer.from(msg).toString("base64");
 
-    this.setUrl(
-      `/wasm/v1/contract/${this.contractAddress}/smart/${query}`
-    );
+    this.setUrl(`/wasm/v1/contract/${this.contractAddress}/smart/${query}`);
   }
 
   protected async fetchResponse(

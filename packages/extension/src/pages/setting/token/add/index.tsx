@@ -71,9 +71,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
   const query = isSecret20
     ? queries.secret.querySecret20ContractInfo
     : queries.cosmwasm.querycw20ContractInfo;
-  const queryContractInfo = query.getQueryContract(
-    contractAddress
-  );
+  const queryContractInfo = query.getQueryContract(contractAddress);
 
   const tokenInfo = queryContractInfo.tokenInfo;
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] = useState(
