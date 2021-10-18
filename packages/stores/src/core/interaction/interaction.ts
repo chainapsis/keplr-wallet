@@ -27,7 +27,7 @@ export class InteractionStore implements InteractionForegroundHandler {
   @observable.shallow
   protected events: Map<
     string,
-    Omit<InteractionWaitingData, "id">[]
+    Omit<InteractionWaitingData, "id" | "isInternal">[]
   > = new Map();
 
   constructor(
@@ -46,10 +46,14 @@ export class InteractionStore implements InteractionForegroundHandler {
 
   getEvents<T = unknown>(
     type: string
-  ): Omit<InteractionWaitingData<T>, "id">[] {
+  ): Omit<InteractionWaitingData<T>, "id" | "isInternal">[] {
     return (
-      toJS(this.events.get(type) as Omit<InteractionWaitingData<T>, "id">[]) ??
-      []
+      toJS(
+        this.events.get(type) as Omit<
+          InteractionWaitingData<T>,
+          "id" | "isInternal"
+        >[]
+      ) ?? []
     );
   }
 
@@ -69,7 +73,7 @@ export class InteractionStore implements InteractionForegroundHandler {
   }
 
   @action
-  onEventDataReceived(data: Omit<InteractionWaitingData, "id">) {
+  onEventDataReceived(data: Omit<InteractionWaitingData, "id" | "isInternal">) {
     if (!this.events.has(data.type)) {
       this.events.set(
         data.type,
@@ -86,6 +90,21 @@ export class InteractionStore implements InteractionForegroundHandler {
   @flow
   *approve(type: string, id: string, result: unknown) {
     this.removeData(type, id);
+    yield this.msgRequester.sendMessage(
+      BACKGROUND_PORT,
+      new ApproveInteractionMsg(id, result)
+    );
+  }
+
+  /**
+   * Approve the interaction without removing the data on the store.
+   * Actually, this method is used for the sign interaction to wait the actual signing ends.
+   * You should make sure that remove the data manually.
+   * @param id
+   * @param result
+   */
+  @flow
+  *approveWithoutRemovingData(id: string, result: unknown) {
     yield this.msgRequester.sendMessage(
       BACKGROUND_PORT,
       new ApproveInteractionMsg(id, result)

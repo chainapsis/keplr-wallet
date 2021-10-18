@@ -27,6 +27,7 @@ export class SignInteractionStore {
   protected get waitingDatas() {
     return this.interactionStore.getDatas<
       | {
+          msgOrigin: string;
           chainId: string;
           mode: "amino";
           signer: string;
@@ -34,6 +35,7 @@ export class SignInteractionStore {
           signOptions: KeplrSignOptions;
         }
       | {
+          msgOrigin: string;
           chainId: string;
           mode: "direct";
           signer: string;
@@ -46,6 +48,7 @@ export class SignInteractionStore {
   @computed
   get waitingData():
     | InteractionWaitingData<{
+        msgOrigin: string;
         signer: string;
         signDocWrapper: SignDocWrapper;
         signOptions: KeplrSignOptions;
@@ -66,7 +69,9 @@ export class SignInteractionStore {
     return {
       id: data.id,
       type: data.type,
+      isInternal: data.isInternal,
       data: {
+        msgOrigin: data.data.msgOrigin,
         signer: data.data.signer,
         signDocWrapper: wrapper,
         signOptions: data.data.signOptions,
@@ -105,19 +110,17 @@ export class SignInteractionStore {
     }
 
     this._isLoading = true;
+    const id = this.waitingDatas[0].id;
     try {
       const newSignDoc =
         newSignDocWrapper.mode === "amino"
           ? newSignDocWrapper.aminoSignDoc
           : newSignDocWrapper.protoSignDoc.toBytes();
 
-      yield this.interactionStore.approve(
-        "request-sign",
-        this.waitingDatas[0].id,
-        newSignDoc
-      );
+      yield this.interactionStore.approveWithoutRemovingData(id, newSignDoc);
     } finally {
       yield this.waitEnd();
+      this.interactionStore.removeData("request-sign", id);
 
       this._isLoading = false;
     }

@@ -34,6 +34,15 @@ export class Bech32Address {
     return prefix + "1" + former + "..." + latter;
   }
 
+  static fromBech32(bech32Address: string, prefix?: string): Bech32Address {
+    const decoded = bech32.decode(bech32Address);
+    if (prefix && decoded.prefix !== prefix) {
+      throw new Error("Unmatched prefix");
+    }
+
+    return new Bech32Address(new Uint8Array(decoded.words));
+  }
+
   static validate(bech32Address: string, prefix?: string) {
     const { prefix: decodedPrefix } = bech32.decode(bech32Address);
     if (prefix && prefix !== decodedPrefix) {
@@ -62,7 +71,7 @@ export class Bech32Address {
     };
   }
 
-  constructor(protected readonly address: Uint8Array) {}
+  constructor(public readonly address: Uint8Array) {}
 
   toBech32(prefix: string): string {
     const words = bech32.toWords(this.address);

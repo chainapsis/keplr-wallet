@@ -5,7 +5,7 @@ import {
   KeyRingStatus,
   MultiKeyStoreInfoWithSelected,
 } from "./keyring";
-import { BIP44HDPath } from "./types";
+import { BIP44HDPath, ExportKeyRingData } from "./types";
 
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { BIP44, KeplrSignOptions, Key } from "@keplr-wallet/types";
@@ -18,7 +18,6 @@ import { cosmos } from "@keplr-wallet/cosmos";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
-  type: string;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {
   public static type() {
@@ -73,7 +72,6 @@ export class DeleteKeyRingMsg extends Message<{
 }
 
 export class UpdateNameKeyRingMsg extends Message<{
-  status: KeyRingStatus;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {
   public static type() {
@@ -131,12 +129,16 @@ export class ShowKeyRingMsg extends Message<string> {
   }
 }
 
-export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreateMnemonicKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-mnemonic-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly mnemonic: string,
     public readonly password: string,
     public readonly meta: Record<string, string>,
@@ -146,6 +148,14 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.mnemonic) {
       throw new Error("mnemonic not set");
     }
@@ -177,12 +187,15 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddMnemonicKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-mnemonic-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly mnemonic: string,
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
@@ -191,6 +204,14 @@ export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.mnemonic) {
       throw new Error("mnemonic not set");
     }
@@ -218,12 +239,16 @@ export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 }
 
-export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreatePrivateKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-private-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly privateKey: Uint8Array,
     public readonly password: string,
     public readonly meta: Record<string, string>
@@ -232,6 +257,14 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.privateKey || this.privateKey.length === 0) {
       throw new Error("private key not set");
     }
@@ -254,12 +287,16 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreateLedgerKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-ledger-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly password: string,
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
@@ -268,6 +305,14 @@ export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.password) {
       throw new Error("password not set");
     }
@@ -284,12 +329,15 @@ export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddPrivateKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-private-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly privateKey: Uint8Array,
     public readonly meta: Record<string, string>
   ) {
@@ -297,6 +345,14 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.privateKey || this.privateKey.length === 0) {
       throw new Error("private key not set");
     }
@@ -315,12 +371,15 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 }
 
-export class AddLedgerKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddLedgerKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-ledger-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
   ) {
@@ -328,6 +387,14 @@ export class AddLedgerKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     KeyRing.validateBIP44Path(this.bip44HDPath);
   }
 
@@ -520,29 +587,9 @@ export class RequestSignDirectMsg extends Message<{
   }
 }
 
-export class GetKeyRingTypeMsg extends Message<string> {
-  public static type() {
-    return "get-keyring-type";
-  }
-
-  constructor() {
-    super();
-  }
-
-  validateBasic(): void {
-    // noop
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return GetKeyRingTypeMsg.type();
-  }
-}
-
-export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class GetMultiKeyStoreInfoMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "get-multi-key-store-info";
   }
@@ -564,7 +611,9 @@ export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfoWithSelect
   }
 }
 
-export class ChangeKeyRingMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class ChangeKeyRingMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "change-keyring";
   }
@@ -659,5 +708,53 @@ export class SetKeyStoreCoinTypeMsg extends Message<KeyRingStatus> {
 
   type(): string {
     return SetKeyStoreCoinTypeMsg.type();
+  }
+}
+
+export class CheckPasswordMsg extends Message<boolean> {
+  public static type() {
+    return "check-keyring-password";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckPasswordMsg.type();
+  }
+}
+
+export class ExportKeyRingDatasMsg extends Message<ExportKeyRingData[]> {
+  public static type() {
+    return "export-keyring-datas";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ExportKeyRingDatasMsg.type();
   }
 }

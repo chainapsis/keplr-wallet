@@ -47,18 +47,9 @@ export const AddTokenPage: FunctionComponent = observer(() => {
 
   const contractAddress = form.watch("contractAddress");
 
-  const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] = useState(
-    false
-  );
-
   useEffect(() => {
     if (tokensStore.waitingSuggestedToken) {
       chainStore.selectChain(tokensStore.waitingSuggestedToken.data.chainId);
-    }
-  }, [chainStore, tokensStore.waitingSuggestedToken]);
-
-  useEffect(() => {
-    if (tokensStore.waitingSuggestedToken) {
       if (
         contractAddress !==
         tokensStore.waitingSuggestedToken.data.contractAddress
@@ -69,55 +60,41 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         );
       }
     }
-  }, [contractAddress, form, tokensStore.waitingSuggestedToken]);
+  }, [chainStore, contractAddress, form, tokensStore.waitingSuggestedToken]);
 
-  useEffect(() => {
-    if (tokensStore.waitingSuggestedToken) {
-      if (tokensStore.waitingSuggestedToken.data.viewingKey) {
-        setIsOpenSecret20ViewingKey(true);
-      }
-    }
-  }, [tokensStore.waitingSuggestedToken]);
+  const queries = queriesStore.get(chainStore.current.chainId);
+  const queryContractInfo = queries.secret.querySecret20ContractInfo.getQueryContract(
+    contractAddress
+  );
 
-  useEffect(() => {
-    if (tokensStore.waitingSuggestedToken) {
-      if (
-        tokensStore.waitingSuggestedToken.data.viewingKey &&
-        isOpenSecret20ViewingKey
-      ) {
-        form.setValue(
-          "viewingKey",
-          tokensStore.waitingSuggestedToken.data.viewingKey
-        );
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenSecret20ViewingKey, tokensStore.waitingSuggestedToken]);
+  const tokenInfo = queryContractInfo.tokenInfo;
 
   const isSecret20 =
     (chainStore.current.features ?? []).find(
       (feature) => feature === "secretwasm"
     ) != null;
 
-  const queries = queriesStore.get(chainStore.current.chainId);
-  const query = isSecret20
-    ? queries.getQuerySecret20ContractInfo()
-    : queries.getQueryCw20ContractInfo();
-  const queryContractInfo = query.getQueryContract(contractAddress);
-
-  const tokenInfo = queryContractInfo.tokenInfo;
+  const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] = useState(
+    false
+  );
 
   const notification = useNotification();
   const loadingIndicator = useLoadingIndicator();
 
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
-      accountInfo
-        .createSecret20ViewingKey(contractAddress, "", {}, (_, viewingKey) => {
-          loadingIndicator.setIsLoading("create-veiwing-key", false);
+      accountInfo.secret
+        .createSecret20ViewingKey(
+          contractAddress,
+          "",
+          {},
+          {},
+          (_, viewingKey) => {
+            loadingIndicator.setIsLoading("create-veiwing-key", false);
 
-          resolve(viewingKey);
-        })
+            resolve(viewingKey);
+          }
+        )
         .then(() => {
           loadingIndicator.setIsLoading("create-veiwing-key", true);
         })
@@ -342,13 +319,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             htmlFor="viewing-key-checkbox"
             style={{ color: "#666666", paddingTop: "1px" }}
           >
-            <FormattedMessage
-              id={
-                tokensStore.waitingSuggestedToken?.data.viewingKey
-                  ? "setting.token.add.secret20.checkbox.use-suggested-viewing-key"
-                  : "setting.token.add.secret20.checkbox.import-viewing-key"
-              }
-            />
+            <FormattedMessage id="setting.token.add.secret20.checkbox.import-viewing-key" />
           </label>
         </div>
         <Button

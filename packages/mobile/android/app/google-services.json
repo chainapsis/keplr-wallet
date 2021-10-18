@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "571182425378",
+    "project_id": "keplr-main",
+    "storage_bucket": "keplr-main.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:571182425378:android:7c8c2a46b952010d78717b",
+        "android_client_info": {
+          "package_name": "com.chainapsis.keplr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "571182425378-i6k0k9brnrj06qesdhohhnqupjpjagq1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLk3RpnZ9-Yi-SzGcTkwjR1iuOEJIjJAs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "571182425378-i6k0k9brnrj06qesdhohhnqupjpjagq1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "571182425378-nhiicj2ct6e9j1emf9h9s53afh32l08k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.chainapsis.keplr"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

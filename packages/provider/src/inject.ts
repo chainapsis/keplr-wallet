@@ -174,8 +174,8 @@ export class InjectedKeplr implements IKeplr {
 
   constructor(public readonly version: string) {}
 
-  async enable(chainId: string): Promise<void> {
-    await this.requestMethod("enable", [chainId]);
+  async enable(chainIds: string | string[]): Promise<void> {
+    await this.requestMethod("enable", [chainIds]);
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {

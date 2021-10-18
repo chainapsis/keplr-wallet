@@ -13,6 +13,7 @@ import { Alert, Button, ButtonGroup, Form } from "reactstrap";
 import { Input, TextArea } from "../../../components/form";
 import { BackButton } from "../index";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
+import { useStore } from "../../../stores";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -29,6 +30,8 @@ interface FormData {
 export const NewMnemonicIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
+  const { analyticsStore } = useStore();
+
   return (
     <Button
       color="primary"
@@ -38,6 +41,10 @@ export const NewMnemonicIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeNewMnemonic);
+        console.log("here");
+        analyticsStore.logEvent("Create account started", {
+          registerType: "seed",
+        });
       }}
     >
       <FormattedMessage id="register.intro.button.new-account.title" />
@@ -270,6 +277,8 @@ export const VerifyMnemonicModePage: FunctionComponent<{
     setSuggestedWords([]);
   }, [newMnemonicConfig.mnemonic]);
 
+  const { analyticsStore, accountStore } = useStore();
+
   return (
     <div>
       <div style={{ minHeight: "153px" }}>
@@ -337,6 +346,17 @@ export const VerifyMnemonicModePage: FunctionComponent<{
               newMnemonicConfig.password,
               bip44Option.bip44HDPath
             );
+            const accountInfo = accountStore.getAccount(
+              analyticsStore.mainChainId
+            );
+            analyticsStore.setUserId(accountInfo.bech32Address);
+            analyticsStore.setUserProperties({
+              registerType: "seed",
+              accountType: "mnemonic",
+            });
+            analyticsStore.logEvent("Create account finished", {
+              accountType: "mnemonic",
+            });
           } catch (e) {
             alert(e.message ? e.message : e.toString());
             registerConfig.clear();

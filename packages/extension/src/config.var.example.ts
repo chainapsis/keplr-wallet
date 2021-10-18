@@ -98,4 +98,14 @@ export const SENTINEL_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const SENTINEL_REST_ENDPOINT = "";
 export const SENTINEL_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const IXO_RPC_ENDPOINT = "";
+export const IXO_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const IXO_REST_ENDPOINT = "";
+export const IXO_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const EMONEY_RPC_ENDPOINT = "";
+export const EMONEY_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const EMONEY_REST_ENDPOINT = "";
+export const EMONEY_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const PRIVILEGED_ORIGINS: string[] = [];

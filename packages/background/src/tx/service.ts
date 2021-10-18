@@ -1,9 +1,11 @@
 import { delay, inject, singleton } from "tsyringe";
+import { TYPES } from "../types";
 
 import Axios from "axios";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos/build/tx-tracer";
+import { Notification } from "./types";
 
 import { Buffer } from "buffer/";
 
@@ -26,7 +28,9 @@ export class BackgroundTxService {
     @inject(delay(() => ChainsService))
     protected readonly chainsService: ChainsService,
     @inject(delay(() => PermissionService))
-    public readonly permissionService: PermissionService
+    public readonly permissionService: PermissionService,
+    @inject(TYPES.Notification)
+    protected readonly notification: Notification
   ) {}
 
   async sendTx(
@@ -42,9 +46,8 @@ export class BackgroundTxService {
       ...chainInfo.restConfig,
     });
 
-    browser.notifications.create({
-      type: "basic",
-      iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
+    this.notification.create({
+      iconRelativeUrl: "assets/temp-icon.svg",
       title: "Tx is pending...",
       message: "Wait a second",
     });
@@ -65,18 +68,21 @@ export class BackgroundTxService {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
       txTracer.traceTx(txHash).then((tx) => {
         txTracer.close();
-        BackgroundTxService.processTxResultNotification(tx);
+        BackgroundTxService.processTxResultNotification(this.notification, tx);
       });
 
       return txHash;
     } catch (e) {
       console.log(e);
-      BackgroundTxService.processTxErrorNotification(e);
+      BackgroundTxService.processTxErrorNotification(this.notification, e);
       throw e;
     }
   }
 
-  private static processTxResultNotification(result: any): void {
+  private static processTxResultNotification(
+    notification: Notification,
+    result: any
+  ): void {
     try {
       if (result.mode === "commit") {
         if (result.checkTx.code !== undefined && result.checkTx.code !== 0) {
@@ -96,19 +102,21 @@ export class BackgroundTxService {
         }
       }
 
-      browser.notifications.create({
-        type: "basic",
-        iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
+      notification.create({
+        iconRelativeUrl: "assets/temp-icon.svg",
         title: "Tx succeeds",
         // TODO: Let users know the tx id?
         message: "Congratulations!",
       });
     } catch (e) {
-      BackgroundTxService.processTxErrorNotification(e);
+      BackgroundTxService.processTxErrorNotification(notification, e);
     }
   }
 
-  private static processTxErrorNotification(e: Error): void {
+  private static processTxErrorNotification(
+    notification: Notification,
+    e: Error
+  ): void {
     console.log(e);
     let message = e.message;
 
@@ -149,9 +157,8 @@ export class BackgroundTxService {
       // noop
     }
 
-    browser.notifications.create({
-      type: "basic",
-      iconUrl: browser.runtime.getURL("assets/temp-icon.svg"),
+    notification.create({
+      iconRelativeUrl: "assets/temp-icon.svg",
       title: "Tx failed",
       message,
     });

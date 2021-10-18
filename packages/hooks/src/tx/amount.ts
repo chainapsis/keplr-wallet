@@ -1,4 +1,4 @@
-import { IAmountConfig } from "./types";
+import { IAmountConfig, IFeeConfig } from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
@@ -16,6 +16,9 @@ import { useState } from "react";
 
 export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
+  protected feeConfig?: IFeeConfig;
+
+  @observable.ref
   protected queryBalances: ObservableQueryBalances;
 
   @observable
@@ -27,19 +30,29 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable
   protected _amount: string;
 
+  @observable
+  protected _isMax: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
     sender: string,
+    feeConfig: IFeeConfig | undefined,
     queryBalances: ObservableQueryBalances
   ) {
     super(chainGetter, initialChainId);
 
     this._sender = sender;
+    this.feeConfig = feeConfig;
     this.queryBalances = queryBalances;
     this._amount = "";
 
     makeObservable(this);
+  }
+
+  @action
+  setFeeConfig(feeConfig: IFeeConfig) {
+    this.feeConfig = feeConfig;
   }
 
   @action
@@ -63,14 +76,48 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       amount = "0" + amount;
     }
 
+    if (this.isMax) {
+      this.setIsMax(false);
+    }
     this._amount = amount;
+  }
+
+  @action
+  setIsMax(isMax: boolean) {
+    this._isMax = isMax;
+  }
+
+  @action
+  toggleIsMax() {
+    this._isMax = !this._isMax;
+  }
+
+  get isMax(): boolean {
+    return this._isMax;
   }
 
   get sender(): string {
     return this._sender;
   }
 
+  @computed
   get amount(): string {
+    if (this.isMax) {
+      const balance = this.queryBalances
+        .getQueryBech32Address(this.sender)
+        .getBalanceFromCurrency(this.sendCurrency);
+
+      const result = this.feeConfig?.fee
+        ? balance.sub(this.feeConfig.fee)
+        : balance;
+      if (result.toDec().lte(new Dec(0))) {
+        return "0";
+      }
+
+      // Remember that the `CoinPretty`'s sub method do nothing if the currencies are different.
+      return result.trim(true).locale(false).hideDenom(true).toString();
+    }
+
     return this._amount;
   }
 
@@ -85,13 +132,20 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       };
     }
 
-    return {
-      denom: sendCurrency.coinMinimalDenom,
-      amount: new Dec(amountStr)
-        .mul(DecUtils.getPrecisionDec(sendCurrency.coinDecimals))
-        .truncate()
-        .toString(),
-    };
+    try {
+      return {
+        denom: sendCurrency.coinMinimalDenom,
+        amount: new Dec(amountStr)
+          .mul(DecUtils.getPrecisionDec(sendCurrency.coinDecimals))
+          .truncate()
+          .toString(),
+      };
+    } catch {
+      return {
+        denom: sendCurrency.coinMinimalDenom,
+        amount: "0",
+      };
+    }
   }
 
   @computed
@@ -130,27 +184,25 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     if (Number.isNaN(parseFloat(this.amount))) {
       return new InvalidNumberAmountError("Invalid form of number");
     }
-    const dec = new Dec(this.amount);
-    if (dec.equals(new Dec(0))) {
-      return new ZeroAmountError("Amount is zero");
+    let dec;
+    try {
+      dec = new Dec(this.amount);
+      if (dec.equals(new Dec(0))) {
+        return new ZeroAmountError("Amount is zero");
+      }
+    } catch {
+      return new InvalidNumberAmountError("Invalid form of number");
     }
     if (new Dec(this.amount).lt(new Dec(0))) {
       return new NagativeAmountError("Amount is nagative");
     }
 
-    const balances = this.queryBalances.getQueryBech32Address(this.sender)
-      .balances;
-
-    const balance = balances.find(
-      (bal) => bal.currency.coinMinimalDenom === sendCurrency.coinMinimalDenom
-    );
-    if (!balance) {
+    const balance = this.queryBalances
+      .getQueryBech32Address(this.sender)
+      .getBalanceFromCurrency(this.sendCurrency);
+    const balanceDec = balance.toDec();
+    if (dec.gt(balanceDec)) {
       return new InsufficientAmountError("Insufficient amount");
-    } else {
-      const balanceDec = balance.balance.toDec();
-      if (dec.gt(balanceDec)) {
-        return new InsufficientAmountError("Insufficient amount");
-      }
     }
 
     return;
@@ -164,7 +216,8 @@ export const useAmountConfig = (
   queryBalances: ObservableQueryBalances
 ) => {
   const [txConfig] = useState(
-    () => new AmountConfig(chainGetter, chainId, sender, queryBalances)
+    () =>
+      new AmountConfig(chainGetter, chainId, sender, undefined, queryBalances)
   );
   txConfig.setChain(chainId);
   txConfig.setQueryBalances(queryBalances);

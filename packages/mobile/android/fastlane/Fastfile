@@ -1,0 +1,113 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  def set_version_code(number)
+    path = "../app/build.gradle"
+    re = /versionCode\s+(\d+)/
+
+    s = File.read(path)
+    s[re, 1] = (number).to_s
+
+    f = File.new(path, "w")
+    f.write(s)
+    f.close
+  end
+
+  def set_version(version)
+    re = /\d+.\d+.\d+/
+    version_nums = version[re, 0]
+
+    if version_nums.length != 5
+      UI.error("Invalid version #{version}")
+    end
+
+    path = "../app/build.gradle"
+    re = /versionName\s+("[\d.]+")/
+
+    s = File.read(path)
+    s[re, 1] = "\"#{version}\""
+
+    f = File.new(path, "w")
+    f.write(s)
+    f.close
+  end
+
+  lane :deploy_codepush do |options|
+    if options[:target_version]
+      target_version = options[:target_version]
+    else
+      target_version = prompt(text: "Enter the target version\n(Ex. 1.0.0): ")
+    end
+
+    re = /\d+.\d+.\d+/
+    version_nums = target_version[re, 0]
+
+    if version_nums.length != 5
+      UI.error("Invalid version #{target_version}")
+    end
+
+    UI.message("Code push will be deployed for Android #{target_version}")
+
+    sh("cd ../.. && appcenter codepush release-react -a #{ENV["ANDROID_APPCENTER_APP_NAME"]} -d Production -t #{target_version}")
+  end
+
+  desc "Deploy a new version to the Google Play"
+  lane :deploy do |options|
+    json_key = ENV["PLAYSTORE_JSON_KEY_FILE"]
+
+    if options[:version]
+      version = options[:version]
+    else
+      version = prompt(text: "Enter the version type or specific version\n(Ex. 1.0.0): ")
+    end
+
+    UI.message("Version will be #{version}")
+    set_version(version)
+
+    version_code = [
+      # google_play_track_version_codes[0],
+      google_play_track_version_codes(track: "beta", json_key: json_key)[0],
+      google_play_track_version_codes(track: "alpha", json_key: json_key)[0],
+      google_play_track_version_codes(track: "internal", json_key: json_key)[0],
+    ].max + 1
+    UI.message("Version code will be #{version_code}")
+    set_version_code(version_code)
+
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      print_command: false,
+      properties: {
+        "android.injected.signing.store.file" => ENV["ANDROID_APP_SIGNING"],
+        "android.injected.signing.store.password" => ENV["ANDROID_APP_SIGNING_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["ANDROID_APP_SIGNING_KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["ANDROID_APP_SIGNING_KEY_PASSWORD"],
+      },
+    )
+    upload_to_play_store(
+      track: "beta",
+      release_status: "draft",
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_screenshots: true,
+      skip_upload_images: true,
+      skip_upload_apk: true,
+      json_key: json_key
+    )
+  end
+end

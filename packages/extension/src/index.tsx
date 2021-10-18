@@ -55,6 +55,7 @@ import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router";
+import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 
 window.keplr = new Keplr(manifest.version, new InExtensionMessageRequester());
 
@@ -168,6 +169,11 @@ ReactDOM.render(
                   exact
                   path="/setting/address-book"
                   component={AddressBookPage}
+                />
+                <Route
+                  exact
+                  path="/setting/export-to-mobile"
+                  component={ExportToMobilePage}
                 />
                 <Route exact path="/setting/credit" component={CreditPage} />
                 <Route

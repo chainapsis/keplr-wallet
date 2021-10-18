@@ -1,5 +1,4 @@
 import assert from "assert";
-import "mocha";
 import { ProtoSignDocDecoder } from "./index";
 
 import { cosmos } from "../proto";

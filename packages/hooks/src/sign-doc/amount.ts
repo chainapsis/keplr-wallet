@@ -1,6 +1,10 @@
 import { IAmountConfig } from "../tx";
 import { TxChainSetter } from "../tx/chain";
-import { ChainGetter, CoinPrimitive, MsgOpts } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  CoinPrimitive,
+  CosmosMsgOpts,
+} from "@keplr-wallet/stores";
 import { AppCurrency } from "@keplr-wallet/types";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Coin, CoinPretty, Int } from "@keplr-wallet/unit";
@@ -17,7 +21,7 @@ export class SignDocAmountConfig
   extends TxChainSetter
   implements IAmountConfig {
   @observable.ref
-  protected msgOpts: MsgOpts;
+  protected msgOpts: CosmosMsgOpts;
 
   @observable.ref
   protected signDocHelper?: SignDocHelper = undefined;
@@ -25,7 +29,7 @@ export class SignDocAmountConfig
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
-    msgOpts: MsgOpts
+    msgOpts: CosmosMsgOpts
   ) {
     super(chainGetter, initialChainId);
 
@@ -35,7 +39,7 @@ export class SignDocAmountConfig
   }
 
   @action
-  setMsgOpts(opts: MsgOpts) {
+  setMsgOpts(opts: CosmosMsgOpts) {
     this.msgOpts = opts;
   }
 
@@ -176,6 +180,18 @@ export class SignDocAmountConfig
     return undefined;
   }
 
+  setIsMax(_: boolean): void {
+    // noop
+  }
+  toggleIsMax(): void {
+    // noop
+  }
+
+  get isMax(): boolean {
+    // noop
+    return false;
+  }
+
   setAmount(): void {
     // noop
   }
@@ -192,7 +208,7 @@ export class SignDocAmountConfig
 export const useSignDocAmountConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  msgOpts: MsgOpts
+  msgOpts: CosmosMsgOpts
 ) => {
   const [config] = useState(
     () => new SignDocAmountConfig(chainGetter, chainId, msgOpts)

@@ -100,6 +100,20 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
+            id: "setting.export-to-mobile",
+          })}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/export-to-mobile",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
+          title={intl.formatMessage({
             id: "setting.credit",
           })}
           onClick={() => {

@@ -2,21 +2,39 @@
   "name": "keplr",
   "description": "Keplr is a browser extension wallet for the Inter blockchain ecosystem.",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/@react-native-*/**",
+      "**/react-native",
+      "**/react-native/**",
+      "**/*-react-native",
+      "**/react-native-*",
+      "**/@react-navigation/**",
+      "**/expo-*",
+      "**/@unimodules/**",
+      "**/unimodules-*",
+      "**/native-base",
+      "**/@react-native-async-storage/async-storage",
+      "**/@ledgerhq/react-native-hw-transport-ble",
+      "**/jetifier"
+    ]
+  },
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
     "clean": "lerna run clean; rm -rf node_modules",
     "build": "lerna run build",
+    "build:libs": "lerna run build --ignore @keplr-wallet/extension",
+    "test": "lerna run test --parallel",
     "build:clean": "yarn clean && yarn install --frozen-lockfile && lerna run build",
-    "test": "lerna run test",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
     "ci": "yarn install --frozen-lockfile && yarn build && yarn test",
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
-    "ci-publish": "yarn clean && yarn install --frozen-lockfile && lerna run build --ignore @keplr/extension && lerna publish from-git --yes",
+    "ci-publish": "yarn clean && yarn install --frozen-lockfile && lerna run build --ignore @keplr-wallet/extension && lerna publish from-git --yes",
     "pre-commit": "lint-staged"
   },
   "pre-commit": [
@@ -32,6 +50,7 @@
   "author": "chainapsis",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/node": "^16.6.2",
     "@types/webpack": "^4.39.1",
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
@@ -49,11 +68,16 @@
     "prettier": "^2.2.1",
     "ts-loader": "^8.0.14",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.3"
+    "typescript": "^4.1.3",
+    "@types/jest": "^26.0.22",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.5"
   },
   "resolutions": {
+    "@types/react": "^16.14.4",
+    "@cosmjs/crypto": "^0.24.0-alpha.25",
+    "@iov/crypto": "2.1.0",
     "libsodium": "file:./etc/noop",
-    "libsodium-wrappers": "file:./etc/noop",
-    "@types/react": "^16.14.4"
+    "libsodium-wrappers": "file:./etc/noop"
   }
 }

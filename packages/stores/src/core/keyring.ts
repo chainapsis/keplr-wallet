@@ -11,7 +11,6 @@ import {
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
   GetIsKeyStoreCoinTypeSetMsg,
-  GetKeyRingTypeMsg,
   GetMultiKeyStoreInfoMsg,
   KeyRingStatus,
   LockKeyRingMsg,
@@ -20,6 +19,10 @@ import {
   SetKeyStoreCoinTypeMsg,
   ShowKeyRingMsg,
   UnlockKeyRingMsg,
+  KeyRing,
+  CheckPasswordMsg,
+  ExportKeyRingData,
+  ExportKeyRingDatasMsg,
 } from "@keplr-wallet/background";
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -124,15 +127,16 @@ export class KeyRingStore {
   status: KeyRingStatus = KeyRingStatus.NOTLOADED;
 
   @observable
-  keyRingType: string = "none";
-
-  @observable
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected = [];
 
   @observable.shallow
   protected selectablesMap: Map<string, KeyRingSelectablesStore> = new Map();
 
   constructor(
+    protected readonly eventDispatcher: {
+      dispatchEvent: (type: string) => void;
+    },
+    public readonly defaultKdf: "scrypt" | "sha256" | "pbkdf2",
     protected readonly chainGetter: ChainGetter,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
@@ -142,99 +146,117 @@ export class KeyRingStore {
     this.restore();
   }
 
+  @computed
+  get keyRingType(): string {
+    const keyStore = this.multiKeyStoreInfo.find(
+      (keyStore) => keyStore.selected
+    );
+
+    if (!keyStore) {
+      return "none";
+    } else {
+      return KeyRing.getTypeOfKeyStore(keyStore);
+    }
+  }
+
   @flow
   *createMnemonicKey(
     mnemonic: string,
     password: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
-    const msg = new CreateMnemonicKeyMsg(mnemonic, password, meta, bip44HDPath);
+    const msg = new CreateMnemonicKeyMsg(
+      kdf,
+      mnemonic,
+      password,
+      meta,
+      bip44HDPath
+    );
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
-
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
   @flow
   *createPrivateKey(
     privateKey: Uint8Array,
     password: string,
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
-    const msg = new CreatePrivateKeyMsg(privateKey, password, meta);
+    const msg = new CreatePrivateKeyMsg(kdf, privateKey, password, meta);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
-
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
   @flow
   *createLedgerKey(
     password: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
-    const msg = new CreateLedgerKeyMsg(password, meta, bip44HDPath);
+    const msg = new CreateLedgerKeyMsg(kdf, password, meta, bip44HDPath);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
-
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
   @flow
   *addMnemonicKey(
     mnemonic: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
-    const msg = new AddMnemonicKeyMsg(mnemonic, meta, bip44HDPath);
-    this.multiKeyStoreInfo = yield* toGenerator(
+    const msg = new AddMnemonicKeyMsg(kdf, mnemonic, meta, bip44HDPath);
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    )).multiKeyStoreInfo;
   }
 
   @flow
-  *addPrivateKey(privateKey: Uint8Array, meta: Record<string, string>) {
-    const msg = new AddPrivateKeyMsg(privateKey, meta);
-    this.multiKeyStoreInfo = yield* toGenerator(
+  *addPrivateKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string>,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
+  ) {
+    const msg = new AddPrivateKeyMsg(kdf, privateKey, meta);
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    )).multiKeyStoreInfo;
   }
 
   @flow
-  *addLedgerKey(meta: Record<string, string>, bip44HDPath: BIP44HDPath) {
-    const msg = new AddLedgerKeyMsg(meta, bip44HDPath);
-    this.multiKeyStoreInfo = yield* toGenerator(
+  *addLedgerKey(
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
+  ) {
+    const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath);
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    )).multiKeyStoreInfo;
   }
 
   @flow
   *changeKeyRing(index: number) {
     const msg = new ChangeKeyRingMsg(index);
-    this.multiKeyStoreInfo = yield* toGenerator(
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    )).multiKeyStoreInfo;
 
     // Emit the key store changed event manually.
-    window.dispatchEvent(new Event("keplr_keystorechange"));
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
@@ -260,7 +282,8 @@ export class KeyRingStore {
       yield this.interactionStore.approve("unlock", interaction.id, {});
     }
 
-    window.dispatchEvent(new Event("keplr_keystoreunlock"));
+    this.eventDispatcher.dispatchEvent("keplr_keystoreunlock");
+    this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
   @flow
@@ -275,18 +298,19 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
-    this.keyRingType = result.type;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
   }
 
-  @flow
-  *showKeyRing(index: number, password: string) {
+  async showKeyRing(index: number, password: string) {
     const msg = new ShowKeyRingMsg(index, password);
-    return yield this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   @flow
   *deleteKeyRing(index: number, password: string) {
+    const selectedIndex = this.multiKeyStoreInfo.findIndex(
+      (keyStore) => keyStore.selected
+    );
     const msg = new DeleteKeyRingMsg(index, password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
@@ -294,10 +318,11 @@ export class KeyRingStore {
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
 
-    // Possibly, key ring can be changed if deleting key store was selected one.
-    this.keyRingType = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetKeyRingTypeMsg())
-    );
+    // Selected keystore may be changed if the selected one is deleted.
+    if (selectedIndex === index) {
+      this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+      this.selectablesMap.forEach((selectables) => selectables.refresh());
+    }
   }
 
   @flow
@@ -306,15 +331,21 @@ export class KeyRingStore {
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
     const selectedIndex = this.multiKeyStoreInfo.findIndex(
       (keyStore) => keyStore.selected
     );
     // If selectedIndex and index are same, name could be changed, so dispatch keystore event
     if (selectedIndex === index) {
-      window.dispatchEvent(new Event("keplr_keystorechange"));
+      this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     }
+  }
+
+  async checkPassword(password: string): Promise<boolean> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new CheckPasswordMsg(password)
+    );
   }
 
   getKeyStoreSelectables(chainId: string): KeyRingSelectablesStore {
@@ -347,14 +378,21 @@ export class KeyRingStore {
       )
     );
 
-    this.multiKeyStoreInfo = yield* toGenerator(
+    this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetMultiKeyStoreInfoMsg())
-    );
+    )).multiKeyStoreInfo;
 
     this.status = status;
 
     // Emit the key store changed event manually.
-    window.dispatchEvent(new Event("keplr_keystorechange"));
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     this.selectablesMap.forEach((selectables) => selectables.refresh());
+  }
+
+  async exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new ExportKeyRingDatasMsg(password)
+    );
   }
 }

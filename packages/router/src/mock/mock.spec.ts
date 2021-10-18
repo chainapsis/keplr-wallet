@@ -1,5 +1,4 @@
 import assert from "assert";
-import "mocha";
 import { Message } from "../message";
 import { MockRouter, Router } from "../router";
 import { MockEnv } from "../env";
@@ -63,7 +62,7 @@ describe("Test message permission", () => {
   );
 
   let router: Router | undefined;
-  before(() => {
+  beforeEach(() => {
     // Init router for mocking.
     router = new MockRouter(new MockEnv(mockId, mockUrl).envProducer());
     router.addGuard(MockGuards.checkOriginIsValid);
@@ -78,7 +77,7 @@ describe("Test message permission", () => {
     router.listen(port);
   });
 
-  after(() => {
+  afterEach(() => {
     if (router) {
       router.unlisten();
     }

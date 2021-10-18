@@ -1,5 +1,6 @@
 import bigInteger from "big-integer";
 import { Int } from "./int";
+import { CoinUtils } from "./coin-utils";
 
 export class Dec {
   public static readonly precision: bigInteger.BigInteger = bigInteger(18);
@@ -270,7 +271,7 @@ export class Dec {
     const integerStr = locale
       ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        BigInt(integer.toString()).toLocaleString("en-US")
+        CoinUtils.integerStringToUSLocaleString(integer.toString())
       : integer.toString();
 
     return `${isNegative ? "-" : ""}${integerStr}${

@@ -67,19 +67,17 @@ export class ChainUpdaterService {
       baseURL: chainInfo.rpc,
     });
 
-    // Get the latest block.
+    // Get the status to get the chain id.
     const result = await instance.get<{
       result: {
-        block: {
-          header: {
-            chain_id: string;
-          };
+        node_info: {
+          network: string;
         };
       };
-    }>("/block");
+    }>("/status");
 
     const currentVersion = ChainIdHelper.parse(chainInfo.chainId);
-    const fetchedChainId = result.data.result.block.header.chain_id;
+    const fetchedChainId = result.data.result.node_info.network;
     const fetchedVersion = ChainIdHelper.parse(fetchedChainId);
 
     if (
@@ -207,18 +205,16 @@ export class ChainUpdaterService {
       baseURL: chainInfo.rpc,
     });
 
-    // Get the latest block.
+    // Get the status to get the chain id.
     const result = await instance.get<{
       result: {
-        block: {
-          header: {
-            chain_id: string;
-          };
+        node_info: {
+          network: "osmosis-1";
         };
       };
-    }>("/block");
+    }>("/status");
 
-    const resultChainId = result.data.result.block.header.chain_id;
+    const resultChainId = result.data.result.node_info.network;
 
     const version = ChainIdHelper.parse(chainId);
     const fetchedVersion = ChainIdHelper.parse(resultChainId);

@@ -63,6 +63,14 @@ import {
   PERSISTENCE_RPC_CONFIG,
   PERSISTENCE_REST_ENDPOINT,
   PERSISTENCE_REST_CONFIG,
+  IXO_RPC_ENDPOINT,
+  IXO_RPC_CONFIG,
+  IXO_REST_ENDPOINT,
+  IXO_REST_CONFIG,
+  EMONEY_RPC_ENDPOINT,
+  EMONEY_RPC_CONFIG,
+  EMONEY_REST_ENDPOINT,
+  EMONEY_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -82,11 +90,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/cosmoshub/stake"
-        : "http://localhost:8081/#/cosmoshub/stake",
+        : "http://localhost:8080/#/cosmoshub/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/cosmoshub/stake"
-        : "http://localhost:8081/#/cosmoshub/stake",
+        : "http://localhost:8080/#/cosmoshub/stake",
     bip44: {
       coinType: 118,
     },
@@ -130,7 +138,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/osmosis/stake"
-        : "http://localhost:8081/#/osmosis/stake",
+        : "http://localhost:8080/#/osmosis/stake",
     bip44: { coinType: 118 },
     bech32Config: Bech32Address.defaultBech32Config("osmo"),
     currencies: [
@@ -157,8 +165,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0,
-      average: 0.025,
-      high: 0.035,
+      average: 0,
+      high: 0.025,
     },
     features: ["stargate", "ibc-transfer"],
   },
@@ -167,7 +175,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: SECRET_NETWORK_RPC_CONFIG,
     rest: SECRET_NETWORK_REST_ENDPOINT,
     restConfig: SECRET_NETWORK_REST_CONFIG,
-    chainId: "secret-2",
+    chainId: "secret-3",
     chainName: "Secret Network",
     stakeCurrency: {
       coinDenom: "SCRT",
@@ -178,11 +186,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/secret/stake"
-        : "http://localhost:8081/#/secret/stake",
+        : "http://localhost:8080/#/secret/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/secret/stake"
-        : "http://localhost:8081/#/secret/stake",
+        : "http://localhost:8080/#/secret/stake",
     bip44: {
       coinType: 529,
     },
@@ -232,11 +240,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/akashnet/stake"
-        : "http://localhost:8081/#/akashnet/stake",
+        : "http://localhost:8080/#/akashnet/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/akashnet/stake"
-        : "http://localhost:8081/#/akashnet/stake",
+        : "http://localhost:8080/#/akashnet/stake",
     bip44: {
       coinType: 118,
     },
@@ -275,11 +283,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/crypto-org/stake"
-        : "http://localhost:8081/#/crypto-org/stake",
+        : "http://localhost:8080/#/crypto-org/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/crypto-org/stake"
-        : "http://localhost:8081/#/crypto-org/stake",
+        : "http://localhost:8080/#/crypto-org/stake",
     bip44: {
       coinType: 394,
     },
@@ -323,11 +331,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/iov-mainnet/stake"
-        : "http://localhost:8081/#/iov-mainnet/stake",
+        : "http://localhost:8080/#/iov-mainnet/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/iov-mainnet/stake"
-        : "http://localhost:8081/#/iov-mainnet/stake",
+        : "http://localhost:8080/#/iov-mainnet/stake",
     bip44: {
       coinType: 234,
     },
@@ -371,11 +379,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/sifchain/stake"
-        : "http://localhost:8081/#/sifchain/stake",
+        : "http://localhost:8080/#/sifchain/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/sifchain/stake"
-        : "http://localhost:8081/#/sifchain/stake",
+        : "http://localhost:8080/#/sifchain/stake",
     bip44: {
       coinType: 118,
     },
@@ -683,7 +691,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: CERTIK_RPC_CONFIG,
     rest: CERTIK_REST_ENDPOINT,
     restConfig: CERTIK_REST_CONFIG,
-    chainId: "shentu-1",
+    chainId: "shentu-2.2",
     chainName: "Certik",
     stakeCurrency: {
       coinDenom: "CTK",
@@ -694,11 +702,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/shentu/stake"
-        : "http://localhost:8081/#/shentu/stake",
+        : "http://localhost:8080/#/shentu/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/shentu/stake"
-        : "http://localhost:8081/#/shentu/stake",
+        : "http://localhost:8080/#/shentu/stake",
     bip44: {
       coinType: 118,
     },
@@ -719,6 +727,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "certik",
       },
     ],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: IRIS_RPC_ENDPOINT,
@@ -736,11 +745,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/irishub/stake"
-        : "http://localhost:8081/#/irishub/stake",
+        : "http://localhost:8080/#/irishub/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/irishub/stake"
-        : "http://localhost:8081/#/irishub/stake",
+        : "http://localhost:8080/#/irishub/stake",
     bip44: {
       coinType: 118,
     },
@@ -784,15 +793,16 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "REGEN",
       coinMinimalDenom: "uregen",
       coinDecimals: 6,
+      coinGeckoId: "regen",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/regen/stake"
-        : "http://localhost:8081/#/regen/stake",
+        : "http://localhost:8080/#/regen/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/regen/stake"
-        : "http://localhost:8081/#/regen/stake",
+        : "http://localhost:8080/#/regen/stake",
     bip44: {
       coinType: 118,
     },
@@ -802,6 +812,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "REGEN",
         coinMinimalDenom: "uregen",
         coinDecimals: 6,
+        coinGeckoId: "regen",
       },
     ],
     feeCurrencies: [
@@ -809,13 +820,9 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "REGEN",
         coinMinimalDenom: "uregen",
         coinDecimals: 6,
+        coinGeckoId: "regen",
       },
     ],
-    gasPriceStep: {
-      low: 0,
-      average: 0.025,
-      high: 0.04,
-    },
     features: ["stargate"],
   },
   {
@@ -834,11 +841,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/core/stake"
-        : "http://localhost:8081/#/core/stake",
+        : "http://localhost:8080/#/core/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/core/stake"
-        : "http://localhost:8081/#/core/stake",
+        : "http://localhost:8080/#/core/stake",
     bip44: {
       coinType: 750,
     },
@@ -859,6 +866,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "persistence",
       },
     ],
+    gasPriceStep: {
+      low: 0,
+      average: 0.025,
+      high: 0.04,
+    },
     features: ["stargate", "ibc-transfer"],
   },
   {
@@ -877,11 +889,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/sentinel/stake"
-        : "http://localhost:8081/#/sentinel/stake",
+        : "http://localhost:8080/#/sentinel/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/sentinel/stake"
-        : "http://localhost:8081/#/sentinel/stake",
+        : "http://localhost:8080/#/sentinel/stake",
     bip44: {
       coinType: 118,
     },
@@ -909,13 +921,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     features: ["stargate", "ibc-transfer"],
   },
-
   {
     rpc: KAVA_RPC_ENDPOINT,
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-7",
+    chainId: "kava-8",
     chainName: "Kava",
     stakeCurrency: {
       coinDenom: "KAVA",
@@ -926,11 +937,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/kava/stake"
-        : "http://localhost:8081/#/kava/stake",
+        : "http://localhost:8080/#/kava/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/kava/stake"
-        : "http://localhost:8081/#/kava/stake",
+        : "http://localhost:8080/#/kava/stake",
     bip44: { coinType: 459 },
     alternativeBIP44s: [{ coinType: 118 }],
     bech32Config: Bech32Address.defaultBech32Config("kava"),
@@ -953,6 +964,99 @@ export const EmbedChainInfos: ChainInfo[] = [
     coinType: 459,
   },
   {
+    rpc: IXO_RPC_ENDPOINT,
+    rpcConfig: IXO_RPC_CONFIG,
+    rest: IXO_REST_ENDPOINT,
+    restConfig: IXO_REST_CONFIG,
+    chainId: "impacthub-3",
+    chainName: "ixo",
+    stakeCurrency: {
+      coinDenom: "IXO",
+      coinMinimalDenom: "uixo",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/impacthub/stake"
+        : "http://localhost:8080/#/impacthub/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/impacthub/stake"
+        : "http://localhost:8080/#/impacthub/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("ixo"),
+    currencies: [
+      {
+        coinDenom: "IXO",
+        coinMinimalDenom: "uixo",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IXO",
+        coinMinimalDenom: "uixo",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate"],
+  },
+  {
+    rpc: EMONEY_RPC_ENDPOINT,
+    rpcConfig: EMONEY_RPC_CONFIG,
+    rest: EMONEY_REST_ENDPOINT,
+    restConfig: EMONEY_REST_CONFIG,
+    chainId: "emoney-3",
+    chainName: "e-Money",
+    stakeCurrency: {
+      coinDenom: "NGM",
+      coinMinimalDenom: "ungm",
+      coinDecimals: 6,
+      coinGeckoId: "e-money",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/emoney/stake"
+        : "http://localhost:8080/#/emoney/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/emoney/stake"
+        : "http://localhost:8080/#/emoney/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("emoney"),
+    currencies: [
+      {
+        coinDenom: "NGM",
+        coinMinimalDenom: "ungm",
+        coinDecimals: 6,
+        coinGeckoId: "e-money",
+      },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "NGM",
+        coinMinimalDenom: "ungm",
+        coinDecimals: 6,
+        coinGeckoId: "e-money",
+      },
+    ],
+    gasPriceStep: {
+      low: 1,
+      average: 1,
+      high: 1,
+    },
+    features: ["stargate", "ibc-transfer"],
+  },
+  {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
     rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,
     rest: BETA_CYBER_NETWORK_REST_ENDPOINT,
@@ -967,11 +1071,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/euler/stake"
-        : "http://localhost:8081/#/euler/stake",
+        : "http://localhost:8080/#/euler/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/euler/stake"
-        : "http://localhost:8081/#/euler/stake",
+        : "http://localhost:8080/#/euler/stake",
     bip44: {
       coinType: 118,
     },
@@ -1001,11 +1105,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrl:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/straightedge/stake"
-        : "http://localhost:8081/#/straightedge/stake",
+        : "http://localhost:8080/#/straightedge/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/#/straightedge/stake"
-        : "http://localhost:8081/#/straightedge/stake",
+        : "http://localhost:8080/#/straightedge/stake",
     bip44: {
       coinType: 118,
     },

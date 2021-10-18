@@ -27,3 +27,7 @@ Refer to the [Keplr Example repository](https://github.com/chainapsis/keplr-exam
 
 * Twitter: [@chainapsis](https://twitter.com/chainapsis)
 * Github: [@chainapsis](https://github.com/chainapsis)
+
+## License
+##### Keplr Mobile License
+Copyright (c) 2021 Chainapsis Inc. All rights reserved.

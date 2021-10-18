@@ -60,10 +60,11 @@ const TokenView: FunctionComponent<{
     if ("type" in balance.currency && balance.currency.type === "secret20") {
       const contractAddress = balance.currency.contractAddress;
       return new Promise((resolve) => {
-        accountInfo
+        accountInfo.secret
           .createSecret20ViewingKey(
             contractAddress,
             "",
+            {},
             {},
             (_, viewingKey) => {
               loadingIndicator.setIsLoading("create-veiwing-key", false);
@@ -199,8 +200,7 @@ export const TokensView: FunctionComponent = observer(() => {
 
   const tokens = queriesStore
     .get(chainStore.current.chainId)
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address)
+    .queryBalances.getQueryBech32Address(accountInfo.bech32Address)
     .unstakables.filter((bal) => {
       // Temporary implementation for trimming the 0 balanced native tokens.
       // TODO: Remove this part.

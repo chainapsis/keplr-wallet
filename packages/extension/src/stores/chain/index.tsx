@@ -1,6 +1,9 @@
 import { observable, action, computed, makeObservable, flow } from "mobx";
 
-import { ChainStore as BaseChainStore } from "@keplr-wallet/stores";
+import {
+  ChainInfoInner,
+  ChainStore as BaseChainStore,
+} from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
 import {
@@ -59,7 +62,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   }
 
   @computed
-  get current(): ChainInfoWithEmbed {
+  get current(): ChainInfoInner<ChainInfoWithEmbed> {
     if (this.hasChain(this.selectedChainId)) {
       return this.getChain(this.selectedChainId);
     }

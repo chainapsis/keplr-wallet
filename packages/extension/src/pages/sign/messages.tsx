@@ -11,7 +11,7 @@ import { useStore } from "../../stores";
 import yaml from "js-yaml";
 
 import { Buffer } from "buffer/";
-import { AccountStore, CoinPrimitive } from "@keplr-wallet/stores";
+import { CoinPrimitive } from "@keplr-wallet/stores";
 
 export interface MessageObj {
   readonly type: string;
@@ -510,7 +510,7 @@ export const WasmExecutionMsgView: FunctionComponent<{
   // eslint-disable-next-line @typescript-eslint/ban-types
   msg: object | string;
 }> = observer(({ msg }) => {
-  const { chainStore } = useStore();
+  const { chainStore, accountStore } = useStore();
 
   const [isOpen, setIsOpen] = useState(true);
   const intl = useIntl();
@@ -535,7 +535,9 @@ export const WasmExecutionMsgView: FunctionComponent<{
           const nonce = cipherText.slice(0, 32);
           cipherText = cipherText.slice(64);
 
-          const keplr = await AccountStore.getKeplr();
+          const keplr = await accountStore
+            .getAccount(chainStore.current.chainId)
+            .getKeplr();
           if (!keplr) {
             throw new Error("Can't get the keplr API");
           }
@@ -611,7 +613,7 @@ export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {
   );
 };
 
-function clearDecimals(dec: string): string {
+export function clearDecimals(dec: string): string {
   if (!dec.includes(".")) {
     return dec;
   }

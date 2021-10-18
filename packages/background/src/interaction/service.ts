@@ -26,7 +26,7 @@ export class InteractionService {
 
   // Dispatch the event to the frontend. Don't wait any interaction.
   // And, don't ensure that the event is delivered successfully, just ignore the any errors.
-  async dispatchEvent(port: string, type: string, data: unknown) {
+  dispatchEvent(port: string, type: string, data: unknown) {
     if (!type) {
       throw new Error("Type should not be empty");
     }
@@ -36,11 +36,9 @@ export class InteractionService {
       data,
     });
 
-    try {
-      await this.eventMsgRequester.sendMessage(port, msg);
-    } catch (e) {
+    this.eventMsgRequester.sendMessage(port, msg).catch((e) => {
       console.log(`Failed to send the event to ${port}: ${e.message}`);
-    }
+    });
   }
 
   async waitApprove(
@@ -55,7 +53,11 @@ export class InteractionService {
     }
 
     // TODO: Add timeout?
-    const interactionWaitingData = await this.addDataToMap(type, data);
+    const interactionWaitingData = await this.addDataToMap(
+      type,
+      env.isInternalMsg,
+      data
+    );
 
     const msg = new PushInteractionDataMsg(interactionWaitingData);
 
@@ -85,6 +87,8 @@ export class InteractionService {
       this.resolverMap.get(id)!.onApprove(result);
       this.resolverMap.delete(id);
     }
+
+    this.removeDataFromMap(id);
   }
 
   reject(id: string) {
@@ -93,10 +97,13 @@ export class InteractionService {
       this.resolverMap.get(id)!.onReject(new Error("Request rejected"));
       this.resolverMap.delete(id);
     }
+
+    this.removeDataFromMap(id);
   }
 
   protected async addDataToMap(
     type: string,
+    isInternal: boolean,
     data: unknown
   ): Promise<InteractionWaitingData> {
     const bytes = new Uint8Array(8);
@@ -109,6 +116,7 @@ export class InteractionService {
     const interactionWaitingData: InteractionWaitingData = {
       id,
       type,
+      isInternal,
       data,
     };
 

@@ -1,5 +1,4 @@
 import assert from "assert";
-import "mocha";
 import { Mnemonic } from "./mnemonic";
 import { PrivKeySecp256k1 } from "./key";
 import { Bech32Address } from "@keplr-wallet/cosmos";

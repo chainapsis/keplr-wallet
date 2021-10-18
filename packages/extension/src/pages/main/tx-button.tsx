@@ -87,13 +87,13 @@ const DepositModal: FunctionComponent<{
 };
 
 export const TxButtonView: FunctionComponent = observer(() => {
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
-  const queryBalances = queries
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const queryBalances = queries.queryBalances.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   const [isDepositOpen, setIsDepositOpen] = useState(false);
 
@@ -124,6 +124,10 @@ export const TxButtonView: FunctionComponent = observer(() => {
         outline
         onClick={(e) => {
           e.preventDefault();
+          analyticsStore.logEvent("Deposit button clicked", {
+            chainId: chainStore.current.chainId,
+            chainName: chainStore.current.chainName,
+          });
 
           setIsDepositOpen(true);
         }}
@@ -145,6 +149,10 @@ export const TxButtonView: FunctionComponent = observer(() => {
         data-loading={accountInfo.isSendingMsg === "send"}
         onClick={(e) => {
           e.preventDefault();
+          analyticsStore.logEvent("Send token started", {
+            chainId: chainStore.current.chainId,
+            chainName: chainStore.current.chainName,
+          });
 
           if (hasAssets) {
             history.push("/send");

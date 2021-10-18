@@ -1,0 +1,13 @@
+{
+  "name": "keplr-standard-web-crypto",
+  "version": "0.0.1",
+  "description": "A partial implementation of the W3C Crypto API for Expo",
+  "main": "index.js",
+  "sideEffects": false,
+  "dependencies": {
+    "expo-random": "^11.0.0",
+    "create-hash": "^1.2.0",
+    "create-hmac": "^1.1.7",
+    "browserify-cipher": "^1.0.1"
+  }
+}

@@ -1,4 +1,30 @@
+import { Buffer } from "buffer/";
+import { Hash } from "@keplr-wallet/crypto";
+
 export class DenomHelper {
+  static ibcDenom(
+    paths: {
+      portId: string;
+      channelId: string;
+    }[],
+    coinMinimalDenom: string
+  ): string {
+    const prefixes: string[] = [];
+    for (const path of paths) {
+      prefixes.push(`${path.portId}/${path.channelId}`);
+    }
+
+    const prefix = prefixes.join("/");
+    const denom = `${prefix}/${coinMinimalDenom}`;
+
+    return (
+      "ibc/" +
+      Buffer.from(Hash.sha256(Buffer.from(denom)))
+        .toString("hex")
+        .toUpperCase()
+    );
+  }
+
   protected readonly _type: string;
   protected readonly _contractAddress: string;
 

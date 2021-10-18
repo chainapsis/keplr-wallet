@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>571182425378-nhiicj2ct6e9j1emf9h9s53afh32l08k.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.571182425378-nhiicj2ct6e9j1emf9h9s53afh32l08k</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDF-Aq0WmEfedhMn8kDWcJwSCUlwJt4LQU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>571182425378</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.chainapsis.keplr</string>
+	<key>PROJECT_ID</key>
+	<string>keplr-main</string>
+	<key>STORAGE_BUCKET</key>
+	<string>keplr-main.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<true/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<true/>
+	<key>FIREBASE_ANALYTICS_COLLECTION_DEACTIVATE</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:571182425378:ios:60f9c50c1efcd2f278717b</string>
+</dict>
+</plist>

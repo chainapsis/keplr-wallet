@@ -1,7 +1,13 @@
 import { IRecipientConfig } from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
-import { action, makeObservable, observable, runInAction } from "mobx";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import {
   EmptyAddressError,
   ENSFailedToFetchError,
@@ -20,12 +26,30 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @observable
   protected _ensEndpoint: string | undefined = undefined;
 
+  @observable
+  protected _bech32Prefix: string | undefined = undefined;
+
   @observable.shallow
   protected ensFetcherMap: Map<string, ObservableEnsFetcher> = new Map();
 
   constructor(chainGetter: ChainGetter, initialChainId: string) {
     super(chainGetter, initialChainId);
+
     makeObservable(this);
+  }
+
+  @computed
+  get bech32Prefix(): string {
+    if (!this._bech32Prefix) {
+      return this.chainInfo.bech32Config.bech32PrefixAccAddr;
+    }
+
+    return this._bech32Prefix;
+  }
+
+  @action
+  setBech32Prefix(prefix: string) {
+    this._bech32Prefix = prefix;
   }
 
   get recipient(): string {
@@ -45,7 +69,7 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
         }
 
         return new Bech32Address(ensFetcher.address).toBech32(
-          this.chainInfo.bech32Config.bech32PrefixAccAddr
+          this.bech32Prefix
         );
       } else {
         // Can't try to fetch the ENS.
@@ -111,9 +135,8 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
       return;
     }
 
-    const bech32Prefix = this.chainInfo.bech32Config.bech32PrefixAccAddr;
     try {
-      Bech32Address.validate(this.recipient, bech32Prefix);
+      Bech32Address.validate(this.recipient, this.bech32Prefix);
     } catch (e) {
       return new InvalidBech32Error(
         `Invalid bech32: ${e.message || e.toString()}`

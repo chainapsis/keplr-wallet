@@ -44,7 +44,13 @@ export const SendPage: FunctionComponent = observer(() => {
 
   const notification = useNotification();
 
-  const { chainStore, accountStore, priceStore, queriesStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    priceStore,
+    queriesStore,
+    analyticsStore,
+  } = useStore();
   const current = chainStore.current;
 
   const accountInfo = accountStore.getAccount(current.chainId);
@@ -54,7 +60,7 @@ export const SendPage: FunctionComponent = observer(() => {
     current.chainId,
     accountInfo.msgOpts.send,
     accountInfo.bech32Address,
-    queriesStore.get(current.chainId).getQueryBalances(),
+    queriesStore.get(current.chainId).queryBalances,
     EthereumEndpoint
   );
 
@@ -105,6 +111,15 @@ export const SendPage: FunctionComponent = observer(() => {
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
+                },
+                (tx: any) => {
+                  const isSuccess = tx.code == null || tx.code === 0;
+                  analyticsStore.logEvent("Send token finished", {
+                    chainId: chainStore.current.chainId,
+                    chainName: chainStore.current.chainName,
+                    feeType: sendConfigs.feeConfig.feeType,
+                    isSuccess,
+                  });
                 }
               );
               history.replace("/");
@@ -133,7 +148,6 @@ export const SendPage: FunctionComponent = observer(() => {
             />
             <CoinInput
               amountConfig={sendConfigs.amountConfig}
-              feeConfig={sendConfigs.feeConfig}
               label={intl.formatMessage({ id: "send.input.amount" })}
               balanceText={intl.formatMessage({
                 id: "send.input-button.balance",
