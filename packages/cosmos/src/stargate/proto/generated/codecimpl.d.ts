@@ -3841,6 +3841,313 @@ export namespace google {
     }
 }
 
+/** Namespace ibc. */
+export namespace ibc {
+
+    /** Namespace applications. */
+    namespace applications {
+
+        /** Namespace transfer. */
+        namespace transfer {
+
+            /** Namespace v1. */
+            namespace v1 {
+
+                /** Represents a Msg */
+                class Msg extends $protobuf.rpc.Service {
+
+                    /**
+                     * Constructs a new Msg service.
+                     * @param rpcImpl RPC implementation
+                     * @param [requestDelimited=false] Whether requests are length-delimited
+                     * @param [responseDelimited=false] Whether responses are length-delimited
+                     */
+                    constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
+
+                    /**
+                     * Creates new Msg service using the specified rpc implementation.
+                     * @param rpcImpl RPC implementation
+                     * @param [requestDelimited=false] Whether requests are length-delimited
+                     * @param [responseDelimited=false] Whether responses are length-delimited
+                     * @returns RPC service. Useful where requests and/or responses are streamed.
+                     */
+                    public static create(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean): Msg;
+
+                    /**
+                     * Calls Transfer.
+                     * @param request MsgTransfer message or plain object
+                     * @param callback Node-style callback called with the error, if any, and MsgTransferResponse
+                     */
+                    public transfer(request: ibc.applications.transfer.v1.IMsgTransfer, callback: ibc.applications.transfer.v1.Msg.TransferCallback): void;
+
+                    /**
+                     * Calls Transfer.
+                     * @param request MsgTransfer message or plain object
+                     * @returns Promise
+                     */
+                    public transfer(request: ibc.applications.transfer.v1.IMsgTransfer): Promise<ibc.applications.transfer.v1.MsgTransferResponse>;
+                }
+
+                namespace Msg {
+
+                    /**
+                     * Callback as used by {@link ibc.applications.transfer.v1.Msg#transfer}.
+                     * @param error Error, if any
+                     * @param [response] MsgTransferResponse
+                     */
+                    type TransferCallback = (error: (Error|null), response?: ibc.applications.transfer.v1.MsgTransferResponse) => void;
+                }
+
+                /** Properties of a MsgTransfer. */
+                interface IMsgTransfer {
+
+                    /** MsgTransfer sourcePort */
+                    sourcePort?: (string|null);
+
+                    /** MsgTransfer sourceChannel */
+                    sourceChannel?: (string|null);
+
+                    /** MsgTransfer token */
+                    token?: (cosmos.base.v1beta1.ICoin|null);
+
+                    /** MsgTransfer sender */
+                    sender?: (string|null);
+
+                    /** MsgTransfer receiver */
+                    receiver?: (string|null);
+
+                    /** MsgTransfer timeoutHeight */
+                    timeoutHeight?: (ibc.core.client.v1.IHeight|null);
+
+                    /** MsgTransfer timeoutTimestamp */
+                    timeoutTimestamp?: (Long|null);
+                }
+
+                /** Represents a MsgTransfer. */
+                class MsgTransfer implements IMsgTransfer {
+
+                    /**
+                     * Constructs a new MsgTransfer.
+                     * @param [p] Properties to set
+                     */
+                    constructor(p?: ibc.applications.transfer.v1.IMsgTransfer);
+
+                    /** MsgTransfer sourcePort. */
+                    public sourcePort: string;
+
+                    /** MsgTransfer sourceChannel. */
+                    public sourceChannel: string;
+
+                    /** MsgTransfer token. */
+                    public token?: (cosmos.base.v1beta1.ICoin|null);
+
+                    /** MsgTransfer sender. */
+                    public sender: string;
+
+                    /** MsgTransfer receiver. */
+                    public receiver: string;
+
+                    /** MsgTransfer timeoutHeight. */
+                    public timeoutHeight?: (ibc.core.client.v1.IHeight|null);
+
+                    /** MsgTransfer timeoutTimestamp. */
+                    public timeoutTimestamp: Long;
+
+                    /**
+                     * Creates a new MsgTransfer instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns MsgTransfer instance
+                     */
+                    public static create(properties?: ibc.applications.transfer.v1.IMsgTransfer): ibc.applications.transfer.v1.MsgTransfer;
+
+                    /**
+                     * Encodes the specified MsgTransfer message. Does not implicitly {@link ibc.applications.transfer.v1.MsgTransfer.verify|verify} messages.
+                     * @param m MsgTransfer message or plain object to encode
+                     * @param [w] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(m: ibc.applications.transfer.v1.IMsgTransfer, w?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes a MsgTransfer message from the specified reader or buffer.
+                     * @param r Reader or buffer to decode from
+                     * @param [l] Message length if known beforehand
+                     * @returns MsgTransfer
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): ibc.applications.transfer.v1.MsgTransfer;
+
+                    /**
+                     * Creates a MsgTransfer message from a plain object. Also converts values to their respective internal types.
+                     * @param d Plain object
+                     * @returns MsgTransfer
+                     */
+                    public static fromObject(d: { [k: string]: any }): ibc.applications.transfer.v1.MsgTransfer;
+
+                    /**
+                     * Creates a plain object from a MsgTransfer message. Also converts values to other types if specified.
+                     * @param m MsgTransfer
+                     * @param [o] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(m: ibc.applications.transfer.v1.MsgTransfer, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this MsgTransfer to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of a MsgTransferResponse. */
+                interface IMsgTransferResponse {
+                }
+
+                /** Represents a MsgTransferResponse. */
+                class MsgTransferResponse implements IMsgTransferResponse {
+
+                    /**
+                     * Constructs a new MsgTransferResponse.
+                     * @param [p] Properties to set
+                     */
+                    constructor(p?: ibc.applications.transfer.v1.IMsgTransferResponse);
+
+                    /**
+                     * Creates a new MsgTransferResponse instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns MsgTransferResponse instance
+                     */
+                    public static create(properties?: ibc.applications.transfer.v1.IMsgTransferResponse): ibc.applications.transfer.v1.MsgTransferResponse;
+
+                    /**
+                     * Encodes the specified MsgTransferResponse message. Does not implicitly {@link ibc.applications.transfer.v1.MsgTransferResponse.verify|verify} messages.
+                     * @param m MsgTransferResponse message or plain object to encode
+                     * @param [w] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(m: ibc.applications.transfer.v1.IMsgTransferResponse, w?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes a MsgTransferResponse message from the specified reader or buffer.
+                     * @param r Reader or buffer to decode from
+                     * @param [l] Message length if known beforehand
+                     * @returns MsgTransferResponse
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): ibc.applications.transfer.v1.MsgTransferResponse;
+
+                    /**
+                     * Creates a MsgTransferResponse message from a plain object. Also converts values to their respective internal types.
+                     * @param d Plain object
+                     * @returns MsgTransferResponse
+                     */
+                    public static fromObject(d: { [k: string]: any }): ibc.applications.transfer.v1.MsgTransferResponse;
+
+                    /**
+                     * Creates a plain object from a MsgTransferResponse message. Also converts values to other types if specified.
+                     * @param m MsgTransferResponse
+                     * @param [o] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(m: ibc.applications.transfer.v1.MsgTransferResponse, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this MsgTransferResponse to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+            }
+        }
+    }
+
+    /** Namespace core. */
+    namespace core {
+
+        /** Namespace client. */
+        namespace client {
+
+            /** Namespace v1. */
+            namespace v1 {
+
+                /** Properties of an Height. */
+                interface IHeight {
+
+                    /** Height revisionNumber */
+                    revisionNumber?: (Long|null);
+
+                    /** Height revisionHeight */
+                    revisionHeight?: (Long|null);
+                }
+
+                /** Represents an Height. */
+                class Height implements IHeight {
+
+                    /**
+                     * Constructs a new Height.
+                     * @param [p] Properties to set
+                     */
+                    constructor(p?: ibc.core.client.v1.IHeight);
+
+                    /** Height revisionNumber. */
+                    public revisionNumber: Long;
+
+                    /** Height revisionHeight. */
+                    public revisionHeight: Long;
+
+                    /**
+                     * Creates a new Height instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns Height instance
+                     */
+                    public static create(properties?: ibc.core.client.v1.IHeight): ibc.core.client.v1.Height;
+
+                    /**
+                     * Encodes the specified Height message. Does not implicitly {@link ibc.core.client.v1.Height.verify|verify} messages.
+                     * @param m Height message or plain object to encode
+                     * @param [w] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(m: ibc.core.client.v1.IHeight, w?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes an Height message from the specified reader or buffer.
+                     * @param r Reader or buffer to decode from
+                     * @param [l] Message length if known beforehand
+                     * @returns Height
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): ibc.core.client.v1.Height;
+
+                    /**
+                     * Creates an Height message from a plain object. Also converts values to their respective internal types.
+                     * @param d Plain object
+                     * @returns Height
+                     */
+                    public static fromObject(d: { [k: string]: any }): ibc.core.client.v1.Height;
+
+                    /**
+                     * Creates a plain object from an Height message. Also converts values to other types if specified.
+                     * @param m Height
+                     * @param [o] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(m: ibc.core.client.v1.Height, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Height to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+            }
+        }
+    }
+}
+
 /** Namespace tendermint. */
 export namespace tendermint {
 

@@ -44,6 +44,17 @@ export interface MsgOpt {
   readonly gas: number;
 }
 
+/*
+  If the chain has "no-legacy-stdTx" feature, we should send the tx based on protobuf.
+  Expectedly, the sign doc should be formed as animo-json regardless of the tx type (animo or proto).
+*/
+type AminoMsgsOrWithProtoMsgs =
+  | Msg[]
+  | {
+      aminoMsgs: Msg[];
+      protoMsgs?: google.protobuf.IAny[];
+    };
+
 export interface AccountSetOpts<MsgOpts> {
   readonly prefetching: boolean;
   readonly suggestChain: boolean;
@@ -241,7 +252,9 @@ export class AccountSetBase<MsgOpts, Queries> {
 
   async sendMsgs(
     type: string | "unknown",
-    msgs: Msg[] | (() => Promise<Msg[]> | Msg[]),
+    msgs:
+      | AminoMsgsOrWithProtoMsgs
+      | (() => Promise<AminoMsgsOrWithProtoMsgs> | AminoMsgsOrWithProtoMsgs),
     memo: string = "",
     fee: StdFee,
     signOptions?: KeplrSignOptions,
@@ -251,13 +264,7 @@ export class AccountSetBase<MsgOpts, Queries> {
           onBroadcastFailed?: (e?: Error) => void;
           onBroadcasted?: (txHash: Uint8Array) => void;
           onFulfill?: (tx: any) => void;
-        },
-    /*
-    Temporary param. This is used when the chain has "no-legacy-stdTx" feature.
-    The amino sign mode will be used.
-    So, in this case, the `msgs` param is only used to make sign doc.
-    */
-    protoMsgs?: google.protobuf.IAny[]
+        }
   ) {
     runInAction(() => {
       this._isSendingMsg = type;
@@ -275,8 +282,7 @@ export class AccountSetBase<MsgOpts, Queries> {
         fee,
         memo,
         signOptions,
-        this.broadcastMode,
-        protoMsgs
+        this.broadcastMode
       );
       txHash = result.txHash;
       signDoc = result.signDoc;
@@ -400,17 +406,11 @@ export class AccountSetBase<MsgOpts, Queries> {
 
   // Return the tx hash.
   protected async broadcastMsgs(
-    msgs: Msg[],
+    msgs: AminoMsgsOrWithProtoMsgs,
     fee: StdFee,
     memo: string = "",
     signOptions?: KeplrSignOptions,
-    mode: "block" | "async" | "sync" = "async",
-    /*
-     Temporary param. This is used when the chain has "no-legacy-stdTx" feature.
-     The amino sign mode will be used.
-     So, in this case, the `msgs` param is only used to make sign doc.
-     */
-    protoMsgs?: google.protobuf.IAny[]
+    mode: "block" | "async" | "sync" = "async"
   ): Promise<{
     txHash: Uint8Array;
     signDoc: StdSignDoc;
@@ -419,7 +419,16 @@ export class AccountSetBase<MsgOpts, Queries> {
       throw new Error(`Wallet is not loaded: ${this.walletStatus}`);
     }
 
-    if (msgs.length === 0) {
+    let aminoMsgs: Msg[];
+    let protoMsgs: google.protobuf.IAny[] | undefined;
+    if ("aminoMsgs" in msgs) {
+      aminoMsgs = msgs.aminoMsgs;
+      protoMsgs = msgs.protoMsgs;
+    } else {
+      aminoMsgs = msgs;
+    }
+
+    if (aminoMsgs.length === 0) {
       throw new Error("There is no msg to send");
     }
 
@@ -442,7 +451,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     const keplr = (await this.getKeplr())!;
 
     const signDoc = makeSignDoc(
-      msgs,
+      aminoMsgs,
       fee,
       this.chainId,
       memo,

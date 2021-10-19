@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tendermint = exports.google = exports.cosmos = void 0;
+exports.tendermint = exports.ibc = exports.google = exports.cosmos = void 0;
 var $protobuf = require("protobufjs/minimal");
 const $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 const $root = {};
@@ -4337,6 +4337,351 @@ exports.google = $root.google = (() => {
         return protobuf;
     })();
     return google;
+})();
+exports.ibc = $root.ibc = (() => {
+    const ibc = {};
+    ibc.applications = (function () {
+        const applications = {};
+        applications.transfer = (function () {
+            const transfer = {};
+            transfer.v1 = (function () {
+                const v1 = {};
+                v1.Msg = (function () {
+                    function Msg(rpcImpl, requestDelimited, responseDelimited) {
+                        $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
+                    }
+                    (Msg.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Msg;
+                    Msg.create = function create(rpcImpl, requestDelimited, responseDelimited) {
+                        return new this(rpcImpl, requestDelimited, responseDelimited);
+                    };
+                    Object.defineProperty(Msg.prototype.transfer = function transfer(request, callback) {
+                        return this.rpcCall(transfer, $root.ibc.applications.transfer.v1.MsgTransfer, $root.ibc.applications.transfer.v1.MsgTransferResponse, request, callback);
+                    }, "name", { value: "Transfer" });
+                    return Msg;
+                })();
+                v1.MsgTransfer = (function () {
+                    function MsgTransfer(p) {
+                        if (p)
+                            for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
+                                if (p[ks[i]] != null)
+                                    this[ks[i]] = p[ks[i]];
+                    }
+                    MsgTransfer.prototype.sourcePort = "";
+                    MsgTransfer.prototype.sourceChannel = "";
+                    MsgTransfer.prototype.token = null;
+                    MsgTransfer.prototype.sender = "";
+                    MsgTransfer.prototype.receiver = "";
+                    MsgTransfer.prototype.timeoutHeight = null;
+                    MsgTransfer.prototype.timeoutTimestamp = $util.Long ? $util.Long.fromBits(0, 0, true) : 0;
+                    MsgTransfer.create = function create(properties) {
+                        return new MsgTransfer(properties);
+                    };
+                    MsgTransfer.encode = function encode(m, w) {
+                        if (!w)
+                            w = $Writer.create();
+                        if (m.sourcePort != null && Object.hasOwnProperty.call(m, "sourcePort"))
+                            w.uint32(10).string(m.sourcePort);
+                        if (m.sourceChannel != null && Object.hasOwnProperty.call(m, "sourceChannel"))
+                            w.uint32(18).string(m.sourceChannel);
+                        if (m.token != null && Object.hasOwnProperty.call(m, "token"))
+                            $root.cosmos.base.v1beta1.Coin.encode(m.token, w.uint32(26).fork()).ldelim();
+                        if (m.sender != null && Object.hasOwnProperty.call(m, "sender"))
+                            w.uint32(34).string(m.sender);
+                        if (m.receiver != null && Object.hasOwnProperty.call(m, "receiver"))
+                            w.uint32(42).string(m.receiver);
+                        if (m.timeoutHeight != null && Object.hasOwnProperty.call(m, "timeoutHeight"))
+                            $root.ibc.core.client.v1.Height.encode(m.timeoutHeight, w.uint32(50).fork()).ldelim();
+                        if (m.timeoutTimestamp != null && Object.hasOwnProperty.call(m, "timeoutTimestamp"))
+                            w.uint32(56).uint64(m.timeoutTimestamp);
+                        return w;
+                    };
+                    MsgTransfer.decode = function decode(r, l) {
+                        if (!(r instanceof $Reader))
+                            r = $Reader.create(r);
+                        var c = l === undefined ? r.len : r.pos + l, m = new $root.ibc.applications.transfer.v1.MsgTransfer();
+                        while (r.pos < c) {
+                            var t = r.uint32();
+                            switch (t >>> 3) {
+                                case 1:
+                                    m.sourcePort = r.string();
+                                    break;
+                                case 2:
+                                    m.sourceChannel = r.string();
+                                    break;
+                                case 3:
+                                    m.token = $root.cosmos.base.v1beta1.Coin.decode(r, r.uint32());
+                                    break;
+                                case 4:
+                                    m.sender = r.string();
+                                    break;
+                                case 5:
+                                    m.receiver = r.string();
+                                    break;
+                                case 6:
+                                    m.timeoutHeight = $root.ibc.core.client.v1.Height.decode(r, r.uint32());
+                                    break;
+                                case 7:
+                                    m.timeoutTimestamp = r.uint64();
+                                    break;
+                                default:
+                                    r.skipType(t & 7);
+                                    break;
+                            }
+                        }
+                        return m;
+                    };
+                    MsgTransfer.fromObject = function fromObject(d) {
+                        if (d instanceof $root.ibc.applications.transfer.v1.MsgTransfer)
+                            return d;
+                        var m = new $root.ibc.applications.transfer.v1.MsgTransfer();
+                        if (d.sourcePort != null) {
+                            m.sourcePort = String(d.sourcePort);
+                        }
+                        if (d.sourceChannel != null) {
+                            m.sourceChannel = String(d.sourceChannel);
+                        }
+                        if (d.token != null) {
+                            if (typeof d.token !== "object")
+                                throw TypeError(".ibc.applications.transfer.v1.MsgTransfer.token: object expected");
+                            m.token = $root.cosmos.base.v1beta1.Coin.fromObject(d.token);
+                        }
+                        if (d.sender != null) {
+                            m.sender = String(d.sender);
+                        }
+                        if (d.receiver != null) {
+                            m.receiver = String(d.receiver);
+                        }
+                        if (d.timeoutHeight != null) {
+                            if (typeof d.timeoutHeight !== "object")
+                                throw TypeError(".ibc.applications.transfer.v1.MsgTransfer.timeoutHeight: object expected");
+                            m.timeoutHeight = $root.ibc.core.client.v1.Height.fromObject(d.timeoutHeight);
+                        }
+                        if (d.timeoutTimestamp != null) {
+                            if ($util.Long)
+                                (m.timeoutTimestamp = $util.Long.fromValue(d.timeoutTimestamp)).unsigned = true;
+                            else if (typeof d.timeoutTimestamp === "string")
+                                m.timeoutTimestamp = parseInt(d.timeoutTimestamp, 10);
+                            else if (typeof d.timeoutTimestamp === "number")
+                                m.timeoutTimestamp = d.timeoutTimestamp;
+                            else if (typeof d.timeoutTimestamp === "object")
+                                m.timeoutTimestamp = new $util.LongBits(d.timeoutTimestamp.low >>> 0, d.timeoutTimestamp.high >>> 0).toNumber(true);
+                        }
+                        return m;
+                    };
+                    MsgTransfer.toObject = function toObject(m, o) {
+                        if (!o)
+                            o = {};
+                        var d = {};
+                        if (o.defaults) {
+                            d.sourcePort = "";
+                            d.sourceChannel = "";
+                            d.token = null;
+                            d.sender = "";
+                            d.receiver = "";
+                            d.timeoutHeight = null;
+                            if ($util.Long) {
+                                var n = new $util.Long(0, 0, true);
+                                d.timeoutTimestamp = o.longs === String ? n.toString() : o.longs === Number ? n.toNumber() : n;
+                            }
+                            else
+                                d.timeoutTimestamp = o.longs === String ? "0" : 0;
+                        }
+                        if (m.sourcePort != null && m.hasOwnProperty("sourcePort")) {
+                            d.sourcePort = m.sourcePort;
+                        }
+                        if (m.sourceChannel != null && m.hasOwnProperty("sourceChannel")) {
+                            d.sourceChannel = m.sourceChannel;
+                        }
+                        if (m.token != null && m.hasOwnProperty("token")) {
+                            d.token = $root.cosmos.base.v1beta1.Coin.toObject(m.token, o);
+                        }
+                        if (m.sender != null && m.hasOwnProperty("sender")) {
+                            d.sender = m.sender;
+                        }
+                        if (m.receiver != null && m.hasOwnProperty("receiver")) {
+                            d.receiver = m.receiver;
+                        }
+                        if (m.timeoutHeight != null && m.hasOwnProperty("timeoutHeight")) {
+                            d.timeoutHeight = $root.ibc.core.client.v1.Height.toObject(m.timeoutHeight, o);
+                        }
+                        if (m.timeoutTimestamp != null && m.hasOwnProperty("timeoutTimestamp")) {
+                            if (typeof m.timeoutTimestamp === "number")
+                                d.timeoutTimestamp = o.longs === String ? String(m.timeoutTimestamp) : m.timeoutTimestamp;
+                            else
+                                d.timeoutTimestamp = o.longs === String ? $util.Long.prototype.toString.call(m.timeoutTimestamp) : o.longs === Number ? new $util.LongBits(m.timeoutTimestamp.low >>> 0, m.timeoutTimestamp.high >>> 0).toNumber(true) : m.timeoutTimestamp;
+                        }
+                        return d;
+                    };
+                    MsgTransfer.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+                    return MsgTransfer;
+                })();
+                v1.MsgTransferResponse = (function () {
+                    function MsgTransferResponse(p) {
+                        if (p)
+                            for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
+                                if (p[ks[i]] != null)
+                                    this[ks[i]] = p[ks[i]];
+                    }
+                    MsgTransferResponse.create = function create(properties) {
+                        return new MsgTransferResponse(properties);
+                    };
+                    MsgTransferResponse.encode = function encode(m, w) {
+                        if (!w)
+                            w = $Writer.create();
+                        return w;
+                    };
+                    MsgTransferResponse.decode = function decode(r, l) {
+                        if (!(r instanceof $Reader))
+                            r = $Reader.create(r);
+                        var c = l === undefined ? r.len : r.pos + l, m = new $root.ibc.applications.transfer.v1.MsgTransferResponse();
+                        while (r.pos < c) {
+                            var t = r.uint32();
+                            switch (t >>> 3) {
+                                default:
+                                    r.skipType(t & 7);
+                                    break;
+                            }
+                        }
+                        return m;
+                    };
+                    MsgTransferResponse.fromObject = function fromObject(d) {
+                        if (d instanceof $root.ibc.applications.transfer.v1.MsgTransferResponse)
+                            return d;
+                        return new $root.ibc.applications.transfer.v1.MsgTransferResponse();
+                    };
+                    MsgTransferResponse.toObject = function toObject() {
+                        return {};
+                    };
+                    MsgTransferResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+                    return MsgTransferResponse;
+                })();
+                return v1;
+            })();
+            return transfer;
+        })();
+        return applications;
+    })();
+    ibc.core = (function () {
+        const core = {};
+        core.client = (function () {
+            const client = {};
+            client.v1 = (function () {
+                const v1 = {};
+                v1.Height = (function () {
+                    function Height(p) {
+                        if (p)
+                            for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
+                                if (p[ks[i]] != null)
+                                    this[ks[i]] = p[ks[i]];
+                    }
+                    Height.prototype.revisionNumber = $util.Long ? $util.Long.fromBits(0, 0, true) : 0;
+                    Height.prototype.revisionHeight = $util.Long ? $util.Long.fromBits(0, 0, true) : 0;
+                    Height.create = function create(properties) {
+                        return new Height(properties);
+                    };
+                    Height.encode = function encode(m, w) {
+                        if (!w)
+                            w = $Writer.create();
+                        if (m.revisionNumber != null && Object.hasOwnProperty.call(m, "revisionNumber"))
+                            w.uint32(8).uint64(m.revisionNumber);
+                        if (m.revisionHeight != null && Object.hasOwnProperty.call(m, "revisionHeight"))
+                            w.uint32(16).uint64(m.revisionHeight);
+                        return w;
+                    };
+                    Height.decode = function decode(r, l) {
+                        if (!(r instanceof $Reader))
+                            r = $Reader.create(r);
+                        var c = l === undefined ? r.len : r.pos + l, m = new $root.ibc.core.client.v1.Height();
+                        while (r.pos < c) {
+                            var t = r.uint32();
+                            switch (t >>> 3) {
+                                case 1:
+                                    m.revisionNumber = r.uint64();
+                                    break;
+                                case 2:
+                                    m.revisionHeight = r.uint64();
+                                    break;
+                                default:
+                                    r.skipType(t & 7);
+                                    break;
+                            }
+                        }
+                        return m;
+                    };
+                    Height.fromObject = function fromObject(d) {
+                        if (d instanceof $root.ibc.core.client.v1.Height)
+                            return d;
+                        var m = new $root.ibc.core.client.v1.Height();
+                        if (d.revisionNumber != null) {
+                            if ($util.Long)
+                                (m.revisionNumber = $util.Long.fromValue(d.revisionNumber)).unsigned = true;
+                            else if (typeof d.revisionNumber === "string")
+                                m.revisionNumber = parseInt(d.revisionNumber, 10);
+                            else if (typeof d.revisionNumber === "number")
+                                m.revisionNumber = d.revisionNumber;
+                            else if (typeof d.revisionNumber === "object")
+                                m.revisionNumber = new $util.LongBits(d.revisionNumber.low >>> 0, d.revisionNumber.high >>> 0).toNumber(true);
+                        }
+                        if (d.revisionHeight != null) {
+                            if ($util.Long)
+                                (m.revisionHeight = $util.Long.fromValue(d.revisionHeight)).unsigned = true;
+                            else if (typeof d.revisionHeight === "string")
+                                m.revisionHeight = parseInt(d.revisionHeight, 10);
+                            else if (typeof d.revisionHeight === "number")
+                                m.revisionHeight = d.revisionHeight;
+                            else if (typeof d.revisionHeight === "object")
+                                m.revisionHeight = new $util.LongBits(d.revisionHeight.low >>> 0, d.revisionHeight.high >>> 0).toNumber(true);
+                        }
+                        return m;
+                    };
+                    Height.toObject = function toObject(m, o) {
+                        if (!o)
+                            o = {};
+                        var d = {};
+                        if (o.defaults) {
+                            if ($util.Long) {
+                                var n = new $util.Long(0, 0, true);
+                                d.revisionNumber = o.longs === String ? n.toString() : o.longs === Number ? n.toNumber() : n;
+                            }
+                            else
+                                d.revisionNumber = o.longs === String ? "0" : 0;
+                            if ($util.Long) {
+                                var n = new $util.Long(0, 0, true);
+                                d.revisionHeight = o.longs === String ? n.toString() : o.longs === Number ? n.toNumber() : n;
+                            }
+                            else
+                                d.revisionHeight = o.longs === String ? "0" : 0;
+                        }
+                        if (m.revisionNumber != null && m.hasOwnProperty("revisionNumber")) {
+                            if (typeof m.revisionNumber === "number")
+                                d.revisionNumber = o.longs === String ? String(m.revisionNumber) : m.revisionNumber;
+                            else
+                                d.revisionNumber = o.longs === String ? $util.Long.prototype.toString.call(m.revisionNumber) : o.longs === Number ? new $util.LongBits(m.revisionNumber.low >>> 0, m.revisionNumber.high >>> 0).toNumber(true) : m.revisionNumber;
+                        }
+                        if (m.revisionHeight != null && m.hasOwnProperty("revisionHeight")) {
+                            if (typeof m.revisionHeight === "number")
+                                d.revisionHeight = o.longs === String ? String(m.revisionHeight) : m.revisionHeight;
+                            else
+                                d.revisionHeight = o.longs === String ? $util.Long.prototype.toString.call(m.revisionHeight) : o.longs === Number ? new $util.LongBits(m.revisionHeight.low >>> 0, m.revisionHeight.high >>> 0).toNumber(true) : m.revisionHeight;
+                        }
+                        return d;
+                    };
+                    Height.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+                    return Height;
+                })();
+                return v1;
+            })();
+            return client;
+        })();
+        return core;
+    })();
+    return ibc;
 })();
 exports.tendermint = $root.tendermint = (() => {
     const tendermint = {};
