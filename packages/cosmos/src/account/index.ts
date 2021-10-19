@@ -70,18 +70,12 @@ export class BaseAccount implements Account {
     }
 
     const accountNumber = value.account_number;
-    if (accountNumber == null) {
-      throw new Error(
-        `Account's account number is unknown: ${JSON.stringify(obj)}`
-      );
-    }
-
     const sequence = value.sequence;
 
     return new BaseAccount(
       type,
       address,
-      new Int(accountNumber),
+      new Int(accountNumber ?? "0"),
       new Int(sequence ?? "0")
     );
   }
