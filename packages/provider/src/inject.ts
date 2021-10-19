@@ -188,10 +188,10 @@ export class InjectedKeplr implements IKeplr {
 
   async sendTx(
     chainId: string,
-    stdTx: StdTx,
+    tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
-    return await this.requestMethod("sendTx", [chainId, stdTx, mode]);
+    return await this.requestMethod("sendTx", [chainId, tx, mode]);
   }
 
   async signAmino(

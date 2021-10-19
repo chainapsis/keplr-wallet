@@ -3,7 +3,7 @@ import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ChainIdHelper, cosmos } from "@keplr-wallet/cosmos";
 import { BondStatus } from "../query/cosmos/staking/types";
 import { HasCosmosQueries, QueriesSetBase, QueriesStore } from "../query";
 import { DeepReadonly } from "utility-types";
@@ -119,6 +119,13 @@ export class CosmosAccount {
           return dec.truncate().toString();
         })();
 
+        const paramAmount = [
+          {
+            denom: currency.coinMinimalDenom,
+            amount: actualAmount,
+          },
+        ];
+
         await this.base.sendMsgs(
           "send",
           [
@@ -127,12 +134,7 @@ export class CosmosAccount {
               value: {
                 from_address: this.base.bech32Address,
                 to_address: recipient,
-                amount: [
-                  {
-                    denom: currency.coinMinimalDenom,
-                    amount: actualAmount,
-                  },
-                ],
+                amount: paramAmount,
               },
             },
           ],
@@ -157,7 +159,17 @@ export class CosmosAccount {
                 queryBalance.fetch();
               }
             }
-          })
+          }),
+          [
+            {
+              type_url: "/cosmos.bank.v1beta1.MsgSend",
+              value: cosmos.bank.v1beta1.MsgSend.encode({
+                fromAddress: this.base.bech32Address,
+                toAddress: recipient,
+                amount: paramAmount,
+              }).finish(),
+            },
+          ]
         );
         return true;
     }
@@ -621,5 +633,13 @@ export class CosmosAccount {
 
   protected get queries(): DeepReadonly<QueriesSetBase & HasCosmosQueries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  protected hasNoLegacyStdFeature(): boolean {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    return (
+      chainInfo.features != null &&
+      chainInfo.features.includes("no-legacy-stdTx")
+    );
   }
 }

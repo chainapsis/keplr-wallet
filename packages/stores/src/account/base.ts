@@ -19,9 +19,17 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
+import {
+  BaseAccount,
+  cosmos,
+  google,
+  TendermintTxTracer,
+} from "@keplr-wallet/cosmos";
 import Axios, { AxiosInstance } from "axios";
 import { Buffer } from "buffer/";
+import Long from "long";
+import ICoin = cosmos.base.v1beta1.ICoin;
+import SignMode = cosmos.tx.signing.v1beta1.SignMode;
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -243,7 +251,13 @@ export class AccountSetBase<MsgOpts, Queries> {
           onBroadcastFailed?: (e?: Error) => void;
           onBroadcasted?: (txHash: Uint8Array) => void;
           onFulfill?: (tx: any) => void;
-        }
+        },
+    /*
+    Temporary param. This is used when the chain has "no-legacy-stdTx" feature.
+    The amino sign mode will be used.
+    So, in this case, the `msgs` param is only used to make sign doc.
+    */
+    protoMsgs?: google.protobuf.IAny[]
   ) {
     runInAction(() => {
       this._isSendingMsg = type;
@@ -261,7 +275,8 @@ export class AccountSetBase<MsgOpts, Queries> {
         fee,
         memo,
         signOptions,
-        this.broadcastMode
+        this.broadcastMode,
+        protoMsgs
       );
       txHash = result.txHash;
       signDoc = result.signDoc;
@@ -389,7 +404,13 @@ export class AccountSetBase<MsgOpts, Queries> {
     fee: StdFee,
     memo: string = "",
     signOptions?: KeplrSignOptions,
-    mode: "block" | "async" | "sync" = "async"
+    mode: "block" | "async" | "sync" = "async",
+    /*
+     Temporary param. This is used when the chain has "no-legacy-stdTx" feature.
+     The amino sign mode will be used.
+     So, in this case, the `msgs` param is only used to make sign doc.
+     */
+    protoMsgs?: google.protobuf.IAny[]
   ): Promise<{
     txHash: Uint8Array;
     signDoc: StdSignDoc;
@@ -400,6 +421,15 @@ export class AccountSetBase<MsgOpts, Queries> {
 
     if (msgs.length === 0) {
       throw new Error("There is no msg to send");
+    }
+
+    if (
+      this.hasNoLegacyStdFeature() &&
+      (!protoMsgs || protoMsgs.length === 0)
+    ) {
+      throw new Error(
+        "Chain can't send legecy stdTx. But, proto any type msgs are not provided"
+      );
     }
 
     const account = await BaseAccount.fetchFromRest(
@@ -427,7 +457,40 @@ export class AccountSetBase<MsgOpts, Queries> {
       signOptions
     );
 
-    const signedTx = makeStdTx(signResponse.signed, signResponse.signature);
+    const signedTx = this.hasNoLegacyStdFeature()
+      ? cosmos.tx.v1beta1.TxRaw.encode({
+          bodyBytes: cosmos.tx.v1beta1.TxBody.encode({
+            messages: protoMsgs,
+            memo: signResponse.signed.memo,
+          }).finish(),
+          authInfoBytes: cosmos.tx.v1beta1.AuthInfo.encode({
+            signerInfos: [
+              {
+                publicKey: {
+                  type_url: "/cosmos.crypto.secp256k1.PubKey",
+                  value: cosmos.crypto.secp256k1.PubKey.encode({
+                    key: Buffer.from(
+                      signResponse.signature.pub_key.value,
+                      "base64"
+                    ),
+                  }).finish(),
+                },
+                modeInfo: {
+                  single: {
+                    mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+                  },
+                },
+                sequence: Long.fromString(signResponse.signed.sequence),
+              },
+            ],
+            fee: {
+              amount: signResponse.signed.fee.amount as ICoin[],
+              gasLimit: Long.fromString(signResponse.signed.fee.gas),
+            },
+          }).finish(),
+          signatures: [Buffer.from(signResponse.signature.signature, "base64")],
+        }).finish()
+      : makeStdTx(signResponse.signed, signResponse.signature);
 
     return {
       txHash: await keplr.sendTx(this.chainId, signedTx, mode as BroadcastMode),
@@ -463,5 +526,13 @@ export class AccountSetBase<MsgOpts, Queries> {
 
   protected get queries(): DeepReadonly<QueriesSetBase & Queries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  protected hasNoLegacyStdFeature(): boolean {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    return (
+      chainInfo.features != null &&
+      chainInfo.features.includes("no-legacy-stdTx")
+    );
   }
 }
