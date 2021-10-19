@@ -8,6 +8,7 @@ import { BondStatus } from "../query/cosmos/staking/types";
 import { HasCosmosQueries, QueriesSetBase, QueriesStore } from "../query";
 import { DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
+import Long from "long";
 
 export interface HasCosmosAccount {
   cosmos: DeepReadonly<CosmosAccount>;
@@ -119,25 +120,23 @@ export class CosmosAccount {
           return dec.truncate().toString();
         })();
 
-        const paramAmount = [
-          {
-            denom: currency.coinMinimalDenom,
-            amount: actualAmount,
+        const msg = {
+          type: this.base.msgOpts.send.native.type,
+          value: {
+            from_address: this.base.bech32Address,
+            to_address: recipient,
+            amount: [
+              {
+                denom: currency.coinMinimalDenom,
+                amount: actualAmount,
+              },
+            ],
           },
-        ];
+        };
 
         await this.base.sendMsgs(
           "send",
-          [
-            {
-              type: this.base.msgOpts.send.native.type,
-              value: {
-                from_address: this.base.bech32Address,
-                to_address: recipient,
-                amount: paramAmount,
-              },
-            },
-          ],
+          [msg],
           memo,
           {
             amount: stdFee.amount ?? [],
@@ -165,9 +164,9 @@ export class CosmosAccount {
                 {
                   type_url: "/cosmos.bank.v1beta1.MsgSend",
                   value: cosmos.bank.v1beta1.MsgSend.encode({
-                    fromAddress: this.base.bech32Address,
-                    toAddress: recipient,
-                    amount: paramAmount,
+                    fromAddress: msg.value.from_address,
+                    toAddress: msg.value.to_address,
+                    amount: msg.value.amount,
                   }).finish(),
                 },
               ]
@@ -338,7 +337,19 @@ export class CosmosAccount {
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
         }
-      })
+      }),
+      this.hasNoLegacyStdFeature()
+        ? [
+            {
+              type_url: "/cosmos.staking.v1beta1.MsgDelegate",
+              value: cosmos.staking.v1beta1.MsgDelegate.encode({
+                delegatorAddress: msg.value.delegator_address,
+                validatorAddress: msg.value.validator_address,
+                amount: msg.value.amount,
+              }).finish(),
+            },
+          ]
+        : undefined
     );
   }
 
@@ -405,7 +416,19 @@ export class CosmosAccount {
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
         }
-      })
+      }),
+      this.hasNoLegacyStdFeature()
+        ? [
+            {
+              type_url: "/cosmos.staking.v1beta1.MsgUndelegate",
+              value: cosmos.staking.v1beta1.MsgUndelegate.encode({
+                delegatorAddress: msg.value.delegator_address,
+                validatorAddress: msg.value.validator_address,
+                amount: msg.value.amount,
+              }).finish(),
+            },
+          ]
+        : undefined
     );
   }
 
@@ -472,7 +495,20 @@ export class CosmosAccount {
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
         }
-      })
+      }),
+      this.hasNoLegacyStdFeature()
+        ? [
+            {
+              type_url: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+              value: cosmos.staking.v1beta1.MsgBeginRedelegate.encode({
+                delegatorAddress: msg.value.delegator_address,
+                validatorSrcAddress: msg.value.validator_src_address,
+                validatorDstAddress: msg.value.validator_dst_address,
+                amount: msg.value.amount,
+              }).finish(),
+            },
+          ]
+        : undefined
     );
   }
 
@@ -518,7 +554,21 @@ export class CosmosAccount {
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
         }
-      })
+      }),
+      this.hasNoLegacyStdFeature()
+        ? msgs.map((msg) => {
+            return {
+              type_url:
+                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+              value: cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.encode(
+                {
+                  delegatorAddress: msg.value.delegator_address,
+                  validatorAddress: msg.value.validator_address,
+                }
+              ).finish(),
+            };
+          })
+        : undefined
     );
   }
 
@@ -588,7 +638,38 @@ export class CosmosAccount {
           );
           vote.fetch();
         }
-      })
+      }),
+      this.hasNoLegacyStdFeature()
+        ? [
+            {
+              type_url: "/cosmos.gov.v1beta1.MsgVote",
+              value: cosmos.gov.v1beta1.MsgVote.encode({
+                proposalId: Long.fromString(msg.value.proposal_id),
+                voter: msg.value.voter,
+                option: (() => {
+                  switch (msg.value.option) {
+                    case "Yes":
+                    case 1:
+                      return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_YES;
+                    case "Abstain":
+                    case 2:
+                      return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_ABSTAIN;
+                    case "No":
+                    case 3:
+                      return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_NO;
+                    case "NoWithVeto":
+                    case 4:
+                      return cosmos.gov.v1beta1.VoteOption
+                        .VOTE_OPTION_NO_WITH_VETO;
+                    default:
+                      return cosmos.gov.v1beta1.VoteOption
+                        .VOTE_OPTION_UNSPECIFIED;
+                  }
+                })(),
+              }).finish(),
+            },
+          ]
+        : undefined
     );
   }
 
