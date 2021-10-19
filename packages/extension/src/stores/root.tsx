@@ -99,6 +99,71 @@ export class RootStore {
       QueriesWithCosmosAndSecret
     );
 
+    const chainOpts = this.chainStore.chainInfos.map((chainInfo) => {
+      // In certik, change the msg type of the MsgSend to "bank/MsgSend"
+      if (chainInfo.chainId.startsWith("shentu-")) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                type: "bank/MsgSend",
+              },
+            },
+          },
+        };
+      }
+
+      // In akash or sifchain, increase the default gas for sending
+      if (
+        chainInfo.chainId.startsWith("akashnet-") ||
+        chainInfo.chainId.startsWith("sifchain")
+      ) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                gas: 120000,
+              },
+            },
+          },
+        };
+      }
+
+      return { chainId: chainInfo.chainId };
+    });
+
+    // What a silly...
+    chainOpts.push(
+      {
+        chainId: "bombay-12",
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        prefetching: false,
+        msgOpts: {
+          send: {
+            native: {
+              type: "bank/MsgSend",
+            },
+          },
+        },
+      },
+      {
+        chainId: "columbus-5",
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        prefetching: false,
+        msgOpts: {
+          send: {
+            native: {
+              type: "bank/MsgSend",
+            },
+          },
+        },
+      }
+    );
+
     this.accountStore = new AccountStore(
       window,
       AccountWithCosmosAndSecret,
@@ -118,40 +183,7 @@ export class RootStore {
           autoInit: true,
           getKeplr: getKeplrFromWindow,
         },
-        chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
-          // In certik, change the msg type of the MsgSend to "bank/MsgSend"
-          if (chainInfo.chainId.startsWith("shentu-")) {
-            return {
-              chainId: chainInfo.chainId,
-              msgOpts: {
-                send: {
-                  native: {
-                    type: "bank/MsgSend",
-                  },
-                },
-              },
-            };
-          }
-
-          // In akash or sifchain, increase the default gas for sending
-          if (
-            chainInfo.chainId.startsWith("akashnet-") ||
-            chainInfo.chainId.startsWith("sifchain")
-          ) {
-            return {
-              chainId: chainInfo.chainId,
-              msgOpts: {
-                send: {
-                  native: {
-                    gas: 120000,
-                  },
-                },
-              },
-            };
-          }
-
-          return { chainId: chainInfo.chainId };
-        }),
+        chainOpts,
       }
     );
 
