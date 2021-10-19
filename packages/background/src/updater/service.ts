@@ -159,9 +159,8 @@ export class ChainUpdaterService {
           baseURL: chainInfo.rest,
         });
 
-        // If the chain can't send the legacy stdTx (above cosmos-sdk@v0.44.0),
-        // try to post the /txs endpoint.
-        // assume that it can't send the legacy stdTx if the response says "not implemented".
+        // The chain with above cosmos-sdk@v0.44.0 can't send the legacy stdTx,
+        // Assume that it can't send the legacy stdTx if the POST /txs responses "not implemented".
         const result = await restInstance.post<
           | {
               code: 12;
