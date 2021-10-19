@@ -41,7 +41,7 @@ export class AccountWithCosmos
     },
     ibcTransfer: {
       type: "cosmos-sdk/MsgTransfer",
-      gas: 120000,
+      gas: 450000,
     },
     delegate: {
       type: "cosmos-sdk/MsgDelegate",
