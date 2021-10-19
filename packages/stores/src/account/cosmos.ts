@@ -160,16 +160,18 @@ export class CosmosAccount {
               }
             }
           }),
-          [
-            {
-              type_url: "/cosmos.bank.v1beta1.MsgSend",
-              value: cosmos.bank.v1beta1.MsgSend.encode({
-                fromAddress: this.base.bech32Address,
-                toAddress: recipient,
-                amount: paramAmount,
-              }).finish(),
-            },
-          ]
+          this.hasNoLegacyStdFeature()
+            ? [
+                {
+                  type_url: "/cosmos.bank.v1beta1.MsgSend",
+                  value: cosmos.bank.v1beta1.MsgSend.encode({
+                    fromAddress: this.base.bech32Address,
+                    toAddress: recipient,
+                    amount: paramAmount,
+                  }).finish(),
+                },
+              ]
+            : undefined
         );
         return true;
     }
