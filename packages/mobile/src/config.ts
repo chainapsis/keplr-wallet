@@ -937,6 +937,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "JUNO",
       coinMinimalDenom: "ujuno",
       coinDecimals: 6,
+      coinGeckoId: "juno-network",
     },
     bip44: {
       coinType: 118,
@@ -947,6 +948,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "JUNO",
         coinMinimalDenom: "ujuno",
         coinDecimals: 6,
+        coinGeckoId: "juno-network",
       },
     ],
     feeCurrencies: [
@@ -954,6 +956,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "JUNO",
         coinMinimalDenom: "ujuno",
         coinDecimals: 6,
+        coinGeckoId: "juno-network",
       },
     ],
     features: ["stargate", "ibc-transfer"],
