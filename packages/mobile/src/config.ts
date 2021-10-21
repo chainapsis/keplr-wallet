@@ -959,7 +959,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinGeckoId: "juno-network",
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
     hideInUI: true,
   },
   {
