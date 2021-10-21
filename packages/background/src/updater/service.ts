@@ -147,6 +147,49 @@ export class ChainUpdaterService {
         }
       }
     } catch {}
+
+    try {
+      if (
+        (!chainInfo.features ||
+          !chainInfo.features.includes("no-legacy-stdTx")) &&
+        (staragteUpdate ||
+          (chainInfo.features && chainInfo.features.includes("stargate")))
+      ) {
+        const restInstance = Axios.create({
+          baseURL: chainInfo.rest,
+        });
+
+        // The chain with above cosmos-sdk@v0.44.0 can't send the legacy stdTx,
+        // Assume that it can't send the legacy stdTx if the POST /txs responses "not implemented".
+        const result = await restInstance.post<
+          | {
+              code: 12;
+              message: "Not Implemented";
+              details: [];
+            }
+          | any
+        >("/txs", undefined, {
+          validateStatus: (status) => {
+            return (status >= 200 && status < 300) || status === 501;
+          },
+        });
+        if (
+          result.status === 501 &&
+          result.data.code === 12 &&
+          result.data.message === "Not Implemented"
+        ) {
+          const savedChainProperty = await this.getUpdatedChainProperty(
+            chainInfo.chainId
+          );
+
+          await this.saveChainProperty(currentVersion.identifier, {
+            features: (savedChainProperty.features ?? []).concat([
+              "no-legacy-stdTx",
+            ]),
+          });
+        }
+      }
+    } catch {}
   }
 
   private async getUpdatedChainProperty(
@@ -271,9 +314,45 @@ export class ChainUpdaterService {
       }
     } catch {}
 
+    let noLegacyStdTxUpdate = false;
+    try {
+      if (
+        (!chainInfo.features ||
+          !chainInfo.features.includes("no-legacy-stdTx")) &&
+        (staragteUpdate ||
+          (chainInfo.features && chainInfo.features.includes("stargate")))
+      ) {
+        const restInstance = Axios.create({
+          baseURL: chainInfo.rest,
+        });
+
+        // The chain with above cosmos-sdk@v0.44.0 can't send the legacy stdTx,
+        // Assume that it can't send the legacy stdTx if the POST /txs responses "not implemented".
+        const result = await restInstance.post<
+          | {
+              code: 12;
+              message: "Not Implemented";
+              details: [];
+            }
+          | any
+        >("/txs", undefined, {
+          validateStatus: (status) => {
+            return (status >= 200 && status < 300) || status === 501;
+          },
+        });
+        if (
+          result.status === 501 &&
+          result.data.code === 12 &&
+          result.data.message === "Not Implemented"
+        ) {
+          noLegacyStdTxUpdate = true;
+        }
+      }
+    } catch {}
+
     return {
       explicit: version.version < fetchedVersion.version,
-      slient: staragteUpdate || ibcTransferUpdate,
+      slient: staragteUpdate || ibcTransferUpdate || noLegacyStdTxUpdate,
     };
   }
 }

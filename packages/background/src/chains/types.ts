@@ -103,7 +103,13 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   }),
   features: Joi.array()
     .items(
-      Joi.string().valid("stargate", "cosmwasm", "secretwasm", "ibc-transfer")
+      Joi.string().valid(
+        "stargate",
+        "cosmwasm",
+        "secretwasm",
+        "ibc-transfer",
+        "no-legacy-stdTx"
+      )
     )
     .unique()
     .custom((value: string[]) => {

@@ -65,7 +65,11 @@ export interface Keplr {
   ): Promise<DirectSignResponse>;
   sendTx(
     chainId: string,
-    stdTx: StdTx,
+    /*
+     If the type is `StdTx`, it is considered as legacy stdTx.
+     If the type is `Uint8Array`, it is considered as proto tx.
+     */
+    tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array>;
 

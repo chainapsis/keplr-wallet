@@ -63,7 +63,10 @@ export class AccountStore<
       this.storeOpts.defaultOpts
     );
     for (const opts of this.storeOpts.chainOpts ?? []) {
-      if (opts.prefetching || defaultOpts.prefetching) {
+      if (
+        opts.prefetching ||
+        (defaultOpts.prefetching && opts.prefetching !== false)
+      ) {
         this.getAccount(opts.chainId);
       }
     }

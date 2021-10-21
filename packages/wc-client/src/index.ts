@@ -402,11 +402,11 @@ export class KeplrWalletConnectV1 implements Keplr {
    */
   sendTx(
     chainId: string,
-    stdTx: StdTx,
+    tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
     if (this.options.sendTx) {
-      return this.options.sendTx(chainId, stdTx, mode);
+      return this.options.sendTx(chainId, tx, mode);
     }
 
     throw new Error("send tx is not delivered by options");
