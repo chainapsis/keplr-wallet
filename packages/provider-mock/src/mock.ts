@@ -16,7 +16,7 @@ import {
 import { SecretUtils } from "secretjs/types/enigmautils";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { OfflineDirectSigner } from "@cosmjs/proto-signing";
-import { CosmJSOfflineSigner } from "./cosmjs";
+import { CosmJSOfflineSigner } from "@keplr-wallet/provider";
 import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
 
 export class MockKeplr implements Keplr {

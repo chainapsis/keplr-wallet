@@ -17,7 +17,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
-    "@keplr-wallet/provider": "^0.9.4"
+    "@keplr-wallet/provider-mock": "^0.9.4"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
