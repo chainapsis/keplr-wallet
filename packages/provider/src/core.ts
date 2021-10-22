@@ -26,7 +26,7 @@ import {
   ReqeustEncryptMsg,
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
-} from "@keplr-wallet/background";
+} from "./types";
 import { cosmos } from "@keplr-wallet/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
 

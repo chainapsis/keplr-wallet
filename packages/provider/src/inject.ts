@@ -6,7 +6,7 @@ import {
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
-import { Result } from "@keplr-wallet/router";
+import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import {
   BroadcastMode,
   AminoSignResponse,
@@ -20,7 +20,6 @@ import { SecretUtils } from "secretjs/types/enigmautils";
 import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
-import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 

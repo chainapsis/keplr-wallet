@@ -8,3 +8,4 @@ export * from "./constant";
 export * from "./encoding";
 export * from "./guard";
 export * from "./env";
+export * from "./json-uint8-array";
