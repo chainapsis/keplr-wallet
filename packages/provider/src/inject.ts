@@ -14,7 +14,6 @@ import {
   StdTx,
   OfflineSigner,
 } from "@cosmjs/launchpad";
-import { cosmos } from "@keplr-wallet/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
@@ -22,6 +21,7 @@ import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
+import Long from "long";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -210,7 +210,12 @@ export class InjectedKeplr implements IKeplr {
   async signDirect(
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.ISignDoc,
+    signDoc: {
+      bodyBytes?: Uint8Array | null;
+      authInfoBytes?: Uint8Array | null;
+      chainId?: string | null;
+      accountNumber?: Long | null;
+    },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
     const result = await this.requestMethod("signDirect", [
@@ -220,14 +225,20 @@ export class InjectedKeplr implements IKeplr {
       deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
 
-    // IMPORTANT: Remember that the proto message is encoded by not the Uint8Json but the Message#toJson.
-    //            So the result is not properly decoded as Uint8Array
-    //            and even it has the long type by string without type conversion.
-    //            So, we have to decode it by the proto message.
-    const jsonSignDoc = result.signed as { [k: string]: any };
-    const decodedSignDoc = cosmos.tx.v1beta1.SignDoc.fromObject(jsonSignDoc);
+    const signed: {
+      bodyBytes: Uint8Array;
+      authInfoBytes: Uint8Array;
+      chainId: string;
+      accountNumber: string;
+    } = result.signed;
+
     return {
-      signed: decodedSignDoc,
+      signed: {
+        bodyBytes: signed.bodyBytes,
+        authInfoBytes: signed.authInfoBytes,
+        chainId: signed.chainId,
+        accountNumber: Long.fromString(signed.accountNumber),
+      },
       signature: result.signature,
     };
   }
