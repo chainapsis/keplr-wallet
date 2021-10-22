@@ -88,11 +88,45 @@ export class InjectedKeplr implements IKeplr {
           throw new Error("GetEnigmaUtils method can't be proxy request");
         }
 
-        const result = await keplr[message.method](
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          ...JSONUint8Array.unwrap(message.args)
-        );
+        const result =
+          message.method === "signDirect"
+            ? await (async () => {
+                const receivedSignDoc: {
+                  bodyBytes?: Uint8Array | null;
+                  authInfoBytes?: Uint8Array | null;
+                  chainId?: string | null;
+                  accountNumber?: string | null;
+                } = message.args[2];
+
+                const result = await keplr.signDirect(
+                  message.args[0],
+                  message.args[1],
+                  {
+                    bodyBytes: receivedSignDoc.bodyBytes,
+                    authInfoBytes: receivedSignDoc.authInfoBytes,
+                    chainId: receivedSignDoc.chainId,
+                    accountNumber: receivedSignDoc.accountNumber
+                      ? Long.fromString(receivedSignDoc.accountNumber)
+                      : null,
+                  },
+                  message.args[2]
+                );
+
+                return {
+                  signed: {
+                    bodyBytes: result.signed.bodyBytes,
+                    authInfoBytes: result.signed.authInfoBytes,
+                    chainId: result.signed.chainId,
+                    accountNumber: result.signed.accountNumber.toString(),
+                  },
+                  signature: result.signature,
+                };
+              })()
+            : await keplr[message.method](
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                ...JSONUint8Array.unwrap(message.args)
+              );
 
         const proxyResponse: ProxyRequestResponse = {
           type: "proxy-request-response",
@@ -221,7 +255,16 @@ export class InjectedKeplr implements IKeplr {
     const result = await this.requestMethod("signDirect", [
       chainId,
       signer,
-      signDoc,
+      // We can't send the `Long` with remaing the type.
+      // Receiver should change the `string` to `Long`.
+      {
+        bodyBytes: signDoc.bodyBytes,
+        authInfoBytes: signDoc.authInfoBytes,
+        chainId: signDoc.chainId,
+        accountNumber: signDoc.accountNumber
+          ? signDoc.accountNumber.toString()
+          : null,
+      },
       deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
 
@@ -237,6 +280,8 @@ export class InjectedKeplr implements IKeplr {
         bodyBytes: signed.bodyBytes,
         authInfoBytes: signed.authInfoBytes,
         chainId: signed.chainId,
+        // We can't send the `Long` with remaing the type.
+        // Sender should change the `Long` to `string`.
         accountNumber: Long.fromString(signed.accountNumber),
       },
       signature: result.signature,
