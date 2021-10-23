@@ -1,8 +1,10 @@
-import { MessageRequester } from "../types";
-import { Message } from "../message";
-import { JSONUint8Array } from "../json-uint8-array";
+import {
+  MessageRequester,
+  Message,
+  JSONUint8Array,
+  Result,
+} from "@keplr-wallet/router";
 import { MockRouter } from "../router";
-import { Result } from "../interfaces";
 
 export class MockMessageRequester implements MessageRequester {
   constructor(protected readonly id: string, protected readonly url: string) {}

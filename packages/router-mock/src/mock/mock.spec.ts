@@ -1,6 +1,6 @@
 import assert from "assert";
-import { Message } from "../message";
-import { MockRouter, Router } from "../router";
+import { Message, Router } from "@keplr-wallet/router";
+import { MockRouter } from "../router";
 import { MockEnv } from "../env";
 import { MockMessageRequester } from "../requester";
 import { MockGuards } from "../guard";

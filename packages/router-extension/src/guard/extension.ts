@@ -1,5 +1,4 @@
-import { Env, Guard, MessageSender } from "../types";
-import { Message } from "../message";
+import { Env, Guard, MessageSender, Message } from "@keplr-wallet/router";
 
 export class ExtensionGuards {
   static readonly checkOriginIsValid: Guard = (

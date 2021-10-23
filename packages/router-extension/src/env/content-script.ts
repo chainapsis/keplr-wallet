@@ -1,4 +1,4 @@
-import { Env, MessageSender } from "../types";
+import { Env, MessageSender } from "@keplr-wallet/router";
 
 // ContentScriptEnv only checks the id is same as the extension id.
 // And, doesn't support the request interaction.

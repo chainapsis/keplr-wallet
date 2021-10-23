@@ -1,7 +1,7 @@
 import assert from "assert";
 
 import { ExtensionEnv } from "./extension";
-import { MessageSender } from "../types";
+import { MessageSender } from "@keplr-wallet/router";
 
 describe("Test extension env producer", () => {
   const extensionId = "id";

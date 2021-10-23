@@ -1,5 +1,4 @@
-import { Env, Guard, MessageSender } from "../types";
-import { Message } from "../message";
+import { Env, Guard, MessageSender, Message } from "@keplr-wallet/router";
 
 export class ContentScriptGuards {
   // Router in content script will reject all messages that can be sent from the external.

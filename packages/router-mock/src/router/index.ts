@@ -1,6 +1,4 @@
-import { Router } from "./types";
-import { MessageSender } from "../types";
-import { Result } from "../interfaces";
+import { Router, MessageSender, Result } from "@keplr-wallet/router";
 import { EventEmitter } from "events";
 
 export class MockRouter extends Router {

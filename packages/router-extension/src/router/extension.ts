@@ -1,6 +1,4 @@
-import { Router } from "./types";
-import { MessageSender } from "../types";
-import { Result } from "../interfaces";
+import { Router, MessageSender, Result } from "@keplr-wallet/router";
 
 export class ExtensionRouter extends Router {
   listen(port: string): void {

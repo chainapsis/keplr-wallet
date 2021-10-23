@@ -1,5 +1,5 @@
-import { Env, MessageSender } from "../types";
-import { ExtensionEnv } from "./extension";
+import { Env, MessageSender } from "@keplr-wallet/router";
+import { ExtensionEnv } from "@keplr-wallet/router-extension";
 
 export class MockEnv {
   constructor(protected readonly id: string, protected readonly url: string) {}

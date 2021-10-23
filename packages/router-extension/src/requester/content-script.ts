@@ -1,6 +1,8 @@
-import { MessageRequester } from "../types";
-import { Message } from "../message";
-import { JSONUint8Array } from "../json-uint8-array";
+import {
+  MessageRequester,
+  Message,
+  JSONUint8Array,
+} from "@keplr-wallet/router";
 
 // The message requester to send the message to the content scripts.
 // This will send message to the tab with the content script.

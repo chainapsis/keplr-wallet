@@ -1,6 +1,8 @@
-import { MessageRequester } from "../types";
-import { Message } from "../message";
-import { JSONUint8Array } from "../json-uint8-array";
+import {
+  MessageRequester,
+  Message,
+  JSONUint8Array,
+} from "@keplr-wallet/router";
 
 export class InExtensionMessageRequester implements MessageRequester {
   async sendMessage<M extends Message<unknown>>(
