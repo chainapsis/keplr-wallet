@@ -6,11 +6,53 @@ import {
 } from "@keplr-wallet/router";
 import { openPopupWindow as openPopupWindowInner } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "../requester";
-import PQueue from "p-queue";
 
-const openPopupQueue = new PQueue({
-  concurrency: 1,
-});
+class PromiseQueue {
+  protected workingOnPromise: boolean = false;
+  protected queue: {
+    fn: () => Promise<unknown>;
+    resolve: (result: any) => void;
+    reject: (e: any) => void;
+  }[] = [];
+
+  enqueue<R>(fn: () => Promise<R>): Promise<R> {
+    return new Promise<R>((resolve, reject) => {
+      this.queue.push({
+        fn,
+        resolve,
+        reject,
+      });
+
+      this.dequeue();
+    });
+  }
+
+  protected dequeue() {
+    if (this.workingOnPromise) {
+      return;
+    }
+    const item = this.queue.shift();
+    if (!item) {
+      return;
+    }
+
+    this.workingOnPromise = true;
+    item
+      .fn()
+      .then((result) => {
+        item.resolve(result);
+      })
+      .catch((e) => {
+        item.reject(e);
+      })
+      .finally(() => {
+        this.workingOnPromise = false;
+        this.dequeue();
+      });
+  }
+}
+
+const openPopupQueue = new PromiseQueue();
 
 // To handle the opening popup more easily,
 // just open the popup one by one.
@@ -18,7 +60,7 @@ async function openPopupWindow(
   url: string,
   channel: string = "default"
 ): Promise<number> {
-  return await openPopupQueue.add(() => openPopupWindowInner(url, channel));
+  return await openPopupQueue.enqueue(() => openPopupWindowInner(url, channel));
 }
 
 export class ExtensionEnv {
