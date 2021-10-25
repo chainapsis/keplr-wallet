@@ -6,7 +6,7 @@ import {
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
-import { Result } from "@keplr-wallet/router";
+import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import {
   BroadcastMode,
   AminoSignResponse,
@@ -14,15 +14,14 @@ import {
   StdTx,
   OfflineSigner,
 } from "@cosmjs/launchpad";
-import { cosmos } from "@keplr-wallet/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
-import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
+import Long from "long";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -89,11 +88,45 @@ export class InjectedKeplr implements IKeplr {
           throw new Error("GetEnigmaUtils method can't be proxy request");
         }
 
-        const result = await keplr[message.method](
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          ...JSONUint8Array.unwrap(message.args)
-        );
+        const result =
+          message.method === "signDirect"
+            ? await (async () => {
+                const receivedSignDoc: {
+                  bodyBytes?: Uint8Array | null;
+                  authInfoBytes?: Uint8Array | null;
+                  chainId?: string | null;
+                  accountNumber?: string | null;
+                } = message.args[2];
+
+                const result = await keplr.signDirect(
+                  message.args[0],
+                  message.args[1],
+                  {
+                    bodyBytes: receivedSignDoc.bodyBytes,
+                    authInfoBytes: receivedSignDoc.authInfoBytes,
+                    chainId: receivedSignDoc.chainId,
+                    accountNumber: receivedSignDoc.accountNumber
+                      ? Long.fromString(receivedSignDoc.accountNumber)
+                      : null,
+                  },
+                  message.args[2]
+                );
+
+                return {
+                  signed: {
+                    bodyBytes: result.signed.bodyBytes,
+                    authInfoBytes: result.signed.authInfoBytes,
+                    chainId: result.signed.chainId,
+                    accountNumber: result.signed.accountNumber.toString(),
+                  },
+                  signature: result.signature,
+                };
+              })()
+            : await keplr[message.method](
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                ...JSONUint8Array.unwrap(message.args)
+              );
 
         const proxyResponse: ProxyRequestResponse = {
           type: "proxy-request-response",
@@ -211,24 +244,46 @@ export class InjectedKeplr implements IKeplr {
   async signDirect(
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.ISignDoc,
+    signDoc: {
+      bodyBytes?: Uint8Array | null;
+      authInfoBytes?: Uint8Array | null;
+      chainId?: string | null;
+      accountNumber?: Long | null;
+    },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
     const result = await this.requestMethod("signDirect", [
       chainId,
       signer,
-      signDoc,
+      // We can't send the `Long` with remaing the type.
+      // Receiver should change the `string` to `Long`.
+      {
+        bodyBytes: signDoc.bodyBytes,
+        authInfoBytes: signDoc.authInfoBytes,
+        chainId: signDoc.chainId,
+        accountNumber: signDoc.accountNumber
+          ? signDoc.accountNumber.toString()
+          : null,
+      },
       deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
 
-    // IMPORTANT: Remember that the proto message is encoded by not the Uint8Json but the Message#toJson.
-    //            So the result is not properly decoded as Uint8Array
-    //            and even it has the long type by string without type conversion.
-    //            So, we have to decode it by the proto message.
-    const jsonSignDoc = result.signed as { [k: string]: any };
-    const decodedSignDoc = cosmos.tx.v1beta1.SignDoc.fromObject(jsonSignDoc);
+    const signed: {
+      bodyBytes: Uint8Array;
+      authInfoBytes: Uint8Array;
+      chainId: string;
+      accountNumber: string;
+    } = result.signed;
+
     return {
-      signed: decodedSignDoc,
+      signed: {
+        bodyBytes: signed.bodyBytes,
+        authInfoBytes: signed.authInfoBytes,
+        chainId: signed.chainId,
+        // We can't send the `Long` with remaing the type.
+        // Sender should change the `Long` to `string`.
+        accountNumber: Long.fromString(signed.accountNumber),
+      },
       signature: result.signature,
     };
   }

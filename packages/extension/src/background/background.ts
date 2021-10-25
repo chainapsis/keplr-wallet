@@ -1,10 +1,10 @@
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   ExtensionRouter,
   ExtensionGuards,
   ExtensionEnv,
-  BACKGROUND_PORT,
   ContentScriptMessageRequester,
-} from "@keplr-wallet/router";
+} from "@keplr-wallet/router-extension";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { init, ScryptParams } from "@keplr-wallet/background";
 import scrypt from "scrypt-js";

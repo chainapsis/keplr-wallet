@@ -25,8 +25,8 @@ import {
   ContentScriptEnv,
   ContentScriptGuards,
   InExtensionMessageRequester,
-  APP_PORT,
-} from "@keplr-wallet/router";
+} from "@keplr-wallet/router-extension";
+import { APP_PORT } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 

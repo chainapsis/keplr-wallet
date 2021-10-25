@@ -1,10 +1,10 @@
+import { WEBPAGE_PORT } from "@keplr-wallet/router";
 import {
   ContentScriptEnv,
   ContentScriptGuards,
   ExtensionRouter,
   InExtensionMessageRequester,
-  WEBPAGE_PORT,
-} from "@keplr-wallet/router";
+} from "@keplr-wallet/router-extension";
 import { Keplr, InjectedKeplr } from "@keplr-wallet/provider";
 import { initEvents } from "./events";
 

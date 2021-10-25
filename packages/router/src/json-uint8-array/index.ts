@@ -1,6 +1,6 @@
-import { Buffer } from "buffer/";
-
 // The JSON encoder that supports the `Uint8Array`.
+import { fromHex, toHex } from "./hex";
+
 export class JSONUint8Array {
   static parse(text: string) {
     return JSON.parse(text, (_, value) => {
@@ -9,9 +9,7 @@ export class JSONUint8Array {
         typeof value === "string" &&
         value.startsWith("__uint8array__")
       ) {
-        return new Uint8Array(
-          Buffer.from(value.replace("__uint8array__", ""), "hex")
-        );
+        return fromHex(value.replace("__uint8array__", ""));
       }
 
       return value;
@@ -29,7 +27,10 @@ export class JSONUint8Array {
             value.type === "Buffer" &&
             Array.isArray(value.data)))
       ) {
-        return `__uint8array__${Buffer.from(value).toString("hex")}`;
+        const array =
+          value instanceof Uint8Array ? value : new Uint8Array(value.data);
+
+        return `__uint8array__${toHex(array)}`;
       }
 
       return value;

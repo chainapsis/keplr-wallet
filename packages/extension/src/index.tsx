@@ -54,7 +54,7 @@ import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";
-import { InExtensionMessageRequester } from "@keplr-wallet/router";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 
 window.keplr = new Keplr(manifest.version, new InExtensionMessageRequester());
