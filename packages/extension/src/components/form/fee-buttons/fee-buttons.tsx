@@ -191,7 +191,7 @@ export const FeeButtonsInner: FunctionComponent<
                   "text-muted": feeConfig.feeType !== "low",
                 })}
               >
-                {lowFeePrice.toString()}
+                {lowFeePrice.trim(true).toString()}
               </div>
             ) : null}
             <div
@@ -199,7 +199,7 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "low",
               })}
             >
-              {lowFee.trim(true).toString()}
+              {lowFee.trim(true).toMetricPrefix()}
             </div>
           </Button>
           <Button
@@ -228,7 +228,10 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "average",
               })}
             >
-              {feeConfig.getFeeTypePretty("average").trim(true).toString()}
+              {feeConfig
+                .getFeeTypePretty("average")
+                .trim(true)
+                .toMetricPrefix()}
             </div>
           </Button>
           <Button
@@ -255,7 +258,7 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "high",
               })}
             >
-              {feeConfig.getFeeTypePretty("high").trim(true).toString()}
+              {feeConfig.getFeeTypePretty("high").trim(true).toMetricPrefix()}
             </div>
           </Button>
         </ButtonGroup>

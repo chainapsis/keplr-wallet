@@ -1,6 +1,7 @@
 import { IntPretty, IntPrettyOptions } from "./int-pretty";
 import { Int } from "./int";
 import { Dec } from "./decimal";
+import { toMetric } from "./utils";
 import { AppCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 
@@ -160,6 +161,37 @@ export class CoinPretty {
     }
 
     return `${this.intPretty.toString()}${separator}${denom}`;
+  }
+
+  toMetricPrefix(): string {
+    const [, afterPoint] = this.intPretty.toString().split(".");
+
+    if (!afterPoint) {
+      return this.intPretty.toString();
+    }
+
+    let denom = this.denom;
+    if (this._options.upperCase) {
+      denom = denom.toUpperCase();
+    }
+    if (this._options.lowerCase) {
+      denom = denom.toLowerCase();
+    }
+
+    let separator = this._options.separator;
+
+    if (this._options.hideDenom) {
+      denom = "";
+      separator = "";
+    }
+
+    const { remainder, prefix } = toMetric(afterPoint.length);
+    const numberPart = remainder
+      ? Number(afterPoint) * Math.pow(10, remainder)
+      : Number(afterPoint);
+    const prefixPart = prefix ? ` ${prefix}` : "";
+
+    return `${numberPart}${prefixPart}${separator}${denom}`;
   }
 
   clone(): CoinPretty {

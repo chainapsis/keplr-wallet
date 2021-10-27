@@ -10,13 +10,14 @@
   },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
-    "build": "tsc; mkdir -p build/stargate/proto/generated && cp ./src/stargate/proto/generated/* ./build/stargate/proto/generated",
+    "build": "tsc && mkdirp -p build/stargate/proto/generated && cp ./src/stargate/proto/generated/* ./build/stargate/proto/generated",
     "dev": "tsc -w",
     "test": "mocha --timeout 30000 -r ts-node/register 'src/**/*.spec.ts'",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
+    "mkdirp": "^1.0.4",
     "mocha": "^8.2.1"
   },
   "dependencies": {
