@@ -64,13 +64,9 @@ export class TokensService {
       // If the secret20 token,
       // just try to change the viewing key.
       if (viewingKey) {
-        const tokens = await this.getTokens(chainId);
-        const token = tokens.find((token) =>
-          token.coinMinimalDenom.startsWith(`secret20:${contractAddress}`)
-        );
-        if (token && "type" in token && token.type === "secret20") {
+        if ("type" in find && find.type === "secret20") {
           await this.addToken(chainId, {
-            ...token,
+            ...find,
             viewingKey,
           });
         }
