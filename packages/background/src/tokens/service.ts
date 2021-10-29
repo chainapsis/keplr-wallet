@@ -61,6 +61,21 @@ export class TokensService {
     );
     // If the same currency is already registered, do nothing.
     if (find) {
+      // If the secret20 token,
+      // just try to change the viewing key.
+      if (viewingKey) {
+        const tokens = await this.getTokens(chainId);
+        const token = tokens.find((token) =>
+          token.coinMinimalDenom.startsWith(`secret20:${contractAddress}`)
+        );
+        if (token && "type" in token && token.type === "secret20") {
+          await this.addToken(chainId, {
+            ...token,
+            viewingKey,
+          });
+        }
+        return;
+      }
       return;
     }
 
