@@ -11,7 +11,7 @@ import { initEvents } from "./events";
 import manifest from "../manifest.json";
 
 InjectedKeplr.startProxy(
-  new Keplr(manifest.version, new InExtensionMessageRequester())
+  new Keplr(manifest.version, "core", new InExtensionMessageRequester())
 );
 
 const router = new ExtensionRouter(ContentScriptEnv.produceEnv);

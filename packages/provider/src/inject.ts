@@ -3,6 +3,7 @@ import {
   Keplr,
   Keplr as IKeplr,
   KeplrIntereactionOptions,
+  KeplrMode,
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
@@ -57,6 +58,10 @@ export class InjectedKeplr implements IKeplr {
 
         if (message.method === "version") {
           throw new Error("Version is not function");
+        }
+
+        if (message.method === "mode") {
+          throw new Error("Mode is not function");
         }
 
         if (message.method === "defaultOptions") {
@@ -205,7 +210,10 @@ export class InjectedKeplr implements IKeplr {
 
   public defaultOptions: KeplrIntereactionOptions = {};
 
-  constructor(public readonly version: string) {}
+  constructor(
+    public readonly version: string,
+    public readonly mode: KeplrMode
+  ) {}
 
   async enable(chainIds: string | string[]): Promise<void> {
     await this.requestMethod("enable", [chainIds]);

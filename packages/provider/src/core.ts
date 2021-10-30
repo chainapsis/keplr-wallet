@@ -2,6 +2,7 @@ import {
   ChainInfo,
   Keplr as IKeplr,
   KeplrIntereactionOptions,
+  KeplrMode,
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
@@ -43,6 +44,7 @@ export class Keplr implements IKeplr {
 
   constructor(
     public readonly version: string,
+    public readonly mode: KeplrMode,
     protected readonly requester: MessageRequester
   ) {}
 

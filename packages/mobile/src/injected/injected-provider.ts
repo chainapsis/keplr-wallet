@@ -33,6 +33,10 @@ export class RNInjectedKeplr extends InjectedKeplr {
         throw new Error("Version is not function");
       }
 
+      if (message.method === "mode") {
+        throw new Error("Mode is not function");
+      }
+
       if (message.method === "defaultOptions") {
         throw new Error("DefaultOptions is not function");
       }

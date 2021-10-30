@@ -33,7 +33,7 @@ export const WebScreen: FunctionComponent = () => {
   // IMPORTANT: Current message requester is for the internal usages.
   //            Don't use it in the production!!
   const [keplr] = useState(
-    () => new Keplr("0.0.1", new RNMessageRequesterInternal())
+    () => new Keplr("0.0.1", "core", new RNMessageRequesterInternal())
   );
   const [messageHandler] = useState(() =>
     RNInjectedKeplr.onMessageHandler(keplr)
