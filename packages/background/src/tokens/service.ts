@@ -61,6 +61,17 @@ export class TokensService {
     );
     // If the same currency is already registered, do nothing.
     if (find) {
+      // If the secret20 token,
+      // just try to change the viewing key.
+      if (viewingKey) {
+        if ("type" in find && find.type === "secret20") {
+          await this.addToken(chainId, {
+            ...find,
+            viewingKey,
+          });
+        }
+        return;
+      }
       return;
     }
 
