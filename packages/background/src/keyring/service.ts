@@ -390,7 +390,20 @@ export class KeyRingService {
   }
 
   async setKeyStoreCoinType(chainId: string, coinType: number): Promise<void> {
+    const prevCoinType = this.keyRing.computeKeyStoreCoinType(
+      chainId,
+      await this.chainsService.getChainCoinType(chainId)
+    );
+
     await this.keyRing.setKeyStoreCoinType(chainId, coinType);
+
+    if (prevCoinType !== coinType) {
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
+    }
   }
 
   async getKeyStoreBIP44Selectables(

@@ -180,7 +180,7 @@ export class KeyRing {
     return this.keyStore.meta[key] ?? "";
   }
 
-  private computeKeyStoreCoinType(
+  public computeKeyStoreCoinType(
     chainId: string,
     defaultCoinType: number
   ): number {
