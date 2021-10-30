@@ -1101,6 +1101,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "milliampere",
         coinDecimals: 3,
       },
+      {
+        coinDenom: "TOCYB",
+        coinMinimalDenom: "tocyb",
+        coinDecimals: 0,
+      },
     ],
     feeCurrencies: [
       {
