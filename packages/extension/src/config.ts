@@ -1110,11 +1110,11 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0.001,
+      low: 0,
       average: 0.01,
-      high: 0.025,
+      high: 0.02,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ['stargate', 'ibc-transfer', "no-legacy-stdTx", "cosmwasm"]
   },
   {
     rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
