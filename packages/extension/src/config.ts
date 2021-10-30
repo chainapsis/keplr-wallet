@@ -1061,34 +1061,60 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,
     rest: BETA_CYBER_NETWORK_REST_ENDPOINT,
     restConfig: BETA_CYBER_NETWORK_REST_CONFIG,
-    chainId: "euler-6",
-    chainName: "Cyber",
+    chainId: "bostrom",
+    chainName: "Bostrom",
     stakeCurrency: {
-      coinDenom: "EUL",
-      coinMinimalDenom: "eul",
+      coinDenom: "BOOT",
+      coinMinimalDenom: "boot",
       coinDecimals: 0,
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/euler/stake"
-        : "http://localhost:8080/#/euler/stake",
+        ? "https://wallet.keplr.app/#/bostrom/stake"
+        : "http://localhost:8080/#/bostrom/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/euler/stake"
-        : "http://localhost:8080/#/euler/stake",
+        ? "https://wallet.keplr.app/#/bostrom/stake"
+        : "http://localhost:8080/#/bostrom/stake",
     bip44: {
       coinType: 118,
     },
-    bech32Config: Bech32Address.defaultBech32Config("cyber"),
+    bech32Config: Bech32Address.defaultBech32Config("bostrom"),
     currencies: [
       {
-        coinDenom: "EUL",
-        coinMinimalDenom: "eul",
+        coinDenom: "BOOT",
+        coinMinimalDenom: "boot",
+        coinDecimals: 0,
+      },
+      {
+        coinDenom: "H",
+        coinMinimalDenom: "hydrogen",
+        coinDecimals: 0,
+      },
+      {
+        coinDenom: "V",
+        coinMinimalDenom: "millivolt",
+        coinDecimals: 3,
+      },
+      {
+        coinDenom: "A",
+        coinMinimalDenom: "milliampere",
+        coinDecimals: 3,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BOOT",
+        coinMinimalDenom: "boot",
         coinDecimals: 0,
       },
     ],
-    feeCurrencies: [],
-    beta: true,
+    gasPriceStep: {
+      low: 0.001,
+      average: 0.01,
+      high: 0.025,
+    },
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,

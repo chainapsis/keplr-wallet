@@ -149,7 +149,7 @@ export function renderAminoMessage(
           values={{
             b: (...chunks: any[]) => <b>{chunks}</b>,
             br: <br />,
-            address: Bech32Address.shortenAddress(value.address, 20),
+            neuron: Bech32Address.shortenAddress(value.neuron, 20),
             link: cyberlinks
               .map((link) => {
                 return `${Hash.truncHashPortion(
