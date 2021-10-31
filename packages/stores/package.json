@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores",
-  "version": "0.9.5-rc.0",
+  "version": "0.9.5-rc.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -17,7 +17,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
-    "@keplr-wallet/provider-mock": "^0.9.5-rc.0"
+    "@keplr-wallet/provider-mock": "^0.9.5-rc.2"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",

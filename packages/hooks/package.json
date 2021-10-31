@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/hooks",
-  "version": "0.9.5-rc.0",
+  "version": "0.9.5-rc.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -27,7 +27,7 @@
     "@keplr-wallet/crypto": "^0.9.5-rc.0",
     "@keplr-wallet/ens": "^0.9.0",
     "@keplr-wallet/popup": "^0.9.0",
-    "@keplr-wallet/stores": "^0.9.5-rc.0",
+    "@keplr-wallet/stores": "^0.9.5-rc.2",
     "@keplr-wallet/types": "^0.9.5-rc.0",
     "@keplr-wallet/unit": "^0.9.5-rc.0",
     "long": "^4.0.0",
