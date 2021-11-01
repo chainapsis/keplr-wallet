@@ -150,30 +150,32 @@ export const StakeView: FunctionComponent = observer(() => {
           >
             <FormattedMessage id="main.stake.message.stake" />
           </p>
-          <p
-            className={classnames(
-              "h4",
-              "my-0",
-              "font-weight-normal",
-              styleStake.paragraphSub
-            )}
-          >
-            <FormattedMessage
-              id="main.stake.message.earning"
-              values={{
-                apr: (
-                  <React.Fragment>
-                    {inflation.inflation.trim(true).maxDecimals(2).toString()}
-                    {inflation.isFetching ? (
-                      <span>
-                        <i className="fas fa-spinner fa-spin" />
-                      </span>
-                    ) : null}
-                  </React.Fragment>
-                ),
-              }}
-            />
-          </p>
+          {inflation.inflation.toDec().equals(new Dec(0)) ? null : (
+            <p
+              className={classnames(
+                "h4",
+                "my-0",
+                "font-weight-normal",
+                styleStake.paragraphSub
+              )}
+            >
+              <FormattedMessage
+                id="main.stake.message.earning"
+                values={{
+                  apr: (
+                    <React.Fragment>
+                      {inflation.inflation.trim(true).maxDecimals(2).toString()}
+                      {inflation.isFetching ? (
+                        <span>
+                          <i className="fas fa-spinner fa-spin" />
+                        </span>
+                      ) : null}
+                    </React.Fragment>
+                  ),
+                }}
+              />
+            </p>
+          )}
         </div>
         <div style={{ flex: 1 }} />
         <a

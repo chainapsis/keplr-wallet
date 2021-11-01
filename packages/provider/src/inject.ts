@@ -3,6 +3,7 @@ import {
   Keplr,
   Keplr as IKeplr,
   KeplrIntereactionOptions,
+  KeplrMode,
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
@@ -43,9 +44,23 @@ export interface ProxyRequestResponse {
  * This will use `window.postMessage` to interact with the content script.
  */
 export class InjectedKeplr implements IKeplr {
-  static startProxy(keplr: IKeplr) {
-    window.addEventListener("message", async (e: any) => {
-      const message: ProxyRequest = e.data;
+  static startProxy(
+    keplr: IKeplr,
+    eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+    parseMessage?: (message: any) => any
+  ) {
+    eventListener.addMessageListener(async (e: any) => {
+      const message: ProxyRequest = parseMessage
+        ? parseMessage(e.data)
+        : e.data;
       if (!message || message.type !== "proxy-request") {
         return;
       }
@@ -57,6 +72,10 @@ export class InjectedKeplr implements IKeplr {
 
         if (message.method === "version") {
           throw new Error("Version is not function");
+        }
+
+        if (message.method === "mode") {
+          throw new Error("Mode is not function");
         }
 
         if (message.method === "defaultOptions") {
@@ -136,7 +155,7 @@ export class InjectedKeplr implements IKeplr {
           },
         };
 
-        window.postMessage(proxyResponse, window.location.origin);
+        eventListener.postMessage(proxyResponse);
       } catch (e) {
         const proxyResponse: ProxyRequestResponse = {
           type: "proxy-request-response",
@@ -146,7 +165,7 @@ export class InjectedKeplr implements IKeplr {
           },
         };
 
-        window.postMessage(proxyResponse, window.location.origin);
+        eventListener.postMessage(proxyResponse);
       }
     });
   }
@@ -168,7 +187,9 @@ export class InjectedKeplr implements IKeplr {
 
     return new Promise((resolve, reject) => {
       const receiveResponse = (e: any) => {
-        const proxyResponse: ProxyRequestResponse = e.data;
+        const proxyResponse: ProxyRequestResponse = this.parseMessage
+          ? this.parseMessage(e.data)
+          : e.data;
 
         if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
           return;
@@ -178,7 +199,7 @@ export class InjectedKeplr implements IKeplr {
           return;
         }
 
-        window.removeEventListener("message", receiveResponse);
+        this.eventListener.removeMessageListener(receiveResponse);
 
         const result = JSONUint8Array.unwrap(proxyResponse.result);
 
@@ -195,9 +216,9 @@ export class InjectedKeplr implements IKeplr {
         resolve(result.return);
       };
 
-      window.addEventListener("message", receiveResponse);
+      this.eventListener.addMessageListener(receiveResponse);
 
-      window.postMessage(proxyMessage, window.location.origin);
+      this.eventListener.postMessage(proxyMessage);
     });
   }
 
@@ -205,7 +226,23 @@ export class InjectedKeplr implements IKeplr {
 
   public defaultOptions: KeplrIntereactionOptions = {};
 
-  constructor(public readonly version: string) {}
+  constructor(
+    public readonly version: string,
+    public readonly mode: KeplrMode,
+    protected readonly eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      removeMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      removeMessageListener: (fn: (e: any) => void) =>
+        window.removeEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+    protected readonly parseMessage?: (message: any) => any
+  ) {}
 
   async enable(chainIds: string | string[]): Promise<void> {
     await this.requestMethod("enable", [chainIds]);

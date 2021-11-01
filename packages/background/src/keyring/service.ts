@@ -101,11 +101,24 @@ export class KeyRingService {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
     status: KeyRingStatus;
   }> {
-    const multiKeyStoreInfo = await this.keyRing.deleteKeyRing(index, password);
-    return {
-      multiKeyStoreInfo,
-      status: this.keyRing.status,
-    };
+    let keyStoreChanged = false;
+
+    try {
+      const result = await this.keyRing.deleteKeyRing(index, password);
+      keyStoreChanged = result.keyStoreChanged;
+      return {
+        multiKeyStoreInfo: result.multiKeyStoreInfo,
+        status: this.keyRing.status,
+      };
+    } finally {
+      if (keyStoreChanged) {
+        this.interactionService.dispatchEvent(
+          WEBPAGE_PORT,
+          "keystore-changed",
+          {}
+        );
+      }
+    }
   }
 
   async updateNameKeyRing(
@@ -377,7 +390,20 @@ export class KeyRingService {
   }
 
   async setKeyStoreCoinType(chainId: string, coinType: number): Promise<void> {
+    const prevCoinType = this.keyRing.computeKeyStoreCoinType(
+      chainId,
+      await this.chainsService.getChainCoinType(chainId)
+    );
+
     await this.keyRing.setKeyStoreCoinType(chainId, coinType);
+
+    if (prevCoinType !== coinType) {
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
+    }
   }
 
   async getKeyStoreBIP44Selectables(

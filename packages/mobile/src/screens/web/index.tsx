@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { PageWithView } from "../../components/page";
 import { Platform, Text } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
@@ -7,6 +13,7 @@ import { Keplr } from "@keplr-wallet/provider";
 import { RNMessageRequesterInternal } from "../../router";
 import { RNInjectedKeplr } from "../../injected/injected-provider";
 import RNFS from "react-native-fs";
+import EventEmitter from "eventemitter3";
 
 export const useInjectedSourceCode = () => {
   const [code, setCode] = useState<string | undefined>();
@@ -33,26 +40,35 @@ export const WebScreen: FunctionComponent = () => {
   // IMPORTANT: Current message requester is for the internal usages.
   //            Don't use it in the production!!
   const [keplr] = useState(
-    () => new Keplr("0.0.1", new RNMessageRequesterInternal())
-  );
-  const [messageHandler] = useState(() =>
-    RNInjectedKeplr.onMessageHandler(keplr)
+    () => new Keplr("0.0.1", "core", new RNMessageRequesterInternal())
   );
 
-  const sourceCode = useInjectedSourceCode();
+  const [eventEmitter] = useState(() => new EventEmitter());
+  const onMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      eventEmitter.emit("message", event.nativeEvent);
+    },
+    [eventEmitter]
+  );
 
   const webviewRef = useRef<WebView | null>(null);
 
-  const onMessage = async (event: WebViewMessageEvent) => {
-    const response = await messageHandler(event.nativeEvent.data);
-    // TODO: How to handle the target origin?
-    webviewRef.current?.injectJavaScript(
-      `
-      window.postMessage(\`${JSON.stringify(response)}\`, "*");
-      true; // note: this is required, or you'll sometimes get silent failures
-      `
+  useEffect(() => {
+    RNInjectedKeplr.startProxy(
+      keplr,
+      {
+        addMessageListener: (fn) => {
+          eventEmitter.addListener("message", fn);
+        },
+        postMessage: (message) => {
+          webviewRef.current?.postMessage(JSON.stringify(message));
+        },
+      },
+      RNInjectedKeplr.parseWebviewMessage
     );
-  };
+  }, [eventEmitter, keplr]);
+
+  const sourceCode = useInjectedSourceCode();
 
   return (
     <PageWithView style={style.flatten(["padding-0"])}>

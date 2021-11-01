@@ -87,7 +87,7 @@ export class RootStore {
       this.chainStore,
       async () => {
         // TOOD: Set version for Keplr API
-        return new Keplr("", new RNMessageRequesterInternal());
+        return new Keplr("", "core", new RNMessageRequesterInternal());
       },
       QueriesWithCosmosAndSecret
     );
@@ -110,7 +110,8 @@ export class RootStore {
           suggestChain: false,
           autoInit: true,
           getKeplr: async () => {
-            return new Keplr("", new RNMessageRequesterInternal());
+            // TOOD: Set version for Keplr API
+            return new Keplr("", "core", new RNMessageRequesterInternal());
           },
         },
       }

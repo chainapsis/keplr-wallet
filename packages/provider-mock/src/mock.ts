@@ -1,6 +1,7 @@
 import {
   Keplr,
   KeplrIntereactionOptions,
+  KeplrMode,
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
@@ -21,6 +22,7 @@ import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
 
 export class MockKeplr implements Keplr {
   readonly version: string = "0.0.1";
+  readonly mode: KeplrMode = "extension";
 
   public defaultOptions: KeplrIntereactionOptions = {};
 
