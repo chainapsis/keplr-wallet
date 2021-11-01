@@ -62,7 +62,7 @@ export class AnalyticsStore {
 
   initializeAnalytics(): void {
     this.amplitudeAnalytics = Amplitude.getInstance();
-    this.amplitudeAnalytics.init("a7a210fad464b9f84af711bc29e73c26");
+    this.amplitudeAnalytics.init("03e0234602d4044c9123bdad308fa1bc");
 
     this._isInitialized = true;
   }
