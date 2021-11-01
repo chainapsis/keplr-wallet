@@ -1,6 +1,6 @@
 {
   "name": "mobile",
-  "version": "0.9.5-rc.2",
+  "version": "0.9.5-rc.3",
   "private": true,
   "workspaces": {
     "nohoist": [
