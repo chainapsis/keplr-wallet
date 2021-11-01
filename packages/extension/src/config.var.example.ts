@@ -108,4 +108,9 @@ export const EMONEY_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const EMONEY_REST_ENDPOINT = "";
 export const EMONEY_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const AGORIC_RPC_ENDPOINT = "";
+export const AGORIC_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const AGORIC_REST_ENDPOINT = "";
+export const AGORIC_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const PRIVILEGED_ORIGINS: string[] = [];
