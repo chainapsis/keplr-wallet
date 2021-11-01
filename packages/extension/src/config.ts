@@ -1105,8 +1105,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0,
-      average: 0.025,
-      high: 0.04,
+      average: 0,
+      high: 0,
     },
     features: ["stargate", "no-legacy-stdTx"],
   },
