@@ -57,7 +57,11 @@ import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 
-window.keplr = new Keplr(manifest.version, new InExtensionMessageRequester());
+window.keplr = new Keplr(
+  manifest.version,
+  "core",
+  new InExtensionMessageRequester()
+);
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");

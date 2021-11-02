@@ -180,7 +180,7 @@ export class KeyRing {
     return this.keyStore.meta[key] ?? "";
   }
 
-  private computeKeyStoreCoinType(
+  public computeKeyStoreCoinType(
     chainId: string,
     defaultCoinType: number
   ): number {
@@ -481,7 +481,10 @@ export class KeyRing {
   public async deleteKeyRing(
     index: number,
     password: string
-  ): Promise<MultiKeyStoreInfoWithSelected> {
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+    keyStoreChanged: boolean;
+  }> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
     }
@@ -503,6 +506,7 @@ export class KeyRing {
     // Make sure that password is valid.
     await Crypto.decrypt(this.crypto, keyStore, password);
 
+    let keyStoreChanged = false;
     if (this.keyStore) {
       // If key store is currently selected key store
       if (
@@ -522,12 +526,17 @@ export class KeyRing {
           this.mnemonic = undefined;
           this.privateKey = undefined;
         }
+
+        keyStoreChanged = true;
       }
     }
 
     this.multiKeyStore = multiKeyStore;
     await this.save();
-    return this.getMultiKeyStoreInfo();
+    return {
+      multiKeyStoreInfo: this.getMultiKeyStoreInfo(),
+      keyStoreChanged,
+    };
   }
 
   public async updateNameKeyRing(

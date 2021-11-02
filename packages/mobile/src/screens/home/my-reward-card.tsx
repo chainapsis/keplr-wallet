@@ -52,6 +52,14 @@ export const MyRewardCard: FunctionComponent<{
                     txHash: Buffer.from(txHash).toString("hex"),
                   });
                 },
+                onFulfill: (tx) => {
+                  const isSuccess = tx.code == null || tx.code === 0;
+                  analyticsStore.logEvent("Claim reward finished", {
+                    chainId: chainStore.current.chainId,
+                    chainName: chainStore.current.chainName,
+                    isSuccess,
+                  });
+                },
               }
             );
           } catch (e) {

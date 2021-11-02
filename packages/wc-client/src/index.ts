@@ -7,6 +7,7 @@ import {
   ChainInfo,
   Keplr,
   KeplrIntereactionOptions,
+  KeplrMode,
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
@@ -99,6 +100,7 @@ export class KeplrWalletConnectV1 implements Keplr {
   }
 
   readonly version: string = "0.9.0";
+  readonly mode: KeplrMode = "walletconnect";
 
   defaultOptions: KeplrIntereactionOptions = {};
 
