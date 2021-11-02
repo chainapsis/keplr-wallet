@@ -16,6 +16,15 @@
 }
 
 .deposit-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 16px;
+
+  .qr-code {
+    margin-bottom: 16px;
+  }
+
   .address {
     text-align: center;
     font-size: 16px;

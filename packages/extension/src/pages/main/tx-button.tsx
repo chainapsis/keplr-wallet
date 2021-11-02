@@ -62,15 +62,9 @@ const DepositModal: FunctionComponent<{
   );
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", height: "250px" }}
-      className={styleTxButton.depositModal}
-    >
-      <div style={{ flex: 1 }} />
-      <div style={{ display: "flex" }}>
-        <div style={{ flex: 1 }} />
+    <div className={styleTxButton.depositModal}>
+      <div className={styleTxButton.qrCode}>
         <canvas id="qrcode" ref={qrCodeRef} />
-        <div style={{ flex: 1 }} />
       </div>
       <div className={styleTxButton.address} onClick={copyAddress}>
         <Address
@@ -81,7 +75,6 @@ const DepositModal: FunctionComponent<{
           {bech32Address}
         </Address>
       </div>
-      <div style={{ flex: 1 }} />
     </div>
   );
 };
