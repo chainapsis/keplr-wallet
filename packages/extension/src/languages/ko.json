@@ -169,6 +169,7 @@
   "lock.input.password": "비밀번호",
   "lock.input.password.error.required": "비밀번호를 입력하세요",
   "lock.input.password.error.invalid": "잘못된 비밀번호입니다",
+  "lock.alert.capslock": "CapsLock이 켜져 있습니다",
   "lock.button.unlock": "잠금 해제",
 
   "send.input.recipient": "받는 주소",

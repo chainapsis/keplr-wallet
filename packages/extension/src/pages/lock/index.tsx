@@ -25,6 +25,7 @@ interface FormData {
 export const LockPage: FunctionComponent = observer(() => {
   const intl = useIntl();
   const history = useHistory();
+  const [isOnCapsLock, setIsOnCapsLock] = useState(false);
 
   const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {
@@ -96,7 +97,19 @@ export const LockPage: FunctionComponent = observer(() => {
               id: "lock.input.password.error.required",
             }),
           })}
+          onKeyDown={(e) => {
+            if (e.getModifierState("CapsLock")) {
+              setIsOnCapsLock(true);
+            } else {
+              setIsOnCapsLock(false);
+            }
+          }}
         />
+        {isOnCapsLock && (
+          <div className={style.capslockAlert}>
+            <FormattedMessage id="lock.alert.capslock" />
+          </div>
+        )}
         <Button type="submit" color="primary" block data-loading={loading}>
           <FormattedMessage id="lock.button.unlock" />
         </Button>
