@@ -103,6 +103,8 @@ import {
   ImportFromExtensionScreen,
   ImportFromExtensionSetPasswordScreen,
 } from "./screens/register/import-from-extension";
+import { OsmosisWebpageScreen } from "./screens/web/webpages";
+import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 
 const {
   SmartNavigatorProvider,
@@ -213,6 +215,12 @@ const {
     },
     TxFailedResult: {
       upperScreenName: "Others",
+    },
+    "Web.Intro": {
+      upperScreenName: "Web",
+    },
+    "Web.Osmosis": {
+      upperScreenName: "Web",
     },
   }).withParams<{
     "Register.NewMnemonic": {
@@ -712,6 +720,25 @@ export const AddressBookStackScreen: FunctionComponent = () => {
   );
 };
 
+export const WebNavigation: FunctionComponent = () => {
+  return (
+    <Stack.Navigator
+      initialRouteName="Web.Intro"
+      screenOptions={{
+        ...WebpageScreenScreenOptionsPreset,
+      }}
+      headerMode="screen"
+    >
+      <Stack.Screen
+        options={{ headerShown: false }}
+        name="Web.Intro"
+        component={WebScreen}
+      />
+      <Stack.Screen name="Web.Osmosis" component={OsmosisWebpageScreen} />
+    </Stack.Navigator>
+  );
+};
+
 export const MainTabNavigation: FunctionComponent = () => {
   const style = useStyle();
 
@@ -831,7 +858,7 @@ export const MainTabNavigation: FunctionComponent = () => {
       )}
     >
       <Tab.Screen name="Main" component={MainNavigation} />
-      {__DEV__ ? <Tab.Screen name="Web" component={WebScreen} /> : null}
+      {__DEV__ ? <Tab.Screen name="Web" component={WebNavigation} /> : null}
       <Tab.Screen
         name="Settings"
         component={SettingStackScreen}
