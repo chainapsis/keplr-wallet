@@ -20260,10 +20260,10 @@ react-native-url-polyfill@^1.3.0:
   dependencies:
     whatwg-url-without-unicode "8.0.0-3"
 
-react-native-webview@^11.6.5:
-  version "11.6.5"
-  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-11.6.5.tgz#34e86a342c6a2cbcf109db98f639f7bb8f055da2"
-  integrity sha512-5U+hI8snkCrFeDy+bUTszwhzcJIenaaOy3ubhY77HZq7R0pFIZzRYWkT0YXe1ymRYW9mSU96nr6S0AVDk8qkMw==
+react-native-webview@^11.14.2:
+  version "11.14.2"
+  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-11.14.2.tgz#31e62864b28f950fd887bf20469fe8cd71101d29"
+  integrity sha512-4pRLskbu98xmC8q+YY9cfshSxhywVran+tQ0ou7V6Js0ye2Zb33dDpe6d7QUWD39w5LbYSI3knpxLLVDAVm0hA==
   dependencies:
     escape-string-regexp "2.0.0"
     invariant "2.2.4"
