@@ -64,7 +64,10 @@ async function openPopupWindow(
 }
 
 export class ExtensionEnv {
-  static readonly produceEnv = (sender: MessageSender): Env => {
+  static readonly produceEnv = (
+    sender: MessageSender,
+    routerMeta: Record<string, any>
+  ): Env => {
     const isInternalMsg = ExtensionEnv.checkIsInternalMessage(
       sender,
       browser.runtime.id,
@@ -149,13 +152,35 @@ export class ExtensionEnv {
         }
 
         const backgroundPage = await browser.runtime.getBackgroundPage();
-        const windows = browser.extension.getViews().filter((window) => {
-          return window.location.href !== backgroundPage.location.href;
-        });
-        const prefer = windows.find((window) => {
-          return window.location.href === sender.url;
-        });
-        (prefer ?? windows[0]).location.href = url;
+        const views = browser.extension
+          .getViews({
+            // Request only for the same tab as the requested frontend.
+            // But the browser popup itself has no information about tab.
+            // Also, if user has multiple windows on, we need another way to distinguish them.
+            // See the comment right below this part.
+            tabId: sender.tab?.id,
+          })
+          .filter((window) => {
+            // You need to request interaction with the frontend that requested the message.
+            // It is difficult to achieve this with the browser api alone.
+            // Check the router id under the window of each view
+            // and process only the view that has the same router id of the requested frontend.
+            return (
+              window.location.href !== backgroundPage.location.href &&
+              (routerMeta.routerId == null ||
+                routerMeta.routerId === window.keplrExtensionRouterId)
+            );
+          });
+        if (views.length > 0) {
+          for (const view of views) {
+            view.location.href = url;
+          }
+        }
+
+        msg.routerMeta = {
+          ...msg.routerMeta,
+          receiverRouterId: routerMeta.routerId,
+        };
 
         return await new InExtensionMessageRequester().sendMessage(
           APP_PORT,

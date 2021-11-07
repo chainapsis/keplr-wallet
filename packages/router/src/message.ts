@@ -37,6 +37,12 @@ export abstract class Message<R> {
   public readonly origin!: string;
 
   /**
+   * You can put values here that can be helpful when processing in the router.
+   * In logic, these values should not be used.
+   */
+  public routerMeta?: Record<string, any>;
+
+  /**
    * Ask for approval if message is sent externally.
    */
   approveExternal(

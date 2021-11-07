@@ -3,6 +3,7 @@ import {
   Message,
   JSONUint8Array,
 } from "@keplr-wallet/router";
+import { getKeplrExtensionRouterId } from "../utils";
 
 // The message requester to send the message to the content scripts.
 // This will send message to the tab with the content script.
@@ -19,6 +20,10 @@ export class ContentScriptMessageRequester implements MessageRequester {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     msg["origin"] = window.location.origin;
+    msg.routerMeta = {
+      ...msg.routerMeta,
+      routerId: getKeplrExtensionRouterId(),
+    };
 
     const wrappedMsg = JSONUint8Array.wrap(msg);
 

@@ -3,6 +3,7 @@ import {
   Message,
   JSONUint8Array,
 } from "@keplr-wallet/router";
+import { getKeplrExtensionRouterId } from "../utils";
 
 export class InExtensionMessageRequester implements MessageRequester {
   async sendMessage<M extends Message<unknown>>(
@@ -15,6 +16,10 @@ export class InExtensionMessageRequester implements MessageRequester {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     msg["origin"] = window.location.origin;
+    msg.routerMeta = {
+      ...msg.routerMeta,
+      routerId: getKeplrExtensionRouterId(),
+    };
 
     const result = JSONUint8Array.unwrap(
       await browser.runtime.sendMessage({
@@ -46,6 +51,10 @@ export class InExtensionMessageRequester implements MessageRequester {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     msg["origin"] = window.location.origin;
+    msg.routerMeta = {
+      ...msg.routerMeta,
+      routerId: getKeplrExtensionRouterId(),
+    };
 
     const result = JSONUint8Array.unwrap(
       await browser.tabs.sendMessage(tabId, {
