@@ -1173,7 +1173,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.01,
       high: 0.02,
     },
-    features: ['stargate', 'ibc-transfer', "no-legacy-stdTx", "cosmwasm"]
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "cosmwasm"],
   },
   {
     rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,

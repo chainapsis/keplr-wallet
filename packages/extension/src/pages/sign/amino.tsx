@@ -139,33 +139,32 @@ export function renderAminoMessage(
         });
       }
 
-
-    return {
-      icon: "fas fa-paper-plane",
-      title: intl.formatMessage({
-        id: "sign.list.message.cyber/Link.title",
-      }),
-      content: (
-        <FormattedMessage
-          id="sign.list.message.cyber/Link.content"
-          values={{
-            b: (...chunks: any[]) => <b>{chunks}</b>,
-            br: <br />,
-            neuron: Bech32Address.shortenAddress(value.neuron, 20),
-            link: cyberlinks
-              .map((link) => {
-                return `${Hash.truncHashPortion(
-                  link.from,
-                  7,
-                  7
-                )} → ${Hash.truncHashPortion(link.to, 7, 7)}`;
-              })
-              .join(", "),
-          }}
-        />
-      ),
-    };
-   }
+      return {
+        icon: "fas fa-paper-plane",
+        title: intl.formatMessage({
+          id: "sign.list.message.cyber/Link.title",
+        }),
+        content: (
+          <FormattedMessage
+            id="sign.list.message.cyber/Link.content"
+            values={{
+              b: (...chunks: any[]) => <b>{chunks}</b>,
+              br: <br />,
+              neuron: Bech32Address.shortenAddress(value.neuron, 20),
+              link: cyberlinks
+                .map((link) => {
+                  return `${Hash.truncHashPortion(
+                    link.from,
+                    7,
+                    7
+                  )} → ${Hash.truncHashPortion(link.to, 7, 7)}`;
+                })
+                .join(", "),
+            }}
+          />
+        ),
+      };
+    }
   } catch (e) {
     console.log(e);
   }
