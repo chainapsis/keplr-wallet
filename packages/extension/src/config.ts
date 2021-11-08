@@ -75,6 +75,10 @@ import {
   AGORIC_RPC_CONFIG,
   AGORIC_REST_ENDPOINT,
   AGORIC_REST_CONFIG,
+  KICHAIN_RPC_ENDPOINT,
+  KICHAIN_RPC_CONFIG,
+  KICHAIN_REST_ENDPOINT,
+  KICHAIN_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1223,6 +1227,54 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04 * Math.pow(10, 12),
     },
     beta: true,
+  },
+    {
+    rpc: KICHAIN_RPC_ENDPOINT,
+    rpcConfig: KICHAIN_RPC_CONFIG,
+    rest: KICHAIN_REST_ENDPOINT,
+    restConfig: KICHAIN_REST_CONFIG,
+    chainId: "kichain-2",
+    chainName: "Ki Chain",
+    stakeCurrency: {
+      coinDenom: "XKI",
+      coinMinimalDenom: "uxki",
+      coinDecimals: 6,
+      coinGeckoId: "ki",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/kichain/stake"
+        : "http://localhost:8080/#/kichain/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/kichain/stake"
+        : "http://localhost:8080/#/kichain/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("ki"),
+    currencies: [
+      {
+        coinDenom: "XKI",
+        coinMinimalDenom: "uxki",
+        coinDecimals: 6,
+        coinGeckoId: "ki",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "XKI",
+        coinMinimalDenom: "uxki",
+        coinDecimals: 6,
+        coinGeckoId: "ki",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.025,
+      average: 0.05,
+      high: 0.075,
+    },
+    features: ["stargate", "ibc-transfer"],
   },
 ];
 

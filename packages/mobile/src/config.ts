@@ -1041,4 +1041,35 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
     hideInUI: true,
   },
+    {
+    rpc: "https://api-keplr.blockchain.ki",
+    rest: "https://rpc-keplr.blockchain.ki",
+    chainId: "kichain-2",
+    chainName: "Ki Chain",
+    stakeCurrency: {
+      coinDenom: "XKI",
+      coinMinimalDenom: "uxki",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("ki"),
+    currencies: [
+      {
+        coinDenom: "XKI",
+        coinMinimalDenom: "uxki",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "XKI",
+        coinMinimalDenom: "uxki",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
+    hideInUI: true,
+  },
 ];
