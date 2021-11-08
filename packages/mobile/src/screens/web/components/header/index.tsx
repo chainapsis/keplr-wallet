@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWebViewState } from "../context";
 import Svg, { Path } from "react-native-svg";
 import { RectButton } from "../../../../components/rect-button";
+import { useNavigation } from "@react-navigation/native";
 
 const ArrowLeftIcon: FunctionComponent<{
   size: number;
@@ -64,6 +65,8 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
   const safeAreaInsets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
+  const navigation = useNavigation();
+
   const webViewState = useWebViewState();
 
   return (
@@ -76,7 +79,9 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
       <RectButton
         style={style.flatten(["border-radius-8", "margin-left-20"])}
         onPress={() => {
-          if (webViewState.webView) {
+          if (!webViewState.canGoBack) {
+            navigation.goBack();
+          } else if (webViewState.webView) {
             webViewState.webView.goBack();
           }
         }}
