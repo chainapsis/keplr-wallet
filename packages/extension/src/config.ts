@@ -75,6 +75,10 @@ import {
   AGORIC_RPC_CONFIG,
   AGORIC_REST_ENDPOINT,
   AGORIC_REST_CONFIG,
+  STARGAZE_RPC_ENDPOINT,
+  STARGAZE_RPC_CONFIG,
+  STARGAZE_REST_ENDPOINT,
+  STARGAZE_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1223,6 +1227,54 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04 * Math.pow(10, 12),
     },
     beta: true,
+  },
+  {
+    rpc: STARGAZE_RPC_ENDPOINT,
+    rpcConfig: STARGAZE_RPC_CONFIG,
+    rest: STARGAZE_REST_ENDPOINT,
+    restConfig: STARGAZE_REST_CONFIG,
+    chainId: "stargaze-1",
+    chainName: "Stargaze",
+    stakeCurrency: {
+      coinDenom: "STARS",
+      coinMinimalDenom: "ustars",
+      coinDecimals: 6,
+      coinGeckoId: "stargaze",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/stargaze/stake"
+        : "http://localhost:8080/#/stargaze/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/stargaze/stake"
+        : "http://localhost:8080/#/stargaze/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stars"),
+    currencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0,
+      high: 0.025,
+    },
+    features: ["stargate", "ibc-transfer"],
   },
 ];
 
