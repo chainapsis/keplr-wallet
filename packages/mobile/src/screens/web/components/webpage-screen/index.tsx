@@ -9,7 +9,7 @@ import { BackHandler, Platform } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { useStyle } from "../../../../styles";
 import { Keplr } from "@keplr-wallet/provider";
-import { RNMessageRequesterInternal } from "../../../../router";
+import { RNMessageRequesterExternal } from "../../../../router";
 import { RNInjectedKeplr } from "../../../../injected/injected-provider";
 import RNFS from "react-native-fs";
 import EventEmitter from "eventemitter3";
@@ -17,6 +17,7 @@ import { PageWithViewInBottomTabView } from "../../../../components/page/view-in
 import { OnScreenWebpageScreenHeader } from "../header";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { WebViewStateContext } from "../context";
+import { URL } from "react-native-url-polyfill";
 
 export const useInjectedSourceCode = () => {
   const [code, setCode] = useState<string | undefined>();
@@ -41,11 +42,36 @@ export const WebpageScreen: FunctionComponent<
 > = (props) => {
   const style = useStyle();
 
+  const webviewRef = useRef<WebView | null>(null);
+  const [currentURL, setCurrentURL] = useState(() => {
+    if (props.source && "uri" in props.source) {
+      return props.source.uri;
+    }
+
+    return "";
+  });
+
   // TODO: Set the version properly.
-  // IMPORTANT: Current message requester is for the internal usages.
-  //            Don't use it in the production!!
   const [keplr] = useState(
-    () => new Keplr("0.0.1", "core", new RNMessageRequesterInternal())
+    () =>
+      new Keplr(
+        "0.0.1",
+        "core",
+        new RNMessageRequesterExternal(() => {
+          if (!webviewRef.current) {
+            throw new Error("Webview not initialized yet");
+          }
+
+          if (!currentURL) {
+            throw new Error("Current URL is empty");
+          }
+
+          return {
+            url: currentURL,
+            origin: new URL(currentURL).origin,
+          };
+        })
+      )
   );
 
   const [eventEmitter] = useState(() => new EventEmitter());
@@ -55,8 +81,6 @@ export const WebpageScreen: FunctionComponent<
     },
     [eventEmitter]
   );
-
-  const webviewRef = useRef<WebView | null>(null);
 
   useEffect(() => {
     RNInjectedKeplr.startProxy(
@@ -132,12 +156,16 @@ export const WebpageScreen: FunctionComponent<
             // Use two handlers to measure simultaneously in ios and android.
             setCanGoBack(e.canGoBack);
             setCanGoForward(e.canGoForward);
+
+            setCurrentURL(e.url);
           }}
           onLoadProgress={(e) => {
             // Strangely, `onLoadProgress` is only invoked whenever page changed only in Android.
             // Use two handlers to measure simultaneously in ios and android.
             setCanGoBack(e.nativeEvent.canGoBack);
             setCanGoForward(e.nativeEvent.canGoForward);
+
+            setCurrentURL(e.nativeEvent.url);
           }}
           contentInsetAdjustmentBehavior="never"
           automaticallyAdjustContentInsets={false}
