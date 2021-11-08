@@ -128,9 +128,15 @@ export const WebpageScreen: FunctionComponent<
   const navigation = useNavigation();
 
   useEffect(() => {
-    navigation.setOptions({
-      gestureEnabled: !canGoBack,
-    });
+    // Android disables the gesture by default.
+    // If we turn on the gesture manually without checking OS,
+    // the gesture will turn on even on Android.
+    // So, checking platform is required.
+    if (Platform.OS === "ios") {
+      navigation.setOptions({
+        gestureEnabled: !canGoBack,
+      });
+    }
   }, [canGoBack, navigation]);
 
   const sourceCode = useInjectedSourceCode();
