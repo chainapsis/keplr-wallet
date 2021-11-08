@@ -1041,4 +1041,35 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
     hideInUI: true,
   },
+  {
+    rpc: "https://rpc.stargaze.publicawesome.dev",
+    rest: "https://rest.stargaze.publicawesome.dev",
+    chainId: "stargaze-1",
+    chainName: "Stargaze",
+    stakeCurrency: {
+      coinDenom: "STARS",
+      coinMinimalDenom: "ustars",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stars"),
+    currencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
+    hideInUI: true,
+  },
 ];
