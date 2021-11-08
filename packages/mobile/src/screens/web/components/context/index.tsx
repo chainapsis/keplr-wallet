@@ -3,6 +3,7 @@ import WebView from "react-native-webview";
 
 export interface WebViewState {
   webView: WebView | null;
+  url: string;
   canGoBack: boolean;
   canGoForward: boolean;
 }

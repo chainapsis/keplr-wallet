@@ -13,7 +13,7 @@ import { RNMessageRequesterExternal } from "../../../../router";
 import { RNInjectedKeplr } from "../../../../injected/injected-provider";
 import RNFS from "react-native-fs";
 import EventEmitter from "eventemitter3";
-import { PageWithViewInBottomTabView } from "../../../../components/page/view-in-bottom-tab-view";
+import { PageWithViewInBottomTabView } from "../../../../components/page";
 import { OnScreenWebpageScreenHeader } from "../header";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { WebViewStateContext } from "../context";
@@ -140,6 +140,7 @@ export const WebpageScreen: FunctionComponent<
       <WebViewStateContext.Provider
         value={{
           webView: webviewRef.current,
+          url: currentURL,
           canGoBack,
           canGoForward,
         }}
