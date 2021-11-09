@@ -29,7 +29,7 @@ export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
 
   const confirm = useConfirm();
 
@@ -138,7 +138,8 @@ export const MainPage: FunctionComponent = observer(() => {
           <CardBody>{<TokensView />}</CardBody>
         </Card>
       ) : null}
-      {chainStore.current.features?.includes("ibc-transfer") ? (
+      {uiConfigStore.showAdvancedIBCTransfer &&
+      chainStore.current.features?.includes("ibc-transfer") ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>
             <IBCTransferView />
