@@ -1045,7 +1045,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     rpc: "https://api-keplr.blockchain.ki",
     rest: "https://rpc-keplr.blockchain.ki",
     chainId: "kichain-2",
-    chainName: "Ki Chain",
+    chainName: "Ki",
     stakeCurrency: {
       coinDenom: "XKI",
       coinMinimalDenom: "uxki",
