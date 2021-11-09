@@ -113,4 +113,9 @@ export const AGORIC_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const AGORIC_REST_ENDPOINT = "";
 export const AGORIC_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const JUNO_RPC_ENDPOINT = "";
+export const JUNO_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const JUNO_REST_ENDPOINT = "";
+export const JUNO_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const PRIVILEGED_ORIGINS: string[] = [];
