@@ -1234,7 +1234,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: KICHAIN_REST_ENDPOINT,
     restConfig: KICHAIN_REST_CONFIG,
     chainId: "kichain-2",
-    chainName: "Ki Chain",
+    chainName: "Ki",
     stakeCurrency: {
       coinDenom: "XKI",
       coinMinimalDenom: "uxki",
