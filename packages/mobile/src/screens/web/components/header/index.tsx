@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { useHeaderHeight } from "@react-navigation/stack";
 import { useStyle } from "../../../../styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,7 +8,6 @@ import Svg, { Path } from "react-native-svg";
 import { RectButton } from "../../../../components/rect-button";
 import { useSmartNavigation } from "../../../../navigation";
 import { URL } from "react-native-url-polyfill";
-import DeviceInfo from "react-native-device-info";
 
 const ArrowLeftIcon: FunctionComponent<{
   size: number;
@@ -94,7 +93,9 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
           height: headerHeight,
           // If the iPhone has notch, add the extra bottom space for header.
           // Because of the lack of space, it slightly invades the notch, giving it a bit more space.
-          paddingTop: safeAreaInsets.top - (DeviceInfo.hasNotch() ? 4 : 0),
+          paddingTop:
+            safeAreaInsets.top -
+            (Platform.OS === "ios" && safeAreaInsets.top > 44 ? 4 : 0),
         },
         style.flatten(["background-color-white", "flex-row", "items-center"]),
       ])}
