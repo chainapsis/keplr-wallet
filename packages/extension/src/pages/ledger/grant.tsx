@@ -83,9 +83,9 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
     let initErrorOn: LedgerInitErrorOn | undefined;
 
     try {
-      const ledger = await (ledgerInitStore.isWebHID
-        ? LedgerWebHIDIniter
-        : LedgerWebUSBIniter)();
+      const ledger = await Ledger.init(
+        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter
+      );
       await ledger.close();
       // Unfortunately, closing ledger blocks the writing to Ledger on background process.
       // I'm not sure why this happens. But, not closing reduce this problem if transport is webhid.
