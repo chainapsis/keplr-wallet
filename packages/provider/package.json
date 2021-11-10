@@ -23,6 +23,6 @@
     "@keplr-wallet/types": "^0.9.5",
     "deepmerge": "^4.2.2",
     "long": "^4.0.0",
-    "secretjs": "^0.16.0"
+    "secretjs": "^0.17.0"
   }
 }

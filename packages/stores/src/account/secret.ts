@@ -7,6 +7,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepReadonly, Optional } from "utility-types";
+import { cosmos } from "@keplr-wallet/cosmos";
 
 export interface HasSecretAccount {
   secret: DeepReadonly<SecretAccount>;
@@ -167,7 +168,16 @@ export class SecretAccount {
       async (tx) => {
         let viewingKey = "";
         if (tx && "data" in tx && tx.data) {
-          const dataOutputCipher = Buffer.from(tx.data as any, "base64");
+          const txData = Buffer.from(tx.data as any, "base64");
+          const dataFields = cosmos.base.abci.v1beta1.TxMsgData.decode(txData);
+          if (dataFields.data.length !== 1) {
+            throw new Error("Invalid length of data fields");
+          }
+
+          const dataField = dataFields.data[0];
+          if (!dataField.data) {
+            throw new Error("Empty data");
+          }
 
           const keplr = await this.base.getKeplr();
 
@@ -181,7 +191,7 @@ export class SecretAccount {
 
           const dataOutput = Buffer.from(
             Buffer.from(
-              await enigmaUtils.decrypt(dataOutputCipher, nonce)
+              await enigmaUtils.decrypt(dataField.data, nonce)
             ).toString(),
             "base64"
           ).toString();
@@ -231,10 +241,10 @@ export class SecretAccount {
           value: {
             sender: this.base.bech32Address,
             contract: contractAddress,
-            callback_code_hash: "",
+            // callback_code_hash: "",
             msg: Buffer.from(encryptedMsg).toString("base64"),
             sent_funds: sentFunds,
-            callback_sig: null,
+            // callback_sig: null,
           },
         };
 
