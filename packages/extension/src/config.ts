@@ -226,7 +226,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.3,
     },
-    features: ["secretwasm"],
+    features: ["stargate", "secretwasm"],
   },
   {
     rpc: AKASH_RPC_ENDPOINT,
