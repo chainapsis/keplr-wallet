@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/crypto",
-  "version": "0.9.5",
+  "version": "0.9.6-rc.1",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -17,7 +17,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
-    "@keplr-wallet/cosmos": "^0.9.5",
+    "@keplr-wallet/cosmos": "^0.9.6-rc.1",
     "@types/crypto-js": "^4.0.1",
     "@types/elliptic": "^6.4.12",
     "@types/sha.js": "^2.4.0"
