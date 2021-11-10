@@ -2227,6 +2227,152 @@ export namespace cosmos {
                 public toJSON(): { [k: string]: any };
             }
         }
+
+        /** Namespace abci. */
+        namespace abci {
+
+            /** Namespace v1beta1. */
+            namespace v1beta1 {
+
+                /** Properties of a MsgData. */
+                interface IMsgData {
+
+                    /** MsgData msgType */
+                    msgType?: (string|null);
+
+                    /** MsgData data */
+                    data?: (Uint8Array|null);
+                }
+
+                /** Represents a MsgData. */
+                class MsgData implements IMsgData {
+
+                    /**
+                     * Constructs a new MsgData.
+                     * @param [p] Properties to set
+                     */
+                    constructor(p?: cosmos.base.abci.v1beta1.IMsgData);
+
+                    /** MsgData msgType. */
+                    public msgType: string;
+
+                    /** MsgData data. */
+                    public data: Uint8Array;
+
+                    /**
+                     * Creates a new MsgData instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns MsgData instance
+                     */
+                    public static create(properties?: cosmos.base.abci.v1beta1.IMsgData): cosmos.base.abci.v1beta1.MsgData;
+
+                    /**
+                     * Encodes the specified MsgData message. Does not implicitly {@link cosmos.base.abci.v1beta1.MsgData.verify|verify} messages.
+                     * @param m MsgData message or plain object to encode
+                     * @param [w] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(m: cosmos.base.abci.v1beta1.IMsgData, w?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes a MsgData message from the specified reader or buffer.
+                     * @param r Reader or buffer to decode from
+                     * @param [l] Message length if known beforehand
+                     * @returns MsgData
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): cosmos.base.abci.v1beta1.MsgData;
+
+                    /**
+                     * Creates a MsgData message from a plain object. Also converts values to their respective internal types.
+                     * @param d Plain object
+                     * @returns MsgData
+                     */
+                    public static fromObject(d: { [k: string]: any }): cosmos.base.abci.v1beta1.MsgData;
+
+                    /**
+                     * Creates a plain object from a MsgData message. Also converts values to other types if specified.
+                     * @param m MsgData
+                     * @param [o] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(m: cosmos.base.abci.v1beta1.MsgData, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this MsgData to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of a TxMsgData. */
+                interface ITxMsgData {
+
+                    /** TxMsgData data */
+                    data?: (cosmos.base.abci.v1beta1.IMsgData[]|null);
+                }
+
+                /** Represents a TxMsgData. */
+                class TxMsgData implements ITxMsgData {
+
+                    /**
+                     * Constructs a new TxMsgData.
+                     * @param [p] Properties to set
+                     */
+                    constructor(p?: cosmos.base.abci.v1beta1.ITxMsgData);
+
+                    /** TxMsgData data. */
+                    public data: cosmos.base.abci.v1beta1.IMsgData[];
+
+                    /**
+                     * Creates a new TxMsgData instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns TxMsgData instance
+                     */
+                    public static create(properties?: cosmos.base.abci.v1beta1.ITxMsgData): cosmos.base.abci.v1beta1.TxMsgData;
+
+                    /**
+                     * Encodes the specified TxMsgData message. Does not implicitly {@link cosmos.base.abci.v1beta1.TxMsgData.verify|verify} messages.
+                     * @param m TxMsgData message or plain object to encode
+                     * @param [w] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(m: cosmos.base.abci.v1beta1.ITxMsgData, w?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes a TxMsgData message from the specified reader or buffer.
+                     * @param r Reader or buffer to decode from
+                     * @param [l] Message length if known beforehand
+                     * @returns TxMsgData
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): cosmos.base.abci.v1beta1.TxMsgData;
+
+                    /**
+                     * Creates a TxMsgData message from a plain object. Also converts values to their respective internal types.
+                     * @param d Plain object
+                     * @returns TxMsgData
+                     */
+                    public static fromObject(d: { [k: string]: any }): cosmos.base.abci.v1beta1.TxMsgData;
+
+                    /**
+                     * Creates a plain object from a TxMsgData message. Also converts values to other types if specified.
+                     * @param m TxMsgData
+                     * @param [o] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(m: cosmos.base.abci.v1beta1.TxMsgData, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this TxMsgData to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+            }
+        }
     }
 
     /** Namespace crypto. */
