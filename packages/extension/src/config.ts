@@ -179,7 +179,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: SECRET_NETWORK_RPC_CONFIG,
     rest: SECRET_NETWORK_REST_ENDPOINT,
     restConfig: SECRET_NETWORK_REST_CONFIG,
-    chainId: "secret-3",
+    chainId: "secret-4",
     chainName: "Secret Network",
     stakeCurrency: {
       coinDenom: "SCRT",
