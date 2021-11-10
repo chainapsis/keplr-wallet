@@ -41,7 +41,7 @@ export abstract class Router {
     sender: MessageSender
   ): Promise<unknown> {
     const msg = this.msgRegistry.parseMessage(JSONUint8Array.unwrap(message));
-    const env = this.envProducer(sender);
+    const env = this.envProducer(sender, msg.routerMeta ?? {});
 
     for (const guard of this.guards) {
       await guard(env, msg, sender);

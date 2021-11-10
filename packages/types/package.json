@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/types",
-  "version": "0.9.5",
+  "version": "0.9.6-rc.1",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -21,6 +21,6 @@
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "axios": "^0.21.0",
     "long": "^4.0.0",
-    "secretjs": "^0.16.0"
+    "secretjs": "^0.17.0"
   }
 }

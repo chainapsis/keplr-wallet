@@ -1,4 +1,4 @@
-const PopupSize = {
+export const PopupSize = {
   width: 360,
   height: 580,
 };
@@ -13,13 +13,15 @@ const lastWindowIds: Record<string, number | undefined> = {};
  */
 export async function openPopupWindow(
   url: string,
-  channel: string = "default"
+  channel: string = "default",
+  options: Partial<Parameters<typeof browser.windows.create>[0]> = {}
 ): Promise<number> {
   const option = {
     width: PopupSize.width,
     height: PopupSize.height,
     url: url,
     type: "popup" as const,
+    ...options,
   };
 
   if (lastWindowIds[channel] !== undefined) {

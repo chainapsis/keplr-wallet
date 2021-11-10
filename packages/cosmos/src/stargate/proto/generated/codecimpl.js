@@ -2235,6 +2235,173 @@ exports.cosmos = $root.cosmos = (() => {
             })();
             return v1beta1;
         })();
+        base.abci = (function () {
+            const abci = {};
+            abci.v1beta1 = (function () {
+                const v1beta1 = {};
+                v1beta1.MsgData = (function () {
+                    function MsgData(p) {
+                        if (p)
+                            for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
+                                if (p[ks[i]] != null)
+                                    this[ks[i]] = p[ks[i]];
+                    }
+                    MsgData.prototype.msgType = "";
+                    MsgData.prototype.data = $util.newBuffer([]);
+                    MsgData.create = function create(properties) {
+                        return new MsgData(properties);
+                    };
+                    MsgData.encode = function encode(m, w) {
+                        if (!w)
+                            w = $Writer.create();
+                        if (m.msgType != null && Object.hasOwnProperty.call(m, "msgType"))
+                            w.uint32(10).string(m.msgType);
+                        if (m.data != null && Object.hasOwnProperty.call(m, "data"))
+                            w.uint32(18).bytes(m.data);
+                        return w;
+                    };
+                    MsgData.decode = function decode(r, l) {
+                        if (!(r instanceof $Reader))
+                            r = $Reader.create(r);
+                        var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.base.abci.v1beta1.MsgData();
+                        while (r.pos < c) {
+                            var t = r.uint32();
+                            switch (t >>> 3) {
+                                case 1:
+                                    m.msgType = r.string();
+                                    break;
+                                case 2:
+                                    m.data = r.bytes();
+                                    break;
+                                default:
+                                    r.skipType(t & 7);
+                                    break;
+                            }
+                        }
+                        return m;
+                    };
+                    MsgData.fromObject = function fromObject(d) {
+                        if (d instanceof $root.cosmos.base.abci.v1beta1.MsgData)
+                            return d;
+                        var m = new $root.cosmos.base.abci.v1beta1.MsgData();
+                        if (d.msgType != null) {
+                            m.msgType = String(d.msgType);
+                        }
+                        if (d.data != null) {
+                            if (typeof d.data === "string")
+                                $util.base64.decode(d.data, m.data = $util.newBuffer($util.base64.length(d.data)), 0);
+                            else if (d.data.length)
+                                m.data = d.data;
+                        }
+                        return m;
+                    };
+                    MsgData.toObject = function toObject(m, o) {
+                        if (!o)
+                            o = {};
+                        var d = {};
+                        if (o.defaults) {
+                            d.msgType = "";
+                            if (o.bytes === String)
+                                d.data = "";
+                            else {
+                                d.data = [];
+                                if (o.bytes !== Array)
+                                    d.data = $util.newBuffer(d.data);
+                            }
+                        }
+                        if (m.msgType != null && m.hasOwnProperty("msgType")) {
+                            d.msgType = m.msgType;
+                        }
+                        if (m.data != null && m.hasOwnProperty("data")) {
+                            d.data = o.bytes === String ? $util.base64.encode(m.data, 0, m.data.length) : o.bytes === Array ? Array.prototype.slice.call(m.data) : m.data;
+                        }
+                        return d;
+                    };
+                    MsgData.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+                    return MsgData;
+                })();
+                v1beta1.TxMsgData = (function () {
+                    function TxMsgData(p) {
+                        this.data = [];
+                        if (p)
+                            for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
+                                if (p[ks[i]] != null)
+                                    this[ks[i]] = p[ks[i]];
+                    }
+                    TxMsgData.prototype.data = $util.emptyArray;
+                    TxMsgData.create = function create(properties) {
+                        return new TxMsgData(properties);
+                    };
+                    TxMsgData.encode = function encode(m, w) {
+                        if (!w)
+                            w = $Writer.create();
+                        if (m.data != null && m.data.length) {
+                            for (var i = 0; i < m.data.length; ++i)
+                                $root.cosmos.base.abci.v1beta1.MsgData.encode(m.data[i], w.uint32(10).fork()).ldelim();
+                        }
+                        return w;
+                    };
+                    TxMsgData.decode = function decode(r, l) {
+                        if (!(r instanceof $Reader))
+                            r = $Reader.create(r);
+                        var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.base.abci.v1beta1.TxMsgData();
+                        while (r.pos < c) {
+                            var t = r.uint32();
+                            switch (t >>> 3) {
+                                case 1:
+                                    if (!(m.data && m.data.length))
+                                        m.data = [];
+                                    m.data.push($root.cosmos.base.abci.v1beta1.MsgData.decode(r, r.uint32()));
+                                    break;
+                                default:
+                                    r.skipType(t & 7);
+                                    break;
+                            }
+                        }
+                        return m;
+                    };
+                    TxMsgData.fromObject = function fromObject(d) {
+                        if (d instanceof $root.cosmos.base.abci.v1beta1.TxMsgData)
+                            return d;
+                        var m = new $root.cosmos.base.abci.v1beta1.TxMsgData();
+                        if (d.data) {
+                            if (!Array.isArray(d.data))
+                                throw TypeError(".cosmos.base.abci.v1beta1.TxMsgData.data: array expected");
+                            m.data = [];
+                            for (var i = 0; i < d.data.length; ++i) {
+                                if (typeof d.data[i] !== "object")
+                                    throw TypeError(".cosmos.base.abci.v1beta1.TxMsgData.data: object expected");
+                                m.data[i] = $root.cosmos.base.abci.v1beta1.MsgData.fromObject(d.data[i]);
+                            }
+                        }
+                        return m;
+                    };
+                    TxMsgData.toObject = function toObject(m, o) {
+                        if (!o)
+                            o = {};
+                        var d = {};
+                        if (o.arrays || o.defaults) {
+                            d.data = [];
+                        }
+                        if (m.data && m.data.length) {
+                            d.data = [];
+                            for (var j = 0; j < m.data.length; ++j) {
+                                d.data[j] = $root.cosmos.base.abci.v1beta1.MsgData.toObject(m.data[j], o);
+                            }
+                        }
+                        return d;
+                    };
+                    TxMsgData.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+                    return TxMsgData;
+                })();
+                return v1beta1;
+            })();
+            return abci;
+        })();
         return base;
     })();
     cosmos.crypto = (function () {

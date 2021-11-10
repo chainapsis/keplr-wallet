@@ -29,8 +29,11 @@ import {
 import { APP_PORT } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
+import { UIConfigStore } from "./ui-config";
 
 export class RootStore {
+  public readonly uiConfigStore: UIConfigStore;
+
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
   public readonly ibcChannelStore: IBCChannelStore;
@@ -51,6 +54,10 @@ export class RootStore {
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   constructor() {
+    this.uiConfigStore = new UIConfigStore(
+      new ExtensionKVStore("store_ui_config")
+    );
+
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 
