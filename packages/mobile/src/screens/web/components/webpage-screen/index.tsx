@@ -90,7 +90,14 @@ export const WebpageScreen: FunctionComponent<
           eventEmitter.addListener("message", fn);
         },
         postMessage: (message) => {
-          webviewRef.current?.postMessage(JSON.stringify(message));
+          webviewRef.current?.injectJavaScript(
+            `
+                window.postMessage(${JSON.stringify(
+                  message
+                )}, window.location.origin);
+                true; // note: this is required, or you'll sometimes get silent failures
+              `
+          );
         },
       },
       RNInjectedKeplr.parseWebviewMessage
@@ -156,7 +163,7 @@ export const WebpageScreen: FunctionComponent<
       {sourceCode ? (
         <WebView
           ref={webviewRef}
-          injectedJavaScript={sourceCode}
+          injectedJavaScriptBeforeContentLoaded={sourceCode}
           onMessage={onMessage}
           onNavigationStateChange={(e) => {
             // Strangely, `onNavigationStateChange` is only invoked whenever page changed only in IOS.
