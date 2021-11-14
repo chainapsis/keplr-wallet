@@ -38,7 +38,9 @@ export const useInjectedSourceCode = () => {
 };
 
 export const WebpageScreen: FunctionComponent<
-  React.ComponentProps<typeof WebView>
+  React.ComponentProps<typeof WebView> & {
+    name: string;
+  }
 > = (props) => {
   const style = useStyle();
 
@@ -153,6 +155,7 @@ export const WebpageScreen: FunctionComponent<
       <WebViewStateContext.Provider
         value={{
           webView: webviewRef.current,
+          name: props.name,
           url: currentURL,
           canGoBack,
           canGoForward,
