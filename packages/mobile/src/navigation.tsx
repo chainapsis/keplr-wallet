@@ -858,6 +858,8 @@ export const MainTabNavigation: FunctionComponent = () => {
           borderTopColor: style.get("border-color-border-white").borderColor,
           shadowColor: style.get("color-transparent").color,
           elevation: 0,
+          paddingLeft: 40,
+          paddingRight: 40,
         },
         showLabel: false,
       }}
