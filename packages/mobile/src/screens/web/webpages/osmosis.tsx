@@ -5,8 +5,8 @@ export const OsmosisWebpageScreen: FunctionComponent = () => {
   return (
     <WebpageScreen
       name="Osmosis"
-      source={{ uri: "https://40b25c93.osmosis-frontend.pages.dev" }}
-      originWhitelist={["https://40b25c93.osmosis-frontend.pages.dev"]}
+      source={{ uri: "https://app.osmosis.zone" }}
+      originWhitelist={["https://app.osmosis.zone"]}
     />
   );
 };
