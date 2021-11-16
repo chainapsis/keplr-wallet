@@ -18,6 +18,8 @@ import { OnScreenWebpageScreenHeader } from "../header";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { WebViewStateContext } from "../context";
 import { URL } from "react-native-url-polyfill";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
 
 export const useInjectedSourceCode = () => {
   const [code, setCode] = useState<string | undefined>();
@@ -41,7 +43,9 @@ export const WebpageScreen: FunctionComponent<
   React.ComponentProps<typeof WebView> & {
     name: string;
   }
-> = (props) => {
+> = observer((props) => {
+  const { keyRingStore } = useStore();
+
   const style = useStyle();
 
   const webviewRef = useRef<WebView | null>(null);
@@ -105,6 +109,23 @@ export const WebpageScreen: FunctionComponent<
       RNInjectedKeplr.parseWebviewMessage
     );
   }, [eventEmitter, keplr]);
+
+  useEffect(() => {
+    const keyStoreChangedListener = () => {
+      webviewRef.current?.injectJavaScript(
+        `
+            window.dispatchEvent(new Event("keplr_keystorechange"));
+            true; // note: this is required, or you'll sometimes get silent failures
+          `
+      );
+    };
+
+    keyRingStore.addKeyStoreChangedListener(keyStoreChangedListener);
+
+    return () => {
+      keyRingStore.removeKeyStoreChangedListener(keyStoreChangedListener);
+    };
+  }, [keyRingStore]);
 
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
@@ -193,6 +214,6 @@ export const WebpageScreen: FunctionComponent<
       ) : null}
     </PageWithViewInBottomTabView>
   );
-};
+});
 
 export * from "./screen-options";
