@@ -6,6 +6,17 @@
 >
 This repository is still under development  
 
+## Evmos Integration - Connect to Local Node
+
+1. Run `./init.sh` from within evmos/
+2. Stop execution (ctrl + c), open `~/.evmosd/config/app.toml` and change line 104 (Enable defines if the API server should be enabled) to `enable = True`
+3. Run `evmosd start --json-rpc.enable --pruning=nothing --rpc.unsafe --keyring-backend test --log_level info --json-rpc.api eth,txpool,personal,net,debug,web3` to resume execution
+4. Run `yarn build` within this repo to create an unpacked build of Keplr
+5. Upload the build by visiting chrome://extensions, enabling Developer Mode, and selecting Load Unpacked. Select the folder keplr-extension/packages/extension/prod
+6. Create a wallet in Keplr and run `evmosd tx bank send mykey [KEPLR-WALLET-ADDRESS] 10photon --chain-id evmos_9000-1 --keyring-backend test` to send Photons to your wallet
+
+---
+
 This repository containts submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Extension release. However, all primary features of the extension will work without the closed sourced submodules.  
 
 ## Dev
