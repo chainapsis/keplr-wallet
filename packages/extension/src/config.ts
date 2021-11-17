@@ -75,6 +75,10 @@ import {
   AGORIC_RPC_CONFIG,
   AGORIC_REST_ENDPOINT,
   AGORIC_REST_CONFIG,
+  EVMOS_RPC_ENDPOINT,
+  EVMOS_RPC_CONFIG,
+  EVMOS_REST_ENDPOINT,
+  EVMOS_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1223,6 +1227,51 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04 * Math.pow(10, 12),
     },
     beta: true,
+  },
+  {
+    rpc: EVMOS_RPC_ENDPOINT,
+    rpcConfig: EVMOS_RPC_CONFIG,
+    rest: EVMOS_REST_ENDPOINT,
+    restConfig: EVMOS_REST_CONFIG,
+    chainId: "evmos_9000-1",
+    chainName: "Evmos",
+    stakeCurrency: {
+      coinDenom: "PHOTON",
+      coinMinimalDenom: "aphoton",
+      coinDecimals: 18,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/evmos/stake"
+        : "http://localhost:8080/#/evmos/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/evmos/stake"
+        : "http://localhost:8080/#/evmos/stake",
+    bip44: {
+      coinType: 564,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("evmos"),
+    currencies: [
+      {
+        coinDenom: "PHOTON",
+        coinMinimalDenom: "aphoton",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "PHOTON",
+        coinMinimalDenom: "aphoton",
+        coinDecimals: 18,
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0,
+      high: 0,
+    },
+    features: ["stargate", "no-legacy-stdTx"],
   },
 ];
 

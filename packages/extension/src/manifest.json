@@ -24,7 +24,7 @@
     "scripts": ["browser-polyfill.js", "background.bundle.js"],
     "persistent": true
   },
-  "permissions": ["storage", "notifications", "identity"],
+  "permissions": ["storage", "notifications", "identity", "http://localhost/*"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
