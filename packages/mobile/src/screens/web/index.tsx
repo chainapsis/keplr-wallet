@@ -38,7 +38,7 @@ export const WebScreen: FunctionComponent = () => {
           "margin-bottom-20",
         ])}
       >
-        Choose your service
+        Discover DeFi
       </Text>
       <WebpageImageButton
         name="Osmosis"
