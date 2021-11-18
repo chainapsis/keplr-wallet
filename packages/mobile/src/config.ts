@@ -727,7 +727,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/regen.png",
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
   },
   {
     rpc: "https://rpc-persistence.keplr.app",
@@ -937,6 +937,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "JUNO",
       coinMinimalDenom: "ujuno",
       coinDecimals: 6,
+      coinGeckoId: "juno-network",
     },
     bip44: {
       coinType: 118,
@@ -947,6 +948,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "JUNO",
         coinMinimalDenom: "ujuno",
         coinDecimals: 6,
+        coinGeckoId: "juno-network",
       },
     ],
     feeCurrencies: [
@@ -954,9 +956,10 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "JUNO",
         coinMinimalDenom: "ujuno",
         coinDecimals: 6,
+        coinGeckoId: "juno-network",
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
     hideInUI: true,
   },
   {
@@ -1018,6 +1021,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "terrausd",
       },
+      {
+        coinDenom: "KRT",
+        coinMinimalDenom: "ukrw",
+        coinDecimals: 6,
+        coinGeckoId: "terrakrw",
+      },
     ],
     feeCurrencies: [
       {
@@ -1039,6 +1048,167 @@ export const EmbedChainInfos: AppChainInfo[] = [
       high: 0.015,
     },
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://mainnet-node.like.co/rpc",
+    rest: "https://mainnet-node.like.co",
+    chainId: "likecoin-mainnet-2",
+    chainName: "LikeCoin",
+    stakeCurrency: {
+      coinDenom: "LIKE",
+      coinMinimalDenom: "nanolike",
+      coinDecimals: 9,
+      coinGeckoId: "likecoin",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("cosmos"),
+    currencies: [
+      {
+        coinDenom: "LIKE",
+        coinMinimalDenom: "nanolike",
+        coinDecimals: 9,
+        coinGeckoId: "likecoin",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LIKE",
+        coinMinimalDenom: "nanolike",
+        coinDecimals: 9,
+        coinGeckoId: "likecoin",
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc-impacthub.keplr.app",
+    rest: "https://lcd-impacthub.keplr.app",
+    chainId: "impacthub-3",
+    chainName: "IXO",
+    stakeCurrency: {
+      coinDenom: "IXO",
+      coinMinimalDenom: "uixo",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("ixo"),
+    currencies: [
+      {
+        coinDenom: "IXO",
+        coinMinimalDenom: "uixo",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "IXO",
+        coinMinimalDenom: "uixo",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc.bitcanna.io",
+    rest: "https://lcd.bitcanna.io",
+    chainId: "bitcanna-1",
+    chainName: "BitCanna",
+    stakeCurrency: {
+      coinDenom: "BCNA",
+      coinMinimalDenom: "ubcna",
+      coinDecimals: 6,
+      coinGeckoId: "bitcanna",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("bcna"),
+    currencies: [
+      {
+        coinDenom: "BCNA",
+        coinMinimalDenom: "ubcna",
+        coinDecimals: 6,
+        coinGeckoId: "bitcanna",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BCNA",
+        coinMinimalDenom: "ubcna",
+        coinDecimals: 6,
+        coinGeckoId: "bitcanna",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc.explorebitsong.com",
+    rest: "https://lcd.explorebitsong.com",
+    chainId: "bitsong-2b",
+    chainName: "BitSong",
+    stakeCurrency: {
+      coinDenom: "BTSG",
+      coinMinimalDenom: "ubtsg",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 639,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("bitsong"),
+    currencies: [
+      {
+        coinDenom: "BTSG",
+        coinMinimalDenom: "ubtsg",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BTSG",
+        coinMinimalDenom: "ubtsg",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc-mainnet.blockchain.ki",
+    rest: "https://api-mainnet.blockchain.ki",
+    chainId: "kichain-2",
+    chainName: "Ki",
+    stakeCurrency: {
+      coinDenom: "XKI",
+      coinMinimalDenom: "uxki",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("ki"),
+    currencies: [
+      {
+        coinDenom: "XKI",
+        coinMinimalDenom: "uxki",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "XKI",
+        coinMinimalDenom: "uxki",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
     hideInUI: true,
   },
 ];

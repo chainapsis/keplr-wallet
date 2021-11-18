@@ -12,18 +12,38 @@ export const SettingBiometricLockItem: FunctionComponent<{
   const { keychainStore } = useStore();
 
   const [isOpenModal, setIsOpenModal] = useState(false);
+  /*
+    isTurnOffBiometryFallback indicates that the modal is for turning off the biometry
+    when failing to check the password to turn off by the biometry.
+    This is mainly used to give the chance to the user when the biometry information changed after turning on the biometry sign-in.
+   */
+  const [isTurnOffBiometryFallback, setIsTurnOffBiometryFallback] = useState(
+    false
+  );
 
   return (
     <React.Fragment>
       <PasswordInputModal
-        title="Enable Biometric Authentication"
+        title={
+          !isTurnOffBiometryFallback
+            ? "Enable Biometric Authentication"
+            : "Disable Biometric Authentication"
+        }
         isOpen={isOpenModal}
-        close={() => setIsOpenModal(false)}
+        close={() => {
+          setIsOpenModal(false);
+          setIsTurnOffBiometryFallback(false);
+        }}
         onEnterPassword={async (password) => {
           // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread
           // So to make sure that the loading state changes, just wait very short time.
           await delay(10);
-          await keychainStore.turnOnBiometry(password);
+
+          if (!isTurnOffBiometryFallback) {
+            await keychainStore.turnOnBiometry(password);
+          } else {
+            await keychainStore.turnOffBiometryWithPassword(password);
+          }
         }}
       />
       <SettingItem
@@ -31,11 +51,18 @@ export const SettingBiometricLockItem: FunctionComponent<{
         right={
           <Toggle
             on={keychainStore.isBiometryOn}
-            onChange={(value) => {
+            onChange={async (value) => {
               if (value) {
                 setIsOpenModal(true);
+                setIsTurnOffBiometryFallback(false);
               } else {
-                keychainStore.turnOffBiometry();
+                try {
+                  await keychainStore.turnOffBiometry();
+                } catch (e) {
+                  console.log(e);
+                  setIsOpenModal(true);
+                  setIsTurnOffBiometryFallback(true);
+                }
               }
             }}
           />
