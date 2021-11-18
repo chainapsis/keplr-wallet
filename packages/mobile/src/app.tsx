@@ -46,7 +46,7 @@ if (Platform.OS === "android") {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   // const RNLocalize = require("react-native-localize");
   // if ("__setDefaultTimeZone" in Intl.DateTimeFormat) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   // Intl.DateTimeFormat.__setDefaultTimeZone(RNLocalize.getTimeZone());
   // }

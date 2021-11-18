@@ -11,17 +11,17 @@ export const VectorI: FunctionComponent<{
       strokeLinejoin="round"
       strokeMiterlimit="2"
       clipRule="evenodd"
-      viewBox="0 0 14 22"
+      viewBox="0 0 7 35"
       style={{
         height,
-        aspectRatio: 14 / 22,
+        aspectRatio: 7 / 35,
       }}
     >
       <Path
         fill={color}
         fillRule="nonzero"
-        d="M.095 0v-.071h.163v-.515H.095v-.07h.41v.07H.342v.515h.163V0h-.41z"
-        transform="translate(-579.204 -23.777) translate(576.037 45.644) scale(33.3333)"
+        d="M387.369 133.386H393.66900000000004V168.036H387.369z"
+        transform="translate(-387.369 -133.386)"
       />
     </Svg>
   );

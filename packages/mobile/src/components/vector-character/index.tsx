@@ -16,7 +16,7 @@ const CharacterComponents: {
   G: Characters.VectorG,
   H: Characters.VectorH,
   I: Characters.VectorI,
-  J: Characters.VectorG,
+  J: Characters.VectorJ,
   K: Characters.VectorK,
   L: Characters.VectorL,
   M: Characters.VectorM,

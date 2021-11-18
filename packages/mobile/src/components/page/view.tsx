@@ -6,8 +6,6 @@ import { useSetFocusedScreen } from "./utils";
 
 export const PageWithView: FunctionComponent<
   ViewProps & {
-    fixed?: React.ReactNode;
-
     disableSafeArea?: boolean;
   }
 > = (props) => {

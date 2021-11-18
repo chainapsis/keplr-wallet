@@ -132,6 +132,8 @@ export class KeyRingStore {
   @observable.shallow
   protected selectablesMap: Map<string, KeyRingSelectablesStore> = new Map();
 
+  protected keyStoreChangedListeners: (() => void)[] = [];
+
   constructor(
     protected readonly eventDispatcher: {
       dispatchEvent: (type: string) => void;
@@ -256,7 +258,7 @@ export class KeyRingStore {
     )).multiKeyStoreInfo;
 
     // Emit the key store changed event manually.
-    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+    this.dispatchKeyStoreChangeEvent();
     this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
@@ -282,7 +284,7 @@ export class KeyRingStore {
       yield this.interactionStore.approve("unlock", interaction.id, {});
     }
 
-    this.eventDispatcher.dispatchEvent("keplr_keystoreunlock");
+    this.dispatchKeyStoreChangeEvent();
     this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
@@ -320,7 +322,7 @@ export class KeyRingStore {
 
     // Selected keystore may be changed if the selected one is deleted.
     if (selectedIndex === index) {
-      this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+      this.dispatchKeyStoreChangeEvent();
       this.selectablesMap.forEach((selectables) => selectables.refresh());
     }
   }
@@ -337,7 +339,7 @@ export class KeyRingStore {
     );
     // If selectedIndex and index are same, name could be changed, so dispatch keystore event
     if (selectedIndex === index) {
-      this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+      this.dispatchKeyStoreChangeEvent();
     }
   }
 
@@ -385,7 +387,7 @@ export class KeyRingStore {
     this.status = status;
 
     // Emit the key store changed event manually.
-    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+    this.dispatchKeyStoreChangeEvent();
     this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
@@ -394,5 +396,24 @@ export class KeyRingStore {
       BACKGROUND_PORT,
       new ExportKeyRingDatasMsg(password)
     );
+  }
+
+  protected dispatchKeyStoreChangeEvent() {
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+
+    for (const listener of this.keyStoreChangedListeners) {
+      listener();
+    }
+  }
+
+  addKeyStoreChangedListener(listener: () => void) {
+    this.keyStoreChangedListeners.push(listener);
+  }
+
+  removeKeyStoreChangedListener(listener: () => void) {
+    const i = this.keyStoreChangedListeners.indexOf(listener);
+    if (i >= 0) {
+      this.keyStoreChangedListeners.splice(i, 1);
+    }
   }
 }

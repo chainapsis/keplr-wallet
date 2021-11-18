@@ -103,16 +103,17 @@ export class StyleBuilder<
       opacities: Opacities;
     }
   ) {
-    // TODO: Disable checking on the production environment.
     // Don't need to check the static styles because it is prioritized than dynamic styles.
-    StyleBuilder.checkReservedWord(configs.colors);
-    StyleBuilder.checkReservedWord(configs.widths);
-    StyleBuilder.checkReservedWord(configs.heights);
-    StyleBuilder.checkReservedWord(configs.paddingSizes);
-    StyleBuilder.checkReservedWord(configs.marginSizes);
-    StyleBuilder.checkReservedWord(configs.borderWidths);
-    StyleBuilder.checkReservedWord(configs.borderRadiuses);
-    StyleBuilder.checkReservedWord(configs.opacities);
+    if (__DEV__) {
+      StyleBuilder.checkReservedWord(configs.colors);
+      StyleBuilder.checkReservedWord(configs.widths);
+      StyleBuilder.checkReservedWord(configs.heights);
+      StyleBuilder.checkReservedWord(configs.paddingSizes);
+      StyleBuilder.checkReservedWord(configs.marginSizes);
+      StyleBuilder.checkReservedWord(configs.borderWidths);
+      StyleBuilder.checkReservedWord(configs.borderRadiuses);
+      StyleBuilder.checkReservedWord(configs.opacities);
+    }
 
     this.staticStyles = {
       ...configs.custom,

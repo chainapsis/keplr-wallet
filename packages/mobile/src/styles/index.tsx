@@ -69,6 +69,7 @@ export const Colors = {
   "card-modal-handle": "#DCDCE3",
   "setting-screen-background": "#FAFBFD",
   "camera-loading-background": "rgba(255,255,255,0.95)",
+  "big-image-placeholder": "#E7E4EF",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider({
@@ -324,6 +325,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "84": 84,
     "87": 87,
     "90": 90,
+    "104": 104,
     "116": 116,
     "122": 122,
     "214": 214,
@@ -363,6 +365,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "31": 31,
     "32": 32,
     "36": 36,
+    "38": 38,
     "40": 40,
     "42": 42,
     "48": 48,
