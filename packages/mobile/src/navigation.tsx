@@ -835,8 +835,8 @@ export const MainTabNavigation: FunctionComponent = () => {
               activeOpacity={1}
               style={{
                 height: "100%",
-                aspectRatio: 2,
-                maxWidth: "100%",
+                width: "100%",
+                maxWidth: 120,
               }}
             />
           </View>
@@ -850,8 +850,8 @@ export const MainTabNavigation: FunctionComponent = () => {
           borderTopColor: style.get("border-color-border-white").borderColor,
           shadowColor: style.get("color-transparent").color,
           elevation: 0,
-          paddingLeft: 40,
-          paddingRight: 40,
+          paddingLeft: 50,
+          paddingRight: 50,
         },
         showLabel: false,
       }}
