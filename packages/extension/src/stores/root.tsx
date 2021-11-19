@@ -138,6 +138,28 @@ export class RootStore {
         };
       }
 
+      if (chainInfo.chainId.startsWith("secret-")) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                gas: 20000,
+              },
+              secret20: {
+                gas: 50000,
+              },
+            },
+            withdrawRewards: {
+              gas: 25000,
+            },
+            createSecret20ViewingKey: {
+              gas: 50000,
+            },
+          },
+        };
+      }
+
       return { chainId: chainInfo.chainId };
     });
 
