@@ -1233,7 +1233,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: EVMOS_RPC_CONFIG,
     rest: EVMOS_REST_ENDPOINT,
     restConfig: EVMOS_REST_CONFIG,
-    chainId: "evmos_9000-1",
+    chainId: "evmos_9000-2",
     chainName: "Evmos",
     stakeCurrency: {
       coinDenom: "PHOTON",
