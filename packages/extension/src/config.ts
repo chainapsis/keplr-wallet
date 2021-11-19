@@ -1249,7 +1249,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/#/evmos/stake"
         : "http://localhost:8080/#/evmos/stake",
     bip44: {
-      coinType: 564,
+      coinType: 118,
     },
     bech32Config: Bech32Address.defaultBech32Config("evmos"),
     currencies: [
@@ -1268,8 +1268,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0,
-      average: 0,
-      high: 0,
+      average: 0.125 * 1e14,
+      high: 0.625 * 1e14,
     },
     features: ["stargate", "no-legacy-stdTx"],
   },
