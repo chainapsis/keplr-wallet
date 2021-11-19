@@ -120,9 +120,9 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
             case BondStatus.Bonded:
               return `/staking/validators?status=BOND_STATUS_BONDED`;
             case BondStatus.Unbonded:
-              return `/staking/validators?status=BOND_STATUS_UNBONDED`;
+              return `/staking/validators?status=BOND_STATUS_UNBONDED&limit=500`;
             case BondStatus.Unbonding:
-              return `/staking/validators?status=BOND_STATUS_UNBONDING`;
+              return `/staking/validators?status=BOND_STATUS_UNBONDING&limit=500`;
           }
         })();
 

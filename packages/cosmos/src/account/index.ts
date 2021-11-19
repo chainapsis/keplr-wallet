@@ -46,6 +46,14 @@ export class BaseAccount implements Account {
 
     let value = "value" in obj ? obj.value : obj;
 
+    // If the chain modifies the account type, handle the case where the account type embeds the base account.
+    // (Actually, the only existent case is ethermint, and this is the line for handling ethermint)
+    const baseAccount =
+      value.BaseAccount || value.baseAccount || value.base_account;
+    if (baseAccount) {
+      value = baseAccount;
+    }
+
     // If the account is the vesting account that embeds the base vesting account,
     // the actual base account exists under the base vesting account.
     // But, this can be different according to the version of cosmos-sdk.
