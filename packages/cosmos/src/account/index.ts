@@ -59,6 +59,9 @@ export class BaseAccount implements Account {
         baseVestingAccount.BaseAccount ||
         baseVestingAccount.baseAccount ||
         baseVestingAccount.base_account;
+    } else if (value.base_account && value.code_hash) {
+      //  Support for Ethermint chains (Evmos/Crypto.com)
+      value = value.base_account;
     }
 
     let address = value.address;
