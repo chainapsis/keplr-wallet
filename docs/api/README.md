@@ -162,7 +162,7 @@ signDirect(chainId:string, signer:string, signDoc: {
   }): Promise<DirectSignResponse>
 ```
 
-Similar to CosmJS `DirectOfflineSigner`'s `signDirect`, but Keplr's `signDirect` takes the chain-id as a required parameter. Signs Proto-encoded `StdSignDoc`.
+Similar to CosmJS `OfflineDirectSigner`'s `signDirect`, but Keplr's `signDirect` takes the chain-id as a required parameter. Signs Proto-encoded `StdSignDoc`.
 
 ### Request Transaction Broadcasting
 
