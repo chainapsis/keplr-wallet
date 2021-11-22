@@ -144,7 +144,7 @@ export interface MsgLink {
         to: string;
       }
     ];
-    address: string;
+    neuron: string;
   };
 }
 

@@ -22,6 +22,11 @@ import queryString from "querystring";
 
 import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../config.ui";
+import {
+  fitPopupWindow,
+  openPopupWindow,
+  PopupSize,
+} from "@keplr-wallet/popup";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -31,6 +36,10 @@ export const SendPage: FunctionComponent = observer(() => {
   }
   const query = queryString.parse(search) as {
     defaultDenom: string | undefined;
+    initialRecipient: string | undefined;
+    initialAmount: string | undefined;
+    initialMemo: string | undefined;
+    detached: string | undefined;
   };
 
   useEffect(() => {
@@ -76,6 +85,27 @@ export const SendPage: FunctionComponent = observer(() => {
     }
   }, [current.currencies, query.defaultDenom, sendConfigs.amountConfig]);
 
+  const isDetachedPage = query.detached === "true";
+
+  useEffect(() => {
+    if (isDetachedPage) {
+      fitPopupWindow();
+    }
+  }, [isDetachedPage]);
+
+  useEffect(() => {
+    if (query.initialRecipient) {
+      sendConfigs.recipientConfig.setRawRecipient(query.initialRecipient);
+    }
+    if (query.initialAmount) {
+      sendConfigs.amountConfig.setAmount(query.initialAmount);
+    }
+    if (query.initialMemo) {
+      sendConfigs.memoConfig.setMemo(query.initialMemo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.initialAmount, query.initialMemo, query.initialRecipient]);
+
   const sendConfigError =
     sendConfigs.recipientConfig.getError() ??
     sendConfigs.amountConfig.getError() ??
@@ -88,9 +118,65 @@ export const SendPage: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName
       canChangeChainInfo={false}
-      onBackButton={() => {
-        history.goBack();
-      }}
+      onBackButton={
+        isDetachedPage
+          ? undefined
+          : () => {
+              history.goBack();
+            }
+      }
+      rightRenderer={
+        isDetachedPage ? undefined : (
+          <div
+            style={{
+              height: "64px",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              paddingRight: "20px",
+            }}
+          >
+            <i
+              className="fas fa-external-link-alt"
+              style={{
+                cursor: "pointer",
+                padding: "4px",
+                color: "#8B8B9A",
+              }}
+              onClick={async (e) => {
+                e.preventDefault();
+
+                const windowInfo = await browser.windows.getCurrent();
+
+                let queryString = `?detached=true&defaultDenom=${sendConfigs.amountConfig.sendCurrency.coinMinimalDenom}`;
+                if (sendConfigs.recipientConfig.rawRecipient) {
+                  queryString += `&initialRecipient=${sendConfigs.recipientConfig.rawRecipient}`;
+                }
+                if (sendConfigs.amountConfig.amount) {
+                  queryString += `&initialAmount=${sendConfigs.amountConfig.amount}`;
+                }
+                if (sendConfigs.memoConfig.memo) {
+                  queryString += `&initialMemo=${sendConfigs.memoConfig.memo}`;
+                }
+
+                await openPopupWindow(
+                  browser.runtime.getURL(`/popup.html#/send${queryString}`),
+                  undefined,
+                  {
+                    top: (windowInfo.top || 0) + 80,
+                    left:
+                      (windowInfo.left || 0) +
+                      (windowInfo.width || 0) -
+                      PopupSize.width -
+                      20,
+                  }
+                );
+                window.close();
+              }}
+            />
+          </div>
+        )
+      }
     >
       <form
         className={style.formContainer}
@@ -122,9 +208,13 @@ export const SendPage: FunctionComponent = observer(() => {
                   });
                 }
               );
-              history.replace("/");
+              if (!isDetachedPage) {
+                history.replace("/");
+              }
             } catch (e) {
-              history.replace("/");
+              if (!isDetachedPage) {
+                history.replace("/");
+              }
               notification.push({
                 type: "warning",
                 placement: "top-center",
@@ -135,6 +225,12 @@ export const SendPage: FunctionComponent = observer(() => {
                   duration: 0.25,
                 },
               });
+            } finally {
+              // XXX: If the page is in detached state,
+              // close the window without waiting for tx to commit. analytics won't work.
+              if (isDetachedPage) {
+                window.close();
+              }
             }
           }
         }}

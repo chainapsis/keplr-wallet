@@ -1,6 +1,16 @@
-import { Router, MessageSender, Result } from "@keplr-wallet/router";
+import {
+  Router,
+  MessageSender,
+  Result,
+  EnvProducer,
+} from "@keplr-wallet/router";
+import { getKeplrExtensionRouterId } from "../utils";
 
 export class ExtensionRouter extends Router {
+  constructor(envProducer: EnvProducer) {
+    super(envProducer);
+  }
+
   listen(port: string): void {
     if (!port) {
       throw new Error("Empty port");
@@ -37,6 +47,15 @@ export class ExtensionRouter extends Router {
     sender: MessageSender
   ): Promise<Result> | undefined => {
     if (message.port !== this.port) {
+      return;
+    }
+
+    // The receiverRouterId will be set when requesting an interaction from the background to the frontend.
+    // If this value exists, it compares this value with the current router id and processes them only if they are the same.
+    if (
+      message.msg?.routerMeta?.receiverRouterId &&
+      message.msg.routerMeta.receiverRouterId !== getKeplrExtensionRouterId()
+    ) {
       return;
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/cosmos",
-  "version": "0.9.5",
+  "version": "0.9.7",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -10,16 +10,17 @@
   },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
-    "build": "tsc; mkdir -p build/stargate/proto/generated && cp ./src/stargate/proto/generated/* ./build/stargate/proto/generated",
-    "dev": "tsc -w",
+    "build": "yarn build:proto && tsc",
+    "build:proto": "mkdir -p build/stargate/proto/generated && cp ./src/stargate/proto/generated/* ./build/stargate/proto/generated",
+    "dev": "yarn build:proto && tsc -w",
     "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@keplr-wallet/types": "^0.9.5",
-    "@keplr-wallet/unit": "^0.9.5",
+    "@keplr-wallet/types": "^0.9.6",
+    "@keplr-wallet/unit": "^0.9.6",
     "axios": "^0.21.0",
     "bech32": "^1.1.4",
     "buffer": "^6.0.3",

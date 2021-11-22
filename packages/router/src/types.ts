@@ -1,6 +1,9 @@
 import { Message } from "./message";
 
-export type MessageSender = Pick<browser.runtime.MessageSender, "id" | "url">;
+export type MessageSender = Pick<
+  browser.runtime.MessageSender,
+  "id" | "url" | "tab"
+>;
 
 export type FnRequestInteractionOptions = {
   forceOpenWindow?: boolean;
@@ -18,7 +21,10 @@ export interface Env {
   readonly requestInteraction: FnRequestInteraction;
 }
 
-export type EnvProducer = (sender: MessageSender) => Env;
+export type EnvProducer = (
+  sender: MessageSender,
+  routerMeta: Record<string, any>
+) => Env;
 
 export interface MessageRequester {
   sendMessage<M extends Message<unknown>>(

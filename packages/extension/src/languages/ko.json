@@ -232,7 +232,7 @@
   "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "메세지를 복호화하지 못 했습니다. 케플러를 통하지 않고 암호화되었을 수 있습니다.",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
-  "sign.list.message.cyber/Link.content": "<b>{address}</b>가 링크<b>{link}</b>를 생성합니다",
+  "sign.list.message.cyber/Link.content": "<b>{neuron}</b>가 링크<b>{link}</b>를 생성합니다",
 
   "ledger.step1": "1 단계",
   "ledger.step1.paragraph": "렛저를 연결하고 잠금을 해제하세요",

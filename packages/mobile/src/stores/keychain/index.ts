@@ -90,7 +90,30 @@ export class KeychainStore {
             this._isBiometryOn = false;
             yield this.save();
           }
+        } else {
+          throw new Error(
+            "Failed to get valid password from keychain. This may be due to changes of biometry information"
+          );
         }
+      } else {
+        throw new Error("Failed to get credentials from keychain");
+      }
+    }
+  }
+
+  @flow
+  *turnOffBiometryWithPassword(password: string) {
+    if (this.isBiometryOn) {
+      if (yield* toGenerator(this.keyRingStore.checkPassword(password))) {
+        const result = yield* toGenerator(
+          Keychain.resetGenericPassword(KeychainStore.defaultOptions)
+        );
+        if (result) {
+          this._isBiometryOn = false;
+          yield this.save();
+        }
+      } else {
+        throw new Error("Invalid password");
       }
     }
   }

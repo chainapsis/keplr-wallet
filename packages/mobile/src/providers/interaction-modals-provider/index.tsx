@@ -26,6 +26,20 @@ export const InteractionModalsProivder: FunctionComponent = observer(
       }
     }, [walletConnectStore.needGoBackToBrowser]);
 
+    useEffect(() => {
+      for (const data of permissionStore.waitingDatas) {
+        // Currently, there is no modal to permit the permission of external apps.
+        // All apps should be embeded explicitly.
+        // If such apps needs the permissions, add these origins to the privileged origins.
+        if (
+          data.data.origins.length !== 1 ||
+          !WCMessageRequester.isVirtualSessionURL(data.data.origins[0])
+        ) {
+          permissionStore.reject(data.id);
+        }
+      }
+    }, [permissionStore, permissionStore.waitingDatas]);
+
     return (
       <React.Fragment>
         {/*
