@@ -90,7 +90,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
       fontSize: 24,
       lineHeight: 32,
       letterSpacing: 0.3,
-      ...getPlatformFontWeight("600"),
+      ...getPlatformFontWeight("700"),
     },
     h4: {
       fontSize: 20,
