@@ -51,7 +51,7 @@ export const WebScreen: FunctionComponent = () => {
         overrideInner={
           <View style={style.flatten(["flex-1", "items-center"])}>
             <Text
-              style={style.flatten(["h2", "color-text-black-very-very-low"])}
+              style={style.flatten(["h4", "color-text-black-very-very-low"])}
             >
               Coming soon
             </Text>
