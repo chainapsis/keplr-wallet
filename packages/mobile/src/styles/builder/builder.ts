@@ -1,6 +1,7 @@
 import { StyleBuilderDefinitions, StaticStyles } from "./types";
 import { StyleSheet } from "react-native";
-import { UnionToIntersection } from "utility-types";
+import { DeepPartial, UnionToIntersection } from "utility-types";
+import deepmerge from "deepmerge";
 
 export class DefinitionKebabCase {
   protected startIndex: number = -1;
@@ -49,7 +50,16 @@ export class StyleBuilder<
   MarginSizes extends Record<string, string | number>,
   BorderWidths extends Record<string, number>,
   BorderRadiuses extends Record<string, number>,
-  Opacities extends Record<string, number>
+  Opacities extends Record<string, number>,
+  ThemeCustom = DeepPartial<Custom>,
+  ThemeColors = DeepPartial<Colors>,
+  ThemeWidths = DeepPartial<Widths>,
+  ThemeHeights = DeepPartial<Heights>,
+  ThemePaddingSizes = DeepPartial<PaddingSizes>,
+  ThemeMarginSizes = DeepPartial<MarginSizes>,
+  ThemeBorderWidths = DeepPartial<BorderWidths>,
+  ThemeBorderRadiuses = DeepPartial<BorderRadiuses>,
+  ThemeOpacities = DeepPartial<Opacities>
 > {
   protected static readonly ReservedWords: {
     [word: string]: boolean | undefined;
@@ -86,12 +96,26 @@ export class StyleBuilder<
     }
   };
 
+  protected readonly configs: {
+    custom: Custom;
+    colors: Colors;
+    widths: Widths;
+    heights: Heights;
+    paddingSizes: PaddingSizes;
+    marginSizes: MarginSizes;
+    borderWidths: BorderWidths;
+    borderRadiuses: BorderRadiuses;
+    opacities: Opacities;
+  };
+
   protected readonly staticStyles: Record<string, unknown>;
 
   protected readonly cached: Map<string, any> = new Map();
 
+  protected readonly _colorScheme: "light" | "dark" = "light";
+
   constructor(
-    protected readonly configs: {
+    configs: {
       custom: Custom;
       colors: Colors;
       widths: Widths;
@@ -101,8 +125,30 @@ export class StyleBuilder<
       borderWidths: BorderWidths;
       borderRadiuses: BorderRadiuses;
       opacities: Opacities;
+    },
+    colorSheme?: "light" | "dark",
+    themeConfigs?: {
+      custom?: ThemeCustom;
+      colors?: ThemeColors;
+      widths?: ThemeWidths;
+      heights?: ThemeHeights;
+      paddingSizes?: ThemePaddingSizes;
+      marginSizes?: ThemeMarginSizes;
+      borderWidths?: ThemeBorderWidths;
+      borderRadiuses?: ThemeBorderRadiuses;
+      opacities?: ThemeOpacities;
     }
   ) {
+    if (colorSheme) {
+      this._colorScheme = colorSheme;
+    }
+
+    if (themeConfigs) {
+      configs = deepmerge(configs, themeConfigs, {
+        arrayMerge: (_, source) => source,
+      });
+    }
+
     // Don't need to check the static styles because it is prioritized than dynamic styles.
     if (__DEV__) {
       StyleBuilder.checkReservedWord(configs.colors);
@@ -119,6 +165,12 @@ export class StyleBuilder<
       ...configs.custom,
       ...StaticStyles,
     };
+
+    this.configs = configs;
+  }
+
+  get colorSheme(): "light" | "dark" {
+    return this._colorScheme;
   }
 
   flatten<

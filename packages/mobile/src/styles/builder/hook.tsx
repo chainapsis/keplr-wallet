@@ -2,9 +2,13 @@ import React, {
   createContext,
   FunctionComponent,
   useContext,
+  useEffect,
+  useMemo,
   useState,
 } from "react";
 import { StyleBuilder } from "./builder";
+import { Appearance, AppState } from "react-native";
+import { DeepPartial } from "utility-types";
 
 const createStyleContext = <
   Custom extends Record<string, unknown>,
@@ -43,18 +47,42 @@ export const createStyleProvider = <
   MarginSizes extends Record<string, string | number>,
   BorderWidths extends Record<string, number>,
   BorderRadiuses extends Record<string, number>,
-  Opacities extends Record<string, number>
->(configs: {
-  custom: Custom;
-  colors: Colors;
-  widths: Widths;
-  heights: Heights;
-  paddingSizes: PaddingSizes;
-  marginSizes: MarginSizes;
-  borderWidths: BorderWidths;
-  borderRadiuses: BorderRadiuses;
-  opacities: Opacities;
-}): {
+  Opacities extends Record<string, number>,
+  ThemeCustom = DeepPartial<Custom>,
+  ThemeColors = DeepPartial<Colors>,
+  ThemeWidths = DeepPartial<Widths>,
+  ThemeHeights = DeepPartial<Heights>,
+  ThemePaddingSizes = DeepPartial<PaddingSizes>,
+  ThemeMarginSizes = DeepPartial<MarginSizes>,
+  ThemeBorderWidths = DeepPartial<BorderWidths>,
+  ThemeBorderRadiuses = DeepPartial<BorderRadiuses>,
+  ThemeOpacities = DeepPartial<Opacities>
+>(
+  configs: {
+    custom: Custom;
+    colors: Colors;
+    widths: Widths;
+    heights: Heights;
+    paddingSizes: PaddingSizes;
+    marginSizes: MarginSizes;
+    borderWidths: BorderWidths;
+    borderRadiuses: BorderRadiuses;
+    opacities: Opacities;
+  },
+  themes?: {
+    dark?: {
+      custom?: ThemeCustom;
+      colors?: ThemeColors;
+      widths?: ThemeWidths;
+      heights?: ThemeHeights;
+      paddingSizes?: ThemePaddingSizes;
+      marginSizes?: ThemeMarginSizes;
+      borderWidths?: ThemeBorderWidths;
+      borderRadiuses?: ThemeBorderRadiuses;
+      opacities?: ThemeOpacities;
+    };
+  }
+): {
   StyleProvider: FunctionComponent;
   useStyle: () => StyleBuilder<
     Custom,
@@ -83,8 +111,37 @@ export const createStyleProvider = <
   return {
     // eslint-disable-next-line react/display-name
     StyleProvider: ({ children }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const [builder] = useState(() => new StyleBuilder(configs));
+      const [isDarkMode, setIsDarkMode] = useState(
+        Appearance.getColorScheme() === "dark"
+      );
+
+      useEffect(() => {
+        const listener = () => {
+          setIsDarkMode(Appearance.getColorScheme() === "dark");
+        };
+
+        Appearance.addChangeListener(listener);
+        // On android, appearance's listener not work.
+        // So, just check the color scheme whenever app get focused.
+        AppState.addEventListener("focus", listener);
+
+        return () => {
+          Appearance.removeChangeListener(listener);
+          AppState.removeEventListener("focus", listener);
+        };
+      }, []);
+
+      const builder = useMemo(() => {
+        if (isDarkMode && themes?.dark) {
+          return new StyleBuilder(
+            configs,
+            isDarkMode ? "dark" : "light",
+            themes.dark
+          );
+        }
+
+        return new StyleBuilder(configs);
+      }, [isDarkMode]);
 
       return (
         <context.Provider

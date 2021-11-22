@@ -162,22 +162,10 @@ export const DoubleDoughnutChart: FunctionComponent<{
 
   return (
     <Svg width={size} height={size} viewBox="0 0 180 180">
-      <Circle
-        cx={centerLocation}
-        cy={centerLocation}
-        r={radius}
-        stroke="#f4f5f7"
-        strokeWidth="14"
-        fill="transparent"
-      />
       <Defs>
         <LinearGradient id="grad1" x1="1" y1="0" x2="0" y2="0">
           <Stop offset="0%" stopColor="#71C4FF" />
           <Stop offset="100%" stopColor="#D378FE" />
-        </LinearGradient>
-        <LinearGradient id="grad2" x1="0" y1="0" x2="1" y2="0">
-          <Stop offset="0%" stopColor="#F0C9FF" />
-          <Stop offset="100%" stopColor="#D4EEFF" />
         </LinearGradient>
         <ClipPath id="first-arc-clip">
           <AnimatedPath
@@ -249,12 +237,13 @@ export const DoubleDoughnutChart: FunctionComponent<{
         cx={centerLocation}
         cy={centerLocation}
         r={radius}
+        opacity={0.3}
       />
       <Use
         clipPath="url(#second-arc-clip)"
         xlinkHref="#second-arc"
         fill="transparent"
-        stroke="url(#grad2)"
+        stroke="url(#grad1)"
         strokeWidth="14"
         clipRule="nonzero"
       />
