@@ -7,7 +7,7 @@ import {
 } from "@react-navigation/drawer";
 import { useStore } from "../../stores";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { RectButton } from "../rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,10 +23,18 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
 
     const safeAreaInsets = useSafeAreaInsets();
 
+    const { style: propStyle, ...rest } = props;
+
     const style = useStyle();
 
     return (
-      <DrawerContentScrollView {...props}>
+      <DrawerContentScrollView
+        style={StyleSheet.flatten([
+          propStyle,
+          style.flatten(["background-color-theme-white"]),
+        ])}
+        {...rest}
+      >
         <View
           style={{
             marginBottom: safeAreaInsets.bottom,

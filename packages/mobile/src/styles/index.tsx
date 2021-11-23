@@ -1,7 +1,8 @@
 import { createStyleProvider } from "./builder";
 import { EnumTextTransform, EnumTextDecorationLine } from "./builder/types";
-import { Platform } from "react-native";
+import { Platform, StatusBarStyle } from "react-native";
 import { getPlatformFontWeight } from "./builder/utils";
+import { BlurViewProperties } from "@react-native-community/blur";
 
 export const Colors = {
   primary: "#4762E7",
@@ -61,6 +62,7 @@ export const Colors = {
   "border-gray": "#C6C6CD",
   "border-white": "#F5F5F5",
   white: "#fff",
+  "theme-white": "#fff",
   black: "#000",
   disabled: "#EEEEF3",
   divider: "#F5F5F5",
@@ -88,6 +90,9 @@ export const DarkColors = {
   "text-black-very-low": "#7E8794",
   "text-black-very-very-low": "#71707C",
   "text-black-very-very-very-low": "#5D5D68",
+  "border-white": "#71707C",
+  "theme-white": "#1C243D",
+  divider: "#71707C",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider(
@@ -244,11 +249,24 @@ export const { StyleProvider, useStyle } = createStyleProvider(
           },
         ],
       },
+
+      "status-bar-style": "dark-content" as StatusBarStyle,
+
+      "blurred-header-blur-type": "light" as BlurViewProperties["blurType"],
+      "blurred-header-blur-amount": 60,
+      "blurred-header-reducedTransparencyFallbackColor": "white",
+
+      "blurred-tabbar-blur-type": "light" as BlurViewProperties["blurType"],
+      "blurred-tabbar-blur-amount": 80,
+      "blurred-tabbar-reducedTransparencyFallbackColor": "white",
     },
     colors: {
       ...Colors,
       ...{
         "splash-background": "#FBF8FF",
+
+        "blurred-header-background": "white",
+        "blurred-tabbar-background": "white",
 
         // Belows are for the button props and may not be used as styles.
         "rect-button-default-ripple": "#CCCCCC",
@@ -516,9 +534,22 @@ export const { StyleProvider, useStyle } = createStyleProvider(
             },
           ],
         },
+
+        "status-bar-style": "light-content" as StatusBarStyle,
+
+        "blurred-header-blur-type": "dark" as BlurViewProperties["blurType"],
+        "blurred-header-blur-amount": 60,
+        "blurred-header-reducedTransparencyFallbackColor": "black",
+
+        "blurred-tabbar-blur-type": "dark" as BlurViewProperties["blurType"],
+        "blurred-tabbar-blur-amount": 80,
+        "blurred-tabbar-reducedTransparencyFallbackColor": "black",
       },
       colors: {
         ...DarkColors,
+        "blurred-header-background": "rgba(31, 40, 68, 0.7)",
+        "blurred-tabbar-background": "rgba(31, 40, 68, 0.7)",
+
         "rect-button-default-ripple": "#333333",
         "rect-button-default-underlay": DarkColors["text-black-medium"],
 

@@ -35,10 +35,15 @@ export const BlurredHeaderScreenOptionsPreset = {
   ...TransitionPresets.SlideFromRightIOS,
 };
 
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
+
 export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
   if (Platform.OS !== "ios") {
     return <AndroidAlternativeBlurredHeader {...props} />;
   }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const style = useStyle();
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const route = useRoute();
@@ -49,10 +54,16 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
     pageScrollPosition.getScrollYValueOf(route.key) ?? new Animated.Value(0);
 
   return (
-    <BlurView
-      blurType="light"
-      blurAmount={65}
-      reducedTransparencyFallbackColor="white"
+    <AnimatedBlurView
+      blurType={style.get("blurred-header-blur-type")}
+      blurAmount={scrollY.interpolate({
+        inputRange: [0, 35],
+        outputRange: [0, style.get("blurred-header-blur-amount")],
+        extrapolate: "clamp",
+      })}
+      reducedTransparencyFallbackColor={style.get(
+        "blurred-header-reducedTransparencyFallbackColor"
+      )}
     >
       <Animated.View
         style={{
@@ -61,7 +72,7 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: "white",
+          backgroundColor: style.get("color-blurred-header-background").color,
           opacity: scrollY.interpolate({
             inputRange: [0, 35],
             outputRange: [1, 0.65],
@@ -70,7 +81,7 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
         }}
       />
       <Header {...props} />
-    </BlurView>
+    </AnimatedBlurView>
   );
 };
 
@@ -89,7 +100,7 @@ const AndroidAlternativeBlurredHeader: FunctionComponent<StackHeaderProps> = (
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: "white",
+            backgroundColor: style.get("color-blurred-header-background").color,
             borderBottomWidth: 0.5,
           },
           style.flatten(["border-color-border-white"]),

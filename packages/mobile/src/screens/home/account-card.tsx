@@ -60,7 +60,13 @@ export const AccountCard: FunctionComponent<{
     <Card style={containerStyle}>
       <CardBody style={style.flatten(["padding-bottom-0"])}>
         <View style={style.flatten(["flex", "items-center"])}>
-          <Text style={style.flatten(["h4", "margin-bottom-8"])}>
+          <Text
+            style={style.flatten([
+              "h4",
+              "color-text-black-high",
+              "margin-bottom-8",
+            ])}
+          >
             {account.name || "..."}
           </Text>
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />

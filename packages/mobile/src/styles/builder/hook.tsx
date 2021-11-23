@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { StyleBuilder } from "./builder";
-import { Appearance, AppState } from "react-native";
+import { Appearance, AppState, Platform } from "react-native";
 import { DeepPartial } from "utility-types";
 
 const createStyleContext = <
@@ -123,11 +123,15 @@ export const createStyleProvider = <
         Appearance.addChangeListener(listener);
         // On android, appearance's listener not work.
         // So, just check the color scheme whenever app get focused.
-        AppState.addEventListener("focus", listener);
+        if (Platform.OS === "android") {
+          AppState.addEventListener("focus", listener);
+        }
 
         return () => {
           Appearance.removeChangeListener(listener);
-          AppState.removeEventListener("focus", listener);
+          if (Platform.OS === "android") {
+            AppState.removeEventListener("focus", listener);
+          }
         };
       }, []);
 

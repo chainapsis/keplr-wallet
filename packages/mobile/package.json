@@ -18,7 +18,7 @@
     "generate:splash-image": "expo-splash-screen --background-color \"#FBF8FF\" --image-path ./src/assets/logo/splash-screen-only-k.png --image-resize-mode contain --status-bar-translucent --status-bar-background-color \"#FBF8FF\" --status-bar-style dark-content",
     "pod-install": "pod-install",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "postinstall": "sh ./scripts/fix-android-splash-screen-flash.sh"
+    "postinstall": "sh ./scripts/fix-android-splash-screen-flash.sh && sh ./scripts/fix-ios-blur-view.sh"
   },
   "dependencies": {
     "@amplitude/react-native": "^2.4.0",
@@ -45,7 +45,7 @@
     "@keplr-wallet/unit": "^0.9.6",
     "@ledgerhq/react-native-hw-transport-ble": "^6.3.0",
     "@react-native-async-storage/async-storage": "^1.14.1",
-    "@react-native-community/blur": "^3.6.0",
+    "@react-native-community/blur": "=3.6.0",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-community/netinfo": "^6.0.2",
     "@react-native-firebase/analytics": "^11.4.1",
