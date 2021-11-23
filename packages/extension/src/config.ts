@@ -1268,8 +1268,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0.125 * 1e8, // 1e-6 Photon
-      average: 0.125 * 1e14, // 1 Photon
-      high: 0.625 * 1e14, // 5 Photons
+      average: 0.625 * 1e8, // 5e-6 Photon
+      high: 0.125 * 1e9, // 1e-5 Photons
     },
     features: ["stargate", "no-legacy-stdTx"],
   },
