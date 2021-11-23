@@ -1271,7 +1271,8 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.625 * 1e8, // 5e-6 Photon
       high: 0.125 * 1e9, // 1e-5 Photons
     },
-    features: ["stargate", "no-legacy-stdTx"],
+    features: ["evm", "ibc-transfer", "stargate", "no-legacy-stdTx"],
+    beta: true,
   },
 ];
 
