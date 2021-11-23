@@ -1234,7 +1234,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: EVMOS_REST_ENDPOINT,
     restConfig: EVMOS_REST_CONFIG,
     chainId: "evmos_9000-2",
-    chainName: "Evmos",
+    chainName: "Evmos Testnet",
     stakeCurrency: {
       coinDenom: "PHOTON",
       coinMinimalDenom: "aphoton",
@@ -1249,7 +1249,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/#/evmos/stake"
         : "http://localhost:8080/#/evmos/stake",
     bip44: {
-      coinType: 118,
+      coinType: 60,
     },
     bech32Config: Bech32Address.defaultBech32Config("evmos"),
     currencies: [
@@ -1267,9 +1267,9 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0,
-      average: 0.125 * 1e14,
-      high: 0.625 * 1e14,
+      low: 0.125 * 1e8, // 1e-6 Photon
+      average: 0.125 * 1e14, // 1 Photon
+      high: 0.625 * 1e14, // 5 Photons
     },
     features: ["stargate", "no-legacy-stdTx"],
   },
