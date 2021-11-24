@@ -75,7 +75,7 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
           backgroundColor: style.get("color-blurred-header-background").color,
           opacity: scrollY.interpolate({
             inputRange: [0, 35],
-            outputRange: [1, 0.65],
+            outputRange: [1, style.get("opacity-blurred-header").opacity],
             extrapolate: "clamp",
           }),
         }}

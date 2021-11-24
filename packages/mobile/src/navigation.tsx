@@ -848,6 +848,7 @@ export const MainTabNavigation: FunctionComponent = () => {
         style: {
           borderTopWidth: 0.5,
           borderTopColor: style.get("border-color-border-white").borderColor,
+          backgroundColor: style.get("color-blurred-tabbar-background").color,
           shadowColor: style.get("color-transparent").color,
           elevation: 0,
           paddingLeft: 30,

@@ -24,11 +24,11 @@ export const BlurredBottomTabBar: FunctionComponent<
 
   const containerOpacity = (() => {
     if (enabledScreens.length === 0) {
-      return 0.75;
+      return style.get("opacity-blurred-tabbar").opacity;
     }
 
     if (focusedScreen.name && enabledScreens.includes(focusedScreen.name)) {
-      return 0.75;
+      return style.get("opacity-blurred-tabbar").opacity;
     }
 
     return 1;
