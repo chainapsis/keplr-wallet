@@ -90,7 +90,7 @@ export class ChainUpdaterService {
         const updateFeatures = savedChainProperty.features ?? [];
 
         for (const feature of updates.features) {
-          if (updateFeatures.indexOf(feature) < 0) {
+          if (!updateFeatures.includes(feature)) {
             updateFeatures.push(feature);
           }
         }
@@ -183,18 +183,40 @@ export class ChainUpdaterService {
       };
     }
 
+    const restInstance = Axios.create({
+      baseURL: chainInfo.rest,
+    });
+
     let staragteUpdate = false;
     try {
       if (!chainInfo.features || !chainInfo.features.includes("stargate")) {
-        const restInstance = Axios.create({
-          baseURL: chainInfo.rest,
-        });
-
         // If the chain doesn't have the stargate feature,
         // but it can use the GRPC HTTP Gateway,
         // assume that it can support the stargate and try to update the features.
         await restInstance.get("/cosmos/base/tendermint/v1beta1/node_info");
         staragteUpdate = true;
+      }
+    } catch {}
+
+    let ibcGoUpdates = false;
+    try {
+      if (
+        (!chainInfo.features || !chainInfo.features.includes("ibc-go")) &&
+        (staragteUpdate ||
+          (chainInfo.features && chainInfo.features.includes("stargate")))
+      ) {
+        // If the chain uses the ibc-go module separated from the cosmos-sdk,
+        // we need to check it because the REST API is different.
+        const result = await restInstance.get<{
+          params: {
+            receive_enabled: boolean;
+            send_enabled: boolean;
+          };
+        }>("/ibc/apps/transfer/v1/params");
+
+        if (result.status === 200) {
+          ibcGoUpdates = true;
+        }
       }
     } catch {}
 
@@ -205,9 +227,9 @@ export class ChainUpdaterService {
         (staragteUpdate ||
           (chainInfo.features && chainInfo.features.includes("stargate")))
       ) {
-        const restInstance = Axios.create({
-          baseURL: chainInfo.rest,
-        });
+        const isIBCGo =
+          ibcGoUpdates ||
+          (chainInfo.features && chainInfo.features.includes("ibc-go"));
 
         // If the chain doesn't have the ibc transfer feature,
         // try to fetch the params of ibc transfer module.
@@ -217,7 +239,11 @@ export class ChainUpdaterService {
             receive_enabled: boolean;
             send_enabled: boolean;
           };
-        }>("/ibc/applications/transfer/v1beta1/params");
+        }>(
+          isIBCGo
+            ? "/ibc/apps/transfer/v1/params"
+            : "/ibc/applications/transfer/v1beta1/params"
+        );
         if (
           result.data.params.receive_enabled &&
           result.data.params.send_enabled
@@ -235,10 +261,6 @@ export class ChainUpdaterService {
         (staragteUpdate ||
           (chainInfo.features && chainInfo.features.includes("stargate")))
       ) {
-        const restInstance = Axios.create({
-          baseURL: chainInfo.rest,
-        });
-
         // The chain with above cosmos-sdk@v0.44.0 can't send the legacy stdTx,
         // Assume that it can't send the legacy stdTx if the POST /txs responses "not implemented".
         const result = await restInstance.post<
@@ -267,6 +289,9 @@ export class ChainUpdaterService {
     if (staragteUpdate) {
       features.push("stargate");
     }
+    if (ibcGoUpdates) {
+      features.push("ibc-go");
+    }
     if (ibcTransferUpdate) {
       features.push("ibc-transfer");
     }
@@ -276,7 +301,11 @@ export class ChainUpdaterService {
 
     return {
       explicit: version.version < fetchedVersion.version,
-      slient: staragteUpdate || ibcTransferUpdate || noLegacyStdTxUpdate,
+      slient:
+        staragteUpdate ||
+        ibcGoUpdates ||
+        ibcTransferUpdate ||
+        noLegacyStdTxUpdate,
 
       chainId: resultChainId,
       features,
