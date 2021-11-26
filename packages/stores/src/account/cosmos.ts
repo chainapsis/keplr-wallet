@@ -419,7 +419,19 @@ export class CosmosAccount {
 
     await this.base.sendMsgs(
       "undelegate",
-      [msg],
+      {
+        aminoMsgs: [msg],
+        protoMsgs: [
+          {
+            type_url: "/cosmos.staking.v1beta1.MsgUndelegate",
+            value: cosmos.staking.v1beta1.MsgUndelegate.encode({
+              delegatorAddress: msg.value.delegator_address,
+              validatorAddress: msg.value.validator_address,
+              amount: msg.value.amount,
+            }).finish(),
+          },
+        ],
+      },
       memo,
       {
         amount: stdFee.amount ?? [],
