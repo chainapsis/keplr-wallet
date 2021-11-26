@@ -1,8 +1,8 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useRef, useState } from "react";
 
 import { Input } from "../../components/form";
 
-import { Button, Form } from "reactstrap";
+import { Button, Form, Tooltip } from "reactstrap";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -25,11 +25,18 @@ interface FormData {
 export const LockPage: FunctionComponent = observer(() => {
   const intl = useIntl();
   const history = useHistory();
+  const [isOnCapsLock, setIsOnCapsLock] = useState(false);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
 
   const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {
       password: "",
     },
+  });
+  const ref = register({
+    required: intl.formatMessage({
+      id: "lock.input.password.error.required",
+    }),
   });
 
   const { keyRingStore, analyticsStore } = useStore();
@@ -91,15 +98,40 @@ export const LockPage: FunctionComponent = observer(() => {
           })}
           name="password"
           error={errors.password && errors.password.message}
-          ref={register({
-            required: intl.formatMessage({
-              id: "lock.input.password.error.required",
-            }),
-          })}
+          ref={(e) => {
+            ref(e);
+            passwordRef.current = e;
+          }}
+          onKeyUp={(e) => {
+            if (e.getModifierState("CapsLock")) {
+              setIsOnCapsLock(true);
+            } else {
+              setIsOnCapsLock(false);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.getModifierState("CapsLock")) {
+              setIsOnCapsLock(true);
+            } else {
+              setIsOnCapsLock(false);
+            }
+          }}
         />
         <Button type="submit" color="primary" block data-loading={loading}>
           <FormattedMessage id="lock.button.unlock" />
         </Button>
+
+        {passwordRef && passwordRef.current && (
+          <Tooltip
+            arrowClassName={style.capslockTooltipArrow}
+            placement="top-start"
+            isOpen={isOnCapsLock}
+            target={passwordRef.current}
+            fade
+          >
+            <FormattedMessage id="lock.alert.capslock" />
+          </Tooltip>
+        )}
       </Form>
     </EmptyLayout>
   );
