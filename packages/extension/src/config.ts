@@ -75,6 +75,10 @@ import {
   AGORIC_RPC_CONFIG,
   AGORIC_REST_ENDPOINT,
   AGORIC_REST_CONFIG,
+  CHEQD_RPC_ENDPOINT,
+  CHEQD_RPC_CONFIG,
+  CHEQD_REST_ENDPOINT,
+  CHEQD_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1223,6 +1227,41 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04 * Math.pow(10, 12),
     },
     beta: true,
+  },
+  {
+    rpc: CHEQD_REST_ENDPOINT,
+    rpcConfig: CHEQD_RPC_CONFIG,
+    rest: CHEQD_REST_ENDPOINT,
+    restConfig: CHEQD_REST_ENDPOINT,
+    chainId: "cheqd-mainnet-1",
+    chainName: "cheqd",
+    stakeCurrency: {
+      coinDenom: "CHEQD",
+      coinMinimalDenom: "ncheq",
+      coinDecimals: 9,
+    },
+    bip44: { coinType: 118 },
+    bech32Config: Bech32Address.defaultBech32Config("cheqd"),
+    currencies: [
+      {
+        coinDenom: "CHEQ",
+        coinMinimalDenom: "ncheq",
+        coinDecimals: 9,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "CHEQ",
+        coinMinimalDenom: "ncheq",
+        coinDecimals: 9,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.000000025,
+      average: 0.00000005,
+      high: 0.0000001,
+    },
+    features: ["stargate"],
   },
 ];
 
