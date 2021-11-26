@@ -13,7 +13,7 @@ import { Button, Form } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import useForm from "react-hook-form";
-import { Input, PasswordInput } from "../../../components/form";
+import { PasswordInput } from "../../../components/form";
 import { ExportKeyRingData } from "@keplr-wallet/background";
 import AES, { Counter } from "aes-js";
 import { AddressBookConfigMap, AddressBookData } from "@keplr-wallet/hooks";
