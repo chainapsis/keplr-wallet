@@ -27,6 +27,10 @@ import {
   BETA_STRAIGHTEDGE_REST_CONFIG,
   BETA_STRAIGHTEDGE_RPC_ENDPOINT,
   BETA_STRAIGHTEDGE_RPC_CONFIG,
+  BETA_CHEQD_RPC_ENDPOINT,
+  BETA_CHEQD_RPC_CONFIG,
+  BETA_CHEQD_REST_ENDPOINT,
+  BETA_CHEQD_REST_CONFIG,
   AKASH_RPC_ENDPOINT,
   AKASH_RPC_CONFIG,
   AKASH_REST_ENDPOINT,
@@ -75,10 +79,6 @@ import {
   AGORIC_RPC_CONFIG,
   AGORIC_REST_ENDPOINT,
   AGORIC_REST_CONFIG,
-  CHEQD_RPC_ENDPOINT,
-  CHEQD_RPC_CONFIG,
-  CHEQD_REST_ENDPOINT,
-  CHEQD_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1229,10 +1229,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     beta: true,
   },
   {
-    rpc: CHEQD_REST_ENDPOINT,
-    rpcConfig: CHEQD_RPC_CONFIG,
-    rest: CHEQD_REST_ENDPOINT,
-    restConfig: CHEQD_REST_ENDPOINT,
+    rpc: BETA_CHEQD_REST_ENDPOINT,
+    rpcConfig: BETA_CHEQD_RPC_CONFIG,
+    rest: BETA_CHEQD_REST_ENDPOINT,
+    restConfig: BETA_CHEQD_REST_ENDPOINT,
     chainId: "cheqd-mainnet-1",
     chainName: "cheqd",
     stakeCurrency: {
@@ -1261,6 +1261,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.00000005,
       high: 0.0000001,
     },
+    beta: true,
     features: ["stargate"],
   },
 ];
