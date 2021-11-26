@@ -226,7 +226,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.3,
     },
-    features: ["stargate", "secretwasm"],
+    features: ["stargate", "secretwasm", "ibc-go"],
   },
   {
     rpc: AKASH_RPC_ENDPOINT,
@@ -784,7 +784,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.3,
       high: 0.4,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "ibc-go"],
   },
   {
     rpc: REGEN_RPC_ENDPOINT,
@@ -827,7 +827,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "regen",
       },
     ],
-    features: ["stargate"],
+    features: ["stargate", "ibc-go"],
   },
   {
     rpc: PERSISTENCE_RPC_ENDPOINT,
@@ -1108,7 +1108,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0,
       high: 0,
     },
-    features: ["stargate", "no-legacy-stdTx"],
+    features: ["stargate", "no-legacy-stdTx", "ibc-go"],
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
@@ -1173,7 +1173,13 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.01,
       high: 0.02,
     },
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "cosmwasm"],
+    features: [
+      "stargate",
+      "ibc-transfer",
+      "no-legacy-stdTx",
+      "cosmwasm",
+      "ibc-go",
+    ],
   },
   {
     rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
