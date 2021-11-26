@@ -5,7 +5,7 @@ import { Button, Form } from "reactstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import style from "../style.module.scss";
 import { BackButton } from "../index";
-import { Input, TextArea } from "../../../components/form";
+import { Input, PasswordInput, TextArea } from "../../../components/form";
 import useForm from "react-hook-form";
 import { observer } from "mobx-react-lite";
 import { RegisterConfig } from "@keplr-wallet/hooks";
@@ -219,11 +219,10 @@ export const RecoverMnemonicPage: FunctionComponent<{
           />
           {registerConfig.mode === "create" ? (
             <React.Fragment>
-              <Input
+              <PasswordInput
                 label={intl.formatMessage({
                   id: "register.create.input.password",
                 })}
-                type="password"
                 name="password"
                 ref={register({
                   required: intl.formatMessage({
@@ -239,11 +238,10 @@ export const RecoverMnemonicPage: FunctionComponent<{
                 })}
                 error={errors.password && errors.password.message}
               />
-              <Input
+              <PasswordInput
                 label={intl.formatMessage({
                   id: "register.create.input.confirm-password",
                 })}
-                type="password"
                 name="confirmPassword"
                 ref={register({
                   required: intl.formatMessage({

@@ -10,7 +10,7 @@ import {
 } from "../advanced-bip44";
 import style from "../style.module.scss";
 import { Alert, Button, ButtonGroup, Form } from "reactstrap";
-import { Input, TextArea } from "../../../components/form";
+import { Input, PasswordInput, TextArea } from "../../../components/form";
 import { BackButton } from "../index";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
 import { useStore } from "../../../stores";
@@ -189,11 +189,10 @@ export const GenerateMnemonicModePage: FunctionComponent<{
         />
         {registerConfig.mode === "create" ? (
           <React.Fragment>
-            <Input
+            <PasswordInput
               label={intl.formatMessage({
                 id: "register.create.input.password",
               })}
-              type="password"
               name="password"
               ref={register({
                 required: intl.formatMessage({
@@ -209,11 +208,10 @@ export const GenerateMnemonicModePage: FunctionComponent<{
               })}
               error={errors.password && errors.password.message}
             />
-            <Input
+            <PasswordInput
               label={intl.formatMessage({
                 id: "register.create.input.confirm-password",
               })}
-              type="password"
               name="confirmPassword"
               ref={register({
                 required: intl.formatMessage({

@@ -112,6 +112,8 @@ export class KeychainStore {
           this._isBiometryOn = false;
           yield this.save();
         }
+      } else {
+        throw new Error("Invalid password");
       }
     }
   }

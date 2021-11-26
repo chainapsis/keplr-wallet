@@ -1211,4 +1211,43 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["stargate", "ibc-transfer"],
     hideInUI: true,
   },
+  {
+    rpc: "https://rpc.gopanacea.org",
+    rest: "https://api.gopanacea.org",
+    chainId: "panacea-3",
+    chainName: "Panacea",
+    stakeCurrency: {
+      coinDenom: "MED",
+      coinMinimalDenom: "umed",
+      coinDecimals: 6,
+      coinGeckoId: "medibloc",
+    },
+    bip44: {
+      coinType: 371,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("panacea"),
+    currencies: [
+      {
+        coinDenom: "MED",
+        coinMinimalDenom: "umed",
+        coinDecimals: 6,
+        coinGeckoId: "medibloc",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MED",
+        coinMinimalDenom: "umed",
+        coinDecimals: 6,
+        coinGeckoId: "medibloc",
+      },
+    ],
+    gasPriceStep: {
+      low: 5,
+      average: 7,
+      high: 9,
+    },
+    features: ["stargate", "ibc-transfer"],
+    hideInUI: true,
+  },
 ];

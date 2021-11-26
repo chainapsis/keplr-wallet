@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 
-import { Input } from "../../components/form";
+import { PasswordInput } from "../../components/form";
 
 import { Button, Form } from "reactstrap";
 
@@ -84,8 +84,7 @@ export const LockPage: FunctionComponent = observer(() => {
           logo={require("../../public/assets/logo-temp.png")}
           subtitle="Wallet for the Interchain"
         />
-        <Input
-          type="password"
+        <PasswordInput
           label={intl.formatMessage({
             id: "lock.input.password",
           })}
