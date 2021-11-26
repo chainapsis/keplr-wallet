@@ -8,7 +8,7 @@ import { HeaderLayout } from "../../../layouts";
 
 import { useHistory, useLocation, useRouteMatch } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Input } from "../../../components/form";
+import { PasswordInput } from "../../../components/form";
 import { Button, Form } from "reactstrap";
 import useForm from "react-hook-form";
 import { WarningView } from "./warning-view";
@@ -102,8 +102,7 @@ export const ExportPage: FunctionComponent = observer(() => {
                 }
               })}
             >
-              <Input
-                type="password"
+              <PasswordInput
                 label={intl.formatMessage({
                   id: "setting.export.input.password",
                 })}

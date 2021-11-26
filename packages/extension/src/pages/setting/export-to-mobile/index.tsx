@@ -13,7 +13,7 @@ import { Button, Form } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import useForm from "react-hook-form";
-import { Input } from "../../../components/form";
+import { Input, PasswordInput } from "../../../components/form";
 import { ExportKeyRingData } from "@keplr-wallet/background";
 import AES, { Counter } from "aes-js";
 import { AddressBookConfigMap, AddressBookData } from "@keplr-wallet/hooks";
@@ -194,8 +194,7 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
           }
         })}
       >
-        <Input
-          type="password"
+        <PasswordInput
           label={intl.formatMessage({
             id: "setting.export-to-mobile.input.password",
           })}
