@@ -30,8 +30,8 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
   }
 
   getError(): Error | undefined {
-    if (this.gas <= 0) {
-      return new Error("Gas should be greater than 0");
+    if (this.gas < 0) {
+      return new Error("Gas cannot be negative");
     }
     return;
   }
