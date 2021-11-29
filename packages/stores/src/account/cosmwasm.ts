@@ -6,6 +6,8 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepReadonly, Optional } from "utility-types";
+import { cosmwasm } from "@keplr-wallet/cosmos";
+import { Buffer } from "buffer/";
 
 export interface HasCosmwasmAccount {
   cosmwasm: DeepReadonly<CosmwasmAccount>;
@@ -157,20 +159,33 @@ export class CosmwasmAccount {
           onFulfill?: (tx: any) => void;
         }
   ): Promise<void> {
+    const msg = {
+      type: this.base.msgOpts.executeWasm.type,
+      value: {
+        sender: this.base.bech32Address,
+        contract: contractAddress,
+        msg: obj,
+        funds,
+      },
+    };
+
     await this.base.sendMsgs(
       type,
-      () => {
-        const msg = {
-          type: this.base.msgOpts.executeWasm.type,
-          value: {
-            sender: this.base.bech32Address,
-            contract: contractAddress,
-            msg: obj,
-            funds,
-          },
-        };
-
-        return [msg];
+      {
+        aminoMsgs: [msg],
+        protoMsgs: this.hasNoLegacyStdFeature()
+          ? [
+              {
+                type_url: "/cosmwasm.wasm.v1.MsgExecuteContract",
+                value: cosmwasm.wasm.v1.MsgExecuteContract.encode({
+                  sender: msg.value.sender,
+                  contract: msg.value.contract,
+                  msg: Buffer.from(JSON.stringify(msg.value.msg)),
+                  funds: msg.value.funds,
+                }).finish(),
+              },
+            ]
+          : undefined,
       },
       memo,
       {
@@ -222,5 +237,13 @@ export class CosmwasmAccount {
 
   protected get queries(): DeepReadonly<QueriesSetBase & HasCosmwasmQueries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  protected hasNoLegacyStdFeature(): boolean {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    return (
+      chainInfo.features != null &&
+      chainInfo.features.includes("no-legacy-stdTx")
+    );
   }
 }
