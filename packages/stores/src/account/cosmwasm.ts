@@ -29,7 +29,7 @@ export class AccountWithCosmwasm
   static readonly defaultMsgOpts: CosmwasmMsgOpts = {
     send: {
       cw20: {
-        gas: 175000,
+        gas: 150000,
       },
     },
 
