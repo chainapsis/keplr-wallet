@@ -1,7 +1,6 @@
 import { ObservableChainQuery } from "../chain-query";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
-import { flow, makeObservable } from "mobx";
 import { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
 
@@ -18,28 +17,36 @@ export class ObservableCosmwasmContractChainQuery<
     // eslint-disable-next-line @typescript-eslint/ban-types
     protected obj: object
   ) {
-    super(kvStore, chainId, chainGetter, ``);
-    makeObservable(this);
+    super(
+      kvStore,
+      chainId,
+      chainGetter,
+      ObservableCosmwasmContractChainQuery.getUrlFromObj(contractAddress, obj)
+    );
+  }
 
-    this.init();
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  protected static getUrlFromObj(contractAddress: string, obj: object): string {
+    const msg = JSON.stringify(obj);
+    const query = Buffer.from(msg).toString("base64");
+
+    return `/wasm/v1/contract/${contractAddress}/smart/${query}`;
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
   protected setObj(obj: object) {
     this.obj = obj;
-    this.init();
+
+    this.setUrl(
+      ObservableCosmwasmContractChainQuery.getUrlFromObj(
+        this.contractAddress,
+        this.obj
+      )
+    );
   }
 
   protected canFetch(): boolean {
     return this.contractAddress.length !== 0;
-  }
-
-  @flow
-  protected *init() {
-    const msg = JSON.stringify(this.obj);
-    const query = Buffer.from(msg).toString("base64");
-
-    this.setUrl(`/wasm/v1/contract/${this.contractAddress}/smart/${query}`);
   }
 
   protected async fetchResponse(
