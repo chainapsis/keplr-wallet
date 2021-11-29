@@ -1,4 +1,4 @@
-import bech32 from "bech32";
+import bech32, { fromWords } from "bech32";
 import { Bech32Config } from "@keplr-wallet/types";
 
 export class Bech32Address {
@@ -40,7 +40,7 @@ export class Bech32Address {
       throw new Error("Unmatched prefix");
     }
 
-    return new Bech32Address(new Uint8Array(decoded.words));
+    return new Bech32Address(new Uint8Array(fromWords(decoded.words)));
   }
 
   static validate(bech32Address: string, prefix?: string) {
