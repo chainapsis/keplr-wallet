@@ -68,4 +68,4 @@ Refer to the [keplr-example](https://github.com/chainapsis/keplr-example/blob/ma
 You can use Keplr native API’s to set interaction options even when using CosmJS. Please refer to [this section](./#interaction-options).
 
 ### Adding a custom blockchain to Keplr
-If Keplr doesn't natively support your blockchain within the extension, please refer to the [Suggest chain](./suggest-chain) section.
+If Keplr doesn't natively support your blockchain within the extension, please refer to the [Suggest chain](./suggest-chain.md#suggest-chain) section.
