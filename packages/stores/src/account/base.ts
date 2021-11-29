@@ -212,7 +212,8 @@ export class AccountSetBase<MsgOpts, Queries> {
 
     try {
       yield this.enable(keplr, this.chainId);
-    } catch {
+    } catch (e) {
+      console.log(e);
       this._walletStatus = WalletStatus.Rejected;
       return;
     }
