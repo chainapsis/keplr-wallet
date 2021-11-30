@@ -172,6 +172,12 @@ export class SignDocAmountConfig
         switch (msg.constructor) {
           case cosmos.bank.v1beta1.MsgSend:
             const sendMsg = msg as cosmos.bank.v1beta1.MsgSend;
+            if (sendMsg.fromAddress && sendMsg.fromAddress !== this.sender) {
+              return {
+                amount: "0",
+                denom: this.sendCurrency.coinMinimalDenom,
+              };
+            }
             for (const amountInMsg of sendMsg.amount) {
               if (amountInMsg.denom === amount.denom && amountInMsg.amount) {
                 amount.amount = amount.amount.add(new Int(amountInMsg.amount));
@@ -180,6 +186,15 @@ export class SignDocAmountConfig
             break;
           case cosmos.staking.v1beta1.MsgDelegate:
             const delegateMsg = msg as cosmos.staking.v1beta1.MsgDelegate;
+            if (
+              delegateMsg.delegatorAddress &&
+              delegateMsg.delegatorAddress !== this.sender
+            ) {
+              return {
+                amount: "0",
+                denom: this.sendCurrency.coinMinimalDenom,
+              };
+            }
             if (
               delegateMsg.amount?.denom === amount.denom &&
               delegateMsg.amount.amount
