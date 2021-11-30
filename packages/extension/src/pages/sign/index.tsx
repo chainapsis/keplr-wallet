@@ -81,9 +81,16 @@ export const SignPage: FunctionComponent = observer(() => {
       ) {
         feeConfig.setManualFee(data.data.signDocWrapper.fees[0]);
       }
+      amountConfig.setDisableBalanceCheck(
+        !!data.data.signOptions.disableBalanceCheck
+      );
+      feeConfig.setDisableBalanceCheck(
+        !!data.data.signOptions.disableBalanceCheck
+      );
       setSigner(data.data.signer);
     }
   }, [
+    amountConfig,
     chainStore,
     gasConfig,
     memoConfig,

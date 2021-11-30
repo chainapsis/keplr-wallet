@@ -39,6 +39,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected additionAmountToNeedFee: boolean = true;
 
+  @observable
+  protected _disableBalanceCheck: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
@@ -183,6 +186,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return this.gasConfig.getError();
     }
 
+    if (this.disableBalanceCheck) {
+      return undefined;
+    }
+
     const fee = this.getFeePrimitive();
     if (!fee) {
       return undefined;
@@ -225,6 +232,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         return new InsufficientFeeError("insufficient fee");
       }
     }
+  }
+
+  @action
+  setDisableBalanceCheck(bool: boolean) {
+    this._disableBalanceCheck = bool;
+  }
+
+  get disableBalanceCheck(): boolean {
+    return this._disableBalanceCheck;
   }
 }
 

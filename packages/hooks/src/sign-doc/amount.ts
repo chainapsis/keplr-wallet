@@ -28,6 +28,9 @@ export class SignDocAmountConfig
   @observable
   protected _sender: string;
 
+  @observable
+  protected _disableBalanceCheck: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
@@ -87,6 +90,7 @@ export class SignDocAmountConfig
   getAmountPrimitive = computedFn(
     (): CoinPrimitive => {
       if (
+        this.disableBalanceCheck ||
         !this.signDocHelper?.signDocWrapper ||
         this.chainInfo.feeCurrencies.length === 0
       ) {
@@ -240,6 +244,15 @@ export class SignDocAmountConfig
 
   setSendCurrency(): void {
     // noop
+  }
+
+  @action
+  setDisableBalanceCheck(bool: boolean) {
+    this._disableBalanceCheck = bool;
+  }
+
+  get disableBalanceCheck(): boolean {
+    return this._disableBalanceCheck;
   }
 }
 

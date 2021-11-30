@@ -32,6 +32,8 @@ export interface KeplrIntereactionOptions {
 export interface KeplrSignOptions {
   readonly preferNoSetFee?: boolean;
   readonly preferNoSetMemo?: boolean;
+
+  readonly disableBalanceCheck?: boolean;
 }
 
 export interface Keplr {
