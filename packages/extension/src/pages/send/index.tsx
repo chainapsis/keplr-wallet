@@ -36,9 +36,9 @@ export const SendPage: FunctionComponent = observer(() => {
   }
   const query = queryString.parse(search) as {
     defaultDenom: string | undefined;
-    initialRecipient: string | undefined;
-    initialAmount: string | undefined;
-    initialMemo: string | undefined;
+    defaultRecipient: string | undefined;
+    defaultAmount: string | undefined;
+    defaultMemo: string | undefined;
     detached: string | undefined;
   };
 
@@ -94,17 +94,17 @@ export const SendPage: FunctionComponent = observer(() => {
   }, [isDetachedPage]);
 
   useEffect(() => {
-    if (query.initialRecipient) {
-      sendConfigs.recipientConfig.setRawRecipient(query.initialRecipient);
+    if (query.defaultRecipient) {
+      sendConfigs.recipientConfig.setRawRecipient(query.defaultRecipient);
     }
-    if (query.initialAmount) {
-      sendConfigs.amountConfig.setAmount(query.initialAmount);
+    if (query.defaultAmount) {
+      sendConfigs.amountConfig.setAmount(query.defaultAmount);
     }
-    if (query.initialMemo) {
-      sendConfigs.memoConfig.setMemo(query.initialMemo);
+    if (query.defaultMemo) {
+      sendConfigs.memoConfig.setMemo(query.defaultMemo);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.initialAmount, query.initialMemo, query.initialRecipient]);
+  }, [query.defaultAmount, query.defaultMemo, query.defaultRecipient]);
 
   const sendConfigError =
     sendConfigs.recipientConfig.getError() ??
@@ -150,13 +150,13 @@ export const SendPage: FunctionComponent = observer(() => {
 
                 let queryString = `?detached=true&defaultDenom=${sendConfigs.amountConfig.sendCurrency.coinMinimalDenom}`;
                 if (sendConfigs.recipientConfig.rawRecipient) {
-                  queryString += `&initialRecipient=${sendConfigs.recipientConfig.rawRecipient}`;
+                  queryString += `&defaultRecipient=${sendConfigs.recipientConfig.rawRecipient}`;
                 }
                 if (sendConfigs.amountConfig.amount) {
-                  queryString += `&initialAmount=${sendConfigs.amountConfig.amount}`;
+                  queryString += `&defaultAmount=${sendConfigs.amountConfig.amount}`;
                 }
                 if (sendConfigs.memoConfig.memo) {
-                  queryString += `&initialMemo=${sendConfigs.memoConfig.memo}`;
+                  queryString += `&defaultMemo=${sendConfigs.memoConfig.memo}`;
                 }
 
                 await openPopupWindow(
