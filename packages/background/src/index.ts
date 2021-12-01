@@ -15,6 +15,7 @@ import * as Updater from "./updater/internal";
 import * as Tokens from "./tokens/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
+import * as UI from "./ui/internal";
 
 export * from "./persistent-memory";
 export * from "./chains";
@@ -26,6 +27,7 @@ export * from "./updater";
 export * from "./tokens";
 export * from "./interaction";
 export * from "./permission";
+export * from "./ui";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -117,4 +119,7 @@ export function init(
     BackgroundTx.BackgroundTxService
   );
   BackgroundTx.init(router, backgroundTxService);
+
+  const uiService = container.resolve(UI.UIService);
+  UI.init(router, uiService);
 }

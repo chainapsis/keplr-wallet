@@ -456,4 +456,8 @@ export class KeplrWalletConnectV1 implements Keplr {
   ): Promise<void> {
     throw new Error("Not yet implemented");
   }
+
+  sendAssetInUI(_chainId: string): Promise<string> {
+    throw new Error("Not yet implemented");
+  }
 }
