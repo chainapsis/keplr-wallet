@@ -965,6 +965,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "kava",
       },
     ],
+    gasPriceStep: {
+      low: 0,
+      average: 0.001,
+      high: 0.25,
+    },
     coinType: 459,
   },
   {
