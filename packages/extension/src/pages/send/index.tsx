@@ -20,13 +20,14 @@ import { Button } from "reactstrap";
 import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
-import { useSendTxConfig } from "@keplr-wallet/hooks";
+import { useInteractionInfo, useSendTxConfig } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../config.ui";
 import {
   fitPopupWindow,
   openPopupWindow,
   PopupSize,
 } from "@keplr-wallet/popup";
+import { Buffer } from "buffer/";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -35,6 +36,9 @@ export const SendPage: FunctionComponent = observer(() => {
     search = search.slice(1);
   }
   const query = queryString.parse(search) as {
+    // Used for the keplr.sendAssetInUI() method.
+    chainId: string | undefined;
+
     defaultDenom: string | undefined;
     defaultRecipient: string | undefined;
     defaultAmount: string | undefined;
@@ -59,7 +63,22 @@ export const SendPage: FunctionComponent = observer(() => {
     priceStore,
     queriesStore,
     analyticsStore,
+    sendUIInteractionStore,
   } = useStore();
+
+  useInteractionInfo(() => {
+    // Clean up the send ui interaction on unmount if it exists.
+    if (sendUIInteractionStore.waitingSendUIInteractionData) {
+      sendUIInteractionStore.reject();
+    }
+  });
+
+  useEffect(() => {
+    if (query.chainId) {
+      chainStore.selectChain(query.chainId);
+    }
+  }, [chainStore, query.chainId]);
+
   const current = chainStore.current;
 
   const accountInfo = accountStore.getAccount(current.chainId);
@@ -198,14 +217,23 @@ export const SendPage: FunctionComponent = observer(() => {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
                 },
-                (tx: any) => {
-                  const isSuccess = tx.code == null || tx.code === 0;
-                  analyticsStore.logEvent("Send token finished", {
-                    chainId: chainStore.current.chainId,
-                    chainName: chainStore.current.chainName,
-                    feeType: sendConfigs.feeConfig.feeType,
-                    isSuccess,
-                  });
+                {
+                  onBroadcasted: (txHash) => {
+                    if (sendUIInteractionStore.waitingSendUIInteractionData) {
+                      sendUIInteractionStore.approve(
+                        Buffer.from(txHash).toString("hex")
+                      );
+                    }
+                  },
+                  onFulfill: (tx: any) => {
+                    const isSuccess = tx.code == null || tx.code === 0;
+                    analyticsStore.logEvent("Send token finished", {
+                      chainId: chainStore.current.chainId,
+                      chainName: chainStore.current.chainName,
+                      feeType: sendConfigs.feeConfig.feeType,
+                      isSuccess,
+                    });
+                  },
                 }
               );
               if (!isDetachedPage) {

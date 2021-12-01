@@ -18,6 +18,7 @@ import {
   QueriesWithCosmosAndSecretAndCosmwasm,
   AccountWithAll,
   getKeplrFromWindow,
+  SendUIInteractionStore,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -43,6 +44,7 @@ export class RootStore {
   public readonly signInteractionStore: SignInteractionStore;
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+  public readonly sendUIInteractionStore: SendUIInteractionStore;
 
   public readonly queriesStore: QueriesStore<QueriesWithCosmosAndSecretAndCosmwasm>;
   public readonly accountStore: AccountStore<AccountWithAll>;
@@ -98,6 +100,9 @@ export class RootStore {
       new InExtensionMessageRequester()
     );
     this.chainSuggestStore = new ChainSuggestStore(this.interactionStore);
+    this.sendUIInteractionStore = new SendUIInteractionStore(
+      this.interactionStore
+    );
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
