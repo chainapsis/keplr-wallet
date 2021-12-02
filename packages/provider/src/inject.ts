@@ -128,7 +128,7 @@ export class InjectedKeplr implements IKeplr {
                       ? Long.fromString(receivedSignDoc.accountNumber)
                       : null,
                   },
-                  message.args[2]
+                  message.args[3]
                 );
 
                 return {

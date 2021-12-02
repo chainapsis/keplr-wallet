@@ -1,12 +1,16 @@
 import { GasConfig } from "./gas";
 import { DenomHelper } from "@keplr-wallet/common";
-import { ChainGetter } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  CosmosMsgOpts,
+  SecretMsgOpts,
+  CosmwasmMsgOpts,
+} from "@keplr-wallet/stores";
 import { IAmountConfig } from "./types";
 import { useState } from "react";
-import { CosmosMsgOpts, SecretMsgOpts } from "@keplr-wallet/stores";
 import { action, makeObservable, observable } from "mobx";
 
-type MsgOpts = CosmosMsgOpts & SecretMsgOpts;
+type MsgOpts = CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts;
 
 export class SendGasConfig extends GasConfig {
   @observable.ref
@@ -41,6 +45,8 @@ export class SendGasConfig extends GasConfig {
       switch (denomHelper.type) {
         case "secret20":
           return this.sendMsgOpts.secret20.gas;
+        case "cw20":
+          return this.sendMsgOpts.cw20.gas;
         default:
           return this.sendMsgOpts.native.gas;
       }

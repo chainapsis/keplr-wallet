@@ -4294,6 +4294,168 @@ export namespace ibc {
     }
 }
 
+/** Namespace cosmwasm. */
+export namespace cosmwasm {
+
+    /** Namespace wasm. */
+    namespace wasm {
+
+        /** Namespace v1. */
+        namespace v1 {
+
+            /** Properties of a MsgExecuteContract. */
+            interface IMsgExecuteContract {
+
+                /** MsgExecuteContract sender */
+                sender?: (string|null);
+
+                /** MsgExecuteContract contract */
+                contract?: (string|null);
+
+                /** MsgExecuteContract msg */
+                msg?: (Uint8Array|null);
+
+                /** MsgExecuteContract funds */
+                funds?: (cosmos.base.v1beta1.ICoin[]|null);
+            }
+
+            /** Represents a MsgExecuteContract. */
+            class MsgExecuteContract implements IMsgExecuteContract {
+
+                /**
+                 * Constructs a new MsgExecuteContract.
+                 * @param [p] Properties to set
+                 */
+                constructor(p?: cosmwasm.wasm.v1.IMsgExecuteContract);
+
+                /** MsgExecuteContract sender. */
+                public sender: string;
+
+                /** MsgExecuteContract contract. */
+                public contract: string;
+
+                /** MsgExecuteContract msg. */
+                public msg: Uint8Array;
+
+                /** MsgExecuteContract funds. */
+                public funds: cosmos.base.v1beta1.ICoin[];
+
+                /**
+                 * Creates a new MsgExecuteContract instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns MsgExecuteContract instance
+                 */
+                public static create(properties?: cosmwasm.wasm.v1.IMsgExecuteContract): cosmwasm.wasm.v1.MsgExecuteContract;
+
+                /**
+                 * Encodes the specified MsgExecuteContract message. Does not implicitly {@link cosmwasm.wasm.v1.MsgExecuteContract.verify|verify} messages.
+                 * @param m MsgExecuteContract message or plain object to encode
+                 * @param [w] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(m: cosmwasm.wasm.v1.IMsgExecuteContract, w?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a MsgExecuteContract message from the specified reader or buffer.
+                 * @param r Reader or buffer to decode from
+                 * @param [l] Message length if known beforehand
+                 * @returns MsgExecuteContract
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): cosmwasm.wasm.v1.MsgExecuteContract;
+
+                /**
+                 * Creates a MsgExecuteContract message from a plain object. Also converts values to their respective internal types.
+                 * @param d Plain object
+                 * @returns MsgExecuteContract
+                 */
+                public static fromObject(d: { [k: string]: any }): cosmwasm.wasm.v1.MsgExecuteContract;
+
+                /**
+                 * Creates a plain object from a MsgExecuteContract message. Also converts values to other types if specified.
+                 * @param m MsgExecuteContract
+                 * @param [o] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(m: cosmwasm.wasm.v1.MsgExecuteContract, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this MsgExecuteContract to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+            }
+
+            /** Properties of a MsgExecuteContractResponse. */
+            interface IMsgExecuteContractResponse {
+
+                /** MsgExecuteContractResponse data */
+                data?: (Uint8Array|null);
+            }
+
+            /** Represents a MsgExecuteContractResponse. */
+            class MsgExecuteContractResponse implements IMsgExecuteContractResponse {
+
+                /**
+                 * Constructs a new MsgExecuteContractResponse.
+                 * @param [p] Properties to set
+                 */
+                constructor(p?: cosmwasm.wasm.v1.IMsgExecuteContractResponse);
+
+                /** MsgExecuteContractResponse data. */
+                public data: Uint8Array;
+
+                /**
+                 * Creates a new MsgExecuteContractResponse instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns MsgExecuteContractResponse instance
+                 */
+                public static create(properties?: cosmwasm.wasm.v1.IMsgExecuteContractResponse): cosmwasm.wasm.v1.MsgExecuteContractResponse;
+
+                /**
+                 * Encodes the specified MsgExecuteContractResponse message. Does not implicitly {@link cosmwasm.wasm.v1.MsgExecuteContractResponse.verify|verify} messages.
+                 * @param m MsgExecuteContractResponse message or plain object to encode
+                 * @param [w] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(m: cosmwasm.wasm.v1.IMsgExecuteContractResponse, w?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a MsgExecuteContractResponse message from the specified reader or buffer.
+                 * @param r Reader or buffer to decode from
+                 * @param [l] Message length if known beforehand
+                 * @returns MsgExecuteContractResponse
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): cosmwasm.wasm.v1.MsgExecuteContractResponse;
+
+                /**
+                 * Creates a MsgExecuteContractResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param d Plain object
+                 * @returns MsgExecuteContractResponse
+                 */
+                public static fromObject(d: { [k: string]: any }): cosmwasm.wasm.v1.MsgExecuteContractResponse;
+
+                /**
+                 * Creates a plain object from a MsgExecuteContractResponse message. Also converts values to other types if specified.
+                 * @param m MsgExecuteContractResponse
+                 * @param [o] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(m: cosmwasm.wasm.v1.MsgExecuteContractResponse, o?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this MsgExecuteContractResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+            }
+        }
+    }
+}
+
 /** Namespace tendermint. */
 export namespace tendermint {
 

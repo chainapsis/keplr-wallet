@@ -1,5 +1,4 @@
-import { IAmountConfig } from "../tx";
-import { TxChainSetter } from "../tx/chain";
+import { IAmountConfig, TxChainSetter } from "../tx";
 import {
   ChainGetter,
   CoinPrimitive,
@@ -26,14 +25,22 @@ export class SignDocAmountConfig
   @observable.ref
   protected signDocHelper?: SignDocHelper = undefined;
 
+  @observable
+  protected _sender: string;
+
+  @observable
+  protected _disableBalanceCheck: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
-    msgOpts: CosmosMsgOpts
+    msgOpts: CosmosMsgOpts,
+    sender: string
   ) {
     super(chainGetter, initialChainId);
 
     this.msgOpts = msgOpts;
+    this._sender = sender;
 
     makeObservable(this);
   }
@@ -71,13 +78,19 @@ export class SignDocAmountConfig
     return [this.sendCurrency];
   }
 
+  @action
+  setSender(sender: string): void {
+    this._sender = sender;
+  }
+
   get sender(): string {
-    return "";
+    return this._sender;
   }
 
   getAmountPrimitive = computedFn(
     (): CoinPrimitive => {
       if (
+        this.disableBalanceCheck ||
         !this.signDocHelper?.signDocWrapper ||
         this.chainInfo.feeCurrencies.length === 0
       ) {
@@ -106,6 +119,15 @@ export class SignDocAmountConfig
       try {
         switch (msg.type) {
           case this.msgOpts.send.native.type:
+            if (
+              msg.value.from_address &&
+              msg.value.from_address !== this.sender
+            ) {
+              return {
+                amount: "0",
+                denom: this.sendCurrency.coinMinimalDenom,
+              };
+            }
             if (msg.value.amount && Array.isArray(msg.value.amount)) {
               for (const amountInMsg of msg.value.amount) {
                 if (amountInMsg.denom === amount.denom) {
@@ -117,6 +139,15 @@ export class SignDocAmountConfig
             }
             break;
           case this.msgOpts.delegate.type:
+            if (
+              msg.value.delegator_address &&
+              msg.value.delegator_address !== this.sender
+            ) {
+              return {
+                amount: "0",
+                denom: this.sendCurrency.coinMinimalDenom,
+              };
+            }
             if (msg.value.amount && msg.value.amount.denom === amount.denom) {
               amount.amount = amount.amount.add(
                 new Int(msg.value.amount.amount)
@@ -145,6 +176,12 @@ export class SignDocAmountConfig
         switch (msg.constructor) {
           case cosmos.bank.v1beta1.MsgSend:
             const sendMsg = msg as cosmos.bank.v1beta1.MsgSend;
+            if (sendMsg.fromAddress && sendMsg.fromAddress !== this.sender) {
+              return {
+                amount: "0",
+                denom: this.sendCurrency.coinMinimalDenom,
+              };
+            }
             for (const amountInMsg of sendMsg.amount) {
               if (amountInMsg.denom === amount.denom && amountInMsg.amount) {
                 amount.amount = amount.amount.add(new Int(amountInMsg.amount));
@@ -153,6 +190,15 @@ export class SignDocAmountConfig
             break;
           case cosmos.staking.v1beta1.MsgDelegate:
             const delegateMsg = msg as cosmos.staking.v1beta1.MsgDelegate;
+            if (
+              delegateMsg.delegatorAddress &&
+              delegateMsg.delegatorAddress !== this.sender
+            ) {
+              return {
+                amount: "0",
+                denom: this.sendCurrency.coinMinimalDenom,
+              };
+            }
             if (
               delegateMsg.amount?.denom === amount.denom &&
               delegateMsg.amount.amount
@@ -200,21 +246,28 @@ export class SignDocAmountConfig
     // noop
   }
 
-  setSender(): void {
-    // noop
+  @action
+  setDisableBalanceCheck(bool: boolean) {
+    this._disableBalanceCheck = bool;
+  }
+
+  get disableBalanceCheck(): boolean {
+    return this._disableBalanceCheck;
   }
 }
 
 export const useSignDocAmountConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  msgOpts: CosmosMsgOpts
+  msgOpts: CosmosMsgOpts,
+  sender: string
 ) => {
   const [config] = useState(
-    () => new SignDocAmountConfig(chainGetter, chainId, msgOpts)
+    () => new SignDocAmountConfig(chainGetter, chainId, msgOpts, sender)
   );
   config.setChain(chainId);
   config.setMsgOpts(msgOpts);
+  config.setSender(sender);
 
   return config;
 };
