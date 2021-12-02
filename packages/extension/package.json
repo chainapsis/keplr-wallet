@@ -11,7 +11,8 @@
     "dev:analyzer": "cross-env NODE_ENV=development ANALYZER=true webpack",
     "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" webpack.config.js && prettier --check \"src/**/*\" webpack.config.js",
-    "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js"
+    "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js",
+    "version": "npx zx ./scripts/lerna-lifecyle-version.mjs"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
@@ -88,12 +89,14 @@
     "identity-obj-proxy": "^3.0.0",
     "node-sass": "^4.14.1",
     "sass-loader": "^7.3.1",
+    "semver": "^7.3.5",
     "serialize-javascript": ">=3.1.0",
     "style-loader": "^1.0.0",
     "webpack": "^4.39.2",
     "webpack-bundle-analyzer": "^3.9.0",
     "webpack-cli": "^3.3.7",
     "webpack-dev-server": "^3.8.2",
-    "write-file-webpack-plugin": "^4.5.1"
+    "write-file-webpack-plugin": "^4.5.1",
+    "zx": "^4.2.0"
   }
 }
