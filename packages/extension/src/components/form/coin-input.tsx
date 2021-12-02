@@ -92,6 +92,15 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
 
     const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
 
+    const selectableCurrencies = amountConfig.sendableCurrencies
+      .filter((cur) => {
+        const bal = queryBalances.getBalanceFromCurrency(cur);
+        return !bal.toDec().isZero();
+      })
+      .sort((a, b) => {
+        return a.coinDenom < b.coinDenom ? -1 : 1;
+      });
+
     return (
       <React.Fragment>
         <FormGroup className={className}>
@@ -115,7 +124,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
               {amountConfig.sendCurrency.coinDenom}
             </DropdownToggle>
             <DropdownMenu>
-              {amountConfig.sendableCurrencies.map((currency) => {
+              {selectableCurrencies.map((currency) => {
                 return (
                   <DropdownItem
                     key={currency.coinMinimalDenom}
