@@ -23,9 +23,21 @@ export const TokensScreen: FunctionComponent = observer(() => {
       accountStore.getAccount(chainStore.current.chainId).bech32Address
     );
 
-  const tokens = queryBalances.positiveNativeUnstakables.concat(
-    queryBalances.nonNativeBalances
-  );
+  const tokens = queryBalances.positiveNativeUnstakables
+    .concat(queryBalances.nonNativeBalances)
+    .sort((a, b) => {
+      const aDecIsZero = a.balance.toDec().isZero();
+      const bDecIsZero = b.balance.toDec().isZero();
+
+      if (aDecIsZero && !bDecIsZero) {
+        return 1;
+      }
+      if (!aDecIsZero && bDecIsZero) {
+        return -1;
+      }
+
+      return a.currency.coinDenom < b.currency.coinDenom ? -1 : 1;
+    });
 
   return (
     <PageWithScrollView>
