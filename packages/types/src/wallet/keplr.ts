@@ -36,13 +36,6 @@ export interface KeplrSignOptions {
   readonly disableBalanceCheck?: boolean;
 }
 
-export interface KeplrSendUIOptions {
-  defaultRecipient?: string;
-  defaultDenom?: string;
-  defaultAmount?: string;
-  defaultMemo?: string;
-}
-
 export interface Keplr {
   readonly version: string;
   /**
@@ -125,8 +118,4 @@ export interface Keplr {
     ciphertext: Uint8Array,
     nonce: Uint8Array
   ): Promise<Uint8Array>;
-
-  // Open the send UI.
-  // Return the hex encoded tx hash.
-  sendAssetInUI(chainId: string, options?: KeplrSendUIOptions): Promise<string>;
 }

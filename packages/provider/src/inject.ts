@@ -4,7 +4,6 @@ import {
   Keplr as IKeplr,
   KeplrIntereactionOptions,
   KeplrMode,
-  KeplrSendUIOptions,
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
@@ -414,12 +413,5 @@ export class InjectedKeplr implements IKeplr {
     const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
-  }
-
-  async sendAssetInUI(
-    chainId: string,
-    options?: KeplrSendUIOptions
-  ): Promise<string> {
-    return await this.requestMethod("sendAssetInUI", [chainId, options]);
   }
 }

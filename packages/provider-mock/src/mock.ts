@@ -160,8 +160,4 @@ export class MockKeplr implements Keplr {
   getOfflineSignerOnlyAmino(_chainId: string): OfflineSigner {
     throw new Error("Not implemented");
   }
-
-  sendAssetInUI(_chainId: string): Promise<string> {
-    throw new Error("Not implemented");
-  }
 }

@@ -3,7 +3,6 @@ import {
   Keplr as IKeplr,
   KeplrIntereactionOptions,
   KeplrMode,
-  KeplrSendUIOptions,
   KeplrSignOptions,
   Key,
 } from "@keplr-wallet/types";
@@ -28,7 +27,6 @@ import {
   ReqeustEncryptMsg,
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
-  OpenSendUIMsg,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -220,15 +218,5 @@ export class Keplr implements IKeplr {
     const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
-  }
-
-  async sendAssetInUI(
-    chainId: string,
-    options?: KeplrSendUIOptions
-  ): Promise<string> {
-    return await this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new OpenSendUIMsg(chainId, options)
-    );
   }
 }

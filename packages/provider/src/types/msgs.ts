@@ -1,10 +1,5 @@
 import { Message } from "@keplr-wallet/router";
-import {
-  ChainInfo,
-  KeplrSendUIOptions,
-  KeplrSignOptions,
-  Key,
-} from "@keplr-wallet/types";
+import { ChainInfo, KeplrSignOptions, Key } from "@keplr-wallet/types";
 import { AminoSignResponse, StdSignature, StdSignDoc } from "@cosmjs/launchpad";
 
 export class EnableAccessMsg extends Message<void> {
@@ -424,37 +419,5 @@ export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
 
   type(): string {
     return GetTxEncryptionKeyMsg.type();
-  }
-}
-
-// Result is hex encoded tx hash
-export class OpenSendUIMsg extends Message<string> {
-  public static type() {
-    return "open-send-ui";
-  }
-
-  constructor(
-    public readonly chainId: string,
-    public readonly options?: KeplrSendUIOptions
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id not set");
-    }
-  }
-
-  approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return "ui";
-  }
-
-  type(): string {
-    return OpenSendUIMsg.type();
   }
 }
