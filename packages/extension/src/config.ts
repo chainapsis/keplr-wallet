@@ -226,7 +226,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.3,
     },
-    features: ["stargate", "secretwasm", "ibc-go"],
+    features: ["stargate", "secretwasm", "ibc-go", "ibc-transfer"],
   },
   {
     rpc: AKASH_RPC_ENDPOINT,
@@ -827,7 +827,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "regen",
       },
     ],
-    features: ["stargate", "ibc-go"],
+    features: ["stargate", "ibc-go", "ibc-transfer"],
   },
   {
     rpc: PERSISTENCE_RPC_ENDPOINT,
@@ -1010,7 +1010,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
     ],
-    features: ["stargate"],
+    features: ["stargate", "ibc-transfer"],
   },
   {
     rpc: EMONEY_RPC_ENDPOINT,
