@@ -36,7 +36,9 @@ import {
 } from "./messages";
 
 export function renderAminoMessage(
-  msgOpts: AccountSetOpts<CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts>["msgOpts"],
+  msgOpts: AccountSetOpts<
+    CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts
+  >["msgOpts"],
   msg: MessageObj,
   currencies: Currency[],
   intl: IntlShape
