@@ -57,7 +57,8 @@ export const SignModal: FunctionComponent<{
     const amountConfig = useSignDocAmountConfig(
       chainStore,
       chainId,
-      accountStore.getAccount(chainId).msgOpts
+      accountStore.getAccount(chainId).msgOpts,
+      signer
     );
     const feeConfig = useFeeConfig(
       chainStore,

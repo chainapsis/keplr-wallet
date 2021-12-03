@@ -18,7 +18,7 @@ import {
   EmptyAmountError,
   InvalidNumberAmountError,
   ZeroAmountError,
-  NagativeAmountError,
+  NegativeAmountError,
   InsufficientAmountError,
   IAmountConfig,
 } from "@keplr-wallet/hooks";
@@ -76,7 +76,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             return intl.formatMessage({
               id: "input.amount.error.is-zero",
             });
-          case NagativeAmountError:
+          case NegativeAmountError:
             return intl.formatMessage({
               id: "input.amount.error.is-negative",
             });
@@ -91,6 +91,15 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
     }, [intl, error]);
 
     const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
+
+    const selectableCurrencies = amountConfig.sendableCurrencies
+      .filter((cur) => {
+        const bal = queryBalances.getBalanceFromCurrency(cur);
+        return !bal.toDec().isZero();
+      })
+      .sort((a, b) => {
+        return a.coinDenom < b.coinDenom ? -1 : 1;
+      });
 
     return (
       <React.Fragment>
@@ -115,7 +124,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
               {amountConfig.sendCurrency.coinDenom}
             </DropdownToggle>
             <DropdownMenu>
-              {amountConfig.sendableCurrencies.map((currency) => {
+              {selectableCurrencies.map((currency) => {
                 return (
                   <DropdownItem
                     key={currency.coinMinimalDenom}

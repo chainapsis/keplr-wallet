@@ -62,11 +62,11 @@ export class ZeroAmountError extends Error {
   }
 }
 
-export class NagativeAmountError extends Error {
+export class NegativeAmountError extends Error {
   constructor(m: string) {
     super(m);
     // Set the prototype explicitly.
-    Object.setPrototypeOf(this, NagativeAmountError.prototype);
+    Object.setPrototypeOf(this, NegativeAmountError.prototype);
   }
 }
 

@@ -9,7 +9,7 @@ import { useStore } from "../../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useNotification } from "../../../../components/notification";
 import { useConfirm } from "../../../../components/confirm";
-import { Secret20Currency } from "@keplr-wallet/types";
+import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
 import { useIntl } from "react-intl";
 
 export const ManageTokenPage: FunctionComponent = observer(() => {
@@ -20,8 +20,16 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
   const { chainStore, tokensStore } = useStore();
 
+  const isSecretWasm =
+    chainStore.current.features &&
+    chainStore.current.features.includes("secret-wasm");
+
   const appCurrencies = chainStore.current.currencies.filter((currency) => {
-    return "type" in currency && currency.type === "secret20";
+    if (isSecretWasm) {
+      return "type" in currency && currency.type === "secret20";
+    } else {
+      return "type" in currency && currency.type === "cw20";
+    }
   });
 
   return (
@@ -37,41 +45,39 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     >
       <div className={style.container}>
         {appCurrencies.map((currency) => {
-          if (!("type" in currency) || currency.type !== "secret20") {
-            return;
-          }
-
-          const secret20 = currency as Secret20Currency;
+          const cosmwasmToken = currency as CW20Currency | Secret20Currency;
 
           const icons: React.ReactElement[] = [];
 
-          icons.push(
-            <i
-              key="copy"
-              className="fas fa-copy"
-              style={{
-                cursor: "pointer",
-              }}
-              onClick={async (e) => {
-                e.preventDefault();
+          if ("viewingKey" in cosmwasmToken) {
+            icons.push(
+              <i
+                key="copy"
+                className="fas fa-copy"
+                style={{
+                  cursor: "pointer",
+                }}
+                onClick={async (e) => {
+                  e.preventDefault();
 
-                await navigator.clipboard.writeText(secret20.viewingKey);
-                // TODO: Show success tooltip.
-                notification.push({
-                  placement: "top-center",
-                  type: "success",
-                  duration: 2,
-                  content: intl.formatMessage({
-                    id: "setting.token.manage.notification.viewing-key.copy",
-                  }),
-                  canDelete: true,
-                  transition: {
-                    duration: 0.25,
-                  },
-                });
-              }}
-            />
-          );
+                  await navigator.clipboard.writeText(cosmwasmToken.viewingKey);
+                  // TODO: Show success tooltip.
+                  notification.push({
+                    placement: "top-center",
+                    type: "success",
+                    duration: 2,
+                    content: intl.formatMessage({
+                      id: "setting.token.manage.notification.viewing-key.copy",
+                    }),
+                    canDelete: true,
+                    transition: {
+                      duration: 0.25,
+                    },
+                  });
+                }}
+              />
+            );
+          }
 
           /*
           icons.push(
@@ -111,7 +117,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                 ) {
                   await tokensStore
                     .getTokensOf(chainStore.current.chainId)
-                    .removeToken(secret20);
+                    .removeToken(cosmwasmToken);
                 }
               }}
             />
@@ -119,13 +125,13 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
           return (
             <PageButton
-              key={secret20.contractAddress}
+              key={cosmwasmToken.contractAddress}
               style={{
                 cursor: "auto",
               }}
-              title={secret20.coinDenom}
+              title={cosmwasmToken.coinDenom}
               paragraph={Bech32Address.shortenAddress(
-                secret20.contractAddress,
+                cosmwasmToken.contractAddress,
                 30
               )}
               icons={icons}

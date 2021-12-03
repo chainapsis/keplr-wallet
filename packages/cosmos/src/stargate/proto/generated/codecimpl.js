@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tendermint = exports.ibc = exports.google = exports.cosmos = void 0;
+exports.tendermint = exports.cosmwasm = exports.ibc = exports.google = exports.cosmos = void 0;
 var $protobuf = require("protobufjs/minimal");
 const $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 const $root = {};
@@ -4849,6 +4849,214 @@ exports.ibc = $root.ibc = (() => {
         return core;
     })();
     return ibc;
+})();
+exports.cosmwasm = $root.cosmwasm = (() => {
+    const cosmwasm = {};
+    cosmwasm.wasm = (function () {
+        const wasm = {};
+        wasm.v1 = (function () {
+            const v1 = {};
+            v1.MsgExecuteContract = (function () {
+                function MsgExecuteContract(p) {
+                    this.funds = [];
+                    if (p)
+                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
+                            if (p[ks[i]] != null)
+                                this[ks[i]] = p[ks[i]];
+                }
+                MsgExecuteContract.prototype.sender = "";
+                MsgExecuteContract.prototype.contract = "";
+                MsgExecuteContract.prototype.msg = $util.newBuffer([]);
+                MsgExecuteContract.prototype.funds = $util.emptyArray;
+                MsgExecuteContract.create = function create(properties) {
+                    return new MsgExecuteContract(properties);
+                };
+                MsgExecuteContract.encode = function encode(m, w) {
+                    if (!w)
+                        w = $Writer.create();
+                    if (m.sender != null && Object.hasOwnProperty.call(m, "sender"))
+                        w.uint32(10).string(m.sender);
+                    if (m.contract != null && Object.hasOwnProperty.call(m, "contract"))
+                        w.uint32(18).string(m.contract);
+                    if (m.msg != null && Object.hasOwnProperty.call(m, "msg"))
+                        w.uint32(26).bytes(m.msg);
+                    if (m.funds != null && m.funds.length) {
+                        for (var i = 0; i < m.funds.length; ++i)
+                            $root.cosmos.base.v1beta1.Coin.encode(m.funds[i], w.uint32(42).fork()).ldelim();
+                    }
+                    return w;
+                };
+                MsgExecuteContract.decode = function decode(r, l) {
+                    if (!(r instanceof $Reader))
+                        r = $Reader.create(r);
+                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmwasm.wasm.v1.MsgExecuteContract();
+                    while (r.pos < c) {
+                        var t = r.uint32();
+                        switch (t >>> 3) {
+                            case 1:
+                                m.sender = r.string();
+                                break;
+                            case 2:
+                                m.contract = r.string();
+                                break;
+                            case 3:
+                                m.msg = r.bytes();
+                                break;
+                            case 5:
+                                if (!(m.funds && m.funds.length))
+                                    m.funds = [];
+                                m.funds.push($root.cosmos.base.v1beta1.Coin.decode(r, r.uint32()));
+                                break;
+                            default:
+                                r.skipType(t & 7);
+                                break;
+                        }
+                    }
+                    return m;
+                };
+                MsgExecuteContract.fromObject = function fromObject(d) {
+                    if (d instanceof $root.cosmwasm.wasm.v1.MsgExecuteContract)
+                        return d;
+                    var m = new $root.cosmwasm.wasm.v1.MsgExecuteContract();
+                    if (d.sender != null) {
+                        m.sender = String(d.sender);
+                    }
+                    if (d.contract != null) {
+                        m.contract = String(d.contract);
+                    }
+                    if (d.msg != null) {
+                        if (typeof d.msg === "string")
+                            $util.base64.decode(d.msg, m.msg = $util.newBuffer($util.base64.length(d.msg)), 0);
+                        else if (d.msg.length)
+                            m.msg = d.msg;
+                    }
+                    if (d.funds) {
+                        if (!Array.isArray(d.funds))
+                            throw TypeError(".cosmwasm.wasm.v1.MsgExecuteContract.funds: array expected");
+                        m.funds = [];
+                        for (var i = 0; i < d.funds.length; ++i) {
+                            if (typeof d.funds[i] !== "object")
+                                throw TypeError(".cosmwasm.wasm.v1.MsgExecuteContract.funds: object expected");
+                            m.funds[i] = $root.cosmos.base.v1beta1.Coin.fromObject(d.funds[i]);
+                        }
+                    }
+                    return m;
+                };
+                MsgExecuteContract.toObject = function toObject(m, o) {
+                    if (!o)
+                        o = {};
+                    var d = {};
+                    if (o.arrays || o.defaults) {
+                        d.funds = [];
+                    }
+                    if (o.defaults) {
+                        d.sender = "";
+                        d.contract = "";
+                        if (o.bytes === String)
+                            d.msg = "";
+                        else {
+                            d.msg = [];
+                            if (o.bytes !== Array)
+                                d.msg = $util.newBuffer(d.msg);
+                        }
+                    }
+                    if (m.sender != null && m.hasOwnProperty("sender")) {
+                        d.sender = m.sender;
+                    }
+                    if (m.contract != null && m.hasOwnProperty("contract")) {
+                        d.contract = m.contract;
+                    }
+                    if (m.msg != null && m.hasOwnProperty("msg")) {
+                        d.msg = o.bytes === String ? $util.base64.encode(m.msg, 0, m.msg.length) : o.bytes === Array ? Array.prototype.slice.call(m.msg) : m.msg;
+                    }
+                    if (m.funds && m.funds.length) {
+                        d.funds = [];
+                        for (var j = 0; j < m.funds.length; ++j) {
+                            d.funds[j] = $root.cosmos.base.v1beta1.Coin.toObject(m.funds[j], o);
+                        }
+                    }
+                    return d;
+                };
+                MsgExecuteContract.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+                return MsgExecuteContract;
+            })();
+            v1.MsgExecuteContractResponse = (function () {
+                function MsgExecuteContractResponse(p) {
+                    if (p)
+                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
+                            if (p[ks[i]] != null)
+                                this[ks[i]] = p[ks[i]];
+                }
+                MsgExecuteContractResponse.prototype.data = $util.newBuffer([]);
+                MsgExecuteContractResponse.create = function create(properties) {
+                    return new MsgExecuteContractResponse(properties);
+                };
+                MsgExecuteContractResponse.encode = function encode(m, w) {
+                    if (!w)
+                        w = $Writer.create();
+                    if (m.data != null && Object.hasOwnProperty.call(m, "data"))
+                        w.uint32(10).bytes(m.data);
+                    return w;
+                };
+                MsgExecuteContractResponse.decode = function decode(r, l) {
+                    if (!(r instanceof $Reader))
+                        r = $Reader.create(r);
+                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmwasm.wasm.v1.MsgExecuteContractResponse();
+                    while (r.pos < c) {
+                        var t = r.uint32();
+                        switch (t >>> 3) {
+                            case 1:
+                                m.data = r.bytes();
+                                break;
+                            default:
+                                r.skipType(t & 7);
+                                break;
+                        }
+                    }
+                    return m;
+                };
+                MsgExecuteContractResponse.fromObject = function fromObject(d) {
+                    if (d instanceof $root.cosmwasm.wasm.v1.MsgExecuteContractResponse)
+                        return d;
+                    var m = new $root.cosmwasm.wasm.v1.MsgExecuteContractResponse();
+                    if (d.data != null) {
+                        if (typeof d.data === "string")
+                            $util.base64.decode(d.data, m.data = $util.newBuffer($util.base64.length(d.data)), 0);
+                        else if (d.data.length)
+                            m.data = d.data;
+                    }
+                    return m;
+                };
+                MsgExecuteContractResponse.toObject = function toObject(m, o) {
+                    if (!o)
+                        o = {};
+                    var d = {};
+                    if (o.defaults) {
+                        if (o.bytes === String)
+                            d.data = "";
+                        else {
+                            d.data = [];
+                            if (o.bytes !== Array)
+                                d.data = $util.newBuffer(d.data);
+                        }
+                    }
+                    if (m.data != null && m.hasOwnProperty("data")) {
+                        d.data = o.bytes === String ? $util.base64.encode(m.data, 0, m.data.length) : o.bytes === Array ? Array.prototype.slice.call(m.data) : m.data;
+                    }
+                    return d;
+                };
+                MsgExecuteContractResponse.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+                return MsgExecuteContractResponse;
+            })();
+            return v1;
+        })();
+        return wasm;
+    })();
+    return cosmwasm;
 })();
 exports.tendermint = $root.tendermint = (() => {
     const tendermint = {};

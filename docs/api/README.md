@@ -5,11 +5,7 @@ order: 1
 
 ## How to detect Keplr
 
-You can know if Keplr is installed on the user device by checking `window.keplr`. If `window.keplr` returns `undefined`, Keplr is not installed (note: sometimes `window.keplr` may return `undefined` even when Keplr is installed if browser is parsing the DOM or the way it runs scripts).
-
-However, `window.keplr` will definitely return `Keplr` if the document's `readyState` is complete or upon document's `load` event if Keplr is installed.
-
-There are many ways to use Keplr upon the load event. Refer to the examples below:
+You can determine whether Keplr is installed on the user device by checking `window.keplr`. If `window.keplr` returns `undefined` after document.load, Keplr is not installed. There are several ways to wait for the load event to check the status. Refer to the examples below:
 
 You can register the function to `window.onload`:
 
@@ -21,11 +17,11 @@ window.onload = async () => {
         const chainId = "cosmoshub-4";
 
         // Enabling before using the Keplr is recommended.
-        // This method will ask the user whether or not to allow access if they haven't visited this website.
-        // Also, it will request user to unlock the wallet if the wallet is locked.
+        // This method will ask the user whether to allow access if they haven't visited this website.
+        // Also, it will request that the user unlock the wallet if the wallet is locked.
         await window.keplr.enable(chainId);
     
-        const offlineSigner = window.getOfflineSigner(chainId);
+        const offlineSigner = window.keplr.getOfflineSigner(chainId);
     
         // You can get the address/public keys by `getAccounts` method.
         // It can return the array of address/public key.
@@ -71,7 +67,7 @@ async getKeplr(): Promise<Keplr | undefined> {
 }
 ```
 
-There may be multiple ways to achieve the same result, and not one method is preferred over the other.
+There may be multiple ways to achieve the same result, and no preferred method.
 
 ## Keplr-specific features
 
@@ -162,7 +158,7 @@ signDirect(chainId:string, signer:string, signDoc: {
   }): Promise<DirectSignResponse>
 ```
 
-Similar to CosmJS `DirectOfflineSigner`'s `signDirect`, but Keplr's `signDirect` takes the chain-id as a required parameter. Signs Proto-encoded `StdSignDoc`.
+Similar to CosmJS `OfflineDirectSigner`'s `signDirect`, but Keplr's `signDirect` takes the chain-id as a required parameter. Signs Proto-encoded `StdSignDoc`.
 
 ### Request Transaction Broadcasting
 

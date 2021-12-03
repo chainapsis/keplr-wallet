@@ -208,6 +208,19 @@ export const TokensView: FunctionComponent = observer(() => {
         return bal.balance.toDec().gt(new Dec("0"));
       }
       return true;
+    })
+    .sort((a, b) => {
+      const aDecIsZero = a.balance.toDec().isZero();
+      const bDecIsZero = b.balance.toDec().isZero();
+
+      if (aDecIsZero && !bDecIsZero) {
+        return 1;
+      }
+      if (!aDecIsZero && bDecIsZero) {
+        return -1;
+      }
+
+      return a.currency.coinDenom < b.currency.coinDenom ? -1 : 1;
     });
 
   const history = useHistory();

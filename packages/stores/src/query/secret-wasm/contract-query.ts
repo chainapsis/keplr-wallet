@@ -111,11 +111,11 @@ export class ObservableSecretContractChainQuery<
       if (!Axios.isCancel(e) && e.response?.data?.error) {
         const encryptedError = e.response.data.error;
 
-        const errorMessageRgx = /query contract failed: encrypted: (.+)/g;
+        const errorMessageRgx = /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
 
         const rgxMatches = errorMessageRgx.exec(encryptedError);
-        if (rgxMatches != null && rgxMatches.length === 2) {
-          const errorCipherB64 = rgxMatches[1];
+        if (rgxMatches != null && rgxMatches.length === 4) {
+          const errorCipherB64 = rgxMatches[2];
           const errorCipherBz = Buffer.from(errorCipherB64, "base64");
 
           if (this.keplr && this.nonce) {
