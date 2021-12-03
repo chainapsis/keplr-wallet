@@ -1,7 +1,7 @@
 import { google } from "../proto";
 import * as $protobuf from "protobufjs";
 
-import { cosmos } from "../proto";
+import { cosmos, cosmwasm } from "../proto";
 import { UnknownMessage } from "./unknown";
 
 export * from "./unknown";
@@ -56,4 +56,8 @@ defaultProtoCodec.registerAny(
 defaultProtoCodec.registerAny(
   "/cosmos.staking.v1beta1.MsgBeginRedelegate",
   cosmos.staking.v1beta1.MsgBeginRedelegate
+);
+defaultProtoCodec.registerAny(
+  "/cosmwasm.wasm.v1.MsgExecuteContract",
+  cosmwasm.wasm.v1.MsgExecuteContract
 );
