@@ -7,7 +7,7 @@ import {
   IAmountConfig,
   InsufficientAmountError,
   InvalidNumberAmountError,
-  NagativeAmountError,
+  NegativeAmountError,
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
 import { Button } from "../button";
@@ -44,7 +44,7 @@ export const AmountInput: FunctionComponent<{
             return "Invalid number";
           case ZeroAmountError:
             return "Amount is zero";
-          case NagativeAmountError:
+          case NegativeAmountError:
             return "Amount is negative";
           case InsufficientAmountError:
             return "Insufficient fund";

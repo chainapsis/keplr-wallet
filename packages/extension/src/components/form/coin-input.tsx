@@ -18,7 +18,7 @@ import {
   EmptyAmountError,
   InvalidNumberAmountError,
   ZeroAmountError,
-  NagativeAmountError,
+  NegativeAmountError,
   InsufficientAmountError,
   IAmountConfig,
 } from "@keplr-wallet/hooks";
@@ -76,7 +76,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             return intl.formatMessage({
               id: "input.amount.error.is-zero",
             });
-          case NagativeAmountError:
+          case NegativeAmountError:
             return intl.formatMessage({
               id: "input.amount.error.is-negative",
             });

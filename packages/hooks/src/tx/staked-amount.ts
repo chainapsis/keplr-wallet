@@ -11,7 +11,7 @@ import {
   EmptyAmountError,
   InsufficientAmountError,
   InvalidNumberAmountError,
-  NagativeAmountError,
+  NegativeAmountError,
   ZeroAmountError,
 } from "./errors";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
@@ -178,7 +178,7 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
       return new InvalidNumberAmountError("Invalid form of number");
     }
     if (new Dec(this.amount).lt(new Dec(0))) {
-      return new NagativeAmountError("Amount is negative");
+      return new NegativeAmountError("Amount is negative");
     }
 
     const balance = this.queryDelegations
