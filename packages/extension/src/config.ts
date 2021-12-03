@@ -960,7 +960,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: 'SWP',
         coinMinimalDenom: 'swp',
         coinDecimals: 6,
-        coinGeckoId: 'kava/swap',
+        coinGeckoId: 'kava-swap',
       },
       {
         coinDenom: 'USDX',
