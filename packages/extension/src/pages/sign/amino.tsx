@@ -3,6 +3,7 @@
 import {
   AccountSetOpts,
   CosmosMsgOpts,
+  CosmwasmMsgOpts,
   SecretMsgOpts,
 } from "@keplr-wallet/stores";
 import { Currency } from "@keplr-wallet/types";
@@ -35,7 +36,7 @@ import {
 } from "./messages";
 
 export function renderAminoMessage(
-  msgOpts: AccountSetOpts<CosmosMsgOpts & SecretMsgOpts>["msgOpts"],
+  msgOpts: AccountSetOpts<CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts>["msgOpts"],
   msg: MessageObj,
   currencies: Currency[],
   intl: IntlShape
@@ -115,12 +116,24 @@ export function renderAminoMessage(
       );
     }
 
+    if (msg.type === msgOpts.executeWasm.type) {
+      const value = msg.value as MsgExecuteContract["value"];
+      return renderMsgExecuteContract(
+        currencies,
+        intl,
+        value.funds ?? [],
+        undefined,
+        value.contract,
+        value.msg
+      );
+    }
+
     if (msg.type === msgOpts.executeSecretWasm.type) {
       const value = msg.value as MsgExecuteContract["value"];
       return renderMsgExecuteContract(
         currencies,
         intl,
-        value.sent_funds,
+        value.sent_funds ?? [],
         value.callback_code_hash,
         value.contract,
         value.msg
