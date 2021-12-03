@@ -957,41 +957,41 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "kava",
       },
       {
-        coinDenom: 'SWP',
-        coinMinimalDenom: 'swp',
+        coinDenom: "SWP",
+        coinMinimalDenom: "swp",
         coinDecimals: 6,
-        coinGeckoId: 'kava-swap',
+        coinGeckoId: "kava-swap",
       },
       {
-        coinDenom: 'USDX',
-        coinMinimalDenom: 'usdx',
+        coinDenom: "USDX",
+        coinMinimalDenom: "usdx",
         coinDecimals: 6,
-        coinGeckoId: 'usdx',
+        coinGeckoId: "usdx",
       },
       {
-        coinDenom: 'HARD',
-        coinMinimalDenom: 'hard',
+        coinDenom: "HARD",
+        coinMinimalDenom: "hard",
         coinDecimals: 6,
       },
       {
-        coinDenom: 'BNB',
-        coinMinimalDenom: 'bnb',
-        coinDecimals: 8
+        coinDenom: "BNB",
+        coinMinimalDenom: "bnb",
+        coinDecimals: 8,
       },
       { 
-        coinDenom: 'BTCB',
-        coinMinimalDenom: 'btcb',
-        coinDecimals: 8
+        coinDenom: "BTCB",
+        coinMinimalDenom: "btcb",
+        coinDecimals: 8,
       },
       { 
-        coinDenom: 'BUSD',
-        coinMinimalDenom: 'busd',
-        coinDecimals: 8
+        coinDenom: "BUSD",
+        coinMinimalDenom: "busd",
+        coinDecimals: 8,
       },
       { 
-        coinDenom: 'XRPB',
-        coinMinimalDenom: 'xrpb',
-        coinDecimals: 8
+        coinDenom: "XRPB",
+        coinMinimalDenom: "xrpb",
+        coinDecimals: 8,
       },
     ],
     feeCurrencies: [
