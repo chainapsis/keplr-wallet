@@ -108,7 +108,8 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         "cosmwasm",
         "secretwasm",
         "ibc-transfer",
-        "no-legacy-stdTx"
+        "no-legacy-stdTx",
+        "ibc-go"
       )
     )
     .unique()
