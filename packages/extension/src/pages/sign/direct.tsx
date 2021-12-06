@@ -1,9 +1,10 @@
 import { Currency } from "@keplr-wallet/types";
 import { IntlShape } from "react-intl";
-import { cosmos, UnknownMessage } from "@keplr-wallet/cosmos";
+import { cosmos, cosmwasm, UnknownMessage } from "@keplr-wallet/cosmos";
 import {
   renderMsgBeginRedelegate,
   renderMsgDelegate,
+  renderMsgExecuteContract,
   renderMsgSend,
   renderMsgUndelegate,
   renderUnknownMessage,
@@ -11,6 +12,7 @@ import {
 import { CoinPrimitive } from "@keplr-wallet/stores";
 
 import { Buffer } from "buffer/";
+import { fromUtf8 } from "@cosmjs/encoding";
 
 export function renderDirectMessage(
   msg: any,
@@ -52,6 +54,17 @@ export function renderDirectMessage(
         intl,
         msg.amount as CoinPrimitive,
         msg.validatorAddress
+      );
+    }
+
+    if (msg instanceof cosmwasm.wasm.v1.MsgExecuteContract) {
+      return renderMsgExecuteContract(
+        currencies,
+        intl,
+        msg.funds as CoinPrimitive[],
+        undefined,
+        msg.contract,
+        JSON.parse(fromUtf8(msg.msg))
       );
     }
 

@@ -124,13 +124,20 @@ export interface MsgExecuteContract {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object | string;
     sender: string;
-    sent_funds: [
+    // The field is for wasm message.
+    funds?: [
       {
         amount: string;
         denom: string;
       }
     ];
-    // The bottom two fields are for secret-wasm message.
+    // The bottom fields are for secret-wasm message.
+    sent_funds?: [
+      {
+        amount: string;
+        denom: string;
+      }
+    ];
     callback_code_hash?: string;
     callback_sig?: string | null;
   };
