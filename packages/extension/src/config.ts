@@ -978,17 +978,17 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "bnb",
         coinDecimals: 8,
       },
-      { 
+      {
         coinDenom: "BTCB",
         coinMinimalDenom: "btcb",
         coinDecimals: 8,
       },
-      { 
+      {
         coinDenom: "BUSD",
         coinMinimalDenom: "busd",
         coinDecimals: 8,
       },
-      { 
+      {
         coinDenom: "XRPB",
         coinMinimalDenom: "xrpb",
         coinDecimals: 8,
