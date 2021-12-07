@@ -62,6 +62,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "atestfet",
         coinDecimals: 18,
       },
+      {
+        coinDenom: "MOBX",
+        coinMinimalDenom: "nanomobx",
+        coinDecimals: 9,
+      },
     ],
     feeCurrencies: [
       {
