@@ -78,6 +78,7 @@
     "@cosmjs/crypto": "^0.24.0-alpha.25",
     "@iov/crypto": "2.1.0",
     "libsodium": "file:./etc/noop",
-    "libsodium-wrappers": "file:./etc/noop"
+    "libsodium-wrappers": "file:./etc/noop",
+    "node-sass": "file:./etc/noop"
   }
 }

@@ -34,14 +34,24 @@ const sassRule = {
             localsConvention: "camelCase",
           },
         },
-        "sass-loader",
+        {
+          loader: "sass-loader",
+          options: {
+            implementation: require("sass"),
+          },
+        },
       ],
     },
     {
       use: [
         "style-loader",
         { loader: "css-loader", options: { modules: false } },
-        "sass-loader",
+        {
+          loader: "sass-loader",
+          options: {
+            implementation: require("sass"),
+          },
+        },
       ],
     },
   ],
