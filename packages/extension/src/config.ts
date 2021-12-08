@@ -75,6 +75,10 @@ import {
   AGORIC_RPC_CONFIG,
   AGORIC_REST_ENDPOINT,
   AGORIC_REST_CONFIG,
+  RIZON_RPC_ENDPOINT,
+  RIZON_RPC_CONFIG,
+  RIZON_REST_ENDPOINT,
+  RIZON_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1223,6 +1227,49 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04 * Math.pow(10, 12),
     },
     beta: true,
+  },
+  {
+    rpc: RIZON_RPC_ENDPOINT,
+    rpcConfig: RIZON_RPC_CONFIG,
+    rest: RIZON_REST_ENDPOINT,
+    restConfig: RIZON_REST_CONFIG,
+    chainId: "titan-1",
+    chainName: "RIZON",
+    stakeCurrency: {
+      coinDenom: "ATOLO",
+      coinMinimalDenom: "uatolo",
+      coinDecimals: 6,
+      coinGeckoId: "rizon",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.cosmostation.io/rizon"
+        : "http://localhost:8080/#/rizon/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.cosmostation.io/rizon"
+        : "http://localhost:8080/#/rizon/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("rizon"),
+    currencies: [
+      {
+        coinDenom: "ATOLO",
+        coinMinimalDenom: "uatolo",
+        coinDecimals: 6,
+        coinGeckoId: "rizon",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ATOLO",
+        coinMinimalDenom: "uatolo",
+        coinDecimals: 6,
+        coinGeckoId: "rizon",
+      },
+    ],
+    features: ["stargate", "ibc-transfer"],
   },
 ];
 
