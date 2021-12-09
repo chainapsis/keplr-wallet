@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
+    "@keplr-wallet/crypto": "^0.9.9",
     "@keplr-wallet/types": "^0.9.9",
     "@keplr-wallet/unit": "^0.9.9",
     "axios": "^0.21.0",
