@@ -269,6 +269,19 @@ export class KeyRingService {
       }
     )) as StdSignDoc;
 
+    if (isADR36SignDoc) {
+      // Validate the new sign doc, if it was for ADR-36.
+      if (checkAndValidateADR36AminoSignDoc(signDoc, bech32Prefix)) {
+        if (signDoc.msgs[0].value.signer !== signer) {
+          throw new Error("Unmatched signer in new sign doc");
+        }
+      } else {
+        throw new Error(
+          "Signing request was for ADR-36. But, accidentally, new sign doc is not for ADR-36"
+        );
+      }
+    }
+
     try {
       const signature = await this.keyRing.sign(
         env,
