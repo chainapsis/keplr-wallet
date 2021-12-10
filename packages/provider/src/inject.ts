@@ -14,6 +14,7 @@ import {
   StdSignDoc,
   StdTx,
   OfflineSigner,
+  StdSignature,
 } from "@cosmjs/launchpad";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -323,6 +324,28 @@ export class InjectedKeplr implements IKeplr {
       },
       signature: result.signature,
     };
+  }
+
+  async signArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array
+  ): Promise<StdSignature> {
+    return await this.requestMethod("signArbitrary", [chainId, signer, data]);
+  }
+
+  async verifyArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    signature: StdSignature
+  ): Promise<boolean> {
+    return await this.requestMethod("verifyArbitrary", [
+      chainId,
+      signer,
+      data,
+      signature,
+    ]);
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {

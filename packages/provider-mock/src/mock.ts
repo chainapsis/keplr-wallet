@@ -11,6 +11,7 @@ import {
   makeCosmoshubPath,
   OfflineSigner,
   Secp256k1HdWallet,
+  StdSignature,
   StdSignDoc,
   StdTx,
 } from "@cosmjs/launchpad";
@@ -102,6 +103,23 @@ export class MockKeplr implements Keplr {
       bech32Address: cosmJsKeys[0].address,
       isNanoLedger: false,
     };
+  }
+
+  signArbitrary(
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array
+  ): Promise<StdSignature> {
+    throw new Error("Not implemented");
+  }
+
+  verifyArbitrary(
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array,
+    _signature: StdSignature
+  ): Promise<boolean> {
+    throw new Error("Not implemented");
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {

@@ -13,6 +13,7 @@ import {
   StdSignDoc,
   StdTx,
   OfflineSigner,
+  StdSignature,
 } from "@cosmjs/launchpad";
 import {
   EnableAccessMsg,
@@ -36,6 +37,7 @@ import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
+import { Buffer } from "buffer";
 
 export class Keplr implements IKeplr {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
@@ -128,6 +130,54 @@ export class Keplr implements IKeplr {
       },
       signature: response.signature,
     };
+  }
+
+  async signArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array
+  ): Promise<StdSignature> {
+    let isADR36WithString = false;
+    if (typeof data === "string") {
+      data = Buffer.from(data).toString("base64");
+      isADR36WithString = true;
+    } else {
+      data = Buffer.from(data).toString("base64");
+    }
+
+    const signDoc = {
+      chain_id: "",
+      account_number: "0",
+      sequence: "0",
+      fee: {
+        gas: "0",
+        amount: [],
+      },
+      msgs: [
+        {
+          type: "sign/MsgSignData",
+          value: {
+            signer,
+            data,
+          },
+        },
+      ],
+      memo: "",
+    };
+
+    const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
+      isADR36WithString,
+    });
+    return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).signature;
+  }
+
+  verifyArbitrary(
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array,
+    _signature: StdSignature
+  ): Promise<boolean> {
+    throw new Error("Not yet implemented");
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {

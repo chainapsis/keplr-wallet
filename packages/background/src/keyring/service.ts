@@ -8,7 +8,10 @@ import {
   MultiKeyStoreInfoWithSelected,
 } from "./keyring";
 
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import {
+  Bech32Address,
+  checkAndValidateADR36AminoSignDoc,
+} from "@keplr-wallet/cosmos";
 import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 
 import { KVStore } from "@keplr-wallet/common";
@@ -220,17 +223,35 @@ export class KeyRingService {
     chainId: string,
     signer: string,
     signDoc: StdSignDoc,
-    signOptions: KeplrSignOptions
+    signOptions: KeplrSignOptions & {
+      // Hack option field to detect the sign arbitrary for string
+      isADR36WithString?: boolean;
+    }
   ): Promise<AminoSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
 
     const key = await this.keyRing.getKey(chainId, coinType);
-    const bech32Address = new Bech32Address(key.address).toBech32(
-      (await this.chainsService.getChainInfo(chainId)).bech32Config
-        .bech32PrefixAccAddr
-    );
+    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
+      .bech32Config.bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
+    }
+
+    const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
+      signDoc,
+      bech32Prefix
+    );
+    if (isADR36SignDoc) {
+      if (signDoc.msgs[0].value.signer !== signer) {
+        throw new Error("Unmatched signer in sign doc");
+      }
+    }
+
+    if (signOptions.isADR36WithString != null && !isADR36SignDoc) {
+      throw new Error(
+        'Sign doc is not for ADR-36. But, "isADR36WithString" option is defined'
+      );
     }
 
     const newSignDoc = (await this.interactionService.waitApprove(
@@ -244,6 +265,7 @@ export class KeyRingService {
         signDoc,
         signer,
         signOptions,
+        isADR36SignDoc,
       }
     )) as StdSignDoc;
 
