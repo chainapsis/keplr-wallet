@@ -247,6 +247,47 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
   }
 }
 
+export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
+  public static type() {
+    return "request-verify-adr-36-amino-doc";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly data: Uint8Array,
+    public readonly signature: StdSignature
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    if (!this.signature) {
+      throw new Error("Signature not set");
+    }
+
+    // It is not important to check this on the client side as opposed to increasing the bundle size.
+    // Validate bech32 address.
+    // Bech32Address.validate(this.signer);
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestVerifyADR36AminoSignDoc.type();
+  }
+}
+
 export class RequestSignDirectMsg extends Message<{
   readonly signed: {
     bodyBytes: Uint8Array;

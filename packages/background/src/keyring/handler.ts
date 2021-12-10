@@ -21,6 +21,7 @@ import {
   GetIsKeyStoreCoinTypeSetMsg,
   CheckPasswordMsg,
   ExportKeyRingDatasMsg,
+  RequestVerifyADR36AminoSignDoc,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -75,6 +76,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleRequestSignAminoMsg(service)(
           env,
           msg as RequestSignAminoMsg
+        );
+      case RequestVerifyADR36AminoSignDoc:
+        return handleRequestVerifyADR36AminoSignDoc(service)(
+          env,
+          msg as RequestVerifyADR36AminoSignDoc
         );
       case RequestSignDirectMsg:
         return handleRequestSignDirectMsg(service)(
@@ -276,6 +282,25 @@ const handleRequestSignAminoMsg: (
       msg.signer,
       msg.signDoc,
       msg.signOptions
+    );
+  };
+};
+
+const handleRequestVerifyADR36AminoSignDoc: (
+  service: KeyRingService
+) => InternalHandler<RequestVerifyADR36AminoSignDoc> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      msg.chainId,
+      msg.origin
+    );
+
+    return await service.verifyADR36AminoSignDoc(
+      msg.chainId,
+      msg.signer,
+      msg.data,
+      msg.signature
     );
   };
 };

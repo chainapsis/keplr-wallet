@@ -28,6 +28,7 @@ import {
   ReqeustEncryptMsg,
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
+  RequestVerifyADR36AminoSignDoc,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -171,13 +172,20 @@ export class Keplr implements IKeplr {
     return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).signature;
   }
 
-  verifyArbitrary(
-    _chainId: string,
-    _signer: string,
-    _data: string | Uint8Array,
-    _signature: StdSignature
+  async verifyArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    signature: StdSignature
   ): Promise<boolean> {
-    throw new Error("Not yet implemented");
+    if (typeof data === "string") {
+      data = Buffer.from(data);
+    }
+
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new RequestVerifyADR36AminoSignDoc(chainId, signer, data, signature)
+    );
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
