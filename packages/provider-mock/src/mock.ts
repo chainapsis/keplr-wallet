@@ -54,7 +54,7 @@ export class MockKeplr implements Keplr {
   constructor(
     public readonly sendTxFn: (
       chainId: string,
-      stdTx: StdTx,
+      stdTx: StdTx | Uint8Array,
       mode: BroadcastMode
     ) => Promise<Uint8Array>,
     public readonly chainInfos: {
@@ -114,7 +114,7 @@ export class MockKeplr implements Keplr {
 
   sendTx(
     chainId: string,
-    stdTx: StdTx,
+    stdTx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
     return this.sendTxFn(chainId, stdTx, mode);
