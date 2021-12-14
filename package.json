@@ -32,7 +32,7 @@
     "build:clean": "yarn clean && yarn install --frozen-lockfile && lerna run build",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
-    "ci": "yarn install --frozen-lockfile && yarn build && yarn test",
+    "ci": "yarn install --frozen-lockfile && yarn build && yarn workspace mobile typecheck && yarn test",
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
     "ci-publish": "yarn clean && yarn install --frozen-lockfile && lerna run build --ignore @keplr-wallet/extension && lerna publish from-git --yes",
     "pre-commit": "lint-staged"
