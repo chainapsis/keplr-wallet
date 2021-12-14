@@ -32,12 +32,9 @@ export const GasInput: FunctionComponent<GasInputProps> = observer(
           type="number"
           step={1}
           min={0}
-          value={gasConfig.gas}
+          value={gasConfig.gasRaw}
           onChange={(e) => {
-            const gas = parseInt(e.target.value);
-            if (!isNaN(gas) && gas > 0) {
-              gasConfig.setGas(gas);
-            }
+            gasConfig.setGas(e.target.value);
             e.preventDefault();
           }}
           autoComplete="off"

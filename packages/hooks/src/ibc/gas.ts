@@ -12,7 +12,7 @@ export class IBCTransferGasConfig extends GasConfig {
     initialChainId: string,
     msgOpts: CosmosMsgOpts["ibcTransfer"]
   ) {
-    super(chainGetter, initialChainId, msgOpts.gas);
+    super(chainGetter, initialChainId);
 
     this.msgOpts = msgOpts;
 
@@ -26,11 +26,11 @@ export class IBCTransferGasConfig extends GasConfig {
 
   get gas(): number {
     // If gas not set manually, assume that the tx is for MsgTransfer.
-    if (this._gas <= 0) {
+    if (this._gasRaw == null) {
       return this.msgOpts.gas;
     }
 
-    return this._gas;
+    return super.gas;
   }
 }
 
