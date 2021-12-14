@@ -1,50 +1,78 @@
 import { ProtoSignDocDecoder } from "../decoder";
 import { Coin, StdSignDoc } from "@cosmjs/launchpad";
 
-import { Buffer } from "buffer/";
 import { cosmos } from "../proto";
+import { checkAndValidateADR36AminoSignDoc } from "../../adr-36";
 
 export class SignDocWrapper {
   protected _protoSignDoc?: ProtoSignDocDecoder;
 
-  protected _aminoSignDoc?: StdSignDoc;
+  public readonly isADR36SignDoc: boolean;
+
+  public readonly mode: "amino" | "direct";
 
   constructor(
-    public readonly mode: "amino" | "direct",
-    protected readonly message: Uint8Array
-  ) {}
+    protected readonly signDoc: StdSignDoc | cosmos.tx.v1beta1.SignDoc
+  ) {
+    if ("msgs" in signDoc) {
+      this.mode = "amino";
+    } else {
+      this.mode = "direct";
+    }
+
+    if (this.mode === "amino") {
+      // Check that the sign doc is for ADR-36.
+      // The validation should be performed on the background process.
+      // So, here, we check once more, but the validation related to bech32 is considered to be done in the background process.
+      this.isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
+        this.aminoSignDoc
+      );
+    } else {
+      // Currently, only support amino sign doc for ADR-36
+      this.isADR36SignDoc = false;
+    }
+  }
 
   static fromAminoSignDoc(signDoc: StdSignDoc) {
-    const wrapper = new SignDocWrapper("amino", new Uint8Array(0));
-    wrapper._aminoSignDoc = signDoc;
-    return wrapper;
+    return new SignDocWrapper(signDoc);
   }
 
   static fromDirectSignDoc(signDoc: cosmos.tx.v1beta1.SignDoc) {
-    const wrapper = new SignDocWrapper("direct", new Uint8Array(0));
-    wrapper._protoSignDoc = new ProtoSignDocDecoder(signDoc);
-    return wrapper;
+    return new SignDocWrapper(signDoc);
+  }
+
+  static fromDirectSignDocBytes(signDocBytes: Uint8Array) {
+    return new SignDocWrapper(cosmos.tx.v1beta1.SignDoc.decode(signDocBytes));
   }
 
   clone(): SignDocWrapper {
-    return new SignDocWrapper(this.mode, this.message);
+    return new SignDocWrapper(this.signDoc);
   }
 
   get protoSignDoc(): ProtoSignDocDecoder {
+    if (this.mode === "amino") {
+      throw new Error("Sign doc is encoded as Amino Json");
+    }
+    if ("msgs" in this.signDoc) {
+      throw new Error("Unexpected error");
+    }
+
     if (!this._protoSignDoc) {
-      this._protoSignDoc = ProtoSignDocDecoder.decode(this.message);
+      this._protoSignDoc = new ProtoSignDocDecoder(this.signDoc);
     }
 
     return this._protoSignDoc;
   }
 
   get aminoSignDoc(): StdSignDoc {
-    if (!this._aminoSignDoc) {
-      this._aminoSignDoc = JSON.parse(Buffer.from(this.message).toString());
+    if (this.mode === "direct") {
+      throw new Error("Sign doc is encoded as Protobuf");
+    }
+    if (!("msgs" in this.signDoc)) {
+      throw new Error("Unexpected error");
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this._aminoSignDoc!;
+    return this.signDoc;
   }
 
   get chainId(): string {

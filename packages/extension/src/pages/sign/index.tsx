@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { Button } from "reactstrap";
 
 import { HeaderLayout } from "../../layouts";
@@ -22,6 +22,8 @@ import {
   useMemoConfig,
   useSignDocAmountConfig,
 } from "@keplr-wallet/hooks";
+import { ADR36SignDocDetailsTab } from "./adr-36";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 enum Tab {
   Details,
@@ -44,6 +46,10 @@ export const SignPage: FunctionComponent = observer(() => {
   } = useStore();
 
   const [signer, setSigner] = useState("");
+  const [origin, setOrigin] = useState<string | undefined>();
+  const [isADR36WithString, setIsADR36WithString] = useState<
+    boolean | undefined
+  >();
 
   const current = chainStore.current;
   // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
@@ -64,14 +70,25 @@ export const SignPage: FunctionComponent = observer(() => {
   );
   const memoConfig = useMemoConfig(chainStore, current.chainId);
 
-  const signDocWapper = signInteractionStore.waitingData?.data.signDocWrapper;
   const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
   amountConfig.setSignDocHelper(signDocHelper);
 
   useEffect(() => {
     if (signInteractionStore.waitingData) {
       const data = signInteractionStore.waitingData;
-      chainStore.selectChain(data.data.signDocWrapper.chainId);
+      chainStore.selectChain(data.data.chainId);
+      if (data.data.signDocWrapper.isADR36SignDoc) {
+        setIsADR36WithString(data.data.isADR36WithString);
+      }
+      setOrigin(data.data.msgOrigin);
+      if (
+        !data.data.signDocWrapper.isADR36SignDoc &&
+        data.data.chainId !== data.data.signDocWrapper.chainId
+      ) {
+        // Validate the requested chain id and the chain id in the sign doc are same.
+        // If the sign doc is for ADR-36, there is no chain id in the sign doc, so no need to validate.
+        throw new Error("Chain id unmatched");
+      }
       signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
       gasConfig.setGas(data.data.signDocWrapper.gas);
       memoConfig.setMemo(data.data.signDocWrapper.memo);
@@ -124,9 +141,64 @@ export const SignPage: FunctionComponent = observer(() => {
     signInteractionStore.rejectAll();
   });
 
+  // Check that the request is delivered
+  // and the chain is selected properly.
+  // The chain store loads the saved chain infos including the suggested chain asynchronously on init.
+  // So, it can be different the current chain and the expected selected chain for a moment.
+  const isLoaded = useMemo(() => {
+    if (!signDocHelper.signDocWrapper) {
+      return false;
+    }
+
+    return (
+      ChainIdHelper.parse(chainStore.current.chainId).identifier ===
+      ChainIdHelper.parse(chainStore.selectedChainId).identifier
+    );
+  }, [
+    signDocHelper.signDocWrapper,
+    chainStore.current.chainId,
+    chainStore.selectedChainId,
+  ]);
+
+  // If this is undefined, show the chain name on the header.
+  // If not, show the alternative title.
+  const alternativeTitle = (() => {
+    if (!isLoaded) {
+      return "";
+    }
+
+    if (
+      signDocHelper.signDocWrapper &&
+      signDocHelper.signDocWrapper.isADR36SignDoc
+    ) {
+      return "Prove Ownership";
+    }
+
+    return undefined;
+  })();
+
+  const approveIsDisabled = (() => {
+    if (!isLoaded) {
+      return true;
+    }
+
+    if (!signDocHelper.signDocWrapper) {
+      return true;
+    }
+
+    // If the sign doc is for ADR-36,
+    // there is no error related to the fee or memo...
+    if (signDocHelper.signDocWrapper.isADR36SignDoc) {
+      return false;
+    }
+
+    return memoConfig.getError() != null || feeConfig.getError() != null;
+  })();
+
   return (
     <HeaderLayout
-      showChainName
+      showChainName={alternativeTitle == null}
+      alternativeTitle={alternativeTitle != null ? alternativeTitle : undefined}
       canChangeChainInfo={false}
       onBackButton={
         interactionInfo.interactionInternal
@@ -142,7 +214,7 @@ export const SignPage: FunctionComponent = observer(() => {
          Show the informations of tx when the sign data is delivered.
          If sign data not delivered yet, show the spinner alternatively.
          */
-        signer ? (
+        isLoaded ? (
           <div className={style.container}>
             <div className={classnames(style.tabs)}>
               <ul>
@@ -181,18 +253,26 @@ export const SignPage: FunctionComponent = observer(() => {
                 <DataTab signDocHelper={signDocHelper} />
               ) : null}
               {tab === Tab.Details ? (
-                <DetailsTab
-                  signDocHelper={signDocHelper}
-                  memoConfig={memoConfig}
-                  feeConfig={feeConfig}
-                  gasConfig={gasConfig}
-                  isInternal={
-                    interactionInfo.interaction &&
-                    interactionInfo.interactionInternal
-                  }
-                  preferNoSetFee={preferNoSetFee}
-                  preferNoSetMemo={preferNoSetMemo}
-                />
+                signDocHelper.signDocWrapper?.isADR36SignDoc ? (
+                  <ADR36SignDocDetailsTab
+                    signDocWrapper={signDocHelper.signDocWrapper}
+                    isADR36WithString={isADR36WithString}
+                    origin={origin}
+                  />
+                ) : (
+                  <DetailsTab
+                    signDocHelper={signDocHelper}
+                    memoConfig={memoConfig}
+                    feeConfig={feeConfig}
+                    gasConfig={gasConfig}
+                    isInternal={
+                      interactionInfo.interaction &&
+                      interactionInfo.interactionInternal
+                    }
+                    preferNoSetFee={preferNoSetFee}
+                    preferNoSetMemo={preferNoSetMemo}
+                  />
+                )
               ) : null}
             </div>
             <div style={{ flex: 1 }} />
@@ -213,10 +293,7 @@ export const SignPage: FunctionComponent = observer(() => {
                   <Button
                     className={style.button}
                     color="danger"
-                    disabled={
-                      signDocWapper == null ||
-                      signDocHelper.signDocWrapper == null
-                    }
+                    disabled={signDocHelper.signDocWrapper == null}
                     data-loading={signInteractionStore.isLoading}
                     onClick={async (e) => {
                       e.preventDefault();
@@ -243,12 +320,7 @@ export const SignPage: FunctionComponent = observer(() => {
                   <Button
                     className={style.button}
                     color="primary"
-                    disabled={
-                      signDocWapper == null ||
-                      signDocHelper.signDocWrapper == null ||
-                      memoConfig.getError() != null ||
-                      feeConfig.getError() != null
-                    }
+                    disabled={approveIsDisabled}
                     data-loading={signInteractionStore.isLoading}
                     onClick={async (e) => {
                       e.preventDefault();

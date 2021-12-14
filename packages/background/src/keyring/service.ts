@@ -270,6 +270,7 @@ export class KeyRingService {
         signer,
         signOptions,
         isADR36SignDoc,
+        isADR36WithString: signOptions.isADR36WithString,
       }
     )) as StdSignDoc;
 
