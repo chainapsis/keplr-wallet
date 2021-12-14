@@ -51,7 +51,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     coinType: 118,
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/atom.png",
     txExplorer: {
       name: "Mintscan",
@@ -106,7 +106,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       average: 0,
       high: 0.025,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/osmo.png",
     txExplorer: {
       name: "Mintscan",
