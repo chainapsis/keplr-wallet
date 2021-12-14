@@ -7,7 +7,10 @@ import {
 } from "./keyring";
 import { BIP44HDPath, ExportKeyRingData } from "./types";
 
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import {
+  Bech32Address,
+  checkAndValidateADR36AminoSignDoc,
+} from "@keplr-wallet/cosmos";
 import { BIP44, KeplrSignOptions, Key } from "@keplr-wallet/types";
 
 import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
@@ -491,7 +494,10 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     public readonly chainId: string,
     public readonly signer: string,
     public readonly signDoc: StdSignDoc,
-    public readonly signOptions: KeplrSignOptions = {}
+    public readonly signOptions: KeplrSignOptions & {
+      // Hack option field to detect the sign arbitrary for string
+      isADR36WithString?: boolean;
+    } = {}
   ) {
     super();
   }
@@ -508,10 +514,18 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     // Validate bech32 address.
     Bech32Address.validate(this.signer);
 
-    if (this.signDoc.chain_id !== this.chainId) {
-      throw new Error(
-        "Chain id in the message is not matched with the requested chain id"
-      );
+    // Check and validate the ADR-36 sign doc.
+    // ADR-36 sign doc doesn't have the chain id
+    if (!checkAndValidateADR36AminoSignDoc(this.signDoc)) {
+      if (this.signDoc.chain_id !== this.chainId) {
+        throw new Error(
+          "Chain id in the message is not matched with the requested chain id"
+        );
+      }
+    } else {
+      if (this.signDoc.msgs[0].value.signer !== this.signer) {
+        throw new Error("Unmatched signer in sign doc");
+      }
     }
 
     if (!this.signOptions) {
@@ -529,6 +543,50 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
 
   type(): string {
     return RequestSignAminoMsg.type();
+  }
+}
+
+export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
+  public static type() {
+    return "request-verify-adr-36-amino-doc";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly data: Uint8Array,
+    public readonly signature: StdSignature
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    if (!this.signature) {
+      throw new Error("Signature not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.signer);
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestVerifyADR36AminoSignDoc.type();
   }
 }
 

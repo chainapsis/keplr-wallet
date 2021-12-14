@@ -5,6 +5,7 @@ import {
   StdSignDoc,
   StdTx,
   OfflineSigner,
+  StdSignature,
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { SecretUtils } from "secretjs/types/enigmautils";
@@ -82,6 +83,18 @@ export interface Keplr {
     tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array>;
+
+  signArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array
+  ): Promise<StdSignature>;
+  verifyArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    signature: StdSignature
+  ): Promise<boolean>;
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
   getOfflineSignerOnlyAmino(chainId: string): OfflineSigner;

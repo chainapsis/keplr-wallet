@@ -23,6 +23,13 @@ export class SignDocHelper {
       return undefined;
     }
 
+    // If the sign doc is for ADR-36,
+    // The fee and memo should be empty.
+    // Ignore the fee and memo config, and just return itself.
+    if (this._signDocWrapper.isADR36SignDoc) {
+      return this._signDocWrapper;
+    }
+
     const stdFee = this.feeConfig.toStdFee();
 
     if (this._signDocWrapper.mode === "amino") {

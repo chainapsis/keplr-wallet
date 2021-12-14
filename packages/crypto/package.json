@@ -17,7 +17,6 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
-    "@keplr-wallet/cosmos": "^0.9.9",
     "@types/crypto-js": "^4.0.1",
     "@types/elliptic": "^6.4.12",
     "@types/sha.js": "^2.4.0"

@@ -16,6 +16,7 @@ import {
   AminoSignResponse,
   BroadcastMode,
   OfflineSigner,
+  StdSignature,
   StdSignDoc,
   StdTx,
 } from "@cosmjs/launchpad";
@@ -366,6 +367,23 @@ export class KeplrWalletConnectV1 implements Keplr {
     saved[chainId] = response;
 
     await this.saveAllLastSeenKey(saved);
+  }
+
+  signArbitrary(
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array
+  ): Promise<StdSignature> {
+    throw new Error("Not yet implemented");
+  }
+
+  verifyArbitrary(
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array,
+    _signature: StdSignature
+  ): Promise<boolean> {
+    throw new Error("Not yet implemented");
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {

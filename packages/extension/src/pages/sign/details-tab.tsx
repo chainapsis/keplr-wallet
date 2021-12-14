@@ -63,9 +63,9 @@ export const DetailsTab: FunctionComponent<{
           );
           return (
             <React.Fragment key={i.toString()}>
-              <Msg icon={msgContent.icon} title={msgContent.title}>
+              <MsgRender icon={msgContent.icon} title={msgContent.title}>
                 {msgContent.content}
-              </Msg>
+              </MsgRender>
               <hr />
             </React.Fragment>
           );
@@ -79,9 +79,9 @@ export const DetailsTab: FunctionComponent<{
           );
           return (
             <React.Fragment key={i.toString()}>
-              <Msg icon={msgContent.icon} title={msgContent.title}>
+              <MsgRender icon={msgContent.icon} title={msgContent.title}>
                 {msgContent.content}
-              </Msg>
+              </MsgRender>
               <hr />
             </React.Fragment>
           );
@@ -188,7 +188,7 @@ export const DetailsTab: FunctionComponent<{
   }
 );
 
-const Msg: FunctionComponent<{
+export const MsgRender: FunctionComponent<{
   icon?: string;
   title: string;
 }> = ({ icon = "fas fa-question", title, children }) => {

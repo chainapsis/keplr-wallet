@@ -33,6 +33,8 @@ export class SignInteractionStore {
           signer: string;
           signDoc: StdSignDoc;
           signOptions: KeplrSignOptions;
+          isADR36SignDoc: boolean;
+          isADR36WithString?: boolean;
         }
       | {
           msgOrigin: string;
@@ -48,10 +50,12 @@ export class SignInteractionStore {
   @computed
   get waitingData():
     | InteractionWaitingData<{
+        chainId: string;
         msgOrigin: string;
         signer: string;
         signDocWrapper: SignDocWrapper;
         signOptions: KeplrSignOptions;
+        isADR36WithString?: boolean;
       }>
     | undefined {
     const datas = this.waitingDatas;
@@ -64,17 +68,22 @@ export class SignInteractionStore {
     const wrapper =
       data.data.mode === "amino"
         ? SignDocWrapper.fromAminoSignDoc(data.data.signDoc)
-        : new SignDocWrapper(data.data.mode, data.data.signDocBytes);
+        : SignDocWrapper.fromDirectSignDocBytes(data.data.signDocBytes);
 
     return {
       id: data.id,
       type: data.type,
       isInternal: data.isInternal,
       data: {
+        chainId: data.data.chainId,
         msgOrigin: data.data.msgOrigin,
         signer: data.data.signer,
         signDocWrapper: wrapper,
         signOptions: data.data.signOptions,
+        isADR36WithString:
+          "isADR36WithString" in data.data
+            ? data.data.isADR36WithString
+            : undefined,
       },
     };
   }
