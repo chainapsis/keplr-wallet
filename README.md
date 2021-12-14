@@ -1,3 +1,6 @@
+# NOTE:
+**We do not accept Keplr wallet native integrations in the form of pull requests.**
+
 # Keplr Browser Extension
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Twitter: chainapsis](https://img.shields.io/twitter/follow/chainapsis.svg?style=social)](https://twitter.com/chainapsis)
