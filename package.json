@@ -34,7 +34,7 @@
     "lint-fix": "lerna run lint-fix",
     "ci": "yarn install --frozen-lockfile && yarn build && yarn workspace mobile typecheck && yarn test",
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
-    "ci-publish": "yarn clean && yarn install --frozen-lockfile && lerna run build --ignore @keplr-wallet/extension && lerna publish from-git --yes",
+    "ci-publish": "yarn install --frozen-lockfile && lerna run build --ignore @keplr-wallet/extension && npx zx ./scripts/publish.mjs",
     "pre-commit": "lint-staged"
   },
   "pre-commit": [
