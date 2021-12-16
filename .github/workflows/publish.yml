@@ -1,12 +1,18 @@
-name: Test
+name: Publish
 on:
-  pull_request:
   push:
+    tags:
+      - v(\d+).(\d+).(\d+)(.*)
+  workflow_run:
+    workflows: ["Lint", "Test"]
+    types:
+      - completed
 
 jobs:
-  test:
-    name: Test code base
+  publish:
+    name: Publish to npm
     runs-on: ubuntu-18.04
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -16,6 +22,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14'
+          registry-url: 'https://registry.npmjs.org'
       - run: npm install --global yarn
       - run: sudo apt-get install libusb-1.0-0-dev
       - run: sudo apt-get install apt-transport-https ca-certificates
@@ -30,4 +37,6 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
-      - run: yarn ci
+      - run: yarn ci-publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
