@@ -2,9 +2,13 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Twitter: Keplr Wallet](https://img.shields.io/twitter/follow/keplrwallet.svg?style=social)](https://twitter.com/keplrwallet)
 
-> The first, and leading, IBC-enabled wallet for the Inter blockchain ecosystem.
+> The most powerful wallet for the Interchain.
 
-You can find the latest versions on these links
+## Official Releases
+
+> NOTE: We do not accept native integrations to the official releases through pull requests. Please feel free to check out Keplr's [suggest chain](https://docs.keplr.app/api/suggest-chain.html) feature for permissionless intergrations to your chain.
+
+You can find the latest versions of the official managed releases on these links:
 - [Browser Extension](https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap)
 - [IOS App](https://apps.apple.com/us/app/keplr-wallet/id1567851089)
 - [Android App](https://play.google.com/store/apps/details?id=com.chainapsis.keplr)
