@@ -17,24 +17,29 @@ For help using Keplr Wallet, Visit our [User Support Site](https://keplr.crunch.
 
 ## Building browser extension locally
 This repo uses git-secret to encrypt the endpoints and the api keys. **So, you can't build this without creating your own config file.** You should create your own `config.var.ts`, `config.ui.var.ts` files inside the `packages/extension/src` folder. Refer to the `config.var.example.ts`, ``config.ui.var.example.ts`` sample files to create your own configuration.
+
+Clone this repo and run:
 ```sh
+yarn bootstrap
 yarn dev
 ```
 
 Browser extension's build output is placed in `packages/extension/dist`, and you can check out [this page](https://developer.chrome.com/extensions/getstarted) for installing the developing version.
 
-This repo contains submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Extension release. However, all primary features of the extension will work without the closed sourced submodules.  
+This repo contains submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Browser Extension release. However, all primary features of the extension will work without the closed sourced submodules.
+
+Source code for moblie app is also placed in `packages/mobile`.
 
 ### Example
 Refer to the [Keplr Example repository](https://github.com/chainapsis/keplr-example) for examples of how to integrate Keplr signing support for your web interface/application.
 
 ## Author
-
 👤 **Chainapsis**
-
 * Twitter: [@chainapsis](https://twitter.com/chainapsis)
 * Github: [@chainapsis](https://github.com/chainapsis)
 
 ## License
-##### Keplr Mobile License
+### Browser Extension 
+Apache 2.0
+### IOS / Android App
 Copyright (c) 2021 Chainapsis Inc. All rights reserved.
