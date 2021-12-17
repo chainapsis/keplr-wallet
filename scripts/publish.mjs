@@ -49,7 +49,7 @@ const lerna = JSON.parse(lernaFile);
   if (foundedVersion) {
     console.log(`${foundedVersion} published to NPM`);
   } else {
-    console.log("No version tag found");
+    throw new Error("No version tag found");
   }
 })();
 
