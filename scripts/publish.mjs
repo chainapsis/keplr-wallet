@@ -16,37 +16,33 @@ const lerna = JSON.parse(lernaFile);
   let foundedVersion = "";
 
   for (const version of versions) {
-    try {
-      // semver.parse will check that the version has the major, minor, patch version (with optional prerelease version).
-      const sementic = semver.parse(version);
+    // semver.parse will check that the version has the major, minor, patch version (with optional prerelease version).
+    const sementic = semver.parse(version);
 
-      if (sementic) {
-        if (lerna.version !== sementic.version) {
-          console.log(
-            `WARNING: ${sementic.version} founded. But, it is different with lerna's package versions.`
-          );
-          continue;
-        }
-
-        if (foundedVersion) {
-          console.log(
-            `WARNING: ${foundedVersion} already published. Only one tag can be published at once.`
-          );
-          continue;
-        }
-
-        foundedVersion = version;
-
-        const isPrelease = sementic.prerelease.length > 0;
-
-        if (isPrelease) {
-          await $`lerna publish from-git --yes --dist-tag next`;
-        } else {
-          await $`lerna publish from-git --yes`;
-        }
+    if (sementic) {
+      if (lerna.version !== sementic.version) {
+        console.log(
+          `WARNING: ${sementic.version} founded. But, it is different with lerna's package versions.`
+        );
+        continue;
       }
-    } catch (e) {
-      console.log(e);
+
+      if (foundedVersion) {
+        console.log(
+          `WARNING: ${foundedVersion} already published. Only one tag can be published at once.`
+        );
+        continue;
+      }
+
+      foundedVersion = version;
+
+      const isPrelease = sementic.prerelease.length > 0;
+
+      if (isPrelease) {
+        await $`lerna publish from-git --yes --dist-tag next`;
+      } else {
+        await $`lerna publish from-git --yes`;
+      }
     }
   }
 
