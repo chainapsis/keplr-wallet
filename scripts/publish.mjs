@@ -2,7 +2,10 @@
 
 import "zx/globals";
 import semver from "semver";
-import { version as lernaVersion } from "../lerna.json";
+import fs from "fs";
+
+const lernaFile = fs.readFileSync("./lerna.json", "utf8");
+const lerna = JSON.parse(lernaFile);
 
 (async () => {
   const versions = (await $`git tag --points-at HEAD`).stdout
@@ -18,7 +21,7 @@ import { version as lernaVersion } from "../lerna.json";
       const sementic = semver.parse(version);
 
       if (sementic) {
-        if (lernaVersion !== sementic.version) {
+        if (lerna.version !== sementic.version) {
           console.log(
             `WARNING: ${sementic.version} founded. But, it is different with lerna's package versions.`
           );
@@ -36,9 +39,11 @@ import { version as lernaVersion } from "../lerna.json";
 
         const isPrelease = sementic.prerelease.length > 0;
 
-        await $`lerna publish from-git --yes ${
-          isPrelease ? "--dist-tag next" : ""
-        }`;
+        if (isPrelease) {
+          await $`lerna publish from-git --yes --dist-tag next`;
+        } else {
+          await $`lerna publish from-git --yes`;
+        }
       }
     } catch (e) {
       console.log(e);
@@ -46,7 +51,7 @@ import { version as lernaVersion } from "../lerna.json";
   }
 
   if (foundedVersion) {
-    console.log(`${foundedVersion} published`);
+    console.log(`${foundedVersion} published to NPM`);
   } else {
     console.log("No version tag found");
   }
