@@ -17,12 +17,12 @@ const lerna = JSON.parse(lernaFile);
 
   for (const version of versions) {
     // semver.parse will check that the version has the major, minor, patch version (with optional prerelease version).
-    const sementic = semver.parse(version);
+    const semantic = semver.parse(version);
 
-    if (sementic) {
-      if (lerna.version !== sementic.version) {
+    if (semantic) {
+      if (lerna.version !== semantic.version) {
         console.log(
-          `WARNING: ${sementic.version} founded. But, it is different with lerna's package versions.`
+          `WARNING: ${semantic.version} founded. But, it is different with lerna's package versions.`
         );
         continue;
       }
@@ -36,7 +36,7 @@ const lerna = JSON.parse(lernaFile);
 
       foundedVersion = version;
 
-      const isPrelease = sementic.prerelease.length > 0;
+      const isPrelease = semantic.prerelease.length > 0;
 
       if (isPrelease) {
         await $`lerna publish from-package --yes --dist-tag next`;
@@ -48,6 +48,24 @@ const lerna = JSON.parse(lernaFile);
 
   if (foundedVersion) {
     console.log(`${foundedVersion} published to NPM`);
+
+    console.log(`Try to create the release ${foundedVersion}`);
+
+    const semantic = semver.parse(foundedVersion);
+    if (semantic) {
+      const isPrelease = semantic.prerelease.length > 0;
+
+      await $`cd packages/extension/prod && zip -r keplr-extension-${foundedVersion}.zip .`;
+      if (isPrelease) {
+        await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion}`;
+      } else {
+        await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion} --prerelease`;
+      }
+
+      console.log("Release created");
+    } else {
+      throw new Error("Unexpected error");
+    }
   } else {
     throw new Error("No version tag found");
   }

@@ -6,7 +6,7 @@ on:
 
 jobs:
   publish:
-    name: Publish to npm
+    name: Publish to npm and create release
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -34,6 +34,8 @@ jobs:
       - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
       - run: yarn ci-lint
       - run: yarn ci
+      - run: sudo apt-get install gh
       - run: npx zx ./scripts/publish.mjs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
