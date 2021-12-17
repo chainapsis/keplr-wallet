@@ -39,9 +39,9 @@ const lerna = JSON.parse(lernaFile);
       const isPrelease = sementic.prerelease.length > 0;
 
       if (isPrelease) {
-        await $`lerna publish from-git --yes --dist-tag next`;
+        await $`lerna publish from-package --yes --dist-tag next`;
       } else {
-        await $`lerna publish from-git --yes`;
+        await $`lerna publish from-package --yes`;
       }
     }
   }
