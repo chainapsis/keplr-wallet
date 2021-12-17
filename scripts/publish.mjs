@@ -57,9 +57,9 @@ const lerna = JSON.parse(lernaFile);
 
       await $`cd packages/extension/prod && zip -r keplr-extension-${foundedVersion}.zip .`;
       if (isPrelease) {
-        await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion}`;
-      } else {
         await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion} --prerelease`;
+      } else {
+        await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion}`;
       }
 
       console.log("Release created");
