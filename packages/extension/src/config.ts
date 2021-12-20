@@ -120,7 +120,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 118,
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
   },
   {
     rpc: OSMOSIS_RPC_ENDPOINT,
@@ -172,7 +172,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0,
       high: 0.025,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
   },
   {
     rpc: SECRET_NETWORK_RPC_ENDPOINT,
