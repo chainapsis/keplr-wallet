@@ -287,6 +287,6 @@
   "component.ibc.channel-registrar.chain-selector.placeholder": "Select Chain",
   "component.ibc.channel-registrar.chain-selector.button.add": "New IBC Transfer Channel",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
-  "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Chain Channel ID",
+  "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save"
 }
