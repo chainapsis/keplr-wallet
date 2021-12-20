@@ -120,7 +120,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 118,
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
   },
   {
     rpc: OSMOSIS_RPC_ENDPOINT,
@@ -172,7 +172,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0,
       high: 0.025,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
   },
   {
     rpc: SECRET_NETWORK_RPC_ENDPOINT,
@@ -955,6 +955,43 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "ukava",
         coinDecimals: 6,
         coinGeckoId: "kava",
+      },
+      {
+        coinDenom: "SWP",
+        coinMinimalDenom: "swp",
+        coinDecimals: 6,
+        coinGeckoId: "kava-swap",
+      },
+      {
+        coinDenom: "USDX",
+        coinMinimalDenom: "usdx",
+        coinDecimals: 6,
+        coinGeckoId: "usdx",
+      },
+      {
+        coinDenom: "HARD",
+        coinMinimalDenom: "hard",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "bnb",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "BTCB",
+        coinMinimalDenom: "btcb",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "BUSD",
+        coinMinimalDenom: "busd",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "XRPB",
+        coinMinimalDenom: "xrpb",
+        coinDecimals: 8,
       },
     ],
     feeCurrencies: [

@@ -1,10 +1,10 @@
-name: Test Lint
+name: Lint
 on:
   pull_request:
   push:
 
 jobs:
-  test-lint:
+  lint:
     name: Lint code base
     runs-on: ubuntu-18.04
     steps:

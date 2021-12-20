@@ -17,7 +17,11 @@ export interface IMemoConfig extends ITxChainSetter {
 
 export interface IGasConfig extends ITxChainSetter {
   gas: number;
-  setGas(gas: number): void;
+  /*
+   The actual gas value from the input.
+   */
+  gasRaw: string;
+  setGas(gas: number | string): void;
 
   getError(): Error | undefined;
 }

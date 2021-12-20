@@ -20,12 +20,9 @@ export const GasInput: FunctionComponent<{
         containerStyle={containerStyle}
         inputContainerStyle={inputContainerStyle}
         label={label}
-        value={gasConfig.gas.toString()}
+        value={gasConfig.gasRaw}
         onChangeText={(text) => {
-          const gas = parseInt(text);
-          if (!isNaN(gas) && gas > 0) {
-            gasConfig.setGas(gas);
-          }
+          gasConfig.setGas(text);
         }}
         keyboardType="number-pad"
       />

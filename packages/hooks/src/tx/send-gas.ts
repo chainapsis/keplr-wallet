@@ -37,7 +37,7 @@ export class SendGasConfig extends GasConfig {
   get gas(): number {
     // If gas not set manually, assume that the tx is for MsgSend.
     // And, set the default gas according to the currency type.
-    if (this._gas <= 0 && this.amountConfig.sendCurrency) {
+    if (this._gasRaw == null && this.amountConfig.sendCurrency) {
       const denomHelper = new DenomHelper(
         this.amountConfig.sendCurrency.coinMinimalDenom
       );
@@ -52,7 +52,7 @@ export class SendGasConfig extends GasConfig {
       }
     }
 
-    return this._gas;
+    return super.gas;
   }
 }
 

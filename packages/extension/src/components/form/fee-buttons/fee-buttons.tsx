@@ -162,7 +162,10 @@ export const FeeButtonsInner: FunctionComponent<
             isFeeLoading = true;
             return undefined;
           default:
-            return intl.formatMessage({ id: "input.fee.error.unknown" });
+            return (
+              error.message ||
+              intl.formatMessage({ id: "input.fee.error.unknown" })
+            );
         }
       }
     })();

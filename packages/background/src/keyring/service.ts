@@ -8,7 +8,12 @@ import {
   MultiKeyStoreInfoWithSelected,
 } from "./keyring";
 
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import {
+  Bech32Address,
+  checkAndValidateADR36AminoSignDoc,
+  makeADR36AminoSignDoc,
+  verifyADR36AminoSignDoc,
+} from "@keplr-wallet/cosmos";
 import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 
 import { KVStore } from "@keplr-wallet/common";
@@ -25,11 +30,13 @@ import {
   serializeSignDoc,
   AminoSignResponse,
   StdSignDoc,
+  StdSignature,
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
 import { RNG } from "@keplr-wallet/crypto";
 import { cosmos } from "@keplr-wallet/cosmos";
+import { Buffer } from "buffer/";
 
 @singleton()
 export class KeyRingService {
@@ -220,17 +227,35 @@ export class KeyRingService {
     chainId: string,
     signer: string,
     signDoc: StdSignDoc,
-    signOptions: KeplrSignOptions
+    signOptions: KeplrSignOptions & {
+      // Hack option field to detect the sign arbitrary for string
+      isADR36WithString?: boolean;
+    }
   ): Promise<AminoSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
 
     const key = await this.keyRing.getKey(chainId, coinType);
-    const bech32Address = new Bech32Address(key.address).toBech32(
-      (await this.chainsService.getChainInfo(chainId)).bech32Config
-        .bech32PrefixAccAddr
-    );
+    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
+      .bech32Config.bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
+    }
+
+    const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
+      signDoc,
+      bech32Prefix
+    );
+    if (isADR36SignDoc) {
+      if (signDoc.msgs[0].value.signer !== signer) {
+        throw new Error("Unmatched signer in sign doc");
+      }
+    }
+
+    if (signOptions.isADR36WithString != null && !isADR36SignDoc) {
+      throw new Error(
+        'Sign doc is not for ADR-36. But, "isADR36WithString" option is defined'
+      );
     }
 
     const newSignDoc = (await this.interactionService.waitApprove(
@@ -244,8 +269,23 @@ export class KeyRingService {
         signDoc,
         signer,
         signOptions,
+        isADR36SignDoc,
+        isADR36WithString: signOptions.isADR36WithString,
       }
     )) as StdSignDoc;
+
+    if (isADR36SignDoc) {
+      // Validate the new sign doc, if it was for ADR-36.
+      if (checkAndValidateADR36AminoSignDoc(signDoc, bech32Prefix)) {
+        if (signDoc.msgs[0].value.signer !== signer) {
+          throw new Error("Unmatched signer in new sign doc");
+        }
+      } else {
+        throw new Error(
+          "Signing request was for ADR-36. But, accidentally, new sign doc is not for ADR-36"
+        );
+      }
+    }
 
     try {
       const signature = await this.keyRing.sign(
@@ -314,6 +354,40 @@ export class KeyRingService {
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
+  }
+
+  async verifyADR36AminoSignDoc(
+    chainId: string,
+    signer: string,
+    data: Uint8Array,
+    signature: StdSignature
+  ): Promise<boolean> {
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+
+    const key = await this.keyRing.getKey(chainId, coinType);
+    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
+      .bech32Config.bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+    if (signature.pub_key.type !== "tendermint/PubKeySecp256k1") {
+      throw new Error(`Unsupported type of pub key: ${signature.pub_key.type}`);
+    }
+    if (
+      Buffer.from(key.pubKey).toString("base64") !== signature.pub_key.value
+    ) {
+      throw new Error("Pub key unmatched");
+    }
+
+    const signDoc = makeADR36AminoSignDoc(signer, data);
+
+    return verifyADR36AminoSignDoc(
+      bech32Prefix,
+      signDoc,
+      Buffer.from(signature.pub_key.value, "base64"),
+      Buffer.from(signature.signature, "base64")
+    );
   }
 
   async sign(

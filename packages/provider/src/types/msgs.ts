@@ -186,7 +186,10 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     public readonly chainId: string,
     public readonly signer: string,
     public readonly signDoc: StdSignDoc,
-    public readonly signOptions: KeplrSignOptions = {}
+    public readonly signOptions: KeplrSignOptions & {
+      // Hack option field to detect the sign arbitrary for string
+      isADR36WithString?: boolean;
+    } = {}
   ) {
     super();
   }
@@ -204,7 +207,27 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     // Validate bech32 address.
     // Bech32Address.validate(this.signer);
 
-    if (this.signDoc.chain_id !== this.chainId) {
+    const signDoc = this.signDoc;
+
+    // Check that the sign doc is for ADR-36,
+    // the validation should be performed on the background.
+    const hasOnlyMsgSignData = (() => {
+      if (
+        signDoc &&
+        signDoc.msgs &&
+        Array.isArray(signDoc.msgs) &&
+        signDoc.msgs.length === 1
+      ) {
+        const msg = signDoc.msgs[0];
+        return msg.type === "sign/MsgSignData";
+      } else {
+        return false;
+      }
+    })();
+
+    // If the sign doc is expected to be for ADR-36,
+    // it doesn't have to have the chain id in the sign doc.
+    if (!hasOnlyMsgSignData && signDoc.chain_id !== this.chainId) {
       throw new Error(
         "Chain id in the message is not matched with the requested chain id"
       );
@@ -221,6 +244,47 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
 
   type(): string {
     return RequestSignAminoMsg.type();
+  }
+}
+
+export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
+  public static type() {
+    return "request-verify-adr-36-amino-doc";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly data: Uint8Array,
+    public readonly signature: StdSignature
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    if (!this.signature) {
+      throw new Error("Signature not set");
+    }
+
+    // It is not important to check this on the client side as opposed to increasing the bundle size.
+    // Validate bech32 address.
+    // Bech32Address.validate(this.signer);
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestVerifyADR36AminoSignDoc.type();
   }
 }
 

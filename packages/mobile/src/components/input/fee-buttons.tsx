@@ -70,7 +70,7 @@ export const getFeeErrorText = (error: Error): string | undefined => {
     case NotLoadedFeeError:
       return undefined;
     default:
-      return "Unknown error";
+      return error.message || "Unknown error";
   }
 };
 
