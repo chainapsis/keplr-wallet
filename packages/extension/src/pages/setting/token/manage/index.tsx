@@ -22,7 +22,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
   const isSecretWasm =
     chainStore.current.features &&
-    chainStore.current.features.includes("secret-wasm");
+    chainStore.current.features.includes("secretwasm");
 
   const appCurrencies = chainStore.current.currencies.filter((currency) => {
     if (isSecretWasm) {
