@@ -6,6 +6,8 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  ViewStyle,
+  Platform,
 } from "react-native";
 import { useStyle } from "../../styles";
 import { GradientBackground } from "../svg";
@@ -24,6 +26,7 @@ export const PageWithScrollView = forwardRef<
       fixed?: React.ReactNode;
       disableSafeArea?: boolean;
       backgroundColor?: string;
+      containerStyle?: ViewStyle;
     }
   >
 >((props, ref) => {
@@ -38,6 +41,7 @@ export const PageWithScrollView = forwardRef<
     onScroll,
     disableSafeArea,
     backgroundColor,
+    containerStyle,
     ...restProps
   } = props;
 
@@ -66,7 +70,23 @@ export const PageWithScrollView = forwardRef<
           <GradientBackground />
         )}
       </View>
-      <ContainerElement style={style.get("flex-1")}>
+      <ContainerElement
+        style={StyleSheet.flatten([
+          style.flatten(
+            ["flex-1"],
+            /*
+             In android, overflow of container view is hidden by default.
+             That's why even if you make overflow visible to the scroll view's style, it will behave like hidden unless you change the overflow property of this container view.
+             This is done by the following reasons.
+                - On Android, header or bottom tabbars are opaque by default, so overflow hidden is usually not a problem.
+                - Bug where overflow visible is ignored for unknown reason if ScrollView has RefreshControl .
+                - If the overflow of the container view is not hidden, even if the overflow of the scroll view is hidden, there is a bug that the refresh control created from above still appears outside the scroll view.
+             */
+            [Platform.OS !== "ios" && "overflow-hidden"]
+          ),
+          containerStyle,
+        ])}
+      >
         <AnimatedKeyboardAwareScrollView
           innerRef={(_ref) => {
             if (ref) {
