@@ -1,7 +1,17 @@
-import React, { FunctionComponent, useEffect, useRef } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { PageWithScrollViewInBottomTabView } from "../../components/page";
 import { AccountCard } from "./account-card";
-import { RefreshControl, ScrollView } from "react-native";
+import {
+  AppState,
+  AppStateStatus,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
 import { useStore } from "../../stores";
 import { StakingInfoCard } from "./staking-info-card";
 import { useStyle } from "../../styles";
@@ -9,8 +19,10 @@ import { GovernanceCard } from "./governance-card";
 import { observer } from "mobx-react-lite";
 import { MyRewardCard } from "./my-reward-card";
 import { TokensCard } from "./tokens-card";
-import { useLogScreenView } from "../../hooks";
+import { useLogScreenView, usePrevious } from "../../hooks";
 import { BIP44Selectable } from "./bip44-selectable";
+import { useFocusEffect } from "@react-navigation/native";
+import { ChainUpdaterService } from "@keplr-wallet/background";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -20,6 +32,61 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   const scrollViewRef = useRef<ScrollView | null>(null);
+
+  const currentChainId = chainStore.current.chainId;
+  const previousChainId = usePrevious(currentChainId);
+  const previousChainStoreIsInitializing = usePrevious(
+    chainStore.isInitializing,
+    true
+  );
+
+  const checkAndUpdateChainInfo = useCallback(() => {
+    if (!chainStore.isInitializing) {
+      (async () => {
+        const chainId = chainStore.current.chainId;
+        const result = await ChainUpdaterService.checkChainUpdate(
+          chainStore.current
+        );
+
+        // TODO: Add the modal for explicit chain update.
+        if (result.slient) {
+          chainStore.tryUpdateChain(chainId);
+        }
+      })();
+    }
+  }, [chainStore, chainStore.isInitializing, chainStore.current]);
+
+  useEffect(() => {
+    const appStateHandler = (state: AppStateStatus) => {
+      if (state === "active") {
+        checkAndUpdateChainInfo();
+      }
+    };
+
+    AppState.addEventListener("change", appStateHandler);
+
+    return () => {
+      AppState.removeEventListener("change", appStateHandler);
+    };
+  }, [checkAndUpdateChainInfo]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (
+        (chainStore.isInitializing !== previousChainStoreIsInitializing &&
+          !chainStore.isInitializing) ||
+        currentChainId !== previousChainId
+      ) {
+        checkAndUpdateChainInfo();
+      }
+    }, [
+      currentChainId,
+      previousChainId,
+      checkAndUpdateChainInfo,
+      chainStore.isInitializing,
+      previousChainStoreIsInitializing,
+    ])
+  );
 
   useEffect(() => {
     if (scrollViewRef.current) {
