@@ -1249,4 +1249,200 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["stargate", "ibc-transfer"],
     hideInUI: true,
   },
+  {
+    rpc: "https://rpc.bostrom.cybernode.ai",
+    rest: "https://lcd.bostrom.cybernode.ai",
+    chainId: "bostrom",
+    chainName: "Bostrom",
+    stakeCurrency: {
+      coinDenom: "BOOT",
+      coinMinimalDenom: "boot",
+      coinDecimals: 0,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("bostrom"),
+    currencies: [
+      {
+        coinDenom: "BOOT",
+        coinMinimalDenom: "boot",
+        coinDecimals: 0,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BOOT",
+        coinMinimalDenom: "boot",
+        coinDecimals: 0,
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc.comdex.one",
+    rest: "https://rest.comdex.one",
+    chainId: "comdex-1",
+    chainName: "Comdex",
+    stakeCurrency: {
+      coinDenom: "CMDX",
+      coinMinimalDenom: "ucmdx",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("comdex"),
+    currencies: [
+      {
+        coinDenom: "CMDX",
+        coinMinimalDenom: "ucmdx",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "CMDX",
+        coinMinimalDenom: "ucmdx",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc.cheqd.net",
+    rest: "https://api.cheqd.net",
+    chainId: "cheqd-mainnet-1",
+    chainName: "cheqd",
+    stakeCurrency: {
+      coinDenom: "CHEQ",
+      coinMinimalDenom: "ncheq",
+      coinDecimals: 9,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("cheqd"),
+    currencies: [
+      {
+        coinDenom: "CHEQ",
+        coinMinimalDenom: "ncheq",
+        coinDecimals: 9,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "CHEQ",
+        coinMinimalDenom: "ncheq",
+        coinDecimals: 9,
+      },
+    ],
+    gasPriceStep: {
+      low: 25,
+      average: 30,
+      high: 50,
+    },
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc.stargaze.publicawesome.dev",
+    rest: "https://rest.stargaze.publicawesome.dev",
+    chainId: "stargaze-1",
+    chainName: "Stargaze",
+    stakeCurrency: {
+      coinDenom: "STARS",
+      coinMinimalDenom: "ustars",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stars"),
+    currencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc.chihuahua.wtf",
+    rest: "https://api.chihuahua.wtf",
+    chainId: "chihuahua-1",
+    chainName: "Chihuahua",
+    stakeCurrency: {
+      coinDenom: "HUAHUA",
+      coinMinimalDenom: "uhuahua",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("chihuahua"),
+    currencies: [
+      {
+        coinDenom: "HUAHUA",
+        coinMinimalDenom: "uhuahua",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "HUAHUA",
+        coinMinimalDenom: "uhuahua",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.025,
+      average: 0.03,
+      high: 0.035,
+    },
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://node0.mainnet.lum.network/rpc",
+    rest: "https://node0.mainnet.lum.network/rest",
+    chainId: "lum-network-1",
+    chainName: "Lum Network",
+    stakeCurrency: {
+      coinDenom: "LUM",
+      coinMinimalDenom: "ulum",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("lum"),
+    currencies: [
+      {
+        coinDenom: "LUM",
+        coinMinimalDenom: "ulum",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LUM",
+        coinMinimalDenom: "ulum",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
 ];
