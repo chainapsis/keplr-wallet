@@ -22,13 +22,20 @@ export type ProposalTally = {
 };
 
 export type Proposal = {
-  content: {
-    type: string;
-    value: {
-      title: string;
-      description: string;
-    };
-  };
+  content:
+    | {
+        type: string;
+        value: {
+          title: string;
+          description: string;
+        };
+      }
+    // If the proposal isn't registered to the amino codec,
+    // legacy endpoint will return the content without `type`
+    | {
+        title: string;
+        description: string;
+      };
   // Int
   id: string;
   proposal_status: string;
