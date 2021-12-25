@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores",
-  "version": "0.9.10",
+  "version": "0.9.11-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
