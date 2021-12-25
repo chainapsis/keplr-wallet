@@ -71,11 +71,19 @@ export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally>
   }
 
   get title(): string {
-    return this.raw.content.value.title;
+    if ("value" in this.raw.content) {
+      return this.raw.content.value.title;
+    }
+
+    return this.raw.content.title;
   }
 
   get description(): string {
-    return this.raw.content.value.description;
+    if ("value" in this.raw.content) {
+      return this.raw.content.value.description;
+    }
+
+    return this.raw.content.description;
   }
 
   @computed
