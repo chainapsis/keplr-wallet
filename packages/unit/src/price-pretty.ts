@@ -77,22 +77,30 @@ export class PricePretty {
     return pretty;
   }
 
-  precision(prec: number): PricePretty {
+  moveDecimalPointLeft(delta: number): PricePretty {
     const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.precision(prec);
+    pretty.intPretty = pretty.intPretty.moveDecimalPointLeft(delta);
     return pretty;
   }
 
+  moveDecimalPointRight(delta: number): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.moveDecimalPointRight(delta);
+    return pretty;
+  }
+
+  /**
+   * @deprecated Use`moveDecimalPointLeft`
+   */
   increasePrecision(delta: number): PricePretty {
-    const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.increasePrecision(delta);
-    return pretty;
+    return this.moveDecimalPointLeft(delta);
   }
 
+  /**
+   * @deprecated Use`moveDecimalPointRight`
+   */
   decreasePrecision(delta: number): PricePretty {
-    const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.decreasePrecision(delta);
-    return pretty;
+    return this.moveDecimalPointRight(delta);
   }
 
   maxDecimals(max: number): PricePretty {

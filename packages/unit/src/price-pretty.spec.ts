@@ -16,8 +16,8 @@ describe("Test PricePretty", () => {
     expect(pretty.toString()).toBe("$12.1");
     expect(pretty.increasePrecision(1).toString()).toBe("$1.21");
     expect(pretty.decreasePrecision(1).toString()).toBe("$121");
-    expect(pretty.precision(0).toString()).toBe("$121,234");
-    expect(pretty.precision(-2).toString()).toBe("$12,123,400");
+    expect(pretty.moveDecimalPointLeft(1).toString()).toBe("$1.21");
+    expect(pretty.moveDecimalPointRight(1).toString()).toBe("$121");
 
     expect(pretty.add(new Dec("0.1")).toString()).toBe("$12.2");
     expect(pretty.sub(new Dec("0.1")).toString()).toBe("$12");

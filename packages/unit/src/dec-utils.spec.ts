@@ -34,4 +34,36 @@ describe("Test DecUtils", () => {
       DecUtils.getPrecisionDec(-19);
     }).toThrow();
   });
+
+  it("getTenExponentN should return same cached result", () => {
+    for (let i = 0; i < 3; i++) {
+      expect(DecUtils.getTenExponentN(5).toString()).toBe(
+        new Dec(100000).toString()
+      );
+    }
+  });
+
+  it("Test getTenExponentN", () => {
+    expect(DecUtils.getTenExponentN(0).toString()).toBe(
+      new Dec("1").toString()
+    );
+
+    expect(DecUtils.getTenExponentN(1).toString()).toBe(
+      new Dec("10").toString()
+    );
+
+    expect(DecUtils.getTenExponentN(10).toString()).toBe(
+      new Dec("10000000000").toString()
+    );
+
+    expect(DecUtils.getTenExponentN(20).toString()).toBe(
+      new Dec("100000000000000000000").toString()
+    );
+
+    expect(DecUtils.getTenExponentN(-18).toString()).toBe(
+      new Dec("0.000000000000000001").toString()
+    );
+
+    expect(() => DecUtils.getTenExponentN(-19)).toThrow();
+  });
 });

@@ -2,7 +2,7 @@ import bigInteger from "big-integer";
 import { Dec } from "./decimal";
 
 export class Int {
-  private int: bigInteger.BigInteger;
+  protected int: bigInteger.BigInteger;
 
   /**
    * @param int - Parse a number | bigInteger | string into a bigInt.
@@ -18,6 +18,10 @@ export class Int {
     caseSensitive?: boolean
   ) {
     if (typeof int === "string") {
+      if (int.indexOf(".") >= 0) {
+        throw new Error(`${int} is not integer`);
+      }
+
       this.int = bigInteger(int, base, alphabet, caseSensitive);
     } else if (typeof int === "number") {
       this.int = bigInteger(int);
@@ -26,10 +30,30 @@ export class Int {
     } else {
       this.int = bigInteger(int);
     }
+
+    this.checkBitLen();
+  }
+
+  protected checkBitLen(): void {
+    if (this.int.abs().bitLength().gt(256)) {
+      throw new Error(`Integer out of range ${this.int.toString()}`);
+    }
   }
 
   public toString(): string {
     return this.int.toString(10);
+  }
+
+  public isNegative(): boolean {
+    return this.int.isNegative();
+  }
+
+  public isPositive(): boolean {
+    return this.int.isPositive();
+  }
+
+  public isZero(): boolean {
+    return this.int.eq(bigInteger(0));
   }
 
   public equals(i: Int): boolean {
@@ -50,6 +74,14 @@ export class Int {
 
   public lte(i: Int): boolean {
     return this.int.lesserOrEquals(i.int);
+  }
+
+  public abs(): Int {
+    return new Int(this.int.abs());
+  }
+
+  public absUInt(): Uint {
+    return new Uint(this.int.abs());
   }
 
   public add(i: Int): Int {
@@ -76,13 +108,21 @@ export class Int {
     return new Int(this.int.negate());
   }
 
+  public pow(i: Uint): Int {
+    return new Int(this.int.pow(i.toBigNumber()));
+  }
+
   public toDec(): Dec {
     return new Dec(this);
+  }
+
+  public toBigNumber(): bigInteger.BigInteger {
+    return this.int;
   }
 }
 
 export class Uint {
-  private uint: bigInteger.BigInteger;
+  protected uint: bigInteger.BigInteger;
 
   /**
    * @param uint - Parse a number | bigInteger | string into a bigUint.
@@ -98,6 +138,10 @@ export class Uint {
     caseSensitive?: boolean
   ) {
     if (typeof uint === "string") {
+      if (uint.indexOf(".") >= 0) {
+        throw new Error(`${uint} is not integer`);
+      }
+
       this.uint = bigInteger(uint, base, alphabet, caseSensitive);
     } else if (typeof uint === "number") {
       this.uint = bigInteger(uint);
@@ -110,10 +154,22 @@ export class Uint {
     if (this.uint.isNegative()) {
       throw new TypeError("Uint should not be negative");
     }
+
+    this.checkBitLen();
+  }
+
+  protected checkBitLen(): void {
+    if (this.uint.abs().bitLength().gt(256)) {
+      throw new Error(`Integer out of range ${this.uint.toString()}`);
+    }
   }
 
   public toString(): string {
     return this.uint.toString(10);
+  }
+
+  public isZero(): boolean {
+    return this.uint.eq(bigInteger(0));
   }
 
   public equals(i: Uint): boolean {
@@ -156,7 +212,15 @@ export class Uint {
     return new Uint(this.uint.mod(i.uint));
   }
 
+  public pow(i: Uint): Uint {
+    return new Uint(this.uint.pow(i.toBigNumber()));
+  }
+
   public toDec(): Dec {
     return new Dec(new Int(this.toString()));
+  }
+
+  public toBigNumber(): bigInteger.BigInteger {
+    return this.uint;
   }
 }

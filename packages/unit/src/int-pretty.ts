@@ -5,7 +5,6 @@ import { CoinUtils } from "./coin-utils";
 import { DeepReadonly } from "utility-types";
 
 export type IntPrettyOptions = {
-  precision: number;
   maxDecimals: number;
   trim: boolean;
   shrink: boolean;
@@ -15,10 +14,9 @@ export type IntPrettyOptions = {
 
 export class IntPretty {
   protected dec: Dec;
-  protected decPrecision: number = 0;
+  protected floatingDecimalPointRight = 0;
 
   protected _options: IntPrettyOptions = {
-    precision: 0,
     maxDecimals: 0,
     trim: false,
     shrink: false,
@@ -31,7 +29,7 @@ export class IntPretty {
       num = num.toDec();
     }
 
-    if (num.equals(new Dec(0))) {
+    if (num.isZero()) {
       this.dec = num;
       return;
     }
@@ -50,8 +48,6 @@ export class IntPretty {
     }
 
     this.dec = num;
-    this.decPrecision = decPrecision;
-    this._options.precision = decPrecision;
     this._options.maxDecimals = decPrecision;
   }
 
@@ -59,25 +55,30 @@ export class IntPretty {
     return this._options;
   }
 
-  precision(prec: number): IntPretty {
-    if (prec < -18) {
-      throw new Error("Too little precision");
-    }
-    if (prec > 18) {
-      throw new Error("Too much precision");
-    }
-
+  moveDecimalPointLeft(delta: number): IntPretty {
     const pretty = this.clone();
-    pretty._options.precision = prec;
+    pretty.floatingDecimalPointRight += -delta;
     return pretty;
   }
 
-  increasePrecision(delta: number): IntPretty {
-    return this.precision(this._options.precision + delta);
+  moveDecimalPointRight(delta: number): IntPretty {
+    const pretty = this.clone();
+    pretty.floatingDecimalPointRight += delta;
+    return pretty;
   }
 
+  /**
+   * @deprecated Use`moveDecimalPointLeft`
+   */
+  increasePrecision(delta: number): IntPretty {
+    return this.moveDecimalPointLeft(delta);
+  }
+
+  /**
+   * @deprecated Use`moveDecimalPointRight`
+   */
   decreasePrecision(delta: number): IntPretty {
-    return this.precision(this._options.precision - delta);
+    return this.moveDecimalPointRight(delta);
   }
 
   maxDecimals(max: number): IntPretty {
@@ -129,8 +130,6 @@ export class IntPretty {
     const pretty = new IntPretty(this.toDec().add(target));
     pretty._options = {
       ...this._options,
-      // Precision must not be changed.
-      precision: pretty._options.precision,
     };
     return pretty;
   }
@@ -143,8 +142,6 @@ export class IntPretty {
     const pretty = new IntPretty(this.toDec().sub(target));
     pretty._options = {
       ...this._options,
-      // Precision must not be changed.
-      precision: pretty._options.precision,
     };
     return pretty;
   }
@@ -157,8 +154,6 @@ export class IntPretty {
     const pretty = new IntPretty(this.toDec().mul(target));
     pretty._options = {
       ...this._options,
-      // Precision must not be changed.
-      precision: pretty._options.precision,
     };
     return pretty;
   }
@@ -171,19 +166,32 @@ export class IntPretty {
     const pretty = new IntPretty(this.toDec().quo(target));
     pretty._options = {
       ...this._options,
-      // Precision must not be changed.
-      precision: pretty._options.precision,
     };
     return pretty;
   }
 
   toDec(): Dec {
-    let dec = this.dec;
-    const deltaPrecision = this.decPrecision - this._options.precision;
-    if (deltaPrecision !== 0) {
-      dec = dec.mulTruncate(DecUtils.getPrecisionDec(deltaPrecision));
+    if (this.floatingDecimalPointRight === 0) {
+      return this.dec;
+    } else if (this.floatingDecimalPointRight > 0) {
+      return this.dec.mulTruncate(
+        DecUtils.getTenExponentN(this.floatingDecimalPointRight)
+      );
+    } else {
+      // Since a decimal in Dec cannot exceed 18, it cannot be computed at once.
+      let i = -this.floatingDecimalPointRight;
+      let dec = this.dec;
+      while (i > 0) {
+        if (i >= Dec.precision) {
+          dec = dec.mulTruncate(DecUtils.getTenExponentN(-Dec.precision));
+          i -= Dec.precision;
+        } else {
+          dec = dec.mulTruncate(DecUtils.getTenExponentN(-(i % Dec.precision)));
+          break;
+        }
+      }
+      return dec;
     }
-    return dec;
   }
 
   toString(): string {
@@ -209,7 +217,7 @@ export class IntPretty {
   clone(): IntPretty {
     const pretty = new IntPretty(this.dec);
     pretty.dec = this.dec;
-    pretty.decPrecision = this.decPrecision;
+    pretty.floatingDecimalPointRight = this.floatingDecimalPointRight;
     pretty._options = {
       ...this._options,
     };
