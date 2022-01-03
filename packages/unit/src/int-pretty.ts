@@ -10,6 +10,9 @@ export type IntPrettyOptions = {
   shrink: boolean;
   ready: boolean;
   locale: boolean;
+  // If this is true, toString() will return the string with prefix like < 0.001 if a value cannot be expressed with a max decimals.
+  inequalitySymbol: boolean;
+  inequalitySymbolSeparator: string;
 };
 
 export class IntPretty {
@@ -22,6 +25,8 @@ export class IntPretty {
     shrink: false,
     ready: true,
     locale: true,
+    inequalitySymbol: false,
+    inequalitySymbolSeparator: " ",
   };
 
   constructor(num: Dec | { toDec(): Dec }) {
@@ -84,6 +89,18 @@ export class IntPretty {
   maxDecimals(max: number): IntPretty {
     const pretty = this.clone();
     pretty._options.maxDecimals = max;
+    return pretty;
+  }
+
+  inequalitySymbol(bool: boolean): IntPretty {
+    const pretty = this.clone();
+    pretty._options.inequalitySymbol = bool;
+    return pretty;
+  }
+
+  inequalitySymbolSeparator(str: string): IntPretty {
+    const pretty = this.clone();
+    pretty._options.inequalitySymbolSeparator = str;
     return pretty;
   }
 
@@ -195,9 +212,27 @@ export class IntPretty {
   }
 
   toString(): string {
+    return this.toStringWithSymbols("", "");
+  }
+
+  toStringWithSymbols(prefix: string, suffix: string): string {
     const dec = this.toDec();
 
-    let result = "";
+    if (
+      this._options.inequalitySymbol &&
+      dec.abs().lt(DecUtils.getTenExponentN(-this._options.maxDecimals))
+    ) {
+      const isNeg = dec.isNegative();
+
+      return `${isNeg ? ">" : "<"}${this._options.inequalitySymbolSeparator}${
+        isNeg ? "-" : ""
+      }${prefix}${DecUtils.getTenExponentN(-this._options.maxDecimals).toString(
+        this._options.maxDecimals,
+        this._options.locale
+      )}${suffix}`;
+    }
+
+    let result: string;
     if (!this._options.shrink) {
       result = dec.toString(this._options.maxDecimals, this._options.locale);
     } else {
@@ -211,7 +246,13 @@ export class IntPretty {
     if (this._options.trim) {
       result = DecUtils.trim(result);
     }
-    return result;
+
+    const isNeg = result.charAt(0) === "-";
+    if (isNeg) {
+      result = result.slice(1);
+    }
+
+    return `${isNeg ? "-" : ""}${prefix}${result}${suffix}`;
   }
 
   clone(): IntPretty {

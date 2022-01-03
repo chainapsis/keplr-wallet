@@ -35,5 +35,85 @@ describe("Test PricePretty", () => {
         new Dec("0.001")
       ).toString()
     ).toBe("< $0.01");
+
+    expect(
+      new PricePretty(
+        {
+          currency: "usd",
+          symbol: "$",
+          maxDecimals: 2,
+          locale: "en-US",
+        },
+        new Dec("0.001")
+      )
+        .inequalitySymbol(false)
+        .toString()
+    ).toBe("$0");
+
+    expect(
+      new PricePretty(
+        {
+          currency: "usd",
+          symbol: "$",
+          maxDecimals: 2,
+          locale: "en-US",
+        },
+        new Dec("-0.001")
+      ).toString()
+    ).toBe("> -$0.01");
+
+    expect(
+      new PricePretty(
+        {
+          currency: "usd",
+          symbol: "$",
+          maxDecimals: 2,
+          locale: "en-US",
+        },
+        new Dec("-0.001")
+      )
+        .inequalitySymbol(false)
+        .toString()
+      // TODO: Delete the case of "-0". Return "0"
+    ).toBe("-$0");
+
+    expect(
+      new PricePretty(
+        {
+          currency: "usd",
+          symbol: "$",
+          maxDecimals: 3,
+          locale: "en-US",
+        },
+        new Dec("0.001")
+      ).toString()
+    ).toBe("$0.001");
+
+    expect(
+      new PricePretty(
+        {
+          currency: "usd",
+          symbol: "$",
+          maxDecimals: 3,
+          locale: "en-US",
+        },
+        new Dec("-0.001")
+      ).toString()
+    ).toBe("-$0.001");
+
+    // PricePretty's maxDecimals behave differently than IntPretty.
+    expect(
+      new PricePretty(
+        {
+          currency: "usd",
+          symbol: "$",
+          maxDecimals: 4,
+          locale: "en-US",
+        },
+        new Dec("0.001")
+      )
+        .trim(false)
+        .toString()
+    ).toBe("$0.001");
   });
 });

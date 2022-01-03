@@ -542,4 +542,146 @@ describe("Test IntPretty", () => {
     expect(pretty.maxDecimals(9).trim(true).toString()).toBe("0.0123456");
     expect(pretty.shrink(true).toString()).toBe("0.0123456");
   });
+
+  it("Test inequalitySymbol of IntPretty", () => {
+    const tests: {
+      base: IntPretty;
+      maxDecimals: number;
+      inequalitySymbolSeparator: string;
+      resStr: string;
+    }[] = [
+      {
+        base: new IntPretty(new Dec("1234.123456")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "1,234.123",
+      },
+      {
+        base: new IntPretty(new Dec("0.123456")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "0.123",
+      },
+      {
+        base: new IntPretty(new Dec("0.123456")).moveDecimalPointLeft(2),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "0.001",
+      },
+      {
+        base: new IntPretty(new Dec("0.123456")).moveDecimalPointLeft(3),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "< 0.001",
+      },
+      {
+        base: new IntPretty(new Dec("0.123456")),
+        maxDecimals: 0,
+        inequalitySymbolSeparator: " ",
+        resStr: "< 1",
+      },
+      {
+        base: new IntPretty(new Dec("1.123456")),
+        maxDecimals: 0,
+        inequalitySymbolSeparator: " ",
+        resStr: "1",
+      },
+      {
+        base: new IntPretty(new Dec("0.0001")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "< 0.001",
+      },
+      {
+        base: new IntPretty(new Dec("0.0001")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: "",
+        resStr: "<0.001",
+      },
+      {
+        base: new IntPretty(new Dec("0.001")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "0.001",
+      },
+      {
+        base: new IntPretty(new Dec("-1234.123456")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "-1,234.123",
+      },
+      {
+        base: new IntPretty(new Dec("-0.123456")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "-0.123",
+      },
+      {
+        base: new IntPretty(new Dec("-0.0001")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "> -0.001",
+      },
+      {
+        base: new IntPretty(new Dec("-0.0001")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: "",
+        resStr: ">-0.001",
+      },
+      {
+        base: new IntPretty(new Dec("-0.001")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "-0.001",
+      },
+      {
+        base: new IntPretty(new Dec("-0.123456")),
+        maxDecimals: 0,
+        inequalitySymbolSeparator: " ",
+        resStr: "> -1",
+      },
+      {
+        base: new IntPretty(new Dec("-1.123456")),
+        maxDecimals: 0,
+        inequalitySymbolSeparator: " ",
+        resStr: "-1",
+      },
+    ];
+
+    for (const test of tests) {
+      expect(
+        test.base
+          .maxDecimals(test.maxDecimals)
+          .inequalitySymbol(true)
+          .inequalitySymbolSeparator(test.inequalitySymbolSeparator)
+          .toString()
+      ).toBe(test.resStr);
+    }
+  });
+
+  it("Test toStringWithSymbols() of IntPretty", () => {
+    expect(
+      new IntPretty(new Dec(-123.45)).toStringWithSymbols("$", "SUFFIX")
+    ).toBe("-$123.45SUFFIX");
+
+    expect(
+      new IntPretty(new Dec(-123.45))
+        .maxDecimals(0)
+        .toStringWithSymbols("$", "SUFFIX")
+    ).toBe("-$123SUFFIX");
+
+    expect(
+      new IntPretty(new Dec(-0.045))
+        .maxDecimals(1)
+        .inequalitySymbol(true)
+        .toStringWithSymbols("$", "SUFFIX")
+    ).toBe("> -$0.1SUFFIX");
+
+    expect(
+      new IntPretty(new Dec(0.045))
+        .maxDecimals(1)
+        .inequalitySymbol(true)
+        .toStringWithSymbols("$", "SUFFIX")
+    ).toBe("< $0.1SUFFIX");
+  });
 });

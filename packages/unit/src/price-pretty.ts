@@ -35,7 +35,8 @@ export class PricePretty {
       .maxDecimals(_fiatCurrency.maxDecimals)
       .shrink(true)
       .trim(true)
-      .locale(false);
+      .locale(false)
+      .inequalitySymbol(true);
 
     this._options.locale = _fiatCurrency.locale;
   }
@@ -106,6 +107,18 @@ export class PricePretty {
   maxDecimals(max: number): PricePretty {
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.maxDecimals(max);
+    return pretty;
+  }
+
+  inequalitySymbol(bool: boolean): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.inequalitySymbol(bool);
+    return pretty;
+  }
+
+  inequalitySymbolSeparator(str: string): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.inequalitySymbolSeparator(str);
     return pretty;
   }
 
@@ -183,29 +196,32 @@ export class PricePretty {
 
     const dec = this.toDec();
     const options = this.options;
-    if (dec.gt(new Dec(0))) {
-      const precision = new Dec(1).quo(
-        DecUtils.getPrecisionDec(this.options.maxDecimals)
-      );
-      if (dec.lt(precision)) {
-        const precisionLocaleString = parseFloat(
-          precision.toString(options.maxDecimals)
-        ).toLocaleString(options.locale, {
-          maximumFractionDigits: options.maxDecimals,
-        });
 
-        return `< ${symbol}${this._options.separator}${precisionLocaleString}`;
-      }
+    if (
+      options.inequalitySymbol &&
+      dec.abs().lt(DecUtils.getTenExponentN(-options.maxDecimals))
+    ) {
+      return this.intPretty.toStringWithSymbols(
+        `${symbol}${this._options.separator}`,
+        ""
+      );
     }
 
-    const localeString = parseFloat(this.intPretty.toString()).toLocaleString(
+    let localeString = parseFloat(this.intPretty.toString()).toLocaleString(
       options.locale,
       {
         maximumFractionDigits: options.maxDecimals,
       }
     );
 
-    return `${symbol}${this._options.separator}${localeString}`;
+    const isNeg = localeString.charAt(0) === "-";
+    if (isNeg) {
+      localeString = localeString.slice(1);
+    }
+
+    return `${isNeg ? "-" : ""}${symbol}${
+      this._options.separator
+    }${localeString}`;
   }
 
   clone(): PricePretty {

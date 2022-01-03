@@ -118,6 +118,18 @@ export class CoinPretty {
     return pretty;
   }
 
+  inequalitySymbol(bool: boolean): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.inequalitySymbol(bool);
+    return pretty;
+  }
+
+  inequalitySymbolSeparator(str: string): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.inequalitySymbolSeparator(str);
+    return pretty;
+  }
+
   trim(bool: boolean): CoinPretty {
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.trim(bool);
@@ -259,7 +271,7 @@ export class CoinPretty {
       separator = "";
     }
 
-    return `${this.intPretty.toString()}${separator}${denom}`;
+    return this.intPretty.toStringWithSymbols("", `${separator}${denom}`);
   }
 
   clone(): CoinPretty {
