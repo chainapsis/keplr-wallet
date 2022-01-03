@@ -2,6 +2,13 @@ import { DecUtils } from "./dec-utils";
 import { Dec } from "./decimal";
 
 describe("Test DecUtils", () => {
+  it("Test trim in DecUtils", () => {
+    expect(DecUtils.trim("0.00100")).toBe("0.001");
+    expect(DecUtils.trim("0.00")).toBe("0");
+    expect(DecUtils.trim("-0.00100")).toBe("-0.001");
+    expect(DecUtils.trim("-0.00")).toBe("-0");
+  });
+
   it("getPrecisionDec should return the (10^precision)", () => {
     expect(DecUtils.getPrecisionDec(-1).toString()).toBe(
       new Dec("0.1").toString()
