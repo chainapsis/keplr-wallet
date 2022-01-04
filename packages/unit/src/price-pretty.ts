@@ -193,6 +193,7 @@ export class PricePretty {
 
     if (
       options.inequalitySymbol &&
+      !dec.isZero() &&
       dec.abs().lt(DecUtils.getTenExponentN(-options.maxDecimals))
     ) {
       return this.intPretty.toStringWithSymbols(

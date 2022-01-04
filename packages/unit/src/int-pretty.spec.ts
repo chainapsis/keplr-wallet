@@ -551,6 +551,24 @@ describe("Test IntPretty", () => {
       resStr: string;
     }[] = [
       {
+        base: new IntPretty(new Dec("0")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "0.000",
+      },
+      {
+        base: new IntPretty(new Dec("-0")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "0.000",
+      },
+      {
+        base: new IntPretty(new Dec("0.1")),
+        maxDecimals: 3,
+        inequalitySymbolSeparator: " ",
+        resStr: "0.100",
+      },
+      {
         base: new IntPretty(new Dec("1234.123456")),
         maxDecimals: 3,
         inequalitySymbolSeparator: " ",

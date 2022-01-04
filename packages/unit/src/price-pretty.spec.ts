@@ -32,6 +32,30 @@ describe("Test PricePretty", () => {
           maxDecimals: 2,
           locale: "en-US",
         },
+        new Dec("0")
+      ).toString()
+    ).toBe("$0");
+
+    expect(
+      new PricePretty(
+        {
+          currency: "usd",
+          symbol: "$",
+          maxDecimals: 2,
+          locale: "en-US",
+        },
+        new Dec("-0")
+      ).toString()
+    ).toBe("$0");
+
+    expect(
+      new PricePretty(
+        {
+          currency: "usd",
+          symbol: "$",
+          maxDecimals: 2,
+          locale: "en-US",
+        },
         new Dec("0.001")
       ).toString()
     ).toBe("< $0.01");

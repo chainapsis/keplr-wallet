@@ -25,6 +25,9 @@ describe("Test RatePretty", () => {
     expect(new RatePretty(new Dec("0.00001")).toString()).toBe("0.001%");
     expect(new RatePretty(new Dec("0.000001")).toString()).toBe("< 0.001%");
 
+    expect(new RatePretty(new Dec("0")).toString()).toBe("0%");
+    expect(new RatePretty(new Dec("-0")).toString()).toBe("0%");
+
     expect(
       new RatePretty(new Dec("0.000001")).separator(" ").symbol("?").toString()
     ).toBe("< 0.001 ?");

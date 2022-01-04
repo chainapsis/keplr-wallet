@@ -220,6 +220,7 @@ export class IntPretty {
 
     if (
       this._options.inequalitySymbol &&
+      !dec.isZero() &&
       dec.abs().lt(DecUtils.getTenExponentN(-this._options.maxDecimals))
     ) {
       const isNeg = dec.isNegative();
