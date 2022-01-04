@@ -32,6 +32,32 @@ export class Dec {
     return multiplier;
   }
 
+  protected static reduceDecimalsFromString(
+    str: string
+  ): { res: string; isDownToZero: boolean } {
+    const decimalPointIndex = str.indexOf(".");
+    if (decimalPointIndex < 0) {
+      return {
+        res: str,
+        isDownToZero: false,
+      };
+    }
+
+    const exceededDecimals = str.length - 1 - decimalPointIndex - Dec.precision;
+    if (exceededDecimals <= 0) {
+      return {
+        res: str,
+        isDownToZero: false,
+      };
+    }
+
+    const res = str.slice(0, str.length - exceededDecimals);
+    return {
+      res,
+      isDownToZero: /^[0.]*$/.test(res),
+    };
+  }
+
   protected int: bigInteger.BigInteger;
 
   /**
@@ -52,6 +78,15 @@ export class Dec {
       if (!/^(-?\d+\.\d+)$|^(-?\d+)$/.test(int)) {
         throw new Error(`invalid decimal: ${int}`);
       }
+      // Even if an input with more than 18 decimals, it does not throw an error and ignores the rest.
+      const reduced = Dec.reduceDecimalsFromString(int);
+      if (reduced.isDownToZero) {
+        // However, as a result, if the input becomes 0, a problem may occur in mul or quo. In this case, print a warning.
+        console.log(
+          `WARNING: Got ${int}. Dec can only handle up to 18 decimals. However, since the decimal point of the input exceeds 18 digits, the remainder is discarded. As a result, input becomes 0.`
+        );
+      }
+      int = reduced.res;
       if (int.indexOf(".") >= 0) {
         prec = int.length - int.indexOf(".") - 1;
         int = int.replace(".", "");

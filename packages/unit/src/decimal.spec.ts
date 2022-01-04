@@ -45,7 +45,7 @@ describe("Test decimals", () => {
     }).toThrow();
     expect(() => {
       new Dec("0.489234893284938249348923849283408");
-    }).toThrow();
+    }).not.toThrow();
     expect(() => {
       new Dec("foobar");
     }).toThrow();
@@ -593,6 +593,43 @@ describe("Test decimals", () => {
     for (const test of tests) {
       const res = test.d1.toString(test.precision);
       expect(res).toBe(test.exp);
+    }
+  });
+
+  it("Test case that input decimals exceeds 18", () => {
+    const tests: {
+      input: number | string;
+      res: Dec;
+      resStr: string;
+    }[] = [
+      {
+        input: "0.489234893284938249348923849283408",
+        res: new Dec("0.489234893284938249"),
+        resStr: "0.489234893284938249",
+      },
+      {
+        input: 0.0000010000000249348,
+        res: new Dec("0.000001000000024934"),
+        resStr: "0.000001000000024934",
+      },
+      {
+        input: "0.0000000000000000001",
+        res: new Dec("0"),
+        resStr: "0.000000000000000000",
+      },
+      // In this case, number is expressed as 1e-19. So, it can't be parsed.
+      // {
+      //   input: 0.0000000000000000001,
+      //   res: new Dec("0"),
+      //   resStr: "0.000000000000000000",
+      // },
+    ];
+
+    for (const test of tests) {
+      const dec = new Dec(test.input);
+
+      expect(dec.equals(test.res)).toBe(true);
+      expect(dec.toString()).toBe(test.resStr);
     }
   });
 });
