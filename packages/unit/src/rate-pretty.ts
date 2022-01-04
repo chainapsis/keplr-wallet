@@ -1,6 +1,7 @@
 import { IntPretty, IntPrettyOptions } from "./int-pretty";
 import { Dec } from "./decimal";
 import { DeepReadonly } from "utility-types";
+import bigInteger from "big-integer";
 
 export type RatePrettyOptions = {
   separator: string;
@@ -19,7 +20,7 @@ export class RatePretty {
     symbol: "%",
   };
 
-  constructor(protected amount: Dec | { toDec(): Dec }) {
+  constructor(protected amount: Dec | { toDec(): Dec } | bigInteger.BigNumber) {
     this.intPretty = new IntPretty(amount);
 
     this.intPretty = this.intPretty

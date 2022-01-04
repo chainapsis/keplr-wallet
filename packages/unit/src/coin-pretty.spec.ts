@@ -5,6 +5,100 @@ import { CoinUtils } from "./coin-utils";
 import { DecUtils } from "./dec-utils";
 
 describe("Test CoinPretty", () => {
+  it("Test creation of CoinPretty", () => {
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        new Int(1234)
+      )
+        .toDec()
+        .equals(new Dec("0.001234"))
+    ).toBe(true);
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        new Int(1234)
+      ).toString()
+    ).toBe("0.001234 ATOM");
+
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        1234
+      )
+        .toDec()
+        .equals(new Dec("0.001234"))
+    ).toBe(true);
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        1234
+      ).toString()
+    ).toBe("0.001234 ATOM");
+
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        "1234.5"
+      )
+        .toDec()
+        .equals(new Dec("0.0012345"))
+    ).toBe(true);
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        "1234.5"
+      ).toString()
+    ).toBe("0.001234 ATOM");
+
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        new Dec("1234.5")
+      )
+        .toDec()
+        .equals(new Dec("0.0012345"))
+    ).toBe(true);
+    expect(
+      new CoinPretty(
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+        },
+        new Dec("1234.5")
+      ).toString()
+    ).toBe("0.001234 ATOM");
+  });
+
   it("Basic test for CoinPretty", () => {
     const pretty = new CoinPretty(
       {

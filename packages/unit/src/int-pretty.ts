@@ -3,6 +3,7 @@ import { Dec } from "./decimal";
 import { DecUtils } from "./dec-utils";
 import { CoinUtils } from "./coin-utils";
 import { DeepReadonly } from "utility-types";
+import bigInteger from "big-integer";
 
 export type IntPrettyOptions = {
   maxDecimals: number;
@@ -29,9 +30,11 @@ export class IntPretty {
     inequalitySymbolSeparator: " ",
   };
 
-  constructor(num: Dec | { toDec(): Dec }) {
-    if ("toDec" in num) {
+  constructor(num: Dec | { toDec(): Dec } | bigInteger.BigNumber) {
+    if (typeof num === "object" && "toDec" in num) {
       num = num.toDec();
+    } else if (!(num instanceof Dec)) {
+      num = new Dec(num);
     }
 
     if (num.isZero()) {

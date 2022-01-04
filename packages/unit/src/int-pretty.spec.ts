@@ -3,6 +3,24 @@ import { Int } from "./int";
 import { Dec } from "./decimal";
 
 describe("Test IntPretty", () => {
+  it("Test creation of IntPretty", () => {
+    expect(new IntPretty(new Dec("1.1")).toDec().equals(new Dec("1.1"))).toBe(
+      true
+    );
+    expect(new IntPretty(new Dec("1.1")).maxDecimals(2).toString()).toBe(
+      "1.10"
+    );
+
+    expect(new IntPretty("1.1").toDec().equals(new Dec("1.1"))).toBe(true);
+    expect(new IntPretty("1.1").maxDecimals(2).toString()).toBe("1.10");
+
+    expect(new IntPretty(1.1).toDec().equals(new Dec("1.1"))).toBe(true);
+    expect(new IntPretty(1.1).maxDecimals(2).toString()).toBe("1.10");
+
+    expect(new IntPretty(new Int(1)).toDec().equals(new Dec("1.0"))).toBe(true);
+    expect(new IntPretty(new Int(1)).maxDecimals(2).toString()).toBe("1.00");
+  });
+
   it("Test the maxDecimals of IntPretty", () => {
     const params: {
       arg: Dec | Int;

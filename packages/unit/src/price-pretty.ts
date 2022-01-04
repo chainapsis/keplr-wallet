@@ -3,6 +3,7 @@ import { Dec } from "./decimal";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import { DecUtils } from "./dec-utils";
+import bigInteger from "big-integer";
 
 export type PricePrettyOptions = {
   separator: string;
@@ -23,7 +24,7 @@ export class PricePretty {
 
   constructor(
     protected _fiatCurrency: FiatCurrency,
-    protected amount: Dec | { toDec(): Dec }
+    protected amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
   ) {
     this.intPretty = new IntPretty(amount)
       .maxDecimals(_fiatCurrency.maxDecimals)
