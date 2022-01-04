@@ -25,13 +25,7 @@ export class PricePretty {
     protected _fiatCurrency: FiatCurrency,
     protected amount: Dec | { toDec(): Dec }
   ) {
-    if ("toDec" in amount) {
-      this.intPretty = new IntPretty(amount.toDec());
-    } else {
-      this.intPretty = new IntPretty(amount);
-    }
-
-    this.intPretty = this.intPretty
+    this.intPretty = new IntPretty(amount)
       .maxDecimals(_fiatCurrency.maxDecimals)
       .shrink(true)
       .trim(true)
