@@ -4,10 +4,15 @@ import { CoinUtils } from "./coin-utils";
 
 export class Dec {
   public static readonly precision = 18;
-  // bytes required to represent the above precision
+  // Bytes required to represent the above precision is 18.
   // Ceiling[Log2[999 999 999 999 999 999]]
   protected static readonly decimalPrecisionBits = 60;
-  protected static readonly maxDecBitLen = 256 + Dec.decimalPrecisionBits;
+  // Max bit length for `Dec` is 256 + 60(decimalPrecisionBits)
+  // The int in the `Dec` is handled as integer assuming that it has 18 precision.
+  // (2 ** (256 + 60) - 1)
+  protected static readonly maxDec = bigInteger(
+    "133499189745056880149688856635597007162669032647290798121690100488888732861290034376435130433535"
+  );
 
   protected static readonly precisionMultipliers: {
     [key: string]: bigInteger.BigInteger | undefined;
@@ -106,7 +111,7 @@ export class Dec {
   }
 
   protected checkBitLen(): void {
-    if (this.int.abs().bitLength().gt(Dec.maxDecBitLen)) {
+    if (this.int.abs().gt(Dec.maxDec)) {
       throw new Error(`Integer out of range ${this.int.toString()}`);
     }
   }

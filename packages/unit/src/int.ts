@@ -2,6 +2,11 @@ import bigInteger from "big-integer";
 import { Dec } from "./decimal";
 
 export class Int {
+  // (2 ** 256) - 1
+  protected static maxInt = bigInteger(
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+  );
+
   protected int: bigInteger.BigInteger;
 
   /**
@@ -35,7 +40,7 @@ export class Int {
   }
 
   protected checkBitLen(): void {
-    if (this.int.abs().bitLength().gt(256)) {
+    if (this.int.abs().gt(Int.maxInt)) {
       throw new Error(`Integer out of range ${this.int.toString()}`);
     }
   }
