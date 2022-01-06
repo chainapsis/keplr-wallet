@@ -1,11 +1,10 @@
-import { AmountConfig } from "../tx/amount";
+import { AmountConfig, IFeeConfig } from "../tx";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
 import { AppCurrency } from "@keplr-wallet/types";
 import { computed, makeObservable } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
 import { useState } from "react";
-import { IFeeConfig } from "../tx";
 
 export class IBCAmountConfig extends AmountConfig {
   constructor(
