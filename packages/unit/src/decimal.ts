@@ -1,6 +1,11 @@
 import bigInteger from "big-integer";
 import { Int } from "./int";
 import { CoinUtils } from "./coin-utils";
+import {
+  exponentDecStringToDecString,
+  isExponentDecString,
+  isValidDecimalString,
+} from "./etc";
 
 export class Dec {
   public static readonly precision = 18;
@@ -80,8 +85,12 @@ export class Dec {
       if (int.length === 0) {
         throw new Error("empty string");
       }
-      if (!/^(-?\d+\.\d+)$|^(-?\d+)$/.test(int)) {
-        throw new Error(`invalid decimal: ${int}`);
+      if (!isValidDecimalString(int)) {
+        if (isExponentDecString(int)) {
+          int = exponentDecStringToDecString(int);
+        } else {
+          throw new Error(`invalid decimal: ${int}`);
+        }
       }
       // Even if an input with more than 18 decimals, it does not throw an error and ignores the rest.
       const reduced = Dec.reduceDecimalsFromString(int);

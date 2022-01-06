@@ -1,5 +1,10 @@
 import bigInteger from "big-integer";
 import { Dec } from "./decimal";
+import {
+  exponentDecStringToDecString,
+  isExponentDecString,
+  isValidIntegerString,
+} from "./etc";
 
 export class Int {
   // (2 ** 256) - 1
@@ -11,24 +16,21 @@ export class Int {
 
   /**
    * @param int - Parse a number | bigInteger | string into a bigInt.
-   * Remaing parameters only will be used when type of int is string.
-   * @param base - Default base is 10.
-   * @param alphabet - Default alphabet is "0123456789abcdefghijklmnopqrstuvwxyz".
-   * @param caseSensitive - Defaults to false.
    */
-  constructor(
-    int: bigInteger.BigNumber,
-    base?: bigInteger.BigNumber,
-    alphabet?: string,
-    caseSensitive?: boolean
-  ) {
+  constructor(int: bigInteger.BigNumber) {
+    if (typeof int === "number") {
+      int = int.toString();
+    }
+
     if (typeof int === "string") {
-      if (int.indexOf(".") >= 0) {
-        throw new Error(`${int} is not integer`);
+      if (!isValidIntegerString(int)) {
+        if (isExponentDecString(int)) {
+          int = exponentDecStringToDecString(int);
+        } else {
+          throw new Error(`invalid integer: ${int}`);
+        }
       }
 
-      this.int = bigInteger(int, base, alphabet, caseSensitive);
-    } else if (typeof int === "number") {
       this.int = bigInteger(int);
     } else if (typeof int === "bigint") {
       this.int = bigInteger(int);
@@ -131,24 +133,21 @@ export class Uint {
 
   /**
    * @param uint - Parse a number | bigInteger | string into a bigUint.
-   * Remaing parameters only will be used when type of int is string.
-   * @param base - Default base is 10.
-   * @param alphabet - Default alphabet is "0123456789abcdefghijklmnopqrstuvwxyz".
-   * @param caseSensitive - Defaults to false.
    */
-  constructor(
-    uint: bigInteger.BigNumber,
-    base?: bigInteger.BigNumber,
-    alphabet?: string,
-    caseSensitive?: boolean
-  ) {
+  constructor(uint: bigInteger.BigNumber) {
+    if (typeof uint === "number") {
+      uint = uint.toString();
+    }
+
     if (typeof uint === "string") {
-      if (uint.indexOf(".") >= 0) {
-        throw new Error(`${uint} is not integer`);
+      if (!isValidIntegerString(uint)) {
+        if (isExponentDecString(uint)) {
+          uint = exponentDecStringToDecString(uint);
+        } else {
+          throw new Error(`invalid integer: ${uint}`);
+        }
       }
 
-      this.uint = bigInteger(uint, base, alphabet, caseSensitive);
-    } else if (typeof uint === "number") {
       this.uint = bigInteger(uint);
     } else if (typeof uint === "bigint") {
       this.uint = bigInteger(uint);

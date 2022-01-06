@@ -175,4 +175,38 @@ describe("Test Int/Uint", () => {
     expect(uint1.equals(uint2)).toBe(false);
     expect(uint1.equals(uint1)).toBe(true);
   });
+
+  it("Test Int/Uint from exponent number", () => {
+    const tests: {
+      num: number;
+      str: string;
+      expect: Int | Uint;
+    }[] = [
+      {
+        num: 12345678901234567890123,
+        str: "1.2345678901234568e+22",
+        expect: new Int("12345678901234568000000"),
+      },
+      {
+        num: -12345678901234567890123,
+        str: "-1.2345678901234568e+22",
+        expect: new Int("-12345678901234568000000"),
+      },
+      {
+        num: 12345678901234567890123,
+        str: "1.2345678901234568e+22",
+        expect: new Uint("12345678901234568000000"),
+      },
+    ];
+
+    for (const test of tests) {
+      expect(test.num.toString()).toBe(test.str);
+
+      if (test.expect instanceof Int) {
+        expect(new Int(test.num).equals(test.expect)).toBe(true);
+      } else {
+        expect(new Uint(test.num).equals(test.expect)).toBe(true);
+      }
+    }
+  });
 });

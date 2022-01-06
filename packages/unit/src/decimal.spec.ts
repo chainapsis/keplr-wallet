@@ -617,12 +617,11 @@ describe("Test decimals", () => {
         res: new Dec("0"),
         resStr: "0.000000000000000000",
       },
-      // In this case, number is expressed as 1e-19. So, it can't be parsed.
-      // {
-      //   input: 0.0000000000000000001,
-      //   res: new Dec("0"),
-      //   resStr: "0.000000000000000000",
-      // },
+      {
+        input: 0.0000000000000000001,
+        res: new Dec("0"),
+        resStr: "0.000000000000000000",
+      },
     ];
 
     for (const test of tests) {
@@ -630,6 +629,61 @@ describe("Test decimals", () => {
 
       expect(dec.equals(test.res)).toBe(true);
       expect(dec.toString()).toBe(test.resStr);
+    }
+  });
+
+  it("Test Int/Uint from exponent number", () => {
+    const tests: {
+      num: number;
+      str: string;
+      expect: Dec;
+    }[] = [
+      {
+        num: 12345678901234567890123,
+        str: "1.2345678901234568e+22",
+        expect: new Dec("12345678901234568000000"),
+      },
+      {
+        num: -12345678901234567890123,
+        str: "-1.2345678901234568e+22",
+        expect: new Dec("-12345678901234568000000"),
+      },
+      {
+        num: 0.0000000000001,
+        str: "1e-13",
+        expect: new Dec("0.0000000000001"),
+      },
+      {
+        num: 0.000000000000123,
+        str: "1.23e-13",
+        expect: new Dec("0.000000000000123"),
+      },
+      {
+        num: 0.000000000000000001,
+        str: "1e-18",
+        expect: new Dec("0.000000000000000001"),
+      },
+      {
+        num: 0.0000000000000000001,
+        str: "1e-19",
+        expect: new Dec("0"),
+      },
+      {
+        num: 0.00000000000000000123,
+        str: "1.23e-18",
+        expect: new Dec("0.000000000000000001"),
+      },
+      {
+        num: 0.000000000000000000123,
+        str: "1.23e-19",
+        expect: new Dec("0"),
+      },
+    ];
+
+    for (const test of tests) {
+      expect(test.num.toString()).toBe(test.str);
+
+      expect(new Dec(test.num).equals(test.expect)).toBe(true);
     }
   });
 });
