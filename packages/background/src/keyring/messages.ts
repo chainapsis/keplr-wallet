@@ -662,6 +662,79 @@ export class RequestSignDirectMsg extends Message<{
   }
 }
 
+export class RequestSignEthereumMsg extends Message<{
+  readonly signed: {
+    bodyBytes: Uint8Array;
+    authInfoBytes: Uint8Array;
+    chainId: string;
+    accountNumber: string;
+  };
+  readonly signature: StdSignature;
+}> {
+  public static type() {
+    return "request-sign-ethereum";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: {
+      bodyBytes?: Uint8Array | null;
+      authInfoBytes?: Uint8Array | null;
+      chainId?: string | null;
+      accountNumber?: string | null;
+    },
+    public readonly signOptions: KeplrSignOptions = {}
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    // AC: TODO
+    // Validate bech32 address.
+    Bech32Address.validate(this.signer);
+
+    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+      bodyBytes: this.signDoc.bodyBytes,
+      authInfoBytes: this.signDoc.authInfoBytes,
+      chainId: this.signDoc.chainId,
+      accountNumber: this.signDoc.accountNumber
+        ? Long.fromString(this.signDoc.accountNumber)
+        : undefined,
+    });
+
+    if (signDoc.chainId !== this.chainId) {
+      throw new Error(
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignEthereumMsg.type();
+  }
+}
+
 export class GetMultiKeyStoreInfoMsg extends Message<{
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {

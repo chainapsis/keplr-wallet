@@ -6,6 +6,7 @@ import {
   UnlockKeyRingMsg,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
+  RequestSignEthereumMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
@@ -86,6 +87,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleRequestSignDirectMsg(service)(
           env,
           msg as RequestSignDirectMsg
+        );
+      case RequestSignEthereumMsg:
+        return handleRequestSignEthereumMsg(service)(
+          env,
+          msg as RequestSignEthereumMsg
         );
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
@@ -325,6 +331,46 @@ const handleRequestSignDirectMsg: (
     });
 
     const response = await service.requestSignDirect(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      signDoc,
+      msg.signOptions
+    );
+
+    return {
+      signed: {
+        bodyBytes: response.signed.bodyBytes,
+        authInfoBytes: response.signed.authInfoBytes,
+        chainId: response.signed.chainId,
+        accountNumber: response.signed.accountNumber.toString(),
+      },
+      signature: response.signature,
+    };
+  };
+};
+
+const handleRequestSignEthereumMsg: (
+  service: KeyRingService
+) => InternalHandler<RequestSignEthereumMsg> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      msg.chainId,
+      msg.origin
+    );
+
+    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+      bodyBytes: msg.signDoc.bodyBytes,
+      authInfoBytes: msg.signDoc.authInfoBytes,
+      chainId: msg.signDoc.chainId,
+      accountNumber: msg.signDoc.accountNumber
+        ? Long.fromString(msg.signDoc.accountNumber)
+        : undefined,
+    });
+
+    const response = await service.requestSignEthereum(
       env,
       msg.origin,
       msg.chainId,

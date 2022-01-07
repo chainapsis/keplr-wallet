@@ -14,6 +14,8 @@ import { Env } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
+import { Wallet } from "ethers";
+
 export enum KeyRingStatus {
   NOTLOADED,
   EMPTY,
@@ -676,6 +678,41 @@ export class KeyRing {
 
       const privKey = this.loadPrivKey(coinType);
       return privKey.sign(message);
+    }
+  }
+
+  public async signEthereum(message: Uint8Array): Promise<Uint8Array> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
+    if (!this.keyStore) {
+      throw new Error("Key Store is empty");
+    }
+
+    if (this.keyStore.type === "ledger") {
+      // AC: TODO Ledger Integration
+      // const pubKey = this.ledgerPublicKey;
+
+      // if (!pubKey) {
+      //   throw new Error("Ledger public key is not initialized");
+      // }
+
+      // return await this.ledgerKeeper.sign(
+      //   env,
+      //   KeyRing.getKeyStoreBIP44Path(this.keyStore),
+      //   pubKey,
+      //   message
+      // );
+      throw new Error("Ethereum signing with Ledger is not yet supported");
+    } else {
+      if (!this.mnemonic) {
+        throw new Error("Mnemonic is undefined");
+      }
+
+      const ethWallet = Wallet.fromMnemonic(this.mnemonic);
+      const signature = await ethWallet.signMessage(message);
+      return new TextEncoder().encode(signature);
     }
   }
 

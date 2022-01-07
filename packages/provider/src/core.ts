@@ -24,6 +24,7 @@ import {
   GetSecret20ViewingKey,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
+  RequestSignEthereumMsg,
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
@@ -186,6 +187,54 @@ export class Keplr implements IKeplr {
       BACKGROUND_PORT,
       new RequestVerifyADR36AminoSignDoc(chainId, signer, data, signature)
     );
+  }
+
+  async signEthereum(
+    chainId: string,
+    signer: string,
+    signDoc: {
+      bodyBytes?: Uint8Array | null;
+      authInfoBytes?: Uint8Array | null;
+      chainId?: string | null;
+      accountNumber?: Long | null;
+    },
+    signOptions: KeplrSignOptions = {}
+  ): Promise<DirectSignResponse> {
+    // How to access mnemonic to re-generate Eth key...
+    // Need to add API to generate Eth key from mnemonic within keyring
+
+    // Forget EvmosAccount, this should work independently
+
+    // We need a way to access either the mnemonic directly, or a new keyring API to generate an Eth key from the mnemonic
+    // So this API would be to use Keplr to sign an Eth transaction with the private key within Keplrsl
+
+    // Keep the same API as signDirect, but modify to use Ethsecp256k key, and sign with Eth key
+    // Broadcast to existing Keplr node, will work assuming it's connected to Evmos node
+
+    const msg = new RequestSignEthereumMsg(
+      chainId,
+      signer,
+      {
+        bodyBytes: signDoc.bodyBytes,
+        authInfoBytes: signDoc.authInfoBytes,
+        chainId: signDoc.chainId,
+        accountNumber: signDoc.accountNumber
+          ? signDoc.accountNumber.toString()
+          : null,
+      },
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    );
+    const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+
+    return {
+      signed: {
+        bodyBytes: response.signed.bodyBytes,
+        authInfoBytes: response.signed.authInfoBytes,
+        chainId: response.signed.chainId,
+        accountNumber: Long.fromString(response.signed.accountNumber),
+      },
+      signature: response.signature,
+    };
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
