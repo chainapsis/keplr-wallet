@@ -26,6 +26,9 @@ function removeHeadZeros(str: string): string {
   while (str.length > 0 && str[0] === "0") {
     str = str.slice(1);
   }
+  if (str.length === 0 || str[0] === ".") {
+    return "0" + str;
+  }
   return str;
 }
 
