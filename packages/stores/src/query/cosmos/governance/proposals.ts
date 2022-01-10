@@ -28,7 +28,7 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     chainGetter: ChainGetter,
     protected readonly _queryPool: ObservableChainQuery<StakingPool>
   ) {
-    super(kvStore, chainId, chainGetter, "/gov/proposals");
+    super(kvStore, chainId, chainGetter, "/gov/proposals?limit=1000");
     makeObservable(this);
   }
 
