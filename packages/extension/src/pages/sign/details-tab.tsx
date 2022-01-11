@@ -16,7 +16,7 @@ import {
   SignDocHelper,
 } from "@keplr-wallet/hooks";
 import { useLanguage } from "../../languages";
-import { Badge, Label } from "reactstrap";
+import { Badge, Button, Label } from "reactstrap";
 import { renderDirectMessage } from "./direct";
 
 export const DetailsTab: FunctionComponent<{
@@ -25,12 +25,22 @@ export const DetailsTab: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
 
-  disableInputs: boolean | undefined;
+  isInternal: boolean;
+
+  preferNoSetFee: boolean;
+  preferNoSetMemo: boolean;
 }> = observer(
-  ({ signDocHelper, memoConfig, feeConfig, gasConfig, disableInputs }) => {
+  ({
+    signDocHelper,
+    memoConfig,
+    feeConfig,
+    gasConfig,
+    isInternal,
+    preferNoSetFee,
+    preferNoSetMemo,
+  }) => {
     const { chainStore, priceStore, accountStore } = useStore();
     const intl = useIntl();
-
     const language = useLanguage();
 
     const mode = signDocHelper.signDocWrapper
@@ -53,9 +63,9 @@ export const DetailsTab: FunctionComponent<{
           );
           return (
             <React.Fragment key={i.toString()}>
-              <Msg icon={msgContent.icon} title={msgContent.title}>
+              <MsgRender icon={msgContent.icon} title={msgContent.title}>
                 {msgContent.content}
-              </Msg>
+              </MsgRender>
               <hr />
             </React.Fragment>
           );
@@ -69,9 +79,9 @@ export const DetailsTab: FunctionComponent<{
           );
           return (
             <React.Fragment key={i.toString()}>
-              <Msg icon={msgContent.icon} title={msgContent.title}>
+              <MsgRender icon={msgContent.icon} title={msgContent.title}>
                 {msgContent.content}
-              </Msg>
+              </MsgRender>
               <hr />
             </React.Fragment>
           );
@@ -96,7 +106,7 @@ export const DetailsTab: FunctionComponent<{
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
           {renderedMsgs}
         </div>
-        {!disableInputs ? (
+        {!preferNoSetMemo ? (
           <MemoInput
             memoConfig={memoConfig}
             label={intl.formatMessage({ id: "sign.info.memo" })}
@@ -116,7 +126,7 @@ export const DetailsTab: FunctionComponent<{
             </div>
           </React.Fragment>
         )}
-        {!disableInputs ? (
+        {!preferNoSetFee || !feeConfig.isManual ? (
           <FeeButtons
             feeConfig={feeConfig}
             gasConfig={gasConfig}
@@ -133,20 +143,44 @@ export const DetailsTab: FunctionComponent<{
               <div>
                 {feeConfig.fee.maxDecimals(6).trim(true).toString()}
                 {priceStore.calculatePrice(
-                  language.fiatCurrency,
-                  feeConfig.fee
+                  feeConfig.fee,
+                  language.fiatCurrency
                 ) ? (
                   <div
                     className="ml-2"
                     style={{ display: "inline-block", fontSize: "12px" }}
                   >
                     {priceStore
-                      .calculatePrice(language.fiatCurrency, feeConfig.fee)
+                      .calculatePrice(feeConfig.fee, language.fiatCurrency)
                       ?.toString()}
                   </div>
                 ) : null}
               </div>
             </div>
+            {
+              /*
+                Even if the "preferNoSetFee" option is turned on, it provides the way to edit the fee to users.
+                However, if the interaction is internal, you can be sure that the fee is set well inside Keplr.
+                Therefore, the button is not shown in this case.
+              */
+              !isInternal ? (
+                <div style={{ fontSize: "12px" }}>
+                  <Button
+                    color="link"
+                    size="sm"
+                    style={{
+                      padding: 0,
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      feeConfig.setFeeType("average");
+                    }}
+                  >
+                    <FormattedMessage id="sign.info.fee.override" />
+                  </Button>
+                </div>
+              ) : null
+            }
           </React.Fragment>
         ) : null}
       </div>
@@ -154,7 +188,7 @@ export const DetailsTab: FunctionComponent<{
   }
 );
 
-const Msg: FunctionComponent<{
+export const MsgRender: FunctionComponent<{
   icon?: string;
   title: string;
 }> = ({ icon = "fas fa-question", title, children }) => {

@@ -61,6 +61,12 @@
   "setting.address-book.confirm.delete-address.paragraph": "Are you sure you want to delete this address?",
   "setting.address-book.button.save": "Save",
 
+  "setting.export-to-mobile": "Link Keplr Mobile",
+  "setting.export-to-mobile.input.password": "Password",
+  "setting.export-to-mobile.input.password.error.required": "Password is required",
+  "setting.export-to-mobile.input.password.error.invalid": "Invalid password",
+  "setting.export-to-mobile.button.confirm": "Confirm",
+
   "setting.credit": "Special thanks",
 
   "setting.keyring": "Select Account",
@@ -101,6 +107,7 @@
   "setting.token.add.decimals": "Decimals",
   "setting.token.add.button.submit": "Submit",
   "setting.token.add.secret20.checkbox.import-viewing-key": "(Advanced) Import my own viewing key",
+  "setting.token.add.secret20.checkbox.use-suggested-viewing-key": "Use webpage suggested viewing key",
   "setting.token.add.secret20.viewing-key": "Viewing Key",
 
   "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
@@ -187,6 +194,7 @@
   "lock.input.password": "Password",
   "lock.input.password.error.required": "Empty password",
   "lock.input.password.error.invalid": "Invalid password",
+  "lock.alert.capslock": "CapsLock is on",
   "lock.button.unlock": "Unlock",
 
   "send.input.recipient": "Recipient",
@@ -218,6 +226,7 @@
   "sign.info.fee": "Fee",
   "sign.info.memo": "Memo",
   "sign.info.warning.empty-memo": "(Empty memo)",
+  "sign.info.fee.override": "Override fee",
   "sign.info.gas": "Gas",
   "sign.button.approve": "Approve",
   "sign.button.reject": "Reject",
@@ -248,13 +257,13 @@
   "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "Failed to decrypt Secret message. This may be due to Keplr viewing key not matching the transaction viewing key.",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
-  "sign.list.message.cyber/Link.content": "<b>{address}</b> create link {br}<b>{link}</b>",
+  "sign.list.message.cyber/Link.content": "<b>{neuron}</b> create link {br}<b>{link}</b>",
 
   "ledger.step1": "Step 1",
   "ledger.step1.paragraph": "Connect and unlock your Ledger.",
   "ledger.step2": "Step 2",
   "ledger.step2.paragraph": "Open the Cosmos app on your Ledger device.",
-  "ledger.option.webhid.checkbox": "Using Ledger X on Windows?",
+  "ledger.option.webhid.checkbox": "Use alternative USB connection method(HID)",
   "ledger.option.webhid.warning": "Please copy and paste the following link {link} on your browser and enable ‘experimental web platform features’",
   "ledger.option.webhid.link.copied": "Link copied!",
   "ledger.button.next": "Next",
@@ -288,6 +297,6 @@
   "component.ibc.channel-registrar.chain-selector.placeholder": "Select Chain",
   "component.ibc.channel-registrar.chain-selector.button.add": "New IBC Transfer Channel",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
-  "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Destination Chain Channel ID",
+  "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save"
 }

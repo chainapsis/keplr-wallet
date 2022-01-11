@@ -11,13 +11,13 @@ import { FormattedMessage } from "react-intl";
 
 export const IBCTransferView: FunctionComponent = observer(() => {
   const history = useHistory();
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
-  const queryBalances = queries
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const queryBalances = queries.queryBalances.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
 
   const hasAssets =
     queryBalances.balances.find((bal) => bal.balance.toDec().gt(new Dec(0))) !==
@@ -57,6 +57,11 @@ export const IBCTransferView: FunctionComponent = observer(() => {
         onClick={(e) => {
           e.preventDefault();
 
+          analyticsStore.logEvent("Send token started", {
+            chainId: chainStore.current.chainId,
+            chainName: chainStore.current.chainName,
+            isIbc: true,
+          });
           history.push("/ibc-transfer");
         }}
       >

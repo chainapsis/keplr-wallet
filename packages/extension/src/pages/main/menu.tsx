@@ -49,7 +49,7 @@ export const Menu: FunctionComponent = observer(() => {
         </div>
       ) : null}
       {(chainStore.current.features ?? []).find(
-        (feature) => feature === "secretwasm"
+        (feature) => feature === "cosmwasm" || feature === "secretwasm"
       ) ? (
         <div
           className={styleMenu.item}

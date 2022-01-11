@@ -140,13 +140,13 @@ export const FeeButtonsInner: FunctionComponent<
     const fiatCurrency = language.fiatCurrency;
 
     const lowFee = feeConfig.getFeeTypePretty("low");
-    const lowFeePrice = priceStore.calculatePrice(fiatCurrency, lowFee);
+    const lowFeePrice = priceStore.calculatePrice(lowFee, fiatCurrency);
 
     const averageFee = feeConfig.getFeeTypePretty("average");
-    const averageFeePrice = priceStore.calculatePrice(fiatCurrency, averageFee);
+    const averageFeePrice = priceStore.calculatePrice(averageFee, fiatCurrency);
 
     const highFee = feeConfig.getFeeTypePretty("high");
-    const highFeePrice = priceStore.calculatePrice(fiatCurrency, highFee);
+    const highFeePrice = priceStore.calculatePrice(highFee, fiatCurrency);
 
     let isFeeLoading = false;
 
@@ -162,7 +162,10 @@ export const FeeButtonsInner: FunctionComponent<
             isFeeLoading = true;
             return undefined;
           default:
-            return intl.formatMessage({ id: "input.fee.error.unknown" });
+            return (
+              error.message ||
+              intl.formatMessage({ id: "input.fee.error.unknown" })
+            );
         }
       }
     })();

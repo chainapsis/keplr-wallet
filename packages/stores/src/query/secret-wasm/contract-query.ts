@@ -3,7 +3,6 @@ import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
-import { AccountStore } from "../../account";
 import { Keplr } from "@keplr-wallet/types";
 import Axios, { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
@@ -25,6 +24,7 @@ export class ObservableSecretContractChainQuery<
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
+    protected readonly apiGetter: () => Promise<Keplr | undefined>,
     protected readonly contractAddress: string,
     // eslint-disable-next-line @typescript-eslint/ban-types
     protected obj: object,
@@ -75,7 +75,7 @@ export class ObservableSecretContractChainQuery<
 
   @flow
   protected *initKeplr() {
-    this.keplr = yield* toGenerator(AccountStore.getKeplr());
+    this.keplr = yield* toGenerator(this.apiGetter());
   }
 
   @flow
@@ -111,11 +111,11 @@ export class ObservableSecretContractChainQuery<
       if (!Axios.isCancel(e) && e.response?.data?.error) {
         const encryptedError = e.response.data.error;
 
-        const errorMessageRgx = /query contract failed: encrypted: (.+)/g;
+        const errorMessageRgx = /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
 
         const rgxMatches = errorMessageRgx.exec(encryptedError);
-        if (rgxMatches != null && rgxMatches.length === 2) {
-          const errorCipherB64 = rgxMatches[1];
+        if (rgxMatches != null && rgxMatches.length === 4) {
+          const errorCipherB64 = rgxMatches[2];
           const errorCipherBz = Buffer.from(errorCipherB64, "base64");
 
           if (this.keplr && this.nonce) {

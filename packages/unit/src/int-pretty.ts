@@ -14,7 +14,8 @@ export type IntPrettyOptions = {
 };
 
 export class IntPretty {
-  protected int: Int;
+  protected dec: Dec;
+  protected decPrecision: number = 0;
 
   protected _options: IntPrettyOptions = {
     precision: 0,
@@ -25,24 +26,33 @@ export class IntPretty {
     locale: true,
   };
 
-  constructor(num: Int | Dec) {
-    if (num instanceof Dec) {
-      let dec = num;
-      let precision = 0;
-      for (let i = 0; i < 18; i++) {
-        dec = dec.mul(new Dec(10));
-        if (dec.equals(new Dec(dec.truncate()))) {
-          break;
-        }
-        precision++;
-      }
-
-      const int = num.mulTruncate(DecUtils.getPrecisionDec(precision));
-      this.int = int.truncate();
-      this._options.precision = precision;
-    } else {
-      this.int = num;
+  constructor(num: Dec | { toDec(): Dec }) {
+    if ("toDec" in num) {
+      num = num.toDec();
     }
+
+    if (num.equals(new Dec(0))) {
+      this.dec = num;
+      return;
+    }
+
+    let dec = num;
+    let decPrecision = 0;
+    for (let i = 0; i < 18; i++) {
+      if (
+        !dec.truncate().equals(new Int(0)) &&
+        dec.equals(new Dec(dec.truncate()))
+      ) {
+        break;
+      }
+      dec = dec.mul(new Dec(10));
+      decPrecision++;
+    }
+
+    this.dec = num;
+    this.decPrecision = decPrecision;
+    this._options.precision = decPrecision;
+    this._options.maxDecimals = decPrecision;
   }
 
   get options(): DeepReadonly<IntPrettyOptions> {
@@ -50,9 +60,24 @@ export class IntPretty {
   }
 
   precision(prec: number): IntPretty {
+    if (prec < -18) {
+      throw new Error("Too little precision");
+    }
+    if (prec > 18) {
+      throw new Error("Too much precision");
+    }
+
     const pretty = this.clone();
     pretty._options.precision = prec;
     return pretty;
+  }
+
+  increasePrecision(delta: number): IntPretty {
+    return this.precision(this._options.precision + delta);
+  }
+
+  decreasePrecision(delta: number): IntPretty {
+    return this.precision(this._options.precision - delta);
   }
 
   maxDecimals(max: number): IntPretty {
@@ -96,17 +121,67 @@ export class IntPretty {
     return this._options.ready;
   }
 
-  add(target: IntPretty): IntPretty {
-    const pretty = this.clone();
-    // TODO: Handle the precision of target.
-    pretty.int = pretty.int.add(target.int);
+  add(target: Dec | { toDec(): Dec }): IntPretty {
+    if (!(target instanceof Dec)) {
+      target = target.toDec();
+    }
+
+    const pretty = new IntPretty(this.toDec().add(target));
+    pretty._options = {
+      ...this._options,
+      // Precision must not be changed.
+      precision: pretty._options.precision,
+    };
+    return pretty;
+  }
+
+  sub(target: Dec | { toDec(): Dec }): IntPretty {
+    if (!(target instanceof Dec)) {
+      target = target.toDec();
+    }
+
+    const pretty = new IntPretty(this.toDec().sub(target));
+    pretty._options = {
+      ...this._options,
+      // Precision must not be changed.
+      precision: pretty._options.precision,
+    };
+    return pretty;
+  }
+
+  mul(target: Dec | { toDec(): Dec }): IntPretty {
+    if (!(target instanceof Dec)) {
+      target = target.toDec();
+    }
+
+    const pretty = new IntPretty(this.toDec().mul(target));
+    pretty._options = {
+      ...this._options,
+      // Precision must not be changed.
+      precision: pretty._options.precision,
+    };
+    return pretty;
+  }
+
+  quo(target: Dec | { toDec(): Dec }): IntPretty {
+    if (!(target instanceof Dec)) {
+      target = target.toDec();
+    }
+
+    const pretty = new IntPretty(this.toDec().quo(target));
+    pretty._options = {
+      ...this._options,
+      // Precision must not be changed.
+      precision: pretty._options.precision,
+    };
     return pretty;
   }
 
   toDec(): Dec {
-    let dec = new Dec(this.int);
-    if (this._options.precision) {
-      dec = dec.quoTruncate(DecUtils.getPrecisionDec(this._options.precision));
+    let dec = this.dec;
+    const deltaPrecision = this.decPrecision - this._options.precision;
+    if (deltaPrecision !== 0) {
+      dec = dec.mulTruncate(DecUtils.getPrecisionDec(deltaPrecision));
     }
     return dec;
   }
@@ -119,8 +194,7 @@ export class IntPretty {
       result = dec.toString(this._options.maxDecimals, this._options.locale);
     } else {
       result = CoinUtils.shrinkDecimals(
-        this.int,
-        this._options.precision,
+        dec,
         0,
         this._options.maxDecimals,
         this._options.locale
@@ -133,7 +207,9 @@ export class IntPretty {
   }
 
   clone(): IntPretty {
-    const pretty = new IntPretty(this.int);
+    const pretty = new IntPretty(this.dec);
+    pretty.dec = this.dec;
+    pretty.decPrecision = this.decPrecision;
     pretty._options = {
       ...this._options,
     };

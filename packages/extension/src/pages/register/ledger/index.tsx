@@ -4,10 +4,11 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Button, Form } from "reactstrap";
 import useForm from "react-hook-form";
 import style from "../style.module.scss";
-import { Input } from "../../../components/form";
+import { Input, PasswordInput } from "../../../components/form";
 import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 import { BackButton } from "../index";
 import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
 
 export const TypeImportLedger = "import-ledger";
 
@@ -20,6 +21,8 @@ interface FormData {
 export const ImportLedgerIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
+  const { analyticsStore } = useStore();
+
   return (
     <Button
       color="primary"
@@ -29,6 +32,9 @@ export const ImportLedgerIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeImportLedger);
+        analyticsStore.logEvent("Import account started", {
+          registerType: "ledger",
+        });
       }}
     >
       <FormattedMessage id="register.ledger.title" />
@@ -51,6 +57,8 @@ export const ImportLedgerPage: FunctionComponent<{
     },
   });
 
+  const { analyticsStore, accountStore } = useStore();
+
   return (
     <div>
       <div className={style.title}>
@@ -67,6 +75,17 @@ export const ImportLedgerPage: FunctionComponent<{
               data.password,
               bip44Option.bip44HDPath
             );
+            const accountInfo = accountStore.getAccount(
+              analyticsStore.mainChainId
+            );
+            analyticsStore.setUserId(accountInfo.bech32Address);
+            analyticsStore.setUserProperties({
+              registerType: "ledger",
+              accountType: "ledger",
+            });
+            analyticsStore.logEvent("Import account finished", {
+              accountType: "ledger",
+            });
           } catch (e) {
             alert(e.message ? e.message : e.toString());
             registerConfig.clear();
@@ -88,11 +107,10 @@ export const ImportLedgerPage: FunctionComponent<{
         />
         {registerConfig.mode === "create" ? (
           <React.Fragment>
-            <Input
+            <PasswordInput
               label={intl.formatMessage({
                 id: "register.create.input.password",
               })}
-              type="password"
               name="password"
               ref={register({
                 required: intl.formatMessage({
@@ -108,11 +126,10 @@ export const ImportLedgerPage: FunctionComponent<{
               })}
               error={errors.password && errors.password.message}
             />
-            <Input
+            <PasswordInput
               label={intl.formatMessage({
                 id: "register.create.input.confirm-password",
               })}
-              type="password"
               name="confirmPassword"
               ref={register({
                 required: intl.formatMessage({

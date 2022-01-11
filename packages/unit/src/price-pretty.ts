@@ -1,5 +1,4 @@
 import { IntPretty, IntPrettyOptions } from "./int-pretty";
-import { Int } from "./int";
 import { Dec } from "./decimal";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
@@ -24,10 +23,10 @@ export class PricePretty {
 
   constructor(
     protected _fiatCurrency: FiatCurrency,
-    protected amount: Int | Dec | IntPretty
+    protected amount: Dec | { toDec(): Dec }
   ) {
-    if (amount instanceof IntPretty) {
-      this.intPretty = amount;
+    if ("toDec" in amount) {
+      this.intPretty = new IntPretty(amount.toDec());
     } else {
       this.intPretty = new IntPretty(amount);
     }
@@ -84,6 +83,18 @@ export class PricePretty {
     return pretty;
   }
 
+  increasePrecision(delta: number): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.increasePrecision(delta);
+    return pretty;
+  }
+
+  decreasePrecision(delta: number): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.decreasePrecision(delta);
+    return pretty;
+  }
+
   maxDecimals(max: number): PricePretty {
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.maxDecimals(max);
@@ -125,9 +136,27 @@ export class PricePretty {
     return this.intPretty.isReady;
   }
 
-  add(target: PricePretty): PricePretty {
+  add(target: Dec | { toDec(): Dec }): PricePretty {
     const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.add(target.intPretty);
+    pretty.intPretty = pretty.intPretty.add(target);
+    return pretty;
+  }
+
+  sub(target: Dec | { toDec(): Dec }): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.sub(target);
+    return pretty;
+  }
+
+  mul(target: Dec | { toDec(): Dec }): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.mul(target);
+    return pretty;
+  }
+
+  quo(target: Dec | { toDec(): Dec }): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.quo(target);
     return pretty;
   }
 

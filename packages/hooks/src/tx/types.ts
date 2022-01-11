@@ -17,7 +17,11 @@ export interface IMemoConfig extends ITxChainSetter {
 
 export interface IGasConfig extends ITxChainSetter {
   gas: number;
-  setGas(gas: number): void;
+  /*
+   The actual gas value from the input.
+   */
+  gasRaw: string;
+  setGas(gas: number | string): void;
 
   getError(): Error | undefined;
 }
@@ -31,7 +35,7 @@ export interface IFeeConfig extends ITxChainSetter {
   fee: CoinPretty | undefined;
   getFeeTypePretty(feeType: FeeType): CoinPretty;
   getFeePrimitive(): CoinPrimitive | undefined;
-
+  isManual: boolean;
   getError(): Error | undefined;
 }
 
@@ -52,6 +56,9 @@ export interface IAmountConfig extends ITxChainSetter {
   sendableCurrencies: AppCurrency[];
   sender: string;
   setSender(sender: string): void;
+  setIsMax(isMax: boolean): void;
+  toggleIsMax(): void;
+  isMax: boolean;
 
   getError(): Error | undefined;
 }

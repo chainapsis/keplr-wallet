@@ -1,17 +1,14 @@
-import scrypt from "scrypt-js";
 import AES, { Counter } from "aes-js";
-import { BIP44HDPath, CoinTypeForChain } from "./types";
+import {
+  BIP44HDPath,
+  CoinTypeForChain,
+  ScryptParams,
+  CommonCrypto,
+} from "./types";
 import { Hash, RNG } from "@keplr-wallet/crypto";
+import pbkdf2 from "pbkdf2";
 
 import { Buffer } from "buffer/";
-
-interface ScryptParams {
-  dklen: number;
-  salt: string;
-  n: number;
-  r: number;
-  p: number;
-}
 
 /**
  * This is similar to ethereum's key store.
@@ -35,7 +32,8 @@ export interface KeyStore {
       iv: string;
     };
     ciphertext: string;
-    kdf: "scrypt";
+    // Strength: scrypt >>> pbkdf2 > sha256
+    kdf: "scrypt" | "sha256" | "pbkdf2";
     kdfparams: ScryptParams;
     mac: string;
   };
@@ -44,6 +42,8 @@ export interface KeyStore {
 export class Crypto {
   public static async encrypt(
     rng: RNG,
+    crypto: CommonCrypto,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
     type: "mnemonic" | "privateKey" | "ledger",
     text: string,
     password: string,
@@ -60,7 +60,33 @@ export class Crypto {
       r: 8,
       p: 1,
     };
-    const derivedKey = await Crypto.scrpyt(password, scryptParams);
+    const derivedKey = await (async () => {
+      switch (kdf) {
+        case "scrypt":
+          return await crypto.scrypt(password, scryptParams);
+        case "sha256":
+          return Hash.sha256(Buffer.from(`${salt}/${password}`));
+        case "pbkdf2":
+          return new Promise<Uint8Array>((resolve, reject) => {
+            pbkdf2.pbkdf2(
+              password,
+              salt,
+              4000,
+              32,
+              "sha256",
+              (err, derivedKey) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(new Uint8Array(derivedKey));
+                }
+              }
+            );
+          });
+        default:
+          throw new Error("Unknown kdf");
+      }
+    })();
     const buf = Buffer.from(text);
 
     random = new Uint8Array(16);
@@ -89,7 +115,7 @@ export class Crypto {
           iv: iv.toString("hex"),
         },
         ciphertext: ciphertext.toString("hex"),
-        kdf: "scrypt",
+        kdf,
         kdfparams: scryptParams,
         mac: Buffer.from(mac).toString("hex"),
       },
@@ -97,10 +123,39 @@ export class Crypto {
   }
 
   public static async decrypt(
+    crypto: CommonCrypto,
     keyStore: KeyStore,
     password: string
   ): Promise<Uint8Array> {
-    const derivedKey = await Crypto.scrpyt(password, keyStore.crypto.kdfparams);
+    const derivedKey = await (async () => {
+      switch (keyStore.crypto.kdf) {
+        case "scrypt":
+          return await crypto.scrypt(password, keyStore.crypto.kdfparams);
+        case "sha256":
+          return Hash.sha256(
+            Buffer.from(`${keyStore.crypto.kdfparams.salt}/${password}`)
+          );
+        case "pbkdf2":
+          return new Promise<Uint8Array>((resolve, reject) => {
+            pbkdf2.pbkdf2(
+              password,
+              keyStore.crypto.kdfparams.salt,
+              4000,
+              32,
+              "sha256",
+              (err, derivedKey) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(new Uint8Array(derivedKey));
+                }
+              }
+            );
+          });
+        default:
+          throw new Error("Unknown kdf");
+      }
+    })();
 
     const counter = new Counter(0);
     counter.setBytes(Buffer.from(keyStore.crypto.cipherparams.iv, "hex"));
@@ -118,22 +173,6 @@ export class Crypto {
 
     return Buffer.from(
       aesCtr.decrypt(Buffer.from(keyStore.crypto.ciphertext, "hex"))
-    );
-  }
-
-  private static async scrpyt(
-    text: string,
-    params: ScryptParams
-  ): Promise<Uint8Array> {
-    const buf = Buffer.from(text);
-
-    return await scrypt.scrypt(
-      buf,
-      Buffer.from(params.salt, "hex"),
-      params.n,
-      params.r,
-      params.p,
-      params.dklen
     );
   }
 }

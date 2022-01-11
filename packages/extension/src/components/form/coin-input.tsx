@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 
 import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
@@ -18,10 +18,9 @@ import {
   EmptyAmountError,
   InvalidNumberAmountError,
   ZeroAmountError,
-  NagativeAmountError,
+  NegativeAmountError,
   InsufficientAmountError,
   IAmountConfig,
-  IFeeConfig,
 } from "@keplr-wallet/hooks";
 import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -29,7 +28,6 @@ import { useStore } from "../../stores";
 
 export interface CoinInputProps {
   amountConfig: IAmountConfig;
-  feeConfig: IFeeConfig;
 
   balanceText?: string;
 
@@ -40,14 +38,13 @@ export interface CoinInputProps {
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = observer(
-  ({ amountConfig, feeConfig, className, label, disableAllBalance }) => {
+  ({ amountConfig, className, label, disableAllBalance }) => {
     const intl = useIntl();
 
     const { queriesStore } = useStore();
     const queryBalances = queriesStore
       .get(amountConfig.chainId)
-      .getQueryBalances()
-      .getQueryBech32Address(amountConfig.sender);
+      .queryBalances.getQueryBech32Address(amountConfig.sender);
 
     const queryBalance = queryBalances.balances.find(
       (bal) =>
@@ -57,31 +54,6 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
     const balance = queryBalance
       ? queryBalance.balance
       : new CoinPretty(amountConfig.sendCurrency, new Int(0));
-
-    const [isAllBalanceMode, setIsAllBalanceMode] = useState(false);
-    const toggleAllBalanceMode = () => setIsAllBalanceMode((value) => !value);
-
-    const fee = feeConfig.fee;
-    useEffect(() => {
-      if (isAllBalanceMode) {
-        // Get the actual sendable balance with considering the fee.
-        const sendableBalance =
-          balance.currency.coinMinimalDenom === fee?.currency.coinMinimalDenom
-            ? new CoinPretty(
-                balance.currency,
-                balance
-                  .toDec()
-                  .sub(fee.toDec())
-                  .mul(DecUtils.getPrecisionDec(balance.currency.coinDecimals))
-                  .truncate()
-              )
-            : balance;
-
-        amountConfig.setAmount(
-          sendableBalance.trim(true).locale(false).hideDenom(true).toString()
-        );
-      }
-    }, [balance, fee, isAllBalanceMode, amountConfig]);
 
     const [randomId] = useState(() => {
       const bytes = new Uint8Array(4);
@@ -104,7 +76,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             return intl.formatMessage({
               id: "input.amount.error.is-zero",
             });
-          case NagativeAmountError:
+          case NegativeAmountError:
             return intl.formatMessage({
               id: "input.amount.error.is-negative",
             });
@@ -120,6 +92,15 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
 
     const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
 
+    const selectableCurrencies = amountConfig.sendableCurrencies
+      .filter((cur) => {
+        const bal = queryBalances.getBalanceFromCurrency(cur);
+        return !bal.toDec().isZero();
+      })
+      .sort((a, b) => {
+        return a.coinDenom < b.coinDenom ? -1 : 1;
+      });
+
     return (
       <React.Fragment>
         <FormGroup className={className}>
@@ -133,17 +114,17 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
           <ButtonDropdown
             id={`selector-${randomId}`}
             className={classnames(styleCoinInput.tokenSelector, {
-              disabled: isAllBalanceMode,
+              disabled: amountConfig.isMax,
             })}
             isOpen={isOpenTokenSelector}
             toggle={() => setIsOpenTokenSelector((value) => !value)}
-            disabled={isAllBalanceMode}
+            disabled={amountConfig.isMax}
           >
             <DropdownToggle caret>
               {amountConfig.sendCurrency.coinDenom}
             </DropdownToggle>
             <DropdownMenu>
-              {amountConfig.sendableCurrencies.map((currency) => {
+              {selectableCurrencies.map((currency) => {
                 return (
                   <DropdownItem
                     key={currency.coinMinimalDenom}
@@ -178,10 +159,14 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
                     styleCoinInput.balance,
                     styleCoinInput.clickable,
                     {
-                      [styleCoinInput.clicked]: isAllBalanceMode,
+                      [styleCoinInput.clicked]: amountConfig.isMax,
                     }
                   )}
-                  onClick={toggleAllBalanceMode}
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    amountConfig.toggleIsMax();
+                  }}
                 >
                   {`Balance: ${balance.trim(true).maxDecimals(6).toString()}`}
                 </div>
@@ -209,7 +194,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
               )
               .toString(amountConfig.sendCurrency?.coinDecimals ?? 0)}
             min={0}
-            disabled={isAllBalanceMode}
+            disabled={amountConfig.isMax}
             autoComplete="off"
           />
           {errorText != null ? (

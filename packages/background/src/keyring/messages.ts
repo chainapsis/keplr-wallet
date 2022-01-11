@@ -5,20 +5,23 @@ import {
   KeyRingStatus,
   MultiKeyStoreInfoWithSelected,
 } from "./keyring";
-import { BIP44HDPath } from "./types";
+import { BIP44HDPath, ExportKeyRingData } from "./types";
 
-import { Bech32Address } from "@keplr-wallet/cosmos";
-import { BIP44, Key } from "@keplr-wallet/types";
+import {
+  Bech32Address,
+  checkAndValidateADR36AminoSignDoc,
+} from "@keplr-wallet/cosmos";
+import { BIP44, KeplrSignOptions, Key } from "@keplr-wallet/types";
 
 import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 import { cosmos } from "@keplr-wallet/cosmos";
+import Long from "long";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
-  type: string;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {
   public static type() {
@@ -73,7 +76,6 @@ export class DeleteKeyRingMsg extends Message<{
 }
 
 export class UpdateNameKeyRingMsg extends Message<{
-  status: KeyRingStatus;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {
   public static type() {
@@ -131,12 +133,16 @@ export class ShowKeyRingMsg extends Message<string> {
   }
 }
 
-export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreateMnemonicKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-mnemonic-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly mnemonic: string,
     public readonly password: string,
     public readonly meta: Record<string, string>,
@@ -146,6 +152,14 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.mnemonic) {
       throw new Error("mnemonic not set");
     }
@@ -177,12 +191,15 @@ export class CreateMnemonicKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddMnemonicKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-mnemonic-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly mnemonic: string,
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
@@ -191,6 +208,14 @@ export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.mnemonic) {
       throw new Error("mnemonic not set");
     }
@@ -218,12 +243,16 @@ export class AddMnemonicKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 }
 
-export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreatePrivateKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-private-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly privateKey: Uint8Array,
     public readonly password: string,
     public readonly meta: Record<string, string>
@@ -232,6 +261,14 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.privateKey || this.privateKey.length === 0) {
       throw new Error("private key not set");
     }
@@ -254,12 +291,16 @@ export class CreatePrivateKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
+export class CreateLedgerKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "create-ledger-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly password: string,
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
@@ -268,6 +309,14 @@ export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.password) {
       throw new Error("password not set");
     }
@@ -284,12 +333,15 @@ export class CreateLedgerKeyMsg extends Message<{ status: KeyRingStatus }> {
   }
 }
 
-export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddPrivateKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-private-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly privateKey: Uint8Array,
     public readonly meta: Record<string, string>
   ) {
@@ -297,6 +349,14 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     if (!this.privateKey || this.privateKey.length === 0) {
       throw new Error("private key not set");
     }
@@ -315,12 +375,15 @@ export class AddPrivateKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 }
 
-export class AddLedgerKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class AddLedgerKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "add-ledger-key";
   }
 
   constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly meta: Record<string, string>,
     public readonly bip44HDPath: BIP44HDPath
   ) {
@@ -328,6 +391,14 @@ export class AddLedgerKeyMsg extends Message<MultiKeyStoreInfoWithSelected> {
   }
 
   validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
     KeyRing.validateBIP44Path(this.bip44HDPath);
   }
 
@@ -422,7 +493,11 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
   constructor(
     public readonly chainId: string,
     public readonly signer: string,
-    public readonly signDoc: StdSignDoc
+    public readonly signDoc: StdSignDoc,
+    public readonly signOptions: KeplrSignOptions & {
+      // Hack option field to detect the sign arbitrary for string
+      isADR36WithString?: boolean;
+    } = {}
   ) {
     super();
   }
@@ -439,10 +514,22 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     // Validate bech32 address.
     Bech32Address.validate(this.signer);
 
-    if (this.signDoc.chain_id !== this.chainId) {
-      throw new Error(
-        "Chain id in the message is not matched with the requested chain id"
-      );
+    // Check and validate the ADR-36 sign doc.
+    // ADR-36 sign doc doesn't have the chain id
+    if (!checkAndValidateADR36AminoSignDoc(this.signDoc)) {
+      if (this.signDoc.chain_id !== this.chainId) {
+        throw new Error(
+          "Chain id in the message is not matched with the requested chain id"
+        );
+      }
+    } else {
+      if (this.signDoc.msgs[0].value.signer !== this.signer) {
+        throw new Error("Unmatched signer in sign doc");
+      }
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
     }
   }
 
@@ -459,9 +546,57 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
   }
 }
 
+export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
+  public static type() {
+    return "request-verify-adr-36-amino-doc";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly data: Uint8Array,
+    public readonly signature: StdSignature
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    if (!this.signature) {
+      throw new Error("Signature not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.signer);
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestVerifyADR36AminoSignDoc.type();
+  }
+}
+
 export class RequestSignDirectMsg extends Message<{
-  // Bytes of the sign doc
-  readonly signedBytes: Uint8Array;
+  readonly signed: {
+    bodyBytes: Uint8Array;
+    authInfoBytes: Uint8Array;
+    chainId: string;
+    accountNumber: string;
+  };
   readonly signature: StdSignature;
 }> {
   public static type() {
@@ -471,7 +606,13 @@ export class RequestSignDirectMsg extends Message<{
   constructor(
     public readonly chainId: string,
     public readonly signer: string,
-    public readonly signDocBytes: Uint8Array
+    public readonly signDoc: {
+      bodyBytes?: Uint8Array | null;
+      authInfoBytes?: Uint8Array | null;
+      chainId?: string | null;
+      accountNumber?: string | null;
+    },
+    public readonly signOptions: KeplrSignOptions = {}
   ) {
     super();
   }
@@ -488,12 +629,23 @@ export class RequestSignDirectMsg extends Message<{
     // Validate bech32 address.
     Bech32Address.validate(this.signer);
 
-    const signDoc = cosmos.tx.v1beta1.SignDoc.decode(this.signDocBytes);
+    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+      bodyBytes: this.signDoc.bodyBytes,
+      authInfoBytes: this.signDoc.authInfoBytes,
+      chainId: this.signDoc.chainId,
+      accountNumber: this.signDoc.accountNumber
+        ? Long.fromString(this.signDoc.accountNumber)
+        : undefined,
+    });
 
     if (signDoc.chainId !== this.chainId) {
       throw new Error(
         "Chain id in the message is not matched with the requested chain id"
       );
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
     }
   }
 
@@ -510,29 +662,9 @@ export class RequestSignDirectMsg extends Message<{
   }
 }
 
-export class GetKeyRingTypeMsg extends Message<string> {
-  public static type() {
-    return "get-keyring-type";
-  }
-
-  constructor() {
-    super();
-  }
-
-  validateBasic(): void {
-    // noop
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return GetKeyRingTypeMsg.type();
-  }
-}
-
-export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class GetMultiKeyStoreInfoMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "get-multi-key-store-info";
   }
@@ -554,7 +686,9 @@ export class GetMultiKeyStoreInfoMsg extends Message<MultiKeyStoreInfoWithSelect
   }
 }
 
-export class ChangeKeyRingMsg extends Message<MultiKeyStoreInfoWithSelected> {
+export class ChangeKeyRingMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
   public static type() {
     return "change-keyring";
   }
@@ -649,5 +783,53 @@ export class SetKeyStoreCoinTypeMsg extends Message<KeyRingStatus> {
 
   type(): string {
     return SetKeyStoreCoinTypeMsg.type();
+  }
+}
+
+export class CheckPasswordMsg extends Message<boolean> {
+  public static type() {
+    return "check-keyring-password";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckPasswordMsg.type();
+  }
+}
+
+export class ExportKeyRingDatasMsg extends Message<ExportKeyRingData[]> {
+  public static type() {
+    return "export-keyring-datas";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ExportKeyRingDatasMsg.type();
   }
 }

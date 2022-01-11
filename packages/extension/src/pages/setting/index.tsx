@@ -2,13 +2,15 @@ import React, { FunctionComponent, useMemo } from "react";
 import { HeaderLayout } from "../../layouts";
 import { useHistory } from "react-router";
 import { PageButton } from "./page-button";
-
 import style from "./style.module.scss";
 import { useLanguage } from "../../languages";
 import { useIntl } from "react-intl";
 import { observer } from "mobx-react-lite";
+import { useStore } from "../../stores";
 
 export const SettingPage: FunctionComponent = observer(() => {
+  const { uiConfigStore } = useStore();
+
   const language = useLanguage();
   const history = useHistory();
   const intl = useIntl();
@@ -97,6 +99,46 @@ export const SettingPage: FunctionComponent = observer(() => {
             () => [<i key="next" className="fas fa-chevron-right" />],
             []
           )}
+        />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.export-to-mobile",
+          })}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/export-to-mobile",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
+          title="Show Advanced IBC Transfers"
+          onClick={() => {
+            uiConfigStore.setShowAdvancedIBCTransfer(
+              !uiConfigStore.showAdvancedIBCTransfer
+            );
+          }}
+          icons={[
+            <label
+              key="toggle"
+              className="custom-toggle"
+              style={{ marginBottom: 0 }}
+            >
+              <input
+                type="checkbox"
+                checked={uiConfigStore.showAdvancedIBCTransfer}
+                onChange={() => {
+                  uiConfigStore.setShowAdvancedIBCTransfer(
+                    !uiConfigStore.showAdvancedIBCTransfer
+                  );
+                }}
+              />
+              <span className="custom-toggle-slider rounded-circle" />
+            </label>,
+          ]}
         />
         <PageButton
           title={intl.formatMessage({

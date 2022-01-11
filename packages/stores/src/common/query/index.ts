@@ -13,6 +13,7 @@ import Axios, { AxiosInstance, CancelToken, CancelTokenSource } from "axios";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { DeepReadonly } from "utility-types";
 import { HasMapStore } from "../map";
+import EventEmitter from "eventemitter3";
 
 export type QueryOptions = {
   // millisec
@@ -64,7 +65,10 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   private observedCount: number = 0;
 
-  private intervalId: number = -1;
+  // intervalId can be number or NodeJS's Timout object according to the environment.
+  // If environment is browser, intervalId should be number.
+  // If environment is NodeJS, intervalId should be NodeJS.Timeout.
+  private intervalId: number | NodeJS.Timeout | undefined = undefined;
 
   @observable.ref
   protected _instance: AxiosInstance;
@@ -139,7 +143,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this.fetch();
 
     if (this.options.fetchingInterval > 0) {
-      this.intervalId = window.setInterval(
+      this.intervalId = setInterval(
         this.intervalFetch,
         this.options.fetchingInterval
       );
@@ -149,8 +153,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   protected onStop() {
     this.cancel();
 
-    if (this.intervalId >= 0) {
-      window.clearInterval(this.intervalId);
+    if (this.intervalId != null) {
+      clearInterval(this.intervalId as NodeJS.Timeout);
     }
   }
 
@@ -188,7 +192,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
 
     this._isFetching = true;
-    this.cancelToken = Axios.CancelToken.source();
 
     // If there is no existing response, try to load saved reponse.
     if (!this._response) {
@@ -205,6 +208,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         staled: true,
       });
     }
+
+    this.cancelToken = Axios.CancelToken.source();
 
     try {
       const response = yield* toGenerator(
@@ -291,7 +296,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       const disposer = autorun(() => {
         if (!this.isFetching) {
           resolve(this.response);
-          disposer();
+          if (disposer) {
+            disposer();
+          }
         }
       });
     });
@@ -310,6 +317,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           this.fetch();
           onceCoerce = true;
         }
+      },
+      {
+        fireImmediately: true,
       }
     );
 
@@ -317,8 +327,12 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       const disposer = autorun(() => {
         if (!this.isFetching) {
           resolve(this.response);
-          reactionDisposer();
-          disposer();
+          if (reactionDisposer) {
+            reactionDisposer();
+          }
+          if (disposer) {
+            disposer();
+          }
         }
       });
     });
@@ -345,6 +359,18 @@ export class ObservableQuery<
   T = unknown,
   E = unknown
 > extends ObservableQueryBase<T, E> {
+  protected static eventListener: EventEmitter = new EventEmitter();
+
+  public static refreshAllObserved() {
+    ObservableQuery.eventListener.emit("refresh");
+  }
+
+  public static refreshAllObservedIfError() {
+    ObservableQuery.eventListener.emit("refresh", {
+      ifError: true,
+    });
+  }
+
   @observable
   protected _url: string = "";
 
@@ -359,6 +385,29 @@ export class ObservableQuery<
 
     this.setUrl(url);
   }
+
+  protected onStart() {
+    super.onStart();
+
+    ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
+  }
+
+  protected onStop() {
+    super.onStop();
+
+    ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
+  }
+
+  protected readonly refreshHandler = (data: any) => {
+    const ifError = data?.ifError;
+    if (ifError) {
+      if (this.error) {
+        this.fetch();
+      }
+    } else {
+      this.fetch();
+    }
+  };
 
   get url(): string {
     return this._url;

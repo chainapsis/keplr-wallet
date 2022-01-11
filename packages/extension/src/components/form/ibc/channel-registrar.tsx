@@ -58,7 +58,12 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
                   <FormattedMessage id="component.ibc.channel-registrar.chain-selector.placeholder" />
                 )}
               </DropdownToggle>
-              <DropdownMenu>
+              <DropdownMenu
+                style={{
+                  maxHeight: "95vh",
+                  overflowY: "auto",
+                }}
+              >
                 {chainStore.chainInfos.map((chainInfo) => {
                   if (chainStore.current.chainId !== chainInfo.chainId) {
                     if ((chainInfo.features ?? []).includes("ibc-transfer")) {
@@ -113,13 +118,11 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
 
               const queries = queriesStore.get(chainStore.current.chainId);
 
-              const channel = await queries
-                .getQueryIBCCChannel()
+              const channel = await queries.cosmos.queryIBCChannel
                 .getTransferChannel(channelId)
                 .waitFreshResponse();
 
-              const clientState = await queries
-                .getQueryIBCClientState()
+              const clientState = await queries.cosmos.queryIBCClientState
                 .getClientStateOnTransferPort(channelId)
                 .waitFreshResponse();
 

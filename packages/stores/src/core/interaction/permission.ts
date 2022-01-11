@@ -9,6 +9,8 @@ import {
   isSecret20ViewingKeyPermissionType,
   splitSecret20ViewingKeyPermissionType,
   getSecret20ViewingKeyPermissionType,
+  AddPermissionOrigin,
+  GetOriginPermittedChainsMsg,
 } from "@keplr-wallet/background";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { HasMapStore } from "../../common";
@@ -75,6 +77,19 @@ export class BasicAccessPermissionInnerStore {
 
   get origins(): string[] {
     return this._origins;
+  }
+
+  @flow
+  *addOrigin(origin: string) {
+    yield this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new AddPermissionOrigin(
+        this.chainId,
+        getBasicAccessPermissionType(),
+        origin
+      )
+    );
+    yield this.refreshOrigins();
   }
 
   @flow
@@ -147,6 +162,16 @@ export class PermissionStore extends HasMapStore<
     return this.get(key) as BasicAccessPermissionInnerStore;
   }
 
+  async getOriginPermittedChains(
+    origin: string,
+    type: string
+  ): Promise<string[]> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetOriginPermittedChainsMsg(origin, type)
+    );
+  }
+
   getSecret20ViewingKeyAccessInfo(
     chainId: string,
     contractAddress: string
@@ -163,7 +188,7 @@ export class PermissionStore extends HasMapStore<
   get waitingBasicAccessPermissions(): {
     id: string;
     data: {
-      chainId: string;
+      chainIds: string[];
       origins: string[];
     };
   }[] {
@@ -175,7 +200,7 @@ export class PermissionStore extends HasMapStore<
         result.push({
           id: data.id,
           data: {
-            chainId: data.data.chainId,
+            chainIds: data.data.chainIds,
             origins: data.data.origins,
           },
         });
@@ -189,7 +214,7 @@ export class PermissionStore extends HasMapStore<
   get waitingSecret20ViewingKeyAccessPermissions(): {
     id: string;
     data: {
-      chainId: string;
+      chainIds: string[];
       contractAddress: string;
       origins: string[];
     };
@@ -202,7 +227,7 @@ export class PermissionStore extends HasMapStore<
         result.push({
           id: data.id,
           data: {
-            chainId: data.data.chainId,
+            chainIds: data.data.chainIds,
             contractAddress: splitSecret20ViewingKeyPermissionType(
               data.data.type
             ),

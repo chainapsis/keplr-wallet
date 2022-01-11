@@ -1,10 +1,16 @@
 import { GasConfig } from "./gas";
 import { DenomHelper } from "@keplr-wallet/common";
-import { ChainGetter } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  CosmosMsgOpts,
+  SecretMsgOpts,
+  CosmwasmMsgOpts,
+} from "@keplr-wallet/stores";
 import { IAmountConfig } from "./types";
 import { useState } from "react";
-import { MsgOpts } from "@keplr-wallet/stores";
 import { action, makeObservable, observable } from "mobx";
+
+type MsgOpts = CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts;
 
 export class SendGasConfig extends GasConfig {
   @observable.ref
@@ -31,22 +37,22 @@ export class SendGasConfig extends GasConfig {
   get gas(): number {
     // If gas not set manually, assume that the tx is for MsgSend.
     // And, set the default gas according to the currency type.
-    if (this._gas <= 0 && this.amountConfig.sendCurrency) {
+    if (this._gasRaw == null && this.amountConfig.sendCurrency) {
       const denomHelper = new DenomHelper(
         this.amountConfig.sendCurrency.coinMinimalDenom
       );
 
       switch (denomHelper.type) {
-        case "cw20":
-          return this.sendMsgOpts.cw20.gas;
         case "secret20":
           return this.sendMsgOpts.secret20.gas;
+        case "cw20":
+          return this.sendMsgOpts.cw20.gas;
         default:
           return this.sendMsgOpts.native.gas;
       }
     }
 
-    return this._gas;
+    return super.gas;
   }
 }
 

@@ -1,6 +1,9 @@
 import { observable, action, computed, makeObservable, flow } from "mobx";
 
-import { ChainStore as BaseChainStore } from "@keplr-wallet/stores";
+import {
+  ChainInfoInner,
+  ChainStore as BaseChainStore,
+} from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
 import {
@@ -18,7 +21,7 @@ import { toGenerator } from "@keplr-wallet/common";
 
 export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   @observable
-  protected selectedChainId: string;
+  protected _selectedChainId: string;
 
   @observable
   protected _isInitializing: boolean = false;
@@ -39,7 +42,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
       })
     );
 
-    this.selectedChainId = embedChainInfos[0].chainId;
+    this._selectedChainId = embedChainInfos[0].chainId;
 
     makeObservable(this);
 
@@ -50,18 +53,22 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
     return this._isInitializing;
   }
 
+  get selectedChainId(): string {
+    return this._selectedChainId;
+  }
+
   @action
   selectChain(chainId: string) {
     if (this._isInitializing) {
       this.deferChainIdSelect = chainId;
     }
-    this.selectedChainId = chainId;
+    this._selectedChainId = chainId;
   }
 
   @computed
-  get current(): ChainInfoWithEmbed {
-    if (this.hasChain(this.selectedChainId)) {
-      return this.getChain(this.selectedChainId);
+  get current(): ChainInfoInner<ChainInfoWithEmbed> {
+    if (this.hasChain(this._selectedChainId)) {
+      return this.getChain(this._selectedChainId);
     }
 
     return this.chainInfos[0];
@@ -71,7 +78,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   *saveLastViewChainId() {
     // Save last view chain id to persistent background
     const msg = new SetPersistentMemoryMsg({
-      lastViewChainId: this.selectedChainId,
+      lastViewChainId: this._selectedChainId,
     });
     yield this.requester.sendMessage(BACKGROUND_PORT, msg);
   }

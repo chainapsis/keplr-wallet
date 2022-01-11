@@ -1,8 +1,15 @@
-import { ChainGetter, MsgOpts } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  CosmosMsgOpts,
+  CosmwasmMsgOpts,
+  SecretMsgOpts,
+} from "@keplr-wallet/stores";
 import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
 import { useFeeConfig, useMemoConfig, useRecipientConfig } from "./index";
 import { useSendGasConfig } from "./send-gas";
 import { useAmountConfig } from "./amount";
+
+type MsgOpts = CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts;
 
 export const useSendTxConfig = (
   chainGetter: ChainGetter,
@@ -34,6 +41,10 @@ export const useSendTxConfig = (
     amountConfig,
     gasConfig
   );
+  // Due to the circular references between the amount config and gas/fee configs,
+  // set the fee config of the amount config after initing the gas/fee configs.
+  amountConfig.setFeeConfig(feeConfig);
+
   const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
 
   return {

@@ -5,7 +5,7 @@ import {
 } from "../../chain-query";
 import { ChainGetter } from "../../../common";
 import { DenomTraceResponse } from "./types";
-import { computed } from "mobx";
+import { autorun, computed } from "mobx";
 
 export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTraceResponse> {
   constructor(
@@ -20,6 +20,13 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
       chainGetter,
       `/ibc/applications/transfer/v1beta1/denom_traces/${hash}`
     );
+
+    autorun(() => {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
+        this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${hash}`);
+      }
+    });
   }
 
   @computed

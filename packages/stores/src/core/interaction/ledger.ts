@@ -128,8 +128,23 @@ export class LedgerInitStore {
     return false;
   }
 
+  @computed
+  get isInitNeeded(): boolean {
+    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+      "ledger-init"
+    );
+
+    for (const data of datas) {
+      if (data.data.event === "init-failed") {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   @flow
-  *resume() {
+  *resume(...initArgs: any[]) {
     this._isLoading = true;
 
     try {
@@ -140,8 +155,77 @@ export class LedgerInitStore {
       for (const data of datas) {
         if (data.data.event === "init-failed") {
           // Approve resuming the initing ledger.
-          yield this.interactionStore.approve("ledger-init", data.id, {});
+          yield this.interactionStore.approve("ledger-init", data.id, {
+            initArgs,
+          });
           break;
+        }
+      }
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *resumeAll(...initArgs: any[]) {
+    this._isLoading = true;
+
+    try {
+      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+        "ledger-init"
+      );
+
+      for (const data of datas) {
+        if (data.data.event === "init-failed") {
+          // Approve resuming the initing ledger.
+          yield this.interactionStore.approve("ledger-init", data.id, {
+            initArgs,
+          });
+        }
+      }
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *abort() {
+    this._isLoading = true;
+
+    try {
+      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+        "ledger-init"
+      );
+
+      for (const data of datas) {
+        if (data.data.event === "init-failed") {
+          // Approve resuming the initing ledger.
+          yield this.interactionStore.approve("ledger-init", data.id, {
+            abort: true,
+          });
+          break;
+        }
+      }
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *abortAll() {
+    this._isLoading = true;
+
+    try {
+      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+        "ledger-init"
+      );
+
+      for (const data of datas) {
+        if (data.data.event === "init-failed") {
+          // Approve resuming the initing ledger.
+          yield this.interactionStore.approve("ledger-init", data.id, {
+            abort: true,
+          });
         }
       }
     } finally {

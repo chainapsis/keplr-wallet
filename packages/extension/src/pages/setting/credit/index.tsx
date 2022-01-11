@@ -33,16 +33,6 @@ export const CreditPage: FunctionComponent = () => {
           }}
         />
         <PageButton
-          title="Cosmos Hub node"
-          paragraph="Provided by Figment Networks Datahub"
-          onClick={(e) => {
-            e.preventDefault();
-            browser.tabs.create({
-              url: "https://figment.network",
-            });
-          }}
-        />
-        <PageButton
           title="Price data"
           paragraph="Provided by Coingecko API"
           onClick={(e) => {

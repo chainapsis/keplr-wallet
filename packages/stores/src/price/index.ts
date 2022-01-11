@@ -1,16 +1,20 @@
 import { ObservableQuery, QueryResponse } from "../common";
 import { CoinGeckoSimplePrice } from "./types";
 import Axios, { CancelToken } from "axios";
-import { KVStore } from "@keplr-wallet/common";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { Dec, CoinPretty, Int } from "@keplr-wallet/unit";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { PricePretty } from "@keplr-wallet/unit/build/price-pretty";
 import { DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
+import { action, flow, makeObservable, observable } from "mobx";
 
 export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   protected coinIds: string[];
   protected vsCurrencies: string[];
+
+  @observable
+  protected _defaultVsCurrency: string;
 
   protected _supportedVsCurrencies: {
     [vsCurrency: string]: FiatCurrency | undefined;
@@ -20,7 +24,8 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     kvStore: KVStore,
     supportedVsCurrencies: {
       [vsCurrency: string]: FiatCurrency;
-    }
+    },
+    defaultVsCurrency: string
   ) {
     const instance = Axios.create({
       baseURL: "https://api.coingecko.com/api/v3",
@@ -30,8 +35,37 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
 
     this.coinIds = [];
     this.vsCurrencies = [];
+    this._defaultVsCurrency = defaultVsCurrency;
 
     this._supportedVsCurrencies = supportedVsCurrencies;
+
+    makeObservable(this);
+
+    this.restoreDefaultVsCurrency();
+  }
+
+  get defaultVsCurrency(): string {
+    return this._defaultVsCurrency;
+  }
+
+  @action
+  setDefaultVsCurrency(defaultVsCurrency: string) {
+    this._defaultVsCurrency = defaultVsCurrency;
+    this.saveDefaultVsCurrency();
+  }
+
+  @flow
+  *restoreDefaultVsCurrency() {
+    const saved = yield* toGenerator(
+      this.kvStore.get<string>("__default_vs_currency")
+    );
+    if (saved) {
+      this._defaultVsCurrency = saved;
+    }
+  }
+
+  async saveDefaultVsCurrency() {
+    await this.kvStore.set("__default_vs_currency", this.defaultVsCurrency);
   }
 
   get supportedVsCurrencies(): DeepReadonly<{
@@ -81,7 +115,11 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     })}`;
   }
 
-  getPrice(coinId: string, vsCurrency: string): number | undefined {
+  getPrice(coinId: string, vsCurrency?: string): number | undefined {
+    if (!vsCurrency) {
+      vsCurrency = this.defaultVsCurrency;
+    }
+
     if (!this.supportedVsCurrencies[vsCurrency]) {
       return undefined;
     }
@@ -113,11 +151,15 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   }
 
   calculatePrice(
-    vsCurrrency: string,
-    coin: CoinPretty
+    coin: CoinPretty,
+    vsCurrrency?: string
   ): PricePretty | undefined {
     if (!coin.currency.coinGeckoId) {
       return undefined;
+    }
+
+    if (!vsCurrrency) {
+      vsCurrrency = this.defaultVsCurrency;
     }
 
     const fiatCurrency = this.supportedVsCurrencies[vsCurrrency];

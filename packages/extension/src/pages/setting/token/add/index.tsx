@@ -62,18 +62,18 @@ export const AddTokenPage: FunctionComponent = observer(() => {
     }
   }, [chainStore, contractAddress, form, tokensStore.waitingSuggestedToken]);
 
-  const queries = queriesStore.get(chainStore.current.chainId);
-  const queryContractInfo = queries
-    .getQuerySecret20ContractInfo()
-    .getQueryContract(contractAddress);
-
-  const tokenInfo = queryContractInfo.tokenInfo;
-
   const isSecret20 =
     (chainStore.current.features ?? []).find(
       (feature) => feature === "secretwasm"
     ) != null;
 
+  const queries = queriesStore.get(chainStore.current.chainId);
+  const query = isSecret20
+    ? queries.secret.querySecret20ContractInfo
+    : queries.cosmwasm.querycw20ContractInfo;
+  const queryContractInfo = query.getQueryContract(contractAddress);
+
+  const tokenInfo = queryContractInfo.tokenInfo;
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] = useState(
     false
   );
@@ -83,12 +83,18 @@ export const AddTokenPage: FunctionComponent = observer(() => {
 
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
-      accountInfo
-        .createSecret20ViewingKey(contractAddress, "", (_, viewingKey) => {
-          loadingIndicator.setIsLoading("create-veiwing-key", false);
+      accountInfo.secret
+        .createSecret20ViewingKey(
+          contractAddress,
+          "",
+          {},
+          {},
+          (_, viewingKey) => {
+            loadingIndicator.setIsLoading("create-veiwing-key", false);
 
-          resolve(viewingKey);
-        })
+            resolve(viewingKey);
+          }
+        )
         .then(() => {
           loadingIndicator.setIsLoading("create-veiwing-key", true);
         })

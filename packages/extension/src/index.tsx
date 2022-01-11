@@ -54,9 +54,14 @@ import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";
-import { InExtensionMessageRequester } from "@keplr-wallet/router";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 
-window.keplr = new Keplr(manifest.version, new InExtensionMessageRequester());
+window.keplr = new Keplr(
+  manifest.version,
+  "core",
+  new InExtensionMessageRequester()
+);
 
 // Make sure that icon file will be included in bundle
 require("./public/assets/temp-icon.svg");
@@ -166,6 +171,11 @@ ReactDOM.render(
                   exact
                   path="/setting/address-book"
                   component={AddressBookPage}
+                />
+                <Route
+                  exact
+                  path="/setting/export-to-mobile"
+                  component={ExportToMobilePage}
                 />
                 <Route exact path="/setting/credit" component={CreditPage} />
                 <Route

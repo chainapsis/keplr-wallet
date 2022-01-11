@@ -1,20 +1,29 @@
-import { ChainInfo, Keplr, Keplr as IKeplr, Key } from "@keplr-wallet/types";
-import { Result } from "@keplr-wallet/router";
+import {
+  ChainInfo,
+  Keplr,
+  Keplr as IKeplr,
+  KeplrIntereactionOptions,
+  KeplrMode,
+  KeplrSignOptions,
+  Key,
+} from "@keplr-wallet/types";
+import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
   StdTx,
   OfflineSigner,
+  StdSignature,
 } from "@cosmjs/launchpad";
-import { cosmos } from "@keplr-wallet/cosmos";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
-import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
-import { CosmJSOfflineSigner } from "./cosmjs";
+import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
+import deepmerge from "deepmerge";
+import Long from "long";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -36,9 +45,23 @@ export interface ProxyRequestResponse {
  * This will use `window.postMessage` to interact with the content script.
  */
 export class InjectedKeplr implements IKeplr {
-  static startProxy(keplr: IKeplr) {
-    window.addEventListener("message", async (e: any) => {
-      const message: ProxyRequest = e.data;
+  static startProxy(
+    keplr: IKeplr,
+    eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+    parseMessage?: (message: any) => any
+  ) {
+    eventListener.addMessageListener(async (e: any) => {
+      const message: ProxyRequest = parseMessage
+        ? parseMessage(e.data)
+        : e.data;
       if (!message || message.type !== "proxy-request") {
         return;
       }
@@ -52,6 +75,14 @@ export class InjectedKeplr implements IKeplr {
           throw new Error("Version is not function");
         }
 
+        if (message.method === "mode") {
+          throw new Error("Mode is not function");
+        }
+
+        if (message.method === "defaultOptions") {
+          throw new Error("DefaultOptions is not function");
+        }
+
         if (
           !keplr[message.method] ||
           typeof keplr[message.method] !== "function"
@@ -60,18 +91,62 @@ export class InjectedKeplr implements IKeplr {
         }
 
         if (message.method === "getOfflineSigner") {
-          throw new Error("GetEnigmaUtils method can't be proxy request");
+          throw new Error("GetOfflineSigner method can't be proxy request");
+        }
+
+        if (message.method === "getOfflineSignerOnlyAmino") {
+          throw new Error(
+            "GetOfflineSignerOnlyAmino method can't be proxy request"
+          );
+        }
+
+        if (message.method === "getOfflineSignerAuto") {
+          throw new Error("GetOfflineSignerAuto method can't be proxy request");
         }
 
         if (message.method === "getEnigmaUtils") {
           throw new Error("GetEnigmaUtils method can't be proxy request");
         }
 
-        const result = await keplr[message.method](
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          ...JSONUint8Array.unwrap(message.args)
-        );
+        const result =
+          message.method === "signDirect"
+            ? await (async () => {
+                const receivedSignDoc: {
+                  bodyBytes?: Uint8Array | null;
+                  authInfoBytes?: Uint8Array | null;
+                  chainId?: string | null;
+                  accountNumber?: string | null;
+                } = message.args[2];
+
+                const result = await keplr.signDirect(
+                  message.args[0],
+                  message.args[1],
+                  {
+                    bodyBytes: receivedSignDoc.bodyBytes,
+                    authInfoBytes: receivedSignDoc.authInfoBytes,
+                    chainId: receivedSignDoc.chainId,
+                    accountNumber: receivedSignDoc.accountNumber
+                      ? Long.fromString(receivedSignDoc.accountNumber)
+                      : null,
+                  },
+                  message.args[3]
+                );
+
+                return {
+                  signed: {
+                    bodyBytes: result.signed.bodyBytes,
+                    authInfoBytes: result.signed.authInfoBytes,
+                    chainId: result.signed.chainId,
+                    accountNumber: result.signed.accountNumber.toString(),
+                  },
+                  signature: result.signature,
+                };
+              })()
+            : await keplr[message.method](
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                ...JSONUint8Array.unwrap(message.args)
+              );
 
         const proxyResponse: ProxyRequestResponse = {
           type: "proxy-request-response",
@@ -81,7 +156,7 @@ export class InjectedKeplr implements IKeplr {
           },
         };
 
-        window.postMessage(proxyResponse, window.location.origin);
+        eventListener.postMessage(proxyResponse);
       } catch (e) {
         const proxyResponse: ProxyRequestResponse = {
           type: "proxy-request-response",
@@ -91,7 +166,7 @@ export class InjectedKeplr implements IKeplr {
           },
         };
 
-        window.postMessage(proxyResponse, window.location.origin);
+        eventListener.postMessage(proxyResponse);
       }
     });
   }
@@ -113,7 +188,9 @@ export class InjectedKeplr implements IKeplr {
 
     return new Promise((resolve, reject) => {
       const receiveResponse = (e: any) => {
-        const proxyResponse: ProxyRequestResponse = e.data;
+        const proxyResponse: ProxyRequestResponse = this.parseMessage
+          ? this.parseMessage(e.data)
+          : e.data;
 
         if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
           return;
@@ -123,7 +200,7 @@ export class InjectedKeplr implements IKeplr {
           return;
         }
 
-        window.removeEventListener("message", receiveResponse);
+        this.eventListener.removeMessageListener(receiveResponse);
 
         const result = JSONUint8Array.unwrap(proxyResponse.result);
 
@@ -140,18 +217,36 @@ export class InjectedKeplr implements IKeplr {
         resolve(result.return);
       };
 
-      window.addEventListener("message", receiveResponse);
+      this.eventListener.addMessageListener(receiveResponse);
 
-      window.postMessage(proxyMessage, window.location.origin);
+      this.eventListener.postMessage(proxyMessage);
     });
   }
 
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
 
-  constructor(public readonly version: string) {}
+  public defaultOptions: KeplrIntereactionOptions = {};
 
-  async enable(chainId: string): Promise<void> {
-    await this.requestMethod("enable", [chainId]);
+  constructor(
+    public readonly version: string,
+    public readonly mode: KeplrMode,
+    protected readonly eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      removeMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      removeMessageListener: (fn: (e: any) => void) =>
+        window.removeEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+    protected readonly parseMessage?: (message: any) => any
+  ) {}
+
+  async enable(chainIds: string | string[]): Promise<void> {
+    await this.requestMethod("enable", [chainIds]);
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
@@ -164,34 +259,123 @@ export class InjectedKeplr implements IKeplr {
 
   async sendTx(
     chainId: string,
-    stdTx: StdTx,
+    tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
-    return await this.requestMethod("sendTx", [chainId, stdTx, mode]);
+    return await this.requestMethod("sendTx", [chainId, tx, mode]);
   }
 
   async signAmino(
     chainId: string,
     signer: string,
-    signDoc: StdSignDoc
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    return await this.requestMethod("signAmino", [chainId, signer, signDoc]);
+    return await this.requestMethod("signAmino", [
+      chainId,
+      signer,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+    ]);
   }
 
   async signDirect(
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.ISignDoc
+    signDoc: {
+      bodyBytes?: Uint8Array | null;
+      authInfoBytes?: Uint8Array | null;
+      chainId?: string | null;
+      accountNumber?: Long | null;
+    },
+    signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    return await this.requestMethod("signDirect", [chainId, signer, signDoc]);
+    const result = await this.requestMethod("signDirect", [
+      chainId,
+      signer,
+      // We can't send the `Long` with remaing the type.
+      // Receiver should change the `string` to `Long`.
+      {
+        bodyBytes: signDoc.bodyBytes,
+        authInfoBytes: signDoc.authInfoBytes,
+        chainId: signDoc.chainId,
+        accountNumber: signDoc.accountNumber
+          ? signDoc.accountNumber.toString()
+          : null,
+      },
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+    ]);
+
+    const signed: {
+      bodyBytes: Uint8Array;
+      authInfoBytes: Uint8Array;
+      chainId: string;
+      accountNumber: string;
+    } = result.signed;
+
+    return {
+      signed: {
+        bodyBytes: signed.bodyBytes,
+        authInfoBytes: signed.authInfoBytes,
+        chainId: signed.chainId,
+        // We can't send the `Long` with remaing the type.
+        // Sender should change the `Long` to `string`.
+        accountNumber: Long.fromString(signed.accountNumber),
+      },
+      signature: result.signature,
+    };
+  }
+
+  async signArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array
+  ): Promise<StdSignature> {
+    return await this.requestMethod("signArbitrary", [chainId, signer, data]);
+  }
+
+  async verifyArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    signature: StdSignature
+  ): Promise<boolean> {
+    return await this.requestMethod("verifyArbitrary", [
+      chainId,
+      signer,
+      data,
+      signature,
+    ]);
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  async suggestToken(chainId: string, contractAddress: string): Promise<void> {
-    return await this.requestMethod("suggestToken", [chainId, contractAddress]);
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+    return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+  }
+
+  async getOfflineSignerAuto(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
+    const key = await this.getKey(chainId);
+    if (key.isNanoLedger) {
+      return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+    }
+    return new CosmJSOfflineSigner(chainId, this);
+  }
+
+  async suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ): Promise<void> {
+    return await this.requestMethod("suggestToken", [
+      chainId,
+      contractAddress,
+      viewingKey,
+    ]);
   }
 
   async getSecret20ViewingKey(
@@ -206,6 +390,16 @@ export class InjectedKeplr implements IKeplr {
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
     return await this.requestMethod("getEnigmaPubKey", [chainId]);
+  }
+
+  async getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array
+  ): Promise<Uint8Array> {
+    return await this.requestMethod("getEnigmaTxEncryptionKey", [
+      chainId,
+      nonce,
+    ]);
   }
 
   async enigmaEncrypt(

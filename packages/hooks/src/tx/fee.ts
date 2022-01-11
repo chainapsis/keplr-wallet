@@ -29,20 +29,40 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected _manualFee: CoinPrimitive | undefined = undefined;
 
+  /**
+   * `additionAmountToNeedFee` indicated that the fee config should consider the amount config's amount
+   *  when checking that the fee is sufficient to send tx.
+   *  If this value is true and if the amount + fee is not sufficient to send tx, it will return error.
+   *  Else, only consider the fee without addition the amount.
+   * @protected
+   */
+  @observable
+  protected additionAmountToNeedFee: boolean = true;
+
+  @observable
+  protected _disableBalanceCheck: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
     sender: string,
     queryBalances: ObservableQueryBalances,
     protected readonly amountConfig: IAmountConfig,
-    protected readonly gasConfig: IGasConfig
+    protected readonly gasConfig: IGasConfig,
+    additionAmountToNeedFee: boolean = true
   ) {
     super(chainGetter, initialChainId);
 
     this._sender = sender;
     this.queryBalances = queryBalances;
+    this.additionAmountToNeedFee = additionAmountToNeedFee;
 
     makeObservable(this);
+  }
+
+  @action
+  setAdditionAmountToNeedFee(additionAmountToNeedFee: boolean) {
+    this.additionAmountToNeedFee = additionAmountToNeedFee;
   }
 
   @action
@@ -59,6 +79,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   setFeeType(feeType: FeeType | undefined) {
     this._feeType = feeType;
     this._manualFee = undefined;
+  }
+
+  get isManual(): boolean {
+    return this.feeType === undefined;
   }
 
   get feeType(): FeeType | undefined {
@@ -162,6 +186,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return this.gasConfig.getError();
     }
 
+    if (this.disableBalanceCheck) {
+      return undefined;
+    }
+
     const fee = this.getFeePrimitive();
     if (!fee) {
       return undefined;
@@ -170,7 +198,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     const amount = this.amountConfig.getAmountPrimitive();
 
     let need: Coin;
-    if (fee && fee.denom === amount.denom) {
+    if (this.additionAmountToNeedFee && fee && fee.denom === amount.denom) {
       need = new Coin(
         fee.denom,
         new Int(fee.amount).add(new Int(amount.amount))
@@ -205,6 +233,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       }
     }
   }
+
+  @action
+  setDisableBalanceCheck(bool: boolean) {
+    this._disableBalanceCheck = bool;
+  }
+
+  get disableBalanceCheck(): boolean {
+    return this._disableBalanceCheck;
+  }
 }
 
 export const useFeeConfig = (
@@ -213,7 +250,8 @@ export const useFeeConfig = (
   sender: string,
   queryBalances: ObservableQueryBalances,
   amountConfig: IAmountConfig,
-  gasConfig: IGasConfig
+  gasConfig: IGasConfig,
+  additionAmountToNeedFee: boolean = true
 ) => {
   const [config] = useState(
     () =>
@@ -223,12 +261,14 @@ export const useFeeConfig = (
         sender,
         queryBalances,
         amountConfig,
-        gasConfig
+        gasConfig,
+        additionAmountToNeedFee
       )
   );
   config.setChain(chainId);
   config.setQueryBalances(queryBalances);
   config.setSender(sender);
+  config.setAdditionAmountToNeedFee(additionAmountToNeedFee);
 
   return config;
 };

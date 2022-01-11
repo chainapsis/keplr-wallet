@@ -23,6 +23,13 @@ export class SignDocHelper {
       return undefined;
     }
 
+    // If the sign doc is for ADR-36,
+    // The fee and memo should be empty.
+    // Ignore the fee and memo config, and just return itself.
+    if (this._signDocWrapper.isADR36SignDoc) {
+      return this._signDocWrapper;
+    }
+
     const stdFee = this.feeConfig.toStdFee();
 
     if (this._signDocWrapper.mode === "amino") {
@@ -44,8 +51,12 @@ export class SignDocHelper {
           denom: fee.denom,
         };
       }),
-      granter: protoSignDoc.authInfo.fee?.granter,
-      payer: protoSignDoc.authInfo.fee?.payer,
+      granter: protoSignDoc.authInfo.fee?.granter
+        ? protoSignDoc.authInfo.fee?.granter
+        : null,
+      payer: protoSignDoc.authInfo.fee?.payer
+        ? protoSignDoc.authInfo.fee?.granter
+        : null,
     });
 
     const newSignDoc = cosmos.tx.v1beta1.SignDoc.create({

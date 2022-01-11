@@ -5,11 +5,12 @@ import { Button, Form } from "reactstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import style from "../style.module.scss";
 import { BackButton } from "../index";
-import { Input, TextArea } from "../../../components/form";
+import { Input, PasswordInput, TextArea } from "../../../components/form";
 import useForm from "react-hook-form";
 import { observer } from "mobx-react-lite";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
+import { useStore } from "../../../stores";
 
 import { Buffer } from "buffer/";
 
@@ -21,7 +22,14 @@ function isPrivateKey(str: string): boolean {
     return true;
   }
 
-  return str.length === 64;
+  if (str.length === 64) {
+    try {
+      return Buffer.from(str, "hex").length === 32;
+    } catch {
+      return false;
+    }
+  }
+  return false;
 }
 
 function trimWordsStr(str: string): string {
@@ -46,6 +54,8 @@ export const TypeRecoverMnemonic = "recover-mnemonic";
 export const RecoverMnemonicIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
+  const { analyticsStore } = useStore();
+
   return (
     <Button
       color="primary"
@@ -55,6 +65,9 @@ export const RecoverMnemonicIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeRecoverMnemonic);
+        analyticsStore.logEvent("Import account started", {
+          registerType: "seed",
+        });
       }}
     >
       <FormattedMessage id="register.intro.button.import-account.title" />
@@ -68,6 +81,8 @@ export const RecoverMnemonicPage: FunctionComponent<{
   const intl = useIntl();
 
   const bip44Option = useBIP44Option();
+
+  const { analyticsStore, accountStore } = useStore();
 
   const { register, handleSubmit, getValues, errors } = useForm<FormData>({
     defaultValues: {
@@ -97,6 +112,17 @@ export const RecoverMnemonicPage: FunctionComponent<{
                   data.password,
                   bip44Option.bip44HDPath
                 );
+                const accountInfo = accountStore.getAccount(
+                  analyticsStore.mainChainId
+                );
+                analyticsStore.setUserId(accountInfo.bech32Address);
+                analyticsStore.setUserProperties({
+                  registerType: "seed",
+                  accountType: "mnemonic",
+                });
+                analyticsStore.logEvent("Import account finished", {
+                  accountType: "mnemonic",
+                });
               } else {
                 const privateKey = Buffer.from(
                   data.words.trim().replace("0x", ""),
@@ -107,6 +133,17 @@ export const RecoverMnemonicPage: FunctionComponent<{
                   privateKey,
                   data.password
                 );
+                const accountInfo = accountStore.getAccount(
+                  analyticsStore.mainChainId
+                );
+                analyticsStore.setUserId(accountInfo.bech32Address);
+                analyticsStore.setUserProperties({
+                  registerType: "seed",
+                  accountType: "privateKey",
+                });
+                analyticsStore.logEvent("Import account finished", {
+                  accountType: "privateKey",
+                });
               }
             } catch (e) {
               alert(e.message ? e.message : e.toString());
@@ -182,11 +219,10 @@ export const RecoverMnemonicPage: FunctionComponent<{
           />
           {registerConfig.mode === "create" ? (
             <React.Fragment>
-              <Input
+              <PasswordInput
                 label={intl.formatMessage({
                   id: "register.create.input.password",
                 })}
-                type="password"
                 name="password"
                 ref={register({
                   required: intl.formatMessage({
@@ -202,11 +238,10 @@ export const RecoverMnemonicPage: FunctionComponent<{
                 })}
                 error={errors.password && errors.password.message}
               />
-              <Input
+              <PasswordInput
                 label={intl.formatMessage({
                   id: "register.create.input.confirm-password",
                 })}
-                type="password"
                 name="confirmPassword"
                 ref={register({
                   required: intl.formatMessage({

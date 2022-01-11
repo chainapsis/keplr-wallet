@@ -1,18 +1,18 @@
 import { GasConfig } from "../tx";
-import { ChainGetter, MsgOpts } from "@keplr-wallet/stores";
+import { ChainGetter, CosmosMsgOpts } from "@keplr-wallet/stores";
 import { action, makeObservable, observable } from "mobx";
 import { useState } from "react";
 
 export class IBCTransferGasConfig extends GasConfig {
   @observable.ref
-  protected msgOpts: MsgOpts["ibcTransfer"];
+  protected msgOpts: CosmosMsgOpts["ibcTransfer"];
 
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
-    msgOpts: MsgOpts["ibcTransfer"]
+    msgOpts: CosmosMsgOpts["ibcTransfer"]
   ) {
-    super(chainGetter, initialChainId, msgOpts.gas);
+    super(chainGetter, initialChainId);
 
     this.msgOpts = msgOpts;
 
@@ -20,24 +20,24 @@ export class IBCTransferGasConfig extends GasConfig {
   }
 
   @action
-  setMsgOpts(opts: MsgOpts["ibcTransfer"]) {
+  setMsgOpts(opts: CosmosMsgOpts["ibcTransfer"]) {
     this.msgOpts = opts;
   }
 
   get gas(): number {
     // If gas not set manually, assume that the tx is for MsgTransfer.
-    if (this._gas <= 0) {
+    if (this._gasRaw == null) {
       return this.msgOpts.gas;
     }
 
-    return this._gas;
+    return super.gas;
   }
 }
 
 export const useIBCTransferGasConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  msgOpts: MsgOpts["ibcTransfer"]
+  msgOpts: CosmosMsgOpts["ibcTransfer"]
 ) => {
   const [gasConfig] = useState(
     () => new IBCTransferGasConfig(chainGetter, chainId, msgOpts)

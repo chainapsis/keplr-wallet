@@ -11,7 +11,7 @@ import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 
 export const AccountView: FunctionComponent = observer(() => {
-  const { accountStore, chainStore } = useStore();
+  const { accountStore, chainStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const intl = useIntl();
@@ -21,6 +21,10 @@ export const AccountView: FunctionComponent = observer(() => {
   const copyAddress = useCallback(async () => {
     if (accountInfo.walletStatus === WalletStatus.Loaded) {
       await navigator.clipboard.writeText(accountInfo.bech32Address);
+      analyticsStore.logEvent("Address copied", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+      });
       notification.push({
         placement: "top-center",
         type: "success",

@@ -14,13 +14,17 @@ import { PageButton } from "../page-button";
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 
+import { useLogScreenView } from "../../../hooks";
+
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
   const history = useHistory();
 
   const loadingIndicator = useLoadingIndicator();
+
+  useLogScreenView("Select account");
 
   return (
     <HeaderLayout
@@ -46,6 +50,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
               size="sm"
               onClick={(e) => {
                 e.preventDefault();
+                analyticsStore.logEvent("Add additional account started");
 
                 browser.tabs.create({
                   url: "/popup.html#/register",
@@ -101,10 +106,10 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                   ? undefined
                   : async (e) => {
                       e.preventDefault();
-
                       loadingIndicator.setIsLoading("keyring", true);
                       try {
                         await keyRingStore.changeKeyRing(i);
+                        analyticsStore.logEvent("Account changed");
                         loadingIndicator.setIsLoading("keyring", false);
                         history.push("/");
                       } catch (e) {

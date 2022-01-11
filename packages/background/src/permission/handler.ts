@@ -1,5 +1,7 @@
 import {
+  AddPermissionOrigin,
   EnableAccessMsg,
+  GetOriginPermittedChainsMsg,
   GetPermissionOriginsMsg,
   RemovePermissionOrigin,
 } from "./messages";
@@ -18,6 +20,16 @@ export const getHandler: (service: PermissionService) => Handler = (
           env,
           msg as GetPermissionOriginsMsg
         );
+      case GetOriginPermittedChainsMsg:
+        return handleGetOriginPermittedChainsMsg(service)(
+          env,
+          msg as GetOriginPermittedChainsMsg
+        );
+      case AddPermissionOrigin:
+        return handleAddPermissionOrigin(service)(
+          env,
+          msg as RemovePermissionOrigin
+        );
       case RemovePermissionOrigin:
         return handleRemovePermissionOrigin(service)(
           env,
@@ -35,7 +47,7 @@ const handleEnableAccessMsg: (
   return async (env, msg) => {
     return await service.checkOrGrantBasicAccessPermission(
       env,
-      msg.chainId,
+      msg.chainIds,
       msg.origin
     );
   };
@@ -46,6 +58,27 @@ const handleGetPermissionOriginsMsg: (
 ) => InternalHandler<GetPermissionOriginsMsg> = (service) => {
   return (_, msg) => {
     return service.getPermissionOrigins(msg.chainId, msg.permissionType);
+  };
+};
+
+const handleGetOriginPermittedChainsMsg: (
+  service: PermissionService
+) => InternalHandler<GetOriginPermittedChainsMsg> = (service) => {
+  return (_, msg) => {
+    return service.getOriginPermittedChains(
+      msg.permissionOrigin,
+      msg.permissionType
+    );
+  };
+};
+
+const handleAddPermissionOrigin: (
+  service: PermissionService
+) => InternalHandler<AddPermissionOrigin> = (service) => {
+  return async (_, msg) => {
+    await service.addPermission([msg.chainId], msg.permissionType, [
+      msg.permissionOrigin,
+    ]);
   };
 };
 

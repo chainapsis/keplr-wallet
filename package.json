@@ -2,20 +2,38 @@
   "name": "keplr",
   "description": "Keplr is a browser extension wallet for the Inter blockchain ecosystem.",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/@react-native-*/**",
+      "**/react-native",
+      "**/react-native/**",
+      "**/*-react-native",
+      "**/react-native-*",
+      "**/@react-navigation/**",
+      "**/expo-*",
+      "**/@unimodules/**",
+      "**/unimodules-*",
+      "**/native-base",
+      "**/@react-native-async-storage/async-storage",
+      "**/@ledgerhq/react-native-hw-transport-ble",
+      "**/jetifier"
+    ]
+  },
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
     "clean": "lerna run clean; rm -rf node_modules",
     "build": "lerna run build",
-    "test": "lerna run test",
+    "build:libs": "lerna run build --ignore @keplr-wallet/extension",
+    "test": "lerna run test --parallel",
+    "build:clean": "yarn clean && yarn install --frozen-lockfile && lerna run build",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
-    "ci": "yarn install --frozen-lockfile && yarn build && yarn test",
+    "ci": "yarn install --frozen-lockfile && yarn build && yarn workspace mobile typecheck && yarn test",
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
-    "ci-publish": "yarn clean && yarn install --frozen-lockfile && lerna run build --ignore @keplr/extension && lerna publish from-git --yes",
     "pre-commit": "lint-staged"
   },
   "pre-commit": [
@@ -31,6 +49,8 @@
   "author": "chainapsis",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/jest": "^26.0.22",
+    "@types/node": "^16.6.2",
     "@types/webpack": "^4.39.1",
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
@@ -42,17 +62,24 @@
     "eslint-plugin-react": "^7.14.3",
     "eslint-plugin-react-hooks": "^2.0.1",
     "eslint-plugin-unicorn": "^24.0.0",
+    "jest": "^26.6.3",
     "lerna": "^3.22.1",
     "lint-staged": "^10.5.4",
     "pre-commit": "^1.2.2",
     "prettier": "^2.2.1",
+    "semver": "^7.3.5",
+    "ts-jest": "^26.5.5",
     "ts-loader": "^8.0.14",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.3"
+    "typescript": "^4.1.3",
+    "zx": "^4.2.0"
   },
   "resolutions": {
+    "@types/react": "^16.14.4",
+    "@cosmjs/crypto": "^0.24.0-alpha.25",
+    "@iov/crypto": "2.1.0",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
-    "@types/react": "^16.14.4"
+    "node-sass": "file:./etc/noop"
   }
 }

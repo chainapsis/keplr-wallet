@@ -18,20 +18,20 @@ import { FormattedMessage } from "react-intl";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const notification = useNotification();
 
-  const inflation = queries.getQueryInflation();
-  const rewards = queries
-    .getQueryRewards()
-    .getQueryBech32Address(accountInfo.bech32Address);
+  const inflation = queries.cosmos.queryInflation;
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
   const stakableReward = rewards.stakableReward;
-  const stakable = queries
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address).stakable;
+  const stakable = queries.queryBalances.getQueryBech32Address(
+    accountInfo.bech32Address
+  ).stakable;
 
   const isRewardExist = rewards.rewards.length > 0;
 
@@ -42,12 +42,26 @@ export const StakeView: FunctionComponent = observer(() => {
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
+        analyticsStore.logEvent("Claim reward started", {
+          chainId: chainStore.current.chainId,
+          chainName: chainStore.current.chainName,
+        });
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
-        await accountInfo.sendWithdrawDelegationRewardMsgs(
+        await accountInfo.cosmos.sendWithdrawDelegationRewardMsgs(
           rewards.getDescendingPendingRewardValidatorAddresses(8),
-          ""
+          "",
+          undefined,
+          undefined,
+          (tx: any) => {
+            const isSuccess = tx.code == null || tx.code === 0;
+            analyticsStore.logEvent("Claim reward finished", {
+              chainId: chainStore.current.chainId,
+              chainName: chainStore.current.chainName,
+              isSuccess,
+            });
+          }
         );
 
         history.replace("/");
@@ -136,30 +150,32 @@ export const StakeView: FunctionComponent = observer(() => {
           >
             <FormattedMessage id="main.stake.message.stake" />
           </p>
-          <p
-            className={classnames(
-              "h4",
-              "my-0",
-              "font-weight-normal",
-              styleStake.paragraphSub
-            )}
-          >
-            <FormattedMessage
-              id="main.stake.message.earning"
-              values={{
-                apr: (
-                  <React.Fragment>
-                    {inflation.inflation.trim(true).maxDecimals(2).toString()}
-                    {inflation.isFetching ? (
-                      <span>
-                        <i className="fas fa-spinner fa-spin" />
-                      </span>
-                    ) : null}
-                  </React.Fragment>
-                ),
-              }}
-            />
-          </p>
+          {inflation.inflation.toDec().equals(new Dec(0)) ? null : (
+            <p
+              className={classnames(
+                "h4",
+                "my-0",
+                "font-weight-normal",
+                styleStake.paragraphSub
+              )}
+            >
+              <FormattedMessage
+                id="main.stake.message.earning"
+                values={{
+                  apr: (
+                    <React.Fragment>
+                      {inflation.inflation.trim(true).maxDecimals(2).toString()}
+                      {inflation.isFetching ? (
+                        <span>
+                          <i className="fas fa-spinner fa-spin" />
+                        </span>
+                      ) : null}
+                    </React.Fragment>
+                  ),
+                }}
+              />
+            </p>
+          )}
         </div>
         <div style={{ flex: 1 }} />
         <a
@@ -169,6 +185,11 @@ export const StakeView: FunctionComponent = observer(() => {
           onClick={(e) => {
             if (!isStakableExist) {
               e.preventDefault();
+            } else {
+              analyticsStore.logEvent("Stake button clicked", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+              });
             }
           }}
         >

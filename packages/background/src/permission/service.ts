@@ -56,23 +56,34 @@ export class PermissionService {
 
   async checkOrGrantBasicAccessPermission(
     env: Env,
-    chainId: string,
+    chainIds: string | string[],
     origin: string
   ) {
     // Try to unlock the key ring before checking or granting the basic permission.
     await this.keyRingService.enable(env);
 
-    if (!this.hasPermisson(chainId, getBasicAccessPermissionType(), origin)) {
-      await this.grantBasicAccessPermission(env, chainId, [origin]);
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
     }
 
-    await this.checkBasicAccessPermission(env, chainId, origin);
+    const ungrantedChainIds: string[] = [];
+    for (const chainId of chainIds) {
+      if (!this.hasPermisson(chainId, getBasicAccessPermissionType(), origin)) {
+        ungrantedChainIds.push(chainId);
+      }
+    }
+
+    if (ungrantedChainIds.length > 0) {
+      await this.grantBasicAccessPermission(env, ungrantedChainIds, [origin]);
+    }
+
+    await this.checkBasicAccessPermission(env, chainIds, origin);
   }
 
   async grantPermission(
     env: Env,
     url: string,
-    chainId: string,
+    chainIds: string[],
     type: string,
     origins: string[]
   ) {
@@ -81,7 +92,7 @@ export class PermissionService {
     }
 
     const permissionData: PermissionData = {
-      chainId,
+      chainIds,
       type,
       origins,
     };
@@ -93,21 +104,23 @@ export class PermissionService {
       permissionData
     );
 
-    await this.addPermission(chainId, type, origins);
+    await this.addPermission(chainIds, type, origins);
   }
 
   async grantBasicAccessPermission(
     env: Env,
-    chainId: string,
+    chainIds: string[],
     origins: string[]
   ) {
-    // Make sure that the chain info is registered.
-    await this.chainsService.getChainInfo(chainId);
+    for (const chainId of chainIds) {
+      // Make sure that the chain info is registered.
+      await this.chainsService.getChainInfo(chainId);
+    }
 
     await this.grantPermission(
       env,
       "/access",
-      chainId,
+      chainIds,
       getBasicAccessPermissionType(),
       origins
     );
@@ -123,11 +136,22 @@ export class PermissionService {
     }
   }
 
-  async checkBasicAccessPermission(env: Env, chainId: string, origin: string) {
-    // Make sure that the chain info is registered.
-    await this.chainsService.getChainInfo(chainId);
+  async checkBasicAccessPermission(
+    env: Env,
+    chainIds: string[],
+    origin: string
+  ) {
+    for (const chainId of chainIds) {
+      // Make sure that the chain info is registered.
+      await this.chainsService.getChainInfo(chainId);
 
-    this.checkPermission(env, chainId, getBasicAccessPermissionType(), origin);
+      this.checkPermission(
+        env,
+        chainId,
+        getBasicAccessPermissionType(),
+        origin
+      );
+    }
   }
 
   hasPermisson(chainId: string, type: string, origin: string): boolean {
@@ -171,29 +195,46 @@ export class PermissionService {
     return origins;
   }
 
-  protected async addPermission(
-    chainId: string,
-    type: string,
-    origins: string[]
-  ) {
-    let permissionsInChain = this.permissionMap[
-      ChainIdHelper.parse(chainId).identifier
-    ];
-    if (!permissionsInChain) {
-      permissionsInChain = {};
-      this.permissionMap[
+  getOriginPermittedChains(origin: string, type: string): string[] {
+    const chains: string[] = [];
+
+    for (const chain of Object.keys(this.permissionMap)) {
+      const permissionInChain = this.permissionMap[chain];
+
+      const originMap =
+        (permissionInChain ? permissionInChain[type] : undefined) ?? {};
+
+      for (const _origin of Object.keys(originMap)) {
+        if (_origin === origin && originMap[_origin]) {
+          chains.push(chain);
+        }
+      }
+    }
+
+    return chains;
+  }
+
+  async addPermission(chainIds: string[], type: string, origins: string[]) {
+    for (const chainId of chainIds) {
+      let permissionsInChain = this.permissionMap[
         ChainIdHelper.parse(chainId).identifier
-      ] = permissionsInChain;
-    }
+      ];
+      if (!permissionsInChain) {
+        permissionsInChain = {};
+        this.permissionMap[
+          ChainIdHelper.parse(chainId).identifier
+        ] = permissionsInChain;
+      }
 
-    let innerMap = permissionsInChain[type];
-    if (!innerMap) {
-      innerMap = {};
-      permissionsInChain[type] = innerMap;
-    }
+      let innerMap = permissionsInChain[type];
+      if (!innerMap) {
+        innerMap = {};
+        permissionsInChain[type] = innerMap;
+      }
 
-    for (const origin of origins) {
-      innerMap[origin] = true;
+      for (const origin of origins) {
+        innerMap[origin] = true;
+      }
     }
 
     await this.save();

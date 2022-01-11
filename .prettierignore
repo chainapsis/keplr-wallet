@@ -12,4 +12,11 @@ dist/*
 prod/*
 
 yarn.lock
+Podfile.lock
+build.gradle
 .nvmrc
+injected-provider.bundle.js
+
+.gitsecret/*
+*.styl
+.github/*

@@ -1,4 +1,4 @@
-name: Test Lint
+name: Lint
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
       - release/*
 
 jobs:
-  test-lint:
+  lint:
     name: Lint code base
     runs-on: ubuntu-18.04
     steps:
@@ -20,6 +20,6 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: "12"
+          node-version: '14'
       - run: npm install --global yarn
       - run: yarn ci-lint

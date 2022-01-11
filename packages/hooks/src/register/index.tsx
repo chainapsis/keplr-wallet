@@ -96,7 +96,8 @@ export class RegisterConfig {
     name: string,
     mnemonic: string,
     password: string,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    meta: Record<string, string> = {}
   ) {
     this._isLoading = true;
     try {
@@ -106,6 +107,7 @@ export class RegisterConfig {
           password,
           {
             name,
+            ...meta,
           },
           bip44HDPath
         );
@@ -114,6 +116,7 @@ export class RegisterConfig {
           mnemonic,
           {
             name,
+            ...meta,
           },
           bip44HDPath
         );
@@ -155,16 +158,23 @@ export class RegisterConfig {
   // Create or add the account based on the private key.
   // If the mode is "add", password will be ignored.
   @flow
-  *createPrivateKey(name: string, privateKey: Uint8Array, password: string) {
+  *createPrivateKey(
+    name: string,
+    privateKey: Uint8Array,
+    password: string,
+    meta: Record<string, string> = {}
+  ) {
     this._isLoading = true;
     try {
       if (this.mode === "create") {
         yield this.keyRingStore.createPrivateKey(privateKey, password, {
           name,
+          ...meta,
         });
       } else {
         yield this.keyRingStore.addPrivateKey(privateKey, {
           name,
+          ...meta,
         });
       }
       this._isFinalized = true;

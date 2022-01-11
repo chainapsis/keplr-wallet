@@ -3,6 +3,7 @@ import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { StdSignDoc } from "@cosmjs/launchpad";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
+import { KeplrSignOptions } from "@keplr-wallet/types";
 
 export class SignInteractionStore {
   @observable
@@ -26,23 +27,36 @@ export class SignInteractionStore {
   protected get waitingDatas() {
     return this.interactionStore.getDatas<
       | {
+          msgOrigin: string;
           chainId: string;
           mode: "amino";
           signer: string;
           signDoc: StdSignDoc;
+          signOptions: KeplrSignOptions;
+          isADR36SignDoc: boolean;
+          isADR36WithString?: boolean;
         }
       | {
+          msgOrigin: string;
           chainId: string;
           mode: "direct";
           signer: string;
           signDocBytes: Uint8Array;
+          signOptions: KeplrSignOptions;
         }
     >("request-sign");
   }
 
   @computed
   get waitingData():
-    | InteractionWaitingData<{ signer: string; signDocWrapper: SignDocWrapper }>
+    | InteractionWaitingData<{
+        chainId: string;
+        msgOrigin: string;
+        signer: string;
+        signDocWrapper: SignDocWrapper;
+        signOptions: KeplrSignOptions;
+        isADR36WithString?: boolean;
+      }>
     | undefined {
     const datas = this.waitingDatas;
 
@@ -54,12 +68,23 @@ export class SignInteractionStore {
     const wrapper =
       data.data.mode === "amino"
         ? SignDocWrapper.fromAminoSignDoc(data.data.signDoc)
-        : new SignDocWrapper(data.data.mode, data.data.signDocBytes);
+        : SignDocWrapper.fromDirectSignDocBytes(data.data.signDocBytes);
 
     return {
       id: data.id,
       type: data.type,
-      data: { signer: data.data.signer, signDocWrapper: wrapper },
+      isInternal: data.isInternal,
+      data: {
+        chainId: data.data.chainId,
+        msgOrigin: data.data.msgOrigin,
+        signer: data.data.signer,
+        signDocWrapper: wrapper,
+        signOptions: data.data.signOptions,
+        isADR36WithString:
+          "isADR36WithString" in data.data
+            ? data.data.isADR36WithString
+            : undefined,
+      },
     };
   }
 
@@ -94,19 +119,17 @@ export class SignInteractionStore {
     }
 
     this._isLoading = true;
+    const id = this.waitingDatas[0].id;
     try {
       const newSignDoc =
         newSignDocWrapper.mode === "amino"
           ? newSignDocWrapper.aminoSignDoc
           : newSignDocWrapper.protoSignDoc.toBytes();
 
-      yield this.interactionStore.approve(
-        "request-sign",
-        this.waitingDatas[0].id,
-        newSignDoc
-      );
+      yield this.interactionStore.approveWithoutRemovingData(id, newSignDoc);
     } finally {
       yield this.waitEnd();
+      this.interactionStore.removeData("request-sign", id);
 
       this._isLoading = false;
     }

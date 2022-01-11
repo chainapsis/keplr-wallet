@@ -33,7 +33,8 @@ export class SuggestTokenMsg extends Message<void> {
 
   constructor(
     public readonly chainId: string,
-    public readonly contractAddress: string
+    public readonly contractAddress: string,
+    public readonly viewingKey?: string
   ) {
     super();
   }

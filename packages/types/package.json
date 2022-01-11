@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/types",
-  "version": "0.8.8",
+  "version": "0.9.10",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -12,18 +12,15 @@
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "mocha -r ts-node/register 'src/**/*.spec.ts'",
+    "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
-  },
-  "devDependencies": {
-    "mocha": "^8.2.1"
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "axios": "^0.21.0",
     "long": "^4.0.0",
-    "secretjs": "^0.10.4"
+    "secretjs": "^0.17.0"
   }
 }

@@ -1,4 +1,5 @@
 import { ChainStore } from "./chain";
+import { AnalyticsStore } from "./analytics";
 import { EmbedChainInfos } from "../config";
 import { FiatCurrencies } from "../config.ui";
 import {
@@ -14,6 +15,9 @@ import {
   ChainSuggestStore,
   IBCChannelStore,
   IBCCurrencyRegsitrar,
+  QueriesWithCosmosAndSecretAndCosmwasm,
+  AccountWithAll,
+  getKeplrFromWindow,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -21,12 +25,15 @@ import {
   ContentScriptEnv,
   ContentScriptGuards,
   InExtensionMessageRequester,
-  APP_PORT,
-} from "@keplr-wallet/router";
+} from "@keplr-wallet/router-extension";
+import { APP_PORT } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
+import { UIConfigStore } from "./ui-config";
 
 export class RootStore {
+  public readonly uiConfigStore: UIConfigStore;
+
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
   public readonly ibcChannelStore: IBCChannelStore;
@@ -37,14 +44,20 @@ export class RootStore {
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
-  public readonly queriesStore: QueriesStore;
-  public readonly accountStore: AccountStore;
+  public readonly queriesStore: QueriesStore<QueriesWithCosmosAndSecretAndCosmwasm>;
+  public readonly accountStore: AccountStore<AccountWithAll>;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
+
+  public readonly analyticsStore: AnalyticsStore;
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   constructor() {
+    this.uiConfigStore = new UIConfigStore(
+      new ExtensionKVStore("store_ui_config")
+    );
+
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 
@@ -60,6 +73,12 @@ export class RootStore {
     );
 
     this.keyRingStore = new KeyRingStore(
+      {
+        dispatchEvent: (type: string) => {
+          window.dispatchEvent(new Event(type));
+        },
+      },
+      "scrypt",
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
@@ -82,55 +101,120 @@ export class RootStore {
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
-      this.chainStore
+      this.chainStore,
+      getKeplrFromWindow,
+      QueriesWithCosmosAndSecretAndCosmwasm
     );
 
-    this.accountStore = new AccountStore(this.chainStore, this.queriesStore, {
-      defaultOpts: {
-        // When the unlock request sent from external webpage,
-        // it will open the extension popup below the uri "/unlock".
-        // But, in this case, if the prefetching option is true, it will redirect
-        // the page to the "/unlock" with **interactionInternal=true**
-        // because prefetching will request the unlock from the internal.
-        // To prevent this problem, just check the first uri is "#/unlcok" and
-        // if it is "#/unlock", don't use the prefetching option.
-        prefetching: !window.location.href.includes("#/unlock"),
-      },
-      chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
-        // In certik, change the msg type of the MsgSend to "bank/MsgSend"
-        if (chainInfo.chainId.startsWith("shentu-")) {
-          return {
-            chainId: chainInfo.chainId,
-            msgOpts: {
-              send: {
-                native: {
-                  type: "bank/MsgSend",
-                },
+    const chainOpts = this.chainStore.chainInfos.map((chainInfo) => {
+      // In certik, change the msg type of the MsgSend to "bank/MsgSend"
+      if (chainInfo.chainId.startsWith("shentu-")) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                type: "bank/MsgSend",
               },
             },
-          };
-        }
+          },
+        };
+      }
 
-        // In akash or sifchain, increase the default gas for sending
-        if (
-          chainInfo.chainId.startsWith("akashnet-") ||
-          chainInfo.chainId.startsWith("sifchain")
-        ) {
-          return {
-            chainId: chainInfo.chainId,
-            msgOpts: {
-              send: {
-                native: {
-                  gas: 120000,
-                },
+      // In akash or sifchain, increase the default gas for sending
+      if (
+        chainInfo.chainId.startsWith("akashnet-") ||
+        chainInfo.chainId.startsWith("sifchain")
+      ) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                gas: 120000,
               },
             },
-          };
-        }
+          },
+        };
+      }
 
-        return { chainId: chainInfo.chainId };
-      }),
+      if (chainInfo.chainId.startsWith("secret-")) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                gas: 20000,
+              },
+              secret20: {
+                gas: 50000,
+              },
+            },
+            withdrawRewards: {
+              gas: 25000,
+            },
+            createSecret20ViewingKey: {
+              gas: 50000,
+            },
+          },
+        };
+      }
+
+      return { chainId: chainInfo.chainId };
     });
+
+    // What a silly...
+    chainOpts.push(
+      {
+        chainId: "bombay-12",
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        prefetching: false,
+        msgOpts: {
+          send: {
+            native: {
+              type: "bank/MsgSend",
+            },
+          },
+        },
+      },
+      {
+        chainId: "columbus-5",
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        prefetching: false,
+        msgOpts: {
+          send: {
+            native: {
+              type: "bank/MsgSend",
+            },
+          },
+        },
+      }
+    );
+
+    this.accountStore = new AccountStore(
+      window,
+      AccountWithAll,
+      this.chainStore,
+      this.queriesStore,
+      {
+        defaultOpts: {
+          // When the unlock request sent from external webpage,
+          // it will open the extension popup below the uri "/unlock".
+          // But, in this case, if the prefetching option is true, it will redirect
+          // the page to the "/unlock" with **interactionInternal=true**
+          // because prefetching will request the unlock from the internal.
+          // To prevent this problem, just check the first uri is "#/unlcok" and
+          // if it is "#/unlock", don't use the prefetching option.
+          prefetching: !window.location.href.includes("#/unlock"),
+          suggestChain: false,
+          autoInit: true,
+          getKeplr: getKeplrFromWindow,
+        },
+        chainOpts,
+      }
+    );
 
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),
@@ -139,19 +223,40 @@ export class RootStore {
       }>((obj, fiat) => {
         obj[fiat.currency] = fiat;
         return obj;
-      }, {})
+      }, {}),
+      "usd"
     );
 
     this.tokensStore = new TokensStore(
+      window,
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
     );
 
     this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
+      new ExtensionKVStore("store_ibc_curreny_registrar"),
+      24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
       this.queriesStore
+    );
+
+    this.analyticsStore = new AnalyticsStore(
+      "KeplrExtension",
+      {
+        amplitudeConfig: {
+          platform: "Extension",
+          includeUtm: true,
+          includeReferrer: true,
+          includeFbclid: true,
+          includeGclid: true,
+          saveEvents: true,
+          saveParamsReferrerOncePerSession: false,
+        },
+      },
+      this.accountStore,
+      this.keyRingStore
     );
 
     router.listen(APP_PORT);

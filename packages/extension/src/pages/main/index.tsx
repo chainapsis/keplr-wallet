@@ -23,12 +23,13 @@ import { ChainUpdaterService } from "@keplr-wallet/background";
 import { IBCTransferView } from "./ibc-transfer";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
+import { useLogScreenView } from "../../hooks";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
 
   const confirm = useConfirm();
 
@@ -70,8 +71,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
-    .getQueryBalances()
-    .getQueryBech32Address(accountInfo.bech32Address);
+    .queryBalances.getQueryBech32Address(accountInfo.bech32Address);
 
   const tokens = queryBalances.unstakables.filter((bal) => {
     // Temporary implementation for trimming the 0 balanced native tokens.
@@ -83,6 +83,8 @@ export const MainPage: FunctionComponent = observer(() => {
   });
 
   const hasTokens = tokens.length > 0;
+
+  useLogScreenView("Home Dashboard");
 
   return (
     <HeaderLayout
@@ -136,7 +138,8 @@ export const MainPage: FunctionComponent = observer(() => {
           <CardBody>{<TokensView />}</CardBody>
         </Card>
       ) : null}
-      {chainStore.current.features?.includes("ibc-transfer") ? (
+      {uiConfigStore.showAdvancedIBCTransfer &&
+      chainStore.current.features?.includes("ibc-transfer") ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>
             <IBCTransferView />
