@@ -1085,6 +1085,27 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EEUR",
         coinMinimalDenom: "eeur",
         coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
       },
     ],
     feeCurrencies: [
