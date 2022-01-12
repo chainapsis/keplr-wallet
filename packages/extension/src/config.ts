@@ -75,6 +75,10 @@ import {
   AGORIC_RPC_CONFIG,
   AGORIC_REST_ENDPOINT,
   AGORIC_REST_CONFIG,
+  AXELAR_RPC_ENDPOINT,
+  AXELAR_RPC_CONFIG,
+  AXELAR_REST_ENDPOINT,
+  AXELAR_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1222,6 +1226,46 @@ export const EmbedChainInfos: ChainInfo[] = [
       "cosmwasm",
       "ibc-go",
     ],
+  },
+  {
+    rpc: AXELAR_RPC_ENDPOINT,
+    rpcConfig: AXELAR_RPC_CONFIG,
+    rest: AXELAR_REST_ENDPOINT,
+    restConfig: AXELAR_REST_CONFIG,
+    chainId: "axelar-dojo-1",
+    chainName: "Axelar",
+    stakeCurrency: {
+      coinDenom: "AXL",
+      coinMinimalDenom: "uaxl",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/axelar/stake"
+        : "http://localhost:8080/#/axelar/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/axelar/stake"
+        : "http://localhost:8080/#/axelar/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("axelar"),
+    currencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
   },
   {
     rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
