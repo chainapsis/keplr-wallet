@@ -1445,4 +1445,39 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     hideInUI: true,
   },
+  {
+    rpc: "https://rpc-axelar.keplr.app",
+    rest: "https://lcd-axelar.keplr.app",
+    chainId: "axelar-dojo-1",
+    chainName: "Axelar",
+    stakeCurrency: {
+      coinDenom: "AXL",
+      coinMinimalDenom: "uaxl",
+      coinDecimals: 6,
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("axelar"),
+    currencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+  },
 ];
