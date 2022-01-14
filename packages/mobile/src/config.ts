@@ -1480,4 +1480,51 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
   },
+  {
+    rpc: "https://rpc-juno.keplr.app",
+    rest: "https://lcd-juno.keplr.app",
+    chainId: "juno-1",
+    chainName: "Juno",
+    stakeCurrency: {
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+      coinGeckoId: "juno-network",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("juno"),
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+      },
+    ],
+    features: [
+      "stargate",
+      "no-legacy-stdTx",
+      "cosmwasm",
+      "ibc-transfer",
+      "ibc-go",
+    ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/juno/txs/{txHash}",
+    },
+  },
 ];

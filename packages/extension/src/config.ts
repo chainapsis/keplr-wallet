@@ -79,6 +79,10 @@ import {
   AXELAR_RPC_CONFIG,
   AXELAR_REST_ENDPOINT,
   AXELAR_REST_CONFIG,
+  JUNO_RPC_ENDPOINT,
+  JUNO_RPC_CONFIG,
+  JUNO_REST_ENDPOINT,
+  JUNO_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1266,6 +1270,55 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
+  },
+  {
+    rpc: JUNO_RPC_ENDPOINT,
+    rpcConfig: JUNO_RPC_CONFIG,
+    rest: JUNO_REST_ENDPOINT,
+    restConfig: JUNO_REST_CONFIG,
+    chainId: "juno-1",
+    chainName: "Juno",
+    stakeCurrency: {
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+      coinGeckoId: "juno-network",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/juno/stake"
+        : "http://localhost:8080/#/juno/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/juno/stake"
+        : "http://localhost:8080/#/juno/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("juno"),
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    features: [
+      "stargate",
+      "no-legacy-stdTx",
+      "cosmwasm",
+      "ibc-transfer",
+      "ibc-go",
+    ],
   },
   {
     rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
