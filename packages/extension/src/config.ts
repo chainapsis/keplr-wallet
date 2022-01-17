@@ -674,6 +674,151 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "ctidal",
         coinDecimals: 18,
       },
+      {
+        coinDenom: "Axie Infinity",
+        coinMinimalDenom: "caxs",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "BitSong",
+        coinMinimalDenom: "cbtsg",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Cosmostarter",
+        coinMinimalDenom: "ccsms",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Dfyn Network",
+        coinMinimalDenom: "cdfyn",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "DinoSwap",
+        coinMinimalDenom: "cdino",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "DinoX",
+        coinMinimalDenom: "cdnxc",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Don-key",
+        coinMinimalDenom: "cdon",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Ethernity Chain",
+        coinMinimalDenom: "cern",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Frax",
+        coinMinimalDenom: "cfrax",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Frax Share",
+        coinMinimalDenom: "cfxs",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Knit Finance",
+        coinMinimalDenom: "ckft",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Lido DAO",
+        coinMinimalDenom: "cldo",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Doge Killer",
+        coinMinimalDenom: "cleash",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "LGCY Network",
+        coinMinimalDenom: "clgcy",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Polygon",
+        coinMinimalDenom: "cmatic",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Metis Token",
+        coinMinimalDenom: "cmetis",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Oh! Finance",
+        coinMinimalDenom: "coh",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Polkastarter",
+        coinMinimalDenom: "cpols",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Marlin",
+        coinMinimalDenom: "cpond",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Quickswap",
+        coinMinimalDenom: "cquick",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Railgun",
+        coinMinimalDenom: "crail",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "StaFi rATOM",
+        coinMinimalDenom: "cratom",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Saito",
+        coinMinimalDenom: "csaito",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Shiba Inu",
+        coinMinimalDenom: "cshib",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Tokemak",
+        coinMinimalDenom: "ctoke",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "UFO Gaming",
+        coinMinimalDenom: "cufo",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "UST (ERC-20)",
+        coinMinimalDenom: "cust",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "0chain",
+        coinMinimalDenom: "czcn",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Unizen",
+        coinMinimalDenom: "czcx",
+        coinDecimals: 18,
+      },
     ],
     feeCurrencies: [
       {
