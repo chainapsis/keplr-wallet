@@ -1481,8 +1481,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0.05,
-      average: 0.125,
-      high: 0.2,
+      average: 0.075,
+      high: 0.1,
     },
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     chainSymbolImageUrl:
