@@ -1527,4 +1527,46 @@ export const EmbedChainInfos: AppChainInfo[] = [
       txUrl: "https://www.mintscan.io/juno/txs/{txHash}",
     },
   },
+  {
+    rpc: "https://rpc-stargaze.keplr.app",
+    rest: "https://lcd-stargaze.keplr.app",
+    chainId: "stargaze-1",
+    chainName: "Stargaze",
+    stakeCurrency: {
+      coinDenom: "STARS",
+      coinMinimalDenom: "ustars",
+      coinDecimals: 6,
+      coinGeckoId: "stargaze",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stars"),
+    currencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+      },
+    ],
+    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/stargaze/txs/{txHash}",
+    },
+  },
 ];

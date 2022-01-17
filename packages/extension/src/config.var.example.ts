@@ -123,4 +123,9 @@ export const JUNO_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const JUNO_REST_ENDPOINT = "";
 export const JUNO_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const STARGAZE_RPC_ENDPOINT = "";
+export const STARGAZE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const STARGAZE_REST_ENDPOINT = "";
+export const STARGAZE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const PRIVILEGED_ORIGINS: string[] = [];
