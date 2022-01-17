@@ -19,7 +19,7 @@
     "generate:splash-image": "expo-splash-screen --background-color \"#FBF8FF\" --image-path ./src/assets/logo/splash-screen-only-k.png --image-resize-mode contain --status-bar-translucent --status-bar-background-color \"#FBF8FF\" --status-bar-style dark-content",
     "pod-install": "pod-install",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "postinstall": "sh ./scripts/fix-android-splash-screen-flash.sh"
+    "postinstall": "sh ./scripts/fix-android-splash-screen-flash.sh && sh ./scripts/force-export-ble-manager-from-ledger.sh"
   },
   "dependencies": {
     "@amplitude/react-native": "^2.4.0",
@@ -44,7 +44,7 @@
     "@keplr-wallet/stores": "^0.9.11-rc.4",
     "@keplr-wallet/types": "^0.9.10",
     "@keplr-wallet/unit": "^0.9.11-rc.3",
-    "@ledgerhq/react-native-hw-transport-ble": "^6.20.0",
+    "@ledgerhq/react-native-hw-transport-ble": "=6.20.0",
     "@react-native-async-storage/async-storage": "^1.14.1",
     "@react-native-community/blur": "^3.6.0",
     "@react-native-community/masked-view": "^0.1.10",

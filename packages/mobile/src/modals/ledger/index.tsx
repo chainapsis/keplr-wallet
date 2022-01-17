@@ -5,8 +5,10 @@ import { PermissionsAndroid, Platform, Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
-import { BleManager, State } from "react-native-ble-plx";
-import TransportBLE from "@ledgerhq/react-native-hw-transport-ble";
+import { State } from "react-native-ble-plx";
+import TransportBLE, {
+  bleManager,
+} from "@ledgerhq/react-native-hw-transport-ble";
 import { LoadingSpinner } from "../../components/spinner";
 import { Ledger, LedgerInitErrorOn } from "@keplr-wallet/background";
 import { getLastUsedLedgerDeviceId } from "../../utils/ledger";
@@ -21,8 +23,6 @@ export const LedgerGranterModal: FunctionComponent<{
     const { ledgerInitStore } = useStore();
 
     const style = useStyle();
-
-    const [bleManager] = useState(() => new BleManager());
 
     const resumed = useRef(false);
     const [isAvailable, setIsAvailable] = useState(false);
@@ -59,7 +59,7 @@ export const LedgerGranterModal: FunctionComponent<{
       return () => {
         subscription.remove();
       };
-    }, [bleManager]);
+    }, []);
 
     useEffect(() => {
       if (Platform.OS === "android" && !isAvailable) {
@@ -68,7 +68,7 @@ export const LedgerGranterModal: FunctionComponent<{
         // Below API can be called only in android.
         bleManager.enable();
       }
-    }, [bleManager, isAvailable]);
+    }, [isAvailable]);
 
     const [isFinding, setIsFinding] = useState(false);
 
@@ -123,6 +123,9 @@ export const LedgerGranterModal: FunctionComponent<{
                   setDevices(_devices);
                 }
               }
+            },
+            error: (e: Error) => {
+              console.log(e);
             },
           }).unsubscribe;
         })();
