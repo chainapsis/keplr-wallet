@@ -1577,4 +1577,40 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     hideInUI: true,
   },
+  {
+    rpc: "https://rpc-1-dig.notional.ventures",
+    rest: "https://api-1-dig.notional.ventures",
+    chainId: "dig-1",
+    chainName: "Dig",
+    stakeCurrency: {
+      coinDenom: "DIG",
+      coinMinimalDenom: "udig",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("dig"),
+    currencies: [
+      {
+        coinDenom: "DIG",
+        coinMinimalDenom: "udig",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DIG",
+        coinMinimalDenom: "udig",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.025,
+      average: 0.03,
+      high: 0.035,
+    },
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
 ];
