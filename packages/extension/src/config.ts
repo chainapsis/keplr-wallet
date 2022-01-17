@@ -1402,51 +1402,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
   },
   {
-    rpc: AXELAR_RPC_ENDPOINT,
-    rpcConfig: AXELAR_RPC_CONFIG,
-    rest: AXELAR_REST_ENDPOINT,
-    restConfig: AXELAR_REST_CONFIG,
-    chainId: "axelar-dojo-1",
-    chainName: "Axelar",
-    stakeCurrency: {
-      coinDenom: "AXL",
-      coinMinimalDenom: "uaxl",
-      coinDecimals: 6,
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/axelar/stake"
-        : "http://localhost:8080/#/axelar/stake",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/axelar/stake"
-        : "http://localhost:8080/#/axelar/stake",
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("axelar"),
-    currencies: [
-      {
-        coinDenom: "AXL",
-        coinMinimalDenom: "uaxl",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "AXL",
-        coinMinimalDenom: "uaxl",
-        coinDecimals: 6,
-      },
-    ],
-    gasPriceStep: {
-      low: 0.05,
-      average: 0.075,
-      high: 0.1,
-    },
-    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
-  },
-  {
     rpc: JUNO_RPC_ENDPOINT,
     rpcConfig: JUNO_RPC_CONFIG,
     rest: JUNO_REST_ENDPOINT,
@@ -1536,6 +1491,51 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "stargaze",
       },
     ],
+    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: AXELAR_RPC_ENDPOINT,
+    rpcConfig: AXELAR_RPC_CONFIG,
+    rest: AXELAR_REST_ENDPOINT,
+    restConfig: AXELAR_REST_CONFIG,
+    chainId: "axelar-dojo-1",
+    chainName: "Axelar",
+    stakeCurrency: {
+      coinDenom: "AXL",
+      coinMinimalDenom: "uaxl",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/axelar/stake"
+        : "http://localhost:8080/#/axelar/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/axelar/stake"
+        : "http://localhost:8080/#/axelar/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("axelar"),
+    currencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.05,
+      average: 0.075,
+      high: 0.1,
+    },
     features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
   },
   {

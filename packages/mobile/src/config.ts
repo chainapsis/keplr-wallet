@@ -730,6 +730,95 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
   },
   {
+    rpc: "https://rpc-juno.keplr.app",
+    rest: "https://lcd-juno.keplr.app",
+    chainId: "juno-1",
+    chainName: "Juno",
+    stakeCurrency: {
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+      coinGeckoId: "juno-network",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("juno"),
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+      },
+    ],
+    features: [
+      "stargate",
+      "no-legacy-stdTx",
+      "cosmwasm",
+      "ibc-transfer",
+      "ibc-go",
+    ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/juno/txs/{txHash}",
+    },
+  },
+  {
+    rpc: "https://rpc-stargaze.keplr.app",
+    rest: "https://lcd-stargaze.keplr.app",
+    chainId: "stargaze-1",
+    chainName: "Stargaze",
+    stakeCurrency: {
+      coinDenom: "STARS",
+      coinMinimalDenom: "ustars",
+      coinDecimals: 6,
+      coinGeckoId: "stargaze",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stars"),
+    currencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+      },
+    ],
+    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/stargaze/txs/{txHash}",
+    },
+  },
+  {
     rpc: "https://rpc-persistence.keplr.app",
     rest: "https://lcd-persistence.keplr.app",
     chainId: "core-1",
@@ -774,6 +863,46 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
     features: ["stargate", "ibc-transfer"],
+  },
+  {
+    rpc: "https://rpc-axelar.keplr.app",
+    rest: "https://lcd-axelar.keplr.app",
+    chainId: "axelar-dojo-1",
+    chainName: "Axelar",
+    stakeCurrency: {
+      coinDenom: "AXL",
+      coinMinimalDenom: "uaxl",
+      coinDecimals: 6,
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("axelar"),
+    currencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.05,
+      average: 0.075,
+      high: 0.1,
+    },
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
   },
   {
     rpc: "https://rpc-sentinel.keplr.app",
@@ -1447,134 +1576,5 @@ export const EmbedChainInfos: AppChainInfo[] = [
     ],
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     hideInUI: true,
-  },
-  {
-    rpc: "https://rpc-axelar.keplr.app",
-    rest: "https://lcd-axelar.keplr.app",
-    chainId: "axelar-dojo-1",
-    chainName: "Axelar",
-    stakeCurrency: {
-      coinDenom: "AXL",
-      coinMinimalDenom: "uaxl",
-      coinDecimals: 6,
-      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("axelar"),
-    currencies: [
-      {
-        coinDenom: "AXL",
-        coinMinimalDenom: "uaxl",
-        coinDecimals: 6,
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "AXL",
-        coinMinimalDenom: "uaxl",
-        coinDecimals: 6,
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
-      },
-    ],
-    gasPriceStep: {
-      low: 0.05,
-      average: 0.075,
-      high: 0.1,
-    },
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
-    chainSymbolImageUrl:
-      "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
-  },
-  {
-    rpc: "https://rpc-juno.keplr.app",
-    rest: "https://lcd-juno.keplr.app",
-    chainId: "juno-1",
-    chainName: "Juno",
-    stakeCurrency: {
-      coinDenom: "JUNO",
-      coinMinimalDenom: "ujuno",
-      coinDecimals: 6,
-      coinGeckoId: "juno-network",
-      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("juno"),
-    currencies: [
-      {
-        coinDenom: "JUNO",
-        coinMinimalDenom: "ujuno",
-        coinDecimals: 6,
-        coinGeckoId: "juno-network",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "JUNO",
-        coinMinimalDenom: "ujuno",
-        coinDecimals: 6,
-        coinGeckoId: "juno-network",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
-      },
-    ],
-    features: [
-      "stargate",
-      "no-legacy-stdTx",
-      "cosmwasm",
-      "ibc-transfer",
-      "ibc-go",
-    ],
-    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
-    txExplorer: {
-      name: "Mintscan",
-      txUrl: "https://www.mintscan.io/juno/txs/{txHash}",
-    },
-  },
-  {
-    rpc: "https://rpc-stargaze.keplr.app",
-    rest: "https://lcd-stargaze.keplr.app",
-    chainId: "stargaze-1",
-    chainName: "Stargaze",
-    stakeCurrency: {
-      coinDenom: "STARS",
-      coinMinimalDenom: "ustars",
-      coinDecimals: 6,
-      coinGeckoId: "stargaze",
-      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("stars"),
-    currencies: [
-      {
-        coinDenom: "STARS",
-        coinMinimalDenom: "ustars",
-        coinDecimals: 6,
-        coinGeckoId: "stargaze",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "STARS",
-        coinMinimalDenom: "ustars",
-        coinDecimals: 6,
-        coinGeckoId: "stargaze",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
-      },
-    ],
-    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
-    chainSymbolImageUrl:
-      "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
-    txExplorer: {
-      name: "Mintscan",
-      txUrl: "https://www.mintscan.io/stargaze/txs/{txHash}",
-    },
   },
 ];
