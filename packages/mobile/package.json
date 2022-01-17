@@ -49,8 +49,6 @@
     "@react-native-community/blur": "^3.6.0",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-community/netinfo": "^6.0.2",
-    "@react-native-firebase/analytics": "^11.4.1",
-    "@react-native-firebase/app": "^11.4.1",
     "@react-navigation/bottom-tabs": "^5.11.8",
     "@react-navigation/drawer": "^5.12.4",
     "@react-navigation/native": "^5.9.3",

@@ -38,10 +38,6 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CodePushDeploymentKey</key>
 	<string>Bp7ApGEQu01igCf6axrsaAgi6Mc0X5oBgGjFI</string>
-	<key>FIREBASE_ANALYTICS_COLLECTION_DEACTIVATE</key>
-	<false/>
-	<key>IS_ANALYTICS_ENABLED</key>
-	<true/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

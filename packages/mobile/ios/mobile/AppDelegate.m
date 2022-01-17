@@ -10,7 +10,6 @@
 
 #import <React/RCTLinkingManager.h>
 
-#import <Firebase.h>
 #import <CodePush/CodePush.h>
 
 #import <AppCenterReactNative.h>
@@ -49,10 +48,6 @@ static void InitializeFlipper(UIApplication *application) {
   [AppCenterReactNative register];
   [AppCenterReactNativeAnalytics registerWithInitiallyEnabled:true];
   [AppCenterReactNativeCrashes registerWithAutomaticProcessing];
-
-    if ([FIRApp defaultApp] == nil) {
-    [FIRApp configure];
-  }
 
 #ifdef FB_SONARKIT_ENABLED
   InitializeFlipper(application);
