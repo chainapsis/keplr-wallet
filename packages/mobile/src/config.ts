@@ -1412,6 +1412,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
   },
   {
     rpc: "https://rpc.mainnet.desmos.network",
@@ -1445,6 +1446,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
   },
   {
     rpc: "https://rpc-axelar.keplr.app",
