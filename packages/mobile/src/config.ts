@@ -1477,6 +1477,11 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
     ],
+    gasPriceStep: {
+      low: 0.05,
+      average: 0.125,
+      high: 0.2,
+    },
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
