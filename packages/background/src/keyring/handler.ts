@@ -6,7 +6,6 @@ import {
   UnlockKeyRingMsg,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
-  RequestSignEthereumMsg,
   LockKeyRingMsg,
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
@@ -84,15 +83,18 @@ export const getHandler: (service: KeyRingService) => Handler = (
           msg as RequestVerifyADR36AminoSignDoc
         );
       case RequestSignDirectMsg:
-        return handleRequestSignDirectMsg(service)(
-          env,
-          msg as RequestSignDirectMsg
-        );
-      case RequestSignEthereumMsg:
-        return handleRequestSignEthereumMsg(service)(
-          env,
-          msg as RequestSignEthereumMsg
-        );
+        const requestSignDirectMessage = msg as RequestSignDirectMsg;
+        if (!requestSignDirectMessage.isEthereum) {
+          return handleRequestSignDirectMsg(service)(
+            env,
+            requestSignDirectMessage
+          );
+        } else {
+          return handleRequestSignEthereumMsg(service)(
+            env,
+            requestSignDirectMessage
+          );
+        }
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
           env,
@@ -353,7 +355,7 @@ const handleRequestSignDirectMsg: (
 
 const handleRequestSignEthereumMsg: (
   service: KeyRingService
-) => InternalHandler<RequestSignEthereumMsg> = (service) => {
+) => InternalHandler<RequestSignDirectMsg> = (service) => {
   return async (env, msg) => {
     await service.permissionService.checkOrGrantBasicAccessPermission(
       env,
