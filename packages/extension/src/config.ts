@@ -1439,7 +1439,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
     ],
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
+    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
   },
   {
     rpc: JUNO_RPC_ENDPOINT,
