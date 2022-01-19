@@ -786,7 +786,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: "ustars",
       coinDecimals: 6,
       coinGeckoId: "stargaze",
-      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
     },
     bip44: {
       coinType: 118,
