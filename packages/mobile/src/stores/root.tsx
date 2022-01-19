@@ -92,7 +92,7 @@ export class RootStore {
       QueriesWithCosmosAndSecretAndCosmwasm
     );
 
-    this.accountStore = new AccountStore(
+    this.accountStore = new AccountStore<AccountWithAll>(
       {
         addEventListener: (type: string, fn: () => void) => {
           eventEmitter.addListener(type, fn);
@@ -114,6 +114,20 @@ export class RootStore {
             return new Keplr("", "core", new RNMessageRequesterInternal());
           },
         },
+        chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
+          if (chainInfo.chainId.startsWith("osmosis")) {
+            return {
+              chainId: chainInfo.chainId,
+              msgOpts: {
+                withdrawRewards: {
+                  gas: 200000,
+                },
+              },
+            };
+          }
+
+          return { chainId: chainInfo.chainId };
+        }),
       }
     );
 
