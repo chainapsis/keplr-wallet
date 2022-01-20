@@ -41,7 +41,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     coinType: 118,
     features: [],
     gasPriceStep: {
-      low: 5000000000,
+      low: 0,
       average: 5000000000,
       high: 6250000000,
     },
@@ -83,7 +83,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     coinType: 118,
     features: [],
     gasPriceStep: {
-      low: 5000000000,
+      low: 0,
       average: 5000000000,
       high: 6250000000,
     },
@@ -120,7 +120,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     coinType: 118,
     features: [],
     gasPriceStep: {
-      low: 5000000000,
+      low: 0,
       average: 5000000000,
       high: 6250000000,
     },
