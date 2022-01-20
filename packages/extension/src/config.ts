@@ -40,6 +40,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 118,
     features: [],
+    gasPriceStep: {
+      low: 5000000000,
+      average: 5000000000,
+      high: 6250000000,
+    },
   },
   {
     rpc: "https://rpc-andromeda.fetch.ai",
@@ -114,6 +119,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 118,
     features: [],
+    gasPriceStep: {
+      low: 5000000000,
+      average: 5000000000,
+      high: 6250000000,
+    },
   },
 ];
 
