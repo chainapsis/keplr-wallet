@@ -17,6 +17,11 @@
   resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.24.tgz#2ce605af7d2c38d4a01313fb2385df55fbbd69aa"
   integrity sha512-VbQuJymJ20WEw0HtI2np7EdC3NJGUWi8+Xdbc7uk8WfMIF308T0howpzkQ3JFMN7ejnrcSM/OyNGveeE3TP3TA==
 
+"@amplitude/ua-parser-js@0.7.26":
+  version "0.7.26"
+  resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.26.tgz#18d889d84d2ba90c248ab6fcd7e3dd07f1c9c86e"
+  integrity sha512-62/Rid6YQ7F2KT/5vTre41Y26ivrEoFC8lbrsJZqBKaiXMJWG0YpNv9RgxNSaZS2jPLVQgoB/FFeWxihOLfIcg==
+
 "@amplitude/utils@^1.0.5":
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/@amplitude/utils/-/utils-1.8.2.tgz#77a614e0921ee5b57b994bb82dc3f9a81a0e493d"
@@ -4134,6 +4139,85 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
+"@keplr-wallet/background@^0.9.11":
+  version "0.9.11"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/background/-/background-0.9.11.tgz#46eada6b13db98530c82667080f1400768795fc2"
+  integrity sha512-1K2aZSBUeVcWrH5chEhZjXe2guaQNX+EogSkgN6Nk7/kRwA95aZYchvGr/b4KJKtHAjNyYo9bZ8QpWQo0N1/lQ==
+  dependencies:
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@cosmjs/proto-signing" "^0.24.0-alpha.25"
+    "@keplr-wallet/common" "^0.9.10"
+    "@keplr-wallet/cosmos" "^0.9.11-rc.3"
+    "@keplr-wallet/crypto" "^0.9.10"
+    "@keplr-wallet/popup" "^0.9.6"
+    "@keplr-wallet/router" "^0.9.6"
+    "@keplr-wallet/types" "^0.9.10"
+    "@keplr-wallet/unit" "^0.9.11-rc.3"
+    "@ledgerhq/hw-transport" "^6.20.0"
+    "@ledgerhq/hw-transport-webhid" "^6.20.0"
+    "@ledgerhq/hw-transport-webusb" "^6.20.0"
+    aes-js "^3.1.2"
+    axios "^0.21.0"
+    big-integer "^1.6.48"
+    bip39 "^3.0.2"
+    buffer "^6.0.3"
+    delay "^4.4.0"
+    joi "^17.5.0"
+    ledger-cosmos-js "^2.1.8"
+    long "^4.0.0"
+    pbkdf2 "^3.1.2"
+    reflect-metadata "^0.1.13"
+    secp256k1 "^4.0.2"
+    secretjs "^0.17.0"
+    tsyringe "^4.4.0"
+
+"@keplr-wallet/hooks@^0.9.11":
+  version "0.9.11"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/hooks/-/hooks-0.9.11.tgz#ffc59f635b8273b1c8af53523ab51ca793fa46e3"
+  integrity sha512-QXczWDKfKoLYpWKuCPXh7ZtsJtAgJTEfuiX2lqo9cXLWLKmVJYljTO7zbc+AxKcxkoAQzwTCshsaiyWqL7A3Gw==
+  dependencies:
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@keplr-wallet/background" "^0.9.11"
+    "@keplr-wallet/common" "^0.9.10"
+    "@keplr-wallet/cosmos" "^0.9.11-rc.3"
+    "@keplr-wallet/crypto" "^0.9.10"
+    "@keplr-wallet/ens" "^0.9.0"
+    "@keplr-wallet/popup" "^0.9.6"
+    "@keplr-wallet/stores" "^0.9.11"
+    "@keplr-wallet/types" "^0.9.10"
+    "@keplr-wallet/unit" "^0.9.11-rc.3"
+    long "^4.0.0"
+    mobx "^6.1.7"
+    mobx-utils "^6.0.3"
+    react "^16.14.0"
+    react-router "^5.1.2"
+    utility-types "^3.10.0"
+
+"@keplr-wallet/stores@^0.9.11":
+  version "0.9.11"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/stores/-/stores-0.9.11.tgz#724fb26d0974ff23997f94e0ac167f6e7ed8ec66"
+  integrity sha512-6REvCoT/5jdQ6P2ybkg+xxkz0cwUg0en8OeQsl1WgWH23soYUm6uCY5RF1lmaVf+UVFpXI/BiORKvRVR1DqNtA==
+  dependencies:
+    "@cosmjs/encoding" "^0.24.0-alpha.25"
+    "@cosmjs/launchpad" "^0.24.0-alpha.25"
+    "@cosmjs/tendermint-rpc" "^0.24.1"
+    "@keplr-wallet/background" "^0.9.11"
+    "@keplr-wallet/common" "^0.9.10"
+    "@keplr-wallet/cosmos" "^0.9.11-rc.3"
+    "@keplr-wallet/crypto" "^0.9.10"
+    "@keplr-wallet/router" "^0.9.6"
+    "@keplr-wallet/types" "^0.9.10"
+    "@keplr-wallet/unit" "^0.9.11-rc.3"
+    axios "^0.21.0"
+    buffer "^6.0.3"
+    deepmerge "^4.2.2"
+    eventemitter3 "^4.0.7"
+    long "^4.0.0"
+    mobx "^6.1.7"
+    mobx-utils "^6.0.3"
+    p-queue "^6.6.2"
+    utility-types "^3.10.0"
+
 "@ledgerhq/devices@^5.36.0":
   version "5.36.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-5.36.0.tgz#f4493bea44390325fcc7a2a0d03bba69fc1604ec"
@@ -4142,6 +4226,16 @@
     "@ledgerhq/errors" "^5.36.0"
     "@ledgerhq/logs" "^5.36.0"
     rxjs "^6.6.3"
+
+"@ledgerhq/devices@^6.20.0":
+  version "6.20.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-6.20.0.tgz#4280aaa5dc16f821ecab9ee8ae882299411ba5b7"
+  integrity sha512-WehM7HGdb+nSUzyUlz1t2qJ8Tg4I+rQkOJJsx0/Dpjkx6/+1hHcX6My/apPuwh39qahqwYhjszq0H1YzGDS0Yg==
+  dependencies:
+    "@ledgerhq/errors" "^6.10.0"
+    "@ledgerhq/logs" "^6.10.0"
+    rxjs "6"
+    semver "^7.3.5"
 
 "@ledgerhq/devices@^6.3.0":
   version "6.3.0"
@@ -4158,10 +4252,25 @@
   resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-5.36.0.tgz#9d178b54116ae81b1fbdfa80afcd33981453be4c"
   integrity sha512-VS6aFzn3IDUmSLaX2kAPg5sQOc5m7IwvswAGvoMc3FCi9/a1dXWwtiYn5rWd1QjDJlTKSfCwmSpvUMp8FKoY2Q==
 
+"@ledgerhq/errors@^6.10.0":
+  version "6.10.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-6.10.0.tgz#dda9127b65f653fbb2f74a55e8f0e550d69de6e4"
+  integrity sha512-fQFnl2VIXh9Yd41lGjReCeK+Q2hwxQJvLZfqHnKqWapTz68NHOv5QcI0OHuZVNEbv0xhgdLhi5b65kgYeQSUVg==
+
 "@ledgerhq/errors@^6.2.0":
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-6.2.0.tgz#7dc2b3bf6bdedccdaa1b97dccacfa912c4fc22f8"
   integrity sha512-eO03x8HJmG60WtlrMuahigW/rwywFdcGzCnihta/MjkM8BD9A660cKVkyIuheCcpaB7UV/r+QsRl9abHbjjaag==
+
+"@ledgerhq/hw-transport-webhid@^6.20.0":
+  version "6.20.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-webhid/-/hw-transport-webhid-6.20.0.tgz#5341a02b31663bc5259ef055b147e35be15c9b35"
+  integrity sha512-vpbeKmvlQQHQIT7MOAt8TJV7706YkvfEsW2it/vQKAKGjmAYWgrLDXLLgmA1rEDschq0w63crOSp0El4doy+JQ==
+  dependencies:
+    "@ledgerhq/devices" "^6.20.0"
+    "@ledgerhq/errors" "^6.10.0"
+    "@ledgerhq/hw-transport" "^6.20.0"
+    "@ledgerhq/logs" "^6.10.0"
 
 "@ledgerhq/hw-transport-webhid@^6.3.0":
   version "6.4.1"
@@ -4172,6 +4281,16 @@
     "@ledgerhq/errors" "^6.2.0"
     "@ledgerhq/hw-transport" "^6.3.0"
     "@ledgerhq/logs" "^6.2.0"
+
+"@ledgerhq/hw-transport-webusb@^6.20.0":
+  version "6.20.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-webusb/-/hw-transport-webusb-6.20.0.tgz#ddf4db2727d2dc79930d3c672e11cd08658f22c8"
+  integrity sha512-7rtgOEuEZ7/O5JofcglUVck7RXH5D8vS3zP5SjPURhvSFiJVGrtOVS+Qna7gXqGdkesDcNF0xBkwme+67n4Imw==
+  dependencies:
+    "@ledgerhq/devices" "^6.20.0"
+    "@ledgerhq/errors" "^6.10.0"
+    "@ledgerhq/hw-transport" "^6.20.0"
+    "@ledgerhq/logs" "^6.10.0"
 
 "@ledgerhq/hw-transport-webusb@^6.3.0":
   version "6.3.0"
@@ -4192,6 +4311,15 @@
     "@ledgerhq/errors" "^5.36.0"
     events "^3.2.0"
 
+"@ledgerhq/hw-transport@^6.20.0":
+  version "6.20.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-6.20.0.tgz#16e84c99fca2d10f637c0e36c87088322479a488"
+  integrity sha512-5KS0Y6CbWRDOv3FgNIfk53ViQOIZqMxAw0RuOexreW5GMwuYfK7ddGi4142qcu7YrxkGo7cNe42wBbx1hdXl0Q==
+  dependencies:
+    "@ledgerhq/devices" "^6.20.0"
+    "@ledgerhq/errors" "^6.10.0"
+    events "^3.3.0"
+
 "@ledgerhq/hw-transport@^6.3.0":
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-6.3.0.tgz#4fc966b1a68c991c0a6b5384841f99c4f8304ce9"
@@ -4205,6 +4333,11 @@
   version "5.36.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-5.36.0.tgz#78721347162fb834d90effa1123b363dc46e3a52"
   integrity sha512-HnD/hByteUL1MsJu1lMinY9bNq8++5mWJ8qHCW9dLC9LbsvWIqwLwmZiGcW0D2tX9p0/C5ESuIpJ9B/d2dReuw==
+
+"@ledgerhq/logs@^6.10.0":
+  version "6.10.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-6.10.0.tgz#c012c1ecc1a0e53d50e6af381618dca5268461c1"
+  integrity sha512-lLseUPEhSFUXYTKj6q7s2O3s2vW2ebgA11vMAlKodXGf5AFw4zUoEbTz9CoFOC9jS6xY4Qr8BmRnxP/odT4Uuw==
 
 "@ledgerhq/logs@^6.2.0":
   version "6.2.0"
@@ -6936,6 +7069,17 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
   integrity sha1-SlKCrBZHKek2Gbz9OtFR+BfOkfU=
+
+amplitude-js@^8.16.0:
+  version "8.16.0"
+  resolved "https://registry.yarnpkg.com/amplitude-js/-/amplitude-js-8.16.0.tgz#7c4faf4dc16342c6f377d775d0a02c0db3f47cba"
+  integrity sha512-PtHuYphktZsCf2BRSbb0EMuClQjHP2kSTDz2QBy6cv18yRvqVs3I2MB386BfeOxgxR16J/OlfFVBWhv9CX2rYw==
+  dependencies:
+    "@amplitude/ua-parser-js" "0.7.26"
+    "@amplitude/utils" "^1.0.5"
+    "@babel/runtime" "^7.3.4"
+    blueimp-md5 "^2.10.0"
+    query-string "5"
 
 amplitude-js@^8.5.0:
   version "8.5.0"
@@ -17204,6 +17348,11 @@ mobx@^6.1.7:
   version "6.1.7"
   resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.1.7.tgz#009c65f6909ee89ab42dd4b058577739f0d899df"
   integrity sha512-2iIgg2o0jd/bWAK/9KHJ1uwKHGowKyaTUM4qarJ0qGdLskYcB3sJevjjV7t7jW0WVjItz6BBlPNiZ14oHTpvMg==
+
+mobx@^6.3.13:
+  version "6.3.13"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.3.13.tgz#93e56a57ee72369f850cf3d6398fd36ee8ef062e"
+  integrity sha512-zDDKDhYUk9QCHQUdLG+wb4Jv/nXutSLt/P8kkwHyjdbrJO4OZS6QTEsrOnrKM39puqXSrJZHdB6+yRys2NBFFA==
 
 mock-fs@^4.1.0:
   version "4.13.0"
