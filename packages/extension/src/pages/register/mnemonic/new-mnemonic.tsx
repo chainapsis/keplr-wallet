@@ -13,7 +13,7 @@ import { Alert, Button, ButtonGroup, Form } from "reactstrap";
 import { Input, PasswordInput, TextArea } from "../../../components/form";
 import { BackButton } from "../index";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
-import { useStore } from "../../../stores";
+import { useAnalytics } from "@keplr-wallet/analytics";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -30,7 +30,7 @@ interface FormData {
 export const NewMnemonicIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const { analyticsStore } = useStore();
+  const analytics = useAnalytics();
 
   return (
     <Button
@@ -41,8 +41,7 @@ export const NewMnemonicIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeNewMnemonic);
-        console.log("here");
-        analyticsStore.logEvent("Create account started", {
+        analytics.logEvent("Create account started", {
           registerType: "seed",
         });
       }}
@@ -275,7 +274,7 @@ export const VerifyMnemonicModePage: FunctionComponent<{
     setSuggestedWords([]);
   }, [newMnemonicConfig.mnemonic]);
 
-  const { analyticsStore, accountStore } = useStore();
+  const analytics = useAnalytics();
 
   return (
     <div>
@@ -344,15 +343,8 @@ export const VerifyMnemonicModePage: FunctionComponent<{
               newMnemonicConfig.password,
               bip44Option.bip44HDPath
             );
-            const accountInfo = accountStore.getAccount(
-              analyticsStore.mainChainId
-            );
-            analyticsStore.setUserId(accountInfo.bech32Address);
-            analyticsStore.setUserProperties({
+            analytics.setUserProperties({
               registerType: "seed",
-              accountType: "mnemonic",
-            });
-            analyticsStore.logEvent("Create account finished", {
               accountType: "mnemonic",
             });
           } catch (e) {

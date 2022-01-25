@@ -17,6 +17,7 @@ import { observer } from "mobx-react-lite";
 
 import style from "./style.module.scss";
 import { WarningView } from "./warning-view";
+import { useAnalytics } from "@keplr-wallet/analytics";
 
 interface FormData {
   password: string;
@@ -30,7 +31,8 @@ export const ClearPage: FunctionComponent = observer(() => {
 
   const [loading, setLoading] = useState(false);
 
-  const { keyRingStore, analyticsStore } = useStore();
+  const { keyRingStore } = useStore();
+  const analytics = useAnalytics();
   const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {
       password: "",
@@ -74,7 +76,7 @@ export const ClearPage: FunctionComponent = observer(() => {
                 parseInt(match.params.index),
                 data.password
               );
-              analyticsStore.logEvent("Account removed");
+              analytics.logEvent("Account removed");
 
               history.push("/");
             } catch (e) {

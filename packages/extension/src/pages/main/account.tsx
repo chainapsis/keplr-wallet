@@ -9,9 +9,11 @@ import { useStore } from "../../stores";
 import { useNotification } from "../../components/notification";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const AccountView: FunctionComponent = observer(() => {
-  const { accountStore, chainStore, analyticsStore } = useStore();
+  const { accountStore, chainStore } = useStore();
+  const analytics = useAnalytics();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const intl = useIntl();
@@ -21,7 +23,7 @@ export const AccountView: FunctionComponent = observer(() => {
   const copyAddress = useCallback(async () => {
     if (accountInfo.walletStatus === WalletStatus.Loaded) {
       await navigator.clipboard.writeText(accountInfo.bech32Address);
-      analyticsStore.logEvent("Address copied", {
+      analytics.logEvent("Address copied", {
         chainId: chainStore.current.chainId,
         chainName: chainStore.current.chainName,
       });

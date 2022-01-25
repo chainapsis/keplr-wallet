@@ -47,7 +47,7 @@ export const AddressBookPage: FunctionComponent<{
     const intl = useIntl();
     const history = useHistory();
 
-    const { chainStore, analyticsStore } = useStore();
+    const { chainStore } = useStore();
     const current = chainStore.current;
 
     const [selectedChainId, setSelectedChainId] = useState(
@@ -135,8 +135,6 @@ export const AddressBookPage: FunctionComponent<{
     };
 
     useLogScreenView("Address book", {
-      chainId: chainStore.current.chainId,
-      chainName: chainStore.current.chainName,
       fromScreen: isInTransaction ? "Transaction" : "Setting",
     });
 
@@ -215,10 +213,6 @@ export const AddressBookPage: FunctionComponent<{
                   e.stopPropagation();
 
                   setAddAddressModalOpen(true);
-                  analyticsStore.logEvent("Add address started", {
-                    chainId: selectedChainId,
-                    chainName: chainStore.getChain(selectedChainId).chainName,
-                  });
                 }}
               >
                 <i

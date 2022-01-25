@@ -32,6 +32,7 @@
     "@keplr-wallet/stores": "^0.9.11-rc.3",
     "@keplr-wallet/types": "^0.9.10",
     "@keplr-wallet/unit": "^0.9.11-rc.3",
+    "@keplr-wallet/analytics": "^0.9.11",
     "@walletconnect/client": "^1.6.4",
     "aes-js": "^3.1.2",
     "amplitude-js": "^8.5.0",

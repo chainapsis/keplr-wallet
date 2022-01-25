@@ -25,15 +25,17 @@ import { useStore } from "../../stores";
 import { EthereumEndpoint } from "../../config.ui";
 import { useNotification } from "../../components/notification";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {
   const history = useHistory();
 
   const [phase, setPhase] = useState<"channel" | "amount">("channel");
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
+  const analytics = useAnalytics();
 
   const notification = useNotification();
 
@@ -94,7 +96,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   },
                   (tx: any) => {
                     const isSuccess = tx.code == null || tx.code === 0;
-                    analyticsStore.logEvent("Send token finished", {
+                    analytics.logEvent("Send token finished", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       feeType: ibcTransferConfigs.feeConfig.feeType,

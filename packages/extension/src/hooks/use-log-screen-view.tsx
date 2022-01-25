@@ -1,28 +1,31 @@
-import { EventProperties } from "../stores/analytics";
+import { useAnalytics, EventProperties } from "@keplr-wallet/analytics";
 import { useStore } from "../stores";
 import { useEffect } from "react";
 import { useLanguage } from "../languages";
 
 export const useLogScreenView = (
   screenName: string,
-  eventProperties?: EventProperties
+  eventProperties: EventProperties = {}
 ): void => {
-  const { chainStore, analyticsStore } = useStore();
+  const analytics = useAnalytics();
+  const { chainStore, accountStore } = useStore();
   const language = useLanguage();
 
+  const currentChainInfo = chainStore.getChain(chainStore.current.chainId);
+  const defaultAccountInfo = accountStore.getAccount("cosmoshub-4");
+
   useEffect(() => {
-    if (analyticsStore.isInitialized) {
-      if (eventProperties && eventProperties.chainId) {
-        const { chainId } = eventProperties;
-        const chainInfo = chainStore.getChain(chainId);
-        eventProperties.chainName = chainInfo.chainName;
+    if (analytics.isInitialized) {
+      if (eventProperties) {
+        eventProperties.chainId = currentChainInfo.chainId;
+        eventProperties.chainName = currentChainInfo.chainName;
       }
-      analyticsStore.setUserId();
-      analyticsStore.setUserProperties({
+      analytics.setUserId(defaultAccountInfo.bech32Address);
+      analytics.setUserProperties({
         currency: language.fiatCurrency,
         language: language.language,
       });
-      analyticsStore.logScreenView(screenName, eventProperties);
+      analytics.logScreenView(screenName, eventProperties);
     }
-  }, [analyticsStore.isInitialized]);
+  }, [analytics.isInitialized]);
 };

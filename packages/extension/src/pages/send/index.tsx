@@ -27,6 +27,7 @@ import {
   openPopupWindow,
   PopupSize,
 } from "@keplr-wallet/popup";
+import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -53,13 +54,8 @@ export const SendPage: FunctionComponent = observer(() => {
 
   const notification = useNotification();
 
-  const {
-    chainStore,
-    accountStore,
-    priceStore,
-    queriesStore,
-    analyticsStore,
-  } = useStore();
+  const { chainStore, accountStore, priceStore, queriesStore } = useStore();
+  const analytics = useAnalytics();
   const current = chainStore.current;
 
   const accountInfo = accountStore.getAccount(current.chainId);
@@ -200,7 +196,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 },
                 (tx: any) => {
                   const isSuccess = tx.code == null || tx.code === 0;
-                  analyticsStore.logEvent("Send token finished", {
+                  analytics.logEvent("Send token finished", {
                     chainId: chainStore.current.chainId,
                     chainName: chainStore.current.chainName,
                     feeType: sendConfigs.feeConfig.feeType,

@@ -8,7 +8,7 @@ import { Input, PasswordInput } from "../../../components/form";
 import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 import { BackButton } from "../index";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
+import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const TypeImportLedger = "import-ledger";
 
@@ -21,7 +21,7 @@ interface FormData {
 export const ImportLedgerIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const { analyticsStore } = useStore();
+  const analytics = useAnalytics();
 
   return (
     <Button
@@ -32,7 +32,7 @@ export const ImportLedgerIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeImportLedger);
-        analyticsStore.logEvent("Import account started", {
+        analytics.logEvent("Import account started", {
           registerType: "ledger",
         });
       }}
@@ -57,7 +57,7 @@ export const ImportLedgerPage: FunctionComponent<{
     },
   });
 
-  const { analyticsStore, accountStore } = useStore();
+  const analytics = useAnalytics();
 
   return (
     <div>
@@ -75,15 +75,8 @@ export const ImportLedgerPage: FunctionComponent<{
               data.password,
               bip44Option.bip44HDPath
             );
-            const accountInfo = accountStore.getAccount(
-              analyticsStore.mainChainId
-            );
-            analyticsStore.setUserId(accountInfo.bech32Address);
-            analyticsStore.setUserProperties({
+            analytics.setUserProperties({
               registerType: "ledger",
-              accountType: "ledger",
-            });
-            analyticsStore.logEvent("Import account finished", {
               accountType: "ledger",
             });
           } catch (e) {

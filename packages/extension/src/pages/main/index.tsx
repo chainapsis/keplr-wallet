@@ -84,7 +84,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const hasTokens = tokens.length > 0;
 
-  useLogScreenView("Home Dashboard");
+  useLogScreenView("Home dashboard");
 
   return (
     <HeaderLayout

@@ -15,10 +15,12 @@ import { useNotification } from "../../components/notification";
 import { useHistory } from "react-router";
 
 import { FormattedMessage } from "react-intl";
+import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore } = useStore();
+  const analytics = useAnalytics();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
@@ -42,7 +44,7 @@ export const StakeView: FunctionComponent = observer(() => {
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
-        analyticsStore.logEvent("Claim reward started", {
+        analytics.logEvent("Claim reward started", {
           chainId: chainStore.current.chainId,
           chainName: chainStore.current.chainName,
         });
@@ -53,15 +55,7 @@ export const StakeView: FunctionComponent = observer(() => {
           rewards.getDescendingPendingRewardValidatorAddresses(8),
           "",
           undefined,
-          undefined,
-          (tx: any) => {
-            const isSuccess = tx.code == null || tx.code === 0;
-            analyticsStore.logEvent("Claim reward finished", {
-              chainId: chainStore.current.chainId,
-              chainName: chainStore.current.chainName,
-              isSuccess,
-            });
-          }
+          undefined
         );
 
         history.replace("/");
@@ -186,7 +180,7 @@ export const StakeView: FunctionComponent = observer(() => {
             if (!isStakableExist) {
               e.preventDefault();
             } else {
-              analyticsStore.logEvent("Stake button clicked", {
+              analytics.logEvent("Stake button clicked", {
                 chainId: chainStore.current.chainId,
                 chainName: chainStore.current.chainName,
               });
