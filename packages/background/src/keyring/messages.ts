@@ -612,8 +612,7 @@ export class RequestSignDirectMsg extends Message<{
       chainId?: string | null;
       accountNumber?: string | null;
     },
-    public readonly signOptions: KeplrSignOptions = {},
-    public readonly isEthereum: boolean = false
+    public readonly signOptions: KeplrSignOptions = {}
   ) {
     super();
   }

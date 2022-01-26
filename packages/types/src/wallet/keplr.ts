@@ -35,6 +35,7 @@ export interface KeplrSignOptions {
   readonly preferNoSetMemo?: boolean;
 
   readonly disableBalanceCheck?: boolean;
+  readonly isEthereum?: boolean;
 }
 
 export interface Keplr {

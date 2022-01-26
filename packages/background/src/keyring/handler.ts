@@ -84,17 +84,10 @@ export const getHandler: (service: KeyRingService) => Handler = (
         );
       case RequestSignDirectMsg:
         const requestSignDirectMessage = msg as RequestSignDirectMsg;
-        if (!requestSignDirectMessage.isEthereum) {
-          return handleRequestSignDirectMsg(service)(
-            env,
-            requestSignDirectMessage
-          );
-        } else {
-          return handleRequestSignEthereumMsg(service)(
-            env,
-            requestSignDirectMessage
-          );
-        }
+        return handleRequestSignDirectMsg(service)(
+          env,
+          requestSignDirectMessage
+        );
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
           env,
@@ -333,46 +326,6 @@ const handleRequestSignDirectMsg: (
     });
 
     const response = await service.requestSignDirect(
-      env,
-      msg.origin,
-      msg.chainId,
-      msg.signer,
-      signDoc,
-      msg.signOptions
-    );
-
-    return {
-      signed: {
-        bodyBytes: response.signed.bodyBytes,
-        authInfoBytes: response.signed.authInfoBytes,
-        chainId: response.signed.chainId,
-        accountNumber: response.signed.accountNumber.toString(),
-      },
-      signature: response.signature,
-    };
-  };
-};
-
-const handleRequestSignEthereumMsg: (
-  service: KeyRingService
-) => InternalHandler<RequestSignDirectMsg> = (service) => {
-  return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainId,
-      msg.origin
-    );
-
-    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
-      bodyBytes: msg.signDoc.bodyBytes,
-      authInfoBytes: msg.signDoc.authInfoBytes,
-      chainId: msg.signDoc.chainId,
-      accountNumber: msg.signDoc.accountNumber
-        ? Long.fromString(msg.signDoc.accountNumber)
-        : undefined,
-    });
-
-    const response = await service.requestSignEthereum(
       env,
       msg.origin,
       msg.chainId,

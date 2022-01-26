@@ -188,44 +188,6 @@ export class Keplr implements IKeplr {
     );
   }
 
-  async signEthereum(
-    chainId: string,
-    signer: string,
-    signDoc: {
-      bodyBytes?: Uint8Array | null;
-      authInfoBytes?: Uint8Array | null;
-      chainId?: string | null;
-      accountNumber?: Long | null;
-    },
-    signOptions: KeplrSignOptions = {}
-  ): Promise<DirectSignResponse> {
-    const msg = new RequestSignDirectMsg(
-      chainId,
-      signer,
-      {
-        bodyBytes: signDoc.bodyBytes,
-        authInfoBytes: signDoc.authInfoBytes,
-        chainId: signDoc.chainId,
-        accountNumber: signDoc.accountNumber
-          ? signDoc.accountNumber.toString()
-          : null,
-      },
-      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
-      true // Parameter isEthereum
-    );
-    const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
-
-    return {
-      signed: {
-        bodyBytes: response.signed.bodyBytes,
-        authInfoBytes: response.signed.authInfoBytes,
-        chainId: response.signed.chainId,
-        accountNumber: Long.fromString(response.signed.accountNumber),
-      },
-      signature: response.signature,
-    };
-  }
-
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }

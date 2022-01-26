@@ -340,68 +340,18 @@ export class KeyRingService {
     const newSignDoc = cosmos.tx.v1beta1.SignDoc.decode(newSignDocBytes);
 
     try {
-      const signature = await this.keyRing.sign(
-        env,
-        chainId,
-        coinType,
-        makeSignBytes(newSignDoc)
-      );
+      const signature = signOptions.isEthereum
+        ? await this.keyRing.signEthereum(makeSignBytes(newSignDoc))
+        : await this.keyRing.sign(
+            env,
+            chainId,
+            coinType,
+            makeSignBytes(newSignDoc)
+          );
 
       return {
         signed: newSignDoc,
         signature: encodeSecp256k1Signature(key.pubKey, signature),
-      };
-    } finally {
-      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-    }
-  }
-
-  async requestSignEthereum(
-    env: Env,
-    msgOrigin: string,
-    chainId: string,
-    signer: string, // This is Evmos public key
-    signDoc: cosmos.tx.v1beta1.SignDoc,
-    signOptions: KeplrSignOptions
-  ): Promise<DirectSignResponse> {
-    // AC: TODO
-    const coinType = await this.chainsService.getChainCoinType(chainId);
-
-    // Confirm Evmos public key parameter matches user's address
-
-    const key = await this.keyRing.getKey(chainId, coinType);
-    const bech32Address = new Bech32Address(key.address).toBech32(
-      (await this.chainsService.getChainInfo(chainId)).bech32Config
-        .bech32PrefixAccAddr
-    );
-    if (signer !== bech32Address) {
-      throw new Error("Signer mismatched");
-    }
-
-    const newSignDocBytes = (await this.interactionService.waitApprove(
-      env,
-      "/sign",
-      "request-sign",
-      {
-        msgOrigin,
-        chainId,
-        mode: "direct",
-        signDocBytes: cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
-        signer,
-        signOptions,
-      }
-    )) as Uint8Array;
-
-    const newSignDoc = cosmos.tx.v1beta1.SignDoc.decode(newSignDocBytes);
-
-    try {
-      const signature = await this.keyRing.signEthereum(
-        makeSignBytes(newSignDoc)
-      );
-
-      return {
-        signed: newSignDoc,
-        signature: encodeSecp256k1Signature(key.pubKey, signature), // Leave in Secp256k1 Format for Keplr to digest
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
