@@ -83,10 +83,9 @@ export const getHandler: (service: KeyRingService) => Handler = (
           msg as RequestVerifyADR36AminoSignDoc
         );
       case RequestSignDirectMsg:
-        const requestSignDirectMessage = msg as RequestSignDirectMsg;
         return handleRequestSignDirectMsg(service)(
           env,
-          requestSignDirectMessage
+          msg as RequestSignDirectMsg
         );
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
