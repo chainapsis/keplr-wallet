@@ -8,12 +8,10 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Dec } from "@keplr-wallet/unit";
 import { FormattedMessage } from "react-intl";
-import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const IBCTransferView: FunctionComponent = observer(() => {
   const history = useHistory();
   const { accountStore, chainStore, queriesStore } = useStore();
-  const analytics = useAnalytics();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);

@@ -110,10 +110,6 @@ export const TxButtonView: FunctionComponent = observer(() => {
         data-loading={accountInfo.isSendingMsg === "send"}
         onClick={(e) => {
           e.preventDefault();
-          analytics.logEvent("Send token started", {
-            chainId: chainStore.current.chainId,
-            chainName: chainStore.current.chainName,
-          });
 
           if (hasAssets) {
             history.push("/send");
