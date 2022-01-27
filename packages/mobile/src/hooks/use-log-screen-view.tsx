@@ -1,11 +1,11 @@
-import { useCallback } from "react";
-import { useAnalytics, EventProperties } from "../providers/analytics";
+import { useEffect } from "react";
+import { useAnalytics } from "../providers/analytics";
+import { EventProperties } from "@keplr-wallet/analytics";
 import { useStore } from "../stores";
-import { useFocusEffect } from "@react-navigation/native";
 
 export const useLogScreenView = (
   screenName: string,
-  eventProperties?: EventProperties
+  eventProperties: EventProperties = {}
 ): void => {
   const analytics = useAnalytics();
   const { chainStore, priceStore, accountStore } = useStore();
@@ -13,27 +13,27 @@ export const useLogScreenView = (
   const currentChainInfo = chainStore.getChain(chainStore.current.chainId);
   const defaultAccountInfo = accountStore.getAccount("cosmoshub-4");
 
-  useFocusEffect(
-    useCallback(() => {
-      if (analytics.isInitialized) {
-        if (eventProperties) {
-          eventProperties.chainId = currentChainInfo.chainId;
-          eventProperties.chainName = currentChainInfo.chainName;
-        }
-        analytics.setUserId(defaultAccountInfo.bech32Address);
-        analytics.setUserProperties({
-          currency: priceStore.defaultVsCurrency,
-        });
-        analytics.logScreenView(screenName, eventProperties);
+  useEffect(() => {
+    if (analytics.isInitialized) {
+      eventProperties.currentChainId = currentChainInfo.chainId;
+      eventProperties.currentChainName = currentChainInfo.chainName;
+
+      if (eventProperties.chainId) {
+        eventProperties.chainName = chainStore.getChain(
+          eventProperties.chainId
+        ).chainName;
       }
-    }, [
-      analytics,
-      currentChainInfo.chainId,
-      currentChainInfo.chainName,
-      defaultAccountInfo.bech32Address,
-      eventProperties,
-      priceStore.defaultVsCurrency,
-      screenName,
-    ])
-  );
+      if (eventProperties.toChainId) {
+        eventProperties.toChainName = chainStore.getChain(
+          eventProperties.toChainId
+        ).chainName;
+      }
+
+      analytics.setUserId(defaultAccountInfo.bech32Address);
+      analytics.setUserProperties({
+        currency: priceStore.defaultVsCurrency,
+      });
+      analytics.logScreenView(screenName, eventProperties);
+    }
+  }, [screenName, analytics.isInitialized]);
 };

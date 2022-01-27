@@ -33,6 +33,7 @@
     "@formatjs/intl-numberformat": "^7.1.5",
     "@formatjs/intl-pluralrules": "^4.0.28",
     "@formatjs/intl-relativetimeformat": "^9.1.7",
+    "@keplr-wallet/analytics": "^0.9.11",
     "@keplr-wallet/background": "^0.9.11-rc.3",
     "@keplr-wallet/common": "^0.9.10",
     "@keplr-wallet/cosmos": "^0.9.11-rc.3",

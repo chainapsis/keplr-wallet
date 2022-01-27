@@ -1,6 +1,6 @@
 import { Amplitude } from "@amplitude/react-native";
 import { makeObservable, observable } from "mobx";
-import { FeeType } from "@keplr-wallet/hooks";
+import { EventProperties, UserProperties } from "@keplr-wallet/analytics";
 import { sha256 } from "sha.js";
 import React, {
   createContext,
@@ -8,35 +8,6 @@ import React, {
   useContext,
   FunctionComponent,
 } from "react";
-
-export type EventProperties = {
-  chainId?: string;
-  chainIdPrefix?: string;
-  chainName?: string;
-  toChainId?: string;
-  toChainIdPrefix?: string;
-  toChainName?: string;
-  validatorName?: string;
-  proposalId?: string;
-  proposalTitle?: string;
-  linkTitle?: string;
-  linkUrl?: string;
-  registerType?: "seed" | "google" | "ledger" | "qr";
-  accountType?: "mnemonic" | "privateKey" | "ledger";
-  authType?: "biometrics" | "password";
-  feeType?: FeeType | undefined;
-  isSuccess?: boolean;
-  isIbc?: boolean;
-  fromScreen?: "Transaction" | "Setting";
-};
-
-export type UserProperties = {
-  registerType?: "seed" | "google" | "ledger" | "qr";
-  accountType?: "mnemonic" | "privateKey" | "ledger";
-  currency?: string;
-  language?: string;
-  hasExtensionAccount?: boolean;
-};
 
 export class KeplrAnalyticsRn {
   @observable
@@ -75,6 +46,11 @@ export class KeplrAnalyticsRn {
     eventName: string,
     eventProperties?: EventProperties | undefined
   ): void {
+    if (eventProperties && eventProperties.currentChainId) {
+      eventProperties.currentChainIdPrefix = eventProperties.currentChainId.split(
+        "-"
+      )[0];
+    }
     if (eventProperties && eventProperties.chainId) {
       eventProperties.chainIdPrefix = eventProperties.chainId.split("-")[0];
     }
