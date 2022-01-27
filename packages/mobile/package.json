@@ -22,7 +22,7 @@
     "postinstall": "sh ./scripts/fix-android-splash-screen-flash.sh"
   },
   "dependencies": {
-    "@amplitude/react-native": "^2.4.0",
+    "@amplitude/react-native": "^2.7.0",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@formatjs/intl-datetimeformat": "^4.1.6",

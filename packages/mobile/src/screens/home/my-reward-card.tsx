@@ -7,11 +7,13 @@ import { Dec } from "@keplr-wallet/unit";
 import { ViewStyle } from "react-native";
 import { useStore } from "../../stores";
 import { useSmartNavigation } from "../../navigation";
+import { useAnalytics } from "../../providers/analytics";
 
 export const MyRewardCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore } = useStore();
+  const analytics = useAnalytics();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -35,11 +37,6 @@ export const MyRewardCard: FunctionComponent<{
           .upperCase(true)
           .toString()}
         onPress={async () => {
-          analyticsStore.logEvent("Claim reward started", {
-            chainId: chainStore.current.chainId,
-            chainName: chainStore.current.chainName,
-          });
-
           try {
             await account.cosmos.sendWithdrawDelegationRewardMsgs(
               queryReward.getDescendingPendingRewardValidatorAddresses(8),
@@ -48,16 +45,12 @@ export const MyRewardCard: FunctionComponent<{
               {},
               {
                 onBroadcasted: (txHash) => {
-                  smartNavigation.pushSmart("TxPendingResult", {
-                    txHash: Buffer.from(txHash).toString("hex"),
-                  });
-                },
-                onFulfill: (tx) => {
-                  const isSuccess = tx.code == null || tx.code === 0;
-                  analyticsStore.logEvent("Claim reward finished", {
+                  analytics.logEvent("Claim reward tx broadcasted", {
                     chainId: chainStore.current.chainId,
                     chainName: chainStore.current.chainName,
-                    isSuccess,
+                  });
+                  smartNavigation.pushSmart("TxPendingResult", {
+                    txHash: Buffer.from(txHash).toString("hex"),
                   });
                 },
               }

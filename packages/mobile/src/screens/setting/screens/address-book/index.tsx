@@ -28,7 +28,7 @@ const addressBookItemComponent = {
 };
 
 export const AddressBookScreen: FunctionComponent = observer(() => {
-  const { chainStore, analyticsStore } = useStore();
+  const { chainStore } = useStore();
 
   const confirmModal = useConfirmModal();
 
@@ -80,10 +80,6 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
       headerRight: () => (
         <HeaderRightButton
           onPress={() => {
-            analyticsStore.logEvent("Add address started", {
-              chainId: chainStore.current.chainId,
-              chainName: chainStore.current.chainName,
-            });
             smartNavigation.navigateSmart("AddAddressBook", {
               chainId,
               addressBookConfig,
@@ -94,14 +90,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
         </HeaderRightButton>
       ),
     });
-  }, [
-    addressBookConfig,
-    analyticsStore,
-    chainId,
-    chainStore,
-    smartNavigation,
-    style,
-  ]);
+  }, [addressBookConfig, chainId, chainStore, smartNavigation, style]);
 
   const isInTransaction = recipientConfig != null || memoConfig != null;
   const AddressBookItem =

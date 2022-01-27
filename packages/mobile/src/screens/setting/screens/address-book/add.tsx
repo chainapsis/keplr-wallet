@@ -33,7 +33,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
     >
   >();
 
-  const { chainStore, analyticsStore } = useStore();
+  const { chainStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
   const addressBookConfig = route.params.addressBookConfig;
@@ -85,10 +85,6 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
               name,
               address: recipientConfig.rawRecipient,
               memo: memoConfig.memo,
-            });
-            analyticsStore.logEvent("Add address finished", {
-              chainId: chainStore.current.chainId,
-              chainName: chainStore.current.chainName,
             });
 
             smartNavigation.goBack();

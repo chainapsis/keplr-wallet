@@ -13,12 +13,14 @@ import { RectButton } from "../rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VectorCharacter } from "../vector-character";
 import FastImage from "react-native-fast-image";
+import { useAnalytics } from "../../providers/analytics";
 
 export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOptions>;
 
 export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
   (props) => {
-    const { chainStore, analyticsStore } = useStore();
+    const { chainStore } = useStore();
+    const analytics = useAnalytics();
     const navigation = useNavigation();
 
     const safeAreaInsets = useSafeAreaInsets();
@@ -50,7 +52,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
               <RectButton
                 key={chainInfo.chainId}
                 onPress={() => {
-                  analyticsStore.logEvent("Chain changed", {
+                  analytics.logEvent("Chain changed", {
                     chainId: chainStore.current.chainId,
                     chainName: chainStore.current.chainName,
                     toChainId: chainInfo.chainId,

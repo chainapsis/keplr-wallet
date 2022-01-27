@@ -11,6 +11,7 @@ import { View } from "react-native";
 import { useStore } from "../../../stores";
 import { Button } from "../../../components/button";
 import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
+import { useAnalytics } from "../../../providers/analytics";
 
 interface FormData {
   name: string;
@@ -33,7 +34,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const { analyticsStore } = useStore();
+  const analytics = useAnalytics();
 
   const smartNavigation = useSmartNavigation();
 
@@ -60,11 +61,8 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
         getValues("password"),
         bip44Option.bip44HDPath
       );
-      analyticsStore.setUserId();
-      analyticsStore.setUserProperties({
+      analytics.setUserProperties({
         registerType: "ledger",
-      });
-      analyticsStore.logEvent("Import account finished", {
         accountType: "ledger",
       });
 

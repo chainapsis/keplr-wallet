@@ -13,9 +13,9 @@ import * as WebBrowser from "expo-web-browser";
 import { Buffer } from "buffer/";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import Torus from "@toruslabs/torus.js";
-import { useStore } from "../../../stores";
 import { useLoadingScreen } from "../../../providers/loading-screen";
 import * as AppleAuthentication from "expo-apple-authentication";
+import { useAnalytics } from "../../../providers/analytics";
 
 interface FormData {
   name: string;
@@ -288,7 +288,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const { analyticsStore } = useStore();
+  const analytics = useAnalytics();
 
   const smartNavigation = useSmartNavigation();
 
@@ -335,11 +335,8 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         getValues("password"),
         { email, socialType: route.params.type }
       );
-      analyticsStore.setUserId();
-      analyticsStore.setUserProperties({
-        registerType: "google",
-      });
-      analyticsStore.logEvent("OAuth sign in finished", {
+      analytics.setUserProperties({
+        registerType: route.params.type,
         accountType: "privateKey",
       });
 

@@ -11,9 +11,11 @@ import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAnalytics } from "../../providers/analytics";
 
 export const RegisterNewUserScreen: FunctionComponent = observer(() => {
-  const { keyRingStore, analyticsStore } = useStore();
+  const { keyRingStore } = useStore();
+  const analytics = useAnalytics();
 
   const style = useStyle();
 
@@ -61,7 +63,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
           size="large"
           mode="light"
           onPress={() => {
-            analyticsStore.logEvent("OAuth sign in started", {
+            analytics.logEvent("OAuth sign in started", {
               registerType: "apple",
             });
             smartNavigation.navigateSmart("Register.TorusSignIn", {
@@ -82,7 +84,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         size="large"
         mode="light"
         onPress={() => {
-          analyticsStore.logEvent("OAuth sign in started", {
+          analytics.logEvent("OAuth sign in started", {
             registerType: "google",
           });
           smartNavigation.navigateSmart("Register.TorusSignIn", {
@@ -105,7 +107,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         size="large"
         mode="light"
         onPress={() => {
-          analyticsStore.logEvent("Create account started", {
+          analytics.logEvent("Create account started", {
             registerType: "seed",
           });
           smartNavigation.navigateSmart("Register.NewMnemonic", {

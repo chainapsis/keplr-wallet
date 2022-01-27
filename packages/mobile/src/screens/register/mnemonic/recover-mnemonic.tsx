@@ -13,6 +13,7 @@ import Clipboard from "expo-clipboard";
 import { useStore } from "../../../stores";
 import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
 import { Buffer } from "buffer/";
+import { useAnalytics } from "../../../providers/analytics";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -64,7 +65,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const { analyticsStore } = useStore();
+  const analytics = useAnalytics();
 
   const smartNavigation = useSmartNavigation();
 
@@ -95,6 +96,10 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         getValues("password"),
         bip44Option.bip44HDPath
       );
+      analytics.setUserProperties({
+        registerType: "seed",
+        accountType: "mnemonic",
+      });
     } else {
       const privateKey = Buffer.from(mnemonic.trim().replace("0x", ""), "hex");
       await registerConfig.createPrivateKey(
@@ -102,15 +107,11 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         privateKey,
         getValues("password")
       );
+      analytics.setUserProperties({
+        registerType: "seed",
+        accountType: "privateKey",
+      });
     }
-
-    analyticsStore.setUserId();
-    analyticsStore.setUserProperties({
-      registerType: "seed",
-    });
-    analyticsStore.logEvent("Import account finished", {
-      accountType: "mnemonic",
-    });
 
     smartNavigation.reset({
       index: 0,

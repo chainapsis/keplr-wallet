@@ -11,6 +11,7 @@ import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { useAnalytics } from "../../../providers/analytics";
 
 export const DelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -27,7 +28,8 @@ export const DelegateScreen: FunctionComponent = observer(() => {
 
   const validatorAddress = route.params.validatorAddress;
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore } = useStore();
+  const analytics = useAnalytics();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
@@ -111,18 +113,14 @@ export const DelegateScreen: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    smartNavigation.pushSmart("TxPendingResult", {
-                      txHash: Buffer.from(txHash).toString("hex"),
-                    });
-                  },
-                  onFulfill: (tx) => {
-                    const isSuccess = tx.code == null || tx.code === 0;
-                    analyticsStore.logEvent("Delegate finished", {
+                    analytics.logEvent("Delegate tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       validatorName: validator?.description.moniker,
                       feeType: sendConfigs.feeConfig.feeType,
-                      isSuccess,
+                    });
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
                     });
                   },
                 }

@@ -13,6 +13,7 @@ import {
 import { View } from "react-native";
 import { useSmartNavigation } from "../../../../navigation";
 import { useLogScreenView } from "../../../../hooks";
+import { useAnalytics } from "../../../../providers/analytics";
 
 const CheckIcon: FunctionComponent<{
   color: string;
@@ -77,7 +78,8 @@ export const getKeyStoreParagraph = (keyStore: MultiKeyStoreInfoElem) => {
 };
 
 export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
-  const { keyRingStore, analyticsStore } = useStore();
+  const { keyRingStore } = useStore();
+  const analytics = useAnalytics();
 
   const style = useStyle();
 
@@ -168,7 +170,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
                     ) : undefined
                   }
                   onPress={async () => {
-                    analyticsStore.logEvent("Account changed");
+                    analytics.logEvent("Account changed");
                     await selectKeyStore(keyStore);
                   }}
                 />

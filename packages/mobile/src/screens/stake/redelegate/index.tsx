@@ -17,6 +17,7 @@ import {
 } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
+import { useAnalytics } from "../../../providers/analytics";
 
 export const RedelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -35,7 +36,8 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
 
   const smartNavigation = useSmartNavigation();
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore } = useStore();
+  const analytics = useAnalytics();
 
   const style = useStyle();
 
@@ -205,19 +207,15 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    smartNavigation.pushSmart("TxPendingResult", {
-                      txHash: Buffer.from(txHash).toString("hex"),
-                    });
-                  },
-                  onFulfill: (tx) => {
-                    const isSuccess = tx.code == null || tx.code === 0;
-                    analyticsStore.logEvent("Redelgate finished", {
+                    analytics.logEvent("Redelgate tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       validatorName: srcValidator?.description.moniker,
                       toValidatorName: dstValidator?.description.moniker,
                       feeType: sendConfigs.feeConfig.feeType,
-                      isSuccess,
+                    });
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
                     });
                   },
                 }

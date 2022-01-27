@@ -105,6 +105,7 @@ import {
 } from "./screens/register/import-from-extension";
 import { OsmosisWebpageScreen } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
+import { useAnalytics } from "./providers/analytics";
 
 const {
   SmartNavigatorProvider,
@@ -635,7 +636,7 @@ export const SettingStackScreen: FunctionComponent = () => {
 
   const navigation = useNavigation();
 
-  const { analyticsStore } = useStore();
+  const analytics = useAnalytics();
 
   return (
     <Stack.Navigator
@@ -663,7 +664,7 @@ export const SettingStackScreen: FunctionComponent = () => {
           headerRight: () => (
             <HeaderRightButton
               onPress={() => {
-                analyticsStore.logEvent("Add additional account started");
+                analytics.logEvent("Add additional account started");
                 navigation.navigate("Register", {
                   screen: "Register.Intro",
                 });

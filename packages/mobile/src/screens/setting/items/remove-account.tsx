@@ -5,11 +5,13 @@ import { useStyle } from "../../../styles";
 import { PasswordInputModal } from "../../../modals/password-input/modal";
 import { useStore } from "../../../stores";
 import { useNavigation } from "@react-navigation/native";
+import { useAnalytics } from "../../../providers/analytics";
 
 export const SettingRemoveAccountItem: FunctionComponent<{
   topBorder?: boolean;
 }> = observer(({ topBorder }) => {
-  const { keychainStore, keyRingStore, analyticsStore } = useStore();
+  const { keychainStore, keyRingStore } = useStore();
+  const analytics = useAnalytics();
 
   const style = useStyle();
 
@@ -40,7 +42,7 @@ export const SettingRemoveAccountItem: FunctionComponent<{
 
           if (index >= 0) {
             await keyRingStore.deleteKeyRing(index, password);
-            analyticsStore.logEvent("Account removed");
+            analytics.logEvent("Account removed");
 
             if (keyRingStore.multiKeyStoreInfo.length === 0) {
               await keychainStore.reset();

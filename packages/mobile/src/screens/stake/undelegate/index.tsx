@@ -13,6 +13,7 @@ import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/type
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { Buffer } from "buffer/";
 import { useSmartNavigation } from "../../../navigation";
+import { useAnalytics } from "../../../providers/analytics";
 
 export const UndelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -29,7 +30,8 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   const validatorAddress = route.params.validatorAddress;
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore } = useStore();
+  const analytics = useAnalytics();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
@@ -167,18 +169,14 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    smartNavigation.pushSmart("TxPendingResult", {
-                      txHash: Buffer.from(txHash).toString("hex"),
-                    });
-                  },
-                  onFulfill: (tx) => {
-                    const isSuccess = tx.code == null || tx.code === 0;
-                    analyticsStore.logEvent("Undelegate finished", {
+                    analytics.logEvent("Undelegate tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       validatorName: validator?.description.moniker,
                       feeType: sendConfigs.feeConfig.feeType,
-                      isSuccess,
+                    });
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
                     });
                   },
                 }
