@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useHistory } from "react-router";
 import { Button, Alert } from "reactstrap";
 
@@ -8,14 +8,30 @@ import { FormattedMessage } from "react-intl";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
   const history = useHistory();
+  const analytics = useAnalytics();
 
   const interactionInfo = useInteractionInfo(() => {
     chainSuggestStore.rejectAll();
   });
+
+  useEffect(() => {
+    if (
+      analytics.isInitialized &&
+      chainSuggestStore.waitingSuggestedChainInfo
+    ) {
+      analytics.logEvent("Suggest chain viewed", {
+        chainId: chainSuggestStore.waitingSuggestedChainInfo.data.chainId,
+        chainName: chainSuggestStore.waitingSuggestedChainInfo.data.chainName,
+        rpc: chainSuggestStore.waitingSuggestedChainInfo.data.rpc,
+        rest: chainSuggestStore.waitingSuggestedChainInfo.data.rest,
+      });
+    }
+  }, [analytics.isInitialized, chainSuggestStore.waitingSuggestedChainInfo]);
 
   return (
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>

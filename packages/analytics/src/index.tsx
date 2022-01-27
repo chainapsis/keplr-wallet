@@ -9,12 +9,10 @@ import React, {
   FunctionComponent,
 } from "react";
 
-type AmplitudeConfig = Amplitude.Config;
-type AnalyticsConfigs = {
-  amplitudeConfig: AmplitudeConfig;
-};
-
 export type EventProperties = {
+  currentChainId?: string;
+  currentChainIdPrefix?: string;
+  currentChainName?: string;
   chainId?: string;
   chainIdPrefix?: string;
   chainName?: string;
@@ -33,6 +31,8 @@ export type EventProperties = {
   isSuccess?: boolean;
   isIbc?: boolean;
   fromScreen?: "Transaction" | "Setting";
+  rpc?: string;
+  rest?: string;
 };
 
 export type UserProperties = {
@@ -41,6 +41,11 @@ export type UserProperties = {
   currency?: string;
   language?: string;
   hasExtensionAccount?: boolean;
+};
+
+type AmplitudeConfig = Amplitude.Config;
+type AnalyticsConfigs = {
+  amplitudeConfig: AmplitudeConfig;
 };
 
 export class KeplrAnalytics {
@@ -92,6 +97,11 @@ export class KeplrAnalytics {
     eventName: string,
     eventProperties?: EventProperties | undefined
   ): void {
+    if (eventProperties && eventProperties.currentChainId) {
+      eventProperties.chainIdPrefix = eventProperties.currentChainId.split(
+        "-"
+      )[0];
+    }
     if (eventProperties && eventProperties.chainId) {
       eventProperties.chainIdPrefix = eventProperties.chainId.split("-")[0];
     }

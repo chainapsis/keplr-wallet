@@ -16,10 +16,20 @@ export const useLogScreenView = (
 
   useEffect(() => {
     if (analytics.isInitialized) {
-      if (eventProperties) {
-        eventProperties.chainId = currentChainInfo.chainId;
-        eventProperties.chainName = currentChainInfo.chainName;
+      eventProperties.currentChainId = currentChainInfo.chainId;
+      eventProperties.currentChainName = currentChainInfo.chainName;
+
+      if (eventProperties.chainId) {
+        eventProperties.chainName = chainStore.getChain(
+          eventProperties.chainId
+        ).chainName;
       }
+      if (eventProperties.toChainId) {
+        eventProperties.toChainName = chainStore.getChain(
+          eventProperties.toChainId
+        ).chainName;
+      }
+
       analytics.setUserId(defaultAccountInfo.bech32Address);
       analytics.setUserProperties({
         currency: language.fiatCurrency,
@@ -27,5 +37,5 @@ export const useLogScreenView = (
       });
       analytics.logScreenView(screenName, eventProperties);
     }
-  }, [analytics.isInitialized]);
+  }, [analytics.isInitialized, screenName]);
 };
