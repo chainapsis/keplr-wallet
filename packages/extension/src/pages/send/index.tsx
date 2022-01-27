@@ -194,14 +194,14 @@ export const SendPage: FunctionComponent = observer(() => {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
                 },
-                (tx: any) => {
-                  const isSuccess = tx.code == null || tx.code === 0;
-                  analytics.logEvent("Send token finished", {
-                    chainId: chainStore.current.chainId,
-                    chainName: chainStore.current.chainName,
-                    feeType: sendConfigs.feeConfig.feeType,
-                    isSuccess,
-                  });
+                {
+                  onBroadcasted: () => {
+                    analytics.logEvent("Send token tx broadcasted", {
+                      chainId: chainStore.current.chainId,
+                      chainName: chainStore.current.chainName,
+                      feeType: sendConfigs.feeConfig.feeType,
+                    });
+                  },
                 }
               );
               if (!isDetachedPage) {

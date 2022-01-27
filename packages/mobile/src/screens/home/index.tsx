@@ -131,7 +131,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     queryBalances.nonNativeBalances
   );
 
-  useLogScreenView("Home Dashboard", {
+  useLogScreenView("Home dashboard", {
     chainId: chainStore.current.chainId,
     chainName: chainStore.current.chainName,
   });

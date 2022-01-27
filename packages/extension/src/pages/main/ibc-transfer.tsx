@@ -59,11 +59,6 @@ export const IBCTransferView: FunctionComponent = observer(() => {
         onClick={(e) => {
           e.preventDefault();
 
-          analytics.logEvent("Send token started", {
-            chainId: chainStore.current.chainId,
-            chainName: chainStore.current.chainName,
-            isIbc: true,
-          });
           history.push("/ibc-transfer");
         }}
       >

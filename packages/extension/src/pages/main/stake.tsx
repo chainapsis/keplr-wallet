@@ -44,10 +44,6 @@ export const StakeView: FunctionComponent = observer(() => {
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
-        analytics.logEvent("Claim reward started", {
-          chainId: chainStore.current.chainId,
-          chainName: chainStore.current.chainName,
-        });
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
@@ -55,7 +51,15 @@ export const StakeView: FunctionComponent = observer(() => {
           rewards.getDescendingPendingRewardValidatorAddresses(8),
           "",
           undefined,
-          undefined
+          undefined,
+          {
+            onBroadcasted: () => {
+              analytics.logEvent("Claim reward tx broadcasted", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+              });
+            },
+          }
         );
 
         history.replace("/");
