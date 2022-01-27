@@ -681,7 +681,11 @@ export class KeyRing {
     }
   }
 
-  public async signEthereum(message: Uint8Array): Promise<Uint8Array> {
+  public async signEthereum(
+    chainId: string,
+    defaultCoinType: number,
+    message: Uint8Array
+  ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
     }
@@ -706,11 +710,17 @@ export class KeyRing {
       // );
       throw new Error("Ethereum signing with Ledger is not yet supported");
     } else {
-      if (!this.mnemonic) {
-        throw new Error("Mnemonic is undefined");
+      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+      if (coinType !== 60) {
+        throw new Error(
+          "Invalid coin type passed in to Ethereum signing (expected 60)"
+        );
       }
 
-      const ethWallet = Wallet.fromMnemonic(this.mnemonic);
+      const privKey = this.loadPrivKey(coinType);
+
+      // Use ether js to sign Ethereum tx
+      const ethWallet = new Wallet(privKey.toBytes());
       const signature = await ethWallet.signMessage(message);
       return new TextEncoder().encode(signature);
     }
