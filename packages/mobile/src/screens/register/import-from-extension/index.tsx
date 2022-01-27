@@ -17,6 +17,7 @@ import {
   registerExportedKeyRingDatas,
 } from "../../../utils/import-from-mobile";
 import { AsyncKVStore } from "../../../common";
+import { useAnalytics } from "../../../providers/analytics";
 
 export * from "./intro";
 export * from "./set-password";
@@ -42,6 +43,7 @@ export interface WCExportKeyRingDatasResponse {
 
 export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
   const { chainStore, keyRingStore } = useStore();
+  const analytics = useAnalytics();
 
   const [addressBookConfigMap] = useState(
     () => new AddressBookConfigMap(new AsyncKVStore("address_book"), chainStore)
@@ -77,6 +79,10 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
         sharedData,
         chainStore.chainInfosInUI.map((chainInfo) => chainInfo.chainId)
       );
+      analytics.setUserProperties({
+        registerType: "qr",
+        accountType: imported.KeyRingDatas[0].type,
+      });
 
       if (keyRingStore.multiKeyStoreInfo.length > 0) {
         // If already has accounts,
