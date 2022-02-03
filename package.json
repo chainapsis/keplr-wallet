@@ -82,5 +82,6 @@
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
     "node-sass": "file:./etc/noop"
-  }
+  },
+  "dependencies": {}
 }
