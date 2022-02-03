@@ -20,7 +20,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     rpc: "https://rpc-cosmoshub.keplr.app",
     rest: "https://lcd-cosmoshub.keplr.app",
     chainId: "cosmoshub-4",
-    chainName: "Cosmos",
+    chainName: "Cosmos Hub",
     stakeCurrency: {
       coinDenom: "ATOM",
       coinMinimalDenom: "uatom",

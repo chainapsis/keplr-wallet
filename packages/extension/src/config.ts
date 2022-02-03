@@ -100,7 +100,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: COSMOS_REST_ENDPOINT,
     restConfig: COSMOS_REST_CONFIG,
     chainId: "cosmoshub-4",
-    chainName: "Cosmos",
+    chainName: "Cosmos Hub",
     stakeCurrency: {
       coinDenom: "ATOM",
       coinMinimalDenom: "uatom",
