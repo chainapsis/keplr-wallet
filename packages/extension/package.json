@@ -36,7 +36,7 @@
     "aes-js": "^3.1.2",
     "amplitude-js": "^8.5.0",
     "argon-dashboard-react": "^1.1.0",
-    "axios": "^0.21.0",
+    "axios": "^0.21.4",
     "bip39": "^3.0.2",
     "buffer": "^6.0.3",
     "chart.js": "^2.9.3",
