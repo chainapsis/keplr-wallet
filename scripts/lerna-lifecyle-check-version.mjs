@@ -21,7 +21,7 @@ const version = require("../lerna.json").version;
         const sem = semver.parse(packageJson.version);
         if (sem.prerelease.length !== 0) {
           throw new Error(
-            `The root version doesn't have prelease, but some packages have a prelease. Suggest you to use "--conventional-graduate": ${pack}`
+            `The root version doesn't have prelease, but some packages have a prelease. Suggest you to use "lerna version --conventional-commits --conventional-graduate --no-changelog": ${pack}`
           );
         }
       }
