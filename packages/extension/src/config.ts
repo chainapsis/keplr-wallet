@@ -888,7 +888,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "certik",
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
   },
   {
     rpc: IRIS_RPC_ENDPOINT,
