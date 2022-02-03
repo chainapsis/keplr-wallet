@@ -8,7 +8,7 @@
     ]
   },
   "scripts": {
-    "clean": "rm -rf node_modules; rm -rf build",
+    "clean": "sh ./scripts/clean.sh",
     "android": "yarn build:provider && react-native run-android",
     "ios": "yarn build:provider && react-native run-ios",
     "android:connect": "adb reverse tcp:8081 tcp:8081",
