@@ -16,6 +16,12 @@
 default_platform(:android)
 
 platform :android do
+  def check_version(version)
+    if (version =~ /^\d+.\d+.\d+$/) != 0
+      UI.user_error!("Invalid version #{version}")
+    end
+  end
+
   def set_version_code(number)
     path = "../app/build.gradle"
     re = /versionCode\s+(\d+)/
@@ -29,12 +35,7 @@ platform :android do
   end
 
   def set_version(version)
-    re = /\d+.\d+.\d+/
-    version_nums = version[re, 0]
-
-    if version_nums.length != 5
-      UI.error("Invalid version #{version}")
-    end
+    check_version(version)
 
     path = "../app/build.gradle"
     re = /versionName\s+("[\d.]+")/
@@ -54,12 +55,7 @@ platform :android do
       target_version = prompt(text: "Enter the target version\n(Ex. 1.0.0): ")
     end
 
-    re = /\d+.\d+.\d+/
-    version_nums = target_version[re, 0]
-
-    if version_nums.length != 5
-      UI.error("Invalid version #{target_version}")
-    end
+    check_version(target_version)
 
     UI.message("Code push will be deployed for Android #{target_version}")
 

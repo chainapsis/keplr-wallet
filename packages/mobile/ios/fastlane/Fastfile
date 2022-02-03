@@ -16,6 +16,12 @@
 default_platform(:ios)
 
 platform :ios do
+  def check_version(version)
+    if (version =~ /^\d+.\d+.\d+$/) != 0
+      UI.user_error!("Invalid version #{version}")
+    end
+  end
+
   lane :deploy_codepush do |options|
     if options[:target_version]
       target_version = options[:target_version]
@@ -23,12 +29,7 @@ platform :ios do
       target_version = prompt(text: "Enter the target version\n(Ex. 1.0.0): ")
     end
 
-    re = /\d+.\d+.\d+/
-    version_nums = target_version[re, 0]
-
-    if version_nums.length != 5
-      UI.error("Invalid version #{target_version}")
-    end
+    check_version(target_version)
 
     UI.message("Code push will be deployed for IOS #{target_version}")
 
@@ -55,12 +56,7 @@ platform :ios do
       version = prompt(text: "Enter the version type or specific version\n(Ex. 1.0.0): ")
     end
 
-    re = /\d+.\d+.\d+/
-    version_nums = version[re, 0]
-
-    if version_nums.length != 5
-      UI.error("Invalid version #{version}")
-    end
+    check_version(version)
 
     # Should set the MATCH_KEYCHAIN_PASSWORD env to prevent interaction if you need.
     cert(
