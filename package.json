@@ -34,7 +34,8 @@
     "lint-fix": "lerna run lint-fix",
     "ci": "yarn install --frozen-lockfile && yarn build && yarn workspace mobile typecheck && yarn test",
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "version": "npx zx ./scripts/lerna-lifecyle-check-version.mjs"
   },
   "pre-commit": [
     "pre-commit"
