@@ -1442,6 +1442,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "juno-network",
       },
     ],
+    gasPriceStep: {
+      low: 0.001,
+      average: 0.0025,
+      high: 0.004,
+    },
     features: [
       "stargate",
       "no-legacy-stdTx",

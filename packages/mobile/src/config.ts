@@ -763,6 +763,11 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
       },
     ],
+    gasPriceStep: {
+      low: 0.001,
+      average: 0.0025,
+      high: 0.004,
+    },
     features: [
       "stargate",
       "no-legacy-stdTx",
