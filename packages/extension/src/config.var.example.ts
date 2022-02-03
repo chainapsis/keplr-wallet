@@ -128,4 +128,9 @@ export const STARGAZE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const STARGAZE_REST_ENDPOINT = "";
 export const STARGAZE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const SOMMELIER_RPC_ENDPOINT = "";
+export const SOMMELIER_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const SOMMELIER_REST_ENDPOINT = "";
+export const SOMMELIER_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const PRIVILEGED_ORIGINS: string[] = [];

@@ -910,6 +910,43 @@ export const EmbedChainInfos: AppChainInfo[] = [
       "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
   },
   {
+    rpc: "https://rpc-sommelier.keplr.app",
+    rest: "https://lcd-sommelier.keplr.app",
+    chainId: "sommelier-3",
+    chainName: "Sommelier",
+    stakeCurrency: {
+      coinDenom: "SOMM",
+      coinMinimalDenom: "usomm",
+      coinDecimals: 6,
+      coinGeckoId: "sommelier",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("somm"),
+    currencies: [
+      {
+        coinDenom: "SOMM",
+        coinMinimalDenom: "usomm",
+        coinDecimals: 6,
+        coinGeckoId: "sommelier",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "SOMM",
+        coinMinimalDenom: "usomm",
+        coinDecimals: 6,
+        coinGeckoId: "sommelier",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
+  },
+  {
     rpc: "https://rpc-sentinel.keplr.app",
     rest: "https://lcd-sentinel.keplr.app",
     chainId: "sentinelhub-2",

@@ -87,6 +87,10 @@ import {
   STARGAZE_RPC_CONFIG,
   STARGAZE_REST_ENDPOINT,
   STARGAZE_REST_CONFIG,
+  SOMMELIER_RPC_ENDPOINT,
+  SOMMELIER_RPC_CONFIG,
+  SOMMELIER_REST_ENDPOINT,
+  SOMMELIER_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1542,6 +1546,49 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.1,
     },
     features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: SOMMELIER_RPC_ENDPOINT,
+    rpcConfig: SOMMELIER_RPC_CONFIG,
+    rest: SOMMELIER_REST_ENDPOINT,
+    restConfig: SOMMELIER_REST_CONFIG,
+    chainId: "sommelier-3",
+    chainName: "Sommelier",
+    stakeCurrency: {
+      coinDenom: "SOMM",
+      coinMinimalDenom: "usomm",
+      coinDecimals: 6,
+      coinGeckoId: "sommelier",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sommelier/stake"
+        : "http://localhost:8080/#/sommelier/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sommelier/stake"
+        : "http://localhost:8080/#/sommelier/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("somm"),
+    currencies: [
+      {
+        coinDenom: "SOMM",
+        coinMinimalDenom: "usomm",
+        coinDecimals: 6,
+        coinGeckoId: "sommelier",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "SOMM",
+        coinMinimalDenom: "usomm",
+        coinDecimals: 6,
+        coinGeckoId: "sommelier",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
   },
   {
     rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
