@@ -103,6 +103,7 @@ import {
 } from "./screens/register/import-from-extension";
 import { OsmosisWebpageScreen } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
+import Bugsnag from "@bugsnag/react-native";
 
 const {
   SmartNavigatorProvider,
@@ -892,6 +893,23 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   );
 };
 
+const BugsnagNavigationContainerPlugin = Bugsnag.getPlugin("reactNavigation");
+// The returned BugsnagNavigationContainer has exactly the same usage
+// except now it tracks route information to send with your error reports
+const BugsnagNavigationContainer = (() => {
+  if (BugsnagNavigationContainerPlugin) {
+    console.log("BugsnagNavigationContainerPlugin found");
+    return BugsnagNavigationContainerPlugin.createNavigationContainer(
+      NavigationContainer
+    );
+  } else {
+    console.log(
+      "WARNING: BugsnagNavigationContainerPlugin is null. Fallback to use basic NavigationContainer"
+    );
+    return NavigationContainer;
+  }
+})();
+
 export const AppNavigation: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
@@ -899,7 +917,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
-          <NavigationContainer>
+          <BugsnagNavigationContainer>
             <Stack.Navigator
               initialRouteName={
                 keyRingStore.status !== KeyRingStatus.UNLOCKED
@@ -924,7 +942,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
                 component={AddressBookStackScreen}
               />
             </Stack.Navigator>
-          </NavigationContainer>
+          </BugsnagNavigationContainer>
           {/* <ModalsRenderer /> */}
         </SmartNavigatorProvider>
       </FocusedScreenProvider>

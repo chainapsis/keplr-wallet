@@ -86,6 +86,9 @@ project.ext.react = [
 apply from: "../../node_modules/react-native/react.gradle"
 apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
 
+// The following line must be inserted AFTER the React gradle plugin
+apply plugin: "com.bugsnag.android.gradle"
+
 /**
  * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices

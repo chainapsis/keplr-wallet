@@ -19,7 +19,8 @@
       "**/native-base",
       "**/@react-native-async-storage/async-storage",
       "**/@ledgerhq/react-native-hw-transport-ble",
-      "**/jetifier"
+      "**/jetifier",
+      "**/@bugsnag/**"
     ]
   },
   "scripts": {

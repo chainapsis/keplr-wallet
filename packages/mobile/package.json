@@ -23,6 +23,8 @@
   },
   "dependencies": {
     "@amplitude/react-native": "^2.4.0",
+    "@bugsnag/react-native": "^7.16.1",
+    "@bugsnag/plugin-react-navigation": "^7.16.1",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@formatjs/intl-datetimeformat": "^4.1.6",
