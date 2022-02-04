@@ -102,7 +102,7 @@ platform :ios do
       xcodeproj: "mobile.xcodeproj",
       build_number: build_number,
     )
-    build_app(workspace: "mobile.xcworkspace", scheme: "mobile")
+    build_app(workspace: "mobile.xcworkspace", scheme: "mobile", xcargs: "-allowProvisioningUpdates")
     upload_to_testflight(
       apple_id: apple_id,
       team_id: team_id,
