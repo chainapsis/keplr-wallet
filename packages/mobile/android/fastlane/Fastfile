@@ -22,6 +22,19 @@ platform :android do
     end
   end
 
+  def check_codepush_version(version)
+    if (version =~ /^(\d+.\d+.\d+)-codepush.\d+$/) != 0
+      UI.user_error!("Invalid codepush version #{version}")
+    end
+
+    v = version.split(/^(\d+.\d+.\d+)-codepush.\d+$/)[1]
+    if v.length == 0
+      UI.user_error!("Unexpected error #{version}")
+    end
+
+    return v
+  end
+
   def set_version_code(number)
     path = "../app/build.gradle"
     re = /versionCode\s+(\d+)/
@@ -49,17 +62,23 @@ platform :android do
   end
 
   lane :deploy_codepush do |options|
-    if options[:target_version]
-      target_version = options[:target_version]
+    if options[:version]
+      version = options[:version]
     else
-      target_version = prompt(text: "Enter the target version\n(Ex. 1.0.0): ")
+      version = prompt(text: "Enter the target version\n(Ex. 1.0.0-codepush.1): ")
     end
 
-    check_version(target_version)
+    target_version = check_codepush_version(version)
 
-    UI.message("Code push will be deployed for Android #{target_version}")
+    UI.message("Code push will be deployed for Android #{target_version}. Code Bundle ID: #{version}")
 
-    sh("cd ../.. && appcenter codepush release-react -a #{ENV["ANDROID_APPCENTER_APP_NAME"]} -d Production -t #{target_version}")
+    # Change the code bundle id in the `bugsnag.env.ts`
+    sh("cd ../.. && sh ./scripts/set-code-bundle-id.sh #{version}")
+    # A problem may have occurred due to the above step. So, check the typing error.
+    sh("cd ../.. && yarn typecheck")
+
+    sh("cd ../.. && appcenter codepush release-react -a #{ENV["ANDROID_APPCENTER_APP_NAME"]} -d Production -t #{target_version} --output-dir build")
+    sh("cd ../.. && npx bugsnag-source-maps upload-react-native --api-key #{ENV["BUGSNAG_API_KEY"]} --code-bundle-id #{version} --platform android --source-map build/CodePush/index.android.bundle.map --bundle build/CodePush/index.android.bundle")
   end
 
   desc "Deploy a new version to the Google Play"
