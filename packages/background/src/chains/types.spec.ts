@@ -4,12 +4,14 @@ import {
   ChainInfoSchema,
   CurrencySchema,
   CW20CurrencySchema,
+  Secret20CurrencySchema,
 } from "./types";
 import {
   AppCurrency,
   ChainInfo,
   Currency,
   CW20Currency,
+  Secret20Currency
 } from "@keplr-wallet/types";
 import { Bech32Config } from "@keplr-wallet/types";
 import Joi from "joi";
@@ -262,6 +264,85 @@ describe("Test chain info schema", () => {
       };
 
       await CW20CurrencySchema.validateAsync(currency);
+    }, "Should throw error when contract address is missing");
+
+    await assert.doesNotReject(async () => {
+      let currency: Secret20Currency = {
+        type: "secret20",
+        contractAddress: "this should be validated in the keeper",
+        viewingKey: "Test viewingKey",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+      };
+
+      currency = await Secret20CurrencySchema.validateAsync(currency);
+      if (
+        currency.coinMinimalDenom !==
+        "secret20:this should be validated in the keeper:utest"
+      ) {
+        throw new Error(
+          "actual denom doens't start with `type:contract-address:`"
+        );
+      }
+    });
+
+    await assert.doesNotReject(async () => {
+      let currency: Secret20Currency = {
+        type: "secret20",
+        contractAddress: "this should be validated in the keeper",
+        viewingKey: "Test viewingKey",
+        coinDenom: "TEST",
+        coinMinimalDenom: "secret20:this should be validated in the keeper:utest",
+        coinDecimals: 0,
+      };
+
+      currency = await Secret20CurrencySchema.validateAsync(currency);
+      if (
+        currency.coinMinimalDenom !==
+        "secret20:this should be validated in the keeper:utest"
+      ) {
+        throw new Error(
+          "actual denom doens't start with `type:contract-address:`"
+        );
+      }
+    });
+
+    await assert.rejects(async () => {
+      const currency: Secret20Currency = {
+        // @ts-ignore
+        type: "?",
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+      };
+
+      await Secret20CurrencySchema.validateAsync(currency);
+    }, "Should throw error when type is not secret20");
+
+    await assert.rejects(async () => {
+      // @ts-ignore
+      const currency: Secret20Currency = {
+        contractAddress: "this should be validated in the keeper",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+      };
+
+      await Secret20CurrencySchema.validateAsync(currency);
+    }, "Should throw error when type is missing");
+
+    await assert.rejects(async () => {
+      // @ts-ignore
+      const currency: Secret20Currency = {
+        type: "secret20",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+      };
+
+      await Secret20CurrencySchema.validateAsync(currency);
     }, "Should throw error when contract address is missing");
 
     await assert.doesNotReject(async () => {
