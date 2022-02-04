@@ -3,7 +3,7 @@ import {
   Bech32ConfigSchema,
   ChainInfoSchema,
   CurrencySchema,
-  CW20CurrencyShema,
+  CW20CurrencySchema,
 } from "./types";
 import {
   AppCurrency,
@@ -14,9 +14,9 @@ import {
 import { Bech32Config } from "@keplr-wallet/types";
 import Joi from "joi";
 
-const AppCurrencyShemaTest = Joi.array().items(
+const AppCurrencySchemaTest = Joi.array().items(
   CurrencySchema,
-  CW20CurrencyShema
+  CW20CurrencySchema
 );
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
@@ -196,7 +196,7 @@ describe("Test chain info schema", () => {
         coinDecimals: 0,
       };
 
-      currency = await CW20CurrencyShema.validateAsync(currency);
+      currency = await CW20CurrencySchema.validateAsync(currency);
       if (
         currency.coinMinimalDenom !==
         "cw20:this should be validated in the keeper:utest"
@@ -216,7 +216,7 @@ describe("Test chain info schema", () => {
         coinDecimals: 0,
       };
 
-      currency = await CW20CurrencyShema.validateAsync(currency);
+      currency = await CW20CurrencySchema.validateAsync(currency);
       if (
         currency.coinMinimalDenom !==
         "cw20:this should be validated in the keeper:utest"
@@ -237,7 +237,7 @@ describe("Test chain info schema", () => {
         coinDecimals: 0,
       };
 
-      await CW20CurrencyShema.validateAsync(currency);
+      await CW20CurrencySchema.validateAsync(currency);
     }, "Should throw error when type is not cw20");
 
     await assert.rejects(async () => {
@@ -249,7 +249,7 @@ describe("Test chain info schema", () => {
         coinDecimals: 0,
       };
 
-      await CW20CurrencyShema.validateAsync(currency);
+      await CW20CurrencySchema.validateAsync(currency);
     }, "Should throw error when type is missing");
 
     await assert.rejects(async () => {
@@ -261,7 +261,7 @@ describe("Test chain info schema", () => {
         coinDecimals: 0,
       };
 
-      await CW20CurrencyShema.validateAsync(currency);
+      await CW20CurrencySchema.validateAsync(currency);
     }, "Should throw error when contract address is missing");
 
     await assert.doesNotReject(async () => {
@@ -273,7 +273,7 @@ describe("Test chain info schema", () => {
         coinDecimals: 0,
       };
 
-      const currencies = await AppCurrencyShemaTest.validateAsync([currency]);
+      const currencies = await AppCurrencySchemaTest.validateAsync([currency]);
       if (
         currencies[0].coinMinimalDenom !==
         "cw20:this should be validated in the keeper:utest"
@@ -290,7 +290,7 @@ describe("Test chain info schema", () => {
         coinGeckoId: "test",
       };
 
-      await AppCurrencyShemaTest.validateAsync([currency]);
+      await AppCurrencySchemaTest.validateAsync([currency]);
     });
 
     await assert.rejects(async () => {
@@ -302,7 +302,7 @@ describe("Test chain info schema", () => {
         coinDecimals: 0,
       };
 
-      await AppCurrencyShemaTest.validateAsync([currency]);
+      await AppCurrencySchemaTest.validateAsync([currency]);
     }, "Should throw error when contract address is missing");
 
     await assert.rejects(async () => {
@@ -312,7 +312,7 @@ describe("Test chain info schema", () => {
         coinDecimals: 1.5,
       };
 
-      await AppCurrencyShemaTest.validateAsync([currency]);
+      await AppCurrencySchemaTest.validateAsync([currency]);
     }, "Should throw error when coin decimal is not integer");
   });
 

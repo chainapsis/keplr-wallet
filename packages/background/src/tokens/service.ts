@@ -10,8 +10,8 @@ import {
 } from "@keplr-wallet/types";
 import {
   CurrencySchema,
-  CW20CurrencyShema,
-  Secret20CurrencyShema,
+  CW20CurrencySchema,
+  Secret20CurrencySchema,
 } from "../chains";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
@@ -353,7 +353,7 @@ export class TokensService {
     currency: CW20Currency
   ): Promise<CW20Currency> {
     // Validate the schema.
-    currency = await CW20CurrencyShema.validateAsync(currency);
+    currency = await CW20CurrencySchema.validateAsync(currency);
 
     // Validate the contract address.
     Bech32Address.validate(
@@ -369,7 +369,7 @@ export class TokensService {
     currency: Secret20Currency
   ): Promise<Secret20Currency> {
     // Validate the schema.
-    currency = await Secret20CurrencyShema.validateAsync(currency);
+    currency = await Secret20CurrencySchema.validateAsync(currency);
 
     // Validate the contract address.
     Bech32Address.validate(
