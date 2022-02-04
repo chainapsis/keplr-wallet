@@ -4,10 +4,11 @@
 
 import Bugsnag from "@bugsnag/react-native";
 import BugsnagPluginReactNavigation from "@bugsnag/plugin-react-navigation";
+import { codeBundleId } from "./bugsnag.env";
 
-// TODO: Handle "codeBundleId". https://docs.bugsnag.com/platforms/react-native/react-native/codepush/#setting-a-code-bundle-id
 Bugsnag.start({
   plugins: [new BugsnagPluginReactNavigation()],
+  codeBundleId,
 });
 
 import "./shim";

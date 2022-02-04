@@ -3,6 +3,7 @@ import { PageWithScrollViewInBottomTabView } from "../../../../components/page";
 import { SettingItem, SettingSectionTitle } from "../../components";
 import DeviceInfo from "react-native-device-info";
 import codePush from "react-native-code-push";
+import { codeBundleId } from "../../../../../bugsnag.env";
 
 export const KeplrVersionScreen: FunctionComponent = () => {
   const [appVersion] = useState(() => DeviceInfo.getVersion());
@@ -70,6 +71,9 @@ export const KeplrVersionScreen: FunctionComponent = () => {
         label="Code Version"
         paragraph={parseVersion(currentCodeVersion)}
       />
+      {codeBundleId ? (
+        <SettingItem label="Code Bundle ID" paragraph={codeBundleId} />
+      ) : null}
       <SettingSectionTitle title="Remote" />
       <SettingItem
         label="Latest Code Version"
