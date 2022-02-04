@@ -51,6 +51,7 @@
   "author": "chainapsis",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@octokit/core": "^3.5.1",
     "@types/jest": "^26.0.22",
     "@types/node": "^16.6.2",
     "@types/webpack": "^4.39.1",

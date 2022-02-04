@@ -204,10 +204,11 @@ GEM
       xcpretty (~> 0.2, >= 0.0.7)
 
 PLATFORMS
+  arm64-darwin-21
   universal-darwin-20
 
 DEPENDENCIES
   fastlane
 
 BUNDLED WITH
-   2.2.27
+   2.2.32
