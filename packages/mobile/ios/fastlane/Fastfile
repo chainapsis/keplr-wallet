@@ -86,5 +86,7 @@ platform :ios do
       team_id: team_id,
       skip_submission: true
     )
+
+    # TODO: Upload dSYM. https://docs.bugsnag.com/platforms/ios/symbolication-guide/#using-manual-downloads
   end
 end
