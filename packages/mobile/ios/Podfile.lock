@@ -10,15 +10,9 @@ PODS:
   - appcenter-core (4.1.0):
     - AppCenterReactNativeShared (~> 4.0)
     - React-Core
-  - appcenter-crashes (4.1.0):
-    - AppCenter/Crashes (~> 4.0)
-    - AppCenterReactNativeShared (~> 4.0)
-    - React-Core
   - AppCenter/Analytics (4.1.1):
     - AppCenter/Core
   - AppCenter/Core (4.1.1)
-  - AppCenter/Crashes (4.1.1):
-    - AppCenter/Core
   - AppCenterReactNativeShared (4.1.0):
     - AppCenter/Core (= 4.1.1)
   - Base64 (1.1.2)
@@ -385,7 +379,6 @@ DEPENDENCIES:
   - "amplitude-react-native (from `../node_modules/@amplitude/react-native`)"
   - appcenter-analytics (from `../../../node_modules/appcenter-analytics/ios`)
   - appcenter-core (from `../../../node_modules/appcenter/ios`)
-  - appcenter-crashes (from `../../../node_modules/appcenter-crashes/ios`)
   - "BugsnagReactNative (from `../node_modules/@bugsnag/react-native`)"
   - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
@@ -470,8 +463,6 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/appcenter-analytics/ios"
   appcenter-core:
     :path: "../../../node_modules/appcenter/ios"
-  appcenter-crashes:
-    :path: "../../../node_modules/appcenter-crashes/ios"
   BugsnagReactNative:
     :path: "../node_modules/@bugsnag/react-native"
   CodePush:
@@ -599,7 +590,6 @@ SPEC CHECKSUMS:
   AppCenter: cd53e3ed3563cc720bcb806c9731a12389b40d44
   appcenter-analytics: aa074250b2cb182d6f7d67d9c236dd4606673ab5
   appcenter-core: c97920e79eba2321a262d3733cb2a6f1097db539
-  appcenter-crashes: 804ae51c5d1742ce20fdb6a68b3d06208a404ad5
   AppCenterReactNativeShared: 2d5a53b6cbd2fe7f63f0033e9f0a40757a4eacf5
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c

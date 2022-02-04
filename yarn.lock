@@ -7196,13 +7196,6 @@ appcenter-analytics@^4.1.0:
   dependencies:
     appcenter "4.1.0"
 
-appcenter-crashes@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/appcenter-crashes/-/appcenter-crashes-4.1.0.tgz#1d7a1a27c61f6a37d904f3d435de2f30ee0454e5"
-  integrity sha512-erl7387yAPRKa7d8L7KxNd82OAZ+EQwThpsu7tZLQYn3iuIT4P98dNFCnJKO6y64li4dn4B9rCF3s0PN7tPb1A==
-  dependencies:
-    appcenter "4.1.0"
-
 appcenter-file-upload-client@0.0.24:
   version "0.0.24"
   resolved "https://registry.yarnpkg.com/appcenter-file-upload-client/-/appcenter-file-upload-client-0.0.24.tgz#ba1fb3c0f0073d56168a1853f5e9e9cf38a5114c"
