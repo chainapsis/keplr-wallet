@@ -117,7 +117,8 @@ platform :ios do
 
     update_code_signing_settings(
       use_automatic_signing: false,
-      profile_name: "match AppStore " + CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
+      profile_name: "match AppStore " + CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+      code_sign_identity: "Apple Distribution"
     )
 
     build_app(workspace: "mobile.xcworkspace", scheme: "mobile")
