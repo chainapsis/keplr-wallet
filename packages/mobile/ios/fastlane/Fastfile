@@ -80,13 +80,12 @@ platform :ios do
 
     check_version(version)
 
-    # Should set the MATCH_KEYCHAIN_PASSWORD env to prevent interaction if you need.
-    cert(
+    match_git_url = ENV["MATCH_GIT_URL"]
+
+    match(
+      type: "appstore",
       team_id: team_id,
-    )
-    sigh(
-      force: true,
-      team_id: team_id,
+      git_url: match_git_url
     )
 
     increment_version_number(
