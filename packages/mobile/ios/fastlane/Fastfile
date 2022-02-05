@@ -114,6 +114,12 @@ platform :ios do
       xcodeproj: "mobile.xcodeproj",
       build_number: build_number,
     )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      profile_name: "match AppStore " + CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
+    )
+
     build_app(workspace: "mobile.xcworkspace", scheme: "mobile")
     upload_to_testflight(
       apple_id: apple_id,
