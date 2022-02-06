@@ -109,7 +109,6 @@ platform :android do
     gradle(
       task: "bundle",
       build_type: "Release",
-      print_command: false,
       properties: {
         "android.injected.signing.store.file" => ENV["ANDROID_APP_SIGNING"],
         "android.injected.signing.store.password" => ENV["ANDROID_APP_SIGNING_PASSWORD"],
