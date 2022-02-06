@@ -27,6 +27,13 @@ import semver from "semver";
       const semantic = semver.parse(version.replace("mobile/v", ""));
 
       if (semantic) {
+        if (process.env["TARGET_TAG"] !== semantic.raw) {
+          console.log(
+            `Found ${semantic.raw}. But it is not matched to target tag (${process.env["TARGET_TAG"]})`
+          );
+          continue;
+        }
+
         if (semantic.prerelease.length > 0) {
           if (semantic.prerelease[0] !== "codepush") {
             throw new Error(`Invalid version: ${semantic.raw}`);
