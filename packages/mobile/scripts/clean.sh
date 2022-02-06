@@ -3,11 +3,6 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-watchman watch-del "$DIR/.."
-watchman watch-del "$DIR/../../.."
-watchman watch-project "$DIR/.."
-watchman watch-project "$DIR/../../.."
-
 cd "$DIR/../ios"
 xcodebuild clean
 
