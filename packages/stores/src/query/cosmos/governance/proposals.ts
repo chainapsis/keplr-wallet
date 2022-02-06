@@ -103,6 +103,9 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
 
     const result: ObservableQueryProposal[] = [];
 
+    console.log(this.response);
+    console.log(this.response?.data);
+    console.log(this.response?.data?.result);
     for (const raw of this.response.data.result) {
       result.push(
         new ObservableQueryProposal(

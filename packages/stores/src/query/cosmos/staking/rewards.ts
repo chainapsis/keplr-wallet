@@ -85,6 +85,10 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   get stakableReward(): CoinPretty {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
+    console.log(this.response);
+    console.log(this.response?.data);
+    console.log(this.response?.data?.result);
+    console.log(this.response?.data?.result?.total);
     return StoreUtils.getBalanceFromCurrency(
       chainInfo.stakeCurrency,
       this.response?.data.result.total ?? []
