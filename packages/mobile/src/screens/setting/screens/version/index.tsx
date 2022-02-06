@@ -76,7 +76,9 @@ export const KeplrVersionScreen: FunctionComponent = () => {
           testErrorReportRef.current++;
 
           if (testErrorReportRef.current === 10) {
-            throw new Error("This is an runtime error for error report test");
+            setTimeout(() => {
+              throw new Error("This is an runtime error for error report test");
+            }, 200);
           }
 
           if (testErrorReportRef.current === 20) {
