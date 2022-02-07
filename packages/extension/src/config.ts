@@ -7,7 +7,7 @@ export const EmbedChainInfos: ChainInfo[] = [
   {
     rpc: "https://rpc-fetchhub.fetch-ai.com",
     rest: "https://rest-fetchhub.fetch-ai.com",
-    chainId: "fetchhub-2",
+    chainId: "fetchhub-3",
     chainName: "FetchHub",
     stakeCurrency: {
       coinDenom: "FET",
