@@ -23,6 +23,7 @@ import { Keplr } from "@keplr-wallet/provider";
 import { KeychainStore } from "./keychain";
 import { WalletConnectStore } from "./wallet-connect";
 import { AnalyticsStore } from "./analytics";
+import { Platform } from "react-native";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -83,7 +84,11 @@ export class RootStore {
     );
 
     this.queriesStore = new QueriesStore(
-      new AsyncKVStore("store_queries"),
+      Platform.OS === "android"
+        ? // Fix prefix key because there was a problem with storage being corrupted in android. In the case of storage where the prefix key is "store_queries" in android, we should not use it because it is already corrupted in some users.
+          // https://github.com/chainapsis/keplr-wallet/issues/275
+          new AsyncKVStore("store_queries_fix")
+        : new AsyncKVStore("store_queries"),
       this.chainStore,
       async () => {
         // TOOD: Set version for Keplr API
