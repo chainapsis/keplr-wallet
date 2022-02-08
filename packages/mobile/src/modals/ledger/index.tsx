@@ -1,7 +1,15 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
-import { PermissionsAndroid, Platform, Text, View } from "react-native";
+import {
+  AppState,
+  AppStateStatus,
+  Linking,
+  PermissionsAndroid,
+  Platform,
+  Text,
+  View,
+} from "react-native";
 import { useStyle } from "../../styles";
 import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
@@ -15,6 +23,7 @@ import { getLastUsedLedgerDeviceId } from "../../utils/ledger";
 import { RectButton } from "../../components/rect-button";
 import { useUnmount } from "../../hooks";
 import Svg, { Path } from "react-native-svg";
+import { Button } from "../../components/button";
 
 const AlertIcon: FunctionComponent<{
   size: number;
@@ -43,6 +52,15 @@ const AlertIcon: FunctionComponent<{
   );
 };
 
+enum BLEPermissionGrantStatus {
+  NotInit = "notInit",
+  Failed = "failed",
+  // When it failed but need to try again.
+  // For example, when the bluetooth permission is turned off, but user allows the permission in the app setting page and return to the app.
+  FailedAndRetry = "failed-and-retry",
+  Granted = "granted",
+}
+
 export const LedgerGranterModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
@@ -53,7 +71,7 @@ export const LedgerGranterModal: FunctionComponent<{
     const style = useStyle();
 
     const resumed = useRef(false);
-    const [isAvailable, setIsAvailable] = useState(false);
+    const [isBLEAvailable, setIsBLEAvailable] = useState(false);
 
     useEffect(() => {
       // If this modal appears, it's probably because there was a problem with the ledger connection.
@@ -69,7 +87,6 @@ export const LedgerGranterModal: FunctionComponent<{
 
     useUnmount(() => {
       // When the modal is closed without resuming, abort all the ledger init interactions.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       if (!resumed.current) {
         ledgerInitStore.abortAll();
       }
@@ -78,9 +95,9 @@ export const LedgerGranterModal: FunctionComponent<{
     useEffect(() => {
       const subscription = bleManager.onStateChange((newState) => {
         if (newState === State.PoweredOn) {
-          setIsAvailable(true);
+          setIsBLEAvailable(true);
         } else {
-          setIsAvailable(false);
+          setIsBLEAvailable(false);
         }
       }, true);
 
@@ -90,13 +107,13 @@ export const LedgerGranterModal: FunctionComponent<{
     }, []);
 
     useEffect(() => {
-      if (Platform.OS === "android" && !isAvailable) {
+      if (Platform.OS === "android" && !isBLEAvailable) {
         // If the platform is android and can't use the bluetooth,
         // try to turn on the bluetooth.
         // Below API can be called only in android.
         bleManager.enable();
       }
-    }, [isAvailable]);
+    }, [isBLEAvailable]);
 
     const [isFinding, setIsFinding] = useState(false);
 
@@ -108,23 +125,68 @@ export const LedgerGranterModal: FunctionComponent<{
     >([]);
     const [errorOnListen, setErrorOnListen] = useState<string | undefined>();
 
+    const [
+      permissionStatus,
+      setPermissionStatus,
+    ] = useState<BLEPermissionGrantStatus>(() => {
+      if (Platform.OS === "android") {
+        // If android, there is need to request the permission.
+        // You should ask for the permission on next effect.
+        return BLEPermissionGrantStatus.NotInit;
+      } else {
+        // If not android, there is no need to request the permission
+        return BLEPermissionGrantStatus.Granted;
+      }
+    });
+
+    useEffect(() => {
+      const listener = (state: AppStateStatus) => {
+        if (
+          state === "active" &&
+          permissionStatus === BLEPermissionGrantStatus.Failed
+        ) {
+          // When the app becomes active, the user may have granted permission on the setting page, so request the grant again.
+          setPermissionStatus(BLEPermissionGrantStatus.FailedAndRetry);
+        }
+      };
+
+      AppState.addEventListener("change", listener);
+
+      return () => {
+        AppState.removeEventListener("change", listener);
+      };
+    }, [permissionStatus]);
+
+    useEffect(() => {
+      // It is processed only in case of not init at first or re-request after failure.
+      if (
+        permissionStatus === BLEPermissionGrantStatus.NotInit ||
+        permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
+      ) {
+        if (Platform.OS === "android") {
+          PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+          ).then((granted) => {
+            if (granted == PermissionsAndroid.RESULTS.GRANTED) {
+              setPermissionStatus(BLEPermissionGrantStatus.Granted);
+            } else {
+              setPermissionStatus(BLEPermissionGrantStatus.Failed);
+            }
+          });
+        }
+      }
+    }, [permissionStatus]);
+
     useEffect(() => {
       let unsubscriber: (() => void) | undefined;
 
-      if (isAvailable) {
+      if (
+        isBLEAvailable &&
+        permissionStatus === BLEPermissionGrantStatus.Granted
+      ) {
         setIsFinding(true);
 
         (async () => {
-          if (Platform.OS === "android") {
-            const granted = await PermissionsAndroid.request(
-              PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-            );
-
-            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-              throw new Error("Failed to get permission from OS");
-            }
-          }
-
           let _devices: {
             id: string;
             name: string;
@@ -180,7 +242,7 @@ export const LedgerGranterModal: FunctionComponent<{
         }
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAvailable]);
+    }, [isBLEAvailable, permissionStatus]);
 
     return (
       <CardModal
@@ -206,22 +268,11 @@ export const LedgerGranterModal: FunctionComponent<{
           ) : undefined
         }
       >
-        {isAvailable ? (
+        {isBLEAvailable &&
+        permissionStatus === BLEPermissionGrantStatus.Granted ? (
           <React.Fragment>
             {errorOnListen ? (
-              <View style={style.flatten(["items-center"])}>
-                <AlertIcon size={100} color={style.get("color-danger").color} />
-                <Text style={style.flatten(["h4", "color-danger"])}>Error</Text>
-                <Text
-                  style={style.flatten([
-                    "subtitle3",
-                    "color-text-black-medium",
-                    "margin-top-16",
-                  ])}
-                >
-                  {errorOnListen}
-                </Text>
-              </View>
+              <LedgerErrorView text={errorOnListen} />
             ) : (
               <React.Fragment>
                 <Text
@@ -251,6 +302,19 @@ export const LedgerGranterModal: FunctionComponent<{
               );
             })}
           </React.Fragment>
+        ) : permissionStatus === BLEPermissionGrantStatus.Failed ||
+          BLEPermissionGrantStatus.FailedAndRetry ? (
+          <LedgerErrorView text="Keplr doesn't have permission to use bluetooth">
+            <Button
+              containerStyle={style.flatten(["margin-top-16"])}
+              textStyle={style.flatten(["margin-x-8", "normal-case"])}
+              text="Open app setting"
+              size="small"
+              onPress={() => {
+                Linking.openSettings();
+              }}
+            />
+          </LedgerErrorView>
         ) : (
           <Text style={style.flatten(["subtitle3", "color-text-black-high"])}>
             Please turn on Bluetooth
@@ -263,6 +327,29 @@ export const LedgerGranterModal: FunctionComponent<{
     disableSafeArea: true,
   }
 );
+
+const LedgerErrorView: FunctionComponent<{
+  text: string;
+}> = ({ text, children }) => {
+  const style = useStyle();
+
+  return (
+    <View style={style.flatten(["items-center"])}>
+      <AlertIcon size={100} color={style.get("color-danger").color} />
+      <Text style={style.flatten(["h4", "color-danger"])}>Error</Text>
+      <Text
+        style={style.flatten([
+          "subtitle3",
+          "color-text-black-medium",
+          "margin-top-16",
+        ])}
+      >
+        {text}
+      </Text>
+      {children}
+    </View>
+  );
+};
 
 const LedgerNanoBLESelector: FunctionComponent<{
   deviceId: string;
