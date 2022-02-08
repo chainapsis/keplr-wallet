@@ -49,6 +49,6 @@
     "reflect-metadata": "^0.1.13",
     "secp256k1": "^4.0.2",
     "secretjs": "^0.17.0",
-    "tsyringe": "^4.4.0"
+    "tsyringe": "^4.5.0"
   }
 }
