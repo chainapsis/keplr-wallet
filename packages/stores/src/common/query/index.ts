@@ -218,13 +218,15 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       if (
         response.data &&
         typeof response.data === "string" &&
-        response.data.startsWith("stream was reset:")
+        (response.data.startsWith("stream was reset:") ||
+          response.data === "The network connection was lost.")
       ) {
-        // In some android devices, it is a http ok code, but a strange response is sometimes returned.
+        // In some devices, it is a http ok code, but a strange response is sometimes returned.
         // It's not that they can't query at all, it seems that they get weird response from time to time.
         // These causes are not clear.
         // To solve this problem, if this problem occurs, try the query again, and if that fails, an error is raised.
         // https://github.com/chainapsis/keplr-wallet/issues/275
+        // https://github.com/chainapsis/keplr-wallet/issues/278
         if (this.cancelToken && this.cancelToken.token.reason) {
           // In this case, it is assumed that it is caused by cancel() and do nothing.
           return;
@@ -238,7 +240,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         if (
           response.data &&
           typeof response.data === "string" &&
-          response.data.startsWith("stream was reset:")
+          (response.data.startsWith("stream was reset:") ||
+            response.data === "The network connection was lost.")
         ) {
           throw new Error(response.data);
         }
