@@ -46,6 +46,11 @@ export type QueryResponse<T> = {
  * This recommends to use the Axios to query the response.
  */
 export abstract class ObservableQueryBase<T = unknown, E = unknown> {
+  protected static suspectedResponseDatasWithInvalidValue: string[] = [
+    "The network connection was lost.",
+    "The request timed out.",
+  ];
+
   protected options: QueryOptions;
 
   // Just use the oberable ref because the response is immutable and not directly adjusted.
@@ -219,7 +224,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         response.data &&
         typeof response.data === "string" &&
         (response.data.startsWith("stream was reset:") ||
-          response.data === "The network connection was lost.")
+          ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
+            response.data
+          ))
       ) {
         // In some devices, it is a http ok code, but a strange response is sometimes returned.
         // It's not that they can't query at all, it seems that they get weird response from time to time.
@@ -241,7 +248,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           response.data &&
           typeof response.data === "string" &&
           (response.data.startsWith("stream was reset:") ||
-            response.data === "The network connection was lost.")
+            ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
+              response.data
+            ))
         ) {
           throw new Error(response.data);
         }
