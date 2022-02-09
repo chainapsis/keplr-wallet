@@ -84,10 +84,10 @@ export class RootStore {
 
     this.queriesStore = new QueriesStore(
       // Fix prefix key because there was a problem with storage being corrupted.
-      // In the case of storage where the prefix key is "store_queries", we should not use it because it is already corrupted in some users.
+      // In the case of storage where the prefix key is "store_queries" or "store_queries_fix", we should not use it because it is already corrupted in some users.
       // https://github.com/chainapsis/keplr-wallet/issues/275
       // https://github.com/chainapsis/keplr-wallet/issues/278
-      new AsyncKVStore("store_queries_fix"),
+      new AsyncKVStore("store_queries_fix2"),
       this.chainStore,
       async () => {
         // TOOD: Set version for Keplr API
