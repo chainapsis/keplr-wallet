@@ -988,7 +988,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "regen",
       },
     ],
-    features: ["stargate", "ibc-go", "ibc-transfer"],
+    features: ["stargate", "ibc-go", "ibc-transfer", "ibc-go"],
   },
   {
     rpc: PERSISTENCE_RPC_ENDPOINT,

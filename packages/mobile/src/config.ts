@@ -727,7 +727,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/regen.png",
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
   },
   {
     rpc: "https://rpc-juno.keplr.app",
