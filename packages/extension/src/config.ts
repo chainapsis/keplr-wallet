@@ -91,6 +91,10 @@ import {
   SOMMELIER_RPC_CONFIG,
   SOMMELIER_REST_ENDPOINT,
   SOMMELIER_REST_CONFIG,
+  UMEE_RPC_ENDPOINT,
+  UMEE_RPC_CONFIG,
+  UMEE_REST_ENDPOINT,
+  UMEE_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1586,6 +1590,46 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "usomm",
         coinDecimals: 6,
         coinGeckoId: "sommelier",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+  },
+  {
+    rpc: UMEE_RPC_ENDPOINT,
+    rpcConfig: UMEE_RPC_CONFIG,
+    rest: UMEE_REST_ENDPOINT,
+    restConfig: UMEE_REST_CONFIG,
+    chainId: "umee-1",
+    chainName: "Umee",
+    stakeCurrency: {
+      coinDenom: "UMEE",
+      coinMinimalDenom: "uumee",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/umee/stake"
+        : "http://localhost:8080/#/umee/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/umee/stake"
+        : "http://localhost:8080/#/umee/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("umee"),
+    currencies: [
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "uumee",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "uumee",
+        coinDecimals: 6,
       },
     ],
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
