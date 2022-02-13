@@ -18,27 +18,30 @@ export const AccountView: FunctionComponent = observer(() => {
 
   const notification = useNotification();
 
-  const copyAddress = useCallback(async () => {
-    if (accountInfo.walletStatus === WalletStatus.Loaded) {
-      await navigator.clipboard.writeText(accountInfo.bech32Address);
-      analyticsStore.logEvent("Address copied", {
-        chainId: chainStore.current.chainId,
-        chainName: chainStore.current.chainName,
-      });
-      notification.push({
-        placement: "top-center",
-        type: "success",
-        duration: 2,
-        content: intl.formatMessage({
-          id: "main.address.copied",
-        }),
-        canDelete: true,
-        transition: {
-          duration: 0.25,
-        },
-      });
-    }
-  }, [accountInfo.walletStatus, accountInfo.bech32Address, notification, intl]);
+  const copyAddress = useCallback(
+    async (address: string) => {
+      if (accountInfo.walletStatus === WalletStatus.Loaded) {
+        await navigator.clipboard.writeText(address);
+        analyticsStore.logEvent("Address copied", {
+          chainId: chainStore.current.chainId,
+          chainName: chainStore.current.chainName,
+        });
+        notification.push({
+          placement: "top-center",
+          type: "success",
+          duration: 2,
+          content: intl.formatMessage({
+            id: "main.address.copied",
+          }),
+          canDelete: true,
+          transition: {
+            duration: 0.25,
+          },
+        });
+      }
+    },
+    [accountInfo.walletStatus, accountInfo.bech32Address, notification, intl]
+  );
 
   return (
     <div>
@@ -56,7 +59,10 @@ export const AccountView: FunctionComponent = observer(() => {
       </div>
       <div className={styleAccount.containerAccount}>
         <div style={{ flex: 1 }} />
-        <div className={styleAccount.address} onClick={copyAddress}>
+        <div
+          className={styleAccount.address}
+          onClick={() => copyAddress(accountInfo.bech32Address)}
+        >
           <Address maxCharacters={22} lineBreakBeforePrefix={false}>
             {accountInfo.walletStatus === WalletStatus.Loaded &&
             accountInfo.bech32Address
@@ -66,6 +72,26 @@ export const AccountView: FunctionComponent = observer(() => {
         </div>
         <div style={{ flex: 1 }} />
       </div>
+      {accountInfo.hasEvmosHexAddress && (
+        <div
+          className={styleAccount.containerAccount}
+          style={{ marginTop: "2px" }}
+        >
+          <div style={{ flex: 1 }} />
+          <div
+            className={styleAccount.address}
+            onClick={() => copyAddress(accountInfo.evmosHexAddress)}
+          >
+            <Address maxCharacters={22} lineBreakBeforePrefix={false}>
+              {accountInfo.walletStatus === WalletStatus.Loaded &&
+              accountInfo.evmosHexAddress
+                ? accountInfo.evmosHexAddress
+                : "..."}
+            </Address>
+          </div>
+          <div style={{ flex: 1 }} />
+        </div>
+      )}
     </div>
   );
 });
