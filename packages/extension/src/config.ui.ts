@@ -4,6 +4,7 @@ import {
   ETHEREUM_ENDPOINT,
   ADDITIONAL_INTL_MESSAGES,
   ADDITIONAL_SIGN_IN_PREPEND,
+  AMPLITUDE_API_KEY,
 } from "./config.ui.var";
 import {
   IntlMessages,
@@ -100,3 +101,5 @@ export const AdditionalSignInPrepend:
   | undefined = ADDITIONAL_SIGN_IN_PREPEND;
 
 export const AdditonalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
+
+export const AmplitudeApiKey = AMPLITUDE_API_KEY;

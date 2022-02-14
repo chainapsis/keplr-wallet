@@ -15,11 +15,11 @@ export class KeplrAnalyticsRn {
 
   protected amplitudeClient: Amplitude;
 
-  constructor() {
+  constructor(protected readonly apiKey: string) {
     makeObservable(this);
 
     this.amplitudeClient = Amplitude.getInstance();
-    this.amplitudeClient.init("dbcaf47e30aae5b712bda7f892b2f0c4");
+    this.amplitudeClient.init(apiKey);
 
     this._isInitialized = true;
   }
@@ -71,8 +71,11 @@ export class KeplrAnalyticsRn {
 
 const AnalyticsContext = createContext<KeplrAnalyticsRn | null>(null);
 
-export const AnalyticsProvider: FunctionComponent = ({ children }) => {
-  const [analytics] = useState(() => new KeplrAnalyticsRn());
+export const AnalyticsProvider: FunctionComponent<{ apiKey: string }> = ({
+  apiKey,
+  children,
+}) => {
+  const [analytics] = useState(() => new KeplrAnalyticsRn(apiKey));
 
   return (
     <AnalyticsContext.Provider value={analytics}>

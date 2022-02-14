@@ -51,7 +51,11 @@ import { ManageTokenPage } from "./pages/setting/token/manage";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
 
-import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
+import {
+  AdditonalIntlMessages,
+  LanguageToFiatCurrency,
+  AmplitudeApiKey,
+} from "./config.ui";
 
 import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";
@@ -140,7 +144,10 @@ ReactDOM.render(
         <NotificationStoreProvider>
           <NotificationProvider>
             <ConfirmProvider>
-              <AnalyticsProvider platformName="Extension">
+              <AnalyticsProvider
+                apiKey={AmplitudeApiKey}
+                platformName="Extension"
+              >
                 <HashRouter>
                   <Route exact path="/" component={StateRenderer} />
                   <Route exact path="/unlock" component={LockPage} />

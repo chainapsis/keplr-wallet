@@ -13,6 +13,7 @@ import { LoadingScreenProvider } from "./providers/loading-screen";
 import * as SplashScreen from "expo-splash-screen";
 import { ConfirmModalProvider } from "./providers/confirm-modal";
 import { AnalyticsProvider } from "./providers/analytics";
+import { AmplitudeApiKey } from "./config";
 
 if (Platform.OS === "android") {
   // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
@@ -96,7 +97,7 @@ const AppBody: FunctionComponent = () => {
               <LoadingScreenProvider>
                 <ConfirmModalProvider>
                   <InteractionModalsProivder>
-                    <AnalyticsProvider>
+                    <AnalyticsProvider apiKey={AmplitudeApiKey}>
                       <AppNavigation />
                     </AnalyticsProvider>
                   </InteractionModalsProivder>

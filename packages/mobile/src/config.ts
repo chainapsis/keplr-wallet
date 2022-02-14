@@ -1578,3 +1578,5 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
   },
 ];
+
+export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";

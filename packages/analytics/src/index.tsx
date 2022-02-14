@@ -55,13 +55,14 @@ export class KeplrAnalytics {
   protected amplitudeClient: Amplitude.AmplitudeClient;
 
   constructor(
+    protected readonly apiKey: string,
     protected readonly platformName: string,
     protected readonly configs?: AnalyticsConfigs
   ) {
     makeObservable(this);
 
     this.amplitudeClient = Amplitude.getInstance();
-    this.amplitudeClient.init("dbcaf47e30aae5b712bda7f892b2f0c4", undefined, {
+    this.amplitudeClient.init(apiKey, undefined, {
       includeUtm: true,
       includeReferrer: true,
       includeFbclid: true,
@@ -123,10 +124,13 @@ export class KeplrAnalytics {
 const AnalyticsContext = createContext<KeplrAnalytics | null>(null);
 
 export const AnalyticsProvider: FunctionComponent<{
+  apiKey: string;
   platformName: string;
   configs?: AnalyticsConfigs;
-}> = ({ platformName, configs, children }) => {
-  const [analytics] = useState(() => new KeplrAnalytics(platformName, configs));
+}> = ({ apiKey, platformName, configs, children }) => {
+  const [analytics] = useState(
+    () => new KeplrAnalytics(apiKey, platformName, configs)
+  );
 
   return (
     <AnalyticsContext.Provider value={analytics}>
