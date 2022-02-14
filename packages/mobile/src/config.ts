@@ -947,6 +947,40 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
   },
   {
+    rpc: "https://rpc-umee.keplr.app",
+    rest: "https://lcd-umee.keplr.app",
+    chainId: "umee-1",
+    chainName: "Umee",
+    stakeCurrency: {
+      coinDenom: "UMEE",
+      coinMinimalDenom: "uumee",
+      coinDecimals: 6,
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("umee"),
+    currencies: [
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "uumee",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "uumee",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+  },
+  {
     rpc: "https://rpc-sentinel.keplr.app",
     rest: "https://lcd-sentinel.keplr.app",
     chainId: "sentinelhub-2",
