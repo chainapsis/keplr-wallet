@@ -14,7 +14,9 @@ import { Env } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-import { Wallet } from "ethers";
+import { Wallet, utils } from "ethers";
+import { ETH } from "@hanchon/ethermint-address-converter";
+import { keccak256 } from "ethers/lib/utils";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -594,6 +596,20 @@ export class KeyRing {
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
+      if (coinType === 60) {
+        // For Ethereum Key-Gen Only:
+        const wallet = new Wallet(privKey.toBytes());
+        const ethereumAddress = ETH.decoder(wallet.address);
+
+        return {
+          algo: "ethsecp256k1",
+          pubKey: pubKey.toBytes(),
+          address: ethereumAddress,
+          isNanoLedger: false,
+        };
+      }
+
+      // Default
       return {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
@@ -721,8 +737,12 @@ export class KeyRing {
 
       // Use ether js to sign Ethereum tx
       const ethWallet = new Wallet(privKey.toBytes());
-      const signature = await ethWallet.signMessage(message);
-      return new TextEncoder().encode(signature);
+
+      const signature = await ethWallet
+        ._signingKey()
+        .signDigest(keccak256(message));
+      const splitSignature = utils.splitSignature(signature);
+      return utils.arrayify(utils.concat([splitSignature.r, splitSignature.s]));
     }
   }
 
