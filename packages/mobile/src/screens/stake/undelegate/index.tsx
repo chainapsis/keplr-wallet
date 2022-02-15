@@ -13,7 +13,6 @@ import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/type
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { Buffer } from "buffer/";
 import { useSmartNavigation } from "../../../navigation";
-import { useAnalytics } from "../../../providers/analytics";
 
 export const UndelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -30,8 +29,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   const validatorAddress = route.params.validatorAddress;
 
-  const { chainStore, accountStore, queriesStore } = useStore();
-  const analytics = useAnalytics();
+  const { chainStore, accountStore, queriesStore, analytics } = useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();

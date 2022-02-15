@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { PageWithScrollView } from "../../../components/page";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { ValidatorDetailsCard } from "./validator-details-card";
@@ -8,7 +8,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { Dec } from "@keplr-wallet/unit";
 import { UnbondingCard } from "./unbonding-card";
-import { useLogScreenView } from "../../../hooks";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 
 export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
@@ -26,7 +25,7 @@ export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
 
   const validatorAddress = route.params.validatorAddress;
 
-  const { chainStore, queriesStore, accountStore } = useStore();
+  const { chainStore, queriesStore, accountStore, analytics } = useStore();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -49,11 +48,13 @@ export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  useLogScreenView("Validator detail", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-    validatorName: validator?.description.moniker,
-  });
+  useEffect(() => {
+    analytics.logScreenView("Validator detail", {
+      chainId: chainStore.current.chainId,
+      chainName: chainStore.current.chainName,
+      validatorName: validator?.description.moniker,
+    });
+  }, [analytics.isInitialized]);
 
   return (
     <PageWithScrollView>

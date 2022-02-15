@@ -17,11 +17,9 @@ import { Button } from "../../components/button";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useSmartNavigation } from "../../navigation";
 import { Buffer } from "buffer/";
-import { useAnalytics } from "../../providers/analytics";
 
 export const SendScreen: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
-  const analytics = useAnalytics();
+  const { chainStore, accountStore, queriesStore, analytics } = useStore();
 
   const route = useRoute<
     RouteProp<

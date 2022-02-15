@@ -2,14 +2,11 @@ import { Amplitude } from "@amplitude/react-native";
 import { makeObservable, observable } from "mobx";
 import { EventProperties, UserProperties } from "@keplr-wallet/analytics";
 import { sha256 } from "sha.js";
-import React, {
-  createContext,
-  useState,
-  useContext,
-  FunctionComponent,
-} from "react";
 
-export class KeplrAnalyticsRn {
+export class KeplrAnalyticsRn<
+  EP extends EventProperties,
+  UP extends UserProperties
+> {
   @observable
   protected _isInitialized: boolean = false;
 
@@ -38,19 +35,11 @@ export class KeplrAnalyticsRn {
     this.amplitudeClient.setUserId(hashedAddress);
   }
 
-  setUserProperties(userProperties: UserProperties): void {
+  setUserProperties(userProperties: UP): void {
     this.amplitudeClient.setUserProperties(userProperties);
   }
 
-  logEvent(
-    eventName: string,
-    eventProperties?: EventProperties | undefined
-  ): void {
-    if (eventProperties && eventProperties.currentChainId) {
-      eventProperties.currentChainIdPrefix = eventProperties.currentChainId.split(
-        "-"
-      )[0];
-    }
+  logEvent(eventName: string, eventProperties?: EP): void {
     if (eventProperties && eventProperties.chainId) {
       eventProperties.chainIdPrefix = eventProperties.chainId.split("-")[0];
     }
@@ -61,34 +50,7 @@ export class KeplrAnalyticsRn {
     this.amplitudeClient.logEvent(eventName, eventProperties);
   }
 
-  logScreenView(
-    screenName: string,
-    eventProperties?: EventProperties | undefined
-  ): void {
+  logScreenView(screenName: string, eventProperties?: EP): void {
     this.logEvent(`${screenName} viewed`, eventProperties);
   }
 }
-
-const AnalyticsContext = createContext<KeplrAnalyticsRn | null>(null);
-
-export const AnalyticsProvider: FunctionComponent<{ apiKey: string }> = ({
-  apiKey,
-  children,
-}) => {
-  const [analytics] = useState(() => new KeplrAnalyticsRn(apiKey));
-
-  return (
-    <AnalyticsContext.Provider value={analytics}>
-      {children}
-    </AnalyticsContext.Provider>
-  );
-};
-
-export const useAnalytics = () => {
-  const analytics = useContext(AnalyticsContext);
-  if (!analytics) {
-    throw new Error("You have forgot to use AnalyticsProvider");
-  }
-
-  return analytics;
-};

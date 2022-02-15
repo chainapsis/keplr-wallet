@@ -18,7 +18,6 @@ import { RectButton } from "../../../../components/rect-button";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { HeaderRightButton } from "../../../../components/header";
 import { HeaderAddIcon } from "../../../../components/header/icon";
-import { useLogScreenView } from "../../../../hooks";
 import { AddressBookIcon } from "../../../../components/icon";
 import { useConfirmModal } from "../../../../providers/confirm-modal";
 
@@ -95,12 +94,6 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
   const isInTransaction = recipientConfig != null || memoConfig != null;
   const AddressBookItem =
     addressBookItemComponent[isInTransaction ? "inTransaction" : "inSetting"];
-
-  useLogScreenView("Address book", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-    fromScreen: isInTransaction ? "Transaction" : "Setting",
-  });
 
   return addressBookConfig.addressBookDatas.length > 0 ? (
     <PageWithScrollView>

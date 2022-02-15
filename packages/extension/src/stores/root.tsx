@@ -1,6 +1,6 @@
 import { ChainStore } from "./chain";
 import { EmbedChainInfos } from "../config";
-import { FiatCurrencies } from "../config.ui";
+import { FiatCurrencies, AmplitudeApiKey } from "../config.ui";
 import {
   KeyRingStore,
   InteractionStore,
@@ -29,6 +29,8 @@ import { APP_PORT } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
+import { FeeType } from "@keplr-wallet/hooks";
+import { KeplrAnalytics } from "@keplr-wallet/analytics";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -49,6 +51,26 @@ export class RootStore {
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+
+  public readonly analytics: KeplrAnalytics<
+    {
+      chainId?: string;
+      chainName?: string;
+      toChainId?: string;
+      toChainName?: string;
+      registerType?: "seed" | "google" | "ledger" | "qr";
+      feeType?: FeeType | undefined;
+      isIbc?: boolean;
+      rpc?: string;
+      rest?: string;
+    },
+    {
+      registerType?: "seed" | "google" | "ledger" | "qr";
+      accountType?: "mnemonic" | "privateKey" | "ledger";
+      currency?: string;
+      language?: string;
+    }
+  >;
 
   constructor() {
     this.uiConfigStore = new UIConfigStore(
@@ -238,6 +260,8 @@ export class RootStore {
       this.accountStore,
       this.queriesStore
     );
+
+    this.analytics = new KeplrAnalytics(AmplitudeApiKey, "Extension");
 
     router.listen(APP_PORT);
   }

@@ -15,7 +15,6 @@ import { useHistory } from "react-router";
 
 import classnames from "classnames";
 import { Dec } from "@keplr-wallet/unit";
-import { useAnalytics } from "@keplr-wallet/analytics";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");
@@ -41,7 +40,6 @@ const DepositModal: FunctionComponent<{
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
-  const analytics = useAnalytics();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -85,10 +83,6 @@ export const TxButtonView: FunctionComponent = observer(() => {
         outline
         onClick={(e) => {
           e.preventDefault();
-          analytics.logEvent("Deposit button clicked", {
-            chainId: chainStore.current.chainId,
-            chainName: chainStore.current.chainName,
-          });
 
           setIsDepositOpen(true);
         }}

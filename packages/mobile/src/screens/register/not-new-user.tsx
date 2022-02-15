@@ -11,11 +11,9 @@ import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAnalytics } from "../../providers/analytics";
 
 export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
-  const analytics = useAnalytics();
+  const { keyRingStore, analytics } = useStore();
 
   const style = useStyle();
 

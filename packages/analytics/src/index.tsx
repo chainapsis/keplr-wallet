@@ -1,54 +1,32 @@
 import Amplitude from "amplitude-js";
 import { makeObservable, observable } from "mobx";
-import { FeeType } from "@keplr-wallet/hooks";
 import { sha256 } from "sha.js";
-import React, {
-  createContext,
-  useState,
-  useContext,
-  FunctionComponent,
-} from "react";
 
-export type EventProperties = {
-  currentChainId?: string;
-  currentChainIdPrefix?: string;
-  currentChainName?: string;
+export interface EventProperties extends Record<string, unknown> {
   chainId?: string;
-  chainIdPrefix?: string;
   chainName?: string;
+  chainIdPrefix?: string;
   toChainId?: string;
-  toChainIdPrefix?: string;
   toChainName?: string;
-  validatorName?: string;
-  proposalId?: string;
-  proposalTitle?: string;
-  linkTitle?: string;
-  linkUrl?: string;
-  registerType?: "seed" | "google" | "ledger" | "qr";
-  accountType?: "mnemonic" | "privateKey" | "ledger";
-  authType?: "biometrics" | "password";
-  feeType?: FeeType | undefined;
-  isSuccess?: boolean;
-  isIbc?: boolean;
-  fromScreen?: "Transaction" | "Setting";
-  rpc?: string;
-  rest?: string;
-};
+  toChainIdPrefix?: string;
+}
 
-export type UserProperties = {
-  registerType?: "seed" | "google" | "ledger" | "qr";
-  accountType?: "mnemonic" | "privateKey" | "ledger";
+export interface UserProperties extends Record<string, unknown> {
+  registerType?: string;
+  accountType?: string;
   currency?: string;
   language?: string;
-  hasExtensionAccount?: boolean;
-};
+}
 
 type AmplitudeConfig = Amplitude.Config;
 type AnalyticsConfigs = {
   amplitudeConfig: AmplitudeConfig;
 };
 
-export class KeplrAnalytics {
+export class KeplrAnalytics<
+  EP extends EventProperties,
+  UP extends UserProperties
+> {
   @observable
   protected _isInitialized: boolean = false;
 
@@ -90,19 +68,11 @@ export class KeplrAnalytics {
     this.amplitudeClient.setUserId(hashedAddress);
   }
 
-  setUserProperties(userProperties: UserProperties): void {
+  setUserProperties(userProperties: UP): void {
     this.amplitudeClient.setUserProperties(userProperties);
   }
 
-  logEvent(
-    eventName: string,
-    eventProperties?: EventProperties | undefined
-  ): void {
-    if (eventProperties && eventProperties.currentChainId) {
-      eventProperties.chainIdPrefix = eventProperties.currentChainId.split(
-        "-"
-      )[0];
-    }
+  logEvent(eventName: string, eventProperties?: EP): void {
     if (eventProperties && eventProperties.chainId) {
       eventProperties.chainIdPrefix = eventProperties.chainId.split("-")[0];
     }
@@ -113,37 +83,7 @@ export class KeplrAnalytics {
     this.amplitudeClient.logEvent(eventName, eventProperties);
   }
 
-  logScreenView(
-    screenName: string,
-    eventProperties?: EventProperties | undefined
-  ): void {
-    this.logEvent(`${screenName} viewed`, eventProperties);
+  logPageView(pageName: string, eventProperties?: EP): void {
+    this.logEvent(`${pageName} viewed`, eventProperties);
   }
 }
-
-const AnalyticsContext = createContext<KeplrAnalytics | null>(null);
-
-export const AnalyticsProvider: FunctionComponent<{
-  apiKey: string;
-  platformName: string;
-  configs?: AnalyticsConfigs;
-}> = ({ apiKey, platformName, configs, children }) => {
-  const [analytics] = useState(
-    () => new KeplrAnalytics(apiKey, platformName, configs)
-  );
-
-  return (
-    <AnalyticsContext.Provider value={analytics}>
-      {children}
-    </AnalyticsContext.Provider>
-  );
-};
-
-export const useAnalytics = () => {
-  const analytics = useContext(AnalyticsContext);
-  if (!analytics) {
-    throw new Error("You have forgot to use AnalyticsProvider");
-  }
-
-  return analytics;
-};

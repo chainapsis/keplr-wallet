@@ -17,7 +17,6 @@ import {
   registerExportedKeyRingDatas,
 } from "../../../utils/import-from-mobile";
 import { AsyncKVStore } from "../../../common";
-import { useAnalytics } from "../../../providers/analytics";
 
 export * from "./intro";
 export * from "./set-password";
@@ -42,8 +41,7 @@ export interface WCExportKeyRingDatasResponse {
 }
 
 export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
-  const { chainStore, keyRingStore } = useStore();
-  const analytics = useAnalytics();
+  const { chainStore, keyRingStore, analytics } = useStore();
 
   const [addressBookConfigMap] = useState(
     () => new AddressBookConfigMap(new AsyncKVStore("address_book"), chainStore)

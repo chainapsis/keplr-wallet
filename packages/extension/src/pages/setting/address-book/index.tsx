@@ -28,7 +28,6 @@ import {
   useRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../../config.ui";
-import { useLogScreenView } from "../../../hooks";
 
 export const AddressBookPage: FunctionComponent<{
   onBackButton?: () => void;
@@ -42,7 +41,7 @@ export const AddressBookPage: FunctionComponent<{
     hideChainDropdown,
     selectHandler,
     ibcChannelConfig,
-    isInTransaction,
+    //isInTransaction,
   }) => {
     const intl = useIntl();
     const history = useHistory();
@@ -133,10 +132,6 @@ export const AddressBookPage: FunctionComponent<{
         />,
       ];
     };
-
-    useLogScreenView("Address book", {
-      fromScreen: isInTransaction ? "Transaction" : "Setting",
-    });
 
     return (
       <HeaderLayout

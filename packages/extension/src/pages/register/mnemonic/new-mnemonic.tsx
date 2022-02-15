@@ -13,7 +13,7 @@ import { Alert, Button, ButtonGroup, Form } from "reactstrap";
 import { Input, PasswordInput, TextArea } from "../../../components/form";
 import { BackButton } from "../index";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
-import { useAnalytics } from "@keplr-wallet/analytics";
+import { useStore } from "../../../stores";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -30,7 +30,7 @@ interface FormData {
 export const NewMnemonicIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   return (
     <Button
@@ -274,7 +274,7 @@ export const VerifyMnemonicModePage: FunctionComponent<{
     setSuggestedWords([]);
   }, [newMnemonicConfig.mnemonic]);
 
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   return (
     <div>

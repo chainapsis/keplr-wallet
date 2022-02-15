@@ -5,13 +5,11 @@ import { useStyle } from "../../../styles";
 import { PasswordInputModal } from "../../../modals/password-input/modal";
 import { useStore } from "../../../stores";
 import { useNavigation } from "@react-navigation/native";
-import { useAnalytics } from "../../../providers/analytics";
 
 export const SettingRemoveAccountItem: FunctionComponent<{
   topBorder?: boolean;
 }> = observer(({ topBorder }) => {
-  const { keychainStore, keyRingStore } = useStore();
-  const analytics = useAnalytics();
+  const { keychainStore, keyRingStore, analytics } = useStore();
 
   const style = useStyle();
 

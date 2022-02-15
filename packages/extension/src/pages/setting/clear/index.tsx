@@ -17,7 +17,6 @@ import { observer } from "mobx-react-lite";
 
 import style from "./style.module.scss";
 import { WarningView } from "./warning-view";
-import { useAnalytics } from "@keplr-wallet/analytics";
 
 interface FormData {
   password: string;
@@ -31,8 +30,7 @@ export const ClearPage: FunctionComponent = observer(() => {
 
   const [loading, setLoading] = useState(false);
 
-  const { keyRingStore } = useStore();
-  const analytics = useAnalytics();
+  const { keyRingStore, analytics } = useStore();
   const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {
       password: "",

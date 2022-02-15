@@ -6,15 +6,13 @@ import { useStore } from "../../stores";
 
 import style from "./chain-list.module.scss";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
-import { useAnalytics } from "@keplr-wallet/analytics";
 import { useConfirm } from "../../components/confirm";
 import { useIntl } from "react-intl";
 
 const ChainElement: FunctionComponent<{
   chainInfo: ChainInfoWithEmbed;
 }> = observer(({ chainInfo }) => {
-  const { chainStore } = useStore();
-  const analytics = useAnalytics();
+  const { chainStore, analytics } = useStore();
 
   const intl = useIntl();
 

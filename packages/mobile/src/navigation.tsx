@@ -29,7 +29,6 @@ import {
   createDrawerNavigator,
   useIsDrawerOpen,
 } from "@react-navigation/drawer";
-import analytics from "@react-native-firebase/analytics";
 import { DrawerContent } from "./components/drawer";
 import { useStyle } from "./styles";
 import { BorderlessButton } from "react-native-gesture-handler";
@@ -105,7 +104,6 @@ import {
 } from "./screens/register/import-from-extension";
 import { OsmosisWebpageScreen } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
-import { useAnalytics } from "./providers/analytics";
 
 const {
   SmartNavigatorProvider,
@@ -636,7 +634,7 @@ export const SettingStackScreen: FunctionComponent = () => {
 
   const navigation = useNavigation();
 
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   return (
     <Stack.Navigator
@@ -895,10 +893,22 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   );
 };
 
+type RouteNameToScreenName = {
+  [routeName: string]: string | undefined;
+};
+
 export const AppNavigation: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const {
+    keyRingStore,
+    analytics,
+    accountStore,
+    chainStore,
+    priceStore,
+  } = useStore();
   const navigationRef = useRef<NavigationContainerRef>(null);
   const routeNameRef = useRef<string>();
+
+  const account = accountStore.getAccount("cosmoshub-4");
 
   return (
     <PageScrollPositionProvider>
@@ -911,17 +921,37 @@ export const AppNavigation: FunctionComponent = observer(() => {
             }
             onStateChange={async () => {
               const previousRouteName = routeNameRef.current;
-              const currentRouteName = navigationRef.current?.getCurrentRoute()
-                ?.name;
+              const currentRoute = navigationRef.current?.getCurrentRoute();
+              const currentRouteName = currentRoute?.name;
+
+              const routeNameToScreenName: RouteNameToScreenName = {
+                Home: "Home dashboard",
+                "Register.Intro": "Register",
+                "Validator.List": "Validator list",
+                "Staking.Dashboard": "Staking dashboard",
+                Governance: "Governance",
+                Setting: "Setting",
+                SettingSelectAccount: "Select account",
+                AddressBook: "Address book",
+                "Web.Osmosis": "Osmosis",
+              };
+              const loggingScreenName =
+                currentRouteName && routeNameToScreenName[currentRouteName];
 
               if (previousRouteName !== currentRouteName) {
-                // The line below uses the expo-firebase-analytics tracker
-                // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
-                // Change this line to use another Mobile analytics SDK
-                await analytics().logScreenView({
-                  screen_name: currentRouteName,
-                  screen_class: currentRouteName,
-                });
+                if (analytics.isInitialized && loggingScreenName) {
+                  const eventProperties = {
+                    chainId: chainStore.current.chainId,
+                    chainName: chainStore.current.chainName,
+                  };
+
+                  account.bech32Address &&
+                    analytics.setUserId(account.bech32Address);
+                  analytics.setUserProperties({
+                    currency: priceStore.defaultVsCurrency,
+                  });
+                  analytics.logScreenView(loggingScreenName, eventProperties);
+                }
               }
 
               // Save the current route name for later comparison

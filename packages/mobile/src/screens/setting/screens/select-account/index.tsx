@@ -12,8 +12,6 @@ import {
 } from "@keplr-wallet/background";
 import { View } from "react-native";
 import { useSmartNavigation } from "../../../../navigation";
-import { useLogScreenView } from "../../../../hooks";
-import { useAnalytics } from "../../../../providers/analytics";
 
 const CheckIcon: FunctionComponent<{
   color: string;
@@ -78,14 +76,11 @@ export const getKeyStoreParagraph = (keyStore: MultiKeyStoreInfoElem) => {
 };
 
 export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
-  const analytics = useAnalytics();
+  const { keyRingStore, analytics } = useStore();
 
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
-
-  useLogScreenView("Select account");
 
   const googleTorusKeyStores = useMemo(() => {
     return keyRingStore.multiKeyStoreInfo.filter(

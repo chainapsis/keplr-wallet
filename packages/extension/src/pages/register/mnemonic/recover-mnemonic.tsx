@@ -12,7 +12,7 @@ import { RegisterConfig } from "@keplr-wallet/hooks";
 import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 
 import { Buffer } from "buffer/";
-import { useAnalytics } from "@keplr-wallet/analytics";
+import { useStore } from "../../../stores";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -54,7 +54,7 @@ export const TypeRecoverMnemonic = "recover-mnemonic";
 export const RecoverMnemonicIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   return (
     <Button
@@ -82,7 +82,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
 
   const bip44Option = useBIP44Option();
 
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   const { register, handleSubmit, getValues, errors } = useForm<FormData>({
     defaultValues: {

@@ -11,7 +11,6 @@ import { View } from "react-native";
 import { useStore } from "../../../stores";
 import { Button } from "../../../components/button";
 import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
-import { useAnalytics } from "../../../providers/analytics";
 
 interface FormData {
   name: string;
@@ -34,7 +33,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   const smartNavigation = useSmartNavigation();
 

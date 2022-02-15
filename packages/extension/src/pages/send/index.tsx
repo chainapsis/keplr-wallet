@@ -27,7 +27,6 @@ import {
   openPopupWindow,
   PopupSize,
 } from "@keplr-wallet/popup";
-import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -54,8 +53,13 @@ export const SendPage: FunctionComponent = observer(() => {
 
   const notification = useNotification();
 
-  const { chainStore, accountStore, priceStore, queriesStore } = useStore();
-  const analytics = useAnalytics();
+  const {
+    chainStore,
+    accountStore,
+    priceStore,
+    queriesStore,
+    analytics,
+  } = useStore();
   const current = chainStore.current;
 
   const accountInfo = accountStore.getAccount(current.chainId);

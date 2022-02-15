@@ -8,12 +8,10 @@ import { FormattedMessage } from "react-intl";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
-  const { chainSuggestStore } = useStore();
+  const { chainSuggestStore, analytics } = useStore();
   const history = useHistory();
-  const analytics = useAnalytics();
 
   const interactionInfo = useInteractionInfo(() => {
     chainSuggestStore.rejectAll();
@@ -24,7 +22,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
       analytics.isInitialized &&
       chainSuggestStore.waitingSuggestedChainInfo
     ) {
-      analytics.logEvent("Suggest chain viewed", {
+      analytics.logEvent("Chain suggested", {
         chainId: chainSuggestStore.waitingSuggestedChainInfo.data.chainId,
         chainName: chainSuggestStore.waitingSuggestedChainInfo.data.chainName,
         rpc: chainSuggestStore.waitingSuggestedChainInfo.data.rpc,

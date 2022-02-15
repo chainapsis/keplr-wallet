@@ -15,12 +15,10 @@ import { useNotification } from "../../components/notification";
 import { useHistory } from "react-router";
 
 import { FormattedMessage } from "react-intl";
-import { useAnalytics } from "@keplr-wallet/analytics";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
-  const { chainStore, accountStore, queriesStore } = useStore();
-  const analytics = useAnalytics();
+  const { chainStore, accountStore, queriesStore, analytics } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 

@@ -11,7 +11,6 @@ import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
 import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
-import { useAnalytics } from "../../../providers/analytics";
 
 export const DelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -28,8 +27,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
 
   const validatorAddress = route.params.validatorAddress;
 
-  const { chainStore, accountStore, queriesStore } = useStore();
-  const analytics = useAnalytics();
+  const { chainStore, accountStore, queriesStore, analytics } = useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();

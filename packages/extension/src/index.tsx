@@ -17,7 +17,6 @@ import { SetKeyRingPage } from "./pages/setting/keyring";
 
 import { Banner } from "./components/banner";
 
-import { AnalyticsProvider } from "@keplr-wallet/analytics";
 import {
   NotificationProvider,
   NotificationStoreProvider,
@@ -51,16 +50,13 @@ import { ManageTokenPage } from "./pages/setting/token/manage";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
 
-import {
-  AdditonalIntlMessages,
-  LanguageToFiatCurrency,
-  AmplitudeApiKey,
-} from "./config.ui";
+import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
+import { LogPageViewWrapper } from "./components/analytics";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -144,11 +140,8 @@ ReactDOM.render(
         <NotificationStoreProvider>
           <NotificationProvider>
             <ConfirmProvider>
-              <AnalyticsProvider
-                apiKey={AmplitudeApiKey}
-                platformName="Extension"
-              >
-                <HashRouter>
+              <HashRouter>
+                <LogPageViewWrapper>
                   <Route exact path="/" component={StateRenderer} />
                   <Route exact path="/unlock" component={LockPage} />
                   <Route exact path="/access" component={AccessPage} />
@@ -233,8 +226,8 @@ ReactDOM.render(
                   />
                   <Route path="/sign" component={SignPage} />
                   <Route path="/suggest-chain" component={ChainSuggestedPage} />
-                </HashRouter>
-              </AnalyticsProvider>
+                </LogPageViewWrapper>
+              </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>
         </NotificationStoreProvider>

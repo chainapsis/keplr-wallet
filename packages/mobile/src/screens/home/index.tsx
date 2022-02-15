@@ -19,7 +19,7 @@ import { GovernanceCard } from "./governance-card";
 import { observer } from "mobx-react-lite";
 import { MyRewardCard } from "./my-reward-card";
 import { TokensCard } from "./tokens-card";
-import { useLogScreenView, usePrevious } from "../../hooks";
+import { usePrevious } from "../../hooks";
 import { BIP44Selectable } from "./bip44-selectable";
 import { useFocusEffect } from "@react-navigation/native";
 import { ChainUpdaterService } from "@keplr-wallet/background";
@@ -130,11 +130,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const tokens = queryBalances.positiveNativeUnstakables.concat(
     queryBalances.nonNativeBalances
   );
-
-  useLogScreenView("Home dashboard", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-  });
 
   return (
     <PageWithScrollViewInBottomTabView

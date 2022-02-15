@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../components/page";
 import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
@@ -16,8 +16,6 @@ import { dateToLocalString } from "./utils";
 import { registerModal } from "../../modals/base";
 import { RectButton } from "../../components/rect-button";
 import { useSmartNavigation } from "../../navigation";
-import { useLogScreenView } from "../../hooks";
-import { useAnalytics } from "../../providers/analytics";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -266,8 +264,7 @@ export const GovernanceVoteModal: FunctionComponent<{
   smartNavigation: ReturnType<typeof useSmartNavigation>;
 }> = registerModal(
   observer(({ proposalId, close, smartNavigation }) => {
-    const { chainStore, accountStore, queriesStore } = useStore();
-    const analytics = useAnalytics();
+    const { chainStore, accountStore, queriesStore, analytics } = useStore();
 
     const account = accountStore.getAccount(chainStore.current.chainId);
     const queries = queriesStore.get(chainStore.current.chainId);
@@ -468,7 +465,7 @@ export const GovernanceVoteModal: FunctionComponent<{
 );
 
 export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore, accountStore } = useStore();
+  const { chainStore, queriesStore, accountStore, analytics } = useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
@@ -511,12 +508,16 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useLogScreenView("Proposal detail", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-    proposalId,
-    proposalTitle: proposal?.title,
-  });
+  useEffect(() => {
+    if (analytics.isInitialized) {
+      analytics.logScreenView("Proposal detail", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+        proposalId,
+        proposalTitle: proposal?.title,
+      });
+    }
+  }, [analytics.isInitialized]);
 
   return (
     <PageWithScrollView

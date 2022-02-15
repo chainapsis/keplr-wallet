@@ -7,13 +7,11 @@ import { Dec } from "@keplr-wallet/unit";
 import { ViewStyle } from "react-native";
 import { useStore } from "../../stores";
 import { useSmartNavigation } from "../../navigation";
-import { useAnalytics } from "../../providers/analytics";
 
 export const MyRewardCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
-  const { chainStore, accountStore, queriesStore } = useStore();
-  const analytics = useAnalytics();
+  const { chainStore, accountStore, queriesStore, analytics } = useStore();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);

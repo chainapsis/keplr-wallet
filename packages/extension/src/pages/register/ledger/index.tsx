@@ -8,7 +8,7 @@ import { Input, PasswordInput } from "../../../components/form";
 import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 import { BackButton } from "../index";
 import { observer } from "mobx-react-lite";
-import { useAnalytics } from "@keplr-wallet/analytics";
+import { useStore } from "../../../stores";
 
 export const TypeImportLedger = "import-ledger";
 
@@ -21,8 +21,7 @@ interface FormData {
 export const ImportLedgerIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const analytics = useAnalytics();
-
+  const { analytics } = useStore();
   return (
     <Button
       color="primary"
@@ -57,7 +56,7 @@ export const ImportLedgerPage: FunctionComponent<{
     },
   });
 
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   return (
     <div>

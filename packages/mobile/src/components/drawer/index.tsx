@@ -13,14 +13,12 @@ import { RectButton } from "../rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VectorCharacter } from "../vector-character";
 import FastImage from "react-native-fast-image";
-import { useAnalytics } from "../../providers/analytics";
 
 export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOptions>;
 
 export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
   (props) => {
-    const { chainStore } = useStore();
-    const analytics = useAnalytics();
+    const { chainStore, analytics } = useStore();
     const navigation = useNavigation();
 
     const safeAreaInsets = useSafeAreaInsets();

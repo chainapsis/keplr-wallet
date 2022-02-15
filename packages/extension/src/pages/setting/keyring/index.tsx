@@ -14,19 +14,13 @@ import { PageButton } from "../page-button";
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 
-import { useLogScreenView } from "../../../hooks";
-import { useAnalytics } from "@keplr-wallet/analytics";
-
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
-  const { keyRingStore } = useStore();
-  const analytics = useAnalytics();
+  const { keyRingStore, analytics } = useStore();
   const history = useHistory();
 
   const loadingIndicator = useLoadingIndicator();
-
-  useLogScreenView("Select account");
 
   return (
     <HeaderLayout

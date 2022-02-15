@@ -15,7 +15,7 @@ import NodeDetailManager from "@toruslabs/fetch-node-details";
 import Torus from "@toruslabs/torus.js";
 import { useLoadingScreen } from "../../../providers/loading-screen";
 import * as AppleAuthentication from "expo-apple-authentication";
-import { useAnalytics } from "../../../providers/analytics";
+import { useStore } from "../../../stores";
 
 interface FormData {
   name: string;
@@ -288,7 +288,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   const smartNavigation = useSmartNavigation();
 

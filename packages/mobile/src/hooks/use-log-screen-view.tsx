@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useAnalytics } from "../providers/analytics";
 import { EventProperties } from "@keplr-wallet/analytics";
 import { useStore } from "../stores";
 
@@ -7,8 +6,7 @@ export const useLogScreenView = (
   screenName: string,
   eventProperties: EventProperties = {}
 ): void => {
-  const analytics = useAnalytics();
-  const { chainStore, priceStore, accountStore } = useStore();
+  const { chainStore, priceStore, accountStore, analytics } = useStore();
 
   const currentChainInfo = chainStore.getChain(chainStore.current.chainId);
   const defaultAccountInfo = accountStore.getAccount("cosmoshub-4");

@@ -11,7 +11,7 @@ import { RegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { RectButton } from "../../../components/rect-button";
 import { BIP44HDPath } from "@keplr-wallet/background";
-import { useAnalytics } from "../../../providers/analytics";
+import { useStore } from "../../../stores";
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -30,7 +30,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const analytics = useAnalytics();
+  const { analytics } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
