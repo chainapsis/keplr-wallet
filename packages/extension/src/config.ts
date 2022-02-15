@@ -35,6 +35,10 @@ import {
   CRYPTO_ORG_RPC_CONFIG,
   CRYPTO_ORG_REST_ENDPOINT,
   CRYPTO_ORG_REST_CONFIG,
+  DECENTR_RPC_ENDPOINT,
+  DECENTR_RPC_CONFIG,
+  DECENTR_REST_ENDPOINT,
+  DECENTR_REST_CONFIG,
   IOV_RPC_ENDPOINT,
   IOV_RPC_CONFIG,
   IOV_REST_ENDPOINT,
@@ -1682,6 +1686,59 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04 * Math.pow(10, 12),
     },
     beta: true,
+  },
+  {
+    rpc: DECENTR_RPC_ENDPOINT,
+    rpcConfig: DECENTR_RPC_CONFIG,
+    rest: DECENTR_REST_ENDPOINT,
+    restConfig: DECENTR_REST_CONFIG,
+    chainId: "mainnet-3",
+    chainName: "Decentr",
+    stakeCurrency: {
+      coinDenom: "DEC",
+      coinMinimalDenom: "udec",
+      coinDecimals: 6,
+      coinGeckoId: "decentr",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/decentr/stake"
+        : "http://localhost:8080/#/decentr/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/decentr/stake"
+        : "http://localhost:8080/#/decentr/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("decentr"),
+    currencies: [
+      {
+        coinDenom: "DEC",
+        coinMinimalDenom: "udec",
+        coinDecimals: 6,
+        coinGeckoId: "decentr",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DEC",
+        coinMinimalDenom: "udec",
+        coinDecimals: 6,
+        coinGeckoId: "decentr",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.025,
+      average: 0.025,
+      high: 0.025,
+    },
+    features: [
+      "stargate",
+      "no-legacy-stdTx",
+      "ibc-transfer",
+      "ibc-go",
+    ],
   },
 ];
 

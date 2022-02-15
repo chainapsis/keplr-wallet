@@ -76,6 +76,11 @@ export const CRYPTO_ORG_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const CRYPTO_ORG_REST_ENDPOINT = "";
 export const CRYPTO_ORG_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const DECENTR_RPC_ENDPOINT = "";
+export const DECENTR_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const DECENTR_REST_ENDPOINT = "";
+export const DECENTR_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const OSMOSIS_RPC_ENDPOINT = "";
 export const OSMOSIS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const OSMOSIS_REST_ENDPOINT = "";
