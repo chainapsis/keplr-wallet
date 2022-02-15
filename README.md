@@ -28,7 +28,7 @@ Browser extension's build output is placed in `packages/extension/dist`, and you
 
 This repo contains submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Browser Extension release. However, all primary features of the extension will work without the closed sourced submodules.
 
-Source code for moblie app is also placed in `packages/mobile`.
+Source code for mobile app is also placed in `packages/mobile`.
 
 ### Example
 Refer to the [Keplr Example repository](https://github.com/chainapsis/keplr-example) for examples of how to integrate Keplr signing support for your web interface/application.
