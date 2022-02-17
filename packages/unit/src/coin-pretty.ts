@@ -252,10 +252,15 @@ export class CoinPretty {
   }
 
   toMetricPrefix(): string {
-    const [, afterPoint] = this.intPretty.toString().split(".");
+    let [, afterPoint] = this.intPretty.toString().split(".");
 
     if (!afterPoint) {
       return this.intPretty.toString();
+    }
+    for (let i = afterPoint.length; i > 0; i--) {
+      if (afterPoint.endsWith("0")) {
+        afterPoint = afterPoint.slice(0, i - 1);
+      }
     }
 
     let denom = this.denom;
@@ -275,7 +280,7 @@ export class CoinPretty {
 
     const { remainder, prefix } = toMetric(afterPoint.length);
     const numberPart = remainder
-      ? Number(afterPoint) * Math.pow(10, remainder)
+      ? Number(afterPoint) / Math.pow(10, remainder)
       : Number(afterPoint);
     const prefixPart = prefix ? ` ${prefix}` : "";
 
