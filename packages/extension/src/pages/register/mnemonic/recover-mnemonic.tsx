@@ -10,9 +10,9 @@ import useForm from "react-hook-form";
 import { observer } from "mobx-react-lite";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
-import { useStore } from "../../../stores";
 
 import { Buffer } from "buffer/";
+import { useStore } from "../../../stores";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -54,7 +54,7 @@ export const TypeRecoverMnemonic = "recover-mnemonic";
 export const RecoverMnemonicIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const { analyticsStore } = useStore();
+  const { analytics } = useStore();
 
   return (
     <Button
@@ -65,7 +65,7 @@ export const RecoverMnemonicIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeRecoverMnemonic);
-        analyticsStore.logEvent("Import account started", {
+        analytics.logEvent("Import account started", {
           registerType: "seed",
         });
       }}
@@ -82,7 +82,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
 
   const bip44Option = useBIP44Option();
 
-  const { analyticsStore, accountStore } = useStore();
+  const { analytics } = useStore();
 
   const { register, handleSubmit, getValues, errors } = useForm<FormData>({
     defaultValues: {
@@ -112,15 +112,8 @@ export const RecoverMnemonicPage: FunctionComponent<{
                   data.password,
                   bip44Option.bip44HDPath
                 );
-                const accountInfo = accountStore.getAccount(
-                  analyticsStore.mainChainId
-                );
-                analyticsStore.setUserId(accountInfo.bech32Address);
-                analyticsStore.setUserProperties({
+                analytics.setUserProperties({
                   registerType: "seed",
-                  accountType: "mnemonic",
-                });
-                analyticsStore.logEvent("Import account finished", {
                   accountType: "mnemonic",
                 });
               } else {
@@ -133,15 +126,8 @@ export const RecoverMnemonicPage: FunctionComponent<{
                   privateKey,
                   data.password
                 );
-                const accountInfo = accountStore.getAccount(
-                  analyticsStore.mainChainId
-                );
-                analyticsStore.setUserId(accountInfo.bech32Address);
-                analyticsStore.setUserProperties({
+                analytics.setUserProperties({
                   registerType: "seed",
-                  accountType: "privateKey",
-                });
-                analyticsStore.logEvent("Import account finished", {
                   accountType: "privateKey",
                 });
               }

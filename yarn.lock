@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@amplitude/react-native@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@amplitude/react-native/-/react-native-2.4.0.tgz#0b75b088245500b4b60c89dc36fc07e1ac34cafb"
-  integrity sha512-xbmaHRB4iKX8V6ElG9Yl7ikELiGW2XOkdMimWqTLR6zUIpjEwN+PSZ9+gPyexX15qnPDg52O58X5zyAL2Y/hzQ==
+"@amplitude/react-native@^2.7.0":
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/@amplitude/react-native/-/react-native-2.7.0.tgz#bcd82142eaf8d7d6f161ce040c22f86eb3efb60c"
+  integrity sha512-2dMxCVgRPwReHRDm9JKbL+sZGyozJlcdr5Jokv8TQR7idNxxGmm4YSYkjhGjSWkoEyGEyy+lh9kRJQL/DcUWJQ==
 
 "@amplitude/types@^1.8.2":
   version "1.8.2"
@@ -16,6 +16,11 @@
   version "0.7.24"
   resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.24.tgz#2ce605af7d2c38d4a01313fb2385df55fbbd69aa"
   integrity sha512-VbQuJymJ20WEw0HtI2np7EdC3NJGUWi8+Xdbc7uk8WfMIF308T0howpzkQ3JFMN7ejnrcSM/OyNGveeE3TP3TA==
+
+"@amplitude/ua-parser-js@0.7.26":
+  version "0.7.26"
+  resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.26.tgz#18d889d84d2ba90c248ab6fcd7e3dd07f1c9c86e"
+  integrity sha512-62/Rid6YQ7F2KT/5vTre41Y26ivrEoFC8lbrsJZqBKaiXMJWG0YpNv9RgxNSaZS2jPLVQgoB/FFeWxihOLfIcg==
 
 "@amplitude/utils@^1.0.5":
   version "1.8.2"
@@ -7084,6 +7089,17 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
   integrity sha1-SlKCrBZHKek2Gbz9OtFR+BfOkfU=
+
+amplitude-js@^8.16.0:
+  version "8.16.0"
+  resolved "https://registry.yarnpkg.com/amplitude-js/-/amplitude-js-8.16.0.tgz#7c4faf4dc16342c6f377d775d0a02c0db3f47cba"
+  integrity sha512-PtHuYphktZsCf2BRSbb0EMuClQjHP2kSTDz2QBy6cv18yRvqVs3I2MB386BfeOxgxR16J/OlfFVBWhv9CX2rYw==
+  dependencies:
+    "@amplitude/ua-parser-js" "0.7.26"
+    "@amplitude/utils" "^1.0.5"
+    "@babel/runtime" "^7.3.4"
+    blueimp-md5 "^2.10.0"
+    query-string "5"
 
 amplitude-js@^8.5.0:
   version "8.5.0"

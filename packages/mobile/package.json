@@ -22,7 +22,7 @@
     "postinstall": "sh ./scripts/fix-android-splash-screen-flash.sh && sh ./scripts/force-export-ble-manager-from-ledger.sh"
   },
   "dependencies": {
-    "@amplitude/react-native": "^2.4.0",
+    "@amplitude/react-native": "^2.7.0",
     "@bugsnag/react-native": "^7.16.1",
     "@bugsnag/plugin-react-navigation": "^7.16.1",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
@@ -36,6 +36,7 @@
     "@formatjs/intl-pluralrules": "^4.0.28",
     "@formatjs/intl-relativetimeformat": "^9.1.7",
     "@keplr-wallet/background": "^0.9.12",
+    "@keplr-wallet/analytics": "^0.9.11",
     "@keplr-wallet/common": "^0.9.10",
     "@keplr-wallet/cosmos": "^0.9.12",
     "@keplr-wallet/crypto": "^0.9.10",

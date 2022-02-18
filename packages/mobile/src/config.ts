@@ -1690,3 +1690,5 @@ export const EmbedChainInfos: AppChainInfo[] = [
     hideInUI: true,
   },
 ];
+
+export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";

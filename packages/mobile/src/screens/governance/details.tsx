@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../components/page";
 import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
@@ -16,7 +16,6 @@ import { dateToLocalString } from "./utils";
 import { registerModal } from "../../modals/base";
 import { RectButton } from "../../components/rect-button";
 import { useSmartNavigation } from "../../navigation";
-import { useLogScreenView } from "../../hooks";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -265,12 +264,7 @@ export const GovernanceVoteModal: FunctionComponent<{
   smartNavigation: ReturnType<typeof useSmartNavigation>;
 }> = registerModal(
   observer(({ proposalId, close, smartNavigation }) => {
-    const {
-      chainStore,
-      accountStore,
-      analyticsStore,
-      queriesStore,
-    } = useStore();
+    const { chainStore, accountStore, queriesStore, analytics } = useStore();
 
     const account = accountStore.getAccount(chainStore.current.chainId);
     const queries = queriesStore.get(chainStore.current.chainId);
@@ -442,18 +436,14 @@ export const GovernanceVoteModal: FunctionComponent<{
                   {},
                   {
                     onBroadcasted: (txHash) => {
-                      smartNavigation.pushSmart("TxPendingResult", {
-                        txHash: Buffer.from(txHash).toString("hex"),
-                      });
-                    },
-                    onFulfill: (tx) => {
-                      const isSuccess = tx.code == null || tx.code === 0;
-                      analyticsStore.logEvent("Vote finished", {
+                      analytics.logEvent("Vote tx broadcasted", {
                         chainId: chainStore.current.chainId,
                         chainName: chainStore.current.chainName,
                         proposalId,
                         proposalTitle: proposal?.title,
-                        isSuccess,
+                      });
+                      smartNavigation.pushSmart("TxPendingResult", {
+                        txHash: Buffer.from(txHash).toString("hex"),
                       });
                     },
                   }
@@ -475,7 +465,7 @@ export const GovernanceVoteModal: FunctionComponent<{
 );
 
 export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, queriesStore, accountStore, analytics } = useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
@@ -518,12 +508,16 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useLogScreenView("Proposal detail", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-    proposalId,
-    proposalTitle: proposal?.title,
-  });
+  useEffect(() => {
+    if (analytics.isInitialized) {
+      analytics.logScreenView("Proposal detail", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+        proposalId,
+        proposalTitle: proposal?.title,
+      });
+    }
+  }, [analytics.isInitialized]);
 
   return (
     <PageWithScrollView
@@ -539,12 +533,6 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
               size="large"
               disabled={!voteEnabled || !account.isReadyToSendMsgs}
               onPress={() => {
-                analyticsStore.logEvent("Vote started", {
-                  chainId: chainStore.current.chainId,
-                  chainName: chainStore.current.chainName,
-                  proposalId,
-                  proposalTitle: proposal?.title,
-                });
                 setIsModalOpen(true);
               }}
             />

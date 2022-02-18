@@ -30,7 +30,7 @@ interface FormData {
 export const NewMnemonicIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const { analyticsStore } = useStore();
+  const { analytics } = useStore();
 
   return (
     <Button
@@ -41,8 +41,7 @@ export const NewMnemonicIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeNewMnemonic);
-        console.log("here");
-        analyticsStore.logEvent("Create account started", {
+        analytics.logEvent("Create account started", {
           registerType: "seed",
         });
       }}
@@ -275,7 +274,7 @@ export const VerifyMnemonicModePage: FunctionComponent<{
     setSuggestedWords([]);
   }, [newMnemonicConfig.mnemonic]);
 
-  const { analyticsStore, accountStore } = useStore();
+  const { analytics } = useStore();
 
   return (
     <div>
@@ -344,15 +343,8 @@ export const VerifyMnemonicModePage: FunctionComponent<{
               newMnemonicConfig.password,
               bip44Option.bip44HDPath
             );
-            const accountInfo = accountStore.getAccount(
-              analyticsStore.mainChainId
-            );
-            analyticsStore.setUserId(accountInfo.bech32Address);
-            analyticsStore.setUserProperties({
+            analytics.setUserProperties({
               registerType: "seed",
-              accountType: "mnemonic",
-            });
-            analyticsStore.logEvent("Create account finished", {
               accountType: "mnemonic",
             });
           } catch (e) {

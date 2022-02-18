@@ -21,8 +21,7 @@ interface FormData {
 export const ImportLedgerIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const { analyticsStore } = useStore();
-
+  const { analytics } = useStore();
   return (
     <Button
       color="primary"
@@ -32,7 +31,7 @@ export const ImportLedgerIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeImportLedger);
-        analyticsStore.logEvent("Import account started", {
+        analytics.logEvent("Import account started", {
           registerType: "ledger",
         });
       }}
@@ -57,7 +56,7 @@ export const ImportLedgerPage: FunctionComponent<{
     },
   });
 
-  const { analyticsStore, accountStore } = useStore();
+  const { analytics } = useStore();
 
   return (
     <div>
@@ -75,15 +74,8 @@ export const ImportLedgerPage: FunctionComponent<{
               data.password,
               bip44Option.bip44HDPath
             );
-            const accountInfo = accountStore.getAccount(
-              analyticsStore.mainChainId
-            );
-            analyticsStore.setUserId(accountInfo.bech32Address);
-            analyticsStore.setUserProperties({
+            analytics.setUserProperties({
               registerType: "ledger",
-              accountType: "ledger",
-            });
-            analyticsStore.logEvent("Import account finished", {
               accountType: "ledger",
             });
           } catch (e) {

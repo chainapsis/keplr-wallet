@@ -470,7 +470,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-mobile/Pods-mobile-resources.sh",
-				"${PODS_ROOT}/Amplitude/Sources/Amplitude/Resources/ComodoRsaDomainValidationCA.der",
+				"${PODS_ROOT}/Amplitude/Sources/Resources/ComodoRsaDomainValidationCA.der",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/AccessibilityResources.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
@@ -534,7 +534,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-mobile-mobileTests/Pods-mobile-mobileTests-resources.sh",
-				"${PODS_ROOT}/Amplitude/Sources/Amplitude/Resources/ComodoRsaDomainValidationCA.der",
+				"${PODS_ROOT}/Amplitude/Sources/Resources/ComodoRsaDomainValidationCA.der",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/AccessibilityResources.bundle",
 			);
 			name = "[CP] Copy Pods Resources";

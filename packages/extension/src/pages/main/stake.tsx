@@ -18,7 +18,7 @@ import { FormattedMessage } from "react-intl";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analytics } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
@@ -42,10 +42,6 @@ export const StakeView: FunctionComponent = observer(() => {
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
-        analyticsStore.logEvent("Claim reward started", {
-          chainId: chainStore.current.chainId,
-          chainName: chainStore.current.chainName,
-        });
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
@@ -54,13 +50,13 @@ export const StakeView: FunctionComponent = observer(() => {
           "",
           undefined,
           undefined,
-          (tx: any) => {
-            const isSuccess = tx.code == null || tx.code === 0;
-            analyticsStore.logEvent("Claim reward finished", {
-              chainId: chainStore.current.chainId,
-              chainName: chainStore.current.chainName,
-              isSuccess,
-            });
+          {
+            onBroadcasted: () => {
+              analytics.logEvent("Claim reward tx broadcasted", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+              });
+            },
           }
         );
 
@@ -186,7 +182,7 @@ export const StakeView: FunctionComponent = observer(() => {
             if (!isStakableExist) {
               e.preventDefault();
             } else {
-              analyticsStore.logEvent("Stake button clicked", {
+              analytics.logEvent("Stake button clicked", {
                 chainId: chainStore.current.chainId,
                 chainName: chainStore.current.chainName,
               });

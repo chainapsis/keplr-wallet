@@ -1,25 +1,37 @@
-import { useCallback } from "react";
-import { EventProperties } from "../stores/analytics";
+import { useEffect } from "react";
+import { EventProperties } from "@keplr-wallet/analytics";
 import { useStore } from "../stores";
-import { useFocusEffect } from "@react-navigation/native";
 
 export const useLogScreenView = (
   screenName: string,
-  eventProperties?: EventProperties
+  eventProperties: EventProperties = {}
 ): void => {
-  const { analyticsStore, priceStore, accountStore } = useStore();
-  const accountInfo = accountStore.getAccount(analyticsStore.mainChainId);
+  const { chainStore, priceStore, accountStore, analytics } = useStore();
 
-  useFocusEffect(
-    useCallback(() => {
-      if (analyticsStore.isInitialized) {
-        analyticsStore.setUserId(accountInfo.bech32Address);
-        analyticsStore.setUserProperties({
-          currency: priceStore.defaultVsCurrency,
-        });
-        analyticsStore.logScreenView(screenName, eventProperties);
+  const currentChainInfo = chainStore.getChain(chainStore.current.chainId);
+  const defaultAccountInfo = accountStore.getAccount("cosmoshub-4");
+
+  useEffect(() => {
+    if (analytics.isInitialized) {
+      eventProperties.currentChainId = currentChainInfo.chainId;
+      eventProperties.currentChainName = currentChainInfo.chainName;
+
+      if (eventProperties.chainId) {
+        eventProperties.chainName = chainStore.getChain(
+          eventProperties.chainId
+        ).chainName;
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [analyticsStore.isInitialized])
-  );
+      if (eventProperties.toChainId) {
+        eventProperties.toChainName = chainStore.getChain(
+          eventProperties.toChainId
+        ).chainName;
+      }
+
+      analytics.setUserId(defaultAccountInfo.bech32Address);
+      analytics.setUserProperties({
+        currency: priceStore.defaultVsCurrency,
+      });
+      analytics.logScreenView(screenName, eventProperties);
+    }
+  }, [screenName, analytics.isInitialized]);
 };

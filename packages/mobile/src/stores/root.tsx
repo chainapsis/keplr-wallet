@@ -22,7 +22,9 @@ import EventEmitter from "eventemitter3";
 import { Keplr } from "@keplr-wallet/provider";
 import { KeychainStore } from "./keychain";
 import { WalletConnectStore } from "./wallet-connect";
-import { AnalyticsStore } from "./analytics";
+import { FeeType } from "@keplr-wallet/hooks";
+import { KeplrAnalyticsRn } from "./analytics";
+import { AmplitudeApiKey } from "../config";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -42,7 +44,28 @@ export class RootStore {
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
-  public readonly analyticsStore: AnalyticsStore;
+
+  public readonly analytics: KeplrAnalyticsRn<
+    {
+      chainId?: string;
+      chainName?: string;
+      toChainId?: string;
+      toChainName?: string;
+      registerType?: "seed" | "google" | "ledger" | "qr";
+      feeType?: FeeType | undefined;
+      isIbc?: boolean;
+      validatorName?: string;
+      toValidatorName?: string;
+      proposalId?: string;
+      proposalTitle?: string;
+    },
+    {
+      registerType?: "seed" | "google" | "ledger" | "qr" | "apple";
+      accountType?: "mnemonic" | "privateKey" | "ledger";
+      currency?: string;
+      language?: string;
+    }
+  >;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -238,11 +261,7 @@ export class RootStore {
       this.permissionStore
     );
 
-    this.analyticsStore = new AnalyticsStore(
-      "KeplrMobile",
-      this.accountStore,
-      this.keyRingStore
-    );
+    this.analytics = new KeplrAnalyticsRn(AmplitudeApiKey);
   }
 }
 
