@@ -264,7 +264,12 @@ export const GovernanceVoteModal: FunctionComponent<{
   smartNavigation: ReturnType<typeof useSmartNavigation>;
 }> = registerModal(
   observer(({ proposalId, close, smartNavigation }) => {
-    const { chainStore, accountStore, queriesStore, analytics } = useStore();
+    const {
+      chainStore,
+      accountStore,
+      queriesStore,
+      analyticsStore,
+    } = useStore();
 
     const account = accountStore.getAccount(chainStore.current.chainId);
     const queries = queriesStore.get(chainStore.current.chainId);
@@ -436,7 +441,7 @@ export const GovernanceVoteModal: FunctionComponent<{
                   {},
                   {
                     onBroadcasted: (txHash) => {
-                      analytics.logEvent("Vote tx broadcasted", {
+                      analyticsStore.logEvent("Vote tx broadcasted", {
                         chainId: chainStore.current.chainId,
                         chainName: chainStore.current.chainName,
                         proposalId,
@@ -465,7 +470,7 @@ export const GovernanceVoteModal: FunctionComponent<{
 );
 
 export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore, accountStore, analytics } = useStore();
+  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
@@ -509,15 +514,15 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (analytics.isInitialized) {
-      analytics.logScreenView("Proposal detail", {
+    if (analyticsStore.isInitialized) {
+      analyticsStore.logScreenView("Proposal detail", {
         chainId: chainStore.current.chainId,
         chainName: chainStore.current.chainName,
         proposalId,
         proposalTitle: proposal?.title,
       });
     }
-  }, [analytics.isInitialized]);
+  }, [analyticsStore.isInitialized]);
 
   return (
     <PageWithScrollView

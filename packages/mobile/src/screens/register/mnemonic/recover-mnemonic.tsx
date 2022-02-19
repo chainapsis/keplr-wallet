@@ -64,7 +64,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const { analytics } = useStore();
+  const { analyticsStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
@@ -95,7 +95,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         getValues("password"),
         bip44Option.bip44HDPath
       );
-      analytics.setUserProperties({
+      analyticsStore.setUserProperties({
         registerType: "seed",
         accountType: "mnemonic",
       });
@@ -106,7 +106,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         privateKey,
         getValues("password")
       );
-      analytics.setUserProperties({
+      analyticsStore.setUserProperties({
         registerType: "seed",
         accountType: "privateKey",
       });

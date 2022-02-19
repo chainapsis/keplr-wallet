@@ -18,26 +18,35 @@ export const LogPageViewWrapper: FunctionComponent = ({ children }) => {
   const location = useLocation();
   const loggingPageName = pathnameToPageName[location.pathname];
 
-  const { chainStore, accountStore, analytics } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const language = useLanguage();
 
   const account = accountStore.getAccount("cosmoshub-4");
 
   useEffect(() => {
-    if (analytics.isInitialized && loggingPageName) {
+    if (loggingPageName) {
       const eventProperties = {
         chainId: chainStore.current.chainId,
         chainName: chainStore.current.chainName,
       };
 
-      account.bech32Address && analytics.setUserId(account.bech32Address);
-      analytics.setUserProperties({
+      if (account.bech32Address) {
+        analyticsStore.setUserId(account.bech32Address);
+      }
+      analyticsStore.setUserProperties({
         currency: language.fiatCurrency,
         language: language.language,
       });
-      analytics.logPageView(loggingPageName, eventProperties);
+      analyticsStore.logPageView(loggingPageName, eventProperties);
     }
-  }, [analytics.isInitialized, loggingPageName]);
+  }, [
+    account.bech32Address,
+    analyticsStore,
+    chainStore,
+    language.fiatCurrency,
+    language.language,
+    loggingPageName,
+  ]);
 
-  return <>{children}</>;
+  return <React.Fragment>{children}</React.Fragment>;
 };

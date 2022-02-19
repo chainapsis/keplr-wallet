@@ -23,8 +23,10 @@ import { Keplr } from "@keplr-wallet/provider";
 import { KeychainStore } from "./keychain";
 import { WalletConnectStore } from "./wallet-connect";
 import { FeeType } from "@keplr-wallet/hooks";
-import { KeplrAnalyticsRn } from "./analytics";
 import { AmplitudeApiKey } from "../config";
+import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
+import { Amplitude } from "@amplitude/react-native";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -45,7 +47,7 @@ export class RootStore {
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
 
-  public readonly analytics: KeplrAnalyticsRn<
+  public readonly analyticsStore: AnalyticsStore<
     {
       chainId?: string;
       chainName?: string;
@@ -261,7 +263,44 @@ export class RootStore {
       this.permissionStore
     );
 
-    this.analytics = new KeplrAnalyticsRn(AmplitudeApiKey);
+    this.analyticsStore = new AnalyticsStore(
+      (() => {
+        if (!AmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance();
+          amplitudeClient.init(AmplitudeApiKey);
+
+          return amplitudeClient;
+        }
+      })(),
+      {
+        logEvent: (eventName, eventProperties) => {
+          if (eventProperties?.chainId || eventProperties?.toChainId) {
+            eventProperties = {
+              ...eventProperties,
+            };
+
+            if (eventProperties.chainId) {
+              eventProperties.chainId = ChainIdHelper.parse(
+                eventProperties.chainId
+              ).identifier;
+            }
+
+            if (eventProperties.toChainId) {
+              eventProperties.toChainId = ChainIdHelper.parse(
+                eventProperties.toChainId
+              ).identifier;
+            }
+          }
+
+          return {
+            eventName,
+            eventProperties,
+          };
+        },
+      }
+    );
   }
 }
 

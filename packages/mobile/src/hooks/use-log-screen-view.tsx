@@ -6,13 +6,13 @@ export const useLogScreenView = (
   screenName: string,
   eventProperties: EventProperties = {}
 ): void => {
-  const { chainStore, priceStore, accountStore, analytics } = useStore();
+  const { chainStore, priceStore, accountStore, analyticsStore } = useStore();
 
   const currentChainInfo = chainStore.getChain(chainStore.current.chainId);
   const defaultAccountInfo = accountStore.getAccount("cosmoshub-4");
 
   useEffect(() => {
-    if (analytics.isInitialized) {
+    if (analyticsStore.isInitialized) {
       eventProperties.currentChainId = currentChainInfo.chainId;
       eventProperties.currentChainName = currentChainInfo.chainName;
 
@@ -27,11 +27,11 @@ export const useLogScreenView = (
         ).chainName;
       }
 
-      analytics.setUserId(defaultAccountInfo.bech32Address);
-      analytics.setUserProperties({
+      analyticsStore.setUserId(defaultAccountInfo.bech32Address);
+      analyticsStore.setUserProperties({
         currency: priceStore.defaultVsCurrency,
       });
-      analytics.logScreenView(screenName, eventProperties);
+      analyticsStore.logScreenView(screenName, eventProperties);
     }
-  }, [screenName, analytics.isInitialized]);
+  }, [screenName, analyticsStore.isInitialized]);
 };

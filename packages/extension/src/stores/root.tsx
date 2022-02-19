@@ -30,7 +30,9 @@ import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
 import { FeeType } from "@keplr-wallet/hooks";
-import { KeplrAnalytics } from "@keplr-wallet/analytics";
+import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
+import Amplitude from "amplitude-js";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -52,7 +54,7 @@ export class RootStore {
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
 
-  public readonly analytics: KeplrAnalytics<
+  public readonly analyticsStore: AnalyticsStore<
     {
       chainId?: string;
       chainName?: string;
@@ -262,7 +264,47 @@ export class RootStore {
       this.queriesStore
     );
 
-    this.analytics = new KeplrAnalytics(AmplitudeApiKey, "Extension");
+    this.analyticsStore = new AnalyticsStore(
+      (() => {
+        if (!AmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance();
+          amplitudeClient.init(AmplitudeApiKey, undefined, {
+            saveEvents: true,
+            platform: "Extension",
+          });
+
+          return amplitudeClient;
+        }
+      })(),
+      {
+        logEvent: (eventName, eventProperties) => {
+          if (eventProperties?.chainId || eventProperties?.toChainId) {
+            eventProperties = {
+              ...eventProperties,
+            };
+
+            if (eventProperties.chainId) {
+              eventProperties.chainId = ChainIdHelper.parse(
+                eventProperties.chainId
+              ).identifier;
+            }
+
+            if (eventProperties.toChainId) {
+              eventProperties.toChainId = ChainIdHelper.parse(
+                eventProperties.toChainId
+              ).identifier;
+            }
+          }
+
+          return {
+            eventName,
+            eventProperties,
+          };
+        },
+      }
+    );
 
     router.listen(APP_PORT);
   }

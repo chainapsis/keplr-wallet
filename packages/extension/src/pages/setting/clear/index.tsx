@@ -30,7 +30,7 @@ export const ClearPage: FunctionComponent = observer(() => {
 
   const [loading, setLoading] = useState(false);
 
-  const { keyRingStore, analytics } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
   const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {
       password: "",
@@ -74,7 +74,7 @@ export const ClearPage: FunctionComponent = observer(() => {
                 parseInt(match.params.index),
                 data.password
               );
-              analytics.logEvent("Account removed");
+              analyticsStore.logEvent("Account removed");
 
               history.push("/");
             } catch (e) {

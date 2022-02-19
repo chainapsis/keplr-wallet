@@ -11,7 +11,7 @@ import { useSmartNavigation } from "../../../navigation";
 export const MyRewardCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
-  const { chainStore, accountStore, queriesStore, analytics } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -76,7 +76,7 @@ export const MyRewardCard: FunctionComponent<{
                   {},
                   {
                     onBroadcasted: (txHash) => {
-                      analytics.logEvent("Claim reward tx broadcasted", {
+                      analyticsStore.logEvent("Claim reward tx broadcasted", {
                         chainId: chainStore.current.chainId,
                         chainName: chainStore.current.chainName,
                       });

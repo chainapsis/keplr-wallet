@@ -25,7 +25,7 @@ export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
 
   const validatorAddress = route.params.validatorAddress;
 
-  const { chainStore, queriesStore, accountStore, analytics } = useStore();
+  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -49,12 +49,12 @@ export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   useEffect(() => {
-    analytics.logScreenView("Validator detail", {
+    analyticsStore.logScreenView("Validator detail", {
       chainId: chainStore.current.chainId,
       chainName: chainStore.current.chainName,
       validatorName: validator?.description.moniker,
     });
-  }, [analytics.isInitialized]);
+  }, [analyticsStore.isInitialized]);
 
   return (
     <PageWithScrollView>

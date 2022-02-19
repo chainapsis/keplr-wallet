@@ -54,7 +54,7 @@ export const TypeRecoverMnemonic = "recover-mnemonic";
 export const RecoverMnemonicIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
-  const { analytics } = useStore();
+  const { analyticsStore } = useStore();
 
   return (
     <Button
@@ -65,7 +65,7 @@ export const RecoverMnemonicIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeRecoverMnemonic);
-        analytics.logEvent("Import account started", {
+        analyticsStore.logEvent("Import account started", {
           registerType: "seed",
         });
       }}
@@ -82,7 +82,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
 
   const bip44Option = useBIP44Option();
 
-  const { analytics } = useStore();
+  const { analyticsStore } = useStore();
 
   const { register, handleSubmit, getValues, errors } = useForm<FormData>({
     defaultValues: {
@@ -112,7 +112,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
                   data.password,
                   bip44Option.bip44HDPath
                 );
-                analytics.setUserProperties({
+                analyticsStore.setUserProperties({
                   registerType: "seed",
                   accountType: "mnemonic",
                 });
@@ -126,7 +126,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
                   privateKey,
                   data.password
                 );
-                analytics.setUserProperties({
+                analyticsStore.setUserProperties({
                   registerType: "seed",
                   accountType: "privateKey",
                 });

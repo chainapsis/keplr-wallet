@@ -41,7 +41,7 @@ export interface WCExportKeyRingDatasResponse {
 }
 
 export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
-  const { chainStore, keyRingStore, analytics } = useStore();
+  const { chainStore, keyRingStore, analyticsStore } = useStore();
 
   const [addressBookConfigMap] = useState(
     () => new AddressBookConfigMap(new AsyncKVStore("address_book"), chainStore)
@@ -77,7 +77,7 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
         sharedData,
         chainStore.chainInfosInUI.map((chainInfo) => chainInfo.chainId)
       );
-      analytics.setUserProperties({
+      analyticsStore.setUserProperties({
         registerType: "qr",
         accountType: imported.KeyRingDatas[0].type,
       });

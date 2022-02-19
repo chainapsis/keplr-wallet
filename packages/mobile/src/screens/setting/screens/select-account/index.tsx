@@ -76,7 +76,7 @@ export const getKeyStoreParagraph = (keyStore: MultiKeyStoreInfoElem) => {
 };
 
 export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
-  const { keyRingStore, analytics } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -165,7 +165,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
                     ) : undefined
                   }
                   onPress={async () => {
-                    analytics.logEvent("Account changed");
+                    analyticsStore.logEvent("Account changed");
                     await selectKeyStore(keyStore);
                   }}
                 />

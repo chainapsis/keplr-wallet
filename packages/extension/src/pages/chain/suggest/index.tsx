@@ -10,7 +10,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
-  const { chainSuggestStore, analytics } = useStore();
+  const { chainSuggestStore, analyticsStore } = useStore();
   const history = useHistory();
 
   const interactionInfo = useInteractionInfo(() => {
@@ -18,18 +18,15 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
   });
 
   useEffect(() => {
-    if (
-      analytics.isInitialized &&
-      chainSuggestStore.waitingSuggestedChainInfo
-    ) {
-      analytics.logEvent("Chain suggested", {
+    if (chainSuggestStore.waitingSuggestedChainInfo) {
+      analyticsStore.logEvent("Chain suggested", {
         chainId: chainSuggestStore.waitingSuggestedChainInfo.data.chainId,
         chainName: chainSuggestStore.waitingSuggestedChainInfo.data.chainName,
         rpc: chainSuggestStore.waitingSuggestedChainInfo.data.rpc,
         rest: chainSuggestStore.waitingSuggestedChainInfo.data.rest,
       });
     }
-  }, [analytics.isInitialized, chainSuggestStore.waitingSuggestedChainInfo]);
+  }, [analyticsStore, chainSuggestStore.waitingSuggestedChainInfo]);
 
   return (
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>

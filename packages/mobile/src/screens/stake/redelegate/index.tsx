@@ -35,7 +35,7 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
 
   const smartNavigation = useSmartNavigation();
 
-  const { chainStore, accountStore, queriesStore, analytics } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -205,7 +205,7 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    analytics.logEvent("Redelgate tx broadcasted", {
+                    analyticsStore.logEvent("Redelgate tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       validatorName: srcValidator?.description.moniker,

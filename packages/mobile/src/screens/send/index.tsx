@@ -19,7 +19,7 @@ import { useSmartNavigation } from "../../navigation";
 import { Buffer } from "buffer/";
 
 export const SendScreen: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore, analytics } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
 
   const route = useRoute<
     RouteProp<
@@ -125,7 +125,7 @@ export const SendScreen: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    analytics.logEvent("Send token tx broadcasted", {
+                    analyticsStore.logEvent("Send token tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       feeType: sendConfigs.feeConfig.feeType,

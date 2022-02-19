@@ -58,7 +58,7 @@ export const SendPage: FunctionComponent = observer(() => {
     accountStore,
     priceStore,
     queriesStore,
-    analytics,
+    analyticsStore,
   } = useStore();
   const current = chainStore.current;
 
@@ -200,7 +200,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: () => {
-                    analytics.logEvent("Send token tx broadcasted", {
+                    analyticsStore.logEvent("Send token tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       feeType: sendConfigs.feeConfig.feeType,

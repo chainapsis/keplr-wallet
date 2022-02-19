@@ -29,7 +29,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   const validatorAddress = route.params.validatorAddress;
 
-  const { chainStore, accountStore, queriesStore, analytics } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
@@ -167,7 +167,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    analytics.logEvent("Undelegate tx broadcasted", {
+                    analyticsStore.logEvent("Undelegate tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       validatorName: validator?.description.moniker,

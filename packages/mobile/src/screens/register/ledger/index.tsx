@@ -33,7 +33,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const { analytics } = useStore();
+  const { analyticsStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
@@ -60,7 +60,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
         getValues("password"),
         bip44Option.bip44HDPath
       );
-      analytics.setUserProperties({
+      analyticsStore.setUserProperties({
         registerType: "ledger",
         accountType: "ledger",
       });

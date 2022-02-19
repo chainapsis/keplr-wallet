@@ -18,7 +18,7 @@ import { FormattedMessage } from "react-intl";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
-  const { chainStore, accountStore, queriesStore, analytics } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
@@ -52,7 +52,7 @@ export const StakeView: FunctionComponent = observer(() => {
           undefined,
           {
             onBroadcasted: () => {
-              analytics.logEvent("Claim reward tx broadcasted", {
+              analyticsStore.logEvent("Claim reward tx broadcasted", {
                 chainId: chainStore.current.chainId,
                 chainName: chainStore.current.chainName,
               });
@@ -182,7 +182,7 @@ export const StakeView: FunctionComponent = observer(() => {
             if (!isStakableExist) {
               e.preventDefault();
             } else {
-              analytics.logEvent("Stake button clicked", {
+              analyticsStore.logEvent("Stake button clicked", {
                 chainId: chainStore.current.chainId,
                 chainName: chainStore.current.chainName,
               });

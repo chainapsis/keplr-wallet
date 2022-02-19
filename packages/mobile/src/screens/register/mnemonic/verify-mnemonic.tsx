@@ -30,7 +30,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const { analytics } = useStore();
+  const { analyticsStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
@@ -145,7 +145,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
             newMnemonicConfig.password,
             route.params.bip44HDPath
           );
-          analytics.setUserProperties({
+          analyticsStore.setUserProperties({
             registerType: "seed",
             accountType: "mnemonic",
           });

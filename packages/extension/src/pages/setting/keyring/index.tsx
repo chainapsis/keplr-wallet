@@ -17,7 +17,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
-  const { keyRingStore, analytics } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
   const history = useHistory();
 
   const loadingIndicator = useLoadingIndicator();
@@ -46,7 +46,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
               size="sm"
               onClick={(e) => {
                 e.preventDefault();
-                analytics.logEvent("Add additional account started");
+                analyticsStore.logEvent("Add additional account started");
 
                 browser.tabs.create({
                   url: "/popup.html#/register",
@@ -105,7 +105,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                       loadingIndicator.setIsLoading("keyring", true);
                       try {
                         await keyRingStore.changeKeyRing(i);
-                        analytics.logEvent("Account changed");
+                        analyticsStore.logEvent("Account changed");
                         loadingIndicator.setIsLoading("keyring", false);
                         history.push("/");
                       } catch (e) {

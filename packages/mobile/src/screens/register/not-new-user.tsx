@@ -13,7 +13,7 @@ import { useStore } from "../../stores";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
-  const { keyRingStore, analytics } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -61,7 +61,7 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
           size="large"
           mode="light"
           onPress={() => {
-            analytics.logEvent("OAuth sign in started", {
+            analyticsStore.logEvent("OAuth sign in started", {
               registerType: "apple",
             });
             smartNavigation.navigateSmart("Register.TorusSignIn", {
@@ -82,7 +82,7 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
         size="large"
         mode="light"
         onPress={() => {
-          analytics.logEvent("OAuth sign in started", {
+          analyticsStore.logEvent("OAuth sign in started", {
             registerType: "google",
           });
           smartNavigation.navigateSmart("Register.TorusSignIn", {
@@ -106,7 +106,7 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
         size="large"
         mode="light"
         onPress={() => {
-          analytics.logEvent("Import account started", {
+          analyticsStore.logEvent("Import account started", {
             registerType: "qr",
           });
           smartNavigation.navigateSmart("Register.ImportFromExtension.Intro", {
@@ -119,7 +119,7 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
         size="large"
         mode="light"
         onPress={() => {
-          analytics.logEvent("Import account started", {
+          analyticsStore.logEvent("Import account started", {
             registerType: "seed",
           });
           smartNavigation.navigateSmart("Register.RecoverMnemonic", {

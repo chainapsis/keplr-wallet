@@ -286,7 +286,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const { analytics } = useStore();
+  const { analyticsStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
@@ -333,7 +333,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         getValues("password"),
         { email, socialType: route.params.type }
       );
-      analytics.setUserProperties({
+      analyticsStore.setUserProperties({
         registerType: route.params.type,
         accountType: "privateKey",
       });

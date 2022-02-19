@@ -35,7 +35,7 @@
     "@keplr-wallet/analytics": "^0.9.11",
     "@walletconnect/client": "^1.6.4",
     "aes-js": "^3.1.2",
-    "amplitude-js": "^8.5.0",
+    "amplitude-js": "^8.16.0",
     "argon-dashboard-react": "^1.1.0",
     "axios": "^0.21.4",
     "bip39": "^3.0.2",
