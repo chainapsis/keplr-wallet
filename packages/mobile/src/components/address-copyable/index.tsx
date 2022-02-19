@@ -7,7 +7,6 @@ import { RectButton } from "../rect-button";
 import { CopyIcon } from "../icon";
 import { useSimpleTimer } from "../../hooks";
 import LottieView from "lottie-react-native";
-import { useStore } from "../../stores";
 
 export const AddressCopyable: FunctionComponent<{
   style?: ViewStyle;
@@ -15,7 +14,6 @@ export const AddressCopyable: FunctionComponent<{
   maxCharacters: number;
 }> = ({ style: propStyle, address, maxCharacters }) => {
   const style = useStyle();
-  const { chainStore } = useStore();
   const { isTimedOut, setTimer } = useSimpleTimer();
 
   return (

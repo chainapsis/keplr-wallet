@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../components/page";
 import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
@@ -470,7 +470,7 @@ export const GovernanceVoteModal: FunctionComponent<{
 );
 
 export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, queriesStore, accountStore } = useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
@@ -512,17 +512,6 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
   })();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (analyticsStore.isInitialized) {
-      analyticsStore.logScreenView("Proposal detail", {
-        chainId: chainStore.current.chainId,
-        chainName: chainStore.current.chainName,
-        proposalId,
-        proposalTitle: proposal?.title,
-      });
-    }
-  }, [analyticsStore.isInitialized]);
 
   return (
     <PageWithScrollView

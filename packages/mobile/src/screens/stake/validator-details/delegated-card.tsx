@@ -6,7 +6,6 @@ import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 
 export const DelegatedCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -29,12 +28,6 @@ export const DelegatedCard: FunctionComponent<{
   const rewards = queries.cosmos.queryRewards
     .getQueryBech32Address(account.bech32Address)
     .getStakableRewardOf(validatorAddress);
-
-  const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
-  );
-
-  const validator = bondedValidators.getValidator(validatorAddress);
 
   return (
     <Card style={containerStyle}>

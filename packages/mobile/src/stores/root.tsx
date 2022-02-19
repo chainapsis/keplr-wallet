@@ -53,7 +53,7 @@ export class RootStore {
       chainName?: string;
       toChainId?: string;
       toChainName?: string;
-      registerType?: "seed" | "google" | "ledger" | "qr";
+      registerType?: "seed" | "google" | "apple" | "ledger" | "qr";
       feeType?: FeeType | undefined;
       isIbc?: boolean;
       validatorName?: string;
