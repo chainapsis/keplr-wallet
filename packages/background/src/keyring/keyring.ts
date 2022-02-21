@@ -717,19 +717,7 @@ export class KeyRing {
     }
 
     if (this.keyStore.type === "ledger") {
-      // AC: TODO Ledger Integration
-      // const pubKey = this.ledgerPublicKey;
-
-      // if (!pubKey) {
-      //   throw new Error("Ledger public key is not initialized");
-      // }
-
-      // return await this.ledgerKeeper.sign(
-      //   env,
-      //   KeyRing.getKeyStoreBIP44Path(this.keyStore),
-      //   pubKey,
-      //   message
-      // );
+      // TODO: Ethereum Ledger Integration
       throw new Error("Ethereum signing with Ledger is not yet supported");
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
