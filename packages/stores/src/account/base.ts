@@ -448,6 +448,8 @@ export class AccountSetBase<MsgOpts, Queries> {
       true
     );
 
+    const coinType = this.chainGetter.getChain(this.chainId).coinType;
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.getKeplr())!;
 
@@ -477,7 +479,10 @@ export class AccountSetBase<MsgOpts, Queries> {
             signerInfos: [
               {
                 publicKey: {
-                  type_url: "/cosmos.crypto.secp256k1.PubKey",
+                  type_url:
+                    coinType === 60
+                      ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
+                      : "/cosmos.crypto.secp256k1.PubKey",
                   value: cosmos.crypto.secp256k1.PubKey.encode({
                     key: Buffer.from(
                       signResponse.signature.pub_key.value,

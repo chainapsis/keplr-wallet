@@ -676,6 +676,12 @@ export class KeyRing {
       throw new Error("Key Store is empty");
     }
 
+    // Sign with Evmos/Ethereum
+    const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+    if (coinType === 60) {
+      return this.signEthereum(chainId, defaultCoinType, message);
+    }
+
     if (this.keyStore.type === "ledger") {
       const pubKey = this.ledgerPublicKey;
 
