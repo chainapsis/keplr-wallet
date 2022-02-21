@@ -1026,6 +1026,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "persistence",
       },
+      {
+        coinDenom: "PSTAKE",
+        coinMinimalDenom: "ibc/A6E3AF63B3C906416A9AF7A556C59EA4BD50E617EFFE6299B99700CCB780E444",
+        coinDecimals: 18,
+      },
     ],
     feeCurrencies: [
       {
