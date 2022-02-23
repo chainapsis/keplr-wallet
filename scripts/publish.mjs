@@ -8,66 +8,71 @@ const lernaFile = fs.readFileSync("./lerna.json", "utf8");
 const lerna = JSON.parse(lernaFile);
 
 (async () => {
-  const versions = (await $`git tag --points-at HEAD`).stdout
-    .split(/\s/)
-    .map((v) => v.trim())
-    .filter((v) => !!v);
+  try {
+    const versions = (await $`git tag --points-at HEAD`).stdout
+      .split(/\s/)
+      .map((v) => v.trim())
+      .filter((v) => !!v);
 
-  let foundedVersion = "";
+    let foundedVersion = "";
 
-  for (const version of versions) {
-    // semver.parse will check that the version has the major, minor, patch version (with optional prerelease version).
-    const semantic = semver.parse(version);
+    for (const version of versions) {
+      // semver.parse will check that the version has the major, minor, patch version (with optional prerelease version).
+      const semantic = semver.parse(version);
 
-    if (semantic) {
-      if (lerna.version !== semantic.version) {
-        console.log(
-          `WARNING: ${semantic.version} founded. But, it is different with lerna's package versions.`
-        );
-        continue;
-      }
+      if (semantic) {
+        if (lerna.version !== semantic.version) {
+          console.log(
+            `WARNING: ${semantic.version} founded. But, it is different with lerna's package versions.`
+          );
+          continue;
+        }
 
-      if (foundedVersion) {
-        console.log(
-          `WARNING: ${foundedVersion} already published. Only one tag can be published at once.`
-        );
-        continue;
-      }
+        if (foundedVersion) {
+          console.log(
+            `WARNING: ${foundedVersion} already published. Only one tag can be published at once.`
+          );
+          continue;
+        }
 
-      foundedVersion = version;
+        foundedVersion = version;
 
-      const isPrelease = semantic.prerelease.length > 0;
+        const isPrelease = semantic.prerelease.length > 0;
 
-      if (isPrelease) {
-        await $`lerna publish from-package --yes --dist-tag next`;
-      } else {
-        await $`lerna publish from-package --yes`;
+        if (isPrelease) {
+          await $`lerna publish from-package --yes --dist-tag next`;
+        } else {
+          await $`lerna publish from-package --yes`;
+        }
       }
     }
-  }
 
-  if (foundedVersion) {
-    console.log(`${foundedVersion} published to NPM`);
+    if (foundedVersion) {
+      console.log(`${foundedVersion} published to NPM`);
 
-    console.log(`Try to create the release ${foundedVersion}`);
+      console.log(`Try to create the release ${foundedVersion}`);
 
-    const semantic = semver.parse(foundedVersion);
-    if (semantic) {
-      const isPrelease = semantic.prerelease.length > 0;
+      const semantic = semver.parse(foundedVersion);
+      if (semantic) {
+        const isPrelease = semantic.prerelease.length > 0;
 
-      await $`cd packages/extension/prod && zip -r keplr-extension-${foundedVersion}.zip .`;
-      if (isPrelease) {
-        await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion} --prerelease`;
+        await $`cd packages/extension/prod && zip -r keplr-extension-${foundedVersion}.zip .`;
+        if (isPrelease) {
+          await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion} --prerelease`;
+        } else {
+          await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion}`;
+        }
+
+        console.log("Release created");
       } else {
-        await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion}`;
+        throw new Error("Unexpected error");
       }
-
-      console.log("Release created");
     } else {
-      throw new Error("Unexpected error");
+      throw new Error("No version tag found");
     }
-  } else {
-    throw new Error("No version tag found");
+  } catch (e) {
+    console.log(e);
+    process.exit(1);
   }
 })();
 

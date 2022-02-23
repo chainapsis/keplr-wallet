@@ -46,6 +46,11 @@ export type QueryResponse<T> = {
  * This recommends to use the Axios to query the response.
  */
 export abstract class ObservableQueryBase<T = unknown, E = unknown> {
+  protected static suspectedResponseDatasWithInvalidValue: string[] = [
+    "The network connection was lost.",
+    "The request timed out.",
+  ];
+
   protected options: QueryOptions;
 
   // Just use the oberable ref because the response is immutable and not directly adjusted.
@@ -123,7 +128,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   @action
   private stop() {
-    if (this.isStarted) {
+    if (this._isStarted) {
       this.onStop();
       this._isStarted = false;
     }
@@ -212,9 +217,44 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this.cancelToken = Axios.CancelToken.source();
 
     try {
-      const response = yield* toGenerator(
+      let response = yield* toGenerator(
         this.fetchResponse(this.cancelToken.token)
       );
+      if (
+        response.data &&
+        typeof response.data === "string" &&
+        (response.data.startsWith("stream was reset:") ||
+          ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
+            response.data
+          ))
+      ) {
+        // In some devices, it is a http ok code, but a strange response is sometimes returned.
+        // It's not that they can't query at all, it seems that they get weird response from time to time.
+        // These causes are not clear.
+        // To solve this problem, if this problem occurs, try the query again, and if that fails, an error is raised.
+        // https://github.com/chainapsis/keplr-wallet/issues/275
+        // https://github.com/chainapsis/keplr-wallet/issues/278
+        if (this.cancelToken && this.cancelToken.token.reason) {
+          // In this case, it is assumed that it is caused by cancel() and do nothing.
+          return;
+        }
+
+        // Try to query again.
+        response = yield* toGenerator(
+          this.fetchResponse(this.cancelToken.token)
+        );
+
+        if (
+          response.data &&
+          typeof response.data === "string" &&
+          (response.data.startsWith("stream was reset:") ||
+            ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
+              response.data
+            ))
+        ) {
+          throw new Error(response.data);
+        }
+      }
       this.setResponse(response);
       // Clear the error if fetching succeeds.
       this.setError(undefined);

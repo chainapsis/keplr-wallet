@@ -496,6 +496,9 @@ export class WalletConnectStore extends WalletConnectManager {
                 this.deepLinkClientKeyMap[client.key] = true;
                 this.saveDeepLinkClientKeyMap(this.deepLinkClientKeyMap);
               })
+              .catch((e) => {
+                console.log("Failed to init wallet connect v1 client", e);
+              })
               .finally(() => {
                 runInAction(() => {
                   this._isPendingClientFromDeepLink = false;

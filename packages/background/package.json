@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/background",
-  "version": "0.9.11-rc.2",
+  "version": "0.9.12",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -28,17 +28,17 @@
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@hanchon/ethermint-address-converter": "^1.1.0",
     "@keplr-wallet/common": "^0.9.10",
-    "@keplr-wallet/cosmos": "^0.9.11-rc.2",
+    "@keplr-wallet/cosmos": "^0.9.12",
     "@keplr-wallet/crypto": "^0.9.10",
     "@keplr-wallet/popup": "^0.9.6",
     "@keplr-wallet/router": "^0.9.6",
-    "@keplr-wallet/types": "^0.9.10",
-    "@keplr-wallet/unit": "^0.9.11-rc.2",
-    "@ledgerhq/hw-transport": "^6.3.0",
-    "@ledgerhq/hw-transport-webhid": "^6.3.0",
-    "@ledgerhq/hw-transport-webusb": "^6.3.0",
+    "@keplr-wallet/types": "^0.9.12",
+    "@keplr-wallet/unit": "^0.9.12",
+    "@ledgerhq/hw-transport": "^6.20.0",
+    "@ledgerhq/hw-transport-webhid": "^6.20.0",
+    "@ledgerhq/hw-transport-webusb": "^6.20.0",
     "aes-js": "^3.1.2",
-    "axios": "^0.21.0",
+    "axios": "^0.21.4",
     "big-integer": "^1.6.48",
     "bip39": "^3.0.2",
     "buffer": "^6.0.3",
@@ -51,6 +51,6 @@
     "reflect-metadata": "^0.1.13",
     "secp256k1": "^4.0.2",
     "secretjs": "^0.17.0",
-    "tsyringe": "^4.4.0"
+    "tsyringe": "^4.5.0"
   }
 }

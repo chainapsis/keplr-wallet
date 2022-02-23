@@ -239,6 +239,7 @@ export class RootStore {
       24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
+      this.queriesStore,
       this.queriesStore
     );
 

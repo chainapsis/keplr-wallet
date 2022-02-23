@@ -304,24 +304,26 @@ export const AddTokenPage: FunctionComponent = observer(() => {
           />
         ) : null}
         <div style={{ flex: 1 }} />
-        <div className="custom-control custom-checkbox mb-2">
-          <input
-            className="custom-control-input"
-            id="viewing-key-checkbox"
-            type="checkbox"
-            checked={isOpenSecret20ViewingKey}
-            onChange={() => {
-              setIsOpenSecret20ViewingKey((value) => !value);
-            }}
-          />
-          <label
-            className="custom-control-label"
-            htmlFor="viewing-key-checkbox"
-            style={{ color: "#666666", paddingTop: "1px" }}
-          >
-            <FormattedMessage id="setting.token.add.secret20.checkbox.import-viewing-key" />
-          </label>
-        </div>
+        {isSecret20 ? (
+          <div className="custom-control custom-checkbox mb-2">
+            <input
+              className="custom-control-input"
+              id="viewing-key-checkbox"
+              type="checkbox"
+              checked={isOpenSecret20ViewingKey}
+              onChange={() => {
+                setIsOpenSecret20ViewingKey((value) => !value);
+              }}
+            />
+            <label
+              className="custom-control-label"
+              htmlFor="viewing-key-checkbox"
+              style={{ color: "#666666", paddingTop: "1px" }}
+            >
+              <FormattedMessage id="setting.token.add.secret20.checkbox.import-viewing-key" />
+            </label>
+          </div>
+        ) : null}
         <Button
           type="submit"
           color="primary"

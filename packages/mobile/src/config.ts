@@ -20,7 +20,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     rpc: "https://rpc-cosmoshub.keplr.app",
     rest: "https://lcd-cosmoshub.keplr.app",
     chainId: "cosmoshub-4",
-    chainName: "Cosmos",
+    chainName: "Cosmos Hub",
     stakeCurrency: {
       coinDenom: "ATOM",
       coinMinimalDenom: "uatom",
@@ -641,7 +641,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinGeckoId: "certik",
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     hideInUI: true,
   },
   {
@@ -727,7 +727,101 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/regen.png",
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+  },
+  {
+    rpc: "https://rpc-juno.keplr.app",
+    rest: "https://lcd-juno.keplr.app",
+    chainId: "juno-1",
+    chainName: "Juno",
+    stakeCurrency: {
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+      coinGeckoId: "juno-network",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("juno"),
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.001,
+      average: 0.0025,
+      high: 0.004,
+    },
+    features: [
+      "stargate",
+      "no-legacy-stdTx",
+      "cosmwasm",
+      "ibc-transfer",
+      "ibc-go",
+    ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/juno/txs/{txHash}",
+    },
+  },
+  {
+    rpc: "https://rpc-stargaze.keplr.app",
+    rest: "https://lcd-stargaze.keplr.app",
+    chainId: "stargaze-1",
+    chainName: "Stargaze",
+    stakeCurrency: {
+      coinDenom: "STARS",
+      coinMinimalDenom: "ustars",
+      coinDecimals: 6,
+      coinGeckoId: "stargaze",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stars"),
+    currencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+      },
+    ],
+    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/stargaze.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/stargaze/txs/{txHash}",
+    },
   },
   {
     rpc: "https://rpc-persistence.keplr.app",
@@ -774,6 +868,117 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
     features: ["stargate", "ibc-transfer"],
+  },
+  {
+    rpc: "https://rpc-axelar.keplr.app",
+    rest: "https://lcd-axelar.keplr.app",
+    chainId: "axelar-dojo-1",
+    chainName: "Axelar",
+    stakeCurrency: {
+      coinDenom: "AXL",
+      coinMinimalDenom: "uaxl",
+      coinDecimals: 6,
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("axelar"),
+    currencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.05,
+      average: 0.075,
+      high: 0.1,
+    },
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+  },
+  {
+    rpc: "https://rpc-sommelier.keplr.app",
+    rest: "https://lcd-sommelier.keplr.app",
+    chainId: "sommelier-3",
+    chainName: "Sommelier",
+    stakeCurrency: {
+      coinDenom: "SOMM",
+      coinMinimalDenom: "usomm",
+      coinDecimals: 6,
+      coinGeckoId: "sommelier",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("somm"),
+    currencies: [
+      {
+        coinDenom: "SOMM",
+        coinMinimalDenom: "usomm",
+        coinDecimals: 6,
+        coinGeckoId: "sommelier",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "SOMM",
+        coinMinimalDenom: "usomm",
+        coinDecimals: 6,
+        coinGeckoId: "sommelier",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/somm.png",
+  },
+  {
+    rpc: "https://rpc-umee.keplr.app",
+    rest: "https://lcd-umee.keplr.app",
+    chainId: "umee-1",
+    chainName: "Umee",
+    stakeCurrency: {
+      coinDenom: "UMEE",
+      coinMinimalDenom: "uumee",
+      coinDecimals: 6,
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("umee"),
+    currencies: [
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "uumee",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "uumee",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
   },
   {
     rpc: "https://rpc-sentinel.keplr.app",
@@ -925,40 +1130,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
     features: ["stargate", "ibc-transfer"],
-    hideInUI: true,
-  },
-  {
-    rpc: "https://rpc-juno.itastakers.com",
-    rest: "https://lcd-juno.itastakers.com",
-    chainId: "juno-1",
-    chainName: "Juno",
-    stakeCurrency: {
-      coinDenom: "JUNO",
-      coinMinimalDenom: "ujuno",
-      coinDecimals: 6,
-      coinGeckoId: "juno-network",
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("juno"),
-    currencies: [
-      {
-        coinDenom: "JUNO",
-        coinMinimalDenom: "ujuno",
-        coinDecimals: 6,
-        coinGeckoId: "juno-network",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "JUNO",
-        coinMinimalDenom: "ujuno",
-        coinDecimals: 6,
-        coinGeckoId: "juno-network",
-      },
-    ],
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx"],
     hideInUI: true,
   },
   {
@@ -1348,37 +1519,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     hideInUI: true,
   },
   {
-    rpc: "https://rpc.stargaze.publicawesome.dev",
-    rest: "https://rest.stargaze.publicawesome.dev",
-    chainId: "stargaze-1",
-    chainName: "Stargaze",
-    stakeCurrency: {
-      coinDenom: "STARS",
-      coinMinimalDenom: "ustars",
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("stars"),
-    currencies: [
-      {
-        coinDenom: "STARS",
-        coinMinimalDenom: "ustars",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "STARS",
-        coinMinimalDenom: "ustars",
-        coinDecimals: 6,
-      },
-    ],
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
-    hideInUI: true,
-  },
-  {
     rpc: "https://rpc.chihuahua.wtf",
     rest: "https://api.chihuahua.wtf",
     chainId: "chihuahua-1",
@@ -1442,6 +1582,110 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
       },
     ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://mainnet-rpc.vidulum.app",
+    rest: "https://mainnet-lcd.vidulum.app",
+    chainId: "vidulum-1",
+    chainName: "Vidulum",
+    stakeCurrency: {
+      coinDenom: "VDL",
+      coinMinimalDenom: "uvdl",
+      coinDecimals: 6,
+      coinGeckoId: "vidulum",
+    },
+    bip44: {
+      coinType: 370,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("vdl"),
+    currencies: [
+      {
+        coinDenom: "VDL",
+        coinMinimalDenom: "uvdl",
+        coinDecimals: 6,
+        coinGeckoId: "vidulum",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "VDL",
+        coinMinimalDenom: "uvdl",
+        coinDecimals: 6,
+        coinGeckoId: "vidulum",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc.mainnet.desmos.network",
+    rest: "https://api.mainnet.desmos.network",
+    chainId: "desmos-mainnet",
+    chainName: "Desmos",
+    stakeCurrency: {
+      coinDenom: "DSM",
+      coinMinimalDenom: "udsm",
+      coinDecimals: 6,
+      coinGeckoId: "desmos",
+    },
+    bip44: {
+      coinType: 852,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("desmos"),
+    currencies: [
+      {
+        coinDenom: "DSM",
+        coinMinimalDenom: "udsm",
+        coinDecimals: 6,
+        coinGeckoId: "desmos",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DSM",
+        coinMinimalDenom: "udsm",
+        coinDecimals: 6,
+        coinGeckoId: "desmos",
+      },
+    ],
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc-1-dig.notional.ventures",
+    rest: "https://api-1-dig.notional.ventures",
+    chainId: "dig-1",
+    chainName: "Dig",
+    stakeCurrency: {
+      coinDenom: "DIG",
+      coinMinimalDenom: "udig",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("dig"),
+    currencies: [
+      {
+        coinDenom: "DIG",
+        coinMinimalDenom: "udig",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DIG",
+        coinMinimalDenom: "udig",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.025,
+      average: 0.03,
+      high: 0.035,
+    },
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     hideInUI: true,
   },

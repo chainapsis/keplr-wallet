@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>bugsnag</key>
+	<dict>
+		<key>apiKey</key>
+		<string>f07be1dce2391227e818fbe3e4235bf4</string>
+	</dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -38,10 +43,6 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CodePushDeploymentKey</key>
 	<string>Bp7ApGEQu01igCf6axrsaAgi6Mc0X5oBgGjFI</string>
-	<key>FIREBASE_ANALYTICS_COLLECTION_DEACTIVATE</key>
-	<false/>
-	<key>IS_ANALYTICS_ENABLED</key>
-	<true/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

@@ -115,13 +115,12 @@ const useTorusGoogleSignIn = (): {
             torusNodeEndpoints,
             torusNodePub,
             torusIndexes,
-          } = await nodeDetailManager.getNodeDetails();
-
-          const torus = new Torus({
-            enableLogging: __DEV__,
-            metadataHost: "https://metadata.tor.us",
-            allowHost: "https://signer.tor.us/api/allow",
+          } = await nodeDetailManager.getNodeDetails({
+            verifier: "chainapsis-google",
+            verifierId: email.toLowerCase(),
           });
+
+          const torus = new Torus();
 
           const response = await torus.getPublicAddress(
             torusNodeEndpoints,
@@ -221,13 +220,12 @@ const useTorusAppleSignIn = (): {
           torusNodeEndpoints,
           torusNodePub,
           torusIndexes,
-        } = await nodeDetailManager.getNodeDetails();
-
-        const torus = new Torus({
-          enableLogging: __DEV__,
-          metadataHost: "https://metadata.tor.us",
-          allowHost: "https://signer.tor.us/api/allow",
+        } = await nodeDetailManager.getNodeDetails({
+          verifier: "chainapsis-apple",
+          verifierId: sub,
         });
+
+        const torus = new Torus();
 
         const response = await torus.getPublicAddress(
           torusNodeEndpoints,

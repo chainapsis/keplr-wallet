@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { FunctionComponent, useEffect, useRef } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { Text, View } from "react-native";
 import {
   BIP44HDPath,
@@ -9,7 +9,6 @@ import {
 import {
   DrawerActions,
   NavigationContainer,
-  NavigationContainerRef,
   useNavigation,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
@@ -29,7 +28,6 @@ import {
   createDrawerNavigator,
   useIsDrawerOpen,
 } from "@react-navigation/drawer";
-import analytics from "@react-native-firebase/analytics";
 import { DrawerContent } from "./components/drawer";
 import { useStyle } from "./styles";
 import { BorderlessButton } from "react-native-gesture-handler";
@@ -105,6 +103,7 @@ import {
 } from "./screens/register/import-from-extension";
 import { OsmosisWebpageScreen } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
+import Bugsnag from "@bugsnag/react-native";
 
 const {
   SmartNavigatorProvider,
@@ -894,39 +893,31 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   );
 };
 
+const BugsnagNavigationContainerPlugin = Bugsnag.getPlugin("reactNavigation");
+// The returned BugsnagNavigationContainer has exactly the same usage
+// except now it tracks route information to send with your error reports
+const BugsnagNavigationContainer = (() => {
+  if (BugsnagNavigationContainerPlugin) {
+    console.log("BugsnagNavigationContainerPlugin found");
+    return BugsnagNavigationContainerPlugin.createNavigationContainer(
+      NavigationContainer
+    );
+  } else {
+    console.log(
+      "WARNING: BugsnagNavigationContainerPlugin is null. Fallback to use basic NavigationContainer"
+    );
+    return NavigationContainer;
+  }
+})();
+
 export const AppNavigation: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
-  const navigationRef = useRef<NavigationContainerRef>(null);
-  const routeNameRef = useRef<string>();
 
   return (
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
-          <NavigationContainer
-            ref={navigationRef}
-            onReady={() =>
-              (routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name)
-            }
-            onStateChange={async () => {
-              const previousRouteName = routeNameRef.current;
-              const currentRouteName = navigationRef.current?.getCurrentRoute()
-                ?.name;
-
-              if (previousRouteName !== currentRouteName) {
-                // The line below uses the expo-firebase-analytics tracker
-                // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
-                // Change this line to use another Mobile analytics SDK
-                await analytics().logScreenView({
-                  screen_name: currentRouteName,
-                  screen_class: currentRouteName,
-                });
-              }
-
-              // Save the current route name for later comparison
-              routeNameRef.current = currentRouteName;
-            }}
-          >
+          <BugsnagNavigationContainer>
             <Stack.Navigator
               initialRouteName={
                 keyRingStore.status !== KeyRingStatus.UNLOCKED
@@ -951,7 +942,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
                 component={AddressBookStackScreen}
               />
             </Stack.Navigator>
-          </NavigationContainer>
+          </BugsnagNavigationContainer>
           {/* <ModalsRenderer /> */}
         </SmartNavigatorProvider>
       </FocusedScreenProvider>

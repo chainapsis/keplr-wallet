@@ -164,7 +164,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     return {
       denom: this.feeCurrency.coinMinimalDenom,
-      amount: feeAmount.truncate().toString(),
+      amount: feeAmount.roundUp().toString(),
     };
   }
 
