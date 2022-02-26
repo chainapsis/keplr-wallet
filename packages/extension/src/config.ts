@@ -95,6 +95,10 @@ import {
   UMEE_RPC_CONFIG,
   UMEE_REST_ENDPOINT,
   UMEE_REST_CONFIG,
+  VIDULUM_RPC_ENDPOINT,
+  VIDULUM_RPC_CONFIG,
+  VIDULUM_REST_ENDPOINT,
+  VIDULUM_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1682,6 +1686,59 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.04 * Math.pow(10, 12),
     },
     beta: true,
+  },
+  {
+    rpc: VIDULUM_RPC_ENDPOINT,
+    rpcConfig: VIDULUM_RPC_CONFIG,
+    rest: VIDULUM_REST_ENDPOINT,
+    restConfig: VIDULUM_REST_CONFIG,
+    chainId: "vidulum-1",
+    chainName: "Vidulum",
+    stakeCurrency: {
+      coinDenom: "VDL",
+      coinMinimalDenom: "uvdl",
+      coinDecimals: 6,
+      coinGeckoId: "vidulum",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/vidulum/stake"
+        : "http://localhost:8080/#/vidulum/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/vidulum/stake"
+        : "http://localhost:8080/#/vidulum/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("vdl"),
+    currencies: [
+      {
+        coinDenom: "VDL",
+        coinMinimalDenom: "uvdl",
+        coinDecimals: 6,
+        coinGeckoId: "vidulum",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "VDL",
+        coinMinimalDenom: "uvdl",
+        coinDecimals: 6,
+        coinGeckoId: "vidulum",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.0,
+      average: 0.001,
+      high: 0.002,
+    },
+    features: [
+      "stargate",
+      "no-legacy-stdTx",
+      "ibc-transfer",
+      "ibc-go",
+    ],
   },
 ];
 
