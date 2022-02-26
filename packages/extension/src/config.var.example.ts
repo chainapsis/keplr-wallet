@@ -138,4 +138,9 @@ export const UMEE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const UMEE_REST_ENDPOINT = "";
 export const UMEE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const VIDULUM_RPC_ENDPOINT = "";
+export const VIDULUM_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const VIDULUM_REST_ENDPOINT = "";
+export const VIDULUM_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const PRIVILEGED_ORIGINS: string[] = [];
