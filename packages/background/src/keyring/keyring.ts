@@ -15,7 +15,7 @@ import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 import { Wallet, utils } from "ethers";
-import { ETH } from "@hanchon/ethermint-address-converter";
+import { ETH } from "@tharsis/address-converter";
 import { keccak256 } from "ethers/lib/utils";
 
 export enum KeyRingStatus {
