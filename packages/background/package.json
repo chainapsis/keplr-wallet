@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/background",
-  "version": "0.9.12",
+  "version": "0.9.14",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -26,6 +26,9 @@
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
+    "@ethersproject/bytes": "^5.5.0",
+    "@ethersproject/keccak256": "^5.5.0",
+    "@ethersproject/wallet": "^5.5.0",
     "@keplr-wallet/common": "^0.9.10",
     "@keplr-wallet/cosmos": "^0.9.12",
     "@keplr-wallet/crypto": "^0.9.10",
@@ -43,9 +46,6 @@
     "bip39": "^3.0.2",
     "buffer": "^6.0.3",
     "delay": "^4.4.0",
-    "@ethersproject/bytes": "^5.5.0",
-    "@ethersproject/wallet": "^5.5.0",
-    "@ethersproject/keccak256": "^5.5.0",
     "joi": "^17.5.0",
     "ledger-cosmos-js": "^2.1.8",
     "long": "^4.0.0",
