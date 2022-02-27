@@ -41,7 +41,6 @@ export const NewMnemonicIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeNewMnemonic);
-        console.log("here");
         analyticsStore.logEvent("Create account started", {
           registerType: "seed",
         });
@@ -275,7 +274,7 @@ export const VerifyMnemonicModePage: FunctionComponent<{
     setSuggestedWords([]);
   }, [newMnemonicConfig.mnemonic]);
 
-  const { analyticsStore, accountStore } = useStore();
+  const { analyticsStore } = useStore();
 
   return (
     <div>
@@ -344,15 +343,8 @@ export const VerifyMnemonicModePage: FunctionComponent<{
               newMnemonicConfig.password,
               bip44Option.bip44HDPath
             );
-            const accountInfo = accountStore.getAccount(
-              analyticsStore.mainChainId
-            );
-            analyticsStore.setUserId(accountInfo.bech32Address);
             analyticsStore.setUserProperties({
               registerType: "seed",
-              accountType: "mnemonic",
-            });
-            analyticsStore.logEvent("Create account finished", {
               accountType: "mnemonic",
             });
           } catch (e) {

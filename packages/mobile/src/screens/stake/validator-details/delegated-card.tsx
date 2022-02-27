@@ -6,14 +6,13 @@ import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 
 export const DelegatedCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 
   validatorAddress: string;
 }> = observer(({ containerStyle, validatorAddress }) => {
-  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, queriesStore, accountStore } = useStore();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -29,12 +28,6 @@ export const DelegatedCard: FunctionComponent<{
   const rewards = queries.cosmos.queryRewards
     .getQueryBech32Address(account.bech32Address)
     .getStakableRewardOf(validatorAddress);
-
-  const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
-  );
-
-  const validator = bondedValidators.getValidator(validatorAddress);
 
   return (
     <Card style={containerStyle}>
@@ -80,11 +73,6 @@ export const DelegatedCard: FunctionComponent<{
             mode="outline"
             text="Switch Validator"
             onPress={() => {
-              analyticsStore.logEvent("Redelegate started", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-                validatorName: validator?.description.moniker,
-              });
               smartNavigation.navigateSmart("Redelegate", { validatorAddress });
             }}
           />
@@ -93,11 +81,6 @@ export const DelegatedCard: FunctionComponent<{
             containerStyle={style.flatten(["flex-1"])}
             text="Unstake"
             onPress={() => {
-              analyticsStore.logEvent("Undelegate started", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-                validatorName: validator?.description.moniker,
-              });
               smartNavigation.navigateSmart("Undelegate", { validatorAddress });
             }}
           />

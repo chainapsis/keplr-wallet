@@ -11,7 +11,6 @@ import { SettingRemoveAccountItem } from "./items/remove-account";
 import { canShowPrivateData } from "./screens/view-private-data";
 import { SettingViewPrivateDataItem } from "./items/view-private-data";
 import { useStyle } from "../../styles";
-import { useLogScreenView } from "../../hooks";
 import { View } from "react-native";
 
 export const SettingScreen: FunctionComponent = observer(() => {
@@ -20,8 +19,6 @@ export const SettingScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
-
-  useLogScreenView("Setting");
 
   return (
     <PageWithScrollViewInBottomTabView

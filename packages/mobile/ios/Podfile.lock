@@ -1,7 +1,7 @@
 PODS:
-  - Amplitude (8.2.0)
-  - amplitude-react-native (2.4.0):
-    - Amplitude (= 8.2.0)
+  - Amplitude (8.7.1)
+  - amplitude-react-native (2.7.0):
+    - Amplitude (= 8.7.1)
     - React-Core
   - appcenter-analytics (4.1.0):
     - AppCenter/Analytics (~> 4.0)
@@ -585,8 +585,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  Amplitude: 263118b9e691e73a1c864b05bb08a3aff3636d16
-  amplitude-react-native: ab47821981de1d0fcee70ee96213108d098f74ce
+  Amplitude: 834c7332dfb9640a751e21c13efb22a07c0c12d4
+  amplitude-react-native: 0ed8cab759aafaa94961b82122bf56297da607ad
   AppCenter: cd53e3ed3563cc720bcb806c9731a12389b40d44
   appcenter-analytics: aa074250b2cb182d6f7d67d9c236dd4606673ab5
   appcenter-core: c97920e79eba2321a262d3733cb2a6f1097db539

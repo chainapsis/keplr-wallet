@@ -22,7 +22,11 @@ import EventEmitter from "eventemitter3";
 import { Keplr } from "@keplr-wallet/provider";
 import { KeychainStore } from "./keychain";
 import { WalletConnectStore } from "./wallet-connect";
-import { AnalyticsStore } from "./analytics";
+import { FeeType } from "@keplr-wallet/hooks";
+import { AmplitudeApiKey } from "../config";
+import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
+import { Amplitude } from "@amplitude/react-native";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -42,7 +46,28 @@ export class RootStore {
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
-  public readonly analyticsStore: AnalyticsStore;
+
+  public readonly analyticsStore: AnalyticsStore<
+    {
+      chainId?: string;
+      chainName?: string;
+      toChainId?: string;
+      toChainName?: string;
+      registerType?: "seed" | "google" | "apple" | "ledger" | "qr";
+      feeType?: FeeType | undefined;
+      isIbc?: boolean;
+      validatorName?: string;
+      toValidatorName?: string;
+      proposalId?: string;
+      proposalTitle?: string;
+    },
+    {
+      registerType?: "seed" | "google" | "ledger" | "qr" | "apple";
+      accountType?: "mnemonic" | "privateKey" | "ledger";
+      currency?: string;
+      language?: string;
+    }
+  >;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -239,9 +264,42 @@ export class RootStore {
     );
 
     this.analyticsStore = new AnalyticsStore(
-      "KeplrMobile",
-      this.accountStore,
-      this.keyRingStore
+      (() => {
+        if (!AmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance();
+          amplitudeClient.init(AmplitudeApiKey);
+
+          return amplitudeClient;
+        }
+      })(),
+      {
+        logEvent: (eventName, eventProperties) => {
+          if (eventProperties?.chainId || eventProperties?.toChainId) {
+            eventProperties = {
+              ...eventProperties,
+            };
+
+            if (eventProperties.chainId) {
+              eventProperties.chainId = ChainIdHelper.parse(
+                eventProperties.chainId
+              ).identifier;
+            }
+
+            if (eventProperties.toChainId) {
+              eventProperties.toChainId = ChainIdHelper.parse(
+                eventProperties.toChainId
+              ).identifier;
+            }
+          }
+
+          return {
+            eventName,
+            eventProperties,
+          };
+        },
+      }
     );
   }
 }

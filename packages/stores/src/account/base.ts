@@ -31,6 +31,8 @@ import Long from "long";
 import ICoin = cosmos.base.v1beta1.ICoin;
 import SignMode = cosmos.tx.signing.v1beta1.SignMode;
 
+import { evmosToEth } from "@hanchon/ethermint-address-converter";
+
 export enum WalletStatus {
   NotInit = "NotInit",
   Loading = "Loading",
@@ -448,6 +450,8 @@ export class AccountSetBase<MsgOpts, Queries> {
       true
     );
 
+    const coinType = this.chainGetter.getChain(this.chainId).coinType;
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.getKeplr())!;
 
@@ -477,7 +481,10 @@ export class AccountSetBase<MsgOpts, Queries> {
             signerInfos: [
               {
                 publicKey: {
-                  type_url: "/cosmos.crypto.secp256k1.PubKey",
+                  type_url:
+                    coinType === 60
+                      ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
+                      : "/cosmos.crypto.secp256k1.PubKey",
                   value: cosmos.crypto.secp256k1.PubKey.encode({
                     key: Buffer.from(
                       signResponse.signature.pub_key.value,
@@ -532,6 +539,14 @@ export class AccountSetBase<MsgOpts, Queries> {
 
   get isSendingMsg(): string | boolean {
     return this._isSendingMsg;
+  }
+
+  get hasEvmosHexAddress(): boolean {
+    return this.bech32Address.startsWith("evmos");
+  }
+
+  get evmosHexAddress(): string {
+    return evmosToEth(this.bech32Address);
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & Queries> {

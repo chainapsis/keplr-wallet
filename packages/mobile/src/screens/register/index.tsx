@@ -9,7 +9,6 @@ import { useSmartNavigation } from "../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { useLogScreenView } from "../../hooks";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const RegisterIntroScreen: FunctionComponent = observer(() => {
@@ -24,8 +23,6 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
   const safeAreaInsets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const actualHeightHeight = headerHeight - safeAreaInsets.top;
-
-  useLogScreenView("Register");
 
   return (
     <PageWithScrollView

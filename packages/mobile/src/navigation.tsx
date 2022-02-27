@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useRef } from "react";
 import { Text, View } from "react-native";
 import {
   BIP44HDPath,
@@ -9,6 +9,7 @@ import {
 import {
   DrawerActions,
   NavigationContainer,
+  NavigationContainerRef,
   useNavigation,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
@@ -911,13 +912,39 @@ const BugsnagNavigationContainer = (() => {
 })();
 
 export const AppNavigation: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
+
+  const navigationRef = useRef<NavigationContainerRef | null>(null);
+  const routeNameRef = useRef<string | null>(null);
 
   return (
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
-          <BugsnagNavigationContainer>
+          <BugsnagNavigationContainer
+            ref={navigationRef}
+            onReady={() => {
+              const routerName = navigationRef.current?.getCurrentRoute();
+              if (routerName) {
+                routeNameRef.current = routerName.name;
+
+                analyticsStore.logPageView(routerName.name);
+              }
+            }}
+            onStateChange={() => {
+              const routerName = navigationRef.current?.getCurrentRoute();
+              if (routerName) {
+                const previousRouteName = routeNameRef.current;
+                const currentRouteName = routerName.name;
+
+                if (previousRouteName !== currentRouteName) {
+                  analyticsStore.logPageView(currentRouteName);
+                }
+
+                routeNameRef.current = currentRouteName;
+              }
+            }}
+          >
             <Stack.Navigator
               initialRouteName={
                 keyRingStore.status !== KeyRingStatus.UNLOCKED
