@@ -11,7 +11,7 @@ import {
   ChainInfo,
   Currency,
   CW20Currency,
-  Secret20Currency
+  Secret20Currency,
 } from "@keplr-wallet/types";
 import { Bech32Config } from "@keplr-wallet/types";
 import Joi from "joi";
@@ -293,7 +293,8 @@ describe("Test chain info schema", () => {
         contractAddress: "this should be validated in the keeper",
         viewingKey: "Test viewingKey",
         coinDenom: "TEST",
-        coinMinimalDenom: "secret20:this should be validated in the keeper:utest",
+        coinMinimalDenom:
+          "secret20:this should be validated in the keeper:utest",
         coinDecimals: 0,
       };
 
