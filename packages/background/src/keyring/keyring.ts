@@ -14,9 +14,10 @@ import { Env } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-import { Wallet, utils } from "ethers";
+import { Wallet } from "@ethersproject/wallet";
+import BytesUtils from "@ethersproject/bytes";
 import { ETH } from "@tharsis/address-converter";
-import { keccak256 } from "ethers/lib/utils";
+import { keccak256 } from "@ethersproject/keccak256";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -735,8 +736,10 @@ export class KeyRing {
       const signature = await ethWallet
         ._signingKey()
         .signDigest(keccak256(message));
-      const splitSignature = utils.splitSignature(signature);
-      return utils.arrayify(utils.concat([splitSignature.r, splitSignature.s]));
+      const splitSignature = BytesUtils.splitSignature(signature);
+      return BytesUtils.arrayify(
+        BytesUtils.concat([splitSignature.r, splitSignature.s])
+      );
     }
   }
 
