@@ -14,6 +14,10 @@ import { Env } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
+import { Wallet, utils } from "ethers";
+import { ETH } from "@tharsis/address-converter";
+import { keccak256 } from "ethers/lib/utils";
+
 export enum KeyRingStatus {
   NOTLOADED,
   EMPTY,
@@ -592,6 +596,20 @@ export class KeyRing {
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
+      if (coinType === 60) {
+        // For Ethereum Key-Gen Only:
+        const wallet = new Wallet(privKey.toBytes());
+        const ethereumAddress = ETH.decoder(wallet.address);
+
+        return {
+          algo: "ethsecp256k1",
+          pubKey: pubKey.toBytes(),
+          address: ethereumAddress,
+          isNanoLedger: false,
+        };
+      }
+
+      // Default
       return {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
@@ -658,6 +676,12 @@ export class KeyRing {
       throw new Error("Key Store is empty");
     }
 
+    // Sign with Evmos/Ethereum
+    const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+    if (coinType === 60) {
+      return this.signEthereum(chainId, defaultCoinType, message);
+    }
+
     if (this.keyStore.type === "ledger") {
       const pubKey = this.ledgerPublicKey;
 
@@ -676,6 +700,43 @@ export class KeyRing {
 
       const privKey = this.loadPrivKey(coinType);
       return privKey.sign(message);
+    }
+  }
+
+  public async signEthereum(
+    chainId: string,
+    defaultCoinType: number,
+    message: Uint8Array
+  ): Promise<Uint8Array> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
+    if (!this.keyStore) {
+      throw new Error("Key Store is empty");
+    }
+
+    if (this.keyStore.type === "ledger") {
+      // TODO: Ethereum Ledger Integration
+      throw new Error("Ethereum signing with Ledger is not yet supported");
+    } else {
+      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+      if (coinType !== 60) {
+        throw new Error(
+          "Invalid coin type passed in to Ethereum signing (expected 60)"
+        );
+      }
+
+      const privKey = this.loadPrivKey(coinType);
+
+      // Use ether js to sign Ethereum tx
+      const ethWallet = new Wallet(privKey.toBytes());
+
+      const signature = await ethWallet
+        ._signingKey()
+        .signDigest(keccak256(message));
+      const splitSignature = utils.splitSignature(signature);
+      return utils.arrayify(utils.concat([splitSignature.r, splitSignature.s]));
     }
   }
 
