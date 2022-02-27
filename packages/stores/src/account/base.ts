@@ -31,6 +31,8 @@ import Long from "long";
 import ICoin = cosmos.base.v1beta1.ICoin;
 import SignMode = cosmos.tx.signing.v1beta1.SignMode;
 
+import { evmosToEth } from "@hanchon/ethermint-address-converter";
+
 export enum WalletStatus {
   NotInit = "NotInit",
   Loading = "Loading",
@@ -532,6 +534,14 @@ export class AccountSetBase<MsgOpts, Queries> {
 
   get isSendingMsg(): string | boolean {
     return this._isSendingMsg;
+  }
+
+  get hasEvmosHexAddress(): boolean {
+    return this.bech32Address.startsWith("evmos");
+  }
+
+  get evmosHexAddress(): string {
+    return evmosToEth(this.bech32Address);
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & Queries> {
