@@ -95,6 +95,10 @@ import {
   UMEE_RPC_CONFIG,
   UMEE_REST_ENDPOINT,
   UMEE_REST_CONFIG,
+  EVMOS_RPC_ENDPOINT,
+  EVMOS_RPC_CONFIG,
+  EVMOS_REST_ENDPOINT,
+  EVMOS_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1633,6 +1637,52 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+  },
+  {
+    rpc: EVMOS_RPC_ENDPOINT,
+    rpcConfig: EVMOS_RPC_CONFIG,
+    rest: EVMOS_REST_ENDPOINT,
+    restConfig: EVMOS_REST_CONFIG,
+    chainId: "evmos_9001-1",
+    chainName: "Evmos (Beta)",
+    stakeCurrency: {
+      coinDenom: "EVMOS",
+      coinMinimalDenom: "aevmos",
+      coinDecimals: 18,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/evmos/stake"
+        : "http://localhost:8080/#/evmos/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/evmos/stake"
+        : "http://localhost:8080/#/evmos/stake",
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("evmos"),
+    currencies: [
+      {
+        coinDenom: "EVMOS",
+        coinMinimalDenom: "aevmos",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "EVMOS",
+        coinMinimalDenom: "aevmos",
+        coinDecimals: 18,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.005,
+      average: 0.025,
+      high: 0.04,
+    },
+    features: ["ibc-transfer", "stargate", "no-legacy-stdTx", "ibc-go"],
+    beta: true,
   },
   {
     rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
