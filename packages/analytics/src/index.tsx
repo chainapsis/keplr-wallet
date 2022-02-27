@@ -1,4 +1,4 @@
-import { sha256 } from "sha.js";
+// import { sha256 } from "sha.js";
 
 export interface AnalyticsClient {
   setUserId(userId: string | null): void;
@@ -59,10 +59,10 @@ export class AnalyticsStore<
   // For example, the address will be different according to the chains (cosmoshub, secret, kava...),
   // but we want to classify the user without considering the chains.
   // So, I recommend to use only the address of the main chain (probably cosmoshub).
-  setUserId(bech32Address: string): void {
-    const hashedAddress = new sha256().update(bech32Address).digest("hex");
-    this.analyticsClient.setUserId(hashedAddress);
-  }
+  // setUserId(bech32Address: string): void {
+  //   const hashedAddress = new sha256().update(bech32Address).digest("hex");
+  //   this.analyticsClient.setUserId(hashedAddress);
+  // }
 
   setUserProperties(userProperties: U): void {
     this.analyticsClient.setUserProperties(userProperties);

@@ -18,10 +18,8 @@ export const LogPageViewWrapper: FunctionComponent = ({ children }) => {
   const location = useLocation();
   const loggingPageName = pathnameToPageName[location.pathname];
 
-  const { chainStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
   const language = useLanguage();
-
-  const account = accountStore.getAccount("cosmoshub-4");
 
   useEffect(() => {
     if (loggingPageName) {
@@ -30,9 +28,6 @@ export const LogPageViewWrapper: FunctionComponent = ({ children }) => {
         chainName: chainStore.current.chainName,
       };
 
-      if (account.bech32Address) {
-        analyticsStore.setUserId(account.bech32Address);
-      }
       analyticsStore.setUserProperties({
         currency: language.fiatCurrency,
         language: language.language,
@@ -40,7 +35,6 @@ export const LogPageViewWrapper: FunctionComponent = ({ children }) => {
       analyticsStore.logPageView(loggingPageName, eventProperties);
     }
   }, [
-    account.bech32Address,
     analyticsStore,
     chainStore,
     language.fiatCurrency,
