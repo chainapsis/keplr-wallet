@@ -15,7 +15,7 @@ import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 import { Wallet } from "@ethersproject/wallet";
-import BytesUtils from "@ethersproject/bytes";
+import * as BytesUtils from "@ethersproject/bytes";
 import { ETH } from "@tharsis/address-converter";
 import { keccak256 } from "@ethersproject/keccak256";
 
