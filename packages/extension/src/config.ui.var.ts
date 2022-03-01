@@ -1,6 +1,7 @@
 import { IntlMessages } from "./languages";
 import { RegisterOption } from "@keplr-wallet/hooks";
 
+export const AMPLITUDE_API_KEY = "";
 export const ETHEREUM_ENDPOINT =
   "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";
 
