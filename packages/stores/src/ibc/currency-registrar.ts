@@ -1,7 +1,7 @@
 import { flow, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { ChainInfoInner, ChainStore } from "../chain";
-import { HasCosmosQueries, QueriesSetBase } from "../query";
+import { HasCosmosQueries, HasCosmwasmQueries, QueriesSetBase } from "../query";
 import { DenomHelper, KVStore, toGenerator } from "@keplr-wallet/common";
 
 type CacheIBCDenomData = {
@@ -53,6 +53,11 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     protected readonly queriesStore: {
       get(chainId: string): QueriesSetBase & HasCosmosQueries;
     },
+    protected readonly cosmwasmQueriesStore:
+      | {
+          get(chainId: string): QueriesSetBase & HasCosmwasmQueries;
+        }
+      | undefined,
     protected readonly coinDenomGenerator: (
       denomTrace: {
         denom: string;
@@ -222,25 +227,73 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     }
 
     if (originChainInfo && denomTrace) {
-      const currency = originChainInfo.forceFindCurrency(denomTrace.denom);
+      if (denomTrace.denom.split(/^(cw20):(\w+)$/).length === 4) {
+        // If the origin currency is ics20-cw20.
+        let cw20Currency = originChainInfo.currencies.find(
+          (cur) =>
+            denomTrace && cur.coinMinimalDenom.startsWith(denomTrace.denom)
+        );
+        if (!cw20Currency && this.cosmwasmQueriesStore) {
+          const cosmwasmQuries = this.cosmwasmQueriesStore.get(
+            originChainInfo.chainId
+          );
+          const contractAddress = denomTrace.denom.replace("cw20:", "");
+          const contractInfo = cosmwasmQuries.cosmwasm.querycw20ContractInfo.getQueryContract(
+            contractAddress
+          );
+          if (contractInfo.response) {
+            cw20Currency = {
+              coinDecimals: contractInfo.response.data.decimals,
+              coinDenom: contractInfo.response.data.symbol,
+              coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
+            };
+            originChainInfo.addCurrencies(cw20Currency);
+          }
+        }
 
-      if (!("type" in currency)) {
-        return [
-          {
-            ...currency,
-            coinMinimalDenom: denomHelper.denom,
-            coinDenom: this.coinDenomGenerator(
-              denomTrace,
-              originChainInfo,
-              counterpartyChainInfo,
-              currency
-            ),
-            paths: denomTrace.paths,
-            originChainId: originChainInfo.chainId,
-            originCurrency: currency,
-          },
-          true,
-        ];
+        if (cw20Currency) {
+          return [
+            {
+              coinDecimals: cw20Currency.coinDecimals,
+              coinGeckoId: cw20Currency.coinGeckoId,
+              coinImageUrl: cw20Currency.coinImageUrl,
+              coinMinimalDenom: denomHelper.denom,
+              coinDenom: this.coinDenomGenerator(
+                denomTrace,
+                originChainInfo,
+                counterpartyChainInfo,
+                cw20Currency
+              ),
+              paths: denomTrace.paths,
+              originChainId: originChainInfo.chainId,
+              originCurrency: cw20Currency,
+            },
+            true,
+          ];
+        }
+      } else {
+        const currency = originChainInfo.forceFindCurrency(denomTrace.denom);
+
+        if (!("paths" in currency)) {
+          return [
+            {
+              coinDecimals: currency.coinDecimals,
+              coinGeckoId: currency.coinGeckoId,
+              coinImageUrl: currency.coinImageUrl,
+              coinMinimalDenom: denomHelper.denom,
+              coinDenom: this.coinDenomGenerator(
+                denomTrace,
+                originChainInfo,
+                counterpartyChainInfo,
+                currency
+              ),
+              paths: denomTrace.paths,
+              originChainId: originChainInfo.chainId,
+              originCurrency: currency,
+            },
+            true,
+          ];
+        }
       }
 
       // In this case, just show the raw currency.
@@ -319,6 +372,11 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
     protected readonly queriesStore: {
       get(chainId: string): QueriesSetBase & HasCosmosQueries;
     },
+    protected readonly cosmwasmQueriesStore:
+      | {
+          get(chainId: string): QueriesSetBase & HasCosmwasmQueries;
+        }
+      | undefined,
     protected readonly coinDenomGenerator: (
       denomTrace: {
         denom: string;
@@ -358,6 +416,7 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
             this.chainStore,
             this.accountStore,
             this.queriesStore,
+            this.cosmwasmQueriesStore,
             this.coinDenomGenerator
           )
         );

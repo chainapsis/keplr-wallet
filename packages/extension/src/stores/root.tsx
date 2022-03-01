@@ -1,7 +1,6 @@
 import { ChainStore } from "./chain";
-import { AnalyticsStore } from "./analytics";
 import { EmbedChainInfos } from "../config";
-import { FiatCurrencies } from "../config.ui";
+import { FiatCurrencies, AmplitudeApiKey } from "../config.ui";
 import {
   KeyRingStore,
   InteractionStore,
@@ -30,6 +29,10 @@ import { APP_PORT } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
+import { FeeType } from "@keplr-wallet/hooks";
+import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
+import Amplitude from "amplitude-js";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -49,9 +52,27 @@ export class RootStore {
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
-  public readonly analyticsStore: AnalyticsStore;
-
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+
+  public readonly analyticsStore: AnalyticsStore<
+    {
+      chainId?: string;
+      chainName?: string;
+      toChainId?: string;
+      toChainName?: string;
+      registerType?: "seed" | "google" | "ledger" | "qr";
+      feeType?: FeeType | undefined;
+      isIbc?: boolean;
+      rpc?: string;
+      rest?: string;
+    },
+    {
+      registerType?: "seed" | "google" | "ledger" | "qr";
+      accountType?: "mnemonic" | "privateKey" | "ledger";
+      currency?: string;
+      language?: string;
+    }
+  >;
 
   constructor() {
     this.uiConfigStore = new UIConfigStore(
@@ -239,24 +260,50 @@ export class RootStore {
       24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
+      this.queriesStore,
       this.queriesStore
     );
 
     this.analyticsStore = new AnalyticsStore(
-      "KeplrExtension",
+      (() => {
+        if (!AmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance();
+          amplitudeClient.init(AmplitudeApiKey, undefined, {
+            saveEvents: true,
+            platform: "Extension",
+          });
+
+          return amplitudeClient;
+        }
+      })(),
       {
-        amplitudeConfig: {
-          platform: "Extension",
-          includeUtm: true,
-          includeReferrer: true,
-          includeFbclid: true,
-          includeGclid: true,
-          saveEvents: true,
-          saveParamsReferrerOncePerSession: false,
+        logEvent: (eventName, eventProperties) => {
+          if (eventProperties?.chainId || eventProperties?.toChainId) {
+            eventProperties = {
+              ...eventProperties,
+            };
+
+            if (eventProperties.chainId) {
+              eventProperties.chainId = ChainIdHelper.parse(
+                eventProperties.chainId
+              ).identifier;
+            }
+
+            if (eventProperties.toChainId) {
+              eventProperties.toChainId = ChainIdHelper.parse(
+                eventProperties.toChainId
+              ).identifier;
+            }
+          }
+
+          return {
+            eventName,
+            eventProperties,
+          };
         },
-      },
-      this.accountStore,
-      this.keyRingStore
+      }
     );
 
     router.listen(APP_PORT);

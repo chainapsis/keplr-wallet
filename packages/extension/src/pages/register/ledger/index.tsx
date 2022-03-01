@@ -22,7 +22,6 @@ export const ImportLedgerIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
   const { analyticsStore } = useStore();
-
   return (
     <Button
       color="primary"
@@ -57,7 +56,7 @@ export const ImportLedgerPage: FunctionComponent<{
     },
   });
 
-  const { analyticsStore, accountStore } = useStore();
+  const { analyticsStore } = useStore();
 
   return (
     <div>
@@ -75,15 +74,8 @@ export const ImportLedgerPage: FunctionComponent<{
               data.password,
               bip44Option.bip44HDPath
             );
-            const accountInfo = accountStore.getAccount(
-              analyticsStore.mainChainId
-            );
-            analyticsStore.setUserId(accountInfo.bech32Address);
             analyticsStore.setUserProperties({
               registerType: "ledger",
-              accountType: "ledger",
-            });
-            analyticsStore.logEvent("Import account finished", {
               accountType: "ledger",
             });
           } catch (e) {

@@ -13,9 +13,9 @@ import * as WebBrowser from "expo-web-browser";
 import { Buffer } from "buffer/";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import Torus from "@toruslabs/torus.js";
-import { useStore } from "../../../stores";
 import { useLoadingScreen } from "../../../providers/loading-screen";
 import * as AppleAuthentication from "expo-apple-authentication";
+import { useStore } from "../../../stores";
 
 interface FormData {
   name: string;
@@ -115,13 +115,12 @@ const useTorusGoogleSignIn = (): {
             torusNodeEndpoints,
             torusNodePub,
             torusIndexes,
-          } = await nodeDetailManager.getNodeDetails();
-
-          const torus = new Torus({
-            enableLogging: __DEV__,
-            metadataHost: "https://metadata.tor.us",
-            allowHost: "https://signer.tor.us/api/allow",
+          } = await nodeDetailManager.getNodeDetails({
+            verifier: "chainapsis-google",
+            verifierId: email.toLowerCase(),
           });
+
+          const torus = new Torus();
 
           const response = await torus.getPublicAddress(
             torusNodeEndpoints,
@@ -221,13 +220,12 @@ const useTorusAppleSignIn = (): {
           torusNodeEndpoints,
           torusNodePub,
           torusIndexes,
-        } = await nodeDetailManager.getNodeDetails();
-
-        const torus = new Torus({
-          enableLogging: __DEV__,
-          metadataHost: "https://metadata.tor.us",
-          allowHost: "https://signer.tor.us/api/allow",
+        } = await nodeDetailManager.getNodeDetails({
+          verifier: "chainapsis-apple",
+          verifierId: sub,
         });
+
+        const torus = new Torus();
 
         const response = await torus.getPublicAddress(
           torusNodeEndpoints,
@@ -335,11 +333,8 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         getValues("password"),
         { email, socialType: route.params.type }
       );
-      analyticsStore.setUserId();
       analyticsStore.setUserProperties({
-        registerType: "google",
-      });
-      analyticsStore.logEvent("OAuth sign in finished", {
+        registerType: route.params.type,
         accountType: "privateKey",
       });
 

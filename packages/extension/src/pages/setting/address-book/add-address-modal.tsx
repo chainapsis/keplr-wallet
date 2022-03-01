@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { HeaderLayout } from "../../../layouts";
 import { AddressInput, Input, MemoInput } from "../../../components/form";
-import { useStore } from "../../../stores";
 import { Button } from "reactstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import { observer } from "mobx-react-lite";
@@ -28,16 +27,8 @@ export const AddAddressModal: FunctionComponent<{
   index: number;
   chainId: string;
 }> = observer(
-  ({
-    closeModal,
-    recipientConfig,
-    memoConfig,
-    addressBookConfig,
-    index,
-    chainId,
-  }) => {
+  ({ closeModal, recipientConfig, memoConfig, addressBookConfig, index }) => {
     const intl = useIntl();
-    const { chainStore, analyticsStore } = useStore();
 
     const [name, setName] = useState("");
 
@@ -118,10 +109,6 @@ export const AddAddressModal: FunctionComponent<{
                   name,
                   address: recipientConfig.recipient,
                   memo: memoConfig.memo,
-                });
-                analyticsStore.logEvent("Add address finished", {
-                  chainId,
-                  chainName: chainStore.getChain(chainId).chainName,
                 });
               } else {
                 await addressBookConfig.editAddressBookAt(index, {

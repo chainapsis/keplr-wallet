@@ -205,19 +205,15 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    smartNavigation.pushSmart("TxPendingResult", {
-                      txHash: Buffer.from(txHash).toString("hex"),
-                    });
-                  },
-                  onFulfill: (tx) => {
-                    const isSuccess = tx.code == null || tx.code === 0;
-                    analyticsStore.logEvent("Redelgate finished", {
+                    analyticsStore.logEvent("Redelgate tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       validatorName: srcValidator?.description.moniker,
                       toValidatorName: dstValidator?.description.moniker,
                       feeType: sendConfigs.feeConfig.feeType,
-                      isSuccess,
+                    });
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
                     });
                   },
                 }

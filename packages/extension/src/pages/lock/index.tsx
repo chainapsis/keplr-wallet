@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 
 import { PasswordInput } from "../../components/form";
 
@@ -26,18 +26,27 @@ export const LockPage: FunctionComponent = observer(() => {
   const intl = useIntl();
   const history = useHistory();
 
+  const passwordRef = useRef<HTMLInputElement | null>();
+
   const { register, handleSubmit, setError, errors } = useForm<FormData>({
     defaultValues: {
       password: "",
     },
   });
 
-  const { keyRingStore, analyticsStore } = useStore();
+  const { keyRingStore } = useStore();
   const [loading, setLoading] = useState(false);
 
   const interactionInfo = useInteractionInfo(() => {
     keyRingStore.rejectAll();
   });
+
+  useEffect(() => {
+    if (passwordRef.current) {
+      // Focus the password input on enter.
+      passwordRef.current.focus();
+    }
+  }, []);
 
   return (
     <EmptyLayout style={{ backgroundColor: "white", height: "100%" }}>
@@ -47,9 +56,6 @@ export const LockPage: FunctionComponent = observer(() => {
           setLoading(true);
           try {
             await keyRingStore.unlock(data.password);
-            analyticsStore.logEvent("Account unlocked", {
-              authType: "password",
-            });
             if (interactionInfo.interaction) {
               if (!interactionInfo.interactionInternal) {
                 // XXX: If the connection doesn't have the permission,
@@ -89,11 +95,15 @@ export const LockPage: FunctionComponent = observer(() => {
           })}
           name="password"
           error={errors.password && errors.password.message}
-          ref={register({
-            required: intl.formatMessage({
-              id: "lock.input.password.error.required",
-            }),
-          })}
+          ref={(ref) => {
+            passwordRef.current = ref;
+
+            register({
+              required: intl.formatMessage({
+                id: "lock.input.password.error.required",
+              }),
+            })(ref);
+          }}
         />
         <Button type="submit" color="primary" block data-loading={loading}>
           <FormattedMessage id="lock.button.unlock" />

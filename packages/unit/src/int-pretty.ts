@@ -3,35 +3,41 @@ import { Dec } from "./decimal";
 import { DecUtils } from "./dec-utils";
 import { CoinUtils } from "./coin-utils";
 import { DeepReadonly } from "utility-types";
+import bigInteger from "big-integer";
 
 export type IntPrettyOptions = {
-  precision: number;
   maxDecimals: number;
   trim: boolean;
   shrink: boolean;
   ready: boolean;
   locale: boolean;
+  // If this is true, toString() will return the string with prefix like < 0.001 if a value cannot be expressed with a max decimals.
+  inequalitySymbol: boolean;
+  inequalitySymbolSeparator: string;
 };
 
 export class IntPretty {
   protected dec: Dec;
-  protected decPrecision: number = 0;
+  protected floatingDecimalPointRight = 0;
 
   protected _options: IntPrettyOptions = {
-    precision: 0,
     maxDecimals: 0,
     trim: false,
     shrink: false,
     ready: true,
     locale: true,
+    inequalitySymbol: false,
+    inequalitySymbolSeparator: " ",
   };
 
-  constructor(num: Dec | { toDec(): Dec }) {
-    if ("toDec" in num) {
+  constructor(num: Dec | { toDec(): Dec } | bigInteger.BigNumber) {
+    if (typeof num === "object" && "toDec" in num) {
       num = num.toDec();
+    } else if (!(num instanceof Dec)) {
+      num = new Dec(num);
     }
 
-    if (num.equals(new Dec(0))) {
+    if (num.isZero()) {
       this.dec = num;
       return;
     }
@@ -50,8 +56,6 @@ export class IntPretty {
     }
 
     this.dec = num;
-    this.decPrecision = decPrecision;
-    this._options.precision = decPrecision;
     this._options.maxDecimals = decPrecision;
   }
 
@@ -59,30 +63,47 @@ export class IntPretty {
     return this._options;
   }
 
-  precision(prec: number): IntPretty {
-    if (prec < -18) {
-      throw new Error("Too little precision");
-    }
-    if (prec > 18) {
-      throw new Error("Too much precision");
-    }
-
+  moveDecimalPointLeft(delta: number): IntPretty {
     const pretty = this.clone();
-    pretty._options.precision = prec;
+    pretty.floatingDecimalPointRight += -delta;
     return pretty;
   }
 
-  increasePrecision(delta: number): IntPretty {
-    return this.precision(this._options.precision + delta);
+  moveDecimalPointRight(delta: number): IntPretty {
+    const pretty = this.clone();
+    pretty.floatingDecimalPointRight += delta;
+    return pretty;
   }
 
+  /**
+   * @deprecated Use`moveDecimalPointLeft`
+   */
+  increasePrecision(delta: number): IntPretty {
+    return this.moveDecimalPointLeft(delta);
+  }
+
+  /**
+   * @deprecated Use`moveDecimalPointRight`
+   */
   decreasePrecision(delta: number): IntPretty {
-    return this.precision(this._options.precision - delta);
+    return this.moveDecimalPointRight(delta);
   }
 
   maxDecimals(max: number): IntPretty {
     const pretty = this.clone();
     pretty._options.maxDecimals = max;
+    return pretty;
+  }
+
+  inequalitySymbol(bool: boolean): IntPretty {
+    const pretty = this.clone();
+    pretty._options.inequalitySymbol = bool;
+    return pretty;
+  }
+
+  inequalitySymbolSeparator(str: string): IntPretty {
+    const pretty = this.clone();
+    pretty._options.inequalitySymbolSeparator = str;
     return pretty;
   }
 
@@ -129,8 +150,6 @@ export class IntPretty {
     const pretty = new IntPretty(this.toDec().add(target));
     pretty._options = {
       ...this._options,
-      // Precision must not be changed.
-      precision: pretty._options.precision,
     };
     return pretty;
   }
@@ -143,8 +162,6 @@ export class IntPretty {
     const pretty = new IntPretty(this.toDec().sub(target));
     pretty._options = {
       ...this._options,
-      // Precision must not be changed.
-      precision: pretty._options.precision,
     };
     return pretty;
   }
@@ -157,8 +174,6 @@ export class IntPretty {
     const pretty = new IntPretty(this.toDec().mul(target));
     pretty._options = {
       ...this._options,
-      // Precision must not be changed.
-      precision: pretty._options.precision,
     };
     return pretty;
   }
@@ -171,25 +186,57 @@ export class IntPretty {
     const pretty = new IntPretty(this.toDec().quo(target));
     pretty._options = {
       ...this._options,
-      // Precision must not be changed.
-      precision: pretty._options.precision,
     };
     return pretty;
   }
 
   toDec(): Dec {
-    let dec = this.dec;
-    const deltaPrecision = this.decPrecision - this._options.precision;
-    if (deltaPrecision !== 0) {
-      dec = dec.mulTruncate(DecUtils.getPrecisionDec(deltaPrecision));
+    if (this.floatingDecimalPointRight === 0) {
+      return this.dec;
+    } else if (this.floatingDecimalPointRight > 0) {
+      return this.dec.mulTruncate(
+        DecUtils.getTenExponentN(this.floatingDecimalPointRight)
+      );
+    } else {
+      // Since a decimal in Dec cannot exceed 18, it cannot be computed at once.
+      let i = -this.floatingDecimalPointRight;
+      let dec = this.dec;
+      while (i > 0) {
+        if (i >= Dec.precision) {
+          dec = dec.mulTruncate(DecUtils.getTenExponentN(-Dec.precision));
+          i -= Dec.precision;
+        } else {
+          dec = dec.mulTruncate(DecUtils.getTenExponentN(-(i % Dec.precision)));
+          break;
+        }
+      }
+      return dec;
     }
-    return dec;
   }
 
   toString(): string {
+    return this.toStringWithSymbols("", "");
+  }
+
+  toStringWithSymbols(prefix: string, suffix: string): string {
     const dec = this.toDec();
 
-    let result = "";
+    if (
+      this._options.inequalitySymbol &&
+      !dec.isZero() &&
+      dec.abs().lt(DecUtils.getTenExponentN(-this._options.maxDecimals))
+    ) {
+      const isNeg = dec.isNegative();
+
+      return `${isNeg ? ">" : "<"}${this._options.inequalitySymbolSeparator}${
+        isNeg ? "-" : ""
+      }${prefix}${DecUtils.getTenExponentN(-this._options.maxDecimals).toString(
+        this._options.maxDecimals,
+        this._options.locale
+      )}${suffix}`;
+    }
+
+    let result: string;
     if (!this._options.shrink) {
       result = dec.toString(this._options.maxDecimals, this._options.locale);
     } else {
@@ -203,13 +250,19 @@ export class IntPretty {
     if (this._options.trim) {
       result = DecUtils.trim(result);
     }
-    return result;
+
+    const isNeg = result.charAt(0) === "-";
+    if (isNeg) {
+      result = result.slice(1);
+    }
+
+    return `${isNeg ? "-" : ""}${prefix}${result}${suffix}`;
   }
 
   clone(): IntPretty {
     const pretty = new IntPretty(this.dec);
     pretty.dec = this.dec;
-    pretty.decPrecision = this.decPrecision;
+    pretty.floatingDecimalPointRight = this.floatingDecimalPointRight;
     pretty._options = {
       ...this._options,
     };

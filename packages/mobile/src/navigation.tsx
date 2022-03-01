@@ -29,7 +29,6 @@ import {
   createDrawerNavigator,
   useIsDrawerOpen,
 } from "@react-navigation/drawer";
-import analytics from "@react-native-firebase/analytics";
 import { DrawerContent } from "./components/drawer";
 import { useStyle } from "./styles";
 import { BorderlessButton } from "react-native-gesture-handler";
@@ -105,6 +104,7 @@ import {
 } from "./screens/register/import-from-extension";
 import { OsmosisWebpageScreen } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
+import Bugsnag from "@bugsnag/react-native";
 
 const {
   SmartNavigatorProvider,
@@ -894,37 +894,55 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   );
 };
 
+const BugsnagNavigationContainerPlugin = Bugsnag.getPlugin("reactNavigation");
+// The returned BugsnagNavigationContainer has exactly the same usage
+// except now it tracks route information to send with your error reports
+const BugsnagNavigationContainer = (() => {
+  if (BugsnagNavigationContainerPlugin) {
+    console.log("BugsnagNavigationContainerPlugin found");
+    return BugsnagNavigationContainerPlugin.createNavigationContainer(
+      NavigationContainer
+    );
+  } else {
+    console.log(
+      "WARNING: BugsnagNavigationContainerPlugin is null. Fallback to use basic NavigationContainer"
+    );
+    return NavigationContainer;
+  }
+})();
+
 export const AppNavigation: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
-  const navigationRef = useRef<NavigationContainerRef>(null);
-  const routeNameRef = useRef<string>();
+  const { keyRingStore, analyticsStore } = useStore();
+
+  const navigationRef = useRef<NavigationContainerRef | null>(null);
+  const routeNameRef = useRef<string | null>(null);
 
   return (
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
-          <NavigationContainer
+          <BugsnagNavigationContainer
             ref={navigationRef}
-            onReady={() =>
-              (routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name)
-            }
-            onStateChange={async () => {
-              const previousRouteName = routeNameRef.current;
-              const currentRouteName = navigationRef.current?.getCurrentRoute()
-                ?.name;
+            onReady={() => {
+              const routerName = navigationRef.current?.getCurrentRoute();
+              if (routerName) {
+                routeNameRef.current = routerName.name;
 
-              if (previousRouteName !== currentRouteName) {
-                // The line below uses the expo-firebase-analytics tracker
-                // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
-                // Change this line to use another Mobile analytics SDK
-                await analytics().logScreenView({
-                  screen_name: currentRouteName,
-                  screen_class: currentRouteName,
-                });
+                analyticsStore.logPageView(routerName.name);
               }
+            }}
+            onStateChange={() => {
+              const routerName = navigationRef.current?.getCurrentRoute();
+              if (routerName) {
+                const previousRouteName = routeNameRef.current;
+                const currentRouteName = routerName.name;
 
-              // Save the current route name for later comparison
-              routeNameRef.current = currentRouteName;
+                if (previousRouteName !== currentRouteName) {
+                  analyticsStore.logPageView(currentRouteName);
+                }
+
+                routeNameRef.current = currentRouteName;
+              }
             }}
           >
             <Stack.Navigator
@@ -951,7 +969,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
                 component={AddressBookStackScreen}
               />
             </Stack.Navigator>
-          </NavigationContainer>
+          </BugsnagNavigationContainer>
           {/* <ModalsRenderer /> */}
         </SmartNavigatorProvider>
       </FocusedScreenProvider>

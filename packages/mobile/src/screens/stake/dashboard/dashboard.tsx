@@ -4,7 +4,6 @@ import { MyRewardCard } from "./reward-card";
 import { DelegationsCard } from "./delegations-card";
 import { UndelegationsCard } from "./undelegations-card";
 import { useStyle } from "../../../styles";
-import { useLogScreenView } from "../../../hooks";
 import { useStore } from "../../../stores";
 
 export const StakingDashboardScreen: FunctionComponent = () => {
@@ -18,11 +17,6 @@ export const StakingDashboardScreen: FunctionComponent = () => {
   const unbondings = queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
     account.bech32Address
   ).unbondingBalances;
-
-  useLogScreenView("Staking dashboard", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-  });
 
   return (
     <PageWithScrollView>

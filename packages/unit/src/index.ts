@@ -6,3 +6,4 @@ export * from "./decimal";
 export * from "./coin-utils";
 export * from "./dec-utils";
 export * from "./price-pretty";
+export * from "./rate-pretty";

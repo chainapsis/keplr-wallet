@@ -6,7 +6,6 @@ import { useStore } from "../../stores";
 import { ObservableQueryProposal } from "@keplr-wallet/stores";
 import { Card, CardDivider } from "../../components/card";
 import { useStyle } from "../../styles";
-import { useLogScreenView } from "../../hooks";
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore } = useStore();
@@ -20,11 +19,6 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
 
     return [{ data: proposals }];
   })();
-
-  useLogScreenView("Governance", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-  });
 
   return (
     <PageWithSectionList

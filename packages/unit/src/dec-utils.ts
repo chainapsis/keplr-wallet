@@ -1,7 +1,8 @@
 import { Dec } from "./decimal";
+import { Int } from "./int";
 
 export class DecUtils {
-  static trim(dec: Dec | string): string {
+  public static trim(dec: Dec | string): string {
     let decStr = typeof dec === "string" ? dec : dec.toString();
 
     if (decStr.indexOf(".") < 0) {
@@ -25,33 +26,37 @@ export class DecUtils {
     return decStr;
   }
 
-  private static precisions: { [precision: string]: Dec } = {};
+  protected static tenExponentNs: { [n: string]: Dec } = {};
 
-  static getPrecisionDec(precision: number): Dec {
-    if (precision < -18) {
+  public static getTenExponentN(n: number): Dec {
+    if (n < -Dec.precision) {
+      // Dec can only handle up to precision 18.
+      // Anything less than 18 precision is 0, so there is a high probability of an error.
       throw new Error("Too little precision");
     }
-    if (precision > 18) {
+
+    if (DecUtils.tenExponentNs[n.toString()]) {
+      return DecUtils.tenExponentNs[n.toString()];
+    }
+
+    const dec = new Dec(10).pow(new Int(n));
+    DecUtils.tenExponentNs[n.toString()] = dec;
+
+    return dec;
+  }
+
+  public static getTenExponentNInPrecisionRange(n: number): Dec {
+    if (n > Dec.precision) {
       throw new Error("Too much precision");
     }
 
-    if (DecUtils.precisions[precision.toString()]) {
-      return DecUtils.precisions[precision.toString()];
-    }
+    return DecUtils.getTenExponentN(n);
+  }
 
-    let dec = new Dec(1);
-
-    if (precision > 0) {
-      for (let i = 0; i < precision; i++) {
-        dec = dec.mul(new Dec(10));
-      }
-    } else if (precision < 0) {
-      for (let i = 0; i < -precision; i++) {
-        dec = dec.quo(new Dec(10));
-      }
-    }
-
-    DecUtils.precisions[precision.toString()] = dec;
-    return dec;
+  /**
+   * @deprecated Use`getTenExponentNInPrecisionRange`
+   */
+  public static getPrecisionDec(precision: number): Dec {
+    return DecUtils.getTenExponentNInPrecisionRange(precision);
   }
 }

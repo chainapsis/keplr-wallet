@@ -95,6 +95,10 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         getValues("password"),
         bip44Option.bip44HDPath
       );
+      analyticsStore.setUserProperties({
+        registerType: "seed",
+        accountType: "mnemonic",
+      });
     } else {
       const privateKey = Buffer.from(mnemonic.trim().replace("0x", ""), "hex");
       await registerConfig.createPrivateKey(
@@ -102,15 +106,11 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         privateKey,
         getValues("password")
       );
+      analyticsStore.setUserProperties({
+        registerType: "seed",
+        accountType: "privateKey",
+      });
     }
-
-    analyticsStore.setUserId();
-    analyticsStore.setUserProperties({
-      registerType: "seed",
-    });
-    analyticsStore.logEvent("Import account finished", {
-      accountType: "mnemonic",
-    });
 
     smartNavigation.reset({
       index: 0,

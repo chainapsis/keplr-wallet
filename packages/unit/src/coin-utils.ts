@@ -123,21 +123,29 @@ export class CoinUtils {
       return "0";
     }
 
-    const integer = dec.truncate();
-    const fraction = dec.sub(new Dec(integer));
+    const isNeg = dec.isNegative();
+
+    const integer = dec.abs().truncate();
+    const fraction = dec.abs().sub(new Dec(integer));
 
     const decimals = Math.max(
       maxDecimals - integer.toString().length + 1,
       minDecimals
     );
 
-    const fractionStr = fraction.toString(decimals).replace("0.", "");
+    const fractionStr =
+      decimals === 0 ? "" : fraction.toString(decimals).replace("0.", "");
 
     const integerStr = locale
       ? CoinUtils.integerStringToUSLocaleString(integer.toString())
       : integer.toString();
 
-    return integerStr + (fractionStr.length > 0 ? "." : "") + fractionStr;
+    return (
+      (isNeg ? "-" : "") +
+      integerStr +
+      (fractionStr.length > 0 ? "." : "") +
+      fractionStr
+    );
   }
 
   /**

@@ -99,13 +99,7 @@ const useAutoBiomtric = (keychainStore: KeychainStore, tryEnabled: boolean) => {
  * @constructor
  */
 export const UnlockScreen: FunctionComponent = observer(() => {
-  const {
-    keyRingStore,
-    keychainStore,
-    accountStore,
-    chainStore,
-    analyticsStore,
-  } = useStore();
+  const { keyRingStore, keychainStore, accountStore, chainStore } = useStore();
 
   const style = useStyle();
 
@@ -136,13 +130,9 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     if (isSplashEnd && autoBiometryStatus === AutoBiomtricStatus.SUCCESS) {
       (async () => {
         await hideSplashScreen();
-
-        analyticsStore.logEvent("Account unlocked", {
-          authType: "biometrics",
-        });
       })();
     }
-  }, [analyticsStore, autoBiometryStatus, isSplashEnd, navigation]);
+  }, [autoBiometryStatus, isSplashEnd, navigation]);
 
   useEffect(() => {
     if (
@@ -180,15 +170,11 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       await keychainStore.tryUnlockWithBiometry();
 
       await hideSplashScreen();
-
-      analyticsStore.logEvent("Account unlocked", {
-        authType: "biometrics",
-      });
     } catch (e) {
       console.log(e);
       setIsBiometricLoading(false);
     }
-  }, [analyticsStore, keychainStore]);
+  }, [keychainStore]);
 
   const tryUnlock = async () => {
     try {
@@ -201,10 +187,6 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       await keyRingStore.unlock(password);
 
       await hideSplashScreen();
-
-      analyticsStore.logEvent("Account unlocked", {
-        authType: "password",
-      });
     } catch (e) {
       console.log(e);
       setIsLoading(false);

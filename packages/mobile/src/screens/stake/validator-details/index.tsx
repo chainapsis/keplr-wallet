@@ -8,8 +8,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { Dec } from "@keplr-wallet/unit";
 import { UnbondingCard } from "./unbonding-card";
-import { useLogScreenView } from "../../../hooks";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
 
 export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -41,19 +39,7 @@ export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
       (unbonding) => unbonding.validatorAddress === validatorAddress
     );
 
-  const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
-  );
-
-  const validator = bondedValidators.getValidator(validatorAddress);
-
   const style = useStyle();
-
-  useLogScreenView("Validator detail", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-    validatorName: validator?.description.moniker,
-  });
 
   return (
     <PageWithScrollView>

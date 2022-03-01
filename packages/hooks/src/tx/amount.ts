@@ -31,7 +31,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   protected _amount: string;
 
   @observable
-  protected _isMax: boolean = false;
+  protected _fraction: number | undefined = undefined;
 
   constructor(
     chainGetter: ChainGetter,
@@ -76,33 +76,42 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       amount = "0" + amount;
     }
 
-    if (this.isMax) {
-      this.setIsMax(false);
+    if (this.fraction != null) {
+      this.setFraction(undefined);
     }
     this._amount = amount;
   }
 
   @action
   setIsMax(isMax: boolean) {
-    this._isMax = isMax;
+    this._fraction = isMax ? 1 : undefined;
   }
 
   @action
   toggleIsMax() {
-    this._isMax = !this._isMax;
+    this.setIsMax(!this.isMax);
   }
 
   get isMax(): boolean {
-    return this._isMax;
+    return this._fraction === 1;
   }
 
   get sender(): string {
     return this._sender;
   }
 
+  get fraction(): number | undefined {
+    return this._fraction;
+  }
+
+  @action
+  setFraction(value: number | undefined) {
+    this._fraction = value;
+  }
+
   @computed
   get amount(): string {
-    if (this.isMax) {
+    if (this.fraction != null) {
       const balance = this.queryBalances
         .getQueryBech32Address(this.sender)
         .getBalanceFromCurrency(this.sendCurrency);
@@ -115,7 +124,12 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       }
 
       // Remember that the `CoinPretty`'s sub method do nothing if the currencies are different.
-      return result.trim(true).locale(false).hideDenom(true).toString();
+      return result
+        .mul(new Dec(this.fraction))
+        .trim(true)
+        .locale(false)
+        .hideDenom(true)
+        .toString();
     }
 
     return this._amount;

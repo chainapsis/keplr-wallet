@@ -11,7 +11,6 @@ import { Button } from "reactstrap";
 import { FormattedMessage } from "react-intl";
 
 import { useRegisterConfig } from "@keplr-wallet/hooks";
-import { useLogScreenView } from "../../hooks";
 import { useStore } from "../../stores";
 import { NewMnemonicIntro, NewMnemonicPage, TypeNewMnemonic } from "./mnemonic";
 import {
@@ -60,7 +59,6 @@ export const RegisterPage: FunctionComponent = observer(() => {
   }, []);
 
   const { keyRingStore } = useStore();
-  useLogScreenView("Register");
 
   const registerConfig = useRegisterConfig(keyRingStore, [
     ...(AdditionalSignInPrepend ?? []),

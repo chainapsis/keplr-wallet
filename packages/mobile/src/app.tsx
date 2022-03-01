@@ -12,6 +12,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LoadingScreenProvider } from "./providers/loading-screen";
 import * as SplashScreen from "expo-splash-screen";
 import { ConfirmModalProvider } from "./providers/confirm-modal";
+import Bugsnag from "@bugsnag/react-native";
 
 if (Platform.OS === "android") {
   // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
@@ -107,4 +108,31 @@ const AppBody: FunctionComponent = () => {
   );
 };
 
-export const App: FunctionComponent = __DEV__ ? AppBody : codePush(AppBody);
+const ErrorBoundaryPlugin = Bugsnag.getPlugin("react");
+const ErrorBoundary = (() => {
+  if (ErrorBoundaryPlugin) {
+    console.log("ErrorBoundaryPlugin found");
+    return ErrorBoundaryPlugin.createErrorBoundary(React);
+  } else {
+    console.log(
+      "WARNING: ErrorBoundaryPlugin is null. Fallback to use basic AppBody"
+    );
+    return;
+  }
+})();
+
+const CodePushAppBody: FunctionComponent = __DEV__
+  ? AppBody
+  : codePush(AppBody);
+
+export const App: FunctionComponent = () => {
+  if (ErrorBoundary) {
+    return (
+      <ErrorBoundary>
+        <CodePushAppBody />
+      </ErrorBoundary>
+    );
+  } else {
+    return <CodePushAppBody />;
+  }
+};

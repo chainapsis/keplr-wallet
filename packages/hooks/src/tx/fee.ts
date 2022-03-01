@@ -164,7 +164,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     return {
       denom: this.feeCurrency.coinMinimalDenom,
-      amount: feeAmount.truncate().toString(),
+      amount: feeAmount.roundUp().toString(),
     };
   }
 
@@ -176,9 +176,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     const feeTypePrimitive = this.getFeeTypePrimitive(feeType);
     const feeCurrency = this.feeCurrency;
 
-    return new CoinPretty(feeCurrency, new Int(feeTypePrimitive.amount))
-      .precision(feeCurrency.coinDecimals)
-      .maxDecimals(feeCurrency.coinDecimals);
+    return new CoinPretty(
+      feeCurrency,
+      new Int(feeTypePrimitive.amount)
+    ).maxDecimals(feeCurrency.coinDecimals);
   });
 
   getError(): Error | undefined {
