@@ -46,6 +46,48 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 6250000000,
     },
   },
+  {
+    rpc: "https://rpc-capricorn.fetch.ai",
+    rest: "https://rest-capricorn.fetch.ai",
+    chainId: "capricorn-1",
+    chainName: "Capricorn",
+    stakeCurrency: {
+      coinDenom: "TESTFET",
+      coinMinimalDenom: "atestfet",
+      coinDecimals: 18,
+      coinGeckoId: "fetch-ai",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("fetch"),
+    currencies: [
+      {
+        coinDenom: "TESTFET",
+        coinMinimalDenom: "atestfet",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "MOBX",
+        coinMinimalDenom: "nanomobx",
+        coinDecimals: 9,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TESTFET",
+        coinMinimalDenom: "atestfet",
+        coinDecimals: 18,
+      },
+    ],
+    coinType: 118,
+    features: [],
+    gasPriceStep: {
+      low: 0,
+      average: 5000000000,
+      high: 6250000000,
+    },
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
