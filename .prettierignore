@@ -10,6 +10,7 @@ node_modules
 
 dist/*
 prod/*
+build/*
 
 yarn.lock
 Podfile.lock
@@ -20,3 +21,13 @@ injected-provider.bundle.js
 .gitsecret/*
 *.styl
 .github/*
+
+**/*.proto
+
+.eslintignore
+.prettierignore
+
+packages/proto-types/src/*
+
+package.json
+tsconfig.json

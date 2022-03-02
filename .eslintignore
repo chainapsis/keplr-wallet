@@ -12,6 +12,7 @@ node_modules
 
 dist/*
 prod/*
+build/*
 
 yarn.lock
 Podfile.lock
@@ -22,3 +23,7 @@ injected-provider.bundle.js
 .gitsecret/*
 *.styl
 .github/*
+
+**/*.proto
+
+packages/proto-types/src/*
