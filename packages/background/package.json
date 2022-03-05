@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/background",
-  "version": "0.9.15",
+  "version": "0.9.16",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -30,7 +30,7 @@
     "@ethersproject/keccak256": "^5.5.0",
     "@ethersproject/wallet": "^5.5.0",
     "@keplr-wallet/common": "^0.9.10",
-    "@keplr-wallet/cosmos": "^0.9.12",
+    "@keplr-wallet/cosmos": "^0.9.16",
     "@keplr-wallet/crypto": "^0.9.10",
     "@keplr-wallet/popup": "^0.9.6",
     "@keplr-wallet/router": "^0.9.6",
