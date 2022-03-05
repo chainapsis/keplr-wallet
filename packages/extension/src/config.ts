@@ -1677,7 +1677,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 5000000000,
+      low: 10000000000,
       average: 25000000000,
       high: 40000000000,
     },

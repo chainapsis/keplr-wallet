@@ -181,6 +181,22 @@ export class RootStore {
         };
       }
 
+      if (chainInfo.chainId.startsWith("evmos_")) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                gas: 140000,
+              },
+            },
+            withdrawRewards: {
+              gas: 200000,
+            },
+          },
+        };
+      }
+
       return { chainId: chainInfo.chainId };
     });
 
