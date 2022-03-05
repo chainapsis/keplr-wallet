@@ -78,10 +78,15 @@ export const AccountView: FunctionComponent = observer(() => {
             className={styleAccount.address}
             onClick={() => copyAddress(accountInfo.evmosHexAddress)}
           >
-            <Address maxCharacters={22} lineBreakBeforePrefix={false}>
+            <Address isRaw={true} tooltipAddress={accountInfo.evmosHexAddress}>
               {accountInfo.walletStatus === WalletStatus.Loaded &&
               accountInfo.evmosHexAddress
-                ? accountInfo.evmosHexAddress
+                ? accountInfo.evmosHexAddress.length === 42
+                  ? `${accountInfo.evmosHexAddress.slice(
+                      0,
+                      10
+                    )}...${accountInfo.evmosHexAddress.slice(-8)}`
+                  : accountInfo.evmosHexAddress
                 : "..."}
             </Address>
           </div>
