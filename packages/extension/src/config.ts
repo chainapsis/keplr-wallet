@@ -1677,9 +1677,9 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0.005,
-      average: 0.025,
-      high: 0.04,
+      low: 5000000000,
+      average: 25000000000,
+      high: 40000000000,
     },
     features: ["ibc-transfer", "stargate", "no-legacy-stdTx", "ibc-go"],
     beta: true,
