@@ -17,6 +17,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "ts-proto": "^1.106.2"
+    "ts-proto": "^1.106.2",
+    "folder-hash": "^4.0.2"
   }
 }

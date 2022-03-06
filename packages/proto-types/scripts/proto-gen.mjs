@@ -2,9 +2,21 @@
 
 import "zx/globals";
 import fs from "fs";
+import FolderHash from "folder-hash";
+
+async function getOutputSrcHash() {
+  return (await FolderHash.hashElement(path.join(__dirname, "../src"))).hash;
+}
 
 (async () => {
   try {
+    // When executed in CI, the proto output should not be different with ones built locally.
+    let outputSrcHash = undefined;
+    if (process.env.CI === "true") {
+      console.log("You are ci runner");
+      outputSrcHash = await getOutputSrcHash();
+    }
+
     const protoTsBinPath = (() => {
       try {
         const binPath = path.join(
@@ -59,6 +71,10 @@ import fs from "fs";
       --ts_proto_out=${outDir} \
       ${inputs.map((i) => path.join(baseProtoPath, i))} \
       ${thirdPartyInputs.map((i) => path.join(thirdPartyProtoPath, i))}`;
+
+    if (outputSrcHash && outputSrcHash !== (await getOutputSrcHash())) {
+      throw new Error("Output is different");
+    }
   } catch (e) {
     console.log(e);
     process.exit(1);
