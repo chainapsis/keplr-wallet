@@ -19,11 +19,13 @@ jobs:
           node-version: "14"
           registry-url: "https://registry.npmjs.org"
       - run: npm install --global yarn
+      - run: sudo apt-get update
       - run: sudo apt-get install libusb-1.0-0-dev
+      - run: sudo apt-get install protobuf-compiler
       - run: sudo apt-get install apt-transport-https ca-certificates
       - run: sudo sh -c "echo 'deb https://gitsecret.jfrog.io/artifactory/git-secret-deb git-secret main' >> /etc/apt/sources.list"
       - run: wget -qO - 'https://gitsecret.jfrog.io/artifactory/api/gpg/key/public' | sudo apt-key add -
-      - run: sudo apt-get update && sudo apt-get install git-secret
+      - run: sudo apt-get install git-secret
       - run: printf $GPG_KEY | base64 --decode > private.key
         env:
           GPG_KEY: ${{ secrets.GPG_KEY }}
