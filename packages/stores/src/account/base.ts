@@ -19,17 +19,19 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
+import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
 import {
-  BaseAccount,
-  cosmos,
-  google,
-  TendermintTxTracer,
-} from "@keplr-wallet/cosmos";
+  Any,
+  Coin,
+  SignMode,
+  TxRaw,
+  TxBody,
+  AuthInfo,
+  Fee,
+  PubKey,
+} from "@keplr-wallet/proto-types";
 import Axios, { AxiosInstance } from "axios";
 import { Buffer } from "buffer/";
-import Long from "long";
-import ICoin = cosmos.base.v1beta1.ICoin;
-import SignMode = cosmos.tx.signing.v1beta1.SignMode;
 
 import { evmosToEth } from "@hanchon/ethermint-address-converter";
 
@@ -54,7 +56,7 @@ type AminoMsgsOrWithProtoMsgs =
   | Msg[]
   | {
       aminoMsgs: Msg[];
-      protoMsgs?: google.protobuf.IAny[];
+      protoMsgs?: Any[];
     };
 
 export interface AccountSetOpts<MsgOpts> {
@@ -423,7 +425,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     }
 
     let aminoMsgs: Msg[];
-    let protoMsgs: google.protobuf.IAny[] | undefined;
+    let protoMsgs: Any[] | undefined;
     if ("aminoMsgs" in msgs) {
       aminoMsgs = msgs.aminoMsgs;
       protoMsgs = msgs.protoMsgs;
@@ -472,20 +474,22 @@ export class AccountSetBase<MsgOpts, Queries> {
     );
 
     const signedTx = this.hasNoLegacyStdFeature()
-      ? cosmos.tx.v1beta1.TxRaw.encode({
-          bodyBytes: cosmos.tx.v1beta1.TxBody.encode({
-            messages: protoMsgs,
-            memo: signResponse.signed.memo,
-          }).finish(),
-          authInfoBytes: cosmos.tx.v1beta1.AuthInfo.encode({
+      ? TxRaw.encode({
+          bodyBytes: TxBody.encode(
+            TxBody.fromPartial({
+              messages: protoMsgs,
+              memo: signResponse.signed.memo,
+            })
+          ).finish(),
+          authInfoBytes: AuthInfo.encode({
             signerInfos: [
               {
                 publicKey: {
-                  type_url:
+                  typeUrl:
                     coinType === 60
                       ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
                       : "/cosmos.crypto.secp256k1.PubKey",
-                  value: cosmos.crypto.secp256k1.PubKey.encode({
+                  value: PubKey.encode({
                     key: Buffer.from(
                       signResponse.signature.pub_key.value,
                       "base64"
@@ -496,14 +500,15 @@ export class AccountSetBase<MsgOpts, Queries> {
                   single: {
                     mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
                   },
+                  multi: undefined,
                 },
-                sequence: Long.fromString(signResponse.signed.sequence),
+                sequence: signResponse.signed.sequence,
               },
             ],
-            fee: {
-              amount: signResponse.signed.fee.amount as ICoin[],
-              gasLimit: Long.fromString(signResponse.signed.fee.gas),
-            },
+            fee: Fee.fromPartial({
+              amount: signResponse.signed.fee.amount as Coin[],
+              gasLimit: signResponse.signed.fee.gas,
+            }),
           }).finish(),
           signatures: [Buffer.from(signResponse.signature.signature, "base64")],
         }).finish()

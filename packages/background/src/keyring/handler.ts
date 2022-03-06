@@ -25,9 +25,7 @@ import {
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-
-import { cosmos } from "@keplr-wallet/cosmos";
-import Long from "long";
+import { SignDoc } from "@keplr-wallet/proto-types";
 
 export const getHandler: (service: KeyRingService) => Handler = (
   service: KeyRingService
@@ -315,13 +313,11 @@ const handleRequestSignDirectMsg: (
       msg.origin
     );
 
-    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+    const signDoc = SignDoc.fromPartial({
       bodyBytes: msg.signDoc.bodyBytes,
       authInfoBytes: msg.signDoc.authInfoBytes,
       chainId: msg.signDoc.chainId,
-      accountNumber: msg.signDoc.accountNumber
-        ? Long.fromString(msg.signDoc.accountNumber)
-        : undefined,
+      accountNumber: msg.signDoc.accountNumber,
     });
 
     const response = await service.requestSignDirect(

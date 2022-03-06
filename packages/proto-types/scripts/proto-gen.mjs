@@ -41,6 +41,8 @@ import fs from "fs";
       "cosmos/tx/v1beta1/tx.proto",
       "cosmos/tx/signing/v1beta1/signing.proto",
       "cosmos/base/abci/v1beta1/abci.proto",
+      "cosmwasm/wasm/v1/tx.proto",
+      "ibc/applications/transfer/v1/tx.proto",
     ];
 
     const thirdPartyInputs = ["tendermint/crypto/keys.proto"];

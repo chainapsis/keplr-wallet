@@ -3,12 +3,21 @@ import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
-import { ChainIdHelper, cosmos, ibc } from "@keplr-wallet/cosmos";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import {
+  MsgSend,
+  MsgTransfer,
+  MsgDelegate,
+  MsgUndelegate,
+  MsgBeginRedelegate,
+  MsgWithdrawDelegatorReward,
+  MsgVote,
+  VoteOption,
+} from "@keplr-wallet/proto-types";
 import { BondStatus } from "../query/cosmos/staking/types";
 import { HasCosmosQueries, QueriesSetBase, QueriesStore } from "../query";
 import { DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
-import Long from "long";
 
 export interface HasCosmosAccount {
   cosmos: DeepReadonly<CosmosAccount>;
@@ -141,8 +150,8 @@ export class CosmosAccount {
             protoMsgs: this.hasNoLegacyStdFeature()
               ? [
                   {
-                    type_url: "/cosmos.bank.v1beta1.MsgSend",
-                    value: cosmos.bank.v1beta1.MsgSend.encode({
+                    typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+                    value: MsgSend.encode({
                       fromAddress: msg.value.from_address,
                       toAddress: msg.value.to_address,
                       amount: msg.value.amount,
@@ -256,22 +265,22 @@ export class CosmosAccount {
           aminoMsgs: [msg],
           protoMsgs: [
             {
-              type_url: "/ibc.applications.transfer.v1.MsgTransfer",
-              value: ibc.applications.transfer.v1.MsgTransfer.encode({
-                sourcePort: msg.value.source_port,
-                sourceChannel: msg.value.source_channel,
-                token: msg.value.token,
-                sender: msg.value.sender,
-                receiver: msg.value.receiver,
-                timeoutHeight: {
-                  revisionNumber: msg.value.timeout_height.revision_number
-                    ? Long.fromString(msg.value.timeout_height.revision_number)
-                    : null,
-                  revisionHeight: Long.fromString(
-                    msg.value.timeout_height.revision_height
-                  ),
-                },
-              }).finish(),
+              typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+              value: MsgTransfer.encode(
+                MsgTransfer.fromPartial({
+                  sourcePort: msg.value.source_port,
+                  sourceChannel: msg.value.source_channel,
+                  token: msg.value.token,
+                  sender: msg.value.sender,
+                  receiver: msg.value.receiver,
+                  timeoutHeight: {
+                    revisionNumber: msg.value.timeout_height.revision_number
+                      ? msg.value.timeout_height.revision_number
+                      : "0",
+                    revisionHeight: msg.value.timeout_height.revision_height,
+                  },
+                })
+              ).finish(),
             },
           ],
         };
@@ -346,8 +355,8 @@ export class CosmosAccount {
         protoMsgs: this.hasNoLegacyStdFeature()
           ? [
               {
-                type_url: "/cosmos.staking.v1beta1.MsgDelegate",
-                value: cosmos.staking.v1beta1.MsgDelegate.encode({
+                typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
+                value: MsgDelegate.encode({
                   delegatorAddress: msg.value.delegator_address,
                   validatorAddress: msg.value.validator_address,
                   amount: msg.value.amount,
@@ -423,8 +432,8 @@ export class CosmosAccount {
         aminoMsgs: [msg],
         protoMsgs: [
           {
-            type_url: "/cosmos.staking.v1beta1.MsgUndelegate",
-            value: cosmos.staking.v1beta1.MsgUndelegate.encode({
+            typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
+            value: MsgUndelegate.encode({
               delegatorAddress: msg.value.delegator_address,
               validatorAddress: msg.value.validator_address,
               amount: msg.value.amount,
@@ -506,8 +515,8 @@ export class CosmosAccount {
         protoMsgs: this.hasNoLegacyStdFeature()
           ? [
               {
-                type_url: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-                value: cosmos.staking.v1beta1.MsgBeginRedelegate.encode({
+                typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+                value: MsgBeginRedelegate.encode({
                   delegatorAddress: msg.value.delegator_address,
                   validatorSrcAddress: msg.value.validator_src_address,
                   validatorDstAddress: msg.value.validator_dst_address,
@@ -569,14 +578,12 @@ export class CosmosAccount {
         protoMsgs: this.hasNoLegacyStdFeature()
           ? msgs.map((msg) => {
               return {
-                type_url:
+                typeUrl:
                   "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-                value: cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.encode(
-                  {
-                    delegatorAddress: msg.value.delegator_address,
-                    validatorAddress: msg.value.validator_address,
-                  }
-                ).finish(),
+                value: MsgWithdrawDelegatorReward.encode({
+                  delegatorAddress: msg.value.delegator_address,
+                  validatorAddress: msg.value.validator_address,
+                }).finish(),
               };
             })
           : undefined,
@@ -650,29 +657,26 @@ export class CosmosAccount {
         protoMsgs: this.hasNoLegacyStdFeature()
           ? [
               {
-                type_url: "/cosmos.gov.v1beta1.MsgVote",
-                value: cosmos.gov.v1beta1.MsgVote.encode({
-                  proposalId: Long.fromString(msg.value.proposal_id),
+                typeUrl: "/cosmos.gov.v1beta1.MsgVote",
+                value: MsgVote.encode({
+                  proposalId: msg.value.proposal_id,
                   voter: msg.value.voter,
                   option: (() => {
                     switch (msg.value.option) {
                       case "Yes":
                       case 1:
-                        return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_YES;
+                        return VoteOption.VOTE_OPTION_YES;
                       case "Abstain":
                       case 2:
-                        return cosmos.gov.v1beta1.VoteOption
-                          .VOTE_OPTION_ABSTAIN;
+                        return VoteOption.VOTE_OPTION_ABSTAIN;
                       case "No":
                       case 3:
-                        return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_NO;
+                        return VoteOption.VOTE_OPTION_NO;
                       case "NoWithVeto":
                       case 4:
-                        return cosmos.gov.v1beta1.VoteOption
-                          .VOTE_OPTION_NO_WITH_VETO;
+                        return VoteOption.VOTE_OPTION_NO_WITH_VETO;
                       default:
-                        return cosmos.gov.v1beta1.VoteOption
-                          .VOTE_OPTION_UNSPECIFIED;
+                        return VoteOption.VOTE_OPTION_UNSPECIFIED;
                     }
                   })(),
                 }).finish(),

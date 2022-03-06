@@ -1,6 +1,7 @@
 import { Buffer } from "buffer/";
+import { Any } from "@keplr-wallet/proto-types";
 
-export class UnknownMessage {
+export class UnknownMessage implements Any {
   constructor(
     /** Any type_url. */
     protected readonly _typeUrl: string,

@@ -1,8 +1,8 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { IFeeConfig, IMemoConfig } from "../tx";
-import { cosmos, SignDocWrapper } from "@keplr-wallet/cosmos";
-import Long from "long";
+import { SignDocWrapper } from "@keplr-wallet/cosmos";
+import { SignDoc, TxBody, AuthInfo, Fee } from "@keplr-wallet/proto-types";
 
 export * from "./amount";
 
@@ -43,39 +43,35 @@ export class SignDocHelper {
     }
 
     const protoSignDoc = this._signDocWrapper.protoSignDoc;
-    const fee = new cosmos.tx.v1beta1.Fee({
-      gasLimit: Long.fromString(stdFee.gas),
+    const fee = Fee.fromPartial({
+      gasLimit: stdFee.gas,
       amount: stdFee.amount.map((fee) => {
         return {
           amount: fee.amount,
           denom: fee.denom,
         };
       }),
-      granter: protoSignDoc.authInfo.fee?.granter
-        ? protoSignDoc.authInfo.fee?.granter
-        : null,
-      payer: protoSignDoc.authInfo.fee?.payer
-        ? protoSignDoc.authInfo.fee?.granter
-        : null,
+      granter: protoSignDoc.authInfo.fee?.granter,
+      payer: protoSignDoc.authInfo.fee?.payer,
     });
 
-    const newSignDoc = cosmos.tx.v1beta1.SignDoc.create({
+    const newSignDoc: SignDoc = {
       ...protoSignDoc.signDoc,
       ...{
-        bodyBytes: cosmos.tx.v1beta1.TxBody.encode({
+        bodyBytes: TxBody.encode({
           ...protoSignDoc.txBody,
           ...{
             memo: this.memoConfig.memo,
           },
         }).finish(),
-        authInfoBytes: cosmos.tx.v1beta1.AuthInfo.encode({
+        authInfoBytes: AuthInfo.encode({
           ...protoSignDoc.authInfo,
           ...{
             fee,
           },
         }).finish(),
       },
-    });
+    };
 
     return SignDocWrapper.fromDirectSignDoc(newSignDoc);
   }

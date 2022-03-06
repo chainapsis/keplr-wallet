@@ -18,6 +18,7 @@ import {
 import { useLanguage } from "../../languages";
 import { Badge, Button, Label } from "reactstrap";
 import { renderDirectMessage } from "./direct";
+import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 
 export const DetailsTab: FunctionComponent<{
   signDocHelper: SignDocHelper;
@@ -71,7 +72,7 @@ export const DetailsTab: FunctionComponent<{
           );
         });
       } else if (mode === "direct") {
-        return (msgs as any[]).map((msg, i) => {
+        return (msgs as AnyWithUnpacked[]).map((msg, i) => {
           const msgContent = renderDirectMessage(
             msg,
             chainStore.current.currencies,

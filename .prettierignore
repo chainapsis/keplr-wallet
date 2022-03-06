@@ -28,6 +28,7 @@ injected-provider.bundle.js
 .prettierignore
 
 packages/proto-types/src/*
+!packages/proto-types/src/index.ts
 
 package.json
 tsconfig.json

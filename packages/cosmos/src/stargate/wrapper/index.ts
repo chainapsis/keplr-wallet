@@ -1,7 +1,6 @@
 import { ProtoSignDocDecoder } from "../decoder";
 import { Coin, StdSignDoc } from "@cosmjs/launchpad";
-
-import { cosmos } from "../proto";
+import { SignDoc } from "@keplr-wallet/proto-types";
 import { checkAndValidateADR36AminoSignDoc } from "../../adr-36";
 
 export class SignDocWrapper {
@@ -11,9 +10,7 @@ export class SignDocWrapper {
 
   public readonly mode: "amino" | "direct";
 
-  constructor(
-    protected readonly signDoc: StdSignDoc | cosmos.tx.v1beta1.SignDoc
-  ) {
+  constructor(protected readonly signDoc: StdSignDoc | SignDoc) {
     if ("msgs" in signDoc) {
       this.mode = "amino";
     } else {
@@ -37,12 +34,12 @@ export class SignDocWrapper {
     return new SignDocWrapper(signDoc);
   }
 
-  static fromDirectSignDoc(signDoc: cosmos.tx.v1beta1.SignDoc) {
+  static fromDirectSignDoc(signDoc: SignDoc) {
     return new SignDocWrapper(signDoc);
   }
 
   static fromDirectSignDocBytes(signDocBytes: Uint8Array) {
-    return new SignDocWrapper(cosmos.tx.v1beta1.SignDoc.decode(signDocBytes));
+    return new SignDocWrapper(SignDoc.decode(signDocBytes));
   }
 
   clone(): SignDocWrapper {
@@ -112,7 +109,11 @@ export class SignDocWrapper {
 
   get gas(): number {
     if (this.mode === "direct") {
-      return this.protoSignDoc.authInfo.fee?.gasLimit?.toNumber() ?? 0;
+      if (this.protoSignDoc.authInfo.fee?.gasLimit) {
+        return parseInt(this.protoSignDoc.authInfo.fee.gasLimit);
+      } else {
+        return 0;
+      }
     }
 
     return parseInt(this.aminoSignDoc.fee.gas);

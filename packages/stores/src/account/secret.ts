@@ -7,7 +7,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepReadonly, Optional } from "utility-types";
-import { cosmos } from "@keplr-wallet/cosmos";
+import { TxMsgData } from "@keplr-wallet/proto-types";
 
 export interface HasSecretAccount {
   secret: DeepReadonly<SecretAccount>;
@@ -169,7 +169,7 @@ export class SecretAccount {
         let viewingKey = "";
         if (tx && "data" in tx && tx.data) {
           const txData = Buffer.from(tx.data as any, "base64");
-          const dataFields = cosmos.base.abci.v1beta1.TxMsgData.decode(txData);
+          const dataFields = TxMsgData.decode(txData);
           if (dataFields.data.length !== 1) {
             throw new Error("Invalid length of data fields");
           }
