@@ -49,6 +49,8 @@ export const AccountView: FunctionComponent = observer(() => {
               intl.formatMessage({
                 id: "setting.keyring.unnamed-account",
               })
+            : WalletStatus.Rejected
+            ? "Key Rejected"
             : "Loading..."}
         </div>
         <div style={{ flex: 1 }} />

@@ -220,13 +220,23 @@ export class AccountSetBase<MsgOpts, Queries> {
       return;
     }
 
-    const key = yield* toGenerator(keplr.getKey(this.chainId));
-    this._bech32Address = key.bech32Address;
-    this._name = key.name;
-    this.pubKey = key.pubKey;
+    try {
+      const key = yield* toGenerator(keplr.getKey(this.chainId));
+      this._bech32Address = key.bech32Address;
+      this._name = key.name;
+      this.pubKey = key.pubKey;
 
-    // Set the wallet status as loaded after getting all necessary infos.
-    this._walletStatus = WalletStatus.Loaded;
+      // Set the wallet status as loaded after getting all necessary infos.
+      this._walletStatus = WalletStatus.Loaded;
+    } catch {
+      // Caught error loading key
+      // Reset properties, and set status to Rejected
+      this._bech32Address = "";
+      this._name = "";
+      this.pubKey = new Uint8Array(0);
+
+      this._walletStatus = WalletStatus.Rejected;
+    }
   }
 
   @action
