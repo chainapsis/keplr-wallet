@@ -45,7 +45,8 @@ export const useDelegateTxConfig = (
   gas: number,
   sender: string,
   queryBalances: ObservableQueryBalances,
-  ensEndpoint?: string
+  ensEndpoint?: string,
+  tnsEndpoint?: string
 ) => {
   const amountConfig = useDelegateAmountConfig(
     chainGetter,
@@ -69,7 +70,12 @@ export const useDelegateTxConfig = (
   // set the fee config of the amount config after initing the gas/fee configs.
   amountConfig.setFeeConfig(feeConfig);
 
-  const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
+  const recipientConfig = useRecipientConfig(
+    chainGetter,
+    chainId,
+    ensEndpoint,
+    tnsEndpoint
+  );
   recipientConfig.setBech32Prefix(
     chainGetter.getChain(chainId).bech32Config.bech32PrefixValAddr
   );

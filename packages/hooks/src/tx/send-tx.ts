@@ -17,7 +17,8 @@ export const useSendTxConfig = (
   sendMsgOpts: MsgOpts["send"],
   sender: string,
   queryBalances: ObservableQueryBalances,
-  ensEndpoint?: string
+  ensEndpoint?: string,
+  tnsEndpoint?: string
 ) => {
   const amountConfig = useAmountConfig(
     chainGetter,
@@ -45,7 +46,12 @@ export const useSendTxConfig = (
   // set the fee config of the amount config after initing the gas/fee configs.
   amountConfig.setFeeConfig(feeConfig);
 
-  const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
+  const recipientConfig = useRecipientConfig(
+    chainGetter,
+    chainId,
+    ensEndpoint,
+    tnsEndpoint
+  );
 
   return {
     amountConfig,

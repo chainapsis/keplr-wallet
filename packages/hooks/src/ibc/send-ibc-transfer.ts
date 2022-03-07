@@ -24,7 +24,8 @@ export const useIBCTransferConfig = (
   msgOpts: CosmosMsgOpts["ibcTransfer"],
   sender: string,
   queryBalances: ObservableQueryBalances,
-  ensEndpoint?: string
+  ensEndpoint?: string,
+  tnsEndpoint?: string
 ) => {
   const amountConfig = useIBCAmountConfig(
     chainGetter,
@@ -53,7 +54,8 @@ export const useIBCTransferConfig = (
     chainGetter,
     chainId,
     channelConfig,
-    ensEndpoint
+    ensEndpoint,
+    tnsEndpoint
   );
 
   return {

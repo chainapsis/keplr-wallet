@@ -11,13 +11,17 @@ import {
 import {
   EmptyAddressError,
   ENSFailedToFetchError,
+  TNSFailedToFetchError,
   ENSIsFetchingError,
+  TNSIsFetchingError,
   ENSNotSupportedError,
+  TNSNotSupportedError,
   InvalidBech32Error,
 } from "./errors";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useState } from "react";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
+import { ObservableTnsFetcher } from "@keplr-wallet/tns";
 
 export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @observable
@@ -27,10 +31,16 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   protected _ensEndpoint: string | undefined = undefined;
 
   @observable
+  protected _tnsEndpoint: string | undefined = undefined;
+
+  @observable
   protected _bech32Prefix: string | undefined = undefined;
 
   @observable.shallow
   protected ensFetcherMap: Map<string, ObservableEnsFetcher> = new Map();
+
+  @observable.shallow
+  protected tnsFetcherMap: Map<string, ObservableTnsFetcher> = new Map();
 
   constructor(chainGetter: ChainGetter, initialChainId: string) {
     super(chainGetter, initialChainId);
@@ -77,6 +87,27 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
       }
     }
 
+    if (ObservableTnsFetcher.isValidTNS(this.rawRecipient)) {
+      const tnsFetcher = this.getTNSFetcher(this.rawRecipient);
+      if (tnsFetcher) {
+        if (tnsFetcher.isFetching) {
+          return "";
+        }
+
+        if (!tnsFetcher.address || tnsFetcher.error != null) {
+          return "";
+        }
+        try {
+          Bech32Address.validate(tnsFetcher.address, this.bech32Prefix);
+        } catch (e: any) {
+          return "";
+        }
+        return tnsFetcher.address;
+      } else {
+        return "";
+      }
+    }
+
     return this._rawRecipient;
   }
 
@@ -102,9 +133,36 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
     return fetcher;
   }
 
+  protected getTNSFetcher(name: string): ObservableTnsFetcher | undefined {
+    if (!this._tnsEndpoint || this.chainInfo.coinType == null) {
+      return;
+    }
+
+    if (!this.tnsFetcherMap.has(this._tnsEndpoint)) {
+      runInAction(() => {
+        this.tnsFetcherMap.set(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          this._tnsEndpoint!,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          new ObservableTnsFetcher(this._tnsEndpoint!)
+        );
+      });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const fetcher = this.tnsFetcherMap.get(this._tnsEndpoint)!;
+    fetcher.setNameAndCoinType(name, this.chainInfo.coinType);
+    return fetcher;
+  }
+
   @action
   setENSEndpoint(endpoint: string | undefined) {
     this._ensEndpoint = endpoint;
+  }
+
+  @action
+  setTNSEndpoint(endpoint: string | undefined) {
+    this._tnsEndpoint = endpoint;
   }
 
   getError(): Error | undefined {
@@ -135,6 +193,32 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
       return;
     }
 
+    if (ObservableTnsFetcher.isValidTNS(this.rawRecipient)) {
+      const tnsFetcher = this.getTNSFetcher(this.rawRecipient);
+      if (!tnsFetcher) {
+        return new TNSNotSupportedError("TNS not supported for this chain");
+      }
+
+      if (tnsFetcher.isFetching) {
+        return new TNSIsFetchingError("TNS is fetching");
+      }
+
+      if (!tnsFetcher.address || tnsFetcher.error != null) {
+        return new TNSFailedToFetchError(
+          "Failed to fetch the address from TNS"
+        );
+      }
+
+      try {
+        Bech32Address.validate(tnsFetcher.address, this.bech32Prefix);
+      } catch (e: any) {
+        return new InvalidBech32Error(
+          `Invalid bech32: ${e.message || e.toString()}`
+        );
+      }
+      return;
+    }
+
     try {
       Bech32Address.validate(this.recipient, this.bech32Prefix);
     } catch (e) {
@@ -158,11 +242,13 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
 export const useRecipientConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  ensEndpoint?: string
+  ensEndpoint?: string,
+  tnsEndpoint?: string
 ) => {
   const [config] = useState(() => new RecipientConfig(chainGetter, chainId));
   config.setChain(chainId);
   config.setENSEndpoint(ensEndpoint);
+  config.setTNSEndpoint(tnsEndpoint);
 
   return config;
 };

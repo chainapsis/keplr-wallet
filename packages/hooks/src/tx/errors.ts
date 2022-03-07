@@ -22,6 +22,14 @@ export class ENSNotSupportedError extends Error {
   }
 }
 
+export class TNSNotSupportedError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, TNSNotSupportedError.prototype);
+  }
+}
+
 export class ENSIsFetchingError extends Error {
   constructor(m: string) {
     super(m);
@@ -30,11 +38,27 @@ export class ENSIsFetchingError extends Error {
   }
 }
 
+export class TNSIsFetchingError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, TNSIsFetchingError.prototype);
+  }
+}
+
 export class ENSFailedToFetchError extends Error {
   constructor(m: string) {
     super(m);
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, ENSFailedToFetchError.prototype);
+  }
+}
+
+export class TNSFailedToFetchError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, TNSFailedToFetchError.prototype);
   }
 }
 
