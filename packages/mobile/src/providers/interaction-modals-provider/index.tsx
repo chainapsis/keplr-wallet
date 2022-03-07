@@ -81,7 +81,14 @@ export const InteractionModalsProivder: FunctionComponent = observer(
         ) : null}
         {permissionStore.waitingDatas.map((data) => {
           if (data.data.origins.length === 1) {
-            if (WCMessageRequester.isVirtualSessionURL(data.data.origins[0])) {
+            if (
+              WCMessageRequester.isVirtualSessionURL(data.data.origins[0]) &&
+              walletConnectStore.getSession(
+                WCMessageRequester.getSessionIdFromVirtualURL(
+                  data.data.origins[0]
+                )
+              )
+            ) {
               return (
                 <WalletConnectApprovalModal
                   key={data.id}

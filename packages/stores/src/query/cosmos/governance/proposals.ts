@@ -28,7 +28,7 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     chainGetter: ChainGetter,
     protected readonly _queryPool: ObservableChainQuery<StakingPool>
   ) {
-    super(kvStore, chainId, chainGetter, "/gov/proposals");
+    super(kvStore, chainId, chainGetter, "/gov/proposals?limit=1000");
     makeObservable(this);
   }
 
@@ -100,6 +100,15 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     if (!this.response) {
       return [];
     }
+
+    // XXX: In the current mobile, this getter is executed first on the home screen.
+    //      Because there is an issue related to networking in mobile,
+    //      we need temporarily log the console to check the response until this problem is sufficiently resolved.
+    // https://github.com/chainapsis/keplr-wallet/issues/275
+    // https://github.com/chainapsis/keplr-wallet/issues/278
+    // TODO: Erase this part soon
+    console.log("proposals response", this.response);
+    console.log("proposals response data", this.response.data);
 
     const result: ObservableQueryProposal[] = [];
 

@@ -69,11 +69,6 @@ export const MyRewardCard: FunctionComponent<{
             containerStyle={style.flatten(["min-width-72"])}
             onPress={async () => {
               try {
-                analyticsStore.logEvent("Claim reward started", {
-                  chainId: chainStore.current.chainId,
-                  chainName: chainStore.current.chainName,
-                });
-
                 await account.cosmos.sendWithdrawDelegationRewardMsgs(
                   queryReward.getDescendingPendingRewardValidatorAddresses(8),
                   "",
@@ -81,16 +76,12 @@ export const MyRewardCard: FunctionComponent<{
                   {},
                   {
                     onBroadcasted: (txHash) => {
-                      smartNavigation.pushSmart("TxPendingResult", {
-                        txHash: Buffer.from(txHash).toString("hex"),
-                      });
-                    },
-                    onFulfill: (tx) => {
-                      const isSuccess = tx.code == null || tx.code === 0;
-                      analyticsStore.logEvent("Claim reward finished", {
+                      analyticsStore.logEvent("Claim reward tx broadcasted", {
                         chainId: chainStore.current.chainId,
                         chainName: chainStore.current.chainName,
-                        isSuccess,
+                      });
+                      smartNavigation.pushSmart("TxPendingResult", {
+                        txHash: Buffer.from(txHash).toString("hex"),
                       });
                     },
                   }

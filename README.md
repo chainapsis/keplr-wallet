@@ -7,6 +7,39 @@ The wallet is configured for the Fetch.ai Stargate network with a planned launch
 
 Further information on the Keplr extension wallet can be found at the base [repo](https://github.com/chainapsis/keplr-extension).  
 
+
+## Developing
+
+### Environment Setup
+
+Install global npm dependencies:
+```bash
+npm install --global yarn lerna
+
+# TODO: install [watchman](https://facebook.github.io/watchman/docs/install.html)
+```
+
+[Bootstrap](https://lerna.js.org/#command-bootstrap) packages:
+```bash
+yarn bootstrap
+```
+
+Install package dependencies:
+```bash
+yarn install
+```
+
+Initial build:
+```bash
+yarn build
+```
+
+### Local dev server
+
+```bash
+yarn dev
+```
+
 ## Author
 
 👤 **Fetch.ai**

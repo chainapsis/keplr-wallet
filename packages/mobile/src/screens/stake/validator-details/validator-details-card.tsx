@@ -14,7 +14,7 @@ export const ValidatorDetailsCard: FunctionComponent<{
   containerStyle?: ViewStyle;
   validatorAddress: string;
 }> = observer(({ containerStyle, validatorAddress }) => {
-  const { chainStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, queriesStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
@@ -130,11 +130,6 @@ export const ValidatorDetailsCard: FunctionComponent<{
           <Button
             text="Stake"
             onPress={() => {
-              analyticsStore.logEvent("Delegate started", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-                validatorName: validator.description.moniker,
-              });
               smartNavigation.navigateSmart("Delegate", {
                 validatorAddress,
               });

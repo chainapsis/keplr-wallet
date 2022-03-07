@@ -238,6 +238,15 @@ export class SignDocAmountConfig
     return false;
   }
 
+  get fraction(): number | undefined {
+    // noop
+    return undefined;
+  }
+
+  setFraction(_: number | undefined) {
+    // noop
+  }
+
   setAmount(): void {
     // noop
   }

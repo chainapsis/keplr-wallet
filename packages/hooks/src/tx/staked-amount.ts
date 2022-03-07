@@ -31,7 +31,7 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
   protected _amount: string;
 
   @observable
-  protected _isMax: boolean = false;
+  protected _fraction: number | undefined = undefined;
 
   constructor(
     chainGetter: ChainGetter,
@@ -88,16 +88,25 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   @action
   setIsMax(isMax: boolean) {
-    this._isMax = isMax;
+    this._fraction = isMax ? 1 : undefined;
   }
 
   @action
   toggleIsMax() {
-    this._isMax = !this._isMax;
+    this.setIsMax(!this.isMax);
   }
 
   get isMax(): boolean {
-    return this._isMax;
+    return this._fraction === 1;
+  }
+
+  get fraction(): number | undefined {
+    return this._fraction;
+  }
+
+  @action
+  setFraction(value: number | undefined) {
+    this._fraction = value;
   }
 
   get sender(): string {
@@ -106,7 +115,7 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   @computed
   get amount(): string {
-    if (this.isMax) {
+    if (this.fraction != null) {
       const result = this.queryDelegations
         .getQueryBech32Address(this.sender)
         .getDelegationTo(this.validatorAddress);
@@ -115,7 +124,12 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
         return "0";
       }
 
-      return result.trim(true).locale(false).hideDenom(true).toString();
+      return result
+        .mul(new Dec(this.fraction))
+        .trim(true)
+        .locale(false)
+        .hideDenom(true)
+        .toString();
     }
 
     return this._amount;

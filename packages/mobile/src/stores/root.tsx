@@ -22,7 +22,11 @@ import EventEmitter from "eventemitter3";
 import { Keplr } from "@keplr-wallet/provider";
 import { KeychainStore } from "./keychain";
 import { WalletConnectStore } from "./wallet-connect";
-import { AnalyticsStore } from "./analytics";
+import { FeeType } from "@keplr-wallet/hooks";
+import { AmplitudeApiKey } from "../config";
+import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
+import { Amplitude } from "@amplitude/react-native";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -42,7 +46,28 @@ export class RootStore {
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
-  public readonly analyticsStore: AnalyticsStore;
+
+  public readonly analyticsStore: AnalyticsStore<
+    {
+      chainId?: string;
+      chainName?: string;
+      toChainId?: string;
+      toChainName?: string;
+      registerType?: "seed" | "google" | "apple" | "ledger" | "qr";
+      feeType?: FeeType | undefined;
+      isIbc?: boolean;
+      validatorName?: string;
+      toValidatorName?: string;
+      proposalId?: string;
+      proposalTitle?: string;
+    },
+    {
+      registerType?: "seed" | "google" | "ledger" | "qr" | "apple";
+      accountType?: "mnemonic" | "privateKey" | "ledger";
+      currency?: string;
+      language?: string;
+    }
+  >;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -83,7 +108,11 @@ export class RootStore {
     );
 
     this.queriesStore = new QueriesStore(
-      new AsyncKVStore("store_queries"),
+      // Fix prefix key because there was a problem with storage being corrupted.
+      // In the case of storage where the prefix key is "store_queries" or "store_queries_fix", we should not use it because it is already corrupted in some users.
+      // https://github.com/chainapsis/keplr-wallet/issues/275
+      // https://github.com/chainapsis/keplr-wallet/issues/278
+      new AsyncKVStore("store_queries_fix2"),
       this.chainStore,
       async () => {
         // TOOD: Set version for Keplr API
@@ -92,7 +121,7 @@ export class RootStore {
       QueriesWithCosmosAndSecretAndCosmwasm
     );
 
-    this.accountStore = new AccountStore(
+    this.accountStore = new AccountStore<AccountWithAll>(
       {
         addEventListener: (type: string, fn: () => void) => {
           eventEmitter.addListener(type, fn);
@@ -114,6 +143,20 @@ export class RootStore {
             return new Keplr("", "core", new RNMessageRequesterInternal());
           },
         },
+        chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
+          if (chainInfo.chainId.startsWith("osmosis")) {
+            return {
+              chainId: chainInfo.chainId,
+              msgOpts: {
+                withdrawRewards: {
+                  gas: 200000,
+                },
+              },
+            };
+          }
+
+          return { chainId: chainInfo.chainId };
+        }),
       }
     );
 
@@ -194,6 +237,7 @@ export class RootStore {
       24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
+      this.queriesStore,
       this.queriesStore
     );
 
@@ -220,9 +264,42 @@ export class RootStore {
     );
 
     this.analyticsStore = new AnalyticsStore(
-      "KeplrMobile",
-      this.accountStore,
-      this.keyRingStore
+      (() => {
+        if (!AmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance();
+          amplitudeClient.init(AmplitudeApiKey);
+
+          return amplitudeClient;
+        }
+      })(),
+      {
+        logEvent: (eventName, eventProperties) => {
+          if (eventProperties?.chainId || eventProperties?.toChainId) {
+            eventProperties = {
+              ...eventProperties,
+            };
+
+            if (eventProperties.chainId) {
+              eventProperties.chainId = ChainIdHelper.parse(
+                eventProperties.chainId
+              ).identifier;
+            }
+
+            if (eventProperties.toChainId) {
+              eventProperties.toChainId = ChainIdHelper.parse(
+                eventProperties.toChainId
+              ).identifier;
+            }
+          }
+
+          return {
+            eventName,
+            eventProperties,
+          };
+        },
+      }
     );
   }
 }

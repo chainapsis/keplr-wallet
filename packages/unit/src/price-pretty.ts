@@ -3,6 +3,7 @@ import { Dec } from "./decimal";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import { DecUtils } from "./dec-utils";
+import bigInteger from "big-integer";
 
 export type PricePrettyOptions = {
   separator: string;
@@ -23,19 +24,14 @@ export class PricePretty {
 
   constructor(
     protected _fiatCurrency: FiatCurrency,
-    protected amount: Dec | { toDec(): Dec }
+    protected amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
   ) {
-    if ("toDec" in amount) {
-      this.intPretty = new IntPretty(amount.toDec());
-    } else {
-      this.intPretty = new IntPretty(amount);
-    }
-
-    this.intPretty = this.intPretty
+    this.intPretty = new IntPretty(amount)
       .maxDecimals(_fiatCurrency.maxDecimals)
       .shrink(true)
       .trim(true)
-      .locale(false);
+      .locale(false)
+      .inequalitySymbol(true);
 
     this._options.locale = _fiatCurrency.locale;
   }
@@ -77,27 +73,47 @@ export class PricePretty {
     return pretty;
   }
 
-  precision(prec: number): PricePretty {
+  moveDecimalPointLeft(delta: number): PricePretty {
     const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.precision(prec);
+    pretty.intPretty = pretty.intPretty.moveDecimalPointLeft(delta);
     return pretty;
   }
 
+  moveDecimalPointRight(delta: number): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.moveDecimalPointRight(delta);
+    return pretty;
+  }
+
+  /**
+   * @deprecated Use`moveDecimalPointLeft`
+   */
   increasePrecision(delta: number): PricePretty {
-    const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.increasePrecision(delta);
-    return pretty;
+    return this.moveDecimalPointLeft(delta);
   }
 
+  /**
+   * @deprecated Use`moveDecimalPointRight`
+   */
   decreasePrecision(delta: number): PricePretty {
-    const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.decreasePrecision(delta);
-    return pretty;
+    return this.moveDecimalPointRight(delta);
   }
 
   maxDecimals(max: number): PricePretty {
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.maxDecimals(max);
+    return pretty;
+  }
+
+  inequalitySymbol(bool: boolean): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.inequalitySymbol(bool);
+    return pretty;
+  }
+
+  inequalitySymbolSeparator(str: string): PricePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.inequalitySymbolSeparator(str);
     return pretty;
   }
 
@@ -175,29 +191,33 @@ export class PricePretty {
 
     const dec = this.toDec();
     const options = this.options;
-    if (dec.gt(new Dec(0))) {
-      const precision = new Dec(1).quo(
-        DecUtils.getPrecisionDec(this.options.maxDecimals)
-      );
-      if (dec.lt(precision)) {
-        const precisionLocaleString = parseFloat(
-          precision.toString(options.maxDecimals)
-        ).toLocaleString(options.locale, {
-          maximumFractionDigits: options.maxDecimals,
-        });
 
-        return `< ${symbol}${this._options.separator}${precisionLocaleString}`;
-      }
+    if (
+      options.inequalitySymbol &&
+      !dec.isZero() &&
+      dec.abs().lt(DecUtils.getTenExponentN(-options.maxDecimals))
+    ) {
+      return this.intPretty.toStringWithSymbols(
+        `${symbol}${this._options.separator}`,
+        ""
+      );
     }
 
-    const localeString = parseFloat(this.intPretty.toString()).toLocaleString(
+    let localeString = parseFloat(this.intPretty.toString()).toLocaleString(
       options.locale,
       {
         maximumFractionDigits: options.maxDecimals,
       }
     );
 
-    return `${symbol}${this._options.separator}${localeString}`;
+    const isNeg = localeString.charAt(0) === "-";
+    if (isNeg) {
+      localeString = localeString.slice(1);
+    }
+
+    return `${isNeg ? "-" : ""}${symbol}${
+      this._options.separator
+    }${localeString}`;
   }
 
   clone(): PricePretty {

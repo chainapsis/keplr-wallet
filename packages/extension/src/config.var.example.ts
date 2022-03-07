@@ -113,4 +113,34 @@ export const AGORIC_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const AGORIC_REST_ENDPOINT = "";
 export const AGORIC_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const AXELAR_RPC_ENDPOINT = "";
+export const AXELAR_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const AXELAR_REST_ENDPOINT = "";
+export const AXELAR_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const JUNO_RPC_ENDPOINT = "";
+export const JUNO_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const JUNO_REST_ENDPOINT = "";
+export const JUNO_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const STARGAZE_RPC_ENDPOINT = "";
+export const STARGAZE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const STARGAZE_REST_ENDPOINT = "";
+export const STARGAZE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const SOMMELIER_RPC_ENDPOINT = "";
+export const SOMMELIER_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const SOMMELIER_REST_ENDPOINT = "";
+export const SOMMELIER_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const UMEE_RPC_ENDPOINT = "";
+export const UMEE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const UMEE_REST_ENDPOINT = "";
+export const UMEE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const EVMOS_RPC_ENDPOINT = "";
+export const EVMOS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const EVMOS_REST_ENDPOINT = "";
+export const EVMOS_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const PRIVILEGED_ORIGINS: string[] = [];
