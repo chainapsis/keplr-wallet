@@ -23,10 +23,14 @@ import {
   ENSFailedToFetchError,
   ENSIsFetchingError,
   IIBCChannelConfig,
+  TNSIsFetchingError,
+  TNSNotSupportedError,
+  TNSFailedToFetchError,
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
+import { ObservableTnsFetcher } from "@keplr-wallet/tns";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
@@ -65,6 +69,10 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       recipientConfig.rawRecipient
     );
 
+    const isTNSAddress = ObservableTnsFetcher.isValidTNS(
+      recipientConfig.rawRecipient
+    );
+
     const error = recipientConfig.getError();
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -86,6 +94,16 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             });
           case ENSIsFetchingError:
             return;
+          case TNSNotSupportedError:
+            return intl.formatMessage({
+              id: "input.recipient.error.tns-not-supported",
+            });
+          case TNSFailedToFetchError:
+            return intl.formatMessage({
+              id: "input.recipient.error.tns-failed-to-fetch",
+            });
+          case TNSIsFetchingError:
+            return;
           default:
             return intl.formatMessage({ id: "input.recipient.error.unknown" });
         }
@@ -93,6 +111,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     }, [intl, error]);
 
     const isENSLoading: boolean = error instanceof ENSIsFetchingError;
+    const isTNSLoading: boolean = error instanceof TNSIsFetchingError;
 
     const selectAddressFromAddressBook = {
       setRecipient: (recipient: string) => {
@@ -158,12 +177,13 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               </Button>
             ) : null}
           </InputGroup>
-          {isENSLoading ? (
+          {isENSLoading || isTNSLoading ? (
             <FormText>
               <i className="fa fa-spinner fa-spin fa-fw" />
             </FormText>
           ) : null}
-          {!isENSLoading && isENSAddress && !error ? (
+          {(!isENSLoading && isENSAddress) ||
+          (!isTNSLoading && isTNSAddress && !error) ? (
             <FormText>{recipientConfig.recipient}</FormText>
           ) : null}
           {errorText != null ? (

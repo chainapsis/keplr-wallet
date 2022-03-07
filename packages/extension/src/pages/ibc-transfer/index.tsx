@@ -22,7 +22,7 @@ import {
   useIBCTransferConfig,
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
-import { EthereumEndpoint } from "../../config.ui";
+import { EthereumEndpoint, TerraEndpoint } from "../../config.ui";
 import { useNotification } from "../../components/notification";
 import { FormattedMessage, useIntl } from "react-intl";
 
@@ -43,7 +43,8 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
     queries.queryBalances,
-    EthereumEndpoint
+    EthereumEndpoint,
+    TerraEndpoint
   );
 
   const toChainId =

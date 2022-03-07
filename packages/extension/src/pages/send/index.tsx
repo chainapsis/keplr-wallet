@@ -21,7 +21,7 @@ import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
 import { useSendTxConfig } from "@keplr-wallet/hooks";
-import { EthereumEndpoint } from "../../config.ui";
+import { EthereumEndpoint, TerraEndpoint } from "../../config.ui";
 import {
   fitPopupWindow,
   openPopupWindow,
@@ -70,7 +70,8 @@ export const SendPage: FunctionComponent = observer(() => {
     accountInfo.msgOpts.send,
     accountInfo.bech32Address,
     queriesStore.get(current.chainId).queryBalances,
-    EthereumEndpoint
+    EthereumEndpoint,
+    TerraEndpoint
   );
 
   useEffect(() => {

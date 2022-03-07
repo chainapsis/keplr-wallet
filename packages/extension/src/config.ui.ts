@@ -5,6 +5,7 @@ import {
   ADDITIONAL_INTL_MESSAGES,
   ADDITIONAL_SIGN_IN_PREPEND,
   AMPLITUDE_API_KEY,
+  TERRA_ENDPOINT,
 } from "./config.ui.var";
 import {
   IntlMessages,
@@ -21,6 +22,10 @@ export const AutoFetchingAssetsInterval = 15 * 1000; // 15sec
 // Endpoint for Ethereum node.
 // This is used for ENS.
 export const EthereumEndpoint = ETHEREUM_ENDPOINT;
+
+// Endpoint for Terra node.
+// This is used for TNS.
+export const TerraEndpoint = TERRA_ENDPOINT;
 
 export const FiatCurrencies: FiatCurrency[] = [
   {
