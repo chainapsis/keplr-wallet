@@ -7,7 +7,8 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepReadonly, Optional } from "utility-types";
-import { TxMsgData } from "@keplr-wallet/proto-types";
+import { TxMsgData, MsgExecuteSecretContract } from "@keplr-wallet/proto-types";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export interface HasSecretAccount {
   secret: DeepReadonly<SecretAccount>;
@@ -248,7 +249,26 @@ export class SecretAccount {
           },
         };
 
-        return [msg];
+        return {
+          aminoMsgs: [msg],
+          protoMsgs: this.hasNoLegacyStdFeature()
+            ? [
+                {
+                  typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
+                  value: MsgExecuteSecretContract.encode(
+                    MsgExecuteSecretContract.fromPartial({
+                      sender: Bech32Address.fromBech32(msg.value.sender)
+                        .address,
+                      contract: Bech32Address.fromBech32(msg.value.contract)
+                        .address,
+                      msg: Buffer.from(msg.value.msg, "base64"),
+                      sentFunds: sentFunds,
+                    })
+                  ).finish(),
+                },
+              ]
+            : undefined,
+        };
       },
       memo,
       {
@@ -329,5 +349,13 @@ export class SecretAccount {
 
   protected get queries(): DeepReadonly<QueriesSetBase & HasSecretQueries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  protected hasNoLegacyStdFeature(): boolean {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    return (
+      chainInfo.features != null &&
+      chainInfo.features.includes("no-legacy-stdTx")
+    );
   }
 }

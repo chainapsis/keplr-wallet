@@ -45,3 +45,5 @@ export { AccessConfig, AccessType } from "./cosmwasm/wasm/v1/types";
 
 export { MsgTransfer } from "./ibc/applications/transfer/v1/tx";
 export { Height } from "./ibc/core/client/v1/client";
+
+export { MsgExecuteContract as MsgExecuteSecretContract } from "./secret/compute/v1beta1/msg";

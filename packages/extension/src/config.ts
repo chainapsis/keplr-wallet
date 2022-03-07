@@ -250,7 +250,13 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.3,
     },
-    features: ["stargate", "secretwasm", "ibc-go", "ibc-transfer"],
+    features: [
+      "stargate",
+      "secretwasm",
+      "ibc-go",
+      "ibc-transfer",
+      "no-legacy-stdTx",
+    ],
   },
   {
     rpc: AKASH_RPC_ENDPOINT,

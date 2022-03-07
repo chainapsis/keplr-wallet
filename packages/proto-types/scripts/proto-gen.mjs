@@ -55,6 +55,7 @@ async function getOutputSrcHash() {
       "cosmos/base/abci/v1beta1/abci.proto",
       "cosmwasm/wasm/v1/tx.proto",
       "ibc/applications/transfer/v1/tx.proto",
+      "secret/compute/v1beta1/msg.proto",
     ];
 
     const thirdPartyInputs = ["tendermint/crypto/keys.proto"];
