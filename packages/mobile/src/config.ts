@@ -867,7 +867,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "ibc-go", "no-legacy-stdTx"],
   },
   {
     rpc: "https://rpc-axelar.keplr.app",
