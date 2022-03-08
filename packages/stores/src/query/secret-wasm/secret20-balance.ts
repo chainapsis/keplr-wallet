@@ -68,14 +68,20 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
 
   protected async fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<{ balance: { amount: string } }>> {
-    const result = await super.fetchResponse(cancelToken);
+  ): Promise<{
+    response: QueryResponse<{ balance: { amount: string } }>;
+    headers: any;
+  }> {
+    const { response, headers } = await super.fetchResponse(cancelToken);
 
-    if (result.data["viewing_key_error"]) {
-      throw new WrongViewingKeyError(result.data["viewing_key_error"]?.msg);
+    if (response.data["viewing_key_error"]) {
+      throw new WrongViewingKeyError(response.data["viewing_key_error"]?.msg);
     }
 
-    return result;
+    return {
+      headers,
+      response,
+    };
   }
 }
 

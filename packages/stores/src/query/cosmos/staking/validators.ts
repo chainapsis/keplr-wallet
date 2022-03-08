@@ -71,7 +71,7 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
 
   protected async fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<KeybaseResult>> {
+  ): Promise<{ response: QueryResponse<KeybaseResult>; headers: any }> {
     return await ObservableQueryValidatorThumbnail.fetchingThumbnailQueue.add(
       () => {
         return super.fetchResponse(cancelToken);
