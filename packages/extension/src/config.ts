@@ -1040,7 +1040,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025,
       high: 0.04,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "ibc-go", "no-legacy-stdTx"],
   },
   {
     rpc: SENTINEL_RPC_ENDPOINT,
