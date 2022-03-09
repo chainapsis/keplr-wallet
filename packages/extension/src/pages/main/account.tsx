@@ -49,27 +49,34 @@ export const AccountView: FunctionComponent = observer(() => {
               intl.formatMessage({
                 id: "setting.keyring.unnamed-account",
               })
-            : WalletStatus.Rejected
-            ? "Key Rejected"
+            : accountInfo.walletStatus === WalletStatus.Rejected
+            ? "Unsupported Key"
             : "Loading..."}
         </div>
         <div style={{ flex: 1 }} />
       </div>
-      <div className={styleAccount.containerAccount}>
-        <div style={{ flex: 1 }} />
-        <div
-          className={styleAccount.address}
-          onClick={() => copyAddress(accountInfo.bech32Address)}
-        >
-          <Address maxCharacters={22} lineBreakBeforePrefix={false}>
-            {accountInfo.walletStatus === WalletStatus.Loaded &&
-            accountInfo.bech32Address
-              ? accountInfo.bech32Address
-              : "..."}
-          </Address>
+      {accountInfo.walletStatus === WalletStatus.Rejected && (
+        <div className={styleAccount.unsupportedKeyMessage}>
+          This keytype is currently not supported
         </div>
-        <div style={{ flex: 1 }} />
-      </div>
+      )}
+      {accountInfo.walletStatus !== WalletStatus.Rejected && (
+        <div className={styleAccount.containerAccount}>
+          <div style={{ flex: 1 }} />
+          <div
+            className={styleAccount.address}
+            onClick={() => copyAddress(accountInfo.bech32Address)}
+          >
+            <Address maxCharacters={22} lineBreakBeforePrefix={false}>
+              {accountInfo.walletStatus === WalletStatus.Loaded &&
+              accountInfo.bech32Address
+                ? accountInfo.bech32Address
+                : "..."}
+            </Address>
+          </div>
+          <div style={{ flex: 1 }} />
+        </div>
+      )}
       {accountInfo.hasEvmosHexAddress && (
         <div
           className={styleAccount.containerAccount}
