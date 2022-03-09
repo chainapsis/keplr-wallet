@@ -7,6 +7,7 @@ import styleAccount from "./account.module.scss";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useNotification } from "../../components/notification";
+import { ToolTip } from "../../components/tooltip";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 
@@ -56,9 +57,18 @@ export const AccountView: FunctionComponent = observer(() => {
         <div style={{ flex: 1 }} />
       </div>
       {accountInfo.walletStatus === WalletStatus.Rejected && (
-        <div className={styleAccount.unsupportedKeyMessage}>
-          This keytype is currently not supported
-        </div>
+        <ToolTip
+          tooltip="Could not load public key for this device"
+          theme="dark"
+          trigger="hover"
+          options={{
+            placement: "top",
+          }}
+        >
+          <i
+            className={`fas fa-exclamation-triangle text-danger ${styleAccount.unsupportedKeyIcon}`}
+          />
+        </ToolTip>
       )}
       {accountInfo.walletStatus !== WalletStatus.Rejected && (
         <div className={styleAccount.containerAccount}>
