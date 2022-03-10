@@ -247,7 +247,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     coinType: 529,
     gasPriceStep: {
       low: 0.0125,
-      average: 0.015,
+      average: 0.1,
       high: 0.25,
     },
     features: ["stargate", "secretwasm", "ibc-go", "ibc-transfer"],
