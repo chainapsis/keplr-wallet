@@ -6,7 +6,7 @@
 
 ## Official Releases
 
-> NOTE: We do not accept native integrations to the official releases through pull requests. Please feel free to check out Keplr's [suggest chain](https://docs.keplr.app/api/suggest-chain.html) feature for permissionless intergrations to your chain.
+> NOTE: We do not accept native integrations to the official releases through pull requests. Please feel free to check out Keplr's [suggest chain](https://docs.keplr.app/api/suggest-chain.html) feature for permissionless integrations to your chain.
 
 You can find the latest versions of the official managed releases on these links:
 - [Browser Extension](https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap)
