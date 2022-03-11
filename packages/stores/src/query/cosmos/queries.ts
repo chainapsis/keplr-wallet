@@ -34,6 +34,7 @@ import {
   ObservableQueryOsmosisEpochs,
   ObservableQueryOsmosisMintParmas,
 } from "./supply/osmosis";
+import { ObservableQueryDistributionParams } from "./distribution";
 
 export interface HasCosmosQueries {
   cosmos: CosmosQueries;
@@ -135,7 +136,8 @@ export class CosmosQueries {
         chainGetter,
         osmosisMintParams
       ),
-      osmosisMintParams
+      osmosisMintParams,
+      new ObservableQueryDistributionParams(kvStore, chainId, chainGetter)
     );
     this.queryRewards = new ObservableQueryRewards(
       kvStore,
