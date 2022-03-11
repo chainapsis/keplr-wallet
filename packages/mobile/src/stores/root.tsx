@@ -23,6 +23,8 @@ import { Keplr } from "@keplr-wallet/provider";
 import { KeychainStore } from "./keychain";
 import { WalletConnectStore } from "./wallet-connect";
 import { AnalyticsStore } from "./analytics";
+import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -81,6 +83,43 @@ export class RootStore {
       new RNMessageRequesterInternal(),
       this.interactionStore
     );
+
+    if (Platform.OS === "android") {
+      (async () => {
+        let needClear = true;
+        try {
+          if (await AsyncStorage.getItem("__hotfix__clear_legacy_store")) {
+            needClear = false;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+        if (needClear) {
+          console.log("Try to clear legacy store");
+          try {
+            const keys = await AsyncStorage.getAllKeys();
+            if (keys) {
+              for (const key of keys) {
+                if (
+                  key.startsWith("store_queries/") ||
+                  key.startsWith("store_queries_fix/") ||
+                  key.startsWith("store_queries_fix2/")
+                ) {
+                  await AsyncStorage.removeItem(key);
+                }
+              }
+
+              await AsyncStorage.setItem(
+                "__hotfix__clear_legacy_store",
+                "cleared"
+              );
+            }
+          } catch (e) {
+            console.log(e);
+          }
+        }
+      })();
+    }
 
     this.queriesStore = new QueriesStore(
       // Fix prefix key because there was a problem with storage being corrupted.
