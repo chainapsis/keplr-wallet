@@ -38,6 +38,8 @@ import { RNG } from "@keplr-wallet/crypto";
 import { cosmos } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 
+import { StargateClient } from "@cosmjs/stargate";
+
 @singleton()
 export class KeyRingService {
   private readonly keyRing: KeyRing;
@@ -362,21 +364,17 @@ export class KeyRingService {
     data: Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
-    const coinType = await this.chainsService.getChainCoinType(chainId);
+    const chainInfo = await this.chainsService.getChainInfo(chainId);
 
-    const key = await this.keyRing.getKey(chainId, coinType);
-    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
-      .bech32Config.bech32PrefixAccAddr;
-    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
-    if (signer !== bech32Address) {
-      throw new Error("Signer mismatched");
-    }
+    const client = await StargateClient.connect(chainInfo.rpc);
+
+    const account = await client.getAccount(signer);
+
+    const bech32Prefix = chainInfo.bech32Config.bech32PrefixAccAddr;
     if (signature.pub_key.type !== "tendermint/PubKeySecp256k1") {
       throw new Error(`Unsupported type of pub key: ${signature.pub_key.type}`);
     }
-    if (
-      Buffer.from(key.pubKey).toString("base64") !== signature.pub_key.value
-    ) {
+    if (account?.pubkey?.value !== signature.pub_key.value) {
       throw new Error("Pub key unmatched");
     }
 
