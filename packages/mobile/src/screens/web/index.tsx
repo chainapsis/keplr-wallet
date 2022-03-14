@@ -38,13 +38,20 @@ export const WebScreen: FunctionComponent = () => {
           "margin-bottom-20",
         ])}
       >
-        Discover DeFi
+        Discover Apps
       </Text>
       <WebpageImageButton
         name="Osmosis"
         source={require("../../assets/image/webpage/osmosis.png")}
         onPress={() => {
           smartNavigation.pushSmart("Web.Osmosis", {});
+        }}
+      />
+      <WebpageImageButton
+        name="Stargaze"
+        source={require("../../assets/image/webpage/stargaze.png")}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.Stargaze", {});
         }}
       />
       <WebpageImageButton

@@ -24,7 +24,7 @@ init(
   (prefix: string) => new AsyncKVStore(prefix),
   new RNMessageRequesterInternalToUI(),
   EmbedChainInfos,
-  ["https://app.osmosis.zone"],
+  ["https://app.osmosis.zone", "https://app.stargaze.zone"],
   getRandomBytesAsync,
   {
     scrypt: async (text: string, params: ScryptParams) => {

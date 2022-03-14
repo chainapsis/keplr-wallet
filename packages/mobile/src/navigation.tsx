@@ -101,7 +101,10 @@ import {
   ImportFromExtensionScreen,
   ImportFromExtensionSetPasswordScreen,
 } from "./screens/register/import-from-extension";
-import { OsmosisWebpageScreen } from "./screens/web/webpages";
+import {
+  OsmosisWebpageScreen,
+  StargazeWebpageScreen,
+} from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
 
@@ -219,6 +222,9 @@ const {
       upperScreenName: "Web",
     },
     "Web.Osmosis": {
+      upperScreenName: "Web",
+    },
+    "Web.Stargaze": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -734,6 +740,7 @@ export const WebNavigation: FunctionComponent = () => {
         component={WebScreen}
       />
       <Stack.Screen name="Web.Osmosis" component={OsmosisWebpageScreen} />
+      <Stack.Screen name="Web.Stargaze" component={StargazeWebpageScreen} />
     </Stack.Navigator>
   );
 };
