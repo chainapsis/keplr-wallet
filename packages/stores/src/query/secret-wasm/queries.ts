@@ -7,19 +7,19 @@ import { DeepReadonly } from "utility-types";
 import { ObservableQuerySecret20BalanceRegistry } from "./secret20-balance";
 import { Keplr } from "@keplr-wallet/types";
 
-export interface HasSecretQueries {
-  secret: SecretQueries;
+export interface SecretQueries {
+  secret: SecretQueriesImpl;
 }
 
-export class SecretQueries {
-  static use(
-    apiGetter: () => Promise<Keplr | undefined>
-  ): (
+export const SecretQueries = {
+  use(options: {
+    apiGetter: () => Promise<Keplr | undefined>;
+  }): (
     queriesSetBase: QueriesSetBase,
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter
-  ) => HasSecretQueries {
+  ) => SecretQueries {
     return (
       queriesSetBase: QueriesSetBase,
       kvStore: KVStore,
@@ -27,17 +27,19 @@ export class SecretQueries {
       chainGetter: ChainGetter
     ) => {
       return {
-        secret: new SecretQueries(
+        secret: new SecretQueriesImpl(
           queriesSetBase,
           kvStore,
           chainId,
           chainGetter,
-          apiGetter
+          options.apiGetter
         ),
       };
     };
-  }
+  },
+};
 
+export class SecretQueriesImpl {
   public readonly querySecretContractCodeHash: DeepReadonly<ObservableQuerySecretContractCodeHash>;
   public readonly querySecret20ContractInfo: DeepReadonly<ObservableQuerySecret20ContractInfo>;
 

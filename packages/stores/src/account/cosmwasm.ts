@@ -1,5 +1,5 @@
 import { AccountSetBase, AccountSetOpts, MsgOpt } from "./base";
-import { HasCosmwasmQueries, IQueriesStore, QueriesSetBase } from "../query";
+import { CosmwasmQueries, IQueriesStore, QueriesSetBase } from "../query";
 import { ChainGetter, CoinPrimitive } from "../common";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
@@ -22,7 +22,7 @@ export interface CosmwasmMsgOpts {
 }
 
 export class AccountWithCosmwasm
-  extends AccountSetBase<CosmwasmMsgOpts, HasCosmwasmQueries>
+  extends AccountSetBase<CosmwasmMsgOpts, CosmwasmQueries>
   implements HasCosmwasmAccount {
   public readonly cosmwasm: DeepReadonly<CosmwasmAccount>;
 
@@ -45,7 +45,7 @@ export class AccountWithCosmwasm
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: IQueriesStore<HasCosmwasmQueries>,
+    protected readonly queriesStore: IQueriesStore<CosmwasmQueries>,
     protected readonly opts: AccountSetOpts<CosmwasmMsgOpts>
   ) {
     super(eventListener, chainGetter, chainId, queriesStore, opts);
@@ -61,13 +61,10 @@ export class AccountWithCosmwasm
 
 export class CosmwasmAccount {
   constructor(
-    protected readonly base: AccountSetBase<
-      CosmwasmMsgOpts,
-      HasCosmwasmQueries
-    >,
+    protected readonly base: AccountSetBase<CosmwasmMsgOpts, CosmwasmQueries>,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: IQueriesStore<HasCosmwasmQueries>
+    protected readonly queriesStore: IQueriesStore<CosmwasmQueries>
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
@@ -231,7 +228,7 @@ export class CosmwasmAccount {
     };
   }
 
-  protected get queries(): DeepReadonly<QueriesSetBase & HasCosmwasmQueries> {
+  protected get queries(): DeepReadonly<QueriesSetBase & CosmwasmQueries> {
     return this.queriesStore.get(this.chainId);
   }
 

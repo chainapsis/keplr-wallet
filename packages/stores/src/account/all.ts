@@ -12,9 +12,9 @@ import {
   SecretMsgOpts,
 } from "./secret";
 import {
-  HasCosmosQueries,
-  HasCosmwasmQueries,
-  HasSecretQueries,
+  CosmosQueries,
+  CosmwasmQueries,
+  SecretQueries,
   IQueriesStore,
 } from "../query";
 import deepmerge from "deepmerge";
@@ -30,7 +30,7 @@ import {
 export class AccountWithAll
   extends AccountSetBase<
     CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts,
-    HasCosmosQueries & HasSecretQueries & HasCosmwasmQueries
+    CosmosQueries & SecretQueries & CosmwasmQueries
   >
   implements HasCosmosAccount, HasSecretAccount, HasCosmwasmAccount {
   static readonly defaultMsgOpts: CosmosMsgOpts &
@@ -55,7 +55,7 @@ export class AccountWithAll
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: IQueriesStore<
-      HasCosmosQueries & HasSecretQueries & HasCosmwasmQueries
+      CosmosQueries & SecretQueries & CosmwasmQueries
     >,
     protected readonly opts: AccountSetOpts<
       CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts

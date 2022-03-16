@@ -14,9 +14,6 @@ import {
   ChainSuggestStore,
   IBCChannelStore,
   IBCCurrencyRegsitrar,
-  HasCosmosQueries,
-  HasCosmwasmQueries,
-  HasSecretQueries,
   AccountWithAll,
   getKeplrFromWindow,
   CosmosQueries,
@@ -53,7 +50,7 @@ export class RootStore {
   public readonly chainSuggestStore: ChainSuggestStore;
 
   public readonly queriesStore: QueriesStore<
-    [HasCosmosQueries, HasCosmwasmQueries, HasSecretQueries]
+    [CosmosQueries, CosmwasmQueries, SecretQueries]
   >;
   public readonly accountStore: AccountStore<AccountWithAll>;
   public readonly priceStore: CoinGeckoPriceStore;
@@ -132,7 +129,9 @@ export class RootStore {
       this.chainStore,
       CosmosQueries.use(),
       CosmwasmQueries.use(),
-      SecretQueries.use(getKeplrFromWindow)
+      SecretQueries.use({
+        apiGetter: getKeplrFromWindow,
+      })
     );
 
     const chainOpts = this.chainStore.chainInfos.map((chainInfo) => {

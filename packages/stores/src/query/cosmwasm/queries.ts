@@ -5,17 +5,17 @@ import { ObservableQueryCw20ContractInfo } from "./cw20-contract-info";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryCw20BalanceRegistry } from "./cw20-balance";
 
-export interface HasCosmwasmQueries {
-  cosmwasm: CosmwasmQueries;
+export interface CosmwasmQueries {
+  cosmwasm: CosmwasmQueriesImpl;
 }
 
-export class CosmwasmQueries {
-  static use(): (
+export const CosmwasmQueries = {
+  use(): (
     queriesSetBase: QueriesSetBase,
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter
-  ) => HasCosmwasmQueries {
+  ) => CosmwasmQueries {
     return (
       queriesSetBase: QueriesSetBase,
       kvStore: KVStore,
@@ -23,7 +23,7 @@ export class CosmwasmQueries {
       chainGetter: ChainGetter
     ) => {
       return {
-        cosmwasm: new CosmwasmQueries(
+        cosmwasm: new CosmwasmQueriesImpl(
           queriesSetBase,
           kvStore,
           chainId,
@@ -31,8 +31,10 @@ export class CosmwasmQueries {
         ),
       };
     };
-  }
+  },
+};
 
+export class CosmwasmQueriesImpl {
   public readonly querycw20ContractInfo: DeepReadonly<ObservableQueryCw20ContractInfo>;
 
   constructor(

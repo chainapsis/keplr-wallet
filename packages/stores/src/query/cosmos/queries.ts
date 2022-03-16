@@ -35,17 +35,17 @@ import {
   ObservableQueryOsmosisMintParmas,
 } from "./supply/osmosis";
 
-export interface HasCosmosQueries {
-  cosmos: CosmosQueries;
+export interface CosmosQueries {
+  cosmos: CosmosQueriesImpl;
 }
 
-export class CosmosQueries {
-  static use(): (
+export const CosmosQueries = {
+  use(): (
     queriesSetBase: QueriesSetBase,
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter
-  ) => HasCosmosQueries {
+  ) => CosmosQueries {
     return (
       queriesSetBase: QueriesSetBase,
       kvStore: KVStore,
@@ -53,7 +53,7 @@ export class CosmosQueries {
       chainGetter: ChainGetter
     ) => {
       return {
-        cosmos: new CosmosQueries(
+        cosmos: new CosmosQueriesImpl(
           queriesSetBase,
           kvStore,
           chainId,
@@ -61,8 +61,10 @@ export class CosmosQueries {
         ),
       };
     };
-  }
+  },
+};
 
+export class CosmosQueriesImpl {
   public readonly queryBlock: DeepReadonly<ObservableQueryBlock>;
   public readonly queryAccount: DeepReadonly<ObservableQueryAccount>;
   public readonly queryMint: DeepReadonly<ObservableQueryMintingInfation>;

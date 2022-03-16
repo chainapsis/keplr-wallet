@@ -1,7 +1,7 @@
 import { flow, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { ChainInfoInner, ChainStore } from "../chain";
-import { HasCosmosQueries, HasCosmwasmQueries, QueriesSetBase } from "../query";
+import { CosmosQueries, CosmwasmQueries, QueriesSetBase } from "../query";
 import { DenomHelper, KVStore, toGenerator } from "@keplr-wallet/common";
 
 type CacheIBCDenomData = {
@@ -51,11 +51,11 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
       };
     },
     protected readonly queriesStore: {
-      get(chainId: string): QueriesSetBase & HasCosmosQueries;
+      get(chainId: string): QueriesSetBase & CosmosQueries;
     },
     protected readonly cosmwasmQueriesStore:
       | {
-          get(chainId: string): QueriesSetBase & HasCosmwasmQueries;
+          get(chainId: string): QueriesSetBase & CosmwasmQueries;
         }
       | undefined,
     protected readonly coinDenomGenerator: (
@@ -370,11 +370,11 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
       };
     },
     protected readonly queriesStore: {
-      get(chainId: string): QueriesSetBase & HasCosmosQueries;
+      get(chainId: string): QueriesSetBase & CosmosQueries;
     },
     protected readonly cosmwasmQueriesStore:
       | {
-          get(chainId: string): QueriesSetBase & HasCosmwasmQueries;
+          get(chainId: string): QueriesSetBase & CosmwasmQueries;
         }
       | undefined,
     protected readonly coinDenomGenerator: (

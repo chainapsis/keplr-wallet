@@ -1,5 +1,5 @@
 import { AccountSetBase, AccountSetOpts, MsgOpt } from "./base";
-import { HasSecretQueries, QueriesSetBase, IQueriesStore } from "../query";
+import { SecretQueries, QueriesSetBase, IQueriesStore } from "../query";
 import { Buffer } from "buffer/";
 import { ChainGetter, CoinPrimitive } from "../common";
 import { StdFee } from "@cosmjs/launchpad";
@@ -23,7 +23,7 @@ export interface SecretMsgOpts {
 }
 
 export class AccountWithSecret
-  extends AccountSetBase<SecretMsgOpts, HasSecretQueries>
+  extends AccountSetBase<SecretMsgOpts, SecretQueries>
   implements HasSecretAccount {
   public readonly secret: DeepReadonly<SecretAccount>;
 
@@ -50,7 +50,7 @@ export class AccountWithSecret
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: IQueriesStore<HasSecretQueries>,
+    protected readonly queriesStore: IQueriesStore<SecretQueries>,
     protected readonly opts: AccountSetOpts<SecretMsgOpts>
   ) {
     super(eventListener, chainGetter, chainId, queriesStore, opts);
@@ -61,10 +61,10 @@ export class AccountWithSecret
 
 export class SecretAccount {
   constructor(
-    protected readonly base: AccountSetBase<SecretMsgOpts, HasSecretQueries>,
+    protected readonly base: AccountSetBase<SecretMsgOpts, SecretQueries>,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: IQueriesStore<HasSecretQueries>
+    protected readonly queriesStore: IQueriesStore<SecretQueries>
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
@@ -323,7 +323,7 @@ export class SecretAccount {
     };
   }
 
-  protected get queries(): DeepReadonly<QueriesSetBase & HasSecretQueries> {
+  protected get queries(): DeepReadonly<QueriesSetBase & SecretQueries> {
     return this.queriesStore.get(this.chainId);
   }
 }
