@@ -15,7 +15,7 @@ import {
   HasCosmosQueries,
   HasCosmwasmQueries,
   HasSecretQueries,
-  QueriesStore,
+  IQueriesStore,
 } from "../query";
 import deepmerge from "deepmerge";
 import { DeepReadonly } from "utility-types";
@@ -30,7 +30,7 @@ import {
 export class AccountWithAll
   extends AccountSetBase<
     CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts,
-    [HasCosmosQueries, HasSecretQueries, HasCosmwasmQueries]
+    HasCosmosQueries & HasSecretQueries & HasCosmwasmQueries
   >
   implements HasCosmosAccount, HasSecretAccount, HasCosmwasmAccount {
   static readonly defaultMsgOpts: CosmosMsgOpts &
@@ -54,8 +54,8 @@ export class AccountWithAll
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      [HasCosmosQueries, HasSecretQueries, HasCosmwasmQueries]
+    protected readonly queriesStore: IQueriesStore<
+      HasCosmosQueries & HasSecretQueries & HasCosmwasmQueries
     >,
     protected readonly opts: AccountSetOpts<
       CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts
@@ -63,23 +63,13 @@ export class AccountWithAll
   ) {
     super(eventListener, chainGetter, chainId, queriesStore, opts);
 
-    this.cosmos = new CosmosAccount(
-      this as any,
-      chainGetter,
-      chainId,
-      queriesStore as any
-    );
-    this.secret = new SecretAccount(
-      this as any,
-      chainGetter,
-      chainId,
-      queriesStore as any
-    );
+    this.cosmos = new CosmosAccount(this, chainGetter, chainId, queriesStore);
+    this.secret = new SecretAccount(this, chainGetter, chainId, queriesStore);
     this.cosmwasm = new CosmwasmAccount(
-      this as any,
+      this,
       chainGetter,
       chainId,
-      queriesStore as any
+      queriesStore
     );
   }
 }

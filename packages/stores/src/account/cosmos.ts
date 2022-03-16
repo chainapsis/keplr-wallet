@@ -5,7 +5,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { ChainIdHelper, cosmos, ibc } from "@keplr-wallet/cosmos";
 import { BondStatus } from "../query/cosmos/staking/types";
-import { HasCosmosQueries, QueriesSetBase, QueriesStore } from "../query";
+import { HasCosmosQueries, QueriesSetBase, IQueriesStore } from "../query";
 import { DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
 import Long from "long";
@@ -28,7 +28,7 @@ export interface CosmosMsgOpts {
 }
 
 export class AccountWithCosmos
-  extends AccountSetBase<CosmosMsgOpts, [HasCosmosQueries]>
+  extends AccountSetBase<CosmosMsgOpts, HasCosmosQueries>
   implements HasCosmosAccount {
   public readonly cosmos: DeepReadonly<CosmosAccount>;
 
@@ -73,7 +73,7 @@ export class AccountWithCosmos
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<[HasCosmosQueries]>,
+    protected readonly queriesStore: IQueriesStore<HasCosmosQueries>,
     protected readonly opts: AccountSetOpts<CosmosMsgOpts>
   ) {
     super(eventListener, chainGetter, chainId, queriesStore, opts);
@@ -84,10 +84,10 @@ export class AccountWithCosmos
 
 export class CosmosAccount {
   constructor(
-    protected readonly base: AccountSetBase<CosmosMsgOpts, [HasCosmosQueries]>,
+    protected readonly base: AccountSetBase<CosmosMsgOpts, HasCosmosQueries>,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<[HasCosmosQueries]>
+    protected readonly queriesStore: IQueriesStore<HasCosmosQueries>
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }

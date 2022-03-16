@@ -18,6 +18,10 @@ export const createQueriesSetBase = (
   };
 };
 
+export interface IQueriesStore<T extends IObject> {
+  get(chainId: string): DeepReadonly<QueriesSetBase & T>;
+}
+
 export class QueriesStore<T extends Array<IObject>> {
   @observable.shallow
   protected queriesMap: Map<

@@ -18,6 +18,9 @@ export type Functionify<P extends Array<any>, R> = (...p: P) => R;
  *
  * TupleFunctionify<[number, string], [number, string, number]> =
  *  [(n:number, s:string) => number, (n:number, s:string) => string, (n:number, s:string) => number]
+ *
+ * AFAIK, `variadic tuple types` and `recursive conditional types` features are introduced in typescript 4,
+ * thus, this only works on typescript 4+.
  */
 export type TupleFunctionify<
   P extends Array<any>,
@@ -32,6 +35,9 @@ export type TupleFunctionify<
  * This is a function that handles this part in common way.
  * `merge` is only provided at a shallow level and can't handle properly for deep, nested objects.
  * Also, if the properties of objects overlap, it does not guarantee proper functioning.
+ *
+ * AFAIK, `variadic tuple types` and `recursive conditional types` features are introduced in typescript 4,
+ * thus, this only works on typescript 4+.
  *
  * @param parameters Tuple to pass to fns as parameters.
  * @param fns The functions to create the merged object.
