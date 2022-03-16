@@ -1,54 +1,81 @@
 import { makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { DeepReadonly } from "utility-types";
+import { DeepReadonly, UnionToIntersection } from "utility-types";
 import { ObservableQueryBalances } from "./balances";
-import { ChainGetter } from "../common";
-import { Keplr } from "@keplr-wallet/types";
+import { ChainGetter, IObject, mergeStores, TupleFunctionify } from "../common";
 
-export class QueriesSetBase {
-  public readonly queryBalances: DeepReadonly<ObservableQueryBalances>;
-
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    this.queryBalances = new ObservableQueryBalances(
-      kvStore,
-      chainId,
-      chainGetter
-    );
-  }
+export interface QueriesSetBase {
+  readonly queryBalances: DeepReadonly<ObservableQueryBalances>;
 }
 
-export class QueriesStore<QueriesSet extends QueriesSetBase> {
+export const createQueriesSetBase = (
+  kvStore: KVStore,
+  chainId: string,
+  chainGetter: ChainGetter
+): QueriesSetBase => {
+  return {
+    queryBalances: new ObservableQueryBalances(kvStore, chainId, chainGetter),
+  };
+};
+
+export class QueriesStore<T extends Array<IObject>> {
   @observable.shallow
-  protected queriesMap: Map<string, QueriesSet> = new Map();
+  protected queriesMap: Map<
+    string,
+    QueriesSetBase & UnionToIntersection<T[number]>
+  > = new Map();
+
+  protected readonly queriesCreators: TupleFunctionify<
+    // queriesSetBase: QueriesSetBase,
+    // kvStore: KVStore,
+    // chainId: string,
+    // chainGetter: ChainGetter
+    [QueriesSetBase, KVStore, string, ChainGetter],
+    T
+  >;
 
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainGetter: ChainGetter,
-    protected readonly apiGetter: () => Promise<Keplr | undefined>,
-    protected readonly queriesCreator: new (
-      kvStore: KVStore,
-      chainId: string,
-      chainGetter: ChainGetter,
-      apiGetter: () => Promise<Keplr | undefined>
-    ) => QueriesSet
+    ...queriesCreators: TupleFunctionify<
+      // queriesSetBase: QueriesSetBase,
+      // kvStore: KVStore,
+      // chainId: string,
+      // chainGetter: ChainGetter
+      [QueriesSetBase, KVStore, string, ChainGetter],
+      T
+    >
   ) {
+    this.queriesCreators = queriesCreators;
+
     makeObservable(this);
   }
 
-  get(chainId: string): DeepReadonly<QueriesSet> {
+  get(
+    chainId: string
+  ): DeepReadonly<QueriesSetBase & UnionToIntersection<T[number]>> {
     if (!this.queriesMap.has(chainId)) {
-      const queries = new this.queriesCreator(
+      const queriesSetBase = createQueriesSetBase(
         this.kvStore,
         chainId,
-        this.chainGetter,
-        this.apiGetter
+        this.chainGetter
       );
       runInAction(() => {
-        this.queriesMap.set(chainId, queries);
+        const merged = mergeStores<
+          [QueriesSetBase, KVStore, string, ChainGetter],
+          T
+        >(
+          [queriesSetBase, this.kvStore, chainId, this.chainGetter],
+          ...this.queriesCreators
+        );
+
+        this.queriesMap.set(chainId, Object.assign(queriesSetBase, merged));
       });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.queriesMap.get(chainId)! as DeepReadonly<QueriesSet>;
+    return this.queriesMap.get(chainId)! as DeepReadonly<
+      QueriesSetBase & UnionToIntersection<T[number]>
+    >;
   }
 }

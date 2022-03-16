@@ -22,7 +22,7 @@ export interface CosmwasmMsgOpts {
 }
 
 export class AccountWithCosmwasm
-  extends AccountSetBase<CosmwasmMsgOpts, HasCosmwasmQueries>
+  extends AccountSetBase<CosmwasmMsgOpts, [HasCosmwasmQueries]>
   implements HasCosmwasmAccount {
   public readonly cosmwasm: DeepReadonly<CosmwasmAccount>;
 
@@ -45,9 +45,7 @@ export class AccountWithCosmwasm
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      QueriesSetBase & HasCosmwasmQueries
-    >,
+    protected readonly queriesStore: QueriesStore<[HasCosmwasmQueries]>,
     protected readonly opts: AccountSetOpts<CosmwasmMsgOpts>
   ) {
     super(eventListener, chainGetter, chainId, queriesStore, opts);
@@ -65,13 +63,11 @@ export class CosmwasmAccount {
   constructor(
     protected readonly base: AccountSetBase<
       CosmwasmMsgOpts,
-      HasCosmwasmQueries
+      [HasCosmwasmQueries]
     >,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      QueriesSetBase & HasCosmwasmQueries
-    >
+    protected readonly queriesStore: QueriesStore<[HasCosmwasmQueries]>
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }

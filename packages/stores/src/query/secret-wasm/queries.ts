@@ -5,37 +5,39 @@ import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { ObservableQuerySecret20ContractInfo } from "./secret20-contract-info";
 import { DeepReadonly } from "utility-types";
 import { ObservableQuerySecret20BalanceRegistry } from "./secret20-balance";
-import { QueriesWithCosmos } from "../cosmos";
 import { Keplr } from "@keplr-wallet/types";
 
 export interface HasSecretQueries {
   secret: SecretQueries;
 }
 
-export class QueriesWithCosmosAndSecret
-  extends QueriesWithCosmos
-  implements HasSecretQueries {
-  public secret: SecretQueries;
-
-  constructor(
+export class SecretQueries {
+  static use(
+    apiGetter: () => Promise<Keplr | undefined>
+  ): (
+    queriesSetBase: QueriesSetBase,
     kvStore: KVStore,
     chainId: string,
-    chainGetter: ChainGetter,
-    apiGetter: () => Promise<Keplr | undefined>
-  ) {
-    super(kvStore, chainId, chainGetter);
-
-    this.secret = new SecretQueries(
-      this,
-      kvStore,
-      chainId,
-      chainGetter,
-      apiGetter
-    );
+    chainGetter: ChainGetter
+  ) => HasSecretQueries {
+    return (
+      queriesSetBase: QueriesSetBase,
+      kvStore: KVStore,
+      chainId: string,
+      chainGetter: ChainGetter
+    ) => {
+      return {
+        secret: new SecretQueries(
+          queriesSetBase,
+          kvStore,
+          chainId,
+          chainGetter,
+          apiGetter
+        ),
+      };
+    };
   }
-}
 
-export class SecretQueries {
   public readonly querySecretContractCodeHash: DeepReadonly<ObservableQuerySecretContractCodeHash>;
   public readonly querySecret20ContractInfo: DeepReadonly<ObservableQuerySecret20ContractInfo>;
 

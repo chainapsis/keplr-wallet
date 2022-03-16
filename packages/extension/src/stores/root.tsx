@@ -14,9 +14,14 @@ import {
   ChainSuggestStore,
   IBCChannelStore,
   IBCCurrencyRegsitrar,
-  QueriesWithCosmosAndSecretAndCosmwasm,
+  HasCosmosQueries,
+  HasCosmwasmQueries,
+  HasSecretQueries,
   AccountWithAll,
   getKeplrFromWindow,
+  CosmosQueries,
+  CosmwasmQueries,
+  SecretQueries,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -47,7 +52,9 @@ export class RootStore {
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
-  public readonly queriesStore: QueriesStore<QueriesWithCosmosAndSecretAndCosmwasm>;
+  public readonly queriesStore: QueriesStore<
+    [HasCosmosQueries, HasCosmwasmQueries, HasSecretQueries]
+  >;
   public readonly accountStore: AccountStore<AccountWithAll>;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
@@ -123,8 +130,9 @@ export class RootStore {
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
       this.chainStore,
-      getKeplrFromWindow,
-      QueriesWithCosmosAndSecretAndCosmwasm
+      CosmosQueries.use(),
+      CosmwasmQueries.use(),
+      SecretQueries.use(getKeplrFromWindow)
     );
 
     const chainOpts = this.chainStore.chainInfos.map((chainInfo) => {
@@ -216,7 +224,7 @@ export class RootStore {
 
     this.accountStore = new AccountStore(
       window,
-      AccountWithAll,
+      AccountWithAll as any,
       this.chainStore,
       this.queriesStore,
       {
@@ -233,9 +241,9 @@ export class RootStore {
           autoInit: true,
           getKeplr: getKeplrFromWindow,
         },
-        chainOpts,
+        chainOpts: chainOpts as any,
       }
-    );
+    ) as any;
 
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),

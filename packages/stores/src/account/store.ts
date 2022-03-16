@@ -1,9 +1,8 @@
-import { HasMapStore } from "../common";
+import { HasMapStore, IObject } from "../common";
 import { ChainGetter } from "../common";
 import { QueriesStore } from "../query";
 import { DeepPartial } from "utility-types";
 import deepmerge from "deepmerge";
-import { QueriesSetBase } from "../query";
 import { AccountSetBase, AccountSetOpts } from "./base";
 
 export interface AccountStoreOpts<MsgOpts> {
@@ -13,8 +12,8 @@ export interface AccountStoreOpts<MsgOpts> {
 }
 
 export class AccountStore<
-  AccountSet extends AccountSetBase<unknown, unknown>,
-  MsgOpts = AccountSet extends AccountSetBase<infer M, unknown> ? M : never,
+  AccountSet extends AccountSetBase<unknown, any>,
+  MsgOpts = AccountSet extends AccountSetBase<infer M, any> ? M : never,
   Queries = AccountSet extends AccountSetBase<unknown, infer Q> ? Q : never,
   Opts = AccountSetOpts<MsgOpts>
 > extends HasMapStore<AccountSet> {
@@ -30,11 +29,15 @@ export class AccountStore<
       },
       chainGetter: ChainGetter,
       chainId: string,
-      queriesStore: QueriesStore<QueriesSetBase & Queries>,
+      queriesStore: QueriesStore<
+        Queries extends Array<IObject> ? Queries : never
+      >,
       opts: Opts
     ) => AccountSet) & { defaultMsgOpts: MsgOpts },
     protected readonly chainGetter: ChainGetter,
-    protected readonly queriesStore: QueriesStore<QueriesSetBase & Queries>,
+    protected readonly queriesStore: QueriesStore<
+      Queries extends Array<IObject> ? Queries : never
+    >,
     protected readonly storeOpts: AccountStoreOpts<MsgOpts>
   ) {
     super((chainId: string) => {

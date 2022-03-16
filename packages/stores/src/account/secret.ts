@@ -23,7 +23,7 @@ export interface SecretMsgOpts {
 }
 
 export class AccountWithSecret
-  extends AccountSetBase<SecretMsgOpts, HasSecretQueries>
+  extends AccountSetBase<SecretMsgOpts, [HasSecretQueries]>
   implements HasSecretAccount {
   public readonly secret: DeepReadonly<SecretAccount>;
 
@@ -50,9 +50,7 @@ export class AccountWithSecret
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      QueriesSetBase & HasSecretQueries
-    >,
+    protected readonly queriesStore: QueriesStore<[HasSecretQueries]>,
     protected readonly opts: AccountSetOpts<SecretMsgOpts>
   ) {
     super(eventListener, chainGetter, chainId, queriesStore, opts);
@@ -63,12 +61,10 @@ export class AccountWithSecret
 
 export class SecretAccount {
   constructor(
-    protected readonly base: AccountSetBase<SecretMsgOpts, HasSecretQueries>,
+    protected readonly base: AccountSetBase<SecretMsgOpts, [HasSecretQueries]>,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      QueriesSetBase & HasSecretQueries
-    >
+    protected readonly queriesStore: QueriesStore<[HasSecretQueries]>
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }

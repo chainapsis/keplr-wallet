@@ -28,7 +28,7 @@ export interface CosmosMsgOpts {
 }
 
 export class AccountWithCosmos
-  extends AccountSetBase<CosmosMsgOpts, HasCosmosQueries>
+  extends AccountSetBase<CosmosMsgOpts, [HasCosmosQueries]>
   implements HasCosmosAccount {
   public readonly cosmos: DeepReadonly<CosmosAccount>;
 
@@ -73,9 +73,7 @@ export class AccountWithCosmos
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      QueriesSetBase & HasCosmosQueries
-    >,
+    protected readonly queriesStore: QueriesStore<[HasCosmosQueries]>,
     protected readonly opts: AccountSetOpts<CosmosMsgOpts>
   ) {
     super(eventListener, chainGetter, chainId, queriesStore, opts);
@@ -86,12 +84,10 @@ export class AccountWithCosmos
 
 export class CosmosAccount {
   constructor(
-    protected readonly base: AccountSetBase<CosmosMsgOpts, HasCosmosQueries>,
+    protected readonly base: AccountSetBase<CosmosMsgOpts, [HasCosmosQueries]>,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      QueriesSetBase & HasCosmosQueries
-    >
+    protected readonly queriesStore: QueriesStore<[HasCosmosQueries]>
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }

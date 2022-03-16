@@ -7,8 +7,8 @@ import {
   runInAction,
 } from "mobx";
 import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
-import { DeepReadonly } from "utility-types";
-import { ChainGetter } from "../common";
+import { DeepReadonly, UnionToIntersection } from "utility-types";
+import { ChainGetter, IObject } from "../common";
 import { QueriesSetBase, QueriesStore } from "../query";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import {
@@ -78,7 +78,7 @@ export interface AccountSetOpts<MsgOpts> {
   ) => WebSocket;
 }
 
-export class AccountSetBase<MsgOpts, Queries> {
+export class AccountSetBase<MsgOpts, Queries extends Array<IObject>> {
   @observable
   protected _walletVersion: string | undefined = undefined;
 
@@ -123,7 +123,7 @@ export class AccountSetBase<MsgOpts, Queries> {
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<QueriesSetBase & Queries>,
+    protected readonly queriesStore: QueriesStore<Queries>,
     protected readonly opts: AccountSetOpts<MsgOpts>
   ) {
     makeObservable(this);
@@ -549,7 +549,9 @@ export class AccountSetBase<MsgOpts, Queries> {
     return evmosToEth(this.bech32Address);
   }
 
-  protected get queries(): DeepReadonly<QueriesSetBase & Queries> {
+  protected get queries(): DeepReadonly<
+    QueriesSetBase & UnionToIntersection<Queries[number]>
+  > {
     return this.queriesStore.get(this.chainId);
   }
 

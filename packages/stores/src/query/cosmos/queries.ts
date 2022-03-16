@@ -39,19 +39,30 @@ export interface HasCosmosQueries {
   cosmos: CosmosQueries;
 }
 
-export class QueriesWithCosmos
-  extends QueriesSetBase
-  implements HasCosmosQueries {
-  public cosmos: CosmosQueries;
-
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter);
-
-    this.cosmos = new CosmosQueries(this, kvStore, chainId, chainGetter);
-  }
-}
-
 export class CosmosQueries {
+  static use(): (
+    queriesSetBase: QueriesSetBase,
+    kvStore: KVStore,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) => HasCosmosQueries {
+    return (
+      queriesSetBase: QueriesSetBase,
+      kvStore: KVStore,
+      chainId: string,
+      chainGetter: ChainGetter
+    ) => {
+      return {
+        cosmos: new CosmosQueries(
+          queriesSetBase,
+          kvStore,
+          chainId,
+          chainGetter
+        ),
+      };
+    };
+  }
+
   public readonly queryBlock: DeepReadonly<ObservableQueryBlock>;
   public readonly queryAccount: DeepReadonly<ObservableQueryAccount>;
   public readonly queryMint: DeepReadonly<ObservableQueryMintingInfation>;
