@@ -6,12 +6,7 @@ import {
   mergeStores,
 } from "../common";
 import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
-import { DeepPartial, UnionToIntersection } from "utility-types";
-
-export interface AccountStoreOpts {
-  defaultOpts: AccountSetOpts;
-  chainOpts?: (DeepPartial<AccountSetOpts> & { chainId: string })[];
-}
+import { UnionToIntersection } from "utility-types";
 
 export class AccountStore<
   Injects extends Array<IObject>,
@@ -31,7 +26,7 @@ export class AccountStore<
       removeEventListener: (type: string, fn: () => unknown) => void;
     },
     protected readonly chainGetter: ChainGetter,
-    protected readonly storeOpts: AccountStoreOpts,
+    protected readonly storeOptsCreator: (chainId: string) => AccountSetOpts,
     ...accountSetCreators: ChainedFunctionifyTuple<
       { accountSetBase: AccountSetBaseSuper },
       // chainGetter: ChainGetter,
@@ -45,7 +40,7 @@ export class AccountStore<
         eventListener,
         chainGetter,
         chainId,
-        this.storeOpts.defaultOpts
+        storeOptsCreator(chainId)
       );
 
       const injected = mergeStores(

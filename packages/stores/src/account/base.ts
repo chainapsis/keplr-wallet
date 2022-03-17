@@ -19,7 +19,6 @@ export interface MsgOpt {
 }
 
 export interface AccountSetOpts {
-  readonly prefetching: boolean;
   readonly suggestChain: boolean;
   readonly suggestChainFn?: (
     keplr: Keplr,
