@@ -1,4 +1,4 @@
-import { AccountSetBase, AccountSetOpts, MsgOpt } from "./base";
+import { AccountSetBase, AccountSetBaseSuper, MsgOpt } from "./base";
 import { SecretQueries, QueriesSetBase, IQueriesStore } from "../query";
 import { Buffer } from "buffer/";
 import { ChainGetter, CoinPrimitive } from "../common";
@@ -6,12 +6,46 @@ import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
-import { DeepReadonly, Optional } from "utility-types";
+import { DeepPartial, DeepReadonly, Optional } from "utility-types";
 import { cosmos } from "@keplr-wallet/cosmos";
+import { CosmosAccount } from "./cosmos";
+import deepmerge from "deepmerge";
 
-export interface HasSecretAccount {
-  secret: DeepReadonly<SecretAccount>;
+export interface SecretAccount {
+  secret: SecretAccountImpl;
 }
+
+export const SecretAccount = {
+  use(options: {
+    msgOptsCreator?: (
+      chainId: string
+    ) => DeepPartial<SecretMsgOpts> | undefined;
+    queriesStore: IQueriesStore<SecretQueries>;
+  }): (
+    base: { accountSetBase: AccountSetBaseSuper & CosmosAccount },
+    chainGetter: ChainGetter,
+    chainId: string
+  ) => SecretAccount {
+    return (base, chainGetter, chainId) => {
+      const msgOptsFromCreator = options.msgOptsCreator
+        ? options.msgOptsCreator(chainId)
+        : undefined;
+
+      return {
+        secret: new SecretAccountImpl(
+          base.accountSetBase,
+          chainGetter,
+          chainId,
+          options.queriesStore,
+          deepmerge<SecretMsgOpts, DeepPartial<SecretMsgOpts>>(
+            defaultMsgOpts,
+            msgOptsFromCreator ? msgOptsFromCreator : {}
+          )
+        ),
+      };
+    };
+  },
+};
 
 export interface SecretMsgOpts {
   readonly send: {
@@ -22,49 +56,29 @@ export interface SecretMsgOpts {
   readonly executeSecretWasm: Pick<MsgOpt, "type">;
 }
 
-export class AccountWithSecret
-  extends AccountSetBase<SecretMsgOpts, SecretQueries>
-  implements HasSecretAccount {
-  public readonly secret: DeepReadonly<SecretAccount>;
-
-  static readonly defaultMsgOpts: SecretMsgOpts = {
-    send: {
-      secret20: {
-        gas: 250000,
-      },
+export const defaultMsgOpts: SecretMsgOpts = {
+  send: {
+    secret20: {
+      gas: 250000,
     },
+  },
 
-    createSecret20ViewingKey: {
-      gas: 150000,
-    },
+  createSecret20ViewingKey: {
+    gas: 150000,
+  },
 
-    executeSecretWasm: {
-      type: "wasm/MsgExecuteContract",
-    },
-  };
+  executeSecretWasm: {
+    type: "wasm/MsgExecuteContract",
+  },
+};
 
+export class SecretAccountImpl {
   constructor(
-    protected readonly eventListener: {
-      addEventListener: (type: string, fn: () => unknown) => void;
-      removeEventListener: (type: string, fn: () => unknown) => void;
-    },
+    protected readonly base: AccountSetBase & CosmosAccount,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: IQueriesStore<SecretQueries>,
-    protected readonly opts: AccountSetOpts<SecretMsgOpts>
-  ) {
-    super(eventListener, chainGetter, chainId, queriesStore, opts);
-
-    this.secret = new SecretAccount(this, chainGetter, chainId, queriesStore);
-  }
-}
-
-export class SecretAccount {
-  constructor(
-    protected readonly base: AccountSetBase<SecretMsgOpts, SecretQueries>,
-    protected readonly chainGetter: ChainGetter,
-    protected readonly chainId: string,
-    protected readonly queriesStore: IQueriesStore<SecretQueries>
+    protected readonly msgOpts: SecretMsgOpts
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
@@ -109,7 +123,7 @@ export class SecretAccount {
           memo,
           {
             amount: stdFee.amount ?? [],
-            gas: stdFee.gas ?? this.base.msgOpts.send.secret20.gas.toString(),
+            gas: stdFee.gas ?? this.msgOpts.send.secret20.gas.toString(),
           },
           signOptions,
           this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
@@ -156,9 +170,7 @@ export class SecretAccount {
       memo,
       {
         amount: stdFee.amount ?? [],
-        gas:
-          stdFee.gas ??
-          this.base.msgOpts.createSecret20ViewingKey.gas.toString(),
+        gas: stdFee.gas ?? this.msgOpts.createSecret20ViewingKey.gas.toString(),
       },
       signOptions,
       async (tx) => {
@@ -224,7 +236,7 @@ export class SecretAccount {
   ): Promise<Uint8Array> {
     let encryptedMsg: Uint8Array;
 
-    await this.base.sendMsgs(
+    await this.base.cosmos.sendMsgs(
       type,
       async () => {
         encryptedMsg = await this.encryptSecretContractMsg(
@@ -233,7 +245,7 @@ export class SecretAccount {
         );
 
         const msg = {
-          type: this.base.msgOpts.executeSecretWasm.type,
+          type: this.msgOpts.executeSecretWasm.type,
           value: {
             sender: this.base.bech32Address,
             contract: contractAddress,

@@ -1,17 +1,51 @@
-import { AccountSetBase, AccountSetOpts, MsgOpt } from "./base";
+import { AccountSetBase, AccountSetBaseSuper, MsgOpt } from "./base";
 import { CosmwasmQueries, IQueriesStore, QueriesSetBase } from "../query";
 import { ChainGetter, CoinPrimitive } from "../common";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
-import { DeepReadonly, Optional } from "utility-types";
+import { DeepPartial, DeepReadonly, Optional } from "utility-types";
 import { cosmwasm } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
+import deepmerge from "deepmerge";
+import { CosmosAccount } from "./cosmos";
 
-export interface HasCosmwasmAccount {
-  cosmwasm: DeepReadonly<CosmwasmAccount>;
+export interface CosmwasmAccount {
+  cosmwasm: CosmwasmAccountImpl;
 }
+
+export const CosmwasmAccount = {
+  use(options: {
+    msgOptsCreator?: (
+      chainId: string
+    ) => DeepPartial<CosmwasmMsgOpts> | undefined;
+    queriesStore: IQueriesStore<CosmwasmQueries>;
+  }): (
+    base: { accountSetBase: AccountSetBaseSuper & CosmosAccount },
+    chainGetter: ChainGetter,
+    chainId: string
+  ) => CosmwasmAccount {
+    return (base, chainGetter, chainId) => {
+      const msgOptsFromCreator = options.msgOptsCreator
+        ? options.msgOptsCreator(chainId)
+        : undefined;
+
+      return {
+        cosmwasm: new CosmwasmAccountImpl(
+          base.accountSetBase,
+          chainGetter,
+          chainId,
+          options.queriesStore,
+          deepmerge<CosmwasmMsgOpts, DeepPartial<CosmwasmMsgOpts>>(
+            defaultMsgOpts,
+            msgOptsFromCreator ? msgOptsFromCreator : {}
+          )
+        ),
+      };
+    };
+  },
+};
 
 export interface CosmwasmMsgOpts {
   readonly send: {
@@ -21,50 +55,25 @@ export interface CosmwasmMsgOpts {
   readonly executeWasm: Pick<MsgOpt, "type">;
 }
 
-export class AccountWithCosmwasm
-  extends AccountSetBase<CosmwasmMsgOpts, CosmwasmQueries>
-  implements HasCosmwasmAccount {
-  public readonly cosmwasm: DeepReadonly<CosmwasmAccount>;
-
-  static readonly defaultMsgOpts: CosmwasmMsgOpts = {
-    send: {
-      cw20: {
-        gas: 150000,
-      },
+export const defaultMsgOpts: CosmwasmMsgOpts = {
+  send: {
+    cw20: {
+      gas: 150000,
     },
+  },
 
-    executeWasm: {
-      type: "wasm/MsgExecuteContract",
-    },
-  };
+  executeWasm: {
+    type: "wasm/MsgExecuteContract",
+  },
+};
 
+export class CosmwasmAccountImpl {
   constructor(
-    protected readonly eventListener: {
-      addEventListener: (type: string, fn: () => unknown) => void;
-      removeEventListener: (type: string, fn: () => unknown) => void;
-    },
+    protected readonly base: AccountSetBase & CosmosAccount,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: IQueriesStore<CosmwasmQueries>,
-    protected readonly opts: AccountSetOpts<CosmwasmMsgOpts>
-  ) {
-    super(eventListener, chainGetter, chainId, queriesStore, opts);
-
-    this.cosmwasm = new CosmwasmAccount(
-      this,
-      chainGetter,
-      chainId,
-      queriesStore
-    );
-  }
-}
-
-export class CosmwasmAccount {
-  constructor(
-    protected readonly base: AccountSetBase<CosmwasmMsgOpts, CosmwasmQueries>,
-    protected readonly chainGetter: ChainGetter,
-    protected readonly chainId: string,
-    protected readonly queriesStore: IQueriesStore<CosmwasmQueries>
+    protected readonly msgOpts: CosmwasmMsgOpts
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
@@ -109,7 +118,7 @@ export class CosmwasmAccount {
           memo,
           {
             amount: stdFee.amount ?? [],
-            gas: stdFee.gas ?? this.base.msgOpts.send.cw20.gas.toString(),
+            gas: stdFee.gas ?? this.msgOpts.send.cw20.gas.toString(),
           },
           signOptions,
           this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
@@ -153,7 +162,7 @@ export class CosmwasmAccount {
         }
   ): Promise<void> {
     const msg = {
-      type: this.base.msgOpts.executeWasm.type,
+      type: this.msgOpts.executeWasm.type,
       value: {
         sender: this.base.bech32Address,
         contract: contractAddress,
@@ -162,7 +171,7 @@ export class CosmwasmAccount {
       },
     };
 
-    await this.base.sendMsgs(
+    await this.base.cosmos.sendMsgs(
       type,
       {
         aminoMsgs: [msg],

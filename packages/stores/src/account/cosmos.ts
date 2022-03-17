@@ -49,11 +49,7 @@ export const CosmosAccount = {
     chainGetter: ChainGetter,
     chainId: string
   ) => CosmosAccount {
-    return (
-      base: { accountSetBase: AccountSetBaseSuper },
-      chainGetter: ChainGetter,
-      chainId: string
-    ) => {
+    return (base, chainGetter, chainId) => {
       const msgOptsFromCreator = options.msgOptsCreator
         ? options.msgOptsCreator(chainId)
         : undefined;
