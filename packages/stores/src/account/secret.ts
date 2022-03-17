@@ -22,7 +22,7 @@ export const SecretAccount = {
     ) => DeepPartial<SecretMsgOpts> | undefined;
     queriesStore: IQueriesStore<SecretQueries>;
   }): (
-    base: { accountSetBase: AccountSetBaseSuper & CosmosAccount },
+    base: AccountSetBaseSuper & CosmosAccount,
     chainGetter: ChainGetter,
     chainId: string
   ) => SecretAccount {
@@ -33,7 +33,7 @@ export const SecretAccount = {
 
       return {
         secret: new SecretAccountImpl(
-          base.accountSetBase,
+          base,
           chainGetter,
           chainId,
           options.queriesStore,

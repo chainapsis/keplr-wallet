@@ -22,7 +22,7 @@ export const CosmwasmAccount = {
     ) => DeepPartial<CosmwasmMsgOpts> | undefined;
     queriesStore: IQueriesStore<CosmwasmQueries>;
   }): (
-    base: { accountSetBase: AccountSetBaseSuper & CosmosAccount },
+    base: AccountSetBaseSuper & CosmosAccount,
     chainGetter: ChainGetter,
     chainId: string
   ) => CosmwasmAccount {
@@ -33,7 +33,7 @@ export const CosmwasmAccount = {
 
       return {
         cosmwasm: new CosmwasmAccountImpl(
-          base.accountSetBase,
+          base,
           chainGetter,
           chainId,
           options.queriesStore,

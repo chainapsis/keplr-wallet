@@ -45,7 +45,7 @@ export const CosmosAccount = {
       onFulfill?: (tx: any) => void;
     };
   }): (
-    base: { accountSetBase: AccountSetBaseSuper },
+    base: AccountSetBaseSuper,
     chainGetter: ChainGetter,
     chainId: string
   ) => CosmosAccount {
@@ -56,7 +56,7 @@ export const CosmosAccount = {
 
       return {
         cosmos: new CosmosAccountImpl(
-          base.accountSetBase,
+          base,
           chainGetter,
           chainId,
           options.queriesStore,

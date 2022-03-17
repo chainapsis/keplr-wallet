@@ -31,7 +31,6 @@ describe("Test Account set base", () => {
       chainStore,
       "test",
       {
-        prefetching: true,
         suggestChain: false,
         autoInit: true,
         getKeplr: async () => {
@@ -89,7 +88,6 @@ describe("Test Account set base", () => {
       chainStore,
       "test",
       {
-        prefetching: true,
         suggestChain: false,
         autoInit: false,
         getKeplr: async () => {

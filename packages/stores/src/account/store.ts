@@ -13,7 +13,7 @@ export class AccountStore<
   AccountSetReturn = AccountSetBase & UnionToIntersection<Injects[number]>
 > extends HasMapStore<AccountSetReturn> {
   protected accountSetCreators: ChainedFunctionifyTuple<
-    { accountSetBase: AccountSetBaseSuper },
+    AccountSetBaseSuper,
     // chainGetter: ChainGetter,
     // chainId: string,
     [ChainGetter, string],
@@ -28,7 +28,7 @@ export class AccountStore<
     protected readonly chainGetter: ChainGetter,
     protected readonly storeOptsCreator: (chainId: string) => AccountSetOpts,
     ...accountSetCreators: ChainedFunctionifyTuple<
-      { accountSetBase: AccountSetBaseSuper },
+      AccountSetBaseSuper,
       // chainGetter: ChainGetter,
       // chainId: string,
       [ChainGetter, string],
@@ -43,21 +43,11 @@ export class AccountStore<
         storeOptsCreator(chainId)
       );
 
-      const injected = mergeStores(
-        { accountSetBase },
+      return mergeStores(
+        accountSetBase,
         [this.chainGetter, chainId],
         ...this.accountSetCreators
       );
-
-      for (const key of Object.keys(injected)) {
-        if (key !== "accountSetBase") {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          accountSetBase[key] = injected[key];
-        }
-      }
-
-      return accountSetBase as any;
     });
 
     this.accountSetCreators = accountSetCreators;
