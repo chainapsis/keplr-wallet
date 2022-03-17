@@ -1,81 +1,74 @@
-import { HasMapStore, IObject } from "../common";
-import { ChainGetter } from "../common";
-import { QueriesStore } from "../query";
-import { DeepPartial } from "utility-types";
-import deepmerge from "deepmerge";
-import { AccountSetBase, AccountSetOpts } from "./base";
+import {
+  ChainedFunctionifyTuple,
+  ChainGetter,
+  HasMapStore,
+  IObject,
+  mergeStores,
+} from "../common";
+import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
+import { DeepPartial, UnionToIntersection } from "utility-types";
 
-export interface AccountStoreOpts<MsgOpts> {
-  defaultOpts: Omit<AccountSetOpts<MsgOpts>, "msgOpts"> &
-    DeepPartial<Pick<AccountSetOpts<MsgOpts>, "msgOpts">>;
-  chainOpts?: (DeepPartial<AccountSetOpts<MsgOpts>> & { chainId: string })[];
+export interface AccountStoreOpts {
+  defaultOpts: AccountSetOpts;
+  chainOpts?: (DeepPartial<AccountSetOpts> & { chainId: string })[];
 }
 
 export class AccountStore<
-  AccountSet extends AccountSetBase<unknown, any>,
-  MsgOpts = AccountSet extends AccountSetBase<infer M, any> ? M : never,
-  Queries = AccountSet extends AccountSetBase<unknown, infer Q> ? Q : never,
-  Opts = AccountSetOpts<MsgOpts>
-> extends HasMapStore<AccountSet> {
+  Injects extends Array<IObject>,
+  AccountSetReturn = AccountSetBase & UnionToIntersection<Injects[number]>
+> extends HasMapStore<AccountSetReturn> {
+  protected accountSetCreators: ChainedFunctionifyTuple<
+    { accountSetBase: AccountSetBaseSuper },
+    // chainGetter: ChainGetter,
+    // chainId: string,
+    [ChainGetter, string],
+    Injects
+  >;
+
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
       removeEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly accountSetCreator: (new (
-      eventListener: {
-        addEventListener: (type: string, fn: () => unknown) => void;
-        removeEventListener: (type: string, fn: () => unknown) => void;
-      },
-      chainGetter: ChainGetter,
-      chainId: string,
-      queriesStore: QueriesStore<
-        Queries extends Array<IObject> ? Queries : never
-      >,
-      opts: Opts
-    ) => AccountSet) & { defaultMsgOpts: MsgOpts },
     protected readonly chainGetter: ChainGetter,
-    protected readonly queriesStore: QueriesStore<
-      Queries extends Array<IObject> ? Queries : never
-    >,
-    protected readonly storeOpts: AccountStoreOpts<MsgOpts>
+    protected readonly storeOpts: AccountStoreOpts,
+    ...accountSetCreators: ChainedFunctionifyTuple<
+      { accountSetBase: AccountSetBaseSuper },
+      // chainGetter: ChainGetter,
+      // chainId: string,
+      [ChainGetter, string],
+      Injects
+    >
   ) {
     super((chainId: string) => {
-      return new accountSetCreator(
-        this.eventListener,
-        this.chainGetter,
+      const accountSetBase = new AccountSetBaseSuper(
+        eventListener,
+        chainGetter,
         chainId,
-        this.queriesStore,
-        (deepmerge(
-          deepmerge(
-            {
-              msgOpts: accountSetCreator.defaultMsgOpts,
-            },
-            this.storeOpts.defaultOpts
-          ),
-          this.storeOpts.chainOpts?.find((opts) => opts.chainId === chainId) ??
-            {}
-        ) as unknown) as Opts
+        this.storeOpts.defaultOpts
       );
+
+      const injected = mergeStores(
+        { accountSetBase },
+        [this.chainGetter, chainId],
+        ...this.accountSetCreators
+      );
+
+      for (const key of Object.keys(injected)) {
+        if (key !== "accountSetBase") {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          accountSetBase[key] = injected[key];
+        }
+      }
+
+      return accountSetBase as any;
     });
 
-    const defaultOpts = deepmerge(
-      {
-        msgOpts: accountSetCreator.defaultMsgOpts,
-      },
-      this.storeOpts.defaultOpts
-    );
-    for (const opts of this.storeOpts.chainOpts ?? []) {
-      if (
-        opts.prefetching ||
-        (defaultOpts.prefetching && opts.prefetching !== false)
-      ) {
-        this.getAccount(opts.chainId);
-      }
-    }
+    this.accountSetCreators = accountSetCreators;
   }
 
-  getAccount(chainId: string): AccountSet {
+  getAccount(chainId: string): AccountSetReturn {
     return this.get(chainId);
   }
 
