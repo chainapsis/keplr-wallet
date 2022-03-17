@@ -38,7 +38,7 @@ export const CosmwasmAccount = {
           chainId,
           options.queriesStore,
           deepmerge<CosmwasmMsgOpts, DeepPartial<CosmwasmMsgOpts>>(
-            defaultMsgOpts,
+            defaultCosmwasmMsgOpts,
             msgOptsFromCreator ? msgOptsFromCreator : {}
           )
         ),
@@ -55,7 +55,7 @@ export interface CosmwasmMsgOpts {
   readonly executeWasm: Pick<MsgOpt, "type">;
 }
 
-export const defaultMsgOpts: CosmwasmMsgOpts = {
+export const defaultCosmwasmMsgOpts: CosmwasmMsgOpts = {
   send: {
     cw20: {
       gas: 150000,

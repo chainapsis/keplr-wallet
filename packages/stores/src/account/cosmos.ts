@@ -61,7 +61,7 @@ export const CosmosAccount = {
           chainId,
           options.queriesStore,
           deepmerge<CosmosMsgOpts, DeepPartial<CosmosMsgOpts>>(
-            defaultMsgOpts,
+            defaultCosmosMsgOpts,
             msgOptsFromCreator ? msgOptsFromCreator : {}
           ),
           options
@@ -84,7 +84,7 @@ export interface CosmosMsgOpts {
   readonly govVote: MsgOpt;
 }
 
-export const defaultMsgOpts: CosmosMsgOpts = {
+export const defaultCosmosMsgOpts: CosmosMsgOpts = {
   send: {
     native: {
       type: "cosmos-sdk/MsgSend",

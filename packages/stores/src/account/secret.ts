@@ -38,7 +38,7 @@ export const SecretAccount = {
           chainId,
           options.queriesStore,
           deepmerge<SecretMsgOpts, DeepPartial<SecretMsgOpts>>(
-            defaultMsgOpts,
+            defaultSecretMsgOpts,
             msgOptsFromCreator ? msgOptsFromCreator : {}
           )
         ),
@@ -56,7 +56,7 @@ export interface SecretMsgOpts {
   readonly executeSecretWasm: Pick<MsgOpt, "type">;
 }
 
-export const defaultMsgOpts: SecretMsgOpts = {
+export const defaultSecretMsgOpts: SecretMsgOpts = {
   send: {
     secret20: {
       gas: 250000,

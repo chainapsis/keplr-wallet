@@ -4,4 +4,3 @@ export * from "./get-keplr";
 export * from "./secret";
 export * from "./store";
 export * from "./cosmwasm";
-export * from "./all";
