@@ -138,93 +138,6 @@ export class RootStore {
       })
     );
 
-    const chainOpts = this.chainStore.chainInfos.map((chainInfo) => {
-      // In certik, change the msg type of the MsgSend to "bank/MsgSend"
-      if (chainInfo.chainId.startsWith("shentu-")) {
-        return {
-          chainId: chainInfo.chainId,
-          msgOpts: {
-            send: {
-              native: {
-                type: "bank/MsgSend",
-              },
-            },
-          },
-        };
-      }
-
-      // In akash or sifchain, increase the default gas for sending
-      if (
-        chainInfo.chainId.startsWith("akashnet-") ||
-        chainInfo.chainId.startsWith("sifchain")
-      ) {
-        return {
-          chainId: chainInfo.chainId,
-          msgOpts: {
-            send: {
-              native: {
-                gas: 120000,
-              },
-            },
-          },
-        };
-      }
-
-      if (chainInfo.chainId.startsWith("secret-")) {
-        return {
-          chainId: chainInfo.chainId,
-          msgOpts: {
-            send: {
-              native: {
-                gas: 20000,
-              },
-              secret20: {
-                gas: 50000,
-              },
-            },
-            withdrawRewards: {
-              gas: 25000,
-            },
-            createSecret20ViewingKey: {
-              gas: 50000,
-            },
-          },
-        };
-      }
-
-      return { chainId: chainInfo.chainId };
-    });
-
-    // What a silly...
-    chainOpts.push(
-      {
-        chainId: "bombay-12",
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        prefetching: false,
-        msgOpts: {
-          send: {
-            native: {
-              type: "bank/MsgSend",
-            },
-          },
-        },
-      },
-      {
-        chainId: "columbus-5",
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        prefetching: false,
-        msgOpts: {
-          send: {
-            native: {
-              type: "bank/MsgSend",
-            },
-          },
-        },
-      }
-    );
-
     this.accountStore = new AccountStore(
       window,
       this.chainStore,
@@ -237,14 +150,98 @@ export class RootStore {
       },
       CosmosAccount.use({
         queriesStore: this.queriesStore,
+        msgOptsCreator: (chainId) => {
+          // In certik, change the msg type of the MsgSend to "bank/MsgSend"
+          if (chainId.startsWith("shentu-")) {
+            return {
+              send: {
+                native: {
+                  type: "bank/MsgSend",
+                },
+              },
+            };
+          }
+
+          // In akash or sifchain, increase the default gas for sending
+          if (
+            chainId.startsWith("akashnet-") ||
+            chainId.startsWith("sifchain")
+          ) {
+            return {
+              send: {
+                native: {
+                  gas: 120000,
+                },
+              },
+            };
+          }
+
+          if (chainId.startsWith("secret-")) {
+            return {
+              send: {
+                native: {
+                  gas: 20000,
+                },
+              },
+              withdrawRewards: {
+                gas: 25000,
+              },
+            };
+          }
+
+          // For terra related chains
+          if (
+            chainId.startsWith("bombay-") ||
+            chainId.startsWith("columbus-")
+          ) {
+            return {
+              send: {
+                native: {
+                  type: "bank/MsgSend",
+                },
+              },
+            };
+          }
+        },
       }),
       CosmwasmAccount.use({
         queriesStore: this.queriesStore,
       }),
       SecretAccount.use({
         queriesStore: this.queriesStore,
+        msgOptsCreator: (chainId) => {
+          if (chainId.startsWith("secret-")) {
+            return {
+              send: {
+                secret20: {
+                  gas: 50000,
+                },
+              },
+              createSecret20ViewingKey: {
+                gas: 50000,
+              },
+            };
+          }
+        },
       })
     );
+
+    if (!window.location.href.includes("#/unlock")) {
+      // Start init for registered chains so that users can see account address more quickly.
+      // Because {autoInit: true} is given as the default option above,
+      // initialization for the account starts at this time just by using getAccount().
+      for (const chainInfo of this.chainStore.chainInfos) {
+        this.accountStore.getAccount(chainInfo.chainId);
+      }
+    } else {
+      // When the unlock request sent from external webpage,
+      // it will open the extension popup below the uri "/unlock".
+      // But, in this case, if the prefetching option is true, it will redirect
+      // the page to the "/unlock" with **interactionInternal=true**
+      // because prefetching will request the unlock from the internal.
+      // To prevent this problem, just check the first uri is "#/unlcok" and
+      // if it is "#/unlock", don't use the prefetching option.
+    }
 
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),
