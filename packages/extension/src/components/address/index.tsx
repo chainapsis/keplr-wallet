@@ -8,6 +8,7 @@ export interface AddressProps {
   children: string;
   tooltipFontSize?: string;
   tooltipAddress?: string;
+  iconClass?: string;
 
   lineBreakBeforePrefix?: boolean;
 }
@@ -34,6 +35,8 @@ export class Address extends React.Component<AddressProps> {
       ? this.props.tooltipAddress
       : children;
 
+    const iconClass = [this.props.iconClass, "pr-2"].join(" ");
+
     return (
       <ToolTip
         trigger="hover"
@@ -55,6 +58,7 @@ export class Address extends React.Component<AddressProps> {
           </div>
         }
       >
+        {this.props.iconClass ? <i className={iconClass} /> : ""}
         {Bech32Address.shortenAddress(children, this.props.maxCharacters)}
       </ToolTip>
     );

@@ -59,7 +59,11 @@ export const AccountView: FunctionComponent = observer(() => {
           className={styleAccount.address}
           onClick={() => copyAddress(accountInfo.bech32Address)}
         >
-          <Address maxCharacters={22} lineBreakBeforePrefix={false}>
+          <Address
+            maxCharacters={22}
+            lineBreakBeforePrefix={false}
+            iconClass="fas fa-copy"
+          >
             {accountInfo.walletStatus === WalletStatus.Loaded &&
             accountInfo.bech32Address
               ? accountInfo.bech32Address
