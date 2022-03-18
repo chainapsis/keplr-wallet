@@ -137,7 +137,7 @@ export class CosmosAccountImpl {
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
-    protected readonly msgOpts: CosmosMsgOpts,
+    protected readonly _msgOpts: CosmosMsgOpts,
     protected readonly txOpts: {
       wsObject?: new (url: string, protocols?: string | string[]) => WebSocket;
       preTxEvents?: {
@@ -148,6 +148,10 @@ export class CosmosAccountImpl {
     }
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
+  }
+
+  get msgOpts(): CosmosMsgOpts {
+    return this._msgOpts;
   }
 
   protected async processSendToken(

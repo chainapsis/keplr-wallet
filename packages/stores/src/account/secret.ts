@@ -78,9 +78,13 @@ export class SecretAccountImpl {
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: IQueriesStore<SecretQueries>,
-    protected readonly msgOpts: SecretMsgOpts
+    protected readonly _msgOpts: SecretMsgOpts
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
+  }
+
+  get msgOpts(): SecretMsgOpts {
+    return this._msgOpts;
   }
 
   protected async processSendToken(

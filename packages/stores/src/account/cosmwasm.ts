@@ -73,9 +73,13 @@ export class CosmwasmAccountImpl {
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: IQueriesStore<CosmwasmQueries>,
-    protected readonly msgOpts: CosmwasmMsgOpts
+    protected readonly _msgOpts: CosmwasmMsgOpts
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
+  }
+
+  get msgOpts(): CosmwasmMsgOpts {
+    return this._msgOpts;
   }
 
   protected async processSendToken(
