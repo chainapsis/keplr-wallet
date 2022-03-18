@@ -1,32 +1,33 @@
 import { ChainStore } from "./chain";
 import { EmbedChainInfos } from "../config";
-import { FiatCurrencies, AmplitudeApiKey } from "../config.ui";
+import { AmplitudeApiKey, FiatCurrencies } from "../config.ui";
 import {
-  KeyRingStore,
-  InteractionStore,
-  QueriesStore,
-  CoinGeckoPriceStore,
   AccountStore,
-  PermissionStore,
-  SignInteractionStore,
-  LedgerInitStore,
-  TokensStore,
   ChainSuggestStore,
+  CoinGeckoPriceStore,
+  CosmosAccount,
+  CosmosQueries,
+  CosmwasmAccount,
+  CosmwasmQueries,
+  getKeplrFromWindow,
   IBCChannelStore,
   IBCCurrencyRegsitrar,
-  getKeplrFromWindow,
-  CosmosQueries,
-  CosmwasmQueries,
-  SecretQueries,
-  CosmosAccount,
+  InteractionStore,
+  KeyRingStore,
+  LedgerInitStore,
+  PermissionStore,
+  QueriesStore,
   SecretAccount,
-  CosmwasmAccount,
+  SecretQueries,
+  SignInteractionStore,
+  TokensStore,
+  WalletStatus,
 } from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
-  ExtensionRouter,
   ContentScriptEnv,
   ContentScriptGuards,
+  ExtensionRouter,
   InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -228,10 +229,14 @@ export class RootStore {
 
     if (!window.location.href.includes("#/unlock")) {
       // Start init for registered chains so that users can see account address more quickly.
-      // Because {autoInit: true} is given as the default option above,
-      // initialization for the account starts at this time just by using getAccount().
       for (const chainInfo of this.chainStore.chainInfos) {
-        this.accountStore.getAccount(chainInfo.chainId);
+        const account = this.accountStore.getAccount(chainInfo.chainId);
+        // Because {autoInit: true} is given as the default option above,
+        // initialization for the account starts at this time just by using getAccount().
+        // However, run safe check on current status and init if status is not inited.
+        if (account.walletStatus === WalletStatus.NotInit) {
+          account.init();
+        }
       }
     } else {
       // When the unlock request sent from external webpage,
