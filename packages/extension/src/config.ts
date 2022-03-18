@@ -45,6 +45,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 5000000000,
       high: 6250000000,
     },
+    walletUrlForStaking: "https://browse-fetchhub.fetch.ai/validators",
   },
   {
     rpc: "https://rpc-capricorn.fetch.ai",
@@ -87,6 +88,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 5000000000,
       high: 6250000000,
     },
+    walletUrlForStaking: "https://browse-capricorn.fetch.ai/validators",
   },
 ];
 
