@@ -24,6 +24,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "FET",
         coinMinimalDenom: "afet",
         coinDecimals: 18,
+        coinGeckoId: "fetch-ai",
       },
       {
         coinDenom: "MOBX",
@@ -36,6 +37,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "FET",
         coinMinimalDenom: "afet",
         coinDecimals: 18,
+        coinGeckoId: "fetch-ai",
       },
     ],
     coinType: 118,
@@ -56,7 +58,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "TESTFET",
       coinMinimalDenom: "atestfet",
       coinDecimals: 18,
-      coinGeckoId: "fetch-ai",
     },
     bip44: {
       coinType: 118,
