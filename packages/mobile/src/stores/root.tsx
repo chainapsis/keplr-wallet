@@ -126,7 +126,7 @@ export class RootStore {
               chainId: chainInfo.chainId,
               msgOpts: {
                 withdrawRewards: {
-                  gas: 200000,
+                  gas: 300000,
                 },
               },
             };
