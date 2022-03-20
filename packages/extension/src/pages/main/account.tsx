@@ -50,13 +50,13 @@ export const AccountView: FunctionComponent = observer(() => {
               intl.formatMessage({
                 id: "setting.keyring.unnamed-account",
               })
-            : accountInfo.walletStatus === WalletStatus.Rejected
-            ? "Unsupported Key"
+            : accountInfo.isWalletRejectedWithError
+            ? "Unable to Load Key"
             : "Loading..."}
         </div>
         <div style={{ flex: 1 }} />
       </div>
-      {accountInfo.walletStatus === WalletStatus.Rejected && (
+      {accountInfo.isWalletRejectedWithError && (
         <ToolTip
           tooltip="Could not load public key for this device"
           theme="dark"
