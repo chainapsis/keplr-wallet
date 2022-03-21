@@ -71,15 +71,13 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
         text="Save"
         size="large"
         disabled={
-          !name ||
-          recipientConfig.getError() != null ||
-          memoConfig.getError() != null
+          !name || recipientConfig.error != null || memoConfig.error != null
         }
         onPress={async () => {
           if (
             name &&
-            recipientConfig.getError() == null &&
-            memoConfig.getError() == null
+            recipientConfig.error == null &&
+            memoConfig.error == null
           ) {
             await addressBookConfig.addAddressBook({
               name,

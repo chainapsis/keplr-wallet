@@ -38,7 +38,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
   const sendConfigs = useDelegateTxConfig(
     chainStore,
     chainStore.current.chainId,
-    account.msgOpts["delegate"].gas,
+    account.cosmos.msgOpts.delegate.gas,
     account.bech32Address,
     queries.queryBalances,
     EthereumEndpoint
@@ -49,11 +49,11 @@ export const DelegateScreen: FunctionComponent = observer(() => {
   }, [sendConfigs.recipientConfig, validatorAddress]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(

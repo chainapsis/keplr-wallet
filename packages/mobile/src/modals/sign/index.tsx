@@ -56,8 +56,8 @@ export const SignModal: FunctionComponent<{
     const gasConfig = useGasConfig(chainStore, chainId, 1);
     const amountConfig = useSignDocAmountConfig(
       chainStore,
+      accountStore,
       chainId,
-      accountStore.getAccount(chainId).msgOpts,
       signer
     );
     const feeConfig = useFeeConfig(
@@ -130,7 +130,7 @@ export const SignModal: FunctionComponent<{
           const account = accountStore.getAccount(chainId);
           const chainInfo = chainStore.getChain(chainId);
           const { title, content, scrollViewHorizontal } = renderAminoMessage(
-            account.msgOpts,
+            account,
             msg,
             chainInfo.currencies
           );
@@ -246,8 +246,8 @@ export const SignModal: FunctionComponent<{
           disabled={
             signDocWapper == null ||
             signDocHelper.signDocWrapper == null ||
-            memoConfig.getError() != null ||
-            feeConfig.getError() != null
+            memoConfig.error != null ||
+            feeConfig.error != null
           }
           loading={signInteractionStore.isLoading}
           onPress={async () => {

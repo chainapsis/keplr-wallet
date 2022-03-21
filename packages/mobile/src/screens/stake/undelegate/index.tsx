@@ -67,7 +67,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
   const sendConfigs = useUndelegateTxConfig(
     chainStore,
     chainStore.current.chainId,
-    account.msgOpts["undelegate"].gas,
+    account.cosmos.msgOpts.undelegate.gas,
     account.bech32Address,
     queries.queryBalances,
     queries.cosmos.queryDelegations,
@@ -79,11 +79,11 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
   }, [sendConfigs.recipientConfig, validatorAddress]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   return (

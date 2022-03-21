@@ -49,7 +49,7 @@ export const AddressInput: FunctionComponent<{
       recipientConfig.rawRecipient
     );
 
-    const error = recipientConfig.getError();
+    const error = recipientConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
         switch (error.constructor) {
