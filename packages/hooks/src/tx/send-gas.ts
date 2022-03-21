@@ -3,7 +3,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { IAmountConfig } from "./types";
 import { useState } from "react";
-import { computed, makeObservable, override } from "mobx";
+import { makeObservable, override } from "mobx";
 import { AccountStore } from "./send-types";
 import { UnknownCurrencyError } from "./errors";
 
@@ -43,7 +43,7 @@ export class SendGasConfig extends GasConfig {
     return super.gas;
   }
 
-  @computed
+  @override
   get error(): Error | undefined {
     if (this.amountConfig.sendCurrency) {
       const denomHelper = new DenomHelper(
