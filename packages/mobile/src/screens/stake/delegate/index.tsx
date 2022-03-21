@@ -10,7 +10,7 @@ import { EthereumEndpoint } from "../../../config";
 import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 
 export const DelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -57,7 +57,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
   const txStateIsValid = sendConfigError == null;
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
 
   const validator = bondedValidators.getValidator(validatorAddress);

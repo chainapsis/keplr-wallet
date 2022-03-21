@@ -9,7 +9,7 @@ import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Text, View } from "react-native";
 import { Button } from "../../../components/button";
 import { Card, CardBody, CardDivider } from "../../../components/card";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { Buffer } from "buffer/";
 import { useSmartNavigation } from "../../../navigation";
@@ -39,24 +39,24 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   const validator =
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Bonded)
+      .getQueryStatus(Staking.BondStatus.Bonded)
       .getValidator(validatorAddress) ||
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Unbonding)
+      .getQueryStatus(Staking.BondStatus.Unbonding)
       .getValidator(validatorAddress) ||
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Unbonded)
+      .getQueryStatus(Staking.BondStatus.Unbonded)
       .getValidator(validatorAddress);
 
   const validatorThumbnail = validator
     ? queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Bonded)
+        .getQueryStatus(Staking.BondStatus.Bonded)
         .getValidatorThumbnail(validatorAddress) ||
       queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Unbonding)
+        .getQueryStatus(Staking.BondStatus.Unbonding)
         .getValidatorThumbnail(validatorAddress) ||
       queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Unbonded)
+        .getQueryStatus(Staking.BondStatus.Unbonded)
         .getValidatorThumbnail(validatorAddress)
     : undefined;
 

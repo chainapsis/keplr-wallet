@@ -1,5 +1,8 @@
-import { ChainGetter, ObservableQueryDelegations } from "@keplr-wallet/stores";
-import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
+import {
+  ChainGetter,
+  ObservableQueryDelegations,
+  ObservableQueryBalances,
+} from "@keplr-wallet/stores";
 import {
   useFeeConfig,
   useGasConfig,

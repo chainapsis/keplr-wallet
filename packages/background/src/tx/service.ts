@@ -4,7 +4,7 @@ import { TYPES } from "../types";
 import Axios from "axios";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
-import { TendermintTxTracer } from "@keplr-wallet/cosmos/build/tx-tracer";
+import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Notification } from "./types";
 
 import { Buffer } from "buffer/";

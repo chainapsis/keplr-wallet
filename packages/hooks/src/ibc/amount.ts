@@ -1,6 +1,5 @@
 import { AmountConfig, IFeeConfig } from "../tx";
-import { ChainGetter } from "@keplr-wallet/stores";
-import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
+import { ChainGetter, ObservableQueryBalances } from "@keplr-wallet/stores";
 import { AppCurrency } from "@keplr-wallet/types";
 import { computed, makeObservable } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";

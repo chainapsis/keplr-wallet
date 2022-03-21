@@ -1,5 +1,8 @@
-import { ChainGetter, CosmosMsgOpts } from "@keplr-wallet/stores";
-import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
+import {
+  ChainGetter,
+  CosmosMsgOpts,
+  ObservableQueryBalances,
+} from "@keplr-wallet/stores";
 import { useFeeConfig, useMemoConfig } from "../tx";
 import { useIBCAmountConfig } from "./amount";
 import { useIBCTransferGasConfig } from "./gas";
