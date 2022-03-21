@@ -3,9 +3,8 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { IAmountConfig } from "./types";
 import { useState } from "react";
-import { makeObservable, override } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import { AccountStore } from "./send-types";
-import { computedFn } from "mobx-utils";
 import { UnknownCurrencyError } from "./errors";
 
 export class SendGasConfig extends GasConfig {
@@ -44,7 +43,8 @@ export class SendGasConfig extends GasConfig {
     return super.gas;
   }
 
-  getError = computedFn((): Error | undefined => {
+  @computed
+  get error(): Error | undefined {
     if (this.amountConfig.sendCurrency) {
       const denomHelper = new DenomHelper(
         this.amountConfig.sendCurrency.coinMinimalDenom
@@ -73,8 +73,8 @@ export class SendGasConfig extends GasConfig {
       }
     }
 
-    return super.getError();
-  });
+    return super.error;
+  }
 }
 
 export const useSendGasConfig = (

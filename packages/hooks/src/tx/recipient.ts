@@ -18,7 +18,6 @@ import {
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useState } from "react";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
-import { computedFn } from "mobx-utils";
 
 export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @observable
@@ -108,7 +107,8 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
     this._ensEndpoint = endpoint;
   }
 
-  getError = computedFn((): Error | undefined => {
+  @computed
+  get error(): Error | undefined {
     if (!this.rawRecipient) {
       return new EmptyAddressError("Address is empty");
     }
@@ -144,7 +144,7 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
       );
     }
     return;
-  });
+  }
 
   get rawRecipient(): string {
     return this._rawRecipient;

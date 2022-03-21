@@ -135,9 +135,9 @@ export const IBCTransferPageChannel: FunctionComponent<{
 }> = observer(({ channelConfig, recipientConfig, memoConfig, onNext }) => {
   const intl = useIntl();
   const isValid =
-    channelConfig.getError() == null &&
-    recipientConfig.getError() == null &&
-    memoConfig.getError() == null;
+    channelConfig.error == null &&
+    recipientConfig.error == null &&
+    memoConfig.error == null;
 
   const isChannelSet = channelConfig.channel != null;
 
@@ -202,9 +202,9 @@ export const IBCTransferPageAmount: FunctionComponent<{
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const isValid =
-    amountConfig.getError() == null &&
-    feeConfig.getError() == null &&
-    gasConfig.getError() == null;
+    amountConfig.error == null &&
+    feeConfig.error == null &&
+    gasConfig.error == null;
 
   return (
     <form className={style.formContainer}>

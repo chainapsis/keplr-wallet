@@ -192,7 +192,7 @@ export const SignPage: FunctionComponent = observer(() => {
       return false;
     }
 
-    return memoConfig.getError() != null || feeConfig.getError() != null;
+    return memoConfig.error != null || feeConfig.error != null;
   })();
 
   return (

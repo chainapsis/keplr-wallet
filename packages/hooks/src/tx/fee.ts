@@ -182,9 +182,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     ).maxDecimals(feeCurrency.coinDecimals);
   });
 
-  getError = computedFn((): Error | undefined => {
-    if (this.gasConfig.getError()) {
-      return this.gasConfig.getError();
+  @computed
+  get error(): Error | undefined {
+    if (this.gasConfig.error) {
+      return this.gasConfig.error;
     }
 
     if (this.disableBalanceCheck) {
@@ -233,7 +234,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         return new InsufficientFeeError("insufficient fee");
       }
     }
-  });
+  }
 
   @action
   setDisableBalanceCheck(bool: boolean) {

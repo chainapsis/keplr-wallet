@@ -150,7 +150,7 @@ export const FeeButtonsInner: FunctionComponent<
 
     let isFeeLoading = false;
 
-    const error = feeConfig.getError();
+    const error = feeConfig.error;
     const errorText: string | undefined = (() => {
       if (error) {
         switch (error.constructor) {

@@ -3,7 +3,6 @@ import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
-import { computedFn } from "mobx-utils";
 
 export class GasConfig extends TxChainSetter implements IGasConfig {
   /*
@@ -69,7 +68,8 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
     }
   }
 
-  getError = computedFn((): Error | undefined => {
+  @computed
+  get error(): Error | undefined {
     if (this._gasRaw === "") {
       return new Error("Gas not set");
     }
@@ -86,7 +86,7 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
       return new Error("Gas should be greater than 0");
     }
     return;
-  });
+  }
 }
 
 export const useGasConfig = (

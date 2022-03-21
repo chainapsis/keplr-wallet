@@ -222,7 +222,7 @@ export class SignDocAmountConfig
     };
   }
 
-  getError(): Error | undefined {
+  get error(): Error | undefined {
     return undefined;
   }
 

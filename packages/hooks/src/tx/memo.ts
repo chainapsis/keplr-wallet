@@ -3,7 +3,6 @@ import { action, makeObservable, observable } from "mobx";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { TxChainSetter } from "./chain";
 import { useState } from "react";
-import { computedFn } from "mobx-utils";
 
 export class MemoConfig extends TxChainSetter implements IMemoConfig {
   @observable
@@ -23,9 +22,9 @@ export class MemoConfig extends TxChainSetter implements IMemoConfig {
     this._memo = memo;
   }
 
-  getError = computedFn((): Error | undefined => {
+  get error(): Error | undefined {
     return undefined;
-  });
+  }
 }
 
 export const useMemoConfig = (chainGetter: ChainGetter, chainId: string) => {
