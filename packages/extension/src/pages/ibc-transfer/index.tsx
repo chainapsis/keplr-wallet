@@ -40,7 +40,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
+    accountInfo.cosmos.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
     queries.queryBalances,
     EthereumEndpoint

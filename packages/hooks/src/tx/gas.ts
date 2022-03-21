@@ -1,8 +1,9 @@
 import { IGasConfig } from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
+import { computedFn } from "mobx-utils";
 
 export class GasConfig extends TxChainSetter implements IGasConfig {
   /*
@@ -33,6 +34,7 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
     return this._gasRaw;
   }
 
+  @computed
   get gas(): number {
     // If the gasRaw is undefined,
     // it means that the user never input something yet.
@@ -67,7 +69,7 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
     }
   }
 
-  getError(): Error | undefined {
+  getError = computedFn((): Error | undefined => {
     if (this._gasRaw === "") {
       return new Error("Gas not set");
     }
@@ -84,7 +86,7 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
       return new Error("Gas should be greater than 0");
     }
     return;
-  }
+  });
 }
 
 export const useGasConfig = (

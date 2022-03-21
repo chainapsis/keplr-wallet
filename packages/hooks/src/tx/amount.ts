@@ -13,6 +13,7 @@ import {
 } from "./errors";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { useState } from "react";
+import { computedFn } from "mobx-utils";
 
 export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
@@ -187,7 +188,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     return this.chainInfo.currencies;
   }
 
-  getError(): Error | undefined {
+  getError = computedFn((): Error | undefined => {
     const sendCurrency = this.sendCurrency;
     if (!sendCurrency) {
       return new Error("Currency to send not set");
@@ -220,7 +221,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     }
 
     return;
-  }
+  });
 }
 
 export const useAmountConfig = (

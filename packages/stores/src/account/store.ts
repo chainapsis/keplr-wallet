@@ -6,7 +6,11 @@ import {
   mergeStores,
 } from "../common";
 import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
-import { UnionToIntersection } from "utility-types";
+import { DeepReadonly, UnionToIntersection } from "utility-types";
+
+export interface IAccountStore<T extends IObject> {
+  getAccount(chainId: string): DeepReadonly<AccountSetBase & T>;
+}
 
 export class AccountStore<
   Injects extends Array<IObject>,

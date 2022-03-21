@@ -66,8 +66,8 @@ export const SendPage: FunctionComponent = observer(() => {
 
   const sendConfigs = useSendTxConfig(
     chainStore,
+    accountStore,
     current.chainId,
-    accountInfo.msgOpts.send,
     accountInfo.bech32Address,
     queriesStore.get(current.chainId).queryBalances,
     EthereumEndpoint

@@ -56,8 +56,8 @@ export const SignPage: FunctionComponent = observer(() => {
   const gasConfig = useGasConfig(chainStore, current.chainId, 1);
   const amountConfig = useSignDocAmountConfig(
     chainStore,
+    accountStore,
     current.chainId,
-    accountStore.getAccount(current.chainId).msgOpts,
     signer
   );
   const feeConfig = useFeeConfig(
