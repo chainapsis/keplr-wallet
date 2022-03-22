@@ -7,6 +7,7 @@ import styleAccount from "./account.module.scss";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useNotification } from "../../components/notification";
+import { ToolTip } from "../../components/tooltip";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 
@@ -49,25 +50,43 @@ export const AccountView: FunctionComponent = observer(() => {
               intl.formatMessage({
                 id: "setting.keyring.unnamed-account",
               })
+            : accountInfo.isWalletRejectedWithError
+            ? "Unable to Load Key"
             : "Loading..."}
         </div>
         <div style={{ flex: 1 }} />
       </div>
-      <div className={styleAccount.containerAccount}>
-        <div style={{ flex: 1 }} />
-        <div
-          className={styleAccount.address}
-          onClick={() => copyAddress(accountInfo.bech32Address)}
+      {accountInfo.isWalletRejectedWithError && (
+        <ToolTip
+          tooltip="Could not load public key for this device"
+          theme="dark"
+          trigger="hover"
+          options={{
+            placement: "top",
+          }}
         >
-          <Address maxCharacters={22} lineBreakBeforePrefix={false}>
-            {accountInfo.walletStatus === WalletStatus.Loaded &&
-            accountInfo.bech32Address
-              ? accountInfo.bech32Address
-              : "..."}
-          </Address>
+          <i
+            className={`fas fa-exclamation-triangle text-danger ${styleAccount.unsupportedKeyIcon}`}
+          />
+        </ToolTip>
+      )}
+      {accountInfo.walletStatus !== WalletStatus.Rejected && (
+        <div className={styleAccount.containerAccount}>
+          <div style={{ flex: 1 }} />
+          <div
+            className={styleAccount.address}
+            onClick={() => copyAddress(accountInfo.bech32Address)}
+          >
+            <Address maxCharacters={22} lineBreakBeforePrefix={false}>
+              {accountInfo.walletStatus === WalletStatus.Loaded &&
+              accountInfo.bech32Address
+                ? accountInfo.bech32Address
+                : "..."}
+            </Address>
+          </div>
+          <div style={{ flex: 1 }} />
         </div>
-        <div style={{ flex: 1 }} />
-      </div>
+      )}
       {accountInfo.hasEvmosHexAddress && (
         <div
           className={styleAccount.containerAccount}

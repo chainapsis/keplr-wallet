@@ -585,6 +585,12 @@ export class KeyRing {
         throw new Error("Ledger public key not set");
       }
 
+      if (coinType === 60) {
+        throw new Error(
+          "Ledger is not compatible with this coinType right now"
+        );
+      }
+
       const pubKey = new PubKeySecp256k1(this.ledgerPublicKey);
 
       return {

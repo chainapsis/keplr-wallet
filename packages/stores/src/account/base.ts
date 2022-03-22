@@ -86,6 +86,9 @@ export class AccountSetBase<MsgOpts, Queries> {
   protected _walletStatus: WalletStatus = WalletStatus.NotInit;
 
   @observable
+  protected _walletRejectionError: Error | undefined;
+
+  @observable
   protected _name: string = "";
 
   @observable
@@ -204,6 +207,9 @@ export class AccountSetBase<MsgOpts, Queries> {
     // Set wallet status as loading whenever try to init.
     this._walletStatus = WalletStatus.Loading;
 
+    // Reset previous rejection error message
+    this._walletRejectionError = undefined;
+
     const keplr = yield* toGenerator(this.getKeplr());
     if (!keplr) {
       this._walletStatus = WalletStatus.NotExist;
@@ -220,13 +226,24 @@ export class AccountSetBase<MsgOpts, Queries> {
       return;
     }
 
-    const key = yield* toGenerator(keplr.getKey(this.chainId));
-    this._bech32Address = key.bech32Address;
-    this._name = key.name;
-    this.pubKey = key.pubKey;
+    try {
+      const key = yield* toGenerator(keplr.getKey(this.chainId));
+      this._bech32Address = key.bech32Address;
+      this._name = key.name;
+      this.pubKey = key.pubKey;
 
-    // Set the wallet status as loaded after getting all necessary infos.
-    this._walletStatus = WalletStatus.Loaded;
+      // Set the wallet status as loaded after getting all necessary infos.
+      this._walletStatus = WalletStatus.Loaded;
+    } catch (error: any) {
+      // Caught error loading key
+      // Reset properties, and set status to Rejected
+      this._bech32Address = "";
+      this._name = "";
+      this.pubKey = new Uint8Array(0);
+
+      this._walletStatus = WalletStatus.Rejected;
+      this._walletRejectionError = error as Error;
+    }
   }
 
   @action
@@ -527,6 +544,13 @@ export class AccountSetBase<MsgOpts, Queries> {
 
   get walletStatus(): WalletStatus {
     return this._walletStatus;
+  }
+
+  get isWalletRejectedWithError(): boolean {
+    return (
+      this.walletStatus === WalletStatus.Rejected &&
+      this._walletRejectionError !== undefined
+    );
   }
 
   get name(): string {
