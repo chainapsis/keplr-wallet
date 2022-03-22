@@ -59,6 +59,7 @@ export class CosmosQueries {
   public readonly queryPool: DeepReadonly<ObservableQueryStakingPool>;
   public readonly queryStakingParams: DeepReadonly<ObservableQueryStakingParams>;
   public readonly querySupplyTotal: DeepReadonly<ObservableQuerySupplyTotal>;
+  public readonly queryDistributionParams: DeepReadonly<ObservableQueryDistributionParams>;
   public readonly queryInflation: DeepReadonly<ObservableQueryInflation>;
   public readonly queryRewards: DeepReadonly<ObservableQueryRewards>;
   public readonly queryDelegations: DeepReadonly<ObservableQueryDelegations>;
@@ -121,6 +122,12 @@ export class CosmosQueries {
       chainGetter
     );
 
+    this.queryDistributionParams = new ObservableQueryDistributionParams(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
     this.queryInflation = new ObservableQueryInflation(
       chainId,
       chainGetter,
@@ -137,7 +144,7 @@ export class CosmosQueries {
         osmosisMintParams
       ),
       osmosisMintParams,
-      new ObservableQueryDistributionParams(kvStore, chainId, chainGetter)
+      this.queryDistributionParams
     );
     this.queryRewards = new ObservableQueryRewards(
       kvStore,

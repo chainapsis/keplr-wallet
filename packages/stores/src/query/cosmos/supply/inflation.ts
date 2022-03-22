@@ -122,12 +122,6 @@ export class ObservableQueryInflation {
           this._queryPool.response.data.result.bonded_tokens
         );
 
-        // community tax is normally small (~0.02), so assume zero if the query fails
-        const community_tax = new Dec(
-          this._queryDistributionParams.response?.data.result.community_tax ??
-            "0"
-        );
-
         const totalStr = (() => {
           if (chainInfo.chainId.startsWith("osmosis")) {
             // For osmosis, for now, just assume that the current supply is 100,000,000 with 6 decimals.
@@ -151,7 +145,11 @@ export class ObservableQueryInflation {
           //   apr = new_coins_per_year / total_bonded_tokens
 
           const ratio = bondedToken.quo(total);
-          dec = dec.mul(new Dec(1).sub(community_tax)).quo(ratio);
+          dec = dec
+            .mul(
+              new Dec(1).sub(this._queryDistributionParams.communityTax.toDec())
+            )
+            .quo(ratio);
           // TODO: Rounding?
         }
       }
