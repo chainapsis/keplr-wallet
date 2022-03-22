@@ -50,15 +50,30 @@ export const AccountView: FunctionComponent = observer(() => {
               intl.formatMessage({
                 id: "setting.keyring.unnamed-account",
               })
-            : accountInfo.isWalletRejectedWithError
+            : accountInfo.walletStatus === WalletStatus.Rejected
             ? "Unable to Load Key"
             : "Loading..."}
         </div>
         <div style={{ flex: 1 }} />
       </div>
-      {accountInfo.isWalletRejectedWithError && (
+      {accountInfo.walletStatus === WalletStatus.Rejected && (
         <ToolTip
-          tooltip="Could not load public key for this device"
+          tooltip={(() => {
+            if (
+              accountInfo.rejectionReason &&
+              accountInfo.rejectionReason.message ===
+                "Ledger is not compatible with this coinType right now"
+            ) {
+              return "Ledger is not supported for this chain";
+            }
+
+            let result = "Failed to load account by unknown reason";
+            if (accountInfo.rejectionReason) {
+              result += `: ${accountInfo.rejectionReason.toString()}`;
+            }
+
+            return result;
+          })()}
           theme="dark"
           trigger="hover"
           options={{
