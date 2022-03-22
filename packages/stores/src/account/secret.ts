@@ -146,15 +146,15 @@ export class SecretAccount {
     signOptions?: KeplrSignOptions,
     onFulfill?: (tx: any, viewingKey: string) => void
   ) {
-    const random = new Uint8Array(15);
+    const random = new Uint8Array(32);
     crypto.getRandomValues(random);
-    const entropy = Buffer.from(random).toString("hex");
+    const key = Buffer.from(random).toString("hex");
 
-    const encrypted = await this.sendExecuteSecretContractMsg(
+    await this.sendExecuteSecretContractMsg(
       "createSecret20ViewingKey",
       contractAddress,
       {
-        create_viewing_key: { entropy },
+        set_viewing_key: { key },
       },
       [],
       memo,
@@ -167,38 +167,8 @@ export class SecretAccount {
       signOptions,
       async (tx) => {
         let viewingKey = "";
-        if (tx && "data" in tx && tx.data) {
-          const txData = Buffer.from(tx.data as any, "base64");
-          const dataFields = cosmos.base.abci.v1beta1.TxMsgData.decode(txData);
-          if (dataFields.data.length !== 1) {
-            throw new Error("Invalid length of data fields");
-          }
-
-          const dataField = dataFields.data[0];
-          if (!dataField.data) {
-            throw new Error("Empty data");
-          }
-
-          const keplr = await this.base.getKeplr();
-
-          if (!keplr) {
-            throw new Error("Can't get the Keplr API");
-          }
-
-          const enigmaUtils = keplr.getEnigmaUtils(this.chainId);
-
-          const nonce = encrypted.slice(0, 32);
-
-          const dataOutput = Buffer.from(
-            Buffer.from(
-              await enigmaUtils.decrypt(dataField.data, nonce)
-            ).toString(),
-            "base64"
-          ).toString();
-
-          // Expected: {"create_viewing_key":{"key":"api_key_1k1T...btJQo="}}
-          const data = JSON.parse(dataOutput);
-          viewingKey = data["create_viewing_key"]["key"];
+        if (tx.code === 0) {
+          viewingKey = key;
         }
 
         if (onFulfill) {
