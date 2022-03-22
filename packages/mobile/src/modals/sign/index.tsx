@@ -62,9 +62,9 @@ export const SignModal: FunctionComponent<{
     );
     const feeConfig = useFeeConfig(
       chainStore,
+      queriesStore,
       chainId,
       signer,
-      queriesStore.get(chainId).queryBalances,
       amountConfig,
       gasConfig
     );

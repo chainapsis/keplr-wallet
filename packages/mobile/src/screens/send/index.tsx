@@ -44,14 +44,13 @@ export const SendScreen: FunctionComponent = observer(() => {
     : chainStore.current.chainId;
 
   const account = accountStore.getAccount(chainId);
-  const queries = queriesStore.get(chainId);
 
   const sendConfigs = useSendTxConfig(
     chainStore,
+    queriesStore,
     accountStore,
     chainId,
     account.bech32Address,
-    queries.queryBalances,
     EthereumEndpoint
   );
 

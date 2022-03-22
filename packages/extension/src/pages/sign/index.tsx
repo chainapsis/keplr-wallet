@@ -62,9 +62,9 @@ export const SignPage: FunctionComponent = observer(() => {
   );
   const feeConfig = useFeeConfig(
     chainStore,
+    queriesStore,
     current.chainId,
     signer,
-    queriesStore.get(current.chainId).queryBalances,
     amountConfig,
     gasConfig
   );

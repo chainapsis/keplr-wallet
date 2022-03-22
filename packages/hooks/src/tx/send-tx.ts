@@ -1,4 +1,4 @@
-import { ChainGetter, ObservableQueryBalances } from "@keplr-wallet/stores";
+import { ChainGetter, IQueriesStore } from "@keplr-wallet/stores";
 import { useFeeConfig, useMemoConfig, useRecipientConfig } from "./index";
 import { useSendGasConfig } from "./send-gas";
 import { useAmountConfig } from "./amount";
@@ -6,17 +6,18 @@ import { AccountStore } from "./send-types";
 
 export const useSendTxConfig = (
   chainGetter: ChainGetter,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  queriesStore: IQueriesStore<{}>,
   accountStore: AccountStore,
   chainId: string,
   sender: string,
-  queryBalances: ObservableQueryBalances,
   ensEndpoint?: string
 ) => {
   const amountConfig = useAmountConfig(
     chainGetter,
+    queriesStore,
     chainId,
-    sender,
-    queryBalances
+    sender
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
@@ -28,9 +29,9 @@ export const useSendTxConfig = (
   );
   const feeConfig = useFeeConfig(
     chainGetter,
+    queriesStore,
     chainId,
     sender,
-    queryBalances,
     amountConfig,
     gasConfig
   );

@@ -33,16 +33,15 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
-  const queries = queriesStore.get(chainStore.current.chainId);
 
   const notification = useNotification();
 
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
     chainStore.current.chainId,
     accountInfo.cosmos.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
     EthereumEndpoint
   );
 

@@ -37,10 +37,10 @@ export const DelegateScreen: FunctionComponent = observer(() => {
 
   const sendConfigs = useDelegateTxConfig(
     chainStore,
+    queriesStore,
     chainStore.current.chainId,
     account.cosmos.msgOpts.delegate.gas,
     account.bech32Address,
-    queries.queryBalances,
     EthereumEndpoint
   );
 

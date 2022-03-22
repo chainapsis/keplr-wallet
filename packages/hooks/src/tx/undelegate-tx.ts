@@ -1,7 +1,7 @@
 import {
   ChainGetter,
-  ObservableQueryDelegations,
-  ObservableQueryBalances,
+  IQueriesStore,
+  CosmosQueriesImpl,
 } from "@keplr-wallet/stores";
 import {
   useFeeConfig,
@@ -13,18 +13,19 @@ import { useStakedAmountConfig } from "./staked-amount";
 
 export const useUndelegateTxConfig = (
   chainGetter: ChainGetter,
+  queriesStore: IQueriesStore<{
+    cosmos: Pick<CosmosQueriesImpl, "queryDelegations">;
+  }>,
   chainId: string,
   gas: number,
   sender: string,
-  queryBalances: ObservableQueryBalances,
-  queryDelegations: ObservableQueryDelegations,
   validatorAddress: string
 ) => {
   const amountConfig = useStakedAmountConfig(
     chainGetter,
+    queriesStore,
     chainId,
     sender,
-    queryDelegations,
     validatorAddress
   );
 
@@ -33,9 +34,9 @@ export const useUndelegateTxConfig = (
   gasConfig.setGas(gas);
   const feeConfig = useFeeConfig(
     chainGetter,
+    queriesStore,
     chainId,
     sender,
-    queryBalances,
     amountConfig,
     gasConfig,
     false

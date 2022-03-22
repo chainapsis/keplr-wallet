@@ -66,11 +66,10 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   const sendConfigs = useUndelegateTxConfig(
     chainStore,
+    queriesStore,
     chainStore.current.chainId,
     account.cosmos.msgOpts.undelegate.gas,
     account.bech32Address,
-    queries.queryBalances,
-    queries.cosmos.queryDelegations,
     validatorAddress
   );
 

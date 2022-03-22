@@ -1,5 +1,5 @@
 import { AmountConfig, IFeeConfig } from "../tx";
-import { ChainGetter, ObservableQueryBalances } from "@keplr-wallet/stores";
+import { ChainGetter, IQueriesStore } from "@keplr-wallet/stores";
 import { AppCurrency } from "@keplr-wallet/types";
 import { computed, makeObservable } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
@@ -8,12 +8,13 @@ import { useState } from "react";
 export class IBCAmountConfig extends AmountConfig {
   constructor(
     chainGetter: ChainGetter,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    protected readonly queriesStore: IQueriesStore<{}>,
     initialChainId: string,
     sender: string,
-    feeConfig: IFeeConfig | undefined,
-    queryBalances: ObservableQueryBalances
+    feeConfig: IFeeConfig | undefined
   ) {
-    super(chainGetter, initialChainId, sender, feeConfig, queryBalances);
+    super(chainGetter, queriesStore, initialChainId, sender, feeConfig);
 
     makeObservable(this);
   }
@@ -29,22 +30,16 @@ export class IBCAmountConfig extends AmountConfig {
 
 export const useIBCAmountConfig = (
   chainGetter: ChainGetter,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  queriesStore: IQueriesStore<{}>,
   chainId: string,
-  sender: string,
-  queryBalances: ObservableQueryBalances
+  sender: string
 ) => {
   const [txConfig] = useState(
     () =>
-      new IBCAmountConfig(
-        chainGetter,
-        chainId,
-        sender,
-        undefined,
-        queryBalances
-      )
+      new IBCAmountConfig(chainGetter, queriesStore, chainId, sender, undefined)
   );
   txConfig.setChain(chainId);
-  txConfig.setQueryBalances(queryBalances);
   txConfig.setSender(sender);
 
   return txConfig;

@@ -66,10 +66,10 @@ export const SendPage: FunctionComponent = observer(() => {
 
   const sendConfigs = useSendTxConfig(
     chainStore,
+    queriesStore,
     accountStore,
     current.chainId,
     accountInfo.bech32Address,
-    queriesStore.get(current.chainId).queryBalances,
     EthereumEndpoint
   );
 

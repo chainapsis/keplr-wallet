@@ -1,4 +1,4 @@
-import { ChainGetter, ObservableQueryBalances } from "@keplr-wallet/stores";
+import { ChainGetter, IQueriesStore } from "@keplr-wallet/stores";
 import {
   AmountConfig,
   useFeeConfig,
@@ -17,22 +17,22 @@ export class DelegateAmountConfig extends AmountConfig {
 
 export const useDelegateAmountConfig = (
   chainGetter: ChainGetter,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  queriesStore: IQueriesStore<{}>,
   chainId: string,
-  sender: string,
-  queryBalances: ObservableQueryBalances
+  sender: string
 ) => {
   const [txConfig] = useState(
     () =>
       new DelegateAmountConfig(
         chainGetter,
+        queriesStore,
         chainId,
         sender,
-        undefined,
-        queryBalances
+        undefined
       )
   );
   txConfig.setChain(chainId);
-  txConfig.setQueryBalances(queryBalances);
   txConfig.setSender(sender);
 
   return txConfig;
@@ -40,17 +40,18 @@ export const useDelegateAmountConfig = (
 
 export const useDelegateTxConfig = (
   chainGetter: ChainGetter,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  queriesStore: IQueriesStore<{}>,
   chainId: string,
   gas: number,
   sender: string,
-  queryBalances: ObservableQueryBalances,
   ensEndpoint?: string
 ) => {
   const amountConfig = useDelegateAmountConfig(
     chainGetter,
+    queriesStore,
     chainId,
-    sender,
-    queryBalances
+    sender
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
@@ -58,9 +59,9 @@ export const useDelegateTxConfig = (
   gasConfig.setGas(gas);
   const feeConfig = useFeeConfig(
     chainGetter,
+    queriesStore,
     chainId,
     sender,
-    queryBalances,
     amountConfig,
     gasConfig
   );
