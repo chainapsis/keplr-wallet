@@ -4,7 +4,7 @@
   "description": "Keplr wallet Documentation",
   "scripts": {
     "serve": "trap 'exit 0' SIGINT; vuepress dev --no-cache",
-    "build": "trap 'exit 0' SIGINT; vuepress build --no-cache"
+    "build": "trap 'exit 0' SIGINT; vuepress build --no-cache --debug"
   },
   "author": "chainapsis",
   "license": "Apache-2.0",
