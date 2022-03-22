@@ -29,8 +29,8 @@ module.exports = {
   themeConfig: {
     custom: true,
     editLinks: true,
-    repo: "chainapsis/keplr-extension",
-    docsRepo: "chainapsis/keplr-extension",
+    repo: "chainapsis/keplr-wallet",
+    docsRepo: "chainapsis/keplr-wallet",
     docsDir: "docs",
     logo: {
       src: "/Keplr_Black.png",
