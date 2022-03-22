@@ -7,7 +7,6 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepReadonly, Optional } from "utility-types";
-import { cosmos } from "@keplr-wallet/cosmos";
 
 export interface HasSecretAccount {
   secret: DeepReadonly<SecretAccount>;
