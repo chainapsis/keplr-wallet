@@ -12,6 +12,7 @@ import {
   ObservableQueryOsmosisEpochs,
   ObservableQueryOsmosisMintParmas,
 } from "./osmosis";
+import { ObservableQueryDistributionParams } from "../distribution";
 
 export class ObservableQueryInflation {
   constructor(
@@ -24,7 +25,8 @@ export class ObservableQueryInflation {
     protected readonly _querySifchainAPY: ObservableQuerySifchainLiquidityAPY,
     protected readonly _queryOsmosisEpochs: ObservableQueryOsmosisEpochs,
     protected readonly _queryOsmosisEpochProvisions: ObservableQueryOsmosisEpochProvisions,
-    protected readonly _queryOsmosisMintParams: ObservableQueryOsmosisMintParmas
+    protected readonly _queryOsmosisMintParams: ObservableQueryOsmosisMintParmas,
+    protected readonly _queryDistributionParams: ObservableQueryDistributionParams
   ) {
     makeObservable(this);
   }
@@ -119,9 +121,16 @@ export class ObservableQueryInflation {
         const bondedToken = new Dec(
           this._queryPool.response.data.result.bonded_tokens
         );
+
+        // community tax is normally small (~0.02), so assume zero if the query fails
+        const community_tax = new Dec(
+          this._queryDistributionParams.response?.data.result.community_tax ??
+            "0"
+        );
+
         const totalStr = (() => {
           if (chainInfo.chainId.startsWith("osmosis")) {
-            // For osmosis, for now, just assume that the curreny supply is 100,000,000 with 6 decimals.
+            // For osmosis, for now, just assume that the current supply is 100,000,000 with 6 decimals.
             return DecUtils.getPrecisionDec(8 + 6).toString();
           }
 
@@ -137,9 +146,12 @@ export class ObservableQueryInflation {
         })();
         const total = new Dec(totalStr);
         if (total.gt(new Dec(0))) {
-          const ratio = bondedToken.quo(total);
+          // staking APR is calculated as:
+          //   new_coins_per_year = inflation_pct * total_supply * (1 - community_pool_tax)
+          //   apr = new_coins_per_year / total_bonded_tokens
 
-          dec = dec.quo(ratio);
+          const ratio = bondedToken.quo(total);
+          dec = dec.mul(new Dec(1).sub(community_tax)).quo(ratio);
           // TODO: Rounding?
         }
       }
