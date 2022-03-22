@@ -150,8 +150,26 @@ export class RootStore {
             return {
               chainId: chainInfo.chainId,
               msgOpts: {
+                send: {
+                  native: {
+                    gas: 100000,
+                  },
+                },
                 withdrawRewards: {
                   gas: 300000,
+                },
+              },
+            };
+          }
+
+          if (chainInfo.chainId.startsWith("stargaze-")) {
+            return {
+              chainId: chainInfo.chainId,
+              msgOpts: {
+                send: {
+                  native: {
+                    gas: 100000,
+                  },
                 },
               },
             };

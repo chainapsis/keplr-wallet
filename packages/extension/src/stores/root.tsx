@@ -197,6 +197,22 @@ export class RootStore {
         };
       }
 
+      if (
+        chainInfo.chainId.startsWith("osmosis-") ||
+        chainInfo.chainId.startsWith("stargaze-")
+      ) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                gas: 100000,
+              },
+            },
+          },
+        };
+      }
+
       return { chainId: chainInfo.chainId };
     });
 
