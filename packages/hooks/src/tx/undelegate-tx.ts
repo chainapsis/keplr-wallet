@@ -2,22 +2,80 @@ import {
   ChainGetter,
   IQueriesStore,
   CosmosQueriesImpl,
+  IAccountStore,
+  MsgOpt,
 } from "@keplr-wallet/stores";
 import {
+  GasConfig,
   useFeeConfig,
-  useGasConfig,
   useMemoConfig,
   useRecipientConfig,
 } from "./index";
 import { useStakedAmountConfig } from "./staked-amount";
+import { makeObservable, override } from "mobx";
+import { useState } from "react";
+
+export class UndelegateGasConfig extends GasConfig {
+  constructor(
+    chainGetter: ChainGetter,
+    protected readonly accountStore: IAccountStore<{
+      cosmos: {
+        readonly msgOpts: {
+          readonly undelegate: MsgOpt;
+        };
+      };
+    }>,
+    initialChainId: string
+  ) {
+    super(chainGetter, initialChainId);
+
+    makeObservable(this);
+  }
+
+  @override
+  get gas(): number {
+    // If gas not set manually, assume that the tx is for MsgTransfer.
+    if (this._gasRaw == null) {
+      return this.accountStore.getAccount(this.chainId).cosmos.msgOpts
+        .undelegate.gas;
+    }
+
+    return super.gas;
+  }
+}
+
+export const useUndelegateGasConfig = (
+  chainGetter: ChainGetter,
+  accountStore: IAccountStore<{
+    cosmos: {
+      readonly msgOpts: {
+        readonly undelegate: MsgOpt;
+      };
+    };
+  }>,
+  chainId: string
+) => {
+  const [gasConfig] = useState(
+    () => new UndelegateGasConfig(chainGetter, accountStore, chainId)
+  );
+  gasConfig.setChain(chainId);
+
+  return gasConfig;
+};
 
 export const useUndelegateTxConfig = (
   chainGetter: ChainGetter,
   queriesStore: IQueriesStore<{
     cosmos: Pick<CosmosQueriesImpl, "queryDelegations">;
   }>,
+  accountStore: IAccountStore<{
+    cosmos: {
+      readonly msgOpts: {
+        readonly undelegate: MsgOpt;
+      };
+    };
+  }>,
   chainId: string,
-  gas: number,
   sender: string,
   validatorAddress: string
 ) => {
@@ -30,8 +88,7 @@ export const useUndelegateTxConfig = (
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
-  const gasConfig = useGasConfig(chainGetter, chainId, gas);
-  gasConfig.setGas(gas);
+  const gasConfig = useUndelegateGasConfig(chainGetter, accountStore, chainId);
   const feeConfig = useFeeConfig(
     chainGetter,
     queriesStore,

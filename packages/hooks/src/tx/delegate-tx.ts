@@ -1,17 +1,52 @@
-import { ChainGetter, IQueriesStore } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  IAccountStore,
+  IQueriesStore,
+  MsgOpt,
+} from "@keplr-wallet/stores";
 import {
   AmountConfig,
+  GasConfig,
   useFeeConfig,
-  useGasConfig,
   useMemoConfig,
   useRecipientConfig,
 } from "./index";
 import { AppCurrency } from "@keplr-wallet/types";
 import { useState } from "react";
+import { makeObservable, override } from "mobx";
 
 export class DelegateAmountConfig extends AmountConfig {
   get sendableCurrencies(): AppCurrency[] {
     return [this.chainInfo.stakeCurrency];
+  }
+}
+
+export class DelegateGasConfig extends GasConfig {
+  constructor(
+    chainGetter: ChainGetter,
+    protected readonly accountStore: IAccountStore<{
+      cosmos: {
+        readonly msgOpts: {
+          readonly delegate: MsgOpt;
+        };
+      };
+    }>,
+    initialChainId: string
+  ) {
+    super(chainGetter, initialChainId);
+
+    makeObservable(this);
+  }
+
+  @override
+  get gas(): number {
+    // If gas not set manually, assume that the tx is for MsgTransfer.
+    if (this._gasRaw == null) {
+      return this.accountStore.getAccount(this.chainId).cosmos.msgOpts.delegate
+        .gas;
+    }
+
+    return super.gas;
   }
 }
 
@@ -38,12 +73,37 @@ export const useDelegateAmountConfig = (
   return txConfig;
 };
 
+export const useDelegateGasConfig = (
+  chainGetter: ChainGetter,
+  accountStore: IAccountStore<{
+    cosmos: {
+      readonly msgOpts: {
+        readonly delegate: MsgOpt;
+      };
+    };
+  }>,
+  chainId: string
+) => {
+  const [gasConfig] = useState(
+    () => new DelegateGasConfig(chainGetter, accountStore, chainId)
+  );
+  gasConfig.setChain(chainId);
+
+  return gasConfig;
+};
+
 export const useDelegateTxConfig = (
   chainGetter: ChainGetter,
   // eslint-disable-next-line @typescript-eslint/ban-types
   queriesStore: IQueriesStore<{}>,
+  accountStore: IAccountStore<{
+    cosmos: {
+      readonly msgOpts: {
+        readonly delegate: MsgOpt;
+      };
+    };
+  }>,
   chainId: string,
-  gas: number,
   sender: string,
   ensEndpoint?: string
 ) => {
@@ -55,8 +115,7 @@ export const useDelegateTxConfig = (
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
-  const gasConfig = useGasConfig(chainGetter, chainId, gas);
-  gasConfig.setGas(gas);
+  const gasConfig = useDelegateGasConfig(chainGetter, accountStore, chainId);
   const feeConfig = useFeeConfig(
     chainGetter,
     queriesStore,

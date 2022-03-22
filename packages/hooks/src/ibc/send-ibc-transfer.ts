@@ -1,7 +1,8 @@
 import {
   ChainGetter,
-  CosmosMsgOpts,
+  IAccountStore,
   IQueriesStore,
+  MsgOpt,
 } from "@keplr-wallet/stores";
 import { useFeeConfig, useMemoConfig } from "../tx";
 import { useIBCAmountConfig } from "./amount";
@@ -16,8 +17,8 @@ import { useIBCRecipientConfig } from "./reciepient";
  * So, you should remember that the recipient config's chain id is equalt to the sending chain id, if channel not set.
  * @param chainGetter
  * @param queriesStore
+ * @param accountStore
  * @param chainId
- * @param msgOpts
  * @param sender
  * @param ensEndpoint
  */
@@ -25,8 +26,14 @@ export const useIBCTransferConfig = (
   chainGetter: ChainGetter,
   // eslint-disable-next-line @typescript-eslint/ban-types
   queriesStore: IQueriesStore<{}>,
+  accountStore: IAccountStore<{
+    cosmos: {
+      readonly msgOpts: {
+        readonly ibcTransfer: MsgOpt;
+      };
+    };
+  }>,
   chainId: string,
-  msgOpts: CosmosMsgOpts["ibcTransfer"],
   sender: string,
   ensEndpoint?: string
 ) => {
@@ -38,7 +45,7 @@ export const useIBCTransferConfig = (
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
-  const gasConfig = useIBCTransferGasConfig(chainGetter, chainId, msgOpts);
+  const gasConfig = useIBCTransferGasConfig(chainGetter, accountStore, chainId);
   const feeConfig = useFeeConfig(
     chainGetter,
     queriesStore,
