@@ -51,8 +51,8 @@ export class ObservableCosmwasmContractChainQuery<
 
   protected async fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<T>> {
-    const response = await super.fetchResponse(cancelToken);
+  ): Promise<{ response: QueryResponse<T>; headers: any }> {
+    const { response, headers } = await super.fetchResponse(cancelToken);
 
     const wasmResult = (response.data as unknown) as
       | {
@@ -65,10 +65,13 @@ export class ObservableCosmwasmContractChainQuery<
     }
 
     return {
-      data: wasmResult.data as T,
-      status: response.status,
-      staled: false,
-      timestamp: Date.now(),
+      headers,
+      response: {
+        data: wasmResult.data as T,
+        status: response.status,
+        staled: false,
+        timestamp: Date.now(),
+      },
     };
   }
 }

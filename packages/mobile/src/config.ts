@@ -867,7 +867,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
-    features: ["stargate", "ibc-transfer"],
+    features: ["stargate", "ibc-transfer", "ibc-go", "no-legacy-stdTx"],
   },
   {
     rpc: "https://rpc-axelar.keplr.app",
@@ -984,6 +984,50 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+  },
+  {
+    rpc: "https://rpc-agoric.keplr.app",
+    rest: "https://lcd-agoric.keplr.app",
+    chainId: "agoric-3",
+    chainName: "Agoric",
+    stakeCurrency: {
+      coinDenom: "BLD",
+      coinMinimalDenom: "ubld",
+      coinDecimals: 6,
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
+    },
+    bip44: {
+      coinType: 564,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("agoric"),
+    currencies: [
+      {
+        coinDenom: "BLD",
+        coinMinimalDenom: "ubld",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
+      },
+      {
+        coinDenom: "RUN",
+        coinMinimalDenom: "urun",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "RUN",
+        coinMinimalDenom: "urun",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0,
+      high: 0,
+    },
+    features: ["stargate", "no-legacy-stdTx", "ibc-go"],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
   },
   {
     rpc: "https://rpc-sentinel.keplr.app",

@@ -103,10 +103,13 @@ export class ObservableSecretContractChainQuery<
 
   protected async fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<T>> {
+  ): Promise<{ response: QueryResponse<T>; headers: any }> {
     let response: QueryResponse<T>;
+    let headers: any;
     try {
-      response = await super.fetchResponse(cancelToken);
+      const fetched = await super.fetchResponse(cancelToken);
+      response = fetched.response;
+      headers = fetched.headers;
     } catch (e) {
       if (!Axios.isCancel(e) && e.response?.data?.error) {
         const encryptedError = e.response.data.error;
@@ -165,10 +168,13 @@ export class ObservableSecretContractChainQuery<
 
     const obj = JSON.parse(message);
     return {
-      data: obj as T,
-      status: response.status,
-      staled: false,
-      timestamp: Date.now(),
+      headers,
+      response: {
+        data: obj as T,
+        status: response.status,
+        staled: false,
+        timestamp: Date.now(),
+      },
     };
   }
 

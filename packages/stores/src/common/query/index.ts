@@ -51,6 +51,15 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     "The request timed out.",
   ];
 
+  protected static guessResponseTruncated(headers: any, data: string): boolean {
+    return (
+      headers &&
+      typeof headers["content-type"] === "string" &&
+      headers["content-type"].startsWith("application/json") &&
+      data.startsWith("{")
+    );
+  }
+
   protected options: QueryOptions;
 
   // Just use the oberable ref because the response is immutable and not directly adjusted.
@@ -217,7 +226,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this.cancelToken = Axios.CancelToken.source();
 
     try {
-      let response = yield* toGenerator(
+      let { response, headers } = yield* toGenerator(
         this.fetchResponse(this.cancelToken.token)
       );
       if (
@@ -226,7 +235,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         (response.data.startsWith("stream was reset:") ||
           ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
             response.data
-          ))
+          ) ||
+          ObservableQuery.guessResponseTruncated(headers, response.data))
       ) {
         // In some devices, it is a http ok code, but a strange response is sometimes returned.
         // It's not that they can't query at all, it seems that they get weird response from time to time.
@@ -234,25 +244,36 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         // To solve this problem, if this problem occurs, try the query again, and if that fails, an error is raised.
         // https://github.com/chainapsis/keplr-wallet/issues/275
         // https://github.com/chainapsis/keplr-wallet/issues/278
+        // https://github.com/chainapsis/keplr-wallet/issues/318
         if (this.cancelToken && this.cancelToken.token.reason) {
           // In this case, it is assumed that it is caused by cancel() and do nothing.
           return;
         }
 
-        // Try to query again.
-        response = yield* toGenerator(
-          this.fetchResponse(this.cancelToken.token)
+        console.log(
+          "There is an unknown problem to the response. Request one more time."
         );
 
-        if (
-          response.data &&
-          typeof response.data === "string" &&
-          (response.data.startsWith("stream was reset:") ||
+        // Try to query again.
+        const refetched = yield* toGenerator(
+          this.fetchResponse(this.cancelToken.token)
+        );
+        response = refetched.response;
+        headers = refetched.headers;
+
+        if (response.data && typeof response.data === "string") {
+          if (
+            response.data.startsWith("stream was reset:") ||
             ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
               response.data
-            ))
-        ) {
-          throw new Error(response.data);
+            )
+          ) {
+            throw new Error(response.data);
+          }
+
+          if (ObservableQuery.guessResponseTruncated(headers, response.data)) {
+            throw new Error("The response data seems to be truncated");
+          }
         }
       }
       this.setResponse(response);
@@ -380,7 +401,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   protected abstract fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<T>>;
+  ): Promise<{ response: QueryResponse<T>; headers: any }>;
 
   protected abstract saveResponse(
     response: Readonly<QueryResponse<T>>
@@ -463,15 +484,18 @@ export class ObservableQuery<
 
   protected async fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<T>> {
+  ): Promise<{ response: QueryResponse<T>; headers: any }> {
     const result = await this.instance.get<T>(this.url, {
       cancelToken,
     });
     return {
-      data: result.data,
-      status: result.status,
-      staled: false,
-      timestamp: Date.now(),
+      headers: result.headers,
+      response: {
+        data: result.data,
+        status: result.status,
+        staled: false,
+        timestamp: Date.now(),
+      },
     };
   }
 
