@@ -11,7 +11,7 @@
   "dependencies": {
     "markdown-it": "12.3.2",
     "markdown-it-container": "^3.0.0",
-    "vuepress": "1.8.2",
-    "vuepress-theme-cosmos": "1.0.179"
+    "vuepress": "1.9.7",
+    "vuepress-theme-cosmos": "1.0.183"
   }
 }
