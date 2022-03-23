@@ -166,7 +166,7 @@ export class SecretAccount {
       signOptions,
       async (tx) => {
         let viewingKey = "";
-        if (tx.code === 0) {
+        if (tx.code == null || tx.code === 0) {
           viewingKey = key;
         }
 
