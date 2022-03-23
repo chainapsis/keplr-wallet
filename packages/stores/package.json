@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores",
-  "version": "0.9.17-rc.0",
+  "version": "0.9.17",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -24,7 +24,7 @@
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/tendermint-rpc": "^0.24.1",
     "@hanchon/ethermint-address-converter": "^1.1.0",
-    "@keplr-wallet/background": "^0.9.17-rc.0",
+    "@keplr-wallet/background": "^0.9.17",
     "@keplr-wallet/common": "^0.9.10",
     "@keplr-wallet/cosmos": "^0.9.16",
     "@keplr-wallet/crypto": "^0.9.10",
