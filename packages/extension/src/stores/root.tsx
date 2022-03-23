@@ -197,10 +197,23 @@ export class RootStore {
         };
       }
 
-      if (
-        chainInfo.chainId.startsWith("osmosis-") ||
-        chainInfo.chainId.startsWith("stargaze-")
-      ) {
+      if (chainInfo.chainId.startsWith("osmosis")) {
+        return {
+          chainId: chainInfo.chainId,
+          msgOpts: {
+            send: {
+              native: {
+                gas: 100000,
+              },
+            },
+            withdrawRewards: {
+              gas: 300000,
+            },
+          },
+        };
+      }
+
+      if (chainInfo.chainId.startsWith("stargaze-")) {
         return {
           chainId: chainInfo.chainId,
           msgOpts: {
