@@ -107,7 +107,8 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
     this._ensEndpoint = endpoint;
   }
 
-  getError(): Error | undefined {
+  @computed
+  get error(): Error | undefined {
     if (!this.rawRecipient) {
       return new EmptyAddressError("Address is empty");
     }

@@ -36,23 +36,36 @@ import {
 } from "./supply/osmosis";
 import { ObservableQueryDistributionParams } from "./distribution";
 
-export interface HasCosmosQueries {
-  cosmos: CosmosQueries;
+export interface CosmosQueries {
+  cosmos: CosmosQueriesImpl;
 }
 
-export class QueriesWithCosmos
-  extends QueriesSetBase
-  implements HasCosmosQueries {
-  public cosmos: CosmosQueries;
+export const CosmosQueries = {
+  use(): (
+    queriesSetBase: QueriesSetBase,
+    kvStore: KVStore,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) => CosmosQueries {
+    return (
+      queriesSetBase: QueriesSetBase,
+      kvStore: KVStore,
+      chainId: string,
+      chainGetter: ChainGetter
+    ) => {
+      return {
+        cosmos: new CosmosQueriesImpl(
+          queriesSetBase,
+          kvStore,
+          chainId,
+          chainGetter
+        ),
+      };
+    };
+  },
+};
 
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter);
-
-    this.cosmos = new CosmosQueries(this, kvStore, chainId, chainGetter);
-  }
-}
-
-export class CosmosQueries {
+export class CosmosQueriesImpl {
   public readonly queryBlock: DeepReadonly<ObservableQueryBlock>;
   public readonly queryAccount: DeepReadonly<ObservableQueryAccount>;
   public readonly queryMint: DeepReadonly<ObservableQueryMintingInfation>;

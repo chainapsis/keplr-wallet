@@ -18,7 +18,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import { KeychainStore } from "../../stores/keychain";
-import { AccountStore } from "@keplr-wallet/stores";
+import { IAccountStore } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 
 let splashScreenHided = false;
@@ -32,7 +32,8 @@ async function hideSplashScreen() {
 }
 
 async function waitAccountLoad(
-  accountStore: AccountStore<any, any, any, any>,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  accountStore: IAccountStore<{}>,
   chainId: string
 ): Promise<void> {
   if (accountStore.getAccount(chainId).bech32Address) {
