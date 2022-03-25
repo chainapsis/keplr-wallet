@@ -10,7 +10,7 @@ import { Controller, useForm } from "react-hook-form";
 import {
   registerExportedAddressBooks,
   registerExportedKeyRingDatas,
-} from "../../../utils/import-from-mobile";
+} from "../../../utils/import-from-extension";
 import {
   AddressBookConfigMap,
   AddressBookData,
