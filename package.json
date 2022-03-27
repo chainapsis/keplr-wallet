@@ -20,7 +20,8 @@
       "**/@react-native-async-storage/async-storage",
       "**/@ledgerhq/react-native-hw-transport-ble",
       "**/jetifier",
-      "**/@bugsnag/**"
+      "**/@bugsnag/**",
+      "**/@babel/**"
     ]
   },
   "scripts": {
@@ -86,5 +87,7 @@
     "libsodium-wrappers": "file:./etc/noop",
     "node-sass": "file:./etc/noop"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@babel/runtime": "^7.17.8"
+  }
 }

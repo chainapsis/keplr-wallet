@@ -8,7 +8,7 @@ import React, {
 import { StyleSheet, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useStyle } from "../../styles";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated, { EasingNode } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useModalTransision } from "./transition";
 import {
@@ -346,7 +346,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                   {
                     toValue: 0,
                     duration: transition.duration,
-                    easing: Easing.out(Easing.cubic),
+                    easing: EasingNode.out(EasingNode.cubic),
                   }
                 ),
                 Animated.cond(transition.finished, [
@@ -417,7 +417,7 @@ export const ModalBase: FunctionComponent<ModalBaseProps> = ({
                   {
                     toValue: transition.startY,
                     duration: transition.duration,
-                    easing: Easing.out(Easing.quad),
+                    easing: EasingNode.out(EasingNode.quad),
                   }
                 ),
                 Animated.cond(transition.finished, [
