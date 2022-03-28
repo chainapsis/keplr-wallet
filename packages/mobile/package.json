@@ -93,6 +93,7 @@
     "react-native-code-push": "^7.0.4",
     "react-native-crypto-polyfill": "file:./crypto-polyfill",
     "react-native-device-info": "^8.3.1",
+    "react-native-draggable-flatlist": "^3.0.7",
     "react-native-fast-image": "^8.3.7",
     "react-native-fs": "^2.18.0",
     "react-native-gesture-handler": "^1.10.3",
