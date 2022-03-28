@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { Text, View } from "react-native";
-import Animated, { EasingNode } from "react-native-reanimated";
+import Animated, { Easing } from "react-native-reanimated";
 import { AlertIcon, RefreshIcon } from "../../components/icon";
 import { useStyle } from "../../styles";
 import { useNetInfo } from "@react-native-community/netinfo";
@@ -128,13 +128,13 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
       Animated.timing(animatedValue, {
         toValue: 1,
         duration: 500,
-        easing: EasingNode.out(EasingNode.cubic),
+        easing: Easing.out(Easing.cubic),
       }).start();
     } else {
       Animated.timing(animatedValue, {
         toValue: 0,
         duration: 330,
-        easing: EasingNode.out(EasingNode.sin),
+        easing: Easing.out(Easing.sin),
       }).start();
     }
   }, [animatedValue, isOpen]);

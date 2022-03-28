@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import Animated, { Clock, EasingNode } from "react-native-reanimated";
+import Animated, { Clock, Easing } from "react-native-reanimated";
 
 export const useSpinAnimated = (enabled: boolean) => {
   const [spinClock] = useState(() => new Clock());
@@ -15,7 +15,7 @@ export const useSpinAnimated = (enabled: boolean) => {
     return {
       duration: 1200,
       toValue: 360,
-      easing: EasingNode.linear,
+      easing: Easing.linear,
     };
   });
 

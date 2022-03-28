@@ -9,7 +9,7 @@ import {
   Svg,
   Use,
 } from "react-native-svg";
-import Animated, { EasingNode } from "react-native-reanimated";
+import Animated, { Easing } from "react-native-reanimated";
 
 const polarToCartesian = (
   centerX: number,
@@ -131,12 +131,12 @@ export const DoubleDoughnutChart: FunctionComponent<{
     Animated.timing(firstProcess.current, {
       toValue: firstEndDegree,
       duration: 1000,
-      easing: EasingNode.out(EasingNode.cubic),
+      easing: Easing.out(Easing.cubic),
     }).start();
     Animated.timing(secondProcess.current, {
       toValue: secondEndDegree,
       duration: 1000,
-      easing: EasingNode.out(EasingNode.cubic),
+      easing: Easing.out(Easing.cubic),
     }).start();
   }, [firstEndDegree, secondEndDegree]);
 

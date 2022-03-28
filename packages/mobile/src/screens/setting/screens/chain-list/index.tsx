@@ -10,10 +10,7 @@ import { useStyle } from "../../../../styles";
 import { Toggle } from "../../../../components/toggle";
 import FastImage from "react-native-fast-image";
 import { VectorCharacter } from "../../../../components/vector-character";
-import {
-  PanGestureHandler,
-  TouchableWithoutFeedback,
-} from "react-native-gesture-handler";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 export const SettingChainListScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -21,7 +18,7 @@ export const SettingChainListScreen: FunctionComponent = observer(() => {
   return (
     <PageWithView>
       <DraggableFlatList
-        style={{ height: 1000 }}
+        style={{ height: 500 }}
         data={chainStore.chainInfosInUI.map((chainInfo) => {
           return {
             chainId: chainInfo.chainId,
@@ -48,7 +45,7 @@ export const SettingChainListScreenElement: FunctionComponent<{
 
   return (
     <OpacityDecorator>
-      <PanGestureHandler onActivated={drag}>
+      <TouchableWithoutFeedback onLongPress={drag}>
         <View
           style={style.flatten([
             "padding-x-16",
@@ -97,7 +94,7 @@ export const SettingChainListScreenElement: FunctionComponent<{
             />
           </View>
         </View>
-      </PanGestureHandler>
+      </TouchableWithoutFeedback>
     </OpacityDecorator>
   );
 };
