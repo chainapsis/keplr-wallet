@@ -35,7 +35,7 @@ export class BackgroundTxService {
 
   async sendTx(
     chainId: string,
-    tx: unknown,
+    tx: Uint8Array,
     mode: "async" | "sync" | "block"
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
@@ -54,7 +54,7 @@ export class BackgroundTxService {
 
     try {
       const params = {
-        tx_bytes: Buffer.from(tx as any).toString("base64"),
+        tx_bytes: Buffer.from(tx).toString("base64"),
         mode: (() => {
           switch (mode) {
             case "async":

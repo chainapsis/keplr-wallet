@@ -18,7 +18,6 @@ import {
   OfflineSigner,
   StdSignature,
   StdSignDoc,
-  StdTx,
 } from "@cosmjs/launchpad";
 import {
   CosmJSOfflineSigner,
@@ -422,7 +421,7 @@ export class KeplrWalletConnectV1 implements Keplr {
    */
   sendTx(
     chainId: string,
-    tx: StdTx | Uint8Array,
+    tx: Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
     if (this.options.sendTx) {
