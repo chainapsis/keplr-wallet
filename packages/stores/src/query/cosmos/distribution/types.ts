@@ -1,8 +1,8 @@
 export type DistributionParams = {
-  height: string;
-  result: {
+  params: {
     community_tax: string;
     base_proposer_reward: string;
     bonus_proposer_reward: string;
+    withdraw_addr_enabled: boolean;
   };
 };

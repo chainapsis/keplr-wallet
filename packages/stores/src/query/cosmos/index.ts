@@ -3,7 +3,6 @@ export * from "./staking";
 export * from "./supply";
 export * from "./account";
 export * from "./ibc";
-export * from "./block";
 export * from "./balance";
 
 export * as Governance from "./governance/types";

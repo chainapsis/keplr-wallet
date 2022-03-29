@@ -21,7 +21,7 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
       kvStore,
       chainId,
       chainGetter,
-      `/staking/delegators/${bech32Address}/unbonding_delegations`
+      `/cosmos/staking/v1beta1/delegators/${bech32Address}/unbonding_delegations?pagination.limit=1000`
     );
     makeObservable(this);
 
@@ -42,7 +42,7 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
     }
 
     let totalBalance = new Int(0);
-    for (const unbondingDelegation of this.response.data.result) {
+    for (const unbondingDelegation of this.response.data.unbonding_responses) {
       for (const entry of unbondingDelegation.entries) {
         totalBalance = totalBalance.add(new Int(entry.balance));
       }
@@ -90,7 +90,7 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
       return [];
     }
 
-    return this.response.data.result;
+    return this.response.data.unbonding_responses;
   }
 }
 

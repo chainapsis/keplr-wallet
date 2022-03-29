@@ -2,16 +2,14 @@ import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
-import { Delegation, Delegations, DelegationsStargate } from "./types";
+import { Delegation, Delegations } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { computedFn } from "mobx-utils";
 
-export class ObservableQueryDelegationsInner extends ObservableChainQuery<
-  Delegations | DelegationsStargate
-> {
+export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delegations> {
   protected bech32Address: string;
 
   constructor(
@@ -24,7 +22,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<
       kvStore,
       chainId,
       chainGetter,
-      `/staking/delegators/${bech32Address}/delegations`
+      `/cosmos/staking/v1beta1/delegations/${bech32Address}?pagination.limit=1000`
     );
     makeObservable(this);
 
@@ -45,12 +43,8 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<
     }
 
     let totalBalance = new Int(0);
-    for (const delegation of this.response.data.result) {
-      if (typeof delegation.balance === "string") {
-        totalBalance = totalBalance.add(new Int(delegation.balance));
-      } else {
-        totalBalance = totalBalance.add(new Int(delegation.balance.amount));
-      }
+    for (const delegation of this.response.data.delegation_responses) {
+      totalBalance = totalBalance.add(new Int(delegation.balance.amount));
     }
 
     return new CoinPretty(stakeCurrency, totalBalance);
@@ -69,18 +63,13 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<
 
     const result = [];
 
-    for (const delegation of this.response.data.result) {
-      const balance =
-        typeof delegation.balance === "string"
-          ? delegation.balance
-          : delegation.balance.amount;
-
+    for (const delegation of this.response.data.delegation_responses) {
       result.push({
-        validatorAddress:
-          "validator_address" in delegation
-            ? delegation.validator_address
-            : delegation.delegation.validator_address,
-        balance: new CoinPretty(stakeCurrency, new Int(balance)),
+        validatorAddress: delegation.delegation.validator_address,
+        balance: new CoinPretty(
+          stakeCurrency,
+          new Int(delegation.balance.amount)
+        ),
       });
     }
 
@@ -93,23 +82,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<
       return [];
     }
 
-    const result = this.response.data.result;
-    if (result.length > 0 && "delegation" in result[0]) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      return result.map((r) => {
-        return {
-          balance: r.balance,
-          delegator_address: r.delegation.delegator_address,
-          validator_address: r.delegation.validator_address,
-          shares: r.delegation.shares,
-        };
-      });
-    }
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return result;
+    return this.response.data.delegation_responses;
   }
 
   readonly getDelegationTo = computedFn(
@@ -124,14 +97,10 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<
       }
 
       for (const delegation of delegations) {
-        if (delegation.validator_address === validatorAddress) {
+        if (delegation.delegation.validator_address === validatorAddress) {
           return new CoinPretty(
             stakeCurrency,
-            new Int(
-              typeof delegation.balance === "string"
-                ? delegation.balance
-                : delegation.balance.amount
-            )
+            new Int(delegation.balance.amount)
           );
         }
       }
@@ -141,9 +110,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<
   );
 }
 
-export class ObservableQueryDelegations extends ObservableChainQueryMap<
-  Delegations | DelegationsStargate
-> {
+export class ObservableQueryDelegations extends ObservableChainQueryMap<Delegations> {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainId: string,

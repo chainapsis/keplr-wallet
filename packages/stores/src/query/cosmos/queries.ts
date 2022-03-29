@@ -1,7 +1,6 @@
 import { QueriesSetBase } from "../queries";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
-import { ObservableQueryBlock } from "./block";
 import { ObservableQueryAccount } from "./account";
 import {
   ObservableQueryInflation,
@@ -66,7 +65,6 @@ export const CosmosQueries = {
 };
 
 export class CosmosQueriesImpl {
-  public readonly queryBlock: DeepReadonly<ObservableQueryBlock>;
   public readonly queryAccount: DeepReadonly<ObservableQueryAccount>;
   public readonly queryMint: DeepReadonly<ObservableQueryMintingInfation>;
   public readonly queryPool: DeepReadonly<ObservableQueryStakingPool>;
@@ -102,7 +100,6 @@ export class CosmosQueriesImpl {
       new ObservableQueryCosmosBalanceRegistry(kvStore)
     );
 
-    this.queryBlock = new ObservableQueryBlock(kvStore, chainId, chainGetter);
     this.queryAccount = new ObservableQueryAccount(
       kvStore,
       chainId,
