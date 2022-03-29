@@ -165,7 +165,7 @@ Similar to CosmJS `OfflineDirectSigner`'s `signDirect`, but Keplr's `signDirect`
 ```javascript
 sendTx(
     chainId: string,
-    stdTx: StdTx,
+    tx: Uint8Array,
     mode: BroadcastMode
 ): Promise<Uint8Array>;
 ```
