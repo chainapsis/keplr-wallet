@@ -122,7 +122,7 @@ export const UndelegationsCard: FunctionComponent<{
                       (endTime - currentTime) / 1000
                     );
                     const unbondingTime = stakingParams
-                      ? parseFloat(stakingParams.data.result.unbonding_time) /
+                      ? parseFloat(stakingParams.data.params.unbonding_time) /
                         10 ** 9
                       : 3600 * 24 * 21;
 

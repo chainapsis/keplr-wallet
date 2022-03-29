@@ -12,7 +12,6 @@ import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
-  StdTx,
   OfflineSigner,
   StdSignature,
 } from "@cosmjs/launchpad";
@@ -250,6 +249,15 @@ export class InjectedKeplr implements IKeplr {
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+    if (
+      chainInfo.features?.includes("stargate") ||
+      chainInfo.features?.includes("no-legacy-stdTx")
+    ) {
+      console.log(
+        "“stargate”, “no-legacy-stdTx” feature has been deprecated. The launchpad is no longer supported, thus works without the two features. We would keep the aforementioned two feature for a while, but the upcoming update would potentially cause errors. Remove the two feature."
+      );
+    }
+
     await this.requestMethod("experimentalSuggestChain", [chainInfo]);
   }
 
@@ -259,7 +267,7 @@ export class InjectedKeplr implements IKeplr {
 
   async sendTx(
     chainId: string,
-    tx: StdTx | Uint8Array,
+    tx: Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
     return await this.requestMethod("sendTx", [chainId, tx, mode]);

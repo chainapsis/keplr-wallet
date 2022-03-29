@@ -106,7 +106,7 @@ export const DelegationsCard: FunctionComponent<{
       {delegations && delegations.length > 0 && (
         <CardBody style={style.flatten(["padding-x-0", "padding-y-14"])}>
           {delegations.map((del) => {
-            const val = validatorsMap.get(del.validator_address);
+            const val = validatorsMap.get(del.delegation.validator_address);
             if (!val) {
               return null;
             }
@@ -122,7 +122,7 @@ export const DelegationsCard: FunctionComponent<{
 
             return (
               <RectButton
-                key={del.validator_address}
+                key={del.delegation.validator_address}
                 style={style.flatten([
                   "flex-row",
                   "items-center",
@@ -131,7 +131,7 @@ export const DelegationsCard: FunctionComponent<{
                 ])}
                 onPress={() => {
                   smartNavigation.navigateSmart("Validator.Details", {
-                    validatorAddress: del.validator_address,
+                    validatorAddress: del.delegation.validator_address,
                   });
                 }}
               >

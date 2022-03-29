@@ -187,24 +187,9 @@ export class ChainUpdaterService {
       baseURL: chainInfo.rest,
     });
 
-    let staragteUpdate = false;
-    try {
-      if (!chainInfo.features || !chainInfo.features.includes("stargate")) {
-        // If the chain doesn't have the stargate feature,
-        // but it can use the GRPC HTTP Gateway,
-        // assume that it can support the stargate and try to update the features.
-        await restInstance.get("/cosmos/base/tendermint/v1beta1/node_info");
-        staragteUpdate = true;
-      }
-    } catch {}
-
     let ibcGoUpdates = false;
     try {
-      if (
-        (!chainInfo.features || !chainInfo.features.includes("ibc-go")) &&
-        (staragteUpdate ||
-          (chainInfo.features && chainInfo.features.includes("stargate")))
-      ) {
+      if (!chainInfo.features || !chainInfo.features.includes("ibc-go")) {
         // If the chain uses the ibc-go module separated from the cosmos-sdk,
         // we need to check it because the REST API is different.
         const result = await restInstance.get<{
@@ -222,11 +207,7 @@ export class ChainUpdaterService {
 
     let ibcTransferUpdate = false;
     try {
-      if (
-        (!chainInfo.features || !chainInfo.features.includes("ibc-transfer")) &&
-        (staragteUpdate ||
-          (chainInfo.features && chainInfo.features.includes("stargate")))
-      ) {
+      if (!chainInfo.features || !chainInfo.features.includes("ibc-transfer")) {
         const isIBCGo =
           ibcGoUpdates ||
           (chainInfo.features && chainInfo.features.includes("ibc-go"));
@@ -253,59 +234,17 @@ export class ChainUpdaterService {
       }
     } catch {}
 
-    let noLegacyStdTxUpdate = false;
-    try {
-      if (
-        (!chainInfo.features ||
-          !chainInfo.features.includes("no-legacy-stdTx")) &&
-        (staragteUpdate ||
-          (chainInfo.features && chainInfo.features.includes("stargate")))
-      ) {
-        // The chain with above cosmos-sdk@v0.44.0 can't send the legacy stdTx,
-        // Assume that it can't send the legacy stdTx if the POST /txs responses "not implemented".
-        const result = await restInstance.post<
-          | {
-              code: 12;
-              message: "Not Implemented";
-              details: [];
-            }
-          | any
-        >("/txs", undefined, {
-          validateStatus: (status) => {
-            return (status >= 200 && status < 300) || status === 501;
-          },
-        });
-        if (
-          result.status === 501 &&
-          result.data.code === 12 &&
-          result.data.message === "Not Implemented"
-        ) {
-          noLegacyStdTxUpdate = true;
-        }
-      }
-    } catch {}
-
     const features: string[] = [];
-    if (staragteUpdate) {
-      features.push("stargate");
-    }
     if (ibcGoUpdates) {
       features.push("ibc-go");
     }
     if (ibcTransferUpdate) {
       features.push("ibc-transfer");
     }
-    if (noLegacyStdTxUpdate) {
-      features.push("no-legacy-stdTx");
-    }
 
     return {
       explicit: version.version < fetchedVersion.version,
-      slient:
-        staragteUpdate ||
-        ibcGoUpdates ||
-        ibcTransferUpdate ||
-        noLegacyStdTxUpdate,
+      slient: ibcGoUpdates || ibcTransferUpdate,
 
       chainId: resultChainId,
       features,

@@ -35,7 +35,7 @@ export class BackgroundTxService {
 
   async sendTx(
     chainId: string,
-    tx: unknown,
+    tx: Uint8Array,
     mode: "async" | "sync" | "block"
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
@@ -52,36 +52,26 @@ export class BackgroundTxService {
       message: "Wait a second",
     });
 
-    const isProtoTx = Buffer.isBuffer(tx) || tx instanceof Uint8Array;
-
-    const params = isProtoTx
-      ? {
-          tx_bytes: Buffer.from(tx as any).toString("base64"),
-          mode: (() => {
-            switch (mode) {
-              case "async":
-                return "BROADCAST_MODE_ASYNC";
-              case "block":
-                return "BROADCAST_MODE_BLOCK";
-              case "sync":
-                return "BROADCAST_MODE_SYNC";
-              default:
-                return "BROADCAST_MODE_UNSPECIFIED";
-            }
-          })(),
-        }
-      : {
-          tx,
-          mode: mode,
-        };
-
     try {
-      const result = await restInstance.post(
-        isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
-        params
-      );
+      const params = {
+        tx_bytes: Buffer.from(tx).toString("base64"),
+        mode: (() => {
+          switch (mode) {
+            case "async":
+              return "BROADCAST_MODE_ASYNC";
+            case "block":
+              return "BROADCAST_MODE_BLOCK";
+            case "sync":
+              return "BROADCAST_MODE_SYNC";
+            default:
+              return "BROADCAST_MODE_UNSPECIFIED";
+          }
+        })(),
+      };
 
-      const txResponse = isProtoTx ? result.data["tx_response"] : result.data;
+      const result = await restInstance.post("/cosmos/tx/v1beta1/txs", params);
+
+      const txResponse = result.data["tx_response"];
 
       if (txResponse.code != null && txResponse.code !== 0) {
         throw new Error(txResponse["raw_log"]);

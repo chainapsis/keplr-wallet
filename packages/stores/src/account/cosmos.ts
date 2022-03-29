@@ -3,7 +3,6 @@ import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import {
   BroadcastMode,
   makeSignDoc,
-  makeStdTx,
   Msg,
   StdFee,
   StdSignDoc,
@@ -118,16 +117,12 @@ export const defaultCosmosMsgOpts: CosmosMsgOpts = {
   },
 };
 
-/*
-  If the chain has "no-legacy-stdTx" feature, we should send the tx based on protobuf.
-  Expectedly, the sign doc should be formed as animo-json regardless of the tx type (animo or proto).
-*/
-type AminoMsgsOrWithProtoMsgs =
-  | Msg[]
-  | {
-      aminoMsgs: Msg[];
-      protoMsgs?: google.protobuf.IAny[];
-    };
+type ProtoMsgsOrWithAminoMsgs = {
+  // TODO: Make `aminoMsgs` nullable
+  //       And, make proto sign doc if `aminoMsgs` is null
+  aminoMsgs: Msg[];
+  protoMsgs: google.protobuf.IAny[];
+};
 
 export class CosmosAccountImpl {
   public broadcastMode: "sync" | "async" | "block" = "sync";
@@ -196,18 +191,16 @@ export class CosmosAccountImpl {
           "send",
           {
             aminoMsgs: [msg],
-            protoMsgs: this.hasNoLegacyStdFeature()
-              ? [
-                  {
-                    type_url: "/cosmos.bank.v1beta1.MsgSend",
-                    value: cosmos.bank.v1beta1.MsgSend.encode({
-                      fromAddress: msg.value.from_address,
-                      toAddress: msg.value.to_address,
-                      amount: msg.value.amount,
-                    }).finish(),
-                  },
-                ]
-              : undefined,
+            protoMsgs: [
+              {
+                type_url: "/cosmos.bank.v1beta1.MsgSend",
+                value: cosmos.bank.v1beta1.MsgSend.encode({
+                  fromAddress: msg.value.from_address,
+                  toAddress: msg.value.to_address,
+                  amount: msg.value.amount,
+                }).finish(),
+              },
+            ],
           },
           memo,
           {
@@ -241,8 +234,8 @@ export class CosmosAccountImpl {
   async sendMsgs(
     type: string | "unknown",
     msgs:
-      | AminoMsgsOrWithProtoMsgs
-      | (() => Promise<AminoMsgsOrWithProtoMsgs> | AminoMsgsOrWithProtoMsgs),
+      | ProtoMsgsOrWithAminoMsgs
+      | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
     memo: string = "",
     fee: StdFee,
     signOptions?: KeplrSignOptions,
@@ -351,7 +344,7 @@ export class CosmosAccountImpl {
 
   // Return the tx hash.
   protected async broadcastMsgs(
-    msgs: AminoMsgsOrWithProtoMsgs,
+    msgs: ProtoMsgsOrWithAminoMsgs,
     fee: StdFee,
     memo: string = "",
     signOptions?: KeplrSignOptions,
@@ -364,26 +357,16 @@ export class CosmosAccountImpl {
       throw new Error(`Wallet is not loaded: ${this.base.walletStatus}`);
     }
 
-    let aminoMsgs: Msg[];
-    let protoMsgs: google.protobuf.IAny[] | undefined;
-    if ("aminoMsgs" in msgs) {
-      aminoMsgs = msgs.aminoMsgs;
-      protoMsgs = msgs.protoMsgs;
-    } else {
-      aminoMsgs = msgs;
-    }
+    const aminoMsgs: Msg[] = msgs.aminoMsgs;
+    const protoMsgs: google.protobuf.IAny[] = msgs.protoMsgs;
 
-    if (aminoMsgs.length === 0) {
+    // TODO: Make proto sign doc if `aminoMsgs` is empty or null
+    if (aminoMsgs.length === 0 || protoMsgs.length === 0) {
       throw new Error("There is no msg to send");
     }
 
-    if (
-      this.hasNoLegacyStdFeature() &&
-      (!protoMsgs || protoMsgs.length === 0)
-    ) {
-      throw new Error(
-        "Chain can't send legecy stdTx. But, proto any type msgs are not provided"
-      );
+    if (aminoMsgs.length !== protoMsgs.length) {
+      throw new Error("The length of aminoMsgs and protoMsgs are different");
     }
 
     const account = await BaseAccount.fetchFromRest(
@@ -413,43 +396,41 @@ export class CosmosAccountImpl {
       signOptions
     );
 
-    const signedTx = this.hasNoLegacyStdFeature()
-      ? cosmos.tx.v1beta1.TxRaw.encode({
-          bodyBytes: cosmos.tx.v1beta1.TxBody.encode({
-            messages: protoMsgs,
-            memo: signResponse.signed.memo,
-          }).finish(),
-          authInfoBytes: cosmos.tx.v1beta1.AuthInfo.encode({
-            signerInfos: [
-              {
-                publicKey: {
-                  type_url:
-                    coinType === 60
-                      ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
-                      : "/cosmos.crypto.secp256k1.PubKey",
-                  value: cosmos.crypto.secp256k1.PubKey.encode({
-                    key: Buffer.from(
-                      signResponse.signature.pub_key.value,
-                      "base64"
-                    ),
-                  }).finish(),
-                },
-                modeInfo: {
-                  single: {
-                    mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
-                  },
-                },
-                sequence: Long.fromString(signResponse.signed.sequence),
-              },
-            ],
-            fee: {
-              amount: signResponse.signed.fee.amount as ICoin[],
-              gasLimit: Long.fromString(signResponse.signed.fee.gas),
+    const signedTx = cosmos.tx.v1beta1.TxRaw.encode({
+      bodyBytes: cosmos.tx.v1beta1.TxBody.encode({
+        messages: protoMsgs,
+        memo: signResponse.signed.memo,
+      }).finish(),
+      authInfoBytes: cosmos.tx.v1beta1.AuthInfo.encode({
+        signerInfos: [
+          {
+            publicKey: {
+              type_url:
+                coinType === 60
+                  ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
+                  : "/cosmos.crypto.secp256k1.PubKey",
+              value: cosmos.crypto.secp256k1.PubKey.encode({
+                key: Buffer.from(
+                  signResponse.signature.pub_key.value,
+                  "base64"
+                ),
+              }).finish(),
             },
-          }).finish(),
-          signatures: [Buffer.from(signResponse.signature.signature, "base64")],
-        }).finish()
-      : makeStdTx(signResponse.signed, signResponse.signature);
+            modeInfo: {
+              single: {
+                mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+              },
+            },
+            sequence: Long.fromString(signResponse.signed.sequence),
+          },
+        ],
+        fee: {
+          amount: signResponse.signed.fee.amount as ICoin[],
+          gasLimit: Long.fromString(signResponse.signed.fee.gas),
+        },
+      }).finish(),
+      signatures: [Buffer.from(signResponse.signature.signature, "base64")],
+    }).finish();
 
     return {
       txHash: await keplr.sendTx(this.chainId, signedTx, mode as BroadcastMode),
@@ -496,17 +477,34 @@ export class CosmosAccountImpl {
       return dec.truncate().toString();
     })();
 
-    const destinationBlockHeight = this.queriesStore
-      .get(channel.counterpartyChainId)
-      .cosmos.queryBlock.getBlock("latest");
+    const destinationInfo = this.queriesStore.get(channel.counterpartyChainId)
+      .cosmos.queryRPCStatus;
 
     await this.sendMsgs(
       "ibcTransfer",
       async () => {
         // Wait until fetching complete.
-        await destinationBlockHeight.waitFreshResponse();
+        await destinationInfo.waitFreshResponse();
 
-        if (destinationBlockHeight.height.equals(new Int("0"))) {
+        if (!destinationInfo.network) {
+          throw new Error(
+            `Failed to fetch the network chain id of ${channel.counterpartyChainId}`
+          );
+        }
+
+        if (
+          ChainIdHelper.parse(destinationInfo.network).identifier !==
+          ChainIdHelper.parse(channel.counterpartyChainId).identifier
+        ) {
+          throw new Error(
+            `Fetched the network chain id is different with counterparty chain id (${destinationInfo.network}, ${channel.counterpartyChainId})`
+          );
+        }
+
+        if (
+          !destinationInfo.latestBlockHeight ||
+          destinationInfo.latestBlockHeight.equals(new Int("0"))
+        ) {
           throw new Error(
             `Failed to fetch the latest block of ${channel.counterpartyChainId}`
           );
@@ -525,10 +523,10 @@ export class CosmosAccountImpl {
             receiver: recipient,
             timeout_height: {
               revision_number: ChainIdHelper.parse(
-                channel.counterpartyChainId
+                destinationInfo.network
               ).version.toString() as string | undefined,
               // Set the timeout height as the current height + 150.
-              revision_height: destinationBlockHeight.height
+              revision_height: destinationInfo.latestBlockHeight
                 .add(new Int("150"))
                 .toString(),
             },
@@ -630,18 +628,16 @@ export class CosmosAccountImpl {
       "delegate",
       {
         aminoMsgs: [msg],
-        protoMsgs: this.hasNoLegacyStdFeature()
-          ? [
-              {
-                type_url: "/cosmos.staking.v1beta1.MsgDelegate",
-                value: cosmos.staking.v1beta1.MsgDelegate.encode({
-                  delegatorAddress: msg.value.delegator_address,
-                  validatorAddress: msg.value.validator_address,
-                  amount: msg.value.amount,
-                }).finish(),
-              },
-            ]
-          : undefined,
+        protoMsgs: [
+          {
+            type_url: "/cosmos.staking.v1beta1.MsgDelegate",
+            value: cosmos.staking.v1beta1.MsgDelegate.encode({
+              delegatorAddress: msg.value.delegator_address,
+              validatorAddress: msg.value.validator_address,
+              amount: msg.value.amount,
+            }).finish(),
+          },
+        ],
       },
       memo,
       {
@@ -790,19 +786,17 @@ export class CosmosAccountImpl {
       "redelegate",
       {
         aminoMsgs: [msg],
-        protoMsgs: this.hasNoLegacyStdFeature()
-          ? [
-              {
-                type_url: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-                value: cosmos.staking.v1beta1.MsgBeginRedelegate.encode({
-                  delegatorAddress: msg.value.delegator_address,
-                  validatorSrcAddress: msg.value.validator_src_address,
-                  validatorDstAddress: msg.value.validator_dst_address,
-                  amount: msg.value.amount,
-                }).finish(),
-              },
-            ]
-          : undefined,
+        protoMsgs: [
+          {
+            type_url: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+            value: cosmos.staking.v1beta1.MsgBeginRedelegate.encode({
+              delegatorAddress: msg.value.delegator_address,
+              validatorSrcAddress: msg.value.validator_src_address,
+              validatorDstAddress: msg.value.validator_dst_address,
+              amount: msg.value.amount,
+            }).finish(),
+          },
+        ],
       },
       memo,
       {
@@ -853,20 +847,17 @@ export class CosmosAccountImpl {
       "withdrawRewards",
       {
         aminoMsgs: msgs,
-        protoMsgs: this.hasNoLegacyStdFeature()
-          ? msgs.map((msg) => {
-              return {
-                type_url:
-                  "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-                value: cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.encode(
-                  {
-                    delegatorAddress: msg.value.delegator_address,
-                    validatorAddress: msg.value.validator_address,
-                  }
-                ).finish(),
-              };
-            })
-          : undefined,
+        protoMsgs: msgs.map((msg) => {
+          return {
+            type_url: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+            value: cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward.encode(
+              {
+                delegatorAddress: msg.value.delegator_address,
+                validatorAddress: msg.value.validator_address,
+              }
+            ).finish(),
+          };
+        }),
       },
       memo,
       {
@@ -934,38 +925,35 @@ export class CosmosAccountImpl {
       "govVote",
       {
         aminoMsgs: [msg],
-        protoMsgs: this.hasNoLegacyStdFeature()
-          ? [
-              {
-                type_url: "/cosmos.gov.v1beta1.MsgVote",
-                value: cosmos.gov.v1beta1.MsgVote.encode({
-                  proposalId: Long.fromString(msg.value.proposal_id),
-                  voter: msg.value.voter,
-                  option: (() => {
-                    switch (msg.value.option) {
-                      case "Yes":
-                      case 1:
-                        return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_YES;
-                      case "Abstain":
-                      case 2:
-                        return cosmos.gov.v1beta1.VoteOption
-                          .VOTE_OPTION_ABSTAIN;
-                      case "No":
-                      case 3:
-                        return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_NO;
-                      case "NoWithVeto":
-                      case 4:
-                        return cosmos.gov.v1beta1.VoteOption
-                          .VOTE_OPTION_NO_WITH_VETO;
-                      default:
-                        return cosmos.gov.v1beta1.VoteOption
-                          .VOTE_OPTION_UNSPECIFIED;
-                    }
-                  })(),
-                }).finish(),
-              },
-            ]
-          : undefined,
+        protoMsgs: [
+          {
+            type_url: "/cosmos.gov.v1beta1.MsgVote",
+            value: cosmos.gov.v1beta1.MsgVote.encode({
+              proposalId: Long.fromString(msg.value.proposal_id),
+              voter: msg.value.voter,
+              option: (() => {
+                switch (msg.value.option) {
+                  case "Yes":
+                  case 1:
+                    return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_YES;
+                  case "Abstain":
+                  case 2:
+                    return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_ABSTAIN;
+                  case "No":
+                  case 3:
+                    return cosmos.gov.v1beta1.VoteOption.VOTE_OPTION_NO;
+                  case "NoWithVeto":
+                  case 4:
+                    return cosmos.gov.v1beta1.VoteOption
+                      .VOTE_OPTION_NO_WITH_VETO;
+                  default:
+                    return cosmos.gov.v1beta1.VoteOption
+                      .VOTE_OPTION_UNSPECIFIED;
+                }
+              })(),
+            }).finish(),
+          },
+        ],
       },
       memo,
       {
@@ -1036,13 +1024,5 @@ export class CosmosAccountImpl {
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
-  }
-
-  protected hasNoLegacyStdFeature(): boolean {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return (
-      chainInfo.features != null &&
-      chainInfo.features.includes("no-legacy-stdTx")
-    );
   }
 }

@@ -11,7 +11,6 @@ import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
-  StdTx,
   OfflineSigner,
   StdSignature,
 } from "@cosmjs/launchpad";
@@ -74,7 +73,7 @@ export class Keplr implements IKeplr {
 
   async sendTx(
     chainId: string,
-    tx: StdTx | Uint8Array,
+    tx: Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
     const msg = new SendTxMsg(chainId, tx, mode);
