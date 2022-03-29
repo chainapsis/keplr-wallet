@@ -179,19 +179,17 @@ export class CosmwasmAccountImpl {
       type,
       {
         aminoMsgs: [msg],
-        protoMsgs: this.hasNoLegacyStdFeature()
-          ? [
-              {
-                type_url: "/cosmwasm.wasm.v1.MsgExecuteContract",
-                value: cosmwasm.wasm.v1.MsgExecuteContract.encode({
-                  sender: msg.value.sender,
-                  contract: msg.value.contract,
-                  msg: Buffer.from(JSON.stringify(msg.value.msg)),
-                  funds: msg.value.funds,
-                }).finish(),
-              },
-            ]
-          : undefined,
+        protoMsgs: [
+          {
+            type_url: "/cosmwasm.wasm.v1.MsgExecuteContract",
+            value: cosmwasm.wasm.v1.MsgExecuteContract.encode({
+              sender: msg.value.sender,
+              contract: msg.value.contract,
+              msg: Buffer.from(JSON.stringify(msg.value.msg)),
+              funds: msg.value.funds,
+            }).finish(),
+          },
+        ],
       },
       memo,
       {
@@ -243,13 +241,5 @@ export class CosmwasmAccountImpl {
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmwasmQueries> {
     return this.queriesStore.get(this.chainId);
-  }
-
-  protected hasNoLegacyStdFeature(): boolean {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return (
-      chainInfo.features != null &&
-      chainInfo.features.includes("no-legacy-stdTx")
-    );
   }
 }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tendermint = exports.cosmwasm = exports.ibc = exports.google = exports.cosmos = void 0;
+exports.tendermint = exports.secret = exports.cosmwasm = exports.ibc = exports.google = exports.cosmos = void 0;
 var $protobuf = require("protobufjs/minimal");
 const $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 const $root = {};
@@ -10,690 +10,6 @@ exports.cosmos = $root.cosmos = (() => {
         const bank = {};
         bank.v1beta1 = (function () {
             const v1beta1 = {};
-            v1beta1.Params = (function () {
-                function Params(p) {
-                    this.sendEnabled = [];
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                Params.prototype.sendEnabled = $util.emptyArray;
-                Params.prototype.defaultSendEnabled = false;
-                Params.create = function create(properties) {
-                    return new Params(properties);
-                };
-                Params.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.sendEnabled != null && m.sendEnabled.length) {
-                        for (var i = 0; i < m.sendEnabled.length; ++i)
-                            $root.cosmos.bank.v1beta1.SendEnabled.encode(m.sendEnabled[i], w.uint32(10).fork()).ldelim();
-                    }
-                    if (m.defaultSendEnabled != null && Object.hasOwnProperty.call(m, "defaultSendEnabled"))
-                        w.uint32(16).bool(m.defaultSendEnabled);
-                    return w;
-                };
-                Params.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.Params();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                if (!(m.sendEnabled && m.sendEnabled.length))
-                                    m.sendEnabled = [];
-                                m.sendEnabled.push($root.cosmos.bank.v1beta1.SendEnabled.decode(r, r.uint32()));
-                                break;
-                            case 2:
-                                m.defaultSendEnabled = r.bool();
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                Params.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.Params)
-                        return d;
-                    var m = new $root.cosmos.bank.v1beta1.Params();
-                    if (d.sendEnabled) {
-                        if (!Array.isArray(d.sendEnabled))
-                            throw TypeError(".cosmos.bank.v1beta1.Params.sendEnabled: array expected");
-                        m.sendEnabled = [];
-                        for (var i = 0; i < d.sendEnabled.length; ++i) {
-                            if (typeof d.sendEnabled[i] !== "object")
-                                throw TypeError(".cosmos.bank.v1beta1.Params.sendEnabled: object expected");
-                            m.sendEnabled[i] = $root.cosmos.bank.v1beta1.SendEnabled.fromObject(d.sendEnabled[i]);
-                        }
-                    }
-                    if (d.defaultSendEnabled != null) {
-                        m.defaultSendEnabled = Boolean(d.defaultSendEnabled);
-                    }
-                    return m;
-                };
-                Params.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.arrays || o.defaults) {
-                        d.sendEnabled = [];
-                    }
-                    if (o.defaults) {
-                        d.defaultSendEnabled = false;
-                    }
-                    if (m.sendEnabled && m.sendEnabled.length) {
-                        d.sendEnabled = [];
-                        for (var j = 0; j < m.sendEnabled.length; ++j) {
-                            d.sendEnabled[j] = $root.cosmos.bank.v1beta1.SendEnabled.toObject(m.sendEnabled[j], o);
-                        }
-                    }
-                    if (m.defaultSendEnabled != null && m.hasOwnProperty("defaultSendEnabled")) {
-                        d.defaultSendEnabled = m.defaultSendEnabled;
-                    }
-                    return d;
-                };
-                Params.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return Params;
-            })();
-            v1beta1.SendEnabled = (function () {
-                function SendEnabled(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                SendEnabled.prototype.denom = "";
-                SendEnabled.prototype.enabled = false;
-                SendEnabled.create = function create(properties) {
-                    return new SendEnabled(properties);
-                };
-                SendEnabled.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.denom != null && Object.hasOwnProperty.call(m, "denom"))
-                        w.uint32(10).string(m.denom);
-                    if (m.enabled != null && Object.hasOwnProperty.call(m, "enabled"))
-                        w.uint32(16).bool(m.enabled);
-                    return w;
-                };
-                SendEnabled.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.SendEnabled();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                m.denom = r.string();
-                                break;
-                            case 2:
-                                m.enabled = r.bool();
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                SendEnabled.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.SendEnabled)
-                        return d;
-                    var m = new $root.cosmos.bank.v1beta1.SendEnabled();
-                    if (d.denom != null) {
-                        m.denom = String(d.denom);
-                    }
-                    if (d.enabled != null) {
-                        m.enabled = Boolean(d.enabled);
-                    }
-                    return m;
-                };
-                SendEnabled.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.defaults) {
-                        d.denom = "";
-                        d.enabled = false;
-                    }
-                    if (m.denom != null && m.hasOwnProperty("denom")) {
-                        d.denom = m.denom;
-                    }
-                    if (m.enabled != null && m.hasOwnProperty("enabled")) {
-                        d.enabled = m.enabled;
-                    }
-                    return d;
-                };
-                SendEnabled.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return SendEnabled;
-            })();
-            v1beta1.Input = (function () {
-                function Input(p) {
-                    this.coins = [];
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                Input.prototype.address = "";
-                Input.prototype.coins = $util.emptyArray;
-                Input.create = function create(properties) {
-                    return new Input(properties);
-                };
-                Input.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.address != null && Object.hasOwnProperty.call(m, "address"))
-                        w.uint32(10).string(m.address);
-                    if (m.coins != null && m.coins.length) {
-                        for (var i = 0; i < m.coins.length; ++i)
-                            $root.cosmos.base.v1beta1.Coin.encode(m.coins[i], w.uint32(18).fork()).ldelim();
-                    }
-                    return w;
-                };
-                Input.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.Input();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                m.address = r.string();
-                                break;
-                            case 2:
-                                if (!(m.coins && m.coins.length))
-                                    m.coins = [];
-                                m.coins.push($root.cosmos.base.v1beta1.Coin.decode(r, r.uint32()));
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                Input.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.Input)
-                        return d;
-                    var m = new $root.cosmos.bank.v1beta1.Input();
-                    if (d.address != null) {
-                        m.address = String(d.address);
-                    }
-                    if (d.coins) {
-                        if (!Array.isArray(d.coins))
-                            throw TypeError(".cosmos.bank.v1beta1.Input.coins: array expected");
-                        m.coins = [];
-                        for (var i = 0; i < d.coins.length; ++i) {
-                            if (typeof d.coins[i] !== "object")
-                                throw TypeError(".cosmos.bank.v1beta1.Input.coins: object expected");
-                            m.coins[i] = $root.cosmos.base.v1beta1.Coin.fromObject(d.coins[i]);
-                        }
-                    }
-                    return m;
-                };
-                Input.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.arrays || o.defaults) {
-                        d.coins = [];
-                    }
-                    if (o.defaults) {
-                        d.address = "";
-                    }
-                    if (m.address != null && m.hasOwnProperty("address")) {
-                        d.address = m.address;
-                    }
-                    if (m.coins && m.coins.length) {
-                        d.coins = [];
-                        for (var j = 0; j < m.coins.length; ++j) {
-                            d.coins[j] = $root.cosmos.base.v1beta1.Coin.toObject(m.coins[j], o);
-                        }
-                    }
-                    return d;
-                };
-                Input.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return Input;
-            })();
-            v1beta1.Output = (function () {
-                function Output(p) {
-                    this.coins = [];
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                Output.prototype.address = "";
-                Output.prototype.coins = $util.emptyArray;
-                Output.create = function create(properties) {
-                    return new Output(properties);
-                };
-                Output.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.address != null && Object.hasOwnProperty.call(m, "address"))
-                        w.uint32(10).string(m.address);
-                    if (m.coins != null && m.coins.length) {
-                        for (var i = 0; i < m.coins.length; ++i)
-                            $root.cosmos.base.v1beta1.Coin.encode(m.coins[i], w.uint32(18).fork()).ldelim();
-                    }
-                    return w;
-                };
-                Output.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.Output();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                m.address = r.string();
-                                break;
-                            case 2:
-                                if (!(m.coins && m.coins.length))
-                                    m.coins = [];
-                                m.coins.push($root.cosmos.base.v1beta1.Coin.decode(r, r.uint32()));
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                Output.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.Output)
-                        return d;
-                    var m = new $root.cosmos.bank.v1beta1.Output();
-                    if (d.address != null) {
-                        m.address = String(d.address);
-                    }
-                    if (d.coins) {
-                        if (!Array.isArray(d.coins))
-                            throw TypeError(".cosmos.bank.v1beta1.Output.coins: array expected");
-                        m.coins = [];
-                        for (var i = 0; i < d.coins.length; ++i) {
-                            if (typeof d.coins[i] !== "object")
-                                throw TypeError(".cosmos.bank.v1beta1.Output.coins: object expected");
-                            m.coins[i] = $root.cosmos.base.v1beta1.Coin.fromObject(d.coins[i]);
-                        }
-                    }
-                    return m;
-                };
-                Output.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.arrays || o.defaults) {
-                        d.coins = [];
-                    }
-                    if (o.defaults) {
-                        d.address = "";
-                    }
-                    if (m.address != null && m.hasOwnProperty("address")) {
-                        d.address = m.address;
-                    }
-                    if (m.coins && m.coins.length) {
-                        d.coins = [];
-                        for (var j = 0; j < m.coins.length; ++j) {
-                            d.coins[j] = $root.cosmos.base.v1beta1.Coin.toObject(m.coins[j], o);
-                        }
-                    }
-                    return d;
-                };
-                Output.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return Output;
-            })();
-            v1beta1.Supply = (function () {
-                function Supply(p) {
-                    this.total = [];
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                Supply.prototype.total = $util.emptyArray;
-                Supply.create = function create(properties) {
-                    return new Supply(properties);
-                };
-                Supply.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.total != null && m.total.length) {
-                        for (var i = 0; i < m.total.length; ++i)
-                            $root.cosmos.base.v1beta1.Coin.encode(m.total[i], w.uint32(10).fork()).ldelim();
-                    }
-                    return w;
-                };
-                Supply.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.Supply();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                if (!(m.total && m.total.length))
-                                    m.total = [];
-                                m.total.push($root.cosmos.base.v1beta1.Coin.decode(r, r.uint32()));
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                Supply.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.Supply)
-                        return d;
-                    var m = new $root.cosmos.bank.v1beta1.Supply();
-                    if (d.total) {
-                        if (!Array.isArray(d.total))
-                            throw TypeError(".cosmos.bank.v1beta1.Supply.total: array expected");
-                        m.total = [];
-                        for (var i = 0; i < d.total.length; ++i) {
-                            if (typeof d.total[i] !== "object")
-                                throw TypeError(".cosmos.bank.v1beta1.Supply.total: object expected");
-                            m.total[i] = $root.cosmos.base.v1beta1.Coin.fromObject(d.total[i]);
-                        }
-                    }
-                    return m;
-                };
-                Supply.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.arrays || o.defaults) {
-                        d.total = [];
-                    }
-                    if (m.total && m.total.length) {
-                        d.total = [];
-                        for (var j = 0; j < m.total.length; ++j) {
-                            d.total[j] = $root.cosmos.base.v1beta1.Coin.toObject(m.total[j], o);
-                        }
-                    }
-                    return d;
-                };
-                Supply.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return Supply;
-            })();
-            v1beta1.DenomUnit = (function () {
-                function DenomUnit(p) {
-                    this.aliases = [];
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                DenomUnit.prototype.denom = "";
-                DenomUnit.prototype.exponent = 0;
-                DenomUnit.prototype.aliases = $util.emptyArray;
-                DenomUnit.create = function create(properties) {
-                    return new DenomUnit(properties);
-                };
-                DenomUnit.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.denom != null && Object.hasOwnProperty.call(m, "denom"))
-                        w.uint32(10).string(m.denom);
-                    if (m.exponent != null && Object.hasOwnProperty.call(m, "exponent"))
-                        w.uint32(16).uint32(m.exponent);
-                    if (m.aliases != null && m.aliases.length) {
-                        for (var i = 0; i < m.aliases.length; ++i)
-                            w.uint32(26).string(m.aliases[i]);
-                    }
-                    return w;
-                };
-                DenomUnit.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.DenomUnit();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                m.denom = r.string();
-                                break;
-                            case 2:
-                                m.exponent = r.uint32();
-                                break;
-                            case 3:
-                                if (!(m.aliases && m.aliases.length))
-                                    m.aliases = [];
-                                m.aliases.push(r.string());
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                DenomUnit.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.DenomUnit)
-                        return d;
-                    var m = new $root.cosmos.bank.v1beta1.DenomUnit();
-                    if (d.denom != null) {
-                        m.denom = String(d.denom);
-                    }
-                    if (d.exponent != null) {
-                        m.exponent = d.exponent >>> 0;
-                    }
-                    if (d.aliases) {
-                        if (!Array.isArray(d.aliases))
-                            throw TypeError(".cosmos.bank.v1beta1.DenomUnit.aliases: array expected");
-                        m.aliases = [];
-                        for (var i = 0; i < d.aliases.length; ++i) {
-                            m.aliases[i] = String(d.aliases[i]);
-                        }
-                    }
-                    return m;
-                };
-                DenomUnit.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.arrays || o.defaults) {
-                        d.aliases = [];
-                    }
-                    if (o.defaults) {
-                        d.denom = "";
-                        d.exponent = 0;
-                    }
-                    if (m.denom != null && m.hasOwnProperty("denom")) {
-                        d.denom = m.denom;
-                    }
-                    if (m.exponent != null && m.hasOwnProperty("exponent")) {
-                        d.exponent = m.exponent;
-                    }
-                    if (m.aliases && m.aliases.length) {
-                        d.aliases = [];
-                        for (var j = 0; j < m.aliases.length; ++j) {
-                            d.aliases[j] = m.aliases[j];
-                        }
-                    }
-                    return d;
-                };
-                DenomUnit.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return DenomUnit;
-            })();
-            v1beta1.Metadata = (function () {
-                function Metadata(p) {
-                    this.denomUnits = [];
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                Metadata.prototype.description = "";
-                Metadata.prototype.denomUnits = $util.emptyArray;
-                Metadata.prototype.base = "";
-                Metadata.prototype.display = "";
-                Metadata.prototype.name = "";
-                Metadata.prototype.symbol = "";
-                Metadata.create = function create(properties) {
-                    return new Metadata(properties);
-                };
-                Metadata.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.description != null && Object.hasOwnProperty.call(m, "description"))
-                        w.uint32(10).string(m.description);
-                    if (m.denomUnits != null && m.denomUnits.length) {
-                        for (var i = 0; i < m.denomUnits.length; ++i)
-                            $root.cosmos.bank.v1beta1.DenomUnit.encode(m.denomUnits[i], w.uint32(18).fork()).ldelim();
-                    }
-                    if (m.base != null && Object.hasOwnProperty.call(m, "base"))
-                        w.uint32(26).string(m.base);
-                    if (m.display != null && Object.hasOwnProperty.call(m, "display"))
-                        w.uint32(34).string(m.display);
-                    if (m.name != null && Object.hasOwnProperty.call(m, "name"))
-                        w.uint32(42).string(m.name);
-                    if (m.symbol != null && Object.hasOwnProperty.call(m, "symbol"))
-                        w.uint32(50).string(m.symbol);
-                    return w;
-                };
-                Metadata.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.Metadata();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                m.description = r.string();
-                                break;
-                            case 2:
-                                if (!(m.denomUnits && m.denomUnits.length))
-                                    m.denomUnits = [];
-                                m.denomUnits.push($root.cosmos.bank.v1beta1.DenomUnit.decode(r, r.uint32()));
-                                break;
-                            case 3:
-                                m.base = r.string();
-                                break;
-                            case 4:
-                                m.display = r.string();
-                                break;
-                            case 5:
-                                m.name = r.string();
-                                break;
-                            case 6:
-                                m.symbol = r.string();
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                Metadata.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.Metadata)
-                        return d;
-                    var m = new $root.cosmos.bank.v1beta1.Metadata();
-                    if (d.description != null) {
-                        m.description = String(d.description);
-                    }
-                    if (d.denomUnits) {
-                        if (!Array.isArray(d.denomUnits))
-                            throw TypeError(".cosmos.bank.v1beta1.Metadata.denomUnits: array expected");
-                        m.denomUnits = [];
-                        for (var i = 0; i < d.denomUnits.length; ++i) {
-                            if (typeof d.denomUnits[i] !== "object")
-                                throw TypeError(".cosmos.bank.v1beta1.Metadata.denomUnits: object expected");
-                            m.denomUnits[i] = $root.cosmos.bank.v1beta1.DenomUnit.fromObject(d.denomUnits[i]);
-                        }
-                    }
-                    if (d.base != null) {
-                        m.base = String(d.base);
-                    }
-                    if (d.display != null) {
-                        m.display = String(d.display);
-                    }
-                    if (d.name != null) {
-                        m.name = String(d.name);
-                    }
-                    if (d.symbol != null) {
-                        m.symbol = String(d.symbol);
-                    }
-                    return m;
-                };
-                Metadata.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.arrays || o.defaults) {
-                        d.denomUnits = [];
-                    }
-                    if (o.defaults) {
-                        d.description = "";
-                        d.base = "";
-                        d.display = "";
-                        d.name = "";
-                        d.symbol = "";
-                    }
-                    if (m.description != null && m.hasOwnProperty("description")) {
-                        d.description = m.description;
-                    }
-                    if (m.denomUnits && m.denomUnits.length) {
-                        d.denomUnits = [];
-                        for (var j = 0; j < m.denomUnits.length; ++j) {
-                            d.denomUnits[j] = $root.cosmos.bank.v1beta1.DenomUnit.toObject(m.denomUnits[j], o);
-                        }
-                    }
-                    if (m.base != null && m.hasOwnProperty("base")) {
-                        d.base = m.base;
-                    }
-                    if (m.display != null && m.hasOwnProperty("display")) {
-                        d.display = m.display;
-                    }
-                    if (m.name != null && m.hasOwnProperty("name")) {
-                        d.name = m.name;
-                    }
-                    if (m.symbol != null && m.hasOwnProperty("symbol")) {
-                        d.symbol = m.symbol;
-                    }
-                    return d;
-                };
-                Metadata.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return Metadata;
-            })();
-            v1beta1.Msg = (function () {
-                function Msg(rpcImpl, requestDelimited, responseDelimited) {
-                    $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
-                }
-                (Msg.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Msg;
-                Msg.create = function create(rpcImpl, requestDelimited, responseDelimited) {
-                    return new this(rpcImpl, requestDelimited, responseDelimited);
-                };
-                Object.defineProperty(Msg.prototype.send = function send(request, callback) {
-                    return this.rpcCall(send, $root.cosmos.bank.v1beta1.MsgSend, $root.cosmos.bank.v1beta1.MsgSendResponse, request, callback);
-                }, "name", { value: "Send" });
-                Object.defineProperty(Msg.prototype.multiSend = function multiSend(request, callback) {
-                    return this.rpcCall(multiSend, $root.cosmos.bank.v1beta1.MsgMultiSend, $root.cosmos.bank.v1beta1.MsgMultiSendResponse, request, callback);
-                }, "name", { value: "MultiSend" });
-                return Msg;
-            })();
             v1beta1.MsgSend = (function () {
                 function MsgSend(p) {
                     this.amount = [];
@@ -721,6 +37,9 @@ exports.cosmos = $root.cosmos = (() => {
                     }
                     return w;
                 };
+                MsgSend.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 MsgSend.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -745,6 +64,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                MsgSend.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 MsgSend.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.bank.v1beta1.MsgSend)
@@ -798,194 +122,6 @@ exports.cosmos = $root.cosmos = (() => {
                 };
                 return MsgSend;
             })();
-            v1beta1.MsgSendResponse = (function () {
-                function MsgSendResponse(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgSendResponse.create = function create(properties) {
-                    return new MsgSendResponse(properties);
-                };
-                MsgSendResponse.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    return w;
-                };
-                MsgSendResponse.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.MsgSendResponse();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgSendResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.MsgSendResponse)
-                        return d;
-                    return new $root.cosmos.bank.v1beta1.MsgSendResponse();
-                };
-                MsgSendResponse.toObject = function toObject() {
-                    return {};
-                };
-                MsgSendResponse.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgSendResponse;
-            })();
-            v1beta1.MsgMultiSend = (function () {
-                function MsgMultiSend(p) {
-                    this.inputs = [];
-                    this.outputs = [];
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgMultiSend.prototype.inputs = $util.emptyArray;
-                MsgMultiSend.prototype.outputs = $util.emptyArray;
-                MsgMultiSend.create = function create(properties) {
-                    return new MsgMultiSend(properties);
-                };
-                MsgMultiSend.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.inputs != null && m.inputs.length) {
-                        for (var i = 0; i < m.inputs.length; ++i)
-                            $root.cosmos.bank.v1beta1.Input.encode(m.inputs[i], w.uint32(10).fork()).ldelim();
-                    }
-                    if (m.outputs != null && m.outputs.length) {
-                        for (var i = 0; i < m.outputs.length; ++i)
-                            $root.cosmos.bank.v1beta1.Output.encode(m.outputs[i], w.uint32(18).fork()).ldelim();
-                    }
-                    return w;
-                };
-                MsgMultiSend.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.MsgMultiSend();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                if (!(m.inputs && m.inputs.length))
-                                    m.inputs = [];
-                                m.inputs.push($root.cosmos.bank.v1beta1.Input.decode(r, r.uint32()));
-                                break;
-                            case 2:
-                                if (!(m.outputs && m.outputs.length))
-                                    m.outputs = [];
-                                m.outputs.push($root.cosmos.bank.v1beta1.Output.decode(r, r.uint32()));
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgMultiSend.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.MsgMultiSend)
-                        return d;
-                    var m = new $root.cosmos.bank.v1beta1.MsgMultiSend();
-                    if (d.inputs) {
-                        if (!Array.isArray(d.inputs))
-                            throw TypeError(".cosmos.bank.v1beta1.MsgMultiSend.inputs: array expected");
-                        m.inputs = [];
-                        for (var i = 0; i < d.inputs.length; ++i) {
-                            if (typeof d.inputs[i] !== "object")
-                                throw TypeError(".cosmos.bank.v1beta1.MsgMultiSend.inputs: object expected");
-                            m.inputs[i] = $root.cosmos.bank.v1beta1.Input.fromObject(d.inputs[i]);
-                        }
-                    }
-                    if (d.outputs) {
-                        if (!Array.isArray(d.outputs))
-                            throw TypeError(".cosmos.bank.v1beta1.MsgMultiSend.outputs: array expected");
-                        m.outputs = [];
-                        for (var i = 0; i < d.outputs.length; ++i) {
-                            if (typeof d.outputs[i] !== "object")
-                                throw TypeError(".cosmos.bank.v1beta1.MsgMultiSend.outputs: object expected");
-                            m.outputs[i] = $root.cosmos.bank.v1beta1.Output.fromObject(d.outputs[i]);
-                        }
-                    }
-                    return m;
-                };
-                MsgMultiSend.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.arrays || o.defaults) {
-                        d.inputs = [];
-                        d.outputs = [];
-                    }
-                    if (m.inputs && m.inputs.length) {
-                        d.inputs = [];
-                        for (var j = 0; j < m.inputs.length; ++j) {
-                            d.inputs[j] = $root.cosmos.bank.v1beta1.Input.toObject(m.inputs[j], o);
-                        }
-                    }
-                    if (m.outputs && m.outputs.length) {
-                        d.outputs = [];
-                        for (var j = 0; j < m.outputs.length; ++j) {
-                            d.outputs[j] = $root.cosmos.bank.v1beta1.Output.toObject(m.outputs[j], o);
-                        }
-                    }
-                    return d;
-                };
-                MsgMultiSend.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgMultiSend;
-            })();
-            v1beta1.MsgMultiSendResponse = (function () {
-                function MsgMultiSendResponse(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgMultiSendResponse.create = function create(properties) {
-                    return new MsgMultiSendResponse(properties);
-                };
-                MsgMultiSendResponse.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    return w;
-                };
-                MsgMultiSendResponse.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.bank.v1beta1.MsgMultiSendResponse();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgMultiSendResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.bank.v1beta1.MsgMultiSendResponse)
-                        return d;
-                    return new $root.cosmos.bank.v1beta1.MsgMultiSendResponse();
-                };
-                MsgMultiSendResponse.toObject = function toObject() {
-                    return {};
-                };
-                MsgMultiSendResponse.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgMultiSendResponse;
-            })();
             return v1beta1;
         })();
         return bank;
@@ -994,25 +130,6 @@ exports.cosmos = $root.cosmos = (() => {
         const staking = {};
         staking.v1beta1 = (function () {
             const v1beta1 = {};
-            v1beta1.Msg = (function () {
-                function Msg(rpcImpl, requestDelimited, responseDelimited) {
-                    $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
-                }
-                (Msg.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Msg;
-                Msg.create = function create(rpcImpl, requestDelimited, responseDelimited) {
-                    return new this(rpcImpl, requestDelimited, responseDelimited);
-                };
-                Object.defineProperty(Msg.prototype.delegate = function delegate(request, callback) {
-                    return this.rpcCall(delegate, $root.cosmos.staking.v1beta1.MsgDelegate, $root.cosmos.staking.v1beta1.MsgDelegateResponse, request, callback);
-                }, "name", { value: "Delegate" });
-                Object.defineProperty(Msg.prototype.beginRedelegate = function beginRedelegate(request, callback) {
-                    return this.rpcCall(beginRedelegate, $root.cosmos.staking.v1beta1.MsgBeginRedelegate, $root.cosmos.staking.v1beta1.MsgBeginRedelegateResponse, request, callback);
-                }, "name", { value: "BeginRedelegate" });
-                Object.defineProperty(Msg.prototype.undelegate = function undelegate(request, callback) {
-                    return this.rpcCall(undelegate, $root.cosmos.staking.v1beta1.MsgUndelegate, $root.cosmos.staking.v1beta1.MsgUndelegateResponse, request, callback);
-                }, "name", { value: "Undelegate" });
-                return Msg;
-            })();
             v1beta1.MsgDelegate = (function () {
                 function MsgDelegate(p) {
                     if (p)
@@ -1037,6 +154,9 @@ exports.cosmos = $root.cosmos = (() => {
                         $root.cosmos.base.v1beta1.Coin.encode(m.amount, w.uint32(26).fork()).ldelim();
                     return w;
                 };
+                MsgDelegate.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 MsgDelegate.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -1059,6 +179,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                MsgDelegate.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 MsgDelegate.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.staking.v1beta1.MsgDelegate)
@@ -1102,48 +227,6 @@ exports.cosmos = $root.cosmos = (() => {
                 };
                 return MsgDelegate;
             })();
-            v1beta1.MsgDelegateResponse = (function () {
-                function MsgDelegateResponse(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgDelegateResponse.create = function create(properties) {
-                    return new MsgDelegateResponse(properties);
-                };
-                MsgDelegateResponse.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    return w;
-                };
-                MsgDelegateResponse.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.staking.v1beta1.MsgDelegateResponse();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgDelegateResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.staking.v1beta1.MsgDelegateResponse)
-                        return d;
-                    return new $root.cosmos.staking.v1beta1.MsgDelegateResponse();
-                };
-                MsgDelegateResponse.toObject = function toObject() {
-                    return {};
-                };
-                MsgDelegateResponse.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgDelegateResponse;
-            })();
             v1beta1.MsgBeginRedelegate = (function () {
                 function MsgBeginRedelegate(p) {
                     if (p)
@@ -1171,6 +254,9 @@ exports.cosmos = $root.cosmos = (() => {
                         $root.cosmos.base.v1beta1.Coin.encode(m.amount, w.uint32(34).fork()).ldelim();
                     return w;
                 };
+                MsgBeginRedelegate.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 MsgBeginRedelegate.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -1196,6 +282,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                MsgBeginRedelegate.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 MsgBeginRedelegate.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.staking.v1beta1.MsgBeginRedelegate)
@@ -1246,69 +337,6 @@ exports.cosmos = $root.cosmos = (() => {
                 };
                 return MsgBeginRedelegate;
             })();
-            v1beta1.MsgBeginRedelegateResponse = (function () {
-                function MsgBeginRedelegateResponse(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgBeginRedelegateResponse.prototype.completionTime = null;
-                MsgBeginRedelegateResponse.create = function create(properties) {
-                    return new MsgBeginRedelegateResponse(properties);
-                };
-                MsgBeginRedelegateResponse.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.completionTime != null && Object.hasOwnProperty.call(m, "completionTime"))
-                        $root.google.protobuf.Timestamp.encode(m.completionTime, w.uint32(10).fork()).ldelim();
-                    return w;
-                };
-                MsgBeginRedelegateResponse.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.staking.v1beta1.MsgBeginRedelegateResponse();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                m.completionTime = $root.google.protobuf.Timestamp.decode(r, r.uint32());
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgBeginRedelegateResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.staking.v1beta1.MsgBeginRedelegateResponse)
-                        return d;
-                    var m = new $root.cosmos.staking.v1beta1.MsgBeginRedelegateResponse();
-                    if (d.completionTime != null) {
-                        if (typeof d.completionTime !== "object")
-                            throw TypeError(".cosmos.staking.v1beta1.MsgBeginRedelegateResponse.completionTime: object expected");
-                        m.completionTime = $root.google.protobuf.Timestamp.fromObject(d.completionTime);
-                    }
-                    return m;
-                };
-                MsgBeginRedelegateResponse.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.defaults) {
-                        d.completionTime = null;
-                    }
-                    if (m.completionTime != null && m.hasOwnProperty("completionTime")) {
-                        d.completionTime = $root.google.protobuf.Timestamp.toObject(m.completionTime, o);
-                    }
-                    return d;
-                };
-                MsgBeginRedelegateResponse.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgBeginRedelegateResponse;
-            })();
             v1beta1.MsgUndelegate = (function () {
                 function MsgUndelegate(p) {
                     if (p)
@@ -1333,6 +361,9 @@ exports.cosmos = $root.cosmos = (() => {
                         $root.cosmos.base.v1beta1.Coin.encode(m.amount, w.uint32(26).fork()).ldelim();
                     return w;
                 };
+                MsgUndelegate.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 MsgUndelegate.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -1355,6 +386,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                MsgUndelegate.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 MsgUndelegate.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.staking.v1beta1.MsgUndelegate)
@@ -1398,69 +434,6 @@ exports.cosmos = $root.cosmos = (() => {
                 };
                 return MsgUndelegate;
             })();
-            v1beta1.MsgUndelegateResponse = (function () {
-                function MsgUndelegateResponse(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgUndelegateResponse.prototype.completionTime = null;
-                MsgUndelegateResponse.create = function create(properties) {
-                    return new MsgUndelegateResponse(properties);
-                };
-                MsgUndelegateResponse.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    if (m.completionTime != null && Object.hasOwnProperty.call(m, "completionTime"))
-                        $root.google.protobuf.Timestamp.encode(m.completionTime, w.uint32(10).fork()).ldelim();
-                    return w;
-                };
-                MsgUndelegateResponse.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.staking.v1beta1.MsgUndelegateResponse();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            case 1:
-                                m.completionTime = $root.google.protobuf.Timestamp.decode(r, r.uint32());
-                                break;
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgUndelegateResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.staking.v1beta1.MsgUndelegateResponse)
-                        return d;
-                    var m = new $root.cosmos.staking.v1beta1.MsgUndelegateResponse();
-                    if (d.completionTime != null) {
-                        if (typeof d.completionTime !== "object")
-                            throw TypeError(".cosmos.staking.v1beta1.MsgUndelegateResponse.completionTime: object expected");
-                        m.completionTime = $root.google.protobuf.Timestamp.fromObject(d.completionTime);
-                    }
-                    return m;
-                };
-                MsgUndelegateResponse.toObject = function toObject(m, o) {
-                    if (!o)
-                        o = {};
-                    var d = {};
-                    if (o.defaults) {
-                        d.completionTime = null;
-                    }
-                    if (m.completionTime != null && m.hasOwnProperty("completionTime")) {
-                        d.completionTime = $root.google.protobuf.Timestamp.toObject(m.completionTime, o);
-                    }
-                    return d;
-                };
-                MsgUndelegateResponse.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgUndelegateResponse;
-            })();
             return v1beta1;
         })();
         return staking;
@@ -1477,22 +450,6 @@ exports.cosmos = $root.cosmos = (() => {
                 values[valuesById[3] = "VOTE_OPTION_NO"] = 3;
                 values[valuesById[4] = "VOTE_OPTION_NO_WITH_VETO"] = 4;
                 return values;
-            })();
-            v1beta1.Msg = (function () {
-                function Msg(rpcImpl, requestDelimited, responseDelimited) {
-                    $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
-                }
-                (Msg.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Msg;
-                Msg.create = function create(rpcImpl, requestDelimited, responseDelimited) {
-                    return new this(rpcImpl, requestDelimited, responseDelimited);
-                };
-                Object.defineProperty(Msg.prototype.vote = function vote(request, callback) {
-                    return this.rpcCall(vote, $root.cosmos.gov.v1beta1.MsgVote, $root.cosmos.gov.v1beta1.MsgVoteResponse, request, callback);
-                }, "name", { value: "Vote" });
-                Object.defineProperty(Msg.prototype.deposit = function deposit(request, callback) {
-                    return this.rpcCall(deposit, $root.cosmos.gov.v1beta1.MsgDeposit, $root.cosmos.gov.v1beta1.MsgDepositResponse, request, callback);
-                }, "name", { value: "Deposit" });
-                return Msg;
             })();
             v1beta1.MsgVote = (function () {
                 function MsgVote(p) {
@@ -1518,6 +475,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(24).int32(m.option);
                     return w;
                 };
+                MsgVote.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 MsgVote.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -1540,6 +500,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                MsgVote.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 MsgVote.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.gov.v1beta1.MsgVote)
@@ -1615,48 +580,6 @@ exports.cosmos = $root.cosmos = (() => {
                 };
                 return MsgVote;
             })();
-            v1beta1.MsgVoteResponse = (function () {
-                function MsgVoteResponse(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgVoteResponse.create = function create(properties) {
-                    return new MsgVoteResponse(properties);
-                };
-                MsgVoteResponse.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    return w;
-                };
-                MsgVoteResponse.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.gov.v1beta1.MsgVoteResponse();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgVoteResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.gov.v1beta1.MsgVoteResponse)
-                        return d;
-                    return new $root.cosmos.gov.v1beta1.MsgVoteResponse();
-                };
-                MsgVoteResponse.toObject = function toObject() {
-                    return {};
-                };
-                MsgVoteResponse.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgVoteResponse;
-            })();
             v1beta1.MsgDeposit = (function () {
                 function MsgDeposit(p) {
                     this.amount = [];
@@ -1684,6 +607,9 @@ exports.cosmos = $root.cosmos = (() => {
                     }
                     return w;
                 };
+                MsgDeposit.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 MsgDeposit.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -1708,6 +634,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                MsgDeposit.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 MsgDeposit.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.gov.v1beta1.MsgDeposit)
@@ -1776,48 +707,6 @@ exports.cosmos = $root.cosmos = (() => {
                 };
                 return MsgDeposit;
             })();
-            v1beta1.MsgDepositResponse = (function () {
-                function MsgDepositResponse(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgDepositResponse.create = function create(properties) {
-                    return new MsgDepositResponse(properties);
-                };
-                MsgDepositResponse.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    return w;
-                };
-                MsgDepositResponse.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.gov.v1beta1.MsgDepositResponse();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgDepositResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.gov.v1beta1.MsgDepositResponse)
-                        return d;
-                    return new $root.cosmos.gov.v1beta1.MsgDepositResponse();
-                };
-                MsgDepositResponse.toObject = function toObject() {
-                    return {};
-                };
-                MsgDepositResponse.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgDepositResponse;
-            })();
             return v1beta1;
         })();
         return gov;
@@ -1826,19 +715,6 @@ exports.cosmos = $root.cosmos = (() => {
         const distribution = {};
         distribution.v1beta1 = (function () {
             const v1beta1 = {};
-            v1beta1.Msg = (function () {
-                function Msg(rpcImpl, requestDelimited, responseDelimited) {
-                    $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
-                }
-                (Msg.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Msg;
-                Msg.create = function create(rpcImpl, requestDelimited, responseDelimited) {
-                    return new this(rpcImpl, requestDelimited, responseDelimited);
-                };
-                Object.defineProperty(Msg.prototype.withdrawDelegatorReward = function withdrawDelegatorReward(request, callback) {
-                    return this.rpcCall(withdrawDelegatorReward, $root.cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward, $root.cosmos.distribution.v1beta1.MsgWithdrawDelegatorRewardResponse, request, callback);
-                }, "name", { value: "WithdrawDelegatorReward" });
-                return Msg;
-            })();
             v1beta1.MsgWithdrawDelegatorReward = (function () {
                 function MsgWithdrawDelegatorReward(p) {
                     if (p)
@@ -1860,6 +736,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(18).string(m.validatorAddress);
                     return w;
                 };
+                MsgWithdrawDelegatorReward.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 MsgWithdrawDelegatorReward.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -1879,6 +758,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                MsgWithdrawDelegatorReward.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 MsgWithdrawDelegatorReward.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward)
@@ -1913,48 +797,6 @@ exports.cosmos = $root.cosmos = (() => {
                 };
                 return MsgWithdrawDelegatorReward;
             })();
-            v1beta1.MsgWithdrawDelegatorRewardResponse = (function () {
-                function MsgWithdrawDelegatorRewardResponse(p) {
-                    if (p)
-                        for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                            if (p[ks[i]] != null)
-                                this[ks[i]] = p[ks[i]];
-                }
-                MsgWithdrawDelegatorRewardResponse.create = function create(properties) {
-                    return new MsgWithdrawDelegatorRewardResponse(properties);
-                };
-                MsgWithdrawDelegatorRewardResponse.encode = function encode(m, w) {
-                    if (!w)
-                        w = $Writer.create();
-                    return w;
-                };
-                MsgWithdrawDelegatorRewardResponse.decode = function decode(r, l) {
-                    if (!(r instanceof $Reader))
-                        r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmos.distribution.v1beta1.MsgWithdrawDelegatorRewardResponse();
-                    while (r.pos < c) {
-                        var t = r.uint32();
-                        switch (t >>> 3) {
-                            default:
-                                r.skipType(t & 7);
-                                break;
-                        }
-                    }
-                    return m;
-                };
-                MsgWithdrawDelegatorRewardResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmos.distribution.v1beta1.MsgWithdrawDelegatorRewardResponse)
-                        return d;
-                    return new $root.cosmos.distribution.v1beta1.MsgWithdrawDelegatorRewardResponse();
-                };
-                MsgWithdrawDelegatorRewardResponse.toObject = function toObject() {
-                    return {};
-                };
-                MsgWithdrawDelegatorRewardResponse.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-                return MsgWithdrawDelegatorRewardResponse;
-            })();
             return v1beta1;
         })();
         return distribution;
@@ -1984,6 +826,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(18).string(m.amount);
                     return w;
                 };
+                Coin.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 Coin.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -2003,6 +848,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                Coin.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 Coin.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.base.v1beta1.Coin)
@@ -2058,6 +908,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(18).string(m.amount);
                     return w;
                 };
+                DecCoin.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 DecCoin.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -2077,6 +930,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                DecCoin.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 DecCoin.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.base.v1beta1.DecCoin)
@@ -2129,6 +987,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(10).string(m.int);
                     return w;
                 };
+                IntProto.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 IntProto.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -2145,6 +1006,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                IntProto.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 IntProto.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.base.v1beta1.IntProto)
@@ -2190,6 +1056,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(10).string(m.dec);
                     return w;
                 };
+                DecProto.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 DecProto.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -2206,6 +1075,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                DecProto.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 DecProto.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.base.v1beta1.DecProto)
@@ -2260,6 +1134,9 @@ exports.cosmos = $root.cosmos = (() => {
                             w.uint32(18).bytes(m.data);
                         return w;
                     };
+                    MsgData.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     MsgData.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -2279,6 +1156,11 @@ exports.cosmos = $root.cosmos = (() => {
                             }
                         }
                         return m;
+                    };
+                    MsgData.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     MsgData.fromObject = function fromObject(d) {
                         if (d instanceof $root.cosmos.base.abci.v1beta1.MsgData)
@@ -2343,6 +1225,9 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                         return w;
                     };
+                    TxMsgData.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     TxMsgData.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -2361,6 +1246,11 @@ exports.cosmos = $root.cosmos = (() => {
                             }
                         }
                         return m;
+                    };
+                    TxMsgData.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     TxMsgData.fromObject = function fromObject(d) {
                         if (d instanceof $root.cosmos.base.abci.v1beta1.TxMsgData)
@@ -2431,6 +1321,9 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                         return w;
                     };
+                    MultiSignature.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     MultiSignature.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -2449,6 +1342,11 @@ exports.cosmos = $root.cosmos = (() => {
                             }
                         }
                         return m;
+                    };
+                    MultiSignature.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     MultiSignature.fromObject = function fromObject(d) {
                         if (d instanceof $root.cosmos.crypto.multisig.v1beta1.MultiSignature)
@@ -2508,6 +1406,9 @@ exports.cosmos = $root.cosmos = (() => {
                             w.uint32(18).bytes(m.elems);
                         return w;
                     };
+                    CompactBitArray.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     CompactBitArray.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -2527,6 +1428,11 @@ exports.cosmos = $root.cosmos = (() => {
                             }
                         }
                         return m;
+                    };
+                    CompactBitArray.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     CompactBitArray.fromObject = function fromObject(d) {
                         if (d instanceof $root.cosmos.crypto.multisig.v1beta1.CompactBitArray)
@@ -2594,6 +1500,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(10).bytes(m.key);
                     return w;
                 };
+                PubKey.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 PubKey.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -2610,6 +1519,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                PubKey.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 PubKey.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.crypto.secp256k1.PubKey)
@@ -2664,6 +1578,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(10).bytes(m.key);
                     return w;
                 };
+                PrivKey.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 PrivKey.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -2680,6 +1597,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                PrivKey.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 PrivKey.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.crypto.secp256k1.PrivKey)
@@ -2751,6 +1673,9 @@ exports.cosmos = $root.cosmos = (() => {
                     }
                     return w;
                 };
+                Tx.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 Tx.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -2775,6 +1700,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                Tx.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 Tx.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.tx.v1beta1.Tx)
@@ -2860,6 +1790,9 @@ exports.cosmos = $root.cosmos = (() => {
                     }
                     return w;
                 };
+                TxRaw.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 TxRaw.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -2884,6 +1817,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                TxRaw.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 TxRaw.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.tx.v1beta1.TxRaw)
@@ -2983,6 +1921,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(32).uint64(m.accountNumber);
                     return w;
                 };
+                SignDoc.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 SignDoc.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -3008,6 +1949,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                SignDoc.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 SignDoc.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.tx.v1beta1.SignDoc)
@@ -3128,6 +2074,9 @@ exports.cosmos = $root.cosmos = (() => {
                     }
                     return w;
                 };
+                TxBody.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 TxBody.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -3162,6 +2111,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                TxBody.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 TxBody.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.tx.v1beta1.TxBody)
@@ -3288,6 +2242,9 @@ exports.cosmos = $root.cosmos = (() => {
                         $root.cosmos.tx.v1beta1.Fee.encode(m.fee, w.uint32(18).fork()).ldelim();
                     return w;
                 };
+                AuthInfo.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 AuthInfo.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -3309,6 +2266,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                AuthInfo.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 AuthInfo.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.tx.v1beta1.AuthInfo)
@@ -3381,6 +2343,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(24).uint64(m.sequence);
                     return w;
                 };
+                SignerInfo.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 SignerInfo.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -3403,6 +2368,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                SignerInfo.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 SignerInfo.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.tx.v1beta1.SignerInfo)
@@ -3489,6 +2459,9 @@ exports.cosmos = $root.cosmos = (() => {
                         $root.cosmos.tx.v1beta1.ModeInfo.Multi.encode(m.multi, w.uint32(18).fork()).ldelim();
                     return w;
                 };
+                ModeInfo.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 ModeInfo.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -3508,6 +2481,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                ModeInfo.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 ModeInfo.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.tx.v1beta1.ModeInfo)
@@ -3562,6 +2540,9 @@ exports.cosmos = $root.cosmos = (() => {
                             w.uint32(8).int32(m.mode);
                         return w;
                     };
+                    Single.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     Single.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -3578,6 +2559,11 @@ exports.cosmos = $root.cosmos = (() => {
                             }
                         }
                         return m;
+                    };
+                    Single.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     Single.fromObject = function fromObject(d) {
                         if (d instanceof $root.cosmos.tx.v1beta1.ModeInfo.Single)
@@ -3644,6 +2630,9 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                         return w;
                     };
+                    Multi.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     Multi.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -3665,6 +2654,11 @@ exports.cosmos = $root.cosmos = (() => {
                             }
                         }
                         return m;
+                    };
+                    Multi.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     Multi.fromObject = function fromObject(d) {
                         if (d instanceof $root.cosmos.tx.v1beta1.ModeInfo.Multi)
@@ -3745,6 +2739,9 @@ exports.cosmos = $root.cosmos = (() => {
                         w.uint32(34).string(m.granter);
                     return w;
                 };
+                Fee.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 Fee.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -3772,6 +2769,11 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                     }
                     return m;
+                };
+                Fee.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 Fee.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmos.tx.v1beta1.Fee)
@@ -3882,6 +2884,9 @@ exports.cosmos = $root.cosmos = (() => {
                         }
                         return w;
                     };
+                    SignatureDescriptors.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     SignatureDescriptors.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -3900,6 +2905,11 @@ exports.cosmos = $root.cosmos = (() => {
                             }
                         }
                         return m;
+                    };
+                    SignatureDescriptors.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     SignatureDescriptors.fromObject = function fromObject(d) {
                         if (d instanceof $root.cosmos.tx.signing.v1beta1.SignatureDescriptors)
@@ -3961,6 +2971,9 @@ exports.cosmos = $root.cosmos = (() => {
                             w.uint32(24).uint64(m.sequence);
                         return w;
                     };
+                    SignatureDescriptor.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     SignatureDescriptor.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -3983,6 +2996,11 @@ exports.cosmos = $root.cosmos = (() => {
                             }
                         }
                         return m;
+                    };
+                    SignatureDescriptor.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     SignatureDescriptor.fromObject = function fromObject(d) {
                         if (d instanceof $root.cosmos.tx.signing.v1beta1.SignatureDescriptor)
@@ -4067,6 +3085,9 @@ exports.cosmos = $root.cosmos = (() => {
                                 $root.cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Multi.encode(m.multi, w.uint32(18).fork()).ldelim();
                             return w;
                         };
+                        Data.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
                         Data.decode = function decode(r, l) {
                             if (!(r instanceof $Reader))
                                 r = $Reader.create(r);
@@ -4086,6 +3107,11 @@ exports.cosmos = $root.cosmos = (() => {
                                 }
                             }
                             return m;
+                        };
+                        Data.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
                         };
                         Data.fromObject = function fromObject(d) {
                             if (d instanceof $root.cosmos.tx.signing.v1beta1.SignatureDescriptor.Data)
@@ -4143,6 +3169,9 @@ exports.cosmos = $root.cosmos = (() => {
                                     w.uint32(18).bytes(m.signature);
                                 return w;
                             };
+                            Single.encodeDelimited = function encodeDelimited(message, writer) {
+                                return this.encode(message, writer).ldelim();
+                            };
                             Single.decode = function decode(r, l) {
                                 if (!(r instanceof $Reader))
                                     r = $Reader.create(r);
@@ -4162,6 +3191,11 @@ exports.cosmos = $root.cosmos = (() => {
                                     }
                                 }
                                 return m;
+                            };
+                            Single.decodeDelimited = function decodeDelimited(reader) {
+                                if (!(reader instanceof $Reader))
+                                    reader = new $Reader(reader);
+                                return this.decode(reader, reader.uint32());
                             };
                             Single.fromObject = function fromObject(d) {
                                 if (d instanceof $root.cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Single)
@@ -4244,6 +3278,9 @@ exports.cosmos = $root.cosmos = (() => {
                                 }
                                 return w;
                             };
+                            Multi.encodeDelimited = function encodeDelimited(message, writer) {
+                                return this.encode(message, writer).ldelim();
+                            };
                             Multi.decode = function decode(r, l) {
                                 if (!(r instanceof $Reader))
                                     r = $Reader.create(r);
@@ -4265,6 +3302,11 @@ exports.cosmos = $root.cosmos = (() => {
                                     }
                                 }
                                 return m;
+                            };
+                            Multi.decodeDelimited = function decodeDelimited(reader) {
+                                if (!(reader instanceof $Reader))
+                                    reader = new $Reader(reader);
+                                return this.decode(reader, reader.uint32());
                             };
                             Multi.fromObject = function fromObject(d) {
                                 if (d instanceof $root.cosmos.tx.signing.v1beta1.SignatureDescriptor.Data.Multi)
@@ -4350,6 +3392,9 @@ exports.google = $root.google = (() => {
                     w.uint32(18).bytes(m.value);
                 return w;
             };
+            Any.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
             Any.decode = function decode(r, l) {
                 if (!(r instanceof $Reader))
                     r = $Reader.create(r);
@@ -4369,6 +3414,11 @@ exports.google = $root.google = (() => {
                     }
                 }
                 return m;
+            };
+            Any.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
             };
             Any.fromObject = function fromObject(d) {
                 if (d instanceof $root.google.protobuf.Any)
@@ -4412,95 +3462,6 @@ exports.google = $root.google = (() => {
             };
             return Any;
         })();
-        protobuf.Timestamp = (function () {
-            function Timestamp(p) {
-                if (p)
-                    for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                        if (p[ks[i]] != null)
-                            this[ks[i]] = p[ks[i]];
-            }
-            Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0, 0, false) : 0;
-            Timestamp.prototype.nanos = 0;
-            Timestamp.create = function create(properties) {
-                return new Timestamp(properties);
-            };
-            Timestamp.encode = function encode(m, w) {
-                if (!w)
-                    w = $Writer.create();
-                if (m.seconds != null && Object.hasOwnProperty.call(m, "seconds"))
-                    w.uint32(8).int64(m.seconds);
-                if (m.nanos != null && Object.hasOwnProperty.call(m, "nanos"))
-                    w.uint32(16).int32(m.nanos);
-                return w;
-            };
-            Timestamp.decode = function decode(r, l) {
-                if (!(r instanceof $Reader))
-                    r = $Reader.create(r);
-                var c = l === undefined ? r.len : r.pos + l, m = new $root.google.protobuf.Timestamp();
-                while (r.pos < c) {
-                    var t = r.uint32();
-                    switch (t >>> 3) {
-                        case 1:
-                            m.seconds = r.int64();
-                            break;
-                        case 2:
-                            m.nanos = r.int32();
-                            break;
-                        default:
-                            r.skipType(t & 7);
-                            break;
-                    }
-                }
-                return m;
-            };
-            Timestamp.fromObject = function fromObject(d) {
-                if (d instanceof $root.google.protobuf.Timestamp)
-                    return d;
-                var m = new $root.google.protobuf.Timestamp();
-                if (d.seconds != null) {
-                    if ($util.Long)
-                        (m.seconds = $util.Long.fromValue(d.seconds)).unsigned = false;
-                    else if (typeof d.seconds === "string")
-                        m.seconds = parseInt(d.seconds, 10);
-                    else if (typeof d.seconds === "number")
-                        m.seconds = d.seconds;
-                    else if (typeof d.seconds === "object")
-                        m.seconds = new $util.LongBits(d.seconds.low >>> 0, d.seconds.high >>> 0).toNumber();
-                }
-                if (d.nanos != null) {
-                    m.nanos = d.nanos | 0;
-                }
-                return m;
-            };
-            Timestamp.toObject = function toObject(m, o) {
-                if (!o)
-                    o = {};
-                var d = {};
-                if (o.defaults) {
-                    if ($util.Long) {
-                        var n = new $util.Long(0, 0, false);
-                        d.seconds = o.longs === String ? n.toString() : o.longs === Number ? n.toNumber() : n;
-                    }
-                    else
-                        d.seconds = o.longs === String ? "0" : 0;
-                    d.nanos = 0;
-                }
-                if (m.seconds != null && m.hasOwnProperty("seconds")) {
-                    if (typeof m.seconds === "number")
-                        d.seconds = o.longs === String ? String(m.seconds) : m.seconds;
-                    else
-                        d.seconds = o.longs === String ? $util.Long.prototype.toString.call(m.seconds) : o.longs === Number ? new $util.LongBits(m.seconds.low >>> 0, m.seconds.high >>> 0).toNumber() : m.seconds;
-                }
-                if (m.nanos != null && m.hasOwnProperty("nanos")) {
-                    d.nanos = m.nanos;
-                }
-                return d;
-            };
-            Timestamp.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-            };
-            return Timestamp;
-        })();
         return protobuf;
     })();
     return google;
@@ -4513,19 +3474,6 @@ exports.ibc = $root.ibc = (() => {
             const transfer = {};
             transfer.v1 = (function () {
                 const v1 = {};
-                v1.Msg = (function () {
-                    function Msg(rpcImpl, requestDelimited, responseDelimited) {
-                        $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
-                    }
-                    (Msg.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Msg;
-                    Msg.create = function create(rpcImpl, requestDelimited, responseDelimited) {
-                        return new this(rpcImpl, requestDelimited, responseDelimited);
-                    };
-                    Object.defineProperty(Msg.prototype.transfer = function transfer(request, callback) {
-                        return this.rpcCall(transfer, $root.ibc.applications.transfer.v1.MsgTransfer, $root.ibc.applications.transfer.v1.MsgTransferResponse, request, callback);
-                    }, "name", { value: "Transfer" });
-                    return Msg;
-                })();
                 v1.MsgTransfer = (function () {
                     function MsgTransfer(p) {
                         if (p)
@@ -4562,6 +3510,9 @@ exports.ibc = $root.ibc = (() => {
                             w.uint32(56).uint64(m.timeoutTimestamp);
                         return w;
                     };
+                    MsgTransfer.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     MsgTransfer.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -4596,6 +3547,11 @@ exports.ibc = $root.ibc = (() => {
                             }
                         }
                         return m;
+                    };
+                    MsgTransfer.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     MsgTransfer.fromObject = function fromObject(d) {
                         if (d instanceof $root.ibc.applications.transfer.v1.MsgTransfer)
@@ -4684,48 +3640,6 @@ exports.ibc = $root.ibc = (() => {
                     };
                     return MsgTransfer;
                 })();
-                v1.MsgTransferResponse = (function () {
-                    function MsgTransferResponse(p) {
-                        if (p)
-                            for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
-                                if (p[ks[i]] != null)
-                                    this[ks[i]] = p[ks[i]];
-                    }
-                    MsgTransferResponse.create = function create(properties) {
-                        return new MsgTransferResponse(properties);
-                    };
-                    MsgTransferResponse.encode = function encode(m, w) {
-                        if (!w)
-                            w = $Writer.create();
-                        return w;
-                    };
-                    MsgTransferResponse.decode = function decode(r, l) {
-                        if (!(r instanceof $Reader))
-                            r = $Reader.create(r);
-                        var c = l === undefined ? r.len : r.pos + l, m = new $root.ibc.applications.transfer.v1.MsgTransferResponse();
-                        while (r.pos < c) {
-                            var t = r.uint32();
-                            switch (t >>> 3) {
-                                default:
-                                    r.skipType(t & 7);
-                                    break;
-                            }
-                        }
-                        return m;
-                    };
-                    MsgTransferResponse.fromObject = function fromObject(d) {
-                        if (d instanceof $root.ibc.applications.transfer.v1.MsgTransferResponse)
-                            return d;
-                        return new $root.ibc.applications.transfer.v1.MsgTransferResponse();
-                    };
-                    MsgTransferResponse.toObject = function toObject() {
-                        return {};
-                    };
-                    MsgTransferResponse.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-                    return MsgTransferResponse;
-                })();
                 return v1;
             })();
             return transfer;
@@ -4759,6 +3673,9 @@ exports.ibc = $root.ibc = (() => {
                             w.uint32(16).uint64(m.revisionHeight);
                         return w;
                     };
+                    Height.encodeDelimited = function encodeDelimited(message, writer) {
+                        return this.encode(message, writer).ldelim();
+                    };
                     Height.decode = function decode(r, l) {
                         if (!(r instanceof $Reader))
                             r = $Reader.create(r);
@@ -4778,6 +3695,11 @@ exports.ibc = $root.ibc = (() => {
                             }
                         }
                         return m;
+                    };
+                    Height.decodeDelimited = function decodeDelimited(reader) {
+                        if (!(reader instanceof $Reader))
+                            reader = new $Reader(reader);
+                        return this.decode(reader, reader.uint32());
                     };
                     Height.fromObject = function fromObject(d) {
                         if (d instanceof $root.ibc.core.client.v1.Height)
@@ -4886,6 +3808,9 @@ exports.cosmwasm = $root.cosmwasm = (() => {
                     }
                     return w;
                 };
+                MsgExecuteContract.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
                 MsgExecuteContract.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
@@ -4913,6 +3838,11 @@ exports.cosmwasm = $root.cosmwasm = (() => {
                         }
                     }
                     return m;
+                };
+                MsgExecuteContract.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
                 };
                 MsgExecuteContract.fromObject = function fromObject(d) {
                     if (d instanceof $root.cosmwasm.wasm.v1.MsgExecuteContract)
@@ -4982,33 +3912,83 @@ exports.cosmwasm = $root.cosmwasm = (() => {
                 };
                 return MsgExecuteContract;
             })();
-            v1.MsgExecuteContractResponse = (function () {
-                function MsgExecuteContractResponse(p) {
+            return v1;
+        })();
+        return wasm;
+    })();
+    return cosmwasm;
+})();
+exports.secret = $root.secret = (() => {
+    const secret = {};
+    secret.compute = (function () {
+        const compute = {};
+        compute.v1beta1 = (function () {
+            const v1beta1 = {};
+            v1beta1.MsgExecuteContract = (function () {
+                function MsgExecuteContract(p) {
+                    this.sentFunds = [];
                     if (p)
                         for (var ks = Object.keys(p), i = 0; i < ks.length; ++i)
                             if (p[ks[i]] != null)
                                 this[ks[i]] = p[ks[i]];
                 }
-                MsgExecuteContractResponse.prototype.data = $util.newBuffer([]);
-                MsgExecuteContractResponse.create = function create(properties) {
-                    return new MsgExecuteContractResponse(properties);
+                MsgExecuteContract.prototype.sender = $util.newBuffer([]);
+                MsgExecuteContract.prototype.contract = $util.newBuffer([]);
+                MsgExecuteContract.prototype.msg = $util.newBuffer([]);
+                MsgExecuteContract.prototype.callbackCodeHash = "";
+                MsgExecuteContract.prototype.sentFunds = $util.emptyArray;
+                MsgExecuteContract.prototype.callbackSig = $util.newBuffer([]);
+                MsgExecuteContract.create = function create(properties) {
+                    return new MsgExecuteContract(properties);
                 };
-                MsgExecuteContractResponse.encode = function encode(m, w) {
+                MsgExecuteContract.encode = function encode(m, w) {
                     if (!w)
                         w = $Writer.create();
-                    if (m.data != null && Object.hasOwnProperty.call(m, "data"))
-                        w.uint32(10).bytes(m.data);
+                    if (m.sender != null && Object.hasOwnProperty.call(m, "sender"))
+                        w.uint32(10).bytes(m.sender);
+                    if (m.contract != null && Object.hasOwnProperty.call(m, "contract"))
+                        w.uint32(18).bytes(m.contract);
+                    if (m.msg != null && Object.hasOwnProperty.call(m, "msg"))
+                        w.uint32(26).bytes(m.msg);
+                    if (m.callbackCodeHash != null && Object.hasOwnProperty.call(m, "callbackCodeHash"))
+                        w.uint32(34).string(m.callbackCodeHash);
+                    if (m.sentFunds != null && m.sentFunds.length) {
+                        for (var i = 0; i < m.sentFunds.length; ++i)
+                            $root.cosmos.base.v1beta1.Coin.encode(m.sentFunds[i], w.uint32(42).fork()).ldelim();
+                    }
+                    if (m.callbackSig != null && Object.hasOwnProperty.call(m, "callbackSig"))
+                        w.uint32(50).bytes(m.callbackSig);
                     return w;
                 };
-                MsgExecuteContractResponse.decode = function decode(r, l) {
+                MsgExecuteContract.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+                MsgExecuteContract.decode = function decode(r, l) {
                     if (!(r instanceof $Reader))
                         r = $Reader.create(r);
-                    var c = l === undefined ? r.len : r.pos + l, m = new $root.cosmwasm.wasm.v1.MsgExecuteContractResponse();
+                    var c = l === undefined ? r.len : r.pos + l, m = new $root.secret.compute.v1beta1.MsgExecuteContract();
                     while (r.pos < c) {
                         var t = r.uint32();
                         switch (t >>> 3) {
                             case 1:
-                                m.data = r.bytes();
+                                m.sender = r.bytes();
+                                break;
+                            case 2:
+                                m.contract = r.bytes();
+                                break;
+                            case 3:
+                                m.msg = r.bytes();
+                                break;
+                            case 4:
+                                m.callbackCodeHash = r.string();
+                                break;
+                            case 5:
+                                if (!(m.sentFunds && m.sentFunds.length))
+                                    m.sentFunds = [];
+                                m.sentFunds.push($root.cosmos.base.v1beta1.Coin.decode(r, r.uint32()));
+                                break;
+                            case 6:
+                                m.callbackSig = r.bytes();
                                 break;
                             default:
                                 r.skipType(t & 7);
@@ -5017,46 +3997,125 @@ exports.cosmwasm = $root.cosmwasm = (() => {
                     }
                     return m;
                 };
-                MsgExecuteContractResponse.fromObject = function fromObject(d) {
-                    if (d instanceof $root.cosmwasm.wasm.v1.MsgExecuteContractResponse)
+                MsgExecuteContract.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+                MsgExecuteContract.fromObject = function fromObject(d) {
+                    if (d instanceof $root.secret.compute.v1beta1.MsgExecuteContract)
                         return d;
-                    var m = new $root.cosmwasm.wasm.v1.MsgExecuteContractResponse();
-                    if (d.data != null) {
-                        if (typeof d.data === "string")
-                            $util.base64.decode(d.data, m.data = $util.newBuffer($util.base64.length(d.data)), 0);
-                        else if (d.data.length)
-                            m.data = d.data;
+                    var m = new $root.secret.compute.v1beta1.MsgExecuteContract();
+                    if (d.sender != null) {
+                        if (typeof d.sender === "string")
+                            $util.base64.decode(d.sender, m.sender = $util.newBuffer($util.base64.length(d.sender)), 0);
+                        else if (d.sender.length)
+                            m.sender = d.sender;
+                    }
+                    if (d.contract != null) {
+                        if (typeof d.contract === "string")
+                            $util.base64.decode(d.contract, m.contract = $util.newBuffer($util.base64.length(d.contract)), 0);
+                        else if (d.contract.length)
+                            m.contract = d.contract;
+                    }
+                    if (d.msg != null) {
+                        if (typeof d.msg === "string")
+                            $util.base64.decode(d.msg, m.msg = $util.newBuffer($util.base64.length(d.msg)), 0);
+                        else if (d.msg.length)
+                            m.msg = d.msg;
+                    }
+                    if (d.callbackCodeHash != null) {
+                        m.callbackCodeHash = String(d.callbackCodeHash);
+                    }
+                    if (d.sentFunds) {
+                        if (!Array.isArray(d.sentFunds))
+                            throw TypeError(".secret.compute.v1beta1.MsgExecuteContract.sentFunds: array expected");
+                        m.sentFunds = [];
+                        for (var i = 0; i < d.sentFunds.length; ++i) {
+                            if (typeof d.sentFunds[i] !== "object")
+                                throw TypeError(".secret.compute.v1beta1.MsgExecuteContract.sentFunds: object expected");
+                            m.sentFunds[i] = $root.cosmos.base.v1beta1.Coin.fromObject(d.sentFunds[i]);
+                        }
+                    }
+                    if (d.callbackSig != null) {
+                        if (typeof d.callbackSig === "string")
+                            $util.base64.decode(d.callbackSig, m.callbackSig = $util.newBuffer($util.base64.length(d.callbackSig)), 0);
+                        else if (d.callbackSig.length)
+                            m.callbackSig = d.callbackSig;
                     }
                     return m;
                 };
-                MsgExecuteContractResponse.toObject = function toObject(m, o) {
+                MsgExecuteContract.toObject = function toObject(m, o) {
                     if (!o)
                         o = {};
                     var d = {};
+                    if (o.arrays || o.defaults) {
+                        d.sentFunds = [];
+                    }
                     if (o.defaults) {
                         if (o.bytes === String)
-                            d.data = "";
+                            d.sender = "";
                         else {
-                            d.data = [];
+                            d.sender = [];
                             if (o.bytes !== Array)
-                                d.data = $util.newBuffer(d.data);
+                                d.sender = $util.newBuffer(d.sender);
+                        }
+                        if (o.bytes === String)
+                            d.contract = "";
+                        else {
+                            d.contract = [];
+                            if (o.bytes !== Array)
+                                d.contract = $util.newBuffer(d.contract);
+                        }
+                        if (o.bytes === String)
+                            d.msg = "";
+                        else {
+                            d.msg = [];
+                            if (o.bytes !== Array)
+                                d.msg = $util.newBuffer(d.msg);
+                        }
+                        d.callbackCodeHash = "";
+                        if (o.bytes === String)
+                            d.callbackSig = "";
+                        else {
+                            d.callbackSig = [];
+                            if (o.bytes !== Array)
+                                d.callbackSig = $util.newBuffer(d.callbackSig);
                         }
                     }
-                    if (m.data != null && m.hasOwnProperty("data")) {
-                        d.data = o.bytes === String ? $util.base64.encode(m.data, 0, m.data.length) : o.bytes === Array ? Array.prototype.slice.call(m.data) : m.data;
+                    if (m.sender != null && m.hasOwnProperty("sender")) {
+                        d.sender = o.bytes === String ? $util.base64.encode(m.sender, 0, m.sender.length) : o.bytes === Array ? Array.prototype.slice.call(m.sender) : m.sender;
+                    }
+                    if (m.contract != null && m.hasOwnProperty("contract")) {
+                        d.contract = o.bytes === String ? $util.base64.encode(m.contract, 0, m.contract.length) : o.bytes === Array ? Array.prototype.slice.call(m.contract) : m.contract;
+                    }
+                    if (m.msg != null && m.hasOwnProperty("msg")) {
+                        d.msg = o.bytes === String ? $util.base64.encode(m.msg, 0, m.msg.length) : o.bytes === Array ? Array.prototype.slice.call(m.msg) : m.msg;
+                    }
+                    if (m.callbackCodeHash != null && m.hasOwnProperty("callbackCodeHash")) {
+                        d.callbackCodeHash = m.callbackCodeHash;
+                    }
+                    if (m.sentFunds && m.sentFunds.length) {
+                        d.sentFunds = [];
+                        for (var j = 0; j < m.sentFunds.length; ++j) {
+                            d.sentFunds[j] = $root.cosmos.base.v1beta1.Coin.toObject(m.sentFunds[j], o);
+                        }
+                    }
+                    if (m.callbackSig != null && m.hasOwnProperty("callbackSig")) {
+                        d.callbackSig = o.bytes === String ? $util.base64.encode(m.callbackSig, 0, m.callbackSig.length) : o.bytes === Array ? Array.prototype.slice.call(m.callbackSig) : m.callbackSig;
                     }
                     return d;
                 };
-                MsgExecuteContractResponse.prototype.toJSON = function toJSON() {
+                MsgExecuteContract.prototype.toJSON = function toJSON() {
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                 };
-                return MsgExecuteContractResponse;
+                return MsgExecuteContract;
             })();
-            return v1;
+            return v1beta1;
         })();
-        return wasm;
+        return compute;
     })();
-    return cosmwasm;
+    return secret;
 })();
 exports.tendermint = $root.tendermint = (() => {
     const tendermint = {};
@@ -5088,6 +4147,9 @@ exports.tendermint = $root.tendermint = (() => {
                     w.uint32(18).bytes(m.secp256k1);
                 return w;
             };
+            PublicKey.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
             PublicKey.decode = function decode(r, l) {
                 if (!(r instanceof $Reader))
                     r = $Reader.create(r);
@@ -5107,6 +4169,11 @@ exports.tendermint = $root.tendermint = (() => {
                     }
                 }
                 return m;
+            };
+            PublicKey.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
             };
             PublicKey.fromObject = function fromObject(d) {
                 if (d instanceof $root.tendermint.crypto.PublicKey)
