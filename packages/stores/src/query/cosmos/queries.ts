@@ -34,6 +34,7 @@ import {
   ObservableQueryOsmosisMintParmas,
 } from "./supply/osmosis";
 import { ObservableQueryDistributionParams } from "./distribution";
+import { ObservableQueryRPCStatus } from "./status";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;
@@ -65,6 +66,8 @@ export const CosmosQueries = {
 };
 
 export class CosmosQueriesImpl {
+  public readonly queryRPCStatus: DeepReadonly<ObservableQueryRPCStatus>;
+
   public readonly queryAccount: DeepReadonly<ObservableQueryAccount>;
   public readonly queryMint: DeepReadonly<ObservableQueryMintingInfation>;
   public readonly queryPool: DeepReadonly<ObservableQueryStakingPool>;
@@ -91,6 +94,12 @@ export class CosmosQueriesImpl {
     chainId: string,
     chainGetter: ChainGetter
   ) {
+    this.queryRPCStatus = new ObservableQueryRPCStatus(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
     this.querySifchainAPY = new ObservableQuerySifchainLiquidityAPY(
       kvStore,
       chainId

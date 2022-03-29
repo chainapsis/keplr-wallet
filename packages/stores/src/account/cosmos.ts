@@ -496,17 +496,34 @@ export class CosmosAccountImpl {
       return dec.truncate().toString();
     })();
 
-    const destinationBlockHeight = this.queriesStore
-      .get(channel.counterpartyChainId)
-      .cosmos.queryBlock.getBlock("latest");
+    const destinationInfo = this.queriesStore.get(channel.counterpartyChainId)
+      .cosmos.queryRPCStatus;
 
     await this.sendMsgs(
       "ibcTransfer",
       async () => {
         // Wait until fetching complete.
-        await destinationBlockHeight.waitFreshResponse();
+        await destinationInfo.waitFreshResponse();
 
-        if (destinationBlockHeight.height.equals(new Int("0"))) {
+        if (!destinationInfo.network) {
+          throw new Error(
+            `Failed to fetch the network chain id of ${channel.counterpartyChainId}`
+          );
+        }
+
+        if (
+          ChainIdHelper.parse(destinationInfo.network).identifier !==
+          ChainIdHelper.parse(channel.counterpartyChainId).identifier
+        ) {
+          throw new Error(
+            `Fetched the network chain id is different with counterparty chain id (${destinationInfo.network}, ${channel.counterpartyChainId})`
+          );
+        }
+
+        if (
+          !destinationInfo.latestBlockHeight ||
+          destinationInfo.latestBlockHeight.equals(new Int("0"))
+        ) {
           throw new Error(
             `Failed to fetch the latest block of ${channel.counterpartyChainId}`
           );
@@ -525,10 +542,10 @@ export class CosmosAccountImpl {
             receiver: recipient,
             timeout_height: {
               revision_number: ChainIdHelper.parse(
-                channel.counterpartyChainId
+                destinationInfo.network
               ).version.toString() as string | undefined,
               // Set the timeout height as the current height + 150.
-              revision_height: destinationBlockHeight.height
+              revision_height: destinationInfo.latestBlockHeight
                 .add(new Int("150"))
                 .toString(),
             },
