@@ -103,9 +103,9 @@ import {
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
-    rpc: "https://rpc-cosmoshub.blockapsis.com/",
+    rpc: COSMOS_RPC_ENDPOINT,
     rpcConfig: COSMOS_RPC_CONFIG,
-    rest: "https://lcd-cosmoshub.blockapsis.com/",
+    rest: COSMOS_REST_ENDPOINT,
     restConfig: COSMOS_REST_CONFIG,
     chainId: "cosmoshub-4",
     chainName: "Cosmos Hub",
