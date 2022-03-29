@@ -9,7 +9,7 @@ export class SendTxMsg extends Message<Uint8Array> {
 
   constructor(
     public readonly chainId: string,
-    public readonly tx: Uint8Array,
+    public readonly tx: unknown,
     public readonly mode: "async" | "sync" | "block"
   ) {
     super();

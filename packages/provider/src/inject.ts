@@ -12,6 +12,7 @@ import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
+  StdTx,
   OfflineSigner,
   StdSignature,
 } from "@cosmjs/launchpad";
@@ -267,9 +268,15 @@ export class InjectedKeplr implements IKeplr {
 
   async sendTx(
     chainId: string,
-    tx: Uint8Array,
+    tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
+    if (!("length" in tx)) {
+      console.log(
+        "Do not send legacy std tx via `sendTx` API. We now only support protobuf tx. The usage of legeacy std tx would throw an error in the near future."
+      );
+    }
+
     return await this.requestMethod("sendTx", [chainId, tx, mode]);
   }
 
