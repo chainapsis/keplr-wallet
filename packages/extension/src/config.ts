@@ -23,10 +23,6 @@ import {
   BETA_CYBER_NETWORK_REST_CONFIG,
   BETA_CYBER_NETWORK_RPC_ENDPOINT,
   BETA_CYBER_NETWORK_RPC_CONFIG,
-  BETA_STRAIGHTEDGE_REST_ENDPOINT,
-  BETA_STRAIGHTEDGE_REST_CONFIG,
-  BETA_STRAIGHTEDGE_RPC_ENDPOINT,
-  BETA_STRAIGHTEDGE_RPC_CONFIG,
   AKASH_RPC_ENDPOINT,
   AKASH_RPC_CONFIG,
   AKASH_REST_ENDPOINT,
@@ -1675,55 +1671,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 40000000000,
     },
     features: ["ibc-transfer", "ibc-go"],
-    beta: true,
-  },
-  {
-    rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
-    rpcConfig: BETA_STRAIGHTEDGE_RPC_CONFIG,
-    rest: BETA_STRAIGHTEDGE_REST_ENDPOINT,
-    restConfig: BETA_STRAIGHTEDGE_REST_CONFIG,
-    chainId: "straightedge-2",
-    chainName: "Straightedge",
-    stakeCurrency: {
-      coinDenom: "STR",
-      coinMinimalDenom: "astr",
-      coinDecimals: 18,
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/straightedge/stake"
-        : "http://localhost:8080/#/straightedge/stake",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/straightedge/stake"
-        : "http://localhost:8080/#/straightedge/stake",
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("str"),
-    currencies: [
-      {
-        coinDenom: "STR",
-        coinMinimalDenom: "astr",
-        coinDecimals: 18,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "STR",
-        coinMinimalDenom: "astr",
-        coinDecimals: 18,
-      },
-    ],
-    coinType: 551,
-    // STR's decimal is high. Thus, if gas price is set as 0.025, it produces very low and long fee.
-    // And, currently, this long fee is not visible well in Keplr.
-    // Just, increase the gas price step temporarily.
-    gasPriceStep: {
-      low: 0.01 * Math.pow(10, 12),
-      average: 0.025 * Math.pow(10, 12),
-      high: 0.04 * Math.pow(10, 12),
-    },
     beta: true,
   },
 ];
