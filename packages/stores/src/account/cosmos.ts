@@ -39,9 +39,9 @@ export const CosmosAccount = {
     queriesStore: IQueriesStore<CosmosQueries>;
     wsObject?: new (url: string, protocols?: string | string[]) => WebSocket;
     preTxEvents?: {
-      onBroadcastFailed?: (e?: Error) => void;
-      onBroadcasted?: (txHash: Uint8Array) => void;
-      onFulfill?: (tx: any) => void;
+      onBroadcastFailed?: (chainId: string, e?: Error) => void;
+      onBroadcasted?: (chainId: string, txHash: Uint8Array) => void;
+      onFulfill?: (chainId: string, tx: any) => void;
     };
   }): (
     base: AccountSetBaseSuper,
@@ -136,9 +136,9 @@ export class CosmosAccountImpl {
     protected readonly txOpts: {
       wsObject?: new (url: string, protocols?: string | string[]) => WebSocket;
       preTxEvents?: {
-        onBroadcastFailed?: (e?: Error) => void;
-        onBroadcasted?: (txHash: Uint8Array) => void;
-        onFulfill?: (tx: any) => void;
+        onBroadcastFailed?: (chainId: string, e?: Error) => void;
+        onBroadcasted?: (chainId: string, txHash: Uint8Array) => void;
+        onFulfill?: (chainId: string, tx: any) => void;
       };
     }
   ) {
@@ -269,7 +269,7 @@ export class CosmosAccountImpl {
       this.base.setTxTypeInProgress("");
 
       if (this.txOpts.preTxEvents?.onBroadcastFailed) {
-        this.txOpts.preTxEvents.onBroadcastFailed(e);
+        this.txOpts.preTxEvents.onBroadcastFailed(this.chainId, e);
       }
 
       if (
@@ -296,7 +296,7 @@ export class CosmosAccountImpl {
     }
 
     if (this.txOpts.preTxEvents?.onBroadcasted) {
-      this.txOpts.preTxEvents.onBroadcasted(txHash);
+      this.txOpts.preTxEvents.onBroadcasted(this.chainId, txHash);
     }
     if (onBroadcasted) {
       onBroadcasted(txHash);
@@ -333,7 +333,7 @@ export class CosmosAccountImpl {
       }
 
       if (this.txOpts.preTxEvents?.onFulfill) {
-        this.txOpts.preTxEvents.onFulfill(tx);
+        this.txOpts.preTxEvents.onFulfill(this.chainId, tx);
       }
 
       if (onFulfill) {
