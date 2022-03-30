@@ -209,12 +209,19 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
     // If there is no existing response, try to load saved reponse.
     if (!this._response) {
-      const staledResponse = yield* toGenerator(this.loadStaledResponse());
-      if (staledResponse) {
-        if (staledResponse.timestamp > Date.now() - this.options.cacheMaxAge) {
-          this.setResponse(staledResponse);
+      // When first load, try to load the last response from disk.
+      // To improve performance, don't wait the loading to proceed.
+      // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
+      this.loadStaledResponse().then((staledResponse) => {
+        if (staledResponse && !this._response) {
+          if (
+            staledResponse.timestamp >
+            Date.now() - this.options.cacheMaxAge
+          ) {
+            this.setResponse(staledResponse);
+          }
         }
-      }
+      });
     } else {
       // Make the existing response as staled.
       this.setResponse({
@@ -279,7 +286,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       this.setResponse(response);
       // Clear the error if fetching succeeds.
       this.setError(undefined);
-      yield this.saveResponse(response);
+
+      // Should not wait.
+      this.saveResponse(response);
     } catch (e) {
       // If canceld, do nothing.
       if (Axios.isCancel(e)) {
@@ -405,10 +414,20 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     cancelToken: CancelToken
   ): Promise<{ response: QueryResponse<T>; headers: any }>;
 
+  /**
+   * Used for saving the last response to disk.
+   * This should not make observable state changes.
+   * @param response
+   * @protected
+   */
   protected abstract saveResponse(
     response: Readonly<QueryResponse<T>>
   ): Promise<void>;
 
+  /**
+   * Used for loading the last response from disk.
+   * @protected
+   */
   protected abstract loadStaledResponse(): Promise<
     QueryResponse<T> | undefined
   >;
