@@ -375,7 +375,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       () => this.isFetching,
       () => {
         if (!onceCoerce) {
-          this.fetch();
+          if (!this.isFetching) {
+            this.fetch();
+          }
           onceCoerce = true;
         }
       },
