@@ -30,7 +30,7 @@ export class ObservableCosmwasmContractChainQuery<
     const msg = JSON.stringify(obj);
     const query = Buffer.from(msg).toString("base64");
 
-    return `/wasm/v1/contract/${contractAddress}/smart/${query}`;
+    return `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`;
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
