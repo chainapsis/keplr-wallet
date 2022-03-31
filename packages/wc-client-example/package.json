@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/wc-client-example",
-  "version": "0.9.18-rc.2",
+  "version": "0.9.18-rc.3",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": true,
@@ -11,7 +11,7 @@
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@keplr-wallet/common": "^0.9.10",
     "@keplr-wallet/cosmos": "^0.9.18-rc.0",
-    "@keplr-wallet/stores": "^0.9.18-rc.2",
+    "@keplr-wallet/stores": "^0.9.18-rc.3",
     "@keplr-wallet/types": "^0.9.18-rc.0",
     "@keplr-wallet/wc-client": "^0.9.18-rc.0",
     "@keplr-wallet/wc-qrcode-modal": "^0.9.0",
