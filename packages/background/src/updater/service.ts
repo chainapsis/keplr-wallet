@@ -234,6 +234,30 @@ export class ChainUpdaterService {
       }
     } catch {}
 
+    let wasmd24Update = false;
+    try {
+      if (
+        chainInfo.features?.includes("cosmwasm") &&
+        !chainInfo.features.includes("wasmd_0.24+")
+      ) {
+        // It is difficult to decide which contract address to test on each chain.
+        // So it simply sends a query that fails unconditionally.
+        // However, if 400 bad request instead of 501 occurs, the url itself exists.
+        // In this case, it is assumed that wasmd 0.24+ version.
+        const result = await restInstance.get(
+          "/cosmwasm/wasm/v1/contract/test/smart/test",
+          {
+            validateStatus: (status) => {
+              return status === 400 || status === 501;
+            },
+          }
+        );
+        if (result.status === 400) {
+          wasmd24Update = true;
+        }
+      }
+    } catch {}
+
     const features: string[] = [];
     if (ibcGoUpdates) {
       features.push("ibc-go");
@@ -241,10 +265,13 @@ export class ChainUpdaterService {
     if (ibcTransferUpdate) {
       features.push("ibc-transfer");
     }
+    if (wasmd24Update) {
+      features.push("wasmd_0.24+");
+    }
 
     return {
       explicit: version.version < fetchedVersion.version,
-      slient: ibcGoUpdates || ibcTransferUpdate,
+      slient: features.length > 0,
 
       chainId: resultChainId,
       features,
