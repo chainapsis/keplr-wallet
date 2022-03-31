@@ -192,7 +192,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025,
       high: 0.04,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "cosmwasm"],
   },
   {
     rpc: SECRET_NETWORK_RPC_ENDPOINT,
