@@ -2,7 +2,6 @@ import { computed, makeObservable } from "mobx";
 import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { ObservableQuerySupplyTotal } from "./supply";
 import { MintingInflation } from "./types";
-import { StakingPool } from "../staking/types";
 import { ObservableChainQuery } from "../../chain-query";
 import { ChainGetter } from "../../../common";
 import { ObservableQueryIrisMintingInfation } from "./iris-minting";
@@ -13,13 +12,14 @@ import {
   ObservableQueryOsmosisMintParmas,
 } from "./osmosis";
 import { ObservableQueryDistributionParams } from "../distribution";
+import { ObservableQueryStakingPool } from "../staking";
 
 export class ObservableQueryInflation {
   constructor(
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
     protected readonly _queryMint: ObservableChainQuery<MintingInflation>,
-    protected readonly _queryPool: ObservableChainQuery<StakingPool>,
+    protected readonly _queryPool: ObservableQueryStakingPool,
     protected readonly _querySupplyTotal: ObservableQuerySupplyTotal,
     protected readonly _queryIrisMint: ObservableQueryIrisMintingInfation,
     protected readonly _querySifchainAPY: ObservableQuerySifchainLiquidityAPY,
@@ -51,6 +51,8 @@ export class ObservableQueryInflation {
   // If the staking pool info is fetched, this will consider this info for calculating the more accurate value.
   @computed
   get inflation(): IntPretty {
+    // TODO: Use `RatePretty`
+
     try {
       let dec: Dec | undefined;
 
@@ -105,7 +107,7 @@ export class ObservableQueryInflation {
           }
         }
       } else {
-        dec = new Dec(this._queryMint.response?.data.result ?? "0").mul(
+        dec = new Dec(this._queryMint.response?.data.inflation ?? "0").mul(
           DecUtils.getPrecisionDec(2)
         );
       }
@@ -119,7 +121,7 @@ export class ObservableQueryInflation {
         this._querySupplyTotal.getQueryStakeDenom().response
       ) {
         const bondedToken = new Dec(
-          this._queryPool.response.data.result.bonded_tokens
+          this._queryPool.response.data.pool.bonded_tokens
         );
 
         const totalStr = (() => {
@@ -128,15 +130,8 @@ export class ObservableQueryInflation {
             return DecUtils.getPrecisionDec(8 + 6).toString();
           }
 
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          const response = this._querySupplyTotal.getQueryStakeDenom().response!
-            .data.result;
-
-          if (typeof response === "string") {
-            return response;
-          } else {
-            return response.amount;
-          }
+          return this._querySupplyTotal.getQueryStakeDenom().response!.data
+            .amount.amount;
         })();
         const total = new Dec(totalStr);
         if (total.gt(new Dec(0))) {

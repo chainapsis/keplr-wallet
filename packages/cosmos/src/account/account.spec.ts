@@ -3,50 +3,59 @@ import { BaseAccount } from "./index";
 describe("Test account parse", () => {
   test("Test fromAminoJSON", () => {
     // Base account
-    let account = BaseAccount.fromAminoJSON({
-      height: "8409557",
-      result: {
-        type: "cosmos-sdk/BaseAccount",
-        value: {
-          address: "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k",
-          public_key: {
-            type: "tendermint/PubKeySecp256k1",
-            value: "Avn3xBbmE0+MEyWMuxhmjjiX1GtCUVyv/Mavg8OcRIm4",
-          },
-          account_number: "9736",
-          sequence: "971",
+    let account = BaseAccount.fromProtoJSON({
+      account: {
+        "@type": "/cosmos.auth.v1beta1.BaseAccount",
+        address: "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k",
+        pub_key: {
+          "@type": "/cosmos.crypto.secp256k1.PubKey",
+          key: "Avn3xBbmE0+MEyWMuxhmjjiX1GtCUVyv/Mavg8OcRIm4",
         },
+        account_number: "9736",
+        sequence: "1019",
       },
     });
 
     expect(account.getAddress()).toBe(
       "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k"
     );
-    expect(account.getSequence().toString()).toBe("971");
+    expect(account.getSequence().toString()).toBe("1019");
     expect(account.getAccountNumber().toString()).toBe("9736");
-    expect(account.getType()).toBe("cosmos-sdk/BaseAccount");
+    expect(account.getType()).toBe("/cosmos.auth.v1beta1.BaseAccount");
 
     // Vesting account
-    account = BaseAccount.fromAminoJSON({
-      height: "8409738",
-      result: {
-        type: "cosmos-sdk/DelayedVestingAccount",
-        value: {
-          base_vesting_account: {
-            base_account: {
-              address: "cosmos1x3rhderemr703f4lxktk2da99vl5crs28ur3xl",
-              public_key: {
-                type: "tendermint/PubKeySecp256k1",
-                value: "A+Zzm/8QhyL00ISXgiAgeW6zeqZHezVFi2w3iQkJeKyP",
-              },
-              account_number: "367245",
-              sequence: "7",
+    account = BaseAccount.fromProtoJSON({
+      account: {
+        "@type": "/cosmos.vesting.v1beta1.DelayedVestingAccount",
+        base_vesting_account: {
+          base_account: {
+            address: "cosmos1x3rhderemr703f4lxktk2da99vl5crs28ur3xl",
+            pub_key: {
+              "@type": "/cosmos.crypto.secp256k1.PubKey",
+              key: "A+Zzm/8QhyL00ISXgiAgeW6zeqZHezVFi2w3iQkJeKyP",
             },
-            original_vesting: [{ denom: "uatom", amount: "16666660000" }],
-            delegated_free: [],
-            delegated_vesting: [],
-            end_time: "1719752607",
+            account_number: "367245",
+            sequence: "30",
           },
+          original_vesting: [
+            {
+              denom: "uatom",
+              amount: "16666660000",
+            },
+          ],
+          delegated_free: [
+            {
+              denom: "uatom",
+              amount: "11620069",
+            },
+          ],
+          delegated_vesting: [
+            {
+              denom: "uatom",
+              amount: "16666660000",
+            },
+          ],
+          end_time: "1719752607",
         },
       },
     });
@@ -54,10 +63,14 @@ describe("Test account parse", () => {
     expect(account.getAddress()).toBe(
       "cosmos1x3rhderemr703f4lxktk2da99vl5crs28ur3xl"
     );
-    expect(account.getSequence().toString()).toBe("7");
+    expect(account.getSequence().toString()).toBe("30");
     expect(account.getAccountNumber().toString()).toBe("367245");
-    expect(account.getType()).toBe("cosmos-sdk/DelayedVestingAccount");
+    expect(account.getType()).toBe(
+      "/cosmos.vesting.v1beta1.DelayedVestingAccount"
+    );
 
+    /*
+    TODO: Recover test case for ethermint.
     // Custom account that embeds the base account (ethermint)
     account = BaseAccount.fromAminoJSON({
       height: "449",
@@ -84,5 +97,6 @@ describe("Test account parse", () => {
     expect(account.getSequence().toString()).toBe("1");
     expect(account.getAccountNumber().toString()).toBe("11");
     expect(account.getType()).toBe("");
+     */
   });
 });

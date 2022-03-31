@@ -7,7 +7,7 @@ import { RatePretty } from "@keplr-wallet/unit";
 
 export class ObservableQueryDistributionParams extends ObservableChainQuery<DistributionParams> {
   constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, "/distribution/parameters");
+    super(kvStore, chainId, chainGetter, "/cosmos/distribution/v1beta1/params");
 
     makeObservable(this);
   }
@@ -18,6 +18,6 @@ export class ObservableQueryDistributionParams extends ObservableChainQuery<Dist
       return new RatePretty(0);
     }
 
-    return new RatePretty(this.response.data.result.community_tax);
+    return new RatePretty(this.response.data.params.community_tax);
   }
 }
