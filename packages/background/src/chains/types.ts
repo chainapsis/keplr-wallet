@@ -106,6 +106,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       Joi.string().valid(
         "stargate",
         "cosmwasm",
+        "wasmd_0.24+",
         "secretwasm",
         "ibc-transfer",
         "no-legacy-stdTx",
