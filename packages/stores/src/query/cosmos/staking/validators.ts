@@ -103,7 +103,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
       chainId,
       chainGetter,
       `/cosmos/staking/v1beta1/validators?pagination.limit=1000&status=${(() => {
-        switch (this.status) {
+        switch (status) {
           case BondStatus.Bonded:
             return "BOND_STATUS_BONDED";
           case BondStatus.Unbonded:
