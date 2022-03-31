@@ -6,8 +6,7 @@ import { AccountStore } from "./send-types";
 
 export const useSendTxConfig = (
   chainGetter: ChainGetter,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  queriesStore: IQueriesStore<{}>,
+  queriesStore: IQueriesStore,
   accountStore: AccountStore,
   chainId: string,
   sender: string,

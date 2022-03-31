@@ -24,8 +24,7 @@ import { useIBCRecipientConfig } from "./reciepient";
  */
 export const useIBCTransferConfig = (
   chainGetter: ChainGetter,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  queriesStore: IQueriesStore<{}>,
+  queriesStore: IQueriesStore,
   accountStore: IAccountStore<{
     cosmos: {
       readonly msgOpts: {

@@ -44,8 +44,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   constructor(
     chainGetter: ChainGetter,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    protected readonly queriesStore: IQueriesStore<{}>,
+    protected readonly queriesStore: IQueriesStore,
     initialChainId: string,
     sender: string,
     protected readonly amountConfig: IAmountConfig,
@@ -244,8 +243,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
 export const useFeeConfig = (
   chainGetter: ChainGetter,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  queriesStore: IQueriesStore<{}>,
+  queriesStore: IQueriesStore,
   chainId: string,
   sender: string,
   amountConfig: IAmountConfig,

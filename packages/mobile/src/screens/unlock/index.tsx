@@ -32,8 +32,7 @@ async function hideSplashScreen() {
 }
 
 async function waitAccountLoad(
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  accountStore: IAccountStore<{}>,
+  accountStore: IAccountStore,
   chainId: string
 ): Promise<void> {
   if (accountStore.getAccount(chainId).bech32Address) {

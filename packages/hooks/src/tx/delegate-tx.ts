@@ -52,8 +52,7 @@ export class DelegateGasConfig extends GasConfig {
 
 export const useDelegateAmountConfig = (
   chainGetter: ChainGetter,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  queriesStore: IQueriesStore<{}>,
+  queriesStore: IQueriesStore,
   chainId: string,
   sender: string
 ) => {
@@ -94,8 +93,7 @@ export const useDelegateGasConfig = (
 
 export const useDelegateTxConfig = (
   chainGetter: ChainGetter,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  queriesStore: IQueriesStore<{}>,
+  queriesStore: IQueriesStore,
   accountStore: IAccountStore<{
     cosmos: {
       readonly msgOpts: {

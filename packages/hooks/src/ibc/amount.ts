@@ -8,8 +8,7 @@ import { useState } from "react";
 export class IBCAmountConfig extends AmountConfig {
   constructor(
     chainGetter: ChainGetter,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    protected readonly queriesStore: IQueriesStore<{}>,
+    protected readonly queriesStore: IQueriesStore,
     initialChainId: string,
     sender: string,
     feeConfig: IFeeConfig | undefined
@@ -30,8 +29,7 @@ export class IBCAmountConfig extends AmountConfig {
 
 export const useIBCAmountConfig = (
   chainGetter: ChainGetter,
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  queriesStore: IQueriesStore<{}>,
+  queriesStore: IQueriesStore,
   chainId: string,
   sender: string
 ) => {

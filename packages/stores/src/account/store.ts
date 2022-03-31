@@ -8,7 +8,8 @@ import {
 import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
 import { DeepReadonly, UnionToIntersection } from "utility-types";
 
-export interface IAccountStore<T extends IObject> {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export interface IAccountStore<T extends IObject = {}> {
   getAccount(chainId: string): DeepReadonly<AccountSetBase & T>;
 }
 

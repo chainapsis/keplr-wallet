@@ -23,7 +23,8 @@ export const createQueriesSetBase = (
   };
 };
 
-export interface IQueriesStore<T extends IObject> {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export interface IQueriesStore<T extends IObject = {}> {
   get(chainId: string): DeepReadonly<QueriesSetBase & T>;
 }
 
