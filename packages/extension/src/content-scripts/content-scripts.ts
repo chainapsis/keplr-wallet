@@ -5,14 +5,26 @@ import {
   ExtensionRouter,
   InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
-import { Keplr, InjectedKeplr } from "@keplr-wallet/provider";
+import {
+  Keplr,
+  InjectedKeplr,
+  ExtensionCoreFetchWallet,
+  startFetchWalletProxy,
+} from "@keplr-wallet/provider";
 import { initEvents } from "./events";
 
 import manifest from "../manifest.json";
 
-InjectedKeplr.startProxy(
-  new Keplr(manifest.version, "core", new InExtensionMessageRequester())
+const messageRequester = new InExtensionMessageRequester();
+const coreKeplr = new Keplr(manifest.version, "core", messageRequester);
+const coreFetchWallet = new ExtensionCoreFetchWallet(
+  coreKeplr,
+  manifest.version,
+  messageRequester
 );
+
+InjectedKeplr.startProxy(coreKeplr);
+startFetchWalletProxy(coreFetchWallet);
 
 const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
 router.addGuard(ContentScriptGuards.checkMessageIsInternal);

@@ -2,9 +2,11 @@ import { Keplr } from "@keplr-wallet/types";
 import { OfflineSigner } from "@cosmjs/launchpad";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import { OfflineDirectSigner } from "@cosmjs/proto-signing";
+import { FetchBrowserWallet } from "@fetchai/fetchai-wallet-types";
 
 export function init(
   keplr: Keplr,
+  fetchWallet: FetchBrowserWallet,
   getOfflineSigner: (chainId: string) => OfflineSigner & OfflineDirectSigner,
   getOfflineSignerOnlyAmino: (chainId: string) => OfflineSigner,
   getOfflineSignerAuto: (
@@ -16,6 +18,9 @@ export function init(
   if (process.env.NODE_ENV !== "production") {
     if (!window.keplr) {
       window.keplr = keplr;
+    }
+    if (!window.fetchBrowserWallet) {
+      window.fetchBrowserWallet = fetchWallet;
     }
 
     if (!window.getOfflineSigner) {
@@ -32,6 +37,7 @@ export function init(
     }
   } else {
     window.keplr = keplr;
+    window.fetchBrowserWallet = fetchWallet;
     window.getOfflineSigner = getOfflineSigner;
     window.getOfflineSignerOnlyAmino = getOfflineSignerOnlyAmino;
     window.getOfflineSignerAuto = getOfflineSignerAuto;

@@ -36,6 +36,7 @@
     "@keplr-wallet/router": "^0.9.6",
     "@keplr-wallet/types": "^0.9.12",
     "@keplr-wallet/unit": "^0.9.12",
+    "@fetchai/umbral-types": "^0.9.10",
     "@ledgerhq/hw-transport": "^6.20.0",
     "@ledgerhq/hw-transport-webhid": "^6.20.0",
     "@ledgerhq/hw-transport-webusb": "^6.20.0",

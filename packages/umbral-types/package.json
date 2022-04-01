@@ -1,8 +1,8 @@
 {
-  "name": "@keplr-wallet/provider",
-  "version": "0.9.12",
+  "name": "@fetchai/umbral-types",
+  "version": "0.9.10",
   "main": "build/index.js",
-  "author": "chainapsis",
+  "author": "fetchai",
   "license": "Apache-2.0",
   "private": false,
   "publishConfig": {
@@ -17,15 +17,6 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@cosmjs/proto-signing": "^0.24.0-alpha.25",
-    "@keplr-wallet/router": "^0.9.6",
-    "@keplr-wallet/types": "^0.9.12",
-    "@fetchai/fetchai-wallet-types": "^0.9.10",
-    "@fetchai/umbral-types": "^0.9.10",
-    "buffer": "^6.0.3",
-    "deepmerge": "^4.2.2",
-    "long": "^4.0.0",
-    "secretjs": "^0.17.0"
+    "@keplr-wallet/router": "^0.9.6"
   }
 }

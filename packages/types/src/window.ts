@@ -5,6 +5,7 @@ import { OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 export interface Window {
   keplr?: Keplr;
+  fetchBrowserWallet?: any;
   getOfflineSigner?: (chainId: string) => OfflineSigner & OfflineDirectSigner;
   getOfflineSignerOnlyAmino?: (chainId: string) => OfflineSigner;
   getOfflineSignerAuto?: (

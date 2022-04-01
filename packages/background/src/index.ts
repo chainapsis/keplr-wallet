@@ -15,6 +15,7 @@ import * as Updater from "./updater/internal";
 import * as Tokens from "./tokens/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
+import * as Umbral from "./umbral/internal";
 
 export * from "./persistent-memory";
 export * from "./chains";
@@ -112,6 +113,9 @@ export function init(
 
   const secretWasmService = container.resolve(SecretWasm.SecretWasmService);
   SecretWasm.init(router, secretWasmService);
+
+  const umbralService = container.resolve(Umbral.UmbralService);
+  Umbral.init(router, umbralService);
 
   const backgroundTxService = container.resolve(
     BackgroundTx.BackgroundTxService
