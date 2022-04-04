@@ -19,6 +19,12 @@ export function PageWithDraggableFlatList<T>(
   const style = useStyle();
 
   useSetFocusedScreen();
+  // TODO: `usePageRegisterScrollYValue()` uses the Animated from react-native
+  //        However, `DraggableFlatList` uses the Animated from react-native-reanimated
+  //        Thus, it makes hard to handle `usePageRegisterScrollYValue()`
+  //        and the header transition according to scroll Y position not work.
+  //        Temporarily, disable this feature for this screen.
+  // const scrollY = usePageRegisterScrollYValue();
 
   const {
     containerStyle,
