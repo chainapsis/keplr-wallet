@@ -15,8 +15,11 @@ import Svg, { Path } from "react-native-svg";
 export const SettingChainListScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
 
+  const style = useStyle();
+
   return (
     <PageWithDraggableFlatList
+      contentContainerStyle={style.flatten(["padding-y-12"])}
       data={chainStore.chainInfosWithUIConfig.map(
         ({ chainInfo, disabled }, index) => {
           return {
@@ -73,8 +76,6 @@ export const SettingChainListScreenElement: FunctionComponent<{
         style={style.flatten(
           ["flex-row", "height-84", "items-center"],
           [
-            isFirst && "margin-top-12",
-            isLast && "margin-bottom-12",
             !isLast && "border-solid",
             !isLast && "border-width-bottom-1",
             !isLast && "border-color-divider",
