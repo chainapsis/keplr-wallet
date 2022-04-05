@@ -1,5 +1,5 @@
 import { IIBCChannelConfig, Channel } from "./types";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { ChannelNotSetError } from "./errors";
 import { useState } from "react";
 
@@ -15,7 +15,8 @@ export class IBCChannelConfig implements IIBCChannelConfig {
     return this._channel;
   }
 
-  getError(): Error | undefined {
+  @computed
+  get error(): Error | undefined {
     if (!this._channel) {
       return new ChannelNotSetError("Channel not set");
     }

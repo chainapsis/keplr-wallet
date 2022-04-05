@@ -3,6 +3,7 @@ import {
   ChainGetter,
   CoinPrimitive,
   CosmosMsgOpts,
+  IAccountStore,
 } from "@keplr-wallet/stores";
 import { AppCurrency } from "@keplr-wallet/types";
 import { action, computed, makeObservable, observable } from "mobx";
@@ -14,15 +15,18 @@ import { Msg } from "@cosmjs/launchpad";
 import { MsgSend, MsgDelegate } from "@keplr-wallet/proto-types";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 
+export type AccountStore = IAccountStore<{
+  cosmos: {
+    readonly msgOpts: CosmosMsgOpts;
+  };
+}>;
+
 // This config helps the fee config to calculate that the fee is enough to send with considering
 // the amount in the sign doc.
 // This sets the amount as the sum of the messages in the sign doc if the message is known and can be parsed.
 export class SignDocAmountConfig
   extends TxChainSetter
   implements IAmountConfig {
-  @observable.ref
-  protected msgOpts: CosmosMsgOpts;
-
   @observable.ref
   protected signDocHelper?: SignDocHelper = undefined;
 
@@ -34,21 +38,15 @@ export class SignDocAmountConfig
 
   constructor(
     chainGetter: ChainGetter,
+    protected readonly accountStore: AccountStore,
     initialChainId: string,
-    msgOpts: CosmosMsgOpts,
     sender: string
   ) {
     super(chainGetter, initialChainId);
 
-    this.msgOpts = msgOpts;
     this._sender = sender;
 
     makeObservable(this);
-  }
-
-  @action
-  setMsgOpts(opts: CosmosMsgOpts) {
-    this.msgOpts = opts;
   }
 
   @action
@@ -116,10 +114,12 @@ export class SignDocAmountConfig
   protected computeAmountInAminoMsgs(msgs: readonly Msg[]) {
     const amount = new Coin(this.sendCurrency.coinMinimalDenom, new Int(0));
 
+    const account = this.accountStore.getAccount(this.chainId);
+
     for (const msg of msgs) {
       try {
         switch (msg.type) {
-          case this.msgOpts.send.native.type:
+          case account.cosmos.msgOpts.send.native.type:
             if (
               msg.value.from_address &&
               msg.value.from_address !== this.sender
@@ -139,7 +139,7 @@ export class SignDocAmountConfig
               }
             }
             break;
-          case this.msgOpts.delegate.type:
+          case account.cosmos.msgOpts.delegate.type:
             if (
               msg.value.delegator_address &&
               msg.value.delegator_address !== this.sender
@@ -229,7 +229,7 @@ export class SignDocAmountConfig
     };
   }
 
-  getError(): Error | undefined {
+  get error(): Error | undefined {
     return undefined;
   }
 
@@ -274,15 +274,14 @@ export class SignDocAmountConfig
 
 export const useSignDocAmountConfig = (
   chainGetter: ChainGetter,
+  accountStore: AccountStore,
   chainId: string,
-  msgOpts: CosmosMsgOpts,
   sender: string
 ) => {
   const [config] = useState(
-    () => new SignDocAmountConfig(chainGetter, chainId, msgOpts, sender)
+    () => new SignDocAmountConfig(chainGetter, accountStore, chainId, sender)
   );
   config.setChain(chainId);
-  config.setMsgOpts(msgOpts);
   config.setSender(sender);
 
   return config;

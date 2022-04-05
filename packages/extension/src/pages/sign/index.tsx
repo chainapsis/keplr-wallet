@@ -56,15 +56,15 @@ export const SignPage: FunctionComponent = observer(() => {
   const gasConfig = useGasConfig(chainStore, current.chainId, 1);
   const amountConfig = useSignDocAmountConfig(
     chainStore,
+    accountStore,
     current.chainId,
-    accountStore.getAccount(current.chainId).msgOpts,
     signer
   );
   const feeConfig = useFeeConfig(
     chainStore,
+    queriesStore,
     current.chainId,
     signer,
-    queriesStore.get(current.chainId).queryBalances,
     amountConfig,
     gasConfig
   );
@@ -192,7 +192,7 @@ export const SignPage: FunctionComponent = observer(() => {
       return false;
     }
 
-    return memoConfig.getError() != null || feeConfig.getError() != null;
+    return memoConfig.error != null || feeConfig.error != null;
   })();
 
   return (

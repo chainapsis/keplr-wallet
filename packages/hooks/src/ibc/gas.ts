@@ -1,33 +1,31 @@
 import { GasConfig } from "../tx";
-import { ChainGetter, CosmosMsgOpts } from "@keplr-wallet/stores";
-import { action, makeObservable, observable } from "mobx";
+import { ChainGetter, IAccountStore, MsgOpt } from "@keplr-wallet/stores";
+import { makeObservable, override } from "mobx";
 import { useState } from "react";
 
 export class IBCTransferGasConfig extends GasConfig {
-  @observable.ref
-  protected msgOpts: CosmosMsgOpts["ibcTransfer"];
-
   constructor(
     chainGetter: ChainGetter,
-    initialChainId: string,
-    msgOpts: CosmosMsgOpts["ibcTransfer"]
+    protected readonly accountStore: IAccountStore<{
+      cosmos: {
+        readonly msgOpts: {
+          readonly ibcTransfer: MsgOpt;
+        };
+      };
+    }>,
+    initialChainId: string
   ) {
     super(chainGetter, initialChainId);
-
-    this.msgOpts = msgOpts;
 
     makeObservable(this);
   }
 
-  @action
-  setMsgOpts(opts: CosmosMsgOpts["ibcTransfer"]) {
-    this.msgOpts = opts;
-  }
-
+  @override
   get gas(): number {
     // If gas not set manually, assume that the tx is for MsgTransfer.
     if (this._gasRaw == null) {
-      return this.msgOpts.gas;
+      return this.accountStore.getAccount(this.chainId).cosmos.msgOpts
+        .ibcTransfer.gas;
     }
 
     return super.gas;
@@ -36,14 +34,19 @@ export class IBCTransferGasConfig extends GasConfig {
 
 export const useIBCTransferGasConfig = (
   chainGetter: ChainGetter,
-  chainId: string,
-  msgOpts: CosmosMsgOpts["ibcTransfer"]
+  accountStore: IAccountStore<{
+    cosmos: {
+      readonly msgOpts: {
+        readonly ibcTransfer: MsgOpt;
+      };
+    };
+  }>,
+  chainId: string
 ) => {
   const [gasConfig] = useState(
-    () => new IBCTransferGasConfig(chainGetter, chainId, msgOpts)
+    () => new IBCTransferGasConfig(chainGetter, accountStore, chainId)
   );
   gasConfig.setChain(chainId);
-  gasConfig.setMsgOpts(msgOpts);
 
   return gasConfig;
 };

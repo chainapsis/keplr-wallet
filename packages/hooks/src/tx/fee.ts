@@ -6,20 +6,20 @@ import {
   IGasConfig,
 } from "./types";
 import { TxChainSetter } from "./chain";
-import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  CoinPrimitive,
+  IQueriesStore,
+} from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Coin, CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Currency } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
 import { StdFee } from "@cosmjs/launchpad";
 import { useState } from "react";
-import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
 import { InsufficientFeeError, NotLoadedFeeError } from "./errors";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
-  @observable.ref
-  protected queryBalances: ObservableQueryBalances;
-
   @observable
   protected _sender: string;
 
@@ -44,9 +44,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   constructor(
     chainGetter: ChainGetter,
+    protected readonly queriesStore: IQueriesStore,
     initialChainId: string,
     sender: string,
-    queryBalances: ObservableQueryBalances,
     protected readonly amountConfig: IAmountConfig,
     protected readonly gasConfig: IGasConfig,
     additionAmountToNeedFee: boolean = true
@@ -54,7 +54,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     super(chainGetter, initialChainId);
 
     this._sender = sender;
-    this.queryBalances = queryBalances;
     this.additionAmountToNeedFee = additionAmountToNeedFee;
 
     makeObservable(this);
@@ -63,11 +62,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @action
   setAdditionAmountToNeedFee(additionAmountToNeedFee: boolean) {
     this.additionAmountToNeedFee = additionAmountToNeedFee;
-  }
-
-  @action
-  setQueryBalances(queryBalances: ObservableQueryBalances) {
-    this.queryBalances = queryBalances;
   }
 
   @action
@@ -182,9 +176,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     ).maxDecimals(feeCurrency.coinDecimals);
   });
 
-  getError(): Error | undefined {
-    if (this.gasConfig.getError()) {
-      return this.gasConfig.getError();
+  @computed
+  get error(): Error | undefined {
+    if (this.gasConfig.error) {
+      return this.gasConfig.error;
     }
 
     if (this.disableBalanceCheck) {
@@ -209,8 +204,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     if (need.amount.gt(new Int(0))) {
-      const bal = this.queryBalances
-        .getQueryBech32Address(this._sender)
+      const bal = this.queriesStore
+        .get(this.chainId)
+        .queryBalances.getQueryBech32Address(this._sender)
         .balances.find((bal) => {
           return bal.currency.coinMinimalDenom === need.denom;
         });
@@ -247,9 +243,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
 export const useFeeConfig = (
   chainGetter: ChainGetter,
+  queriesStore: IQueriesStore,
   chainId: string,
   sender: string,
-  queryBalances: ObservableQueryBalances,
   amountConfig: IAmountConfig,
   gasConfig: IGasConfig,
   additionAmountToNeedFee: boolean = true
@@ -258,16 +254,15 @@ export const useFeeConfig = (
     () =>
       new FeeConfig(
         chainGetter,
+        queriesStore,
         chainId,
         sender,
-        queryBalances,
         amountConfig,
         gasConfig,
         additionAmountToNeedFee
       )
   );
   config.setChain(chainId);
-  config.setQueryBalances(queryBalances);
   config.setSender(sender);
   config.setAdditionAmountToNeedFee(additionAmountToNeedFee);
 

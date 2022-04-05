@@ -28,9 +28,9 @@ module.exports = {
   ],
   themeConfig: {
     custom: true,
-    editLinks: true,
-    repo: "chainapsis/keplr-extension",
-    docsRepo: "chainapsis/keplr-extension",
+    editLinks: false,
+    repo: "chainapsis/keplr-wallet",
+    docsRepo: "chainapsis/keplr-wallet",
     docsDir: "docs",
     logo: {
       src: "/Keplr_Black.png",
@@ -54,7 +54,14 @@ module.exports = {
       ],
     },
   },
-  plugins: [],
+  plugins: [
+    [
+      "sitemap",
+      {
+        hostname: "https://docs.keplr.app",
+      },
+    ],
+  ],
   markdown: {
     extendMarkdown: (md) => {
       md.use(require("markdown-it-container"), "suggest-chain-example-table");

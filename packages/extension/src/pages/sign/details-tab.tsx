@@ -57,7 +57,7 @@ export const DetailsTab: FunctionComponent<{
       if (mode === "amino") {
         return (msgs as readonly Msg[]).map((msg, i) => {
           const msgContent = renderAminoMessage(
-            accountStore.getAccount(chainStore.current.chainId).msgOpts,
+            accountStore.getAccount(chainStore.current.chainId),
             msg,
             chainStore.current.currencies,
             intl

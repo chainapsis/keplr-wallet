@@ -1,18 +1,52 @@
-import { AccountSetBase, AccountSetOpts, MsgOpt } from "./base";
-import { HasSecretQueries, QueriesSetBase, QueriesStore } from "../query";
+import { AccountSetBase, AccountSetBaseSuper, MsgOpt } from "./base";
+import { SecretQueries, QueriesSetBase, IQueriesStore } from "../query";
 import { Buffer } from "buffer/";
 import { ChainGetter, CoinPrimitive } from "../common";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
+import { MsgExecuteSecretContract } from "@keplr-wallet/proto-types";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
-import { DeepReadonly, Optional } from "utility-types";
-import { TxMsgData, MsgExecuteSecretContract } from "@keplr-wallet/proto-types";
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import { DeepPartial, DeepReadonly, Optional } from "utility-types";
+import { CosmosAccount } from "./cosmos";
+import deepmerge from "deepmerge";
 
-export interface HasSecretAccount {
-  secret: DeepReadonly<SecretAccount>;
+export interface SecretAccount {
+  secret: SecretAccountImpl;
 }
+
+export const SecretAccount = {
+  use(options: {
+    msgOptsCreator?: (
+      chainId: string
+    ) => DeepPartial<SecretMsgOpts> | undefined;
+    queriesStore: IQueriesStore<SecretQueries>;
+  }): (
+    base: AccountSetBaseSuper & CosmosAccount,
+    chainGetter: ChainGetter,
+    chainId: string
+  ) => SecretAccount {
+    return (base, chainGetter, chainId) => {
+      const msgOptsFromCreator = options.msgOptsCreator
+        ? options.msgOptsCreator(chainId)
+        : undefined;
+
+      return {
+        secret: new SecretAccountImpl(
+          base,
+          chainGetter,
+          chainId,
+          options.queriesStore,
+          deepmerge<SecretMsgOpts, DeepPartial<SecretMsgOpts>>(
+            defaultSecretMsgOpts,
+            msgOptsFromCreator ? msgOptsFromCreator : {}
+          )
+        ),
+      };
+    };
+  },
+};
 
 export interface SecretMsgOpts {
   readonly send: {
@@ -23,55 +57,35 @@ export interface SecretMsgOpts {
   readonly executeSecretWasm: Pick<MsgOpt, "type">;
 }
 
-export class AccountWithSecret
-  extends AccountSetBase<SecretMsgOpts, HasSecretQueries>
-  implements HasSecretAccount {
-  public readonly secret: DeepReadonly<SecretAccount>;
-
-  static readonly defaultMsgOpts: SecretMsgOpts = {
-    send: {
-      secret20: {
-        gas: 250000,
-      },
+export const defaultSecretMsgOpts: SecretMsgOpts = {
+  send: {
+    secret20: {
+      gas: 250000,
     },
+  },
 
-    createSecret20ViewingKey: {
-      gas: 150000,
-    },
+  createSecret20ViewingKey: {
+    gas: 150000,
+  },
 
-    executeSecretWasm: {
-      type: "wasm/MsgExecuteContract",
-    },
-  };
+  executeSecretWasm: {
+    type: "wasm/MsgExecuteContract",
+  },
+};
 
+export class SecretAccountImpl {
   constructor(
-    protected readonly eventListener: {
-      addEventListener: (type: string, fn: () => unknown) => void;
-      removeEventListener: (type: string, fn: () => unknown) => void;
-    },
+    protected readonly base: AccountSetBase & CosmosAccount,
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      QueriesSetBase & HasSecretQueries
-    >,
-    protected readonly opts: AccountSetOpts<SecretMsgOpts>
-  ) {
-    super(eventListener, chainGetter, chainId, queriesStore, opts);
-
-    this.secret = new SecretAccount(this, chainGetter, chainId, queriesStore);
-  }
-}
-
-export class SecretAccount {
-  constructor(
-    protected readonly base: AccountSetBase<SecretMsgOpts, HasSecretQueries>,
-    protected readonly chainGetter: ChainGetter,
-    protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<
-      QueriesSetBase & HasSecretQueries
-    >
+    protected readonly queriesStore: IQueriesStore<SecretQueries>,
+    protected readonly _msgOpts: SecretMsgOpts
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
+  }
+
+  get msgOpts(): SecretMsgOpts {
+    return this._msgOpts;
   }
 
   protected async processSendToken(
@@ -114,7 +128,7 @@ export class SecretAccount {
           memo,
           {
             amount: stdFee.amount ?? [],
-            gas: stdFee.gas ?? this.base.msgOpts.send.secret20.gas.toString(),
+            gas: stdFee.gas ?? this.msgOpts.send.secret20.gas.toString(),
           },
           signOptions,
           this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
@@ -147,59 +161,27 @@ export class SecretAccount {
     signOptions?: KeplrSignOptions,
     onFulfill?: (tx: any, viewingKey: string) => void
   ) {
-    const random = new Uint8Array(15);
+    const random = new Uint8Array(32);
     crypto.getRandomValues(random);
-    const entropy = Buffer.from(random).toString("hex");
+    const key = Buffer.from(random).toString("hex");
 
-    const encrypted = await this.sendExecuteSecretContractMsg(
+    await this.sendExecuteSecretContractMsg(
       "createSecret20ViewingKey",
       contractAddress,
       {
-        create_viewing_key: { entropy },
+        set_viewing_key: { key },
       },
       [],
       memo,
       {
         amount: stdFee.amount ?? [],
-        gas:
-          stdFee.gas ??
-          this.base.msgOpts.createSecret20ViewingKey.gas.toString(),
+        gas: stdFee.gas ?? this.msgOpts.createSecret20ViewingKey.gas.toString(),
       },
       signOptions,
       async (tx) => {
         let viewingKey = "";
-        if (tx && "data" in tx && tx.data) {
-          const txData = Buffer.from(tx.data as any, "base64");
-          const dataFields = TxMsgData.decode(txData);
-          if (dataFields.data.length !== 1) {
-            throw new Error("Invalid length of data fields");
-          }
-
-          const dataField = dataFields.data[0];
-          if (!dataField.data) {
-            throw new Error("Empty data");
-          }
-
-          const keplr = await this.base.getKeplr();
-
-          if (!keplr) {
-            throw new Error("Can't get the Keplr API");
-          }
-
-          const enigmaUtils = keplr.getEnigmaUtils(this.chainId);
-
-          const nonce = encrypted.slice(0, 32);
-
-          const dataOutput = Buffer.from(
-            Buffer.from(
-              await enigmaUtils.decrypt(dataField.data, nonce)
-            ).toString(),
-            "base64"
-          ).toString();
-
-          // Expected: {"create_viewing_key":{"key":"api_key_1k1T...btJQo="}}
-          const data = JSON.parse(dataOutput);
-          viewingKey = data["create_viewing_key"]["key"];
+        if (tx.code == null || tx.code === 0) {
+          viewingKey = key;
         }
 
         if (onFulfill) {
@@ -229,7 +211,7 @@ export class SecretAccount {
   ): Promise<Uint8Array> {
     let encryptedMsg: Uint8Array;
 
-    await this.base.sendMsgs(
+    await this.base.cosmos.sendMsgs(
       type,
       async () => {
         encryptedMsg = await this.encryptSecretContractMsg(
@@ -238,7 +220,7 @@ export class SecretAccount {
         );
 
         const msg = {
-          type: this.base.msgOpts.executeSecretWasm.type,
+          type: this.msgOpts.executeSecretWasm.type,
           value: {
             sender: this.base.bech32Address,
             contract: contractAddress,
@@ -251,23 +233,20 @@ export class SecretAccount {
 
         return {
           aminoMsgs: [msg],
-          protoMsgs: this.hasNoLegacyStdFeature()
-            ? [
-                {
-                  typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
-                  value: MsgExecuteSecretContract.encode(
-                    MsgExecuteSecretContract.fromPartial({
-                      sender: Bech32Address.fromBech32(msg.value.sender)
-                        .address,
-                      contract: Bech32Address.fromBech32(msg.value.contract)
-                        .address,
-                      msg: Buffer.from(msg.value.msg, "base64"),
-                      sentFunds: sentFunds,
-                    })
-                  ).finish(),
-                },
-              ]
-            : undefined,
+          protoMsgs: [
+            {
+              typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
+              value: MsgExecuteSecretContract.encode(
+                MsgExecuteSecretContract.fromPartial({
+                  sender: Bech32Address.fromBech32(msg.value.sender).address,
+                  contract: Bech32Address.fromBech32(msg.value.contract)
+                    .address,
+                  msg: Buffer.from(msg.value.msg, "base64"),
+                  sentFunds: msg.value.sent_funds,
+                })
+              ).finish(),
+            },
+          ],
         };
       },
       memo,
@@ -347,15 +326,7 @@ export class SecretAccount {
     };
   }
 
-  protected get queries(): DeepReadonly<QueriesSetBase & HasSecretQueries> {
+  protected get queries(): DeepReadonly<QueriesSetBase & SecretQueries> {
     return this.queriesStore.get(this.chainId);
-  }
-
-  protected hasNoLegacyStdFeature(): boolean {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return (
-      chainInfo.features != null &&
-      chainInfo.features.includes("no-legacy-stdTx")
-    );
   }
 }

@@ -12,6 +12,8 @@ import {
 import { Buffer } from "buffer/";
 
 export interface TextareaProps {
+  type?: string;
+
   label?: string;
   error?: string;
 }
@@ -21,11 +23,12 @@ export const TextArea = forwardRef<
   HTMLInputElement,
   TextareaProps & React.TextareaHTMLAttributes<HTMLInputElement>
 >((props, ref) => {
-  const { label, error } = props;
+  const { type, label, error } = props;
 
   const attributes = { ...props };
   delete attributes.className;
   delete attributes.color;
+  delete attributes.type;
   delete attributes.label;
   delete attributes.error;
   delete attributes.children;
@@ -46,7 +49,7 @@ export const TextArea = forwardRef<
       <ReactStrapInput
         id={inputId}
         className={classnames("form-control-alternative", props.className)}
-        type={"textarea" as any}
+        type={type ?? ("textarea" as any)}
         innerRef={ref}
         invalid={error != null}
         {...attributes}

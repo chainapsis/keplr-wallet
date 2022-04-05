@@ -138,6 +138,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
           })}
         >
           <TextArea
+            type="password"
             className={style.mnemonic}
             placeholder={intl.formatMessage({
               id: "register.create.textarea.mnemonic.place-holder",

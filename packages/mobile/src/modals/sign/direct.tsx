@@ -1,14 +1,16 @@
 import { AppCurrency } from "@keplr-wallet/types";
-import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import {
   MsgBeginRedelegate,
   MsgDelegate,
+  MsgExecuteContract,
   MsgSend,
   MsgUndelegate,
 } from "@keplr-wallet/proto-types";
+import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import {
   renderMsgBeginRedelegate,
   renderMsgDelegate,
+  renderMsgExecuteContract,
   renderMsgSend,
   renderMsgUndelegate,
   renderUnknownMessage,
@@ -62,6 +64,22 @@ export function renderDirectMessage(
               undelegateMsg.validatorAddress
             );
           }
+          break;
+        }
+        case "/cosmwasm.wasm.v1.MsgExecuteContract": {
+          const executeMsg = msg.unpacked as MsgExecuteContract;
+          return renderMsgExecuteContract(
+            currencies,
+            executeMsg.funds,
+            undefined,
+            executeMsg.contract,
+            JSON.parse(
+              Buffer.from(
+                Buffer.from(executeMsg.msg).toString(),
+                "utf8"
+              ).toString()
+            )
+          );
           break;
         }
       }

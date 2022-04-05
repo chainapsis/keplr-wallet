@@ -13,7 +13,6 @@ import {
   Secp256k1HdWallet,
   StdSignature,
   StdSignDoc,
-  StdTx,
 } from "@cosmjs/launchpad";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -55,7 +54,7 @@ export class MockKeplr implements Keplr {
   constructor(
     public readonly sendTxFn: (
       chainId: string,
-      stdTx: StdTx | Uint8Array,
+      stdTx: Uint8Array,
       mode: BroadcastMode
     ) => Promise<Uint8Array>,
     public readonly chainInfos: {
@@ -132,7 +131,7 @@ export class MockKeplr implements Keplr {
 
   sendTx(
     chainId: string,
-    stdTx: StdTx | Uint8Array,
+    stdTx: Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
     return this.sendTxFn(chainId, stdTx, mode);

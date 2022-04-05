@@ -93,3 +93,11 @@ export class InsufficientFeeError extends Error {
     Object.setPrototypeOf(this, InsufficientFeeError.prototype);
   }
 }
+
+export class UnknownCurrencyError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, UnknownCurrencyError.prototype);
+  }
+}

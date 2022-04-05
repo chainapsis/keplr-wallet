@@ -65,7 +65,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       recipientConfig.rawRecipient
     );
 
-    const error = recipientConfig.getError();
+    const error = recipientConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
         switch (error.constructor) {

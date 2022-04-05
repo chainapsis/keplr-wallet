@@ -7,7 +7,7 @@ import { useStyle } from "../../../styles";
 import { useIntl } from "react-intl";
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { ProgressBar } from "../../../components/progress-bar";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 
 export const UndelegationsCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -22,13 +22,13 @@ export const UndelegationsCard: FunctionComponent<{
   ).unbondingBalances;
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
   const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonding
+    Staking.BondStatus.Unbonding
   );
   const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonded
+    Staking.BondStatus.Unbonded
   );
   const stakingParams = queries.cosmos.queryStakingParams.response;
 
@@ -122,7 +122,7 @@ export const UndelegationsCard: FunctionComponent<{
                       (endTime - currentTime) / 1000
                     );
                     const unbondingTime = stakingParams
-                      ? parseFloat(stakingParams.data.result.unbonding_time) /
+                      ? parseFloat(stakingParams.data.params.unbonding_time) /
                         10 ** 9
                       : 3600 * 24 * 21;
 

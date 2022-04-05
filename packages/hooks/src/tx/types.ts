@@ -12,7 +12,7 @@ export interface IMemoConfig extends ITxChainSetter {
   memo: string;
   setMemo(memo: string): void;
 
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export interface IGasConfig extends ITxChainSetter {
@@ -23,7 +23,7 @@ export interface IGasConfig extends ITxChainSetter {
   gasRaw: string;
   setGas(gas: number | string): void;
 
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export interface IFeeConfig extends ITxChainSetter {
@@ -36,7 +36,7 @@ export interface IFeeConfig extends ITxChainSetter {
   getFeeTypePretty(feeType: FeeType): CoinPretty;
   getFeePrimitive(): CoinPrimitive | undefined;
   isManual: boolean;
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export interface IRecipientConfig extends ITxChainSetter {
@@ -44,7 +44,7 @@ export interface IRecipientConfig extends ITxChainSetter {
   rawRecipient: string;
   setRawRecipient(recipient: string): void;
 
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export interface IAmountConfig extends ITxChainSetter {
@@ -76,7 +76,7 @@ export interface IAmountConfig extends ITxChainSetter {
   fraction: number | undefined;
   setFraction(value: number | undefined): void;
 
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export const DefaultGasPriceStep: {

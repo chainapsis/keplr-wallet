@@ -22,7 +22,7 @@ export class MemoConfig extends TxChainSetter implements IMemoConfig {
     this._memo = memo;
   }
 
-  getError(): Error | undefined {
+  get error(): Error | undefined {
     return undefined;
   }
 }

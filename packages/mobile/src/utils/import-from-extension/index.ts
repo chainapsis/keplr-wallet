@@ -29,7 +29,7 @@ export interface WCExportKeyRingDatasResponse {
   addressBooks: { [chainId: string]: AddressBookData[] | undefined };
 }
 
-export function parseQRCodeDataForImportFromMobile(
+export function parseQRCodeDataForImportFromExtension(
   data: string
 ): QRCodeSharedData {
   const sharedData = JSON.parse(data) as QRCodeSharedData;
@@ -39,7 +39,7 @@ export function parseQRCodeDataForImportFromMobile(
   return sharedData;
 }
 
-export async function importFromMobile(
+export async function importFromExtension(
   sharedData: QRCodeSharedData,
   chainIdsForAddressBook: string[]
 ): Promise<{

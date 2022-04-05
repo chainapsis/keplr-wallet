@@ -1,14 +1,19 @@
-import { ChainGetter } from "@keplr-wallet/stores";
-import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
+import {
+  ChainGetter,
+  IAccountStore,
+  IQueriesStore,
+  MsgOpt,
+} from "@keplr-wallet/stores";
 import {
   AmountConfig,
+  GasConfig,
   useFeeConfig,
-  useGasConfig,
   useMemoConfig,
   useRecipientConfig,
 } from "./index";
 import { AppCurrency } from "@keplr-wallet/types";
 import { useState } from "react";
+import { makeObservable, override } from "mobx";
 
 export class DelegateAmountConfig extends AmountConfig {
   get sendableCurrencies(): AppCurrency[] {
@@ -16,52 +21,104 @@ export class DelegateAmountConfig extends AmountConfig {
   }
 }
 
+export class DelegateGasConfig extends GasConfig {
+  constructor(
+    chainGetter: ChainGetter,
+    protected readonly accountStore: IAccountStore<{
+      cosmos: {
+        readonly msgOpts: {
+          readonly delegate: MsgOpt;
+        };
+      };
+    }>,
+    initialChainId: string
+  ) {
+    super(chainGetter, initialChainId);
+
+    makeObservable(this);
+  }
+
+  @override
+  get gas(): number {
+    // If gas not set manually, assume that the tx is for MsgTransfer.
+    if (this._gasRaw == null) {
+      return this.accountStore.getAccount(this.chainId).cosmos.msgOpts.delegate
+        .gas;
+    }
+
+    return super.gas;
+  }
+}
+
 export const useDelegateAmountConfig = (
   chainGetter: ChainGetter,
+  queriesStore: IQueriesStore,
   chainId: string,
-  sender: string,
-  queryBalances: ObservableQueryBalances
+  sender: string
 ) => {
   const [txConfig] = useState(
     () =>
       new DelegateAmountConfig(
         chainGetter,
+        queriesStore,
         chainId,
         sender,
-        undefined,
-        queryBalances
+        undefined
       )
   );
   txConfig.setChain(chainId);
-  txConfig.setQueryBalances(queryBalances);
   txConfig.setSender(sender);
 
   return txConfig;
 };
 
+export const useDelegateGasConfig = (
+  chainGetter: ChainGetter,
+  accountStore: IAccountStore<{
+    cosmos: {
+      readonly msgOpts: {
+        readonly delegate: MsgOpt;
+      };
+    };
+  }>,
+  chainId: string
+) => {
+  const [gasConfig] = useState(
+    () => new DelegateGasConfig(chainGetter, accountStore, chainId)
+  );
+  gasConfig.setChain(chainId);
+
+  return gasConfig;
+};
+
 export const useDelegateTxConfig = (
   chainGetter: ChainGetter,
+  queriesStore: IQueriesStore,
+  accountStore: IAccountStore<{
+    cosmos: {
+      readonly msgOpts: {
+        readonly delegate: MsgOpt;
+      };
+    };
+  }>,
   chainId: string,
-  gas: number,
   sender: string,
-  queryBalances: ObservableQueryBalances,
   ensEndpoint?: string
 ) => {
   const amountConfig = useDelegateAmountConfig(
     chainGetter,
+    queriesStore,
     chainId,
-    sender,
-    queryBalances
+    sender
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
-  const gasConfig = useGasConfig(chainGetter, chainId, gas);
-  gasConfig.setGas(gas);
+  const gasConfig = useDelegateGasConfig(chainGetter, accountStore, chainId);
   const feeConfig = useFeeConfig(
     chainGetter,
+    queriesStore,
     chainId,
     sender,
-    queryBalances,
     amountConfig,
     gasConfig
   );

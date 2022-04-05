@@ -10,13 +10,10 @@ import {
 } from "../advanced-bip44";
 import style from "../style.module.scss";
 import { Alert, Button, ButtonGroup, Form } from "reactstrap";
-import { Input, PasswordInput, TextArea } from "../../../components/form";
+import { Input, PasswordInput } from "../../../components/form";
 import { BackButton } from "../index";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
 import { useStore } from "../../../stores";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bip39 = require("bip39");
 
 export const TypeNewMnemonic = "new-mnemonic";
 
@@ -146,33 +143,7 @@ export const GenerateMnemonicModePage: FunctionComponent<{
           newMnemonicConfig.setMode("verify");
         })}
       >
-        <TextArea
-          className={style.mnemonic}
-          placeholder={intl.formatMessage({
-            id: "register.create.textarea.mnemonic.place-holder",
-          })}
-          name="words"
-          rows={newMnemonicConfig.numWords === NumWords.WORDS24 ? 5 : 3}
-          readOnly={true}
-          value={newMnemonicConfig.mnemonic}
-          ref={register({
-            required: "Mnemonic is required",
-            validate: (value: string): string | undefined => {
-              if (value.split(" ").length < 8) {
-                return intl.formatMessage({
-                  id: "register.create.textarea.mnemonic.error.too-short",
-                });
-              }
-
-              if (!bip39.validateMnemonic(value)) {
-                return intl.formatMessage({
-                  id: "register.create.textarea.mnemonic.error.invalid",
-                });
-              }
-            },
-          })}
-          error={errors.words && errors.words.message}
-        />
+        <div className={style.newMnemonic}>{newMnemonicConfig.mnemonic}</div>
         <Input
           label={intl.formatMessage({
             id: "register.name",
