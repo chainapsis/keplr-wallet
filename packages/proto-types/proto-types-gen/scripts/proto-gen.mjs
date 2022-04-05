@@ -138,7 +138,15 @@ function setOutputHash(root, hash) {
       }
     }
 
-    await $`cp -R ${buildOutDir + "/"} ${packageRoot}`;
+    const cpDirs = fs.readdirSync(buildOutDir, {
+      withFileTypes: true,
+    });
+    for (const dir of cpDirs) {
+      if (dir.isDirectory()) {
+        const p = path.join(buildOutDir, dir.name);
+        await $`cp -R ${p} ${packageRoot}`;
+      }
+    }
 
     const outputHash = await calculateOutputHash(packageRoot);
     console.log("Output hash is", outputHash);
