@@ -3,18 +3,22 @@
 import "zx/globals";
 import fs from "fs";
 import FolderHash from "folder-hash";
+import glob from "glob";
 
-async function getOutputSrcHash() {
-  return (await FolderHash.hashElement(path.join(__dirname, "../src"))).hash;
+async function getDirectoryHash(src) {
+  return (await FolderHash.hashElement(src)).hash;
 }
 
 (async () => {
   try {
+    const outDir = path.join(__dirname, "../src");
+    await $`mkdir -p ${outDir}`;
+
     // When executed in CI, the proto output should not be different with ones built locally.
     let outputSrcHash = undefined;
     if (process.env.CI === "true") {
       console.log("You are ci runner");
-      outputSrcHash = await getOutputSrcHash();
+      outputSrcHash = await getDirectoryHash(outDir);
     }
 
     const protoTsBinPath = (() => {
@@ -60,8 +64,6 @@ async function getOutputSrcHash() {
 
     const thirdPartyInputs = ["tendermint/crypto/keys.proto"];
 
-    const outDir = path.join(__dirname, "../src");
-
     await $`protoc \
       --plugin=${protoTsBinPath} \
       --ts_proto_opt=forceLong=string \
@@ -73,9 +75,26 @@ async function getOutputSrcHash() {
       ${inputs.map((i) => path.join(baseProtoPath, i))} \
       ${thirdPartyInputs.map((i) => path.join(thirdPartyProtoPath, i))}`;
 
-    if (outputSrcHash && outputSrcHash !== (await getOutputSrcHash())) {
+    if (outputSrcHash && outputSrcHash !== (await getDirectoryHash(outDir))) {
       throw new Error("Output is different");
     }
+
+    // Build javascript output
+    const rootDir = path.join(__dirname, "..");
+    cd(rootDir);
+    await $`npx tsc`;
+
+    // Move javascript output to proto-types package
+    const buildOutDir = path.join(rootDir, "./build");
+    const targetDir = path.join(rootDir, "../proto-types");
+
+    // Remove previous output if exist
+    const previous = glob.sync(`${targetDir}/**/*.+(ts|js|cjs|mjs|map)`);
+    for (const path of previous) {
+      await $`rm -f ${path}`;
+    }
+
+    await $`cp -R ${buildOutDir + "/"} ${targetDir}`;
   } catch (e) {
     console.log(e);
     process.exit(1);

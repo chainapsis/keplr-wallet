@@ -16,3 +16,10 @@ packages/extension/src/config.ui.var.tsx
 .cache
 
 coverage
+
+packages/proto-types-gen/src/*
+packages/proto-types/**/*.ts
+packages/proto-types/**/*.js
+packages/proto-types/**/*.mjs
+packages/proto-types/**/*.cjs
+packages/proto-types/**/*.map

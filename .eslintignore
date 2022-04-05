@@ -26,5 +26,6 @@ injected-provider.bundle.js
 
 **/*.proto
 
-packages/proto-types/src/*
-!packages/proto-types/src/index.ts
+packages/proto-types/*
+!packages/proto-types/package.json
+packages/proto-types-gen/src/*

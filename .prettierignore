@@ -27,8 +27,9 @@ injected-provider.bundle.js
 .eslintignore
 .prettierignore
 
-packages/proto-types/src/*
-!packages/proto-types/src/index.ts
+packages/proto-types/*
+!packages/proto-types/package.json
+packages/proto-types-gen/src/*
 
 package.json
 tsconfig.json

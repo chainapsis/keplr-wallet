@@ -1,7 +1,6 @@
 {
   "name": "@keplr-wallet/proto-types",
   "version": "0.9.12",
-  "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": false,
@@ -9,15 +8,11 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rm -rf node_modules; rm -rf build",
-    "build": "npx zx ./scripts/proto-gen.mjs && tsc",
-    "lint-test": "eslint \"scripts/**/*\" && prettier --check \"scripts/**/*\"",
-    "lint-fix": "eslint --fix \"scripts/**/*\" && prettier --write \"scripts/**/*\""
   },
   "dependencies": {
+    "long": "^4.0.0",
+    "protobufjs": "^6.11.2"
   },
   "devDependencies": {
-    "ts-proto": "^1.106.2",
-    "folder-hash": "^4.0.2"
   }
 }

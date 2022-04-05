@@ -1,4 +1,2 @@
-build/*
-src/*
-!src/index.ts
-proto/*
+*
+!package.json
