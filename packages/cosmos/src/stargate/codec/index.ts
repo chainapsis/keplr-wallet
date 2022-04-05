@@ -1,12 +1,12 @@
 import * as $protobuf from "protobufjs";
+import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import {
-  Any,
-  MsgSend,
   MsgDelegate,
   MsgUndelegate,
   MsgBeginRedelegate,
-  MsgExecuteContract,
-} from "@keplr-wallet/proto-types";
+} from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { UnknownMessage } from "./unknown";
 
 export * from "./unknown";

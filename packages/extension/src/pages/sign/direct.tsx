@@ -11,13 +11,13 @@ import {
 } from "./messages";
 import { Buffer } from "buffer/";
 import { fromUtf8 } from "@cosmjs/encoding";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import {
   MsgBeginRedelegate,
   MsgDelegate,
-  MsgExecuteContract,
-  MsgSend,
   MsgUndelegate,
-} from "@keplr-wallet/proto-types";
+} from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 
 export function renderDirectMessage(
   msg: AnyWithUnpacked,

@@ -9,24 +9,26 @@ import {
 } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import {
-  Any,
   AuthInfo,
   TxRaw,
   TxBody,
-  PubKey,
-  SignMode,
-  Coin,
   Fee,
-  MsgSend,
-  MsgTransfer,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
+import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
+import { Coin } from "@keplr-wallet/proto-types/cosmos/base/v1beta1/coin";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
+import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
+import {
   MsgDelegate,
   MsgUndelegate,
   MsgBeginRedelegate,
-  MsgWithdrawDelegatorReward,
-  MsgVote,
-  VoteOption,
-} from "@keplr-wallet/proto-types";
+} from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
+import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
+import { VoteOption } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/gov";
 import {
   BaseAccount,
   ChainIdHelper,

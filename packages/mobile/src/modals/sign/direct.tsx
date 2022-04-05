@@ -1,11 +1,11 @@
 import { AppCurrency } from "@keplr-wallet/types";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import {
   MsgBeginRedelegate,
   MsgDelegate,
-  MsgExecuteContract,
-  MsgSend,
   MsgUndelegate,
-} from "@keplr-wallet/proto-types";
+} from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import {
   renderMsgBeginRedelegate,

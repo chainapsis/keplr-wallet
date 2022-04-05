@@ -25,7 +25,7 @@ import {
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { SignDoc } from "@keplr-wallet/proto-types";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export const getHandler: (service: KeyRingService) => Handler = (
   service: KeyRingService

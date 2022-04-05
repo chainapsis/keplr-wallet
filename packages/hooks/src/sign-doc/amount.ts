@@ -12,7 +12,8 @@ import { SignDocHelper } from "./index";
 import { useState } from "react";
 import { computedFn } from "mobx-utils";
 import { Msg } from "@cosmjs/launchpad";
-import { MsgSend, MsgDelegate } from "@keplr-wallet/proto-types";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
+import { MsgDelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 
 export type AccountStore = IAccountStore<{

@@ -35,7 +35,7 @@ import {
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
 import { RNG } from "@keplr-wallet/crypto";
-import { SignDoc } from "@keplr-wallet/proto-types";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 

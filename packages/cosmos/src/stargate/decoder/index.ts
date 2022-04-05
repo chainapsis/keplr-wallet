@@ -1,4 +1,8 @@
-import { SignDoc, TxBody, AuthInfo } from "@keplr-wallet/proto-types";
+import {
+  SignDoc,
+  TxBody,
+  AuthInfo,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import {
   AnyWithUnpacked,
   defaultProtoCodec,

@@ -4,7 +4,7 @@ import { Buffer } from "buffer/";
 import { ChainGetter, CoinPrimitive } from "../common";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
-import { MsgExecuteSecretContract } from "@keplr-wallet/proto-types";
+import { MsgExecuteContract } from "@keplr-wallet/proto-types/secret/compute/v1beta1/msg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
@@ -236,8 +236,8 @@ export class SecretAccountImpl {
           protoMsgs: [
             {
               typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
-              value: MsgExecuteSecretContract.encode(
-                MsgExecuteSecretContract.fromPartial({
+              value: MsgExecuteContract.encode(
+                MsgExecuteContract.fromPartial({
                   sender: Bech32Address.fromBech32(msg.value.sender).address,
                   contract: Bech32Address.fromBech32(msg.value.contract)
                     .address,

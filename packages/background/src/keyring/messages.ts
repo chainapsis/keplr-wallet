@@ -17,7 +17,7 @@ import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
-import { SignDoc } from "@keplr-wallet/proto-types";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;

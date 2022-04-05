@@ -2,7 +2,12 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { IFeeConfig, IMemoConfig } from "../tx";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
-import { SignDoc, TxBody, AuthInfo, Fee } from "@keplr-wallet/proto-types";
+import {
+  SignDoc,
+  TxBody,
+  AuthInfo,
+  Fee,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export * from "./amount";
 

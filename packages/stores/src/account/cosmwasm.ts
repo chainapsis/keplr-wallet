@@ -6,7 +6,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly, Optional } from "utility-types";
-import { MsgExecuteContract } from "@keplr-wallet/proto-types";
+import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { Buffer } from "buffer/";
 import deepmerge from "deepmerge";
 import { CosmosAccount } from "./cosmos";
