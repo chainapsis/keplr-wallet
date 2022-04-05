@@ -33,6 +33,9 @@ async function calculateOutputHash(root) {
   for (const dir of dirs) {
     const p = path.join(root, dir.name);
     const buf = Buffer.from((await FolderHash.hashElement(p)).hash, "base64");
+
+    console.log(p, buf.toString("base64"));
+
     hash = Buffer.concat([hash, buf]);
   }
 
@@ -40,7 +43,7 @@ async function calculateOutputHash(root) {
 }
 
 function getOutputHash(root) {
-  return fs.readFileSync(path.join(root, "outputHash"));
+  return fs.readFileSync(path.join(root, "outputHash")).toString();
 }
 
 function setOutputHash(root, hash) {
@@ -58,7 +61,8 @@ function setOutputHash(root, hash) {
     let lastOutputHash = undefined;
     if (process.env.CI === "true") {
       console.log("You are ci runner");
-      lastOutputHash = await getOutputHash(packageRoot);
+      lastOutputHash = getOutputHash(packageRoot);
+      console.log("Expected output hash is", lastOutputHash);
     }
 
     const protoTsBinPath = (() => {
@@ -137,6 +141,7 @@ function setOutputHash(root, hash) {
     await $`cp -R ${buildOutDir + "/"} ${packageRoot}`;
 
     const outputHash = await calculateOutputHash(packageRoot);
+    console.log("Output hash is", outputHash);
     if (lastOutputHash && lastOutputHash !== outputHash) {
       throw new Error("Output is different");
     }
