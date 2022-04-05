@@ -25,14 +25,14 @@ async function getDirectoryHash(src) {
       try {
         const binPath = path.join(
           __dirname,
-          "../node_modules/.bin/protoc-gen-ts_proto"
+          "../../node_modules/.bin/protoc-gen-ts_proto"
         );
         fs.readFileSync(binPath);
         return binPath;
       } catch {
         const binPath = path.join(
           __dirname,
-          "../../../node_modules/.bin/protoc-gen-ts_proto"
+          "../../../../node_modules/.bin/protoc-gen-ts_proto"
         );
         fs.readFileSync(binPath);
         return binPath;
@@ -86,12 +86,17 @@ async function getDirectoryHash(src) {
 
     // Move javascript output to proto-types package
     const buildOutDir = path.join(rootDir, "./build");
-    const targetDir = path.join(rootDir, "../proto-types");
+    const targetDir = path.join(rootDir, "..");
 
     // Remove previous output if exist
     const previous = glob.sync(`${targetDir}/**/*.+(ts|js|cjs|mjs|map)`);
     for (const path of previous) {
-      await $`rm -f ${path}`;
+      if (
+        !path.includes("/proto-types-gen/") &&
+        !path.includes("/node_modules/")
+      ) {
+        await $`rm -f ${path}`;
+      }
     }
 
     await $`cp -R ${buildOutDir + "/"} ${targetDir}`;

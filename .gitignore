@@ -17,9 +17,15 @@ packages/extension/src/config.ui.var.tsx
 
 coverage
 
-packages/proto-types-gen/src/*
 packages/proto-types/**/*.ts
 packages/proto-types/**/*.js
 packages/proto-types/**/*.mjs
 packages/proto-types/**/*.cjs
 packages/proto-types/**/*.map
+!packages/proto-types/proto-types-gen/**/*.ts
+!packages/proto-types/proto-types-gen/**/*.js
+!packages/proto-types/proto-types-gen/**/*.mjs
+!packages/proto-types/proto-types-gen/**/*.cjs
+!packages/proto-types/proto-types-gen/**/*.map
+
+packages/proto-types/proto-types-gen/src
