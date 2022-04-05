@@ -5,20 +5,60 @@ import fs from "fs";
 import FolderHash from "folder-hash";
 import glob from "glob";
 
-async function getDirectoryHash(src) {
-  return (await FolderHash.hashElement(src)).hash;
+async function calculateOutputHash(root) {
+  const dirCandidates = fs.readdirSync(root, {
+    withFileTypes: true,
+  });
+
+  let dirs = [];
+
+  for (const candidate of dirCandidates) {
+    if (candidate.isDirectory()) {
+      if (
+        candidate.name !== "node_modules" &&
+        candidate.name !== "proto-types-gen"
+      ) {
+        dirs.push(candidate);
+      }
+    }
+  }
+
+  dirs = dirs.sort((dir1, dir2) => {
+    if (dir1.name < dir2.name) return -1;
+    if (dir1.name > dir2.name) return 1;
+    return 0;
+  });
+
+  let hash = Buffer.alloc(0);
+  for (const dir of dirs) {
+    const p = path.join(root, dir.name);
+    const buf = Buffer.from((await FolderHash.hashElement(p)).hash, "base64");
+    hash = Buffer.concat([hash, buf]);
+  }
+
+  return hash.toString("base64");
+}
+
+function getOutputHash(root) {
+  return fs.readFileSync(path.join(root, "outputHash"));
+}
+
+function setOutputHash(root, hash) {
+  return fs.writeFileSync(path.join(root, "outputHash"), hash, { mode: 0o600 });
 }
 
 (async () => {
   try {
+    const packageRoot = path.join(__dirname, "../..");
+
     const outDir = path.join(__dirname, "../src");
     await $`mkdir -p ${outDir}`;
 
     // When executed in CI, the proto output should not be different with ones built locally.
-    let outputSrcHash = undefined;
+    let lastOutputHash = undefined;
     if (process.env.CI === "true") {
       console.log("You are ci runner");
-      outputSrcHash = await getDirectoryHash(outDir);
+      lastOutputHash = await getOutputHash(packageRoot);
     }
 
     const protoTsBinPath = (() => {
@@ -75,21 +115,16 @@ async function getDirectoryHash(src) {
       ${inputs.map((i) => path.join(baseProtoPath, i))} \
       ${thirdPartyInputs.map((i) => path.join(thirdPartyProtoPath, i))}`;
 
-    if (outputSrcHash && outputSrcHash !== (await getDirectoryHash(outDir))) {
-      throw new Error("Output is different");
-    }
-
     // Build javascript output
     const rootDir = path.join(__dirname, "..");
     cd(rootDir);
     await $`npx tsc`;
 
     // Move javascript output to proto-types package
-    const buildOutDir = path.join(rootDir, "./build");
-    const targetDir = path.join(rootDir, "..");
+    const buildOutDir = path.join(rootDir, "build");
 
     // Remove previous output if exist
-    const previous = glob.sync(`${targetDir}/**/*.+(ts|js|cjs|mjs|map)`);
+    const previous = glob.sync(`${packageRoot}/**/*.+(ts|js|cjs|mjs|map)`);
     for (const path of previous) {
       if (
         !path.includes("/proto-types-gen/") &&
@@ -99,7 +134,14 @@ async function getDirectoryHash(src) {
       }
     }
 
-    await $`cp -R ${buildOutDir + "/"} ${targetDir}`;
+    await $`cp -R ${buildOutDir + "/"} ${packageRoot}`;
+
+    const outputHash = await calculateOutputHash(packageRoot);
+    if (lastOutputHash && lastOutputHash !== outputHash) {
+      throw new Error("Output is different");
+    }
+
+    setOutputHash(packageRoot, outputHash);
   } catch (e) {
     console.log(e);
     process.exit(1);
