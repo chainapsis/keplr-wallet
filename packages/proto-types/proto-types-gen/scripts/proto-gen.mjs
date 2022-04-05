@@ -138,14 +138,13 @@ function setOutputHash(root, hash) {
       }
     }
 
-    const cpDirs = fs.readdirSync(buildOutDir, {
-      withFileTypes: true,
-    });
-    for (const dir of cpDirs) {
-      if (dir.isDirectory()) {
-        const p = path.join(buildOutDir, dir.name);
-        await $`cp -R ${p} ${packageRoot}`;
-      }
+    const fresh = glob.sync(`${buildOutDir}/**/*.+(ts|js|cjs|mjs|map)`);
+    for (const p of fresh) {
+      const targetPath = path.join(
+        packageRoot,
+        p.replace(buildOutDir + "/", "")
+      );
+      await $`mkdir -p ${path.join(targetPath, "..")} && cp ${p} ${targetPath}`;
     }
 
     const outputHash = await calculateOutputHash(packageRoot);
