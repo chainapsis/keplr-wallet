@@ -134,7 +134,7 @@ function setOutputHash(root, hash) {
         !path.includes("/proto-types-gen/") &&
         !path.includes("/node_modules/")
       ) {
-        await $`rm -f ${path}`;
+        await quiet($`rm -f ${path}`);
       }
     }
 
@@ -144,7 +144,9 @@ function setOutputHash(root, hash) {
         packageRoot,
         p.replace(buildOutDir + "/", "")
       );
-      await $`mkdir -p ${path.join(targetPath, "..")} && cp ${p} ${targetPath}`;
+      await quiet(
+        $`mkdir -p ${path.join(targetPath, "..")} && cp ${p} ${targetPath}`
+      );
     }
 
     const outputHash = await calculateOutputHash(packageRoot);
