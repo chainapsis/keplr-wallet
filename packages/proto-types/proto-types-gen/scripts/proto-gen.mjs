@@ -55,7 +55,9 @@ function setOutputHash(root, hash) {
     const packageRoot = path.join(__dirname, "../..");
 
     const outDir = path.join(__dirname, "../src");
+    $.verbose = false;
     await $`mkdir -p ${outDir}`;
+    $.verbose = true;
 
     // When executed in CI, the proto output should not be different with ones built locally.
     let lastOutputHash = undefined;
@@ -119,6 +121,8 @@ function setOutputHash(root, hash) {
       ${inputs.map((i) => path.join(baseProtoPath, i))} \
       ${thirdPartyInputs.map((i) => path.join(thirdPartyProtoPath, i))}`;
 
+    $.verbose = false;
+
     // Build javascript output
     const rootDir = path.join(__dirname, "..");
     cd(rootDir);
@@ -134,7 +138,7 @@ function setOutputHash(root, hash) {
         !path.includes("/proto-types-gen/") &&
         !path.includes("/node_modules/")
       ) {
-        await quiet($`rm -f ${path}`);
+        await $`rm -f ${path}`;
       }
     }
 
@@ -144,10 +148,10 @@ function setOutputHash(root, hash) {
         packageRoot,
         p.replace(buildOutDir + "/", "")
       );
-      await quiet(
-        $`mkdir -p ${path.join(targetPath, "..")} && cp ${p} ${targetPath}`
-      );
+      await $`mkdir -p ${path.join(targetPath, "..")} && cp ${p} ${targetPath}`;
     }
+
+    $.verbose = true;
 
     const outputHash = await calculateOutputHash(packageRoot);
     console.log("Output hash is", outputHash);
