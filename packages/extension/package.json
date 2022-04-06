@@ -27,6 +27,7 @@
     "@keplr-wallet/ens": "0.10.0",
     "@keplr-wallet/hooks": "0.10.0",
     "@keplr-wallet/popup": "0.10.0",
+    "@keplr-wallet/proto-types": "^0.9.12",
     "@keplr-wallet/provider": "0.10.0",
     "@keplr-wallet/router": "0.10.0",
     "@keplr-wallet/router-extension": "0.10.0",

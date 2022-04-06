@@ -27,6 +27,7 @@
     "@keplr-wallet/crypto": "0.10.0",
     "@keplr-wallet/ens": "0.10.0",
     "@keplr-wallet/popup": "0.10.0",
+    "@keplr-wallet/proto-types": "^0.9.12",
     "@keplr-wallet/stores": "0.10.0",
     "@keplr-wallet/types": "0.10.0",
     "@keplr-wallet/unit": "0.10.0",

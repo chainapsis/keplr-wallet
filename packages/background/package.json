@@ -33,6 +33,7 @@
     "@keplr-wallet/cosmos": "0.10.0",
     "@keplr-wallet/crypto": "0.10.0",
     "@keplr-wallet/popup": "0.10.0",
+    "@keplr-wallet/proto-types": "^0.9.12",
     "@keplr-wallet/router": "0.10.0",
     "@keplr-wallet/types": "0.10.0",
     "@keplr-wallet/unit": "0.10.0",
