@@ -202,7 +202,7 @@ If requested sign doc with the `signAnimo` API with the ADR-36 that Keplr requir
 - sign doc memo should be an empty string("")
 - sign doc account_number should be "0"
 - sign doc sequence should be "0"
-- sign doc fee should be {gas: "0", amount: []}
+- sign doc fee should be `{gas: "0", amount: []}`
   
 When using the `signArbitrary` API, if the data parameter type is string, the signature page displays as plain text.  
 Using `verifyArbitrary`, you can verify the results requested by `signArbitrary` API or `signAmino` API that has been requested with the ADR-36 spec standards.  
