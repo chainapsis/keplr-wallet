@@ -12,6 +12,7 @@ import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import {
   AuthInfo,
+  SignerInfo,
   TxRaw,
   TxBody,
   Fee,
@@ -40,6 +41,7 @@ import { DeepPartial, DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
 import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
+import { Buffer } from "buffer/";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -243,6 +245,82 @@ export class CosmosAccountImpl {
     }
 
     return false;
+  }
+
+  /**
+   * Simulate tx without making state transition on chain or not waiting the tx committed.
+   * Mainly used to estimate the gas needed to process tx.
+   * You should multiply arbitrary number (gas adjustment) for gas before sending tx.
+   *
+   * NOTE: "/cosmos/tx/v1beta1/simulate" returns 400 status and error code as a response when tx fails on stimulate.
+   *       Currently, 400 status is handled as error, thus error would be thrown.
+   *       It’s also possible to change this implementation so that it returns an error code instead of throwing an error.
+   *       Currently, implemented as the former explanation, but eligible to change according upon further decisions.
+   *
+   * XXX: Uses the simulate request format for cosmos-sdk@0.43+
+   *      Thus, may throw an error if the chain is below cosmos-sdk@0.43
+   *      And, for simplicity, doesn't set the public key to tx bytes.
+   *      Thus, the gas estimated doesn't include the tx bytes size of public key.
+   *
+   * @param msgs
+   * @param memo
+   * @param fee
+   * @param sender
+   */
+  async simulateTx(
+    msgs: Any[],
+    memo: string,
+    fee: Omit<StdFee, "gas">,
+    sender: string = this.base.bech32Address
+  ): Promise<{
+    gasUsed: Int;
+  }> {
+    const account = await BaseAccount.fetchFromRest(
+      this.instance,
+      sender,
+      true
+    );
+
+    const unsignedTx = TxRaw.encode({
+      bodyBytes: TxBody.encode(
+        TxBody.fromPartial({
+          messages: msgs,
+          memo: memo,
+        })
+      ).finish(),
+      authInfoBytes: AuthInfo.encode({
+        signerInfos: [
+          SignerInfo.fromPartial({
+            // Pub key is ignored.
+            // It is fine to ignore the pub key when simulating tx.
+            // However, the estimated gas would be slightly smaller because tx size doesn't include pub key.
+            modeInfo: {
+              single: {
+                mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+              },
+              multi: undefined,
+            },
+            sequence: account.getSequence().toString(),
+          }),
+        ],
+        fee: Fee.fromPartial({
+          amount: fee.amount.map((amount) => {
+            return { amount: amount.amount, denom: amount.denom };
+          }),
+        }),
+      }).finish(),
+      // Because of the validation of tx itself, the signature must exist.
+      // However, since they do not actually verify the signature, it is okay to use any value.
+      signatures: [new Uint8Array(0)],
+    }).finish();
+
+    const result = await this.instance.post("/cosmos/tx/v1beta1/simulate", {
+      tx_bytes: Buffer.from(unsignedTx).toString("base64"),
+    });
+
+    return {
+      gasUsed: new Int(result.data.gas_info.gas_used),
+    };
   }
 
   async sendMsgs(
