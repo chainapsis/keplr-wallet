@@ -174,6 +174,40 @@ This function requests Keplr to delegates the broadcasting of the transaction to
 This method returns the transaction hash if it succeeds to broadcast, if else the method will throw an error.
 When Keplr broadcasts the transaction, Keplr will send the notification on the transaction's progress.
 
+### Request Signature for Arbitrary Message
+
+```javascript
+signArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array
+): Promise<StdSignature>;
+verifyArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    signature: StdSignature
+): Promise<boolean>;
+```
+
+This is an experimental implementation of [ADR-36](https://github.com/cosmos/cosmos-sdk/blob/master/docs/architecture/adr-036-arbitrary-signature.md). Please use this at your own risk.  
+  
+Mostly used to prove ownership of an account off-chain.  
+Able to request ADR-36 signature using the `signArbitrary` API.  
+If requested sign doc with the `signAnimo` API with the ADR-36 that Keplr requires instead of using the `signArbitary` API, it would function as `signArbitary`  
+- Supports sign doc only in the format of Amino as of now. (in the case of protobuf, [ADR-36](https://github.com/cosmos/cosmos-sdk/blob/master/docs/architecture/adr-036-arbitrary-signature.md) requirements aren't fully specified for implementation)
+- sign doc message should be single and the message type should be "sign/MsgSignData"
+- sign doc chain_id should be an empty string("")
+- sign doc memo should be an empty string("")
+- sign doc account_number should be "0"
+- sign doc sequence should be "0"
+- sign doc fee should be {gas: "0", amount: []}
+  
+When using the `signArbitrary` API, if the data parameter type is string, the signature page displays as plain text.  
+Using `verifyArbitrary`, you can verify the results requested by `signArbitrary` API or `signAmino` API that has been requested with the ADR-36 spec standards.  
+`verifyArbitrary` has been only implemented for a simple usage. `verifyArbitrary` returns the result of the verification of the current selected account's sign doc. If the account is not the currently selected account, it would throw an error.  
+It is recommended to use `verifyADR36Amino` function in the `@keplr-wallet/cosmos` package or your own implementation instead of using `verifyArbitrary`.  
+
 ### Interaction Options
 
 ```javascript
