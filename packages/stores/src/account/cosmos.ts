@@ -252,8 +252,8 @@ export class CosmosAccountImpl {
    * Mainly used to estimate the gas needed to process tx.
    * You should multiply arbitrary number (gas adjustment) for gas before sending tx.
    *
-   * NOTE: "/cosmos/tx/v1beta1/simulate" returns 400 status and error code as a response when tx fails on stimulate.
-   *       Currently, 400 status is handled as error, thus error would be thrown.
+   * NOTE: "/cosmos/tx/v1beta1/simulate" returns 400, 500 or (more?) status and error code as a response when tx fails on stimulate.
+   *       Currently, non 200~300 status is handled as error, thus error would be thrown.
    *       It’s also possible to change this implementation so that it returns an error code instead of throwing an error.
    *       Currently, implemented as the former explanation, but eligible to change according upon further decisions.
    *
