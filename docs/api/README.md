@@ -197,6 +197,7 @@ Able to request ADR-36 signature using the `signArbitrary` API.
 If requested sign doc with the `signAnimo` API with the ADR-36 that Keplr requires instead of using the `signArbitary` API, it would function as `signArbitary`  
 - Supports sign doc only in the format of Amino as of now. (in the case of protobuf, [ADR-36](https://github.com/cosmos/cosmos-sdk/blob/master/docs/architecture/adr-036-arbitrary-signature.md) requirements aren't fully specified for implementation)
 - sign doc message should be single and the message type should be "sign/MsgSignData"
+- "sign/MsgSignData" message in sign doc should have "signer" and "data" as its "value". "data" should be base64 encoded.
 - sign doc chain_id should be an empty string("")
 - sign doc memo should be an empty string("")
 - sign doc account_number should be "0"
