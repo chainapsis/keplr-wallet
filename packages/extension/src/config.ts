@@ -7,7 +7,7 @@ export const EmbedChainInfos: ChainInfo[] = [
   {
     rpc: "https://rpc-fetchhub.fetch-ai.com",
     rest: "https://rest-fetchhub.fetch-ai.com",
-    chainId: "fetchhub-3",
+    chainId: "fetchhub-4",
     chainName: "FetchHub",
     stakeCurrency: {
       coinDenom: "FET",
@@ -31,6 +31,16 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "nanomobx",
         coinDecimals: 9,
       },
+      {
+        coinDenom: "NOMX",
+        coinMinimalDenom: "nanonomx",
+        coinDecimals: 9,
+      },
+      {
+        coinDenom: "LRN",
+        coinMinimalDenom: "ulrn",
+        coinDecimals: 6,
+      },
     ],
     feeCurrencies: [
       {
@@ -50,10 +60,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     walletUrlForStaking: "https://browse-fetchhub.fetch.ai/validators",
   },
   {
-    rpc: "https://rpc-capricorn.fetch.ai",
-    rest: "https://rest-capricorn.fetch.ai",
-    chainId: "capricorn-1",
-    chainName: "Capricorn",
+    rpc: "https://rpc-dorado.fetch.ai",
+    rest: "https://rest-dorado.fetch.ai",
+    chainId: "dorado-1",
+    chainName: "Dorado",
     stakeCurrency: {
       coinDenom: "TESTFET",
       coinMinimalDenom: "atestfet",
@@ -89,7 +99,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 5000000000,
       high: 6250000000,
     },
-    walletUrlForStaking: "https://browse-capricorn.fetch.ai/validators",
+    walletUrlForStaking: "https://browse-dorado.fetch.ai/validators",
   },
 ];
 
