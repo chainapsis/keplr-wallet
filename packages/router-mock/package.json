@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/router-mock",
-  "version": "0.9.6",
+  "version": "0.9.12-rc.3",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -17,7 +17,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/router": "^0.9.6",
-    "@keplr-wallet/router-extension": "^0.9.6"
+    "@keplr-wallet/router": "0.9.12-rc.3",
+    "@keplr-wallet/router-extension": "0.9.12-rc.3"
   }
 }
