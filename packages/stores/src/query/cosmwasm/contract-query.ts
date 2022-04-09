@@ -5,6 +5,7 @@ import { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
 
 import { Buffer } from "buffer/";
+import { autorun } from "mobx";
 
 export class ObservableCosmwasmContractChainQuery<
   T
@@ -23,6 +24,15 @@ export class ObservableCosmwasmContractChainQuery<
       chainGetter,
       ObservableCosmwasmContractChainQuery.getUrlFromObj(contractAddress, obj)
     );
+
+    autorun(() => {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      if (chainInfo.features?.includes("wasmd_0.24+")) {
+        if (this.url.startsWith("/wasm/v1/")) {
+          this.setUrl(`/cosmwasm${this.url}`);
+        }
+      }
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
