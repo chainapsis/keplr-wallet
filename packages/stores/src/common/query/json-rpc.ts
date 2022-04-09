@@ -89,7 +89,7 @@ export class ObservableJsonRPCQuery<
       Hash.sha256(Buffer.from(JSON.stringify(this.params))).slice(0, 8)
     ).toString("hex");
 
-    return `${super.getCacheKey()}-${paramsHash}`;
+    return `${super.getCacheKey()}-${this.method}-${paramsHash}`;
   }
 }
 
