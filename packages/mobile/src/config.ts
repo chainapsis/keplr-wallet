@@ -885,6 +885,30 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+      },
+      {
+        coinDenom: "FRAX",
+        coinMinimalDenom: "frax-wei",
+        coinDecimals: 18,
+        coinGeckoId: "frax",
+      },
+      {
+        coinDenom: "DAI",
+        coinMinimalDenom: "dai-wei",
+        coinDecimals: 18,
+        coinGeckoId: "dai",
+      },
+      {
+        coinDenom: "USDT",
+        coinMinimalDenom: "uusdt",
+        coinDecimals: 6,
+        coinGeckoId: "tether",
+      },
     ],
     feeCurrencies: [
       {
