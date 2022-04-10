@@ -91,6 +91,10 @@ import {
   UMEE_RPC_CONFIG,
   UMEE_REST_ENDPOINT,
   UMEE_REST_CONFIG,
+  GRAVITY_BRIDGE_RPC_ENDPOINT,
+  GRAVITY_BRIDGE_RPC_CONFIG,
+  GRAVITY_BRIDGE_REST_ENDPOINT,
+  GRAVITY_BRIDGE_REST_CONFIG,
   EVMOS_RPC_ENDPOINT,
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
@@ -1625,6 +1629,46 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025,
       high: 0.04,
     },
+    features: ["ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: GRAVITY_BRIDGE_RPC_ENDPOINT,
+    rpcConfig: GRAVITY_BRIDGE_RPC_CONFIG,
+    rest: GRAVITY_BRIDGE_REST_ENDPOINT,
+    restConfig: GRAVITY_BRIDGE_REST_CONFIG,
+    chainId: "gravity-bridge-3",
+    chainName: "Gravity Bridge",
+    stakeCurrency: {
+      coinDenom: "GRAV",
+      coinMinimalDenom: "ugraviton",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/gravity-bridge/stake"
+        : "http://localhost:8080/#/gravity-bridge/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/gravity-bridge/stake"
+        : "http://localhost:8080/#/gravity-bridge/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("gravity"),
+    currencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+      },
+    ],
     features: ["ibc-transfer", "ibc-go"],
   },
   {
