@@ -85,6 +85,8 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             return intl.formatMessage({
               id: "input.recipient.error.ens-failed-to-fetch",
             });
+          case ENSIsFetchingError:
+            return;
           case InvalidHexError:
             return intl.formatMessage({
               id: "input.recipient.error.invalid-hex",
