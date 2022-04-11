@@ -273,9 +273,9 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
           ];
         }
       } else {
-        const currency = originChainInfo.forceFindCurrency(denomTrace.denom);
+        const currency = originChainInfo.findCurrency(denomTrace.denom);
 
-        if (!("paths" in currency)) {
+        if (currency && !("paths" in currency)) {
           return [
             {
               coinDecimals: currency.coinDecimals,
