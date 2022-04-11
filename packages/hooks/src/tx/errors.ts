@@ -101,3 +101,11 @@ export class UnknownCurrencyError extends Error {
     Object.setPrototypeOf(this, UnknownCurrencyError.prototype);
   }
 }
+
+export class InvalidHexError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, InvalidHexError.prototype);
+  }
+}
