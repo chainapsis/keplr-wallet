@@ -8,14 +8,13 @@ import { observer } from "mobx-react-lite";
 
 import styleStake from "./stake.module.scss";
 import classnames from "classnames";
-import { Dec, Int } from "@keplr-wallet/unit";
+import { Dec } from "@keplr-wallet/unit";
 
 import { useNotification } from "../../components/notification";
 
 import { useHistory } from "react-router";
 
 import { FormattedMessage } from "react-intl";
-import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -41,59 +40,26 @@ export const StakeView: FunctionComponent = observer(() => {
   }, [stakable.balance]);
 
   const withdrawAllRewards = async () => {
-    const gasAdjustment = new Dec(1.3);
-    // gasAdjusted is estimated gas * gas adjustment.
-    // But, simulating tx can be failed for some reasons...
-    // If simulating tx is failed, this would be undefined.
-    // If undefined the tx gas should be set according to the default gas setting.
-    let gasAdjusted: Int | undefined;
-    try {
-      const simulated = await accountInfo.cosmos.simulateTx(
-        rewards
-          .getDescendingPendingRewardValidatorAddresses(8)
-          .map((validatorAddress) => {
-            return {
-              typeUrl:
-                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-              value: MsgWithdrawDelegatorReward.encode({
-                delegatorAddress: accountInfo.bech32Address,
-                validatorAddress,
-              }).finish(),
-            };
-          }),
-        "",
-        {
-          amount: [],
-        }
-      );
-
-      gasAdjusted = simulated.gasUsed.toDec().mul(gasAdjustment).truncate();
-    } catch (e) {
-      console.log(e.message || e);
-      gasAdjusted = undefined;
-    }
-
     if (accountInfo.isReadyToSendMsgs) {
       try {
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
-        await accountInfo.cosmos.sendWithdrawDelegationRewardMsgs(
-          rewards.getDescendingPendingRewardValidatorAddresses(8),
-          "",
-          {
-            gas: gasAdjusted?.toString(),
-          },
-          undefined,
-          {
-            onBroadcasted: () => {
-              analyticsStore.logEvent("Claim reward tx broadcasted", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-              });
-            },
-          }
-        );
+        await accountInfo.cosmos
+          .makeWithdrawDelegationRewardTx(
+            rewards.getDescendingPendingRewardValidatorAddresses(8)
+          )
+          .simulateAndSend({
+            gasAdjustment: 1.3,
+            gasPrice: chainStore.current.feeCurrencies
+              .slice(0, 1)
+              .map((cur) => {
+                return {
+                  denom: cur.coinMinimalDenom,
+                  amount: new Dec(0),
+                };
+              }),
+          });
 
         history.replace("/");
       } catch (e) {

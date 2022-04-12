@@ -263,21 +263,19 @@ export class CosmosAccountImpl {
    *      Thus, the gas estimated doesn't include the tx bytes size of public key.
    *
    * @param msgs
-   * @param memo
    * @param fee
-   * @param sender
+   * @param memo
    */
   async simulateTx(
     msgs: Any[],
-    memo: string,
     fee: Omit<StdFee, "gas">,
-    sender: string = this.base.bech32Address
+    memo: string = ""
   ): Promise<{
     gasUsed: Int;
   }> {
     const account = await BaseAccount.fetchFromRest(
       this.instance,
-      sender,
+      this.base.bech32Address,
       true
     );
 
@@ -320,6 +318,140 @@ export class CosmosAccountImpl {
 
     return {
       gasUsed: new Int(result.data.gas_info.gas_used),
+    };
+  }
+
+  makeTx(
+    type: string | "unknown",
+    msgs:
+      | ProtoMsgsOrWithAminoMsgs
+      | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
+    defaultFallbackFee?: StdFee
+  ) {
+    const simulate = async (
+      fee: Partial<Omit<StdFee, "gas">>,
+      memo: string = ""
+    ): Promise<{
+      gasUsed: Int;
+    }> => {
+      if (typeof msgs === "function") {
+        msgs = await msgs();
+      }
+
+      return this.simulateTx(
+        msgs.protoMsgs,
+        {
+          amount: fee.amount ?? defaultFallbackFee?.amount ?? [],
+        },
+        memo
+      );
+    };
+
+    return {
+      msgs: async (): Promise<DeepReadonly<ProtoMsgsOrWithAminoMsgs>> => {
+        if (typeof msgs === "function") {
+          msgs = await msgs();
+        }
+        return msgs;
+      },
+      defaultFallbackFee,
+      simulate,
+      simulateAndSend: async (
+        fee: {
+          gasAdjustment: number;
+          gasPrice: {
+            denom: string;
+            amount: Dec;
+          }[];
+          disableSimulationFallbackFee?: boolean;
+        },
+        memo: string = "",
+        signOptions?: KeplrSignOptions,
+        onTxEvents?:
+          | ((tx: any) => void)
+          | {
+              onBroadcastFailed?: (e?: Error) => void;
+              onBroadcasted?: (txHash: Uint8Array) => void;
+              onFulfill?: (tx: any) => void;
+            }
+      ): Promise<void> => {
+        this.base.setTxTypeInProgress(type);
+
+        let estimatedFee: StdFee;
+
+        try {
+          let gasEstimated: Int | undefined;
+          try {
+            const estimated = await simulate({}, memo);
+            gasEstimated = estimated.gasUsed;
+          } catch (e) {
+            console.log("Failed to estimate gas", e);
+            if (!fee.disableSimulationFallbackFee) {
+              throw e;
+            }
+            if (!defaultFallbackFee) {
+              console.log(
+                "Gas estimation fail. And simulationFallbackFee is also null"
+              );
+              throw e;
+            }
+
+            console.log(
+              "Gas estimation fail. Use simulationFallbackFee instead",
+              defaultFallbackFee.gas
+            );
+
+            gasEstimated = new Int(defaultFallbackFee.gas);
+          }
+
+          if (!gasEstimated) {
+            throw new Error("Gas estimation is null");
+          }
+
+          if (gasEstimated.lte(new Int(0))) {
+            throw new Error("Gas estimated is zero or negative");
+          }
+
+          const gasAdjusted = new Dec(fee.gasAdjustment).mul(
+            gasEstimated.toDec()
+          );
+          estimatedFee = {
+            gas: gasAdjusted.truncate().toString(),
+            amount: fee.gasPrice.map((price) => {
+              return {
+                denom: price.denom,
+                amount: price.amount.mul(gasAdjusted).truncate().toString(),
+              };
+            }),
+          };
+        } catch (e) {
+          this.base.setTxTypeInProgress("");
+          throw e;
+        }
+
+        return this.sendMsgs(
+          type,
+          msgs,
+          memo,
+          estimatedFee,
+          signOptions,
+          onTxEvents
+        );
+      },
+      send: async (
+        fee: StdFee,
+        memo: string = "",
+        signOptions?: KeplrSignOptions,
+        onTxEvents?:
+          | ((tx: any) => void)
+          | {
+              onBroadcastFailed?: (e?: Error) => void;
+              onBroadcasted?: (txHash: Uint8Array) => void;
+              onFulfill?: (tx: any) => void;
+            }
+      ): Promise<void> => {
+        return this.sendMsgs(type, msgs, memo, fee, signOptions, onTxEvents);
+      },
     };
   }
 
@@ -543,7 +675,7 @@ export class CosmosAccountImpl {
     });
   }
 
-  async sendIBCTransferMsg(
+  makeIBCTransferTx(
     channel: {
       portId: string;
       channelId: string;
@@ -551,33 +683,25 @@ export class CosmosAccountImpl {
     },
     amount: string,
     currency: AppCurrency,
-    recipient: string,
-    memo: string = "",
-    stdFee: Partial<StdFee> = {},
-    signOptions?: KeplrSignOptions,
-    onTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
+    recipient: string
   ) {
-    if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
-      throw new Error("Only native token can be sent via IBC");
-    }
-
-    const actualAmount = (() => {
-      let dec = new Dec(amount);
-      dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
-      return dec.truncate().toString();
-    })();
-
-    const destinationInfo = this.queriesStore.get(channel.counterpartyChainId)
-      .cosmos.queryRPCStatus;
-
-    await this.sendMsgs(
+    return this.makeTx(
       "ibcTransfer",
       async () => {
+        if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
+          throw new Error("Only native token can be sent via IBC");
+        }
+
+        const actualAmount = (() => {
+          let dec = new Dec(amount);
+          dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+          return dec.truncate().toString();
+        })();
+
+        const destinationInfo = this.queriesStore.get(
+          channel.counterpartyChainId
+        ).cosmos.queryRPCStatus;
+
         // Wait until fetching complete.
         await destinationInfo.waitFreshResponse();
 
@@ -656,28 +780,44 @@ export class CosmosAccountImpl {
           ],
         };
       },
-      memo,
       {
-        amount: stdFee.amount ?? [],
-        gas: stdFee.gas ?? this.msgOpts.ibcTransfer.gas.toString(),
-      },
-      signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
-        if (tx.code == null || tx.code === 0) {
-          // After succeeding to send token, refresh the balance.
-          const queryBalance = this.queries.queryBalances
-            .getQueryBech32Address(this.base.bech32Address)
-            .balances.find((bal) => {
-              return (
-                bal.currency.coinMinimalDenom === currency.coinMinimalDenom
-              );
-            });
+        amount: [],
+        gas: this.msgOpts.ibcTransfer.gas.toString(),
+      }
+    );
+  }
 
-          if (queryBalance) {
-            queryBalance.fetch();
-          }
+  async sendIBCTransferMsg(
+    channel: {
+      portId: string;
+      channelId: string;
+      counterpartyChainId: string;
+    },
+    amount: string,
+    currency: AppCurrency,
+    recipient: string,
+    memo: string = "",
+    stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
         }
-      })
+  ) {
+    const tx = this.makeIBCTransferTx(channel, amount, currency, recipient);
+    if (!tx.defaultFallbackFee) {
+      throw new Error("defaultFallbackFee is null");
+    }
+    return tx.send(
+      {
+        amount: stdFee.amount ?? tx.defaultFallbackFee.amount,
+        gas: stdFee.gas ?? tx.defaultFallbackFee.gas,
+      },
+      memo,
+      signOptions,
+      onTxEvents
     );
   }
 
@@ -916,6 +1056,43 @@ export class CosmosAccountImpl {
     );
   }
 
+  makeWithdrawDelegationRewardTx(validatorAddresses: string[]) {
+    return this.makeTx(
+      "withdrawRewards",
+      () => {
+        const msgs = validatorAddresses.map((validatorAddress) => {
+          return {
+            type: this.msgOpts.withdrawRewards.type,
+            value: {
+              delegator_address: this.base.bech32Address,
+              validator_address: validatorAddress,
+            },
+          };
+        });
+
+        return {
+          aminoMsgs: msgs,
+          protoMsgs: msgs.map((msg) => {
+            return {
+              typeUrl:
+                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+              value: MsgWithdrawDelegatorReward.encode({
+                delegatorAddress: msg.value.delegator_address,
+                validatorAddress: msg.value.validator_address,
+              }).finish(),
+            };
+          }),
+        };
+      },
+      {
+        amount: [],
+        gas: (
+          this.msgOpts.withdrawRewards.gas * validatorAddresses.length
+        ).toString(),
+      }
+    );
+  }
+
   async sendWithdrawDelegationRewardMsgs(
     validatorAddresses: string[],
     memo: string = "",
@@ -928,48 +1105,18 @@ export class CosmosAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ) {
-    const msgs = validatorAddresses.map((validatorAddress) => {
-      return {
-        type: this.msgOpts.withdrawRewards.type,
-        value: {
-          delegator_address: this.base.bech32Address,
-          validator_address: validatorAddress,
-        },
-      };
-    });
-
-    await this.sendMsgs(
-      "withdrawRewards",
+    const tx = this.makeWithdrawDelegationRewardTx(validatorAddresses);
+    if (!tx.defaultFallbackFee) {
+      throw new Error("defaultFallbackFee is null");
+    }
+    return tx.send(
       {
-        aminoMsgs: msgs,
-        protoMsgs: msgs.map((msg) => {
-          return {
-            typeUrl: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-            value: MsgWithdrawDelegatorReward.encode({
-              delegatorAddress: msg.value.delegator_address,
-              validatorAddress: msg.value.validator_address,
-            }).finish(),
-          };
-        }),
+        amount: stdFee.amount ?? tx.defaultFallbackFee.amount,
+        gas: stdFee.gas ?? tx.defaultFallbackFee.gas,
       },
       memo,
-      {
-        amount: stdFee.amount ?? [],
-        gas:
-          stdFee.gas ??
-          (
-            this.msgOpts.withdrawRewards.gas * validatorAddresses.length
-          ).toString(),
-      },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
-        if (tx.code == null || tx.code === 0) {
-          // After succeeding to withdraw rewards, refresh rewards.
-          this.queries.cosmos.queryRewards
-            .getQueryBech32Address(this.base.bech32Address)
-            .fetch();
-        }
-      })
+      onTxEvents
     );
   }
 
