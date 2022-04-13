@@ -1048,6 +1048,40 @@ export const EmbedChainInfos: AppChainInfo[] = [
       "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
   },
   {
+    rpc: "https://rpc-gravity-bridge.keplr.app",
+    rest: "https://lcd-gravity-bridge.keplr.app",
+    chainId: "gravity-bridge-3",
+    chainName: "Gravity Bridge",
+    stakeCurrency: {
+      coinDenom: "GRAV",
+      coinMinimalDenom: "ugraviton",
+      coinDecimals: 6,
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/grav.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("gravity"),
+    currencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/grav.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/grav.png",
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/grav.png",
+  },
+  {
     rpc: "https://rpc-sentinel.keplr.app",
     rest: "https://lcd-sentinel.keplr.app",
     chainId: "sentinelhub-2",

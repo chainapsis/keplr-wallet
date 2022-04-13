@@ -46,6 +46,7 @@
     "@keplr-wallet/provider": "0.10.1",
     "@keplr-wallet/router": "0.10.1",
     "@keplr-wallet/stores": "0.10.1",
+    "@keplr-wallet/stores-etc": "0.10.1",
     "@keplr-wallet/types": "0.10.1",
     "@keplr-wallet/unit": "0.10.1",
     "@ledgerhq/react-native-hw-transport-ble": "=6.20.0",
