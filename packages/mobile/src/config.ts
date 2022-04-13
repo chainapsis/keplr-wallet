@@ -768,7 +768,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       average: 0.0025,
       high: 0.004,
     },
-    features: ["cosmwasm", "ibc-transfer", "ibc-go"],
+    features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
     txExplorer: {
       name: "Mintscan",
