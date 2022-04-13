@@ -326,7 +326,7 @@ export class RootStore {
       this.queriesStore
     );
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>(
-      new ExtensionKVStore("store_gravity_bridge_curreny_registrar"),
+      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore
     );
