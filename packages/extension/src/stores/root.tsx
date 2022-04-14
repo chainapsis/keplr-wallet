@@ -1,6 +1,10 @@
 import { ChainStore } from "./chain";
 import { EmbedChainInfos } from "../config";
-import { AmplitudeApiKey, FiatCurrencies } from "../config.ui";
+import {
+  AmplitudeApiKey,
+  EthereumEndpoint,
+  FiatCurrencies,
+} from "../config.ui";
 import {
   AccountStore,
   ChainSuggestStore,
@@ -23,6 +27,10 @@ import {
   TokensStore,
   WalletStatus,
 } from "@keplr-wallet/stores";
+import {
+  KeplrETCQueries,
+  GravityBridgeCurrencyRegsitrar,
+} from "@keplr-wallet/stores-etc";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   ContentScriptEnv,
@@ -53,7 +61,7 @@ export class RootStore {
   public readonly chainSuggestStore: ChainSuggestStore;
 
   public readonly queriesStore: QueriesStore<
-    [CosmosQueries, CosmwasmQueries, SecretQueries]
+    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
   >;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
@@ -62,6 +70,7 @@ export class RootStore {
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -136,6 +145,9 @@ export class RootStore {
       CosmwasmQueries.use(),
       SecretQueries.use({
         apiGetter: getKeplrFromWindow,
+      }),
+      KeplrETCQueries.use({
+        ethereumURL: EthereumEndpoint,
       })
     );
 
@@ -324,6 +336,11 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       this.queriesStore,
+      this.queriesStore
+    );
+    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>(
+      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+      this.chainStore,
       this.queriesStore
     );
 

@@ -6,7 +6,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly, Optional } from "utility-types";
-import { cosmwasm } from "@keplr-wallet/cosmos";
+import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { Buffer } from "buffer/";
 import deepmerge from "deepmerge";
 import { CosmosAccount } from "./cosmos";
@@ -181,8 +181,8 @@ export class CosmwasmAccountImpl {
         aminoMsgs: [msg],
         protoMsgs: [
           {
-            type_url: "/cosmwasm.wasm.v1.MsgExecuteContract",
-            value: cosmwasm.wasm.v1.MsgExecuteContract.encode({
+            typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+            value: MsgExecuteContract.encode({
               sender: msg.value.sender,
               contract: msg.value.contract,
               msg: Buffer.from(JSON.stringify(msg.value.msg)),
