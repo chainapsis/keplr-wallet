@@ -4,6 +4,7 @@ import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { StdFee } from "@cosmjs/launchpad";
 import { evmosToEth } from "@hanchon/ethermint-address-converter";
+import { echelonToEth } from "ethermint-address-converter";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -301,6 +302,14 @@ export class AccountSetBase {
 
   get evmosHexAddress(): string {
     return evmosToEth(this.bech32Address);
+  }
+
+  get hasEchHexAddress(): boolean {
+    return this.bech32Address.startsWith("echelon");
+  }
+
+  get echelonHexAddress(): string {
+    return echelonToEth(this.bech32Address);
   }
 }
 

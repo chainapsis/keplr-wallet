@@ -217,6 +217,19 @@ export class RootStore {
             };
           }
 
+          if (chainId.startsWith("echelon_")) {
+            return {
+              send: {
+                native: {
+                  gas: 140000,
+                },
+              },
+              withdrawRewards: {
+                gas: 200000,
+              },
+            };
+          }
+
           if (chainId.startsWith("osmosis")) {
             return {
               send: {

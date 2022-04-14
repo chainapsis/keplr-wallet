@@ -24,6 +24,7 @@
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/tendermint-rpc": "^0.24.1",
     "@hanchon/ethermint-address-converter": "^1.1.0",
+    "ethermint-address-converter": "github:echelonfoundation/ethermint-address-converter.git",
     "@keplr-wallet/background": "0.10.0",
     "@keplr-wallet/common": "0.10.0",
     "@keplr-wallet/cosmos": "0.10.0",

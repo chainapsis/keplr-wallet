@@ -127,6 +127,34 @@ export const AccountView: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
         </div>
       )}
+      {accountInfo.hasEchHexAddress && (
+        <div
+          className={styleAccount.containerAccount}
+          style={{ marginTop: "2px" }}
+        >
+          <div style={{ flex: 1 }} />
+          <div
+            className={styleAccount.address}
+            onClick={() => copyAddress(accountInfo.echelonHexAddress)}
+          >
+            <Address
+              isRaw={true}
+              tooltipAddress={accountInfo.echelonHexAddress}
+            >
+              {accountInfo.walletStatus === WalletStatus.Loaded &&
+              accountInfo.echelonHexAddress
+                ? accountInfo.echelonHexAddress.length === 42
+                  ? `${accountInfo.echelonHexAddress.slice(
+                      0,
+                      10
+                    )}...${accountInfo.echelonHexAddress.slice(-8)}`
+                  : accountInfo.echelonHexAddress
+                : "..."}
+            </Address>
+          </div>
+          <div style={{ flex: 1 }} />
+        </div>
+      )}
     </div>
   );
 });

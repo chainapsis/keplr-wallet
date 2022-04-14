@@ -9,6 +9,7 @@ prod
 packages/extension/src/config.var.tsx
 
 yarn-error.log
+yarn.lock
 
 build
 packages/extension/src/config.ui.var.tsx

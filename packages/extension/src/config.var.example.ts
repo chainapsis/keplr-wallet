@@ -134,4 +134,9 @@ export const EVMOS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const EVMOS_REST_ENDPOINT = "";
 export const EVMOS_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const ECHELON_RPC_ENDPOINT = "";
+export const ECHELON_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const ECHELON_REST_ENDPOINT = "";
+export const ECHELON_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const PRIVILEGED_ORIGINS: string[] = [];

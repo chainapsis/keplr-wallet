@@ -95,6 +95,10 @@ import {
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
   EVMOS_REST_CONFIG,
+  ECHELON_RPC_ENDPOINT,
+  ECHELON_RPC_CONFIG,
+  ECHELON_REST_ENDPOINT,
+  ECHELON_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1662,6 +1666,52 @@ export const EmbedChainInfos: ChainInfo[] = [
       {
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
+        coinDecimals: 18,
+      },
+    ],
+    gasPriceStep: {
+      low: 10000000000,
+      average: 25000000000,
+      high: 40000000000,
+    },
+    features: ["ibc-transfer", "ibc-go"],
+    beta: true,
+  },
+  {
+    rpc: ECHELON_RPC_ENDPOINT,
+    rpcConfig: ECHELON_RPC_CONFIG,
+    rest: ECHELON_REST_ENDPOINT,
+    restConfig: ECHELON_REST_CONFIG,
+    chainId: "echelon_3000-3",
+    chainName: "Echelon",
+    stakeCurrency: {
+      coinDenom: "ECH",
+      coinMinimalDenom: "aechelon",
+      coinDecimals: 18,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/echelon/stake"
+        : "http://localhost:8080/#/echelon/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/echelon/stake"
+        : "http://localhost:8080/#/echelon/stake",
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("echelon"),
+    currencies: [
+      {
+        coinDenom: "ECH",
+        coinMinimalDenom: "aechelon",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ECH",
+        coinMinimalDenom: "aechelon",
         coinDecimals: 18,
       },
     ],
