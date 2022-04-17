@@ -1,5 +1,12 @@
 import { AppCurrency } from "@keplr-wallet/types";
-import { cosmos, cosmwasm, UnknownMessage } from "@keplr-wallet/cosmos";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
+import {
+  MsgBeginRedelegate,
+  MsgDelegate,
+  MsgUndelegate,
+} from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
+import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import {
   renderMsgBeginRedelegate,
   renderMsgDelegate,
@@ -8,61 +15,81 @@ import {
   renderMsgUndelegate,
   renderUnknownMessage,
 } from "./messages";
-import { CoinPrimitive } from "@keplr-wallet/stores";
 import { Buffer } from "buffer/";
 
-export function renderDirectMessage(msg: any, currencies: AppCurrency[]) {
-  if (msg instanceof cosmos.bank.v1beta1.MsgSend) {
-    return renderMsgSend(
-      currencies,
-      msg.amount as CoinPrimitive[],
-      msg.toAddress
-    );
-  }
+export function renderDirectMessage(
+  msg: AnyWithUnpacked,
+  currencies: AppCurrency[]
+) {
+  try {
+    if (msg instanceof UnknownMessage) {
+      return renderUnknownMessage(msg.toJSON());
+    }
 
-  if (msg instanceof cosmos.staking.v1beta1.MsgDelegate) {
-    return renderMsgDelegate(
-      currencies,
-      msg.amount as CoinPrimitive,
-      msg.validatorAddress
-    );
-  }
-
-  if (msg instanceof cosmos.staking.v1beta1.MsgBeginRedelegate) {
-    return renderMsgBeginRedelegate(
-      currencies,
-      msg.amount as CoinPrimitive,
-      msg.validatorSrcAddress,
-      msg.validatorDstAddress
-    );
-  }
-
-  if (msg instanceof cosmos.staking.v1beta1.MsgUndelegate) {
-    return renderMsgUndelegate(
-      currencies,
-      msg.amount as CoinPrimitive,
-      msg.validatorAddress
-    );
-  }
-
-  if (msg instanceof cosmwasm.wasm.v1.MsgExecuteContract) {
-    return renderMsgExecuteContract(
-      currencies,
-      msg.funds as CoinPrimitive[],
-      undefined,
-      msg.contract,
-      JSON.parse(
-        Buffer.from(Buffer.from(msg.msg).toString(), "utf8").toString()
-      )
-    );
-  }
-
-  if (msg instanceof UnknownMessage) {
-    return renderUnknownMessage(msg.toJSON());
+    if ("unpacked" in msg) {
+      switch (msg.typeUrl) {
+        case "/cosmos.bank.v1beta1.MsgSend": {
+          const sendMsg = msg.unpacked as MsgSend;
+          return renderMsgSend(currencies, sendMsg.amount, sendMsg.toAddress);
+        }
+        case "/cosmos.staking.v1beta1.MsgDelegate": {
+          const delegateMsg = msg.unpacked as MsgDelegate;
+          if (delegateMsg.amount) {
+            return renderMsgDelegate(
+              currencies,
+              delegateMsg.amount,
+              delegateMsg.validatorAddress
+            );
+          }
+          break;
+        }
+        case "/cosmos.staking.v1beta1.MsgBeginRedelegate": {
+          const redelegateMsg = msg.unpacked as MsgBeginRedelegate;
+          if (redelegateMsg.amount) {
+            return renderMsgBeginRedelegate(
+              currencies,
+              redelegateMsg.amount,
+              redelegateMsg.validatorSrcAddress,
+              redelegateMsg.validatorDstAddress
+            );
+          }
+          break;
+        }
+        case "/cosmos.staking.v1beta1.MsgUndelegate": {
+          const undelegateMsg = msg.unpacked as MsgUndelegate;
+          if (undelegateMsg.amount) {
+            return renderMsgUndelegate(
+              currencies,
+              undelegateMsg.amount,
+              undelegateMsg.validatorAddress
+            );
+          }
+          break;
+        }
+        case "/cosmwasm.wasm.v1.MsgExecuteContract": {
+          const executeMsg = msg.unpacked as MsgExecuteContract;
+          return renderMsgExecuteContract(
+            currencies,
+            executeMsg.funds,
+            undefined,
+            executeMsg.contract,
+            JSON.parse(
+              Buffer.from(
+                Buffer.from(executeMsg.msg).toString(),
+                "utf8"
+              ).toString()
+            )
+          );
+          break;
+        }
+      }
+    }
+  } catch (e) {
+    console.log(e);
   }
 
   return renderUnknownMessage({
-    typeUrl: msg.typeUrl || msg.type_url || "Unknown",
+    typeUrl: msg.typeUrl || "Unknown",
     value: Buffer.from(msg.value).toString("base64"),
   });
 }
