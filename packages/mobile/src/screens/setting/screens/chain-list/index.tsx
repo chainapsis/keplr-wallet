@@ -1,16 +1,15 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { PageWithDraggableFlatList } from "../../../../components/page";
 import { useStore } from "../../../../stores";
 import { StyleSheet, Text, View } from "react-native";
 import { useStyle } from "../../../../styles";
 import { Toggle } from "../../../../components/toggle";
 import FastImage from "react-native-fast-image";
 import { VectorCharacter } from "../../../../components/vector-character";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
-import { useOnCellActiveAnimation } from "react-native-draggable-flatlist";
+import { PanGestureHandler } from "react-native-gesture-handler";
 import Svg, { Path } from "react-native-svg";
+import { PageWithFixedHeightSortableList } from "../../../../components/page/fixed-height-sortable-list";
+import Animated, { Easing } from "react-native-reanimated";
 
 export const SettingChainListScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -18,11 +17,13 @@ export const SettingChainListScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   return (
-    <PageWithDraggableFlatList
-      contentContainerStyle={style.flatten(["padding-y-12"])}
+    <PageWithFixedHeightSortableList
+      contentContainerStyle={style.get("flex-grow-1")}
+      itemHeight={84}
       data={chainStore.chainInfosWithUIConfig.map(
         ({ chainInfo, disabled }, index) => {
           return {
+            key: chainInfo.chainId,
             isFirst: index === 0,
             isLast: index === chainStore.chainInfosWithUIConfig.length - 1,
             chainId: chainInfo.chainId,
@@ -32,16 +33,44 @@ export const SettingChainListScreen: FunctionComponent = observer(() => {
           };
         }
       )}
-      keyExtractor={(item) => item.chainId}
-      renderItem={({ item, drag }) => {
-        return <SettingChainListScreenElement {...item} drag={drag} />;
+      dividerIndex={chainStore.chainInfosWithUIConfig.findIndex(
+        ({ disabled }) => disabled
+      )}
+      delegateOnGestureEventToItemView={true}
+      onDragEnd={(keys) => {
+        chainStore.setChainInfosInUIOrder(keys);
       }}
-      onDragEnd={({ data }) => {
-        chainStore.setChainInfosInUIOrder(data.map((data) => data.chainId));
+      renderItem={(item, anims) => {
+        return (
+          <SettingChainListScreenElement
+            {...item}
+            isDragging={anims.isDragging}
+            onGestureEvent={anims.onGestureEvent}
+          />
+        );
       }}
+      gapTop={12}
+      gapBottom={12}
     />
   );
 });
+
+const usePreviousDiff = (initialValue: number) => {
+  const [previous] = useState(() => new Animated.Value<number>(initialValue));
+
+  return useMemo(() => {
+    return {
+      set: (value: Animated.Adaptable<number>) => Animated.set(previous, value),
+      diff: (value: Animated.Adaptable<number>) =>
+        Animated.cond(
+          Animated.defined(previous),
+          Animated.sub(value, previous),
+          value
+        ),
+      previous,
+    };
+  }, [previous]);
+};
 
 export const SettingChainListScreenElement: FunctionComponent<{
   isFirst: boolean;
@@ -52,24 +81,63 @@ export const SettingChainListScreenElement: FunctionComponent<{
   chainSymbolImageUrl: string | undefined;
   disabled: boolean;
 
-  drag: () => void;
+  isDragging: Animated.Value<number>;
+  onGestureEvent: (...args: any[]) => void;
 }> = observer(
   ({
-    isFirst,
     isLast,
     chainId,
     chainName,
     chainSymbolImageUrl,
     disabled,
-    drag,
+    isDragging,
+    onGestureEvent,
   }) => {
     const { chainStore } = useStore();
 
     const style = useStyle();
 
-    const { isActive, onActiveAnim } = useOnCellActiveAnimation({
-      animationConfig: { mass: 0.1, restDisplacementThreshold: 0.0001 },
+    const [animatedState] = useState(() => {
+      return {
+        clock: new Animated.Clock(),
+        finished: new Animated.Value(0),
+        position: new Animated.Value(0),
+        time: new Animated.Value(0),
+        frameTime: new Animated.Value(0),
+      };
     });
+    const isDraggingDiff = usePreviousDiff(0);
+
+    const animIsDragging = useMemo(() => {
+      return Animated.block([
+        Animated.cond(
+          Animated.not(Animated.eq(isDraggingDiff.diff(isDragging), 0)),
+          [
+            Animated.set(animatedState.finished, 0),
+            Animated.set(animatedState.time, 0),
+            Animated.set(animatedState.frameTime, 0),
+            Animated.cond(
+              Animated.not(Animated.clockRunning(animatedState.clock)),
+              Animated.startClock(animatedState.clock)
+            ),
+          ]
+        ),
+
+        Animated.timing(animatedState.clock, animatedState, {
+          duration: 140,
+          toValue: isDragging,
+          easing: Easing.out(Easing.cubic),
+        }),
+
+        Animated.cond(animatedState.finished, [
+          Animated.stopClock(animatedState.clock),
+        ]),
+
+        isDraggingDiff.set(isDragging),
+
+        animatedState.position,
+      ]);
+    }, [animatedState, isDragging, isDraggingDiff]);
 
     return (
       <View
@@ -86,23 +154,28 @@ export const SettingChainListScreenElement: FunctionComponent<{
           style={StyleSheet.flatten([
             style.flatten(["absolute-fill", "background-color-white"]),
             {
-              backgroundColor: isActive
-                ? (Animated.interpolateColors(onActiveAnim, {
-                    inputRange: [0, 1],
-                    outputColorRange: [
-                      style.get("color-white").color,
-                      style.get("color-chain-list-element-dragging").color,
-                    ],
-                  }) as Animated.Node<string>)
-                : style.get("color-white").color,
+              backgroundColor: Animated.interpolateColors(animIsDragging, {
+                inputRange: [0, 1],
+                outputColorRange: [
+                  style.get("color-white").color,
+                  style.get("color-chain-list-element-dragging").color,
+                ],
+              }) as Animated.Node<string>,
             },
           ])}
         />
-        <TouchableWithoutFeedback onLongPress={drag} delayLongPress={100}>
-          <View
+        <PanGestureHandler
+          onGestureEvent={onGestureEvent}
+          onHandlerStateChange={onGestureEvent}
+          activeOffsetX={[-5000, 5000]}
+          activeOffsetY={[-10, 10]}
+          failOffsetX={[-30, 30]}
+        >
+          <Animated.View
             style={style.flatten([
-              "height-44",
-              "padding-left-18",
+              "height-64",
+              "margin-left-8",
+              "padding-left-10",
               "padding-right-10",
               "justify-center",
               "items-center",
@@ -116,8 +189,8 @@ export const SettingChainListScreenElement: FunctionComponent<{
                 d="M2 1.5h13M2 8.5h13"
               />
             </Svg>
-          </View>
-        </TouchableWithoutFeedback>
+          </Animated.View>
+        </PanGestureHandler>
         <View
           style={style.flatten(
             [
@@ -129,7 +202,7 @@ export const SettingChainListScreenElement: FunctionComponent<{
             ],
             [
               disabled
-                ? "background-color-primary-100"
+                ? "background-color-text-black-very-very-very-low"
                 : "background-color-primary",
             ]
           )}

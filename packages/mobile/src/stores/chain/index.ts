@@ -7,7 +7,10 @@ import {
   runInAction,
 } from "mobx";
 
-import { ChainStore as BaseChainStore } from "@keplr-wallet/stores";
+import {
+  ChainInfoInner,
+  ChainStore as BaseChainStore,
+} from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
 import {
@@ -21,6 +24,7 @@ import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { AppChainInfo } from "../../config";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Vibration } from "react-native";
+import { stableSort } from "../../utils/stable-sort";
 
 class ObservableKVStore<Value> {
   @observable.ref
@@ -77,8 +81,10 @@ export class ChainStore extends BaseChainStore<
   protected deferChainIdSelect: string = "";
 
   protected chainInfoInUIConfig: ObservableKVStore<{
-    sortedChains: string[];
-    disabledChains: Record<string, boolean | undefined>;
+    // Array of chain identifiers
+    enabledChains: string[];
+    // Array of chain identifiers
+    disabledChains: string[];
   }>;
 
   constructor(
@@ -105,11 +111,15 @@ export class ChainStore extends BaseChainStore<
         onInit: () => {
           if (!this.chainInfoInUIConfig.value) {
             this.chainInfoInUIConfig.setValue({
-              sortedChains: this.chainInfosInUI.map((chainInfo) => {
-                const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
-                return chainIdentifier.identifier;
-              }),
-              disabledChains: {},
+              enabledChains: this.chainInfos
+                .filter((chainInfo) => !chainInfo.raw.hideInUI)
+                .map((chainInfo) => {
+                  const chainIdentifier = ChainIdHelper.parse(
+                    chainInfo.chainId
+                  );
+                  return chainIdentifier.identifier;
+                }),
+              disabledChains: [],
             });
           }
         },
@@ -127,56 +137,134 @@ export class ChainStore extends BaseChainStore<
 
   @computed
   get chainInfosInUI() {
-    return this.chainInfosWithUIConfig
-      .filter(({ disabled }) => !disabled)
-      .map(({ chainInfo }) => chainInfo);
+    return this.enabledChainInfosInUI;
   }
 
   @computed
   get chainInfosWithUIConfig() {
+    return this.enabledChainInfosInUI
+      .map((chainInfo) => {
+        return {
+          chainInfo,
+          disabled: false,
+        };
+      })
+      .concat(
+        this.disabledChainInfosInUI.map((chainInfo) => {
+          return {
+            chainInfo,
+            disabled: true,
+          };
+        })
+      );
+  }
+
+  @computed
+  protected get enabledChainInfosInUI() {
     const chainSortInfo: Record<string, number | undefined> =
-      this.chainInfoInUIConfig.value?.sortedChains.reduce<
+      this.chainInfoInUIConfig.value?.enabledChains.reduce<
         Record<string, number | undefined>
       >((previous, current, index) => {
         previous[current] = index;
         return previous;
       }, {}) ?? {};
-    const disabledChains: Record<string, boolean | undefined> =
-      this.chainInfoInUIConfig.value?.disabledChains ?? {};
 
-    return this.chainInfos
-      .filter((chainInfo) => {
-        return !chainInfo.raw.hideInUI;
-      })
-      .sort((chainInfo1, chainInfo2) => {
-        const index1 =
-          chainSortInfo[ChainIdHelper.parse(chainInfo1.chainId).identifier];
-        const index2 =
-          chainSortInfo[ChainIdHelper.parse(chainInfo2.chainId).identifier];
+    const disabledChainsMap: Record<string, boolean | undefined> =
+      this.chainInfoInUIConfig.value?.disabledChains.reduce<
+        Record<string, boolean | undefined>
+      >((previous, current) => {
+        previous[current] = true;
+        return previous;
+      }, {}) ?? {};
 
-        if (index1 == null) {
-          if (index2 == null) {
-            // TODO: Handle stable sort.
-            //       JS array sort doesn't ensure stable sort.
-            return 0;
-          } else {
-            return 1;
-          }
-        }
+    const chainSortFn = (
+      chainInfo1: ChainInfoInner,
+      chainInfo2: ChainInfoInner
+    ): number => {
+      const chainIdentifier1 = ChainIdHelper.parse(chainInfo1.chainId);
+      const chainIdentifier2 = ChainIdHelper.parse(chainInfo2.chainId);
+
+      const index1 = chainSortInfo[chainIdentifier1.identifier];
+      const index2 = chainSortInfo[chainIdentifier2.identifier];
+
+      if (index1 == null) {
         if (index2 == null) {
-          return -1;
+          return 0;
+        } else {
+          return 1;
         }
+      }
+      if (index2 == null) {
+        return -1;
+      }
 
-        return index1 < index2 ? -1 : 1;
-      })
-      .map((chainInfo) => {
-        const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
+      return index1 < index2 ? -1 : 1;
+    };
 
-        return {
-          chainInfo,
-          disabled: disabledChains[chainIdentifier.identifier] === true,
-        };
-      });
+    return stableSort(
+      this.chainInfos
+        .filter((chainInfo) => !chainInfo.raw.hideInUI)
+        .filter(
+          (chainInfo) =>
+            !disabledChainsMap[
+              ChainIdHelper.parse(chainInfo.chainId).identifier
+            ]
+        ),
+      chainSortFn
+    );
+  }
+
+  @computed
+  protected get disabledChainInfosInUI() {
+    const chainSortInfo: Record<string, number | undefined> =
+      this.chainInfoInUIConfig.value?.disabledChains.reduce<
+        Record<string, number | undefined>
+      >((previous, current, index) => {
+        previous[current] = index;
+        return previous;
+      }, {}) ?? {};
+
+    const disabledChainsMap: Record<string, boolean | undefined> =
+      this.chainInfoInUIConfig.value?.disabledChains.reduce<
+        Record<string, boolean | undefined>
+      >((previous, current) => {
+        previous[current] = true;
+        return previous;
+      }, {}) ?? {};
+
+    const chainSortFn = (
+      chainInfo1: ChainInfoInner,
+      chainInfo2: ChainInfoInner
+    ): number => {
+      const chainIdentifier1 = ChainIdHelper.parse(chainInfo1.chainId);
+      const chainIdentifier2 = ChainIdHelper.parse(chainInfo2.chainId);
+
+      const index1 = chainSortInfo[chainIdentifier1.identifier];
+      const index2 = chainSortInfo[chainIdentifier2.identifier];
+
+      if (index1 == null) {
+        if (index2 == null) {
+          return 0;
+        } else {
+          return 1;
+        }
+      }
+      if (index2 == null) {
+        return -1;
+      }
+
+      return index1 < index2 ? -1 : 1;
+    };
+
+    return stableSort(
+      this.chainInfos
+        .filter((chainInfo) => !chainInfo.raw.hideInUI)
+        .filter(
+          (chainInfo) =>
+            disabledChainsMap[ChainIdHelper.parse(chainInfo.chainId).identifier]
+        ),
+      chainSortFn
+    );
   }
 
   setChainInfosInUIOrder(chainIds: string[]) {
@@ -184,10 +272,30 @@ export class ChainStore extends BaseChainStore<
       (chainId) => ChainIdHelper.parse(chainId).identifier
     );
 
+    const enabledChainsMap: Record<string, boolean | undefined> =
+      this.chainInfoInUIConfig.value?.enabledChains.reduce<
+        Record<string, boolean | undefined>
+      >((previous, current) => {
+        previous[current] = true;
+        return previous;
+      }, {}) ?? {};
+
+    const disabledChainsMap: Record<string, boolean | undefined> =
+      this.chainInfoInUIConfig.value?.disabledChains.reduce<
+        Record<string, boolean | undefined>
+      >((previous, current) => {
+        previous[current] = true;
+        return previous;
+      }, {}) ?? {};
+
     // No need to wait
     this.chainInfoInUIConfig.setValue({
-      sortedChains: chainIds,
-      disabledChains: this.chainInfoInUIConfig.value?.disabledChains ?? {},
+      enabledChains: chainIds.filter(
+        (chainIdentifier) => enabledChainsMap[chainIdentifier]
+      ),
+      disabledChains: chainIds.filter(
+        (chainIdentifier) => disabledChainsMap[chainIdentifier]
+      ),
     });
   }
 
@@ -195,12 +303,19 @@ export class ChainStore extends BaseChainStore<
     chainId = ChainIdHelper.parse(chainId).identifier;
 
     if (this.chainInfoInUIConfig.value) {
-      const disabledChains = {
-        ...this.chainInfoInUIConfig.value.disabledChains,
-      };
+      const i = this.chainInfoInUIConfig.value.disabledChains.indexOf(chainId);
+      if (i >= 0) {
+        const disabledChains = this.chainInfoInUIConfig.value.disabledChains.slice();
+        disabledChains.splice(i, 1);
 
-      if (this.chainInfoInUIConfig.value.disabledChains[chainId]) {
-        delete disabledChains[chainId];
+        // No need to wait
+        this.chainInfoInUIConfig.setValue({
+          enabledChains: [
+            ...this.chainInfoInUIConfig.value.enabledChains,
+            chainId,
+          ],
+          disabledChains: disabledChains,
+        });
       } else {
         const chainInfosInUI = this.chainInfosInUI;
         if (chainInfosInUI.length === 1) {
@@ -223,14 +338,26 @@ export class ChainStore extends BaseChainStore<
           }
         }
 
-        disabledChains[chainId] = true;
-      }
+        const enabledChains = this.chainInfoInUIConfig.value.enabledChains.slice();
+        const i = this.chainInfoInUIConfig.value.enabledChains.indexOf(chainId);
+        if (i >= 0) {
+          enabledChains.splice(i, 1);
+        }
 
-      // No need to wait
-      this.chainInfoInUIConfig.setValue({
-        sortedChains: this.chainInfoInUIConfig.value.sortedChains,
-        disabledChains: disabledChains,
-      });
+        const disabledChains = [
+          chainId,
+          ...this.chainInfoInUIConfig.value.disabledChains,
+        ];
+
+        // No need to wait
+        this.chainInfoInUIConfig.setValue({
+          enabledChains: [
+            ...this.chainInfoInUIConfig.value.enabledChains,
+            chainId,
+          ],
+          disabledChains: disabledChains,
+        });
+      }
     }
   }
 
