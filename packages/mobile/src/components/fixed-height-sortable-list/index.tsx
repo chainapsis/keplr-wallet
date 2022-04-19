@@ -5,7 +5,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ScrollView, ScrollViewProps, View } from "react-native";
+import {
+  ScrollViewProps,
+  View,
+  Animated as NativeAnimated,
+} from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, { Easing } from "react-native-reanimated";
 import { stableSort } from "../../utils/stable-sort";
@@ -275,7 +279,7 @@ export function FixedHeightSortableList<Item extends { key: string }>(
   }, [memoizedItems]);
 
   return (
-    <ScrollView {...scrollViewProps}>
+    <NativeAnimated.ScrollView {...scrollViewProps}>
       <View
         style={{
           height: itemHeight * memoizedItems.length + gapTop + gapBottom,
@@ -312,7 +316,7 @@ export function FixedHeightSortableList<Item extends { key: string }>(
           </MemoizedChildrenRenderer>
         );
       })}
-    </ScrollView>
+    </NativeAnimated.ScrollView>
   );
 }
 

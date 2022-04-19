@@ -4,8 +4,8 @@ import {
   FixedHeightSortableListProps,
 } from "../fixed-height-sortable-list";
 import { useStyle } from "../../styles";
-import { useSetFocusedScreen } from "./utils";
-import { SafeAreaView, StyleSheet, View } from "react-native";
+import { usePageRegisterScrollYValue, useSetFocusedScreen } from "./utils";
+import { Animated, SafeAreaView, StyleSheet, View } from "react-native";
 import { GradientBackground } from "../svg";
 
 export function PageWithFixedHeightSortableList<Item extends { key: string }>(
@@ -17,12 +17,13 @@ export function PageWithFixedHeightSortableList<Item extends { key: string }>(
   const style = useStyle();
 
   useSetFocusedScreen();
-  // const scrollY = usePageRegisterScrollYValue();
+  const scrollY = usePageRegisterScrollYValue();
 
   const {
     style: propStyle,
     disableSafeArea,
     backgroundColor,
+    onScroll,
     ...restProps
   } = props;
 
@@ -57,6 +58,14 @@ export function PageWithFixedHeightSortableList<Item extends { key: string }>(
             style.flatten(["flex-1", "padding-0", "overflow-visible"]),
             propStyle,
           ])}
+          onScroll={Animated.event(
+            [
+              {
+                nativeEvent: { contentOffset: { y: scrollY } },
+              },
+            ],
+            { useNativeDriver: true, listener: onScroll }
+          )}
           {...restProps}
         />
       </ContainerElement>
