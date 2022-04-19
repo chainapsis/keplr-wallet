@@ -167,9 +167,6 @@ export const SettingChainListScreenElement: FunctionComponent<{
         <PanGestureHandler
           onGestureEvent={onGestureEvent}
           onHandlerStateChange={onGestureEvent}
-          activeOffsetX={[-5000, 5000]}
-          activeOffsetY={[-10, 10]}
-          failOffsetX={[-30, 30]}
         >
           <Animated.View
             style={style.flatten([
