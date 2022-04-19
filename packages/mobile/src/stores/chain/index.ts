@@ -81,8 +81,13 @@ export class ChainStore extends BaseChainStore<
   protected deferChainIdSelect: string = "";
 
   protected chainInfoInUIConfig: ObservableKVStore<{
+    // Any chains that's not disabled is classified as an enabled chain.
+    // This array manages the sorting order of enabled chain(anything not in the disabledChains) used in the UI.
+    // Anything not included in neither sortedEnabledChains and disabledChains would go to the very end of enabled chains in the UI.
     // Array of chain identifiers
-    enabledChains: string[];
+    sortedEnabledChains: string[];
+    // This array is what actually controls the enabled and disabled chains.
+    // This array also controls the sorting order of the disabled chains showed in the UI.
     // Array of chain identifiers
     disabledChains: string[];
   }>;
@@ -111,7 +116,7 @@ export class ChainStore extends BaseChainStore<
         onInit: () => {
           if (!this.chainInfoInUIConfig.value) {
             this.chainInfoInUIConfig.setValue({
-              enabledChains: this.chainInfos
+              sortedEnabledChains: this.chainInfos
                 .filter((chainInfo) => !chainInfo.raw.hideInUI)
                 .map((chainInfo) => {
                   const chainIdentifier = ChainIdHelper.parse(
@@ -162,7 +167,7 @@ export class ChainStore extends BaseChainStore<
   @computed
   protected get enabledChainInfosInUI() {
     const chainSortInfo: Record<string, number | undefined> =
-      this.chainInfoInUIConfig.value?.enabledChains.reduce<
+      this.chainInfoInUIConfig.value?.sortedEnabledChains.reduce<
         Record<string, number | undefined>
       >((previous, current, index) => {
         previous[current] = index;
@@ -272,25 +277,31 @@ export class ChainStore extends BaseChainStore<
       (chainId) => ChainIdHelper.parse(chainId).identifier
     );
 
-    const enabledChainsMap: Record<string, boolean | undefined> =
-      this.chainInfoInUIConfig.value?.enabledChains.reduce<
-        Record<string, boolean | undefined>
-      >((previous, current) => {
-        previous[current] = true;
+    const enabledChainsMap: Record<
+      string,
+      boolean | undefined
+    > = this.enabledChainInfosInUI.reduce<Record<string, boolean | undefined>>(
+      (previous, current) => {
+        previous[ChainIdHelper.parse(current.chainId).identifier] = true;
         return previous;
-      }, {}) ?? {};
+      },
+      {}
+    );
 
-    const disabledChainsMap: Record<string, boolean | undefined> =
-      this.chainInfoInUIConfig.value?.disabledChains.reduce<
-        Record<string, boolean | undefined>
-      >((previous, current) => {
-        previous[current] = true;
+    const disabledChainsMap: Record<
+      string,
+      boolean | undefined
+    > = this.disabledChainInfosInUI.reduce<Record<string, boolean | undefined>>(
+      (previous, current) => {
+        previous[ChainIdHelper.parse(current.chainId).identifier] = true;
         return previous;
-      }, {}) ?? {};
+      },
+      {}
+    );
 
     // No need to wait
     this.chainInfoInUIConfig.setValue({
-      enabledChains: chainIds.filter(
+      sortedEnabledChains: chainIds.filter(
         (chainIdentifier) => enabledChainsMap[chainIdentifier]
       ),
       disabledChains: chainIds.filter(
@@ -310,8 +321,8 @@ export class ChainStore extends BaseChainStore<
 
         // No need to wait
         this.chainInfoInUIConfig.setValue({
-          enabledChains: [
-            ...this.chainInfoInUIConfig.value.enabledChains,
+          sortedEnabledChains: [
+            ...this.chainInfoInUIConfig.value.sortedEnabledChains,
             chainId,
           ],
           disabledChains: disabledChains,
@@ -338,24 +349,21 @@ export class ChainStore extends BaseChainStore<
           }
         }
 
-        const enabledChains = this.chainInfoInUIConfig.value.enabledChains.slice();
-        const i = this.chainInfoInUIConfig.value.enabledChains.indexOf(chainId);
+        const sortedEnabledChains = this.chainInfoInUIConfig.value.sortedEnabledChains.slice();
+        const i = this.chainInfoInUIConfig.value.sortedEnabledChains.indexOf(
+          chainId
+        );
         if (i >= 0) {
-          enabledChains.splice(i, 1);
+          sortedEnabledChains.splice(i, 1);
         }
-
-        const disabledChains = [
-          chainId,
-          ...this.chainInfoInUIConfig.value.disabledChains,
-        ];
 
         // No need to wait
         this.chainInfoInUIConfig.setValue({
-          enabledChains: [
-            ...this.chainInfoInUIConfig.value.enabledChains,
+          sortedEnabledChains,
+          disabledChains: [
             chainId,
+            ...this.chainInfoInUIConfig.value.disabledChains,
           ],
-          disabledChains: disabledChains,
         });
       }
     }
