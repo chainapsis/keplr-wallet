@@ -32,6 +32,8 @@ import {
   StdSignDoc,
   StdSignature,
 } from "@cosmjs/launchpad";
+import { sortedJsonStringify } from "@cosmjs/launchpad/build/encoding";
+import { toUtf8 } from "@cosmjs/encoding";
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
 import { RNG } from "@keplr-wallet/crypto";
@@ -289,11 +291,15 @@ export class KeyRingService {
     }
 
     try {
+      const isGnoChain = bech32Prefix === "g";
+
       const signature = await this.keyRing.sign(
         env,
         chainId,
         coinType,
-        serializeSignDoc(newSignDoc)
+        isGnoChain
+          ? this.serializeSignToGnoDoc(newSignDoc)
+          : serializeSignDoc(newSignDoc)
       );
 
       return {
@@ -303,6 +309,26 @@ export class KeyRingService {
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
+  }
+
+  private serializeSignToGnoDoc(signDoc: StdSignDoc): Uint8Array {
+    const gnoSignDoc = {
+      chain_id: signDoc.chain_id,
+      account_number: signDoc.account_number,
+      sequence: signDoc.sequence,
+      fee: {
+        gas_fee: `${signDoc.fee.amount[0].amount}${signDoc.fee.amount[0].denom}`,
+        gas_wanted: signDoc.fee.gas,
+      },
+      msgs: signDoc.msgs.map((m) => ({
+        "@type": m.type,
+        ...m.value,
+      })),
+      memo: signDoc.memo,
+      time: "0001-01-01T00:00:00Z",
+    };
+
+    return toUtf8(sortedJsonStringify(gnoSignDoc));
   }
 
   async requestSignDirect(

@@ -24,6 +24,7 @@
     "@types/w3c-web-usb": "^1.0.5"
   },
   "dependencies": {
+    "@cosmjs/encoding": "^0.24.0-alpha.25",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@ethersproject/bytes": "^5.5.0",
