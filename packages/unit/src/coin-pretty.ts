@@ -3,6 +3,7 @@ import { Dec } from "./decimal";
 import { AppCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import { DecUtils } from "./dec-utils";
+import bigInteger from "big-integer";
 
 export type CoinPrettyOptions = {
   separator: string;
@@ -23,23 +24,19 @@ export class CoinPretty {
 
   constructor(
     protected _currency: AppCurrency,
-    protected amount: Dec | { toDec(): Dec }
+    protected amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
   ) {
-    if ("toDec" in this.amount) {
+    if (typeof this.amount === "object" && "toDec" in this.amount) {
       this.amount = this.amount.toDec();
+    } else if (!(this.amount instanceof Dec)) {
+      this.amount = new Dec(this.amount);
     }
 
-    this.intPretty = new IntPretty(this.amount);
-
-    if (this.intPretty.options.precision === 0) {
-      this.intPretty = this.intPretty
-        .maxDecimals(_currency.coinDecimals)
-        .precision(_currency.coinDecimals);
-    } else {
-      this.intPretty = this.intPretty
-        .maxDecimals(_currency.coinDecimals)
-        .mul(DecUtils.getPrecisionDec(-_currency.coinDecimals));
-    }
+    this.intPretty = new IntPretty(
+      this.amount.quoTruncate(
+        DecUtils.getTenExponentNInPrecisionRange(_currency.coinDecimals)
+      )
+    ).maxDecimals(_currency.coinDecimals);
   }
 
   get options(): DeepReadonly<IntPrettyOptions & CoinPrettyOptions> {
@@ -58,11 +55,11 @@ export class CoinPretty {
   }
 
   setCurrency(currency: AppCurrency): CoinPretty {
-    const pretty = new CoinPretty(currency, this.amount);
-    pretty._options = {
-      ...this._options,
-    };
-    pretty.intPretty = this.intPretty.clone();
+    const pretty = this.clone();
+    pretty.intPretty = this.intPretty.moveDecimalPointRight(
+      this._currency.coinDecimals - currency.coinDecimals
+    );
+    pretty._currency = currency;
     return pretty;
   }
 
@@ -92,27 +89,47 @@ export class CoinPretty {
     return pretty;
   }
 
-  precision(prec: number): CoinPretty {
+  moveDecimalPointLeft(delta: number): CoinPretty {
     const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.precision(prec);
+    pretty.intPretty = pretty.intPretty.moveDecimalPointLeft(delta);
     return pretty;
   }
 
+  moveDecimalPointRight(delta: number): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.moveDecimalPointRight(delta);
+    return pretty;
+  }
+
+  /**
+   * @deprecated Use`moveDecimalPointLeft`
+   */
   increasePrecision(delta: number): CoinPretty {
-    const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.increasePrecision(delta);
-    return pretty;
+    return this.moveDecimalPointLeft(delta);
   }
 
+  /**
+   * @deprecated Use`moveDecimalPointRight`
+   */
   decreasePrecision(delta: number): CoinPretty {
-    const pretty = this.clone();
-    pretty.intPretty = pretty.intPretty.decreasePrecision(delta);
-    return pretty;
+    return this.moveDecimalPointRight(delta);
   }
 
   maxDecimals(max: number): CoinPretty {
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.maxDecimals(max);
+    return pretty;
+  }
+
+  inequalitySymbol(bool: boolean): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.inequalitySymbol(bool);
+    return pretty;
+  }
+
+  inequalitySymbolSeparator(str: string): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.inequalitySymbolSeparator(str);
     return pretty;
   }
 
@@ -171,7 +188,11 @@ export class CoinPretty {
     pretty.intPretty = pretty.intPretty.add(
       isCoinPretty
         ? target
-        : target.mul(DecUtils.getPrecisionDec(-this._currency.coinDecimals))
+        : target.mul(
+            DecUtils.getTenExponentNInPrecisionRange(
+              -this._currency.coinDecimals
+            )
+          )
     );
     return pretty;
   }
@@ -196,7 +217,11 @@ export class CoinPretty {
     pretty.intPretty = pretty.intPretty.sub(
       isCoinPretty
         ? target
-        : target.mul(DecUtils.getPrecisionDec(-this._currency.coinDecimals))
+        : target.mul(
+            DecUtils.getTenExponentNInPrecisionRange(
+              -this._currency.coinDecimals
+            )
+          )
     );
     return pretty;
   }
@@ -222,7 +247,9 @@ export class CoinPretty {
     amount: string;
   } {
     const amount = this.toDec()
-      .mul(DecUtils.getPrecisionDec(this.currency.coinDecimals))
+      .mulTruncate(
+        DecUtils.getTenExponentNInPrecisionRange(this.currency.coinDecimals)
+      )
       .truncate();
 
     return {
@@ -247,7 +274,7 @@ export class CoinPretty {
       separator = "";
     }
 
-    return `${this.intPretty.toString()}${separator}${denom}`;
+    return this.intPretty.toStringWithSymbols("", `${separator}${denom}`);
   }
 
   clone(): CoinPretty {

@@ -29,7 +29,6 @@ import {
   createDrawerNavigator,
   useIsDrawerOpen,
 } from "@react-navigation/drawer";
-import analytics from "@react-native-firebase/analytics";
 import { DrawerContent } from "./components/drawer";
 import { useStyle } from "./styles";
 import { BorderlessButton } from "react-native-gesture-handler";
@@ -37,6 +36,7 @@ import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 import { SettingScreen } from "./screens/setting";
 import { SettingSelectAccountScreen } from "./screens/setting/screens/select-account";
 import { ViewPrivateDataScreen } from "./screens/setting/screens/view-private-data";
+import { SettingChainListScreen } from "./screens/setting/screens/chain-list";
 import { WebScreen } from "./screens/web";
 import { RegisterIntroScreen } from "./screens/register";
 import {
@@ -103,8 +103,12 @@ import {
   ImportFromExtensionScreen,
   ImportFromExtensionSetPasswordScreen,
 } from "./screens/register/import-from-extension";
-import { OsmosisWebpageScreen } from "./screens/web/webpages";
+import {
+  OsmosisWebpageScreen,
+  StargazeWebpageScreen,
+} from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
+import Bugsnag from "@bugsnag/react-native";
 
 const {
   SmartNavigatorProvider,
@@ -198,6 +202,9 @@ const {
     "Setting.Version": {
       upperScreenName: "Settings",
     },
+    "Setting.ChainList": {
+      upperScreenName: "ChainList",
+    },
     AddressBook: {
       upperScreenName: "AddressBooks",
     },
@@ -220,6 +227,9 @@ const {
       upperScreenName: "Web",
     },
     "Web.Osmosis": {
+      upperScreenName: "Web",
+    },
+    "Web.Stargaze": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -720,6 +730,28 @@ export const AddressBookStackScreen: FunctionComponent = () => {
   );
 };
 
+export const ChainListStackScreen: FunctionComponent = () => {
+  const style = useStyle();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        ...BlurredHeaderScreenOptionsPreset,
+        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+      }}
+      headerMode="screen"
+    >
+      <Stack.Screen
+        options={{
+          title: "Chain List",
+        }}
+        name="Setting.ChainList"
+        component={SettingChainListScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
 export const WebNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
@@ -735,6 +767,7 @@ export const WebNavigation: FunctionComponent = () => {
         component={WebScreen}
       />
       <Stack.Screen name="Web.Osmosis" component={OsmosisWebpageScreen} />
+      <Stack.Screen name="Web.Stargaze" component={StargazeWebpageScreen} />
     </Stack.Navigator>
   );
 };
@@ -895,37 +928,55 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   );
 };
 
+const BugsnagNavigationContainerPlugin = Bugsnag.getPlugin("reactNavigation");
+// The returned BugsnagNavigationContainer has exactly the same usage
+// except now it tracks route information to send with your error reports
+const BugsnagNavigationContainer = (() => {
+  if (BugsnagNavigationContainerPlugin) {
+    console.log("BugsnagNavigationContainerPlugin found");
+    return BugsnagNavigationContainerPlugin.createNavigationContainer(
+      NavigationContainer
+    );
+  } else {
+    console.log(
+      "WARNING: BugsnagNavigationContainerPlugin is null. Fallback to use basic NavigationContainer"
+    );
+    return NavigationContainer;
+  }
+})();
+
 export const AppNavigation: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
-  const navigationRef = useRef<NavigationContainerRef>(null);
-  const routeNameRef = useRef<string>();
+  const { keyRingStore, analyticsStore } = useStore();
+
+  const navigationRef = useRef<NavigationContainerRef | null>(null);
+  const routeNameRef = useRef<string | null>(null);
 
   return (
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
-          <NavigationContainer
+          <BugsnagNavigationContainer
             ref={navigationRef}
-            onReady={() =>
-              (routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name)
-            }
-            onStateChange={async () => {
-              const previousRouteName = routeNameRef.current;
-              const currentRouteName = navigationRef.current?.getCurrentRoute()
-                ?.name;
+            onReady={() => {
+              const routerName = navigationRef.current?.getCurrentRoute();
+              if (routerName) {
+                routeNameRef.current = routerName.name;
 
-              if (previousRouteName !== currentRouteName) {
-                // The line below uses the expo-firebase-analytics tracker
-                // https://docs.expo.io/versions/latest/sdk/firebase-analytics/
-                // Change this line to use another Mobile analytics SDK
-                await analytics().logScreenView({
-                  screen_name: currentRouteName,
-                  screen_class: currentRouteName,
-                });
+                analyticsStore.logPageView(routerName.name);
               }
+            }}
+            onStateChange={() => {
+              const routerName = navigationRef.current?.getCurrentRoute();
+              if (routerName) {
+                const previousRouteName = routeNameRef.current;
+                const currentRouteName = routerName.name;
 
-              // Save the current route name for later comparison
-              routeNameRef.current = currentRouteName;
+                if (previousRouteName !== currentRouteName) {
+                  analyticsStore.logPageView(currentRouteName);
+                }
+
+                routeNameRef.current = currentRouteName;
+              }
             }}
           >
             <Stack.Navigator
@@ -951,8 +1002,9 @@ export const AppNavigation: FunctionComponent = observer(() => {
                 name="AddressBooks"
                 component={AddressBookStackScreen}
               />
+              <Stack.Screen name="ChainList" component={ChainListStackScreen} />
             </Stack.Navigator>
-          </NavigationContainer>
+          </BugsnagNavigationContainer>
           {/* <ModalsRenderer /> */}
         </SmartNavigatorProvider>
       </FocusedScreenProvider>

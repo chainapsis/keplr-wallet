@@ -28,7 +28,6 @@ import {
   useRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../../config.ui";
-import { useLogScreenView } from "../../../hooks";
 
 export const AddressBookPage: FunctionComponent<{
   onBackButton?: () => void;
@@ -42,12 +41,12 @@ export const AddressBookPage: FunctionComponent<{
     hideChainDropdown,
     selectHandler,
     ibcChannelConfig,
-    isInTransaction,
+    //isInTransaction,
   }) => {
     const intl = useIntl();
     const history = useHistory();
 
-    const { chainStore, analyticsStore } = useStore();
+    const { chainStore } = useStore();
     const current = chainStore.current;
 
     const [selectedChainId, setSelectedChainId] = useState(
@@ -134,12 +133,6 @@ export const AddressBookPage: FunctionComponent<{
       ];
     };
 
-    useLogScreenView("Address book", {
-      chainId: chainStore.current.chainId,
-      chainName: chainStore.current.chainName,
-      fromScreen: isInTransaction ? "Transaction" : "Setting",
-    });
-
     return (
       <HeaderLayout
         showChainName={false}
@@ -215,10 +208,6 @@ export const AddressBookPage: FunctionComponent<{
                   e.stopPropagation();
 
                   setAddAddressModalOpen(true);
-                  analyticsStore.logEvent("Add address started", {
-                    chainId: selectedChainId,
-                    chainName: chainStore.getChain(selectedChainId).chainName,
-                  });
                 }}
               >
                 <i

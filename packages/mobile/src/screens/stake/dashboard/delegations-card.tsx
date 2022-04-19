@@ -6,10 +6,7 @@ import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { StakedTokenSymbol } from "../../../components/token-symbol";
 import { Button } from "../../../components/button";
-import {
-  BondStatus,
-  Validator,
-} from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 import { RightArrowIcon } from "../../../components/icon";
 import { useSmartNavigation } from "../../../navigation";
 import { ValidatorThumbnail } from "../../../components/thumbnail";
@@ -33,13 +30,13 @@ export const DelegationsCard: FunctionComponent<{
   const delegations = queryDelegations.delegations;
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
   const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonding
+    Staking.BondStatus.Unbonding
   );
   const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonded
+    Staking.BondStatus.Unbonded
   );
 
   const validators = useMemo(() => {
@@ -53,7 +50,7 @@ export const DelegationsCard: FunctionComponent<{
   ]);
 
   const validatorsMap = useMemo(() => {
-    const map: Map<string, Validator> = new Map();
+    const map: Map<string, Staking.Validator> = new Map();
 
     for (const val of validators) {
       map.set(val.operator_address, val);
@@ -109,7 +106,7 @@ export const DelegationsCard: FunctionComponent<{
       {delegations && delegations.length > 0 && (
         <CardBody style={style.flatten(["padding-x-0", "padding-y-14"])}>
           {delegations.map((del) => {
-            const val = validatorsMap.get(del.validator_address);
+            const val = validatorsMap.get(del.delegation.validator_address);
             if (!val) {
               return null;
             }
@@ -125,7 +122,7 @@ export const DelegationsCard: FunctionComponent<{
 
             return (
               <RectButton
-                key={del.validator_address}
+                key={del.delegation.validator_address}
                 style={style.flatten([
                   "flex-row",
                   "items-center",
@@ -134,7 +131,7 @@ export const DelegationsCard: FunctionComponent<{
                 ])}
                 onPress={() => {
                   smartNavigation.navigateSmart("Validator.Details", {
-                    validatorAddress: del.validator_address,
+                    validatorAddress: del.delegation.validator_address,
                   });
                 }}
               >

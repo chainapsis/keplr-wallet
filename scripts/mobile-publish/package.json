@@ -1,0 +1,15 @@
+{
+  "name": "mobile-publish-repository-dispatch",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "repository-dispatch": "npx zx ./repository-dispatch.mjs",
+    "publish-ios": "npx zx ./publish.mjs ios",
+    "publish-android": "npx zx ./publish.mjs android"
+  },
+  "devDependencies": {
+    "@octokit/core": "^3.5.1",
+    "semver": "^7.3.5",
+    "zx": "^4.3.0"
+  }
+}

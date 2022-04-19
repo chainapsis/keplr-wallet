@@ -1,8 +1,11 @@
 import { IAmountConfig, IFeeConfig } from "./types";
 import { TxChainSetter } from "./chain";
-import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  CoinPrimitive,
+  IQueriesStore,
+} from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
-import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
 import { AppCurrency } from "@keplr-wallet/types";
 import {
   EmptyAmountError,
@@ -18,9 +21,6 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
   protected feeConfig?: IFeeConfig;
 
-  @observable.ref
-  protected queryBalances: ObservableQueryBalances;
-
   @observable
   protected _sender: string;
 
@@ -31,20 +31,19 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   protected _amount: string;
 
   @observable
-  protected _isMax: boolean = false;
+  protected _fraction: number | undefined = undefined;
 
   constructor(
     chainGetter: ChainGetter,
+    protected readonly queriesStore: IQueriesStore,
     initialChainId: string,
     sender: string,
-    feeConfig: IFeeConfig | undefined,
-    queryBalances: ObservableQueryBalances
+    feeConfig: IFeeConfig | undefined
   ) {
     super(chainGetter, initialChainId);
 
     this._sender = sender;
     this.feeConfig = feeConfig;
-    this.queryBalances = queryBalances;
     this._amount = "";
 
     makeObservable(this);
@@ -53,11 +52,6 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @action
   setFeeConfig(feeConfig: IFeeConfig) {
     this.feeConfig = feeConfig;
-  }
-
-  @action
-  setQueryBalances(queryBalances: ObservableQueryBalances) {
-    this.queryBalances = queryBalances;
   }
 
   @action
@@ -76,35 +70,45 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       amount = "0" + amount;
     }
 
-    if (this.isMax) {
-      this.setIsMax(false);
+    if (this.fraction != null) {
+      this.setFraction(undefined);
     }
     this._amount = amount;
   }
 
   @action
   setIsMax(isMax: boolean) {
-    this._isMax = isMax;
+    this._fraction = isMax ? 1 : undefined;
   }
 
   @action
   toggleIsMax() {
-    this._isMax = !this._isMax;
+    this.setIsMax(!this.isMax);
   }
 
   get isMax(): boolean {
-    return this._isMax;
+    return this._fraction === 1;
   }
 
   get sender(): string {
     return this._sender;
   }
 
+  get fraction(): number | undefined {
+    return this._fraction;
+  }
+
+  @action
+  setFraction(value: number | undefined) {
+    this._fraction = value;
+  }
+
   @computed
   get amount(): string {
-    if (this.isMax) {
-      const balance = this.queryBalances
-        .getQueryBech32Address(this.sender)
+    if (this.fraction != null) {
+      const balance = this.queriesStore
+        .get(this.chainId)
+        .queryBalances.getQueryBech32Address(this.sender)
         .getBalanceFromCurrency(this.sendCurrency);
 
       const result = this.feeConfig?.fee
@@ -115,7 +119,12 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       }
 
       // Remember that the `CoinPretty`'s sub method do nothing if the currencies are different.
-      return result.trim(true).locale(false).hideDenom(true).toString();
+      return result
+        .mul(new Dec(this.fraction))
+        .trim(true)
+        .locale(false)
+        .hideDenom(true)
+        .toString();
     }
 
     return this._amount;
@@ -173,7 +182,8 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     return this.chainInfo.currencies;
   }
 
-  getError(): Error | undefined {
+  @computed
+  get error(): Error | undefined {
     const sendCurrency = this.sendCurrency;
     if (!sendCurrency) {
       return new Error("Currency to send not set");
@@ -197,8 +207,9 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       return new NegativeAmountError("Amount is negative");
     }
 
-    const balance = this.queryBalances
-      .getQueryBech32Address(this.sender)
+    const balance = this.queriesStore
+      .get(this.chainId)
+      .queryBalances.getQueryBech32Address(this.sender)
       .getBalanceFromCurrency(this.sendCurrency);
     const balanceDec = balance.toDec();
     if (dec.gt(balanceDec)) {
@@ -211,16 +222,15 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
 export const useAmountConfig = (
   chainGetter: ChainGetter,
+  queriesStore: IQueriesStore,
   chainId: string,
-  sender: string,
-  queryBalances: ObservableQueryBalances
+  sender: string
 ) => {
   const [txConfig] = useState(
     () =>
-      new AmountConfig(chainGetter, chainId, sender, undefined, queryBalances)
+      new AmountConfig(chainGetter, queriesStore, chainId, sender, undefined)
   );
   txConfig.setChain(chainId);
-  txConfig.setQueryBalances(queryBalances);
   txConfig.setSender(sender);
 
   return txConfig;

@@ -19,7 +19,7 @@ import { GovernanceCard } from "./governance-card";
 import { observer } from "mobx-react-lite";
 import { MyRewardCard } from "./my-reward-card";
 import { TokensCard } from "./tokens-card";
-import { useLogScreenView, usePrevious } from "../../hooks";
+import { usePrevious } from "../../hooks";
 import { BIP44Selectable } from "./bip44-selectable";
 import { useFocusEffect } from "@react-navigation/native";
 import { ChainUpdaterService } from "@keplr-wallet/background";
@@ -33,28 +33,27 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const scrollViewRef = useRef<ScrollView | null>(null);
 
-  const currentChainId = chainStore.current.chainId;
+  const currentChain = chainStore.current;
+  const currentChainId = currentChain.chainId;
   const previousChainId = usePrevious(currentChainId);
+  const chainStoreIsInitializing = chainStore.isInitializing;
   const previousChainStoreIsInitializing = usePrevious(
-    chainStore.isInitializing,
+    chainStoreIsInitializing,
     true
   );
 
   const checkAndUpdateChainInfo = useCallback(() => {
-    if (!chainStore.isInitializing) {
+    if (!chainStoreIsInitializing) {
       (async () => {
-        const chainId = chainStore.current.chainId;
-        const result = await ChainUpdaterService.checkChainUpdate(
-          chainStore.current
-        );
+        const result = await ChainUpdaterService.checkChainUpdate(currentChain);
 
         // TODO: Add the modal for explicit chain update.
         if (result.slient) {
-          chainStore.tryUpdateChain(chainId);
+          chainStore.tryUpdateChain(currentChainId);
         }
       })();
     }
-  }, [chainStore, chainStore.isInitializing, chainStore.current]);
+  }, [chainStore, chainStoreIsInitializing, currentChain, currentChainId]);
 
   useEffect(() => {
     const appStateHandler = (state: AppStateStatus) => {
@@ -73,18 +72,18 @@ export const HomeScreen: FunctionComponent = observer(() => {
   useFocusEffect(
     useCallback(() => {
       if (
-        (chainStore.isInitializing !== previousChainStoreIsInitializing &&
-          !chainStore.isInitializing) ||
+        (chainStoreIsInitializing !== previousChainStoreIsInitializing &&
+          !chainStoreIsInitializing) ||
         currentChainId !== previousChainId
       ) {
         checkAndUpdateChainInfo();
       }
     }, [
+      chainStoreIsInitializing,
+      previousChainStoreIsInitializing,
       currentChainId,
       previousChainId,
       checkAndUpdateChainInfo,
-      chainStore.isInitializing,
-      previousChainStoreIsInitializing,
     ])
   );
 
@@ -131,11 +130,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const tokens = queryBalances.positiveNativeUnstakables.concat(
     queryBalances.nonNativeBalances
   );
-
-  useLogScreenView("Home Dashboard", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-  });
 
   return (
     <PageWithScrollViewInBottomTabView

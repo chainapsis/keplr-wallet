@@ -20,7 +20,7 @@ export const CurrencySchema = Joi.object<Currency>({
   coinImageUrl: Joi.string().uri(),
 });
 
-export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<CW20Currency>)
+export const CW20CurrencySchema = (CurrencySchema as ObjectSchema<CW20Currency>)
   .keys({
     type: Joi.string().equal("cw20").required(),
     contractAddress: Joi.string().required(),
@@ -41,7 +41,7 @@ export const CW20CurrencyShema = (CurrencySchema as ObjectSchema<CW20Currency>)
     }
   });
 
-export const Secret20CurrencyShema = (CurrencySchema as ObjectSchema<Secret20Currency>)
+export const Secret20CurrencySchema = (CurrencySchema as ObjectSchema<Secret20Currency>)
   .keys({
     type: Joi.string().equal("secret20").required(),
     contractAddress: Joi.string().required(),
@@ -91,7 +91,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   bech32Config: Bech32ConfigSchema.required(),
   currencies: Joi.array()
     .min(1)
-    .items(CurrencySchema, CW20CurrencyShema, Secret20CurrencyShema)
+    .items(CurrencySchema, CW20CurrencySchema, Secret20CurrencySchema)
     .required(),
   feeCurrencies: Joi.array().min(1).items(CurrencySchema).required(),
   coinType: Joi.number().integer(),
@@ -106,6 +106,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       Joi.string().valid(
         "stargate",
         "cosmwasm",
+        "wasmd_0.24+",
         "secretwasm",
         "ibc-transfer",
         "no-legacy-stdTx",

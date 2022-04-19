@@ -15,13 +15,7 @@ import { NetworkErrorView } from "./network-error-view";
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
-  const {
-    chainStore,
-    accountStore,
-    queriesStore,
-    priceStore,
-    analyticsStore,
-  } = useStore();
+  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const style = useStyle();
 
@@ -147,10 +141,6 @@ export const AccountCard: FunctionComponent<{
               size="small"
               containerStyle={style.flatten(["min-width-72"])}
               onPress={() => {
-                analyticsStore.logEvent("Send token started", {
-                  chainId: chainStore.current.chainId,
-                  chainName: chainStore.current.chainName,
-                });
                 smartNavigation.navigateSmart("Send", {
                   currency: chainStore.current.stakeCurrency.coinMinimalDenom,
                 });

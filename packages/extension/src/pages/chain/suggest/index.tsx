@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useHistory } from "react-router";
 import { Button, Alert } from "reactstrap";
 
@@ -10,12 +10,23 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
-  const { chainSuggestStore } = useStore();
+  const { chainSuggestStore, analyticsStore } = useStore();
   const history = useHistory();
 
   const interactionInfo = useInteractionInfo(() => {
     chainSuggestStore.rejectAll();
   });
+
+  useEffect(() => {
+    if (chainSuggestStore.waitingSuggestedChainInfo) {
+      analyticsStore.logEvent("Chain suggested", {
+        chainId: chainSuggestStore.waitingSuggestedChainInfo.data.chainId,
+        chainName: chainSuggestStore.waitingSuggestedChainInfo.data.chainName,
+        rpc: chainSuggestStore.waitingSuggestedChainInfo.data.rpc,
+        rest: chainSuggestStore.waitingSuggestedChainInfo.data.rest,
+      });
+    }
+  }, [analyticsStore, chainSuggestStore.waitingSuggestedChainInfo]);
 
   return (
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>

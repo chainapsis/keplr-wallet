@@ -1,35 +1,51 @@
 import { ChainStore } from "./chain";
-import { AnalyticsStore } from "./analytics";
 import { EmbedChainInfos } from "../config";
-import { FiatCurrencies } from "../config.ui";
 import {
-  KeyRingStore,
-  InteractionStore,
-  QueriesStore,
-  CoinGeckoPriceStore,
+  AmplitudeApiKey,
+  EthereumEndpoint,
+  FiatCurrencies,
+} from "../config.ui";
+import {
   AccountStore,
-  PermissionStore,
-  SignInteractionStore,
-  LedgerInitStore,
-  TokensStore,
   ChainSuggestStore,
+  CoinGeckoPriceStore,
+  CosmosAccount,
+  CosmosQueries,
+  CosmwasmAccount,
+  CosmwasmQueries,
+  getKeplrFromWindow,
   IBCChannelStore,
   IBCCurrencyRegsitrar,
-  QueriesWithCosmosAndSecretAndCosmwasm,
-  AccountWithAll,
-  getKeplrFromWindow,
+  InteractionStore,
+  KeyRingStore,
+  LedgerInitStore,
+  PermissionStore,
+  QueriesStore,
+  SecretAccount,
+  SecretQueries,
+  SignInteractionStore,
+  TokensStore,
+  WalletStatus,
 } from "@keplr-wallet/stores";
+import {
+  KeplrETCQueries,
+  GravityBridgeCurrencyRegsitrar,
+} from "@keplr-wallet/stores-etc";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
-  ExtensionRouter,
   ContentScriptEnv,
   ContentScriptGuards,
+  ExtensionRouter,
   InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
 import { APP_PORT } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
+import { FeeType } from "@keplr-wallet/hooks";
+import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
+import Amplitude from "amplitude-js";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -44,14 +60,37 @@ export class RootStore {
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
-  public readonly queriesStore: QueriesStore<QueriesWithCosmosAndSecretAndCosmwasm>;
-  public readonly accountStore: AccountStore<AccountWithAll>;
+  public readonly queriesStore: QueriesStore<
+    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
+  >;
+  public readonly accountStore: AccountStore<
+    [CosmosAccount, CosmwasmAccount, SecretAccount]
+  >;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
-  public readonly analyticsStore: AnalyticsStore;
-
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
+
+  public readonly analyticsStore: AnalyticsStore<
+    {
+      chainId?: string;
+      chainName?: string;
+      toChainId?: string;
+      toChainName?: string;
+      registerType?: "seed" | "google" | "ledger" | "qr";
+      feeType?: FeeType | undefined;
+      isIbc?: boolean;
+      rpc?: string;
+      rest?: string;
+    },
+    {
+      registerType?: "seed" | "google" | "ledger" | "qr";
+      accountType?: "mnemonic" | "privateKey" | "ledger";
+      currency?: string;
+      language?: string;
+    }
+  >;
 
   constructor() {
     this.uiConfigStore = new UIConfigStore(
@@ -102,119 +141,163 @@ export class RootStore {
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
       this.chainStore,
-      getKeplrFromWindow,
-      QueriesWithCosmosAndSecretAndCosmwasm
-    );
-
-    const chainOpts = this.chainStore.chainInfos.map((chainInfo) => {
-      // In certik, change the msg type of the MsgSend to "bank/MsgSend"
-      if (chainInfo.chainId.startsWith("shentu-")) {
-        return {
-          chainId: chainInfo.chainId,
-          msgOpts: {
-            send: {
-              native: {
-                type: "bank/MsgSend",
-              },
-            },
-          },
-        };
-      }
-
-      // In akash or sifchain, increase the default gas for sending
-      if (
-        chainInfo.chainId.startsWith("akashnet-") ||
-        chainInfo.chainId.startsWith("sifchain")
-      ) {
-        return {
-          chainId: chainInfo.chainId,
-          msgOpts: {
-            send: {
-              native: {
-                gas: 120000,
-              },
-            },
-          },
-        };
-      }
-
-      if (chainInfo.chainId.startsWith("secret-")) {
-        return {
-          chainId: chainInfo.chainId,
-          msgOpts: {
-            send: {
-              native: {
-                gas: 20000,
-              },
-              secret20: {
-                gas: 50000,
-              },
-            },
-            withdrawRewards: {
-              gas: 25000,
-            },
-            createSecret20ViewingKey: {
-              gas: 50000,
-            },
-          },
-        };
-      }
-
-      return { chainId: chainInfo.chainId };
-    });
-
-    // What a silly...
-    chainOpts.push(
-      {
-        chainId: "bombay-12",
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        prefetching: false,
-        msgOpts: {
-          send: {
-            native: {
-              type: "bank/MsgSend",
-            },
-          },
-        },
-      },
-      {
-        chainId: "columbus-5",
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        prefetching: false,
-        msgOpts: {
-          send: {
-            native: {
-              type: "bank/MsgSend",
-            },
-          },
-        },
-      }
+      CosmosQueries.use(),
+      CosmwasmQueries.use(),
+      SecretQueries.use({
+        apiGetter: getKeplrFromWindow,
+      }),
+      KeplrETCQueries.use({
+        ethereumURL: EthereumEndpoint,
+      })
     );
 
     this.accountStore = new AccountStore(
       window,
-      AccountWithAll,
       this.chainStore,
-      this.queriesStore,
-      {
-        defaultOpts: {
-          // When the unlock request sent from external webpage,
-          // it will open the extension popup below the uri "/unlock".
-          // But, in this case, if the prefetching option is true, it will redirect
-          // the page to the "/unlock" with **interactionInternal=true**
-          // because prefetching will request the unlock from the internal.
-          // To prevent this problem, just check the first uri is "#/unlcok" and
-          // if it is "#/unlock", don't use the prefetching option.
-          prefetching: !window.location.href.includes("#/unlock"),
+      () => {
+        return {
           suggestChain: false,
           autoInit: true,
           getKeplr: getKeplrFromWindow,
+        };
+      },
+      CosmosAccount.use({
+        queriesStore: this.queriesStore,
+        msgOptsCreator: (chainId) => {
+          // In certik, change the msg type of the MsgSend to "bank/MsgSend"
+          if (chainId.startsWith("shentu-")) {
+            return {
+              send: {
+                native: {
+                  type: "bank/MsgSend",
+                },
+              },
+            };
+          }
+
+          // In akash or sifchain, increase the default gas for sending
+          if (
+            chainId.startsWith("akashnet-") ||
+            chainId.startsWith("sifchain")
+          ) {
+            return {
+              send: {
+                native: {
+                  gas: 120000,
+                },
+              },
+            };
+          }
+
+          if (chainId.startsWith("secret-")) {
+            return {
+              send: {
+                native: {
+                  gas: 20000,
+                },
+              },
+              withdrawRewards: {
+                gas: 25000,
+              },
+            };
+          }
+
+          // For terra related chains
+          if (
+            chainId.startsWith("bombay-") ||
+            chainId.startsWith("columbus-")
+          ) {
+            return {
+              send: {
+                native: {
+                  type: "bank/MsgSend",
+                },
+              },
+            };
+          }
+
+          if (chainId.startsWith("evmos_")) {
+            return {
+              send: {
+                native: {
+                  gas: 140000,
+                },
+              },
+              withdrawRewards: {
+                gas: 200000,
+              },
+            };
+          }
+
+          if (chainId.startsWith("osmosis")) {
+            return {
+              send: {
+                native: {
+                  gas: 100000,
+                },
+              },
+              withdrawRewards: {
+                gas: 300000,
+              },
+            };
+          }
+
+          if (chainId.startsWith("stargaze-")) {
+            return {
+              send: {
+                native: {
+                  gas: 100000,
+                },
+              },
+              withdrawRewards: {
+                gas: 200000,
+              },
+            };
+          }
         },
-        chainOpts,
-      }
+      }),
+      CosmwasmAccount.use({
+        queriesStore: this.queriesStore,
+      }),
+      SecretAccount.use({
+        queriesStore: this.queriesStore,
+        msgOptsCreator: (chainId) => {
+          if (chainId.startsWith("secret-")) {
+            return {
+              send: {
+                secret20: {
+                  gas: 50000,
+                },
+              },
+              createSecret20ViewingKey: {
+                gas: 50000,
+              },
+            };
+          }
+        },
+      })
     );
+
+    if (!window.location.href.includes("#/unlock")) {
+      // Start init for registered chains so that users can see account address more quickly.
+      for (const chainInfo of this.chainStore.chainInfos) {
+        const account = this.accountStore.getAccount(chainInfo.chainId);
+        // Because {autoInit: true} is given as the default option above,
+        // initialization for the account starts at this time just by using getAccount().
+        // However, run safe check on current status and init if status is not inited.
+        if (account.walletStatus === WalletStatus.NotInit) {
+          account.init();
+        }
+      }
+    } else {
+      // When the unlock request sent from external webpage,
+      // it will open the extension popup below the uri "/unlock".
+      // But, in this case, if the prefetching option is true, it will redirect
+      // the page to the "/unlock" with **interactionInternal=true**
+      // because prefetching will request the unlock from the internal.
+      // To prevent this problem, just check the first uri is "#/unlcok" and
+      // if it is "#/unlock", don't use the prefetching option.
+    }
 
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),
@@ -239,24 +322,55 @@ export class RootStore {
       24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
+      this.queriesStore,
+      this.queriesStore
+    );
+    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>(
+      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+      this.chainStore,
       this.queriesStore
     );
 
     this.analyticsStore = new AnalyticsStore(
-      "KeplrExtension",
+      (() => {
+        if (!AmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance();
+          amplitudeClient.init(AmplitudeApiKey, undefined, {
+            saveEvents: true,
+            platform: "Extension",
+          });
+
+          return amplitudeClient;
+        }
+      })(),
       {
-        amplitudeConfig: {
-          platform: "Extension",
-          includeUtm: true,
-          includeReferrer: true,
-          includeFbclid: true,
-          includeGclid: true,
-          saveEvents: true,
-          saveParamsReferrerOncePerSession: false,
+        logEvent: (eventName, eventProperties) => {
+          if (eventProperties?.chainId || eventProperties?.toChainId) {
+            eventProperties = {
+              ...eventProperties,
+            };
+
+            if (eventProperties.chainId) {
+              eventProperties.chainId = ChainIdHelper.parse(
+                eventProperties.chainId
+              ).identifier;
+            }
+
+            if (eventProperties.toChainId) {
+              eventProperties.toChainId = ChainIdHelper.parse(
+                eventProperties.toChainId
+              ).identifier;
+            }
+          }
+
+          return {
+            eventName,
+            eventProperties,
+          };
         },
-      },
-      this.accountStore,
-      this.keyRingStore
+      }
     );
 
     router.listen(APP_PORT);

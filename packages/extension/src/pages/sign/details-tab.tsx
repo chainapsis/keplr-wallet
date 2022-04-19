@@ -18,6 +18,7 @@ import {
 import { useLanguage } from "../../languages";
 import { Badge, Button, Label } from "reactstrap";
 import { renderDirectMessage } from "./direct";
+import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 
 export const DetailsTab: FunctionComponent<{
   signDocHelper: SignDocHelper;
@@ -56,7 +57,7 @@ export const DetailsTab: FunctionComponent<{
       if (mode === "amino") {
         return (msgs as readonly Msg[]).map((msg, i) => {
           const msgContent = renderAminoMessage(
-            accountStore.getAccount(chainStore.current.chainId).msgOpts,
+            accountStore.getAccount(chainStore.current.chainId),
             msg,
             chainStore.current.currencies,
             intl
@@ -71,7 +72,7 @@ export const DetailsTab: FunctionComponent<{
           );
         });
       } else if (mode === "direct") {
-        return (msgs as any[]).map((msg, i) => {
+        return (msgs as AnyWithUnpacked[]).map((msg, i) => {
           const msgContent = renderDirectMessage(
             msg,
             chainStore.current.currencies,

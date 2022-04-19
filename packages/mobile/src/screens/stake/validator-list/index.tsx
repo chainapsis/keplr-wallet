@@ -3,10 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { PageWithSectionList } from "../../../components/page";
 import { Text, View } from "react-native";
-import {
-  BondStatus,
-  Validator,
-} from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 import { useStyle } from "../../../styles";
 import { SelectorModal, TextInput } from "../../../components/input";
 import { GradientBackground } from "../../../components/svg";
@@ -18,7 +15,6 @@ import Svg, { Path } from "react-native-svg";
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RectButton } from "../../../components/rect-button";
-import { useLogScreenView } from "../../../hooks";
 
 type Sort = "APY" | "Voting Power" | "Name";
 
@@ -44,7 +40,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
 
   const style = useStyle();
@@ -87,11 +83,6 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     return data;
   }, [bondedValidators.validators, search, sort]);
 
-  useLogScreenView("Validator list", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-  });
-
   const items = useMemo(() => {
     return [
       { label: "APY", key: "APY" },
@@ -126,8 +117,14 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           },
         ]}
         stickySectionHeadersEnabled={false}
-        keyExtractor={(item: Validator) => item.operator_address}
-        renderItem={({ item, index }: { item: Validator; index: number }) => {
+        keyExtractor={(item: Staking.Validator) => item.operator_address}
+        renderItem={({
+          item,
+          index,
+        }: {
+          item: Staking.Validator;
+          index: number;
+        }) => {
           return (
             <ValidatorItem
               validatorAddress={item.operator_address}
@@ -221,7 +218,7 @@ const ValidatorItem: FunctionComponent<{
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
 
   const style = useStyle();

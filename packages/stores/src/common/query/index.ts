@@ -46,6 +46,20 @@ export type QueryResponse<T> = {
  * This recommends to use the Axios to query the response.
  */
 export abstract class ObservableQueryBase<T = unknown, E = unknown> {
+  protected static suspectedResponseDatasWithInvalidValue: string[] = [
+    "The network connection was lost.",
+    "The request timed out.",
+  ];
+
+  protected static guessResponseTruncated(headers: any, data: string): boolean {
+    return (
+      headers &&
+      typeof headers["content-type"] === "string" &&
+      headers["content-type"].startsWith("application/json") &&
+      data.startsWith("{")
+    );
+  }
+
   protected options: QueryOptions;
 
   // Just use the oberable ref because the response is immutable and not directly adjusted.
@@ -123,7 +137,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   @action
   private stop() {
-    if (this.isStarted) {
+    if (this._isStarted) {
       this.onStop();
       this._isStarted = false;
     }
@@ -195,12 +209,19 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
     // If there is no existing response, try to load saved reponse.
     if (!this._response) {
-      const staledResponse = yield* toGenerator(this.loadStaledResponse());
-      if (staledResponse) {
-        if (staledResponse.timestamp > Date.now() - this.options.cacheMaxAge) {
-          this.setResponse(staledResponse);
+      // When first load, try to load the last response from disk.
+      // To improve performance, don't wait the loading to proceed.
+      // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
+      this.loadStaledResponse().then((staledResponse) => {
+        if (staledResponse && !this._response) {
+          if (
+            staledResponse.timestamp >
+            Date.now() - this.options.cacheMaxAge
+          ) {
+            this.setResponse(staledResponse);
+          }
         }
-      }
+      });
     } else {
       // Make the existing response as staled.
       this.setResponse({
@@ -212,13 +233,62 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this.cancelToken = Axios.CancelToken.source();
 
     try {
-      const response = yield* toGenerator(
+      let { response, headers } = yield* toGenerator(
         this.fetchResponse(this.cancelToken.token)
       );
+      if (
+        response.data &&
+        typeof response.data === "string" &&
+        (response.data.startsWith("stream was reset:") ||
+          ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
+            response.data
+          ) ||
+          ObservableQuery.guessResponseTruncated(headers, response.data))
+      ) {
+        // In some devices, it is a http ok code, but a strange response is sometimes returned.
+        // It's not that they can't query at all, it seems that they get weird response from time to time.
+        // These causes are not clear.
+        // To solve this problem, if this problem occurs, try the query again, and if that fails, an error is raised.
+        // https://github.com/chainapsis/keplr-wallet/issues/275
+        // https://github.com/chainapsis/keplr-wallet/issues/278
+        // https://github.com/chainapsis/keplr-wallet/issues/318
+        if (this.cancelToken && this.cancelToken.token.reason) {
+          // In this case, it is assumed that it is caused by cancel() and do nothing.
+          return;
+        }
+
+        console.log(
+          "There is an unknown problem to the response. Request one more time."
+        );
+
+        // Try to query again.
+        const refetched = yield* toGenerator(
+          this.fetchResponse(this.cancelToken.token)
+        );
+        response = refetched.response;
+        headers = refetched.headers;
+
+        if (response.data && typeof response.data === "string") {
+          if (
+            response.data.startsWith("stream was reset:") ||
+            ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
+              response.data
+            )
+          ) {
+            throw new Error(response.data);
+          }
+
+          if (ObservableQuery.guessResponseTruncated(headers, response.data)) {
+            throw new Error("The response data seems to be truncated");
+          }
+        }
+      }
       this.setResponse(response);
       // Clear the error if fetching succeeds.
       this.setError(undefined);
-      yield this.saveResponse(response);
+
+      // Should not wait.
+      this.saveResponse(response);
     } catch (e) {
       // If canceld, do nothing.
       if (Axios.isCancel(e)) {
@@ -314,7 +384,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       () => this.isFetching,
       () => {
         if (!onceCoerce) {
-          this.fetch();
+          if (!this.isFetching) {
+            this.fetch();
+          }
           onceCoerce = true;
         }
       },
@@ -340,12 +412,22 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   protected abstract fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<T>>;
+  ): Promise<{ response: QueryResponse<T>; headers: any }>;
 
+  /**
+   * Used for saving the last response to disk.
+   * This should not make observable state changes.
+   * @param response
+   * @protected
+   */
   protected abstract saveResponse(
     response: Readonly<QueryResponse<T>>
   ): Promise<void>;
 
+  /**
+   * Used for loading the last response from disk.
+   * @protected
+   */
   protected abstract loadStaledResponse(): Promise<
     QueryResponse<T> | undefined
   >;
@@ -423,15 +505,18 @@ export class ObservableQuery<
 
   protected async fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<T>> {
+  ): Promise<{ response: QueryResponse<T>; headers: any }> {
     const result = await this.instance.get<T>(this.url, {
       cancelToken,
     });
     return {
-      data: result.data,
-      status: result.status,
-      staled: false,
-      timestamp: Date.now(),
+      headers: result.headers,
+      response: {
+        data: result.data,
+        status: result.status,
+        staled: false,
+        timestamp: Date.now(),
+      },
     };
   }
 
@@ -470,3 +555,5 @@ export class ObservableQueryMap<T = unknown, E = unknown> extends HasMapStore<
     super(creater);
   }
 }
+
+export * from "./json-rpc";

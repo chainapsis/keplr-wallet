@@ -44,7 +44,11 @@ export interface IBCCurrency extends Currency {
    * If that chain is unknown, this will be undefined.
    */
   readonly originChainId: string | undefined;
-  readonly originCurrency: Currency | undefined;
+  readonly originCurrency:
+    | Currency
+    | CW20Currency
+    | Secret20Currency
+    | undefined;
 }
 
 /**

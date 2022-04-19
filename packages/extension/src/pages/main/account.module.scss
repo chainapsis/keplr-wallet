@@ -24,3 +24,14 @@
 
   cursor: pointer;
 }
+
+:global(.popper) {
+  font-size: 14px;
+  min-width: 140px;
+  text-align: center;
+}
+
+.unsupported-key-icon {
+  width: 100%;
+  text-align: center;
+}

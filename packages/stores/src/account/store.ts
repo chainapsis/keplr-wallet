@@ -1,78 +1,64 @@
-import { HasMapStore } from "../common";
-import { ChainGetter } from "../common";
-import { QueriesStore } from "../query";
-import { DeepPartial } from "utility-types";
-import deepmerge from "deepmerge";
-import { QueriesSetBase } from "../query";
-import { AccountSetBase, AccountSetOpts } from "./base";
+import {
+  ChainedFunctionifyTuple,
+  ChainGetter,
+  HasMapStore,
+  IObject,
+  mergeStores,
+} from "../common";
+import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
+import { DeepReadonly, UnionToIntersection } from "utility-types";
 
-export interface AccountStoreOpts<MsgOpts> {
-  defaultOpts: Omit<AccountSetOpts<MsgOpts>, "msgOpts"> &
-    DeepPartial<Pick<AccountSetOpts<MsgOpts>, "msgOpts">>;
-  chainOpts?: (DeepPartial<AccountSetOpts<MsgOpts>> & { chainId: string })[];
+// eslint-disable-next-line @typescript-eslint/ban-types
+export interface IAccountStore<T extends IObject = {}> {
+  getAccount(chainId: string): DeepReadonly<AccountSetBase & T>;
 }
 
 export class AccountStore<
-  AccountSet extends AccountSetBase<unknown, unknown>,
-  MsgOpts = AccountSet extends AccountSetBase<infer M, unknown> ? M : never,
-  Queries = AccountSet extends AccountSetBase<unknown, infer Q> ? Q : never,
-  Opts = AccountSetOpts<MsgOpts>
-> extends HasMapStore<AccountSet> {
+  Injects extends Array<IObject>,
+  AccountSetReturn = AccountSetBase & UnionToIntersection<Injects[number]>
+> extends HasMapStore<AccountSetReturn> {
+  protected accountSetCreators: ChainedFunctionifyTuple<
+    AccountSetBaseSuper,
+    // chainGetter: ChainGetter,
+    // chainId: string,
+    [ChainGetter, string],
+    Injects
+  >;
+
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
       removeEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly accountSetCreator: (new (
-      eventListener: {
-        addEventListener: (type: string, fn: () => unknown) => void;
-        removeEventListener: (type: string, fn: () => unknown) => void;
-      },
-      chainGetter: ChainGetter,
-      chainId: string,
-      queriesStore: QueriesStore<QueriesSetBase & Queries>,
-      opts: Opts
-    ) => AccountSet) & { defaultMsgOpts: MsgOpts },
     protected readonly chainGetter: ChainGetter,
-    protected readonly queriesStore: QueriesStore<QueriesSetBase & Queries>,
-    protected readonly storeOpts: AccountStoreOpts<MsgOpts>
+    protected readonly storeOptsCreator: (chainId: string) => AccountSetOpts,
+    ...accountSetCreators: ChainedFunctionifyTuple<
+      AccountSetBaseSuper,
+      // chainGetter: ChainGetter,
+      // chainId: string,
+      [ChainGetter, string],
+      Injects
+    >
   ) {
     super((chainId: string) => {
-      return new accountSetCreator(
-        this.eventListener,
-        this.chainGetter,
+      const accountSetBase = new AccountSetBaseSuper(
+        eventListener,
+        chainGetter,
         chainId,
-        this.queriesStore,
-        (deepmerge(
-          deepmerge(
-            {
-              msgOpts: accountSetCreator.defaultMsgOpts,
-            },
-            this.storeOpts.defaultOpts
-          ),
-          this.storeOpts.chainOpts?.find((opts) => opts.chainId === chainId) ??
-            {}
-        ) as unknown) as Opts
+        storeOptsCreator(chainId)
+      );
+
+      return mergeStores(
+        accountSetBase,
+        [this.chainGetter, chainId],
+        ...this.accountSetCreators
       );
     });
 
-    const defaultOpts = deepmerge(
-      {
-        msgOpts: accountSetCreator.defaultMsgOpts,
-      },
-      this.storeOpts.defaultOpts
-    );
-    for (const opts of this.storeOpts.chainOpts ?? []) {
-      if (
-        opts.prefetching ||
-        (defaultOpts.prefetching && opts.prefetching !== false)
-      ) {
-        this.getAccount(opts.chainId);
-      }
-    }
+    this.accountSetCreators = accountSetCreators;
   }
 
-  getAccount(chainId: string): AccountSet {
+  getAccount(chainId: string): AccountSetReturn {
     return this.get(chainId);
   }
 

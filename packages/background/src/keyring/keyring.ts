@@ -14,6 +14,11 @@ import { Env } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
+import { Wallet } from "@ethersproject/wallet";
+import * as BytesUtils from "@ethersproject/bytes";
+import { ETH } from "@tharsis/address-converter";
+import { keccak256 } from "@ethersproject/keccak256";
+
 export enum KeyRingStatus {
   NOTLOADED,
   EMPTY,
@@ -55,7 +60,7 @@ export class KeyRing {
    * If keyring has private key, it can't set the BIP 44 path.
    */
   private _privateKey?: Uint8Array;
-  private _mnemonic?: string;
+  private _mnemonicMasterSeed?: Uint8Array;
   private _ledgerPublicKey?: Uint8Array;
 
   private keyStore: KeyStore | null;
@@ -102,7 +107,7 @@ export class KeyRing {
   public isLocked(): boolean {
     return (
       this.privateKey == null &&
-      this.mnemonic == null &&
+      this.mnemonicMasterSeed == null &&
       this.ledgerPublicKey == null
     );
   }
@@ -113,17 +118,17 @@ export class KeyRing {
 
   private set privateKey(privateKey: Uint8Array | undefined) {
     this._privateKey = privateKey;
-    this._mnemonic = undefined;
+    this._mnemonicMasterSeed = undefined;
     this._ledgerPublicKey = undefined;
     this.cached = new Map();
   }
 
-  private get mnemonic(): string | undefined {
-    return this._mnemonic;
+  private get mnemonicMasterSeed(): Uint8Array | undefined {
+    return this._mnemonicMasterSeed;
   }
 
-  private set mnemonic(mnemonic: string | undefined) {
-    this._mnemonic = mnemonic;
+  private set mnemonicMasterSeed(masterSeed: Uint8Array | undefined) {
+    this._mnemonicMasterSeed = masterSeed;
     this._privateKey = undefined;
     this._ledgerPublicKey = undefined;
     this.cached = new Map();
@@ -134,7 +139,7 @@ export class KeyRing {
   }
 
   private set ledgerPublicKey(publicKey: Uint8Array | undefined) {
-    this._mnemonic = undefined;
+    this._mnemonicMasterSeed = undefined;
     this._privateKey = undefined;
     this._ledgerPublicKey = publicKey;
     this.cached = new Map();
@@ -213,7 +218,7 @@ export class KeyRing {
       throw new Error("Key ring is not loaded or not empty");
     }
 
-    this.mnemonic = mnemonic;
+    this.mnemonicMasterSeed = Mnemonic.generateMasterSeedFromMnemonic(mnemonic);
     this.keyStore = await KeyRing.CreateMnemonicKeyStore(
       this.rng,
       this.crypto,
@@ -314,7 +319,7 @@ export class KeyRing {
       throw new Error("Key ring is not unlocked");
     }
 
-    this.mnemonic = undefined;
+    this.mnemonicMasterSeed = undefined;
     this.privateKey = undefined;
     this.ledgerPublicKey = undefined;
     this.password = "";
@@ -327,9 +332,11 @@ export class KeyRing {
 
     if (this.type === "mnemonic") {
       // If password is invalid, error will be thrown.
-      this.mnemonic = Buffer.from(
-        await Crypto.decrypt(this.crypto, this.keyStore, password)
-      ).toString();
+      this.mnemonicMasterSeed = Mnemonic.generateMasterSeedFromMnemonic(
+        Buffer.from(
+          await Crypto.decrypt(this.crypto, this.keyStore, password)
+        ).toString()
+      );
     } else if (this.type === "privateKey") {
       // If password is invalid, error will be thrown.
       this.privateKey = Buffer.from(
@@ -523,8 +530,9 @@ export class KeyRing {
         } else {
           // Else clear keyring.
           this.keyStore = null;
-          this.mnemonic = undefined;
+          this.mnemonicMasterSeed = undefined;
           this.privateKey = undefined;
+          this.ledgerPublicKey = undefined;
         }
 
         keyStoreChanged = true;
@@ -580,6 +588,12 @@ export class KeyRing {
         throw new Error("Ledger public key not set");
       }
 
+      if (coinType === 60) {
+        throw new Error(
+          "Ledger is not compatible with this coinType right now"
+        );
+      }
+
       const pubKey = new PubKeySecp256k1(this.ledgerPublicKey);
 
       return {
@@ -592,6 +606,20 @@ export class KeyRing {
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
+      if (coinType === 60) {
+        // For Ethereum Key-Gen Only:
+        const wallet = new Wallet(privKey.toBytes());
+        const ethereumAddress = ETH.decoder(wallet.address);
+
+        return {
+          algo: "ethsecp256k1",
+          pubKey: pubKey.toBytes(),
+          address: ethereumAddress,
+          isNanoLedger: false,
+        };
+      }
+
+      // Default
       return {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
@@ -619,13 +647,16 @@ export class KeyRing {
         return new PrivKeySecp256k1(cachedKey);
       }
 
-      if (!this.mnemonic) {
+      if (!this.mnemonicMasterSeed) {
         throw new Error(
           "Key store type is mnemonic and it is unlocked. But, mnemonic is not loaded unexpectedly"
         );
       }
 
-      const privKey = Mnemonic.generateWalletFromMnemonic(this.mnemonic, path);
+      const privKey = Mnemonic.generatePrivateKeyFromMasterSeed(
+        this.mnemonicMasterSeed,
+        path
+      );
 
       this.cached.set(path, privKey);
       return new PrivKeySecp256k1(privKey);
@@ -658,6 +689,12 @@ export class KeyRing {
       throw new Error("Key Store is empty");
     }
 
+    // Sign with Evmos/Ethereum
+    const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+    if (coinType === 60) {
+      return this.signEthereum(chainId, defaultCoinType, message);
+    }
+
     if (this.keyStore.type === "ledger") {
       const pubKey = this.ledgerPublicKey;
 
@@ -676,6 +713,45 @@ export class KeyRing {
 
       const privKey = this.loadPrivKey(coinType);
       return privKey.sign(message);
+    }
+  }
+
+  public async signEthereum(
+    chainId: string,
+    defaultCoinType: number,
+    message: Uint8Array
+  ): Promise<Uint8Array> {
+    if (this.status !== KeyRingStatus.UNLOCKED) {
+      throw new Error("Key ring is not unlocked");
+    }
+
+    if (!this.keyStore) {
+      throw new Error("Key Store is empty");
+    }
+
+    if (this.keyStore.type === "ledger") {
+      // TODO: Ethereum Ledger Integration
+      throw new Error("Ethereum signing with Ledger is not yet supported");
+    } else {
+      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+      if (coinType !== 60) {
+        throw new Error(
+          "Invalid coin type passed in to Ethereum signing (expected 60)"
+        );
+      }
+
+      const privKey = this.loadPrivKey(coinType);
+
+      // Use ether js to sign Ethereum tx
+      const ethWallet = new Wallet(privKey.toBytes());
+
+      const signature = await ethWallet
+        ._signingKey()
+        .signDigest(keccak256(message));
+      const splitSignature = BytesUtils.splitSignature(signature);
+      return BytesUtils.arrayify(
+        BytesUtils.concat([splitSignature.r, splitSignature.s])
+      );
     }
   }
 

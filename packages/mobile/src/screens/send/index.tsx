@@ -44,14 +44,13 @@ export const SendScreen: FunctionComponent = observer(() => {
     : chainStore.current.chainId;
 
   const account = accountStore.getAccount(chainId);
-  const queries = queriesStore.get(chainId);
 
   const sendConfigs = useSendTxConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainId,
-    account.msgOpts["send"],
     account.bech32Address,
-    queries.queryBalances,
     EthereumEndpoint
   );
 
@@ -73,11 +72,11 @@ export const SendScreen: FunctionComponent = observer(() => {
   }, [route.params.recipient, sendConfigs.recipientConfig]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   return (
@@ -125,17 +124,13 @@ export const SendScreen: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    smartNavigation.pushSmart("TxPendingResult", {
-                      txHash: Buffer.from(txHash).toString("hex"),
-                    });
-                  },
-                  onFulfill: (tx) => {
-                    const isSuccess = tx.code == null || tx.code === 0;
-                    analyticsStore.logEvent("Send token finished", {
+                    analyticsStore.logEvent("Send token tx broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
                       feeType: sendConfigs.feeConfig.feeType,
-                      isSuccess,
+                    });
+                    smartNavigation.pushSmart("TxPendingResult", {
+                      txHash: Buffer.from(txHash).toString("hex"),
                     });
                   },
                 }

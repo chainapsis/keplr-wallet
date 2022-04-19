@@ -2,13 +2,11 @@ import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
-import { ProposalVoter, ProposalVoterStargate } from "./types";
+import { ProposalVoter } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
 
-export class ObservableQueryProposalVoteInner extends ObservableChainQuery<
-  ProposalVoter | ProposalVoterStargate
-> {
+export class ObservableQueryProposalVoteInner extends ObservableChainQuery<ProposalVoter> {
   protected proposalId: string;
   protected bech32Address: string;
 
@@ -23,7 +21,7 @@ export class ObservableQueryProposalVoteInner extends ObservableChainQuery<
       kvStore,
       chainId,
       chainGetter,
-      `/gov/proposals/${proposalsId}/votes/${bech32Address}`
+      `/cosmos/gov/v1beta1/proposals/${proposalsId}/votes/${bech32Address}`
     );
 
     this.proposalId = proposalsId;
@@ -34,25 +32,19 @@ export class ObservableQueryProposalVoteInner extends ObservableChainQuery<
     if (!this.response) {
       return "Unspecified";
     }
-    if (typeof this.response.data.result.option === "string") {
-      return this.response.data.result.option;
-    }
 
-    return (() => {
-      switch (this.response.data.result.option) {
-        //yes: 1, abstain: 2, no: 3, no with veto: 4)
-        case 1:
-          return "Yes";
-        case 2:
-          return "Abstain";
-        case 3:
-          return "No";
-        case 4:
-          return "NoWithVeto";
-        default:
-          return "Unspecified";
-      }
-    })();
+    switch (this.response.data.vote.option) {
+      case "VOTE_OPTION_YES":
+        return "Yes";
+      case "VOTE_OPTION_ABSTAIN":
+        return "Abstain";
+      case "VOTE_OPTION_NO":
+        return "No";
+      case "VOTE_OPTION_NO_WITH_VETO":
+        return "NoWithVeto";
+      default:
+        return "Unspecified";
+    }
   }
 
   protected canFetch(): boolean {
@@ -61,9 +53,7 @@ export class ObservableQueryProposalVoteInner extends ObservableChainQuery<
   }
 }
 
-export class ObservableQueryProposalVote extends ObservableChainQueryMap<
-  ProposalVoter | ProposalVoterStargate
-> {
+export class ObservableQueryProposalVote extends ObservableChainQueryMap<ProposalVoter> {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainId: string,

@@ -66,10 +66,10 @@ export const SendPage: FunctionComponent = observer(() => {
 
   const sendConfigs = useSendTxConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     current.chainId,
-    accountInfo.msgOpts.send,
     accountInfo.bech32Address,
-    queriesStore.get(current.chainId).queryBalances,
     EthereumEndpoint
   );
 
@@ -107,11 +107,11 @@ export const SendPage: FunctionComponent = observer(() => {
   }, [query.defaultAmount, query.defaultMemo, query.defaultRecipient]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   return (
@@ -198,14 +198,14 @@ export const SendPage: FunctionComponent = observer(() => {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
                 },
-                (tx: any) => {
-                  const isSuccess = tx.code == null || tx.code === 0;
-                  analyticsStore.logEvent("Send token finished", {
-                    chainId: chainStore.current.chainId,
-                    chainName: chainStore.current.chainName,
-                    feeType: sendConfigs.feeConfig.feeType,
-                    isSuccess,
-                  });
+                {
+                  onBroadcasted: () => {
+                    analyticsStore.logEvent("Send token tx broadcasted", {
+                      chainId: chainStore.current.chainId,
+                      chainName: chainStore.current.chainName,
+                      feeType: sendConfigs.feeConfig.feeType,
+                    });
+                  },
                 }
               );
               if (!isDetachedPage) {

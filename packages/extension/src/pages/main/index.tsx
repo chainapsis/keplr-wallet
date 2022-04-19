@@ -23,7 +23,7 @@ import { ChainUpdaterService } from "@keplr-wallet/background";
 import { IBCTransferView } from "./ibc-transfer";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
-import { useLogScreenView } from "../../hooks";
+import { WalletStatus } from "@keplr-wallet/stores";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -84,8 +84,6 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const hasTokens = tokens.length > 0;
 
-  useLogScreenView("Home Dashboard");
-
   return (
     <HeaderLayout
       showChainName
@@ -122,7 +120,9 @@ export const MainPage: FunctionComponent = observer(() => {
           <div className={style.containerAccountInner}>
             <AccountView />
             <AssetView />
-            <TxButtonView />
+            {accountInfo.walletStatus !== WalletStatus.Rejected && (
+              <TxButtonView />
+            )}
           </div>
         </CardBody>
       </Card>

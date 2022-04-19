@@ -14,8 +14,6 @@ import { PageButton } from "../page-button";
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 
-import { useLogScreenView } from "../../../hooks";
-
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
@@ -23,8 +21,6 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
   const history = useHistory();
 
   const loadingIndicator = useLoadingIndicator();
-
-  useLogScreenView("Select account");
 
   return (
     <HeaderLayout

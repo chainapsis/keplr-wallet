@@ -19,13 +19,15 @@
       "**/native-base",
       "**/@react-native-async-storage/async-storage",
       "**/@ledgerhq/react-native-hw-transport-ble",
-      "**/jetifier"
+      "**/jetifier",
+      "**/@bugsnag/**"
     ]
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
-    "clean": "lerna run clean; rm -rf node_modules",
+    "clean": "lerna run clean && rm -rf node_modules && yarn clean:watchman",
+    "clean:watchman": "watchman watch-del-all",
     "build": "lerna run build",
     "build:libs": "lerna run build --ignore @keplr-wallet/extension",
     "test": "lerna run test --parallel",
@@ -34,7 +36,8 @@
     "lint-fix": "lerna run lint-fix",
     "ci": "yarn install --frozen-lockfile && yarn build && yarn workspace mobile typecheck && yarn test",
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "version": "npx zx ./scripts/lerna-lifecyle-check-version.mjs"
   },
   "pre-commit": [
     "pre-commit"
@@ -49,6 +52,7 @@
   "author": "chainapsis",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@octokit/core": "^3.5.1",
     "@types/jest": "^26.0.22",
     "@types/node": "^16.6.2",
     "@types/webpack": "^4.39.1",
@@ -81,5 +85,6 @@
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
     "node-sass": "file:./etc/noop"
-  }
+  },
+  "dependencies": {}
 }

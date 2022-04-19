@@ -15,7 +15,12 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
     chainGetter: ChainGetter,
     protected readonly bech32Address: string
   ) {
-    super(kvStore, chainId, chainGetter, `/auth/accounts/${bech32Address}`);
+    super(
+      kvStore,
+      chainId,
+      chainGetter,
+      `/cosmos/auth/v1beta1/accounts/${bech32Address}`
+    );
 
     makeObservable(this);
   }
@@ -26,8 +31,13 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
       return "0";
     }
 
+    // XXX: In launchpad, the status was 200 even if the account not exist.
+    //      However, from stargate, the status becomes 404 if the account not exist.
+    //      This case has not been dealt with yet.
+    //      However, in the case of 404, it will be treated as an error, and in this case the sequence should be 0.
+
     try {
-      const account = BaseAccount.fromAminoJSON(
+      const account = BaseAccount.fromProtoJSON(
         this.response.data,
         this.bech32Address
       );

@@ -11,11 +11,11 @@ import {
   RegisterConfig,
 } from "@keplr-wallet/hooks";
 import {
-  parseQRCodeDataForImportFromMobile,
-  importFromMobile,
+  parseQRCodeDataForImportFromExtension,
+  importFromExtension,
   registerExportedAddressBooks,
   registerExportedKeyRingDatas,
-} from "../../../utils/import-from-mobile";
+} from "../../../utils/import-from-extension";
 import { AsyncKVStore } from "../../../common";
 
 export * from "./intro";
@@ -41,7 +41,7 @@ export interface WCExportKeyRingDatasResponse {
 }
 
 export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
-  const { chainStore, keyRingStore } = useStore();
+  const { chainStore, keyRingStore, analyticsStore } = useStore();
 
   const [addressBookConfigMap] = useState(
     () => new AddressBookConfigMap(new AsyncKVStore("address_book"), chainStore)
@@ -69,14 +69,18 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
     }
 
     try {
-      const sharedData = parseQRCodeDataForImportFromMobile(data);
+      const sharedData = parseQRCodeDataForImportFromExtension(data);
 
       setIsLoading(true);
 
-      const imported = await importFromMobile(
+      const imported = await importFromExtension(
         sharedData,
         chainStore.chainInfosInUI.map((chainInfo) => chainInfo.chainId)
       );
+      analyticsStore.setUserProperties({
+        registerType: "qr",
+        accountType: imported.KeyRingDatas[0].type,
+      });
 
       if (keyRingStore.multiKeyStoreInfo.length > 0) {
         // If already has accounts,

@@ -3,7 +3,7 @@ import bigInteger from "big-integer";
 
 export class Coin {
   public static parse(str: string): Coin {
-    const re = new RegExp("([0-9]+)[ ]*([a-zA-Z]+)");
+    const re = new RegExp("([0-9]+)[ ]*([a-zA-Z]+)$");
     const execed = re.exec(str);
     if (!execed || execed.length !== 3) {
       throw new Error("Invalid coin str");

@@ -9,3 +9,5 @@ export const ADDITIONAL_SIGN_IN_PREPEND:
   | undefined = undefined;
 
 export const ADDITIONAL_INTL_MESSAGES: IntlMessages = {};
+
+export const AMPLITUDE_API_KEY = "";

@@ -8,11 +8,11 @@ import {
 } from "./params";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
-import { StakingPool } from "../staking/types";
 import { DeepReadonly } from "utility-types";
 import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
 import { ObservableQueryProposal } from "./proposal";
+import { ObservableQueryStakingPool } from "../staking";
 
 export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals> {
   @observable.ref
@@ -26,13 +26,19 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly _queryPool: ObservableChainQuery<StakingPool>
+    protected readonly _queryPool: ObservableQueryStakingPool
   ) {
-    super(kvStore, chainId, chainGetter, "/gov/proposals");
+    super(
+      kvStore,
+      chainId,
+      chainGetter,
+      // TODO: Handle pagination
+      "/cosmos/gov/v1beta1/proposals?pagination.limit=3000"
+    );
     makeObservable(this);
   }
 
-  getQueryPool(): DeepReadonly<ObservableChainQuery<StakingPool>> {
+  getQueryPool(): DeepReadonly<ObservableQueryStakingPool> {
     return this._queryPool;
   }
 
@@ -88,7 +94,8 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
       return new IntPretty(new Int(0)).ready(false);
     }
 
-    let quorum = new Dec(paramTally.response.data.result.quorum);
+    // TODO: Use `RatePretty`
+    let quorum = new Dec(paramTally.response.data.tally_params.quorum);
     // Multiply 100
     quorum = quorum.mulTruncate(DecUtils.getPrecisionDec(2));
 
@@ -103,7 +110,7 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
 
     const result: ObservableQueryProposal[] = [];
 
-    for (const raw of this.response.data.result) {
+    for (const raw of this.response.data.proposals) {
       result.push(
         new ObservableQueryProposal(
           this.kvStore,

@@ -33,16 +33,15 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
-  const queries = queriesStore.get(chainStore.current.chainId);
 
   const notification = useNotification();
 
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
     EthereumEndpoint
   );
 
@@ -92,16 +91,17 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                     preferNoSetFee: true,
                     preferNoSetMemo: true,
                   },
-                  (tx: any) => {
-                    const isSuccess = tx.code == null || tx.code === 0;
-                    analyticsStore.logEvent("Send token finished", {
-                      chainId: chainStore.current.chainId,
-                      chainName: chainStore.current.chainName,
-                      feeType: ibcTransferConfigs.feeConfig.feeType,
-                      toChainId,
-                      toChainName,
-                      isSuccess,
-                    });
+                  {
+                    onBroadcasted: () => {
+                      analyticsStore.logEvent("Send token tx broadCasted", {
+                        chainId: chainStore.current.chainId,
+                        chainName: chainStore.current.chainName,
+                        feeType: ibcTransferConfigs.feeConfig.feeType,
+                        isIbc: true,
+                        toChainId,
+                        toChainName,
+                      });
+                    },
                   }
                 );
                 history.push("/");
@@ -134,9 +134,9 @@ export const IBCTransferPageChannel: FunctionComponent<{
 }> = observer(({ channelConfig, recipientConfig, memoConfig, onNext }) => {
   const intl = useIntl();
   const isValid =
-    channelConfig.getError() == null &&
-    recipientConfig.getError() == null &&
-    memoConfig.getError() == null;
+    channelConfig.error == null &&
+    recipientConfig.error == null &&
+    memoConfig.error == null;
 
   const isChannelSet = channelConfig.channel != null;
 
@@ -201,9 +201,9 @@ export const IBCTransferPageAmount: FunctionComponent<{
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const isValid =
-    amountConfig.getError() == null &&
-    feeConfig.getError() == null &&
-    gasConfig.getError() == null;
+    amountConfig.error == null &&
+    feeConfig.error == null &&
+    gasConfig.error == null;
 
   return (
     <form className={style.formContainer}>

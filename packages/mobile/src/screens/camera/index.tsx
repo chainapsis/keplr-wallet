@@ -15,11 +15,11 @@ import QRCode from "react-native-qrcode-svg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FullScreenCameraView } from "../../components/camera";
 import {
-  importFromMobile,
-  parseQRCodeDataForImportFromMobile,
+  importFromExtension,
+  parseQRCodeDataForImportFromExtension,
   registerExportedAddressBooks,
   registerExportedKeyRingDatas,
-} from "../../utils/import-from-mobile";
+} from "../../utils/import-from-extension";
 import { AddressBookConfigMap, useRegisterConfig } from "@keplr-wallet/hooks";
 import { AsyncKVStore } from "../../common";
 import { useFocusEffect } from "@react-navigation/native";
@@ -103,9 +103,11 @@ export const CameraScreen: FunctionComponent = observer(() => {
                     smartNavigation.navigateSmart("Home", {});
                   }
                 } else {
-                  const sharedData = parseQRCodeDataForImportFromMobile(data);
+                  const sharedData = parseQRCodeDataForImportFromExtension(
+                    data
+                  );
 
-                  const improted = await importFromMobile(
+                  const improted = await importFromExtension(
                     sharedData,
                     chainStore.chainInfosInUI.map(
                       (chainInfo) => chainInfo.chainId

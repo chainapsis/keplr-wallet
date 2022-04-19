@@ -23,10 +23,6 @@ import {
   BETA_CYBER_NETWORK_REST_CONFIG,
   BETA_CYBER_NETWORK_RPC_ENDPOINT,
   BETA_CYBER_NETWORK_RPC_CONFIG,
-  BETA_STRAIGHTEDGE_REST_ENDPOINT,
-  BETA_STRAIGHTEDGE_REST_CONFIG,
-  BETA_STRAIGHTEDGE_RPC_ENDPOINT,
-  BETA_STRAIGHTEDGE_RPC_CONFIG,
   AKASH_RPC_ENDPOINT,
   AKASH_RPC_CONFIG,
   AKASH_REST_ENDPOINT,
@@ -75,6 +71,34 @@ import {
   AGORIC_RPC_CONFIG,
   AGORIC_REST_ENDPOINT,
   AGORIC_REST_CONFIG,
+  AXELAR_RPC_ENDPOINT,
+  AXELAR_RPC_CONFIG,
+  AXELAR_REST_ENDPOINT,
+  AXELAR_REST_CONFIG,
+  JUNO_RPC_ENDPOINT,
+  JUNO_RPC_CONFIG,
+  JUNO_REST_ENDPOINT,
+  JUNO_REST_CONFIG,
+  STARGAZE_RPC_ENDPOINT,
+  STARGAZE_RPC_CONFIG,
+  STARGAZE_REST_ENDPOINT,
+  STARGAZE_REST_CONFIG,
+  SOMMELIER_RPC_ENDPOINT,
+  SOMMELIER_RPC_CONFIG,
+  SOMMELIER_REST_ENDPOINT,
+  SOMMELIER_REST_CONFIG,
+  UMEE_RPC_ENDPOINT,
+  UMEE_RPC_CONFIG,
+  UMEE_REST_ENDPOINT,
+  UMEE_REST_CONFIG,
+  GRAVITY_BRIDGE_RPC_ENDPOINT,
+  GRAVITY_BRIDGE_RPC_CONFIG,
+  GRAVITY_BRIDGE_REST_ENDPOINT,
+  GRAVITY_BRIDGE_REST_CONFIG,
+  EVMOS_RPC_ENDPOINT,
+  EVMOS_RPC_CONFIG,
+  EVMOS_REST_ENDPOINT,
+  EVMOS_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -84,7 +108,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: COSMOS_REST_ENDPOINT,
     restConfig: COSMOS_REST_CONFIG,
     chainId: "cosmoshub-4",
-    chainName: "Cosmos",
+    chainName: "Cosmos Hub",
     stakeCurrency: {
       coinDenom: "ATOM",
       coinMinimalDenom: "uatom",
@@ -120,7 +144,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 118,
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: OSMOSIS_RPC_ENDPOINT,
@@ -169,10 +193,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0,
-      average: 0,
-      high: 0.025,
+      average: 0.025,
+      high: 0.04,
     },
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "cosmwasm"],
   },
   {
     rpc: SECRET_NETWORK_RPC_ENDPOINT,
@@ -222,11 +246,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 529,
     gasPriceStep: {
-      low: 0.1,
-      average: 0.25,
-      high: 0.3,
+      low: 0.0125,
+      average: 0.1,
+      high: 0.25,
     },
-    features: ["stargate", "secretwasm", "ibc-go", "ibc-transfer"],
+    features: ["secretwasm", "ibc-go", "ibc-transfer"],
   },
   {
     rpc: AKASH_RPC_ENDPOINT,
@@ -269,7 +293,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "akash-network",
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: CRYPTO_ORG_RPC_ENDPOINT,
@@ -317,7 +341,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.03,
       high: 0.04,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: IOV_RPC_ENDPOINT,
@@ -365,7 +389,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 2,
       high: 3,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: SIFCHAIN_RPC_ENDPOINT,
@@ -674,6 +698,151 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "ctidal",
         coinDecimals: 18,
       },
+      {
+        coinDenom: "Axie Infinity",
+        coinMinimalDenom: "caxs",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "BitSong",
+        coinMinimalDenom: "cbtsg",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Cosmostarter",
+        coinMinimalDenom: "ccsms",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Dfyn Network",
+        coinMinimalDenom: "cdfyn",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "DinoSwap",
+        coinMinimalDenom: "cdino",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "DinoX",
+        coinMinimalDenom: "cdnxc",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Don-key",
+        coinMinimalDenom: "cdon",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Ethernity Chain",
+        coinMinimalDenom: "cern",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Frax",
+        coinMinimalDenom: "cfrax",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Frax Share",
+        coinMinimalDenom: "cfxs",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Knit Finance",
+        coinMinimalDenom: "ckft",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Lido DAO",
+        coinMinimalDenom: "cldo",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Doge Killer",
+        coinMinimalDenom: "cleash",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "LGCY Network",
+        coinMinimalDenom: "clgcy",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Polygon",
+        coinMinimalDenom: "cmatic",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Metis Token",
+        coinMinimalDenom: "cmetis",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Oh! Finance",
+        coinMinimalDenom: "coh",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Polkastarter",
+        coinMinimalDenom: "cpols",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Marlin",
+        coinMinimalDenom: "cpond",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Quickswap",
+        coinMinimalDenom: "cquick",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Railgun",
+        coinMinimalDenom: "crail",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "StaFi rATOM",
+        coinMinimalDenom: "cratom",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Saito",
+        coinMinimalDenom: "csaito",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Shiba Inu",
+        coinMinimalDenom: "cshib",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Tokemak",
+        coinMinimalDenom: "ctoke",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "UFO Gaming",
+        coinMinimalDenom: "cufo",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "UST (ERC-20)",
+        coinMinimalDenom: "cust",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "0chain",
+        coinMinimalDenom: "czcn",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "Unizen",
+        coinMinimalDenom: "czcx",
+        coinDecimals: 18,
+      },
     ],
     feeCurrencies: [
       {
@@ -688,7 +857,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 1500000000000,
       high: 2000000000000,
     },
-    features: ["stargate"],
+    features: [],
   },
   {
     rpc: CERTIK_RPC_ENDPOINT,
@@ -731,7 +900,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "certik",
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: IRIS_RPC_ENDPOINT,
@@ -784,7 +953,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.3,
       high: 0.4,
     },
-    features: ["stargate", "ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: REGEN_RPC_ENDPOINT,
@@ -827,7 +996,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "regen",
       },
     ],
-    features: ["stargate", "ibc-go", "ibc-transfer"],
+    features: ["ibc-go", "ibc-transfer", "ibc-go"],
   },
   {
     rpc: PERSISTENCE_RPC_ENDPOINT,
@@ -875,7 +1044,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025,
       high: 0.04,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: SENTINEL_RPC_ENDPOINT,
@@ -923,14 +1092,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.4,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: KAVA_RPC_ENDPOINT,
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-8",
+    chainId: "kava-9",
     chainName: "Kava",
     stakeCurrency: {
       coinDenom: "KAVA",
@@ -1047,7 +1216,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: EMONEY_RPC_ENDPOINT,
@@ -1085,6 +1254,27 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EEUR",
         coinMinimalDenom: "eeur",
         coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
       },
     ],
     feeCurrencies: [
@@ -1100,7 +1290,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 1,
       high: 1,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: AGORIC_RPC_ENDPOINT,
@@ -1150,7 +1340,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0,
       high: 0,
     },
-    features: ["stargate", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-go"],
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
@@ -1215,61 +1405,340 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.01,
       high: 0.02,
     },
-    features: [
-      "stargate",
-      "ibc-transfer",
-      "no-legacy-stdTx",
-      "cosmwasm",
-      "ibc-go",
-    ],
+    features: ["ibc-transfer", "cosmwasm", "ibc-go"],
   },
   {
-    rpc: BETA_STRAIGHTEDGE_RPC_ENDPOINT,
-    rpcConfig: BETA_STRAIGHTEDGE_RPC_CONFIG,
-    rest: BETA_STRAIGHTEDGE_REST_ENDPOINT,
-    restConfig: BETA_STRAIGHTEDGE_REST_CONFIG,
-    chainId: "straightedge-2",
-    chainName: "Straightedge",
+    rpc: JUNO_RPC_ENDPOINT,
+    rpcConfig: JUNO_RPC_CONFIG,
+    rest: JUNO_REST_ENDPOINT,
+    restConfig: JUNO_REST_CONFIG,
+    chainId: "juno-1",
+    chainName: "Juno",
     stakeCurrency: {
-      coinDenom: "STR",
-      coinMinimalDenom: "astr",
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+      coinGeckoId: "juno-network",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/juno/stake"
+        : "http://localhost:8080/#/juno/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/juno/stake"
+        : "http://localhost:8080/#/juno/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("juno"),
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.001,
+      average: 0.0025,
+      high: 0.004,
+    },
+    features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
+  },
+  {
+    rpc: STARGAZE_RPC_ENDPOINT,
+    rpcConfig: STARGAZE_RPC_CONFIG,
+    rest: STARGAZE_REST_ENDPOINT,
+    restConfig: STARGAZE_REST_CONFIG,
+    chainId: "stargaze-1",
+    chainName: "Stargaze",
+    stakeCurrency: {
+      coinDenom: "STARS",
+      coinMinimalDenom: "ustars",
+      coinDecimals: 6,
+      coinGeckoId: "stargaze",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/stargaze/stake"
+        : "http://localhost:8080/#/stargaze/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/stargaze/stake"
+        : "http://localhost:8080/#/stargaze/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stars"),
+    currencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ustars",
+        coinDecimals: 6,
+        coinGeckoId: "stargaze",
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: AXELAR_RPC_ENDPOINT,
+    rpcConfig: AXELAR_RPC_CONFIG,
+    rest: AXELAR_REST_ENDPOINT,
+    restConfig: AXELAR_REST_CONFIG,
+    chainId: "axelar-dojo-1",
+    chainName: "Axelar",
+    stakeCurrency: {
+      coinDenom: "AXL",
+      coinMinimalDenom: "uaxl",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/axelar/stake"
+        : "http://localhost:8080/#/axelar/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/axelar/stake"
+        : "http://localhost:8080/#/axelar/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("axelar"),
+    currencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+      },
+      {
+        coinDenom: "FRAX",
+        coinMinimalDenom: "frax-wei",
+        coinDecimals: 18,
+        coinGeckoId: "frax",
+      },
+      {
+        coinDenom: "DAI",
+        coinMinimalDenom: "dai-wei",
+        coinDecimals: 18,
+        coinGeckoId: "dai",
+      },
+      {
+        coinDenom: "USDT",
+        coinMinimalDenom: "uusdt",
+        coinDecimals: 6,
+        coinGeckoId: "tether",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "uaxl",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.05,
+      average: 0.075,
+      high: 0.1,
+    },
+    features: ["ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: SOMMELIER_RPC_ENDPOINT,
+    rpcConfig: SOMMELIER_RPC_CONFIG,
+    rest: SOMMELIER_REST_ENDPOINT,
+    restConfig: SOMMELIER_REST_CONFIG,
+    chainId: "sommelier-3",
+    chainName: "Sommelier",
+    stakeCurrency: {
+      coinDenom: "SOMM",
+      coinMinimalDenom: "usomm",
+      coinDecimals: 6,
+      coinGeckoId: "sommelier",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sommelier/stake"
+        : "http://localhost:8080/#/sommelier/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/sommelier/stake"
+        : "http://localhost:8080/#/sommelier/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("somm"),
+    currencies: [
+      {
+        coinDenom: "SOMM",
+        coinMinimalDenom: "usomm",
+        coinDecimals: 6,
+        coinGeckoId: "sommelier",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "SOMM",
+        coinMinimalDenom: "usomm",
+        coinDecimals: 6,
+        coinGeckoId: "sommelier",
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: UMEE_RPC_ENDPOINT,
+    rpcConfig: UMEE_RPC_CONFIG,
+    rest: UMEE_REST_ENDPOINT,
+    restConfig: UMEE_REST_CONFIG,
+    chainId: "umee-1",
+    chainName: "Umee",
+    stakeCurrency: {
+      coinDenom: "UMEE",
+      coinMinimalDenom: "uumee",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/umee/stake"
+        : "http://localhost:8080/#/umee/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/umee/stake"
+        : "http://localhost:8080/#/umee/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("umee"),
+    currencies: [
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "uumee",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "uumee",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0.025,
+      high: 0.04,
+    },
+    features: ["ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: GRAVITY_BRIDGE_RPC_ENDPOINT,
+    rpcConfig: GRAVITY_BRIDGE_RPC_CONFIG,
+    rest: GRAVITY_BRIDGE_REST_ENDPOINT,
+    restConfig: GRAVITY_BRIDGE_REST_CONFIG,
+    chainId: "gravity-bridge-3",
+    chainName: "Gravity Bridge",
+    stakeCurrency: {
+      coinDenom: "GRAV",
+      coinMinimalDenom: "ugraviton",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/gravity-bridge/stake"
+        : "http://localhost:8080/#/gravity-bridge/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/gravity-bridge/stake"
+        : "http://localhost:8080/#/gravity-bridge/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("gravity"),
+    currencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: EVMOS_RPC_ENDPOINT,
+    rpcConfig: EVMOS_RPC_CONFIG,
+    rest: EVMOS_REST_ENDPOINT,
+    restConfig: EVMOS_REST_CONFIG,
+    chainId: "evmos_9001-1",
+    chainName: "Evmos (Beta)",
+    stakeCurrency: {
+      coinDenom: "EVMOS",
+      coinMinimalDenom: "aevmos",
       coinDecimals: 18,
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/straightedge/stake"
-        : "http://localhost:8080/#/straightedge/stake",
+        ? "https://wallet.keplr.app/#/evmos/stake"
+        : "http://localhost:8080/#/evmos/stake",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/straightedge/stake"
-        : "http://localhost:8080/#/straightedge/stake",
+        ? "https://wallet.keplr.app/#/evmos/stake"
+        : "http://localhost:8080/#/evmos/stake",
     bip44: {
-      coinType: 118,
+      coinType: 60,
     },
-    bech32Config: Bech32Address.defaultBech32Config("str"),
+    bech32Config: Bech32Address.defaultBech32Config("evmos"),
     currencies: [
       {
-        coinDenom: "STR",
-        coinMinimalDenom: "astr",
+        coinDenom: "EVMOS",
+        coinMinimalDenom: "aevmos",
         coinDecimals: 18,
       },
     ],
     feeCurrencies: [
       {
-        coinDenom: "STR",
-        coinMinimalDenom: "astr",
+        coinDenom: "EVMOS",
+        coinMinimalDenom: "aevmos",
         coinDecimals: 18,
       },
     ],
-    coinType: 551,
-    // STR's decimal is high. Thus, if gas price is set as 0.025, it produces very low and long fee.
-    // And, currently, this long fee is not visible well in Keplr.
-    // Just, increase the gas price step temporarily.
     gasPriceStep: {
-      low: 0.01 * Math.pow(10, 12),
-      average: 0.025 * Math.pow(10, 12),
-      high: 0.04 * Math.pow(10, 12),
+      low: 10000000000,
+      average: 25000000000,
+      high: 40000000000,
     },
+    features: ["ibc-transfer", "ibc-go"],
     beta: true,
   },
 ];

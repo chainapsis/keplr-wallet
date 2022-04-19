@@ -33,7 +33,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
     >
   >();
 
-  const { chainStore, analyticsStore } = useStore();
+  const { chainStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
   const addressBookConfig = route.params.addressBookConfig;
@@ -71,24 +71,18 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
         text="Save"
         size="large"
         disabled={
-          !name ||
-          recipientConfig.getError() != null ||
-          memoConfig.getError() != null
+          !name || recipientConfig.error != null || memoConfig.error != null
         }
         onPress={async () => {
           if (
             name &&
-            recipientConfig.getError() == null &&
-            memoConfig.getError() == null
+            recipientConfig.error == null &&
+            memoConfig.error == null
           ) {
             await addressBookConfig.addAddressBook({
               name,
               address: recipientConfig.rawRecipient,
               memo: memoConfig.memo,
-            });
-            analyticsStore.logEvent("Add address finished", {
-              chainId: chainStore.current.chainId,
-              chainName: chainStore.current.chainName,
             });
 
             smartNavigation.goBack();
