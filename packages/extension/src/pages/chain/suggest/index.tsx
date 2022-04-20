@@ -32,7 +32,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
       <div className={style.container}>
         <img
-          src={require("../../../public/assets/temp-icon.svg")}
+          src={require("../../../public/assets/keplr-logo.svg")}
           alt="logo"
           style={{ height: "92px" }}
         />
