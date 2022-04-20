@@ -1,0 +1,20 @@
+.btn {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 1.125rem;
+  line-height: 1.25rem;
+}
+
+.btn-secondary {
+  color: $primary;
+  box-shadow: none;
+}
+
+.btn-transparent {
+  color: $primary;
+  background: transparent;
+}
+
+.btn-block + .btn-block {
+  margin-top: 1.25rem;
+}

@@ -79,20 +79,20 @@ export const RegisterPage: FunctionComponent = observer(() => {
       className={style.container}
       style={{ height: "100%", backgroundColor: "white", padding: 0 }}
     >
-      <div className={style.logoContainer}>
-        <img
-          className={style.icon}
-          src={require("../../public/assets/keplr-logo.svg")}
-          alt="logo"
-        />
-        <div className={style.logoInnerContainer}>
+      <div className={style.brandContainer}>
+        <div className={style.logoContainer}>
           <img
-            className={style.logo}
-            src={require("../../public/assets/keplr-logo-text.png")}
-            alt="logo"
+            className={style.logoImage}
+            src={require("../../public/assets/keplr-logo.svg")}
+            alt="keplr logo image"
           />
-          <div className={style.paragraph}>Wallet for the Interchain</div>
+          <img
+            className={style.logoText}
+            src={require("../../public/assets/keplr-logo-text.png")}
+            alt="keplr logo text"
+          />
         </div>
+        <div className={style.paragraph}>The Interchain Wallet</div>
       </div>
       {registerConfig.render()}
       {registerConfig.isFinalized ? <WelcomePage /> : null}

@@ -24,8 +24,7 @@ export const ImportLedgerIntro: FunctionComponent<{
   const { analyticsStore } = useStore();
   return (
     <Button
-      color="primary"
-      outline
+      color="transparent"
       block
       onClick={(e) => {
         e.preventDefault();

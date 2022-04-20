@@ -69,6 +69,7 @@ require("./public/assets/keplr-logo.svg");
 require("./public/assets/keplr-logo-16.png");
 require("./public/assets/keplr-logo-48.png");
 require("./public/assets/keplr-logo-128.png");
+require("./public/assets/keplr-logo-text.png");
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.

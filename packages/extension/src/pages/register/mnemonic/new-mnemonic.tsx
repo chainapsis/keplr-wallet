@@ -32,7 +32,6 @@ export const NewMnemonicIntro: FunctionComponent<{
   return (
     <Button
       color="primary"
-      outline
       block
       onClick={(e) => {
         e.preventDefault();

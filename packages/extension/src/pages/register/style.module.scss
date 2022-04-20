@@ -1,6 +1,6 @@
 @import "../../styles/var";
 
-$container-width: 420px;
+$container-width: 400px;
 
 :global(body)[data-centered="true"] {
   height: 85vh;
@@ -32,34 +32,36 @@ $container-width: 420px;
     margin-right: 0;
   }
 
-  .logo-container {
-    margin-top: 40px;
-    margin-bottom: 40px;
+  .brand-container {
+    margin-bottom: 71px;
 
     display: flex;
+    flex-direction: column;
+    align-items: center;
 
-    .icon {
-      width: 80px;
-      height: 80px;
-    }
-
-    .logo-inner-container {
-      margin-top: 8px;
-      margin-left: 20px;
+    .logo-container {
+      margin-top: 40px;
 
       display: flex;
-      flex-direction: column;
-      justify-content: space-evenly;
-      align-items: start;
+      justify-content: center;
+      align-items: flex-end;
 
-      .logo {
-        height: 50px;
+      .logo-image {
+        width: 105px;
+        height: 105px;
       }
 
-      .paragraph {
-        font-size: 16px;
-        line-height: 1;
+      .logo-text {
+        margin-left: 24px;
+        margin-bottom: 6px;
       }
+    }
+
+    .paragraph {
+      margin-top: 22px;
+      font-weight: 500;
+      font-size: 27px;
+      line-height: 41px;
     }
   }
 

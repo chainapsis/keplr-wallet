@@ -1,5 +1,7 @@
 @charset "utf-8";
 
+@import "var-bootstrap";
+
 @import "../../../../node_modules/argon-dashboard-react/src/assets/plugins/nucleo/css/nucleo.css";
 
 $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
@@ -31,6 +33,8 @@ $body-color: black;
 @import url("https://fonts.googleapis.com/css?family=Courier+Prime&display=swap");
 
 @import "var";
+
+@import "bootstrap";
 
 html {
   width: $popup-size-width;
