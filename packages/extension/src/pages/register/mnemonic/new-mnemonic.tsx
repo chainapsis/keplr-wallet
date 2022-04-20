@@ -91,10 +91,10 @@ export const GenerateMnemonicModePage: FunctionComponent<{
 
   return (
     <div>
-      <Alert color="warning">
-        <h3 style={{ color: "white" }}>
+      <Alert color="danger-outline">
+        <div className={style.alertTitle}>
           <FormattedMessage id="register.create.warning.keep-your-mnemonic.header" />
-        </h3>
+        </div>
         <ul>
           <li>
             <FormattedMessage id="register.create.warning.keep-your-mnemonic.paragraph1" />

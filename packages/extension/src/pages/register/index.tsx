@@ -1,35 +1,35 @@
-import React, { FunctionComponent, useEffect } from "react";
-
-import { EmptyLayout } from "../../layouts/empty-layout";
-
-import { observer } from "mobx-react-lite";
-
-import style from "./style.module.scss";
-
-import { Button } from "reactstrap";
-
-import { FormattedMessage } from "react-intl";
-
 import { useRegisterConfig } from "@keplr-wallet/hooks";
+import { observer } from "mobx-react-lite";
+import React, { FunctionComponent, useEffect } from "react";
+import { FormattedMessage } from "react-intl";
+import { Button } from "reactstrap";
+import { AdditionalSignInPrepend } from "../../config.ui";
+import { EmptyLayout } from "../../layouts/empty-layout";
 import { useStore } from "../../stores";
-import { NewMnemonicIntro, NewMnemonicPage, TypeNewMnemonic } from "./mnemonic";
-import {
-  RecoverMnemonicIntro,
-  RecoverMnemonicPage,
-  TypeRecoverMnemonic,
-} from "./mnemonic";
 import {
   ImportLedgerIntro,
   ImportLedgerPage,
   TypeImportLedger,
 } from "./ledger";
+import {
+  NewMnemonicIntro,
+  NewMnemonicPage,
+  RecoverMnemonicIntro,
+  RecoverMnemonicPage,
+  TypeNewMnemonic,
+  TypeRecoverMnemonic,
+} from "./mnemonic";
+import style from "./style.module.scss";
 import { WelcomePage } from "./welcome";
-import { AdditionalSignInPrepend } from "../../config.ui";
 
 export enum NunWords {
   WORDS12,
   WORDS24,
 }
+
+export const registerTypeToWidth: Record<string, number> = {
+  [TypeNewMnemonic]: 609,
+};
 
 export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
   onClick,
@@ -77,9 +77,31 @@ export const RegisterPage: FunctionComponent = observer(() => {
   return (
     <EmptyLayout
       className={style.container}
-      style={{ height: "100%", backgroundColor: "white", padding: 0 }}
+      style={{
+        backgroundColor: "white",
+        padding: 0,
+        ...(registerConfig.type
+          ? {
+              width: `${registerTypeToWidth[registerConfig.type]}px`,
+              marginLeft: `calc((360px - ${
+                registerTypeToWidth[registerConfig.type]
+              }px) / 2)`,
+            }
+          : {
+              width: "400px",
+              marginLeft: "calc((360px - 400px) / 2)",
+              height: "100%",
+            }),
+      }}
     >
-      <div className={style.brandContainer}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: registerConfig.type ? "flex-start" : "center",
+          marginBottom: registerConfig.type ? "40px" : "71px",
+        }}
+      >
         <div className={style.logoContainer}>
           <img
             className={style.logoImage}
@@ -92,7 +114,9 @@ export const RegisterPage: FunctionComponent = observer(() => {
             alt="keplr logo text"
           />
         </div>
-        <div className={style.paragraph}>The Interchain Wallet</div>
+        {registerConfig.isIntro && (
+          <div className={style.paragraph}>The Interchain Wallet</div>
+        )}
       </div>
       {registerConfig.render()}
       {registerConfig.isFinalized ? <WelcomePage /> : null}
