@@ -1,0 +1,32 @@
+site_name: LedgerExplorer
+site_url: https://docs.fetch.ai/ledger-explorer
+site_description: Everything you need to know about the ledger explorer.
+repo_url: https://github.com/fetchai/ledger-explorer
+site_author: developer@fetch.ai
+
+theme:
+  name: material
+  logo: images/logo.png
+  favicon: assets/images/favicon.ico
+  feature:
+    tabs: true
+  custom_dir: custom_theme
+
+nav:
+  - Getting Started: 'getting_started.md'
+  - Account Management: 'account_management.md'
+#    - Switch accounts: 'switch_account.md'
+#    - Create a new account: 'new_account.md'
+#    - Import existing account: 'import_account.md'
+#    - Migrate ETH: 'migrate_eth.md'
+  - Send Tokens: 'send_tokens.md'
+  - Deposit: 'deposit.md'
+  - Stake: 'stake.md'
+
+extra_css:
+  - css/style.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.highlight
