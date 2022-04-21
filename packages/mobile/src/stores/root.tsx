@@ -1,4 +1,4 @@
-import { EmbedChainInfos } from "../config";
+import { EmbedChainInfos, EthereumEndpoint } from "../config";
 import {
   KeyRingStore,
   InteractionStore,
@@ -31,6 +31,11 @@ import { AmplitudeApiKey } from "../config";
 import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import { Amplitude } from "@amplitude/react-native";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import {
+  GravityBridgeCurrencyRegsitrar,
+  KeplrETCQueries,
+} from "@keplr-wallet/stores-etc";
+import { ExtensionKVStore } from "@keplr-wallet/common";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -42,7 +47,7 @@ export class RootStore {
   public readonly signInteractionStore: SignInteractionStore;
 
   public readonly queriesStore: QueriesStore<
-    [CosmosQueries, CosmwasmQueries, SecretQueries]
+    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
   >;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
@@ -51,6 +56,7 @@ export class RootStore {
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
@@ -131,6 +137,9 @@ export class RootStore {
           // TOOD: Set version for Keplr API
           return new Keplr("", "core", new RNMessageRequesterInternal());
         },
+      }),
+      KeplrETCQueries.use({
+        ethereumURL: EthereumEndpoint,
       })
     );
 
@@ -163,6 +172,12 @@ export class RootStore {
                 native: {
                   gas: 100000,
                 },
+              },
+              undelegate: {
+                gas: 350000,
+              },
+              redelegate: {
+                gas: 550000,
               },
               withdrawRewards: {
                 gas: 300000,
@@ -270,6 +285,11 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       this.queriesStore,
+      this.queriesStore
+    );
+    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar(
+      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+      this.chainStore,
       this.queriesStore
     );
 

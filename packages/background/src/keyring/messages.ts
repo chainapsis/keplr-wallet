@@ -17,8 +17,7 @@ import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
-import { cosmos } from "@keplr-wallet/cosmos";
-import Long from "long";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
@@ -607,10 +606,10 @@ export class RequestSignDirectMsg extends Message<{
     public readonly chainId: string,
     public readonly signer: string,
     public readonly signDoc: {
-      bodyBytes?: Uint8Array | null;
-      authInfoBytes?: Uint8Array | null;
-      chainId?: string | null;
-      accountNumber?: string | null;
+      bodyBytes?: Uint8Array;
+      authInfoBytes?: Uint8Array;
+      chainId?: string;
+      accountNumber?: string;
     },
     public readonly signOptions: KeplrSignOptions = {}
   ) {
@@ -629,13 +628,11 @@ export class RequestSignDirectMsg extends Message<{
     // Validate bech32 address.
     Bech32Address.validate(this.signer);
 
-    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+    const signDoc = SignDoc.fromPartial({
       bodyBytes: this.signDoc.bodyBytes,
       authInfoBytes: this.signDoc.authInfoBytes,
       chainId: this.signDoc.chainId,
-      accountNumber: this.signDoc.accountNumber
-        ? Long.fromString(this.signDoc.accountNumber)
-        : undefined,
+      accountNumber: this.signDoc.accountNumber,
     });
 
     if (signDoc.chainId !== this.chainId) {
