@@ -404,7 +404,7 @@ export class CosmosAccountImpl {
       true
     );
 
-    const coinType = this.chainGetter.getChain(this.chainId).coinType;
+    const coinType = this.chainGetter.getChain(this.chainId).bip44.coinType;
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
