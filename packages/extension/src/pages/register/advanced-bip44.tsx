@@ -1,10 +1,11 @@
-import React, { FunctionComponent, useState } from "react";
-import { Button, FormGroup, Input, Label } from "reactstrap";
-import { useConfirm } from "../../components/confirm";
-import { FormattedMessage, useIntl } from "react-intl";
+import { BIP44HDPath } from "@keplr-wallet/background";
 import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
-import { BIP44HDPath } from "@keplr-wallet/background";
+import React, { FunctionComponent, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import { FormGroup, Input, Label } from "reactstrap";
+import { useConfirm } from "../../components/confirm";
+import style from "./style.module.scss";
 
 export class BIP44Option {
   @observable
@@ -111,18 +112,24 @@ export const AdvancedBIP44Option: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <Button
-        type="button"
-        color="link"
+      <div
+        className={style.derivationPathToggle}
         onClick={(e) => {
           e.preventDefault();
           toggleOpen();
         }}
       >
-        <FormattedMessage id="register.bip44.button.advanced" />
-      </Button>
+        {!isOpen && (
+          <img src={require("../../public/assets/img/setting.svg")} />
+        )}
+        {isOpen ? (
+          <u>Reset HD Derivation Path</u>
+        ) : (
+          <FormattedMessage id="register.bip44.input.hd-path" />
+        )}
+      </div>
       {isOpen ? (
-        <FormGroup>
+        <FormGroup className={style.derivationPath}>
           <Label target="bip44-path" className="form-control-label">
             <FormattedMessage id="register.bip44.input.hd-path" />
           </Label>

@@ -79,7 +79,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
       className={style.container}
       style={{
         backgroundColor: "white",
-        padding: 0,
+        padding: "40px 0",
         ...(registerConfig.type
           ? {
               width: `${registerTypeToWidth[registerConfig.type]}px`,

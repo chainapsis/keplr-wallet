@@ -1,19 +1,27 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { FormattedMessage, useIntl } from "react-intl";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import useForm from "react-hook-form";
+import { FormattedMessage, useIntl } from "react-intl";
+import {
+  Alert,
+  Button,
+  ButtonDropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Form,
+} from "reactstrap";
+import { Input, PasswordInput } from "../../../components/form";
+import { useStore } from "../../../stores";
 import {
   AdvancedBIP44Option,
   BIP44Option,
   useBIP44Option,
 } from "../advanced-bip44";
-import style from "../style.module.scss";
-import { Alert, Button, ButtonGroup, Form } from "reactstrap";
-import { Input, PasswordInput } from "../../../components/form";
 import { BackButton } from "../index";
-import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
-import { useStore } from "../../../stores";
+import style from "../style.module.scss";
+import { NewMnemonicConfig, NumWords, useNewMnemonicConfig } from "./hook";
 
 export const TypeNewMnemonic = "new-mnemonic";
 
@@ -80,6 +88,8 @@ export const GenerateMnemonicModePage: FunctionComponent<{
 }> = observer(({ registerConfig, newMnemonicConfig, bip44Option }) => {
   const intl = useIntl();
 
+  const [isOpenWordsDropdown, setIsOpenWordsDropdown] = useState(false);
+
   const { register, handleSubmit, getValues, errors } = useForm<FormData>({
     defaultValues: {
       name: newMnemonicConfig.name,
@@ -108,29 +118,39 @@ export const GenerateMnemonicModePage: FunctionComponent<{
         {intl.formatMessage({
           id: "register.create.title",
         })}
-        <div style={{ float: "right" }}>
-          <ButtonGroup size="sm" style={{ marginBottom: "4px" }}>
-            <Button
-              type="button"
-              color="primary"
-              outline={newMnemonicConfig.numWords !== NumWords.WORDS12}
-              onClick={() => {
-                newMnemonicConfig.setNumWords(NumWords.WORDS12);
-              }}
-            >
-              <FormattedMessage id="register.create.toggle.word12" />
-            </Button>
-            <Button
-              type="button"
-              color="primary"
-              outline={newMnemonicConfig.numWords !== NumWords.WORDS24}
-              onClick={() => {
-                newMnemonicConfig.setNumWords(NumWords.WORDS24);
-              }}
-            >
-              <FormattedMessage id="register.create.toggle.word24" />
-            </Button>
-          </ButtonGroup>
+        <div>
+          {/* <Select
+            options={selectOptions}
+            defaultValue={selectOptions[0]}
+            isClearable={false}
+            isSearchable={false}
+          /> */}
+          <ButtonDropdown
+            isOpen={isOpenWordsDropdown}
+            toggle={() => setIsOpenWordsDropdown(!isOpenWordsDropdown)}
+          >
+            <DropdownToggle caret>
+              {newMnemonicConfig.numWords === NumWords.WORDS12 ? (
+                <FormattedMessage id="register.create.toggle.word12" />
+              ) : (
+                <FormattedMessage id="register.create.toggle.word24" />
+              )}
+            </DropdownToggle>
+            <DropdownMenu>
+              <DropdownItem
+                active={newMnemonicConfig.numWords === NumWords.WORDS12}
+                onClick={() => newMnemonicConfig.setNumWords(NumWords.WORDS12)}
+              >
+                <FormattedMessage id="register.create.toggle.word12" />
+              </DropdownItem>
+              <DropdownItem
+                active={newMnemonicConfig.numWords === NumWords.WORDS24}
+                onClick={() => newMnemonicConfig.setNumWords(NumWords.WORDS24)}
+              >
+                <FormattedMessage id="register.create.toggle.word24" />
+              </DropdownItem>
+            </DropdownMenu>
+          </ButtonDropdown>
         </div>
       </div>
       <Form
@@ -200,9 +220,11 @@ export const GenerateMnemonicModePage: FunctionComponent<{
           </React.Fragment>
         ) : null}
         <AdvancedBIP44Option bip44Option={bip44Option} />
-        <Button color="primary" type="submit" block>
-          <FormattedMessage id="register.create.button.next" />
-        </Button>
+        <div className={style.submitButton}>
+          <Button color="primary" type="submit">
+            <FormattedMessage id="register.create.button.next" />
+          </Button>
+        </div>
       </Form>
       <BackButton
         onClick={() => {
