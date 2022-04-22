@@ -1,3 +1,4 @@
+// Button
 .btn {
   padding-top: 1rem;
   padding-bottom: 1rem;
@@ -17,4 +18,15 @@
 
 .btn-block + .btn-block {
   margin-top: 1.25rem;
+}
+
+// Alert
+.alert {
+  padding: 1.75rem 2rem;
+}
+
+.alert-danger-outline {
+  color: $danger;
+  background-color: $white;
+  border: 1px solid $danger;
 }

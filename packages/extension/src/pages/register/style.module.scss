@@ -1,7 +1,5 @@
 @import "../../styles/var";
 
-$container-width: 400px;
-
 :global(body)[data-centered="true"] {
   height: 85vh;
   background-color: white;
@@ -20,9 +18,6 @@ $container-width: 400px;
 }
 
 .container {
-  width: $container-width;
-  margin-left: ($popup-size-width - $container-width) / 2;
-
   display: flex;
   flex-direction: column;
   background-color: white;
@@ -32,37 +27,29 @@ $container-width: 400px;
     margin-right: 0;
   }
 
-  .brand-container {
-    margin-bottom: 71px;
+  .logo-container {
+    margin-top: 40px;
 
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    align-items: flex-end;
 
-    .logo-container {
-      margin-top: 40px;
-
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-
-      .logo-image {
-        width: 105px;
-        height: 105px;
-      }
-
-      .logo-text {
-        margin-left: 24px;
-        margin-bottom: 6px;
-      }
+    .logo-image {
+      width: 105px;
+      height: 105px;
     }
 
-    .paragraph {
-      margin-top: 22px;
-      font-weight: 500;
-      font-size: 27px;
-      line-height: 41px;
+    .logo-text {
+      margin-left: 24px;
+      margin-bottom: 6px;
     }
+  }
+
+  .paragraph {
+    margin-top: 22px;
+    font-weight: 500;
+    font-size: 27px;
+    line-height: 41px;
   }
 
   .title {
@@ -133,4 +120,11 @@ $container-width: 400px;
     margin-bottom: 8px;
     margin-left: 0 !important;
   }
+}
+
+.alert-title {
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 23px;
+  margin-bottom: 10px;
 }
