@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/ens",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
