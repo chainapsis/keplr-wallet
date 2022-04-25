@@ -11,7 +11,7 @@ import {
   UmbralVerifyCapsuleFragMsg,
 } from "@fetchai/umbral-types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import { FetchBrowserWallet } from "@fetchai/fetchai-wallet-types";
+import { FetchBrowserWallet } from "@fetchai/wallet-types";
 import { Keplr } from "@keplr-wallet/types";
 
 class ExtensionCoreUmbral implements UmbralApi {

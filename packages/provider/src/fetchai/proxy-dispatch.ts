@@ -1,6 +1,6 @@
 import { Method } from "./types";
 import { UmbralApi } from "@fetchai/umbral-types";
-import { FetchBrowserWallet } from "@fetchai/fetchai-wallet-types";
+import { FetchBrowserWallet } from "@fetchai/wallet-types";
 import { JSONUint8Array } from "@keplr-wallet/router";
 import {
   createBrowserWindowProxy,

@@ -11,7 +11,7 @@ import {
   Proxy,
   toProxyResponse,
 } from "./proxy";
-import { FetchBrowserWallet } from "@fetchai/fetchai-wallet-types";
+import { FetchBrowserWallet } from "@fetchai/wallet-types";
 import { Keplr } from "@keplr-wallet/types";
 
 class BrowserInjectedUmbral implements UmbralApi {

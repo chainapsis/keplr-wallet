@@ -2,7 +2,7 @@ import { Keplr } from "@keplr-wallet/types";
 import { OfflineSigner } from "@cosmjs/launchpad";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import { OfflineDirectSigner } from "@cosmjs/proto-signing";
-import { FetchBrowserWallet } from "@fetchai/fetchai-wallet-types";
+import { FetchBrowserWallet } from "@fetchai/wallet-types";
 
 export function init(
   keplr: Keplr,
