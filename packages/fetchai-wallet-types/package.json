@@ -1,6 +1,6 @@
 {
   "name": "@fetchai/fetchai-wallet-types",
-  "version": "0.9.10",
+  "version": "0.1.0",
   "main": "build/index.js",
   "author": "fetchai",
   "license": "Apache-2.0",
