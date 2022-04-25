@@ -1,6 +1,6 @@
 {
   "name": "@fetchai/wallet-types",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "build/index.js",
   "author": "fetchai",
   "license": "Apache-2.0",
@@ -20,7 +20,7 @@
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@keplr-wallet/types": "^0.9.10",
-    "@fetchai/umbral-types": "^0.1.0",
+    "@fetchai/umbral-types": "^0.1.1",
     "long": "^4.0.0"
   }
 }
