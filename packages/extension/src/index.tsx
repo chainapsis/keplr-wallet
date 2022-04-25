@@ -1,5 +1,4 @@
 import React, { FunctionComponent } from "react";
-import ReactDOM from "react-dom";
 
 import { AppIntlProvider } from "./languages";
 
@@ -128,109 +127,120 @@ const StateRenderer: FunctionComponent = observer(() => {
   }
 });
 
-ReactDOM.render(
-  <StoreProvider>
-    <AppIntlProvider
-      additionalMessages={AdditonalIntlMessages}
-      languageToFiatCurrency={LanguageToFiatCurrency}
-    >
-      <LoadingIndicatorProvider>
-        <NotificationStoreProvider>
-          <NotificationProvider>
-            <ConfirmProvider>
-              <HashRouter>
-                <LogPageViewWrapper>
-                  <Route exact path="/" component={StateRenderer} />
-                  <Route exact path="/unlock" component={LockPage} />
-                  <Route exact path="/access" component={AccessPage} />
-                  <Route
-                    exact
-                    path="/access/viewing-key"
-                    component={Secret20ViewingKeyAccessPage}
-                  />
-                  <Route exact path="/register" component={RegisterPage} />
-                  <Route exact path="/send" component={SendPage} />
-                  <Route
-                    exact
-                    path="/ibc-transfer"
-                    component={IBCTransferPage}
-                  />
-                  <Route exact path="/setting" component={SettingPage} />
-                  <Route
-                    exact
-                    path="/ledger-grant"
-                    component={LedgerGrantPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/language"
-                    component={SettingLanguagePage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/fiat"
-                    component={SettingFiatPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/connections"
-                    component={SettingConnectionsPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/connections/viewing-key/:contractAddress"
-                    component={SettingSecret20ViewingKeyConnectionsPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/address-book"
-                    component={AddressBookPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/export-to-mobile"
-                    component={ExportToMobilePage}
-                  />
-                  <Route exact path="/setting/credit" component={CreditPage} />
-                  <Route
-                    exact
-                    path="/setting/set-keyring"
-                    component={SetKeyRingPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/export/:index"
-                    component={ExportPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/clear/:index"
-                    component={ClearPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/keyring/change/name/:index"
-                    component={ChangeNamePage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/token/add"
-                    component={AddTokenPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/token/manage"
-                    component={ManageTokenPage}
-                  />
-                  <Route path="/sign" component={SignPage} />
-                  <Route path="/suggest-chain" component={ChainSuggestedPage} />
-                </LogPageViewWrapper>
-              </HashRouter>
-            </ConfirmProvider>
-          </NotificationProvider>
-        </NotificationStoreProvider>
-      </LoadingIndicatorProvider>
-    </AppIntlProvider>
-  </StoreProvider>,
-  document.getElementById("app")
-);
+const Application: FunctionComponent = () => {
+  return (
+    <StoreProvider>
+      <AppIntlProvider
+        additionalMessages={AdditonalIntlMessages}
+        languageToFiatCurrency={LanguageToFiatCurrency}
+      >
+        <LoadingIndicatorProvider>
+          <NotificationStoreProvider>
+            <NotificationProvider>
+              <ConfirmProvider>
+                <HashRouter>
+                  <LogPageViewWrapper>
+                    <Route exact path="/" component={StateRenderer} />
+                    <Route exact path="/unlock" component={LockPage} />
+                    <Route exact path="/access" component={AccessPage} />
+                    <Route
+                      exact
+                      path="/access/viewing-key"
+                      component={Secret20ViewingKeyAccessPage}
+                    />
+                    <Route exact path="/register" component={RegisterPage} />
+                    <Route exact path="/send" component={SendPage} />
+                    <Route
+                      exact
+                      path="/ibc-transfer"
+                      component={IBCTransferPage}
+                    />
+                    <Route exact path="/setting" component={SettingPage} />
+                    <Route
+                      exact
+                      path="/ledger-grant"
+                      component={LedgerGrantPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/language"
+                      component={SettingLanguagePage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/fiat"
+                      component={SettingFiatPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/connections"
+                      component={SettingConnectionsPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/connections/viewing-key/:contractAddress"
+                      component={SettingSecret20ViewingKeyConnectionsPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/address-book"
+                      component={AddressBookPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/export-to-mobile"
+                      component={ExportToMobilePage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/credit"
+                      component={CreditPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/set-keyring"
+                      component={SetKeyRingPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/export/:index"
+                      component={ExportPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/clear/:index"
+                      component={ClearPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/keyring/change/name/:index"
+                      component={ChangeNamePage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/token/add"
+                      component={AddTokenPage}
+                    />
+                    <Route
+                      exact
+                      path="/setting/token/manage"
+                      component={ManageTokenPage}
+                    />
+                    <Route path="/sign" component={SignPage} />
+                    <Route
+                      path="/suggest-chain"
+                      component={ChainSuggestedPage}
+                    />
+                  </LogPageViewWrapper>
+                </HashRouter>
+              </ConfirmProvider>
+            </NotificationProvider>
+          </NotificationStoreProvider>
+        </LoadingIndicatorProvider>
+      </AppIntlProvider>
+    </StoreProvider>
+  );
+};
+
+// eslint-disable-next-line import/no-default-export
+export default Application;

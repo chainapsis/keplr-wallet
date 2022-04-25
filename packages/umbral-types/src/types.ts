@@ -28,11 +28,11 @@ export interface UmbralApi {
   /**
    * Encrypt some data for use
    *
-   * @param chainId The target chain id
+   * @param pubKey The pubKey we want to use to encrypt
    * @param plainTextBytes The bytes to be encrypted
    */
   encrypt(
-    chainId: string,
+    pubKey: Uint8Array,
     plainTextBytes: Uint8Array
   ): Promise<UmbralEncryptionResult>;
 
@@ -55,9 +55,14 @@ export interface UmbralApi {
    * Decrypt a previously encrypted piece of data
    *
    * @param chainId The target chain id
+   * @param capsuleBytes The capsule data
    * @param cipherTextBytes The cipher text to decrypt
    */
-  decrypt(chainId: string, cipherTextBytes: Uint8Array): Promise<Uint8Array>;
+  decrypt(
+    chainId: string,
+    capsuleBytes: Uint8Array,
+    cipherTextBytes: Uint8Array
+  ): Promise<Uint8Array>;
 
   /**
    * Decrypt a piece of encrypted data with the capsule and capsule fragments

@@ -10,5 +10,6 @@
       "./@types"
     ]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "excluded" : ["**/*.wasm"]
 }

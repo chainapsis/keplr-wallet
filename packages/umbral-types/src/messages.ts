@@ -65,7 +65,7 @@ export class UmbralEncryptMsg extends Message<UmbralEncryptionResult> {
   }
 
   constructor(
-    public readonly chainId: string,
+    public readonly pubKey: Uint8Array,
     public readonly plainTextBytes: Uint8Array
   ) {
     super();
@@ -84,8 +84,8 @@ export class UmbralEncryptMsg extends Message<UmbralEncryptionResult> {
   }
 
   validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id not set");
+    if (!this.pubKey) {
+      throw new Error("pubKey not set");
     }
     if (!this.plainTextBytes) {
       throw new Error("plainTextBytes not set");
@@ -144,6 +144,7 @@ export class UmbralDecryptMsg extends Message<Uint8Array> {
 
   constructor(
     public readonly chainId: string,
+    public readonly capsuleBytes: Uint8Array,
     public readonly cipherTextBytes: Uint8Array
   ) {
     super();

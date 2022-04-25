@@ -26,11 +26,11 @@ class BrowserInjectedUmbral implements UmbralApi {
   }
 
   async encrypt(
-    chainId: string,
+    pubKey: Uint8Array,
     plainTextBytes: Uint8Array
   ): Promise<UmbralEncryptionResult> {
     return this.requestViaProxy(Method.UMBRAL_V1_ENCRYPT, [
-      chainId,
+      pubKey,
       plainTextBytes,
     ]);
   }

@@ -82,13 +82,7 @@ const handleEncryptMsg: (
   service: UmbralService
 ) => InternalHandler<UmbralEncryptMsg> = (service) => {
   return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainId,
-      msg.origin
-    );
-
-    return await service.encrypt(env, msg.chainId, msg.plainTextBytes);
+    return await service.encrypt(env, msg.pubKey, msg.plainTextBytes);
   };
 };
 
@@ -123,7 +117,12 @@ const handleDecryptMsg: (
       msg.origin
     );
 
-    return await service.decrypt(env, msg.chainId, msg.cipherTextBytes);
+    return await service.decrypt(
+      env,
+      msg.chainId,
+      msg.capsuleBytes,
+      msg.cipherTextBytes
+    );
   };
 };
 
@@ -151,9 +150,8 @@ const handleDecryptReEncryptedMsg: (
 const handleVerifyCapsuleFragMsg: (
   service: UmbralService
 ) => InternalHandler<UmbralVerifyCapsuleFragMsg> = (service) => {
-  return async (env, msg) => {
+  return async (_env, msg) => {
     return await service.verifyCapsuleFragment(
-      env,
       msg.capsuleFragment,
       msg.capsule,
       msg.verifyingPublicKey,
