@@ -274,6 +274,7 @@ export const VerifyMnemonicModePage: FunctionComponent<{
           {suggestedWords.map((word, i) => {
             return (
               <Button
+                color="gray"
                 key={word + i.toString()}
                 onClick={() => {
                   const word = suggestedWords[i];
@@ -298,6 +299,7 @@ export const VerifyMnemonicModePage: FunctionComponent<{
           {randomizedWords.map((word, i) => {
             return (
               <Button
+                color="gray"
                 key={word + i.toString()}
                 onClick={() => {
                   const word = randomizedWords[i];
@@ -316,37 +318,40 @@ export const VerifyMnemonicModePage: FunctionComponent<{
           })}
         </div>
       </div>
-      <Button
-        color="primary"
-        type="submit"
-        disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
-        block
+      <div
+        className={style.submitButton}
         style={{
           marginTop: "30px",
         }}
-        onClick={async (e) => {
-          e.preventDefault();
-
-          try {
-            await registerConfig.createMnemonic(
-              newMnemonicConfig.name,
-              newMnemonicConfig.mnemonic,
-              newMnemonicConfig.password,
-              bip44Option.bip44HDPath
-            );
-            analyticsStore.setUserProperties({
-              registerType: "seed",
-              accountType: "mnemonic",
-            });
-          } catch (e) {
-            alert(e.message ? e.message : e.toString());
-            registerConfig.clear();
-          }
-        }}
-        data-loading={registerConfig.isLoading}
       >
-        <FormattedMessage id="register.verify.button.register" />
-      </Button>
+        <Button
+          color="primary"
+          type="submit"
+          disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
+          onClick={async (e) => {
+            e.preventDefault();
+
+            try {
+              await registerConfig.createMnemonic(
+                newMnemonicConfig.name,
+                newMnemonicConfig.mnemonic,
+                newMnemonicConfig.password,
+                bip44Option.bip44HDPath
+              );
+              analyticsStore.setUserProperties({
+                registerType: "seed",
+                accountType: "mnemonic",
+              });
+            } catch (e) {
+              alert(e.message ? e.message : e.toString());
+              registerConfig.clear();
+            }
+          }}
+          data-loading={registerConfig.isLoading}
+        >
+          <FormattedMessage id="register.verify.button.register" />
+        </Button>
+      </div>
       <BackButton
         onClick={() => {
           newMnemonicConfig.setMode("generate");

@@ -11,6 +11,17 @@
   box-shadow: none;
 }
 
+.btn-gray {
+  background-color: $gray;
+  color: black;
+
+  &:hover,
+  &:active {
+    /* Platinum 100 */
+    background: #d0dcef;
+  }
+}
+
 .btn-transparent {
   color: $primary;
   background: transparent;
@@ -28,7 +39,7 @@
 
 .alert-danger-outline {
   color: $danger;
-  background-color: $white;
+  background-color: $red-50;
   border: 1px solid $danger;
 }
 

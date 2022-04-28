@@ -116,13 +116,21 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
+  row-gap: 14px;
+  column-gap: 29px;
 
-  button:not(:last-child) {
-    margin-right: 8px;
-  }
   button {
-    margin-bottom: 8px;
-    margin-left: 0 !important;
+    box-shadow: 1px 1px 4px rgba(14, 14, 16, 0.15);
+    border-radius: 8px;
+
+    padding: 14.5px 16px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    color: #000000;
+
+    display: flex;
+    align-items: center;
   }
 }
 
