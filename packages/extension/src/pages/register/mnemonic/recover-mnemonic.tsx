@@ -59,6 +59,7 @@ export const RecoverMnemonicIntro: FunctionComponent<{
   return (
     <Button
       color="secondary"
+      size="lg"
       block
       onClick={(e) => {
         e.preventDefault();

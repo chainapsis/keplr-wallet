@@ -1,14 +1,31 @@
 // Button
-.btn {
+.btn-lg {
   padding-top: 1rem;
   padding-bottom: 1rem;
   font-size: 1.125rem;
   line-height: 1.25rem;
+
+  &:not(.btn-block) {
+    width: 160px;
+  }
+}
+
+.btn-primary {
+  &:hover,
+  &:active {
+    background: $blue-500;
+  }
 }
 
 .btn-secondary {
+  background: $secondary;
   color: $primary;
   box-shadow: none;
+
+  &:hover,
+  &:active {
+    color: $primary;
+  }
 }
 
 .btn-gray {
@@ -17,14 +34,19 @@
 
   &:hover,
   &:active {
-    /* Platinum 100 */
-    background: #d0dcef;
+    background: $platinum-100;
   }
 }
 
 .btn-transparent {
   color: $primary;
   background: transparent;
+
+  &:hover,
+  &:active {
+    color: $blue-500;
+    box-shadow: none;
+  }
 }
 
 .btn-block + .btn-block {

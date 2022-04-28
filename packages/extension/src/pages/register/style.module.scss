@@ -18,6 +18,16 @@
   }
 }
 
+.back-button {
+  margin-top: 8px;
+
+  button {
+    padding: 8.5px 4px;
+    font-size: 1.125rem;
+    line-height: 1.25rem;
+  }
+}
+
 .container {
   display: flex;
   flex-direction: column;

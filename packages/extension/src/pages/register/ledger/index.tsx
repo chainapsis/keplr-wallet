@@ -25,6 +25,7 @@ export const ImportLedgerIntro: FunctionComponent<{
   return (
     <Button
       color="transparent"
+      size="lg"
       block
       onClick={(e) => {
         e.preventDefault();

@@ -31,9 +31,9 @@ export const registerTypeToWidth: Record<string, number> = {
   [TypeNewMnemonic]: 609,
 };
 
-export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
-  onClick,
-}) => {
+export const BackButton: FunctionComponent<{
+  onClick: () => void;
+}> = ({ onClick }) => {
   return (
     <div className={style.backButton}>
       <Button color="link" onClick={onClick}>
