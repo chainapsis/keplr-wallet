@@ -286,14 +286,24 @@ export class KeyRingService {
           "Signing request was for ADR-36. But, accidentally, new sign doc is not for ADR-36"
         );
       }
+
+      if (coinType === 60 && newSignDoc.msgs.length !== 1) {
+        // Validate messages length for Evmos sign
+        throw new Error("Invalid number of messages for sign request");
+      }
     }
 
     try {
+      const ethereumMessage = Buffer.from(
+        newSignDoc.msgs[0].value.data,
+        "base64"
+      );
+
       const signature = await this.keyRing.sign(
         env,
         chainId,
         coinType,
-        serializeSignDoc(newSignDoc)
+        coinType !== 60 ? serializeSignDoc(newSignDoc) : ethereumMessage
       );
 
       const encodedSignature = encodeSecp256k1Signature(key.pubKey, signature);
