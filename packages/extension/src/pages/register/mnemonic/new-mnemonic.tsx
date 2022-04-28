@@ -119,33 +119,32 @@ export const GenerateMnemonicModePage: FunctionComponent<{
           id: "register.create.title",
         })}
         <div>
-          {/* <Select
-            options={selectOptions}
-            defaultValue={selectOptions[0]}
-            isClearable={false}
-            isSearchable={false}
-          /> */}
           <ButtonDropdown
             isOpen={isOpenWordsDropdown}
             toggle={() => setIsOpenWordsDropdown(!isOpenWordsDropdown)}
           >
-            <DropdownToggle caret>
+            <DropdownToggle className={style.dropdownToggle}>
               {newMnemonicConfig.numWords === NumWords.WORDS12 ? (
                 <FormattedMessage id="register.create.toggle.word12" />
               ) : (
                 <FormattedMessage id="register.create.toggle.word24" />
               )}
+              <img
+                src={require("../../../public/assets/img/chevron-down.svg")}
+              />
             </DropdownToggle>
-            <DropdownMenu>
+            <DropdownMenu className={style.dropdownMenu}>
               <DropdownItem
                 active={newMnemonicConfig.numWords === NumWords.WORDS12}
                 onClick={() => newMnemonicConfig.setNumWords(NumWords.WORDS12)}
+                className={style.dropdownItem}
               >
                 <FormattedMessage id="register.create.toggle.word12" />
               </DropdownItem>
               <DropdownItem
                 active={newMnemonicConfig.numWords === NumWords.WORDS24}
                 onClick={() => newMnemonicConfig.setNumWords(NumWords.WORDS24)}
+                className={style.dropdownItem}
               >
                 <FormattedMessage id="register.create.toggle.word24" />
               </DropdownItem>

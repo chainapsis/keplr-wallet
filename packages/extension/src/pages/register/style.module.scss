@@ -164,3 +164,28 @@
 .derivation-path {
   margin-bottom: 36px;
 }
+
+.dropdown-toggle {
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 17px;
+  letter-spacing: normal;
+  color: #0f1c32;
+
+  border: 1px solid #596e8d;
+  box-sizing: border-box;
+  border-radius: 4px !important;
+  padding: 10px 10px 10px 16px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 92px;
+
+  &:hover {
+    /* Platinum 50 */
+    background: #ecf2fb;
+  }
+}

@@ -122,8 +122,8 @@
   "register.recover.title": "시드를 입력하세요",
 
   "register.create.title": "니모닉 단어",
-  "register.create.toggle.word12": "12 단어",
-  "register.create.toggle.word24": "24 단어",
+  "register.create.toggle.word12": "12 니모닉 시드",
+  "register.create.toggle.word24": "24 니모닉 시드",
   "register.create.input.password": "새로운 비밀번호 (최소 8자리 이상)",
   "register.create.input.password.error.required": "비밀번호를 입력하세요",
   "register.create.input.password.error.too-short": "비밀번호가 너무 짧습니다",
