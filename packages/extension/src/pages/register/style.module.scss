@@ -39,6 +39,8 @@
   }
 
   .logo-container {
+    margin-top: 40px;
+
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -206,4 +208,11 @@
     /* Platinum 50 */
     background: #ecf2fb;
   }
+}
+
+.alert-title {
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 23px;
+  margin-bottom: 10px;
 }
