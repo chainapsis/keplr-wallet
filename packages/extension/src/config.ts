@@ -1706,6 +1706,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "EVMOS",
       coinMinimalDenom: "aevmos",
       coinDecimals: 18,
+      coinGeckoId: "evmos",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1724,6 +1725,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
+        coinGeckoId: "evmos",
       },
     ],
     feeCurrencies: [
@@ -1731,6 +1733,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
+        coinGeckoId: "evmos",
       },
     ],
     gasPriceStep: {
