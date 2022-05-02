@@ -29,6 +29,7 @@ export enum NunWords {
 
 export const registerTypeToWidth: Record<string, number> = {
   [TypeNewMnemonic]: 609,
+  [TypeRecoverMnemonic]: 820,
 };
 
 export const BackButton: FunctionComponent<{

@@ -1,21 +1,26 @@
-import React, { FunctionComponent } from "react";
-
-import { Button, Form } from "reactstrap";
-
-import { FormattedMessage, useIntl } from "react-intl";
-import style from "../style.module.scss";
-import { BackButton } from "../index";
-import { Input, PasswordInput, TextArea } from "../../../components/form";
-import useForm from "react-hook-form";
-import { observer } from "mobx-react-lite";
 import { RegisterConfig } from "@keplr-wallet/hooks";
-import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
-
 import { Buffer } from "buffer/";
+import { observer } from "mobx-react-lite";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import useForm from "react-hook-form";
+import { FormattedMessage, useIntl } from "react-intl";
+import {
+  Button,
+  ButtonDropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Form,
+  FormGroup,
+} from "reactstrap";
+import { Input, MnemonicInput, PasswordInput } from "../../../components/form";
 import { useStore } from "../../../stores";
+import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
+import { BackButton } from "../index";
+import style from "../style.module.scss";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const bip39 = require("bip39");
+// const bip39 = require("bip39");
 
 function isPrivateKey(str: string): boolean {
   if (str.startsWith("0x")) {
@@ -80,6 +85,13 @@ export const RecoverMnemonicPage: FunctionComponent<{
 }> = observer(({ registerConfig }) => {
   const intl = useIntl();
 
+  const [mnemonicInputValues, setMnemonicInputValues] = useState<string[]>([]);
+
+  // TODO: need to make dynamic;
+  const numWords = 12;
+
+  const [isOpenWordsDropdown, setIsOpenWordsDropdown] = useState(false);
+
   const bip44Option = useBIP44Option();
 
   const { analyticsStore } = useStore();
@@ -93,13 +105,70 @@ export const RecoverMnemonicPage: FunctionComponent<{
     },
   });
 
+  const handlePasteClipboard = (event: any) => {
+    const pastingValue: string = event.clipboardData.getData("text");
+    const trimmedValue: string = trimWordsStr(pastingValue);
+    setMnemonicInputValues(trimmedValue.split(" "));
+
+    event.preventDefault();
+  };
+
+  useEffect(() => {
+    // Initialize mnemonic input prop after pasted
+    if (mnemonicInputValues.length > 0) {
+      setMnemonicInputValues([]);
+    }
+  }, [mnemonicInputValues]);
+
   return (
     <React.Fragment>
       <div>
         <div className={style.title}>
           {intl.formatMessage({
-            id: "register.recover.title",
+            id: "register.private-key",
           })}
+          <div>
+            <ButtonDropdown
+              isOpen={isOpenWordsDropdown}
+              toggle={() => setIsOpenWordsDropdown(!isOpenWordsDropdown)}
+            >
+              <DropdownToggle className={style.dropdownToggle}>
+                {/* {newMnemonicConfig.numWords === NumWords.WORDS12 ? (
+                  <FormattedMessage id="register.create.toggle.word12" />
+                ) : (
+                  <FormattedMessage id="register.create.toggle.word24" />
+                )} */}
+
+                <FormattedMessage id="register.private-key" />
+                <img
+                  src={require("../../../public/assets/img/chevron-down.svg")}
+                />
+              </DropdownToggle>
+              <DropdownMenu className={style.dropdownMenu}>
+                <DropdownItem
+                  // active={newMnemonicConfig.numWords === NumWords.WORDS12}
+                  // onClick={() => newMnemonicConfig.setNumWords(NumWords.WORDS12)}
+                  className={style.dropdownItem}
+                >
+                  <FormattedMessage id="register.create.toggle.word12" />
+                </DropdownItem>
+                <DropdownItem
+                  // active={newMnemonicConfig.numWords === NumWords.WORDS24}
+                  // onClick={() => newMnemonicConfig.setNumWords(NumWords.WORDS24)}
+                  className={style.dropdownItem}
+                >
+                  <FormattedMessage id="register.create.toggle.more-than12" />
+                </DropdownItem>
+                <DropdownItem
+                  // active={newMnemonicConfig.numWords === NumWords.WORDS24}
+                  // onClick={() => newMnemonicConfig.setNumWords(NumWords.WORDS24)}
+                  className={style.dropdownItem}
+                >
+                  <FormattedMessage id="register.private-key" />
+                </DropdownItem>
+              </DropdownMenu>
+            </ButtonDropdown>
+          </div>
         </div>
         <Form
           className={style.formContainer}
@@ -137,7 +206,19 @@ export const RecoverMnemonicPage: FunctionComponent<{
             }
           })}
         >
-          <TextArea
+          {
+            <FormGroup className={style.mnemonicInputGroups}>
+              {Array.from(Array(numWords).keys(), (i) => i + 1).map((index) => (
+                <MnemonicInput
+                  key={index}
+                  index={index}
+                  pastingValue={mnemonicInputValues[index - 1]}
+                  handlePasteClipboard={handlePasteClipboard}
+                />
+              ))}
+            </FormGroup>
+          }
+          {/* <TextArea
             type="password"
             className={style.mnemonic}
             placeholder={intl.formatMessage({
@@ -190,7 +271,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
               },
             })}
             error={errors.words && errors.words.message}
-          />
+          /> */}
           <Input
             label={intl.formatMessage({
               id: "register.name",
@@ -248,14 +329,16 @@ export const RecoverMnemonicPage: FunctionComponent<{
             </React.Fragment>
           ) : null}
           <AdvancedBIP44Option bip44Option={bip44Option} />
-          <Button
-            color="primary"
-            type="submit"
-            block
-            data-loading={registerConfig.isLoading}
-          >
-            <FormattedMessage id="register.create.button.next" />
-          </Button>
+          <div className={style.submitButton}>
+            <Button
+              color="primary"
+              type="submit"
+              size="lg"
+              data-loading={registerConfig.isLoading}
+            >
+              <FormattedMessage id="register.create.button.next" />
+            </Button>
+          </div>
         </Form>
         <BackButton
           onClick={() => {

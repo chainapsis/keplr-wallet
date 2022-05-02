@@ -1,0 +1,45 @@
+.mnemonic-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  column-gap: 12px;
+
+  label {
+    width: 28px;
+    margin-bottom: 0;
+
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #53607c;
+  }
+
+  input {
+    width: 200px;
+    height: 48px;
+    padding: 10px 52px 10px 16px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+
+    box-shadow: 1px 1px 4px rgba(14, 14, 16, 0.15);
+    border-radius: 8px;
+    border: none;
+  }
+
+  .input-type-toggle {
+    position: absolute;
+    padding: 4px 10px 4px 4px;
+    top: 6px;
+    right: 6px;
+
+    &:hover {
+      cursor: pointer;
+    }
+
+    img {
+      width: 28px;
+      height: 28px;
+    }
+  }
+}

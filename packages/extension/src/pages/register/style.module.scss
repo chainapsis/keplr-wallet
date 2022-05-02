@@ -65,6 +65,7 @@
 
   .title {
     margin-top: 26px;
+    margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
@@ -215,4 +216,13 @@
   font-size: 17px;
   line-height: 23px;
   margin-bottom: 10px;
+}
+
+.mnemonic-input-groups {
+  margin-top: 30px;
+
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 50px;
+  row-gap: 16px;
 }

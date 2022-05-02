@@ -113,6 +113,9 @@
   "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
 
+  "register.mnemonic-seed": "Mnemonic Seed",
+  "register.private-key": "Private Key",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",
@@ -127,11 +130,9 @@
   "register.intro.button.import-account.content": "Use a 12/24 word seed to import an existing wallet",
   "register.intro.sub-content": "All sensitive information is stored only on your device.{br}This process does not require an internet connection.",
 
-  "register.recover.title": "Input your seed",
-
-  "register.create.title": "Mnemonic Seed",
   "register.create.toggle.word12": "12 mnemonic seed",
   "register.create.toggle.word24": "24 mnemonic seed",
+  "register.create.toggle.more-than12": "More than 12 mnemonic seed",
   "register.create.input.password": "New Password (minimum 8 characters)",
   "register.create.input.password.error.required": "Password is required",
   "register.create.input.password.error.too-short": "Too short password",

@@ -117,7 +117,7 @@ export const GenerateMnemonicModePage: FunctionComponent<{
       </Alert>
       <div className={style.title}>
         {intl.formatMessage({
-          id: "register.create.title",
+          id: "register.mnemonic-seed",
         })}
         <div>
           <ButtonDropdown
