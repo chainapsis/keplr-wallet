@@ -5,6 +5,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import useForm from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
+  Alert,
   Button,
   ButtonDropdown,
   DropdownItem,
@@ -20,7 +21,7 @@ import { BackButton } from "../index";
 import style from "../style.module.scss";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-// const bip39 = require("bip39");
+const bip39 = require("bip39");
 
 function isPrivateKey(str: string): boolean {
   if (str.startsWith("0x")) {
@@ -85,10 +86,12 @@ export const RecoverMnemonicPage: FunctionComponent<{
 }> = observer(({ registerConfig }) => {
   const intl = useIntl();
 
-  const [mnemonicInputValues, setMnemonicInputValues] = useState<string[]>([]);
-
   // TODO: need to make dynamic;
   const numWords = 12;
+  const [mnemonicValues, setMnemonicValues] = useState<string[]>(
+    Array.from(Array(numWords).keys(), () => "")
+  );
+  const [mnemonicErrorMsg, setMnemonicErrorMsg] = useState("");
 
   const [isOpenWordsDropdown, setIsOpenWordsDropdown] = useState(false);
 
@@ -99,26 +102,51 @@ export const RecoverMnemonicPage: FunctionComponent<{
   const { register, handleSubmit, getValues, errors } = useForm<FormData>({
     defaultValues: {
       name: "",
-      words: "",
       password: "",
       confirmPassword: "",
     },
   });
 
+  const validateMnemonic = (value: string) => {
+    if (value.split(" ").length < 8) {
+      setMnemonicErrorMsg(
+        intl.formatMessage({
+          id: "register.create.textarea.mnemonic.error.too-short",
+        })
+      );
+      return false;
+    }
+
+    if (!bip39.validateMnemonic(value)) {
+      setMnemonicErrorMsg(
+        intl.formatMessage({
+          id: "register.create.textarea.mnemonic.error.invalid",
+        })
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   const handlePasteClipboard = (event: any) => {
     const pastingValue: string = event.clipboardData.getData("text");
     const trimmedValue: string = trimWordsStr(pastingValue);
-    setMnemonicInputValues(trimmedValue.split(" "));
+    if (validateMnemonic(trimmedValue)) {
+      setMnemonicValues(trimmedValue.split(" "));
 
-    event.preventDefault();
+      event.preventDefault();
+    }
   };
 
   useEffect(() => {
-    // Initialize mnemonic input prop after pasted
-    if (mnemonicInputValues.length > 0) {
-      setMnemonicInputValues([]);
+    const mnemonicValueStr = trimWordsStr(mnemonicValues.join(" "));
+    if (mnemonicValueStr.length > 0) {
+      validateMnemonic(mnemonicValueStr);
+    } else {
+      setMnemonicErrorMsg("");
     }
-  }, [mnemonicInputValues]);
+  }, [mnemonicValues]);
 
   return (
     <React.Fragment>
@@ -177,7 +205,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
               if (!isPrivateKey(data.words)) {
                 await registerConfig.createMnemonic(
                   data.name,
-                  trimWordsStr(data.words),
+                  trimWordsStr(mnemonicValues.join(" ")),
                   data.password,
                   bip44Option.bip44HDPath
                 );
@@ -206,18 +234,27 @@ export const RecoverMnemonicPage: FunctionComponent<{
             }
           })}
         >
-          {
-            <FormGroup className={style.mnemonicInputGroups}>
-              {Array.from(Array(numWords).keys(), (i) => i + 1).map((index) => (
-                <MnemonicInput
-                  key={index}
-                  index={index}
-                  pastingValue={mnemonicInputValues[index - 1]}
-                  handlePasteClipboard={handlePasteClipboard}
-                />
-              ))}
-            </FormGroup>
-          }
+          <FormGroup className={style.mnemonicInputGroups}>
+            {Array.from(Array(numWords).keys(), (i) => i + 1).map((index) => (
+              <MnemonicInput
+                key={index}
+                index={index}
+                handlePasteClipboard={handlePasteClipboard}
+                updateMnemonicValues={(value: string) => {
+                  const newMnemonicValues = [...mnemonicValues];
+                  newMnemonicValues[index - 1] = value;
+                  setMnemonicValues(newMnemonicValues);
+                }}
+                pastingValue={mnemonicValues[index - 1]}
+              />
+            ))}
+          </FormGroup>
+          {mnemonicErrorMsg && (
+            <Alert color="danger-outline" className={style.mnemonicAlert}>
+              {mnemonicErrorMsg}
+            </Alert>
+          )}
+
           {/* <TextArea
             type="password"
             className={style.mnemonic}
