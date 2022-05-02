@@ -1,6 +1,6 @@
 import { action, computed, flow, makeObservable, observable } from "mobx";
 import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
-import { ChainGetter } from "../common";
+import { ChainGetter } from "../chain";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { StdFee } from "@cosmjs/launchpad";
 import { evmosToEth } from "@hanchon/ethermint-address-converter";
@@ -125,7 +125,7 @@ export class AccountSetBase {
     keplr: Keplr,
     chainInfo: ReturnType<ChainGetter["getChain"]>
   ): Promise<void> {
-    await keplr.experimentalSuggestChain(chainInfo.raw);
+    await keplr.experimentalSuggestChain(chainInfo.embedded);
   }
 
   private readonly handleInit = () => this.init();

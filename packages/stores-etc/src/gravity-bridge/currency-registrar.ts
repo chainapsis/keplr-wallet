@@ -1,24 +1,21 @@
-import { observable, runInAction } from "mobx";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { AppCurrency } from "@keplr-wallet/types";
 import {
-  ChainInfoInner,
+  IChainInfoImpl,
   ChainStore,
   IQueriesStore,
+  CurrencyRegistrar,
 } from "@keplr-wallet/stores";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { KeplrETCQueries } from "../queries";
 
-export class GravityBridgeCurrencyRegsitrarInner<
-  C extends ChainInfo = ChainInfo
-> {
+export class GravityBridgeCurrencyRegsitrarInner implements CurrencyRegistrar {
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly chainInfoInner: ChainInfoInner<C>,
-    protected readonly chainStore: ChainStore<C>,
+    protected readonly chainInfo: IChainInfoImpl,
     protected readonly queriesStore: IQueriesStore<KeplrETCQueries>
   ) {}
 
-  registerUnknownCurrencies(
+  observeUnknownDenom(
     coinMinimalDenom: string
   ): [AppCurrency | undefined, boolean] | undefined {
     const denomHelper = new DenomHelper(coinMinimalDenom);
@@ -29,7 +26,7 @@ export class GravityBridgeCurrencyRegsitrarInner<
       return;
     }
 
-    const queries = this.queriesStore.get(this.chainInfoInner.chainId);
+    const queries = this.queriesStore.get(this.chainInfo.chainId);
 
     const contractAddress = denomHelper.denom.replace("gravity", "");
 
@@ -51,48 +48,18 @@ export class GravityBridgeCurrencyRegsitrarInner<
   }
 }
 
-export class GravityBridgeCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
-  @observable.shallow
-  protected map: Map<
-    string,
-    GravityBridgeCurrencyRegsitrarInner<C>
-  > = new Map();
-
+export class GravityBridgeCurrencyRegistrar {
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly chainStore: ChainStore<C>,
+    protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<KeplrETCQueries>
   ) {
-    this.chainStore.addSetChainInfoHandler((chainInfoInner) =>
-      this.setChainInfoHandler(chainInfoInner)
-    );
-  }
-
-  setChainInfoHandler(chainInfoInner: ChainInfoInner<C>): void {
-    const inner = this.get(chainInfoInner);
-    chainInfoInner.registerCurrencyRegistrar((coinMinimalDenom) =>
-      inner.registerUnknownCurrencies(coinMinimalDenom)
-    );
-  }
-
-  protected get(
-    chainInfoInner: ChainInfoInner<C>
-  ): GravityBridgeCurrencyRegsitrarInner<C> {
-    if (!this.map.has(chainInfoInner.chainId)) {
-      runInAction(() => {
-        this.map.set(
-          chainInfoInner.chainId,
-          new GravityBridgeCurrencyRegsitrarInner<C>(
-            this.kvStore,
-            chainInfoInner,
-            this.chainStore,
-            this.queriesStore
-          )
-        );
-      });
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.map.get(chainInfoInner.chainId)!;
+    this.chainStore.addCurrencyRegistrarCreator((chainInfo) => {
+      return new GravityBridgeCurrencyRegsitrarInner(
+        kvStore,
+        chainInfo,
+        queriesStore
+      );
+    });
   }
 }

@@ -169,7 +169,7 @@ const TokenView: FunctionComponent<{
                   chainStore.current.chainId
                 );
 
-                await tokenOf.addToken({
+                await tokenOf?.addToken({
                   ...balance.currency,
                   viewingKey,
                 });

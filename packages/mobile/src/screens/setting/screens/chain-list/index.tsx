@@ -28,7 +28,7 @@ export const SettingChainListScreen: FunctionComponent = observer(() => {
             isLast: index === chainStore.chainInfosWithUIConfig.length - 1,
             chainId: chainInfo.chainId,
             chainName: chainInfo.chainName,
-            chainSymbolImageUrl: chainInfo.raw.chainSymbolImageUrl,
+            chainSymbolImageUrl: chainInfo.embedded.chainSymbolImageUrl,
             disabled,
           };
         }

@@ -162,24 +162,21 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     const chainInfo = this.chainInfo;
 
     if (this._sendCurrency) {
-      const find = chainInfo.currencies.find(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (cur) => cur.coinMinimalDenom === this._sendCurrency!.coinMinimalDenom
-      );
+      const find = chainInfo.findCurrency(this._sendCurrency.coinMinimalDenom);
       if (find) {
         return this._sendCurrency;
       }
     }
 
-    if (chainInfo.currencies.length === 0) {
+    if (chainInfo.knownDenoms.length === 0) {
       throw new Error("Chain doesn't have the sendable currency informations");
     }
 
-    return chainInfo.currencies[0];
+    return chainInfo.findCurrency(chainInfo.knownDenoms[0])!;
   }
 
   get sendableCurrencies(): AppCurrency[] {
-    return this.chainInfo.currencies;
+    return this.chainInfo.findCurrencies(...this.chainInfo.knownDenoms);
   }
 
   @computed

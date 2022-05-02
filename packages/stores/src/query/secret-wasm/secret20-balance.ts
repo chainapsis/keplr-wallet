@@ -1,6 +1,7 @@
 import { computed, makeObservable, override } from "mobx";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
-import { ChainGetter, QueryResponse } from "../../common";
+import { ChainGetter } from "../../chain";
+import { QueryResponse } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { QueryError } from "../../common";
 import { CoinPretty, Int } from "@keplr-wallet/unit";

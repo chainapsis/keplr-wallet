@@ -1,5 +1,6 @@
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
-import { ChainGetter, QueryResponse } from "../../../common";
+import { ChainGetter } from "../../../chain";
+import { QueryResponse } from "../../../common";
 import { computed, makeObservable, override } from "mobx";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { StoreUtils } from "../../../common";
@@ -114,7 +115,7 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
     // 어차피 이미 등록되어 있으면 밑의 메소드가 아무 행동도 안하기 때문에 괜찮다.
     // computed를 줄이기 위해서 배열로 한번에 설정하는게 낫다.
     const denoms = response.data.balances.map((coin) => coin.denom);
-    chainInfo.addUnknownCurrencies(...denoms);
+    chainInfo.addUnknownDenoms(...denoms);
   }
 }
 

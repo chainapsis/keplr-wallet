@@ -1,6 +1,6 @@
 import { computed, makeObservable, override } from "mobx";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../common";
+import { ChainGetter } from "../../chain";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
 import { Cw20ContractBalance } from "./types";
@@ -69,9 +69,7 @@ export class ObservableQueryCw20BalanceInner extends ObservableQueryBalanceInner
     const denom = this.denomHelper.denom;
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.currencies.find(
-      (cur) => cur.coinMinimalDenom === denom
-    );
+    const currency = chainInfo.findCurrency(denom);
 
     // TODO: Infer the currency according to its denom (such if denom is `uatom` -> `Atom` with decimal 6)?
     if (!currency) {

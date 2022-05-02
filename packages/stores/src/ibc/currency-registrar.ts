@@ -1,6 +1,6 @@
-import { flow, makeObservable, observable, runInAction } from "mobx";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import { ChainInfoInner, ChainStore } from "../chain";
+import { flow, makeObservable, observable } from "mobx";
+import { AppCurrency } from "@keplr-wallet/types";
+import { ChainInfoImpl, ChainStore, CurrencyRegistrar } from "../chain";
 import {
   CosmosQueries,
   CosmwasmQueries,
@@ -21,7 +21,7 @@ type CacheIBCDenomData = {
   counterpartyChainId: string | undefined;
 };
 
-export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
+export class IBCCurrencyRegistrarInner implements CurrencyRegistrar {
   @observable
   protected isInitialized = false;
   @observable
@@ -45,8 +45,8 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly cacheDuration: number,
-    protected readonly chainInfoInner: ChainInfoInner<C>,
-    protected readonly chainStore: ChainStore<C>,
+    protected readonly chainInfoInner: ChainInfoImpl,
+    protected readonly chainStore: ChainStore,
     protected readonly accountStore: {
       hasAccount(chainId: string): boolean;
       getAccount(
@@ -67,8 +67,8 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
           channelId: string;
         }[];
       },
-      originChainInfo: ChainInfoInner | undefined,
-      counterpartyChainInfo: ChainInfoInner | undefined,
+      originChainInfo: ChainInfoImpl | undefined,
+      counterpartyChainInfo: ChainInfoImpl | undefined,
       originCurrency: AppCurrency | undefined
     ) => string
   ) {
@@ -125,7 +125,7 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     yield this.kvStore.set(key, obj);
   }
 
-  registerUnknownCurrencies(
+  observeUnknownDenom(
     coinMinimalDenom: string
   ): [AppCurrency | undefined, boolean] | undefined {
     const denomHelper = new DenomHelper(coinMinimalDenom);
@@ -152,8 +152,8 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
 
     const cached = this.getCacheIBCDenomData(hash);
 
-    let counterpartyChainInfo: ChainInfoInner | undefined;
-    let originChainInfo: ChainInfoInner | undefined;
+    let counterpartyChainInfo: ChainInfoImpl | undefined;
+    let originChainInfo: ChainInfoImpl | undefined;
     let denomTrace:
       | {
           denom: string;
@@ -230,9 +230,8 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     if (originChainInfo && denomTrace) {
       if (denomTrace.denom.split(/^(cw20):(\w+)$/).length === 4) {
         // If the origin currency is ics20-cw20.
-        let cw20Currency = originChainInfo.currencies.find(
-          (cur) =>
-            denomTrace && cur.coinMinimalDenom.startsWith(denomTrace.denom)
+        let cw20Currency = originChainInfo.findCurrency(
+          (denom) => denomTrace && denom.startsWith(denomTrace.denom)
         );
         if (!cw20Currency && this.cosmwasmQueriesStore) {
           const cosmwasmQuries = this.cosmwasmQueriesStore.get(
@@ -331,10 +330,7 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
  * this will try to get the denom info by traversing the paths, and register the currency with the decimal and denom info.
  * But, if failed to traverse the paths, this will register the currency with 0 decimal and the minimal denom even though it is not suitable for human.
  */
-export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
-  @observable.shallow
-  protected map: Map<string, IBCCurrencyRegsitrarInner<C>> = new Map();
-
+export class IBCCurrencyRegistrar {
   static defaultCoinDenomGenerator(
     denomTrace: {
       denom: string;
@@ -343,8 +339,8 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
         channelId: string;
       }[];
     },
-    _: ChainInfoInner | undefined,
-    counterpartyChainInfo: ChainInfoInner | undefined,
+    _: ChainInfoImpl | undefined,
+    counterpartyChainInfo: ChainInfoImpl | undefined,
     originCurrency: AppCurrency | undefined
   ): string {
     if (originCurrency) {
@@ -361,7 +357,7 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
-    protected readonly chainStore: ChainStore<C>,
+    protected readonly chainStore: ChainStore,
     protected readonly accountStore: {
       hasAccount(chainId: string): boolean;
       getAccount(
@@ -386,45 +382,22 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
           channelId: string;
         }[];
       },
-      originChainInfo: ChainInfoInner | undefined,
-      counterpartyChainInfo: ChainInfoInner | undefined,
+      originChainInfo: ChainInfoImpl | undefined,
+      counterpartyChainInfo: ChainInfoImpl | undefined,
       originCurrency: AppCurrency | undefined
-    ) => string = IBCCurrencyRegsitrar.defaultCoinDenomGenerator
+    ) => string = IBCCurrencyRegistrar.defaultCoinDenomGenerator
   ) {
-    this.chainStore.addSetChainInfoHandler((chainInfoInner) =>
-      this.setChainInfoHandler(chainInfoInner)
-    );
-  }
-
-  setChainInfoHandler(chainInfoInner: ChainInfoInner<C>): void {
-    const inner = this.get(chainInfoInner);
-    chainInfoInner.registerCurrencyRegistrar((coinMinimalDenom) =>
-      inner.registerUnknownCurrencies(coinMinimalDenom)
-    );
-  }
-
-  protected get(
-    chainInfoInner: ChainInfoInner<C>
-  ): IBCCurrencyRegsitrarInner<C> {
-    if (!this.map.has(chainInfoInner.chainId)) {
-      runInAction(() => {
-        this.map.set(
-          chainInfoInner.chainId,
-          new IBCCurrencyRegsitrarInner<C>(
-            this.kvStore,
-            this.cacheDuration,
-            chainInfoInner,
-            this.chainStore,
-            this.accountStore,
-            this.queriesStore,
-            this.cosmwasmQueriesStore,
-            this.coinDenomGenerator
-          )
-        );
-      });
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.map.get(chainInfoInner.chainId)!;
+    this.chainStore.addCurrencyRegistrarCreator((chainInfo) => {
+      return new IBCCurrencyRegistrarInner(
+        this.kvStore,
+        this.cacheDuration,
+        chainInfo,
+        this.chainStore,
+        this.accountStore,
+        this.queriesStore,
+        this.cosmwasmQueriesStore,
+        this.coinDenomGenerator
+      );
+    });
   }
 }

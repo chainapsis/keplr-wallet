@@ -24,13 +24,15 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     chainStore.current.features &&
     chainStore.current.features.includes("secretwasm");
 
-  const appCurrencies = chainStore.current.currencies.filter((currency) => {
-    if (isSecretWasm) {
-      return "type" in currency && currency.type === "secret20";
-    } else {
-      return "type" in currency && currency.type === "cw20";
-    }
-  });
+  const appCurrencies = chainStore.current
+    .findCurrencies(...chainStore.current.knownDenoms)
+    .filter((currency) => {
+      if (isSecretWasm) {
+        return "type" in currency && currency.type === "secret20";
+      } else {
+        return "type" in currency && currency.type === "cw20";
+      }
+    });
 
   return (
     <HeaderLayout
@@ -115,9 +117,13 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                     }),
                   })
                 ) {
-                  await tokensStore
-                    .getTokensOf(chainStore.current.chainId)
-                    .removeToken(cosmwasmToken);
+                  const tokensOf = tokensStore.getTokensOf(
+                    chainStore.current.chainId
+                  );
+
+                  if (tokensOf) {
+                    await tokensOf.removeToken(cosmwasmToken);
+                  }
                 }
               }}
             />

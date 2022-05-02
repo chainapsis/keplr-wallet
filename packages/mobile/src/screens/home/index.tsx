@@ -45,7 +45,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const checkAndUpdateChainInfo = useCallback(() => {
     if (!chainStoreIsInitializing) {
       (async () => {
-        const result = await ChainUpdaterService.checkChainUpdate(currentChain);
+        const result = await ChainUpdaterService.checkChainUpdate(
+          currentChain.embedded
+        );
 
         // TODO: Add the modal for explicit chain update.
         if (result.slient) {

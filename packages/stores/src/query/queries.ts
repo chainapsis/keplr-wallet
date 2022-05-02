@@ -2,12 +2,8 @@ import { makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { DeepReadonly, UnionToIntersection } from "utility-types";
 import { ObservableQueryBalances } from "./balances";
-import {
-  ChainGetter,
-  IObject,
-  mergeStores,
-  ChainedFunctionifyTuple,
-} from "../common";
+import { ChainGetter } from "../chain";
+import { IObject, mergeStores, ChainedFunctionifyTuple } from "../common";
 
 export interface QueriesSetBase {
   readonly queryBalances: DeepReadonly<ObservableQueryBalances>;

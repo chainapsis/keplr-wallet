@@ -1,7 +1,8 @@
 import { AccountSetBase, AccountSetBaseSuper, MsgOpt } from "./base";
 import { SecretQueries, QueriesSetBase, IQueriesStore } from "../query";
 import { Buffer } from "buffer/";
-import { ChainGetter, CoinPrimitive } from "../common";
+import { ChainGetter } from "../chain";
+import { CoinPrimitive } from "../common";
 import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/secret/compute/v1beta1/msg";

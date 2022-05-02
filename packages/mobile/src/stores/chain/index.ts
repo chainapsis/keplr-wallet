@@ -8,7 +8,7 @@ import {
 } from "mobx";
 
 import {
-  ChainInfoInner,
+  ChainInfoImpl,
   ChainStore as BaseChainStore,
 } from "@keplr-wallet/stores";
 
@@ -117,7 +117,7 @@ export class ChainStore extends BaseChainStore<
           if (!this.chainInfoInUIConfig.value) {
             this.chainInfoInUIConfig.setValue({
               sortedEnabledChains: this.chainInfos
-                .filter((chainInfo) => !chainInfo.raw.hideInUI)
+                .filter((chainInfo) => !chainInfo.embedded.hideInUI)
                 .map((chainInfo) => {
                   const chainIdentifier = ChainIdHelper.parse(
                     chainInfo.chainId
@@ -183,8 +183,8 @@ export class ChainStore extends BaseChainStore<
       }, {}) ?? {};
 
     const chainSortFn = (
-      chainInfo1: ChainInfoInner,
-      chainInfo2: ChainInfoInner
+      chainInfo1: ChainInfoImpl,
+      chainInfo2: ChainInfoImpl
     ): number => {
       const chainIdentifier1 = ChainIdHelper.parse(chainInfo1.chainId);
       const chainIdentifier2 = ChainIdHelper.parse(chainInfo2.chainId);
@@ -208,7 +208,7 @@ export class ChainStore extends BaseChainStore<
 
     return stableSort(
       this.chainInfos
-        .filter((chainInfo) => !chainInfo.raw.hideInUI)
+        .filter((chainInfo) => !chainInfo.embedded.hideInUI)
         .filter(
           (chainInfo) =>
             !disabledChainsMap[
@@ -238,8 +238,8 @@ export class ChainStore extends BaseChainStore<
       }, {}) ?? {};
 
     const chainSortFn = (
-      chainInfo1: ChainInfoInner,
-      chainInfo2: ChainInfoInner
+      chainInfo1: ChainInfoImpl,
+      chainInfo2: ChainInfoImpl
     ): number => {
       const chainIdentifier1 = ChainIdHelper.parse(chainInfo1.chainId);
       const chainIdentifier2 = ChainIdHelper.parse(chainInfo2.chainId);
@@ -263,7 +263,7 @@ export class ChainStore extends BaseChainStore<
 
     return stableSort(
       this.chainInfos
-        .filter((chainInfo) => !chainInfo.raw.hideInUI)
+        .filter((chainInfo) => !chainInfo.embedded.hideInUI)
         .filter(
           (chainInfo) =>
             disabledChainsMap[ChainIdHelper.parse(chainInfo.chainId).identifier]
@@ -378,12 +378,12 @@ export class ChainStore extends BaseChainStore<
   }
 
   @computed
-  get current(): ChainInfoWithEmbed {
+  get current(): ChainInfoImpl<ChainInfoWithEmbed & AppChainInfo> {
     if (this.hasChain(this.selectedChainId)) {
-      return this.getChain(this.selectedChainId).raw;
+      return this.getChain(this.selectedChainId);
     }
 
-    return this.chainInfos[0].raw;
+    return this.chainInfos[0];
   }
 
   async saveLastViewChainId() {

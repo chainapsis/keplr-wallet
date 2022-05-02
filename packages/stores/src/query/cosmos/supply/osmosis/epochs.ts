@@ -1,5 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../../common";
+import { ChainGetter } from "../../../../chain";
 import { ObservableChainQuery } from "../../../chain-query";
 import { Epochs } from "./types";
 import { computed, observable } from "mobx";

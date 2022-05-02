@@ -71,7 +71,7 @@ export class SignDocAmountConfig
       return chainInfo.feeCurrencies[0];
     }
 
-    return chainInfo.currencies[0];
+    return chainInfo.findCurrencies(...chainInfo.knownDenoms)[0];
   }
 
   get sendableCurrencies(): AppCurrency[] {

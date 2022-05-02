@@ -1,6 +1,6 @@
 import { ObservableChainQuery } from "./chain-query";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../common";
+import { ChainGetter } from "../chain";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
@@ -124,8 +124,9 @@ export class ObservableQueryBalancesInner {
 
     const result = [];
 
-    for (let i = 0; i < chainInfo.currencies.length; i++) {
-      const currency = chainInfo.currencies[i];
+    const currencies = chainInfo.findCurrencies(...chainInfo.knownDenoms);
+    for (let i = 0; i < currencies.length; i++) {
+      const currency = currencies[i];
       result.push(this.getBalanceInner(currency));
     }
 
@@ -175,9 +176,12 @@ export class ObservableQueryBalancesInner {
   get unstakables(): ObservableQueryBalanceInner[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
-    const currencies = chainInfo.currencies.filter(
-      (cur) => cur.coinMinimalDenom !== chainInfo.stakeCurrency.coinMinimalDenom
-    );
+    const currencies = chainInfo
+      .findCurrencies(...chainInfo.knownDenoms)
+      .filter(
+        (cur) =>
+          cur.coinMinimalDenom !== chainInfo.stakeCurrency.coinMinimalDenom
+      );
 
     const result = [];
 

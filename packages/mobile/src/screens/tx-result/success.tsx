@@ -164,11 +164,11 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             }}
           />
         </View>
-        {chainInfo.raw.txExplorer ? (
+        {chainInfo.embedded.txExplorer ? (
           <Button
             containerStyle={style.flatten(["margin-top-16"])}
             size="default"
-            text={`View on ${chainInfo.raw.txExplorer.name}`}
+            text={`View on ${chainInfo.embedded.txExplorer.name}`}
             mode="text"
             rightIcon={
               <View style={style.flatten(["margin-left-8"])}>
@@ -179,9 +179,9 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
               </View>
             }
             onPress={() => {
-              if (chainInfo.raw.txExplorer) {
+              if (chainInfo.embedded.txExplorer) {
                 WebBrowser.openBrowserAsync(
-                  chainInfo.raw.txExplorer.txUrl.replace(
+                  chainInfo.embedded.txExplorer.txUrl.replace(
                     "{txHash}",
                     txHash.toUpperCase()
                   )

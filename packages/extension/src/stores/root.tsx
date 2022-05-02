@@ -15,7 +15,7 @@ import {
   CosmwasmQueries,
   getKeplrFromWindow,
   IBCChannelStore,
-  IBCCurrencyRegsitrar,
+  IBCCurrencyRegistrar,
   InteractionStore,
   KeyRingStore,
   LedgerInitStore,
@@ -29,7 +29,7 @@ import {
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
-  GravityBridgeCurrencyRegsitrar,
+  GravityBridgeCurrencyRegistrar,
 } from "@keplr-wallet/stores-etc";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -39,7 +39,6 @@ import {
   InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
 import { APP_PORT } from "@keplr-wallet/router";
-import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
 import { FeeType } from "@keplr-wallet/hooks";
@@ -67,10 +66,10 @@ export class RootStore {
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
-  public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
+  public readonly tokensStore: TokensStore;
 
-  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
-  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
+  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -317,7 +316,7 @@ export class RootStore {
       this.interactionStore
     );
 
-    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
+    this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
       new ExtensionKVStore("store_ibc_curreny_registrar"),
       24 * 3600 * 1000,
       this.chainStore,
@@ -325,7 +324,7 @@ export class RootStore {
       this.queriesStore,
       this.queriesStore
     );
-    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>(
+    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(
       new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore

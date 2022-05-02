@@ -124,7 +124,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                     [selected && "background-color-primary"]
                   )}
                 >
-                  {chainInfo.raw.chainSymbolImageUrl ? (
+                  {chainInfo.embedded.chainSymbolImageUrl ? (
                     <FastImage
                       style={{
                         width: 32,
@@ -132,7 +132,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                       }}
                       resizeMode={FastImage.resizeMode.contain}
                       source={{
-                        uri: chainInfo.raw.chainSymbolImageUrl,
+                        uri: chainInfo.embedded.chainSymbolImageUrl,
                       }}
                     />
                   ) : (

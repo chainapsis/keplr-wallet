@@ -39,7 +39,7 @@ export const MainPage: FunctionComponent = observer(() => {
     if (!chainStore.isInitializing && prevChainId.current !== currentChainId) {
       (async () => {
         const result = await ChainUpdaterService.checkChainUpdate(
-          chainStore.current
+          chainStore.current.embedded
         );
         if (result.explicit) {
           // If chain info has been changed, warning the user wether update the chain or not.

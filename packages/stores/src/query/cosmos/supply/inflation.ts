@@ -3,7 +3,7 @@ import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { ObservableQuerySupplyTotal } from "./supply";
 import { MintingInflation } from "./types";
 import { ObservableChainQuery } from "../../chain-query";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { ObservableQueryIrisMintingInfation } from "./iris-minting";
 import { ObservableQuerySifchainLiquidityAPY } from "./sifchain";
 import {

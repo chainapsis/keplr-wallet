@@ -1,10 +1,10 @@
 import {
   ChainedFunctionifyTuple,
-  ChainGetter,
   HasMapStore,
   IObject,
   mergeStores,
 } from "../common";
+import { ChainGetter } from "../chain";
 import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
 import { DeepReadonly, UnionToIntersection } from "utility-types";
 

@@ -1,4 +1,4 @@
-import { ChainGetter } from "../../../../common";
+import { ChainGetter } from "../../../../chain";
 import { ObservableChainQuery } from "../../../chain-query";
 import { EpochProvisions } from "./types";
 import { KVStore } from "@keplr-wallet/common";
@@ -30,9 +30,7 @@ export class ObservableQueryOsmosisEpochProvisions extends ObservableChainQuery<
     }
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.currencies.find(
-      (cur) => cur.coinMinimalDenom === this.queryMintParmas.mintDenom
-    );
+    const currency = chainInfo.findCurrency(this.queryMintParmas.mintDenom);
     if (!currency) {
       throw new Error("Unknown currency");
     }

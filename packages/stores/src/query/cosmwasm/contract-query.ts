@@ -1,6 +1,6 @@
 import { ObservableChainQuery } from "../chain-query";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../common";
+import { ChainGetter } from "../../chain";
 import { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
 

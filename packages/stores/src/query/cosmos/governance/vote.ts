@@ -4,7 +4,7 @@ import {
 } from "../../chain-query";
 import { ProposalVoter } from "./types";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 
 export class ObservableQueryProposalVoteInner extends ObservableChainQuery<ProposalVoter> {
   protected proposalId: string;

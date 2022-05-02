@@ -1,4 +1,3 @@
-import { HasMapStore } from "../common";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   AddTokenMsg,
@@ -6,15 +5,21 @@ import {
   RemoveTokenMsg,
   SuggestTokenMsg,
 } from "@keplr-wallet/background";
-import { autorun, flow, makeObservable, observable } from "mobx";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { flow, makeObservable, observable } from "mobx";
+import {
+  AppCurrency,
+  Currency,
+  CW20Currency,
+  IBCCurrency,
+  Secret20Currency,
+} from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
-import { ChainStore } from "../chain";
+import { ChainInfoImpl, ChainStore, CurrencyRegistrar } from "../chain";
 import { InteractionStore } from "./interaction";
 import { toGenerator } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-export class TokensStoreInner {
+export class TokensStoreInner implements CurrencyRegistrar {
   @observable.ref
   protected _tokens: AppCurrency[] = [];
 
@@ -22,8 +27,7 @@ export class TokensStoreInner {
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly chainStore: ChainStore<any>,
-    protected readonly chainId: string,
+    protected readonly chainInfo: ChainInfoImpl,
     protected readonly requester: MessageRequester
   ) {
     makeObservable(this);
@@ -33,14 +37,34 @@ export class TokensStoreInner {
     // If key store in the keplr extension is unlocked, this event will be dispatched.
     // This is needed becuase the token such as secret20 exists according to the account.
     this.eventListener.addEventListener("keplr_keystoreunlock", () => {
+      this.chainInfo.removeCurrencies(...this._tokens);
       this.refreshTokens();
     });
 
     // If key store in the keplr extension is changed, this event will be dispatched.
     // This is needed becuase the token such as secret20 exists according to the account.
     this.eventListener.addEventListener("keplr_keystorechange", () => {
+      // Tokens should be changed whenever the account changed.
+      // But, the added currencies are not removed automatically.
+      // So, we should remove the prev token currencies from the chain info.
+      this.chainInfo.removeCurrencies(...this._tokens);
       this.refreshTokens();
     });
+  }
+
+  observeUnknownDenom():
+    | Currency
+    | CW20Currency
+    | Secret20Currency
+    | IBCCurrency
+    | [
+        Currency | CW20Currency | Secret20Currency | IBCCurrency | undefined,
+        boolean
+      ]
+    | undefined {
+    // No need to implement this method.
+    // Only used to satisfy interface.
+    return undefined;
   }
 
   get tokens(): DeepReadonly<AppCurrency[]> {
@@ -49,87 +73,66 @@ export class TokensStoreInner {
 
   @flow
   *refreshTokens() {
-    const chainInfo = this.chainStore.getChain(this.chainId);
-
     if (
-      chainInfo.features &&
+      this.chainInfo.features &&
       // Tokens service is only needed for secretwasm and cosmwasm,
       // so, there is no need to fetch the registered token if the chain doesn't support the secretwasm and cosmwasm.
-      (chainInfo.features.includes("secretwasm") ||
-        chainInfo.features.includes("cosmwasm"))
+      (this.chainInfo.features.includes("secretwasm") ||
+        this.chainInfo.features.includes("cosmwasm"))
     ) {
-      const msg = new GetTokensMsg(this.chainId);
+      const msg = new GetTokensMsg(this.chainInfo.chainId);
       this._tokens = yield* toGenerator(
         this.requester.sendMessage(BACKGROUND_PORT, msg)
       );
     } else {
       this._tokens = [];
     }
+
+    // Register currencies whenever refreshing tokens from background.
+    this.chainInfo.addOrReplaceCurrencies(...this._tokens);
   }
 
   @flow
   *addToken(currency: AppCurrency) {
-    const msg = new AddTokenMsg(this.chainId, currency);
+    const msg = new AddTokenMsg(this.chainInfo.chainId, currency);
     yield this.requester.sendMessage(BACKGROUND_PORT, msg);
     yield this.refreshTokens();
   }
 
   @flow
   *removeToken(currency: AppCurrency) {
-    const msg = new RemoveTokenMsg(this.chainId, currency);
+    const msg = new RemoveTokenMsg(this.chainInfo.chainId, currency);
     yield this.requester.sendMessage(BACKGROUND_PORT, msg);
     yield this.refreshTokens();
   }
 }
 
-export class TokensStore<
-  C extends ChainInfo = ChainInfo
-> extends HasMapStore<TokensStoreInner> {
-  protected prevTokens: Map<string, AppCurrency[]> = new Map();
+export class TokensStore {
+  protected readonly map: Map<string, TokensStoreInner> = new Map();
 
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly chainStore: ChainStore<C>,
+    protected readonly chainStore: ChainStore,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
   ) {
-    super((chainId: string) => {
-      return new TokensStoreInner(
-        this.eventListener,
-        this.chainStore,
-        chainId,
-        this.requester
-      );
-    });
     makeObservable(this);
 
-    this.chainStore.addSetChainInfoHandler((chainInfoInner) => {
-      autorun(() => {
-        const chainIdentifier = ChainIdHelper.parse(chainInfoInner.chainId);
+    this.chainStore.addCurrencyRegistrarCreator((chainInfo) => {
+      const inner = new TokensStoreInner(eventListener, chainInfo, requester);
 
-        // Tokens should be changed whenever the account changed.
-        // But, the added currencies are not removed automatically.
-        // So, we should remove the prev token currencies from the chain info.
-        const prevToken = this.prevTokens.get(chainIdentifier.identifier) ?? [];
-        chainInfoInner.removeCurrencies(
-          ...prevToken.map((token) => token.coinMinimalDenom)
-        );
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
+      this.map.set(chainIdentifier.identifier, inner);
 
-        const inner = this.getTokensOf(chainInfoInner.chainId);
-        chainInfoInner.addCurrencies(...inner.tokens);
-
-        this.prevTokens.set(
-          chainIdentifier.identifier,
-          inner.tokens as AppCurrency[]
-        );
-      });
+      return inner;
     });
   }
 
   getTokensOf(chainId: string) {
-    return this.get(chainId);
+    const chainIdentifier = ChainIdHelper.parse(chainId);
+    return this.map.get(chainIdentifier.identifier);
   }
 
   get waitingSuggestedToken() {
@@ -154,7 +157,7 @@ export class TokensStore<
         appCurrency
       );
 
-      yield this.getTokensOf(data.data.chainId).refreshTokens();
+      yield this.getTokensOf(data.data.chainId)?.refreshTokens();
     }
   }
 

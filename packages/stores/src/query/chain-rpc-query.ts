@@ -2,7 +2,7 @@ import { ObservableQuery } from "../common";
 import { KVStore } from "@keplr-wallet/common";
 import Axios, { AxiosInstance } from "axios";
 import { override } from "mobx";
-import { ChainGetter } from "../common";
+import { ChainGetter } from "../chain";
 import { HasMapStore } from "../common";
 
 export class ObservableChainQueryRPC<

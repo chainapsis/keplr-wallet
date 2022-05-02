@@ -1,6 +1,6 @@
 import { ObservableChainQuery } from "../chain-query";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
-import { ChainGetter } from "../../common";
+import { ChainGetter } from "../../chain";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";

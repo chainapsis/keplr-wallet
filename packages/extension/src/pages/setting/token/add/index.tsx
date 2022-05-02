@@ -140,7 +140,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               ) {
                 await tokensStore.approveSuggestedToken(currency);
               } else {
-                await tokensOf.addToken(currency);
+                await tokensOf?.addToken(currency);
               }
             } else {
               let viewingKey = data.viewingKey;
@@ -208,7 +208,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
                 ) {
                   await tokensStore.approveSuggestedToken(currency);
                 } else {
-                  await tokensOf.addToken(currency);
+                  await tokensOf?.addToken(currency);
                 }
               }
             }

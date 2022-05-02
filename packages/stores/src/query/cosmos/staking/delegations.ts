@@ -4,7 +4,7 @@ import {
 } from "../../chain-query";
 import { Delegation, Delegations } from "./types";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { computedFn } from "mobx-utils";

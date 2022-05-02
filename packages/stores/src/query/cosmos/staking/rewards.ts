@@ -4,7 +4,7 @@ import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { Currency } from "@keplr-wallet/types";
@@ -40,15 +40,17 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   get rewards(): CoinPretty[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
-    const currenciesMap = chainInfo.currencies.reduce<{
-      [denom: string]: Currency;
-    }>((obj, currency) => {
-      // TODO: Handle the contract tokens.
-      if (!("type" in currency)) {
-        obj[currency.coinMinimalDenom] = currency;
-      }
-      return obj;
-    }, {});
+    const currenciesMap = chainInfo
+      .findCurrencies(...chainInfo.knownDenoms)
+      .reduce<{
+        [denom: string]: Currency;
+      }>((obj, currency) => {
+        // TODO: Handle the contract tokens.
+        if (!("type" in currency)) {
+          obj[currency.coinMinimalDenom] = currency;
+        }
+        return obj;
+      }, {});
 
     return StoreUtils.getBalancesFromCurrencies(
       currenciesMap,
@@ -60,15 +62,17 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
     (validatorAddress: string): CoinPretty[] => {
       const chainInfo = this.chainGetter.getChain(this.chainId);
 
-      const currenciesMap = chainInfo.currencies.reduce<{
-        [denom: string]: Currency;
-      }>((obj, currency) => {
-        // TODO: Handle the contract tokens.
-        if (!("type" in currency)) {
-          obj[currency.coinMinimalDenom] = currency;
-        }
-        return obj;
-      }, {});
+      const currenciesMap = chainInfo
+        .findCurrencies(...chainInfo.knownDenoms)
+        .reduce<{
+          [denom: string]: Currency;
+        }>((obj, currency) => {
+          // TODO: Handle the contract tokens.
+          if (!("type" in currency)) {
+            obj[currency.coinMinimalDenom] = currency;
+          }
+          return obj;
+        }, {});
 
       const reward = this.response?.data.rewards?.find((r) => {
         return r.validator_address === validatorAddress;
@@ -110,30 +114,9 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   get unstakableRewards(): CoinPretty[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
-    const currenciesMap = chainInfo.currencies.reduce<{
-      [denom: string]: Currency;
-    }>((obj, currency) => {
-      // TODO: Handle the contract tokens.
-      if (
-        !("type" in currency) &&
-        currency.coinMinimalDenom !== chainInfo.stakeCurrency.coinMinimalDenom
-      ) {
-        obj[currency.coinMinimalDenom] = currency;
-      }
-      return obj;
-    }, {});
-
-    return StoreUtils.getBalancesFromCurrencies(
-      currenciesMap,
-      this.response?.data.total ?? []
-    );
-  }
-
-  readonly getUnstakableRewardsOf = computedFn(
-    (validatorAddress: string): CoinPretty[] => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-
-      const currenciesMap = chainInfo.currencies.reduce<{
+    const currenciesMap = chainInfo
+      .findCurrencies(...chainInfo.knownDenoms)
+      .reduce<{
         [denom: string]: Currency;
       }>((obj, currency) => {
         // TODO: Handle the contract tokens.
@@ -145,6 +128,32 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
         }
         return obj;
       }, {});
+
+    return StoreUtils.getBalancesFromCurrencies(
+      currenciesMap,
+      this.response?.data.total ?? []
+    );
+  }
+
+  readonly getUnstakableRewardsOf = computedFn(
+    (validatorAddress: string): CoinPretty[] => {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+
+      const currenciesMap = chainInfo
+        .findCurrencies(...chainInfo.knownDenoms)
+        .reduce<{
+          [denom: string]: Currency;
+        }>((obj, currency) => {
+          // TODO: Handle the contract tokens.
+          if (
+            !("type" in currency) &&
+            currency.coinMinimalDenom !==
+              chainInfo.stakeCurrency.coinMinimalDenom
+          ) {
+            obj[currency.coinMinimalDenom] = currency;
+          }
+          return obj;
+        }, {});
 
       const reward = this.response?.data.rewards?.find((r) => {
         return r.validator_address === validatorAddress;

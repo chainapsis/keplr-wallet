@@ -75,15 +75,20 @@ export const SendPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (query.defaultDenom) {
-      const currency = current.currencies.find(
-        (cur) => cur.coinMinimalDenom === query.defaultDenom
-      );
+      const currency = current
+        .findCurrencies(...current.knownDenoms)
+        .find((cur) => cur.coinMinimalDenom === query.defaultDenom);
 
       if (currency) {
         sendConfigs.amountConfig.setSendCurrency(currency);
       }
     }
-  }, [current.currencies, query.defaultDenom, sendConfigs.amountConfig]);
+  }, [
+    current,
+    current.knownDenoms,
+    query.defaultDenom,
+    sendConfigs.amountConfig,
+  ]);
 
   const isDetachedPage = query.detached === "true";
 

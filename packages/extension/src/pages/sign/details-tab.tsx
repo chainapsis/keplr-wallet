@@ -59,7 +59,9 @@ export const DetailsTab: FunctionComponent<{
           const msgContent = renderAminoMessage(
             accountStore.getAccount(chainStore.current.chainId),
             msg,
-            chainStore.current.currencies,
+            chainStore.current.findCurrencies(
+              ...chainStore.current.knownDenoms
+            ),
             intl
           );
           return (
@@ -75,7 +77,9 @@ export const DetailsTab: FunctionComponent<{
         return (msgs as AnyWithUnpacked[]).map((msg, i) => {
           const msgContent = renderDirectMessage(
             msg,
-            chainStore.current.currencies,
+            chainStore.current.findCurrencies(
+              ...chainStore.current.knownDenoms
+            ),
             intl
           );
           return (
