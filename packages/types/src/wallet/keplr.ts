@@ -82,7 +82,8 @@ export interface Keplr {
   signArbitrary(
     chainId: string,
     signer: string,
-    data: string | Uint8Array
+    data: string | Uint8Array,
+    sign64byteEthereum?: boolean
   ): Promise<StdSignature>;
   verifyArbitrary(
     chainId: string,

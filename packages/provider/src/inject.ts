@@ -344,9 +344,15 @@ export class InjectedKeplr implements IKeplr {
   async signArbitrary(
     chainId: string,
     signer: string,
-    data: string | Uint8Array
+    data: string | Uint8Array,
+    sign64byteEthereum?: boolean
   ): Promise<StdSignature> {
-    return await this.requestMethod("signArbitrary", [chainId, signer, data]);
+    return await this.requestMethod("signArbitrary", [
+      chainId,
+      signer,
+      data,
+      sign64byteEthereum,
+    ]);
   }
 
   async verifyArbitrary(

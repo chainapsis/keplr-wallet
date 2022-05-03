@@ -231,6 +231,7 @@ export class KeyRingService {
     signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
+      sign64byteEthereum?: boolean;
     }
   ): Promise<AminoSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
@@ -286,11 +287,11 @@ export class KeyRingService {
           "Signing request was for ADR-36. But, accidentally, new sign doc is not for ADR-36"
         );
       }
+    }
 
-      if (coinType === 60 && newSignDoc.msgs.length !== 1) {
-        // Validate messages length for Evmos sign
-        throw new Error("Invalid number of messages for sign request");
-      }
+    if (signOptions.sign64byteEthereum && newSignDoc.msgs.length !== 1) {
+      // Validate messages length for Evmos sign
+      throw new Error("Invalid number of messages for sign request");
     }
 
     try {
@@ -303,23 +304,14 @@ export class KeyRingService {
         env,
         chainId,
         coinType,
-        coinType !== 60 ? serializeSignDoc(newSignDoc) : ethereumMessage
+        signOptions.sign64byteEthereum
+          ? ethereumMessage
+          : serializeSignDoc(newSignDoc)
       );
-
-      const encodedSignature = encodeSecp256k1Signature(key.pubKey, signature);
 
       return {
         signed: newSignDoc,
-        signature: {
-          pub_key: {
-            type:
-              coinType !== 60
-                ? encodedSignature.pub_key.type
-                : "ethermint.crypto.v1.ethsecp256k1.PubKey",
-            value: encodedSignature.pub_key.value,
-          },
-          signature: encodedSignature.signature,
-        },
+        signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
