@@ -817,7 +817,22 @@ export class CosmosAccountImpl {
       },
       memo,
       signOptions,
-      onTxEvents
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to send token, refresh the balance.
+          const queryBalance = this.queries.queryBalances
+            .getQueryBech32Address(this.base.bech32Address)
+            .balances.find((bal) => {
+              return (
+                bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+              );
+            });
+
+          if (queryBalance) {
+            queryBalance.fetch();
+          }
+        }
+      })
     );
   }
 
@@ -1116,22 +1131,20 @@ export class CosmosAccountImpl {
       },
       memo,
       signOptions,
-      onTxEvents
+      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to withdraw rewards, refresh rewards.
+          this.queries.cosmos.queryRewards
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+        }
+      })
     );
   }
 
-  async sendGovVoteMsg(
+  makeGovVoteTx(
     proposalId: string,
-    option: "Yes" | "No" | "Abstain" | "NoWithVeto",
-    memo: string = "",
-    stdFee: Partial<StdFee> = {},
-    signOptions?: KeplrSignOptions,
-    onTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
+    option: "Yes" | "No" | "Abstain" | "NoWithVeto"
   ) {
     const voteOption = (() => {
       switch (option) {
@@ -1155,7 +1168,7 @@ export class CosmosAccountImpl {
       },
     };
 
-    await this.sendMsgs(
+    return this.makeTx(
       "govVote",
       {
         aminoMsgs: [msg],
@@ -1183,11 +1196,36 @@ export class CosmosAccountImpl {
           },
         ],
       },
-      memo,
       {
-        amount: stdFee.amount ?? [],
-        gas: stdFee.gas ?? this.msgOpts.govVote.gas.toString(),
+        amount: [],
+        gas: this.msgOpts.govVote.gas.toString(),
+      }
+    );
+  }
+
+  async sendGovVoteMsg(
+    proposalId: string,
+    option: "Yes" | "No" | "Abstain" | "NoWithVeto",
+    memo: string = "",
+    stdFee: Partial<StdFee> = {},
+    signOptions?: KeplrSignOptions,
+    onTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
+  ) {
+    const tx = this.makeGovVoteTx(proposalId, option);
+    if (!tx.defaultFallbackFee) {
+      throw new Error("defaultFallbackFee is null");
+    }
+    return tx.send(
+      {
+        amount: stdFee.amount ?? tx.defaultFallbackFee.amount,
+        gas: stdFee.gas ?? tx.defaultFallbackFee.gas,
       },
+      memo,
       signOptions,
       this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
