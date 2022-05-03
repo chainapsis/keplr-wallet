@@ -291,7 +291,8 @@ export class KeyRingService {
     }
 
     try {
-      const isGnoChain = bech32Prefix === "g";
+      const chainInfo = await this.chainsService.getChainInfo(chainId);
+      const isGnoChain = chainInfo.features && chainInfo.features.includes("gno");
 
       const signature = await this.keyRing.sign(
         env,
@@ -302,9 +303,10 @@ export class KeyRingService {
           : serializeSignDoc(newSignDoc)
       );
 
+      const signatureEncoded = encodeSecp256k1Signature(key.pubKey, signature);
       return {
         signed: newSignDoc,
-        signature: encodeSecp256k1Signature(key.pubKey, signature),
+        signature: isGnoChain ? this.toGnoSignature(signatureEncoded) : signatureEncoded,
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
@@ -329,6 +331,16 @@ export class KeyRingService {
     };
 
     return toUtf8(sortedJsonStringify(gnoSignDoc));
+  }
+
+  private toGnoSignature(signature: StdSignature): StdSignature {
+    return  {
+      pub_key: {
+        type: "/tm.PubKeySecp256k1",
+        value: signature.pub_key.value,
+      },
+      signature: signature.signature
+    };
   }
 
   async requestSignDirect(
