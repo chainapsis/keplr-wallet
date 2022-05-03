@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/proto-types",
-  "version": "0.9.12",
+  "version": "0.10.3",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": false,
@@ -10,6 +10,7 @@
   "scripts": {
     "clean": "npx zx ./proto-types-gen/scripts/clean.mjs; rm -rf node_modules; rm -rf proto-types-gen/build; rm -rf proto-types-gen/src",
     "build": "npx zx ./proto-types-gen/scripts/proto-gen.mjs",
+    "dev": "npx zx ./proto-types-gen/scripts/proto-gen.mjs",
     "lint-test": "eslint \"proto-types-gen/scripts/**/*\" && prettier --check \"proto-types-gen/scripts/**/*\"",
     "lint-fix": "eslint --fix \"proto-types-gen/scripts/**/*\" && prettier --write \"proto-types-gen/scripts/**/*\""
   },
@@ -18,8 +19,8 @@
     "protobufjs": "^6.11.2"
   },
   "devDependencies": {
+    "folder-hash": "^4.0.2",
     "glob": "^7.2.0",
-    "ts-proto": "^1.106.2",
-    "folder-hash": "^4.0.2"
+    "ts-proto": "^1.106.2"
   }
 }

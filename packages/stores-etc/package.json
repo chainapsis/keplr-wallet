@@ -1,0 +1,28 @@
+{
+  "name": "@keplr-wallet/stores-etc",
+  "version": "0.10.3",
+  "main": "build/index.js",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules; rm -rf build",
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "jest --passWithNoTests",
+    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+  },
+  "dependencies": {
+    "@ethersproject/abi": "^5.6.0",
+    "@keplr-wallet/common": "0.10.3",
+    "@keplr-wallet/stores": "0.10.3",
+    "@keplr-wallet/types": "0.10.3",
+    "axios": "^0.21.4",
+    "mobx": "^6.1.7",
+    "utility-types": "^3.10.0"
+  }
+}

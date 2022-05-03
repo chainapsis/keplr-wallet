@@ -36,6 +36,7 @@ import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 import { SettingScreen } from "./screens/setting";
 import { SettingSelectAccountScreen } from "./screens/setting/screens/select-account";
 import { ViewPrivateDataScreen } from "./screens/setting/screens/view-private-data";
+import { SettingChainListScreen } from "./screens/setting/screens/chain-list";
 import { WebScreen } from "./screens/web";
 import { RegisterIntroScreen } from "./screens/register";
 import {
@@ -200,6 +201,9 @@ const {
     },
     "Setting.Version": {
       upperScreenName: "Settings",
+    },
+    "Setting.ChainList": {
+      upperScreenName: "ChainList",
     },
     AddressBook: {
       upperScreenName: "AddressBooks",
@@ -726,6 +730,28 @@ export const AddressBookStackScreen: FunctionComponent = () => {
   );
 };
 
+export const ChainListStackScreen: FunctionComponent = () => {
+  const style = useStyle();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        ...BlurredHeaderScreenOptionsPreset,
+        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+      }}
+      headerMode="screen"
+    >
+      <Stack.Screen
+        options={{
+          title: "Chain List",
+        }}
+        name="Setting.ChainList"
+        component={SettingChainListScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
 export const WebNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
@@ -975,6 +1001,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
                 name="AddressBooks"
                 component={AddressBookStackScreen}
               />
+              <Stack.Screen name="ChainList" component={ChainListStackScreen} />
             </Stack.Navigator>
           </BugsnagNavigationContainer>
           {/* <ModalsRenderer /> */}

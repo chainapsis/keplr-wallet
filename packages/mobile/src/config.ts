@@ -768,7 +768,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       average: 0.0025,
       high: 0.004,
     },
-    features: ["cosmwasm", "ibc-transfer", "ibc-go"],
+    features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
     txExplorer: {
       name: "Mintscan",
@@ -884,6 +884,30 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+      },
+      {
+        coinDenom: "FRAX",
+        coinMinimalDenom: "frax-wei",
+        coinDecimals: 18,
+        coinGeckoId: "frax",
+      },
+      {
+        coinDenom: "DAI",
+        coinMinimalDenom: "dai-wei",
+        coinDecimals: 18,
+        coinGeckoId: "dai",
+      },
+      {
+        coinDenom: "USDT",
+        coinMinimalDenom: "uusdt",
+        coinDecimals: 6,
+        coinGeckoId: "tether",
       },
     ],
     feeCurrencies: [
@@ -1022,6 +1046,40 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["ibc-go"],
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
+  },
+  {
+    rpc: "https://rpc-gravity-bridge.keplr.app",
+    rest: "https://lcd-gravity-bridge.keplr.app",
+    chainId: "gravity-bridge-3",
+    chainName: "Gravity Bridge",
+    stakeCurrency: {
+      coinDenom: "GRAV",
+      coinMinimalDenom: "ugraviton",
+      coinDecimals: 6,
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/grav.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("gravity"),
+    currencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/grav.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/grav.png",
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go"],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/grav.png",
   },
   {
     rpc: "https://rpc-sentinel.keplr.app",

@@ -599,7 +599,7 @@ export class CosmosAccountImpl {
       true
     );
 
-    const coinType = this.chainGetter.getChain(this.chainId).coinType;
+    const coinType = this.chainGetter.getChain(this.chainId).bip44.coinType;
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
@@ -1134,21 +1134,15 @@ export class CosmosAccountImpl {
         }
   ) {
     const voteOption = (() => {
-      if (
-        this.chainGetter.getChain(this.chainId).features?.includes("stargate")
-      ) {
-        switch (option) {
-          case "Yes":
-            return 1;
-          case "Abstain":
-            return 2;
-          case "No":
-            return 3;
-          case "NoWithVeto":
-            return 4;
-        }
-      } else {
-        return option;
+      switch (option) {
+        case "Yes":
+          return 1;
+        case "Abstain":
+          return 2;
+        case "No":
+          return 3;
+        case "NoWithVeto":
+          return 4;
       }
     })();
 
@@ -1173,16 +1167,12 @@ export class CosmosAccountImpl {
               voter: msg.value.voter,
               option: (() => {
                 switch (msg.value.option) {
-                  case "Yes":
                   case 1:
                     return VoteOption.VOTE_OPTION_YES;
-                  case "Abstain":
                   case 2:
                     return VoteOption.VOTE_OPTION_ABSTAIN;
-                  case "No":
                   case 3:
                     return VoteOption.VOTE_OPTION_NO;
-                  case "NoWithVeto":
                   case 4:
                     return VoteOption.VOTE_OPTION_NO_WITH_VETO;
                   default:

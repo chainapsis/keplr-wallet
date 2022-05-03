@@ -123,13 +123,18 @@ function setOutputHash(root, hash) {
 
     $.verbose = false;
 
+    // Move tsconfig.json to package root
+    await $`cp ${packageRoot}/proto-types-gen/tsconfig.json ${packageRoot}/tsconfig.json`;
+
     // Build javascript output
-    const rootDir = path.join(__dirname, "..");
-    cd(rootDir);
+    cd(packageRoot);
     await $`npx tsc`;
 
+    // Remove used tsconfig.json
+    await $`rm ${packageRoot}/tsconfig.json`;
+
     // Move javascript output to proto-types package
-    const buildOutDir = path.join(rootDir, "build");
+    const buildOutDir = path.join(packageRoot, "proto-types-gen/build");
 
     // Remove previous output if exist
     const previous = glob.sync(`${packageRoot}/**/*.+(ts|js|cjs|mjs|map)`);

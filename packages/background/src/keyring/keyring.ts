@@ -60,7 +60,7 @@ export class KeyRing {
    * If keyring has private key, it can't set the BIP 44 path.
    */
   private _privateKey?: Uint8Array;
-  private _mnemonic?: string;
+  private _mnemonicMasterSeed?: Uint8Array;
   private _ledgerPublicKey?: Uint8Array;
 
   private keyStore: KeyStore | null;
@@ -107,7 +107,7 @@ export class KeyRing {
   public isLocked(): boolean {
     return (
       this.privateKey == null &&
-      this.mnemonic == null &&
+      this.mnemonicMasterSeed == null &&
       this.ledgerPublicKey == null
     );
   }
@@ -118,17 +118,17 @@ export class KeyRing {
 
   private set privateKey(privateKey: Uint8Array | undefined) {
     this._privateKey = privateKey;
-    this._mnemonic = undefined;
+    this._mnemonicMasterSeed = undefined;
     this._ledgerPublicKey = undefined;
     this.cached = new Map();
   }
 
-  private get mnemonic(): string | undefined {
-    return this._mnemonic;
+  private get mnemonicMasterSeed(): Uint8Array | undefined {
+    return this._mnemonicMasterSeed;
   }
 
-  private set mnemonic(mnemonic: string | undefined) {
-    this._mnemonic = mnemonic;
+  private set mnemonicMasterSeed(masterSeed: Uint8Array | undefined) {
+    this._mnemonicMasterSeed = masterSeed;
     this._privateKey = undefined;
     this._ledgerPublicKey = undefined;
     this.cached = new Map();
@@ -139,7 +139,7 @@ export class KeyRing {
   }
 
   private set ledgerPublicKey(publicKey: Uint8Array | undefined) {
-    this._mnemonic = undefined;
+    this._mnemonicMasterSeed = undefined;
     this._privateKey = undefined;
     this._ledgerPublicKey = publicKey;
     this.cached = new Map();
@@ -218,7 +218,7 @@ export class KeyRing {
       throw new Error("Key ring is not loaded or not empty");
     }
 
-    this.mnemonic = mnemonic;
+    this.mnemonicMasterSeed = Mnemonic.generateMasterSeedFromMnemonic(mnemonic);
     this.keyStore = await KeyRing.CreateMnemonicKeyStore(
       this.rng,
       this.crypto,
@@ -319,7 +319,7 @@ export class KeyRing {
       throw new Error("Key ring is not unlocked");
     }
 
-    this.mnemonic = undefined;
+    this.mnemonicMasterSeed = undefined;
     this.privateKey = undefined;
     this.ledgerPublicKey = undefined;
     this.password = "";
@@ -332,9 +332,11 @@ export class KeyRing {
 
     if (this.type === "mnemonic") {
       // If password is invalid, error will be thrown.
-      this.mnemonic = Buffer.from(
-        await Crypto.decrypt(this.crypto, this.keyStore, password)
-      ).toString();
+      this.mnemonicMasterSeed = Mnemonic.generateMasterSeedFromMnemonic(
+        Buffer.from(
+          await Crypto.decrypt(this.crypto, this.keyStore, password)
+        ).toString()
+      );
     } else if (this.type === "privateKey") {
       // If password is invalid, error will be thrown.
       this.privateKey = Buffer.from(
@@ -528,8 +530,9 @@ export class KeyRing {
         } else {
           // Else clear keyring.
           this.keyStore = null;
-          this.mnemonic = undefined;
+          this.mnemonicMasterSeed = undefined;
           this.privateKey = undefined;
+          this.ledgerPublicKey = undefined;
         }
 
         keyStoreChanged = true;
@@ -644,13 +647,16 @@ export class KeyRing {
         return new PrivKeySecp256k1(cachedKey);
       }
 
-      if (!this.mnemonic) {
+      if (!this.mnemonicMasterSeed) {
         throw new Error(
           "Key store type is mnemonic and it is unlocked. But, mnemonic is not loaded unexpectedly"
         );
       }
 
-      const privKey = Mnemonic.generateWalletFromMnemonic(this.mnemonic, path);
+      const privKey = Mnemonic.generatePrivateKeyFromMasterSeed(
+        this.mnemonicMasterSeed,
+        path
+      );
 
       this.cached.set(path, privKey);
       return new PrivKeySecp256k1(privKey);
