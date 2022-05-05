@@ -31,6 +31,7 @@ import {
   AminoSignResponse,
   StdSignDoc,
   StdSignature,
+  encodeSecp256k1Pubkey,
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
@@ -231,7 +232,7 @@ export class KeyRingService {
     signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
-      sign64byteEthereum?: boolean;
+      signEthereum?: boolean;
     }
   ): Promise<AminoSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
@@ -289,29 +290,42 @@ export class KeyRingService {
       }
     }
 
-    if (signOptions.sign64byteEthereum && newSignDoc.msgs.length !== 1) {
-      // Validate messages length for Evmos sign
-      throw new Error("Invalid number of messages for sign request");
+    if (signOptions.signEthereum && newSignDoc.msgs.length !== 1) {
+      // Validate messages length for Ethereum sign
+      throw new Error("Invalid number of messages for Ethereum sign request");
     }
 
-    try {
-      const ethereumMessage = Buffer.from(
-        newSignDoc.msgs[0].value.data,
-        "base64"
+    const generateEthereumSignature = async () => {
+      const message = Buffer.from(newSignDoc.msgs[0].value.data, "base64");
+
+      const signatureBytes = await this.keyRing.signEthereum(
+        chainId,
+        coinType,
+        message,
+        false // Sign with prefixed 65-byte signature
       );
 
+      return {
+        pub_key: encodeSecp256k1Pubkey(key.pubKey),
+        signature: Buffer.from(signatureBytes).toString("base64"),
+      };
+    };
+
+    try {
       const signature = await this.keyRing.sign(
         env,
         chainId,
         coinType,
-        signOptions.sign64byteEthereum
-          ? ethereumMessage
-          : serializeSignDoc(newSignDoc)
+        serializeSignDoc(newSignDoc)
       );
+
+      const payload = signOptions.signEthereum
+        ? await generateEthereumSignature()
+        : encodeSecp256k1Signature(key.pubKey, signature);
 
       return {
         signed: newSignDoc,
-        signature: encodeSecp256k1Signature(key.pubKey, signature),
+        signature: payload,
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});

@@ -345,13 +345,13 @@ export class InjectedKeplr implements IKeplr {
     chainId: string,
     signer: string,
     data: string | Uint8Array,
-    sign64byteEthereum?: boolean
+    signEthereum?: boolean
   ): Promise<StdSignature> {
     return await this.requestMethod("signArbitrary", [
       chainId,
       signer,
       data,
-      sign64byteEthereum,
+      signEthereum,
     ]);
   }
 

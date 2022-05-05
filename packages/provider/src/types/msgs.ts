@@ -189,7 +189,7 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     public readonly signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
-      sign64byteEthereum?: boolean;
+      signEthereum?: boolean;
     } = {}
   ) {
     super();

@@ -137,7 +137,7 @@ export class Keplr implements IKeplr {
     chainId: string,
     signer: string,
     data: string | Uint8Array,
-    sign64byteEthereum?: boolean
+    signEthereum?: boolean
   ): Promise<StdSignature> {
     let isADR36WithString = false;
     if (typeof data === "string") {
@@ -169,7 +169,7 @@ export class Keplr implements IKeplr {
 
     const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
       isADR36WithString,
-      sign64byteEthereum,
+      signEthereum,
     });
     return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).signature;
   }
