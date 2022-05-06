@@ -1,15 +1,15 @@
 import React, { FunctionComponent, useCallback } from "react";
-
-import { Address } from "../../components/address";
-
-import styleAccount from "./account.module.scss";
-
+import { useIntl } from "react-intl";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
+
+import { KeplrError } from "@keplr-wallet/common";
+import { WalletStatus } from "@keplr-wallet/stores";
+
 import { useNotification } from "../../components/notification";
 import { ToolTip } from "../../components/tooltip";
-import { useIntl } from "react-intl";
-import { WalletStatus } from "@keplr-wallet/stores";
+import { Address } from "../../components/address";
+import { useStore } from "../../stores";
+import styleAccount from "./account.module.scss";
 
 export const AccountView: FunctionComponent = observer(() => {
   const { accountStore, chainStore } = useStore();
@@ -37,7 +37,7 @@ export const AccountView: FunctionComponent = observer(() => {
         });
       }
     },
-    [accountInfo.walletStatus, accountInfo.bech32Address, notification, intl]
+    [accountInfo.walletStatus, notification, intl]
   );
 
   return (
@@ -60,9 +60,9 @@ export const AccountView: FunctionComponent = observer(() => {
         <ToolTip
           tooltip={(() => {
             if (
-              accountInfo.rejectionReason &&
+              accountInfo.rejectionReason instanceof KeplrError &&
               accountInfo.rejectionReason.message ===
-                "Ledger is not compatible with this coinType right now"
+                "Ledger is not compatible with this coinType right nows"
             ) {
               return "Ledger is not supported for this chain";
             }

@@ -1,9 +1,10 @@
 import { action, computed, flow, makeObservable, observable } from "mobx";
-import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
-import { ChainGetter } from "../common";
-import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { StdFee } from "@cosmjs/launchpad";
 import { evmosToEth } from "@hanchon/ethermint-address-converter";
+
+import { DenomHelper, KeplrError, toGenerator } from "@keplr-wallet/common";
+import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
+import { ChainGetter } from "../common";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -268,7 +269,7 @@ export class AccountSetBase {
     return this._walletStatus;
   }
 
-  get rejectionReason(): Error | undefined {
+  get rejectionReason(): Error | KeplrError | undefined {
     return this._rejectionReason;
   }
 
