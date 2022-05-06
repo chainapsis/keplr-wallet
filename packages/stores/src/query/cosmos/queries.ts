@@ -24,7 +24,6 @@ import {
   ObservableQueryIBCChannel,
   ObservableQueryIBCClientState,
 } from "./ibc";
-import { ObservableQuerySifchainLiquidityAPY } from "./supply/sifchain";
 import { ObservableQueryCosmosBalanceRegistry } from "./balance";
 import { ObservableQueryIrisMintingInfation } from "./supply/iris-minting";
 import { DeepReadonly } from "utility-types";
@@ -86,8 +85,6 @@ export class CosmosQueriesImpl {
   public readonly queryIBCChannel: DeepReadonly<ObservableQueryIBCChannel>;
   public readonly queryIBCDenomTrace: DeepReadonly<ObservableQueryDenomTrace>;
 
-  public readonly querySifchainAPY: DeepReadonly<ObservableQuerySifchainLiquidityAPY>;
-
   constructor(
     base: QueriesSetBase,
     kvStore: KVStore,
@@ -98,11 +95,6 @@ export class CosmosQueriesImpl {
       kvStore,
       chainId,
       chainGetter
-    );
-
-    this.querySifchainAPY = new ObservableQuerySifchainLiquidityAPY(
-      kvStore,
-      chainId
     );
 
     base.queryBalances.addBalanceRegistry(
@@ -154,7 +146,6 @@ export class CosmosQueriesImpl {
       this.queryPool,
       this.querySupplyTotal,
       new ObservableQueryIrisMintingInfation(kvStore, chainId, chainGetter),
-      this.querySifchainAPY,
       new ObservableQueryOsmosisEpochs(kvStore, chainId, chainGetter),
       new ObservableQueryOsmosisEpochProvisions(
         kvStore,

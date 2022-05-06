@@ -5,7 +5,6 @@ import { MintingInflation } from "./types";
 import { ObservableChainQuery } from "../../chain-query";
 import { ChainGetter } from "../../../common";
 import { ObservableQueryIrisMintingInfation } from "./iris-minting";
-import { ObservableQuerySifchainLiquidityAPY } from "./sifchain";
 import {
   ObservableQueryOsmosisEpochProvisions,
   ObservableQueryOsmosisEpochs,
@@ -22,7 +21,6 @@ export class ObservableQueryInflation {
     protected readonly _queryPool: ObservableQueryStakingPool,
     protected readonly _querySupplyTotal: ObservableQuerySupplyTotal,
     protected readonly _queryIrisMint: ObservableQueryIrisMintingInfation,
-    protected readonly _querySifchainAPY: ObservableQuerySifchainLiquidityAPY,
     protected readonly _queryOsmosisEpochs: ObservableQueryOsmosisEpochs,
     protected readonly _queryOsmosisEpochProvisions: ObservableQueryOsmosisEpochProvisions,
     protected readonly _queryOsmosisMintParams: ObservableQueryOsmosisMintParmas,
@@ -56,17 +54,13 @@ export class ObservableQueryInflation {
     try {
       let dec: Dec | undefined;
 
-      // XXX: Hard coded part for the iris hub and sifchain.
+      // XXX: Hard coded part for the iris hub.
       // TODO: Remove this part.
       const chainInfo = this.chainGetter.getChain(this.chainId);
       if (chainInfo.chainId.startsWith("irishub")) {
         dec = new Dec(
           this._queryIrisMint.response?.data.result.inflation ?? "0"
         ).mul(DecUtils.getPrecisionDec(2));
-      } else if (chainInfo.chainId.startsWith("sifchain")) {
-        return new IntPretty(
-          new Dec(this._querySifchainAPY.liquidityAPY.toString())
-        );
       } else if (chainInfo.chainId.startsWith("osmosis")) {
         /*
           XXX: Temporary and unfinished implementation for the osmosis staking APY.
