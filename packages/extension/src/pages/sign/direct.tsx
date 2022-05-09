@@ -2,11 +2,15 @@ import { Currency } from "@keplr-wallet/types";
 import { IntlShape } from "react-intl";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import {
+  renderGenericMsgGrant,
   renderMsgBeginRedelegate,
   renderMsgDelegate,
   renderMsgExecuteContract,
+  renderMsgRevoke,
   renderMsgSend,
   renderMsgUndelegate,
+  renderSendMsgGrant,
+  renderStakeMsgGrant,
   renderUnknownMessage,
 } from "./messages";
 import { Buffer } from "buffer/";
@@ -18,6 +22,13 @@ import {
   MsgUndelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
+import {
+  MsgGrant,
+  MsgRevoke,
+} from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
+import { GenericAuthorization } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/authz";
+import { SendAuthorization } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/authz";
+import { StakeAuthorization } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/authz";
 
 export function renderDirectMessage(
   msg: AnyWithUnpacked,
@@ -87,6 +98,46 @@ export function renderDirectMessage(
             executeContractMsg.contract,
             JSON.parse(fromUtf8(executeContractMsg.msg))
           );
+        }
+        case "/cosmos.authz.v1beta1.MsgGrant": {
+          const grantMsg = msg.unpacked as MsgGrant;
+
+          switch (grantMsg.grant?.authorization?.typeUrl) {
+            case "/cosmos.bank.v1beta1.SendAuthorization":
+              return renderSendMsgGrant(
+                currencies,
+                intl,
+                grantMsg.grantee,
+                grantMsg.grant.expiration,
+                SendAuthorization.decode(grantMsg.grant.authorization.value)
+              );
+
+            case "/cosmos.staking.v1beta1.StakeAuthorization":
+              return renderStakeMsgGrant(
+                currencies,
+                intl,
+                grantMsg.grantee,
+                grantMsg.grant.expiration,
+                StakeAuthorization.decode(grantMsg.grant?.authorization.value)
+              );
+
+            default:
+              return renderGenericMsgGrant(
+                intl,
+                grantMsg.grantee,
+                grantMsg.grant?.expiration,
+                grantMsg.grant?.authorization?.typeUrl ===
+                  "/cosmos.authz.v1beta1.GenericAuthorization"
+                  ? GenericAuthorization.decode(
+                      grantMsg.grant!.authorization!.value
+                    ).msg
+                  : grantMsg.grant!.authorization!.typeUrl
+              );
+          }
+        }
+        case "/cosmos.authz.v1beta1.MsgRevoke": {
+          const revokeMsg = msg.unpacked as MsgRevoke;
+          return renderMsgRevoke(intl, revokeMsg.msgTypeUrl, revokeMsg.grantee);
         }
       }
     }
