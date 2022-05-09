@@ -91,13 +91,13 @@ function setOutputHash(root, hash) {
     const thirdPartyProtoPath = path.join(baseDirPath, "third_party/proto");
 
     const inputs = [
+      "cosmos/authz/v1beta1/tx.proto",
       "cosmos/base/v1beta1/coin.proto",
       "cosmos/bank/v1beta1/bank.proto",
       "cosmos/bank/v1beta1/tx.proto",
       "cosmos/bank/v1beta1/authz.proto",
       "cosmos/staking/v1beta1/tx.proto",
       "cosmos/staking/v1beta1/authz.proto",
-      "cosmos/authz/v1beta1/tx.proto",
       "cosmos/gov/v1beta1/gov.proto",
       "cosmos/gov/v1beta1/tx.proto",
       "cosmos/distribution/v1beta1/tx.proto",
