@@ -6,6 +6,10 @@ import {
   MsgUndelegate,
   MsgBeginRedelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import {
+  MsgGrant,
+  MsgRevoke,
+} from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { UnknownMessage } from "./unknown";
 
@@ -69,3 +73,5 @@ defaultProtoCodec.registerAny(
   "/cosmwasm.wasm.v1.MsgExecuteContract",
   MsgExecuteContract
 );
+defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgGrant", MsgGrant);
+defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgRevoke", MsgRevoke);
