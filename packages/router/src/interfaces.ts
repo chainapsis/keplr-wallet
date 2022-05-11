@@ -1,4 +1,4 @@
 export interface Result {
-  error?: string;
+  error?: string | { module: string; code: number; message: string };
   return?: any;
 }
