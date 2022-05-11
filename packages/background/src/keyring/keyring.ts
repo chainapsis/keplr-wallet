@@ -9,7 +9,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { LedgerService } from "../ledger";
 import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
-import { Env } from "@keplr-wallet/router";
+import { Env, KeplrError } from "@keplr-wallet/router";
 
 import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -90,7 +90,7 @@ export class KeyRing {
     }
 
     if (type !== "mnemonic" && type !== "privateKey" && type !== "ledger") {
-      throw new Error("Invalid type of key store");
+      throw new KeplrError("keyring", 132, "Invalid type of key store");
     }
 
     return type;
@@ -190,7 +190,7 @@ export class KeyRing {
     defaultCoinType: number
   ): number {
     if (!this.keyStore) {
-      throw new Error("Key Store is empty");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     return this.keyStore.coinTypeForChain
@@ -215,7 +215,11 @@ export class KeyRing {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     if (this.status !== KeyRingStatus.EMPTY) {
-      throw new Error("Key ring is not loaded or not empty");
+      throw new KeplrError(
+        "keyring",
+        142,
+        "Key ring is not loaded or not empty"
+      );
     }
 
     this.mnemonicMasterSeed = Mnemonic.generateMasterSeedFromMnemonic(mnemonic);
@@ -249,7 +253,11 @@ export class KeyRing {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     if (this.status !== KeyRingStatus.EMPTY) {
-      throw new Error("Key ring is not loaded or not empty");
+      throw new KeplrError(
+        "keyring",
+        142,
+        "Key ring is not loaded or not empty"
+      );
     }
 
     this.privateKey = privateKey;
@@ -283,7 +291,11 @@ export class KeyRing {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     if (this.status !== KeyRingStatus.EMPTY) {
-      throw new Error("Key ring is not loaded or not empty");
+      throw new KeplrError(
+        "keyring",
+        142,
+        "Key ring is not loaded or not empty"
+      );
     }
 
     // Get public key first
@@ -316,7 +328,7 @@ export class KeyRing {
 
   public lock() {
     if (this.status !== KeyRingStatus.UNLOCKED) {
-      throw new Error("Key ring is not unlocked");
+      throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
 
     this.mnemonicMasterSeed = undefined;
@@ -327,7 +339,7 @@ export class KeyRing {
 
   public async unlock(password: string) {
     if (!this.keyStore || this.type === "none") {
-      throw new Error("Key ring not initialized");
+      throw new KeplrError("keyring", 144, "Key ring not initialized");
     }
 
     if (this.type === "mnemonic") {
@@ -353,7 +365,7 @@ export class KeyRing {
         "hex"
       );
     } else {
-      throw new Error("Unexpected type of keyring");
+      throw new KeplrError("keyring", 145, "Unexpected type of keyring");
     }
 
     this.password = password;
@@ -373,7 +385,7 @@ export class KeyRing {
     }
     const multiKeyStore = await this.kvStore.get<KeyStore[]>(KeyMultiStoreKey);
     if (!multiKeyStore) {
-      // Restore the multi keystore if key store exist but multi key store is empty.
+      // Restore the multi keystore if key store exist 13t multi Key store is empty.
       // This case will occur if extension is updated from the prior version that doesn't support the multi key store.
       // This line ensures the backward compatibility.
       if (keyStore) {
@@ -438,7 +450,7 @@ export class KeyRing {
 
   public isKeyStoreCoinTypeSet(chainId: string): boolean {
     if (!this.keyStore) {
-      throw new Error("Empty key store");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     return (
@@ -451,7 +463,7 @@ export class KeyRing {
 
   public async setKeyStoreCoinType(chainId: string, coinType: number) {
     if (!this.keyStore) {
-      throw new Error("Empty key store");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     if (
@@ -460,7 +472,7 @@ export class KeyRing {
         ChainIdHelper.parse(chainId).identifier
       ] !== undefined
     ) {
-      throw new Error("Coin type already set");
+      throw new KeplrError("keyring", 110, "Coin type already set");
     }
 
     this.keyStore.coinTypeForChain = {
@@ -493,17 +505,17 @@ export class KeyRing {
     keyStoreChanged: boolean;
   }> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
-      throw new Error("Key ring is not unlocked");
+      throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
 
     if (this.password !== password) {
-      throw new Error("Invalid password");
+      throw new KeplrError("keyring", 121, "Invalid password");
     }
 
     const keyStore = this.multiKeyStore[index];
 
     if (!keyStore) {
-      throw new Error("Empty key store");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     const multiKeyStore = this.multiKeyStore
@@ -552,13 +564,13 @@ export class KeyRing {
     name: string
   ): Promise<MultiKeyStoreInfoWithSelected> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
-      throw new Error("Key ring is not unlocked");
+      throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
 
     const keyStore = this.multiKeyStore[index];
 
     if (!keyStore) {
-      throw new Error("Empty key store");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     keyStore.meta = { ...keyStore.meta, name: name };
@@ -576,20 +588,22 @@ export class KeyRing {
 
   private loadKey(coinType: number): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
-      throw new Error("Key ring is not unlocked");
+      throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
 
     if (!this.keyStore) {
-      throw new Error("Key Store is empty");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     if (this.keyStore.type === "ledger") {
       if (!this.ledgerPublicKey) {
-        throw new Error("Ledger public key not set");
+        throw new KeplrError("keyring", 150, "Ledger public key not set");
       }
 
       if (coinType === 60) {
-        throw new Error(
+        throw new KeplrError(
+          "keyring",
+          152,
           "Ledger is not compatible with this coinType right now"
         );
       }
@@ -635,7 +649,7 @@ export class KeyRing {
       this.type === "none" ||
       !this.keyStore
     ) {
-      throw new Error("Key ring is not unlocked");
+      throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
 
     const bip44HDPath = KeyRing.getKeyStoreBIP44Path(this.keyStore);
@@ -648,7 +662,9 @@ export class KeyRing {
       }
 
       if (!this.mnemonicMasterSeed) {
-        throw new Error(
+        throw new KeplrError(
+          "keyring",
+          133,
           "Key store type is mnemonic and it is unlocked. But, mnemonic is not loaded unexpectedly"
         );
       }
@@ -664,14 +680,16 @@ export class KeyRing {
       // If key store type is private key, path will be ignored.
 
       if (!this.privateKey) {
-        throw new Error(
+        throw new KeplrError(
+          "keyring",
+          134,
           "Key store type is private key and it is unlocked. But, private key is not loaded unexpectedly"
         );
       }
 
       return new PrivKeySecp256k1(this.privateKey);
     } else {
-      throw new Error("Unexpected type of keyring");
+      throw new KeplrError("keyring", 145, "Unexpected type of keyring");
     }
   }
 
@@ -682,11 +700,11 @@ export class KeyRing {
     message: Uint8Array
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
-      throw new Error("Key ring is not unlocked");
+      throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
 
     if (!this.keyStore) {
-      throw new Error("Key Store is empty");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     // Sign with Evmos/Ethereum
@@ -699,7 +717,11 @@ export class KeyRing {
       const pubKey = this.ledgerPublicKey;
 
       if (!pubKey) {
-        throw new Error("Ledger public key is not initialized");
+        throw new KeplrError(
+          "keyring",
+          151,
+          "Ledger public key is not initialized"
+        );
       }
 
       return await this.ledgerKeeper.sign(
@@ -722,20 +744,26 @@ export class KeyRing {
     message: Uint8Array
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
-      throw new Error("Key ring is not unlocked");
+      throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
 
     if (!this.keyStore) {
-      throw new Error("Key Store is empty");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     if (this.keyStore.type === "ledger") {
       // TODO: Ethereum Ledger Integration
-      throw new Error("Ethereum signing with Ledger is not yet supported");
+      throw new KeplrError(
+        "keyring",
+        112,
+        "Ethereum signing with Ledger is not yet supported"
+      );
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
       if (coinType !== 60) {
-        throw new Error(
+        throw new KeplrError(
+          "keyring",
+          111,
           "Invalid coin type passed in to Ethereum signing (expected 60)"
         );
       }
@@ -758,17 +786,17 @@ export class KeyRing {
   // Show private key or mnemonic key if password is valid.
   public async showKeyRing(index: number, password: string): Promise<string> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
-      throw new Error("Key ring is not unlocked");
+      throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
 
     if (this.password !== password) {
-      throw new Error("Invalid password");
+      throw new KeplrError("keyring", 121, "Invalid password");
     }
 
     const keyStore = this.multiKeyStore[index];
 
     if (!keyStore) {
-      throw new Error("Empty key store");
+      throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
     if (keyStore.type === "mnemonic") {
@@ -797,7 +825,11 @@ export class KeyRing {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
-      throw new Error("Key ring is locked or not initialized");
+      throw new KeplrError(
+        "keyring",
+        141,
+        "Key ring is locked or not initialized"
+      );
     }
 
     const keyStore = await KeyRing.CreateMnemonicKeyStore(
@@ -825,7 +857,11 @@ export class KeyRing {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
-      throw new Error("Key ring is locked or not initialized");
+      throw new KeplrError(
+        "keyring",
+        141,
+        "Key ring is locked or not initialized"
+      );
     }
 
     const keyStore = await KeyRing.CreatePrivateKeyStore(
@@ -853,7 +889,11 @@ export class KeyRing {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
-      throw new Error("Key ring is locked or not initialized");
+      throw new KeplrError(
+        "keyring",
+        141,
+        "Key ring is locked or not initialized"
+      );
     }
 
     // Get public key first
@@ -883,12 +923,16 @@ export class KeyRing {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
-      throw new Error("Key ring is locked or not initialized");
+      throw new KeplrError(
+        "keyring",
+        141,
+        "Key ring is locked or not initialized"
+      );
     }
 
     const keyStore = this.multiKeyStore[index];
     if (!keyStore) {
-      throw new Error("Invalid keystore");
+      throw new KeplrError("keyring", 120, "Invalid keystore");
     }
 
     this.keyStore = keyStore;
@@ -923,7 +967,7 @@ export class KeyRing {
 
   checkPassword(password: string): boolean {
     if (!this.password) {
-      throw new Error("Keyring is locked");
+      throw new KeplrError("keyring", 100, "Keyring is locked");
     }
 
     return this.password === password;
@@ -931,11 +975,11 @@ export class KeyRing {
 
   async exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
     if (!this.password) {
-      throw new Error("Keyring is locked");
+      throw new KeplrError("keyring", 100, "Keyring is locked");
     }
 
     if (this.password !== password) {
-      throw new Error("Invalid password");
+      throw new KeplrError("keyring", 121, "Invalid password");
     }
 
     const result: ExportKeyRingData[] = [];
@@ -1063,7 +1107,7 @@ export class KeyRing {
   private static getKeyStoreId(keyStore: KeyStore): string {
     const id = keyStore.meta?.__id__;
     if (!id) {
-      throw new Error("Key store's id is empty");
+      throw new KeplrError("keyring", 131, "Key store's id is empty");
     }
 
     return id;
@@ -1083,21 +1127,21 @@ export class KeyRing {
 
   public static validateBIP44Path(bip44Path: BIP44HDPath): void {
     if (!Number.isInteger(bip44Path.account) || bip44Path.account < 0) {
-      throw new Error("Invalid account in hd path");
+      throw new KeplrError("keyring", 100, "Invalid account in hd path");
     }
 
     if (
       !Number.isInteger(bip44Path.change) ||
       !(bip44Path.change === 0 || bip44Path.change === 1)
     ) {
-      throw new Error("Invalid change in hd path");
+      throw new KeplrError("keyring", 102, "Invalid change in hd path");
     }
 
     if (
       !Number.isInteger(bip44Path.addressIndex) ||
       bip44Path.addressIndex < 0
     ) {
-      throw new Error("Invalid address index in hd path");
+      throw new KeplrError("keyring", 101, "Invalid address index in hd path");
     }
   }
 
