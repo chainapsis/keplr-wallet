@@ -35,7 +35,8 @@ import {
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
 import { RNG } from "@keplr-wallet/crypto";
-import { cosmos } from "@keplr-wallet/cosmos";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import Long from "long";
 import { Buffer } from "buffer/";
 
 @singleton()
@@ -309,7 +310,7 @@ export class KeyRingService {
     msgOrigin: string,
     chainId: string,
     signer: string,
-    signDoc: cosmos.tx.v1beta1.SignDoc,
+    signDoc: SignDoc,
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
@@ -331,24 +332,32 @@ export class KeyRingService {
         msgOrigin,
         chainId,
         mode: "direct",
-        signDocBytes: cosmos.tx.v1beta1.SignDoc.encode(signDoc).finish(),
+        signDocBytes: SignDoc.encode(signDoc).finish(),
         signer,
         signOptions,
       }
     )) as Uint8Array;
 
-    const newSignDoc = cosmos.tx.v1beta1.SignDoc.decode(newSignDocBytes);
+    const newSignDoc = SignDoc.decode(newSignDocBytes);
+    const {
+      accountNumber: newSignDocAccountNumber,
+      ...newSignDocRest
+    } = newSignDoc;
+    const cosmJSSignDoc = {
+      ...newSignDocRest,
+      accountNumber: Long.fromString(newSignDocAccountNumber),
+    };
 
     try {
       const signature = await this.keyRing.sign(
         env,
         chainId,
         coinType,
-        makeSignBytes(newSignDoc)
+        makeSignBytes(cosmJSSignDoc)
       );
 
       return {
-        signed: newSignDoc,
+        signed: cosmJSSignDoc,
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {

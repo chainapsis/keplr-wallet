@@ -12,7 +12,9 @@ import { SignDocHelper } from "./index";
 import { useState } from "react";
 import { computedFn } from "mobx-utils";
 import { Msg } from "@cosmjs/launchpad";
-import { cosmos } from "@keplr-wallet/cosmos";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
+import { MsgDelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 
 export type AccountStore = IAccountStore<{
   cosmos: {
@@ -168,46 +170,52 @@ export class SignDocAmountConfig
     };
   }
 
-  protected computeAmountInProtoMsgs(msgs: any[]) {
+  protected computeAmountInProtoMsgs(msgs: AnyWithUnpacked[]) {
     const amount = new Coin(this.sendCurrency.coinMinimalDenom, new Int(0));
 
     for (const msg of msgs) {
       try {
-        switch (msg.constructor) {
-          case cosmos.bank.v1beta1.MsgSend:
-            const sendMsg = msg as cosmos.bank.v1beta1.MsgSend;
-            if (sendMsg.fromAddress && sendMsg.fromAddress !== this.sender) {
-              return {
-                amount: "0",
-                denom: this.sendCurrency.coinMinimalDenom,
-              };
-            }
-            for (const amountInMsg of sendMsg.amount) {
-              if (amountInMsg.denom === amount.denom && amountInMsg.amount) {
-                amount.amount = amount.amount.add(new Int(amountInMsg.amount));
+        if (!(msg instanceof UnknownMessage) && "unpacked" in msg) {
+          switch (msg.typeUrl) {
+            case "/cosmos.bank.v1beta1.MsgSend": {
+              const sendMsg = msg.unpacked as MsgSend;
+              if (sendMsg.fromAddress && sendMsg.fromAddress !== this.sender) {
+                return {
+                  amount: "0",
+                  denom: this.sendCurrency.coinMinimalDenom,
+                };
               }
+              for (const amountInMsg of sendMsg.amount) {
+                if (amountInMsg.denom === amount.denom && amountInMsg.amount) {
+                  amount.amount = amount.amount.add(
+                    new Int(amountInMsg.amount)
+                  );
+                }
+              }
+              break;
             }
-            break;
-          case cosmos.staking.v1beta1.MsgDelegate:
-            const delegateMsg = msg as cosmos.staking.v1beta1.MsgDelegate;
-            if (
-              delegateMsg.delegatorAddress &&
-              delegateMsg.delegatorAddress !== this.sender
-            ) {
-              return {
-                amount: "0",
-                denom: this.sendCurrency.coinMinimalDenom,
-              };
+            case "/cosmos.staking.v1beta1.MsgDelegate": {
+              const delegateMsg = msg.unpacked as MsgDelegate;
+              if (
+                delegateMsg.delegatorAddress &&
+                delegateMsg.delegatorAddress !== this.sender
+              ) {
+                return {
+                  amount: "0",
+                  denom: this.sendCurrency.coinMinimalDenom,
+                };
+              }
+              if (
+                delegateMsg.amount?.denom === amount.denom &&
+                delegateMsg.amount.amount
+              ) {
+                amount.amount = amount.amount.add(
+                  new Int(delegateMsg.amount.amount)
+                );
+              }
+              break;
             }
-            if (
-              delegateMsg.amount?.denom === amount.denom &&
-              delegateMsg.amount.amount
-            ) {
-              amount.amount = amount.amount.add(
-                new Int(delegateMsg.amount.amount)
-              );
-            }
-            break;
+          }
         }
       } catch (e) {
         console.log(

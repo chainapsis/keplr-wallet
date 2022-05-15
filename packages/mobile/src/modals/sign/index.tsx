@@ -23,6 +23,7 @@ import { WCAppLogoAndName } from "../../components/wallet-connect";
 import WalletConnect from "@walletconnect/client";
 import { renderAminoMessage } from "./amino";
 import { renderDirectMessage } from "./direct";
+import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
@@ -167,7 +168,7 @@ export const SignModal: FunctionComponent<{
           );
         });
       } else if (mode === "direct") {
-        return (msgs as any[]).map((msg, i) => {
+        return (msgs as AnyWithUnpacked[]).map((msg, i) => {
           const chainInfo = chainStore.getChain(chainId);
           const { title, content } = renderDirectMessage(
             msg,

@@ -70,6 +70,7 @@ export const Colors = {
   "setting-screen-background": "#FAFBFD",
   "camera-loading-background": "rgba(255,255,255,0.95)",
   "big-image-placeholder": "#E7E4EF",
+  "chain-list-element-dragging": "rgba(242, 242, 247, 0.8)",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider({
@@ -277,6 +278,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "24": 24,
     "32": 32,
     "34": 34,
+    "36": 36,
     "38": 38,
     "40": 40,
     "44": 44,
@@ -322,6 +324,7 @@ export const { StyleProvider, useStyle } = createStyleProvider({
     "72": 72,
     "74": 74,
     "80": 80,
+    "83": 83,
     "84": 84,
     "87": 87,
     "90": 90,
