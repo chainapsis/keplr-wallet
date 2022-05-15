@@ -1,0 +1,26 @@
+{
+  "name": "@keplr-wallet/uns",
+  "version": "0.0.1",
+  "main": "build/index.js",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules; rm -rf build",
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "jest --passWithNoTests",
+    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+  },
+  "dependencies": {
+    "@ensdomains/resolver": "^0.2.4",
+    "buffer": "^6.0.3",
+    "ethereum-ens": "^0.8.0",
+    "mobx": "^6.1.7",
+    "web3": "^1.2.6"
+  }
+}

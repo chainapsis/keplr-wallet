@@ -27,6 +27,7 @@ import {
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
+import { UNS, UNSError } from "@keplr-wallet/uns";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
@@ -65,6 +66,10 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       recipientConfig.rawRecipient
     );
 
+    const isUNSAddress = UNS.isValidUNS(
+      recipientConfig.rawRecipient
+    );
+
     const error = recipientConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -93,6 +98,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     }, [intl, error]);
 
     const isENSLoading: boolean = error instanceof ENSIsFetchingError;
+    const isUNSLoading: boolean = error instanceof UNSError;
 
     const selectAddressFromAddressBook = {
       setRecipient: (recipient: string) => {
@@ -137,8 +143,12 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                 "form-control-alternative",
                 styleAddressInput.input
               )}
+              placeholder="Test"
               value={recipientConfig.rawRecipient}
               onChange={(e) => {
+                if (e.target.value.split(".").length > 0) {
+                  UNS.
+                }
                 recipientConfig.setRawRecipient(e.target.value);
                 e.preventDefault();
               }}
@@ -164,6 +174,14 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             </FormText>
           ) : null}
           {!isENSLoading && isENSAddress && !error ? (
+            <FormText>{recipientConfig.recipient}</FormText>
+          ) : null}
+          {isUNSLoading ? (
+            <FormText>
+              <i className="fa fa-spinner fa-spin fa-fw" />
+            </FormText>
+          ) : null}
+          {!isUNSLoading && isUNSAddress && !error ? (
             <FormText>{recipientConfig.recipient}</FormText>
           ) : null}
           {errorText != null ? (
