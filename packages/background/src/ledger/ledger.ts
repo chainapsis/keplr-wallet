@@ -5,6 +5,7 @@ const CosmosApp: any = require("ledger-cosmos-js").default;
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { signatureImport } from "secp256k1";
+import { KeplrError } from "@keplr-wallet/router";
 
 export enum LedgerInitErrorOn {
   Transport,
@@ -46,7 +47,7 @@ export class Ledger {
       // However, it is almost same as that the device is not unlocked to user-side.
       // So, handle this case as initializing failed in `Transport`.
       if (versionResponse.deviceLocked) {
-        throw new Error("Device is on screen saver");
+        throw new KeplrError("ledger", 102, "Device is on screen saver");
       }
 
       return ledger;
@@ -71,7 +72,7 @@ export class Ledger {
     testMode: boolean;
   }> {
     if (!this.cosmosApp) {
-      throw new Error("Cosmos App not initialized");
+      throw new KeplrError("ledger", 100, "Cosmos App not initialized");
     }
 
     const result = await this.cosmosApp.getVersion();
@@ -91,7 +92,7 @@ export class Ledger {
 
   async getPublicKey(path: number[]): Promise<Uint8Array> {
     if (!this.cosmosApp) {
-      throw new Error("Cosmos App not initialized");
+      throw new KeplrError("ledger", 100, "Cosmos App not initialized");
     }
 
     const result = await this.cosmosApp.publicKey(path);
@@ -104,7 +105,7 @@ export class Ledger {
 
   async sign(path: number[], message: Uint8Array): Promise<Uint8Array> {
     if (!this.cosmosApp) {
-      throw new Error("Cosmos App not initialized");
+      throw new KeplrError("ledger", 100, "Cosmos App not initialized");
     }
 
     const result = await this.cosmosApp.sign(path, message);
