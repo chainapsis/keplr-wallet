@@ -4,7 +4,6 @@ import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { StdFee } from "@cosmjs/launchpad";
 import { evmosToEth } from "@hanchon/ethermint-address-converter";
-import { KeplrError } from "@keplr-wallet/router";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -269,7 +268,7 @@ export class AccountSetBase {
     return this._walletStatus;
   }
 
-  get rejectionReason(): Error | KeplrError | undefined {
+  get rejectionReason(): Error | undefined {
     return this._rejectionReason;
   }
 

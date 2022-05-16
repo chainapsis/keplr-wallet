@@ -61,6 +61,7 @@ export const AccountView: FunctionComponent = observer(() => {
         <ToolTip
           tooltip={(() => {
             if (
+              accountInfo.rejectionReason &&
               accountInfo.rejectionReason instanceof KeplrError &&
               accountInfo.rejectionReason.module === "keyring" &&
               accountInfo.rejectionReason.code === 152
