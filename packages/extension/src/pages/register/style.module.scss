@@ -97,7 +97,11 @@ $container-width: 420px;
     }
 
     &::placeholder {
-      font-family: "Nanum Barun Gothic", sans-serif !important;
+      font-family: "Nunito Sans", sans-serif;
+
+      &[data-lang="ko"] {
+        font-family: "Nanum Barun Gothic", sans-serif;
+      }
     }
   }
 
