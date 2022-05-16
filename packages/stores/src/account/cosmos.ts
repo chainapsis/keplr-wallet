@@ -40,6 +40,8 @@ import { DeepPartial, DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
 import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
+import { isAddress } from "@ethersproject/address";
+import { ethToEvmos } from "@tharsis/address-converter";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -179,6 +181,19 @@ export class CosmosAccountImpl {
   ): Promise<boolean> {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
+    const hexAdjustedRecipient = (recipient: string) => {
+      const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
+        .bech32PrefixAccAddr;
+      if (
+        bech32prefix === "evmos" &&
+        recipient.startsWith("0x") &&
+        isAddress(recipient)
+      ) {
+        return ethToEvmos(recipient);
+      }
+      return recipient;
+    };
+
     switch (denomHelper.type) {
       case "native":
         const actualAmount = (() => {
@@ -191,7 +206,7 @@ export class CosmosAccountImpl {
           type: this.msgOpts.send.native.type,
           value: {
             from_address: this.base.bech32Address,
-            to_address: recipient,
+            to_address: hexAdjustedRecipient(recipient),
             amount: [
               {
                 denom: currency.coinMinimalDenom,

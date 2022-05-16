@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
+    "@ethersproject/address": "^5.6.0",
     "@keplr-wallet/background": "0.10.4-rc.0",
     "@keplr-wallet/common": "0.10.4-rc.0",
     "@keplr-wallet/cosmos": "0.10.4-rc.0",

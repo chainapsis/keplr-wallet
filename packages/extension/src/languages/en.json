@@ -281,6 +281,7 @@
   "input.recipient.error.invalid-bech32": "Invalid address",
   "input.recipient.error.ens-not-supported": "ENS not supported for this chain",
   "input.recipient.error.ens-failed-to-fetch": "Failed to get address from ENS",
+  "input.recipient.error.invalid-hex": "Invalid hex address",
   "input.amount.error.invalid-number": "Invalid number",
   "input.amount.error.is-zero": "Amount should not be zero",
   "input.amount.error.is-negative": "Amount should be positive",
