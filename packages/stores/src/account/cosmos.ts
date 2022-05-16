@@ -31,6 +31,7 @@ import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
 import { VoteOption } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/gov";
 import {
   BaseAccount,
+  Bech32Address,
   ChainIdHelper,
   TendermintTxTracer,
 } from "@keplr-wallet/cosmos";
@@ -41,7 +42,7 @@ import { ChainGetter } from "../common";
 import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
 import { isAddress } from "@ethersproject/address";
-import { ethToEvmos } from "@tharsis/address-converter";
+import { Buffer } from "buffer/";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -184,12 +185,16 @@ export class CosmosAccountImpl {
     const hexAdjustedRecipient = (recipient: string) => {
       const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
         .bech32PrefixAccAddr;
-      if (
-        bech32prefix === "evmos" &&
-        recipient.startsWith("0x") &&
-        isAddress(recipient)
-      ) {
-        return ethToEvmos(recipient);
+      if (bech32prefix === "evmos" && recipient.startsWith("0x")) {
+        // Validate hex address
+        if (!isAddress(recipient)) {
+          throw new Error("Invalid hex address");
+        }
+        const buf = Buffer.from(
+          recipient.replace("0x", "").toLowerCase(),
+          "hex"
+        );
+        return new Bech32Address(buf).toBech32(bech32prefix);
       }
       return recipient;
     };
