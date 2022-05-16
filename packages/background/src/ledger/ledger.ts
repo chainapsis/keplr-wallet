@@ -71,7 +71,7 @@ export class Ledger {
     testMode: boolean;
   }> {
     if (!this.cosmosApp) {
-      throw new Error("Comsos App not initialized");
+      throw new Error("Cosmos App not initialized");
     }
 
     const result = await this.cosmosApp.getVersion();
@@ -91,7 +91,7 @@ export class Ledger {
 
   async getPublicKey(path: number[]): Promise<Uint8Array> {
     if (!this.cosmosApp) {
-      throw new Error("Comsos App not initialized");
+      throw new Error("Cosmos App not initialized");
     }
 
     const result = await this.cosmosApp.publicKey(path);
@@ -104,7 +104,7 @@ export class Ledger {
 
   async sign(path: number[], message: Uint8Array): Promise<Uint8Array> {
     if (!this.cosmosApp) {
-      throw new Error("Comsos App not initialized");
+      throw new Error("Cosmos App not initialized");
     }
 
     const result = await this.cosmosApp.sign(path, message);
