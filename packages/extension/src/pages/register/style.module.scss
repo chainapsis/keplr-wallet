@@ -99,8 +99,8 @@ $container-width: 420px;
     &::placeholder {
       font-family: "Nunito Sans", sans-serif;
 
-      &[data-lang="ko"] {
-        font-family: "Nanum Barun Gothic", sans-serif;
+      body[data-lang="ko"] & {
+        font-family: "Nanum Barun Gothic", sans-serif !important;
       }
     }
   }
