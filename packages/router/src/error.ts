@@ -1,6 +1,6 @@
 export class KeplrError extends Error {
-  module: string;
-  code: number;
+  public readonly module: string;
+  public readonly code: number;
 
   constructor(module: string, code: number, message?: string) {
     super(message);
