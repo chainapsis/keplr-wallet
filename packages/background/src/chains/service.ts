@@ -6,7 +6,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { KVStore, Debouncer } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
-import { Env } from "@keplr-wallet/router";
+import { Env, KeplrError } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
@@ -103,7 +103,11 @@ export class ChainsService {
     });
 
     if (!chainInfo) {
-      throw new Error(`There is no chain info for ${chainId}`);
+      throw new KeplrError(
+        "chains",
+        411,
+        `There is no chain info for ${chainId}`
+      );
     }
     return chainInfo;
   }
@@ -112,7 +116,11 @@ export class ChainsService {
     const chainInfo = await this.getChainInfo(chainId);
 
     if (!chainInfo) {
-      throw new Error(`There is no chain info for ${chainId}`);
+      throw new KeplrError(
+        "chains",
+        411,
+        `There is no chain info for ${chainId}`
+      );
     }
 
     return chainInfo.bip44.coinType;
@@ -153,7 +161,7 @@ export class ChainsService {
 
   async addChainInfo(chainInfo: ChainInfo): Promise<void> {
     if (await this.hasChainInfo(chainInfo.chainId)) {
-      throw new Error("Same chain is already registered");
+      throw new KeplrError("chains", 121, "Same chain is already registered");
     }
 
     const savedChainInfos =
@@ -168,11 +176,11 @@ export class ChainsService {
 
   async removeChainInfo(chainId: string): Promise<void> {
     if (!(await this.hasChainInfo(chainId))) {
-      throw new Error("Chain is not registered");
+      throw new KeplrError("chains", 120, "Chain is not registered");
     }
 
     if ((await this.getChainInfo(chainId)).embeded) {
-      throw new Error("Can't remove the embedded chain");
+      throw new KeplrError("chains", 122, "Can't remove the embedded chain");
     }
 
     const savedChainInfos =

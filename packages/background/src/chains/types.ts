@@ -1,3 +1,4 @@
+import { KeplrError } from "@keplr-wallet/router";
 import {
   Bech32Config,
   ChainInfo,
@@ -116,7 +117,11 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     .unique()
     .custom((value: string[]) => {
       if (value.indexOf("cosmwasm") >= 0 && value.indexOf("secretwasm") >= 0) {
-        throw new Error("cosmwasm and secretwasm are not compatible");
+        throw new KeplrError(
+          "chains",
+          430,
+          "cosmwasm and secretwasm are not compatible"
+        );
       }
 
       return value;
