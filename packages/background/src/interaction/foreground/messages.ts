@@ -1,4 +1,4 @@
-import { Message } from "@keplr-wallet/router";
+import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { InteractionWaitingData } from "../types";
 
@@ -13,7 +13,7 @@ export class PushInteractionDataMsg extends Message<void> {
 
   validateBasic(): void {
     if (!this.data.type) {
-      throw new Error("Type should not be empty");
+      throw new KeplrError("interaction", 101, "Type should not be empty");
     }
   }
 
@@ -39,7 +39,7 @@ export class PushEventDataMsg extends Message<void> {
 
   validateBasic(): void {
     if (!this.data.type) {
-      throw new Error("Type should not be empty");
+      throw new KeplrError("interaction", 101, "Type should not be empty");
     }
   }
 
