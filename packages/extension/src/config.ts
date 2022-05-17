@@ -1529,6 +1529,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
+        coinDenom: "WETH",
+        coinMinimalDenom: "weth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "weth",
+      },
+      {
         coinDenom: "USDC",
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,

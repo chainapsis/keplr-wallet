@@ -886,6 +886,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
       {
+        coinDenom: "WETH",
+        coinMinimalDenom: "weth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "weth",
+      },
+      {
         coinDenom: "USDC",
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,
