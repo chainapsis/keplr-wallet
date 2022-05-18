@@ -196,6 +196,12 @@ export class RootStore {
                   gas: 20000,
                 },
               },
+              undelegate: {
+                gas: 350000,
+              },
+              redelegate: {
+                gas: 550000,
+              },
               withdrawRewards: {
                 gas: 25000,
               },
