@@ -80,10 +80,6 @@ export class BackgroundTxService {
         isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
         params
       );
-
-      const chainInfo = await this.chainsService.getChainInfo(chainId);
-      const isGnoChain = chainInfo.features && chainInfo.features.includes("gno");
-
       const txResponse = isProtoTx ? result.data["tx_response"] : result.data;
 
       if (txResponse.code != null && txResponse.code !== 0) {
@@ -91,8 +87,11 @@ export class BackgroundTxService {
       }
 
       const txHash = Buffer.from(txResponse.txhash, "hex");
+      const chainInfo = await this.chainsService.getChainInfo(chainId);
+      const isGnoChain = chainInfo.features && chainInfo.features.includes("gno");
 
       if (isGnoChain) {
+        // TODO: Gno tx-index
         BackgroundTxService.processTxResultNotification(this.notification, {
           mode: mode,
           ...txResponse,

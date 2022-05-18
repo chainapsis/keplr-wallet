@@ -131,7 +131,7 @@ export const defaultCosmosMsgOpts: CosmosMsgOpts = {
   },
 };
 
-type ProtoMsgsOrWithAminoMsgs = {
+export type ProtoMsgsOrWithAminoMsgs = {
   // TODO: Make `aminoMsgs` nullable
   //       And, make proto sign doc if `aminoMsgs` is null
   aminoMsgs: Msg[];
@@ -181,6 +181,11 @@ export class CosmosAccountImpl {
 
     switch (denomHelper.type) {
       case "native":
+        const chainInfo = this.chainGetter.getChain(this.chainId);
+        if (chainInfo.features?.includes("gno")) {
+          return false;
+        }
+
         const actualAmount = (() => {
           let dec = new Dec(amount);
           dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
