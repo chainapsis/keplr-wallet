@@ -1,0 +1,26 @@
+syntax = "proto3";
+package gnoland.tx;
+
+import "google/protobuf/any.proto";
+
+message Tx {
+  repeated google.protobuf.Any messages = 1;
+
+  Fee fee = 2;
+
+  repeated Signature signatures = 3;
+
+  string memo = 4;
+}
+
+message Fee {
+  sint64 gas_wanted = 1;
+
+  string gas_fee = 2;
+}
+
+message Signature {
+  google.protobuf.Any pub_key = 1;
+
+  bytes signature = 2;
+}
