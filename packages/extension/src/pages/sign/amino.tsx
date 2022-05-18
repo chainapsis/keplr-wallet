@@ -1,7 +1,6 @@
 /* eslint-disable react/display-name */
 
 import {
-  CoinPrimitive,
   CosmosMsgOpts,
   CosmwasmMsgOpts,
   GnoMsgOpts,
@@ -199,12 +198,17 @@ export function renderAminoMessage(
 
     if (msg.type === msgOpts.gno.msgOpts.send.native.type) {
       const value = msg.value as GnoMsgSend["value"];
-      return renderMsgSend(currencies, intl, parseCoins(value.amount), value.to_address);
+      return renderMsgSend(
+        currencies,
+        intl,
+        parseCoins(value.amount),
+        value.to_address
+      );
     }
 
     if (msg.type === "/vm.m_call") {
       const value = msg.value as MsgGnoCallContract["value"];
-      const funds = value.send ? parseCoins(value.send): [];
+      const funds = value.send ? parseCoins(value.send) : [];
 
       return renderGnoCallContract(
         currencies,
@@ -215,7 +219,6 @@ export function renderAminoMessage(
         value.args
       );
     }
-
   } catch (e) {
     console.log(e);
   }

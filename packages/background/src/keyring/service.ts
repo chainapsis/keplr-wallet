@@ -292,7 +292,8 @@ export class KeyRingService {
 
     try {
       const chainInfo = await this.chainsService.getChainInfo(chainId);
-      const isGnoChain = chainInfo.features && chainInfo.features.includes("gno");
+      const isGnoChain =
+        chainInfo.features && chainInfo.features.includes("gno");
 
       const signature = await this.keyRing.sign(
         env,
@@ -306,7 +307,9 @@ export class KeyRingService {
       const signatureEncoded = encodeSecp256k1Signature(key.pubKey, signature);
       return {
         signed: newSignDoc,
-        signature: isGnoChain ? this.toGnoSignature(signatureEncoded) : signatureEncoded,
+        signature: isGnoChain
+          ? this.toGnoSignature(signatureEncoded)
+          : signatureEncoded,
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
@@ -334,12 +337,12 @@ export class KeyRingService {
   }
 
   private toGnoSignature(signature: StdSignature): StdSignature {
-    return  {
+    return {
       pub_key: {
         type: "/tm.PubKeySecp256k1",
         value: signature.pub_key.value,
       },
-      signature: signature.signature
+      signature: signature.signature,
     };
   }
 

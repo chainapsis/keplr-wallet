@@ -88,7 +88,8 @@ export class BackgroundTxService {
 
       const txHash = Buffer.from(txResponse.txhash, "hex");
       const chainInfo = await this.chainsService.getChainInfo(chainId);
-      const isGnoChain = chainInfo.features && chainInfo.features.includes("gno");
+      const isGnoChain =
+        chainInfo.features && chainInfo.features.includes("gno");
 
       if (isGnoChain) {
         // TODO: Gno tx-index
@@ -100,7 +101,10 @@ export class BackgroundTxService {
         const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
         txTracer.traceTx(txHash).then((tx) => {
           txTracer.close();
-          BackgroundTxService.processTxResultNotification(this.notification, tx);
+          BackgroundTxService.processTxResultNotification(
+            this.notification,
+            tx
+          );
         });
       }
 

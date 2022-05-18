@@ -165,11 +165,11 @@ export interface GnoMsgSend {
 
 export interface MsgGnoCallContract {
   value: {
-    caller: string,
-    send: string,
-    pkg_path: string,
-    func: string,
-    args: string[]
+    caller: string;
+    send: string;
+    pkg_path: string;
+    func: string;
+    args: string[];
   };
 }
 
@@ -626,6 +626,7 @@ export function renderGnoCallContract(
   sentFunds: CoinPrimitive[],
   realm: string,
   func: string,
+  // eslint-disable-next-line @typescript-eslint/ban-types
   args: object
 ) {
   const sent: { amount: string; denom: string }[] = [];

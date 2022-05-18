@@ -14,7 +14,7 @@ import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly } from "utility-types";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import { MsgSend } from "@keplr-wallet/proto-types/gnoland/bank/msg";
-import { Tx, Signature, Fee  } from "@keplr-wallet/proto-types/gnoland/tx/tx";
+import { Tx, Signature, Fee } from "@keplr-wallet/proto-types/gnoland/tx/tx";
 import { PubKeySecp256k1 } from "@keplr-wallet/proto-types/gnoland/tm/keys";
 
 import { Buffer } from "buffer/";
@@ -28,9 +28,7 @@ export interface GnoAccount {
 
 export const GnoAccount = {
   use(options: {
-    msgOptsCreator?: (
-      chainId: string
-    ) => DeepPartial<GnoMsgOpts> | undefined;
+    msgOptsCreator?: (chainId: string) => DeepPartial<GnoMsgOpts> | undefined;
     queriesStore: IQueriesStore<CosmosQueries>;
   }): (
     base: AccountSetBaseSuper & CosmosAccount,
@@ -159,7 +157,7 @@ export class GnoAccountImpl {
             }
           })
         );
-        
+
         return true;
     }
 
@@ -226,7 +224,7 @@ export class GnoAccountImpl {
     this.base.setTxTypeInProgress("");
     const tx = {
       mode: this.base.cosmos.broadcastMode,
-      hash: Buffer.from(txHash).toString("hex")
+      hash: Buffer.from(txHash).toString("hex"),
     };
 
     if (onFulfill) {
@@ -294,16 +292,13 @@ export class GnoAccountImpl {
       signatures: [
         Signature.fromPartial({
           pubKey: Any.fromPartial({
-            typeUrl: "/tm.PubKeySecp256k1", 
+            typeUrl: "/tm.PubKeySecp256k1",
             value: PubKeySecp256k1.encode({
-              key: Buffer.from(
-                signResponse.signature.pub_key.value,
-                "base64"
-              ),
+              key: Buffer.from(signResponse.signature.pub_key.value, "base64"),
             }).finish(),
           }),
-          signature: Buffer.from(signResponse.signature.signature, "base64")
-        })
+          signature: Buffer.from(signResponse.signature.signature, "base64"),
+        }),
       ],
       memo: signResponse.signed.memo,
     }).finish();
