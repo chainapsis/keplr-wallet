@@ -155,6 +155,24 @@ export interface MsgLink {
   };
 }
 
+export interface GnoMsgSend {
+  value: {
+    amount: string;
+    from_address: string;
+    to_address: string;
+  };
+}
+
+export interface MsgGnoCallContract {
+  value: {
+    caller: string,
+    send: string,
+    pkg_path: string,
+    func: string,
+    args: string[]
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function renderUnknownMessage(msg: object) {
   return {
@@ -601,6 +619,55 @@ export const WasmExecutionMsgView: FunctionComponent<{
     </div>
   );
 });
+
+export function renderGnoCallContract(
+  currencies: Currency[],
+  intl: IntlShape,
+  sentFunds: CoinPrimitive[],
+  realm: string,
+  func: string,
+  args: object
+) {
+  const sent: { amount: string; denom: string }[] = [];
+  for (const coinPrimitive of sentFunds) {
+    const coin = new Coin(coinPrimitive.denom, coinPrimitive.amount);
+    const parsed = CoinUtils.parseDecAndDenomFromCoin(currencies, coin);
+
+    sent.push({
+      amount: clearDecimals(parsed.amount),
+      denom: parsed.denom,
+    });
+  }
+
+  return {
+    icon: "fas fa-cog",
+    title: intl.formatMessage({
+      id: "sign.list.message.gno/VmCall.title",
+    }),
+    content: (
+      <React.Fragment>
+        <FormattedMessage
+          id="sign.list.message.gno/VmCall.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            br: <br />,
+            realm: realm,
+            func: func,
+            ["only-sent-exist"]: (...chunks: any[]) =>
+              sent.length > 0 ? chunks : "",
+            sent: sent
+              .map((coin) => {
+                return `${coin.amount} ${coin.denom}`;
+              })
+              .join(","),
+          }}
+        />
+        <br />
+        <WasmExecutionMsgView msg={args} />
+      </React.Fragment>
+    ),
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {

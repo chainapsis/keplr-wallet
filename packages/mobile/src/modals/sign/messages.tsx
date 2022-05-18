@@ -43,6 +43,14 @@ export interface MsgSend {
   };
 }
 
+export interface GnoMsgSend {
+  value: {
+    amount: string;
+    from_address: string;
+    to_address: string;
+  };
+}
+
 export interface MsgTransfer {
   value: {
     source_port: string;
