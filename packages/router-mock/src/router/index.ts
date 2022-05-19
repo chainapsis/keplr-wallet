@@ -1,4 +1,9 @@
-import { Router, MessageSender, Result } from "@keplr-wallet/router";
+import {
+  Router,
+  MessageSender,
+  Result,
+  KeplrError,
+} from "@keplr-wallet/router";
 import { EventEmitter } from "events";
 
 export class MockRouter extends Router {
@@ -39,7 +44,15 @@ export class MockRouter extends Router {
       console.log(
         `Failed to process msg ${message.type}: ${e?.message || e?.toString()}`
       );
-      if (e) {
+      if (e instanceof KeplrError) {
+        sender.resolver({
+          error: {
+            code: e.code,
+            module: e.module,
+            message: e.message || e.toString(),
+          },
+        });
+      } else if (e) {
         sender.resolver({
           error: e.message || e.toString(),
         });

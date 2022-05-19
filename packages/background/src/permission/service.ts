@@ -2,7 +2,7 @@ import { delay, inject, singleton } from "tsyringe";
 import { TYPES } from "../types";
 
 import { InteractionService } from "../interaction";
-import { Env } from "@keplr-wallet/router";
+import { Env, KeplrError } from "@keplr-wallet/router";
 import {
   getBasicAccessPermissionType,
   INTERACTION_TYPE_PERMISSION,
@@ -132,7 +132,7 @@ export class PermissionService {
     }
 
     if (!this.hasPermisson(chainId, type, origin)) {
-      throw new Error(`${origin} is not permitted`);
+      throw new KeplrError("permission", 130, `${origin} is not permitted`);
     }
   }
 

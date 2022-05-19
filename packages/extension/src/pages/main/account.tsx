@@ -10,6 +10,7 @@ import { useNotification } from "../../components/notification";
 import { ToolTip } from "../../components/tooltip";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { KeplrError } from "@keplr-wallet/router";
 
 export const AccountView: FunctionComponent = observer(() => {
   const { accountStore, chainStore } = useStore();
@@ -37,7 +38,7 @@ export const AccountView: FunctionComponent = observer(() => {
         });
       }
     },
-    [accountInfo.walletStatus, accountInfo.bech32Address, notification, intl]
+    [accountInfo.walletStatus, notification, intl]
   );
 
   return (
@@ -61,8 +62,9 @@ export const AccountView: FunctionComponent = observer(() => {
           tooltip={(() => {
             if (
               accountInfo.rejectionReason &&
-              accountInfo.rejectionReason.message ===
-                "Ledger is not compatible with this coinType right now"
+              accountInfo.rejectionReason instanceof KeplrError &&
+              accountInfo.rejectionReason.module === "keyring" &&
+              accountInfo.rejectionReason.code === 152
             ) {
               return "Ledger is not supported for this chain";
             }

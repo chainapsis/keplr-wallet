@@ -1,27 +1,59 @@
-import Web3 from "web3";
-import { flow, makeObservable, observable } from "mobx";
+import { action, flow, makeObservable, observable } from "mobx";
 import { Buffer } from "buffer/";
+import { Interface } from "@ethersproject/abi";
+import Axios, { AxiosInstance } from "axios";
+import { toGenerator } from "@keplr-wallet/common";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { hash as nameHash } from "@ensdomains/eth-ens-namehash";
 
-// TODO: Add definition for ethereum-ens.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ENS = require("ethereum-ens");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Resolver } = require("@ensdomains/resolver");
+const ensRegistryInterface: Interface = new Interface([
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "node",
+        type: "bytes32",
+      },
+    ],
+    name: "resolver",
+    outputs: [
+      {
+        name: "",
+        type: "address",
+      },
+    ],
+    type: "function",
+  },
+]);
 
-const ensCache: Map<string, any> = new Map();
-
-// In this case, web3 doesn't make a transaction.
-// And, it is used for just fetching a registered address from ENS.
-// So, just using http provider is fine.
-function getENSProvider(endpoint: string) {
-  if (ensCache.has(endpoint)) {
-    return ensCache.get(endpoint);
-  }
-
-  const provider = new Web3.providers.HttpProvider(endpoint);
-  ensCache.set(endpoint, new ENS(provider));
-  return ensCache.get(endpoint);
-}
+const ensResolverInterface: Interface = new Interface([
+  // Resolver for multi coin.
+  // https://eips.ethereum.org/EIPS/eip-2304
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "node",
+        type: "bytes32",
+      },
+      {
+        name: "coinType",
+        type: "uint256",
+      },
+    ],
+    name: "addr",
+    outputs: [
+      {
+        name: "",
+        type: "bytes",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+]);
 
 export class ObservableEnsFetcher {
   static isValidENS(name: string): boolean {
@@ -34,8 +66,6 @@ export class ObservableEnsFetcher {
     // TODO: What if more top level domain is added?
     return tld === "eth" || tld === "xyz" || tld === "luxe" || tld === "kred";
   }
-
-  protected readonly ens: any;
 
   @observable
   protected _isFetching = false;
@@ -52,12 +82,14 @@ export class ObservableEnsFetcher {
   @observable.ref
   protected _error: Error | undefined = undefined;
 
-  constructor(public readonly endpoint: string) {
-    this.ens = getENSProvider(endpoint);
-
+  constructor(
+    public readonly endpoint: string,
+    public readonly ensRegistryContract: string = "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e"
+  ) {
     makeObservable(this);
   }
 
+  @action
   setNameAndCoinType(name: string, coinType: number) {
     const prevName = this._name;
     const prevCoinType = this._coinType;
@@ -90,15 +122,110 @@ export class ObservableEnsFetcher {
     return this._error;
   }
 
+  protected async fetchResolverAddress(
+    instance: AxiosInstance,
+    node: string
+  ): Promise<string> {
+    const result = await instance.post<{
+      jsonrpc: "2.0";
+      result?: string;
+      id: string;
+      error?: {
+        code?: number;
+        message?: string;
+      };
+    }>("", {
+      jsonrpc: "2.0",
+      id: "1",
+      method: "eth_call",
+      params: [
+        {
+          to: this.ensRegistryContract,
+          data: ensRegistryInterface.encodeFunctionData("resolver", [node]),
+        },
+        "latest",
+      ],
+    });
+
+    if (result.data.error && result.data.error.message) {
+      throw new Error(result.data.error.message);
+    }
+
+    if (!result.data.result) {
+      throw new Error("Unknown error");
+    }
+
+    return ensRegistryInterface.decodeFunctionResult(
+      "resolver",
+      result.data.result
+    )[0];
+  }
+
+  protected async fetchAddrFromResolver(
+    instance: AxiosInstance,
+    resolver: string,
+    node: string,
+    coinType: number
+  ): Promise<string> {
+    const result = await instance.post<{
+      jsonrpc: "2.0";
+      result?: string;
+      id: string;
+      error?: {
+        code?: number;
+        message?: string;
+      };
+    }>("", {
+      jsonrpc: "2.0",
+      id: "1",
+      method: "eth_call",
+      params: [
+        {
+          to: resolver,
+          data: ensResolverInterface.encodeFunctionData("addr", [
+            node,
+            coinType,
+          ]),
+        },
+        "latest",
+      ],
+    });
+
+    if (result.data.error && result.data.error.message) {
+      throw new Error(result.data.error.message);
+    }
+
+    if (!result.data.result) {
+      throw new Error("Unknown error");
+    }
+
+    return ensResolverInterface.decodeFunctionResult(
+      "addr",
+      result.data.result
+    )[0];
+  }
+
   @flow
   protected *fetch(name: string, coinType: number) {
     this._isFetching = true;
 
     try {
-      // It seems that ethereum ens doesn't support the abi of recent public resolver yet.
-      // So to solve this problem, inject the recent public resolver's abi manually.
-      const resolver = yield this.ens.resolver(name, Resolver.abi);
-      const addr = yield resolver.addr(coinType);
+      const instance = Axios.create({
+        ...{
+          baseURL: this.endpoint,
+        },
+      });
+
+      const node = nameHash(name);
+
+      const resolver = yield* toGenerator(
+        this.fetchResolverAddress(instance, node)
+      );
+
+      const addr = yield* toGenerator(
+        this.fetchAddrFromResolver(instance, resolver, node, coinType)
+      );
+
       this._address = Buffer.from(addr.replace("0x", ""), "hex");
       this._error = undefined;
     } catch (e) {

@@ -95,6 +95,14 @@ $container-width: 420px;
     &[readonly] {
       background-color: white;
     }
+
+    &::placeholder {
+      font-family: "Nunito Sans", sans-serif;
+
+      body[data-lang="ko"] & {
+        font-family: "Nanum Barun Gothic", sans-serif !important;
+      }
+    }
   }
 
   .sub-content {

@@ -1,4 +1,4 @@
-import { Message } from "@keplr-wallet/router";
+import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import {
   KeyRing,
@@ -57,11 +57,11 @@ export class DeleteKeyRingMsg extends Message<{
 
   validateBasic(): void {
     if (!Number.isInteger(this.index)) {
-      throw new Error("Invalid index");
+      throw new KeplrError("keyring", 201, "Invalid index");
     }
 
     if (!this.password) {
-      throw new Error("password not set");
+      throw new KeplrError("keyring", 274, "password not set");
     }
   }
 
@@ -87,11 +87,11 @@ export class UpdateNameKeyRingMsg extends Message<{
 
   validateBasic(): void {
     if (!Number.isInteger(this.index)) {
-      throw new Error("Invalid index");
+      throw new KeplrError("keyring", 201, "Invalid index");
     }
 
     if (!this.name) {
-      throw new Error("name not set");
+      throw new KeplrError("keyring", 273, "name not set");
     }
   }
 
@@ -115,11 +115,11 @@ export class ShowKeyRingMsg extends Message<string> {
 
   validateBasic(): void {
     if (!Number.isInteger(this.index)) {
-      throw new Error("Invalid index");
+      throw new KeplrError("keyring", 201, "Invalid index");
     }
 
     if (!this.password) {
-      throw new Error("password not set");
+      throw new KeplrError("keyring", 274, "password not set");
     }
   }
 
@@ -156,15 +156,15 @@ export class CreateMnemonicKeyMsg extends Message<{
       this.kdf !== "sha256" &&
       this.kdf !== "pbkdf2"
     ) {
-      throw new Error("Invalid kdf");
+      throw new KeplrError("keyring", 202, "Invalid kdf");
     }
 
     if (!this.mnemonic) {
-      throw new Error("mnemonic not set");
+      throw new KeplrError("keyring", 272, "mnemonic not set");
     }
 
     if (!this.password) {
-      throw new Error("password not set");
+      throw new KeplrError("keyring", 274, "password not set");
     }
 
     // Validate mnemonic.
@@ -212,11 +212,11 @@ export class AddMnemonicKeyMsg extends Message<{
       this.kdf !== "sha256" &&
       this.kdf !== "pbkdf2"
     ) {
-      throw new Error("Invalid kdf");
+      throw new KeplrError("keyring", 202, "Invalid kdf");
     }
 
     if (!this.mnemonic) {
-      throw new Error("mnemonic not set");
+      throw new KeplrError("keyring", 272, "mnemonic not set");
     }
 
     // Validate mnemonic.
@@ -265,19 +265,19 @@ export class CreatePrivateKeyMsg extends Message<{
       this.kdf !== "sha256" &&
       this.kdf !== "pbkdf2"
     ) {
-      throw new Error("Invalid kdf");
+      throw new KeplrError("keyring", 202, "Invalid kdf");
     }
 
     if (!this.privateKey || this.privateKey.length === 0) {
-      throw new Error("private key not set");
+      throw new KeplrError("keyring", 275, "private key not set");
     }
 
     if (this.privateKey.length !== 32) {
-      throw new Error("invalid length of private key");
+      throw new KeplrError("keyring", 260, "invalid length of private key");
     }
 
     if (!this.password) {
-      throw new Error("password not set");
+      throw new KeplrError("keyring", 274, "password not set");
     }
   }
 
@@ -313,11 +313,11 @@ export class CreateLedgerKeyMsg extends Message<{
       this.kdf !== "sha256" &&
       this.kdf !== "pbkdf2"
     ) {
-      throw new Error("Invalid kdf");
+      throw new KeplrError("keyring", 202, "Invalid kdf");
     }
 
     if (!this.password) {
-      throw new Error("password not set");
+      throw new KeplrError("keyring", 274, "password not set");
     }
 
     KeyRing.validateBIP44Path(this.bip44HDPath);
@@ -353,15 +353,15 @@ export class AddPrivateKeyMsg extends Message<{
       this.kdf !== "sha256" &&
       this.kdf !== "pbkdf2"
     ) {
-      throw new Error("Invalid kdf");
+      throw new KeplrError("keyring", 202, "Invalid kdf");
     }
 
     if (!this.privateKey || this.privateKey.length === 0) {
-      throw new Error("private key not set");
+      throw new KeplrError("keyring", 275, "private key not set");
     }
 
     if (this.privateKey.length !== 32) {
-      throw new Error("invalid length of private key");
+      throw new KeplrError("keyring", 260, "invalid length of private key");
     }
   }
 
@@ -395,7 +395,7 @@ export class AddLedgerKeyMsg extends Message<{
       this.kdf !== "sha256" &&
       this.kdf !== "pbkdf2"
     ) {
-      throw new Error("Invalid kdf");
+      throw new KeplrError("keyring", 202, "Invalid kdf");
     }
 
     KeyRing.validateBIP44Path(this.bip44HDPath);
@@ -443,7 +443,7 @@ export class UnlockKeyRingMsg extends Message<{ status: KeyRingStatus }> {
 
   validateBasic(): void {
     if (!this.password) {
-      throw new Error("password not set");
+      throw new KeplrError("keyring", 274, "password not set");
     }
   }
 
@@ -467,7 +467,7 @@ export class GetKeyMsg extends Message<Key> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("keyring", 270, "chain id not set");
     }
   }
 
@@ -503,11 +503,11 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("keyring", 270, "chain id not set");
     }
 
     if (!this.signer) {
-      throw new Error("signer not set");
+      throw new KeplrError("keyring", 230, "signer not set");
     }
 
     // Validate bech32 address.
@@ -517,18 +517,20 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     // ADR-36 sign doc doesn't have the chain id
     if (!checkAndValidateADR36AminoSignDoc(this.signDoc)) {
       if (this.signDoc.chain_id !== this.chainId) {
-        throw new Error(
+        throw new KeplrError(
+          "keyring",
+          234,
           "Chain id in the message is not matched with the requested chain id"
         );
       }
     } else {
       if (this.signDoc.msgs[0].value.signer !== this.signer) {
-        throw new Error("Unmatched signer in sign doc");
+        throw new KeplrError("keyring", 233, "Unmatched signer in sign doc");
       }
     }
 
     if (!this.signOptions) {
-      throw new Error("Sign options are null");
+      throw new KeplrError("keyring", 235, "Sign options are null");
     }
   }
 
@@ -561,15 +563,15 @@ export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("keyring", 270, "chain id not set");
     }
 
     if (!this.signer) {
-      throw new Error("signer not set");
+      throw new KeplrError("keyring", 230, "signer not set");
     }
 
     if (!this.signature) {
-      throw new Error("Signature not set");
+      throw new KeplrError("keyring", 271, "Signature not set");
     }
 
     // Validate bech32 address.
@@ -618,11 +620,11 @@ export class RequestSignDirectMsg extends Message<{
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("keyring", 270, "chain id not set");
     }
 
     if (!this.signer) {
-      throw new Error("signer not set");
+      throw new KeplrError("keyring", 230, "signer not set");
     }
 
     // Validate bech32 address.
@@ -636,13 +638,15 @@ export class RequestSignDirectMsg extends Message<{
     });
 
     if (signDoc.chainId !== this.chainId) {
-      throw new Error(
+      throw new KeplrError(
+        "keyring",
+        234,
         "Chain id in the message is not matched with the requested chain id"
       );
     }
 
     if (!this.signOptions) {
-      throw new Error("Sign options are null");
+      throw new KeplrError("keyring", 235, "Sign options are null");
     }
   }
 
@@ -696,11 +700,11 @@ export class ChangeKeyRingMsg extends Message<{
 
   validateBasic(): void {
     if (this.index < 0) {
-      throw new Error("Index is negative");
+      throw new KeplrError("keyring", 200, "Index is negative");
     }
 
     if (!Number.isInteger(this.index)) {
-      throw new Error("Invalid index");
+      throw new KeplrError("keyring", 201, "Invalid index");
     }
   }
 
@@ -731,11 +735,11 @@ export class GetIsKeyStoreCoinTypeSetMsg extends Message<
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("keyring", 270, "chain id not set");
     }
 
     if (this.paths.length === 0) {
-      throw new Error("empty bip44 path list");
+      throw new KeplrError("keyring", 250, "empty bip44 path list");
     }
   }
 
@@ -762,15 +766,15 @@ export class SetKeyStoreCoinTypeMsg extends Message<KeyRingStatus> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("keyring", 270, "chain id not set");
     }
 
     if (this.coinType < 0) {
-      throw new Error("coin type can not be negative");
+      throw new KeplrError("keyring", 240, "coin type can not be negative");
     }
 
     if (!Number.isInteger(this.coinType)) {
-      throw new Error("coin type should be integer");
+      throw new KeplrError("keyring", 241, "coin type should be integer");
     }
   }
 
@@ -794,7 +798,7 @@ export class CheckPasswordMsg extends Message<boolean> {
 
   validateBasic(): void {
     if (!this.password) {
-      throw new Error("password not set");
+      throw new KeplrError("keyring", 274, "password not set");
     }
   }
 
@@ -818,7 +822,7 @@ export class ExportKeyRingDatasMsg extends Message<ExportKeyRingData[]> {
 
   validateBasic(): void {
     if (!this.password) {
-      throw new Error("password not set");
+      throw new KeplrError("keyring", 274, "password not set");
     }
   }
 

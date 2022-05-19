@@ -1177,6 +1177,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.25,
     },
     coinType: 459,
+    beta: true,
   },
   {
     rpc: IXO_RPC_ENDPOINT,
@@ -1529,6 +1530,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
+        coinDenom: "WETH",
+        coinMinimalDenom: "weth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "weth",
+      },
+      {
         coinDenom: "USDC",
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,
@@ -1706,6 +1713,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "EVMOS",
       coinMinimalDenom: "aevmos",
       coinDecimals: 18,
+      coinGeckoId: "evmos",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1724,6 +1732,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
+        coinGeckoId: "evmos",
       },
     ],
     feeCurrencies: [
@@ -1731,6 +1740,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
+        coinGeckoId: "evmos",
       },
     ],
     gasPriceStep: {
