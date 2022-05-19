@@ -1177,6 +1177,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.25,
     },
     coinType: 459,
+    beta: true,
   },
   {
     rpc: IXO_RPC_ENDPOINT,
