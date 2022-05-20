@@ -136,7 +136,7 @@ export class GnoAccountImpl {
           },
           memo,
           {
-            amount: [{ amount: "1", denom: currency.coinMinimalDenom }],
+            amount: stdFee.amount ?? [],
             gas: stdFee.gas ?? this.msgOpts.send.native.gas.toString(),
           },
           signOptions,
@@ -287,7 +287,7 @@ export class GnoAccountImpl {
       messages: protoMsgs,
       fee: Fee.fromPartial({
         gasWanted: signResponse.signed.fee.gas,
-        gasFee: `${signResponse.signed.fee.amount[0].amount}${signResponse.signed.fee.amount[0].denom}`,
+        gasFee: signResponse.signed.fee.amount.map((val) => `${val.amount}${val.denom}`).join(","),
       }),
       signatures: [
         Signature.fromPartial({
