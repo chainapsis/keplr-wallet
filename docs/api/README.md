@@ -257,3 +257,13 @@ window.addEventListener("keplr_keystorechange", () => {
     console.log("Key store in Keplr is changed. You may need to refetch the account info.")
 })
 ```
+
+### Change Chain Event
+
+Similarly, when the user switches the network from the extension menu, the webpage might need to be made aware of the currently selected chain. Keplr emits a `keplr_chainchange` event to the webpage's window each time the user selects a new chain from the extension. You can request the currently selected chain based on this event listener.
+```javascript
+window.addEventListener("keplr_chainchange", (e) => {
+    console.log("Keplr chain updated. Currently selected chainId:", (e as CustomEvent).detail);
+});
+```
+
