@@ -10,6 +10,7 @@ import {
   GetChainInfosMsg,
   RemoveSuggestedChainInfoMsg,
   SuggestChainInfoMsg,
+  ChangeChainMsg,
 } from "./messages";
 import { ChainInfo } from "@keplr-wallet/types";
 
@@ -30,6 +31,8 @@ export const getHandler: (service: ChainsService) => Handler = (service) => {
           env,
           msg as RemoveSuggestedChainInfoMsg
         );
+      case ChangeChainMsg:
+        return handleChangeChainMsg(service)(env, msg as ChangeChainMsg);
       default:
         throw new KeplrError("chains", 110, "Unknown msg type");
     }
@@ -70,5 +73,13 @@ const handleRemoveSuggestedChainInfoMsg: (
   return async (_, msg) => {
     await service.removeChainInfo(msg.chainId);
     return await service.getChainInfos();
+  };
+};
+
+const handleChangeChainMsg: (
+  service: ChainsService
+) => InternalHandler<ChangeChainMsg> = (service) => {
+  return async (_, msg) => {
+    service.changeChain(msg.chainInfo);
   };
 };

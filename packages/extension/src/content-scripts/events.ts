@@ -31,16 +31,23 @@ class PushEventDataMsg extends Message<void> {
 
 export function initEvents(router: Router) {
   router.registerMessage(PushEventDataMsg);
-
   router.addHandler("interaction-foreground", (_, msg) => {
-    switch (msg.constructor) {
-      case PushEventDataMsg:
-        if ((msg as PushEventDataMsg).data.type === "keystore-changed") {
+    if (msg.constructor === PushEventDataMsg) {
+      switch ((msg as PushEventDataMsg).data.type) {
+        case "keystore-changed":
           window.dispatchEvent(new Event("keplr_keystorechange"));
-        }
-        return;
-      default:
-        throw new Error("Unknown msg type");
+          return;
+        case "chain-changed":
+          const { chainId } = (msg as PushEventDataMsg).data.data as any;
+          window.dispatchEvent(
+            new CustomEvent("keplr_chainchange", {
+              detail: chainId,
+            })
+          );
+          return;
+      }
+    } else {
+      throw new Error("Unknown msg type");
     }
   });
 }

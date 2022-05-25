@@ -8,6 +8,7 @@ import {
 import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithEmbed,
+  ChangeChainMsg,
   SetPersistentMemoryMsg,
   GetPersistentMemoryMsg,
   GetChainInfosMsg,
@@ -131,5 +132,11 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
     const msg = new TryUpdateChainMsg(chainId);
     yield this.requester.sendMessage(BACKGROUND_PORT, msg);
     yield this.getChainInfosFromBackground();
+  }
+
+  @flow
+  *changeChain(chainInfo: ChainInfo) {
+    const msg = new ChangeChainMsg(chainInfo);
+    yield* toGenerator(this.requester.sendMessage(BACKGROUND_PORT, msg));
   }
 }
