@@ -25,6 +25,11 @@ export interface Key {
 
 export type KeplrMode = "core" | "extension" | "mobile-web" | "walletconnect";
 
+export type SignArbitraryMode =
+  | "default"
+  | "ethereum"
+  | "ethereum-personal"
+  | "ethereum-transaction";
 export interface KeplrIntereactionOptions {
   readonly sign?: KeplrSignOptions;
 }
@@ -83,7 +88,7 @@ export interface Keplr {
     chainId: string,
     signer: string,
     data: string | Uint8Array,
-    signEthereum?: boolean
+    signArbitraryMode?: SignArbitraryMode
   ): Promise<StdSignature>;
   verifyArbitrary(
     chainId: string,

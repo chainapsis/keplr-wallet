@@ -5,6 +5,7 @@ import {
   KeplrMode,
   KeplrSignOptions,
   Key,
+  SignArbitraryMode,
 } from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
@@ -137,7 +138,7 @@ export class Keplr implements IKeplr {
     chainId: string,
     signer: string,
     data: string | Uint8Array,
-    signEthereum?: boolean
+    signArbitraryMode?: SignArbitraryMode
   ): Promise<StdSignature> {
     let isADR36WithString = false;
     if (typeof data === "string") {
@@ -169,7 +170,7 @@ export class Keplr implements IKeplr {
 
     const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
       isADR36WithString,
-      signEthereum,
+      signArbitraryMode,
     });
     return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).signature;
   }

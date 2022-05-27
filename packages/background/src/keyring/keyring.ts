@@ -720,7 +720,11 @@ export class KeyRing {
     chainId: string,
     defaultCoinType: number,
     message: Uint8Array,
-    useRaw64bytes: boolean = true
+    signingMode:
+      | "raw64bytes"
+      | "ethereum"
+      | "ethereum-personal"
+      | "ethereum-transaction" = "raw64bytes"
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new Error("Key ring is not unlocked");
@@ -745,7 +749,7 @@ export class KeyRing {
 
       const ethWallet = new Wallet(privKey.toBytes());
 
-      if (useRaw64bytes) {
+      if (signingMode === "raw64bytes") {
         // Sign Cosmos transaction with Ethereum signing key
         const signature = await ethWallet
           ._signingKey()
@@ -754,9 +758,20 @@ export class KeyRing {
         return BytesUtils.arrayify(
           BytesUtils.concat([splitSignature.r, splitSignature.s])
         );
-      } else {
-        // Sign bytes with standard Ethereum signature
+      } else if (signingMode === "ethereum-personal") {
+        // Sign bytes with standard prefixed Ethereum signature
         const signature = await ethWallet.signMessage(message);
+        return BytesUtils.arrayify(signature);
+      } else if (signingMode === "ethereum") {
+        // Sign bytes with standard unprefixed Ethereum signature
+        const signature = await ethWallet
+          ._signingKey()
+          .signDigest(keccak256(message));
+        return BytesUtils.arrayify(BytesUtils.joinSignature(signature));
+      } else {
+        const signature = await ethWallet.signTransaction(
+          JSON.parse(Buffer.from(message).toString())
+        );
         return BytesUtils.arrayify(signature);
       }
     }

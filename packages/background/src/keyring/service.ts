@@ -20,7 +20,12 @@ import { KVStore } from "@keplr-wallet/common";
 
 import { ChainsService } from "../chains";
 import { LedgerService } from "../ledger";
-import { BIP44, ChainInfo, KeplrSignOptions } from "@keplr-wallet/types";
+import {
+  BIP44,
+  ChainInfo,
+  KeplrSignOptions,
+  SignArbitraryMode,
+} from "@keplr-wallet/types";
 import { APP_PORT, Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
@@ -232,7 +237,7 @@ export class KeyRingService {
     signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
-      signEthereum?: boolean;
+      signArbitraryMode?: SignArbitraryMode;
     }
   ): Promise<AminoSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
@@ -290,19 +295,24 @@ export class KeyRingService {
       }
     }
 
-    if (signOptions.signEthereum && newSignDoc.msgs.length !== 1) {
+    if (
+      (signOptions.signArbitraryMode || "default") !== "default" &&
+      newSignDoc.msgs.length !== 1
+    ) {
       // Validate messages length for Ethereum sign
       throw new Error("Invalid number of messages for Ethereum sign request");
     }
 
-    const generateEthereumSignature = async () => {
+    const generateEthereumSignature = async (
+      mode: "ethereum" | "ethereum-personal" | "ethereum-transaction"
+    ) => {
       const message = Buffer.from(newSignDoc.msgs[0].value.data, "base64");
 
       const signatureBytes = await this.keyRing.signEthereum(
         chainId,
         coinType,
         message,
-        false // Sign with prefixed 65-byte signature
+        mode
       );
 
       return {
@@ -319,9 +329,12 @@ export class KeyRingService {
         serializeSignDoc(newSignDoc)
       );
 
-      const payload = signOptions.signEthereum
-        ? await generateEthereumSignature()
-        : encodeSecp256k1Signature(key.pubKey, signature);
+      const payload =
+        signOptions.signArbitraryMode === "ethereum" ||
+        signOptions.signArbitraryMode === "ethereum-personal" ||
+        signOptions.signArbitraryMode === "ethereum-transaction"
+          ? await generateEthereumSignature(signOptions.signArbitraryMode)
+          : encodeSecp256k1Signature(key.pubKey, signature);
 
       return {
         signed: newSignDoc,
