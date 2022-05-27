@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/ens",
-  "version": "0.10.3",
+  "version": "0.10.5",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -17,10 +17,11 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@ensdomains/resolver": "^0.2.4",
+    "@ensdomains/eth-ens-namehash": "^2.0.15",
+    "@ethersproject/abi": "^5.6.0",
+    "@keplr-wallet/common": "0.10.5",
+    "axios": "^0.21.4",
     "buffer": "^6.0.3",
-    "ethereum-ens": "^0.8.0",
-    "mobx": "^6.1.7",
-    "web3": "^1.2.6"
+    "mobx": "^6.1.7"
   }
 }

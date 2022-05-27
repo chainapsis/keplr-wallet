@@ -14,10 +14,12 @@ import {
   ENSIsFetchingError,
   ENSNotSupportedError,
   InvalidBech32Error,
+  InvalidHexError,
 } from "./errors";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useState } from "react";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
+import { isAddress } from "@ethersproject/address";
 
 export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @observable
@@ -111,6 +113,13 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   get error(): Error | undefined {
     if (!this.rawRecipient) {
       return new EmptyAddressError("Address is empty");
+    }
+
+    if (this.bech32Prefix === "evmos" && this.rawRecipient.startsWith("0x")) {
+      if (isAddress(this.rawRecipient)) {
+        return;
+      }
+      return new InvalidHexError("Invalid hex address for chain");
     }
 
     if (ObservableEnsFetcher.isValidENS(this.rawRecipient)) {

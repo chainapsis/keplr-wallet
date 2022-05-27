@@ -1,4 +1,10 @@
-import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
+import {
+  Env,
+  Handler,
+  InternalHandler,
+  KeplrError,
+  Message,
+} from "@keplr-wallet/router";
 import { LedgerGetWebHIDFlagMsg, LedgerSetWebHIDFlagMsg } from "./messages";
 import { LedgerService } from "./service";
 
@@ -18,7 +24,7 @@ export const getHandler: (service: LedgerService) => Handler = (
           msg as LedgerSetWebHIDFlagMsg
         );
       default:
-        throw new Error("Unknown msg type");
+        throw new KeplrError("ledger", 111, "Unknown msg type");
     }
   };
 };

@@ -35,7 +35,6 @@ import {
   GravityBridgeCurrencyRegsitrar,
   KeplrETCQueries,
 } from "@keplr-wallet/stores-etc";
-import { ExtensionKVStore } from "@keplr-wallet/common";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -288,7 +287,7 @@ export class RootStore {
       this.queriesStore
     );
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar(
-      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+      new AsyncKVStore("store_gravity_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore
     );

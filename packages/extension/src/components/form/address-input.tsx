@@ -23,6 +23,7 @@ import {
   ENSFailedToFetchError,
   ENSIsFetchingError,
   IIBCChannelConfig,
+  InvalidHexError,
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
@@ -86,6 +87,10 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             });
           case ENSIsFetchingError:
             return;
+          case InvalidHexError:
+            return intl.formatMessage({
+              id: "input.recipient.error.invalid-hex",
+            });
           default:
             return intl.formatMessage({ id: "input.recipient.error.unknown" });
         }

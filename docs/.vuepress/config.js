@@ -8,7 +8,7 @@ module.exports = {
   },
   base: process.env.VUEPRESS_BASE || "/",
   head: [
-    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon-svg.svg" }],
+    ["link", { rel: "icon", type: "image/png", href: "/favicon-256.png" }],
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:url", content: "https://docs.keplr.app" }],
     ["meta", { property: "og:title", content: "Documentation | Keplr Wallet" }],
@@ -22,7 +22,7 @@ module.exports = {
     ],
     [
       "meta",
-      { property: "og:image", content: "https://docs.keplr.app/og-image.jpg" },
+      { property: "og:image", content: "https://docs.keplr.app/og-image.png" },
     ],
     ["meta", { name: "twitter:card", content: "summary_large_image" }],
   ],

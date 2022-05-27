@@ -1099,7 +1099,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-9",
+    chainId: "kava_2222-10",
     chainName: "Kava",
     stakeCurrency: {
       coinDenom: "KAVA",
@@ -1172,11 +1172,12 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0,
-      average: 0.001,
+      low: 0.001,
+      average: 0.005,
       high: 0.25,
     },
     coinType: 459,
+    beta: true,
   },
   {
     rpc: IXO_RPC_ENDPOINT,
@@ -1529,6 +1530,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
+        coinDenom: "WETH",
+        coinMinimalDenom: "weth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "weth",
+      },
+      {
         coinDenom: "USDC",
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,
@@ -1700,12 +1707,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: EVMOS_RPC_CONFIG,
     rest: EVMOS_REST_ENDPOINT,
     restConfig: EVMOS_REST_CONFIG,
-    chainId: "evmos_9001-1",
+    chainId: "evmos_9001-2",
     chainName: "Evmos (Beta)",
     stakeCurrency: {
       coinDenom: "EVMOS",
       coinMinimalDenom: "aevmos",
       coinDecimals: 18,
+      coinGeckoId: "evmos",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1724,6 +1732,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
+        coinGeckoId: "evmos",
       },
     ],
     feeCurrencies: [
@@ -1731,6 +1740,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
+        coinGeckoId: "evmos",
       },
     ],
     gasPriceStep: {
