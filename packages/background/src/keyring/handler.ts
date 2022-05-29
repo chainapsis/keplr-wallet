@@ -1,4 +1,10 @@
-import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
+import {
+  Env,
+  Handler,
+  InternalHandler,
+  KeplrError,
+  Message,
+} from "@keplr-wallet/router";
 import {
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
@@ -110,7 +116,7 @@ export const getHandler: (service: KeyRingService) => Handler = (
           msg as ExportKeyRingDatasMsg
         );
       default:
-        throw new Error("Unknown msg type");
+        throw new KeplrError("keyring", 221, "Unknown msg type");
     }
   };
 };

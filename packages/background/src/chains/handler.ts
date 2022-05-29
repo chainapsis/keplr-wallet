@@ -1,4 +1,10 @@
-import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
+import {
+  Env,
+  Handler,
+  InternalHandler,
+  KeplrError,
+  Message,
+} from "@keplr-wallet/router";
 import { ChainsService } from "./service";
 import {
   GetChainInfosMsg,
@@ -25,7 +31,7 @@ export const getHandler: (service: ChainsService) => Handler = (service) => {
           msg as RemoveSuggestedChainInfoMsg
         );
       default:
-        throw new Error("Unknown msg type");
+        throw new KeplrError("chains", 110, "Unknown msg type");
     }
   };
 };

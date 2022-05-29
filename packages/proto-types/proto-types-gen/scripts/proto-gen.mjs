@@ -91,10 +91,13 @@ function setOutputHash(root, hash) {
     const thirdPartyProtoPath = path.join(baseDirPath, "third_party/proto");
 
     const inputs = [
+      "cosmos/authz/v1beta1/tx.proto",
       "cosmos/base/v1beta1/coin.proto",
       "cosmos/bank/v1beta1/bank.proto",
       "cosmos/bank/v1beta1/tx.proto",
+      "cosmos/bank/v1beta1/authz.proto",
       "cosmos/staking/v1beta1/tx.proto",
+      "cosmos/staking/v1beta1/authz.proto",
       "cosmos/gov/v1beta1/gov.proto",
       "cosmos/gov/v1beta1/tx.proto",
       "cosmos/distribution/v1beta1/tx.proto",
@@ -123,13 +126,18 @@ function setOutputHash(root, hash) {
 
     $.verbose = false;
 
+    // Move tsconfig.json to package root
+    await $`cp ${packageRoot}/proto-types-gen/tsconfig.json ${packageRoot}/tsconfig.json`;
+
     // Build javascript output
-    const rootDir = path.join(__dirname, "..");
-    cd(rootDir);
+    cd(packageRoot);
     await $`npx tsc`;
 
+    // Remove used tsconfig.json
+    await $`rm ${packageRoot}/tsconfig.json`;
+
     // Move javascript output to proto-types package
-    const buildOutDir = path.join(rootDir, "build");
+    const buildOutDir = path.join(packageRoot, "proto-types-gen/build");
 
     // Remove previous output if exist
     const previous = glob.sync(`${packageRoot}/**/*.+(ts|js|cjs|mjs|map)`);

@@ -9,7 +9,7 @@ import { Hash } from "@keplr-wallet/crypto";
 import { KVStore, Debouncer } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { Env } from "@keplr-wallet/router";
+import { Env, KeplrError } from "@keplr-wallet/router";
 
 import { Buffer } from "buffer/";
 
@@ -48,7 +48,7 @@ export class SecretWasmService {
 
     const keyRingType = await this.keyRingService.getKeyRingType();
     if (keyRingType === "none") {
-      throw new Error("Key ring is not initialized");
+      throw new KeplrError("secret-wasm", 130, "Key ring is not initialized");
     }
 
     const seed = await this.getSeed(env, chainInfo);
@@ -66,7 +66,7 @@ export class SecretWasmService {
 
     const keyRingType = await this.keyRingService.getKeyRingType();
     if (keyRingType === "none") {
-      throw new Error("Key ring is not initialized");
+      throw new KeplrError("secret-wasm", 130, "Key ring is not initialized");
     }
 
     const seed = await this.getSeed(env, chainInfo);
@@ -86,7 +86,7 @@ export class SecretWasmService {
 
     const keyRingType = await this.keyRingService.getKeyRingType();
     if (keyRingType === "none") {
-      throw new Error("Key ring is not initialized");
+      throw new KeplrError("secret-wasm", 130, "Key ring is not initialized");
     }
 
     // XXX: Keplr should generate the seed deterministically according to the account.
@@ -110,7 +110,7 @@ export class SecretWasmService {
 
     const keyRingType = await this.keyRingService.getKeyRingType();
     if (keyRingType === "none") {
-      throw new Error("Key ring is not initialized");
+      throw new KeplrError("secret-wasm", 130, "Key ring is not initialized");
     }
 
     // XXX: Keplr should generate the seed deterministically according to the account.

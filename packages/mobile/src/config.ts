@@ -886,6 +886,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
       {
+        coinDenom: "WETH",
+        coinMinimalDenom: "weth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "weth",
+      },
+      {
         coinDenom: "USDC",
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,
@@ -1335,7 +1341,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     bip44: {
       coinType: 118,
     },
-    bech32Config: Bech32Address.defaultBech32Config("cosmos"),
+    bech32Config: Bech32Address.defaultBech32Config("like"),
     currencies: [
       {
         coinDenom: "LIKE",
@@ -1352,7 +1358,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinGeckoId: "likecoin",
       },
     ],
-    features: ["ibc-transfer"],
+    features: ["ibc-transfer", "ibc-go"],
     hideInUI: true,
   },
   {

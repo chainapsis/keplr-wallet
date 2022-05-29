@@ -1,4 +1,4 @@
-import { Message } from "@keplr-wallet/router";
+import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { AppCurrency } from "@keplr-wallet/types";
 
@@ -13,7 +13,7 @@ export class GetTokensMsg extends Message<AppCurrency[]> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("Chain id is empty");
+      throw new KeplrError("tokens", 100, "Chain id is empty");
     }
   }
 
@@ -45,11 +45,11 @@ export class SuggestTokenMsg extends Message<void> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("Chain id is empty");
+      throw new KeplrError("tokens", 100, "Chain id is empty");
     }
 
     if (!this.contractAddress) {
-      throw new Error("Contract address is empty");
+      throw new KeplrError("tokens", 101, "Contract address is empty");
     }
   }
 
@@ -76,7 +76,7 @@ export class AddTokenMsg extends Message<void> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("Chain id is empty");
+      throw new KeplrError("tokens", 100, "Chain id is empty");
     }
   }
 
@@ -103,7 +103,7 @@ export class RemoveTokenMsg extends Message<void> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("Chain id is empty");
+      throw new KeplrError("tokens", 100, "Chain id is empty");
     }
   }
 
@@ -130,11 +130,11 @@ export class GetSecret20ViewingKey extends Message<string> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("Chain id is empty");
+      throw new KeplrError("tokens", 100, "Chain id is empty");
     }
 
     if (!this.contractAddress) {
-      throw new Error("Contract address is empty");
+      throw new KeplrError("tokens", 101, "Contract address is empty");
     }
   }
 

@@ -9,6 +9,7 @@ import { Hash, RNG } from "@keplr-wallet/crypto";
 import pbkdf2 from "pbkdf2";
 
 import { Buffer } from "buffer/";
+import { KeplrError } from "@keplr-wallet/router";
 
 /**
  * This is similar to ethereum's key store.
@@ -84,7 +85,7 @@ export class Crypto {
             );
           });
         default:
-          throw new Error("Unknown kdf");
+          throw new KeplrError("keyring", 220, "Unknown kdf");
       }
     })();
     const buf = Buffer.from(text);
@@ -153,7 +154,7 @@ export class Crypto {
             );
           });
         default:
-          throw new Error("Unknown kdf");
+          throw new KeplrError("keyring", 220, "Unknown kdf");
       }
     })();
 
@@ -168,7 +169,7 @@ export class Crypto {
       ])
     );
     if (!Buffer.from(mac).equals(Buffer.from(keyStore.crypto.mac, "hex"))) {
-      throw new Error("Unmatched mac");
+      throw new KeplrError("keyring", 222, "Unmatched mac");
     }
 
     return Buffer.from(

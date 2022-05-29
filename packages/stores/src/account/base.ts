@@ -3,8 +3,8 @@ import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { StdFee } from "@cosmjs/launchpad";
-import { evmosToEth } from "@hanchon/ethermint-address-converter";
 import { echelonToEth } from "ethermint-address-converter";
+import { evmosToEth } from "@tharsis/address-converter";
 
 export enum WalletStatus {
   NotInit = "NotInit",
