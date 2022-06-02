@@ -155,7 +155,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
  * when deciding whether to render the tokens card on the screen and this makes some delay.
  * To solve this problem, this component has been separated.
  */
-const TokensCardRenderIfTokenExists: FunctionComponent = () => {
+const TokensCardRenderIfTokenExists: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
   const style = useStyle();
@@ -179,4 +179,4 @@ const TokensCardRenderIfTokenExists: FunctionComponent = () => {
       ) : null}
     </React.Fragment>
   );
-};
+});
