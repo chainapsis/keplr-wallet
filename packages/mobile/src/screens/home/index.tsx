@@ -121,16 +121,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
     setRefreshing(false);
   }, [accountStore, chainStore, priceStore, queriesStore]);
 
-  const queryBalances = queriesStore
-    .get(chainStore.current.chainId)
-    .queryBalances.getQueryBech32Address(
-      accountStore.getAccount(chainStore.current.chainId).bech32Address
-    );
-
-  const tokens = queryBalances.positiveNativeUnstakables.concat(
-    queryBalances.nonNativeBalances
-  );
-
   return (
     <PageWithScrollViewInBottomTabView
       refreshControl={
@@ -140,11 +130,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
     >
       <BIP44Selectable />
       <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
-      {tokens.length > 0 ? (
-        <TokensCard
-          containerStyle={style.flatten(["margin-bottom-card-gap"])}
-        />
-      ) : null}
+      {/* There is a reason to use TokensCardRenderIfTokenExists. Check the comments on TokensCardRenderIfTokenExists */}
+      <TokensCardRenderIfTokenExists />
       <MyRewardCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}
       />
@@ -157,3 +144,39 @@ export const HomeScreen: FunctionComponent = observer(() => {
     </PageWithScrollViewInBottomTabView>
   );
 });
+
+/**
+ * TokensCardRenderIfTokenExists is used to reduce the re-rendering of HomeScreen component.
+ * Because HomeScreen is screen of the app, if it is re-rendered, all children component will be re-rendered.
+ * If all components on screen are re-rendered, performance problems may occur and users may feel delay.
+ * Therefore, the screen should not have state as much as possible.
+ *
+ * In fact, re-rendering took place because home screen had to check the user's balances
+ * when deciding whether to render the tokens card on the screen and this makes some delay.
+ * To solve this problem, this component has been separated.
+ */
+const TokensCardRenderIfTokenExists: FunctionComponent = () => {
+  const { chainStore, accountStore, queriesStore } = useStore();
+
+  const style = useStyle();
+
+  const queryBalances = queriesStore
+    .get(chainStore.current.chainId)
+    .queryBalances.getQueryBech32Address(
+      accountStore.getAccount(chainStore.current.chainId).bech32Address
+    );
+
+  const tokens = queryBalances.positiveNativeUnstakables.concat(
+    queryBalances.nonNativeBalances
+  );
+
+  return (
+    <React.Fragment>
+      {tokens.length > 0 ? (
+        <TokensCard
+          containerStyle={style.flatten(["margin-bottom-card-gap"])}
+        />
+      ) : null}
+    </React.Fragment>
+  );
+};
