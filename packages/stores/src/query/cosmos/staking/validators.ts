@@ -139,9 +139,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
   get validatorsSortedByVotingPower(): Validator[] {
     const validators = this.validators;
     return validators.sort((v1, v2) => {
-      return new Dec(v1.delegator_shares).gt(new Dec(v2.delegator_shares))
-        ? -1
-        : 1;
+      return new Dec(v1.tokens).gt(new Dec(v2.tokens)) ? -1 : 1;
     });
   }
 
@@ -192,7 +190,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const stakeCurrency = chainInfo.stakeCurrency;
 
-    const power = new Dec(validator.delegator_shares).truncate();
+    const power = new Dec(validator.tokens).truncate();
 
     return new CoinPretty(stakeCurrency, power);
   });
