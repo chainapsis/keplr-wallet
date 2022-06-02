@@ -61,7 +61,7 @@
   "setting.address-book.confirm.delete-address.paragraph": "Are you sure you want to delete this address?",
   "setting.address-book.button.save": "Save",
 
-  "setting.export-to-mobile": "Link Keplr Mobile",
+  "setting.export-to-mobile": "Link Obi Mobile",
   "setting.export-to-mobile.input.password": "Password",
   "setting.export-to-mobile.input.password.error.required": "Password is required",
   "setting.export-to-mobile.input.password.error.invalid": "Invalid password",
@@ -71,7 +71,7 @@
 
   "setting.keyring": "Select Account",
   "setting.keyring.button.add": "Add Account",
-  "setting.keyring.unnamed-account": "Keplr Account",
+  "setting.keyring.unnamed-account": "Obi Account",
   "setting.keyring.selected-account": "(Selected)",
 
   "setting.keyring.change.password": "Reset Password",
@@ -94,7 +94,7 @@
   "setting.clear": "Delete Account",
   "setting.clear.alert": "Make sure you’ve backed up your mnemonic seed before proceeding.",
   "setting.clear.button.back-up": "Back-up account",
-  "setting.clear.warning": "By deleting your account, you will no longer have access to your account on Keplr.",
+  "setting.clear.warning": "By deleting your account, you will no longer have access to your account on Obi.",
   "setting.clear.input.password": "Password",
   "setting.clear.input.password.error.required": "Password is required",
   "setting.clear.input.password.error.invalid": "Invalid password",
@@ -157,7 +157,7 @@
   "register.welcome.button.done": "Done",
 
   "chain.suggested.title": "Chain Add Request",
-  "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
+  "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Obi.",
   "chain.suggested.waring.experiment.title": "Experimental Feature",
   "chain.suggested.waring.experiment.paragraph": "For the brave-hearted cosmonauts",
   "chain.suggested.button.approve": "Approve",
@@ -166,7 +166,7 @@
   "chain.remove.confirm.paragraph": "Are you sure to remove the {chainName}?",
 
   "access.title": "Requesting Connection",
-  "access.paragraph": "<b>{host}</b> is requesting to connect to your Keplr account on <b>{chainId}</b>.",
+  "access.paragraph": "<b>{host}</b> is requesting to connect to your Obi account on <b>{chainId}</b>.",
   "access.permission.title": "By approving this request, the website will:",
   "access.permission.account": "Know your wallet address",
   "access.permission.tx-request": "Be able to request signatures for txs",
@@ -255,7 +255,7 @@
   "sign.list.message.wasm/MsgExecuteContract.title": "Execute Wasm Contract",
   "sign.list.message.wasm/MsgExecuteContract.content": "Execute contract <b>{address}</b><only-sent-exist> by sending <b>{sent}</b></only-sent-exist>",
   "sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm": "Encrypted",
-  "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "Failed to decrypt Secret message. This may be due to Keplr viewing key not matching the transaction viewing key.",
+  "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "Failed to decrypt Secret message. This may be due to Obi viewing key not matching the transaction viewing key.",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{neuron}</b> create link {br}<b>{link}</b>",

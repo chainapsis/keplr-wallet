@@ -1,12 +1,12 @@
 {
   "manifest_version": 2,
 
-  "name": "Keplr",
-  "description": "Keplr is a browser extension wallet for the Inter blockchain ecosystem.",
-  "version": "0.10.5",
+  "name": "Obi",
+  "description": "Obi is a supercharged Keplr fork, a passport for the interchain ecosystem.",
+  "version": "0.1.0",
   "applications": {
     "gecko": {
-      "id": "keplr-extension@keplr.app",
+      "id": "obi-extension@obi.app",
       "strict_min_version": "56.0"
     }
   },
@@ -18,7 +18,7 @@
 
   "browser_action": {
     "default_popup": "popup.html",
-    "default_title": "Keplr"
+    "default_title": "Obi"
   },
   "background": {
     "scripts": ["browser-polyfill.js", "background.bundle.js"],
