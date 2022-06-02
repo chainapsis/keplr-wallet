@@ -35,6 +35,7 @@ export const AddressBookPage: FunctionComponent<{
   selectHandler?: AddressBookSelectHandler;
   ibcChannelConfig?: IIBCChannelConfig;
   isInTransaction?: boolean;
+  isChildAccounts?: boolean;
 }> = observer(
   ({
     onBackButton,
@@ -42,6 +43,7 @@ export const AddressBookPage: FunctionComponent<{
     selectHandler,
     ibcChannelConfig,
     //isInTransaction,
+    isChildAccounts,
   }) => {
     const intl = useIntl();
     const history = useHistory();
@@ -63,7 +65,9 @@ export const AddressBookPage: FunctionComponent<{
     const memoConfig = useMemoConfig(chainStore, selectedChainId);
 
     const addressBookConfig = useAddressBookConfig(
-      new ExtensionKVStore("address-book"),
+      isChildAccounts
+        ? new ExtensionKVStore("child-accounts")
+        : new ExtensionKVStore("address-book"),
       chainStore,
       selectedChainId,
       selectHandler
@@ -138,7 +142,9 @@ export const AddressBookPage: FunctionComponent<{
         showChainName={false}
         canChangeChainInfo={false}
         alternativeTitle={intl.formatMessage({
-          id: "main.menu.address-book",
+          id: isChildAccounts
+            ? "main.menu.child-accounts"
+            : "main.menu.address-book",
         })}
         onBackButton={
           onBackButton

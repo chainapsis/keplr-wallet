@@ -11,6 +11,7 @@ const pathnameToPageName: PathnameToPageName = {
   "/": "Home dashboard",
   "/register": "Register",
   "/setting/address-book": "Address book",
+  "/setting/child-accounts": "Child accounts",
   "/setting/set-keyring": "Select account",
 };
 

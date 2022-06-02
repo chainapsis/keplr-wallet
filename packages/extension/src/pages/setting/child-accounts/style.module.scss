@@ -1,0 +1,22 @@
+@import "../../../styles/var";
+
+.inner-top-container {
+  display: flex;
+  margin: 0 $layout-padding;
+
+  min-height: 43px;
+}
+
+.full-modal {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+
+  &:global(.modal-content) {
+    box-shadow: none;
+  }
+}

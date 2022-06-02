@@ -190,6 +190,11 @@ ReactDOM.render(
                   />
                   <Route
                     exact
+                    path="/setting/child-accounts"
+                    render={() => <AddressBookPage isChildAccounts={true} />}
+                  />
+                  <Route
+                    exact
                     path="/setting/export-to-mobile"
                     component={ExportToMobilePage}
                   />
