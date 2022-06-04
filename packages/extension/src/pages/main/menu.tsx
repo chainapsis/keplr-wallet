@@ -28,6 +28,16 @@ export const Menu: FunctionComponent = observer(() => {
         className={styleMenu.item}
         onClick={() => {
           history.push({
+            pathname: "/setting/child-accounts",
+          });
+        }}
+      >
+        <FormattedMessage id="main.menu.child-accounts" />
+      </div>
+      <div
+        className={styleMenu.item}
+        onClick={() => {
+          history.push({
             pathname: "/setting",
           });
         }}
