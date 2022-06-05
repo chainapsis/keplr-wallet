@@ -4,6 +4,7 @@ export * from "./address-input";
 export * from "./coin-input";
 export * from "./fee-buttons";
 export * from "./memo-input";
+export * from "./permission-input";
 export * from "./gas-input";
 export * from "./ibc";
 export * from "./password-input";

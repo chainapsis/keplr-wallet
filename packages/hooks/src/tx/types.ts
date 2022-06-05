@@ -15,6 +15,22 @@ export interface IMemoConfig extends ITxChainSetter {
   error: Error | undefined;
 }
 
+export interface PermissionDetails {
+  name: string;
+  contract: string;
+  message_name: string;
+  fields: any;
+}
+
+export interface IPermissionConfig extends ITxChainSetter {
+  permission: PermissionDetails;
+  availablePermissions: PermissionDetails[];
+  selectedPermission: PermissionDetails;
+  setPermission(permission: any): void;
+
+  error: Error | undefined;
+}
+
 export interface IGasConfig extends ITxChainSetter {
   gas: number;
   /*
