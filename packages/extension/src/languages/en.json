@@ -300,6 +300,7 @@
   "confirm.no": "No",
 
   "component.form.coin-input.token.label": "Token",
+  "component.form.child-account-input.permission.label": "Permission",
 
   "component.ibc.channel-registrar.chain-selector.label": "Destination Chain",
   "component.ibc.channel-registrar.chain-selector.placeholder": "Select Chain",
