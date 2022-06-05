@@ -51,7 +51,7 @@ export const PermissionInput: FunctionComponent<PermissionInputProps> = observer
           className="form-control-label"
           style={{ width: "100%" }}
         >
-          <FormattedMessage id="component.form.coin-input.token.label" />
+          <FormattedMessage id="component.form.child-account-input.permission.label" />
         </Label>
         <ButtonDropdown
           id={`selector-${randomId}`}
