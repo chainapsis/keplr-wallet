@@ -92,7 +92,8 @@ export const AddChildAccountModal: FunctionComponent<{
           <AddressInput
             recipientConfig={recipientConfig}
             label={intl.formatMessage({ id: "setting.address-book.address" })}
-            disableAddressBook={true}
+            disableAddressBook={false}
+            isChildAccounts={true}
           />
           <PermissionInput
             permissionConfig={permissionConfig}

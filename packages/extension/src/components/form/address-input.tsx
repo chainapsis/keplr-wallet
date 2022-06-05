@@ -32,6 +32,7 @@ import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
   memoConfig?: IMemoConfig;
+  isChildAccounts?: boolean;
   ibcChannelConfig?: IIBCChannelConfig;
 
   className?: string;
@@ -46,6 +47,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
   ({
     recipientConfig,
     memoConfig,
+    isChildAccounts,
     ibcChannelConfig,
     className,
     label,
@@ -150,7 +152,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               autoComplete="off"
               disabled={disabled}
             />
-            {!disableAddressBook && memoConfig ? (
+            {!disableAddressBook && (memoConfig || isChildAccounts) ? (
               <Button
                 className={styleAddressInput.addressBookButton}
                 color="primary"
