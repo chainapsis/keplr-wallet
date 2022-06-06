@@ -28,6 +28,7 @@ import {
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
+import { SetKeyRingPage } from "../../pages/setting/keyring";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
@@ -57,6 +58,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     const intl = useIntl();
 
     const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
+    const [isMyAccountsOpen, setIsMyAccountsOpen] = useState(false);
 
     const [inputId] = useState(() => {
       const bytes = new Uint8Array(4);
@@ -131,6 +133,20 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             />
           </ModalBody>
         </Modal>
+        <Modal
+          isOpen={isMyAccountsOpen}
+          backdrop={false}
+          className={styleAddressInput.fullModal}
+          wrapClassName={styleAddressInput.fullModal}
+          contentClassName={styleAddressInput.fullModal}
+        >
+          <ModalBody className={styleAddressInput.fullModal}>
+            <SetKeyRingPage
+              pickAddressOnly={true}
+              pickAddressAction={selectAddressFromAddressBook.setRecipient}
+            />
+          </ModalBody>
+        </Modal>
         <FormGroup className={className}>
           {label ? (
             <Label for={inputId} className="form-control-label">
@@ -162,6 +178,18 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                 disabled={disabled}
               >
                 <i className="fas fa-address-book" />
+              </Button>
+            ) : null}
+            {isChildAccounts ? (
+              <Button
+                className={styleAddressInput.lastAddressBookButton}
+                color="primary"
+                type="button"
+                outline
+                onClick={() => setIsMyAccountsOpen(true)}
+                disabled={disabled}
+              >
+                <i className="fas fa-id-badge" />
               </Button>
             ) : null}
           </InputGroup>
