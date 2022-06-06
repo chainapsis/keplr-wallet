@@ -23,7 +23,12 @@ export const SetKeyRingPage: FunctionComponent<KeyRingPageProps> = observer(
   ({ pickAddressOnly = false, pickAddressAction }) => {
     const intl = useIntl();
 
-    const { keyRingStore, chainStore, analyticsStore } = useStore();
+    const {
+      keyRingStore,
+      accountStore,
+      chainStore,
+      analyticsStore,
+    } = useStore();
     const history = useHistory();
 
     const loadingIndicator = useLoadingIndicator();
@@ -114,11 +119,13 @@ export const SetKeyRingPage: FunctionComponent<KeyRingPageProps> = observer(
                 onClick={
                   pickAddressOnly
                     ? async () => {
+                        const oldKeyIndex = keyRingStore.currentIndex;
+                        await keyRingStore.changeKeyRing(i);
                         pickAddressActionHandler(
-                          keyRingStore.getKeyStoreSelectables(
-                            chainStore.current.chainId
-                          )._selectables[i].bech32Address
+                          accountStore.getAccount(chainStore.current.chainId)
+                            .bech32Address
                         );
+                        await keyRingStore.changeKeyRing(oldKeyIndex);
                       }
                     : keyStore.selected
                     ? undefined

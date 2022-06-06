@@ -139,6 +139,7 @@ export class KeyRingStore {
       dispatchEvent: (type: string) => void;
     },
     public readonly defaultKdf: "scrypt" | "sha256" | "pbkdf2",
+    public currentIndex: number = 0,
     protected readonly chainGetter: ChainGetter,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
@@ -260,6 +261,7 @@ export class KeyRingStore {
     // Emit the key store changed event manually.
     this.dispatchKeyStoreChangeEvent();
     this.selectablesMap.forEach((selectables) => selectables.refresh());
+    this.currentIndex = index;
   }
 
   @flow
