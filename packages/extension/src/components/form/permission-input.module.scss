@@ -1,0 +1,81 @@
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/functions";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/mixins";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/variables";
+
+.input {
+  box-shadow: $input-alternative-box-shadow !important;
+
+  &:focus {
+    box-shadow: $input-focus-alternative-box-shadow !important;
+
+    & + .select {
+      box-shadow: $input-focus-alternative-box-shadow !important;
+    }
+  }
+}
+
+.token-selector {
+  width: 100%;
+  height: 46px;
+
+  button {
+    width: 100%;
+
+    background: white;
+    text-align: left;
+    font-weight: normal;
+  }
+
+  :global(.dropdown-toggle) {
+    box-shadow: 0 1px 3px rgba(50, 50, 93, 0.15), 0 1px 0 rgba(0, 0, 0, 0.02) !important;
+
+    &::after {
+      border-radius: 2px;
+      content: " ";
+      display: block;
+      height: 0.625em;
+      margin-top: -0.4375em;
+      pointer-events: none;
+      position: absolute;
+      top: 50%;
+      transform: rotate(-45deg);
+      transform-origin: center;
+      width: 0.625em;
+      border: 0 solid black;
+      border-bottom-width: 3px;
+      border-left-width: 3px;
+      right: 1.125em;
+      z-index: 4;
+    }
+  }
+
+  :global(.dropdown-menu.show) {
+    width: 100%;
+  }
+
+  &:global(.disabled) {
+    button {
+      background: #e9ecef;
+      border-color: #e9ecef;
+    }
+  }
+}
+
+.balance {
+  float: right;
+  font-weight: normal;
+  color: #555555;
+
+  &.clickable {
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+      color: black;
+    }
+
+    &.clicked {
+      color: black;
+    }
+  }
+}

@@ -1,7 +1,8 @@
 import { AppCurrency, Currency } from "@keplr-wallet/types";
-import { StdFee } from "@cosmjs/launchpad";
+import { /*StakingRedelegationsResponse*/ StdFee } from "@cosmjs/launchpad";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { CoinPrimitive } from "@keplr-wallet/stores";
+// eslint-disable-next-line import/no-extraneous-dependencies
 
 export interface ITxChainSetter {
   chainId: string;
@@ -11,6 +12,23 @@ export interface ITxChainSetter {
 export interface IMemoConfig extends ITxChainSetter {
   memo: string;
   setMemo(memo: string): void;
+
+  error: Error | undefined;
+}
+
+export interface PermissionDetails {
+  icon: any;
+  name: string;
+  contract: string;
+  message_name: string;
+  fields: any;
+}
+
+export interface IPermissionConfig extends ITxChainSetter {
+  permission: PermissionDetails;
+  availablePermissions: PermissionDetails[];
+  selectedPermission: PermissionDetails;
+  setPermission(permission: any): void;
 
   error: Error | undefined;
 }

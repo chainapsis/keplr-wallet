@@ -28,10 +28,12 @@ import {
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
+import { SetKeyRingPage } from "../../pages/setting/keyring";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig;
   memoConfig?: IMemoConfig;
+  isChildAccounts?: boolean;
   ibcChannelConfig?: IIBCChannelConfig;
 
   className?: string;
@@ -46,6 +48,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
   ({
     recipientConfig,
     memoConfig,
+    isChildAccounts,
     ibcChannelConfig,
     className,
     label,
@@ -55,6 +58,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     const intl = useIntl();
 
     const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
+    const [isMyAccountsOpen, setIsMyAccountsOpen] = useState(false);
 
     const [inputId] = useState(() => {
       const bytes = new Uint8Array(4);
@@ -110,6 +114,10 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       },
     };
 
+    const closeKeyRingPageHandler = () => {
+      setIsMyAccountsOpen(false);
+    };
+
     return (
       <React.Fragment>
         <Modal
@@ -126,6 +134,22 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               selectHandler={selectAddressFromAddressBook}
               ibcChannelConfig={ibcChannelConfig}
               isInTransaction={true}
+            />
+          </ModalBody>
+        </Modal>
+        <Modal
+          isOpen={isMyAccountsOpen}
+          backdrop={false}
+          className={styleAddressInput.fullModal}
+          wrapClassName={styleAddressInput.fullModal}
+          contentClassName={styleAddressInput.fullModal}
+        >
+          <ModalBody className={styleAddressInput.fullModal}>
+            <SetKeyRingPage
+              pickAddressOnly={true}
+              pickAddressAction={selectAddressFromAddressBook.setRecipient}
+              closeKeyRingPage={closeKeyRingPageHandler}
+              onBackButtonAction={closeKeyRingPageHandler}
             />
           </ModalBody>
         </Modal>
@@ -150,7 +174,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               autoComplete="off"
               disabled={disabled}
             />
-            {!disableAddressBook && memoConfig ? (
+            {!disableAddressBook && (memoConfig || isChildAccounts) ? (
               <Button
                 className={styleAddressInput.addressBookButton}
                 color="primary"
@@ -160,6 +184,18 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                 disabled={disabled}
               >
                 <i className="fas fa-address-book" />
+              </Button>
+            ) : null}
+            {isChildAccounts ? (
+              <Button
+                className={styleAddressInput.lastAddressBookButton}
+                color="primary"
+                type="button"
+                outline
+                onClick={() => setIsMyAccountsOpen(true)}
+                disabled={disabled}
+              >
+                <i className="fas fa-id-badge" />
               </Button>
             ) : null}
           </InputGroup>

@@ -122,6 +122,9 @@ const extensionConfig = (env, args) => {
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
       }),
     ],
+    optimization: {
+      minimize: false,
+    },
   };
 };
 

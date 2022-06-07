@@ -17,14 +17,18 @@ import styleAddressBook from "./style.module.scss";
 import { useStore } from "../../../stores";
 import { PageButton } from "../page-button";
 import { AddAddressModal } from "./add-address-modal";
+import { AddChildAccountModal } from "../child-accounts/add-child-account-modal";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useConfirm } from "../../../components/confirm";
 import {
   AddressBookSelectHandler,
+  ChildAccountSelectHandler,
   IIBCChannelConfig,
   useAddressBookConfig,
+  useChildAccountConfig,
   useMemoConfig,
+  usePermissionConfig,
   useRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../../config.ui";
@@ -33,6 +37,7 @@ export const AddressBookPage: FunctionComponent<{
   onBackButton?: () => void;
   hideChainDropdown?: boolean;
   selectHandler?: AddressBookSelectHandler;
+  childSelectHandler?: ChildAccountSelectHandler;
   ibcChannelConfig?: IIBCChannelConfig;
   isInTransaction?: boolean;
   isChildAccounts?: boolean;
@@ -41,6 +46,7 @@ export const AddressBookPage: FunctionComponent<{
     onBackButton,
     hideChainDropdown,
     selectHandler,
+    childSelectHandler,
     ibcChannelConfig,
     //isInTransaction,
     isChildAccounts,
@@ -63,24 +69,42 @@ export const AddressBookPage: FunctionComponent<{
       EthereumEndpoint
     );
     const memoConfig = useMemoConfig(chainStore, selectedChainId);
+    const permissionConfig = usePermissionConfig(chainStore, selectedChainId);
 
-    const addressBookConfig = useAddressBookConfig(
-      isChildAccounts
-        ? new ExtensionKVStore("child-accounts")
-        : new ExtensionKVStore("address-book"),
-      chainStore,
-      selectedChainId,
-      selectHandler
-        ? selectHandler
-        : {
-            setRecipient: (): void => {
-              // noop
-            },
-            setMemo: (): void => {
-              // noop
-            },
-          }
-    );
+    let addressBookConfig: any;
+    if (!isChildAccounts) {
+      addressBookConfig = useAddressBookConfig(
+        new ExtensionKVStore("address-book"),
+        chainStore,
+        selectedChainId,
+        selectHandler
+          ? selectHandler
+          : {
+              setRecipient: (): void => {
+                // noop
+              },
+              setMemo: (): void => {
+                // noop
+              },
+            }
+      );
+    } else {
+      addressBookConfig = useChildAccountConfig(
+        new ExtensionKVStore("child-account"),
+        chainStore,
+        selectedChainId,
+        childSelectHandler
+          ? childSelectHandler
+          : {
+              setRecipient: (): void => {
+                // noop
+              },
+              setPermission: (): void => {
+                // noop
+              },
+            }
+      );
+    }
 
     const [dropdownOpen, setOpen] = useState(false);
     const toggle = () => setOpen(!dropdownOpen);
@@ -121,10 +145,14 @@ export const AddressBookPage: FunctionComponent<{
                   />
                 ),
                 title: intl.formatMessage({
-                  id: "setting.address-book.confirm.delete-address.title",
+                  id: isChildAccounts
+                    ? "setting.child-accounts.confirm.delete-child-account.title"
+                    : "setting.address-book.confirm.delete-address.title",
                 }),
                 paragraph: intl.formatMessage({
-                  id: "setting.address-book.confirm.delete-address.paragraph",
+                  id: isChildAccounts
+                    ? "setting.child-accounts.confirm.delete-child-account.paragraph"
+                    : "setting.address-book.confirm.delete-address.paragraph",
                 }),
               })
             ) {
@@ -135,6 +163,38 @@ export const AddressBookPage: FunctionComponent<{
           }}
         />,
       ];
+    };
+
+    const pickModal = () => {
+      if (isChildAccounts) {
+        return (
+          <AddChildAccountModal
+            closeModal={() => {
+              setAddAddressModalOpen(false);
+              setAddAddressModalIndex(-1);
+            }}
+            recipientConfig={recipientConfig}
+            permissionConfig={permissionConfig}
+            childAccountConfig={addressBookConfig}
+            index={addAddressModalIndex}
+            chainId={selectedChainId}
+          />
+        );
+      } else {
+        return (
+          <AddAddressModal
+            closeModal={() => {
+              setAddAddressModalOpen(false);
+              setAddAddressModalIndex(-1);
+            }}
+            recipientConfig={recipientConfig}
+            memoConfig={memoConfig}
+            addressBookConfig={addressBookConfig}
+            index={addAddressModalIndex}
+            chainId={selectedChainId}
+          />
+        );
+      }
     };
 
     return (
@@ -162,17 +222,7 @@ export const AddressBookPage: FunctionComponent<{
           contentClassName={styleAddressBook.fullModal}
         >
           <ModalBody className={styleAddressBook.fullModal}>
-            <AddAddressModal
-              closeModal={() => {
-                setAddAddressModalOpen(false);
-                setAddAddressModalIndex(-1);
-              }}
-              recipientConfig={recipientConfig}
-              memoConfig={memoConfig}
-              addressBookConfig={addressBookConfig}
-              index={addAddressModalIndex}
-              chainId={selectedChainId}
-            />
+            {pickModal()}
           </ModalBody>
         </Modal>
         <div className={style.container}>
@@ -225,7 +275,7 @@ export const AddressBookPage: FunctionComponent<{
             </div>
           </div>
           <div style={{ flex: "1 1 0", overflowY: "auto" }}>
-            {addressBookConfig.addressBookDatas.map((data, i) => {
+            {addressBookConfig.addressBookDatas.map((data: any, i: any) => {
               return (
                 <PageButton
                   key={i.toString()}

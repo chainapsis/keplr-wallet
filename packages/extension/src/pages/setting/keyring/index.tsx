@@ -14,117 +14,178 @@ import { PageButton } from "../page-button";
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 
-export const SetKeyRingPage: FunctionComponent = observer(() => {
-  const intl = useIntl();
+export interface KeyRingPageProps {
+  pickAddressOnly?: boolean;
+  pickAddressAction?: (address: string) => void;
+  closeKeyRingPage?: () => void;
+  onBackButtonAction?: () => void;
+}
 
-  const { keyRingStore, analyticsStore } = useStore();
-  const history = useHistory();
+export const SetKeyRingPage: FunctionComponent<KeyRingPageProps> = observer(
+  ({
+    pickAddressOnly = false,
+    pickAddressAction,
+    closeKeyRingPage,
+    onBackButtonAction,
+  }) => {
+    const intl = useIntl();
 
-  const loadingIndicator = useLoadingIndicator();
-
-  return (
-    <HeaderLayout
-      showChainName={false}
-      canChangeChainInfo={false}
-      alternativeTitle={intl.formatMessage({ id: "setting.keyring" })}
-      onBackButton={() => {
+    const onBackButtonHandler = () => {
+      if (onBackButtonAction) {
+        onBackButtonAction();
+      } else {
         history.goBack();
-      }}
-    >
-      <div className={style.container}>
-        <div className={style.innerTopContainer}>
-          <div style={{ flex: 1 }} />
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-          >
-            <Button
-              color="primary"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                analyticsStore.logEvent("Add additional account started");
+      }
+    };
 
-                browser.tabs.create({
-                  url: "/popup.html#/register",
-                });
+    const {
+      keyRingStore,
+      accountStore,
+      chainStore,
+      analyticsStore,
+    } = useStore();
+    const history = useHistory();
+
+    const loadingIndicator = useLoadingIndicator();
+
+    const pickAddressActionHandler = (address: string) => {
+      if (pickAddressAction) {
+        pickAddressAction(address);
+      }
+    };
+
+    const closeKeyRingPageHandler = () => {
+      if (closeKeyRingPage) {
+        closeKeyRingPage();
+      }
+    };
+
+    return (
+      <HeaderLayout
+        showChainName={false}
+        canChangeChainInfo={false}
+        alternativeTitle={intl.formatMessage({ id: "setting.keyring" })}
+        onBackButton={() => {
+          onBackButtonHandler();
+        }}
+      >
+        <div className={style.container}>
+          <div className={style.innerTopContainer}>
+            <div style={{ flex: 1 }} />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
               }}
             >
-              <i
-                className="fas fa-plus"
-                style={{ marginRight: "4px", fontSize: "8px" }}
-              />
-              <FormattedMessage id="setting.keyring.button.add" />
-            </Button>
-          </div>
-        </div>
-        {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
-          const bip44HDPath = keyStore.bip44HDPath
-            ? keyStore.bip44HDPath
-            : {
-                account: 0,
-                change: 0,
-                addressIndex: 0,
-              };
+              <Button
+                color="primary"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  analyticsStore.logEvent("Add additional account started");
 
-          return (
-            <PageButton
-              key={i.toString()}
-              title={`${
-                keyStore.meta?.name
-                  ? keyStore.meta.name
-                  : intl.formatMessage({
-                      id: "setting.keyring.unnamed-account",
-                    })
-              } ${
-                keyStore.selected
-                  ? intl.formatMessage({
-                      id: "setting.keyring.selected-account",
-                    })
-                  : ""
-              }`}
-              paragraph={
-                keyStore.type === "ledger"
-                  ? `Ledger - m/44'/118'/${bip44HDPath.account}'${
-                      bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
-                        ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
-                        : ""
-                    }`
-                  : keyStore.meta?.email
-                  ? keyStore.meta.email
-                  : undefined
-              }
-              onClick={
-                keyStore.selected
-                  ? undefined
-                  : async (e) => {
-                      e.preventDefault();
-                      loadingIndicator.setIsLoading("keyring", true);
-                      try {
+                  browser.tabs.create({
+                    url: "/popup.html#/register",
+                  });
+                }}
+              >
+                <i
+                  className="fas fa-plus"
+                  style={{ marginRight: "4px", fontSize: "8px" }}
+                />
+                <FormattedMessage id="setting.keyring.button.add" />
+              </Button>
+            </div>
+          </div>
+          {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
+            const bip44HDPath = keyStore.bip44HDPath
+              ? keyStore.bip44HDPath
+              : {
+                  account: 0,
+                  change: 0,
+                  addressIndex: 0,
+                };
+
+            return (
+              <PageButton
+                key={i.toString()}
+                title={`${
+                  keyStore.meta?.name
+                    ? keyStore.meta.name
+                    : intl.formatMessage({
+                        id: "setting.keyring.unnamed-account",
+                      })
+                } ${
+                  keyStore.selected
+                    ? pickAddressOnly
+                      ? ""
+                      : intl.formatMessage({
+                          id: "setting.keyring.selected-account",
+                        })
+                    : ""
+                }`}
+                paragraph={
+                  keyStore.type === "ledger"
+                    ? `Ledger - m/44'/118'/${bip44HDPath.account}'${
+                        bip44HDPath.change !== 0 ||
+                        bip44HDPath.addressIndex !== 0
+                          ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
+                          : ""
+                      }`
+                    : keyStore.meta?.email
+                    ? keyStore.meta.email
+                    : undefined
+                }
+                onClick={
+                  pickAddressOnly
+                    ? async () => {
+                        const oldKeyIndex = keyRingStore.currentIndex;
                         await keyRingStore.changeKeyRing(i);
-                        analyticsStore.logEvent("Account changed");
-                        loadingIndicator.setIsLoading("keyring", false);
-                        history.push("/");
-                      } catch (e) {
-                        console.log(`Failed to change keyring: ${e.message}`);
-                        loadingIndicator.setIsLoading("keyring", false);
+                        pickAddressActionHandler(
+                          accountStore.getAccount(chainStore.current.chainId)
+                            .bech32Address
+                        );
+                        closeKeyRingPageHandler();
+                        keyRingStore.changeKeyRing(oldKeyIndex);
                       }
-                    }
-              }
-              style={keyStore.selected ? { cursor: "default" } : undefined}
-              icons={[
-                <KeyRingToolsIcon key="tools" index={i} keyStore={keyStore} />,
-              ]}
-            />
-          );
-        })}
-      </div>
-    </HeaderLayout>
-  );
-});
+                    : keyStore.selected
+                    ? undefined
+                    : async (e) => {
+                        e.preventDefault();
+                        loadingIndicator.setIsLoading("keyring", true);
+                        try {
+                          await keyRingStore.changeKeyRing(i);
+                          analyticsStore.logEvent("Account changed");
+                          loadingIndicator.setIsLoading("keyring", false);
+                          history.push("/");
+                        } catch (e: any) {
+                          console.log(`Failed to change keyring: ${e.message}`);
+                          loadingIndicator.setIsLoading("keyring", false);
+                        }
+                      }
+                }
+                style={keyStore.selected ? { cursor: "default" } : undefined}
+                icons={
+                  pickAddressOnly
+                    ? [<div key="tempplaceholder" />]
+                    : [
+                        <KeyRingToolsIcon
+                          key="tools"
+                          index={i}
+                          keyStore={keyStore}
+                        />,
+                      ]
+                }
+              />
+            );
+          })}
+        </div>
+      </HeaderLayout>
+    );
+  }
+);
 
 const KeyRingToolsIcon: FunctionComponent<{
   index: number;

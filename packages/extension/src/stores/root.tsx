@@ -118,6 +118,7 @@ export class RootStore {
         },
       },
       "scrypt",
+      0,
       this.chainStore,
       new InExtensionMessageRequester(),
       this.interactionStore
