@@ -1,14 +1,21 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import { IPermissionConfig, PermissionDetails } from "./types";
 import { action, makeObservable, observable } from "mobx";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { TxChainSetter } from "./chain";
 import { useState } from "react";
+import faCoins from "@fortawesome/fontawesome-free-regular";
+import faArrowsRotate from "@fortawesome/fontawesome-free-regular";
+import faLightEmergencyOn from "@fortawesome/fontawesome-free-regular";
+import faCat from "@fortawesome/fontawesome-free-regular";
+import faHeartCirclePlus from "@fortawesome/fontawesome-free-regular";
 
 export class PermissionConfig
   extends TxChainSetter
   implements IPermissionConfig {
   @observable
   protected _permission: PermissionDetails = {
+    icon: null,
     name: "",
     contract: "",
     message_name: "",
@@ -17,15 +24,38 @@ export class PermissionConfig
 
   public availablePermissions: PermissionDetails[] = [
     {
+      icon: { faCoins },
       name: "Spend OSMO (Limited)",
       contract: "placeholder",
       message_name: "placeholder",
       fields: null,
     },
     {
+      icon: { faArrowsRotate },
       name: "Trade on Osmosis",
       contract: "osmo_placeholder",
       message_name: "trade",
+      fields: null,
+    },
+    {
+      icon: { faLightEmergencyOn },
+      name: "Set as Recovery Partner",
+      contract: "placeholder",
+      message_name: "placeholder",
+      fields: null,
+    },
+    {
+      icon: { faCat },
+      name: "Trade NFTs",
+      contract: "placeholder",
+      message_name: "placeholder",
+      fields: null,
+    },
+    {
+      icon: { faHeartCirclePlus },
+      name: "Set as Inheritance Beneficiary",
+      contract: "placeholder",
+      message_name: "placeholder",
       fields: null,
     },
   ];
@@ -43,7 +73,7 @@ export class PermissionConfig
 
   @action
   setPermission(permission: PermissionDetails) {
-    this._permission = permission;
+    this.selectedPermission = permission;
   }
 
   get error(): Error | undefined {

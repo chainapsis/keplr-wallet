@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { HeaderLayout } from "../../../layouts";
+//import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 import { AddressInput, Input, PermissionInput } from "../../../components/form";
 import { Button } from "reactstrap";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -9,6 +11,14 @@ import {
   PermissionConfig,
   RecipientConfig,
 } from "@keplr-wallet/hooks";
+//import { renderDirectMessage } from "../../sign/direct";
+import {
+  MsgGrant,
+  /*MsgRevoke,*/
+} from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
+import { useStore } from "../../../stores";
+import { SignInteractionStore } from "@keplr-wallet/stores";
+import { BackgroundTxService } from "./service";
 
 /**
  *
@@ -37,6 +47,40 @@ export const AddChildAccountModal: FunctionComponent<{
     const intl = useIntl();
 
     const [name, setName] = useState("");
+
+    const { accountStore, chainStore, signInteractionStore } = useStore();
+
+    const testAuthZ = (parent: string, child: string) => {
+      const grant_message = {
+        granter: parent,
+        grantee: child,
+        authorization: "cosmwasm.wasm.v1.MsgExecuteContract",
+        period: 500000,
+      };
+
+      const msg = MsgGrant.fromJSON(grant_message);
+      const msgAny = {
+        typeUrl: "/cosmos.authz.v1beta1.MsgGrant",
+        value: msg,
+      };
+      /*const fee = {
+        amount: [
+          {
+            denom: "uatom",
+            amount: "2000",
+          },
+        ],
+        gas: "180000", // 180k
+      };
+      const memo = "Use your power wisely";
+      const result = await client.signAndBroadcast(
+        firstAccount.address,
+        [msgAny],
+        fee,
+        memo
+      );*/
+      console.error(JSON.stringify(msgAny));
+    };
 
     useEffect(() => {
       if (index >= 0) {
@@ -69,6 +113,7 @@ export const AddChildAccountModal: FunctionComponent<{
           // Clear the recipient and memo before closing
           recipientConfig.setRawRecipient("");
           permissionConfig.setPermission({
+            icon: "",
             name: "",
             contract: "",
             message_name: "",
@@ -118,6 +163,12 @@ export const AddChildAccountModal: FunctionComponent<{
                 throw new Error("Invalid address");
               }
 
+              testAuthZ(
+                accountStore.getAccount(chainStore.current.chainId)
+                  .bech32Address,
+                recipientConfig.recipient
+              );
+
               if (index < 0) {
                 await childAccountConfig.addAddressBook({
                   name,
@@ -135,6 +186,7 @@ export const AddChildAccountModal: FunctionComponent<{
               // Clear the recipient and memo before closing
               recipientConfig.setRawRecipient("");
               permissionConfig.setPermission({
+                icon: "",
                 name: "",
                 contract: "",
                 message_name: "",

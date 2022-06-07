@@ -114,6 +114,10 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       },
     };
 
+    const closeKeyRingPageHandler = () => {
+      setIsMyAccountsOpen(false);
+    };
+
     return (
       <React.Fragment>
         <Modal
@@ -144,6 +148,8 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             <SetKeyRingPage
               pickAddressOnly={true}
               pickAddressAction={selectAddressFromAddressBook.setRecipient}
+              closeKeyRingPage={closeKeyRingPageHandler}
+              onBackButtonAction={closeKeyRingPageHandler}
             />
           </ModalBody>
         </Modal>

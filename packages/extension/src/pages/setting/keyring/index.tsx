@@ -17,11 +17,26 @@ import { FormattedMessage, useIntl } from "react-intl";
 export interface KeyRingPageProps {
   pickAddressOnly?: boolean;
   pickAddressAction?: (address: string) => void;
+  closeKeyRingPage?: () => void;
+  onBackButtonAction?: () => void;
 }
 
 export const SetKeyRingPage: FunctionComponent<KeyRingPageProps> = observer(
-  ({ pickAddressOnly = false, pickAddressAction }) => {
+  ({
+    pickAddressOnly = false,
+    pickAddressAction,
+    closeKeyRingPage,
+    onBackButtonAction,
+  }) => {
     const intl = useIntl();
+
+    const onBackButtonHandler = () => {
+      if (onBackButtonAction) {
+        onBackButtonAction();
+      } else {
+        history.goBack();
+      }
+    };
 
     const {
       keyRingStore,
@@ -35,8 +50,13 @@ export const SetKeyRingPage: FunctionComponent<KeyRingPageProps> = observer(
 
     const pickAddressActionHandler = (address: string) => {
       if (pickAddressAction) {
-        console.error("reaching 2: " + address);
         pickAddressAction(address);
+      }
+    };
+
+    const closeKeyRingPageHandler = () => {
+      if (closeKeyRingPage) {
+        closeKeyRingPage();
       }
     };
 
@@ -46,7 +66,7 @@ export const SetKeyRingPage: FunctionComponent<KeyRingPageProps> = observer(
         canChangeChainInfo={false}
         alternativeTitle={intl.formatMessage({ id: "setting.keyring" })}
         onBackButton={() => {
-          history.goBack();
+          onBackButtonHandler();
         }}
       >
         <div className={style.container}>
@@ -99,9 +119,11 @@ export const SetKeyRingPage: FunctionComponent<KeyRingPageProps> = observer(
                       })
                 } ${
                   keyStore.selected
-                    ? intl.formatMessage({
-                        id: "setting.keyring.selected-account",
-                      })
+                    ? pickAddressOnly
+                      ? ""
+                      : intl.formatMessage({
+                          id: "setting.keyring.selected-account",
+                        })
                     : ""
                 }`}
                 paragraph={
@@ -125,7 +147,8 @@ export const SetKeyRingPage: FunctionComponent<KeyRingPageProps> = observer(
                           accountStore.getAccount(chainStore.current.chainId)
                             .bech32Address
                         );
-                        await keyRingStore.changeKeyRing(oldKeyIndex);
+                        closeKeyRingPageHandler();
+                        keyRingStore.changeKeyRing(oldKeyIndex);
                       }
                     : keyStore.selected
                     ? undefined

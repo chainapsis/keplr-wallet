@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
-import { IPermissionConfig } from "@keplr-wallet/hooks";
+import { PermissionConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import stylePermissionInput from "./permission-input.module.scss";
 import classnames from "classnames";
@@ -13,9 +13,11 @@ import {
   Label,
 } from "reactstrap";
 import { FormattedMessage } from "react-intl";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export interface PermissionInputProps {
-  permissionConfig: IPermissionConfig;
+  permissionConfig: PermissionConfig;
 
   label?: string;
   className?: string;
@@ -78,7 +80,8 @@ export const PermissionInput: FunctionComponent<PermissionInputProps> = observer
                     permissionConfig.setPermission(permission);
                   }}
                 >
-                  {permission.name}
+                  <FontAwesomeIcon icon={permission.icon} />
+                  {" " + permission.name}
                 </DropdownItem>
               );
             })}
