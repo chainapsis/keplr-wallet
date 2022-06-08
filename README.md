@@ -1,4 +1,4 @@
-# Fetch.ai Browser Extension Wallet
+# Fetch Wallet
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 [Fetch.ai](https://fetch.ai)'s fork of the Keplr browser extension wallet by [chainapsis](https://github.com/chainapsis), which is designed to act as a generic wallet software for blockchains built using the [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk) and to support the inter-blockchain communication (IBC) protocol. 
