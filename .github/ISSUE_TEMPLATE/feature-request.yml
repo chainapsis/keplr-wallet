@@ -1,0 +1,49 @@
+name: ☝️ Feature request
+description: Suggest an idea for this project
+title: "Feature request: <short description>"
+labels: ["enhancement", "unconfirmed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new idea for this project. Please complete the following to ensure we have all the details to get things started.
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm before submitting a feature request.
+      options:
+        - label: I checked the [documentation](https://docs.fetch.ai/browser-extension-wallet/) and made sure this feature does not already exist.
+          required: true
+        - label: I checked the [existing issues](https://github.com/fetchai/fetch-wallet/issues) to make sure this feature has not already been requested.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: |
+        If your feature request relates to a problem, provide a description here, e.g. I'm always frustrated when [...]
+    validations:
+      required: false
+  - type: textarea
+    id: solution
+    attributes:
+      label: Feature / Solution
+      description: |
+        Provide a description of what you want to happen
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: |
+        Provide any alternative solutions or features you've considered
+  - type: textarea
+    id: info
+    attributes:
+      label: Additional Context
+      description: |
+        Any other context or screenshots about the feature request
+    validations:
+      required: false

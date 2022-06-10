@@ -1,0 +1,58 @@
+name: 🐛 Bug Report
+description: Report a reproducible bug.
+title: "Bug report: <short description>"
+labels: ["bug", "unconfirmed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting the issue you are facing. Please complete the following so we can have the details necessary to assist you.
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm before submitting a new issue
+      options:
+        - label: I am running the [latest version of the Browser Extension Wallet](https://github.com/fetchai/fetch-wallet/releases).
+          required: true
+        - label: I checked the [documentation](https://docs.fetch.ai/basics/wallet/getting_started) and found no answer to my problem.
+          required: true
+        - label: I checked the [existing issues](https://github.com/fetchai/fetch-wallet/issues) to make sure my problem has not already been reported.
+          required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: Describe the behavior you are expecting
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Current Behavior
+      description: Describe the current behavior
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: To Reproduce
+      description: Detailed steps for reproducing the issue
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Any relevant information about your setup (this is important in case the issue is not reproducible except for under certain conditions)
+      placeholder: |
+        Operating system [e.g. iOS], Wallet version [e.g. 1.0.0], ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Issue Screenshots or Failure Logs
+      description: Include any relevant log snippets or screenshots here
+    validations:
+      required: false
