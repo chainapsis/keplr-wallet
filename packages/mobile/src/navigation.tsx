@@ -97,6 +97,7 @@ import {
 import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
 import { KeplrVersionScreen } from "./screens/setting/screens/version";
+import { SettingAddTokenScreen } from "./screens/setting/screens/token";
 import { ManageWalletConnectScreen } from "./screens/manage-wallet-connect";
 import {
   ImportFromExtensionIntroScreen,
@@ -204,6 +205,9 @@ const {
     },
     "Setting.ChainList": {
       upperScreenName: "ChainList",
+    },
+    "Setting.AddToken": {
+      upperScreenName: "Others",
     },
     AddressBook: {
       upperScreenName: "AddressBooks",
@@ -635,6 +639,13 @@ export const OtherNavigation: FunctionComponent = () => {
         }}
         name="TxFailedResult"
         component={TxFailedResultScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Add Token",
+        }}
+        name="Setting.AddToken"
+        component={SettingAddTokenScreen}
       />
     </Stack.Navigator>
   );
