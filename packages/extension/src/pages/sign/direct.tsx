@@ -27,7 +27,10 @@ import {
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
 import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
-import { MsgExecuteContract, MsgInstantiateContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
+import {
+  MsgExecuteContract,
+  MsgInstantiateContract,
+} from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import {
   MsgGrant,
@@ -160,7 +163,10 @@ export function renderDirectMessage(
         }
         case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward": {
           const withdrawMsg = msg.unpacked as MsgWithdrawDelegatorReward;
-          return renderMsgWithdrawDelegatorReward(intl, withdrawMsg.validatorAddress);
+          return renderMsgWithdrawDelegatorReward(
+            intl,
+            withdrawMsg.validatorAddress
+          );
         }
         case "/cosmos.gov.v1beta1.MsgVote": {
           const voteMsg = msg.unpacked as MsgVote;
