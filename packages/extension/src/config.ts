@@ -1170,7 +1170,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "kava",
       },
-    ], 
+    ],
     gasPriceStep: {
       low: 0.05,
       average: 0.1,
