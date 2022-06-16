@@ -76,17 +76,19 @@ export const TokensScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView>
-      <Card style={style.flatten(["padding-bottom-14"])}>
-        {tokens.map((token) => {
-          return (
-            <TokenItem
-              key={token.currency.coinMinimalDenom}
-              chainInfo={chainStore.current}
-              balance={token.balance}
-            />
-          );
-        })}
-      </Card>
+      {tokens.length > 0 ? (
+        <Card style={style.flatten(["padding-bottom-14"])}>
+          {tokens.map((token) => {
+            return (
+              <TokenItem
+                key={token.currency.coinMinimalDenom}
+                chainInfo={chainStore.current}
+                balance={token.balance}
+              />
+            );
+          })}
+        </Card>
+      ) : null}
     </PageWithScrollView>
   );
 });

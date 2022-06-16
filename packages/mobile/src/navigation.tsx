@@ -97,7 +97,10 @@ import {
 import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
 import { KeplrVersionScreen } from "./screens/setting/screens/version";
-import { SettingAddTokenScreen } from "./screens/setting/screens/token";
+import {
+  SettingAddTokenScreen,
+  SettingManageTokensScreen,
+} from "./screens/setting/screens/token";
 import { ManageWalletConnectScreen } from "./screens/manage-wallet-connect";
 import {
   ImportFromExtensionIntroScreen,
@@ -207,6 +210,9 @@ const {
       upperScreenName: "ChainList",
     },
     "Setting.AddToken": {
+      upperScreenName: "Others",
+    },
+    "Setting.ManageTokens": {
       upperScreenName: "Others",
     },
     AddressBook: {
@@ -510,6 +516,8 @@ export const RegisterNavigation: FunctionComponent = () => {
 export const OtherNavigation: FunctionComponent = () => {
   const style = useStyle();
 
+  const navigation = useNavigation();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -646,6 +654,22 @@ export const OtherNavigation: FunctionComponent = () => {
         }}
         name="Setting.AddToken"
         component={SettingAddTokenScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Manage Tokens",
+          headerRight: () => (
+            <HeaderRightButton
+              onPress={() => {
+                navigation.navigate("Setting.AddToken");
+              }}
+            >
+              <HeaderAddIcon />
+            </HeaderRightButton>
+          ),
+        }}
+        name="Setting.ManageTokens"
+        component={SettingManageTokensScreen}
       />
     </Stack.Navigator>
   );
