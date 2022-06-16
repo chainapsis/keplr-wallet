@@ -14,11 +14,21 @@ import { useStyle } from "../../styles";
 import { View } from "react-native";
 
 export const SettingScreen: FunctionComponent = observer(() => {
-  const { keychainStore, keyRingStore } = useStore();
+  const { chainStore, keychainStore, keyRingStore, tokensStore } = useStore();
 
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
+
+  const showManageTokenButton = (() => {
+    if (!chainStore.current.features) {
+      return false;
+    }
+
+    if (chainStore.current.features.includes("cosmwasm")) {
+      return true;
+    }
+  })();
 
   return (
     <PageWithScrollViewInBottomTabView
@@ -34,6 +44,21 @@ export const SettingScreen: FunctionComponent = observer(() => {
           smartNavigation.navigateSmart("AddressBook", {});
         }}
       />
+      {showManageTokenButton ? (
+        <SettingItem
+          label="Manage tokens"
+          right={
+            <RightArrow
+              paragraph={tokensStore
+                .getTokensOf(chainStore.current.chainId)
+                .tokens.length.toString()}
+            />
+          }
+          onPress={() => {
+            smartNavigation.navigateSmart("Setting.ManageTokens", {});
+          }}
+        />
+      ) : null}
       <SettingSectionTitle title="Security" />
       {canShowPrivateData(keyRingStore.keyRingType) && (
         <SettingViewPrivateDataItem topBorder={true} />
