@@ -58,7 +58,9 @@ export const MyRewardCard: FunctionComponent<{
                 .toString()}
             </Text>
             <Text style={style.flatten(["h7", "color-primary"])}>
-              {`${apy.maxDecimals(2).trim(true).toString()}% per year`}
+              {apy.toDec().gt(new Dec(0))
+                ? `${apy.maxDecimals(2).trim(true).toString()}% per year`
+                : " "}
             </Text>
           </View>
           <View style={style.flatten(["flex-1"])} />

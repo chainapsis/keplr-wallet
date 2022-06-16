@@ -83,13 +83,23 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     return data;
   }, [bondedValidators.validators, search, sort]);
 
+  const apy = queries.cosmos.queryInflation.inflation;
+
   const items = useMemo(() => {
-    return [
-      { label: "APY", key: "APY" },
-      { label: "Amount Staked", key: "Voting Power" },
-      { label: "Name", key: "Name" },
-    ];
-  }, []);
+    // If inflation is 0 or not fetched properly, there is no need to sort by APY.
+    if (apy.toDec().gt(new Dec(0))) {
+      return [
+        { label: "APY", key: "APY" },
+        { label: "Amount Staked", key: "Voting Power" },
+        { label: "Name", key: "Name" },
+      ];
+    } else {
+      return [
+        { label: "Amount Staked", key: "Voting Power" },
+        { label: "Name", key: "Name" },
+      ];
+    }
+  }, [apy]);
 
   const sortItem = useMemo(() => {
     const item = items.find((item) => item.key === sort);
