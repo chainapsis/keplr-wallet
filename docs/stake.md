@@ -1,10 +1,18 @@
-## Intro
-
-Clicking the "Stake" button on the dashboard should open the [ledger explorer]() in a new tab.
-See [ledger explorer staking docs](TODO: lnk me! - point to staking under explorer (how to stake using; medium article)) for more information.
+Clicking the **Stake** button on the Fetch wallet dashboard opens the Fetch [ledger browser](https://browse-fetchhub.fetch.ai/validators). From here, you can [connect your wallet](./connections.md) and stake your FETs. To learn how, follow the [staking guide](https://docs.fetch.ai/basics/staking/how_to_stake/).
 
 ## Claim rewards
 
-If the active account has delegated tokens, a "Pending Staking Reward" section should appear above the "Stake" section on the dashboard. Clicking the "claim" button will generate a transaction which the wallet will then ask you to approve which will distribute all the account's rewards to its balance.
+If your account has any tokens staked, you can withdraw your rewards from the wallet: 
 
-To claim rewards from validators individually see the [ledger explorer staking documentation](TODO: link me!).
+1. Ensure you are logged into the wallet.
+2. From the wallet dashboard, select **Claim**.
+
+    !!! info
+        This will claim the total rewards accrued for your stakes across every validator.
+
+3. The wallet shows you a summary of the transaction. Review it, select a transaction fee, and if you are happy, hit **Approve** to complete the operation.
+
+You should now see the rewards added to your **Total Balance**.
+
+!!! info
+    To claim rewards from each validator individually, see the [claim rewards using the staking dashboard](https://docs.fetch.ai/basics/staking/how_to_stake/#using-the-staking-dashboard).

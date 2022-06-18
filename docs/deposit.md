@@ -1,13 +1,18 @@
-## How to top up your account
+To transfer funds to your account on the Fetch wallet:
 
-To transfer funds to the active account you will need to copy its address to the sending wallet or application.
+In the wallet or application you are using to send the funds, use your account's address as the destination account to which the funds must go.
 
-Clicking on the account address towards the top of the dashboard (below the account name) will copy it to the clipboard. This address can be used to send supported tokens using the (native) fetch network.
+### To copy your account's address
 
-Clicking on the "Deposit" button opens a modal with a QR code which contains the address of the active account.
+1. Ensure you are logged into the wallet.
+2. Either click on the account address at the top of the dashboard (under the account name):
+![Copy active account address](../images/address_copy.jpg)
+3. Or select **Deposit** and scan the QR code.
 
-## Troubleshooting
+Once you send the tokens, the balance should be updated.
 
-If your origin wallet says that the address (which should start with the word "fetch") is invalid, it is probably expecting an ethereum address (beginning with "0x") and is most likely trying to send [ERC20 FET](TODO: link me!).
-In this case, you need to use the [token bridge](https://token-bridge.fetch.ai/) to swap your ERC20 FET for native FET.
+!!! failure
+    If your origin wallet says that the address (which should start with "`fetch`") is invalid, it is probably expecting an Ethereum address (beginning with "`0x`") and is most likely trying to send ERC20 FET. In this case, you need to use the [token bridge](https://token-bridge.fetch.ai/) to swap your ERC20 FET for native FET.
 
+!!! warning
+    You should **not** send ERC20 FET to this wallet. If you do, you will lose your tokens. The Fetch wallet can only hold native FET tokens and not ERC20 FET tokens.

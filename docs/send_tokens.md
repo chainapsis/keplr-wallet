@@ -1,64 +1,87 @@
-(how to use medium article)
+On this page, you can find instructions on how to send tokens using [native transfers](#native-network-transfer) and the [Inter-Blockchain Communication (IBC)](#ibc-transfer) protocol.
 
 ## Native network transfer
 
-From the dashboard, click on the "Send".
-Enter the recipient address.
-Select the type of token to send.
-Enter an amount to send.
-Click the "Send" button.
-Click the "Approve" button.
+1. Ensure you are logged into the wallet.
+2. Select **Send**.
+3. Fill in the details of your transaction:
+    * **Recipient**: the address you want to send the tokens to
+    * **Token**: the token denomination or type
+    * **Amount**: the number of tokens you want to send with this transaction (you can see your current balance above the **Amount**)
+    * **Memo (Optional)**: some transactions (e.g. to/from some exchanges) require a specific memo. If not needed, you can leave it blank.
+    * **Fee**: the transaction fee. Choose from **Low**, **Average** and **High**
+    !!! tip
+        Usually, the lower the transaction fee, the longer you need to wait for your transaction to be settled on the network.
+4. Press **Send**.
+5. In the summary screen, review the details and if everything is correct, select **Approve**.
+
+!!! info
+    You can check the status of your transaction via [the explorer](https://explore-fetchhub.fetch.ai).
+
 
 ## IBC transfer
 
-_NOTE: In order to send IBC transactions, the "Show Advanced IBC Transfers" setting must be toggled on.
-To navigate to the settings page from the dashboard, click on the hamburger menu (top-left).
-Then click on "Settings"._
+1. Ensure you are logged into the wallet.
+2. Make sure IBC transfers are enabled and that your selected network supports it.
 
-![Enable IBC tramsfer](./images/wallet/enable_IBC_transfer.jpg)
+    !!! tip
+        To enable IBC transfers in the wallet: 
 
-Ensure that the desired origin network is selected on the dashboard (top-center).
-If the origin network supports IBC, an "IBC Transfer" section will be visible towards the bottom of the dashboard.
+        From dashboard, click the ![Hamburger icon](../images/hamburger.png) icon in the top left, then **Settings**. Toggle the **Show Advanced IBC Transfers** switch on.
+  
+           ![Enable IBC transfer](./images/enable_IBC_transfer.png)
 
-![IBC tramsfer enabled](./images/wallet/IBC_transfer_enabled.jpg)
+    !!! warning "Note"
+        If your selected network does not support IBC transfers, you will not see an **IBC Transfer** section in the dashboard.
 
-Click the "Transfer" button in the "IBC Transfer" section.
+3. <span id="step4"></span>Click the **Transfer** button in the **IBC Transfer** section.
 
-Enter your mainnet destination chain address in the Recipient field, a MEMO (Optional), and click on Next to proceed.
+    ![IBC Transfer section](./images/ibc_transfer.png)
 
-![IBC tramsfer details](./images/wallet/IBC_transfer_details.jpg)
+4. Fill in the details of your transaction:
+    * **Destination Chain**: the destination blockchain. 
 
-Now enter the number of token you’d like to send to destination chain on the Amount field, select the preferred transaction fee then click Submit.
-I suggest using Average or High fees at this time.
+        !!! info
+            If you do not see your desired chain, you need to [set up IBC channels first](#first-time-origindestination-transfer).
 
-![IBC tramsfer amount details](./images/wallet/IBC_transfer_amount.jpg)
+    * **Recipient**: the address you want to send the tokens to 
+    * **Memo (Optional)**: an optional memo.
 
-On the transaction confirmation page, you can review the details of your transaction. Click on [Approve] to confirm.
+5. Press **Next**.
+6. In the next page, provide the following:
+    * **Token**: the denomination or type of the tokens being sent 
+    * **Amount**: the number of tokens to be sent 
+    * **Fee**: the transaction fee. Choose from **Low**, **Average**, **High**.
+7. Hit **Submit**.
+8. The wallet now shows you a summary of the transaction. Review it and if you are happy, hit **Approve** to complete the transfer.
 
-![IBC tramsfer approve](./images/wallet/IBC_transfer_approve.jpg)
+!!! warning
+    Don’t send tokens via [Interchain Transfer] directly to a CEX. In most cases, this can cause loss of your funds.
 
-### ⚛️ Congratulations & Welcome to the IBC Gang! ⚛️
+### First-time origin/destination transfer
 
-✏ Notes:
+All IBC Hubs have their own channel ID and knowing this channel ID is necessary to perform the IBC transaction.
 
-- All IBC Hubs have their own channel ID and knowing this channel ID is necessary to perform the IBC transaction.
+Before being able to make an IBC transfer between any two chains for the first time, an IBC channel must be configured in the wallet:
 
-- Don’t send tokens via [Interchain Transfer] directly to a CEX: this can cause in most cases the loss of the funds.
+1. Follow the instructions for [making an IBC transfer](#ibc-transfer), up to [Step 4](#step4).
+2. Click the **Select Chain** drop-down. 
+3. Select **+ New IBC Transfer Channel**.
+4. Select the **Destination Chain** and enter the source **Channel ID** (e.g. `channel-100`).
 
-## First-time origin/destination transfer
+    !!! tip
+        To find out the IBC channel ID between any two chains: 
 
-Before transferring between any given origin and destination combination for the first time, IBC channels must be configured in the wallet.
+        1. Head over to [this page](https://www.mintscan.io/fetchai/relayers)
+        2. At the top, select the sending chain, for example **Fetch.AI**. Then below it, click **IBC RELAYERS**.
+        3. Select the destination chain, for example **OSMOSIS**. 
+        4. You can now see the channels between the two chains. Select an active channel (in green) and note the channel numbers. In this example, Fetch.AI to Osmosis channel is 10.
+        5. Enter `channel-X` as the Destination Chain in the Fetch wallet (`channel-10` in our example). 
 
-Click the "Select Chain" drop-down.
-Click "+ New IBC Transfer Channel".
+    !!! info
+        Remember to write the channel ID in lower case (i.e. `channel-X`)
 
-![Add IBC channel](./images/wallet/add_IBC_channel.jpg)
+6. Click **Save**.
 
-Select the **destination** chain and enter the **source** channel ID (e.g. "channel-100").
-Click "Save".
-
-✏ Notes:
-
-- If you write the wrong number on the Destination Chain Channel ID, extension will reject the operation with the warning "Failed to fetch the channel".
-
-- Remember that you must write the channel ID in lower case (i.e. channel-X)
+!!! Failure
+    If you input the wrong Channel ID, the wallet will not accept it and shows you an error.
