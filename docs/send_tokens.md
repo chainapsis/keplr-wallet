@@ -18,14 +18,13 @@ On this page, you can find instructions on how to send tokens using [native tran
 !!! info
     You can check the status of your transaction via [the explorer](https://explore-fetchhub.fetch.ai).
 
-
 ## IBC transfer
 
 1. Ensure you are logged into the wallet.
 2. Make sure IBC transfers are enabled and that your selected network supports it.
 
     !!! tip
-        To enable IBC transfers in the wallet: 
+        To enable IBC transfers in the wallet:
 
         From dashboard, click the ![Hamburger icon](../images/hamburger.png) icon in the top left, then **Settings**. Toggle the **Show Advanced IBC Transfers** switch on.
   
@@ -39,18 +38,18 @@ On this page, you can find instructions on how to send tokens using [native tran
     ![IBC Transfer section](./images/ibc_transfer.png)
 
 4. Fill in the details of your transaction:
-    * **Destination Chain**: the destination blockchain. 
+    * **Destination Chain**: the destination blockchain.
 
         !!! info
             If you do not see your desired chain, you need to [set up IBC channels first](#first-time-origindestination-transfer).
 
-    * **Recipient**: the address you want to send the tokens to 
+    * **Recipient**: the address you want to send the tokens to
     * **Memo (Optional)**: an optional memo.
 
 5. Press **Next**.
 6. In the next page, provide the following:
-    * **Token**: the denomination or type of the tokens being sent 
-    * **Amount**: the number of tokens to be sent 
+    * **Token**: the denomination or type of the tokens being sent
+    * **Amount**: the number of tokens to be sent
     * **Fee**: the transaction fee. Choose from **Low**, **Average**, **High**.
 7. Hit **Submit**.
 8. The wallet now shows you a summary of the transaction. Review it and if you are happy, hit **Approve** to complete the transfer.
@@ -65,23 +64,23 @@ All IBC Hubs have their own channel ID and knowing this channel ID is necessary 
 Before being able to make an IBC transfer between any two chains for the first time, an IBC channel must be configured in the wallet:
 
 1. Follow the instructions for [making an IBC transfer](#ibc-transfer), up to [Step 4](#step4).
-2. Click the **Select Chain** drop-down. 
+2. Click the **Select Chain** drop-down.
 3. Select **+ New IBC Transfer Channel**.
 4. Select the **Destination Chain** and enter the source **Channel ID** (e.g. `channel-100`).
 
-    !!! tip
-        To find out the IBC channel ID between any two chains: 
+    !!! tip To find out the IBC channel ID between any two chains:
+        1. Go to the [IBC Relayers](https://www.mintscan.io/fetchai/relayers) section of the chain.
+        2. To find the right channel ID (which must be written in lower case channel-[number]) you just have to click on the chain to which you want to send your tokens and look for the channel indicated in green:
+            - the number of the channel ID will be the one on the left! For example, the channel-id to send from Fetch.AI to Osmosis is channel-10
+        3. Enter `channel-X` as the Destination Chain in the Fetch wallet (`channel-10` in our example).
 
-        1. Head over to [this page](https://www.mintscan.io/fetchai/relayers)
-        2. At the top, select the sending chain, for example **Fetch.AI**. Then below it, click **IBC RELAYERS**.
-        3. Select the destination chain, for example **OSMOSIS**. 
-        4. You can now see the channels between the two chains. Select an active channel (in green) and note the channel numbers. In this example, Fetch.AI to Osmosis channel is 10.
-        5. Enter `channel-X` as the Destination Chain in the Fetch wallet (`channel-10` in our example). 
+    !!! warning
+            If there are no green channels please wait because there is a risk that the relays that connect your starting chain with that zone are temporarily inactive.
 
     !!! info
         Remember to write the channel ID in lower case (i.e. `channel-X`)
 
-6. Click **Save**.
+5. Click **Save**.
 
 !!! Failure
     If you input the wrong Channel ID, the wallet will not accept it and shows you an error.
