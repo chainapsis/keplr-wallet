@@ -1,10 +1,11 @@
-The **Fetch Wallet**, originally forked from the [Keplr wallet](https://github.com/chainapsis/keplr-wallet), is a generic wallet for interacting with the Fetch blockchain network, other cosmos-based ledgers, and performing Inter-Blockchain Communication (IBC) transactions.
+The **Fetch Wallet**, originally forked from the [Keplr wallet](https://github.com/chainapsis/keplr-wallet), is a generic wallet for interacting with the Fetch blockchain network and other ledgers built using the Cosmos-SDK, and supports the Inter-Blockchain Communication (IBC) protocol.
 
 Some of its highlights include:
 
-- Private keys are stored locally. This removes the friction and risk of webpages having to safely manage users' private keys.
-- Because private keys are not managed by websites, users do not have to worry about their level of security.
-- The Fetch wallet can easily connect to libraries such as CosmJS, simplifying the process of connecting webpages to blockchains.
+- Private keys and mnemonics are encrypted (using scrypt) and are stored locally on device. This means neither Fetch nor the websites visited have access to these sensitive data. 
+- Multiple accounts on the Fetch ledger and other Cosmos-based ledgers.
+- Support for Ledger hardware wallets for enhanced security.
+- Native and IBC token transfers.
 
 ## Compatibility
 

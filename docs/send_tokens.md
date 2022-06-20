@@ -68,19 +68,22 @@ Before being able to make an IBC transfer between any two chains for the first t
 3. Select **+ New IBC Transfer Channel**.
 4. Select the **Destination Chain** and enter the source **Channel ID** (e.g. `channel-100`).
 
-    !!! tip To find out the IBC channel ID between any two chains:
-        1. Go to the [IBC Relayers](https://www.mintscan.io/fetchai/relayers) section of the chain.
-        2. To find the right channel ID (which must be written in lower case channel-[number]) you just have to click on the chain to which you want to send your tokens and look for the channel indicated in green:
-            - the number of the channel ID will be the one on the left! For example, the channel-id to send from Fetch.AI to Osmosis is channel-10
-        3. Enter `channel-X` as the Destination Chain in the Fetch wallet (`channel-10` in our example).
+    !!! tip 
+        To find out the IBC channel ID between any two chains:
 
-    !!! warning
-            If there are no green channels please wait because there is a risk that the relays that connect your starting chain with that zone are temporarily inactive.
+        1. Head over to [this page](https://www.mintscan.io/fetchai/relayers)
+        2. At the top, select the sending chain, for example **Fetch.AI**. Then below it, click **IBC RELAYERS**.
+        3. Select the destination chain, for example **OSMOSIS**. 
+        4. You can now see the channels between the two chains. Select an active channel (in green) and note the sending chain's channel ID. In the example of Fetch.AI to Osmosis, the sending chain's (Fetch.AI's) channel ID is `channel-10`.
+        5. Enter the channel ID in the Fetch wallet (`channel-10` in our example).
 
     !!! info
         Remember to write the channel ID in lower case (i.e. `channel-X`)
 
-5. Click **Save**.
+    !!! warning
+            If there are no green channels, the relayers are temporarily inactive. Wait until one becomes active again.
+
+6. Click **Save**.
 
 !!! Failure
     If you input the wrong Channel ID, the wallet will not accept it and shows you an error.

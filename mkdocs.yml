@@ -14,7 +14,7 @@ nav:
 #    - Migrate ETH: 'migrate_eth.md'
   - Deposit Tokens: 'deposit.md'
   - Send Tokens: 'send_tokens.md'
-  - Recover ERC20 Account: 'migrate_erc20.md'
+  - Recover Migrated ETH Account: 'migrate_erc20.md'
   - Staking: 'stake.md'
   - Utilities:
     - Address Book: 'address_book.md'
