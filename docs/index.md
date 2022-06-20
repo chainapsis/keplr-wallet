@@ -1,4 +1,4 @@
-The **Fetch Wallet**, originally forked from the [Keplr wallet](https://github.com/chainapsis/keplr-wallet), is a generic wallet for blockchains built using the Cosmos-SDK, including the Fetch network, and supports the Inter-Blockchain Communication (IBC) protocol.
+The **Fetch Wallet**, originally forked from the [Keplr wallet](https://github.com/chainapsis/keplr-wallet), is a generic wallet for interacting with the Fetch blockchain network, other cosmos-based ledgers, and performing Inter-Blockchain Communication (IBC) transactions.
 
 Some of its highlights include:
 
