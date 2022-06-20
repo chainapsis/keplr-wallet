@@ -5,7 +5,7 @@ import {
   ScryptParams,
   CommonCrypto,
 } from "./types";
-import { Hash, RNG } from "@keplr-wallet/crypto";
+import { Hash, RNG, KeyCurve } from "@keplr-wallet/crypto";
 import pbkdf2 from "pbkdf2";
 
 import { Buffer } from "buffer/";
@@ -21,6 +21,7 @@ export interface KeyStore {
    * Below version "1", type is not defined and it is considered as "mnemonic".
    */
   type?: "mnemonic" | "privateKey" | "ledger";
+  curve: KeyCurve;
   coinTypeForChain: CoinTypeForChain;
   bip44HDPath?: BIP44HDPath;
   meta?: {
@@ -45,6 +46,7 @@ export class Crypto {
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     type: "mnemonic" | "privateKey" | "ledger",
+    curve: KeyCurve,
     text: string,
     password: string,
     meta: Record<string, string>,
@@ -107,6 +109,7 @@ export class Crypto {
       version: "1.2",
       type,
       coinTypeForChain: {},
+      curve,
       bip44HDPath,
       meta,
       crypto: {

@@ -34,7 +34,7 @@ import {
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
-import { RNG } from "@keplr-wallet/crypto";
+import { KeyCurve, KeyCurves, RNG } from "@keplr-wallet/crypto";
 import { cosmos } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 
@@ -160,7 +160,8 @@ export class KeyRingService {
       mnemonic,
       password,
       meta,
-      bip44HDPath
+      bip44HDPath,
+      KeyCurves.secp256k1
     );
   }
 
@@ -173,7 +174,13 @@ export class KeyRingService {
     status: KeyRingStatus;
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
-    return await this.keyRing.createPrivateKey(kdf, privateKey, password, meta);
+    return await this.keyRing.createPrivateKey(
+      kdf,
+      privateKey,
+      password,
+      meta,
+      KeyCurves.secp256k1
+    );
   }
 
   async createLedgerKey(
@@ -407,21 +414,23 @@ export class KeyRingService {
     kdf: "scrypt" | "sha256" | "pbkdf2",
     mnemonic: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    curve: KeyCurve = KeyCurves.secp256k1
   ): Promise<{
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
-    return this.keyRing.addMnemonicKey(kdf, mnemonic, meta, bip44HDPath);
+    return this.keyRing.addMnemonicKey(kdf, mnemonic, meta, bip44HDPath, curve);
   }
 
   async addPrivateKey(
     kdf: "scrypt" | "sha256" | "pbkdf2",
     privateKey: Uint8Array,
-    meta: Record<string, string>
+    meta: Record<string, string>,
+    curve: KeyCurve = KeyCurves.secp256k1
   ): Promise<{
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
-    return this.keyRing.addPrivateKey(kdf, privateKey, meta);
+    return this.keyRing.addPrivateKey(kdf, privateKey, meta, curve);
   }
 
   async addLedgerKey(

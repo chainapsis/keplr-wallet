@@ -27,6 +27,13 @@ module.exports = {
     "@typescript-eslint/no-empty-function": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/camelcase": "off",
+    "@typescript-eslint/ban-ts-comment": [
+      "error",
+      {
+        "ts-ignore": "allow-with-description",
+        minimumDescriptionLength: 10,
+      },
+    ],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "unicorn/filename-case": [
@@ -41,6 +48,8 @@ module.exports = {
         devDependencies: [
           "**/*.spec.ts",
           "**/*.spec.js",
+          "**/*.test.ts",
+          "**/*.test.js",
           "**/webpack.config.js",
         ],
       },

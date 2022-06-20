@@ -21,7 +21,8 @@
     "@types/ledgerhq__hw-transport-webusb": "^4.70.1",
     "@types/secp256k1": "^4.0.1",
     "@types/w3c-web-hid": "^1.0.2",
-    "@types/w3c-web-usb": "^1.0.5"
+    "@types/w3c-web-usb": "^1.0.5",
+    "@fetchai/blst-ts": "^0.3.1"
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
@@ -53,6 +54,7 @@
     "long": "^4.0.0",
     "pbkdf2": "^3.1.2",
     "reflect-metadata": "^0.1.13",
+    "scrypt-js": "^3.0.1",
     "secp256k1": "^4.0.2",
     "secretjs": "^0.17.0",
     "tsyringe": "^4.5.0"

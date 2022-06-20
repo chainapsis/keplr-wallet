@@ -121,6 +121,7 @@ const extensionConfig = (env, args) => {
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
       }),
+      new webpack.IgnorePlugin(/^(fs|process)$/),
     ],
   };
 };
