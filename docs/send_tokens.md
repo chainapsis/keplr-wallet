@@ -55,7 +55,7 @@ On this page, you can find instructions on how to send tokens using [native tran
 8. The wallet now shows you a summary of the transaction. Review it and if you are happy, hit **Approve** to complete the transfer.
 
 !!! warning
-    Don’t send tokens via [Interchain Transfer] directly to a CEX. In most cases, this can cause loss of your funds.
+    Don’t send tokens via IBC Transfer directly to a CEX. In most cases, this can cause loss of your funds.
 
 ### First-time origin/destination transfer
 
