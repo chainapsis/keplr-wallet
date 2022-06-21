@@ -12,4 +12,4 @@ The Fetch wallet's **Address Book** makes it easy to transfer funds to accounts 
 !!! tip
     When sending funds, instead of writing the address of the recipient you can hit the icon to the right to select an account from the address book.
 
-    ![Use address bookimages/address_book_use.png)
+    ![Use address book](images/address_book_use.png)
