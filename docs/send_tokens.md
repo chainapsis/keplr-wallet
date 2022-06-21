@@ -26,7 +26,7 @@ On this page, you can find instructions on how to send tokens using [native tran
     !!! tip
         To enable IBC transfers in the wallet:
 
-        From dashboard, click the ![Hamburger icon](../images/hamburger.png) icon in the top left, then **Settings**. Toggle the **Show Advanced IBC Transfers** switch on.
+        From dashboard, click the ![Hamburger icon](images/hamburger.png) icon in the top left, then **Settings**. Toggle the **Show Advanced IBC Transfers** switch on.
   
            ![Enable IBC transfer](./images/enable_IBC_transfer.png)
 

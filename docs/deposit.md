@@ -6,7 +6,7 @@ In the wallet or application you are using to send the funds, use your account's
 
 1. Ensure you are logged into the wallet.
 2. Either click on the account address at the top of the dashboard (under the account name):
-![Copy active account address](../images/address_copy.jpg)
+![Copy active account address](images/address_copy.jpg)
 3. Or select **Deposit** and scan the QR code.
 
 Once you send the tokens, the balance should be updated.

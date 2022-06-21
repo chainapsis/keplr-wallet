@@ -5,6 +5,8 @@ repo_url: https://github.com/fetchai/wallet
 edit_uri: ""
 site_author: developer@fetch.ai
 
+strict: true
+
 nav:
   - Getting Started: 'index.md'
   - Account Management: 'account_management.md'
