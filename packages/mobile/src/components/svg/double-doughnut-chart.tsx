@@ -197,6 +197,8 @@ export const DoubleDoughnutChart: FunctionComponent<{
   const [targetFirstRatio] = useState(() => new Animated.Value<number>(0));
   const [targetSecondRatio] = useState(() => new Animated.Value<number>(0));
 
+  const [backRingOpacity] = useState(() => new Animated.Value(0));
+
   const [targetFirstArcStartAngleInDegree] = useState(
     () => new Animated.Value(90)
   );
@@ -345,6 +347,14 @@ export const DoubleDoughnutChart: FunctionComponent<{
           ),
         ]
       ),
+      Animated.cond(
+        Animated.and(
+          Animated.lessOrEq(targetFirstRatio, 0),
+          Animated.lessOrEq(targetSecondRatio, 0)
+        ),
+        [Animated.set(backRingOpacity, 1)],
+        [Animated.set(backRingOpacity, 0)]
+      ),
     ]);
   }, [
     targetFirstRatio,
@@ -354,6 +364,8 @@ export const DoubleDoughnutChart: FunctionComponent<{
     targetSecondArcEndAngleInDegree,
     targetSecondArcStartAngleInDegree,
   ]);
+
+  const animBackRingOpacity = useAnimated(backRingOpacity, 2);
 
   const animFirstArcStartAngleInDegree = useAnimated(
     targetFirstArcStartAngleInDegree,
@@ -379,6 +391,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
   return (
     <DoubleDoughnutChartInnerSVG
       size={size}
+      backRingOpacity={animBackRingOpacity}
       firstArcStartAngleInDegree={animFirstArcStartAngleInDegree}
       firstArcEndAngleInDegree={animFirstArcEndAngleInDegree}
       secondArcStartAngleInDegree={animSecondArcStartAngleInDegree}
@@ -390,6 +403,8 @@ export const DoubleDoughnutChart: FunctionComponent<{
 const DoubleDoughnutChartInnerSVG: FunctionComponent<{
   size: number;
 
+  backRingOpacity?: Animated.Adaptable<number>;
+
   firstArcStartAngleInDegree: Animated.Adaptable<number>;
   firstArcEndAngleInDegree: Animated.Adaptable<number>;
   secondArcStartAngleInDegree: Animated.Adaptable<number>;
@@ -398,6 +413,8 @@ const DoubleDoughnutChartInnerSVG: FunctionComponent<{
 }> = React.memo(
   ({
     size,
+
+    backRingOpacity,
 
     firstArcStartAngleInDegree,
     firstArcEndAngleInDegree,
@@ -470,14 +487,14 @@ const DoubleDoughnutChartInnerSVG: FunctionComponent<{
 
     return (
       <Svg width={size} height={size} viewBox="0 0 180 180">
-        <Circle
+        <AnimatedCircle
           cx={centerLocation}
           cy={centerLocation}
           r={radius}
-          stroke="#f4f5f7"
+          stroke="#F2F2F7"
           strokeWidth="14"
           fill="transparent"
-          opacity={0}
+          opacity={backRingOpacity ? backRingOpacity : 0}
         />
         <Defs>
           <LinearGradient id="grad1" x1="1" y1="0" x2="0" y2="0">
