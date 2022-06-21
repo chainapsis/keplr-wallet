@@ -10,7 +10,7 @@ If you view such webpages using a browser with the Fetch wallet, you will see ad
 
 You can manage these connections on the wallet:
 
-1. From the wallet dashboard, click the ![Hamburger icon](../images/hamburger.png) icon in the top left, then **Settings**.
+1. From the wallet dashboard, click the ![Hamburger icon](images/hamburger.png) icon in the top left, then **Settings**.
 2. Click on **Manage Connections**.
 
     !!! info
@@ -18,4 +18,4 @@ You can manage these connections on the wallet:
 
         You have the option of removing and thus revoking these connections. If you do, the next time you visit that page, it will not automatically connect to your wallet.
 
-3. To remove a connection, click the ![Cross icon](../images/cross.png) icon on the connection you wish to remove.
+3. To remove a connection, click the ![Cross icon](images/cross.png) icon on the connection you wish to remove.

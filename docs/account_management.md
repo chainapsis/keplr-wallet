@@ -9,7 +9,7 @@ The first time you open the wallet, you will be presented with the welcome page.
 ### Not the First Time
 
 1. Ensure you are logged into the wallet.
-2. Click the account icon ![Account icon](../images/account.png) in the top right corner of the dashboard, then **+ Add Account**.
+2. Click the account icon ![Account icon](images/account.png) in the top right corner of the dashboard, then **+ Add Account**.
 
 !!! info
     In some contexts, the term **account** refers to an address that has, at some point in time, had a balance (and therefore a state on the ledger). In this context, it is not necessary for an account to have a balance, for example for it to be [imported](#importing-an-existing-account).
@@ -69,7 +69,7 @@ If you have a [Ledger](https://www.ledger.com/) hardware wallet and wish to keep
 If you have multiple accounts set up on the Fetch wallet, to switch between them: 
 
 1. Ensure you are logged into the wallet. 
-2. Click the account icon ![Account icon](../images/account.png) in the top right corner of the dashboard. 
+2. Click the account icon ![Account icon](images/account.png) in the top right corner of the dashboard. 
 3. Select the account you want to switch to.
 
 ## Removing an Account
@@ -77,7 +77,7 @@ If you have multiple accounts set up on the Fetch wallet, to switch between them
 To remove an account from your Fetch wallet:
 
 1. Ensure you are logged into the wallet.
-2. Click the account icon ![Account icon](../images/account.png) in the top right corner of the dashboard.
+2. Click the account icon ![Account icon](images/account.png) in the top right corner of the dashboard.
 3. Hit <b style="vertical-align: text-bottom;font-weight: 900;">...</b> (the three dots icon) for the account you want to remove and choose **Delete Account**. 
 4. Enter your wallet password.
 
