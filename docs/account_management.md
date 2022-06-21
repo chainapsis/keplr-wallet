@@ -42,7 +42,7 @@ If you have an account on the Fetch network, for example having had one already 
         **KEEP IT SAFE!** Anyone with your mnemonic seed or private key can access your wallet and take your assets.
 
     !!! tip
-        It is preferable, and likely more convenient, to use the mnemonic when possible because [hierarchical deterministic keys/addresses](https://en.bitcoin.it/wiki/BIP_0044) cannot be derived from the private key format.
+        It is more convenient, and [preferable](https://www.investopedia.com/terms/h/hd-wallet-hierarchical-deterministic-wallet.asp), to use the mnemonic over private keys.
 
 3. Give your account a name and set a password if one is not set (i.e. if it is the first time you open the wallet, or in case you have removed all of your accounts). The password will be used the next time you want to use the wallet or make important changes to your account. Hit **Next**.
 
