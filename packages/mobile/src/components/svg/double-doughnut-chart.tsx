@@ -119,7 +119,7 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const gapAngleInDegree = 14;
-const minSecondAngleInDegree = 0.2;
+const minArcAngleInDegree = 0.2;
 
 // NOTE: `velocitySec` and `minDurationMs` are only used when the animation starts.
 //       It doesn't react whenever these values change.
@@ -197,6 +197,9 @@ export const DoubleDoughnutChart: FunctionComponent<{
   const [targetFirstRatio] = useState(() => new Animated.Value<number>(0));
   const [targetSecondRatio] = useState(() => new Animated.Value<number>(0));
 
+  const [targetFirstArcStartAngleInDegree] = useState(
+    () => new Animated.Value(90)
+  );
   const [targetFirstArcEndAngleInDegree] = useState(
     () => new Animated.Value(90)
   );
@@ -267,20 +270,34 @@ export const DoubleDoughnutChart: FunctionComponent<{
             Animated.greaterThan(targetFirstRatio, 0),
             [
               Animated.set(
+                targetFirstArcStartAngleInDegree,
+                90 + gapAngleInDegree / 2
+              ),
+              Animated.set(
                 targetFirstArcEndAngleInDegree,
                 Animated.add(
-                  Animated.min(
-                    Animated.multiply(360, targetFirstRatio),
-                    360 - gapAngleInDegree * 2 - minSecondAngleInDegree
+                  Animated.max(
+                    Animated.min(
+                      Animated.sub(
+                        Animated.multiply(360, targetFirstRatio),
+                        gapAngleInDegree
+                      ),
+                      360 - gapAngleInDegree * 2 - minArcAngleInDegree
+                    ),
+                    minArcAngleInDegree
                   ),
-                  90
+                  90 + gapAngleInDegree / 2
                 )
               ),
             ],
-            [Animated.set(targetFirstArcEndAngleInDegree, 90)]
+            [
+              Animated.set(targetFirstArcStartAngleInDegree, 90),
+              Animated.set(targetFirstArcEndAngleInDegree, 90),
+            ]
           ),
         ],
         [
+          Animated.set(targetFirstArcStartAngleInDegree, 90),
           Animated.set(
             targetFirstArcEndAngleInDegree,
             Animated.add(Animated.multiply(360, targetFirstRatio), 90)
@@ -299,7 +316,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
               ),
               Animated.set(
                 targetSecondArcEndAngleInDegree,
-                360 + 90 - gapAngleInDegree
+                360 + 90 - gapAngleInDegree / 2
               ),
             ],
             [
@@ -332,11 +349,17 @@ export const DoubleDoughnutChart: FunctionComponent<{
   }, [
     targetFirstRatio,
     targetSecondRatio,
+    targetFirstArcStartAngleInDegree,
     targetFirstArcEndAngleInDegree,
     targetSecondArcEndAngleInDegree,
     targetSecondArcStartAngleInDegree,
   ]);
 
+  const animFirstArcStartAngleInDegree = useAnimated(
+    targetFirstArcStartAngleInDegree,
+    330,
+    600
+  );
   const animFirstArcEndAngleInDegree = useAnimated(
     targetFirstArcEndAngleInDegree,
     330,
@@ -356,7 +379,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
   return (
     <DoubleDoughnutChartInnerSVG
       size={size}
-      firstArcStartAngleInDegree={90}
+      firstArcStartAngleInDegree={animFirstArcStartAngleInDegree}
       firstArcEndAngleInDegree={animFirstArcEndAngleInDegree}
       secondArcStartAngleInDegree={animSecondArcStartAngleInDegree}
       secondArcEndAngleInDegree={animSecondArcEndAngleInDegree}
