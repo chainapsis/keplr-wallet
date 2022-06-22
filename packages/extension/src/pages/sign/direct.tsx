@@ -6,9 +6,13 @@ import {
   renderMsgBeginRedelegate,
   renderMsgDelegate,
   renderMsgExecuteContract,
+  renderMsgInstantiateContract,
   renderMsgRevoke,
   renderMsgSend,
+  renderMsgTransfer,
   renderMsgUndelegate,
+  renderMsgVote,
+  renderMsgWithdrawDelegatorReward,
   renderSendMsgGrant,
   renderStakeMsgGrant,
   renderUnknownMessage,
@@ -21,7 +25,13 @@ import {
   MsgDelegate,
   MsgUndelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
-import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
+import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
+import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
+import {
+  MsgExecuteContract,
+  MsgInstantiateContract,
+} from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
+import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import {
   MsgGrant,
   MsgRevoke,
@@ -88,6 +98,18 @@ export function renderDirectMessage(
           }
           break;
         }
+        case "/cosmwasm.wasm.v1.MsgInstantiateContract": {
+          const instantiateContractMsg = msg.unpacked as MsgInstantiateContract;
+          return renderMsgInstantiateContract(
+            currencies,
+            intl,
+            instantiateContractMsg.funds,
+            instantiateContractMsg.admin,
+            instantiateContractMsg.codeId,
+            instantiateContractMsg.label,
+            JSON.parse(fromUtf8(instantiateContractMsg.msg))
+          );
+        }
         case "/cosmwasm.wasm.v1.MsgExecuteContract": {
           const executeContractMsg = msg.unpacked as MsgExecuteContract;
           return renderMsgExecuteContract(
@@ -138,6 +160,30 @@ export function renderDirectMessage(
         case "/cosmos.authz.v1beta1.MsgRevoke": {
           const revokeMsg = msg.unpacked as MsgRevoke;
           return renderMsgRevoke(intl, revokeMsg.msgTypeUrl, revokeMsg.grantee);
+        }
+        case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward": {
+          const withdrawMsg = msg.unpacked as MsgWithdrawDelegatorReward;
+          return renderMsgWithdrawDelegatorReward(
+            intl,
+            withdrawMsg.validatorAddress
+          );
+        }
+        case "/cosmos.gov.v1beta1.MsgVote": {
+          const voteMsg = msg.unpacked as MsgVote;
+          return renderMsgVote(intl, voteMsg.proposalId, voteMsg.option);
+        }
+        case "/ibc.applications.transfer.v1.MsgTransfer": {
+          const transferMsg = msg.unpacked as MsgTransfer;
+          if (transferMsg.token) {
+            return renderMsgTransfer(
+              currencies,
+              intl,
+              transferMsg.token,
+              transferMsg.receiver,
+              transferMsg.sourceChannel
+            );
+          }
+          break;
         }
       }
     }
