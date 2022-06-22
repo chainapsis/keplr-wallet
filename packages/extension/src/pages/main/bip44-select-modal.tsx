@@ -105,11 +105,23 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadingIndicator = useLoadingIndicator();
+
+  useEffect(() => {
+    if (selectables.needSelectCoinType) {
+      if (isModalOpen) {
+        loadingIndicator.setIsLoading("bip44-selectables-init", false);
+      } else {
+        loadingIndicator.setIsLoading("bip44-selectables-init", true);
+      }
+    } else {
+      loadingIndicator.setIsLoading("bip44-selectables-init", false);
+    }
+  }, [isModalOpen, loadingIndicator, selectables.needSelectCoinType]);
+
   useEffect(() => {
     if (selectables.isInitializing) {
       setIsModalOpen(false);
     } else if (!selectables.needSelectCoinType) {
-      loadingIndicator.setIsLoading("bip44-selectables-init", false);
       setIsModalOpen(false);
     } else {
       // Wait to fetch the balances of the accounts.
@@ -178,8 +190,6 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
         } else {
           setIsModalOpen(true);
         }
-
-        loadingIndicator.setIsLoading("bip44-selectables-init", false);
       });
     }
   }, [
