@@ -86,7 +86,7 @@ export const LockPage: FunctionComponent = observer(() => {
         })}
       >
         <Banner
-          icon={require("../../public/assets/temp-icon.svg")}
+          icon={require("../../public/assets/logo-256.png")}
           logo={require("../../public/assets/logo-temp.png")}
           subtitle="Wallet for the Interchain"
         />

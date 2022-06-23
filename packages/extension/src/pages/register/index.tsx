@@ -82,7 +82,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
       <div className={style.logoContainer}>
         <img
           className={style.icon}
-          src={require("../../public/assets/temp-icon.svg")}
+          src={require("../../public/assets/logo-256.png")}
           alt="logo"
         />
         <div className={style.logoInnerContainer}>
