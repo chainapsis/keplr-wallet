@@ -37,4 +37,4 @@ After account creation or import is completed, the wallet will be accessible fro
 
 You can contribute to this project by engaging with its repository on GitHub:
 
-[GitHub repository](https://github.com/fetchai/keplr-extension)
+[GitHub repository](https://github.com/fetchai/fetch-wallet)

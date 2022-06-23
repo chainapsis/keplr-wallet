@@ -13,9 +13,9 @@ body:
       label: Prerequisites
       description: Please confirm before submitting a new issue
       options:
-        - label: I am running the [latest version of the Browser Extension Wallet](https://github.com/fetchai/fetch-wallet/releases).
+        - label: I am running the [latest version of the Fetch wallet](https://github.com/fetchai/fetch-wallet/releases).
           required: true
-        - label: I checked the [documentation](https://docs.fetch.ai/basics/wallet/getting_started) and found no answer to my problem.
+        - label: I checked the [documentation](https://docs.fetch.ai/fetch-wallet/) and found no answer to my problem.
           required: true
         - label: I checked the [existing issues](https://github.com/fetchai/fetch-wallet/issues) to make sure my problem has not already been reported.
           required: true
