@@ -15,7 +15,7 @@ export const Banner: FunctionComponent<Props> = ({ icon, logo, subtitle }) => {
       <div className={style.empty} />
       <div className={style.flexHorizontal}>
         <div className={style.empty} />
-        <div className={style.flexVertical}>
+        <div className={classmames(style.flexVertical, style.itemsCenter)}>
           <img className={style.icon} src={icon} />
           <img className={style.logo} src={logo} />
           <div className={style.subtitle}>{subtitle}</div>

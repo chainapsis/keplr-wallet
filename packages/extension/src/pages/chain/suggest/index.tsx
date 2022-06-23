@@ -32,9 +32,9 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
       <div className={style.container}>
         <img
-          src={require("../../../public/assets/temp-icon.svg")}
+          src={require("../../../public/assets/logo-256.png")}
           alt="logo"
-          style={{ height: "92px" }}
+          style={{ width: "92px", height: "92px", margin: "0 auto" }}
         />
         <h1 className={style.header}>
           <FormattedMessage id="chain.suggested.title" />

@@ -10,6 +10,7 @@ import { useStore } from "../../../../stores";
 import { observer } from "mobx-react-lite";
 
 import styleName from "./name.module.scss";
+import { KeplrError } from "@keplr-wallet/router";
 
 interface FormData {
   name: string;
@@ -32,7 +33,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (parseInt(match.params.index).toString() !== match.params.index) {
-      throw new Error("Invalid index");
+      throw new KeplrError("keyring", 201, "Invalid index");
     }
   }, [match.params.index]);
 

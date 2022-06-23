@@ -18,19 +18,27 @@ import { AddressBookIcon } from "../icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSmartNavigation } from "../../navigation";
 
-export const AddressInput: FunctionComponent<{
-  labelStyle?: TextStyle;
-  containerStyle?: ViewStyle;
-  inputContainerStyle?: ViewStyle;
-  errorLabelStyle?: TextStyle;
+export const AddressInput: FunctionComponent<
+  {
+    labelStyle?: TextStyle;
+    containerStyle?: ViewStyle;
+    inputContainerStyle?: ViewStyle;
+    errorLabelStyle?: TextStyle;
 
-  label: string;
+    label: string;
 
-  recipientConfig: IRecipientConfig;
-  memoConfig: IMemoConfig;
-
-  disableAddressBook?: boolean;
-}> = observer(
+    recipientConfig: IRecipientConfig;
+  } & (
+    | {
+        memoConfig?: IMemoConfig;
+        disableAddressBook: true;
+      }
+    | {
+        memoConfig: IMemoConfig;
+        disableAddressBook?: false;
+      }
+  )
+> = observer(
   ({
     labelStyle,
     containerStyle,

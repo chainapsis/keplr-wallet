@@ -13,14 +13,23 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
   @observable
   protected _gasRaw: string | undefined = undefined;
 
+  /*
+   There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
+   In this case, there is no obligation to deal with it, but 0 gas is favorably allowed. This option is used for this case.
+   */
+  @observable
+  protected _allowZeroGas?: boolean = undefined;
+
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
-    initialGas?: number
+    initialGas?: number,
+    allowZeroGas?: boolean
   ) {
     super(chainGetter, initialChainId);
 
     this._gasRaw = initialGas?.toString();
+    this._allowZeroGas = allowZeroGas;
 
     makeObservable(this);
   }
@@ -82,8 +91,14 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
       return new Error("Gas is not integer");
     }
 
-    if (this.gas <= 0) {
-      return new Error("Gas should be greater than 0");
+    if (!this._allowZeroGas) {
+      if (this.gas <= 0) {
+        return new Error("Gas should be greater than 0");
+      }
+    } else {
+      if (this.gas < 0) {
+        return new Error("Gas should be greater or equal than 0");
+      }
     }
     return;
   }
@@ -96,6 +111,23 @@ export const useGasConfig = (
 ) => {
   const [txConfig] = useState(
     () => new GasConfig(chainGetter, chainId, initialGas)
+  );
+  txConfig.setChain(chainId);
+
+  return txConfig;
+};
+
+/*
+ There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
+ In this case, there is no obligation to deal with it, but 0 gas is favorably allowed. This option is used for this case.
+ */
+export const useZeroAllowedGasConfig = (
+  chainGetter: ChainGetter,
+  chainId: string,
+  initialGas?: number
+) => {
+  const [txConfig] = useState(
+    () => new GasConfig(chainGetter, chainId, initialGas, true)
   );
   txConfig.setChain(chainId);
 

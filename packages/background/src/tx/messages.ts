@@ -1,4 +1,4 @@
-import { Message } from "@keplr-wallet/router";
+import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 
 // Return the tx hash
@@ -17,18 +17,18 @@ export class SendTxMsg extends Message<Uint8Array> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id is empty");
+      throw new KeplrError("tx", 100, "chain id is empty");
     }
 
     if (!this.tx) {
-      throw new Error("tx is empty");
+      throw new KeplrError("tx", 101, "tx is empty");
     }
 
     if (
       !this.mode ||
       (this.mode !== "sync" && this.mode !== "async" && this.mode !== "block")
     ) {
-      throw new Error("invalid mode");
+      throw new KeplrError("tx", 120, "invalid mode");
     }
   }
 

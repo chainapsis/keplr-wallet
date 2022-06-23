@@ -37,28 +37,36 @@ $container-width: 420px;
     margin-bottom: 40px;
 
     display: flex;
-
-    .icon {
-      width: 80px;
-      height: 80px;
-    }
+    flex-direction: column;
 
     .logo-inner-container {
-      margin-top: 8px;
-      margin-left: 20px;
-
       display: flex;
-      flex-direction: column;
-      justify-content: space-evenly;
-      align-items: start;
+      flex-direction: row;
 
-      .logo {
-        height: 50px;
+      &.justify-center {
+        justify-content: center;
       }
 
-      .paragraph {
-        font-size: 16px;
-        line-height: 1;
+      .icon {
+        width: 80px;
+        height: 80px;
+      }
+
+      .brand-text {
+        height: 80px;
+        margin-left: 18px;
+      }
+    }
+
+    .intro-brand-sub-text-container {
+      margin-top: 16px;
+      height: 14px;
+
+      .intro-brand-sub-text {
+        display: block;
+        width: auto;
+        height: 100%;
+        margin: 0 auto;
       }
     }
   }
@@ -94,6 +102,14 @@ $container-width: 420px;
 
     &[readonly] {
       background-color: white;
+    }
+
+    &::placeholder {
+      font-family: "Nunito Sans", sans-serif;
+
+      body[data-lang="ko"] & {
+        font-family: "Nanum Barun Gothic", sans-serif !important;
+      }
     }
   }
 

@@ -35,7 +35,6 @@ import {
   GravityBridgeCurrencyRegsitrar,
   KeplrETCQueries,
 } from "@keplr-wallet/stores-etc";
-import { ExtensionKVStore } from "@keplr-wallet/common";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -285,10 +284,19 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       this.queriesStore,
-      this.queriesStore
+      this.queriesStore,
+      undefined,
+      // Repeated re-rendering in react native is more fatal to performance.
+      // To alleviate this, load the cached in advance.
+      (chainId: string) => {
+        if (!this.chainStore.getChain(chainId).raw.hideInUI) {
+          return true;
+        }
+      }
     );
+
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar(
-      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+      new AsyncKVStore("store_gravity_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore
     );

@@ -6,7 +6,17 @@ import {
   MsgUndelegate,
   MsgBeginRedelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
-import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
+import {
+  MsgGrant,
+  MsgRevoke,
+} from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
+import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
+import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
+import {
+  MsgExecuteContract,
+  MsgInstantiateContract,
+} from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
+import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import { UnknownMessage } from "./unknown";
 
 export * from "./unknown";
@@ -69,3 +79,18 @@ defaultProtoCodec.registerAny(
   "/cosmwasm.wasm.v1.MsgExecuteContract",
   MsgExecuteContract
 );
+defaultProtoCodec.registerAny(
+  "/cosmwasm.wasm.v1.MsgInstantiateContract",
+  MsgInstantiateContract
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+  MsgWithdrawDelegatorReward
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.transfer.v1.MsgTransfer",
+  MsgTransfer
+);
+defaultProtoCodec.registerAny("/cosmos.gov.v1beta1.MsgVote", MsgVote);
+defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgGrant", MsgGrant);
+defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgRevoke", MsgRevoke);

@@ -7,6 +7,10 @@
   flex-direction: column;
 }
 
+.items-center {
+  align-items: center;
+}
+
 .flex-horizontal {
   display: flex;
   flex-direction: row;
@@ -17,7 +21,7 @@
 }
 
 .icon {
-  object-fit: contain;
+  width: 100px;
   height: 100px;
 
   margin-bottom: 30px;

@@ -1,4 +1,4 @@
-import { Message } from "@keplr-wallet/router";
+import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 
 export class GetPubkeyMsg extends Message<Uint8Array> {
@@ -12,7 +12,7 @@ export class GetPubkeyMsg extends Message<Uint8Array> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("secret-wasm", 100, "chain id not set");
     }
   }
 
@@ -45,15 +45,15 @@ export class ReqeustEncryptMsg extends Message<Uint8Array> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("secret-wasm", 100, "chain id not set");
     }
 
     if (!this.contractCodeHash) {
-      throw new Error("contract code hash not set");
+      throw new KeplrError("secret-wasm", 103, "contract code hash not set");
     }
 
     if (!this.msg) {
-      throw new Error("msg not set");
+      throw new KeplrError("secret-wasm", 101, "msg not set");
     }
   }
 
@@ -85,15 +85,15 @@ export class RequestDecryptMsg extends Message<Uint8Array> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("secret-wasm", 100, "chain id not set");
     }
 
     if (!this.cipherText || this.cipherText.length === 0) {
-      throw new Error("ciphertext not set");
+      throw new KeplrError("secret-wasm", 102, "ciphertext not set");
     }
 
     if (!this.nonce || this.nonce.length === 0) {
-      throw new Error("nonce not set");
+      throw new KeplrError("secret-wasm", 110, "nonce not set");
     }
   }
 
@@ -124,12 +124,12 @@ export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new KeplrError("secret-wasm", 100, "chain id not set");
     }
 
     if (!this.nonce) {
       // Nonce of zero length is permitted.
-      throw new Error("nonce is null");
+      throw new KeplrError("secret-wasm", 111, "nonce is null");
     }
   }
 

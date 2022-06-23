@@ -7,10 +7,10 @@ import { useStore } from "../../stores";
 import { MemoInput } from "../../components/input";
 import {
   useFeeConfig,
-  useGasConfig,
   useMemoConfig,
   useSignDocAmountConfig,
   useSignDocHelper,
+  useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { Button } from "../../components/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
@@ -53,8 +53,9 @@ export const SignModal: FunctionComponent<{
 
     const [chainId, setChainId] = useState(chainStore.current.chainId);
 
-    // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
-    const gasConfig = useGasConfig(chainStore, chainId, 1);
+    // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
+    // In this case, there is no obligation to deal with it, but 0 gas is favorably allowed.
+    const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
     const amountConfig = useSignDocAmountConfig(
       chainStore,
       accountStore,

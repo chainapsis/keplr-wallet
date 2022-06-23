@@ -1,4 +1,4 @@
-import { Message } from "@keplr-wallet/router";
+import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 
 export class TryUpdateChainMsg extends Message<void> {
@@ -12,7 +12,7 @@ export class TryUpdateChainMsg extends Message<void> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("Empty chain id");
+      throw new KeplrError("updater", 100, "Empty chain id");
     }
   }
 
