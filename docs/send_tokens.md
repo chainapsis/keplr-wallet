@@ -59,8 +59,6 @@ On this page, you can find instructions on how to send tokens using [native tran
 
 ### First-time origin/destination transfer
 
-All IBC Hubs have their own channel ID and knowing this channel ID is necessary to perform the IBC transaction.
-
 Before being able to make an IBC transfer between any two chains for the first time, an IBC channel must be configured in the wallet:
 
 1. Follow the instructions for [making an IBC transfer](#ibc-transfer), up to [Step 4](#step4).
@@ -74,16 +72,16 @@ Before being able to make an IBC transfer between any two chains for the first t
         1. Head over to [this page](https://www.mintscan.io/fetchai/relayers)
         2. At the top, select the sending chain, for example **Fetch.AI**. Then below it, click **IBC RELAYERS**.
         3. Select the destination chain, for example **OSMOSIS**. 
-        4. You can now see the channels between the two chains. Select an active channel (in green) and note the sending chain's channel ID. In the example of Fetch.AI to Osmosis, the sending chain's (Fetch.AI's) channel ID is `channel-10`.
+        4. You can now see the channels between the two chains. Select an active channel (in green) and note the sending chain's channel ID. For Fetch.AI to Osmosis, the sending chain's (Fetch.AI's) channel ID is `channel-10`.
         5. Enter the channel ID in the Fetch wallet (`channel-10` in our example).
 
     !!! info
         Remember to write the channel ID in lower case (i.e. `channel-X`)
 
     !!! warning
-            If there are no green channels, the relayers are temporarily inactive. Wait until one becomes active again.
+            If there are no green channels, the relayers are temporarily inactive. You need to wait until one becomes active again.
 
 6. Click **Save**.
 
 !!! Failure
-    If you input the wrong Channel ID, the wallet will not accept it and shows you an error.
+    If you input an incorrect Channel ID, either the wallet will not accept it and shows you an error, or your transaction could get stuck in an inactive channel.
