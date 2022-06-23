@@ -35,6 +35,6 @@
   ],
   "web_accessible_resources": [
     "injectedScript.bundle.js",
-    "assets/temp-icon.svg"
+    "assets/logo-256.png"
   ]
 }

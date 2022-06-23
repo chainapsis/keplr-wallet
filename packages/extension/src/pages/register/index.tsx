@@ -25,11 +25,7 @@ import {
 } from "./ledger";
 import { WelcomePage } from "./welcome";
 import { AdditionalSignInPrepend } from "../../config.ui";
-
-export enum NunWords {
-  WORDS12,
-  WORDS24,
-}
+import classnames from "classnames";
 
 export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
   onClick,
@@ -80,19 +76,31 @@ export const RegisterPage: FunctionComponent = observer(() => {
       style={{ height: "100%", backgroundColor: "white", padding: 0 }}
     >
       <div className={style.logoContainer}>
-        <img
-          className={style.icon}
-          src={require("../../public/assets/temp-icon.svg")}
-          alt="logo"
-        />
-        <div className={style.logoInnerContainer}>
+        <div
+          className={classnames(style.logoInnerContainer, {
+            [style.justifyCenter]: registerConfig.isIntro,
+          })}
+        >
           <img
-            className={style.logo}
-            src={require("../../public/assets/logo-temp.png")}
+            className={style.icon}
+            src={require("../../public/assets/logo-256.png")}
             alt="logo"
           />
-          <div className={style.paragraph}>Wallet for the Interchain</div>
+          <img
+            className={style.brandText}
+            src={require("../../public/assets/brand-text-fit-logo-height.png")}
+            alt="logo"
+          />
         </div>
+        {registerConfig.isIntro ? (
+          <div className={style.introBrandSubTextContainer}>
+            <img
+              className={style.introBrandSubText}
+              src={require("../../public/assets/brand-sub-text.png")}
+              alt="The Interchain Wallet"
+            />
+          </div>
+        ) : null}
       </div>
       {registerConfig.render()}
       {registerConfig.isFinalized ? <WelcomePage /> : null}
