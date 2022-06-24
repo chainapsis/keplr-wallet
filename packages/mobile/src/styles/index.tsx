@@ -4,8 +4,82 @@ import { Platform, StatusBarStyle } from "react-native";
 import { getPlatformFontWeight } from "./builder/utils";
 import { BlurViewProperties } from "@react-native-community/blur";
 
+export const ColorPalette = {
+  "blue-50": "#F0F3FF",
+  "blue-100": "#E4E9FF",
+  "blue-200": "#9DACF4",
+  "blue-300": "#536EF8",
+  "blue-400": "#314FDF",
+  "blue-500": "#1B319E",
+  "blue-600": "#1E2C70",
+  "blue-700": "#0D1749",
+  "blue-800": "#051124",
+
+  "platinum-50": "#F8F9FC",
+  "platinum-100": "#D0DCEF",
+  "platinum-200": "#8EA5C6",
+  "platinum-300": "#596E8D",
+  "platinum-400": "#3B4E6A",
+  "platinum-500": "#1C2A43",
+  "platinum-600": "#0F1C32",
+  "platinum-700": "#09101C",
+
+  "green-50": "#ECFDF6",
+  "green-100": "#DBF9EC",
+  "green-200": "#AAECD0",
+  "green-300": "#68EAB2",
+  "green-400": "#2DD98F",
+  "green-500": "#22AC71",
+  "green-600": "#136844",
+
+  "red-50": "#FFF7F8",
+  "red-100": "#FFD8E0",
+  "red-200": "#FC91A6",
+  "red-300": "#FD5778",
+  "red-400": "#F5365C",
+  "red-500": "#BF2342",
+  "red-600": "#911830",
+  "red-700": "#440B17",
+
+  "pink-50": "#FDF4F9",
+  "pink-100": "#FFE9F4",
+  "pink-200": "#FFCFE7",
+  "pink-300": "#F891C4",
+  "pink-400": "#FF6BB8",
+
+  "purple-50": "#FBF8FF",
+  "purple-100": "#F7F0FF",
+  "purple-200": "#E4D3FD",
+  "purple-300": "#C198FF",
+  "purple-400": "#864FFC",
+  // purple 500~700 not exist yet. But, can be added in the future.
+  "purple-800": "#0A0314",
+
+  white: "#FFFFFF",
+
+  "gray-10": "#FAFBFD",
+  "gray-50": "#F2F2F7",
+  "gray-100": "#DCDCE3",
+  "gray-200": "#C6C6CD",
+  "gray-300": "#9A9AA2",
+  "gray-400": "#64646D",
+  "gray-500": "#37373E",
+  "gray-600": "#1E1E24",
+  "gray-700": "#09090A",
+
+  black: "#000000",
+};
+
 export const Colors = {
-  primary: "#4762E7",
+  primary: ColorPalette["blue-400"],
+
+  card: "rgba(255, 255, 255, 0.95)",
+  // "background secondary" is not used as the background of the screen itself.
+  // This is used when the component needs to be separated from the background behind
+  // while occupying a partial size such as the background of the drawer or the background of the modal.
+  "background-secondary": ColorPalette["white"],
+  "background-tertiary": ColorPalette["platinum-50"],
+
   "primary-10": "#F1F3FC",
   "primary-50": "#E2E8FF",
   "primary-100": "#B3BEF7",
@@ -49,7 +123,6 @@ export const Colors = {
   "profile-orange": "#FEC078",
   "profile-yellow": "#F2ED64",
   icon: "#2C4163",
-  card: "rgba(255,255,255,0.95)",
   success: "#2DCE89",
   error: "#F5365C",
   "text-black-very-high": "#030C1D",
@@ -61,29 +134,30 @@ export const Colors = {
   "text-black-very-very-very-low": "#DCDCE3",
   "border-gray": "#C6C6CD",
   "border-white": "#F5F5F5",
-  white: "#fff",
   "theme-white": "#fff",
-  black: "#000",
   disabled: "#EEEEF3",
   divider: "#F5F5F5",
   transparent: "rgba(255,255,255,0)",
   "modal-backdrop": "rgba(9,18,50,0.6)",
   "card-modal-handle": "#DCDCE3",
-  "setting-screen-background": "#FAFBFD",
   "camera-loading-background": "rgba(255,255,255,0.95)",
   "big-image-placeholder": "#E7E4EF",
   "chain-list-element-dragging": "rgba(242, 242, 247, 0.8)",
 };
 
 export const DarkColors = {
-  primary: "#6882FF",
+  primary: ColorPalette["blue-300"],
+
+  card: "rgba(15, 28, 50, 0.95)",
+  "background-secondary": ColorPalette["platinum-600"],
+  "background-tertiary": ColorPalette["platinum-700"],
+
   "primary-10": "#494F6A",
   "primary-50": "#505877",
   "primary-100": "#576089",
   "primary-200": "#606CA9",
   "primary-300": "#5366C7",
   "primary-400": "#6882FF",
-  card: "rgba(31, 40, 68, 0.7)",
   "text-black-very-high": "#FFFFFF",
   "text-black-high": "#F3F5F8",
   "text-black-medium": "#E3E6EB",
@@ -241,12 +315,12 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         y2: 0,
         stops: [
           {
-            offset: "2.44%",
-            color: "#FBF8FF",
+            offset: "0%",
+            color: ColorPalette["purple-50"],
           },
           {
-            offset: "96.83%",
-            color: "#F7F8FF",
+            offset: "100%",
+            color: ColorPalette["blue-50"],
           },
         ],
       },
@@ -262,6 +336,7 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       "blurred-tabbar-reducedTransparencyFallbackColor": "white",
     },
     colors: {
+      ...ColorPalette,
       ...Colors,
       ...{
         "splash-background": "#FBF8FF",
@@ -527,16 +602,16 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         "gradient-background": {
           x1: 0,
           y1: 0,
-          x2: 0,
-          y2: 1,
+          x2: 1,
+          y2: 0,
           stops: [
             {
               offset: "0%",
-              color: "#13192A",
+              color: ColorPalette["purple-800"],
             },
             {
               offset: "100%",
-              color: "#13192A",
+              color: ColorPalette["blue-800"],
             },
           ],
         },

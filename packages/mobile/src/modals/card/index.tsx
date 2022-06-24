@@ -380,7 +380,7 @@ export const CardModal: FunctionComponent<{
     <Animated.View
       style={StyleSheet.flatten([
         style.flatten([
-          "background-color-white",
+          "background-color-background-secondary",
           "border-radius-top-left-8",
           "border-radius-top-right-8",
           "overflow-hidden",

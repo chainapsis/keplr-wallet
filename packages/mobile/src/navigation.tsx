@@ -694,7 +694,7 @@ export const SettingStackScreen: FunctionComponent = () => {
         options={{
           title: "Settings",
           ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
-            style.get("color-setting-screen-background").color
+            style.get("color-background-tertiary").color
           ),
           headerTitleStyle: style.flatten(["h3", "color-text-black-high"]),
         }}

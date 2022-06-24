@@ -37,7 +37,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
       <DrawerContentScrollView
         style={StyleSheet.flatten([
           propStyle,
-          style.flatten(["background-color-theme-white"]),
+          style.flatten(["background-color-background-secondary"]),
         ])}
         {...rest}
       >

@@ -32,7 +32,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollViewInBottomTabView
-      backgroundColor={style.get("color-setting-screen-background").color}
+      backgroundColor={style.get("color-background-tertiary").color}
     >
       <SettingSelectAccountItem />
       <SettingSectionTitle title="General" />
