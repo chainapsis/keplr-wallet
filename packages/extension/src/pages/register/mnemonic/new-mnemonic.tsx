@@ -34,6 +34,7 @@ export const NewMnemonicIntro: FunctionComponent<{
       color="primary"
       outline
       block
+      size="lg"
       onClick={(e) => {
         e.preventDefault();
 
@@ -201,7 +202,7 @@ export const GenerateMnemonicModePage: FunctionComponent<{
           </React.Fragment>
         ) : null}
         <AdvancedBIP44Option bip44Option={bip44Option} />
-        <Button color="primary" type="submit" block>
+        <Button color="primary" type="submit" block size="lg">
           <FormattedMessage id="register.create.button.next" />
         </Button>
       </Form>
@@ -301,6 +302,7 @@ export const VerifyMnemonicModePage: FunctionComponent<{
         type="submit"
         disabled={suggestedWords.join(" ") !== wordsSlice.join(" ")}
         block
+        size="lg"
         style={{
           marginTop: "30px",
         }}

@@ -72,7 +72,9 @@ export const RegisterPage: FunctionComponent = observer(() => {
 
   return (
     <EmptyLayout
-      className={style.container}
+      className={classnames(style.container, {
+        large: registerConfig.type === "recover-mnemonic",
+      })}
       style={{ height: "100%", backgroundColor: "white", padding: 0 }}
     >
       <div className={style.logoContainer}>
