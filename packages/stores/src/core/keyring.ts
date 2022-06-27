@@ -139,7 +139,7 @@ export class KeyRingStore {
       dispatchEvent: (type: string) => void;
     },
     public readonly defaultKdf: "scrypt" | "sha256" | "pbkdf2",
-    public currentIndex: number = 0,
+    public currentIndex: number,
     protected readonly chainGetter: ChainGetter,
     protected readonly requester: MessageRequester,
     protected readonly interactionStore: InteractionStore
