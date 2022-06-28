@@ -73,7 +73,9 @@ export const RegisterPage: FunctionComponent = observer(() => {
   return (
     <EmptyLayout
       className={classnames(style.container, {
-        large: registerConfig.type === "recover-mnemonic",
+        large:
+          !registerConfig.isFinalized &&
+          registerConfig.type === "recover-mnemonic",
       })}
       style={{ height: "100%", backgroundColor: "white", padding: 0 }}
     >
