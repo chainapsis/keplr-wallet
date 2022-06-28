@@ -734,7 +734,15 @@ export class KeyRing {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
 
       const privKey = this.loadPrivKey(coinType);
-      return privKey.sign(message);
+      const signature = privKey.sign(message);
+
+      // Signing indicates an explicit use of this coin type.
+      // Mainly, this logic exists to explicitly set the coin type when signing by an external request.
+      if (!this.isKeyStoreCoinTypeSet(chainId)) {
+        await this.setKeyStoreCoinType(chainId, coinType);
+      }
+
+      return signature;
     }
   }
 
