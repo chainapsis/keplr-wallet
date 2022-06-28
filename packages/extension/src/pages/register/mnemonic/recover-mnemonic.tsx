@@ -1,12 +1,19 @@
-import React, { FunctionComponent, useCallback, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 
-import { Button, Form } from "reactstrap";
+import {
+  Button,
+  ButtonDropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Form,
+} from "reactstrap";
 
 import { FormattedMessage, useIntl } from "react-intl";
 import style from "../style.module.scss";
 import styleRecoverMnemonic from "./recover-mnemonic.module.scss";
 import { BackButton } from "../index";
-import { Input, PasswordInput, TextArea } from "../../../components/form";
+import { Input, PasswordInput } from "../../../components/form";
 import useForm from "react-hook-form";
 import { observer } from "mobx-react-lite";
 import { RegisterConfig } from "@keplr-wallet/hooks";
@@ -14,6 +21,7 @@ import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 
 import { Buffer } from "buffer/";
 import { useStore } from "../../../stores";
+import classnames from "classnames";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -33,19 +41,22 @@ function isPrivateKey(str: string): boolean {
   return false;
 }
 
-function trimWordsStr(str: string): string {
-  str = str.trim();
-  // Split on the whitespace or new line.
-  const splited = str.split(/\s+/);
-  const words = splited
-    .map((word) => word.trim())
-    .filter((word) => word.trim().length > 0);
-  return words.join(" ");
+function validatePrivateKey(value: string): boolean {
+  if (isPrivateKey(value)) {
+    value = value.replace("0x", "");
+    if (value.length !== 64) {
+      return false;
+    }
+    return (
+      Buffer.from(value, "hex").toString("hex").toLowerCase() ===
+      value.toLowerCase()
+    );
+  }
+  return false;
 }
 
 interface FormData {
   name: string;
-  words: string;
   password: string;
   confirmPassword: string;
 }
@@ -77,6 +88,12 @@ export const RecoverMnemonicIntro: FunctionComponent<{
   );
 });
 
+enum SeedType {
+  WORDS12 = "12words",
+  WORDS24 = "24words",
+  PRIVATE_KEY = "private_key",
+}
+
 export const RecoverMnemonicPage: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
@@ -89,7 +106,6 @@ export const RecoverMnemonicPage: FunctionComponent<{
   const { register, handleSubmit, getValues, errors } = useForm<FormData>({
     defaultValues: {
       name: "",
-      words: "",
       password: "",
       confirmPassword: "",
     },
@@ -97,64 +113,300 @@ export const RecoverMnemonicPage: FunctionComponent<{
 
   const [shownMnemonicIndex, setShownMnemonicIndex] = useState(-1);
 
+  const [seedType, _setSeedType] = useState(SeedType.WORDS12);
+  const [seedWords, setSeedWords] = useState<string[]>(
+    new Array<string>(12).fill("")
+  );
+
+  const setSeedType = (seedType: SeedType) => {
+    _setSeedType(seedType);
+    setShownMnemonicIndex(-1);
+
+    if (seedType === SeedType.WORDS12) {
+      setSeedWords((seedWords) => {
+        if (seedWords.length < 12) {
+          return seedWords.concat(new Array(12 - seedWords.length).fill(""));
+        } else {
+          return seedWords.slice(0, 12);
+        }
+      });
+    }
+    if (seedType === SeedType.WORDS24) {
+      setSeedWords((seedWords) => {
+        if (seedWords.length < 24) {
+          return seedWords.concat(new Array(24 - seedWords.length).fill(""));
+        } else {
+          return seedWords.slice(0, 24);
+        }
+      });
+    }
+    if (seedType === SeedType.PRIVATE_KEY) {
+      setSeedWords((seedWords) => seedWords.slice(0, 1));
+    }
+  };
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const seedTypeToParagraph = (seedType: SeedType) => {
+    switch (seedType) {
+      case SeedType.WORDS12: {
+        return "12 words";
+      }
+      case SeedType.WORDS24: {
+        return "24 words";
+      }
+      case SeedType.PRIVATE_KEY: {
+        return "Private key";
+      }
+      default: {
+        return "Unknown";
+      }
+    }
+  };
+
+  const handlePaste = (index: number, value: string) => {
+    const words = value
+      .trim()
+      .split(" ")
+      .map((word) => word.trim());
+
+    if (words.length === 1) {
+      // If the length of pasted words is 1 and the word is guessed as a private key,
+      // set seed type as private key automatically.
+      if (isPrivateKey(words[0])) {
+        setSeedType(SeedType.PRIVATE_KEY);
+        setSeedWords(words);
+      }
+    }
+
+    if (words.length === 12 || words.length === 24) {
+      // 12/24 words are treated specially.
+      // Regardless of where it is pasted from, if it is a valid seed, it will be processed directly.
+      if (bip39.validateMnemonic(words.join(" "))) {
+        if (words.length === 12) {
+          setSeedType(SeedType.WORDS12);
+        } else {
+          setSeedType(SeedType.WORDS24);
+        }
+
+        setSeedWords(words);
+
+        return;
+      }
+    }
+
+    let newSeedWords = seedWords.slice();
+    const expectedLength = Math.min(index + words.length, 24);
+
+    if (seedWords.length < expectedLength) {
+      newSeedWords = newSeedWords.concat(
+        new Array(expectedLength - seedWords.length).fill("")
+      );
+
+      if (expectedLength > 12) {
+        setSeedType(SeedType.WORDS24);
+      } else {
+        setSeedType(SeedType.WORDS12);
+      }
+    }
+
+    for (let i = index; i < expectedLength; i++) {
+      newSeedWords[i] = words[i - index];
+    }
+
+    setSeedWords(newSeedWords);
+  };
+
+  const [seedWordsError, setSeedWordsError] = useState<string | undefined>(
+    undefined
+  );
+
+  const validateSeedWords = (seedWords: string[]) => {
+    seedWords = seedWords.map((word) => word.trim());
+    if (seedWords.join(" ").trim().length === 0) {
+      return "Mnemonic is required";
+    }
+    if (seedWords.length === 1 && isPrivateKey(seedWords[0])) {
+      if (!validatePrivateKey(seedWords[0])) {
+        return intl.formatMessage({
+          id: "register.import.textarea.private-key.error.invalid",
+        });
+      }
+      return undefined;
+    } else {
+      // num words is the length to the last non-empty word.
+      let numWords = 0;
+      for (let i = 0; i < seedWords.length; i++) {
+        if (seedWords[i].length > 0) {
+          numWords = i + 1;
+        }
+      }
+
+      // If an empty word exists in the middle of words, it is treated as an error.
+      if (seedWords.slice(0, numWords).find((word) => word.length === 0)) {
+        return intl.formatMessage({
+          id: "register.create.textarea.mnemonic.error.invalid",
+        });
+      }
+
+      if (numWords < 9) {
+        return intl.formatMessage({
+          id: "register.create.textarea.mnemonic.error.too-short",
+        });
+      }
+
+      if (!bip39.validateMnemonic(seedWords.join(" "))) {
+        return intl.formatMessage({
+          id: "register.create.textarea.mnemonic.error.invalid",
+        });
+      }
+
+      return undefined;
+    }
+  };
+
   return (
     <React.Fragment>
-      <div>
-        <div className={style.title}>
+      <div className={styleRecoverMnemonic.container}>
+        <div className={classnames(style.title, styleRecoverMnemonic.title)}>
           {intl.formatMessage({
             id: "register.recover.title",
           })}
+          <div style={{ flex: 1 }} />
+          <div>
+            <ButtonDropdown
+              className={styleRecoverMnemonic.dropdown}
+              isOpen={showDropdown}
+              toggle={() => setShowDropdown((value) => !value)}
+            >
+              <DropdownToggle caret>
+                {seedTypeToParagraph(seedType)}
+              </DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem
+                  active={seedType === SeedType.WORDS12}
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    setSeedType(SeedType.WORDS12);
+                  }}
+                >
+                  {seedTypeToParagraph(SeedType.WORDS12)}
+                </DropdownItem>
+                <DropdownItem
+                  active={seedType === SeedType.WORDS24}
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    setSeedType(SeedType.WORDS24);
+                  }}
+                >
+                  {seedTypeToParagraph(SeedType.WORDS24)}
+                </DropdownItem>
+                <DropdownItem
+                  active={seedType === SeedType.PRIVATE_KEY}
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    setSeedType(SeedType.PRIVATE_KEY);
+                  }}
+                >
+                  {seedTypeToParagraph(SeedType.PRIVATE_KEY)}
+                </DropdownItem>
+              </DropdownMenu>
+            </ButtonDropdown>
+          </div>
         </div>
         <Form
           className={style.formContainer}
-          onSubmit={handleSubmit(async (data: FormData) => {
-            try {
-              if (!isPrivateKey(data.words)) {
-                await registerConfig.createMnemonic(
-                  data.name,
-                  trimWordsStr(data.words),
-                  data.password,
-                  bip44Option.bip44HDPath
-                );
-                analyticsStore.setUserProperties({
-                  registerType: "seed",
-                  accountType: "mnemonic",
-                });
-              } else {
-                const privateKey = Buffer.from(
-                  data.words.trim().replace("0x", ""),
-                  "hex"
-                );
-                await registerConfig.createPrivateKey(
-                  data.name,
-                  privateKey,
-                  data.password
-                );
-                analyticsStore.setUserProperties({
-                  registerType: "seed",
-                  accountType: "privateKey",
-                });
-              }
-            } catch (e) {
-              alert(e.message ? e.message : e.toString());
-              registerConfig.clear();
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            const seedWordsError = validateSeedWords(seedWords);
+            if (seedWordsError) {
+              setSeedWordsError(seedWordsError);
+              return;
+            } else {
+              setSeedWordsError(undefined);
             }
-          })}
+
+            handleSubmit(async (data: FormData) => {
+              try {
+                if (seedWords.length === 1 && isPrivateKey(seedWords[0])) {
+                  const privateKey = Buffer.from(
+                    seedWords[0].replace("0x", ""),
+                    "hex"
+                  );
+                  await registerConfig.createPrivateKey(
+                    data.name,
+                    privateKey,
+                    data.password
+                  );
+                  analyticsStore.setUserProperties({
+                    registerType: "seed",
+                    accountType: "privateKey",
+                  });
+                } else {
+                  await registerConfig.createMnemonic(
+                    data.name,
+                    seedWords.join(" "),
+                    data.password,
+                    bip44Option.bip44HDPath
+                  );
+                  analyticsStore.setUserProperties({
+                    registerType: "seed",
+                    accountType: "mnemonic",
+                  });
+                }
+              } catch (e) {
+                alert(e.message ? e.message : e.toString());
+                registerConfig.clear();
+              }
+            })(e);
+          }}
         >
-          <div className={styleRecoverMnemonic.mnemonicContainer}>
-            {new Array(12).fill(0).map((_, index) => {
+          <div
+            className={classnames(styleRecoverMnemonic.mnemonicContainer, {
+              [styleRecoverMnemonic.privateKey]:
+                seedType === SeedType.PRIVATE_KEY,
+            })}
+          >
+            {seedWords.map((word, index) => {
               return (
                 <div
                   key={index}
                   className={styleRecoverMnemonic.mnemonicWordContainer}
                 >
-                  <div className={styleRecoverMnemonic.order}>{index + 1}.</div>
+                  {seedType !== SeedType.PRIVATE_KEY ? (
+                    <div className={styleRecoverMnemonic.order}>
+                      {index + 1}.
+                    </div>
+                  ) : null}
                   <Input
                     type={shownMnemonicIndex === index ? "text" : "password"}
                     formGroupClassName={
                       styleRecoverMnemonic.mnemonicWordFormGroup
                     }
                     className={styleRecoverMnemonic.mnemonicWord}
+                    onPaste={(e) => {
+                      e.preventDefault();
+
+                      handlePaste(index, e.clipboardData.getData("text"));
+                    }}
+                    onChange={(e) => {
+                      e.preventDefault();
+
+                      if (
+                        shownMnemonicIndex >= 0 &&
+                        shownMnemonicIndex !== index
+                      ) {
+                        setShownMnemonicIndex(-1);
+                      }
+
+                      const newSeedWords = seedWords.slice();
+                      newSeedWords[index] = e.target.value.trim();
+                      setSeedWords(newSeedWords);
+                    }}
+                    value={word}
                     append={
                       <div
                         style={{
@@ -188,6 +440,9 @@ export const RecoverMnemonicPage: FunctionComponent<{
               );
             })}
           </div>
+          {seedWordsError ? (
+            <div className={styleRecoverMnemonic.alert}>{seedWordsError}</div>
+          ) : null}
           <div className={styleRecoverMnemonic.formInnerContainer}>
             <Input
               label={intl.formatMessage({
