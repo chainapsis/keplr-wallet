@@ -242,8 +242,9 @@ export const RecoverMnemonicPage: FunctionComponent<{
         }
       }
 
+      seedWords = seedWords.slice(0, numWords);
       // If an empty word exists in the middle of words, it is treated as an error.
-      if (seedWords.slice(0, numWords).find((word) => word.length === 0)) {
+      if (seedWords.find((word) => word.length === 0)) {
         return intl.formatMessage({
           id: "register.create.textarea.mnemonic.error.invalid",
         });
@@ -349,7 +350,11 @@ export const RecoverMnemonicPage: FunctionComponent<{
                 } else {
                   await registerConfig.createMnemonic(
                     data.name,
-                    seedWords.join(" "),
+                    // In logic, not 12/24 words can be handled.
+                    // However, seed words have only a length of 12/24 when mnemonic.
+                    // Since the rest has an empty string, additional spaces are created by the empty string after join.
+                    // Therefore, trim should be done last.
+                    seedWords.join(" ").trim(),
                     data.password,
                     bip44Option.bip44HDPath
                   );
