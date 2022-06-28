@@ -65,7 +65,7 @@ window.keplr = new Keplr(
 );
 
 // Make sure that icon file will be included in bundle
-require("./public/assets/temp-icon.svg");
+require("./public/assets/logo-256.png");
 require("./public/assets/icon/icon-16.png");
 require("./public/assets/icon/icon-48.png");
 require("./public/assets/icon/icon-128.png");
@@ -109,8 +109,8 @@ const StateRenderer: FunctionComponent = observer(() => {
     return (
       <div style={{ height: "100%" }}>
         <Banner
-          icon={require("./public/assets/temp-icon.svg")}
-          logo={require("./public/assets/logo-temp.png")}
+          icon={require("./public/assets/logo-256.png")}
+          logo={require("./public/assets/brand-text.png")}
           subtitle="Wallet for the Interchain"
         />
       </div>
@@ -119,8 +119,8 @@ const StateRenderer: FunctionComponent = observer(() => {
     return (
       <div style={{ height: "100%" }}>
         <Banner
-          icon={require("./public/assets/temp-icon.svg")}
-          logo={require("./public/assets/logo-temp.png")}
+          icon={require("./public/assets/logo-256.png")}
+          logo={require("./public/assets/brand-text.png")}
           subtitle="Wallet for the Interchain"
         />
       </div>

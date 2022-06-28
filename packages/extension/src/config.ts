@@ -996,6 +996,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "regen",
       },
     ],
+    gasPriceStep: {
+      low: 0.015,
+      average: 0.025,
+      high: 0.04,
+    },
     features: ["ibc-go", "ibc-transfer", "ibc-go"],
   },
   {
@@ -1172,8 +1177,8 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0.001,
-      average: 0.005,
+      low: 0.05,
+      average: 0.1,
       high: 0.25,
     },
     coinType: 459,
@@ -1403,8 +1408,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0,
-      average: 0.01,
-      high: 0.02,
+      average: 0,
+      high: 0.01,
     },
     features: ["ibc-transfer", "cosmwasm", "ibc-go"],
   },
@@ -1744,7 +1749,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 10000000000,
+      low: 25000000000,
       average: 25000000000,
       high: 40000000000,
     },

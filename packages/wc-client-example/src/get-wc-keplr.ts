@@ -2,7 +2,7 @@ import { Keplr } from "@keplr-wallet/types";
 import WalletConnect from "@walletconnect/client";
 import { KeplrQRCodeModalV1 } from "@keplr-wallet/wc-qrcode-modal";
 import { KeplrWalletConnectV1 } from "@keplr-wallet/wc-client";
-import { BroadcastMode, StdTx } from "@cosmjs/launchpad";
+import { BroadcastMode } from "@cosmjs/launchpad";
 import Axios from "axios";
 import { EmbedChainInfos } from "./config";
 import { Buffer } from "buffer/";
@@ -12,12 +12,23 @@ let promise: Promise<Keplr> | undefined = undefined;
 
 async function sendTx(
   chainId: string,
-  stdTx: StdTx,
+  tx: Uint8Array,
   mode: BroadcastMode
 ): Promise<Uint8Array> {
   const params = {
-    tx: stdTx,
-    mode,
+    tx_bytes: Buffer.from(tx as any).toString("base64"),
+    mode: (() => {
+      switch (mode) {
+        case "async":
+          return "BROADCAST_MODE_ASYNC";
+        case "block":
+          return "BROADCAST_MODE_BLOCK";
+        case "sync":
+          return "BROADCAST_MODE_SYNC";
+        default:
+          return "BROADCAST_MODE_UNSPECIFIED";
+      }
+    })(),
   };
 
   const restInstance = Axios.create({
@@ -25,9 +36,9 @@ async function sendTx(
       .rest,
   });
 
-  const result = await restInstance.post("/txs", params);
+  const result = await restInstance.post("/cosmos/tx/v1beta1/txs", params);
 
-  return Buffer.from(result.data.txhash, "hex");
+  return Buffer.from(result.data["tx_response"].txhash, "hex");
 }
 
 export function getWCKeplr(): Promise<Keplr> {

@@ -76,7 +76,11 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
   }
 
   @flow
-  protected *restoreCache() {
+  *restoreCache() {
+    if (this.isInitialized) {
+      return;
+    }
+
     this.isInitializing = true;
 
     const key = `cache-ibc-denom-trace-paths/${this.chainInfoInner.chainId}`;
@@ -389,7 +393,14 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
       originChainInfo: ChainInfoInner | undefined,
       counterpartyChainInfo: ChainInfoInner | undefined,
       originCurrency: AppCurrency | undefined
-    ) => string = IBCCurrencyRegsitrar.defaultCoinDenomGenerator
+    ) => string = IBCCurrencyRegsitrar.defaultCoinDenomGenerator,
+    // Preload the cache when chain info is created.
+    // In the case of ibc currency, if users have many tokens, it will try to fetch every currency, which can cause a lot of re-rendering.
+    // To alleviate this, the last known value is stored in the cache.
+    // Using preload you can gain a little more advantage in this part.
+    protected readonly preloadCache:
+      | boolean
+      | ((chainId: string) => boolean | undefined) = false
   ) {
     this.chainStore.addSetChainInfoHandler((chainInfoInner) =>
       this.setChainInfoHandler(chainInfoInner)
@@ -408,19 +419,27 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
   ): IBCCurrencyRegsitrarInner<C> {
     if (!this.map.has(chainInfoInner.chainId)) {
       runInAction(() => {
-        this.map.set(
-          chainInfoInner.chainId,
-          new IBCCurrencyRegsitrarInner<C>(
-            this.kvStore,
-            this.cacheDuration,
-            chainInfoInner,
-            this.chainStore,
-            this.accountStore,
-            this.queriesStore,
-            this.cosmwasmQueriesStore,
-            this.coinDenomGenerator
-          )
+        const inner = new IBCCurrencyRegsitrarInner<C>(
+          this.kvStore,
+          this.cacheDuration,
+          chainInfoInner,
+          this.chainStore,
+          this.accountStore,
+          this.queriesStore,
+          this.cosmwasmQueriesStore,
+          this.coinDenomGenerator
         );
+
+        if (
+          this.preloadCache === true ||
+          (this.preloadCache &&
+            typeof this.preloadCache !== "boolean" &&
+            this.preloadCache(chainInfoInner.chainId))
+        ) {
+          inner.restoreCache();
+        }
+
+        this.map.set(chainInfoInner.chainId, inner);
       });
     }
 
