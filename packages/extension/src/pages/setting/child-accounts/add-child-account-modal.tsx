@@ -17,8 +17,6 @@ import {
   /*MsgRevoke,*/
 } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { useStore } from "../../../stores";
-import { SignInteractionStore } from "@keplr-wallet/stores";
-import { BackgroundTxService } from "./service";
 
 /**
  *
@@ -48,7 +46,7 @@ export const AddChildAccountModal: FunctionComponent<{
 
     const [name, setName] = useState("");
 
-    const { accountStore, chainStore, signInteractionStore } = useStore();
+    const { accountStore, chainStore } = useStore();
 
     const testAuthZ = (parent: string, child: string) => {
       const grant_message = {

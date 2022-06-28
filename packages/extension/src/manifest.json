@@ -1,15 +1,8 @@
 {
   "manifest_version": 2,
-
-<<<<<<< HEAD
   "name": "Obi",
   "description": "Obi is a supercharged Keplr fork, a passport for the interchain ecosystem.",
   "version": "0.1.0",
-=======
-  "name": "Keplr",
-  "description": "Keplr is a browser extension wallet for the Inter blockchain ecosystem.",
-  "version": "0.10.9",
->>>>>>> 4af46d20f0c42659f874df22aa869312d65d04b0
   "applications": {
     "gecko": {
       "id": "obi-extension@obi.app",
