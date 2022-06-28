@@ -174,7 +174,8 @@ export const RecoverMnemonicPage: FunctionComponent<{
       // set seed type as private key automatically.
       if (isPrivateKey(words[0])) {
         setSeedType(SeedType.PRIVATE_KEY);
-        setSeedWords(words);
+        setSeedWords([words[0]]);
+        return;
       }
     }
 
