@@ -115,6 +115,7 @@ export class RootStore {
         },
       },
       "pbkdf2",
+      0,
       this.chainStore,
       new RNMessageRequesterInternal(),
       this.interactionStore
