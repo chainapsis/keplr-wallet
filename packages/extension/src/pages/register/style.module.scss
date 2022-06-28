@@ -7,19 +7,22 @@ $container-width: 420px;
 // For now, it is handled roughly.
 $large-container-width: 680px;
 
-:global(body)[data-centered="true"] {
-  height: 85vh;
-  background-color: white;
+html[data-register-page="true"] {
+  height: 100%;
 
-  overflow: visible !important;
-
-  :global(#app) {
+  body {
     height: 100%;
+    background-color: white;
 
-    .container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+    overflow: visible !important;
+
+    :global(#app) {
+      height: 100%;
+
+      .container {
+        display: flex;
+        flex-direction: column;
+      }
     }
   }
 }
