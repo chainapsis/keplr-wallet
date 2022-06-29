@@ -38,7 +38,15 @@ export function init(
   privilegedOrigins: string[],
   commonCrypto: CommonCrypto,
   notification: Notification,
-  ledgerOptions: Partial<LedgerOptions> = {}
+  ledgerOptions: Partial<LedgerOptions> = {},
+  experimentalOptions: Partial<{
+    suggestChain: Partial<{
+      // Chains registered as suggest chains are managed in memory.
+      // In other words, it disappears when the app is closed.
+      // General operation should be fine. This is a temporary solution for the mobile app.
+      useMemoryKVStore: boolean;
+    }>;
+  }> = {}
 ) {
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester,
@@ -60,7 +68,11 @@ export function init(
 
   const chainsService = new Chains.ChainsService(
     storeCreator("chains"),
-    embedChainInfos
+    embedChainInfos,
+    {
+      useMemoryKVStoreForSuggestChain:
+        experimentalOptions.suggestChain?.useMemoryKVStore,
+    }
   );
 
   const ledgerService = new Ledger.LedgerService(

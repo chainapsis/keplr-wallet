@@ -73,6 +73,11 @@ init(
         return await TransportBLE.open(deviceId);
       },
     },
+  },
+  {
+    suggestChain: {
+      useMemoryKVStore: true,
+    },
   }
 );
 
