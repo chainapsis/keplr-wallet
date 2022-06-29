@@ -378,6 +378,8 @@ export const DoubleDoughnutChart: FunctionComponent<{
     targetFirstArcEndAngleInDegree,
     targetSecondArcEndAngleInDegree,
     targetSecondArcStartAngleInDegree,
+    valueDataIsLoaded,
+    backRingOpacity,
   ]);
 
   const animBackRingOpacity = useAnimated(backRingOpacity, 2);
