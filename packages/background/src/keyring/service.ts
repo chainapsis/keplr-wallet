@@ -62,7 +62,6 @@ export class KeyRingService {
     protected readonly crypto: CommonCrypto
   ) {
     this.keyRing = new KeyRing(
-      chainsService,
       embedChainInfos,
       kvStore,
       ledgerService,
@@ -211,7 +210,8 @@ export class KeyRingService {
   async getKey(chainId: string): Promise<Key> {
     return this.keyRing.getKey(
       chainId,
-      await this.chainsService.getChainCoinType(chainId)
+      await this.chainsService.getChainCoinType(chainId),
+      (await this.chainsService.getChainEthereumKeytype(chainId)).address
     );
   }
 
@@ -235,8 +235,15 @@ export class KeyRingService {
     }
   ): Promise<AminoSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
+    const ethereumKeyType = await this.chainsService.getChainEthereumKeytype(
+      chainId
+    );
 
-    const key = await this.keyRing.getKey(chainId, coinType);
+    const key = await this.keyRing.getKey(
+      chainId,
+      coinType,
+      ethereumKeyType.address
+    );
     const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
       .bech32Config.bech32PrefixAccAddr;
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
@@ -302,7 +309,8 @@ export class KeyRingService {
         env,
         chainId,
         coinType,
-        serializeSignDoc(newSignDoc)
+        serializeSignDoc(newSignDoc),
+        ethereumKeyType.signing
       );
 
       return {
@@ -323,8 +331,15 @@ export class KeyRingService {
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
+    const ethereumKeytype = await this.chainsService.getChainEthereumKeytype(
+      chainId
+    );
 
-    const key = await this.keyRing.getKey(chainId, coinType);
+    const key = await this.keyRing.getKey(
+      chainId,
+      coinType,
+      ethereumKeytype.address
+    );
     const bech32Address = new Bech32Address(key.address).toBech32(
       (await this.chainsService.getChainInfo(chainId)).bech32Config
         .bech32PrefixAccAddr
@@ -362,7 +377,8 @@ export class KeyRingService {
         env,
         chainId,
         coinType,
-        makeSignBytes(cosmJSSignDoc)
+        makeSignBytes(cosmJSSignDoc),
+        ethereumKeytype.signing
       );
 
       return {
@@ -381,8 +397,15 @@ export class KeyRingService {
     signature: StdSignature
   ): Promise<boolean> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
+    const ethereumKeyType = await this.chainsService.getChainEthereumKeytype(
+      chainId
+    );
 
-    const key = await this.keyRing.getKey(chainId, coinType);
+    const key = await this.keyRing.getKey(
+      chainId,
+      coinType,
+      ethereumKeyType.address
+    );
     const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
       .bech32Config.bech32PrefixAccAddr;
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
@@ -421,7 +444,8 @@ export class KeyRingService {
       env,
       chainId,
       await this.chainsService.getChainCoinType(chainId),
-      message
+      message,
+      (await this.chainsService.getChainEthereumKeytype(chainId)).signing
     );
   }
 
@@ -514,7 +538,11 @@ export class KeyRingService {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
 
     for (const path of paths) {
-      const key = await this.keyRing.getKey(chainId, path.coinType);
+      const key = await this.keyRing.getKey(
+        chainId,
+        path.coinType,
+        (await this.chainsService.getChainEthereumKeytype(chainId)).address
+      );
       const bech32Address = new Bech32Address(key.address).toBech32(
         chainInfo.bech32Config.bech32PrefixAccAddr
       );

@@ -12,6 +12,7 @@ import {
   BIP44,
   ChainInfo,
   Currency,
+  EthereumKeytype,
 } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -236,12 +237,7 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
     return this.raw.bip44;
   }
 
-  get ethereumKeytype():
-    | {
-        signing: boolean;
-        address: boolean;
-      }
-    | undefined {
+  get ethereumKeytype(): EthereumKeytype | undefined {
     return this.raw.ethereumKeytype;
   }
 

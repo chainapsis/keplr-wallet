@@ -1,5 +1,6 @@
 import { Currency, AppCurrency } from "./currency";
 import { BIP44 } from "./bip44";
+import { EthereumKeytype } from "./ethereum-keytype";
 import { AxiosRequestConfig } from "axios";
 import { Bech32Config } from "./bech32";
 
@@ -19,10 +20,7 @@ export interface ChainInfo {
   readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;
   readonly alternativeBIP44s?: BIP44[];
-  readonly ethereumKeytype?: {
-    signing: boolean;
-    address: boolean;
-  };
+  readonly ethereumKeytype?: EthereumKeytype;
   readonly bech32Config: Bech32Config;
 
   readonly currencies: AppCurrency[];

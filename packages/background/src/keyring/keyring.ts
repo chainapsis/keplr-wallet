@@ -18,7 +18,6 @@ import { Wallet } from "@ethersproject/wallet";
 import * as BytesUtils from "@ethersproject/bytes";
 import { ETH } from "@tharsis/address-converter";
 import { keccak256 } from "@ethersproject/keccak256";
-import { ChainsService } from "../chains";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -70,11 +69,7 @@ export class KeyRing {
 
   private password: string = "";
 
-  // Memoize fixed chains
-  private chainInfoMap: Record<string, ChainInfo> = {};
-
   constructor(
-    private readonly chainsService: ChainsService,
     private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
     private readonly ledgerKeeper: LedgerService,
@@ -178,11 +173,14 @@ export class KeyRing {
     ];
   }
 
-  public getKey(chainId: string, defaultCoinType: number): Key {
+  public getKey(
+    chainId: string,
+    defaultCoinType: number,
+    useEthereumAddress: boolean
+  ): Key {
     return this.loadKey(
       this.computeKeyStoreCoinType(chainId, defaultCoinType),
-      this.chainInfoMap[ChainIdHelper.parse(chainId).identifier]
-        ?.ethereumKeytype?.address
+      useEthereumAddress
     );
   }
 
@@ -430,14 +428,6 @@ export class KeyRing {
       await this.save();
     }
 
-    // Load chain infos to detect keytypes
-    const chainInfos = await this.chainsService.getChainInfos();
-    chainInfos.forEach((chainInfo) => {
-      this.chainInfoMap[
-        ChainIdHelper.parse(chainInfo.chainId).identifier
-      ] = chainInfo;
-    });
-
     this.loaded = true;
   }
 
@@ -477,12 +467,6 @@ export class KeyRing {
   public async setKeyStoreCoinType(chainId: string, coinType: number) {
     if (!this.keyStore) {
       throw new KeplrError("keyring", 130, "Key store is empty");
-    }
-
-    // Add chain to map if necessary
-    if (!this.chainInfoMap[ChainIdHelper.parse(chainId).identifier]) {
-      const chainInfo = await this.chainsService.getChainInfo(chainId);
-      this.chainInfoMap[ChainIdHelper.parse(chainId).identifier] = chainInfo;
     }
 
     if (
@@ -716,7 +700,8 @@ export class KeyRing {
     env: Env,
     chainId: string,
     defaultCoinType: number,
-    message: Uint8Array
+    message: Uint8Array,
+    useEthereumSigning: boolean
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
@@ -727,9 +712,6 @@ export class KeyRing {
     }
 
     // Sign with Evmos/Ethereum
-    const useEthereumSigning = this.chainInfoMap[
-      ChainIdHelper.parse(chainId).identifier
-    ]?.ethereumKeytype?.signing;
     if (useEthereumSigning) {
       return this.signEthereum(chainId, defaultCoinType, message);
     }

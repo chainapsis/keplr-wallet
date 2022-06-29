@@ -2,7 +2,7 @@ import { delay, inject, singleton } from "tsyringe";
 import { TYPES } from "../types";
 
 import { ChainInfoSchema, ChainInfoWithEmbed } from "./types";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, EthereumKeytype } from "@keplr-wallet/types";
 import { KVStore, Debouncer } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
@@ -203,6 +203,16 @@ export class ChainsService {
     }
 
     this.clearCachedChainInfos();
+  }
+
+  async getChainEthereumKeytype(chainId: string): Promise<EthereumKeytype> {
+    const chainInfo = await this.getChainInfo(chainId);
+    return (
+      chainInfo.ethereumKeytype ?? {
+        address: false,
+        signing: false,
+      }
+    );
   }
 
   addChainRemovedHandler(handler: ChainRemovedHandler) {
