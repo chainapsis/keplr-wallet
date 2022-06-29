@@ -1,6 +1,3 @@
-import { delay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import { ChainInfoSchema, ChainInfoWithEmbed } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
 import { KVStore, Debouncer } from "@keplr-wallet/common";
@@ -12,22 +9,26 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 
-@singleton()
 export class ChainsService {
   protected onChainRemovedHandlers: ChainRemovedHandler[] = [];
 
   protected cachedChainInfos: ChainInfoWithEmbed[] | undefined;
 
+  protected chainUpdaterKeeper!: ChainUpdaterService;
+  protected interactionKeeper!: InteractionService;
+
   constructor(
-    @inject(TYPES.ChainsStore)
     protected readonly kvStore: KVStore,
-    @inject(TYPES.ChainsEmbedChainInfos)
-    protected readonly embedChainInfos: ChainInfo[],
-    @inject(delay(() => ChainUpdaterService))
-    protected readonly chainUpdaterKeeper: ChainUpdaterService,
-    @inject(delay(() => InteractionService))
-    protected readonly interactionKeeper: InteractionService
+    protected readonly embedChainInfos: ChainInfo[]
   ) {}
+
+  init(
+    chainUpdaterKeeper: ChainUpdaterService,
+    interactionKeeper: InteractionService
+  ) {
+    this.chainUpdaterKeeper = chainUpdaterKeeper;
+    this.interactionKeeper = interactionKeeper;
+  }
 
   readonly getChainInfos: () => Promise<
     ChainInfoWithEmbed[]
