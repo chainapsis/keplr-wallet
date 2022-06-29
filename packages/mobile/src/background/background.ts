@@ -25,8 +25,8 @@ init(
   new RNMessageRequesterInternalToUI(),
   EmbedChainInfos,
   ["https://app.osmosis.zone", "https://app.stargaze.zone"],
-  getRandomBytesAsync,
   {
+    rng: getRandomBytesAsync,
     scrypt: async (text: string, params: ScryptParams) => {
       return Buffer.from(
         await scrypt(

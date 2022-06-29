@@ -24,7 +24,6 @@ export * from "./permission";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
-import { RNG } from "@keplr-wallet/crypto";
 import { CommonCrypto } from "./keyring";
 import { Notification } from "./tx";
 import { LedgerOptions } from "./ledger/options";
@@ -37,14 +36,13 @@ export function init(
   embedChainInfos: ChainInfo[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
-  rng: RNG,
   commonCrypto: CommonCrypto,
   notification: Notification,
   ledgerOptions: Partial<LedgerOptions> = {}
 ) {
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester,
-    rng
+    commonCrypto.rng
   );
 
   const persistentMemoryService = new PersistentMemory.PersistentMemoryService();
@@ -73,7 +71,6 @@ export function init(
   const keyRingService = new KeyRing.KeyRingService(
     storeCreator("keyring"),
     embedChainInfos,
-    rng,
     commonCrypto
   );
 

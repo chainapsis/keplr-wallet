@@ -31,7 +31,6 @@ import {
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
-import { RNG } from "@keplr-wallet/crypto";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
@@ -46,7 +45,6 @@ export class KeyRingService {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly embedChainInfos: ChainInfo[],
-    protected readonly rng: RNG,
     protected readonly crypto: CommonCrypto
   ) {}
 
@@ -64,7 +62,6 @@ export class KeyRingService {
       this.embedChainInfos,
       this.kvStore,
       ledgerService,
-      this.rng,
       this.crypto
     );
   }
