@@ -1,6 +1,3 @@
-import { delay as diDelay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import { Ledger, LedgerWebHIDIniter, LedgerWebUSBIniter } from "./ledger";
 
 import delay from "delay";
@@ -12,18 +9,15 @@ import { InteractionService } from "../interaction";
 import { LedgerOptions } from "./options";
 import { Buffer } from "buffer/";
 
-@singleton()
 export class LedgerService {
   private previousInitAborter: ((e: Error) => void) | undefined;
 
   protected options: LedgerOptions;
 
+  protected interactionService!: InteractionService;
+
   constructor(
-    @inject(TYPES.LedgerStore)
     protected readonly kvStore: KVStore,
-    @inject(diDelay(() => InteractionService))
-    protected readonly interactionService: InteractionService,
-    @inject(TYPES.LedgerOptions)
     options: Partial<LedgerOptions>
   ) {
     this.options = {
@@ -37,6 +31,10 @@ export class LedgerService {
     if (!this.options.transportIniters["webhid"]) {
       this.options.transportIniters["webhid"] = LedgerWebHIDIniter;
     }
+  }
+
+  init(interactionService: InteractionService) {
+    this.interactionService = interactionService;
   }
 
   async getPublicKey(env: Env, bip44HDPath: BIP44HDPath): Promise<Uint8Array> {

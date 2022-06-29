@@ -1,6 +1,3 @@
-import { delay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import {
   Key,
   KeyRing,
@@ -39,34 +36,36 @@ import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 
-@singleton()
 export class KeyRingService {
-  private readonly keyRing: KeyRing;
+  private keyRing!: KeyRing;
+
+  protected interactionService!: InteractionService;
+  public chainsService!: ChainsService;
+  public permissionService!: PermissionService;
 
   constructor(
-    @inject(TYPES.KeyRingStore)
-    kvStore: KVStore,
-    @inject(TYPES.ChainsEmbedChainInfos)
-    embedChainInfos: ChainInfo[],
-    @inject(delay(() => InteractionService))
-    protected readonly interactionService: InteractionService,
-    @inject(delay(() => ChainsService))
-    public readonly chainsService: ChainsService,
-    @inject(delay(() => PermissionService))
-    public readonly permissionService: PermissionService,
-    @inject(LedgerService)
-    ledgerService: LedgerService,
-    @inject(TYPES.RNG)
+    protected readonly kvStore: KVStore,
+    protected readonly embedChainInfos: ChainInfo[],
     protected readonly rng: RNG,
-    @inject(TYPES.CommonCrypto)
     protected readonly crypto: CommonCrypto
+  ) {}
+
+  init(
+    interactionService: InteractionService,
+    chainsService: ChainsService,
+    permissionService: PermissionService,
+    ledgerService: LedgerService
   ) {
+    this.interactionService = interactionService;
+    this.chainsService = chainsService;
+    this.permissionService = permissionService;
+
     this.keyRing = new KeyRing(
-      embedChainInfos,
-      kvStore,
+      this.embedChainInfos,
+      this.kvStore,
       ledgerService,
-      rng,
-      crypto
+      this.rng,
+      this.crypto
     );
   }
 
