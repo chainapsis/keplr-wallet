@@ -409,11 +409,8 @@ export class CosmosAccountImpl {
       true
     );
 
-    const useEthereumKeytype = this.chainGetter.getChain(this.chainId)
-      .useEthereumKeytype;
-
-    console.log(`Logging from Cosmos, use keytype is ${useEthereumKeytype}`);
-    console.log(this.chainGetter.getChain(this.chainId));
+    const useEthereumSign = this.chainGetter.getChain(this.chainId)
+      .ethereumKeytype?.signing;
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
@@ -445,7 +442,7 @@ export class CosmosAccountImpl {
         signerInfos: [
           {
             publicKey: {
-              typeUrl: useEthereumKeytype
+              typeUrl: useEthereumSign
                 ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
                 : "/cosmos.crypto.secp256k1.PubKey",
               value: PubKey.encode({

@@ -236,8 +236,13 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
     return this.raw.bip44;
   }
 
-  get useEthereumKeytype(): boolean {
-    return this.raw.useEthereumKeytype ?? false;
+  get ethereumKeytype():
+    | {
+        signing: boolean;
+        address: boolean;
+      }
+    | undefined {
+    return this.raw.ethereumKeytype;
   }
 
   get chainName(): string {

@@ -18,6 +18,7 @@ import { Wallet } from "@ethersproject/wallet";
 import * as BytesUtils from "@ethersproject/bytes";
 import { ETH } from "@tharsis/address-converter";
 import { keccak256 } from "@ethersproject/keccak256";
+import { ChainsService } from "../chains";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -69,9 +70,11 @@ export class KeyRing {
 
   private password: string = "";
 
+  // Memoize fixed chains
   private chainInfoMap: Record<string, ChainInfo> = {};
 
   constructor(
+    private readonly chainsService: ChainsService,
     private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
     private readonly ledgerKeeper: LedgerService,
@@ -81,12 +84,6 @@ export class KeyRing {
     this.loaded = false;
     this.keyStore = null;
     this.multiKeyStore = [];
-
-    embedChainInfos.forEach((chainInfo) => {
-      this.chainInfoMap[
-        ChainIdHelper.parse(chainInfo.chainId).identifier
-      ] = chainInfo;
-    });
   }
 
   public static getTypeOfKeyStore(
@@ -185,7 +182,7 @@ export class KeyRing {
     return this.loadKey(
       this.computeKeyStoreCoinType(chainId, defaultCoinType),
       this.chainInfoMap[ChainIdHelper.parse(chainId).identifier]
-        ?.useEthereumKeytype
+        ?.ethereumKeytype?.address
     );
   }
 
@@ -433,6 +430,14 @@ export class KeyRing {
       await this.save();
     }
 
+    // Load chain infos to detect keytypes
+    const chainInfos = await this.chainsService.getChainInfos();
+    chainInfos.forEach((chainInfo) => {
+      this.chainInfoMap[
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+      ] = chainInfo;
+    });
+
     this.loaded = true;
   }
 
@@ -472,6 +477,12 @@ export class KeyRing {
   public async setKeyStoreCoinType(chainId: string, coinType: number) {
     if (!this.keyStore) {
       throw new KeplrError("keyring", 130, "Key store is empty");
+    }
+
+    // Add chain to map if necessary
+    if (!this.chainInfoMap[ChainIdHelper.parse(chainId).identifier]) {
+      const chainInfo = await this.chainsService.getChainInfo(chainId);
+      this.chainInfoMap[ChainIdHelper.parse(chainId).identifier] = chainInfo;
     }
 
     if (
@@ -594,7 +605,7 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private loadKey(coinType: number, useEthereumKeytype: boolean = false): Key {
+  private loadKey(coinType: number, useEthereumAddress: boolean = false): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
@@ -608,7 +619,7 @@ export class KeyRing {
         throw new KeplrError("keyring", 150, "Ledger public key not set");
       }
 
-      if (useEthereumKeytype) {
+      if (useEthereumAddress) {
         throw new KeplrError(
           "keyring",
           152,
@@ -628,7 +639,7 @@ export class KeyRing {
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
-      if (useEthereumKeytype) {
+      if (useEthereumAddress) {
         // For Ethereum Key-Gen Only:
         const wallet = new Wallet(privKey.toBytes());
         const ethereumAddress = ETH.decoder(wallet.address);
@@ -716,10 +727,10 @@ export class KeyRing {
     }
 
     // Sign with Evmos/Ethereum
-    const useEthereumKeytype = this.chainInfoMap[
+    const useEthereumSigning = this.chainInfoMap[
       ChainIdHelper.parse(chainId).identifier
-    ]?.useEthereumKeytype;
-    if (useEthereumKeytype) {
+    ]?.ethereumKeytype?.signing;
+    if (useEthereumSigning) {
       return this.signEthereum(chainId, defaultCoinType, message);
     }
 
@@ -756,7 +767,7 @@ export class KeyRing {
     }
   }
 
-  public async signEthereum(
+  private async signEthereum(
     chainId: string,
     defaultCoinType: number,
     message: Uint8Array
@@ -778,14 +789,7 @@ export class KeyRing {
       );
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
-      if (coinType !== 60) {
-        throw new KeplrError(
-          "keyring",
-          111,
-          "Invalid coin type passed in to Ethereum signing (expected 60)"
-        );
-      }
-
+      // Allow signing with Ethereum for chains with coinType !== 60
       const privKey = this.loadPrivKey(coinType);
 
       // Use ether js to sign Ethereum tx

@@ -19,7 +19,10 @@ export interface ChainInfo {
   readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;
   readonly alternativeBIP44s?: BIP44[];
-  readonly useEthereumKeytype?: boolean;
+  readonly ethereumKeytype?: {
+    signing: boolean;
+    address: boolean;
+  };
   readonly bech32Config: Bech32Config;
 
   readonly currencies: AppCurrency[];

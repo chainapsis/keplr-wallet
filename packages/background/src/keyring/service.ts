@@ -62,6 +62,7 @@ export class KeyRingService {
     protected readonly crypto: CommonCrypto
   ) {
     this.keyRing = new KeyRing(
+      chainsService,
       embedChainInfos,
       kvStore,
       ledgerService,
