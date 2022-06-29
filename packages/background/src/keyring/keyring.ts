@@ -69,6 +69,8 @@ export class KeyRing {
 
   private password: string = "";
 
+  private chainInfoMap: Record<string, ChainInfo> = {};
+
   constructor(
     private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
@@ -79,6 +81,12 @@ export class KeyRing {
     this.loaded = false;
     this.keyStore = null;
     this.multiKeyStore = [];
+
+    embedChainInfos.forEach((chainInfo) => {
+      this.chainInfoMap[
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+      ] = chainInfo;
+    });
   }
 
   public static getTypeOfKeyStore(
@@ -174,7 +182,11 @@ export class KeyRing {
   }
 
   public getKey(chainId: string, defaultCoinType: number): Key {
-    return this.loadKey(this.computeKeyStoreCoinType(chainId, defaultCoinType));
+    return this.loadKey(
+      this.computeKeyStoreCoinType(chainId, defaultCoinType),
+      this.chainInfoMap[ChainIdHelper.parse(chainId).identifier]
+        ?.useEthereumKeytype
+    );
   }
 
   public getKeyStoreMeta(key: string): string {
@@ -198,10 +210,6 @@ export class KeyRing {
           ChainIdHelper.parse(chainId).identifier
         ] ?? defaultCoinType
       : defaultCoinType;
-  }
-
-  public getKeyFromCoinType(coinType: number): Key {
-    return this.loadKey(coinType);
   }
 
   public async createMnemonicKey(
@@ -586,7 +594,7 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private loadKey(coinType: number): Key {
+  private loadKey(coinType: number, useEthereumKeytype: boolean = false): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
@@ -600,7 +608,7 @@ export class KeyRing {
         throw new KeplrError("keyring", 150, "Ledger public key not set");
       }
 
-      if (coinType === 60) {
+      if (useEthereumKeytype) {
         throw new KeplrError(
           "keyring",
           152,
@@ -620,7 +628,7 @@ export class KeyRing {
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
-      if (coinType === 60) {
+      if (useEthereumKeytype) {
         // For Ethereum Key-Gen Only:
         const wallet = new Wallet(privKey.toBytes());
         const ethereumAddress = ETH.decoder(wallet.address);
@@ -708,8 +716,10 @@ export class KeyRing {
     }
 
     // Sign with Evmos/Ethereum
-    const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
-    if (coinType === 60) {
+    const useEthereumKeytype = this.chainInfoMap[
+      ChainIdHelper.parse(chainId).identifier
+    ]?.useEthereumKeytype;
+    if (useEthereumKeytype) {
       return this.signEthereum(chainId, defaultCoinType, message);
     }
 

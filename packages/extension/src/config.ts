@@ -1731,6 +1731,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     bip44: {
       coinType: 60,
     },
+    useEthereumKeytype: true,
     bech32Config: Bech32Address.defaultBech32Config("evmos"),
     currencies: [
       {
