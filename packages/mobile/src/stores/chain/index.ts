@@ -4,6 +4,7 @@ import {
   flow,
   makeObservable,
   observable,
+  override,
   runInAction,
 } from "mobx";
 
@@ -12,7 +13,6 @@ import {
   ChainStore as BaseChainStore,
 } from "@keplr-wallet/stores";
 
-import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithEmbed,
   GetChainInfosMsg,
@@ -93,7 +93,7 @@ export class ChainStore extends BaseChainStore<
   }>;
 
   constructor(
-    embedChainInfos: ChainInfo[],
+    protected readonly embedChainInfos: AppChainInfo[],
     protected readonly requester: MessageRequester,
     protected readonly kvStore: KVStore
   ) {
@@ -438,5 +438,45 @@ export class ChainStore extends BaseChainStore<
     const msg = new TryUpdateChainMsg(chainId);
     yield this.requester.sendMessage(BACKGROUND_PORT, msg);
     yield this.getChainInfosFromBackground();
+  }
+
+  @override
+  protected setChainInfos(chainInfos: (ChainInfoWithEmbed & AppChainInfo)[]) {
+    super.setChainInfos(
+      chainInfos.map((chainInfo) => {
+        let hideInUI: boolean;
+
+        // When viewed only by typing, `this.embedChainInfos` is not nullable.
+        // However, the `setChainInfos` method is executed in the super() call of the constructor,
+        // and the field of the class cannot be set before the super() call of the constructor.
+        // A strange problem arises here.
+        // Typescript doesn't detect this issue at build time.
+        // Anyway, `this.embedChainInfos` is undefined when the parent class is being created.
+        // There is a problem in the long run because the logic below cannot be grasped by TypeScript.
+        // But for now, it is solved in a simple way.
+        // If `this.embedChainInfos` is undefined, it is before creation is complete,
+        // and chainInfos should be embedded chain infos.
+        // TODO: Modify the logic below so that typescript can fully understand it at build time.
+        if (this.embedChainInfos) {
+          const embedChainInfo = this.embedChainInfos.find(
+            (c) =>
+              ChainIdHelper.parse(c.chainId).identifier ===
+              ChainIdHelper.parse(chainInfo.chainId).identifier
+          );
+          if (embedChainInfo) {
+            hideInUI = !!embedChainInfo.hideInUI;
+          } else {
+            hideInUI = true;
+          }
+        } else {
+          hideInUI = !!chainInfo.hideInUI;
+        }
+
+        return {
+          ...chainInfo,
+          hideInUI,
+        };
+      })
+    );
   }
 }

@@ -292,7 +292,10 @@ export class RootStore {
       // Repeated re-rendering in react native is more fatal to performance.
       // To alleviate this, load the cached in advance.
       (chainId: string) => {
-        if (!this.chainStore.getChain(chainId).raw.hideInUI) {
+        if (
+          this.chainStore.hasChain(chainId) &&
+          !this.chainStore.getChain(chainId).raw.hideInUI
+        ) {
           return true;
         }
       }
