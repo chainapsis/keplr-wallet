@@ -12,6 +12,13 @@ import yaml from "js-yaml";
 
 import { Buffer } from "buffer/";
 import { CoinPrimitive } from "@keplr-wallet/stores";
+import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
+import { Grant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/authz";
+import {
+  AuthorizationType,
+  StakeAuthorization,
+} from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/authz";
+import { SendAuthorization } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/authz";
 
 export interface MessageObj {
   readonly type: string;
@@ -513,6 +520,171 @@ export function renderMsgExecuteContract(
   };
 }
 
+export function renderGenericMsgGrant(
+  intl: IntlShape,
+  granteeAddress: string,
+  expiration: Grant["expiration"],
+  grantTypeUrl: Any["typeUrl"]
+) {
+  return {
+    icon: "fas fa-key",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgGrant.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgGrant.generic.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          grantee: Bech32Address.shortenAddress(granteeAddress, 24),
+          grantType: grantTypeUrl
+            ? grantTypeUrl.split(".").slice(-1)[0]
+            : intl.formatMessage({
+                id: "sign.list.message.cosmos-sdk/MsgGrant.unspecified",
+              }),
+          expirationDate: intl.formatDate(expiration),
+        }}
+      />
+    ),
+  };
+}
+
+const stakingGrantTypes: Record<AuthorizationType, string> = {
+  [AuthorizationType.AUTHORIZATION_TYPE_DELEGATE]:
+    "sign.list.message.cosmos-sdk/MsgDelegate.title",
+  [AuthorizationType.AUTHORIZATION_TYPE_REDELEGATE]:
+    "sign.list.message.cosmos-sdk/MsgBeginRedelegate.title",
+  [AuthorizationType.AUTHORIZATION_TYPE_UNDELEGATE]:
+    "sign.list.message.cosmos-sdk/MsgUndelegate.title",
+  [AuthorizationType.AUTHORIZATION_TYPE_UNSPECIFIED]:
+    "sign.list.message.cosmos-sdk/MsgGrant.unspecified",
+  [AuthorizationType.UNRECOGNIZED]:
+    "sign.list.message.cosmos-sdk/MsgGrant.unrecognized",
+};
+
+export function renderStakeMsgGrant(
+  currencies: Currency[],
+  intl: IntlShape,
+  grantee: string,
+  expiration: Grant["expiration"],
+  stakingSettings: StakeAuthorization
+) {
+  const parsedMaxAmount =
+    stakingSettings.maxTokens &&
+    CoinUtils.parseDecAndDenomFromCoin(
+      currencies,
+      new Coin(
+        stakingSettings.maxTokens.denom,
+        stakingSettings.maxTokens.amount
+      )
+    );
+
+  return {
+    icon: "fas fa-key",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgGrant.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgGrant.staking.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          br: <br />,
+          grantee: Bech32Address.shortenAddress(grantee, 24),
+          grantType: intl.formatMessage({
+            id: stakingGrantTypes[stakingSettings.authorizationType],
+          }),
+          expirationDate: intl.formatDate(expiration),
+          validatorListType: intl.formatMessage({
+            id: stakingSettings.allowList?.address.length
+              ? "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorAllowedLabel"
+              : "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorDeniedLabel",
+          }),
+          validators: intl.formatList(
+            (
+              stakingSettings.allowList?.address ||
+              stakingSettings.denyList?.address ||
+              []
+            ).map((valAddress) => Bech32Address.shortenAddress(valAddress, 24))
+          ),
+          maxAmount: parsedMaxAmount
+            ? `${clearDecimals(parsedMaxAmount.amount)} ${
+                parsedMaxAmount.denom
+              }`
+            : intl.formatMessage({
+                id: "sign.list.message.cosmos-sdk/MsgGrant.unlimited",
+              }),
+        }}
+      />
+    ),
+  };
+}
+
+export function renderSendMsgGrant(
+  currencies: Currency[],
+  intl: IntlShape,
+  granteeAddress: string,
+  expiration: Grant["expiration"],
+  sendSettings: SendAuthorization
+) {
+  const maxAmount =
+    intl.formatList(
+      sendSettings.spendLimit
+        ?.map((amount) =>
+          CoinUtils.parseDecAndDenomFromCoin(
+            currencies,
+            new Coin(amount.denom, amount.amount)
+          )
+        )
+        ?.map((coin) => `${clearDecimals(coin.amount)} ${coin.denom}`)
+    ) ||
+    intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgGrant.unlimited",
+    });
+
+  return {
+    icon: "fas fa-key",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgGrant.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgGrant.sending.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          br: <br />,
+          grantee: Bech32Address.shortenAddress(granteeAddress, 24),
+          maxAmount,
+          expirationDate: intl.formatDate(expiration),
+        }}
+      />
+    ),
+  };
+}
+
+export function renderMsgRevoke(
+  intl: IntlShape,
+  revokeType: string,
+  granteeAddress: string
+) {
+  return {
+    icon: "fas fa-lock",
+    title: intl.formatMessage({
+      id: "sign.list.message.cosmos-sdk/MsgRevoke.title",
+    }),
+    content: (
+      <FormattedMessage
+        id="sign.list.message.cosmos-sdk/MsgRevoke.content"
+        values={{
+          b: (...chunks: any[]) => <b>{chunks}</b>,
+          revokeType: revokeType.split(".").slice(-1)[0],
+          grantee: Bech32Address.shortenAddress(granteeAddress, 24),
+        }}
+      />
+    ),
+  };
+}
+
 export const WasmExecutionMsgView: FunctionComponent<{
   // eslint-disable-next-line @typescript-eslint/ban-types
   msg: object | string;
@@ -533,7 +705,7 @@ export const WasmExecutionMsgView: FunctionComponent<{
     // If msg is string, it will be the message for secret-wasm.
     // So, try to decrypt.
     // But, if this msg is not encrypted via Keplr, Keplr cannot decrypt it.
-    // TODO: Handle the error case. If an error occurs, rather than rejecting the signing, it informs the user that Kepler cannot decrypt it and allows the user to choose.
+    // TODO: Handle the error case. If an error occurs, rather than rejecting the signing, it informs the user that Keplr cannot decrypt it and allows the user to choose.
     if (typeof msg === "string") {
       (async () => {
         try {

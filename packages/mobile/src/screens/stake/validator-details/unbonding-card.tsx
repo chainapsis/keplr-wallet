@@ -71,7 +71,7 @@ export const UnbondingCard: FunctionComponent<{
               const endTime = new Date(entry.completionTime).getTime();
               const remainingTime = Math.floor((endTime - currentTime) / 1000);
               const unbondingTime = stakingParams
-                ? parseFloat(stakingParams.data.result.unbonding_time) / 10 ** 9
+                ? parseFloat(stakingParams.data.params.unbonding_time) / 10 ** 9
                 : 3600 * 24 * 21;
 
               return 100 - (remainingTime / unbondingTime) * 100;

@@ -2,7 +2,7 @@ import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { Card, CardBody } from "../../../components/card";
 import { useStore } from "../../../stores";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { CoinPretty, Dec, IntPretty } from "@keplr-wallet/unit";
@@ -19,13 +19,13 @@ export const ValidatorDetailsCard: FunctionComponent<{
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
   const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonding
+    Staking.BondStatus.Unbonding
   );
   const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonded
+    Staking.BondStatus.Unbonded
   );
 
   const validator = useMemo(() => {

@@ -1,5 +1,10 @@
-import { Message, MessageRequester, Result } from "@keplr-wallet/router";
-import { JSONUint8Array } from "@keplr-wallet/router/build/json-uint8-array";
+import {
+  Message,
+  MessageRequester,
+  Result,
+  JSONUint8Array,
+  KeplrError,
+} from "@keplr-wallet/router";
 import EventEmitter from "eventemitter3";
 
 export class WCMessageRequester implements MessageRequester {
@@ -65,7 +70,15 @@ export class WCMessageRequester implements MessageRequester {
     }
 
     if (result.error) {
-      throw new Error(result.error);
+      if (typeof result.error === "string") {
+        throw new Error(result.error);
+      } else {
+        throw new KeplrError(
+          result.error.module,
+          result.error.code,
+          result.error.message
+        );
+      }
     }
 
     return result.return;

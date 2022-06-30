@@ -38,15 +38,6 @@ export const BETA_CYBER_NETWORK_REST_CONFIG:
   | AxiosRequestConfig
   | undefined = undefined;
 
-export const STRAIGHTEDGE_RPC_ENDPOINT = "";
-export const STRAIGHTEDGE_RPC_CONFIG:
-  | AxiosRequestConfig
-  | undefined = undefined;
-export const STRAIGHTEDGE_REST_ENDPOINT = "";
-export const STRAIGHTEDGE_REST_CONFIG:
-  | AxiosRequestConfig
-  | undefined = undefined;
-
 export const CERTIK_RPC_ENDPOINT = "";
 export const CERTIK_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const CERTIK_REST_ENDPOINT = "";
@@ -137,6 +128,15 @@ export const UMEE_RPC_ENDPOINT = "";
 export const UMEE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const UMEE_REST_ENDPOINT = "";
 export const UMEE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
+export const GRAVITY_BRIDGE_RPC_ENDPOINT = "";
+export const GRAVITY_BRIDGE_RPC_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
+export const GRAVITY_BRIDGE_REST_ENDPOINT = "";
+export const GRAVITY_BRIDGE_REST_CONFIG:
+  | AxiosRequestConfig
+  | undefined = undefined;
 
 export const EVMOS_RPC_ENDPOINT = "";
 export const EVMOS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;

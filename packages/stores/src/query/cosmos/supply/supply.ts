@@ -1,37 +1,28 @@
-import { SupplyTotal, SupplyTotalStargate } from "./types";
+import { SupplyTotal } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { ChainGetter } from "../../../common";
-import { autorun } from "mobx";
 
-export class ObservableChainQuerySupplyTotal extends ObservableChainQuery<
-  SupplyTotal | SupplyTotalStargate
-> {
+export class ObservableChainQuerySupplyTotal extends ObservableChainQuery<SupplyTotal> {
   constructor(
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
     denom: string
   ) {
-    super(kvStore, chainId, chainGetter, `/supply/total/${denom}`);
-
-    autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("stargate")) {
-        const url = `/bank/total/${denom}`;
-
-        this.setUrl(url);
-      }
-    });
+    super(
+      kvStore,
+      chainId,
+      chainGetter,
+      `/cosmos/bank/v1beta1/supply/${denom}`
+    );
   }
 }
 
-export class ObservableQuerySupplyTotal extends ObservableChainQueryMap<
-  SupplyTotal | SupplyTotalStargate
-> {
+export class ObservableQuerySupplyTotal extends ObservableChainQueryMap<SupplyTotal> {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainId: string,
@@ -47,15 +38,11 @@ export class ObservableQuerySupplyTotal extends ObservableChainQueryMap<
     });
   }
 
-  getQueryDenom(
-    denom: string
-  ): ObservableChainQuery<SupplyTotal | SupplyTotalStargate> {
+  getQueryDenom(denom: string): ObservableChainQuerySupplyTotal {
     return this.get(denom);
   }
 
-  getQueryStakeDenom(): ObservableChainQuery<
-    SupplyTotal | SupplyTotalStargate
-  > {
+  getQueryStakeDenom(): ObservableChainQuerySupplyTotal {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     return this.get(chainInfo.stakeCurrency.coinMinimalDenom);
   }

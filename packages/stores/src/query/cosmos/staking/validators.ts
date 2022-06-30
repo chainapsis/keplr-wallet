@@ -5,13 +5,7 @@ import {
 import { BondStatus, Validators, Validator } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
-import {
-  autorun,
-  computed,
-  makeObservable,
-  observable,
-  runInAction,
-} from "mobx";
+import { computed, makeObservable, observable, runInAction } from "mobx";
 import { ObservableQuery, QueryResponse } from "../../../common";
 import Axios, { CancelToken } from "axios";
 import PQueue from "p-queue";
@@ -71,7 +65,7 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
 
   protected async fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<KeybaseResult>> {
+  ): Promise<{ response: QueryResponse<KeybaseResult>; headers: any }> {
     return await ObservableQueryValidatorThumbnail.fetchingThumbnailQueue.add(
       () => {
         return super.fetchResponse(cancelToken);
@@ -108,36 +102,29 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
       kvStore,
       chainId,
       chainGetter,
-      `/staking/validators?status=${status}`
+      `/cosmos/staking/v1beta1/validators?pagination.limit=1000&status=${(() => {
+        switch (status) {
+          case BondStatus.Bonded:
+            return "BOND_STATUS_BONDED";
+          case BondStatus.Unbonded:
+            return "BOND_STATUS_UNBONDED";
+          case BondStatus.Unbonding:
+            return "BOND_STATUS_UNBONDING";
+          default:
+            return "BOND_STATUS_UNSPECIFIED";
+        }
+      })()}`
     );
     makeObservable(this);
-
-    autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("stargate")) {
-        const url = (() => {
-          switch (this.status) {
-            case BondStatus.Bonded:
-              return `/staking/validators?status=BOND_STATUS_BONDED`;
-            case BondStatus.Unbonded:
-              return `/staking/validators?status=BOND_STATUS_UNBONDED&limit=500`;
-            case BondStatus.Unbonding:
-              return `/staking/validators?status=BOND_STATUS_UNBONDING&limit=500`;
-          }
-        })();
-
-        this.setUrl(url);
-      }
-    });
   }
 
   @computed
   get validators(): Validator[] {
-    if (!this.response?.data.result) {
+    if (!this.response) {
       return [];
     }
 
-    return this.response.data.result;
+    return this.response.data.validators;
   }
 
   readonly getValidator = computedFn((validatorAddress: string):
@@ -152,9 +139,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
   get validatorsSortedByVotingPower(): Validator[] {
     const validators = this.validators;
     return validators.sort((v1, v2) => {
-      return new Dec(v1.delegator_shares).gt(new Dec(v2.delegator_shares))
-        ? -1
-        : 1;
+      return new Dec(v1.tokens).gt(new Dec(v2.tokens)) ? -1 : 1;
     });
   }
 
@@ -205,7 +190,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const stakeCurrency = chainInfo.stakeCurrency;
 
-    const power = new Dec(validator.delegator_shares).truncate();
+    const power = new Dec(validator.tokens).truncate();
 
     return new CoinPretty(stakeCurrency, power);
   });

@@ -61,7 +61,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
       return Buffer.from(bytes).toString("hex");
     });
 
-    const error = amountConfig.getError();
+    const error = amountConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
         switch (error.constructor) {

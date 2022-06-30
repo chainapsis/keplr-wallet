@@ -44,14 +44,13 @@ export const SendScreen: FunctionComponent = observer(() => {
     : chainStore.current.chainId;
 
   const account = accountStore.getAccount(chainId);
-  const queries = queriesStore.get(chainId);
 
   const sendConfigs = useSendTxConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainId,
-    account.msgOpts["send"],
     account.bech32Address,
-    queries.queryBalances,
     EthereumEndpoint
   );
 
@@ -73,11 +72,11 @@ export const SendScreen: FunctionComponent = observer(() => {
   }, [route.params.recipient, sendConfigs.recipientConfig]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   return (

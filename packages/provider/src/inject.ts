@@ -250,6 +250,15 @@ export class InjectedKeplr implements IKeplr {
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+    if (
+      chainInfo.features?.includes("stargate") ||
+      chainInfo.features?.includes("no-legacy-stdTx")
+    ) {
+      console.log(
+        "“stargate”, “no-legacy-stdTx” feature has been deprecated. The launchpad is no longer supported, thus works without the two features. We would keep the aforementioned two feature for a while, but the upcoming update would potentially cause errors. Remove the two feature."
+      );
+    }
+
     await this.requestMethod("experimentalSuggestChain", [chainInfo]);
   }
 
@@ -262,6 +271,12 @@ export class InjectedKeplr implements IKeplr {
     tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
+    if (!("length" in tx)) {
+      console.log(
+        "Do not send legacy std tx via `sendTx` API. We now only support protobuf tx. The usage of legeacy std tx would throw an error in the near future."
+      );
+    }
+
     return await this.requestMethod("sendTx", [chainId, tx, mode]);
   }
 

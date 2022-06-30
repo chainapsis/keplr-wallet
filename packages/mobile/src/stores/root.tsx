@@ -1,4 +1,4 @@
-import { EmbedChainInfos } from "../config";
+import { EmbedChainInfos, EthereumEndpoint } from "../config";
 import {
   KeyRingStore,
   InteractionStore,
@@ -7,8 +7,12 @@ import {
   AccountStore,
   SignInteractionStore,
   TokensStore,
-  QueriesWithCosmosAndSecretAndCosmwasm,
-  AccountWithAll,
+  CosmosQueries,
+  CosmwasmQueries,
+  SecretQueries,
+  CosmosAccount,
+  CosmwasmAccount,
+  SecretAccount,
   LedgerInitStore,
   IBCCurrencyRegsitrar,
   PermissionStore,
@@ -27,6 +31,10 @@ import { AmplitudeApiKey } from "../config";
 import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import { Amplitude } from "@amplitude/react-native";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import {
+  GravityBridgeCurrencyRegsitrar,
+  KeplrETCQueries,
+} from "@keplr-wallet/stores-etc";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -37,12 +45,17 @@ export class RootStore {
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly signInteractionStore: SignInteractionStore;
 
-  public readonly queriesStore: QueriesStore<QueriesWithCosmosAndSecretAndCosmwasm>;
-  public readonly accountStore: AccountStore<AccountWithAll>;
+  public readonly queriesStore: QueriesStore<
+    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
+  >;
+  public readonly accountStore: AccountStore<
+    [CosmosAccount, CosmwasmAccount, SecretAccount]
+  >;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
@@ -109,19 +122,27 @@ export class RootStore {
 
     this.queriesStore = new QueriesStore(
       // Fix prefix key because there was a problem with storage being corrupted.
-      // In the case of storage where the prefix key is "store_queries" or "store_queries_fix", we should not use it because it is already corrupted in some users.
+      // In the case of storage where the prefix key is "store_queries" or "store_queries_fix", "store_queries_fix2",
+      // we should not use it because it is already corrupted in some users.
       // https://github.com/chainapsis/keplr-wallet/issues/275
       // https://github.com/chainapsis/keplr-wallet/issues/278
-      new AsyncKVStore("store_queries_fix2"),
+      // https://github.com/chainapsis/keplr-wallet/issues/318
+      new AsyncKVStore("store_queries_fix3"),
       this.chainStore,
-      async () => {
-        // TOOD: Set version for Keplr API
-        return new Keplr("", "core", new RNMessageRequesterInternal());
-      },
-      QueriesWithCosmosAndSecretAndCosmwasm
+      CosmosQueries.use(),
+      CosmwasmQueries.use(),
+      SecretQueries.use({
+        apiGetter: async () => {
+          // TOOD: Set version for Keplr API
+          return new Keplr("", "core", new RNMessageRequesterInternal());
+        },
+      }),
+      KeplrETCQueries.use({
+        ethereumURL: EthereumEndpoint,
+      })
     );
 
-    this.accountStore = new AccountStore<AccountWithAll>(
+    this.accountStore = new AccountStore(
       {
         addEventListener: (type: string, fn: () => void) => {
           eventEmitter.addListener(type, fn);
@@ -130,34 +151,59 @@ export class RootStore {
           eventEmitter.removeListener(type, fn);
         },
       },
-      AccountWithAll,
       this.chainStore,
-      this.queriesStore,
-      {
-        defaultOpts: {
-          prefetching: false,
+      () => {
+        return {
           suggestChain: false,
           autoInit: true,
           getKeplr: async () => {
             // TOOD: Set version for Keplr API
             return new Keplr("", "core", new RNMessageRequesterInternal());
           },
-        },
-        chainOpts: this.chainStore.chainInfos.map((chainInfo) => {
-          if (chainInfo.chainId.startsWith("osmosis")) {
+        };
+      },
+      CosmosAccount.use({
+        queriesStore: this.queriesStore,
+        msgOptsCreator: (chainId) => {
+          if (chainId.startsWith("osmosis")) {
             return {
-              chainId: chainInfo.chainId,
-              msgOpts: {
-                withdrawRewards: {
-                  gas: 200000,
+              send: {
+                native: {
+                  gas: 100000,
                 },
+              },
+              undelegate: {
+                gas: 350000,
+              },
+              redelegate: {
+                gas: 550000,
+              },
+              withdrawRewards: {
+                gas: 300000,
               },
             };
           }
 
-          return { chainId: chainInfo.chainId };
-        }),
-      }
+          if (chainId.startsWith("stargaze-")) {
+            return {
+              send: {
+                native: {
+                  gas: 100000,
+                },
+              },
+              withdrawRewards: {
+                gas: 200000,
+              },
+            };
+          }
+        },
+      }),
+      CosmwasmAccount.use({
+        queriesStore: this.queriesStore,
+      }),
+      SecretAccount.use({
+        queriesStore: this.queriesStore,
+      })
     );
 
     this.priceStore = new CoinGeckoPriceStore(
@@ -238,6 +284,20 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       this.queriesStore,
+      this.queriesStore,
+      undefined,
+      // Repeated re-rendering in react native is more fatal to performance.
+      // To alleviate this, load the cached in advance.
+      (chainId: string) => {
+        if (!this.chainStore.getChain(chainId).raw.hideInUI) {
+          return true;
+        }
+      }
+    );
+
+    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar(
+      new AsyncKVStore("store_gravity_bridge_currency_registrar"),
+      this.chainStore,
       this.queriesStore
     );
 

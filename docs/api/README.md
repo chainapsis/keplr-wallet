@@ -165,7 +165,7 @@ Similar to CosmJS `OfflineDirectSigner`'s `signDirect`, but Keplr's `signDirect`
 ```javascript
 sendTx(
     chainId: string,
-    stdTx: StdTx,
+    tx: Uint8Array,
     mode: BroadcastMode
 ): Promise<Uint8Array>;
 ```
@@ -174,6 +174,44 @@ This function requests Keplr to delegates the broadcasting of the transaction to
 This method returns the transaction hash if it succeeds to broadcast, if else the method will throw an error.
 When Keplr broadcasts the transaction, Keplr will send the notification on the transaction's progress.
 
+### Request Signature for Arbitrary Message
+
+```javascript
+signArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array
+): Promise<StdSignature>;
+verifyArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    signature: StdSignature
+): Promise<boolean>;
+```
+
+This is an experimental implementation of [ADR-36](https://github.com/cosmos/cosmos-sdk/blob/master/docs/architecture/adr-036-arbitrary-signature.md). Use this feature at your own risk.  
+  
+It's main usage is to prove ownership of an account off-chain, requesting ADR-36 signature using the `signArbitrary` API.  
+  
+If requested sign doc with the `signAnimo` API with the ADR-36 that Keplr requires instead of using the `signArbitary` API, it would function as `signArbitary`  
+- Only supports sign doc in the format of Amino. (in the case of protobuf, [ADR-36](https://github.com/cosmos/cosmos-sdk/blob/master/docs/architecture/adr-036-arbitrary-signature.md) requirements aren't fully specified for implementation)
+- sign doc message should be single and the message type should be "sign/MsgSignData"
+- sign doc "sign/MsgSignData" message should have "signer" and "data" as its value. "data" should be base64 encoded
+- sign doc chain_id should be an empty string("")
+- sign doc memo should be an empty string("")
+- sign doc account_number should be "0"
+- sign doc sequence should be "0"
+- sign doc fee should be `{gas: "0", amount: []}`
+
+When using the `signArbitrary` API, if the `data` parameter type is `string`, the signature page displays as plain text.  
+  
+Using `verifyArbitrary`, you can verify the results requested by `signArbitrary` API or `signAmino` API that has been requested with the ADR-36 spec standards.  
+  
+`verifyArbitrary` has been only implemented for simple usage. `verifyArbitrary` returns the result of the verification of the current selected account's sign doc. If the account is not the currently selected account, it would throw an error.  
+  
+It is recommended to use `verifyADR36Amino` function in the `@keplr-wallet/cosmos` package or your own implementation instead of using `verifyArbitrary` API.  
+  
 ### Interaction Options
 
 ```javascript

@@ -7,10 +7,10 @@ import { useStore } from "../../stores";
 import { MemoInput } from "../../components/input";
 import {
   useFeeConfig,
-  useGasConfig,
   useMemoConfig,
   useSignDocAmountConfig,
   useSignDocHelper,
+  useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { Button } from "../../components/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
@@ -23,6 +23,7 @@ import { WCAppLogoAndName } from "../../components/wallet-connect";
 import WalletConnect from "@walletconnect/client";
 import { renderAminoMessage } from "./amino";
 import { renderDirectMessage } from "./direct";
+import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
@@ -52,19 +53,20 @@ export const SignModal: FunctionComponent<{
 
     const [chainId, setChainId] = useState(chainStore.current.chainId);
 
-    // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
-    const gasConfig = useGasConfig(chainStore, chainId, 1);
+    // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
+    // In this case, there is no obligation to deal with it, but 0 gas is favorably allowed.
+    const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
     const amountConfig = useSignDocAmountConfig(
       chainStore,
+      accountStore,
       chainId,
-      accountStore.getAccount(chainId).msgOpts,
       signer
     );
     const feeConfig = useFeeConfig(
       chainStore,
+      queriesStore,
       chainId,
       signer,
-      queriesStore.get(chainId).queryBalances,
       amountConfig,
       gasConfig
     );
@@ -130,7 +132,7 @@ export const SignModal: FunctionComponent<{
           const account = accountStore.getAccount(chainId);
           const chainInfo = chainStore.getChain(chainId);
           const { title, content, scrollViewHorizontal } = renderAminoMessage(
-            account.msgOpts,
+            account,
             msg,
             chainInfo.currencies
           );
@@ -167,7 +169,7 @@ export const SignModal: FunctionComponent<{
           );
         });
       } else if (mode === "direct") {
-        return (msgs as any[]).map((msg, i) => {
+        return (msgs as AnyWithUnpacked[]).map((msg, i) => {
           const chainInfo = chainStore.getChain(chainId);
           const { title, content } = renderDirectMessage(
             msg,
@@ -246,8 +248,8 @@ export const SignModal: FunctionComponent<{
           disabled={
             signDocWapper == null ||
             signDocHelper.signDocWrapper == null ||
-            memoConfig.getError() != null ||
-            feeConfig.getError() != null
+            memoConfig.error != null ||
+            feeConfig.error != null
           }
           loading={signInteractionStore.isLoading}
           onPress={async () => {

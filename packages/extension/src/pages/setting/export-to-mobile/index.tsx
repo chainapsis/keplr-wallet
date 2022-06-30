@@ -282,73 +282,73 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
           connector.killSession();
         } else {
           loadingIndicator.setIsLoading("export-to-mobile", true);
+        }
+      });
 
-          connector.on("call_request", (error, payload) => {
-            if (
-              error ||
-              payload.method !==
-                "keplr_request_export_keyring_datas_wallet_connect_v1"
-            ) {
-              console.log(error, payload?.method);
-              history.replace("/");
-              connector.killSession();
-              loadingIndicator.setIsLoading("export-to-mobile", false);
-            } else {
-              const buf = Buffer.from(JSON.stringify(exportKeyRingDatas));
+      connector.on("call_request", (error, payload) => {
+        if (
+          error ||
+          payload.method !==
+            "keplr_request_export_keyring_datas_wallet_connect_v1"
+        ) {
+          console.log(error, payload?.method);
+          history.replace("/");
+          connector.killSession();
+          loadingIndicator.setIsLoading("export-to-mobile", false);
+        } else {
+          const buf = Buffer.from(JSON.stringify(exportKeyRingDatas));
 
-              const bytes = new Uint8Array(16);
-              crypto.getRandomValues(bytes);
-              const iv = Buffer.from(bytes);
+          const bytes = new Uint8Array(16);
+          crypto.getRandomValues(bytes);
+          const iv = Buffer.from(bytes);
 
-              const counter = new Counter(0);
-              counter.setBytes(iv);
-              const aesCtr = new AES.ModeOfOperation.ctr(
-                Buffer.from(qrCodeData!.sharedPassword, "hex"),
-                counter
-              );
+          const counter = new Counter(0);
+          counter.setBytes(iv);
+          const aesCtr = new AES.ModeOfOperation.ctr(
+            Buffer.from(qrCodeData!.sharedPassword, "hex"),
+            counter
+          );
 
-              (async () => {
-                const addressBooks: {
-                  [chainId: string]: AddressBookData[] | undefined;
-                } = {};
+          (async () => {
+            const addressBooks: {
+              [chainId: string]: AddressBookData[] | undefined;
+            } = {};
 
-                if (payload.params && payload.params.length > 0) {
-                  for (const chainId of payload.params[0].addressBookChainIds ??
-                    []) {
-                    const addressBookConfig = addressBookConfigMap.getAddressBookConfig(
-                      chainId
-                    );
+            if (payload.params && payload.params.length > 0) {
+              for (const chainId of payload.params[0].addressBookChainIds ??
+                []) {
+                const addressBookConfig = addressBookConfigMap.getAddressBookConfig(
+                  chainId
+                );
 
-                    await addressBookConfig.waitLoaded();
+                await addressBookConfig.waitLoaded();
 
-                    addressBooks[chainId] = toJS(
-                      addressBookConfig.addressBookDatas
-                    ) as AddressBookData[];
-                  }
-                }
-
-                const response: WCExportKeyRingDatasResponse = {
-                  encrypted: {
-                    ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString(
-                      "hex"
-                    ),
-                    // Hex encoded
-                    iv: iv.toString("hex"),
-                  },
-                  addressBooks,
-                };
-
-                connector.approveRequest({
-                  id: payload.id,
-                  result: [response],
-                });
-
-                history.replace("/");
-                connector.killSession();
-                loadingIndicator.setIsLoading("export-to-mobile", false);
-              })();
+                addressBooks[chainId] = toJS(
+                  addressBookConfig.addressBookDatas
+                ) as AddressBookData[];
+              }
             }
-          });
+
+            const response: WCExportKeyRingDatasResponse = {
+              encrypted: {
+                ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString("hex"),
+                // Hex encoded
+                iv: iv.toString("hex"),
+              },
+              addressBooks,
+            };
+
+            connector.approveRequest({
+              id: payload.id,
+              result: [response],
+            });
+
+            history.replace("/");
+            setTimeout(() => {
+              connector.killSession();
+            }, 5000);
+            loadingIndicator.setIsLoading("export-to-mobile", false);
+          })();
         }
       });
     }

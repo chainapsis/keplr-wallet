@@ -23,10 +23,6 @@ import {
   BETA_CYBER_NETWORK_REST_CONFIG,
   BETA_CYBER_NETWORK_RPC_ENDPOINT,
   BETA_CYBER_NETWORK_RPC_CONFIG,
-  BETA_STRAIGHTEDGE_REST_ENDPOINT,
-  BETA_STRAIGHTEDGE_REST_CONFIG,
-  BETA_STRAIGHTEDGE_RPC_ENDPOINT,
-  BETA_STRAIGHTEDGE_RPC_CONFIG,
   AKASH_RPC_ENDPOINT,
   AKASH_RPC_CONFIG,
   AKASH_REST_ENDPOINT,
@@ -95,6 +91,10 @@ import {
   UMEE_RPC_CONFIG,
   UMEE_REST_ENDPOINT,
   UMEE_REST_CONFIG,
+  GRAVITY_BRIDGE_RPC_ENDPOINT,
+  GRAVITY_BRIDGE_RPC_CONFIG,
+  GRAVITY_BRIDGE_REST_ENDPOINT,
+  GRAVITY_BRIDGE_REST_CONFIG,
   EVMOS_RPC_ENDPOINT,
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
@@ -148,7 +148,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 118,
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: OSMOSIS_RPC_ENDPOINT,
@@ -197,10 +197,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0,
-      average: 0,
-      high: 0.025,
+      average: 0.025,
+      high: 0.04,
     },
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "cosmwasm"],
   },
   {
     rpc: SECRET_NETWORK_RPC_ENDPOINT,
@@ -250,11 +250,11 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     coinType: 529,
     gasPriceStep: {
-      low: 0.1,
-      average: 0.25,
-      high: 0.3,
+      low: 0.0125,
+      average: 0.1,
+      high: 0.25,
     },
-    features: ["stargate", "secretwasm", "ibc-go", "ibc-transfer"],
+    features: ["secretwasm", "ibc-go", "ibc-transfer"],
   },
   {
     rpc: AKASH_RPC_ENDPOINT,
@@ -297,7 +297,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "akash-network",
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: CRYPTO_ORG_RPC_ENDPOINT,
@@ -345,7 +345,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.03,
       high: 0.04,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: IOV_RPC_ENDPOINT,
@@ -393,7 +393,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 2,
       high: 3,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: SIFCHAIN_RPC_ENDPOINT,
@@ -861,7 +861,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 1500000000000,
       high: 2000000000000,
     },
-    features: ["stargate"],
+    features: [],
   },
   {
     rpc: CERTIK_RPC_ENDPOINT,
@@ -904,7 +904,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "certik",
       },
     ],
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: IRIS_RPC_ENDPOINT,
@@ -957,7 +957,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.3,
       high: 0.4,
     },
-    features: ["stargate", "ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: REGEN_RPC_ENDPOINT,
@@ -1000,7 +1000,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "regen",
       },
     ],
-    features: ["stargate", "ibc-go", "ibc-transfer", "ibc-go"],
+    gasPriceStep: {
+      low: 0.015,
+      average: 0.025,
+      high: 0.04,
+    },
+    features: ["ibc-go", "ibc-transfer", "ibc-go"],
   },
   {
     rpc: PERSISTENCE_RPC_ENDPOINT,
@@ -1048,7 +1053,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025,
       high: 0.04,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: SENTINEL_RPC_ENDPOINT,
@@ -1096,14 +1101,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.25,
       high: 0.4,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: KAVA_RPC_ENDPOINT,
     rpcConfig: KAVA_RPC_CONFIG,
     rest: KAVA_REST_ENDPOINT,
     restConfig: KAVA_REST_CONFIG,
-    chainId: "kava-9",
+    chainId: "kava_2222-10",
     chainName: "Kava",
     stakeCurrency: {
       coinDenom: "KAVA",
@@ -1176,11 +1181,12 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0,
-      average: 0.001,
+      low: 0.05,
+      average: 0.1,
       high: 0.25,
     },
     coinType: 459,
+    beta: true,
   },
   {
     rpc: IXO_RPC_ENDPOINT,
@@ -1220,7 +1226,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
     ],
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: EMONEY_RPC_ENDPOINT,
@@ -1294,7 +1300,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 1,
       high: 1,
     },
-    features: ["stargate", "ibc-transfer"],
+    features: ["ibc-transfer"],
   },
   {
     rpc: AGORIC_RPC_ENDPOINT,
@@ -1344,7 +1350,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0,
       high: 0,
     },
-    features: ["stargate", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-go"],
   },
   {
     rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
@@ -1406,16 +1412,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0,
-      average: 0.01,
-      high: 0.02,
+      average: 0,
+      high: 0.01,
     },
-    features: [
-      "stargate",
-      "ibc-transfer",
-      "no-legacy-stdTx",
-      "cosmwasm",
-      "ibc-go",
-    ],
+    features: ["ibc-transfer", "cosmwasm", "ibc-go"],
   },
   {
     rpc: JUNO_RPC_ENDPOINT,
@@ -1463,13 +1463,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.0025,
       high: 0.004,
     },
-    features: [
-      "stargate",
-      "no-legacy-stdTx",
-      "cosmwasm",
-      "ibc-transfer",
-      "ibc-go",
-    ],
+    features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
   },
   {
     rpc: STARGAZE_RPC_ENDPOINT,
@@ -1512,7 +1506,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "stargaze",
       },
     ],
-    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: AXELAR_RPC_ENDPOINT,
@@ -1544,6 +1538,36 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
       },
+      {
+        coinDenom: "WETH",
+        coinMinimalDenom: "weth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "weth",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+      },
+      {
+        coinDenom: "FRAX",
+        coinMinimalDenom: "frax-wei",
+        coinDecimals: 18,
+        coinGeckoId: "frax",
+      },
+      {
+        coinDenom: "DAI",
+        coinMinimalDenom: "dai-wei",
+        coinDecimals: 18,
+        coinGeckoId: "dai",
+      },
+      {
+        coinDenom: "USDT",
+        coinMinimalDenom: "uusdt",
+        coinDecimals: 6,
+        coinGeckoId: "tether",
+      },
     ],
     feeCurrencies: [
       {
@@ -1557,7 +1581,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.075,
       high: 0.1,
     },
-    features: ["stargate", "no-legacy-stdTx", "ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: SOMMELIER_RPC_ENDPOINT,
@@ -1600,7 +1624,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "sommelier",
       },
     ],
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: UMEE_RPC_ENDPOINT,
@@ -1645,19 +1669,60 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025,
       high: 0.04,
     },
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go"],
+  },
+  {
+    rpc: GRAVITY_BRIDGE_RPC_ENDPOINT,
+    rpcConfig: GRAVITY_BRIDGE_RPC_CONFIG,
+    rest: GRAVITY_BRIDGE_REST_ENDPOINT,
+    restConfig: GRAVITY_BRIDGE_REST_CONFIG,
+    chainId: "gravity-bridge-3",
+    chainName: "Gravity Bridge",
+    stakeCurrency: {
+      coinDenom: "GRAV",
+      coinMinimalDenom: "ugraviton",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/gravity-bridge/stake"
+        : "http://localhost:8080/#/gravity-bridge/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/gravity-bridge/stake"
+        : "http://localhost:8080/#/gravity-bridge/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("gravity"),
+    currencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "ugraviton",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: EVMOS_RPC_ENDPOINT,
     rpcConfig: EVMOS_RPC_CONFIG,
     rest: EVMOS_REST_ENDPOINT,
     restConfig: EVMOS_REST_CONFIG,
-    chainId: "evmos_9001-1",
+    chainId: "evmos_9001-2",
     chainName: "Evmos (Beta)",
     stakeCurrency: {
       coinDenom: "EVMOS",
       coinMinimalDenom: "aevmos",
       coinDecimals: 18,
+      coinGeckoId: "evmos",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1676,6 +1741,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
+        coinGeckoId: "evmos",
       },
     ],
     feeCurrencies: [
@@ -1683,57 +1749,15 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "EVMOS",
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
+        coinGeckoId: "evmos",
       },
     ],
     gasPriceStep: {
-      low: 10000000000,
+      low: 25000000000,
       average: 25000000000,
       high: 40000000000,
     },
     features: ["ibc-transfer", "stargate", "no-legacy-stdTx", "ibc-go"],
-    beta: true,
-  },
-  {
-    rpc: INJECTIVE_RPC_ENDPOINT,
-    rpcConfig: INJECTIVE_RPC_CONFIG,
-    rest: INJECTIVE_REST_ENDPOINT,
-    restConfig: INJECTIVE_REST_CONFIG,
-    chainId: "injective-1",
-    chainName: "Injective (Beta)",
-    stakeCurrency: {
-      coinDenom: "INJ",
-      coinMinimalDenom: "inj",
-      coinDecimals: 18,
-      coinGeckoId: "injective-protocol",
-    },
-    walletUrl: "https://hub.injective.network/",
-    walletUrlForStaking: "https://hub.injective.network/",
-    bip44: {
-      coinType: 60,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("inj"),
-    currencies: [
-      {
-        coinDenom: "INJ",
-        coinMinimalDenom: "inj",
-        coinDecimals: 18,
-        coinGeckoId: "injective-protocol",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "INJ",
-        coinMinimalDenom: "inj",
-        coinDecimals: 18,
-        coinGeckoId: "injective-protocol",
-      },
-    ],
-    gasPriceStep: {
-      low: 2500000000,
-      average: 5000000000,
-      high: 10000000000,
-    },
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     beta: true,
   },
   {
@@ -1783,6 +1807,50 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025 * Math.pow(10, 12),
       high: 0.04 * Math.pow(10, 12),
     },
+    features: ["ibc-transfer", "ibc-go"],
+    beta: true,
+  },
+   {
+    rpc: INJECTIVE_RPC_ENDPOINT,
+    rpcConfig: INJECTIVE_RPC_CONFIG,
+    rest: INJECTIVE_REST_ENDPOINT,
+    restConfig: INJECTIVE_REST_CONFIG,
+    chainId: "injective-1",
+    chainName: "Injective (Beta)",
+    stakeCurrency: {
+      coinDenom: "INJ",
+      coinMinimalDenom: "inj",
+      coinDecimals: 18,
+      coinGeckoId: "injective-protocol",
+    },
+    walletUrl: "https://hub.injective.network/",
+    walletUrlForStaking: "https://hub.injective.network/staking",
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("inj"),
+    currencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+      },
+    ],
+    gasPriceStep: {
+      low: 2500000000,
+      average: 5000000000,
+      high: 10000000000,
+    },
+    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go"],
     beta: true,
   },
 ];

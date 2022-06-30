@@ -8,7 +8,7 @@ module.exports = {
   },
   base: process.env.VUEPRESS_BASE || "/",
   head: [
-    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon-svg.svg" }],
+    ["link", { rel: "icon", type: "image/png", href: "/favicon-256.png" }],
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:url", content: "https://docs.keplr.app" }],
     ["meta", { property: "og:title", content: "Documentation | Keplr Wallet" }],
@@ -22,15 +22,15 @@ module.exports = {
     ],
     [
       "meta",
-      { property: "og:image", content: "https://docs.keplr.app/og-image.jpg" },
+      { property: "og:image", content: "https://docs.keplr.app/og-image.png" },
     ],
     ["meta", { name: "twitter:card", content: "summary_large_image" }],
   ],
   themeConfig: {
     custom: true,
-    editLinks: true,
-    repo: "chainapsis/keplr-extension",
-    docsRepo: "chainapsis/keplr-extension",
+    editLinks: false,
+    repo: "chainapsis/keplr-wallet",
+    docsRepo: "chainapsis/keplr-wallet",
     docsDir: "docs",
     logo: {
       src: "/Keplr_Black.png",
@@ -54,7 +54,14 @@ module.exports = {
       ],
     },
   },
-  plugins: [],
+  plugins: [
+    [
+      "sitemap",
+      {
+        hostname: "https://docs.keplr.app",
+      },
+    ],
+  ],
   markdown: {
     extendMarkdown: (md) => {
       md.use(require("markdown-it-container"), "suggest-chain-example-table");

@@ -1,4 +1,10 @@
-import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
+import {
+  Env,
+  Handler,
+  InternalHandler,
+  KeplrError,
+  Message,
+} from "@keplr-wallet/router";
 import {
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
@@ -25,9 +31,7 @@ import {
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-
-import { cosmos } from "@keplr-wallet/cosmos";
-import Long from "long";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export const getHandler: (service: KeyRingService) => Handler = (
   service: KeyRingService
@@ -112,7 +116,7 @@ export const getHandler: (service: KeyRingService) => Handler = (
           msg as ExportKeyRingDatasMsg
         );
       default:
-        throw new Error("Unknown msg type");
+        throw new KeplrError("keyring", 221, "Unknown msg type");
     }
   };
 };
@@ -315,13 +319,11 @@ const handleRequestSignDirectMsg: (
       msg.origin
     );
 
-    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+    const signDoc = SignDoc.fromPartial({
       bodyBytes: msg.signDoc.bodyBytes,
       authInfoBytes: msg.signDoc.authInfoBytes,
       chainId: msg.signDoc.chainId,
-      accountNumber: msg.signDoc.accountNumber
-        ? Long.fromString(msg.signDoc.accountNumber)
-        : undefined,
+      accountNumber: msg.signDoc.accountNumber,
     });
 
     const response = await service.requestSignDirect(

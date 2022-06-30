@@ -36,6 +36,7 @@ import { createSmartNavigatorProvider, SmartNavigator } from "./hooks";
 import { SettingScreen } from "./screens/setting";
 import { SettingSelectAccountScreen } from "./screens/setting/screens/select-account";
 import { ViewPrivateDataScreen } from "./screens/setting/screens/view-private-data";
+import { SettingChainListScreen } from "./screens/setting/screens/chain-list";
 import { WebScreen } from "./screens/web";
 import { RegisterIntroScreen } from "./screens/register";
 import {
@@ -96,13 +97,20 @@ import {
 import { BlurredBottomTabBar } from "./components/bottom-tabbar";
 import { UnlockScreen } from "./screens/unlock";
 import { KeplrVersionScreen } from "./screens/setting/screens/version";
+import {
+  SettingAddTokenScreen,
+  SettingManageTokensScreen,
+} from "./screens/setting/screens/token";
 import { ManageWalletConnectScreen } from "./screens/manage-wallet-connect";
 import {
   ImportFromExtensionIntroScreen,
   ImportFromExtensionScreen,
   ImportFromExtensionSetPasswordScreen,
 } from "./screens/register/import-from-extension";
-import { OsmosisWebpageScreen } from "./screens/web/webpages";
+import {
+  OsmosisWebpageScreen,
+  StargazeWebpageScreen,
+} from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
 
@@ -198,6 +206,15 @@ const {
     "Setting.Version": {
       upperScreenName: "Settings",
     },
+    "Setting.ChainList": {
+      upperScreenName: "ChainList",
+    },
+    "Setting.AddToken": {
+      upperScreenName: "Others",
+    },
+    "Setting.ManageTokens": {
+      upperScreenName: "Others",
+    },
     AddressBook: {
       upperScreenName: "AddressBooks",
     },
@@ -220,6 +237,9 @@ const {
       upperScreenName: "Web",
     },
     "Web.Osmosis": {
+      upperScreenName: "Web",
+    },
+    "Web.Stargaze": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -496,6 +516,8 @@ export const RegisterNavigation: FunctionComponent = () => {
 export const OtherNavigation: FunctionComponent = () => {
   const style = useStyle();
 
+  const navigation = useNavigation();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -626,6 +648,29 @@ export const OtherNavigation: FunctionComponent = () => {
         name="TxFailedResult"
         component={TxFailedResultScreen}
       />
+      <Stack.Screen
+        options={{
+          title: "Add Token",
+        }}
+        name="Setting.AddToken"
+        component={SettingAddTokenScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: "Manage Tokens",
+          headerRight: () => (
+            <HeaderRightButton
+              onPress={() => {
+                navigation.navigate("Setting.AddToken");
+              }}
+            >
+              <HeaderAddIcon />
+            </HeaderRightButton>
+          ),
+        }}
+        name="Setting.ManageTokens"
+        component={SettingManageTokensScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -720,6 +765,28 @@ export const AddressBookStackScreen: FunctionComponent = () => {
   );
 };
 
+export const ChainListStackScreen: FunctionComponent = () => {
+  const style = useStyle();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        ...BlurredHeaderScreenOptionsPreset,
+        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+      }}
+      headerMode="screen"
+    >
+      <Stack.Screen
+        options={{
+          title: "Chain List",
+        }}
+        name="Setting.ChainList"
+        component={SettingChainListScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
 export const WebNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
@@ -735,6 +802,7 @@ export const WebNavigation: FunctionComponent = () => {
         component={WebScreen}
       />
       <Stack.Screen name="Web.Osmosis" component={OsmosisWebpageScreen} />
+      <Stack.Screen name="Web.Stargaze" component={StargazeWebpageScreen} />
     </Stack.Navigator>
   );
 };
@@ -968,6 +1036,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
                 name="AddressBooks"
                 component={AddressBookStackScreen}
               />
+              <Stack.Screen name="ChainList" component={ChainListStackScreen} />
             </Stack.Navigator>
           </BugsnagNavigationContainer>
           {/* <ModalsRenderer /> */}

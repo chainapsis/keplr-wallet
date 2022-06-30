@@ -17,10 +17,10 @@ import { observer } from "mobx-react-lite";
 import {
   useInteractionInfo,
   useSignDocHelper,
-  useGasConfig,
   useFeeConfig,
   useMemoConfig,
   useSignDocAmountConfig,
+  useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { ADR36SignDocDetailsTab } from "./adr-36";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -52,19 +52,20 @@ export const SignPage: FunctionComponent = observer(() => {
   >();
 
   const current = chainStore.current;
-  // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
-  const gasConfig = useGasConfig(chainStore, current.chainId, 1);
+  // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
+  // In this case, there is no obligation to deal with it, but 0 gas is favorably allowed.
+  const gasConfig = useZeroAllowedGasConfig(chainStore, current.chainId, 0);
   const amountConfig = useSignDocAmountConfig(
     chainStore,
+    accountStore,
     current.chainId,
-    accountStore.getAccount(current.chainId).msgOpts,
     signer
   );
   const feeConfig = useFeeConfig(
     chainStore,
+    queriesStore,
     current.chainId,
     signer,
-    queriesStore.get(current.chainId).queryBalances,
     amountConfig,
     gasConfig
   );
@@ -141,24 +142,28 @@ export const SignPage: FunctionComponent = observer(() => {
     signInteractionStore.rejectAll();
   });
 
+  const currentChainId = chainStore.current.chainId;
+  const currentChainIdentifier = useMemo(
+    () => ChainIdHelper.parse(currentChainId).identifier,
+    [currentChainId]
+  );
+  const selectedChainId = chainStore.selectedChainId;
+  const selectedChainIdentifier = useMemo(
+    () => ChainIdHelper.parse(selectedChainId).identifier,
+    [selectedChainId]
+  );
+
   // Check that the request is delivered
   // and the chain is selected properly.
   // The chain store loads the saved chain infos including the suggested chain asynchronously on init.
   // So, it can be different the current chain and the expected selected chain for a moment.
-  const isLoaded = useMemo(() => {
+  const isLoaded = (() => {
     if (!signDocHelper.signDocWrapper) {
       return false;
     }
 
-    return (
-      ChainIdHelper.parse(chainStore.current.chainId).identifier ===
-      ChainIdHelper.parse(chainStore.selectedChainId).identifier
-    );
-  }, [
-    signDocHelper.signDocWrapper,
-    chainStore.current.chainId,
-    chainStore.selectedChainId,
-  ]);
+    return currentChainIdentifier === selectedChainIdentifier;
+  })();
 
   // If this is undefined, show the chain name on the header.
   // If not, show the alternative title.
@@ -192,7 +197,7 @@ export const SignPage: FunctionComponent = observer(() => {
       return false;
     }
 
-    return memoConfig.getError() != null || feeConfig.getError() != null;
+    return memoConfig.error != null || feeConfig.error != null;
   })();
 
   return (

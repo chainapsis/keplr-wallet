@@ -116,7 +116,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
 
     let isFeeLoading = false;
 
-    const error = feeConfig.getError();
+    const error = feeConfig.error;
     const errorText: string | undefined = (() => {
       if (error) {
         if (error.constructor === NotLoadedFeeError) {

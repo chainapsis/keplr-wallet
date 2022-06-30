@@ -5,6 +5,7 @@ import { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
 
 import { Buffer } from "buffer/";
+import { autorun } from "mobx";
 
 export class ObservableCosmwasmContractChainQuery<
   T
@@ -23,6 +24,18 @@ export class ObservableCosmwasmContractChainQuery<
       chainGetter,
       ObservableCosmwasmContractChainQuery.getUrlFromObj(contractAddress, obj)
     );
+
+    autorun(() => {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      if (
+        chainInfo.features?.includes("cosmwasm") &&
+        chainInfo.features.includes("wasmd_0.24+")
+      ) {
+        if (this.url.startsWith("/wasm/v1/")) {
+          this.setUrl(`/cosmwasm${this.url}`);
+        }
+      }
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -51,8 +64,8 @@ export class ObservableCosmwasmContractChainQuery<
 
   protected async fetchResponse(
     cancelToken: CancelToken
-  ): Promise<QueryResponse<T>> {
-    const response = await super.fetchResponse(cancelToken);
+  ): Promise<{ response: QueryResponse<T>; headers: any }> {
+    const { response, headers } = await super.fetchResponse(cancelToken);
 
     const wasmResult = (response.data as unknown) as
       | {
@@ -65,10 +78,13 @@ export class ObservableCosmwasmContractChainQuery<
     }
 
     return {
-      data: wasmResult.data as T,
-      status: response.status,
-      staled: false,
-      timestamp: Date.now(),
+      headers,
+      response: {
+        data: wasmResult.data as T,
+        status: response.status,
+        staled: false,
+        timestamp: Date.now(),
+      },
     };
   }
 }

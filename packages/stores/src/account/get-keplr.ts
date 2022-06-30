@@ -3,6 +3,10 @@ import { Keplr } from "@keplr-wallet/types";
 export const getKeplrFromWindow: () => Promise<
   Keplr | undefined
 > = async () => {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
   if (window.keplr) {
     return window.keplr;
   }
