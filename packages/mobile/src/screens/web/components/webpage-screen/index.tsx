@@ -20,6 +20,32 @@ import { WebViewStateContext } from "../context";
 import { URL } from "react-native-url-polyfill";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
+import { ChainInfo, KeplrMode } from "@keplr-wallet/types";
+import { MessageRequester } from "@keplr-wallet/router";
+import { autorun } from "mobx";
+
+// Due to the limitations of the current structure, it is not possible to approve the suggest chain and immediately reflect the updated chain infos.
+// Since chain infos cannot be reflected immediately, a problem may occur if a request comes in during that delay.
+// To solve this problem, logic is needed to wait until new chain infos are reflected after the suggest chain.
+// It's not an graceful solution. However, since it is a structural problem, we choose a solution that can solve it right away.
+// TODO: Solve this problem by structural way and remove the class below.
+class SuggestChainReceiverKeplr extends Keplr {
+  constructor(
+    version: string,
+    mode: KeplrMode,
+    requester: MessageRequester,
+    protected readonly suggestChainReceiver: (
+      chainInfo: ChainInfo
+    ) => Promise<void> | void
+  ) {
+    super(version, mode, requester);
+  }
+
+  async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+    await super.experimentalSuggestChain(chainInfo);
+    await this.suggestChainReceiver(chainInfo);
+  }
+}
 
 export const useInjectedSourceCode = () => {
   const [code, setCode] = useState<string | undefined>();
@@ -42,9 +68,12 @@ export const useInjectedSourceCode = () => {
 export const WebpageScreen: FunctionComponent<
   React.ComponentProps<typeof WebView> & {
     name: string;
+    experimentalOptions?: Partial<{
+      enableSuggestChain: boolean;
+    }>;
   }
 > = observer((props) => {
-  const { keyRingStore } = useStore();
+  const { chainStore, chainSuggestStore, keyRingStore } = useStore();
 
   const style = useStyle();
 
@@ -57,11 +86,27 @@ export const WebpageScreen: FunctionComponent<
     return "";
   });
 
+  // XXX: Support for suggest chains experimentally.
+  //      However, due to structural problems, it will not work properly if multiple `WebpageScreen` components exist at the same time.
+  //      However, due to the current UI design, multiple `WebpageScreen` components cannot exist at the same time.
+  //      Therefore, for now, we will postpone the solution of this issue.
+  const waitingSuggestedChainInfo = chainSuggestStore.waitingSuggestedChainInfo;
+  const enableSuggestChain = !!props.experimentalOptions?.enableSuggestChain;
+  useEffect(() => {
+    if (waitingSuggestedChainInfo) {
+      if (enableSuggestChain) {
+        chainSuggestStore.approve();
+      } else {
+        chainSuggestStore.reject();
+      }
+    }
+  }, [chainSuggestStore, enableSuggestChain, waitingSuggestedChainInfo]);
+
   // TODO: Set the version properly.
   const [keplr] = useState(
     () =>
-      new Keplr(
-        "0.0.1",
+      new SuggestChainReceiverKeplr(
+        "0.10.10",
         "core",
         new RNMessageRequesterExternal(() => {
           if (!webviewRef.current) {
@@ -76,7 +121,27 @@ export const WebpageScreen: FunctionComponent<
             url: currentURL,
             origin: new URL(currentURL).origin,
           };
-        })
+        }),
+        // Check the comments on `SuggestChainReceiverKeplr`
+        async (chainInfo) => {
+          if (chainStore.hasChain(chainInfo.chainId)) {
+            return;
+          }
+
+          return new Promise<void>((resolve) => {
+            const disposer = autorun(() => {
+              if (chainStore.hasChain(chainInfo.chainId)) {
+                resolve();
+
+                if (disposer) {
+                  disposer();
+                }
+              } else {
+                chainStore.getChainInfosFromBackground();
+              }
+            });
+          });
+        }
       )
   );
 

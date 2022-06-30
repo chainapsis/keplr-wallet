@@ -16,6 +16,7 @@ import {
   LedgerInitStore,
   IBCCurrencyRegsitrar,
   PermissionStore,
+  ChainSuggestStore,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -44,6 +45,7 @@ export class RootStore {
   public readonly permissionStore: PermissionStore;
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly signInteractionStore: SignInteractionStore;
+  public readonly chainSuggestStore: ChainSuggestStore;
 
   public readonly queriesStore: QueriesStore<
     [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
@@ -101,6 +103,7 @@ export class RootStore {
       new RNMessageRequesterInternal()
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
+    this.chainSuggestStore = new ChainSuggestStore(this.interactionStore);
 
     this.chainStore = new ChainStore(
       EmbedChainInfos,
