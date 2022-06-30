@@ -185,7 +185,10 @@ export class CosmosAccountImpl {
     const hexAdjustedRecipient = (recipient: string) => {
       const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
         .bech32PrefixAccAddr;
-      if (bech32prefix === "evmos" && recipient.startsWith("0x")) {
+      if (
+        (bech32prefix === "evmos" || bech32prefix === "inj") &&
+        recipient.startsWith("0x")
+      ) {
         // Validate hex address
         if (!isAddress(recipient)) {
           throw new Error("Invalid hex address");
@@ -430,6 +433,20 @@ export class CosmosAccountImpl {
       signOptions
     );
 
+    const getPublicKeyTypeUrl = (coinType: number, chainId: string): string => {
+      if (coinType === 60) {
+        if (chainId.startsWith("injective")) {
+          return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+        }
+
+        if (chainId.startsWith("evmos")) {
+          return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+        }
+      }
+
+      return "/cosmos.crypto.secp256k1.PubKey";
+    };
+
     const signedTx = TxRaw.encode({
       bodyBytes: TxBody.encode(
         TxBody.fromPartial({
@@ -441,10 +458,7 @@ export class CosmosAccountImpl {
         signerInfos: [
           {
             publicKey: {
-              typeUrl:
-                coinType === 60
-                  ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
-                  : "/cosmos.crypto.secp256k1.PubKey",
+              typeUrl: getPublicKeyTypeUrl(coinType, this.chainId),
               value: PubKey.encode({
                 key: Buffer.from(
                   signResponse.signature.pub_key.value,

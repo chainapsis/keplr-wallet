@@ -4,6 +4,7 @@ import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { StdFee } from "@cosmjs/launchpad";
 import { evmosToEth } from "@tharsis/address-converter";
+import { bech32 } from "bech32";
 
 export enum WalletStatus {
   NotInit = "NotInit",

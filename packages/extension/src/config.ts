@@ -103,6 +103,10 @@ import {
   INJECTIVE_RPC_CONFIG,
   INJECTIVE_REST_ENDPOINT,
   INJECTIVE_REST_CONFIG,
+  BETA_STRAIGHTEDGE_RPC_ENDPOINT,
+  BETA_STRAIGHTEDGE_RPC_CONFIG,
+  BETA_STRAIGHTEDGE_REST_ENDPOINT,
+  BETA_STRAIGHTEDGE_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1810,7 +1814,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
     beta: true,
   },
-   {
+  {
     rpc: INJECTIVE_RPC_ENDPOINT,
     rpcConfig: INJECTIVE_RPC_CONFIG,
     rest: INJECTIVE_REST_ENDPOINT,

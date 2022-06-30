@@ -104,7 +104,7 @@ export const AccountView: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
         </div>
       )}
-      {accountInfo.hasEvmosHexAddress && (
+      {accountInfo.hasEthereumHexAddress && (
         <div
           className={styleAccount.containerAccount}
           style={{ marginTop: "2px" }}

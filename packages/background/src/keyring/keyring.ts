@@ -406,7 +406,7 @@ export class KeyRing {
     // We should support the legacy coin type, so we determined that the coin type ties with the keystore.
     // To decrease the barrier of existing users, set the alternative coin type by force if the keystore version is prior than 1.2.
     if (this.keyStore) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       if (this.keyStore.version === "1" || this.keyStore.version === "1.1") {
         hasLegacyKeyStore = true;
@@ -414,7 +414,7 @@ export class KeyRing {
       }
     }
     for (const keyStore of this.multiKeyStore) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       if (keyStore.version === "1" || keyStore.version === "1.1") {
         hasLegacyKeyStore = true;
@@ -707,7 +707,7 @@ export class KeyRing {
       throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
-    // Sign with Evmos/Ethereum
+    // Sign with Ethereum
     const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
     if (coinType === 60) {
       return this.signEthereum(chainId, defaultCoinType, message);
