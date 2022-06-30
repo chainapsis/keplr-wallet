@@ -90,10 +90,6 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   walletUrlForStaking: Joi.string().uri(),
   bip44: SuggestingBIP44Schema.required(),
   bech32Config: Bech32ConfigSchema.required(),
-  ethereumKeytype: Joi.object({
-    signing: Joi.boolean().required(),
-    address: Joi.boolean().required(),
-  }),
   currencies: Joi.array()
     .min(1)
     .items(CurrencySchema, CW20CurrencySchema, Secret20CurrencySchema)
@@ -115,7 +111,9 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         "secretwasm",
         "ibc-transfer",
         "no-legacy-stdTx",
-        "ibc-go"
+        "ibc-go",
+        "eth-address-gen",
+        "eth-key-sign"
       )
     )
     .unique()

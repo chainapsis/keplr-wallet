@@ -1731,10 +1731,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     bip44: {
       coinType: 60,
     },
-    ethereumKeytype: {
-      signing: true,
-      address: true,
-    },
     bech32Config: Bech32Address.defaultBech32Config("evmos"),
     currencies: [
       {
@@ -1757,7 +1753,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 25000000000,
       high: 40000000000,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
     beta: true,
   },
 ];

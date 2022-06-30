@@ -409,8 +409,9 @@ export class CosmosAccountImpl {
       true
     );
 
-    const useEthereumSign = this.chainGetter.getChain(this.chainId)
-      .ethereumKeytype?.signing;
+    const useEthereumSign = this.chainGetter
+      .getChain(this.chainId)
+      .features?.includes("eth-key-sign");
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
