@@ -23,6 +23,7 @@ export const TokensCard: FunctionComponent<{
       accountStore.getAccount(chainStore.current.chainId).bech32Address
     );
 
+  // TODO: Add sorting rule
   const tokens = queryBalances.positiveNativeUnstakables
     .concat(queryBalances.nonNativeBalances)
     .slice(0, 2);
