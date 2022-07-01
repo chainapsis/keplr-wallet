@@ -116,7 +116,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
   {
     rpc: "https://rpc-secret.keplr.app",
     rest: "https://lcd-secret.keplr.app",
-    chainId: "secret-3",
+    chainId: "secret-4",
     chainName: "Secret Network",
     stakeCurrency: {
       coinDenom: "SCRT",
