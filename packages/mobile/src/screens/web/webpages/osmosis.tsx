@@ -7,6 +7,9 @@ export const OsmosisWebpageScreen: FunctionComponent = () => {
       name="Osmosis"
       source={{ uri: "https://app.osmosis.zone" }}
       originWhitelist={["https://app.osmosis.zone"]}
+      experimentalOptions={{
+        enableSuggestChain: true,
+      }}
     />
   );
 };
