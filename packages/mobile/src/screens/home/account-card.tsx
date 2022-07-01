@@ -11,6 +11,7 @@ import { LoadingSpinner } from "../../components/spinner";
 import { StakedTokenSymbol, TokenSymbol } from "../../components/token-symbol";
 import { useSmartNavigation } from "../../navigation";
 import { NetworkErrorView } from "./network-error-view";
+import { Dec } from "@keplr-wallet/unit";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -142,6 +143,7 @@ export const AccountCard: FunctionComponent<{
               text="Send"
               size="small"
               containerStyle={style.flatten(["min-width-72"])}
+              disabled={stakable.toDec().lte(new Dec(0))}
               onPress={() => {
                 smartNavigation.navigateSmart("Send", {
                   currency: chainStore.current.stakeCurrency.coinMinimalDenom,
@@ -177,6 +179,7 @@ export const AccountCard: FunctionComponent<{
               mode="light"
               size="small"
               containerStyle={style.flatten(["min-width-72"])}
+              disabled={stakable.toDec().lte(new Dec(0))}
               onPress={() => {
                 smartNavigation.navigateSmart("Validator.List", {});
               }}
