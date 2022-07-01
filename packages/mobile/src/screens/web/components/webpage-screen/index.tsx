@@ -20,9 +20,10 @@ import { WebViewStateContext } from "../context";
 import { URL } from "react-native-url-polyfill";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { ChainInfo, KeplrMode } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo, KeplrMode } from "@keplr-wallet/types";
 import { MessageRequester } from "@keplr-wallet/router";
 import { autorun } from "mobx";
+import { Mutable } from "utility-types";
 
 // Due to the limitations of the current structure, it is not possible to approve the suggest chain and immediately reflect the updated chain infos.
 // Since chain infos cannot be reflected immediately, a problem may occur if a request comes in during that delay.
@@ -42,8 +43,24 @@ class SuggestChainReceiverKeplr extends Keplr {
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
-    await super.experimentalSuggestChain(chainInfo);
-    await this.suggestChainReceiver(chainInfo);
+    // deep copy
+    const mutableChainInfo = JSON.parse(
+      JSON.stringify(chainInfo)
+    ) as Mutable<ChainInfo>;
+
+    mutableChainInfo.currencies = mutableChainInfo.currencies.map((cur) => {
+      const mutableCur = cur as Mutable<AppCurrency>;
+      // Although the coinImageUrl field exists in currency, displaying an icon through it is not yet standardized enough.
+      // And even in dApps themselves, there are many cases where this field is set incorrectly because it is not yet used by the app itself.
+      // For this reason, disable it for a moment.
+      // coinGeckoId is also disabled because it is often set incorrectly in dApp.
+      delete mutableCur.coinImageUrl;
+      delete mutableCur.coinGeckoId;
+      return mutableCur;
+    });
+
+    await super.experimentalSuggestChain(mutableChainInfo);
+    await this.suggestChainReceiver(mutableChainInfo);
   }
 }
 
