@@ -98,7 +98,6 @@ platform :ios do
       git_url: match_git_url,
       keychain_name: ENV["KEYCHAIN_NAME"],
       keychain_password: ENV["KEYCHAIN_PASSWORD"],
-      readonly: ENV["CI"] == "true"
     )
 
     increment_version_number(
