@@ -287,18 +287,7 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       this.queriesStore,
-      this.queriesStore,
-      undefined,
-      // Repeated re-rendering in react native is more fatal to performance.
-      // To alleviate this, load the cached in advance.
-      (chainId: string) => {
-        if (
-          this.chainStore.hasChain(chainId) &&
-          !this.chainStore.getChain(chainId).raw.hideInUI
-        ) {
-          return true;
-        }
-      }
+      this.queriesStore
     );
 
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar(
