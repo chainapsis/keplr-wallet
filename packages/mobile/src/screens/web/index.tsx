@@ -56,13 +56,6 @@ export const WebScreen: FunctionComponent = () => {
         }}
       />
       <WebpageImageButton
-        name="Umee"
-        source={require("../../assets/image/webpage/umee.png")}
-        onPress={() => {
-          smartNavigation.pushSmart("Web.Umee", {});
-        }}
-      />
-      <WebpageImageButton
         name="Junoswap"
         source={require("../../assets/image/webpage/junoswap.png")}
         nameContainerStyle={style.flatten(["flex-row"])}
