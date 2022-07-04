@@ -13,3 +13,16 @@ export const OsmosisWebpageScreen: FunctionComponent = () => {
     />
   );
 };
+
+export const OsmosisFrontierWebpageScreen: FunctionComponent = () => {
+  return (
+    <WebpageScreen
+      name="Osmosis"
+      source={{ uri: "https://frontier.osmosis.zone" }}
+      originWhitelist={["https://frontier.osmosis.zone"]}
+      experimentalOptions={{
+        enableSuggestChain: true,
+      }}
+    />
+  );
+};
