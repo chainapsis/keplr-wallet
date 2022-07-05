@@ -11,6 +11,7 @@ import { Appearance, AppState, Platform } from "react-native";
 import { DeepPartial } from "utility-types";
 
 const createStyleContext = <
+  Themes extends ReadonlyArray<string>,
   Custom extends Record<string, unknown>,
   Colors extends Record<string, string>,
   Widths extends Record<string, string | number>,
@@ -24,6 +25,7 @@ const createStyleContext = <
   createContext<
     | {
         builder: StyleBuilder<
+          Themes,
           Custom,
           Colors,
           Widths,
@@ -39,6 +41,7 @@ const createStyleContext = <
   >(undefined);
 
 export const createStyleProvider = <
+  Themes extends readonly ["dark"],
   Custom extends Record<string, unknown>,
   Colors extends Record<string, string>,
   Widths extends Record<string, string | number>,
@@ -47,18 +50,10 @@ export const createStyleProvider = <
   MarginSizes extends Record<string, string | number>,
   BorderWidths extends Record<string, number>,
   BorderRadiuses extends Record<string, number>,
-  Opacities extends Record<string, number>,
-  ThemeCustom = DeepPartial<Custom>,
-  ThemeColors = DeepPartial<Colors>,
-  ThemeWidths = DeepPartial<Widths>,
-  ThemeHeights = DeepPartial<Heights>,
-  ThemePaddingSizes = DeepPartial<PaddingSizes>,
-  ThemeMarginSizes = DeepPartial<MarginSizes>,
-  ThemeBorderWidths = DeepPartial<BorderWidths>,
-  ThemeBorderRadiuses = DeepPartial<BorderRadiuses>,
-  ThemeOpacities = DeepPartial<Opacities>
+  Opacities extends Record<string, number>
 >(
-  configs: {
+  config: {
+    themes: Themes;
     custom: Custom;
     colors: Colors;
     widths: Widths;
@@ -69,22 +64,23 @@ export const createStyleProvider = <
     borderRadiuses: BorderRadiuses;
     opacities: Opacities;
   },
-  themes?: {
-    dark?: {
-      custom?: ThemeCustom;
-      colors?: ThemeColors;
-      widths?: ThemeWidths;
-      heights?: ThemeHeights;
-      paddingSizes?: ThemePaddingSizes;
-      marginSizes?: ThemeMarginSizes;
-      borderWidths?: ThemeBorderWidths;
-      borderRadiuses?: ThemeBorderRadiuses;
-      opacities?: ThemeOpacities;
-    };
+  themeConfigs?: {
+    [K in Themes[number]]?: DeepPartial<{
+      custom: Custom;
+      colors: Colors;
+      widths: Widths;
+      heights: Heights;
+      paddingSizes: PaddingSizes;
+      marginSizes: MarginSizes;
+      borderWidths: BorderWidths;
+      borderRadiuses: BorderRadiuses;
+      opacities: Opacities;
+    }>;
   }
 ): {
   StyleProvider: FunctionComponent;
   useStyle: () => StyleBuilder<
+    Themes,
     Custom,
     Colors,
     Widths,
@@ -97,6 +93,7 @@ export const createStyleProvider = <
   >;
 } => {
   const context = createStyleContext<
+    Themes,
     Custom,
     Colors,
     Widths,
@@ -136,15 +133,13 @@ export const createStyleProvider = <
       }, []);
 
       const builder = useMemo(() => {
-        if (isDarkMode && themes?.dark) {
-          return new StyleBuilder(
-            configs,
-            isDarkMode ? "dark" : "light",
-            themes.dark
-          );
+        const builder = new StyleBuilder(config, themeConfigs);
+
+        if (isDarkMode) {
+          builder.setTheme("dark");
         }
 
-        return new StyleBuilder(configs);
+        return builder;
       }, [isDarkMode]);
 
       return (

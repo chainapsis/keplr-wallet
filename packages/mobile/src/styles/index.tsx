@@ -145,33 +145,9 @@ export const Colors = {
   "chain-list-element-dragging": "rgba(242, 242, 247, 0.8)",
 };
 
-export const DarkColors = {
-  primary: ColorPalette["blue-300"],
-
-  card: "rgba(15, 28, 50, 0.95)",
-  "background-secondary": ColorPalette["platinum-600"],
-  "background-tertiary": ColorPalette["platinum-700"],
-
-  "primary-10": "#494F6A",
-  "primary-50": "#505877",
-  "primary-100": "#576089",
-  "primary-200": "#606CA9",
-  "primary-300": "#5366C7",
-  "primary-400": "#6882FF",
-  "text-black-very-high": "#FFFFFF",
-  "text-black-high": "#F3F5F8",
-  "text-black-medium": "#E3E6EB",
-  "text-black-low": "#BABAC1",
-  "text-black-very-low": "#7E8794",
-  "text-black-very-very-low": "#71707C",
-  "text-black-very-very-very-low": "#5D5D68",
-  "border-white": "#71707C",
-  "theme-white": "#1C243D",
-  divider: "#71707C",
-};
-
 export const { StyleProvider, useStyle } = createStyleProvider(
   {
+    themes: ["dark"] as const,
     custom: {
       h1: {
         fontSize: 32,
@@ -627,12 +603,8 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         "blurred-tabbar-reducedTransparencyFallbackColor": "black",
       },
       colors: {
-        ...DarkColors,
-        "blurred-header-background": DarkColors["card"],
-        "blurred-tabbar-background": DarkColors["card"],
-
         "rect-button-default-ripple": "#333333",
-        "rect-button-default-underlay": DarkColors["text-black-medium"],
+        "rect-button-default-underlay": ColorPalette["gray-500"],
 
         "drawer-rect-button-underlay": "#F1F3FC",
       },
