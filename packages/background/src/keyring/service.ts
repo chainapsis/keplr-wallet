@@ -538,8 +538,7 @@ export class KeyRingService {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
 
     for (const path of paths) {
-      const key = await this.keyRing.getKey(
-        chainId,
+      const key = await this.keyRing.getKeyFromCoinType(
         path.coinType,
         (await this.chainsService.getChainEthereumKeyFeatures(chainId)).address
       );

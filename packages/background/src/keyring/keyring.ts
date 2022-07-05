@@ -207,6 +207,13 @@ export class KeyRing {
       : defaultCoinType;
   }
 
+  public getKeyFromCoinType(
+    coinType: number,
+    useEthereumAddress: boolean
+  ): Key {
+    return this.loadKey(coinType, useEthereumAddress);
+  }
+
   public async createMnemonicKey(
     kdf: "scrypt" | "sha256" | "pbkdf2",
     mnemonic: string,
