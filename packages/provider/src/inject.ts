@@ -26,14 +26,14 @@ import deepmerge from "deepmerge";
 import Long from "long";
 
 export interface ProxyRequest {
-  type: "proxy-request";
+  type: "fetchai:proxy-request-v1";
   id: string;
   method: keyof Keplr;
   args: any[];
 }
 
 export interface ProxyRequestResponse {
-  type: "proxy-request-response";
+  type: "fetchai:proxy-request-response-v1";
   id: string;
   result: Result | undefined;
 }
@@ -62,7 +62,7 @@ export class InjectedKeplr implements IKeplr {
       const message: ProxyRequest = parseMessage
         ? parseMessage(e.data)
         : e.data;
-      if (!message || message.type !== "proxy-request") {
+      if (!message || message.type !== "fetchai:proxy-request-v1") {
         return;
       }
 
@@ -149,7 +149,7 @@ export class InjectedKeplr implements IKeplr {
               );
 
         const proxyResponse: ProxyRequestResponse = {
-          type: "proxy-request-response",
+          type: "fetchai:proxy-request-response-v1",
           id: message.id,
           result: {
             return: JSONUint8Array.wrap(result),
@@ -159,7 +159,7 @@ export class InjectedKeplr implements IKeplr {
         eventListener.postMessage(proxyResponse);
       } catch (e) {
         const proxyResponse: ProxyRequestResponse = {
-          type: "proxy-request-response",
+          type: "fetchai:proxy-request-response-v1",
           id: message.id,
           result: {
             error: e.message || e.toString(),
@@ -180,7 +180,7 @@ export class InjectedKeplr implements IKeplr {
       .join("");
 
     const proxyMessage: ProxyRequest = {
-      type: "proxy-request",
+      type: "fetchai:proxy-request-v1",
       id,
       method,
       args: JSONUint8Array.wrap(args),
@@ -192,7 +192,10 @@ export class InjectedKeplr implements IKeplr {
           ? this.parseMessage(e.data)
           : e.data;
 
-        if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
+        if (
+          !proxyResponse ||
+          proxyResponse.type !== "fetchai:proxy-request-response-v1"
+        ) {
           return;
         }
 
