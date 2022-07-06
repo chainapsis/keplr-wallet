@@ -3,7 +3,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { KVStore, Debouncer, MemoryKVStore } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
-import { Env, KeplrError } from "@keplr-wallet/router";
+import { Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
@@ -241,5 +241,13 @@ export class ChainsService {
 
   addChainRemovedHandler(handler: ChainRemovedHandler) {
     this.onChainRemovedHandlers.push(handler);
+  }
+
+  changeChain(chainInfo: ChainInfo): void {
+    this.interactionKeeper.dispatchEvent(
+      WEBPAGE_PORT,
+      "chain-changed",
+      chainInfo
+    );
   }
 }

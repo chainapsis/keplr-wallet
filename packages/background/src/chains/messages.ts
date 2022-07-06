@@ -74,3 +74,31 @@ export class RemoveSuggestedChainInfoMsg extends Message<ChainInfoWithEmbed[]> {
     return RemoveSuggestedChainInfoMsg.type();
   }
 }
+
+export class ChangeChainMsg extends Message<void> {
+  public static type() {
+    return "change-chain";
+  }
+
+  constructor(public readonly chainInfo: ChainInfo) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainInfo) {
+      throw new Error("chain info not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ChangeChainMsg.type();
+  }
+}

@@ -34,6 +34,7 @@ const ChainElement: FunctionComponent<{
           });
           chainStore.selectChain(chainInfo.chainId);
           chainStore.saveLastViewChainId();
+          chainStore.changeChain(chainInfo);
         }
       }}
     >
