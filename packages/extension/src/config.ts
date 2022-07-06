@@ -1753,7 +1753,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 25000000000,
       high: 40000000000,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
     beta: true,
   },
 ];

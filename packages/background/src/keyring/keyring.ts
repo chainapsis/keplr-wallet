@@ -171,8 +171,15 @@ export class KeyRing {
     ];
   }
 
-  public getKey(chainId: string, defaultCoinType: number): Key {
-    return this.loadKey(this.computeKeyStoreCoinType(chainId, defaultCoinType));
+  public getKey(
+    chainId: string,
+    defaultCoinType: number,
+    useEthereumAddress: boolean
+  ): Key {
+    return this.loadKey(
+      this.computeKeyStoreCoinType(chainId, defaultCoinType),
+      useEthereumAddress
+    );
   }
 
   public getKeyStoreMeta(key: string): string {
@@ -198,8 +205,11 @@ export class KeyRing {
       : defaultCoinType;
   }
 
-  public getKeyFromCoinType(coinType: number): Key {
-    return this.loadKey(coinType);
+  public getKeyFromCoinType(
+    coinType: number,
+    useEthereumAddress: boolean
+  ): Key {
+    return this.loadKey(coinType, useEthereumAddress);
   }
 
   public async createMnemonicKey(
@@ -581,7 +591,7 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private loadKey(coinType: number): Key {
+  private loadKey(coinType: number, useEthereumAddress: boolean = false): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
@@ -595,7 +605,7 @@ export class KeyRing {
         throw new KeplrError("keyring", 150, "Ledger public key not set");
       }
 
-      if (coinType === 60) {
+      if (useEthereumAddress) {
         throw new KeplrError(
           "keyring",
           152,
@@ -615,7 +625,7 @@ export class KeyRing {
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
-      if (coinType === 60) {
+      if (useEthereumAddress) {
         // For Ethereum Key-Gen Only:
         const wallet = new Wallet(privKey.toBytes());
         const ethereumAddress = ETH.decoder(wallet.address);
@@ -692,7 +702,8 @@ export class KeyRing {
     env: Env,
     chainId: string,
     defaultCoinType: number,
-    message: Uint8Array
+    message: Uint8Array,
+    useEthereumSigning: boolean
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
@@ -703,8 +714,7 @@ export class KeyRing {
     }
 
     // Sign with Evmos/Ethereum
-    const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
-    if (coinType === 60) {
+    if (useEthereumSigning) {
       return this.signEthereum(chainId, defaultCoinType, message);
     }
 
@@ -741,7 +751,7 @@ export class KeyRing {
     }
   }
 
-  public async signEthereum(
+  private async signEthereum(
     chainId: string,
     defaultCoinType: number,
     message: Uint8Array
@@ -763,14 +773,7 @@ export class KeyRing {
       );
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
-      if (coinType !== 60) {
-        throw new KeplrError(
-          "keyring",
-          111,
-          "Invalid coin type passed in to Ethereum signing (expected 60)"
-        );
-      }
-
+      // Allow signing with Ethereum for chains with coinType !== 60
       const privKey = this.loadPrivKey(coinType);
 
       // Use ether js to sign Ethereum tx
