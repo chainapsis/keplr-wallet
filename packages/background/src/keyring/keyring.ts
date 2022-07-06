@@ -3,7 +3,6 @@ import {
   Mnemonic,
   PrivKeySecp256k1,
   PubKeySecp256k1,
-  RNG,
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
 import { LedgerService } from "../ledger";
@@ -73,7 +72,6 @@ export class KeyRing {
     private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
     private readonly ledgerKeeper: LedgerService,
-    private readonly rng: RNG,
     private readonly crypto: CommonCrypto
   ) {
     this.loaded = false;
@@ -173,8 +171,15 @@ export class KeyRing {
     ];
   }
 
-  public getKey(chainId: string, defaultCoinType: number): Key {
-    return this.loadKey(this.computeKeyStoreCoinType(chainId, defaultCoinType));
+  public getKey(
+    chainId: string,
+    defaultCoinType: number,
+    useEthereumAddress: boolean
+  ): Key {
+    return this.loadKey(
+      this.computeKeyStoreCoinType(chainId, defaultCoinType),
+      useEthereumAddress
+    );
   }
 
   public getKeyStoreMeta(key: string): string {
@@ -200,8 +205,11 @@ export class KeyRing {
       : defaultCoinType;
   }
 
-  public getKeyFromCoinType(coinType: number): Key {
-    return this.loadKey(coinType);
+  public getKeyFromCoinType(
+    coinType: number,
+    useEthereumAddress: boolean
+  ): Key {
+    return this.loadKey(coinType, useEthereumAddress);
   }
 
   public async createMnemonicKey(
@@ -224,7 +232,6 @@ export class KeyRing {
 
     this.mnemonicMasterSeed = Mnemonic.generateMasterSeedFromMnemonic(mnemonic);
     this.keyStore = await KeyRing.CreateMnemonicKeyStore(
-      this.rng,
       this.crypto,
       kdf,
       mnemonic,
@@ -262,7 +269,6 @@ export class KeyRing {
 
     this.privateKey = privateKey;
     this.keyStore = await KeyRing.CreatePrivateKeyStore(
-      this.rng,
       this.crypto,
       kdf,
       privateKey,
@@ -305,7 +311,6 @@ export class KeyRing {
     );
 
     const keyStore = await KeyRing.CreateLedgerKeyStore(
-      this.rng,
       this.crypto,
       kdf,
       this.ledgerPublicKey,
@@ -586,7 +591,7 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private loadKey(coinType: number): Key {
+  private loadKey(coinType: number, useEthereumAddress: boolean = false): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
@@ -600,7 +605,7 @@ export class KeyRing {
         throw new KeplrError("keyring", 150, "Ledger public key not set");
       }
 
-      if (coinType === 60) {
+      if (useEthereumAddress) {
         throw new KeplrError(
           "keyring",
           152,
@@ -620,7 +625,7 @@ export class KeyRing {
       const privKey = this.loadPrivKey(coinType);
       const pubKey = privKey.getPubKey();
 
-      if (coinType === 60) {
+      if (useEthereumAddress) {
         // For Ethereum Key-Gen Only:
         const wallet = new Wallet(privKey.toBytes());
         const ethereumAddress = ETH.decoder(wallet.address);
@@ -697,7 +702,8 @@ export class KeyRing {
     env: Env,
     chainId: string,
     defaultCoinType: number,
-    message: Uint8Array
+    message: Uint8Array,
+    useEthereumSigning: boolean
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
@@ -708,8 +714,7 @@ export class KeyRing {
     }
 
     // Sign with Evmos/Ethereum
-    const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
-    if (coinType === 60) {
+    if (useEthereumSigning) {
       return this.signEthereum(chainId, defaultCoinType, message);
     }
 
@@ -746,7 +751,7 @@ export class KeyRing {
     }
   }
 
-  public async signEthereum(
+  private async signEthereum(
     chainId: string,
     defaultCoinType: number,
     message: Uint8Array
@@ -768,14 +773,7 @@ export class KeyRing {
       );
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
-      if (coinType !== 60) {
-        throw new KeplrError(
-          "keyring",
-          111,
-          "Invalid coin type passed in to Ethereum signing (expected 60)"
-        );
-      }
-
+      // Allow signing with Ethereum for chains with coinType !== 60
       const privKey = this.loadPrivKey(coinType);
 
       // Use ether js to sign Ethereum tx
@@ -841,7 +839,6 @@ export class KeyRing {
     }
 
     const keyStore = await KeyRing.CreateMnemonicKeyStore(
-      this.rng,
       this.crypto,
       kdf,
       mnemonic,
@@ -873,7 +870,6 @@ export class KeyRing {
     }
 
     const keyStore = await KeyRing.CreatePrivateKeyStore(
-      this.rng,
       this.crypto,
       kdf,
       privateKey,
@@ -908,7 +904,6 @@ export class KeyRing {
     const publicKey = await this.ledgerKeeper.getPublicKey(env, bip44HDPath);
 
     const keyStore = await KeyRing.CreateLedgerKeyStore(
-      this.rng,
       this.crypto,
       kdf,
       publicKey,
@@ -1041,7 +1036,6 @@ export class KeyRing {
   }
 
   private static async CreateMnemonicKeyStore(
-    rng: RNG,
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     mnemonic: string,
@@ -1050,7 +1044,6 @@ export class KeyRing {
     bip44HDPath: BIP44HDPath
   ): Promise<KeyStore> {
     return await Crypto.encrypt(
-      rng,
       crypto,
       kdf,
       "mnemonic",
@@ -1062,7 +1055,6 @@ export class KeyRing {
   }
 
   private static async CreatePrivateKeyStore(
-    rng: RNG,
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     privateKey: Uint8Array,
@@ -1070,7 +1062,6 @@ export class KeyRing {
     meta: Record<string, string>
   ): Promise<KeyStore> {
     return await Crypto.encrypt(
-      rng,
       crypto,
       kdf,
       "privateKey",
@@ -1081,7 +1072,6 @@ export class KeyRing {
   }
 
   private static async CreateLedgerKeyStore(
-    rng: RNG,
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     publicKey: Uint8Array,
@@ -1090,7 +1080,6 @@ export class KeyRing {
     bip44HDPath: BIP44HDPath
   ): Promise<KeyStore> {
     return await Crypto.encrypt(
-      rng,
       crypto,
       kdf,
       "ledger",

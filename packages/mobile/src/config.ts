@@ -1362,37 +1362,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     hideInUI: true,
   },
   {
-    rpc: "https://rpc-impacthub.keplr.app",
-    rest: "https://lcd-impacthub.keplr.app",
-    chainId: "impacthub-3",
-    chainName: "IXO",
-    stakeCurrency: {
-      coinDenom: "IXO",
-      coinMinimalDenom: "uixo",
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("ixo"),
-    currencies: [
-      {
-        coinDenom: "IXO",
-        coinMinimalDenom: "uixo",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "IXO",
-        coinMinimalDenom: "uixo",
-        coinDecimals: 6,
-      },
-    ],
-    features: ["ibc-transfer"],
-    hideInUI: true,
-  },
-  {
     rpc: "https://rpc.bitcanna.io",
     rest: "https://lcd.bitcanna.io",
     chainId: "bitcanna-1",

@@ -1,19 +1,17 @@
-import { inject, singleton, delay } from "tsyringe";
-import { TYPES } from "../types";
-
 import { ChainInfo } from "@keplr-wallet/types";
 import Axios from "axios";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
 
-@singleton()
 export class ChainUpdaterService {
-  constructor(
-    @inject(TYPES.UpdaterStore) protected readonly kvStore: KVStore,
-    @inject(delay(() => ChainsService))
-    protected readonly chainsService: ChainsService
-  ) {}
+  protected chainsService!: ChainsService;
+
+  constructor(protected readonly kvStore: KVStore) {}
+
+  init(chainsService: ChainsService) {
+    this.chainsService = chainsService;
+  }
 
   async putUpdatedPropertyToChainInfo(
     chainInfo: ChainInfo
