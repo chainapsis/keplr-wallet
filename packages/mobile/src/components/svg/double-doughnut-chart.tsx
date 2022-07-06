@@ -192,11 +192,13 @@ const useAnimated = (
 
 export const DoubleDoughnutChart: FunctionComponent<{
   size?: number;
-  data: [number, number];
+  // Only two data are allowed. If it is [0, 0], a gray ring is shown behind. If undefined, nothing is displayed.
+  data: [number, number] | undefined;
 }> = ({ data, size = 188 }) => {
   const [targetFirstRatio] = useState(() => new Animated.Value<number>(0));
   const [targetSecondRatio] = useState(() => new Animated.Value<number>(0));
 
+  const [valueDataIsLoaded] = useState(() => new Animated.Value(data ? 1 : 0));
   const [backRingOpacity] = useState(() => new Animated.Value(0));
 
   const [targetFirstArcStartAngleInDegree] = useState(
@@ -212,8 +214,9 @@ export const DoubleDoughnutChart: FunctionComponent<{
     () => new Animated.Value(90)
   );
 
-  const firstData = data[0];
-  const secondData = data[1];
+  const dataIsLoaded = !!data;
+  const firstData = data ? data[0] : 0;
+  const secondData = data ? data[1] : 0;
   const sumData = firstData + secondData;
 
   // If animated node is updated too often, some strange glitches occur.
@@ -238,6 +241,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
         debouncer.current = setTimeout(() => {
           targetFirstRatio.setValue(firstRatio);
           targetSecondRatio.setValue(secondRatio);
+          valueDataIsLoaded.setValue(dataIsLoaded ? 1 : 0);
 
           debouncer.current = undefined;
         }, 250);
@@ -245,6 +249,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
         debouncer.current = setTimeout(() => {
           targetFirstRatio.setValue(firstRatio);
           targetSecondRatio.setValue(secondRatio);
+          valueDataIsLoaded.setValue(dataIsLoaded ? 1 : 0);
 
           debouncer.current = undefined;
         }, 100);
@@ -257,11 +262,20 @@ export const DoubleDoughnutChart: FunctionComponent<{
       debouncer.current = setTimeout(() => {
         targetFirstRatio.setValue(firstRatio);
         targetSecondRatio.setValue(secondRatio);
+        valueDataIsLoaded.setValue(dataIsLoaded ? 1 : 0);
 
         debouncer.current = undefined;
       }, 500);
     }
-  }, [firstData, secondData, sumData, targetFirstRatio, targetSecondRatio]);
+  }, [
+    firstData,
+    secondData,
+    sumData,
+    targetFirstRatio,
+    targetSecondRatio,
+    dataIsLoaded,
+    valueDataIsLoaded,
+  ]);
 
   Animated.useCode(() => {
     return Animated.block([
@@ -349,6 +363,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
       ),
       Animated.cond(
         Animated.and(
+          Animated.greaterThan(valueDataIsLoaded, 0),
           Animated.lessOrEq(targetFirstRatio, 0),
           Animated.lessOrEq(targetSecondRatio, 0)
         ),
@@ -363,6 +378,8 @@ export const DoubleDoughnutChart: FunctionComponent<{
     targetFirstArcEndAngleInDegree,
     targetSecondArcEndAngleInDegree,
     targetSecondArcStartAngleInDegree,
+    valueDataIsLoaded,
+    backRingOpacity,
   ]);
 
   const animBackRingOpacity = useAnimated(backRingOpacity, 2);

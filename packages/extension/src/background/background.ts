@@ -22,10 +22,10 @@ init(
   new ContentScriptMessageRequester(),
   EmbedChainInfos,
   PrivilegedOrigins,
-  (array) => {
-    return Promise.resolve(crypto.getRandomValues(array));
-  },
   {
+    rng: (array) => {
+      return Promise.resolve(crypto.getRandomValues(array));
+    },
     scrypt: async (text: string, params: ScryptParams) => {
       return await scrypt.scrypt(
         Buffer.from(text),

@@ -1,8 +1,3 @@
-import "reflect-metadata";
-
-import { container } from "tsyringe";
-import { TYPES } from "./types";
-
 import { MessageRequester, Router } from "@keplr-wallet/router";
 
 import * as PersistentMemory from "./persistent-memory/internal";
@@ -29,7 +24,6 @@ export * from "./permission";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
-import { RNG } from "@keplr-wallet/crypto";
 import { CommonCrypto } from "./keyring";
 import { Notification } from "./tx";
 import { LedgerOptions } from "./ledger/options";
@@ -42,79 +36,93 @@ export function init(
   embedChainInfos: ChainInfo[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
-  rng: RNG,
   commonCrypto: CommonCrypto,
   notification: Notification,
-  ledgerOptions: Partial<LedgerOptions> = {}
+  ledgerOptions: Partial<LedgerOptions> = {},
+  experimentalOptions: Partial<{
+    suggestChain: Partial<{
+      // Chains registered as suggest chains are managed in memory.
+      // In other words, it disappears when the app is closed.
+      // General operation should be fine. This is a temporary solution for the mobile app.
+      useMemoryKVStore: boolean;
+    }>;
+  }> = {}
 ) {
-  container.register(TYPES.ChainsEmbedChainInfos, {
-    useValue: embedChainInfos,
-  });
+  const interactionService = new Interaction.InteractionService(
+    eventMsgRequester,
+    commonCrypto.rng
+  );
 
-  container.register(TYPES.EventMsgRequester, {
-    useValue: eventMsgRequester,
-  });
-  container.register(TYPES.RNG, { useValue: rng });
-  container.register(TYPES.CommonCrypto, { useValue: commonCrypto });
-  container.register(TYPES.Notification, { useValue: notification });
+  const persistentMemoryService = new PersistentMemory.PersistentMemoryService();
 
-  container.register(TYPES.ChainsStore, { useValue: storeCreator("chains") });
-  container.register(TYPES.InteractionStore, {
-    useValue: storeCreator("interaction"),
-  });
-  container.register(TYPES.KeyRingStore, { useValue: storeCreator("keyring") });
-  container.register(TYPES.LedgerStore, { useValue: storeCreator("ledger") });
-  container.register(TYPES.LedgerOptions, { useValue: ledgerOptions });
+  const permissionService = new Permission.PermissionService(
+    storeCreator("permission"),
+    privilegedOrigins
+  );
 
-  container.register(TYPES.PermissionStore, {
-    useValue: storeCreator("permission"),
-  });
-  container.register(TYPES.PermissionServicePrivilegedOrigins, {
-    useValue: privilegedOrigins,
-  });
-  container.register(TYPES.PersistentMemoryStore, {
-    useValue: storeCreator("persistent-memory"),
-  });
-  container.register(TYPES.SecretWasmStore, {
-    useValue: storeCreator("secretwasm"),
-  });
-  container.register(TYPES.TokensStore, { useValue: storeCreator("tokens") });
-  container.register(TYPES.TxStore, {
-    useValue: storeCreator("background-tx"),
-  });
-  container.register(TYPES.UpdaterStore, { useValue: storeCreator("updator") });
+  const chainUpdaterService = new Updater.ChainUpdaterService(
+    storeCreator("updator")
+  );
 
-  const interactionService = container.resolve(Interaction.InteractionService);
+  const tokensService = new Tokens.TokensService(storeCreator("tokens"));
+
+  const chainsService = new Chains.ChainsService(
+    storeCreator("chains"),
+    embedChainInfos,
+    {
+      useMemoryKVStoreForSuggestChain:
+        experimentalOptions.suggestChain?.useMemoryKVStore,
+    }
+  );
+
+  const ledgerService = new Ledger.LedgerService(
+    storeCreator("ledger"),
+    ledgerOptions
+  );
+
+  const keyRingService = new KeyRing.KeyRingService(
+    storeCreator("keyring"),
+    embedChainInfos,
+    commonCrypto
+  );
+
+  const secretWasmService = new SecretWasm.SecretWasmService(
+    storeCreator("secretwasm")
+  );
+
+  const backgroundTxService = new BackgroundTx.BackgroundTxService(
+    notification
+  );
+
+  interactionService.init();
+  persistentMemoryService.init();
+  permissionService.init(interactionService, chainsService, keyRingService);
+  chainUpdaterService.init(chainsService);
+  tokensService.init(
+    interactionService,
+    permissionService,
+    chainsService,
+    keyRingService
+  );
+  chainsService.init(chainUpdaterService, interactionService);
+  ledgerService.init(interactionService);
+  keyRingService.init(
+    interactionService,
+    chainsService,
+    permissionService,
+    ledgerService
+  );
+  secretWasmService.init(chainsService, keyRingService, permissionService);
+  backgroundTxService.init(chainsService, permissionService);
+
   Interaction.init(router, interactionService);
-
-  const persistentMemory = container.resolve(
-    PersistentMemory.PersistentMemoryService
-  );
-  PersistentMemory.init(router, persistentMemory);
-
-  const permissionService = container.resolve(Permission.PermissionService);
+  PersistentMemory.init(router, persistentMemoryService);
   Permission.init(router, permissionService);
-
-  const chainUpdaterService = container.resolve(Updater.ChainUpdaterService);
   Updater.init(router, chainUpdaterService);
-
-  const tokensService = container.resolve(Tokens.TokensService);
   Tokens.init(router, tokensService);
-
-  const chainsService = container.resolve(Chains.ChainsService);
   Chains.init(router, chainsService);
-
-  const ledgerService = container.resolve(Ledger.LedgerService);
   Ledger.init(router, ledgerService);
-
-  const keyRingService = container.resolve(KeyRing.KeyRingService);
   KeyRing.init(router, keyRingService);
-
-  const secretWasmService = container.resolve(SecretWasm.SecretWasmService);
   SecretWasm.init(router, secretWasmService);
-
-  const backgroundTxService = container.resolve(
-    BackgroundTx.BackgroundTxService
-  );
   BackgroundTx.init(router, backgroundTxService);
 }

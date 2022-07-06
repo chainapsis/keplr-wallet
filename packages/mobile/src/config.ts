@@ -116,7 +116,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
   {
     rpc: "https://rpc-secret.keplr.app",
     rest: "https://lcd-secret.keplr.app",
-    chainId: "secret-3",
+    chainId: "secret-4",
     chainName: "Secret Network",
     stakeCurrency: {
       coinDenom: "SCRT",
@@ -1359,37 +1359,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ["ibc-transfer", "ibc-go"],
-    hideInUI: true,
-  },
-  {
-    rpc: "https://rpc-impacthub.keplr.app",
-    rest: "https://lcd-impacthub.keplr.app",
-    chainId: "impacthub-3",
-    chainName: "IXO",
-    stakeCurrency: {
-      coinDenom: "IXO",
-      coinMinimalDenom: "uixo",
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("ixo"),
-    currencies: [
-      {
-        coinDenom: "IXO",
-        coinMinimalDenom: "uixo",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "IXO",
-        coinMinimalDenom: "uixo",
-        coinDecimals: 6,
-      },
-    ],
-    features: ["ibc-transfer"],
     hideInUI: true,
   },
   {

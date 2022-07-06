@@ -109,7 +109,10 @@ import {
 } from "./screens/register/import-from-extension";
 import {
   OsmosisWebpageScreen,
+  OsmosisFrontierWebpageScreen,
   StargazeWebpageScreen,
+  UmeeWebpageScreen,
+  JunoswapWebpageScreen,
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
@@ -239,7 +242,16 @@ const {
     "Web.Osmosis": {
       upperScreenName: "Web",
     },
+    "Web.OsmosisFrontier": {
+      upperScreenName: "Web",
+    },
     "Web.Stargaze": {
+      upperScreenName: "Web",
+    },
+    "Web.Umee": {
+      upperScreenName: "Web",
+    },
+    "Web.Junoswap": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -802,7 +814,13 @@ export const WebNavigation: FunctionComponent = () => {
         component={WebScreen}
       />
       <Stack.Screen name="Web.Osmosis" component={OsmosisWebpageScreen} />
+      <Stack.Screen
+        name="Web.OsmosisFrontier"
+        component={OsmosisFrontierWebpageScreen}
+      />
       <Stack.Screen name="Web.Stargaze" component={StargazeWebpageScreen} />
+      <Stack.Screen name="Web.Umee" component={UmeeWebpageScreen} />
+      <Stack.Screen name="Web.Junoswap" component={JunoswapWebpageScreen} />
     </Stack.Navigator>
   );
 };
