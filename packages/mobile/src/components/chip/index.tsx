@@ -3,7 +3,7 @@ import { useStyle } from "../../styles";
 import { Text, View } from "react-native";
 
 export const Chip: FunctionComponent<{
-  color?: "primary" | "secondary" | "danger";
+  color?: "primary" | "danger";
   mode?: "fill" | "light" | "outline";
   text: string;
 }> = ({ color = "primary", mode = "fill", text }) => {

@@ -13,7 +13,7 @@ export const CardHeaderWithButton: FunctionComponent<{
 
   onPress?: () => void;
 
-  buttonColor?: "primary" | "secondary" | "danger";
+  buttonColor?: "primary" | "danger";
   buttonMode?: "fill" | "light" | "outline" | "text";
   buttonStyle?: ViewStyle;
   buttonContainerStyle?: ViewStyle;

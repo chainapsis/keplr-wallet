@@ -327,40 +327,6 @@ export const { StyleProvider, useStyle } = createStyleProvider(
 
         "drawer-rect-button-underlay": "#F1F3FC",
 
-        // Belows are for the button props and may not be used as styles.
-        "button-primary": Colors.primary,
-        "button-secondary": Colors.secondary,
-        "button-danger": Colors.danger,
-        "button-primary-text-pressed": Colors["primary-500"],
-        "button-secondary-text-pressed": Colors["secondary-500"],
-        "button-danger-text-pressed": Colors["danger-500"],
-        "button-primary-disabled": Colors["text-black-very-very-low"],
-        "button-secondary-disabled": Colors["text-black-very-very-low"],
-        "button-danger-disabled": Colors["text-black-very-very-low"],
-        "button-primary-light": Colors["primary-50"],
-        "button-secondary-light": Colors["secondary-50"],
-        "button-danger-light": Colors["danger-50"],
-        // For Android, note that you can't set the opacity of the ripple color.
-        "button-primary-fill-ripple": Colors["primary-600"],
-        "button-primary-light-ripple": Colors["primary-100"],
-        "button-primary-outline-ripple": Colors["primary-100"],
-        "button-secondary-fill-ripple": Colors["secondary-600"],
-        "button-secondary-light-ripple": Colors["secondary-100"],
-        "button-secondary-outline-ripple": Colors["secondary-100"],
-        "button-danger-fill-ripple": Colors["danger-600"],
-        "button-danger-light-ripple": Colors["danger-100"],
-        "button-danger-outline-ripple": Colors["danger-100"],
-        // For IOS, note that we just set the active opacity as 1, thus, unlike Android, it is opaque.
-        "button-primary-fill-underlay": Colors["primary-500"],
-        "button-primary-light-underlay": Colors["primary-100"],
-        "button-primary-outline-underlay": Colors["primary-50"],
-        "button-secondary-fill-underlay": Colors["secondary-500"],
-        "button-secondary-light-underlay": Colors["secondary-100"],
-        "button-secondary-outline-underlay": Colors["secondary-50"],
-        "button-danger-fill-underlay": Colors["danger-500"],
-        "button-danger-light-underlay": Colors["danger-100"],
-        "button-danger-outline-underlay": Colors["danger-50"],
-
         // Belows are for the chip props and may not be used as styles.
         "chip-light-primary": Colors["primary-50"],
         "chip-light-secondary": Colors["secondary-50"],

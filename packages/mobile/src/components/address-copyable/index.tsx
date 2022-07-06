@@ -34,8 +34,9 @@ export const AddressCopyable: FunctionComponent<{
         Clipboard.setString(address);
         setTimer(2000);
       }}
-      rippleColor={style.get("color-button-primary-outline-ripple").color}
-      underlayColor={style.get("color-button-primary-outline-underlay").color}
+      // TODO
+      rippleColor={"#FFFFFF"}
+      underlayColor={"#FFFFFF"}
       activeOpacity={1}
     >
       <Text style={style.flatten(["subtitle3", "color-primary-400"])}>
