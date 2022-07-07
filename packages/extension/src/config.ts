@@ -1333,15 +1333,15 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
-        coinDenom: "RUN",
-        coinMinimalDenom: "urun",
+        coinDenom: "IST",
+        coinMinimalDenom: "uist",
         coinDecimals: 6,
       },
     ],
     feeCurrencies: [
       {
-        coinDenom: "RUN",
-        coinMinimalDenom: "urun",
+        coinDenom: "IST",
+        coinMinimalDenom: "uist",
         coinDecimals: 6,
       },
     ],
