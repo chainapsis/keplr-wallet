@@ -70,6 +70,22 @@ export const ColorPalette = {
   black: "#000000",
 };
 
+export const TextColors = {
+  "text-emphasis": ColorPalette["blue-400"],
+  "text-high": ColorPalette["platinum-700"],
+  "text-middle": ColorPalette["platinum-400"],
+  "text-low": ColorPalette["gray-300"],
+  "text-label": ColorPalette["platinum-300"],
+};
+
+export const DarkThemeTextColors = {
+  "text-emphasis": ColorPalette["blue-300"],
+  "text-high": ColorPalette["platinum-50"],
+  "text-middle": ColorPalette["platinum-100"],
+  "text-low": ColorPalette["platinum-300"],
+  "text-label": ColorPalette["platinum-200"],
+};
+
 export const Colors = {
   primary: ColorPalette["blue-400"],
 
@@ -339,6 +355,7 @@ export const { StyleProvider, useStyle } = createStyleProvider(
     colors: {
       ...ColorPalette,
       ...Colors,
+      ...TextColors,
       ...{
         "splash-background": "#FBF8FF",
 
@@ -595,6 +612,7 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       },
       colors: {
         ...DarkColors,
+        ...DarkThemeTextColors,
         "blurred-header-background": DarkColors["card"],
         "blurred-tabbar-background": DarkColors["card"],
 

@@ -204,12 +204,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
       >
         <Text
           style={StyleSheet.flatten([
-            style.flatten([
-              "subtitle3",
-              "color-platinum-400",
-              "dark:color-platinum-200",
-              "margin-bottom-3",
-            ]),
+            style.flatten(["subtitle3", "color-text-label", "margin-bottom-3"]),
             labelStyle,
           ])}
         >

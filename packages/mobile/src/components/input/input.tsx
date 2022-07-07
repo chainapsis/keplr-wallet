@@ -45,12 +45,7 @@ export const TextInput = React.forwardRef<
       {props.label ? (
         <Text
           style={StyleSheet.flatten([
-            style.flatten([
-              "subtitle3",
-              "color-platinum-400",
-              "dark:color-platinum-200",
-              "margin-bottom-3",
-            ]),
+            style.flatten(["subtitle3", "color-text-label", "margin-bottom-3"]),
             props.labelStyle,
           ])}
         >
@@ -86,15 +81,25 @@ export const TextInput = React.forwardRef<
           <NativeTextInput
             placeholderTextColor={
               props.placeholderTextColor ??
-              style.get("color-text-black-low").color
+              style.flatten(
+                ["color-gray-300"],
+                [!(props.editable ?? true) && "dark:color-platinum-300"]
+              ).color
             }
             style={StyleSheet.flatten([
-              style.flatten([
-                "padding-0",
-                "body2-in-text-input",
-                "color-text-black-medium",
-                "flex-1",
-              ]),
+              style.flatten(
+                [
+                  "padding-0",
+                  "body2-in-text-input",
+                  "color-gray-600",
+                  "dark:color-platinum-50",
+                  "flex-1",
+                ],
+                [
+                  !(props.editable ?? true) && "color-gray-300",
+                  !(props.editable ?? true) && "dark:color-platinum-300",
+                ]
+              ),
               Platform.select({
                 ios: {},
                 android: {

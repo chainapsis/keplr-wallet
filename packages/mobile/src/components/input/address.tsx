@@ -135,7 +135,10 @@ export const AddressInput: FunctionComponent<
                 }}
               >
                 <AddressBookIcon
-                  color={style.get("color-primary").color}
+                  color={
+                    style.flatten(["color-blue-400", "dark:color-blue-100"])
+                      .color
+                  }
                   height={18}
                 />
               </TouchableOpacity>
