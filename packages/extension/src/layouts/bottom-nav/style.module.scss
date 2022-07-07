@@ -1,0 +1,30 @@
+.bottomNavContainer {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  height: 48px;
+  align-items: center;
+  cursor: pointer;
+  background-color: #fff;
+
+  &.active {
+    color: #3b82f6;
+  }
+
+  img {
+    height: 18px;
+    width: 18px;
+    object-fit: contain;
+  }
+  .title {
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
