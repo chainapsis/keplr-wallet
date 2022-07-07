@@ -47,7 +47,8 @@ export const TextInput = React.forwardRef<
           style={StyleSheet.flatten([
             style.flatten([
               "subtitle3",
-              "color-text-black-medium",
+              "color-platinum-400",
+              "dark:color-platinum-200",
               "margin-bottom-3",
             ]),
             props.labelStyle,
@@ -61,15 +62,19 @@ export const TextInput = React.forwardRef<
           style.flatten(
             [
               "background-color-white",
+              "dark:background-color-platinum-600",
               "padding-x-11",
               "padding-y-12",
               "border-radius-4",
               "border-width-1",
-              "border-color-border-white",
+              "border-color-gray-100@50%",
+              "dark:border-color-platinum-500@50%",
             ],
             [
-              props.error ? "border-color-error" : undefined,
-              !(props.editable ?? true) && "background-color-disabled",
+              props.error ? "border-color-red-200" : undefined,
+              props.error ? "dark:border-color-red-400" : undefined,
+              !(props.editable ?? true) && "background-color-gray-50",
+              !(props.editable ?? true) && "dark:background-color-platinum-500",
             ]
           ),
           props.inputContainerStyle,
@@ -115,7 +120,8 @@ export const TextInput = React.forwardRef<
                 style.flatten([
                   "absolute",
                   "text-caption2",
-                  "color-primary",
+                  "color-blue-400",
+                  "dark:color-blue-300",
                   "margin-top-2",
                   "margin-left-4",
                 ]),
@@ -136,7 +142,7 @@ export const TextInput = React.forwardRef<
               style.flatten([
                 "absolute",
                 "text-caption2",
-                "color-error",
+                "color-red-400",
                 "margin-top-2",
                 "margin-left-4",
               ]),
