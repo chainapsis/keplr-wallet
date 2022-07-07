@@ -1032,15 +1032,15 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
       },
       {
-        coinDenom: "RUN",
-        coinMinimalDenom: "urun",
+        coinDenom: "IST",
+        coinMinimalDenom: "uist",
         coinDecimals: 6,
       },
     ],
     feeCurrencies: [
       {
-        coinDenom: "RUN",
-        coinMinimalDenom: "urun",
+        coinDenom: "IST",
+        coinMinimalDenom: "uist",
         coinDecimals: 6,
       },
     ],
