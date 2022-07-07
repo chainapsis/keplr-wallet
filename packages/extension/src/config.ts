@@ -1723,14 +1723,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: "utgd",
       coinDecimals: 6,
     },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/tgrade-mainnet/stake"
-        : "http://localhost:8080/#/tgrade-mainnet/stake",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/tgrade-mainnet/stake"
-        : "http://localhost:8080/#/tgrade-mainnet/stake",
     bip44: {
       coinType: 118,
     },
