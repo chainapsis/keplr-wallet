@@ -2,6 +2,7 @@ import { StyleBuilderDefinitions, StaticStyles } from "./types";
 import { StyleSheet } from "react-native";
 import { UnionToIntersection, DeepPartial } from "utility-types";
 import deepmerge from "deepmerge";
+import colorAlpha from "color-alpha";
 
 export class DefinitionKebabCase {
   protected startIndex: number = -1;
@@ -102,6 +103,10 @@ export class StyleBuilder<
     for (const key in config) {
       const segments = new DefinitionKebabCase(key).segments();
       for (const segment of segments) {
+        if (segment.includes("/")) {
+          throw new Error(`Confg (${key}) has slash (${segment})`);
+        }
+
         if (segment.includes(":")) {
           throw new Error(`Confg (${key}) has colon (${segment})`);
         }
@@ -295,6 +300,31 @@ export class StyleBuilder<
     return StyleSheet.flatten(styles);
   }
 
+  protected calculateColorDefinition(definition: string): string {
+    const index = definition.indexOf("@");
+    if (index >= 0) {
+      const str = definition.slice(index + 1);
+      if (str.length === 0 || str[str.length - 1] !== "%") {
+        throw new Error(`Invalid color definition with alpha: ${definition}`);
+      }
+
+      const alpha = parseFloat(str.slice(0, str.length - 1));
+      if (Number.isNaN(alpha)) {
+        throw new Error(`Invalid color definition with alpha: ${definition}`);
+      }
+
+      if (alpha < 0 || alpha > 100) {
+        throw new Error(`Alpha is out of range: ${definition}`);
+      }
+
+      const color = definition.slice(0, index);
+
+      return colorAlpha(this.currentConfig.colors[color], alpha / 100);
+    }
+
+    return this.currentConfig.colors[definition];
+  }
+
   get<
     D extends DefinitionsWithThemes<
       Themes,
@@ -331,12 +361,12 @@ export class StyleBuilder<
     switch (segment.read()) {
       case "color":
         return {
-          color: this.currentConfig.colors[segment.flush()],
+          color: this.calculateColorDefinition(segment.flush()),
         };
       case "background":
         if (segment.read() === "color") {
           return {
-            backgroundColor: this.currentConfig.colors[segment.flush()],
+            backgroundColor: this.calculateColorDefinition(segment.flush()),
           };
         }
         throw new Error(`Failed to get style of ${definition}`);
@@ -376,7 +406,7 @@ export class StyleBuilder<
         switch (segment.read()) {
           case "color":
             return {
-              borderColor: this.currentConfig.colors[segment.flush()],
+              borderColor: this.calculateColorDefinition(segment.flush()),
             };
           case "width":
             switch (segment.peek()) {
