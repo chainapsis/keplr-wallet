@@ -27,6 +27,7 @@ export const ImportLedgerIntro: FunctionComponent<{
       color="primary"
       outline
       block
+      size="lg"
       onClick={(e) => {
         e.preventDefault();
 
@@ -145,6 +146,7 @@ export const ImportLedgerPage: FunctionComponent<{
           color="primary"
           type="submit"
           block
+          size="lg"
           data-loading={registerConfig.isLoading}
         >
           <FormattedMessage id="register.create.button.next" />

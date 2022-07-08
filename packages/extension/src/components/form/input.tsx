@@ -22,7 +22,11 @@ export interface InputProps {
   text?: string | React.ReactElement;
   error?: string;
 
+  prepend?: React.ReactElement;
   append?: React.ReactElement;
+
+  formGroupClassName?: string;
+  inputGroupClassName?: string;
 }
 
 // eslint-disable-next-line react/display-name
@@ -30,17 +34,22 @@ export const Input = forwardRef<
   HTMLInputElement,
   InputProps & React.InputHTMLAttributes<HTMLInputElement>
 >((props, ref) => {
-  const { type, label, text, error, append } = props;
+  const {
+    className,
+    formGroupClassName,
+    inputGroupClassName,
+    type,
+    label,
+    text,
+    error,
+    prepend,
+    append,
 
-  const attributes = { ...props };
-  delete attributes.className;
-  delete attributes.type;
-  delete attributes.color;
-  delete attributes.label;
-  delete attributes.text;
-  delete attributes.error;
-  delete attributes.children;
-  delete attributes.append;
+    // XXX: It's been so long I can't remember why I did this...
+    color: _color,
+    children: _children,
+    ...attributes
+  } = props;
 
   const [inputId] = useState(() => {
     const bytes = new Uint8Array(4);
@@ -49,18 +58,19 @@ export const Input = forwardRef<
   });
 
   return (
-    <FormGroup>
+    <FormGroup className={formGroupClassName}>
       {label ? (
         <Label for={inputId} className="form-control-label">
           {label}
         </Label>
       ) : null}
-      <InputGroup>
+      <InputGroup className={inputGroupClassName}>
+        {prepend}
         <ReactStrapInput
           id={inputId}
           className={classnames(
             "form-control-alternative",
-            props.className,
+            className,
             styleInput.input
           )}
           type={type}

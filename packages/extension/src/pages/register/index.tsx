@@ -42,10 +42,10 @@ export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
 
 export const RegisterPage: FunctionComponent = observer(() => {
   useEffect(() => {
-    document.body.setAttribute("data-centered", "true");
+    document.documentElement.setAttribute("data-register-page", "true");
 
     return () => {
-      document.body.removeAttribute("data-centered");
+      document.documentElement.removeAttribute("data-register-page");
     };
   }, []);
 
@@ -72,9 +72,14 @@ export const RegisterPage: FunctionComponent = observer(() => {
 
   return (
     <EmptyLayout
-      className={style.container}
+      className={classnames(style.container, {
+        large:
+          !registerConfig.isFinalized &&
+          registerConfig.type === "recover-mnemonic",
+      })}
       style={{ height: "100%", backgroundColor: "white", padding: 0 }}
     >
+      <div style={{ flex: 10 }} />
       <div className={style.logoContainer}>
         <div
           className={classnames(style.logoInnerContainer, {
@@ -114,6 +119,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
           />
         </div>
       ) : null}
+      <div style={{ flex: 13 }} />
     </EmptyLayout>
   );
 });

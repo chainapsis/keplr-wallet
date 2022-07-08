@@ -11,6 +11,7 @@ import { LoadingSpinner } from "../../components/spinner";
 import { StakedTokenSymbol, TokenSymbol } from "../../components/token-symbol";
 import { useSmartNavigation } from "../../navigation";
 import { NetworkErrorView } from "./network-error-view";
+import { Dec } from "@keplr-wallet/unit";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -45,10 +46,18 @@ export const AccountCard: FunctionComponent<{
 
   const totalPrice = priceStore.calculatePrice(total);
 
-  const data: [number, number] = [
-    parseFloat(stakable.toDec().toString()),
-    parseFloat(stakedSum.toDec().toString()),
-  ];
+  // In the `Double Doughnut Chart` component, if data is undefined, nothing is displayed.
+  // And,  if the data is [0, 0], a gray ring is displayed behind it.
+  // However, data should be [0, 0] initially because no data is loaded at first.
+  // But as a design decision, we should start with no gray ring behind it.
+  // Therefore, in order not to display the gray ring behind it initially (from unloaded data),
+  // when the balance response is not loaded, it is treated as undefined.
+  const data: [number, number] | undefined = queryStakable.response
+    ? [
+        parseFloat(stakable.toDec().toString()),
+        parseFloat(stakedSum.toDec().toString()),
+      ]
+    : undefined;
 
   return (
     <Card style={containerStyle}>
@@ -140,6 +149,7 @@ export const AccountCard: FunctionComponent<{
               text="Send"
               size="small"
               containerStyle={style.flatten(["min-width-72"])}
+              disabled={stakable.toDec().lte(new Dec(0))}
               onPress={() => {
                 smartNavigation.navigateSmart("Send", {
                   currency: chainStore.current.stakeCurrency.coinMinimalDenom,
@@ -175,6 +185,7 @@ export const AccountCard: FunctionComponent<{
               mode="light"
               size="small"
               containerStyle={style.flatten(["min-width-72"])}
+              disabled={stakable.toDec().lte(new Dec(0))}
               onPress={() => {
                 smartNavigation.navigateSmart("Validator.List", {});
               }}

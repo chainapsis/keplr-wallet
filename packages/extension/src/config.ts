@@ -95,6 +95,10 @@ import {
   GRAVITY_BRIDGE_RPC_CONFIG,
   GRAVITY_BRIDGE_REST_ENDPOINT,
   GRAVITY_BRIDGE_REST_CONFIG,
+  TGRADE_RPC_ENDPOINT,
+  TGRADE_RPC_CONFIG,
+  TGRADE_REST_ENDPOINT,
+  TGRADE_REST_CONFIG,
   EVMOS_RPC_ENDPOINT,
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
@@ -1329,15 +1333,15 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
-        coinDenom: "RUN",
-        coinMinimalDenom: "urun",
+        coinDenom: "IST",
+        coinMinimalDenom: "uist",
         coinDecimals: 6,
       },
     ],
     feeCurrencies: [
       {
-        coinDenom: "RUN",
-        coinMinimalDenom: "urun",
+        coinDenom: "IST",
+        coinMinimalDenom: "uist",
         coinDecimals: 6,
       },
     ],
@@ -1408,8 +1412,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     gasPriceStep: {
       low: 0,
-      average: 0.01,
-      high: 0.02,
+      average: 0,
+      high: 0.01,
     },
     features: ["ibc-transfer", "cosmwasm", "ibc-go"],
   },
@@ -1708,12 +1712,49 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
+    rpc: TGRADE_RPC_ENDPOINT,
+    rpcConfig: TGRADE_RPC_CONFIG,
+    rest: TGRADE_REST_ENDPOINT,
+    restConfig: TGRADE_REST_CONFIG,
+    chainId: "tgrade-mainnet-1",
+    chainName: "Tgrade",
+    stakeCurrency: {
+      coinDenom: "TGD",
+      coinMinimalDenom: "utgd",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("tgrade"),
+    currencies: [
+      {
+        coinDenom: "TGD",
+        coinMinimalDenom: "utgd",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TGD",
+        coinMinimalDenom: "utgd",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0.05,
+      average: 0.05,
+      high: 0.075,
+    },
+    features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
+  },
+  {
     rpc: EVMOS_RPC_ENDPOINT,
     rpcConfig: EVMOS_RPC_CONFIG,
     rest: EVMOS_REST_ENDPOINT,
     restConfig: EVMOS_REST_CONFIG,
     chainId: "evmos_9001-2",
-    chainName: "Evmos (Beta)",
+    chainName: "Evmos",
     stakeCurrency: {
       coinDenom: "EVMOS",
       coinMinimalDenom: "aevmos",
@@ -1753,7 +1794,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 25000000000,
       high: 40000000000,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
     beta: true,
   },
 ];

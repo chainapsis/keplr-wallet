@@ -1,6 +1,3 @@
-import { delay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import { InteractionService } from "../interaction";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import {
@@ -13,7 +10,6 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-@singleton()
 export class PermissionService {
   protected permissionMap: {
     [chainIdentifier: string]:
@@ -29,16 +25,12 @@ export class PermissionService {
 
   protected privilegedOrigins: Map<string, boolean> = new Map();
 
+  protected interactionService!: InteractionService;
+  protected chainsService!: ChainsService;
+  protected keyRingService!: KeyRingService;
+
   constructor(
-    @inject(TYPES.PermissionStore)
     protected readonly kvStore: KVStore,
-    @inject(delay(() => InteractionService))
-    protected readonly interactionService: InteractionService,
-    @inject(ChainsService)
-    protected readonly chainsService: ChainsService,
-    @inject(delay(() => KeyRingService))
-    protected readonly keyRingService: KeyRingService,
-    @inject(TYPES.PermissionServicePrivilegedOrigins)
     privilegedOrigins: string[]
   ) {
     for (const origin of privilegedOrigins) {
@@ -46,6 +38,16 @@ export class PermissionService {
     }
 
     this.restore();
+  }
+
+  init(
+    interactionService: InteractionService,
+    chainsService: ChainsService,
+    keyRingService: KeyRingService
+  ) {
+    this.interactionService = interactionService;
+    this.chainsService = chainsService;
+    this.keyRingService = keyRingService;
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
