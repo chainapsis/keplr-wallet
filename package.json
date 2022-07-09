@@ -4,6 +4,7 @@
   "private": true,
   "workspaces": {
     "packages": [
+      "obi-packages/*",
       "packages/analytics",
       "packages/background",
       "packages/common",
