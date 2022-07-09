@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { HeaderLayout } from "../../../layouts";
 
-import { useHistory, useRouteMatch } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { PasswordInput } from "../../../components/form";
 import { Button, Form } from "reactstrap";
@@ -23,8 +23,8 @@ interface FormData {
 }
 
 export const ClearPage: FunctionComponent = observer(() => {
-  const history = useHistory();
-  const match = useRouteMatch<{ index: string }>();
+  const navigate = useNavigate();
+  const params = useParams() as { index: string };
 
   const intl = useIntl();
 
@@ -38,14 +38,14 @@ export const ClearPage: FunctionComponent = observer(() => {
   });
 
   useEffect(() => {
-    if (parseInt(match.params.index).toString() !== match.params.index) {
+    if (parseInt(params.index).toString() !== params.index) {
       throw new Error("Invalid index");
     }
-  }, [match.params.index]);
+  }, [params.index]);
 
   const keyStore = useMemo(() => {
-    return keyRingStore.multiKeyStoreInfo[parseInt(match.params.index)];
-  }, [keyRingStore.multiKeyStoreInfo, match.params.index]);
+    return keyRingStore.multiKeyStoreInfo[parseInt(params.index)];
+  }, [keyRingStore.multiKeyStoreInfo, params.index]);
 
   return (
     <HeaderLayout
@@ -55,15 +55,12 @@ export const ClearPage: FunctionComponent = observer(() => {
         id: "setting.clear",
       })}
       onBackButton={useCallback(() => {
-        history.goBack();
+        navigate(-1);
       }, [history])}
     >
       <div className={style.container}>
         {keyStore ? (
-          <WarningView
-            index={parseInt(match.params.index)}
-            keyStore={keyStore}
-          />
+          <WarningView index={parseInt(params.index)} keyStore={keyStore} />
         ) : null}
         <Form
           onSubmit={handleSubmit(async (data) => {
@@ -71,12 +68,12 @@ export const ClearPage: FunctionComponent = observer(() => {
             try {
               // Make sure that password is valid and keyring is cleared.
               await keyRingStore.deleteKeyRing(
-                parseInt(match.params.index),
+                parseInt(params.index),
                 data.password
               );
               analyticsStore.logEvent("Account removed");
 
-              history.push("/");
+              navigate("/");
             } catch (e) {
               console.log("Fail to decrypt: " + e.message);
               setError(

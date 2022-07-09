@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 
 import style from "./style.module.scss";
 import { Alert, Button } from "reactstrap";
@@ -27,7 +27,7 @@ import { useNotification } from "../../components/notification";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [phase, setPhase] = useState<"channel" | "amount">("channel");
 
@@ -59,7 +59,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
       showChainName={true}
       canChangeChainInfo={false}
       onBackButton={() => {
-        history.goBack();
+        navigate(-1);
       }}
     >
       {phase === "channel" ? (
@@ -104,9 +104,9 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                     },
                   }
                 );
-                history.push("/");
+                navigate("/");
               } catch (e) {
-                history.replace("/");
+                navigate("/", { replace: true });
                 notification.push({
                   type: "warning",
                   placement: "top-center",

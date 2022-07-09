@@ -1,11 +1,11 @@
 import React, { FunctionComponent } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { AppIntlProvider } from "./languages";
 
 import "./styles/global.scss";
 
-import { HashRouter, Route } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 
 import { AccessPage, Secret20ViewingKeyAccessPage } from "./pages/access";
 import { RegisterPage } from "./pages/register";
@@ -130,7 +130,10 @@ const StateRenderer: FunctionComponent = observer(() => {
   }
 });
 
-ReactDOM.render(
+const container = document.getElementById("app");
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const root = createRoot(container!);
+root.render(
   <StoreProvider>
     <AppIntlProvider
       additionalMessages={AdditonalIntlMessages}
@@ -142,95 +145,75 @@ ReactDOM.render(
             <ConfirmProvider>
               <HashRouter>
                 <LogPageViewWrapper>
-                  <Route exact path="/" component={StateRenderer} />
-                  <Route exact path="/unlock" component={LockPage} />
-                  <Route exact path="/access" component={AccessPage} />
-                  <Route
-                    exact
-                    path="/access/viewing-key"
-                    component={Secret20ViewingKeyAccessPage}
-                  />
-                  <Route exact path="/register" component={RegisterPage} />
-                  <Route exact path="/send" component={SendPage} />
-                  <Route
-                    exact
-                    path="/ibc-transfer"
-                    component={IBCTransferPage}
-                  />
-                  <Route exact path="/setting" component={SettingPage} />
-                  <Route
-                    exact
-                    path="/ledger-grant"
-                    component={LedgerGrantPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/language"
-                    component={SettingLanguagePage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/fiat"
-                    component={SettingFiatPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/connections"
-                    component={SettingConnectionsPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/connections/viewing-key/:contractAddress"
-                    component={SettingSecret20ViewingKeyConnectionsPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/address-book"
-                    component={AddressBookPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/child-accounts"
-                    render={() => <AddressBookPage isChildAccounts={true} />}
-                  />
-                  <Route
-                    exact
-                    path="/setting/export-to-mobile"
-                    component={ExportToMobilePage}
-                  />
-                  <Route exact path="/setting/credit" component={CreditPage} />
-                  <Route
-                    exact
-                    path="/setting/set-keyring"
-                    component={SetKeyRingPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/export/:index"
-                    component={ExportPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/clear/:index"
-                    component={ClearPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/keyring/change/name/:index"
-                    component={ChangeNamePage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/token/add"
-                    component={AddTokenPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/token/manage"
-                    component={ManageTokenPage}
-                  />
-                  <Route path="/sign" component={SignPage} />
-                  <Route path="/suggest-chain" component={ChainSuggestedPage} />
+                  <Routes>
+                    <Route path="/" element={<StateRenderer />} />
+                    <Route path="/unlock" element={<LockPage />} />
+                    <Route path="/access" element={<AccessPage />} />
+                    <Route
+                      path="/access/viewing-key"
+                      element={<Secret20ViewingKeyAccessPage />}
+                    />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/send" element={<SendPage />} />
+                    <Route path="/ibc-transfer" element={<IBCTransferPage />} />
+                    <Route path="/setting" element={<SettingPage />} />
+                    <Route path="/ledger-grant" element={<LedgerGrantPage />} />
+                    <Route
+                      path="/setting/language"
+                      element={<SettingLanguagePage />}
+                    />
+                    <Route path="/setting/fiat" element={<SettingFiatPage />} />
+                    <Route
+                      path="/setting/connections"
+                      element={<SettingConnectionsPage />}
+                    />
+                    <Route
+                      path="/setting/connections/viewing-key/:contractAddress"
+                      element={<SettingSecret20ViewingKeyConnectionsPage />}
+                    />
+                    <Route
+                      path="/setting/address-book"
+                      element={<AddressBookPage />}
+                    />
+                    <Route
+                      path="/setting/child-accounts"
+                      element={<AddressBookPage isChildAccounts={true} />}
+                    />
+                    <Route
+                      path="/setting/export-to-mobile"
+                      element={<ExportToMobilePage />}
+                    />
+                    <Route path="/setting/credit" element={<CreditPage />} />
+                    <Route
+                      path="/setting/set-keyring"
+                      element={<SetKeyRingPage />}
+                    />
+                    <Route
+                      path="/setting/export/:index"
+                      element={<ExportPage />}
+                    />
+                    <Route
+                      path="/setting/clear/:index"
+                      element={<ClearPage />}
+                    />
+                    <Route
+                      path="/setting/keyring/change/name/:index"
+                      element={<ChangeNamePage />}
+                    />
+                    <Route
+                      path="/setting/token/add"
+                      element={<AddTokenPage />}
+                    />
+                    <Route
+                      path="/setting/token/manage"
+                      element={<ManageTokenPage />}
+                    />
+                    <Route path="/sign" element={<SignPage />} />
+                    <Route
+                      path="/suggest-chain"
+                      element={<ChainSuggestedPage />}
+                    />
+                  </Routes>
                 </LogPageViewWrapper>
               </HashRouter>
             </ConfirmProvider>
@@ -238,6 +221,5 @@ ReactDOM.render(
         </NotificationStoreProvider>
       </LoadingIndicatorProvider>
     </AppIntlProvider>
-  </StoreProvider>,
-  document.getElementById("app")
+  </StoreProvider>
 );

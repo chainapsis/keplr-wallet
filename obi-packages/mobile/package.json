@@ -6,11 +6,10 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "react": "18.0.0",
+    "react": "^18.2.0",
     "react-native": "0.69.1"
   },
   "devDependencies": {
@@ -27,11 +26,8 @@
     "eslint": "^7.32.0",
     "jest": "^26.6.3",
     "metro-react-native-babel-preset": "^0.70.3",
-    "react-test-renderer": "18.0.0",
+    "react-test-renderer": "^18.2.0",
     "typescript": "^4.4.4"
-  },
-  "resolutions": {
-    "@types/react": "^18"
   },
   "jest": {
     "preset": "react-native",

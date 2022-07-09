@@ -1,6 +1,7 @@
 import React, {
   createContext,
   FunctionComponent,
+  ReactNode,
   useContext,
   useState,
 } from "react";
@@ -16,7 +17,9 @@ const LoadingIndicatorContext = createContext<LoadingState | undefined>(
   undefined
 );
 
-export const LoadingIndicatorProvider: FunctionComponent = ({ children }) => {
+export const LoadingIndicatorProvider: FunctionComponent<{
+  children?: ReactNode | undefined;
+}> = ({ children }) => {
   const [loadingList, setLoadingList] = useState<
     {
       type: string;

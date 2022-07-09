@@ -3,7 +3,7 @@ import React, { FunctionComponent, useMemo, useState } from "react";
 import styleToken from "./token.module.scss";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { Hash } from "@keplr-wallet/crypto";
 import classmames from "classnames";
 import { UncontrolledTooltip } from "reactstrap";
@@ -52,7 +52,7 @@ const TokenView: FunctionComponent<{
     .replace(/\d+/g, "")
     .slice(0, 20);
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const notification = useNotification();
   const loadingIndicator = useLoadingIndicator();
@@ -174,7 +174,7 @@ const TokenView: FunctionComponent<{
                   viewingKey,
                 });
 
-                history.push({
+                navigate({
                   pathname: "/",
                 });
               }
@@ -225,7 +225,7 @@ export const TokensView: FunctionComponent = observer(() => {
       return a.currency.coinDenom < b.currency.coinDenom ? -1 : 1;
     });
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <div className={styleToken.tokensContainer}>
@@ -236,7 +236,7 @@ export const TokensView: FunctionComponent = observer(() => {
             key={i.toString()}
             balance={token}
             onClick={() => {
-              history.push({
+              navigate({
                 pathname: "/send",
                 search: `?defaultDenom=${token.currency.coinMinimalDenom}`,
               });

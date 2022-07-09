@@ -17,7 +17,7 @@ import { useNotification } from "../../components/notification";
 import { useIntl } from "react-intl";
 import { Button } from "reactstrap";
 
-import { useHistory, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import queryString from "querystring";
 
 import { useSendTxConfig } from "@keplr-wallet/hooks";
@@ -29,7 +29,7 @@ import {
 } from "@keplr-wallet/popup";
 
 export const SendPage: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   let search = useLocation().search;
   if (search.startsWith("?")) {
     search = search.slice(1);
@@ -122,7 +122,7 @@ export const SendPage: FunctionComponent = observer(() => {
         isDetachedPage
           ? undefined
           : () => {
-              history.goBack();
+              navigate(-1);
             }
       }
       rightRenderer={
@@ -209,11 +209,11 @@ export const SendPage: FunctionComponent = observer(() => {
                 }
               );
               if (!isDetachedPage) {
-                history.replace("/");
+                navigate("/", { replace: true });
               }
             } catch (e) {
               if (!isDetachedPage) {
-                history.replace("/");
+                navigate("/", { replace: true });
               }
               notification.push({
                 type: "warning",

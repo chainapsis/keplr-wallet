@@ -12,7 +12,7 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
 const commonResolve = (dir) => ({
-  extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
+  extensions: [".ts", ".tsx", ".mjs", ".js", ".jsx", ".css", ".scss"],
   alias: {
     assets: path.resolve(__dirname, dir),
   },
@@ -57,6 +57,11 @@ const sassRule = {
   ],
 };
 const tsRule = { test: /\.tsx?$/, loader: "ts-loader" };
+const mjsRule = {
+  test: /\.mjs$/,
+  include: /node_modules/,
+  type: "javascript/auto",
+};
 const fileRule = {
   test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
   use: [
@@ -91,7 +96,7 @@ const extensionConfig = (env, args) => {
     },
     resolve: commonResolve("src/public/assets"),
     module: {
-      rules: [sassRule, tsRule, fileRule],
+      rules: [sassRule, tsRule, mjsRule, fileRule],
     },
     plugins: [
       // Remove all and write anyway

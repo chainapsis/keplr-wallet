@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { IntlProvider } from "react-intl";
 
 import MessagesEn from "./en.json";
@@ -62,6 +67,7 @@ export type LanguageToFiatCurrency = { ["default"]: string } & {
 };
 
 export const AppIntlProvider: FunctionComponent<{
+  children?: ReactNode | undefined;
   additionalMessages: IntlMessages;
   // Set the fiat currency according to the language if the fiat currency is not set (automatic).
   languageToFiatCurrency: LanguageToFiatCurrency;

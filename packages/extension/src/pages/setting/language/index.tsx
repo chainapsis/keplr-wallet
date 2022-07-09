@@ -4,12 +4,12 @@ import { PageButton } from "../page-button";
 
 import style from "../style.module.scss";
 import { useLanguage } from "../../../languages";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
 
 export const SettingLanguagePage: FunctionComponent = () => {
   const language = useLanguage();
-  const history = useHistory();
+  const navigate = useNavigate();
   const intl = useIntl();
 
   const selectedIcon = useMemo(
@@ -25,7 +25,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
         id: "setting.language",
       })}
       onBackButton={useCallback(() => {
-        history.goBack();
+        navigate(-1);
       }, [history])}
     >
       <div className={style.container}>
@@ -35,7 +35,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
           })}
           onClick={useCallback(() => {
             language.clearLanguage();
-            history.push({
+            navigate({
               pathname: "/",
             });
           }, [history, language])}
@@ -47,7 +47,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
           })}
           onClick={useCallback(() => {
             language.setLanguage("en");
-            history.push({
+            navigate({
               pathname: "/",
             });
           }, [history, language])}
@@ -63,7 +63,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
           })}
           onClick={useCallback(() => {
             language.setLanguage("ko");
-            history.push({
+            navigate({
               pathname: "/",
             });
           }, [history, language])}

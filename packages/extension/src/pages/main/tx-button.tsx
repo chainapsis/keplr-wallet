@@ -11,7 +11,7 @@ import { useStore } from "../../stores";
 import Modal from "react-modal";
 
 import { FormattedMessage } from "react-intl";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 
 import classnames from "classnames";
 import { Dec } from "@keplr-wallet/unit";
@@ -51,7 +51,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const hasAssets =
     queryBalances.balances.find((bal) => bal.balance.toDec().gt(new Dec(0))) !==
@@ -106,7 +106,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
           e.preventDefault();
 
           if (hasAssets) {
-            history.push("/send");
+            navigate("/send");
           }
         }}
       >

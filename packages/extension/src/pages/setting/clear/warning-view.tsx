@@ -2,7 +2,7 @@ import React, { FunctionComponent, MouseEvent, useCallback } from "react";
 
 import styleWarningView from "./warning-view.module.scss";
 import { Alert, Button } from "reactstrap";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { FormattedMessage } from "react-intl";
 
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
@@ -11,13 +11,13 @@ export const WarningView: FunctionComponent<{
   index: number;
   keyStore: MultiKeyStoreInfoWithSelectedElem;
 }> = ({ index, keyStore }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const onBackUpMnemonicButtonClick = useCallback(
     (e: MouseEvent) => {
       e.preventDefault();
 
-      history.push(`/setting/export/${index}`);
+      navigate(`/setting/export/${index}`);
     },
     [history, index]
   );

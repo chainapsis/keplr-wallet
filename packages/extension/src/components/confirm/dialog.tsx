@@ -1,4 +1,8 @@
-import React, { FunctionComponent, useCallback } from "react";
+import React, {
+  FunctionComponent,
+  MouseEventHandler,
+  useCallback,
+} from "react";
 import { Button } from "reactstrap";
 
 import { FormattedMessage } from "react-intl";
@@ -29,7 +33,7 @@ export const ConfirmDialog: FunctionComponent<{
           size="sm"
           color="default"
           outline
-          onClick={useCallback(
+          onClick={useCallback<MouseEventHandler<HTMLButtonElement>>(
             (e) => {
               if (onReject) {
                 onReject();
@@ -45,7 +49,7 @@ export const ConfirmDialog: FunctionComponent<{
           type="button"
           size="sm"
           color="primary"
-          onClick={useCallback(
+          onClick={useCallback<MouseEventHandler<HTMLButtonElement>>(
             (e) => {
               if (onConfirm) {
                 onConfirm();

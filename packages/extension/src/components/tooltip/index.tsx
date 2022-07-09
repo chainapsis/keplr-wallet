@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 import Popper, { PopperOptions } from "popper.js";
 import classNames from "classnames";
@@ -6,6 +6,7 @@ import classNames from "classnames";
 import style from "./tooltip.module.scss";
 
 export interface ToolTipProps {
+  children?: ReactNode | undefined;
   tooltip: React.ReactNode;
   theme: "dark" | "bright";
   options?: PopperOptions;

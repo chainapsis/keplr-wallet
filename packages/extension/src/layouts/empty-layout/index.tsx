@@ -1,10 +1,11 @@
-import React, { CSSProperties, FunctionComponent } from "react";
+import React, { CSSProperties, FunctionComponent, ReactNode } from "react";
 
 import style from "./style.module.scss";
 
 import classnames from "classnames";
 
 interface Props {
+  children?: ReactNode | undefined;
   className?: string;
   style?: CSSProperties;
 }

@@ -1,10 +1,12 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, ReactNode, useState } from "react";
 
 import { createRootStore, RootStore } from "./root";
 
 const storeContext = React.createContext<RootStore | null>(null);
 
-export const StoreProvider: FunctionComponent = ({ children }) => {
+export const StoreProvider: FunctionComponent<{
+  children?: ReactNode | undefined;
+}> = ({ children }) => {
   const [stores] = useState(() => createRootStore());
 
   return (

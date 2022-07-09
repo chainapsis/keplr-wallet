@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { HeaderLayout } from "../../../layouts";
 
-import { useHistory, useLocation, useRouteMatch } from "react-router";
+import { useNavigate, useLocation, useParams } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { PasswordInput } from "../../../components/form";
 import { Button, Form } from "reactstrap";
@@ -26,9 +26,9 @@ interface FormData {
 }
 
 export const ExportPage: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
-  const match = useRouteMatch<{ index: string; type?: string }>();
+  const params = useParams() as { index: string };
   const intl = useIntl();
 
   const { keyRingStore } = useStore();
@@ -47,10 +47,10 @@ export const ExportPage: FunctionComponent = observer(() => {
   });
 
   useEffect(() => {
-    if (parseInt(match.params.index).toString() !== match.params.index) {
+    if (parseInt(params.index).toString() !== params.index) {
       throw new Error("Invalid index");
     }
-  }, [match.params.index]);
+  }, [params.index]);
 
   return (
     <HeaderLayout
@@ -61,7 +61,7 @@ export const ExportPage: FunctionComponent = observer(() => {
           type === "mnemonic" ? "setting.export" : "setting.export.private-key",
       })}
       onBackButton={useCallback(() => {
-        history.goBack();
+        navigate(-1);
       }, [history])}
     >
       <div className={style.container}>
@@ -83,7 +83,7 @@ export const ExportPage: FunctionComponent = observer(() => {
                   setKeyRing(
                     await flowResult(
                       keyRingStore.showKeyRing(
-                        parseInt(match.params.index),
+                        parseInt(params.index),
                         data.password
                       )
                     )

@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  ReactNode,
   useCallback,
   useContext,
   useRef,
@@ -66,6 +67,7 @@ const background = {
 };
 
 export interface Props {
+  children?: ReactNode | undefined;
   isOpen: boolean;
 }
 

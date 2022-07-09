@@ -3,6 +3,7 @@ import React, {
   ChangeEvent,
   useEffect,
   useState,
+  ReactNode,
 } from "react";
 
 import { Button } from "reactstrap";
@@ -305,6 +306,7 @@ const SignCompleteDialog: FunctionComponent<{
 };
 
 const Instruction: FunctionComponent<{
+  children?: ReactNode | undefined;
   icon: React.ReactElement;
   title: string;
   paragraph: string;

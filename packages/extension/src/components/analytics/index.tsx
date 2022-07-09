@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, ReactNode, useEffect } from "react";
 import { useLocation } from "react-router";
 import { useLanguage } from "../../languages";
 import { useStore } from "../../stores";
@@ -15,7 +15,9 @@ const pathnameToPageName: PathnameToPageName = {
   "/setting/set-keyring": "Select account",
 };
 
-export const LogPageViewWrapper: FunctionComponent = ({ children }) => {
+export const LogPageViewWrapper: FunctionComponent<{
+  children?: ReactNode | undefined;
+}> = ({ children }) => {
   const location = useLocation();
   const loggingPageName = pathnameToPageName[location.pathname];
 

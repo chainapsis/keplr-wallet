@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, ReactNode } from "react";
 
 import { Variants } from "framer-motion";
 
@@ -70,7 +70,9 @@ export const useNotification = () => {
   return store;
 };
 
-export const NotificationProvider: FunctionComponent = observer((props) => {
+export const NotificationProvider: FunctionComponent<{
+  children?: ReactNode | undefined;
+}> = observer((props) => {
   const { children } = props;
 
   const notificationStore = useNotificationStore();

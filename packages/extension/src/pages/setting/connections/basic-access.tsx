@@ -2,7 +2,7 @@ import React, { FunctionComponent, useMemo, useState } from "react";
 import { HeaderLayout } from "../../../layouts";
 
 import style from "../style.module.scss";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { PageButton } from "../page-button";
@@ -18,7 +18,7 @@ import { useIntl } from "react-intl";
 import { useConfirm } from "../../../components/confirm";
 
 export const SettingConnectionsPage: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const intl = useIntl();
 
   const { chainStore, permissionStore } = useStore();
@@ -45,7 +45,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
         id: "setting.connections",
       })}
       onBackButton={() => {
-        history.goBack();
+        navigate(-1);
       }}
     >
       <div className={style.container}>
