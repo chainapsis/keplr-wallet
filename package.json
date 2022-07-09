@@ -4,7 +4,28 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "packages/*"
+      "packages/analytics",
+      "packages/background",
+      "packages/common",
+      "packages/cosmos",
+      "packages/crypto",
+      "packages/ens",
+      "packages/extension",
+      "packages/hooks",
+      "packages/popup",
+      "packages/proto-types",
+      "packages/provider",
+      "packages/provider-mock",
+      "packages/router",
+      "packages/router-extension",
+      "packages/router-mock",
+      "packages/stores",
+      "packages/store-etc",
+      "packages/types",
+      "packages/unit",
+      "packages/wc-client",
+      "packages/wc-client-example",
+      "packages/wc-qrcode-modal"
     ],
     "nohoist": [
       "**/@react-native-*/**",
