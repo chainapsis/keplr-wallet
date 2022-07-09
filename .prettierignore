@@ -1,4 +1,4 @@
-@@ -1,11 +0,0 @@
+**/*.html
 **/*.png
 **/*.svg
 **/*.ttf
@@ -8,10 +8,11 @@
 
 node_modules
 
-dist/*
-prod/*
-build/*
+dist
+prod
+build
 
+.yarn
 yarn.lock
 Podfile.lock
 build.gradle
@@ -27,6 +28,10 @@ injected-provider.bundle.js
 .eslintignore
 .prettierignore
 
+obi-packages/mobile/android
+obi-packages/mobile/ios
+
+packages/mobile
 packages/proto-types/!(proto-types-gen)/**/*.ts
 packages/proto-types/!(proto-types-gen)/**/*.js
 packages/proto-types/!(proto-types-gen)/**/*.mjs
