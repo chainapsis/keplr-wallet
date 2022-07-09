@@ -5,7 +5,7 @@ import {
   ScryptParams,
   CommonCrypto,
 } from "./types";
-import { Hash, RNG } from "@keplr-wallet/crypto";
+import { Hash } from "@keplr-wallet/crypto";
 import pbkdf2 from "pbkdf2";
 
 import { Buffer } from "buffer/";
@@ -42,7 +42,6 @@ export interface KeyStore {
 
 export class Crypto {
   public static async encrypt(
-    rng: RNG,
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     type: "mnemonic" | "privateKey" | "ledger",
@@ -52,7 +51,7 @@ export class Crypto {
     bip44HDPath?: BIP44HDPath
   ): Promise<KeyStore> {
     let random = new Uint8Array(32);
-    const salt = Buffer.from(await rng(random)).toString("hex");
+    const salt = Buffer.from(await crypto.rng(random)).toString("hex");
 
     const scryptParams: ScryptParams = {
       salt,
@@ -91,7 +90,7 @@ export class Crypto {
     const buf = Buffer.from(text);
 
     random = new Uint8Array(16);
-    const iv = Buffer.from(await rng(random));
+    const iv = Buffer.from(await crypto.rng(random));
 
     const counter = new Counter(0);
     counter.setBytes(iv);

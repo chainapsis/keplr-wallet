@@ -1,9 +1,6 @@
-import { delay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import { ChainInfoSchema, ChainInfoWithEmbed } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
-import { KVStore, Debouncer } from "@keplr-wallet/common";
+import { KVStore, Debouncer, MemoryKVStore } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
 import { Env, KeplrError } from "@keplr-wallet/router";
@@ -12,22 +9,37 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 
-@singleton()
 export class ChainsService {
   protected onChainRemovedHandlers: ChainRemovedHandler[] = [];
 
   protected cachedChainInfos: ChainInfoWithEmbed[] | undefined;
 
+  protected chainUpdaterKeeper!: ChainUpdaterService;
+  protected interactionKeeper!: InteractionService;
+
+  protected readonly kvStoreForSuggestChain: KVStore;
+
   constructor(
-    @inject(TYPES.ChainsStore)
     protected readonly kvStore: KVStore,
-    @inject(TYPES.ChainsEmbedChainInfos)
     protected readonly embedChainInfos: ChainInfo[],
-    @inject(delay(() => ChainUpdaterService))
-    protected readonly chainUpdaterKeeper: ChainUpdaterService,
-    @inject(delay(() => InteractionService))
-    protected readonly interactionKeeper: InteractionService
-  ) {}
+    protected readonly experimentalOptions: Partial<{
+      useMemoryKVStoreForSuggestChain: boolean;
+    }> = {}
+  ) {
+    if (experimentalOptions?.useMemoryKVStoreForSuggestChain) {
+      this.kvStoreForSuggestChain = new MemoryKVStore("suggest-chain");
+    } else {
+      this.kvStoreForSuggestChain = kvStore;
+    }
+  }
+
+  init(
+    chainUpdaterKeeper: ChainUpdaterService,
+    interactionKeeper: InteractionService
+  ) {
+    this.chainUpdaterKeeper = chainUpdaterKeeper;
+    this.interactionKeeper = interactionKeeper;
+  }
 
   readonly getChainInfos: () => Promise<
     ChainInfoWithEmbed[]
@@ -54,7 +66,7 @@ export class ChainsService {
     }
 
     const savedChainInfos: ChainInfoWithEmbed[] = (
-      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? []
+      await this.getSavedChainInfos()
     )
       .filter((chainInfo) => {
         // Filter the overlaped chain info with the embeded chain infos.
@@ -159,17 +171,26 @@ export class ChainsService {
     await this.addChainInfo(chainInfo);
   }
 
+  async getSavedChainInfos(): Promise<ChainInfo[]> {
+    return (
+      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? []
+    );
+  }
+
   async addChainInfo(chainInfo: ChainInfo): Promise<void> {
     if (await this.hasChainInfo(chainInfo.chainId)) {
       throw new KeplrError("chains", 121, "Same chain is already registered");
     }
 
     const savedChainInfos =
-      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? [];
+      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? [];
 
     savedChainInfos.push(chainInfo);
 
-    await this.kvStore.set<ChainInfo[]>("chain-infos", savedChainInfos);
+    await this.kvStoreForSuggestChain.set<ChainInfo[]>(
+      "chain-infos",
+      savedChainInfos
+    );
 
     this.clearCachedChainInfos();
   }
@@ -184,7 +205,7 @@ export class ChainsService {
     }
 
     const savedChainInfos =
-      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? [];
+      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? [];
 
     const resultChainInfo = savedChainInfos.filter((chainInfo) => {
       return (
@@ -193,7 +214,10 @@ export class ChainsService {
       );
     });
 
-    await this.kvStore.set<ChainInfo[]>("chain-infos", resultChainInfo);
+    await this.kvStoreForSuggestChain.set<ChainInfo[]>(
+      "chain-infos",
+      resultChainInfo
+    );
 
     // Clear the updated chain info.
     await this.chainUpdaterKeeper.clearUpdatedProperty(chainId);
@@ -203,6 +227,16 @@ export class ChainsService {
     }
 
     this.clearCachedChainInfos();
+  }
+
+  async getChainEthereumKeyFeatures(
+    chainId: string
+  ): Promise<{ address: boolean; signing: boolean }> {
+    const chainInfo = await this.getChainInfo(chainId);
+    return {
+      address: chainInfo.features?.includes("eth-address-gen") ?? false,
+      signing: chainInfo.features?.includes("eth-key-sign") ?? false,
+    };
   }
 
   addChainRemovedHandler(handler: ChainRemovedHandler) {

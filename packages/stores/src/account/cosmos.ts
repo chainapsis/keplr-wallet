@@ -409,7 +409,9 @@ export class CosmosAccountImpl {
       true
     );
 
-    const coinType = this.chainGetter.getChain(this.chainId).bip44.coinType;
+    const useEthereumSign = this.chainGetter
+      .getChain(this.chainId)
+      .features?.includes("eth-key-sign");
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
@@ -441,10 +443,9 @@ export class CosmosAccountImpl {
         signerInfos: [
           {
             publicKey: {
-              typeUrl:
-                coinType === 60
-                  ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
-                  : "/cosmos.crypto.secp256k1.PubKey",
+              typeUrl: useEthereumSign
+                ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
+                : "/cosmos.crypto.secp256k1.PubKey",
               value: PubKey.encode({
                 key: Buffer.from(
                   signResponse.signature.pub_key.value,

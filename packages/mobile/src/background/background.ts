@@ -24,9 +24,15 @@ init(
   (prefix: string) => new AsyncKVStore(prefix),
   new RNMessageRequesterInternalToUI(),
   EmbedChainInfos,
-  ["https://app.osmosis.zone", "https://app.stargaze.zone"],
-  getRandomBytesAsync,
+  [
+    "https://app.osmosis.zone",
+    "https://app.stargaze.zone",
+    "https://app.umee.cc",
+    "https://junoswap.com",
+    "https://frontier.osmosis.zone",
+  ],
   {
+    rng: getRandomBytesAsync,
     scrypt: async (text: string, params: ScryptParams) => {
       return Buffer.from(
         await scrypt(
@@ -72,6 +78,11 @@ init(
 
         return await TransportBLE.open(deviceId);
       },
+    },
+  },
+  {
+    suggestChain: {
+      useMemoryKVStore: true,
     },
   }
 );
