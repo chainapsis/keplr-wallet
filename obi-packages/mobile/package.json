@@ -16,7 +16,7 @@
     "react-intl": "^6.0.5",
     "react-native": "0.69.1",
     "react-native-fast-crypto": "^2.2.0",
-    "readable-stream": "^4.0.0"
+    "stream-browserify": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
