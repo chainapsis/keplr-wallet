@@ -12,7 +12,7 @@ import { DataTab } from "./data-tab";
 import { DetailsTab } from "./details-tab";
 import { FormattedMessage, useIntl } from "react-intl";
 
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import {
   useInteractionInfo,
@@ -31,7 +31,7 @@ enum Tab {
 }
 
 export const SignPage: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [tab, setTab] = useState<Tab>(Tab.Details);
 
@@ -208,7 +208,7 @@ export const SignPage: FunctionComponent = observer(() => {
       onBackButton={
         interactionInfo.interactionInternal
           ? () => {
-              history.goBack();
+              navigate(-1);
             }
           : undefined
       }

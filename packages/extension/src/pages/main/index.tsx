@@ -12,7 +12,7 @@ import { AssetView } from "./asset";
 import { StakeView } from "./stake";
 
 import classnames from "classnames";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { TokensView } from "./token";
@@ -26,7 +26,7 @@ import { Dec } from "@keplr-wallet/unit";
 import { WalletStatus } from "@keplr-wallet/stores";
 
 export const MainPage: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const intl = useIntl();
 
   const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
@@ -108,7 +108,7 @@ export const MainPage: FunctionComponent = observer(() => {
             onClick={(e) => {
               e.preventDefault();
 
-              history.push("/setting/set-keyring");
+              navigate("/setting/set-keyring");
             }}
           />
         </div>

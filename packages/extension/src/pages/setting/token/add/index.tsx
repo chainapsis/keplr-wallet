@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { HeaderLayout } from "../../../../layouts";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { useIntl, FormattedMessage } from "react-intl";
 
 import style from "./style.module.scss";
@@ -23,7 +23,7 @@ interface FormData {
 
 export const AddTokenPage: FunctionComponent = observer(() => {
   const intl = useIntl();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const { chainStore, queriesStore, accountStore, tokensStore } = useStore();
   const tokensOf = tokensStore.getTokensOf(chainStore.current.chainId);
@@ -113,7 +113,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         interactionInfo.interaction
           ? undefined
           : () => {
-              history.goBack();
+              navigate(-1);
             }
       }
     >
@@ -172,7 +172,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
                   ) {
                     window.close();
                   } else {
-                    history.push({
+                    navigate({
                       pathname: "/",
                     });
                   }
@@ -219,7 +219,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             ) {
               window.close();
             } else {
-              history.push({
+              navigate({
                 pathname: "/",
               });
             }

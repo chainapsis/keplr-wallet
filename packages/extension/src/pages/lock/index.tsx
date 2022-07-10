@@ -15,7 +15,7 @@ import style from "./style.module.scss";
 
 import { FormattedMessage, useIntl } from "react-intl";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import delay from "delay";
 
 interface FormData {
@@ -24,7 +24,7 @@ interface FormData {
 
 export const LockPage: FunctionComponent = observer(() => {
   const intl = useIntl();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const passwordRef = useRef<HTMLInputElement | null>();
 
@@ -69,7 +69,7 @@ export const LockPage: FunctionComponent = observer(() => {
                   window.close();
                 }
               } else {
-                history.replace("/");
+                navigate("/", { replace: true });
               }
             }
           } catch (e) {

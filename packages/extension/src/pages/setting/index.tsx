@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { HeaderLayout } from "../../layouts";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { PageButton } from "./page-button";
 import style from "./style.module.scss";
 import { useLanguage } from "../../languages";
@@ -12,7 +12,7 @@ export const SettingPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
 
   const language = useLanguage();
-  const history = useHistory();
+  const navigate = useNavigate();
   const intl = useIntl();
 
   const paragraphLang = language.automatic
@@ -49,7 +49,7 @@ export const SettingPage: FunctionComponent = observer(() => {
         id: "main.menu.settings",
       })}
       onBackButton={() => {
-        history.goBack();
+        navigate(-1);
       }}
     >
       <div className={style.container}>
@@ -59,7 +59,7 @@ export const SettingPage: FunctionComponent = observer(() => {
           })}
           paragraph={paragraphLang}
           onClick={() => {
-            history.push({
+            navigate({
               pathname: "/setting/language",
             });
           }}
@@ -74,7 +74,7 @@ export const SettingPage: FunctionComponent = observer(() => {
           })}
           paragraph={paragraphFiat}
           onClick={() => {
-            history.push({
+            navigate({
               pathname: "/setting/fiat",
             });
           }}
@@ -91,7 +91,7 @@ export const SettingPage: FunctionComponent = observer(() => {
             id: "setting.connections.paragraph",
           })}
           onClick={() => {
-            history.push({
+            navigate({
               pathname: "/setting/connections",
             });
           }}
@@ -105,7 +105,7 @@ export const SettingPage: FunctionComponent = observer(() => {
             id: "setting.export-to-mobile",
           })}
           onClick={() => {
-            history.push({
+            navigate({
               pathname: "/setting/export-to-mobile",
             });
           }}
@@ -145,7 +145,7 @@ export const SettingPage: FunctionComponent = observer(() => {
             id: "setting.credit",
           })}
           onClick={() => {
-            history.push({
+            navigate({
               pathname: "/setting/credit",
             });
           }}

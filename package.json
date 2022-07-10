@@ -4,7 +4,29 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "packages/*"
+      "obi-packages/*",
+      "packages/analytics",
+      "packages/background",
+      "packages/common",
+      "packages/cosmos",
+      "packages/crypto",
+      "packages/ens",
+      "packages/extension",
+      "packages/hooks",
+      "packages/popup",
+      "packages/proto-types",
+      "packages/provider",
+      "packages/provider-mock",
+      "packages/router",
+      "packages/router-extension",
+      "packages/router-mock",
+      "packages/stores",
+      "packages/store-etc",
+      "packages/types",
+      "packages/unit",
+      "packages/wc-client",
+      "packages/wc-client-example",
+      "packages/wc-qrcode-modal"
     ],
     "nohoist": [
       "**/@react-native-*/**",
@@ -34,7 +56,7 @@
     "build:clean": "yarn clean && yarn install --frozen-lockfile && lerna run build",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
-    "ci": "yarn install --frozen-lockfile && yarn build && yarn workspace mobile typecheck && yarn test",
+    "ci": "yarn install --frozen-lockfile && yarn build && yarn test",
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
     "pre-commit": "lint-staged",
     "version": "zx ./scripts/lerna-lifecyle-check-version.mjs"
@@ -79,12 +101,14 @@
     "zx": "^4.2.0"
   },
   "resolutions": {
-    "@types/react": "^16.14.4",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
     "@cosmjs/crypto": "^0.24.0-alpha.25",
     "@iov/crypto": "2.1.0",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
-    "node-sass": "file:./etc/noop"
+    "node-sass": "file:./etc/noop",
+    "react": "^18.2.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free-regular": "^5.0.13",

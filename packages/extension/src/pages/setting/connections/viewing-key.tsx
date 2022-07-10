@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { useHistory, useRouteMatch } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import style from "../style.module.scss";
@@ -10,12 +10,12 @@ import { useConfirm } from "../../../components/confirm";
 
 export const SettingSecret20ViewingKeyConnectionsPage: FunctionComponent = observer(
   () => {
-    const match = useRouteMatch<{
+    const params = useParams() as {
       contractAddress: string;
-    }>();
+    };
 
     const intl = useIntl();
-    const history = useHistory();
+    const navigate = useNavigate();
     const confirm = useConfirm();
 
     const { chainStore, permissionStore, queriesStore } = useStore();
@@ -23,12 +23,12 @@ export const SettingSecret20ViewingKeyConnectionsPage: FunctionComponent = obser
     const tokenInfo = queriesStore
       .get(chainStore.current.chainId)
       .secret.querySecret20ContractInfo.getQueryContract(
-        match.params.contractAddress
+        params.contractAddress
       );
 
     const accessInfo = permissionStore.getSecret20ViewingKeyAccessInfo(
       chainStore.current.chainId,
-      match.params.contractAddress
+      params.contractAddress
     );
 
     const xIcon = useMemo(
@@ -44,7 +44,7 @@ export const SettingSecret20ViewingKeyConnectionsPage: FunctionComponent = obser
           id: "setting.connections.viewing-key",
         })}
         onBackButton={() => {
-          history.goBack();
+          navigate(-1);
         }}
       >
         <div className={style.container}>

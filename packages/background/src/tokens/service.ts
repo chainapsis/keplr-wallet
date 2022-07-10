@@ -1,6 +1,3 @@
-import { delay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import { Env, KeplrError } from "@keplr-wallet/router";
 import {
   ChainInfo,
@@ -25,20 +22,25 @@ import { Buffer } from "buffer/";
 import { SuggestTokenMsg } from "./messages";
 import { getSecret20ViewingKeyPermissionType } from "./types";
 
-@singleton()
 export class TokensService {
-  constructor(
-    @inject(TYPES.TokensStore)
-    protected readonly kvStore: KVStore,
-    @inject(delay(() => InteractionService))
-    protected readonly interactionService: InteractionService,
-    @inject(delay(() => PermissionService))
-    public readonly permissionService: PermissionService,
-    @inject(ChainsService)
-    protected readonly chainsService: ChainsService,
-    @inject(delay(() => KeyRingService))
-    protected readonly keyRingService: KeyRingService
+  protected interactionService!: InteractionService;
+  public permissionService!: PermissionService;
+  protected chainsService!: ChainsService;
+  protected keyRingService!: KeyRingService;
+
+  constructor(protected readonly kvStore: KVStore) {}
+
+  init(
+    interactionService: InteractionService,
+    permissionService: PermissionService,
+    chainsService: ChainsService,
+    keyRingService: KeyRingService
   ) {
+    this.interactionService = interactionService;
+    this.permissionService = permissionService;
+    this.chainsService = chainsService;
+    this.keyRingService = keyRingService;
+
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
 

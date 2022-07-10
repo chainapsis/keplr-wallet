@@ -1,13 +1,13 @@
 import React, { FunctionComponent } from "react";
 import { HeaderLayout } from "../../../layouts";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
 import { PageButton } from "../page-button";
 
 import style from "./style.module.scss";
 
 export const CreditPage: FunctionComponent = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const intl = useIntl();
 
   return (
@@ -18,7 +18,7 @@ export const CreditPage: FunctionComponent = () => {
         id: "setting.credit",
       })}
       onBackButton={() => {
-        history.goBack();
+        navigate(-1);
       }}
     >
       <div className={style.container}>

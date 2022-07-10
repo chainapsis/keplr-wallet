@@ -27,6 +27,7 @@
 
   "main.menu.settings": "Settings",
   "main.menu.child-accounts": "Child Accounts",
+  "main.menu.home": "Home",
   "main.menu.address-book": "Address Book",
   "main.menu.token-list": "Token List",
   "main.menu.sign-out": "Sign out",

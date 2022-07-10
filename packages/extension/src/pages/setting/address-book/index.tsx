@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import style from "../style.module.scss";
 import {
   Button,
@@ -52,7 +52,7 @@ export const AddressBookPage: FunctionComponent<{
     isChildAccounts,
   }) => {
     const intl = useIntl();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const { chainStore } = useStore();
     const current = chainStore.current;
@@ -210,7 +210,7 @@ export const AddressBookPage: FunctionComponent<{
           onBackButton
             ? onBackButton
             : () => {
-                history.goBack();
+                navigate(-1);
               }
         }
       >

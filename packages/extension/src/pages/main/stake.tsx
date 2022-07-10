@@ -12,12 +12,12 @@ import { Dec } from "@keplr-wallet/unit";
 
 import { useNotification } from "../../components/notification";
 
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 
 import { FormattedMessage } from "react-intl";
 
 export const StakeView: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -60,9 +60,9 @@ export const StakeView: FunctionComponent = observer(() => {
           }
         );
 
-        history.replace("/");
+        navigate("/", { replace: true });
       } catch (e) {
-        history.replace("/");
+        navigate("/", { replace: true });
         notification.push({
           type: "warning",
           placement: "top-center",

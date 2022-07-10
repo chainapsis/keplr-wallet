@@ -1,9 +1,10 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import classnames from "classnames";
 
 import "./style";
 
 export interface HeaderProps {
+  children?: ReactNode | undefined;
   fixed?: boolean;
   left?: React.ReactNode;
   right?: React.ReactNode;

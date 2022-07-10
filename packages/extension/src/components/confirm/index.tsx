@@ -1,6 +1,7 @@
 import React, {
   createContext,
   FunctionComponent,
+  ReactNode,
   useCallback,
   useContext,
   useMemo,
@@ -28,7 +29,9 @@ const ConfirmContext = createContext<
   | undefined
 >(undefined);
 
-export const ConfirmProvider: FunctionComponent = ({ children }) => {
+export const ConfirmProvider: FunctionComponent<{
+  children?: ReactNode | undefined;
+}> = ({ children }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [currentConfirm, setCurrentConfirm] = useState<

@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { HeaderLayout } from "../../../../layouts";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { PageButton } from "../../page-button";
 
 import style from "./style.module.scss";
@@ -13,7 +13,7 @@ import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
 import { useIntl } from "react-intl";
 
 export const ManageTokenPage: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const intl = useIntl();
   const notification = useNotification();
   const confirm = useConfirm();
@@ -40,7 +40,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
         id: "main.menu.token-list",
       })}
       onBackButton={() => {
-        history.goBack();
+        navigate(-1);
       }}
     >
       <div className={style.container}>
@@ -90,7 +90,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
               onClick={(e) => {
                 e.preventDefault();
 
-                history.push(
+                navigate(
                   `/setting/connections/viewing-key/${currency.contractAddress}`
                 );
               }}

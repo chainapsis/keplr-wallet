@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { Button, Alert } from "reactstrap";
 
 import style from "./style.module.scss";
@@ -11,7 +11,7 @@ import { useStore } from "../../../stores";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore } = useStore();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const interactionInfo = useInteractionInfo(() => {
     chainSuggestStore.rejectAll();
@@ -86,7 +86,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
               ) {
                 window.close();
               } else {
-                history.push("/");
+                navigate("/");
               }
             }}
           >
@@ -108,7 +108,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
               ) {
                 window.close();
               } else {
-                history.push("/");
+                navigate("/");
               }
             }}
           >

@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import { messages as commonMessages } from "@obi-wallet/components";
+import React, {
+  FunctionComponent,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { IntlProvider } from "react-intl";
 
 import MessagesEn from "./en.json";
@@ -8,7 +14,10 @@ export type IntlMessage = Record<string, string>;
 export type IntlMessages = { [lang: string]: Record<string, string> };
 
 const messages: IntlMessages = {
-  en: MessagesEn,
+  en: {
+    ...MessagesEn,
+    ...commonMessages["en"],
+  },
   ko: MessagesKo,
 };
 
@@ -62,6 +71,7 @@ export type LanguageToFiatCurrency = { ["default"]: string } & {
 };
 
 export const AppIntlProvider: FunctionComponent<{
+  children?: ReactNode | undefined;
   additionalMessages: IntlMessages;
   // Set the fiat currency according to the language if the fiat currency is not set (automatic).
   languageToFiatCurrency: LanguageToFiatCurrency;

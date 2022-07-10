@@ -46,9 +46,12 @@ import { FeeType } from "@keplr-wallet/hooks";
 import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import Amplitude from "amplitude-js";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { AppsStore } from "@keplr-wallet/stores";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
+
+  public readonly appsStore: AppsStore;
 
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
@@ -96,6 +99,8 @@ export class RootStore {
     this.uiConfigStore = new UIConfigStore(
       new ExtensionKVStore("store_ui_config")
     );
+
+    this.appsStore = new AppsStore(new ExtensionKVStore("store_apps"));
 
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);

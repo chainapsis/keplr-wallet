@@ -5,19 +5,29 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import { FormattedMessage } from "react-intl";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 
 export const Menu: FunctionComponent = observer(() => {
   const { chainStore, keyRingStore } = useStore();
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <div className={styleMenu.container}>
       <div
         className={styleMenu.item}
         onClick={() => {
-          history.push({
+          navigate({
+            pathname: "/home",
+          });
+        }}
+      >
+        <FormattedMessage id="main.menu.home" />
+      </div>
+      <div
+        className={styleMenu.item}
+        onClick={() => {
+          navigate({
             pathname: "/setting/address-book",
           });
         }}
@@ -27,7 +37,7 @@ export const Menu: FunctionComponent = observer(() => {
       <div
         className={styleMenu.item}
         onClick={() => {
-          history.push({
+          navigate({
             pathname: "/setting/child-accounts",
           });
         }}
@@ -37,7 +47,7 @@ export const Menu: FunctionComponent = observer(() => {
       <div
         className={styleMenu.item}
         onClick={() => {
-          history.push({
+          navigate({
             pathname: "/setting",
           });
         }}
@@ -50,7 +60,7 @@ export const Menu: FunctionComponent = observer(() => {
         <div
           className={styleMenu.item}
           onClick={() => {
-            history.push({
+            navigate({
               pathname: "/setting/token/add",
             });
           }}
@@ -64,7 +74,7 @@ export const Menu: FunctionComponent = observer(() => {
         <div
           className={styleMenu.item}
           onClick={() => {
-            history.push({
+            navigate({
               pathname: "/setting/token/manage",
             });
           }}

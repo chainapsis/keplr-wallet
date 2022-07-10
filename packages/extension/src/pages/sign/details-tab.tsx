@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, ReactNode } from "react";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -192,6 +192,7 @@ export const DetailsTab: FunctionComponent<{
 export const MsgRender: FunctionComponent<{
   icon?: string;
   title: string;
+  children?: ReactNode | undefined;
 }> = ({ icon = "fas fa-question", title, children }) => {
   return (
     <div className={styleDetailsTab.msg}>

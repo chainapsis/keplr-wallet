@@ -1,6 +1,3 @@
-import { delay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import { EnigmaUtils } from "secretjs";
 import { KeyRingService } from "../keyring";
 import { ChainsService } from "../chains";
@@ -10,10 +7,8 @@ import { KVStore, Debouncer } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Env, KeplrError } from "@keplr-wallet/router";
-
 import { Buffer } from "buffer/";
 
-@singleton()
 export class SecretWasmService {
   protected debouncerMap: Map<
     string,
@@ -26,16 +21,21 @@ export class SecretWasmService {
 
   protected cacheEnigmaUtils: Map<string, EnigmaUtils> = new Map();
 
-  constructor(
-    @inject(TYPES.SecretWasmStore)
-    protected readonly kvStore: KVStore,
-    @inject(ChainsService)
-    protected readonly chainsService: ChainsService,
-    @inject(delay(() => KeyRingService))
-    protected readonly keyRingService: KeyRingService,
-    @inject(delay(() => PermissionService))
-    public readonly permissionService: PermissionService
+  protected chainsService!: ChainsService;
+  protected keyRingService!: KeyRingService;
+  public permissionService!: PermissionService;
+
+  constructor(protected readonly kvStore: KVStore) {}
+
+  init(
+    chainsService: ChainsService,
+    keyRingService: KeyRingService,
+    permissionService: PermissionService
   ) {
+    this.chainsService = chainsService;
+    this.keyRingService = keyRingService;
+    this.permissionService = permissionService;
+
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
 

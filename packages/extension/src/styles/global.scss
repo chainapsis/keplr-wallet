@@ -24,6 +24,25 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
   font-weight: bold;
 }
 
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 300;
+  src: url(../public/assets/fonts/poppins/Poppins-Regular.ttf);
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  src: url(../public/assets/fonts/poppins/Poppins-Medium.ttf);
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  src: url(../public/assets/fonts/poppins/Poppins-SemiBold.ttf);
+}
+
 $font-family-base: "Nunito Sans", sans-serif;
 $body-color: black;
 @import "../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard-react";

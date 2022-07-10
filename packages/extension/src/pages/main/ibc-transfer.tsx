@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { Button } from "reactstrap";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 
 import styleTransfer from "./ibc-transfer.module.scss";
 import classnames from "classnames";
@@ -10,7 +10,7 @@ import { Dec } from "@keplr-wallet/unit";
 import { FormattedMessage } from "react-intl";
 
 export const IBCTransferView: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { accountStore, chainStore, queriesStore } = useStore();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
@@ -57,7 +57,7 @@ export const IBCTransferView: FunctionComponent = observer(() => {
         onClick={(e) => {
           e.preventDefault();
 
-          history.push("/ibc-transfer");
+          navigate("/ibc-transfer");
         }}
       >
         <FormattedMessage id="main.ibc.transfer.button" />

@@ -9,11 +9,12 @@ import style from "./style.module.scss";
 import { ToolTip } from "../../components/tooltip";
 
 import { ChainList } from "./chain-list";
-import { Menu, useMenu, MenuButton } from "../menu";
+import { Menu, MenuButton, useMenu } from "../menu";
 
 import { motion } from "framer-motion";
 
 export interface Props {
+  children?: ReactNode | undefined;
   showChainName: boolean;
   canChangeChainInfo: boolean;
 

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState, useEffect, useMemo } from "react";
 import { HeaderLayout } from "../../../../layouts";
 
-import { useHistory, useRouteMatch } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Input } from "../../../../components/form";
 import { Button, Form } from "reactstrap";
@@ -17,8 +17,8 @@ interface FormData {
 }
 
 export const ChangeNamePage: FunctionComponent = observer(() => {
-  const history = useHistory();
-  const match = useRouteMatch<{ index: string }>();
+  const navigate = useNavigate();
+  const params = useParams() as { index: string };
 
   const intl = useIntl();
 
@@ -32,14 +32,14 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
   });
 
   useEffect(() => {
-    if (parseInt(match.params.index).toString() !== match.params.index) {
+    if (parseInt(params.index).toString() !== params.index) {
       throw new KeplrError("keyring", 201, "Invalid index");
     }
-  }, [match.params.index]);
+  }, [params.index]);
 
   const keyStore = useMemo(() => {
-    return keyRingStore.multiKeyStoreInfo[parseInt(match.params.index)];
-  }, [keyRingStore.multiKeyStoreInfo, match.params.index]);
+    return keyRingStore.multiKeyStoreInfo[parseInt(params.index)];
+  }, [keyRingStore.multiKeyStoreInfo, params.index]);
 
   return (
     <HeaderLayout
@@ -49,7 +49,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
         id: "setting.keyring.change.name",
       })}
       onBackButton={() => {
-        history.goBack();
+        navigate(-1);
       }}
     >
       <Form
@@ -59,10 +59,10 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
           try {
             // Make sure that name is changed
             await keyRingStore.updateNameKeyRing(
-              parseInt(match.params.index),
+              parseInt(params.index),
               data.name
             );
-            history.push("/");
+            navigate("/");
           } catch (e) {
             console.log("Fail to decrypt: " + e.message);
             setError(
