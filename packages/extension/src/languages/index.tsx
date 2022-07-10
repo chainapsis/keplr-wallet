@@ -1,3 +1,4 @@
+import { messages as commonMessages } from "@obi-wallet/components";
 import React, {
   FunctionComponent,
   ReactNode,
@@ -13,7 +14,10 @@ export type IntlMessage = Record<string, string>;
 export type IntlMessages = { [lang: string]: Record<string, string> };
 
 const messages: IntlMessages = {
-  en: MessagesEn,
+  en: {
+    ...MessagesEn,
+    ...commonMessages["en"],
+  },
   ko: MessagesKo,
 };
 

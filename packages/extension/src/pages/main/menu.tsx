@@ -18,6 +18,16 @@ export const Menu: FunctionComponent = observer(() => {
         className={styleMenu.item}
         onClick={() => {
           navigate({
+            pathname: "/home",
+          });
+        }}
+      >
+        <FormattedMessage id="main.menu.home" />
+      </div>
+      <div
+        className={styleMenu.item}
+        onClick={() => {
+          navigate({
             pathname: "/setting/address-book",
           });
         }}

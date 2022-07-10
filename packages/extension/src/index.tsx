@@ -8,6 +8,8 @@ import "./styles/global.scss";
 import { HashRouter, Route, Routes } from "react-router-dom";
 
 import { AccessPage, Secret20ViewingKeyAccessPage } from "./pages/access";
+import { HomePage } from "./pages/home";
+import { AppStorePage } from "./pages/home/app-store-page";
 import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
@@ -147,6 +149,8 @@ root.render(
                 <LogPageViewWrapper>
                   <Routes>
                     <Route path="/" element={<StateRenderer />} />
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/home/app-store" element={<AppStorePage />} />
                     <Route path="/unlock" element={<LockPage />} />
                     <Route path="/access" element={<AccessPage />} />
                     <Route
