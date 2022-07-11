@@ -25,26 +25,38 @@ import moreTabBlueIcon from "../../public/assets/icon/more-blue.png";
 import moreTabGreyIcon from "../../public/assets/icon/more-grey.png";
 
 export const BottomNav = () => {
+  const bottomNav = [
+    {
+      title: "Home",
+      icon: homeTabGreyIcon,
+      activeTabIcon: homeTabBlueIcon,
+      path: "/",
+    },
+    {
+      title: "Activity",
+      icon: clockTabGreyIcon,
+      activeTabIcon: clockTabBlueIcon,
+      path: "/activity",
+    },
+    {
+      title: "More",
+      icon: moreTabGreyIcon,
+      activeTabIcon: moreTabBlueIcon,
+      path: "/more",
+    },
+  ];
+
   return (
     <div className={style.bottomNavContainer}>
-      <Tab
-        title="Home"
-        icon={homeTabGreyIcon}
-        activeTabIcon={homeTabBlueIcon}
-        path="/"
-      />
-      <Tab
-        title="Activity"
-        icon={clockTabGreyIcon}
-        activeTabIcon={clockTabBlueIcon}
-        path="/activity"
-      />
-      <Tab
-        title="More"
-        icon={moreTabGreyIcon}
-        activeTabIcon={moreTabBlueIcon}
-        path="/more"
-      />
+      {bottomNav.map((nav, index) => (
+        <Tab
+          key={index}
+          title={nav.title}
+          icon={nav.icon}
+          activeTabIcon={nav.activeTabIcon}
+          path={nav.path}
+        />
+      ))}
     </div>
   );
 };
