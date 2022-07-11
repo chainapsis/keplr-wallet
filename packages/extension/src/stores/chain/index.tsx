@@ -3,6 +3,7 @@ import { observable, action, computed, makeObservable, flow } from "mobx";
 import {
   ChainInfoInner,
   ChainStore as BaseChainStore,
+  DeferInitialQueryController,
 } from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
@@ -29,7 +30,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
 
   constructor(
     embedChainInfos: ChainInfo[],
-    protected readonly requester: MessageRequester
+    protected readonly requester: MessageRequester,
+    protected readonly deferInitialQueryController: DeferInitialQueryController
   ) {
     super(
       embedChainInfos.map((chainInfo) => {
@@ -87,6 +89,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   protected *init() {
     this._isInitializing = true;
     yield this.getChainInfosFromBackground();
+
+    this.deferInitialQueryController.ready();
 
     // Get last view chain id to persistent background
     const msg = new GetPersistentMemoryMsg();
