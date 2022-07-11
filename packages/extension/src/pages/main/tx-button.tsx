@@ -1,8 +1,14 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
-
-import styleTxButton from "./tx-button.module.scss";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { Button, Tooltip } from "reactstrap";
+
+import styleTxButton from "./tx-button.module.scss";
 
 import { observer } from "mobx-react-lite";
 
@@ -13,8 +19,8 @@ import Modal from "react-modal";
 import { FormattedMessage } from "react-intl";
 import { useHistory } from "react-router";
 
-import classnames from "classnames";
 import { Dec } from "@keplr-wallet/unit";
+import classnames from "classnames";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");
@@ -39,7 +45,7 @@ const DepositModal: FunctionComponent<{
 };
 
 export const TxButtonView: FunctionComponent = observer(() => {
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -49,8 +55,8 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   const [isDepositOpen, setIsDepositOpen] = useState(false);
 
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-
+  const [sendTooltipOpen, setSendTooltipOpen] = useState(false);
+  const [stakeTooltipOpen, setStakeTooltipOpen] = useState(false);
   const history = useHistory();
 
   const hasAssets =
@@ -58,6 +64,20 @@ export const TxButtonView: FunctionComponent = observer(() => {
     undefined;
 
   const sendBtnRef = useRef<HTMLButtonElement>(null);
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
+
+  const stakable = queries.queryBalances.getQueryBech32Address(
+    accountInfo.bech32Address
+  ).stakable;
+
+  const isRewardExist = rewards.rewards.length > 0;
+
+  const isStakableExist = useMemo(() => {
+    return stakable.balance.toDec().gt(new Dec(0));
+  }, [stakable.balance]);
+  const stakeBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div className={styleTxButton.containerTxButton}>
@@ -115,14 +135,56 @@ export const TxButtonView: FunctionComponent = observer(() => {
       {!hasAssets ? (
         <Tooltip
           placement="bottom"
-          isOpen={tooltipOpen}
+          isOpen={sendTooltipOpen}
           target={sendBtnRef}
-          toggle={() => setTooltipOpen((value) => !value)}
+          toggle={() => setSendTooltipOpen((value) => !value)}
           fade
         >
           <FormattedMessage id="main.account.tooltip.no-asset" />
         </Tooltip>
       ) : null}
+      <a
+        href={chainStore.current.walletUrlForStaking}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => {
+          if (!isStakableExist) {
+            e.preventDefault();
+          } else {
+            analyticsStore.logEvent("Stake button clicked", {
+              chainId: chainStore.current.chainId,
+              chainName: chainStore.current.chainName,
+            });
+          }
+        }}
+      >
+        {/*
+            "Disabled" property in button tag will block the mouse enter/leave events.
+            So, tooltip will not work as expected.
+            To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
+          */}
+        <Button
+          innerRef={stakeBtnRef}
+          className={classnames(styleTxButton.button, {
+            disabled: !isStakableExist,
+          })}
+          color="primary"
+          outline={isRewardExist}
+        >
+          <FormattedMessage id="main.stake.button.stake" />
+        </Button>
+        {!isStakableExist ? (
+          <Tooltip
+            placement="bottom"
+            isOpen={stakeTooltipOpen}
+            target={stakeBtnRef}
+            toggle={() => setStakeTooltipOpen((value) => !value)}
+            fade
+          >
+            <FormattedMessage id="main.stake.tooltip.no-asset" />
+          </Tooltip>
+        ) : null}
+      </a>
     </div>
   );
 });
