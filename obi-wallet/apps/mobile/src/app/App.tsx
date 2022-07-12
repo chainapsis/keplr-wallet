@@ -1,1 +1,1 @@
-export { App } from '@obi-wallet/common';
+export { App } from "@obi-wallet/common";

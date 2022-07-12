@@ -1,12 +1,12 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React from "react";
+import { IntlProvider } from "react-intl";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { messages } from '../languages';
-import { Home, HomeProps } from '../screens';
-import { RootStore } from '../stores';
+import { messages } from "../languages";
+import { Home, HomeProps } from "../screens";
+import { RootStore } from "../stores";
 
 const Stack = createNativeStackNavigator();
 
@@ -16,26 +16,26 @@ export function App() {
   const home: HomeProps = {
     appsStore: stores.appsStore,
     onAppPress() {
-      console.warn('onAppPress');
+      console.warn("onAppPress");
     },
     onAppStorePress() {
-      console.warn('onAppStorePress');
+      console.warn("onAppStorePress");
     },
   };
 
   return (
     <IntlProvider
       locale="en"
-      messages={messages['en']}
+      messages={messages["en"]}
       formats={{
         date: {
           en: {
-            month: 'short',
-            day: '2-digit',
-            hour: '2-digit',
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
             hour12: false,
-            minute: '2-digit',
-            timeZoneName: 'short',
+            minute: "2-digit",
+            timeZoneName: "short",
           },
         },
       }}

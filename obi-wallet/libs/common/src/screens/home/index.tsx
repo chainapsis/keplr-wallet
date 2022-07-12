@@ -1,17 +1,17 @@
-import { App, AppsStore } from '@keplr-wallet/stores';
-import { observer } from 'mobx-react-lite';
-import React, { FunctionComponent } from 'react';
-import { useIntl } from 'react-intl';
-import { Button, StyleSheet, TouchableWithoutFeedback } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { App, AppsStore } from "@keplr-wallet/stores";
+import { observer } from "mobx-react-lite";
+import React, { FunctionComponent } from "react";
+import { useIntl } from "react-intl";
+import { Button, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Card } from '../../card';
-import { Tile, Tiles } from '../../tiles';
+import { Card } from "../../card";
+import { Tile, Tiles } from "../../tiles";
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
-    height: '100%',
+    backgroundColor: "#ffffff",
+    height: "100%",
   },
 });
 
@@ -63,8 +63,8 @@ export const Home: FunctionComponent<HomeProps> = observer(
                 );
               })}
               <Tile
-                img={'https://place-hold.it/180x180'}
-                label={intl.formatMessage({ id: 'home.appStoreLabel' })}
+                img={"https://place-hold.it/180x180"}
+                label={intl.formatMessage({ id: "home.appStoreLabel" })}
                 onPress={() => {
                   onAppStorePress();
                 }}

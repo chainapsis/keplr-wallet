@@ -1,7 +1,7 @@
-const { withNxMetro } = require('@nrwl/react-native');
-const { getDefaultConfig } = require('metro-config');
-const exclusionList = require('metro-config/src/defaults/exclusionList');
-const path = require('path');
+const { withNxMetro } = require("@nrwl/react-native");
+const { getDefaultConfig } = require("metro-config");
+const exclusionList = require("metro-config/src/defaults/exclusionList");
+const path = require("path");
 
 module.exports = (async () => {
   const {
@@ -16,19 +16,19 @@ module.exports = (async () => {
             inlineRequires: true,
           },
         }),
-        babelTransformerPath: require.resolve('react-native-svg-transformer'),
+        babelTransformerPath: require.resolve("react-native-svg-transformer"),
       },
       resolver: {
-        assetExts: assetExts.filter((ext) => ext !== 'svg'),
-        sourceExts: [...sourceExts, 'svg'],
-        resolverMainFields: ['sbmodern', 'browser', 'main'],
+        assetExts: assetExts.filter((ext) => ext !== "svg"),
+        sourceExts: [...sourceExts, "svg"],
+        resolverMainFields: ["sbmodern", "browser", "main"],
         blockList: exclusionList([/\.\/dist\/.*/, /\/packages\/mobile\/.*/]),
         extraNodeModules: {
-          crypto: require.resolve('react-native-fast-crypto'),
-          fs: require.resolve('react-native-level-fs'),
-          os: require.resolve('os-browserify'),
-          path: require.resolve('path-browserify'),
-          stream: require.resolve('stream-browserify'),
+          crypto: require.resolve("react-native-fast-crypto"),
+          fs: require.resolve("react-native-level-fs"),
+          os: require.resolve("os-browserify"),
+          path: require.resolve("path-browserify"),
+          stream: require.resolve("stream-browserify"),
         },
       },
     },
@@ -41,7 +41,7 @@ module.exports = (async () => {
       // the project root to start the metro server
       projectRoot: __dirname,
       // Specify folders to watch, in addition to Nx defaults (workspace libraries and node_modules)
-      watchFolders: [path.resolve(__dirname, '../../../packages')],
+      watchFolders: [path.resolve(__dirname, "../../../packages")],
     }
   );
 })();

@@ -1,5 +1,5 @@
-import { KVStore } from '@keplr-wallet/common';
-import { AppsStore } from '@keplr-wallet/stores';
+import { KVStore } from "@keplr-wallet/common";
+import { AppsStore } from "@keplr-wallet/stores";
 
 class MockKVStore implements KVStore {
   get<T = unknown>(_key: string): Promise<T | undefined> {
@@ -7,7 +7,7 @@ class MockKVStore implements KVStore {
   }
 
   prefix(): string {
-    return '';
+    return "";
   }
 
   set<T = unknown>(_key: string, _data: T | null): Promise<void> {
