@@ -60,9 +60,6 @@
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
     "version": "zx ./scripts/lerna-lifecyle-check-version.mjs"
   },
-  "pre-commit": [
-    "pre-commit"
-  ],
   "keywords": [],
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -83,8 +80,6 @@
     "eslint-plugin-unicorn": "^24.0.0",
     "jest": "^26.6.3",
     "lerna": "^3.22.1",
-    "lint-staged": "^10.5.4",
-    "pre-commit": "^1.2.2",
     "prettier": "^2.2.1",
     "semver": "^7.3.5",
     "ts-jest": "^26.5.5",
