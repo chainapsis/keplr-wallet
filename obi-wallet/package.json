@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "nx build",
+    "format": "prettier --write .",
     "postinstall": "patch-package",
     "start": "nx serve",
     "test": "nx test"
