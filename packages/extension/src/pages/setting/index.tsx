@@ -142,6 +142,7 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title="Endpoints"
+          paragraph="Change into the node you wish to connect"
           onClick={() => {
             history.push({
               pathname: "/setting/endpoints",
