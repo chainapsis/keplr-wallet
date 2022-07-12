@@ -98,6 +98,3 @@ buck-out/
 # Ruby / CocoaPods
 **/ios/Pods/
 **/vendor/bundle/
-
-
-apps/mobile-e2e/artifacts
