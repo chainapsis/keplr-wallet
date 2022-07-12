@@ -3,25 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@keplr-wallet/common": "*",
-    "@react-native-async-storage/async-storage": "*",
     "@react-navigation/native": "*",
     "@react-navigation/native-stack": "*",
     "@testing-library/jest-native": "*",
-    "@testing-library/react-native": "*",
     "isomorphic-unfetch": "*",
     "mobx-react-lite": "*",
     "node-html-parser": "*",
     "react": "*",
     "react-intl": "*",
     "react-native": "*",
-    "react-native-asset": "*",
-    "react-native-config": "*",
-    "react-native-fast-crypto": "*",
     "react-native-safe-area-context": "*",
-    "react-native-screens": "*",
-    "react-native-svg": "*",
-    "rooks": "*",
-    "stream-browserify": "*"
+    "rooks": "*"
   }
 }
