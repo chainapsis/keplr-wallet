@@ -41,12 +41,14 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
   const [dropdownOpen, setOpen] = useState(false);
   const toggle = () => setOpen(!dropdownOpen);
 
-  const { setValue, register, handleSubmit, errors } = useForm<FormData>({
-    defaultValues: {
-      rpc: "",
-      lcd: "",
-    },
-  });
+  const { setValue, register, handleSubmit, errors, watch } = useForm<FormData>(
+    {
+      defaultValues: {
+        rpc: "",
+        lcd: "",
+      },
+    }
+  );
   useEffect(() => {
     const chainInfo = chainStore.getChain(selectedChainId);
     setValue("rpc", chainInfo.rpc);
@@ -67,27 +69,61 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
       }}
     >
       <div className={style.container}>
-        <ButtonDropdown isOpen={dropdownOpen} toggle={toggle}>
-          <DropdownToggle caret style={{ boxShadow: "none" }}>
-            {chainStore.getChain(selectedChainId).chainName}
-          </DropdownToggle>
-          <DropdownMenu>
-            {chainStore.chainInfos.map((chainInfo) => {
-              return (
-                <DropdownItem
-                  key={chainInfo.chainId}
-                  onClick={(e) => {
-                    e.preventDefault();
+        <div className={style.innerTopContainer}>
+          <ButtonDropdown isOpen={dropdownOpen} toggle={toggle}>
+            <DropdownToggle caret style={{ boxShadow: "none" }}>
+              {chainStore.getChain(selectedChainId).chainName}
+            </DropdownToggle>
+            <DropdownMenu>
+              {chainStore.chainInfos.map((chainInfo) => {
+                return (
+                  <DropdownItem
+                    key={chainInfo.chainId}
+                    onClick={(e) => {
+                      e.preventDefault();
 
-                    setSelectedChainId(chainInfo.chainId);
-                  }}
-                >
-                  {chainInfo.chainName}
-                </DropdownItem>
-              );
-            })}
-          </DropdownMenu>
-        </ButtonDropdown>
+                      setSelectedChainId(chainInfo.chainId);
+                    }}
+                  >
+                    {chainInfo.chainName}
+                  </DropdownItem>
+                );
+              })}
+            </DropdownMenu>
+          </ButtonDropdown>
+          <div style={{ flex: 1 }} />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              color="primary"
+              size="sm"
+              onClick={async (e) => {
+                e.preventDefault();
+
+                setIsLoading(true);
+
+                try {
+                  await chainStore.resetChainEndpoints(selectedChainId);
+
+                  const chainInfo = chainStore.getChain(selectedChainId);
+                  setValue("rpc", chainInfo.rpc);
+                  setValue("lcd", chainInfo.rest);
+                } catch (e) {
+                  console.log(e);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+            >
+              <FormattedMessage id="setting.endpoints.button.reset" />
+            </Button>
+          </div>
+        </div>
         <form
           className={style.formContainer}
           onSubmit={handleSubmit(async (data) => {
@@ -190,7 +226,16 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
           />
           <div style={{ flex: 1 }} />
           <AlertExperimentalFeature />
-          <Button type="submit" color="primary" block data-loading={isLoading}>
+          <Button
+            type="submit"
+            color="primary"
+            block
+            data-loading={isLoading}
+            disabled={
+              chainStore.getChain(selectedChainId).rpc === watch("rpc") &&
+              chainStore.getChain(selectedChainId).rest === watch("lcd")
+            }
+          >
             <FormattedMessage id="setting.endpoints.button.confirm" />
           </Button>
         </form>

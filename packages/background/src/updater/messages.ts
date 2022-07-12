@@ -68,3 +68,27 @@ export class SetChainEndpointsMsg extends Message<ChainInfoWithEmbed[]> {
     return SetChainEndpointsMsg.type();
   }
 }
+
+export class ResetChainEndpointsMsg extends Message<ChainInfoWithEmbed[]> {
+  public static type() {
+    return "reset-chain-endpoints";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("updater", 100, "Empty chain id");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ResetChainEndpointsMsg.type();
+  }
+}

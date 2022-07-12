@@ -16,6 +16,7 @@ import {
   RemoveSuggestedChainInfoMsg,
   TryUpdateChainMsg,
   SetChainEndpointsMsg,
+  ResetChainEndpointsMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
@@ -150,7 +151,18 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    console.log(newChainInfos);
+    this.setChainInfos(newChainInfos);
+
+    ObservableQuery.refreshAllObserved();
+  }
+
+  @flow
+  *resetChainEndpoints(chainId: string) {
+    const msg = new ResetChainEndpointsMsg(chainId);
+    const newChainInfos = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+
     this.setChainInfos(newChainInfos);
 
     ObservableQuery.refreshAllObserved();

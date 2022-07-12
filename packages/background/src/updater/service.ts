@@ -307,6 +307,21 @@ export class ChainUpdaterService {
     return await this.chainsService.getChainInfos();
   }
 
+  public async resetChainEndpoints(
+    chainId: string
+  ): Promise<ChainInfoWithEmbed[]> {
+    const version = ChainIdHelper.parse(chainId);
+
+    // `saveChainProperty` method merges chain info using spread operator.
+    // That is, if the field is undefined, the field is finally saved as undefined and the field is treated as if it were deleted.
+    await this.saveChainProperty(version.identifier, {
+      rpc: undefined,
+      rest: undefined,
+    });
+
+    return await this.chainsService.getChainInfos();
+  }
+
   public static async checkEndpointsConnectivity(
     chainId: string,
     rpc: string,

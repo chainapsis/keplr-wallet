@@ -6,7 +6,11 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import { ChainUpdaterService } from "./service";
-import { SetChainEndpointsMsg, TryUpdateChainMsg } from "./messages";
+import {
+  ResetChainEndpointsMsg,
+  SetChainEndpointsMsg,
+  TryUpdateChainMsg,
+} from "./messages";
 
 export const getHandler: (service: ChainUpdaterService) => Handler = (
   service
@@ -19,6 +23,11 @@ export const getHandler: (service: ChainUpdaterService) => Handler = (
         return handleSetChainEndpointsMsg(service)(
           env,
           msg as SetChainEndpointsMsg
+        );
+      case ResetChainEndpointsMsg:
+        return handleResetChainEndpointsMsg(service)(
+          env,
+          msg as ResetChainEndpointsMsg
         );
       default:
         throw new KeplrError("updater", 110, "Unknown msg type");
@@ -39,5 +48,13 @@ const handleSetChainEndpointsMsg: (
 ) => InternalHandler<SetChainEndpointsMsg> = (service) => {
   return async (_, msg) => {
     return await service.setChainEndpoints(msg.chainId, msg.rpc, msg.rest);
+  };
+};
+
+const handleResetChainEndpointsMsg: (
+  service: ChainUpdaterService
+) => InternalHandler<ResetChainEndpointsMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.resetChainEndpoints(msg.chainId);
   };
 };
