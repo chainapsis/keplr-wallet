@@ -158,8 +158,6 @@
 
   "chain.suggested.title": "Chain Add Request",
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
-  "chain.suggested.waring.experiment.title": "Experimental Feature",
-  "chain.suggested.waring.experiment.paragraph": "For the brave-hearted cosmonauts",
   "chain.suggested.button.approve": "Approve",
   "chain.suggested.button.reject": "Reject",
 
@@ -300,5 +298,8 @@
   "component.ibc.channel-registrar.chain-selector.button.add": "New IBC Transfer Channel",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
-  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save"
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save",
+
+  "component.waring.experimental-feature.title": "Experimental Feature",
+  "component.waring.experimental-feature.paragraph": "For the brave-hearted cosmonauts"
 }

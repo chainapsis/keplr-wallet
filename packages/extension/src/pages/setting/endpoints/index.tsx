@@ -19,6 +19,7 @@ import { useNotification } from "../../../components/notification";
 import { ChainUpdaterService } from "@keplr-wallet/background";
 import { KeplrError } from "@keplr-wallet/router";
 import { useConfirm } from "../../../components/confirm";
+import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
 
 interface FormData {
   rpc: string;
@@ -184,6 +185,7 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
             })}
           />
           <div style={{ flex: 1 }} />
+          <AlertExperimentalFeature />
           <Button type="submit" color="primary" block data-loading={isLoading}>
             Submit
           </Button>
