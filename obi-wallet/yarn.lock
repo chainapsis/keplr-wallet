@@ -1929,19 +1929,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@keplr-wallet/crypto@0.10.11":
-  version "0.10.11"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/crypto/-/crypto-0.10.11.tgz#9fc370c817fbeeac3001787c5e1e74869710d403"
-  integrity sha512-fsqQwW45EFnGbRAjhed3G5REn+3SPxubN1MJ8k+YoemyNWeBR5f+MHDcWe8PfHZos/HT0awMo7Ata3Z/tyieig==
-  dependencies:
-    bip32 "^2.0.6"
-    bip39 "^3.0.3"
-    bs58check "^2.1.2"
-    buffer "^6.0.3"
-    crypto-js "^4.0.0"
-    elliptic "^6.5.3"
-    sha.js "^2.4.11"
-
 "@keplr-wallet/popup@0.10.11":
   version "0.10.11"
   resolved "https://registry.yarnpkg.com/@keplr-wallet/popup/-/popup-0.10.11.tgz#a4835ebba43d8051bf60b24c996d16685a16a607"
