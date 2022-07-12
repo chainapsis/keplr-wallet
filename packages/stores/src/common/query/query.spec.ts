@@ -14,7 +14,7 @@ export class MockObservableQuery extends ObservableQuery<number> {
   }
 }
 
-export class DeplayMemoryKVStore extends MemoryKVStore {
+export class DelayMemoryKVStore extends MemoryKVStore {
   constructor(prefix: string, public readonly delay: number) {
     super(prefix);
   }
@@ -109,14 +109,14 @@ describe("Test observable query", () => {
       expect(query.response?.data).toBe(1);
     };
 
-    const memStore = new DeplayMemoryKVStore("test", 1);
+    const memStore = new DelayMemoryKVStore("test", 1);
     await basicTestFn(memStore);
 
     num = 0;
     // The kvstore below has a delay of 50 seconds.
     // This is definitely slower than the query.
     // Even if the kvstore performs worse than the query, it should handle it well.
-    const delayMemStore = new DeplayMemoryKVStore("test", 50000);
+    const delayMemStore = new DelayMemoryKVStore("test", 50000);
     await basicTestFn(delayMemStore);
   });
 });
