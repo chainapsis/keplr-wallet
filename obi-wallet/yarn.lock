@@ -1929,22 +1929,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@keplr-wallet/cosmos@0.10.11":
-  version "0.10.11"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/cosmos/-/cosmos-0.10.11.tgz#86cbf4b369e6c4016ad4419d34ce197619f9ba30"
-  integrity sha512-Cf0baNZH+1RQ5FGd/5ZQjueJdsoFvKarbBLxgu+StZ4V76FLBjbLogcYBocIrQlMekbVYZ4GiQ2I7vMYubOOUQ==
-  dependencies:
-    "@cosmjs/launchpad" "^0.24.0-alpha.25"
-    "@keplr-wallet/crypto" "0.10.11"
-    "@keplr-wallet/proto-types" "0.10.11"
-    "@keplr-wallet/types" "0.10.11"
-    "@keplr-wallet/unit" "0.10.11"
-    axios "^0.21.4"
-    bech32 "^1.1.4"
-    buffer "^6.0.3"
-    long "^4.0.0"
-    protobufjs "^6.11.2"
-
 "@keplr-wallet/crypto@0.10.11":
   version "0.10.11"
   resolved "https://registry.yarnpkg.com/@keplr-wallet/crypto/-/crypto-0.10.11.tgz#9fc370c817fbeeac3001787c5e1e74869710d403"
