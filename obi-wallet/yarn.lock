@@ -1929,11 +1929,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@keplr-wallet/router@0.10.11":
-  version "0.10.11"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/router/-/router-0.10.11.tgz#61e7ed59aface75b8f2701ecde2784d67fa1cb00"
-  integrity sha512-74o05AYzyYXSTZh9WhMVnYf72aCvEDFVtylQyNhwThe+G5trUSwjS4/Ff3N6Yq+LrD16QFPqPdHcTy4u+mgBLQ==
-
 "@keplr-wallet/types@0.10.11":
   version "0.10.11"
   resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.10.11.tgz#3772868126c92dcfdce15957415c84830aa11b0f"
