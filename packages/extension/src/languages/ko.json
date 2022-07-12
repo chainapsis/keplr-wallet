@@ -105,6 +105,10 @@
   "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",
   "setting.token.manage.notification.viewing-key.copy": "뷰잉키가 복사되었습니다",
 
+  "setting.endpoints": "노드 주소",
+  "setting.endpoints.paragraph": "원하는 풀노드를 사용하도록 설정하세요",
+  "setting.button.confirm": "확인",
+
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
   "register.button.back": "뒤로",

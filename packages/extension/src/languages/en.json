@@ -113,6 +113,10 @@
   "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
 
+  "setting.endpoints": "Endpoints",
+  "setting.endpoints.paragraph": "Change into the node you wish to connect",
+  "setting.button.confirm": "Confirm",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",

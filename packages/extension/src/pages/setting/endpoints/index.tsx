@@ -20,6 +20,7 @@ import { ChainUpdaterService } from "@keplr-wallet/background";
 import { KeplrError } from "@keplr-wallet/router";
 import { useConfirm } from "../../../components/confirm";
 import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
+import { useIntl } from "react-intl";
 
 interface FormData {
   rpc: string;
@@ -28,6 +29,7 @@ interface FormData {
 
 export const SettingEndpointsPage: FunctionComponent = observer(() => {
   const history = useHistory();
+  const intl = useIntl();
   const notification = useNotification();
   const confirm = useConfirm();
 
@@ -57,7 +59,9 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle={"Endpoints"}
+      alternativeTitle={intl.formatMessage({
+        id: "setting.endpoints",
+      })}
       onBackButton={() => {
         history.goBack();
       }}
@@ -187,7 +191,9 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
           <AlertExperimentalFeature />
           <Button type="submit" color="primary" block data-loading={isLoading}>
-            Submit
+            {intl.formatMessage({
+              id: "setting.button.confirm",
+            })}
           </Button>
         </form>
       </div>
