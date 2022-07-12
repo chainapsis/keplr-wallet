@@ -310,7 +310,8 @@ export class ChainUpdaterService {
   public static async checkEndpointsConnectivity(
     chainId: string,
     rpc: string,
-    rest: string
+    rest: string,
+    wsObject?: new (url: string, protocols?: string | string[]) => WebSocket
   ): Promise<void> {
     const rpcInstance = Axios.create({
       baseURL: rpc,
@@ -361,7 +362,29 @@ export class ChainUpdaterService {
       );
     }
 
-    // TODO: Check websocket connectivity
+    let wsURL = rpc;
+    if (wsURL.startsWith("http")) {
+      wsURL = wsURL.replace("http", "ws");
+    }
+    wsURL = wsURL.endsWith("/") ? wsURL + "websocket" : wsURL + "/websocket";
+
+    const wsInstance = wsObject ? new wsObject(wsURL) : new WebSocket(wsURL);
+
+    // Try 15 times at 1 second intervals to test websocket connectivity.
+    for (let i = 0; i < 15; i++) {
+      // If ws state is not "connecting"
+      if (wsInstance.readyState !== 0) {
+        // If ws state is "open", it means that app can connect ws to /websocket rpc
+        if (wsInstance.readyState === 1) {
+          break;
+        } else {
+          // else, handle that as error.
+          throw new Error("Failed to connect websocket to /websocket rpc");
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
 
     const restInstance = Axios.create({
       baseURL: rest,
