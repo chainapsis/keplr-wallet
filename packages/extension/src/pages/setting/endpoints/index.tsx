@@ -113,6 +113,9 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
                   const chainInfo = chainStore.getChain(selectedChainId);
                   setValue("rpc", chainInfo.rpc);
                   setValue("lcd", chainInfo.rest);
+
+                  // To avoid confusion when the user returns to the main page, select the chain if the rpc/lcd endpoints have changed.
+                  chainStore.selectChain(selectedChainId);
                 } catch (e) {
                   console.log(e);
                 } finally {
@@ -170,6 +173,9 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
               }
 
               chainStore.setChainEndpoints(selectedChainId, data.rpc, data.lcd);
+
+              // To avoid confusion when the user returns to the main page, select the chain if the rpc/lcd endpoints have changed.
+              chainStore.selectChain(selectedChainId);
 
               history.push("/");
             } catch (e) {
