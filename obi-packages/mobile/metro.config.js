@@ -22,6 +22,7 @@ module.exports = {
     extraNodeModules: {
       ...monorepoMetroTools.extraNodeModules,
       crypto: require.resolve("react-native-fast-crypto"),
+      os: require.resolve("os-browserify"),
       stream: require.resolve("stream-browserify"),
     },
   },

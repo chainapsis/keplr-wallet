@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@react-native-async-storage/async-storage": "*",
+    "@react-navigation/native": "*",
+    "@react-navigation/native-stack": "*",
     "@testing-library/jest-native": "*",
     "@testing-library/react-native": "*",
     "react": "*",
@@ -11,7 +13,15 @@
     "react-native-asset": "*",
     "react-native-config": "*",
     "react-native-fast-crypto": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-screens": "*",
     "react-native-svg": "*",
-    "stream-browserify": "*"
+    "stream-browserify": "*",
+    "react-intl": "*",
+    "isomorphic-unfetch": "*",
+    "node-html-parser": "*",
+    "mobx-react-lite": "*",
+    "rooks": "*",
+    "@keplr-wallet/common": "*"
   }
 }

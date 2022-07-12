@@ -22,9 +22,12 @@ module.exports = (async () => {
         assetExts: assetExts.filter((ext) => ext !== 'svg'),
         sourceExts: [...sourceExts, 'svg'],
         resolverMainFields: ['sbmodern', 'browser', 'main'],
-        blockList: exclusionList([/\.\/dist\/.*/]),
+        blockList: exclusionList([/\.\/dist\/.*/, /\/packages\/mobile\/.*/]),
         extraNodeModules: {
           crypto: require.resolve('react-native-fast-crypto'),
+          fs: require.resolve('react-native-level-fs'),
+          os: require.resolve('os-browserify'),
+          path: require.resolve('path-browserify'),
           stream: require.resolve('stream-browserify'),
         },
       },
@@ -32,21 +35,13 @@ module.exports = (async () => {
     {
       // Change this to true to see debugging info.
       // Useful if you have issues resolving modules
-      debug: false,
+      debug: true,
       // all the file extensions used for imports other than 'ts', 'tsx', 'js', 'jsx', 'json'
       extensions: [],
       // the project root to start the metro server
       projectRoot: __dirname,
       // Specify folders to watch, in addition to Nx defaults (workspace libraries and node_modules)
-      watchFolders: [
-        path.resolve(__dirname, '../../../node_modules'),
-        path.resolve(__dirname, '../../../packages'),
-      ],
-      nodeModulesPaths: [
-        path.resolve(__dirname, 'node_modules'),
-        path.resolve(__dirname, '../../node_modules'),
-        path.resolve(__dirname, '../../../node_modules'),
-      ],
+      watchFolders: [path.resolve(__dirname, '../../../packages')],
     }
   );
 })();
