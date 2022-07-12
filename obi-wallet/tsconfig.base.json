@@ -11,10 +11,13 @@
     "target": "es2015",
     "module": "esnext",
     "lib": ["es2017", "dom"],
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@obi-wallet/common": ["libs/common/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

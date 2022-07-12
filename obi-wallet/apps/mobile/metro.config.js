@@ -1,6 +1,7 @@
 const { withNxMetro } = require('@nrwl/react-native');
 const { getDefaultConfig } = require('metro-config');
 const exclusionList = require('metro-config/src/defaults/exclusionList');
+const path = require('path');
 
 module.exports = (async () => {
   const {
@@ -22,6 +23,10 @@ module.exports = (async () => {
         sourceExts: [...sourceExts, 'svg'],
         resolverMainFields: ['sbmodern', 'browser', 'main'],
         blockList: exclusionList([/\.\/dist\/.*/]),
+        extraNodeModules: {
+          crypto: require.resolve('react-native-fast-crypto'),
+          stream: require.resolve('stream-browserify'),
+        },
       },
     },
     {
@@ -33,7 +38,15 @@ module.exports = (async () => {
       // the project root to start the metro server
       projectRoot: __dirname,
       // Specify folders to watch, in addition to Nx defaults (workspace libraries and node_modules)
-      watchFolders: [],
+      watchFolders: [
+        path.resolve(__dirname, '../../../node_modules'),
+        path.resolve(__dirname, '../../../packages'),
+      ],
+      nodeModulesPaths: [
+        path.resolve(__dirname, 'node_modules'),
+        path.resolve(__dirname, '../../node_modules'),
+        path.resolve(__dirname, '../../../node_modules'),
+      ],
     }
   );
 })();

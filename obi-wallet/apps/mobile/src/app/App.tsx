@@ -1,11 +1,11 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
+import { Text } from '@obi-wallet/common';
 import React, { useRef, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
-  Text,
   StatusBar,
   TouchableOpacity,
   Linking,

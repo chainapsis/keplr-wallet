@@ -1,5 +1,5 @@
 {
-  "name": "mobile",
+  "name": "keplr-mobile",
   "version": "0.10.11",
   "private": true,
   "workspaces": {
