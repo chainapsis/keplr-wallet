@@ -141,6 +141,18 @@ export const SettingPage: FunctionComponent = observer(() => {
           ]}
         />
         <PageButton
+          title="Endpoints"
+          onClick={() => {
+            history.push({
+              pathname: "/setting/endpoints",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
           title={intl.formatMessage({
             id: "setting.credit",
           })}

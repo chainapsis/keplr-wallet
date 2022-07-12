@@ -4,6 +4,7 @@ import {
   ChainInfoInner,
   ChainStore as BaseChainStore,
   DeferInitialQueryController,
+  ObservableQuery,
 } from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
@@ -14,6 +15,7 @@ import {
   GetChainInfosMsg,
   RemoveSuggestedChainInfoMsg,
   TryUpdateChainMsg,
+  SetChainEndpointsMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
@@ -135,5 +137,22 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
     const msg = new TryUpdateChainMsg(chainId);
     yield this.requester.sendMessage(BACKGROUND_PORT, msg);
     yield this.getChainInfosFromBackground();
+  }
+
+  @flow
+  *setChainEndpoints(
+    chainId: string,
+    rpc: string | undefined,
+    rest: string | undefined
+  ) {
+    const msg = new SetChainEndpointsMsg(chainId, rpc, rest);
+    const newChainInfos = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+
+    console.log(newChainInfos);
+    this.setChainInfos(newChainInfos);
+
+    ObservableQuery.refreshAllObserved();
   }
 }
