@@ -1,7 +1,7 @@
 {
   "name": "@keplr-wallet/cosmos",
   "version": "0.10.11",
-  "main": "build/index.js",
+  "main": "src",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": false,
