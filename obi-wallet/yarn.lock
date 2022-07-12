@@ -1929,14 +1929,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@keplr-wallet/proto-types@0.10.11":
-  version "0.10.11"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/proto-types/-/proto-types-0.10.11.tgz#12bee82247623ae19761161cd8a6e7b7ccf086bb"
-  integrity sha512-eVkw2edFaOXwPAU3VLzF0nNETE66ZJgm03d4O1D0wBETOZpsaAhE8J/Sbqdu7Je8rzEy0f9RwzGly9LVoLbYqA==
-  dependencies:
-    long "^4.0.0"
-    protobufjs "^6.11.2"
-
 "@keplr-wallet/router@0.10.11":
   version "0.10.11"
   resolved "https://registry.yarnpkg.com/@keplr-wallet/router/-/router-0.10.11.tgz#61e7ed59aface75b8f2701ecde2784d67fa1cb00"
