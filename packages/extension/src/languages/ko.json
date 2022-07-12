@@ -107,7 +107,8 @@
 
   "setting.endpoints": "노드 주소",
   "setting.endpoints.paragraph": "원하는 풀노드를 사용하도록 설정하세요",
-  "setting.button.confirm": "확인",
+  "setting.endpoints.button.reset": "초기화",
+  "setting.endpoints.button.confirm": "확인",
 
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",

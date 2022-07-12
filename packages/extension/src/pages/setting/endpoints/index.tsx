@@ -20,7 +20,7 @@ import { ChainUpdaterService } from "@keplr-wallet/background";
 import { KeplrError } from "@keplr-wallet/router";
 import { useConfirm } from "../../../components/confirm";
 import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 interface FormData {
   rpc: string;
@@ -191,9 +191,7 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
           <AlertExperimentalFeature />
           <Button type="submit" color="primary" block data-loading={isLoading}>
-            {intl.formatMessage({
-              id: "setting.button.confirm",
-            })}
+            <FormattedMessage id="setting.endpoints.button.confirm" />
           </Button>
         </form>
       </div>

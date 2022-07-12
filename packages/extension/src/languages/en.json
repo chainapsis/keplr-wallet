@@ -115,7 +115,8 @@
 
   "setting.endpoints": "Endpoints",
   "setting.endpoints.paragraph": "Change into the node you wish to connect",
-  "setting.button.confirm": "Confirm",
+  "setting.endpoints.button.reset": "Reset",
+  "setting.endpoints.button.confirm": "Confirm",
 
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
