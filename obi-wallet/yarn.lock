@@ -1929,26 +1929,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@keplr-wallet/types@0.10.11":
-  version "0.10.11"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.10.11.tgz#3772868126c92dcfdce15957415c84830aa11b0f"
-  integrity sha512-CvkiNlHg7z2r1m6F9HrVJIO2oke0etVdcQqnQZfqTaLoVm1Z4NAR6j/vPNJQ3fQs5R+/b4dcH54/PA17jfD+ZQ==
-  dependencies:
-    "@cosmjs/launchpad" "^0.24.0-alpha.25"
-    "@cosmjs/proto-signing" "^0.24.0-alpha.25"
-    axios "^0.21.4"
-    long "^4.0.0"
-    secretjs "^0.17.0"
-
-"@keplr-wallet/unit@0.10.11":
-  version "0.10.11"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/unit/-/unit-0.10.11.tgz#d92c563fb44101cf51a50d3e02b5ce9b95a46b62"
-  integrity sha512-L0FAvObjX1Fa/840Fx3Bl2/mNz8jdYxg5BffDhMXoGG7WB+xipr7151gjEI8ePnGt3U2EFupy7LxwCA8zlWPgw==
-  dependencies:
-    "@keplr-wallet/types" "0.10.11"
-    big-integer "^1.6.48"
-    utility-types "^3.10.0"
-
 "@ledgerhq/devices@^5.51.1":
   version "5.51.1"
   resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-5.51.1.tgz#d741a4a5d8f17c2f9d282fd27147e6fe1999edb7"
