@@ -19,7 +19,6 @@
     "@ethersproject/bytes": "^5.5.0",
     "@ethersproject/keccak256": "^5.5.0",
     "@ethersproject/wallet": "^5.5.0",
-    "@keplr-wallet/common": "0.10.11",
     "@keplr-wallet/cosmos": "0.10.11",
     "@keplr-wallet/crypto": "0.10.11",
     "@keplr-wallet/popup": "0.10.11",

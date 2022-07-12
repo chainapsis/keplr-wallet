@@ -1929,15 +1929,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@keplr-wallet/common@0.10.11":
-  version "0.10.11"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/common/-/common-0.10.11.tgz#6b8f49f89f181a59f08ea4538d1d6a4cf0ae5588"
-  integrity sha512-2sb7awTJL53Qf11uUuYt9fd2d5aYp/kYudhPSsjGYyVpLJ/HcK1CXl4h80BzkpTUGffCnjkzowsQrSjbZ7OmpQ==
-  dependencies:
-    "@keplr-wallet/crypto" "0.10.11"
-    buffer "^6.0.3"
-    delay "^4.4.0"
-
 "@keplr-wallet/cosmos@0.10.11":
   version "0.10.11"
   resolved "https://registry.yarnpkg.com/@keplr-wallet/cosmos/-/cosmos-0.10.11.tgz#86cbf4b369e6c4016ad4419d34ce197619f9ba30"
