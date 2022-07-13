@@ -2,6 +2,7 @@
 title: Use with SecretJs
 order: 3
 ---
+This document describes how to use secretjs with Keplr if you need to use secret-wasm feature for Secret Network.
 
 ## How to detect Keplr
 Keplr API may be undefined right after the webpage shown.

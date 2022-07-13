@@ -3,6 +3,8 @@ title: Use with CosmJs
 order: 2
 ---
 
+This section describes how to use CosmJS with Keplr.
+
 ## How to detect Keplr
 Keplr API may be undefined right after the webpage shown.
 Please check the [How to detect Keplr](./README.md#how-to-detect-keplr) first before reading this section.
