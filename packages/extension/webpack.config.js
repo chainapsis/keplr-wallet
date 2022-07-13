@@ -15,6 +15,8 @@ const commonResolve = (dir) => ({
   extensions: [".ts", ".tsx", ".mjs", ".js", ".jsx", ".css", ".scss"],
   alias: {
     assets: path.resolve(__dirname, dir),
+    react: path.resolve(__dirname, "../../node_modules/react"),
+    "react-intl": path.resolve(__dirname, "../../node_modules/react-intl"),
     "react-native$": path.resolve(__dirname, "./node_modules/react-native-web"),
   },
 });

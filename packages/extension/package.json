@@ -19,7 +19,7 @@
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@fortawesome/fontawesome-free": "^5.11.2",
-    "@obi-wallet/components": "0.10.11",
+    "@obi-wallet/common": "0.10.11",
     "@keplr-wallet/analytics": "0.10.11",
     "@keplr-wallet/background": "0.10.11",
     "@keplr-wallet/common": "0.10.11",

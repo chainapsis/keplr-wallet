@@ -1,4 +1,4 @@
-import { messages as commonMessages } from "@obi-wallet/components";
+import { messages as commonMessages } from "@obi-wallet/common";
 import React, {
   FunctionComponent,
   ReactNode,
