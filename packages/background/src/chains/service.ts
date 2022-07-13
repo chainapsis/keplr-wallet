@@ -65,8 +65,8 @@ export class ChainsService {
       );
     }
 
-    const savedChainInfos: ChainInfoWithEmbed[] = (
-      await this.getSavedChainInfos()
+    const suggestedChainInfos: ChainInfoWithEmbed[] = (
+      await this.getSuggestedChainInfos()
     )
       .filter((chainInfo) => {
         // Filter the overlaped chain info with the embeded chain infos.
@@ -81,7 +81,7 @@ export class ChainsService {
         };
       });
 
-    let result: ChainInfoWithEmbed[] = chainInfos.concat(savedChainInfos);
+    let result: ChainInfoWithEmbed[] = chainInfos.concat(suggestedChainInfos);
 
     // Set the updated property of the chain.
     result = await Promise.all(
@@ -171,7 +171,7 @@ export class ChainsService {
     await this.addChainInfo(chainInfo);
   }
 
-  async getSavedChainInfos(): Promise<ChainInfo[]> {
+  async getSuggestedChainInfos(): Promise<ChainInfo[]> {
     return (
       (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? []
     );

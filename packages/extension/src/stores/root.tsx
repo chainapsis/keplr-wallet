@@ -13,12 +13,14 @@ import {
   CosmosQueries,
   CosmwasmAccount,
   CosmwasmQueries,
+  DeferInitialQueryController,
   getKeplrFromWindow,
   IBCChannelStore,
   IBCCurrencyRegsitrar,
   InteractionStore,
   KeyRingStore,
   LedgerInitStore,
+  ObservableQueryBase,
   PermissionStore,
   QueriesStore,
   SecretAccount,
@@ -106,9 +108,18 @@ export class RootStore {
       new InExtensionMessageRequester()
     );
 
+    // Defer the first queries until chain infos are loaded from the background.
+    // Due to custom rpc/lcd features, endpoints may differ from embedded values.
+    // If the query is executed immediately on launch, the initial queries that was sent to embedded chain infos endpoints should be canceled
+    // and the queries should be executed again with the new endpoints.
+    // If you do this, there is a high risk of network waste and unstable behavior.
+    // Therefore, we defer the first queries until ready.
+    ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
+
     this.chainStore = new ChainStore(
       EmbedChainInfos,
-      new InExtensionMessageRequester()
+      new InExtensionMessageRequester(),
+      ObservableQueryBase.experimentalDeferInitialQueryController
     );
 
     this.keyRingStore = new KeyRingStore(

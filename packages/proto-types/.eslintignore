@@ -4,3 +4,4 @@
 !(proto-types-gen)/**/*.cjs
 !(proto-types-gen)/**/*.map
 outputHash
+.DS_Store
