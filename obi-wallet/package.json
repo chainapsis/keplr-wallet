@@ -40,6 +40,7 @@
     "delay": "^4.4.0",
     "elliptic": "^6.5.3",
     "eventemitter3": "^4.0.7",
+    "fastestsmallesttextencoderdecoder": "^1.0.22",
     "isomorphic-unfetch": "^3.1.0",
     "joi": "^17.5.0",
     "ledger-cosmos-js": "^2.1.8",

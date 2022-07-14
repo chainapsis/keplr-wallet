@@ -1,23 +1,22 @@
-import { Home, HomeProps, RootStore } from "@obi-wallet/common";
+import { Home } from "@obi-wallet/common";
 import React from "react";
 import { SafeAreaView } from "react-native";
 
-const stores = new RootStore();
-
-const home: HomeProps = {
-  appsStore: stores.appsStore,
-  onAppPress() {
-    console.warn("onAppPress");
-  },
-  onAppStorePress() {
-    console.warn("onAppStorePress");
-  },
-};
+import { useStore } from "../stores";
 
 export function HomeScreen() {
+  const { appsStore } = useStore();
   return (
     <SafeAreaView>
-      <Home {...home} />
+      <Home
+        appsStore={appsStore}
+        onAppPress={() => {
+          console.warn("onAppPress");
+        }}
+        onAppStorePress={() => {
+          console.warn("onAppStorePress");
+        }}
+      />
     </SafeAreaView>
   );
 }

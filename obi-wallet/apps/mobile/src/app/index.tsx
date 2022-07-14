@@ -6,6 +6,7 @@ import { IntlProvider } from "react-intl";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { HomeScreen } from "./screens/home";
+import { StateRendererScreen } from "./screens/state-renderer";
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +31,10 @@ export function App() {
       <SafeAreaProvider>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="home">
+            <Stack.Screen
+              name="state-renderer"
+              component={StateRendererScreen}
+            />
             <Stack.Screen name="home" component={HomeScreen} />
           </Stack.Navigator>
         </NavigationContainer>

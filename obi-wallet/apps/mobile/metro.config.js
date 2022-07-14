@@ -24,6 +24,7 @@ module.exports = (async () => {
         resolverMainFields: ["sbmodern", "browser", "main"],
         blockList: exclusionList([/\.\/dist\/.*/, /\/packages\/mobile\/.*/]),
         extraNodeModules: {
+          buffer: require.resolve("buffer/"),
           crypto: require.resolve("react-native-fast-crypto"),
           fs: require.resolve("react-native-level-fs"),
           os: require.resolve("os-browserify"),

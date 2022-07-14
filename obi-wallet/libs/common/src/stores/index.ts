@@ -1,25 +1,31 @@
-import { KVStore } from "@keplr-wallet/common";
-import { AppsStore } from "@keplr-wallet/stores";
+import {
+  AppsStore,
+  DeferInitialQueryController,
+  ObservableQueryBase,
+} from "@keplr-wallet/stores";
 
-class MockKVStore implements KVStore {
-  get<T = unknown>(_key: string): Promise<T | undefined> {
-    return Promise.resolve(undefined);
-  }
-
-  prefix(): string {
-    return "";
-  }
-
-  set<T = unknown>(_key: string, _data: T | null): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-}
+import { ChainStore } from "./chain";
+import { KVStore } from "./kv-store";
+import {
+  MessageRequester,
+  MessageRequesterInternal,
+} from "./message-requester";
+import { EmbedChainInfos } from "../config";
 
 export class RootStore {
   public readonly appsStore: AppsStore;
+  public readonly chainStore: ChainStore;
 
   constructor() {
     // TODO: KVStore
-    this.appsStore = new AppsStore(new MockKVStore());
+    this.appsStore = new AppsStore(new KVStore());
+
+    ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
+
+    this.chainStore = new ChainStore(
+      EmbedChainInfos,
+      new MessageRequesterInternal(),
+      ObservableQueryBase.experimentalDeferInitialQueryController
+    );
   }
 }
