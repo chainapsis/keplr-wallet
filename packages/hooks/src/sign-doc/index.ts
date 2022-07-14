@@ -8,6 +8,7 @@ import {
   AuthInfo,
   Fee,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { escapeHTML } from "@keplr-wallet/common";
 
 export * from "./amount";
 
@@ -41,7 +42,7 @@ export class SignDocHelper {
       const signDoc = {
         ...this._signDocWrapper.aminoSignDoc,
         fee: stdFee,
-        memo: this.memoConfig.memo,
+        memo: escapeHTML(this.memoConfig.memo),
       };
 
       return SignDocWrapper.fromAminoSignDoc(signDoc);
