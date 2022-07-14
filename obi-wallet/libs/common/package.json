@@ -1,0 +1,6 @@
+{
+  "name": "@obi-wallet/common",
+  "version": "0.10.11",
+  "main": "src/index.ts",
+  "license": "Apache-2.0"
+}

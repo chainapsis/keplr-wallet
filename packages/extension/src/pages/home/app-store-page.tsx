@@ -1,4 +1,4 @@
-import { AppStore } from "@obi-wallet/components";
+import { AppStore } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import { useNavigate } from "react-router";

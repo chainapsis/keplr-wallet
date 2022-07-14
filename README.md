@@ -1,47 +1,29 @@
-# Keplr Wallet
+# Obi Wallet
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Twitter: Keplr Wallet](https://img.shields.io/twitter/follow/keplrwallet.svg?style=social)](https://twitter.com/keplrwallet)
 
-> The most powerful wallet for the Cosmos ecosystem and the Interchain.
+## Development workflow: mobile app
 
-## Official Releases
+### Prerequisites
 
-> NOTE: We do not accept native integrations to the official releases through pull requests. Please feel free to check out Keplr's [suggest chain](https://docs.keplr.app/api/suggest-chain.html) feature for permissionless integrations to your chain.
+- [Setup up React Native development environment](https://reactnative.dev/docs/environment-setup).
+- `npm i -g nx` (or use `npx nx` instead of `nx` for the commands in the Workflow section)
 
-You can find the latest versions of the official managed releases on these links:
-- [Browser Extension](https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap)
-- [IOS App](https://apps.apple.com/us/app/keplr-wallet/id1567851089)
-- [Android App](https://play.google.com/store/apps/details?id=com.chainapsis.keplr)
+### Setup
 
-For help using Keplr Wallet, Visit our [User Support Site](https://keplr.crunch.help).
+- `yarn`
+- `(cd obi-wallet; yarn)`
+- `yarn build` (or `yarn dev` so that `@keplr-wallet` packages can be accessed by mobile app)
 
-## Building browser extension locally
-This repo uses git-secret to encrypt the endpoints and the api keys. **So, you can't build this without creating your own config file.** You should create your own `config.var.ts`, `config.ui.var.ts` files inside the `packages/extension/src` folder. Refer to the `config.var.example.ts`, ``config.ui.var.example.ts`` sample files to create your own configuration.
+### Workflow
 
-This repo requires `protoc` to be installed. Check [Install protobuf](https://grpc.io/docs/protoc-installation/) for details.  
+In `obi-wallet` directory:
 
-Clone this repo and run:
-```sh
-yarn bootstrap
-yarn build
-```
+- `nx run-ios mobile` (to run ios version)
+- `nx run-android mobile` (to run android version)
+- `nx start mobile` (to only start metro packager)
 
-Browser extension's build output is placed in `packages/extension/prod`, and you can check out [this page](https://developer.chrome.com/extensions/getstarted) for installing the developing version.
+## Development workflow: browser extension
 
-This repo contains submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Browser Extension release. However, all primary features of the extension will work without the closed sourced submodules.
-
-Source code for moblie app is also placed in `packages/mobile`.
-
-### Example
-Refer to the [Keplr Example repository](https://github.com/chainapsis/keplr-example) for examples of how to integrate Keplr signing support for your web interface/application.
-
-## Author
-👤 **Chainapsis**
-* Twitter: [@chainapsis](https://twitter.com/chainapsis)
-* Github: [@chainapsis](https://github.com/chainapsis)
-
-## License
-### Browser Extension 
-Apache 2.0
-### IOS / Android App
-Copyright (c) 2021 Chainapsis Inc. All rights reserved.
+- `yarn`
+- `yarn dev`

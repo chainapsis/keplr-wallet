@@ -4,7 +4,7 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "obi-packages/*",
+      "obi-wallet/libs/common",
       "packages/analytics",
       "packages/background",
       "packages/common",
@@ -58,17 +58,7 @@
     "lint-fix": "lerna run lint-fix",
     "ci": "yarn install --frozen-lockfile && yarn build && yarn test",
     "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
-    "pre-commit": "lint-staged",
     "version": "zx ./scripts/lerna-lifecyle-check-version.mjs"
-  },
-  "pre-commit": [
-    "pre-commit"
-  ],
-  "lint-staged": {
-    "*": [
-      "eslint",
-      "prettier --check"
-    ]
   },
   "keywords": [],
   "author": "chainapsis",
@@ -90,8 +80,6 @@
     "eslint-plugin-unicorn": "^24.0.0",
     "jest": "^26.6.3",
     "lerna": "^3.22.1",
-    "lint-staged": "^10.5.4",
-    "pre-commit": "^1.2.2",
     "prettier": "^2.2.1",
     "semver": "^7.3.5",
     "ts-jest": "^26.5.5",
