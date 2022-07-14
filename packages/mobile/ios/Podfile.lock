@@ -332,7 +332,7 @@ PODS:
     - React-Core (= 0.63.4)
     - React-cxxreact (= 0.63.4)
     - React-jsi (= 0.63.4)
-  - RNCAsyncStorage (1.14.1):
+  - RNCAsyncStorage (1.16.3):
     - React-Core
   - RNCMaskedView (0.1.10):
     - React
@@ -639,7 +639,7 @@ SPEC CHECKSUMS:
   React-RCTText: 5c51df3f08cb9dedc6e790161195d12bac06101c
   React-RCTVibration: ae4f914cfe8de7d4de95ae1ea6cc8f6315d73d9d
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
-  RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
+  RNCAsyncStorage: 13d3b40c7fae0796d10b23fbec382e7a76807a0f
   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
   RNDeviceInfo: 7b82d1467b87f7e74d1c7ba9439a9a57d0c68ee9
   RNFastImage: a7384db75df352500261e8e8f1ac2026def26102

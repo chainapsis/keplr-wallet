@@ -7,6 +7,8 @@ buildscript {
         compileSdkVersion = 30
         targetSdkVersion = 30
         supportLibVersion = "28.0.0"
+
+        kotlinVersion = "1.5.31"
     }
     repositories {
         google()
@@ -18,6 +20,8 @@ buildscript {
         // in the individual module build.gradle files
 
         classpath("com.bugsnag:bugsnag-android-gradle-plugin:5.+")
+
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
