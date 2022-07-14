@@ -18,13 +18,12 @@ export const ProgressBar = ({
   useEffect(() => {
     const total = data[0] + data[1];
     const percentage = data[0] / total;
-    console.log(percentage, data[0], data[1]);
     setValue(percentage * width);
   }, [width, data[0], data[1]]);
 
   return (
     <div>
-      <div className={styleAsset.progressDiv} style={{ width: width }}>
+      <div className={styleAsset.progressDiv} style={{ width }}>
         <div style={{ width: `${value}px` }} className={styleAsset.progress} />
       </div>
     </div>
@@ -115,7 +114,7 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
           </div>
           <ProgressBar width={300} data={data} />
         </div>
-        <div style={{ marginTop: "12px", width: "100%" }}>
+        <div className={styleAsset.legendContainer}>
           <div className={styleAsset.legend}>
             <div className={styleAsset.label} style={{ color: "#5e72e4" }}>
               <FormattedMessage id="main.account.chart.available-balance" />

@@ -72,21 +72,26 @@
   }
 }
 
-.legend {
-  display: flex;
+.legendContainer {
+  margin: 12px;
   width: 100%;
 
-  .label {
-    letter-spacing: -0.3px;
-    flex: 1;
+  .legend {
     display: flex;
-  }
+    width: 100%;
 
-  .value {
-    letter-spacing: -0.3px;
-    flex: 1;
-    display: flex;
-    font-weight: bold;
+    .label {
+      letter-spacing: -0.3px;
+      flex: 1;
+      display: flex;
+    }
+
+    .value {
+      letter-spacing: -0.3px;
+      flex: 1;
+      display: flex;
+      font-weight: bold;
+    }
   }
 }
 
