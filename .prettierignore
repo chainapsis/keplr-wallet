@@ -28,8 +28,8 @@ injected-provider.bundle.js
 .eslintignore
 .prettierignore
 
-obi-packages/mobile/android
-obi-packages/mobile/ios
+obi-wallet/apps/mobile/android
+obi-wallet/apps/mobile/ios
 
 packages/mobile
 packages/proto-types/!(proto-types-gen)/**/*.ts

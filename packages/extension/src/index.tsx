@@ -59,6 +59,7 @@ import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { LogPageViewWrapper } from "./components/analytics";
+import { SettingEndpointsPage } from "./pages/setting/endpoints";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -211,6 +212,10 @@ root.render(
                     <Route
                       path="/setting/token/manage"
                       element={<ManageTokenPage />}
+                    />
+                    <Route
+                      path="/setting/endpoints"
+                      element={<SettingEndpointsPage />}
                     />
                     <Route path="/sign" element={<SignPage />} />
                     <Route

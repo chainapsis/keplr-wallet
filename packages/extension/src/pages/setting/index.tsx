@@ -142,6 +142,23 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
+            id: "setting.endpoints",
+          })}
+          paragraph={intl.formatMessage({
+            id: "setting.endpoints.paragraph",
+          })}
+          onClick={() => {
+            navigate({
+              pathname: "/setting/endpoints",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
+          title={intl.formatMessage({
             id: "setting.credit",
           })}
           onClick={() => {

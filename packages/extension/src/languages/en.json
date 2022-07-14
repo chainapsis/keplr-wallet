@@ -120,6 +120,11 @@
   "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
 
+  "setting.endpoints": "Endpoints",
+  "setting.endpoints.paragraph": "Change into the node you wish to connect",
+  "setting.endpoints.button.reset": "Reset",
+  "setting.endpoints.button.confirm": "Confirm",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",
@@ -308,5 +313,8 @@
   "component.ibc.channel-registrar.chain-selector.button.add": "New IBC Transfer Channel",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
-  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save"
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save",
+
+  "component.waring.experimental-feature.title": "Experimental Feature",
+  "component.waring.experimental-feature.paragraph": "For the brave-hearted cosmonauts"
 }

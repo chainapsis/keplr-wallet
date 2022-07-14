@@ -3444,19 +3444,6 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@keplr-wallet/stores-etc@0.10.11":
-  version "0.10.11"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/stores-etc/-/stores-etc-0.10.11.tgz#f2650564cae837d39af95222af6b3da8957fc27e"
-  integrity sha512-wnBsS6bs7DT/g/5eOwqjHIrrbA/6wRJ6Lcuts1TvfoK518obSjxxC1LwPALsJEg7mHVIxtZVwOwgNhmlatA4LA==
-  dependencies:
-    "@ethersproject/abi" "^5.6.0"
-    "@keplr-wallet/common" "0.10.11"
-    "@keplr-wallet/stores" "0.10.11"
-    "@keplr-wallet/types" "0.10.11"
-    axios "^0.21.4"
-    mobx "^6.1.7"
-    utility-types "^3.10.0"
-
 "@ledgerhq/devices@^5.36.0":
   version "5.36.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-5.36.0.tgz#f4493bea44390325fcc7a2a0d03bba69fc1604ec"

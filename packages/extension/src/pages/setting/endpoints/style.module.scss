@@ -1,0 +1,19 @@
+.container {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  .inner-top-container {
+    display: flex;
+
+    min-height: 43px;
+  }
+
+  .form-container {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+  }
+}

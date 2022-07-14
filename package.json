@@ -21,7 +21,7 @@
       "packages/router-extension",
       "packages/router-mock",
       "packages/stores",
-      "packages/store-etc",
+      "packages/stores-etc",
       "packages/types",
       "packages/unit",
       "packages/wc-client",
