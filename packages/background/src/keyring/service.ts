@@ -13,7 +13,7 @@ import {
 } from "@keplr-wallet/cosmos";
 import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 
-import { KVStore } from "@keplr-wallet/common";
+import { escapeHTML, KVStore } from "@keplr-wallet/common";
 
 import { ChainsService } from "../chains";
 import { LedgerService } from "../ledger";
@@ -64,7 +64,13 @@ export class KeyRingService {
       ledgerService,
       this.crypto
     );
+
+    this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
+
+  protected readonly onChainRemoved = (chainId: string) => {
+    this.keyRing.removeAllKeyStoreCoinType(chainId);
+  };
 
   async restore(): Promise<{
     status: KeyRingStatus;
@@ -230,6 +236,11 @@ export class KeyRingService {
       isADR36WithString?: boolean;
     }
   ): Promise<AminoSignResponse> {
+    signDoc = {
+      ...signDoc,
+      memo: escapeHTML(signDoc.memo),
+    };
+
     const coinType = await this.chainsService.getChainCoinType(chainId);
     const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
       chainId
@@ -265,7 +276,7 @@ export class KeyRingService {
       );
     }
 
-    const newSignDoc = (await this.interactionService.waitApprove(
+    let newSignDoc = (await this.interactionService.waitApprove(
       env,
       "/sign",
       "request-sign",
@@ -280,6 +291,11 @@ export class KeyRingService {
         isADR36WithString: signOptions.isADR36WithString,
       }
     )) as StdSignDoc;
+
+    newSignDoc = {
+      ...newSignDoc,
+      memo: escapeHTML(newSignDoc.memo),
+    };
 
     if (isADR36SignDoc) {
       // Validate the new sign doc, if it was for ADR-36.

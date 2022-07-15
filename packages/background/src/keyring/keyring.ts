@@ -502,6 +502,24 @@ export class KeyRing {
     await this.save();
   }
 
+  public removeAllKeyStoreCoinType(chainId: string) {
+    const identifier = ChainIdHelper.parse(chainId).identifier;
+
+    if (this.keyStore) {
+      const coinTypeForChain = this.keyStore.coinTypeForChain ?? {};
+      delete coinTypeForChain[identifier];
+      this.keyStore.coinTypeForChain = coinTypeForChain;
+    }
+
+    for (const keyStore of this.multiKeyStore) {
+      const coinTypeForChain = keyStore.coinTypeForChain ?? {};
+      delete coinTypeForChain[identifier];
+      keyStore.coinTypeForChain = coinTypeForChain;
+    }
+
+    this.save();
+  }
+
   public async deleteKeyRing(
     index: number,
     password: string
