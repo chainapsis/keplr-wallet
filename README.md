@@ -36,9 +36,9 @@ Source code for moblie app is also placed in `packages/mobile`.
 Refer to the [Keplr Example repository](https://github.com/chainapsis/keplr-example) for examples of how to integrate Keplr signing support for your web interface/application.
 
 ### Disclaimer
-> Usage of any other packages besides @keplr-wallet/types is not recommended.
-> - Any other packages besides @keplr-wallet/types are actively being developed, backward compatibility is not in the scope of support.
-> - Since there are active changes being made, documentation is not being updated to the most recent version of the package as of right now. Documentations would be updated as packages get stable.
+Usage of any other packages besides @keplr-wallet/types is not recommended.
+ - Any other packages besides @keplr-wallet/types are actively being developed, backward compatibility is not in the scope of support.
+ - Since there are active changes being made, documentation is not being updated to the most recent version of the package as of right now. Documentations would be updated as packages get stable.
 
 ## Author
 👤 **Chainapsis**
