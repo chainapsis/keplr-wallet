@@ -64,7 +64,13 @@ export class KeyRingService {
       ledgerService,
       this.crypto
     );
+
+    this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
+
+  protected readonly onChainRemoved = (chainId: string) => {
+    this.keyRing.removeAllKeyStoreCoinType(chainId);
+  };
 
   async restore(): Promise<{
     status: KeyRingStatus;
