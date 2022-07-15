@@ -5,6 +5,9 @@ import { ToolTip } from "../../components/tooltip";
 import { useLanguage } from "../../languages";
 import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
+import { TxButtonView } from "./tx-button";
+import walletIcon from "../../public/assets/icon/wallet.png";
+import buyIcon from "../../public/assets/icon/buy.png";
 
 export const ProgressBar = ({
   width,
@@ -30,7 +33,22 @@ export const ProgressBar = ({
   );
 };
 
-export const AssetStakedChartView: FunctionComponent = observer(() => {
+const EmptyState: FunctionComponent = () => {
+  return (
+    <div className={styleAsset.emptyState}>
+      <h1 className={styleAsset.title}>No funds added</h1>
+      <img src={walletIcon} alt="no fund" />
+      <p className={styleAsset.desc}>
+        That’s okay, you can deposit tokens to your address or buy some.
+      </p>
+      <button>
+        <img src={buyIcon} alt="buy tokens" /> Buy Tokens
+      </button>
+    </div>
+  );
+};
+
+export const AssetView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const language = useLanguage();
@@ -77,9 +95,17 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
       : parseFloat(stakedSum.toDec().toString()),
   ];
 
+  const hasBalance = totalPrice
+    ? !totalPrice.toDec().isZero()
+    : !total.toDec().isZero();
+
+  if (!hasBalance) {
+    return <EmptyState />;
+  }
+
   return (
     <React.Fragment>
-      <>
+      <div className={styleAsset.containerAsset}>
         <div className={styleAsset.containerChart}>
           <div className={styleAsset.centerText}>
             <div className={styleAsset.big}>
@@ -144,15 +170,8 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
             </div>
           </div>
         </div>
-      </>
+      </div>
+      <TxButtonView />
     </React.Fragment>
   );
 });
-
-export const AssetView: FunctionComponent = () => {
-  return (
-    <div className={styleAsset.containerAsset}>
-      <AssetStakedChartView />
-    </div>
-  );
-};

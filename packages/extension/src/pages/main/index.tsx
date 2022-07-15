@@ -7,7 +7,6 @@ import { Card, CardBody } from "reactstrap";
 import style from "./style.module.scss";
 import { Menu } from "./menu";
 import { AccountView } from "./account";
-import { TxButtonView } from "./tx-button";
 import { AssetView } from "./asset";
 import { StakeView } from "./stake";
 
@@ -119,7 +118,6 @@ export const MainPage: FunctionComponent = observer(() => {
           <div className={style.containerAccountInner}>
             <AccountView />
             <AssetView />
-            <TxButtonView />
           </div>
         </CardBody>
       </Card>
