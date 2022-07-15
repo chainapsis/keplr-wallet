@@ -72,9 +72,9 @@ export const WebScreen: FunctionComponent = () => {
             <Image
               source={require("../../assets/image/webpage/osmosis-frontier-text.png")}
               style={{
-                width: 70,
-                height: 14,
-                marginLeft: 4,
+                width: 52.8,
+                height: 18,
+                marginLeft: 8,
                 marginBottom: 7,
               }}
               fadeDuration={0}
