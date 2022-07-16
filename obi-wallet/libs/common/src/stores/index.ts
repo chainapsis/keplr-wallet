@@ -5,11 +5,8 @@ import {
 } from "@keplr-wallet/stores";
 
 import { ChainStore } from "./chain";
-import { KVStore } from "./kv-store";
-import {
-  MessageRequester,
-  MessageRequesterInternal,
-} from "./message-requester";
+import { KVStore } from "../kv-store";
+import { MessageRequesterInternal } from "../message-requester";
 import { EmbedChainInfos } from "../config";
 
 export class RootStore {
@@ -17,10 +14,10 @@ export class RootStore {
   public readonly chainStore: ChainStore;
 
   constructor() {
-    // TODO: KVStore
-    this.appsStore = new AppsStore(new KVStore());
+    this.appsStore = new AppsStore(new KVStore("apps-store"));
 
-    ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
+    ObservableQueryBase.experimentalDeferInitialQueryController =
+      new DeferInitialQueryController();
 
     this.chainStore = new ChainStore(
       EmbedChainInfos,

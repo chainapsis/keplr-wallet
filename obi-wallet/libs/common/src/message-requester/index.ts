@@ -1,3 +1,4 @@
+import { RouterBackground, RouterUi } from "@obi-wallet/common";
 import {
   JSONUint8Array,
   KeplrError,
@@ -17,8 +18,6 @@ export class MessageRequester implements AbstractMessageRequester {
     port: string,
     msg: M
   ): Promise<M extends Message<infer R> ? R : never> {
-    console.warn("Sending message", msg.type());
-
     msg.validateBasic();
     // @ts-expect-error
     msg["origin"] = this.sender.origin;
@@ -64,9 +63,24 @@ export class MessageRequester implements AbstractMessageRequester {
   }
 }
 
+export class MessageRequesterExternal extends MessageRequester {
+  constructor(sender: { url: string; origin: string }) {
+    super(RouterBackground.EventEmitter, sender);
+  }
+}
+
 export class MessageRequesterInternal extends MessageRequester {
   constructor() {
-    super(new EventEmitter(), {
+    super(RouterBackground.EventEmitter, {
+      url: "react-native://internal",
+      origin: "react-native://internal",
+    });
+  }
+}
+
+export class MessageRequesterInternalToUi extends MessageRequester {
+  constructor() {
+    super(RouterUi.EventEmitter, {
       url: "react-native://internal",
       origin: "react-native://internal",
     });

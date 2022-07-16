@@ -24,7 +24,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   protected _selectedChainId: string;
 
   @observable
-  protected _isInitializing: boolean = false;
+  protected _isInitializing = false;
   protected deferChainIdSelect = "";
 
   constructor(
