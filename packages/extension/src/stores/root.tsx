@@ -1,3 +1,5 @@
+import { AppsStore } from "@obi-wallet/common";
+
 import { ChainStore } from "./chain";
 import { EmbedChainInfos } from "../config";
 import {
@@ -48,7 +50,6 @@ import { FeeType } from "@keplr-wallet/hooks";
 import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import Amplitude from "amplitude-js";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { AppsStore } from "@keplr-wallet/stores";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;

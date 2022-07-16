@@ -1,4 +1,4 @@
-import { AppsStore } from "@keplr-wallet/stores";
+import { AppsStore } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import {
