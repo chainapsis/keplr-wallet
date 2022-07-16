@@ -21,24 +21,24 @@ export class Router extends AbstractRouter {
     }
 
     this.port = port;
-    this.eventEmitter.addListener("message", this.onMessage);
+    this.eventEmitter.addListener("message", this.onMessage.bind(this));
   }
 
   unlisten(): void {
     this.port = "";
-    this.eventEmitter.removeListener("message", this.onMessage);
+    this.eventEmitter.removeListener("message", this.onMessage.bind(this));
   }
 
-  protected onMessage = (
-    message: any,
-    sender: MessageSender
-  ): Promise<Result> | undefined => {
-    if (message.port !== this.port) {
-      return;
-    }
-
-    return this.onMessageHandler(message, sender);
-  };
+  protected async onMessage({
+    message,
+    sender,
+  }: {
+    message: any;
+    sender: MessageSender & { resolver: (result: Result) => void };
+  }) {
+    if (message.port !== this.port) return;
+    sender.resolver(await this.onMessageHandler(message, sender));
+  }
 
   protected async onMessageHandler(
     message: any,

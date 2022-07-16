@@ -30,7 +30,7 @@ export function App() {
     >
       <SafeAreaProvider>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="home">
+          <Stack.Navigator initialRouteName="state-renderer">
             <Stack.Screen
               name="state-renderer"
               component={StateRendererScreen}
