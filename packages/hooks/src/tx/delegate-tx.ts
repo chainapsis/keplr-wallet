@@ -4,13 +4,12 @@ import {
   IQueriesStore,
   MsgOpt,
 } from "@keplr-wallet/stores";
-import {
-  AmountConfig,
-  GasConfig,
-  useFeeConfig,
-  useMemoConfig,
-  useRecipientConfig,
-} from "./index";
+
+import { AmountConfig } from "./amount";
+import { useFeeConfig } from "./fee";
+import { GasConfig } from "./gas";
+import { useMemoConfig } from "./memo";
+import { useRecipientConfig } from "./recipient";
 import { AppCurrency } from "@keplr-wallet/types";
 import { useState } from "react";
 import { makeObservable, override } from "mobx";

@@ -1,5 +1,6 @@
 export * from "./card";
 export * from "./config";
+export * from "./config.ui";
 export * from "./env";
 export * from "./kv-store";
 export * from "./languages";

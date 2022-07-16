@@ -5,7 +5,6 @@ import React from "react";
 import { IntlProvider } from "react-intl";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { HomeScreen } from "./screens/home";
 import { StateRendererScreen } from "./screens/state-renderer";
 
 const Stack = createNativeStackNavigator();
@@ -35,7 +34,6 @@ export function App() {
               name="state-renderer"
               component={StateRendererScreen}
             />
-            <Stack.Screen name="home" component={HomeScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

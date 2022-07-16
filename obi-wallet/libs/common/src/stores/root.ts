@@ -26,7 +26,8 @@ export class RootStore {
 
     this.appsStore = new AppsStore(new KVStore("apps-store"));
 
-    ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
+    ObservableQueryBase.experimentalDeferInitialQueryController =
+      new DeferInitialQueryController();
 
     this.chainStore = new ChainStore(
       EmbedChainInfos,
