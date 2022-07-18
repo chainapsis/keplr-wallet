@@ -210,7 +210,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
               "flex-row",
               "background-color-white",
               "dark:background-color-platinum-500",
-              "border-radius-4",
+              "border-radius-6",
               "border-width-1",
               "border-color-gray-100@20%",
               "dark:border-color-platinum-400@50%",
