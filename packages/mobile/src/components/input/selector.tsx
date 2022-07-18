@@ -278,13 +278,13 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
         style={StyleSheet.flatten([
           style.flatten([
             "background-color-white",
-            "dark:background-color-platinum-500",
+            "dark:background-color-platinum-700",
             "padding-x-11",
             "padding-y-12",
-            "border-radius-4",
+            "border-radius-6",
             "border-width-1",
-            "border-color-gray-100@50%",
-            "dark:border-color-platinum-400@50%",
+            "border-color-gray-100@20%",
+            "dark:border-color-platinum-600@50%",
           ]),
           selectorContainerStyle,
         ])}

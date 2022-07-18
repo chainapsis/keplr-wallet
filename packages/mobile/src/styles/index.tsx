@@ -22,8 +22,8 @@ export const ColorPalette = {
   "platinum-300": "#596E8D",
   "platinum-400": "#3B4E6A",
   "platinum-500": "#22324F",
-  "platinum-600": "#0F1C32",
-  "platinum-700": "#09101C",
+  "platinum-600": "#112038",
+  "platinum-700": "#0E1829",
 
   "green-50": "#ECFDF6",
   "green-100": "#DBF9EC",
@@ -58,7 +58,7 @@ export const ColorPalette = {
 
   white: "#FFFFFF",
 
-  "gray-10": "#FAFBFD",
+  "gray-10": "#F8F9FC",
   "gray-50": "#F2F2F7",
   "gray-100": "#DCDCE3",
   "gray-200": "#C6C6CD",
@@ -69,10 +69,12 @@ export const ColorPalette = {
   "gray-700": "#09090A",
 
   black: "#000000",
+
+  transparent: "rgba(255,255,255,0)",
 };
 
 export const TextColors = {
-  "text-emphasis": ColorPalette["blue-400"],
+  "text-highest": ColorPalette["black"],
   "text-high": ColorPalette["platinum-700"],
   "text-middle": ColorPalette["platinum-400"],
   "text-low": ColorPalette["gray-300"],
@@ -80,57 +82,29 @@ export const TextColors = {
 };
 
 export const DarkThemeTextColors = {
-  "text-emphasis": ColorPalette["blue-300"],
+  "text-highest": ColorPalette["white"],
   "text-high": ColorPalette["platinum-50"],
   "text-middle": ColorPalette["platinum-100"],
-  "text-low": ColorPalette["platinum-300"],
+  "text-low": ColorPalette["platinum-200"],
   "text-label": ColorPalette["platinum-100"],
 };
 
-export const Colors = {
-  primary: ColorPalette["blue-400"],
-
+export const BackgroundColors = {
   card: "rgba(255, 255, 255, 0.95)",
   // "background secondary" is not used as the background of the screen itself.
   // This is used when the component needs to be separated from the background behind
   // while occupying a partial size such as the background of the drawer or the background of the modal.
   "background-secondary": ColorPalette["white"],
-  "background-tertiary": ColorPalette["platinum-50"],
+  "background-tertiary": ColorPalette["gray-10"],
+};
 
-  "primary-10": "#F1F3FC",
-  "primary-50": "#E2E8FF",
-  "primary-100": "#B3BEF7",
-  "primary-200": "#8E9FF2",
-  "primary-300": "#7388F0",
-  "primary-400": "#4762E7",
-  "primary-500": "#2644DB",
-  "primary-600": "#102FCB",
-  "primary-700": "#0320B4",
-  "primary-800": "#001A9A",
-  "primary-900": "#00157D",
-  secondary: "#FF63B4",
-  "secondary-50": "#FCD1F4",
-  "secondary-100": "#F3B1E1",
-  "secondary-200": "#FA9DD9",
-  "secondary-300": "#FF86CE",
-  "secondary-400": "#FF63B4",
-  "secondary-500": "#E753A8",
-  "secondary-600": "#C84699",
-  "secondary-700": "#A23A83",
-  "secondary-800": "#762C64",
-  "secondary-900": "#471D40",
-  danger: "#F5365C",
-  "danger-10": "#FFF1F4",
-  "danger-50": "#FFD8E0",
-  "danger-100": "#FFBCC9",
-  "danger-200": "#FC91A6",
-  "danger-300": "#FD5778",
-  "danger-400": "#F5365C",
-  "danger-500": "#DD1E44",
-  "danger-600": "#BC1638",
-  "danger-700": "#9A0F2A",
-  "danger-800": "#810A22",
-  "danger-900": "#65081B",
+export const DarkThemeBackgroundColors = {
+  card: "rgba(17, 32, 56, 0.95)",
+  "background-secondary": ColorPalette["platinum-500"],
+  "background-tertiary": ColorPalette["platinum-600"],
+};
+
+export const ProfileColors = {
   "profile-sky-blue": "#80CAFF",
   "profile-mint": "#47DDE7",
   "profile-green": "#78F0C5",
@@ -139,52 +113,6 @@ export const Colors = {
   "profile-red": "#FF6D88",
   "profile-orange": "#FEC078",
   "profile-yellow": "#F2ED64",
-  icon: "#2C4163",
-  success: "#2DCE89",
-  error: "#F5365C",
-  "text-black-very-high": "#030C1D",
-  "text-black-high": "#132340",
-  "text-black-medium": "#2C4163",
-  "text-black-low": "#83838F",
-  "text-black-very-low": "#899BB6",
-  "text-black-very-very-low": "#C6C6CD",
-  "text-black-very-very-very-low": "#DCDCE3",
-  "border-gray": "#C6C6CD",
-  "border-white": "#F5F5F5",
-  "theme-white": "#fff",
-  disabled: "#EEEEF3",
-  divider: "#F5F5F5",
-  transparent: "rgba(255,255,255,0)",
-  "modal-backdrop": "rgba(9,18,50,0.6)",
-  "card-modal-handle": "#DCDCE3",
-  "camera-loading-background": "rgba(255,255,255,0.95)",
-  "big-image-placeholder": "#E7E4EF",
-  "chain-list-element-dragging": "rgba(242, 242, 247, 0.8)",
-};
-
-export const DarkColors = {
-  primary: ColorPalette["blue-300"],
-
-  card: "rgba(15, 28, 50, 0.95)",
-  "background-secondary": ColorPalette["platinum-600"],
-  "background-tertiary": ColorPalette["platinum-700"],
-
-  "primary-10": "#494F6A",
-  "primary-50": "#505877",
-  "primary-100": "#576089",
-  "primary-200": "#606CA9",
-  "primary-300": "#5366C7",
-  "primary-400": "#6882FF",
-  "text-black-very-high": "#FFFFFF",
-  "text-black-high": "#F3F5F8",
-  "text-black-medium": "#E3E6EB",
-  "text-black-low": "#BABAC1",
-  "text-black-very-low": "#7E8794",
-  "text-black-very-very-low": "#71707C",
-  "text-black-very-very-very-low": "#5D5D68",
-  "border-white": "#71707C",
-  "theme-white": "#1C243D",
-  divider: "#71707C",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider(
@@ -343,6 +271,20 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         ],
       },
 
+      "unlock-screen-gradient-background": {
+        degree: 168,
+        stops: [
+          {
+            offset: "0%",
+            color: "#CCD1FF",
+          },
+          {
+            offset: "35%",
+            color: "#ECEEFC",
+          },
+        ],
+      },
+
       "status-bar-style": "dark-content" as StatusBarStyle,
 
       "blurred-header-blur-type": "light" as BlurViewProperties["blurType"],
@@ -352,31 +294,25 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       "blurred-tabbar-blur-type": "light" as BlurViewProperties["blurType"],
       "blurred-tabbar-blur-amount": 80,
       "blurred-tabbar-reducedTransparencyFallbackColor": "white",
+
+      "header-tabbar-border": ColorPalette["gray-50"],
     },
     colors: {
       ...ColorPalette,
-      ...Colors,
+      ...ProfileColors,
       ...TextColors,
+      ...BackgroundColors,
       ...{
-        "splash-background": "#FBF8FF",
-
-        "blurred-header-background": Colors["card"],
-        "blurred-tabbar-background": Colors["card"],
+        "blurred-header-background": BackgroundColors["card"],
+        "blurred-tabbar-background": BackgroundColors["card"],
 
         // Belows are for the button props and may not be used as styles.
-        "rect-button-default-ripple": "#CCCCCC",
-        // Active opacity is 0.055 by default.
-        "rect-button-default-underlay": Colors["text-black-medium"],
-
-        "drawer-rect-button-underlay": "#F1F3FC",
-
-        // Belows are for the chip props and may not be used as styles.
-        "chip-light-primary": Colors["primary-50"],
-        "chip-light-secondary": Colors["secondary-50"],
-        "chip-light-danger": Colors["danger-100"],
+        "rect-button-default-ripple": ColorPalette["gray-100"],
+        // Active opacity is 0.2 by default.
+        "rect-button-default-underlay": ColorPalette["gray-300"],
 
         // Belows are for the loading spinner props and may not be used as styles.
-        "loading-spinner": Colors["text-black-low"],
+        "loading-spinner": "#BABAC1",
       },
     },
     widths: {
@@ -601,6 +537,20 @@ export const { StyleProvider, useStyle } = createStyleProvider(
           ],
         },
 
+        "unlock-screen-gradient-background": {
+          degree: 168,
+          stops: [
+            {
+              offset: "0%",
+              color: "#060F3C",
+            },
+            {
+              offset: "85%",
+              color: "#020913",
+            },
+          ],
+        },
+
         "status-bar-style": "light-content" as StatusBarStyle,
 
         "blurred-header-blur-type": "dark" as BlurViewProperties["blurType"],
@@ -610,17 +560,18 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         "blurred-tabbar-blur-type": "dark" as BlurViewProperties["blurType"],
         "blurred-tabbar-blur-amount": 70,
         "blurred-tabbar-reducedTransparencyFallbackColor": "black",
+
+        "header-tabbar-border": ColorPalette["platinum-500"],
       },
       colors: {
-        ...DarkColors,
         ...DarkThemeTextColors,
-        "blurred-header-background": DarkColors["card"],
-        "blurred-tabbar-background": DarkColors["card"],
+        ...DarkThemeBackgroundColors,
 
-        "rect-button-default-ripple": "#333333",
-        "rect-button-default-underlay": ColorPalette["gray-500"],
+        "blurred-header-background": DarkThemeBackgroundColors["card"],
+        "blurred-tabbar-background": DarkThemeBackgroundColors["card"],
 
-        "drawer-rect-button-underlay": "#F1F3FC",
+        "rect-button-default-ripple": ColorPalette["platinum-400"],
+        "rect-button-default-underlay": ColorPalette["platinum-400"],
       },
     },
   }

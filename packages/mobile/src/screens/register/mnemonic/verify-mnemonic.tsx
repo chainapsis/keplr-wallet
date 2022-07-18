@@ -78,11 +78,12 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"])}
+      backgroundColor={style.get("color-background-tertiary").color}
     >
       <Text
         style={style.flatten([
           "h5",
-          "color-text-black-medium",
+          "color-text-middle",
           "margin-top-32",
           "margin-bottom-4",
           "text-center",
@@ -180,14 +181,17 @@ const WordButton: FunctionComponent<{
     <RectButton
       style={style.flatten(
         [
-          "background-color-primary",
+          "background-color-blue-400",
           "padding-x-12",
           "padding-y-4",
           "margin-right-12",
           "margin-bottom-12",
           "border-radius-8",
         ],
-        [used && "background-color-primary-100"]
+        [
+          used && "background-color-blue-100",
+          used && "dark:background-color-platinum-300",
+        ]
       )}
       onPress={onPress}
     >
@@ -213,6 +217,7 @@ const WordsCard: FunctionComponent<{
         "padding-y-24",
         "padding-x-28",
         "background-color-white",
+        "dark:background-color-platinum-700",
         "border-radius-8",
         "flex-row",
         "flex-wrap",

@@ -20,6 +20,7 @@ import { KeyRingStatus } from "@keplr-wallet/background";
 import { KeychainStore } from "../../stores/keychain";
 import { IAccountStore } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
+import { SimpleGradient } from "../../components/svg";
 
 let splashScreenHided = false;
 async function hideSplashScreen() {
@@ -226,15 +227,8 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <View
-        style={style.flatten([
-          "absolute-fill",
-          "background-color-splash-background",
-        ])}
-      />
-      <View
-        style={style.flatten(["flex-1", "background-color-splash-background"])}
-      >
+      <UnlockScreenGradientBackground />
+      <View style={style.flatten(["flex-1"])}>
         <KeyboardAwareScrollView
           contentContainerStyle={style.flatten(["flex-grow-1"])}
         >
@@ -243,7 +237,11 @@ export const UnlockScreen: FunctionComponent = observer(() => {
             style={StyleSheet.flatten([style.flatten(["width-full"])])}
             fadeDuration={0}
             resizeMode="contain"
-            source={require("../../assets/logo/splash-image.png")}
+            source={
+              style.theme === "dark"
+                ? require("../../assets/logo/splash-image-dark-mode.png")
+                : require("../../assets/logo/splash-image.png")
+            }
           />
           <View style={style.get("flex-3")} />
           <View style={style.flatten(["padding-x-page"])}>
@@ -505,12 +503,7 @@ export const SplashContinuityEffectView: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <View
-        style={style.flatten([
-          "absolute-fill",
-          "background-color-splash-background",
-        ])}
-      />
+      <UnlockScreenGradientBackground />
       <View
         style={style.flatten([
           "absolute-fill",
@@ -595,5 +588,18 @@ export const SplashContinuityEffectView: FunctionComponent<{
         />
       </View>
     </React.Fragment>
+  );
+};
+
+const UnlockScreenGradientBackground: FunctionComponent = () => {
+  const style = useStyle();
+
+  return (
+    <View style={style.flatten(["absolute-fill"])}>
+      <SimpleGradient
+        degree={style.get("unlock-screen-gradient-background").degree}
+        stops={style.get("unlock-screen-gradient-background").stops}
+      />
+    </View>
   );
 };

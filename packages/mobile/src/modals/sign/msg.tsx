@@ -13,14 +13,11 @@ export const Msg: FunctionComponent<{
         "padding-x-16",
         "padding-y-24",
         "background-color-white",
+        "dark:background-color-platinum-500",
       ])}
     >
       <Text
-        style={style.flatten([
-          "h6",
-          "color-text-black-medium",
-          "margin-bottom-2",
-        ])}
+        style={style.flatten(["h6", "color-text-middle", "margin-bottom-2"])}
       >
         {title}
       </Text>

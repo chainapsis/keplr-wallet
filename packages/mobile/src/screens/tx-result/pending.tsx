@@ -79,6 +79,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
         "flex-grow-1",
         "items-center",
         "background-color-white",
+        "dark:background-color-platinum-700",
       ])}
     >
       <View style={style.flatten(["flex-3"])} />
@@ -87,7 +88,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           "width-122",
           "height-122",
           "border-width-8",
-          "border-color-primary",
+          "border-color-blue-400",
           "border-radius-64",
         ])}
       >
@@ -105,15 +106,15 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
             colorFilters={[
               {
                 keypath: "#dot01",
-                color: style.get("color-primary").color,
+                color: style.get("color-blue-400").color,
               },
               {
                 keypath: "#dot02",
-                color: style.get("color-primary").color,
+                color: style.get("color-blue-400").color,
               },
               {
                 keypath: "#dot03",
-                color: style.get("color-primary").color,
+                color: style.get("color-blue-400").color,
               },
             ]}
             autoPlay
@@ -126,7 +127,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-black-medium",
+          "color-text-middle",
           "margin-top-82",
           "margin-bottom-32",
         ])}
@@ -145,13 +146,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           },
         ])}
       >
-        <Text
-          style={style.flatten([
-            "body2",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
+        <Text style={style.flatten(["body2", "text-center", "color-text-low"])}>
           Transaction has been broadcasted to the blockchain and pending
           confirmation.
         </Text>
@@ -171,14 +166,11 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
             size="default"
             text="Go to homescreen"
             mode="text"
-            rightIcon={
+            rightIcon={(color) => (
               <View style={style.flatten(["margin-left-8"])}>
-                <RightArrowIcon
-                  color={style.get("color-primary").color}
-                  height={12}
-                />
+                <RightArrowIcon color={color} height={12} />
               </View>
-            }
+            )}
             onPress={() => {
               smartNavigation.navigateSmart("Home", {});
             }}

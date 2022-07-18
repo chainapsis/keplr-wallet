@@ -20,6 +20,7 @@ const AnimatedKeyboardAwareSectionList = Animated.createAnimatedComponent(
 export const PageWithSectionList: FunctionComponent<
   SectionListProps<any, any> & {
     containerStyle?: ViewStyle;
+    backgroundColor?: string;
   }
 > = (props) => {
   const style = useStyle();
@@ -27,7 +28,13 @@ export const PageWithSectionList: FunctionComponent<
   useSetFocusedScreen();
   const scrollY = usePageRegisterScrollYValue();
 
-  const { style: propStyle, onScroll, containerStyle, ...restProps } = props;
+  const {
+    style: propStyle,
+    onScroll,
+    containerStyle,
+    backgroundColor,
+    ...restProps
+  } = props;
 
   return (
     <React.Fragment>
@@ -40,7 +47,17 @@ export const PageWithSectionList: FunctionComponent<
           bottom: -100,
         }}
       >
-        <GradientBackground />
+        {backgroundColor ? (
+          <View
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundColor,
+            }}
+          />
+        ) : (
+          <GradientBackground />
+        )}
       </View>
       <SafeAreaView
         style={StyleSheet.flatten([

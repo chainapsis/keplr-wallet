@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactElement } from "react";
+import React, { FunctionComponent, ReactElement, isValidElement } from "react";
 import { useStyle } from "../../styles";
 import { Text, StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import { LoadingSpinner } from "../spinner";
@@ -9,8 +9,8 @@ export const Button: FunctionComponent<{
   mode?: "fill" | "light" | "outline" | "text";
   size?: "default" | "small" | "large";
   text: string;
-  leftIcon?: ReactElement;
-  rightIcon?: ReactElement;
+  leftIcon?: ReactElement | ((color: string) => ReactElement);
+  rightIcon?: ReactElement | ((color: string) => ReactElement);
   loading?: boolean;
   disabled?: boolean;
 
@@ -113,7 +113,7 @@ export const Button: FunctionComponent<{
         }
 
         if (color === "primary") {
-          return ["color-white", "dark:color-blue-100"];
+          return ["color-white", "dark:color-blue-50"];
         } else {
           return ["color-white"];
         }
@@ -147,7 +147,11 @@ export const Button: FunctionComponent<{
           }
         }
 
-        return [`color-${baseColor}-400`, `dark:color-${baseColor}-300`];
+        if (color === "primary") {
+          return [`color-${baseColor}-400`, "dark:color-platinum-50"];
+        } else {
+          return [`color-${baseColor}-400`, `dark:color-${baseColor}-300`];
+        }
     }
   })();
 
@@ -156,17 +160,31 @@ export const Button: FunctionComponent<{
       return propRippleColor;
     }
 
-    // TODO
-    return "#FFFFFF";
+    const baseColor = color === "primary" ? "blue" : "red";
 
-    // switch (mode) {
-    //   case "fill":
-    //     return style.get(`color-button-${color}-fill-ripple` as any).color;
-    //   case "light":
-    //     return style.get(`color-button-${color}-light-ripple` as any).color;
-    //   default:
-    //     return style.get(`color-button-${color}-outline-ripple` as any).color;
-    // }
+    switch (mode) {
+      case "fill":
+        return style.get(`color-${baseColor}-500` as any).color;
+      case "light":
+        if (color === "primary") {
+          return (style.flatten([
+            `color-${baseColor}-200`,
+            "dark:color-platinum-600",
+          ] as any) as any).color;
+        }
+        return style.get(`color-${baseColor}-200` as any).color;
+      default:
+        if (color === "primary") {
+          return (style.flatten([
+            `color-${baseColor}-100`,
+            "dark:color-platinum-300",
+          ] as any) as any).color;
+        }
+        return (style.flatten([
+          `color-${baseColor}-100`,
+          `dark:color-${baseColor}-600`,
+        ] as any) as any).color;
+    }
   })();
 
   const underlayColor = (() => {
@@ -174,17 +192,31 @@ export const Button: FunctionComponent<{
       return propUnderlayColor;
     }
 
-    // TODO
-    return "#FFFFFF";
+    if (mode === "text" || mode === "outline") {
+      const baseColor = color === "primary" ? "blue" : "red";
 
-    // switch (mode) {
-    //   case "fill":
-    //     return style.get(`color-button-${color}-fill-underlay` as any).color;
-    //   case "light":
-    //     return style.get(`color-button-${color}-light-underlay` as any).color;
-    //   default:
-    //     return style.get(`color-button-${color}-outline-underlay` as any).color;
-    // }
+      if (color === "primary") {
+        return (style.flatten([
+          `color-${baseColor}-200`,
+          "dark:color-platinum-300",
+        ] as any) as any).color;
+      }
+      return (style.flatten([
+        `color-${baseColor}-200`,
+        `dark:color-${baseColor}-600`,
+      ] as any) as any).color;
+    }
+
+    if (mode === "light" && color === "primary") {
+      return style.flatten(["color-platinum-200", "dark:color-platinum-600"])
+        .color;
+    }
+
+    if (color === "primary") {
+      return style.get("color-platinum-600").color;
+    } else {
+      return style.get("color-platinum-500").color;
+    }
   })();
 
   const outlineBorderDefinition: string[] = (() => {
@@ -237,7 +269,7 @@ export const Button: FunctionComponent<{
         enabled={!loading && !disabled}
         rippleColor={rippleColor}
         underlayColor={underlayColor}
-        activeOpacity={1}
+        activeOpacity={propUnderlayColor ? 1 : color === "primary" ? 0.3 : 0.2}
       >
         <View
           style={style.flatten(
@@ -245,7 +277,13 @@ export const Button: FunctionComponent<{
             [loading && "opacity-transparent"]
           )}
         >
-          <View>{leftIcon}</View>
+          <View>
+            {isValidElement(leftIcon) || !leftIcon
+              ? leftIcon
+              : leftIcon(
+                  (style.flatten(textColorDefinition as any) as any).color
+                )}
+          </View>
         </View>
         <Text
           style={StyleSheet.flatten([
@@ -264,7 +302,13 @@ export const Button: FunctionComponent<{
             [loading && "opacity-transparent"]
           )}
         >
-          <View>{rightIcon}</View>
+          <View>
+            {isValidElement(rightIcon) || !rightIcon
+              ? rightIcon
+              : rightIcon(
+                  (style.flatten(textColorDefinition as any) as any).color
+                )}
+          </View>
         </View>
         {loading ? (
           <View

@@ -35,6 +35,7 @@ export const ConfirmModal: FunctionComponent<{
             "border-radius-8",
             "overflow-hidden",
             "background-color-white",
+            "dark:background-color-platinum-600",
             "padding-x-20",
             "padding-y-28",
             "items-center",
@@ -43,7 +44,7 @@ export const ConfirmModal: FunctionComponent<{
           <Text
             style={style.flatten([
               "h3",
-              "color-text-black-medium",
+              "color-text-middle",
               "margin-bottom-8",
             ])}
           >
@@ -53,7 +54,7 @@ export const ConfirmModal: FunctionComponent<{
             <Text
               style={style.flatten([
                 "body2",
-                "color-text-black-low",
+                "color-text-low",
                 "margin-bottom-16",
                 "text-center",
               ])}
@@ -65,7 +66,7 @@ export const ConfirmModal: FunctionComponent<{
             <Button
               containerStyle={style.flatten(["flex-1"])}
               text={noButtonText}
-              mode="outline"
+              mode="light"
               onPress={() => {
                 onSelectNo();
                 close();

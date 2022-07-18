@@ -38,7 +38,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
           <Text
             style={style.flatten([
               "h3",
-              "color-text-black-high",
+              "color-text-high",
               "margin-top-68",
               "margin-bottom-46",
             ])}
@@ -48,7 +48,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
           <Text
             style={style.flatten([
               "body1",
-              "color-text-black-low",
+              "color-text-low",
               "text-center",
               "margin-x-18",
               "margin-bottom-24",
@@ -59,7 +59,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
           <Text
             style={style.flatten([
               "body3",
-              "color-text-black-low",
+              "color-text-low",
               "text-center",
               "margin-x-38",
             ])}

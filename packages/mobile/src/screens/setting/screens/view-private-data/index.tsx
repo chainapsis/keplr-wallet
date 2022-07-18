@@ -62,10 +62,13 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
     >
       <View
         style={style.flatten([
+          "margin-top-24",
           "padding-top-24",
           "padding-bottom-12",
           "padding-x-24",
-          "background-color-white",
+          "border-radius-8",
+          "background-color-card",
+          "dark:background-color-platinum-700",
         ])}
       >
         <View style={style.flatten(["flex-row", "flex-wrap"])}>
@@ -74,17 +77,24 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
               return <WordChip key={i.toString()} index={i + 1} word={word} />;
             })
           ) : (
-            <Text style={style.flatten(["h6", "margin-bottom-30"])}>
+            <Text
+              style={style.flatten([
+                "h6",
+                "margin-bottom-30",
+                "color-text-high",
+              ])}
+            >
               {words}
             </Text>
           )}
         </View>
         <View style={style.flatten(["width-full"])}>
           <Button
-            textStyle={style.flatten([
-              "text-button1",
-              isTimedOut ? "color-success" : "color-primary",
-            ])}
+            textStyle={style.flatten(
+              ["text-button1", "color-blue-400", "dark:color-platinum-50"],
+              [isTimedOut && "color-green-400"]
+            )}
+            mode="text"
             {...(isTimedOut && {
               rightIcon: (
                 <View style={style.flatten(["margin-left-8"])}>
@@ -92,8 +102,7 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
                 </View>
               ),
             })}
-            mode="text"
-            text="Copy to Clipboard"
+            text="Copy to clipboard"
             onPress={() => {
               Clipboard.setString(words.join(" "));
               setTimer(3000);

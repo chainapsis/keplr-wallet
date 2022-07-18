@@ -39,7 +39,7 @@ export const UndelegationsCard: FunctionComponent<{
   return (
     <Card style={containerStyle}>
       <CardBody>
-        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+        <Text style={style.flatten(["h4", "color-text-highest"])}>
           My Unstaking
         </Text>
         {unbondings.map((unbonding, unbondingIndex) => {
@@ -75,7 +75,7 @@ export const UndelegationsCard: FunctionComponent<{
                     style={style.flatten([
                       "margin-left-16",
                       "h6",
-                      "color-text-black-medium",
+                      "color-text-middle",
                     ])}
                   >
                     {validator?.description.moniker ?? "..."}
@@ -144,7 +144,7 @@ export const UndelegationsCard: FunctionComponent<{
                         <Text
                           style={style.flatten([
                             "subtitle2",
-                            "color-text-black-medium",
+                            "color-text-middle",
                           ])}
                         >
                           {entry.balance
@@ -155,10 +155,7 @@ export const UndelegationsCard: FunctionComponent<{
                         </Text>
                         <View style={style.get("flex-1")} />
                         <Text
-                          style={style.flatten([
-                            "body2",
-                            "color-text-black-low",
-                          ])}
+                          style={style.flatten(["body2", "color-text-low"])}
                         >
                           {remainingText}
                         </Text>
@@ -173,7 +170,11 @@ export const UndelegationsCard: FunctionComponent<{
               {!isLastUnbondingIndex && (
                 <View
                   style={StyleSheet.flatten([
-                    style.flatten(["height-1", "background-color-divider"]),
+                    style.flatten([
+                      "height-1",
+                      "background-color-gray-200",
+                      "dark:background-color-platinum-400",
+                    ]),
                   ])}
                 />
               )}

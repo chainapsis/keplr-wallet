@@ -31,7 +31,7 @@ export const UnbondingCard: FunctionComponent<{
   return unbonding ? (
     <Card style={containerStyle}>
       <CardBody>
-        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+        <Text style={style.flatten(["h4", "color-text-highest"])}>
           My Unstaking
         </Text>
         <View style={style.flatten(["padding-top-4", "padding-bottom-8"])}>
@@ -90,10 +90,7 @@ export const UnbondingCard: FunctionComponent<{
                   ])}
                 >
                   <Text
-                    style={style.flatten([
-                      "subtitle2",
-                      "color-text-black-medium",
-                    ])}
+                    style={style.flatten(["subtitle2", "color-text-middle"])}
                   >
                     {entry.balance
                       .shrink(true)
@@ -102,9 +99,7 @@ export const UnbondingCard: FunctionComponent<{
                       .toString()}
                   </Text>
                   <View style={style.get("flex-1")} />
-                  <Text
-                    style={style.flatten(["body2", "color-text-black-low"])}
-                  >
+                  <Text style={style.flatten(["body2", "color-text-low"])}>
                     {remainingText}
                   </Text>
                 </View>

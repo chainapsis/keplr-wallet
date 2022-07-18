@@ -11,6 +11,7 @@ import {
   NavigationContainer,
   NavigationContainerRef,
   useNavigation,
+  DefaultTheme,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
@@ -70,10 +71,11 @@ import { NewLedgerScreen } from "./screens/register/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
   BlurredHeaderScreenOptionsPreset,
-  getPlainHeaderScreenOptionsPresetWithBackgroundColor,
   HeaderLeftButton,
   HeaderRightButton,
   PlainHeaderScreenOptionsPreset,
+  getPlainHeaderScreenOptionsPresetWithBackgroundColor,
+  TertiaryBackgroundPlainHeaderScreenOptionsPreset,
 } from "./components/header";
 import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/undelegate";
@@ -357,14 +359,13 @@ const HomeScreenHeaderLeft: FunctionComponent = observer(() => {
       }}
     >
       <View style={style.flatten(["flex-row", "items-center"])}>
-        <OpenDrawerIcon size={28} color={style.get("color-primary").color} />
-        <Text
-          style={style.flatten([
-            "h4",
-            "color-text-black-high",
-            "margin-left-4",
-          ])}
-        >
+        <OpenDrawerIcon
+          size={28}
+          color={
+            style.flatten(["color-blue-400", "dark:color-platinum-200"]).color
+          }
+        />
+        <Text style={style.flatten(["h4", "color-text-high", "margin-left-4"])}>
           {chainStore.current.chainName}
         </Text>
       </View>
@@ -388,7 +389,12 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
           });
         }}
       >
-        <ScanIcon size={28} color={style.get("color-primary").color} />
+        <ScanIcon
+          size={28}
+          color={
+            style.flatten(["color-blue-400", "dark:color-platinum-50"]).color
+          }
+        />
       </HeaderRightButton>
       {walletConnectStore.sessions.length > 0 ? (
         <HeaderRightButton
@@ -401,7 +407,11 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
             });
           }}
         >
-          <HeaderWalletConnectIcon />
+          <HeaderWalletConnectIcon
+            color={
+              style.flatten(["color-blue-400", "dark:color-platinum-50"]).color
+            }
+          />
         </HeaderRightButton>
       ) : null}
     </React.Fragment>
@@ -437,7 +447,7 @@ export const RegisterNavigation: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...PlainHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       initialRouteName="Register.Intro"
       headerMode="screen"
@@ -466,6 +476,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Create New Mnemonic",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.NewMnemonic"
         component={NewMnemonicScreen}
@@ -473,6 +484,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Verify Mnemonic",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
@@ -480,6 +492,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Import Existing Wallet",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
@@ -487,11 +500,18 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Import Hardware Wallet",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.NewLedger"
         component={NewLedgerScreen}
       />
-      <Stack.Screen name="Register.TorusSignIn" component={TorusSignInScreen} />
+      <Stack.Screen
+        options={{
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
+        }}
+        name="Register.TorusSignIn"
+        component={TorusSignInScreen}
+      />
       <Stack.Screen
         options={{
           // Only show the back button.
@@ -510,6 +530,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Import Extension",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.ImportFromExtension.SetPassword"
         component={ImportFromExtensionSetPasswordScreen}
@@ -534,13 +555,14 @@ export const OtherNavigation: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
           title: "Send",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Send"
         component={SendScreen}
@@ -611,6 +633,12 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "All Active Validators",
+          ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
+            style.flatten([
+              "color-background-tertiary",
+              "dark:color-platinum-700",
+            ]).color
+          ),
         }}
         name="Validator.List"
         component={ValidatorListScreen}
@@ -618,6 +646,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Stake",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Delegate"
         component={DelegateScreen}
@@ -625,6 +654,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Unstake",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Undelegate"
         component={UndelegateScreen}
@@ -632,6 +662,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Switch Validator",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Redelegate"
         component={RedelegateScreen}
@@ -663,6 +694,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Add Token",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Setting.AddToken"
         component={SettingAddTokenScreen}
@@ -698,7 +730,7 @@ export const SettingStackScreen: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...PlainHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
@@ -706,9 +738,12 @@ export const SettingStackScreen: FunctionComponent = () => {
         options={{
           title: "Settings",
           ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
-            style.get("color-background-tertiary").color
+            style.flatten([
+              "color-background-tertiary",
+              "dark:color-platinum-700",
+            ]).color
           ),
-          headerTitleStyle: style.flatten(["h3", "color-text-black-high"]),
+          headerTitleStyle: style.flatten(["h3", "color-text-high"]),
         }}
         name="Setting"
         component={SettingScreen}
@@ -755,7 +790,7 @@ export const AddressBookStackScreen: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
@@ -784,7 +819,7 @@ export const ChainListStackScreen: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
@@ -919,6 +954,7 @@ export const MainTabNavigation: FunctionComponent = () => {
             <BorderlessButton
               {...props}
               activeOpacity={1}
+              rippleColor={style.get("color-rect-button-default-ripple").color}
               style={{
                 height: "100%",
                 aspectRatio: 1.9,
@@ -929,11 +965,17 @@ export const MainTabNavigation: FunctionComponent = () => {
         ),
       })}
       tabBarOptions={{
-        activeTintColor: style.get("color-primary").color,
-        inactiveTintColor: style.get("color-text-black-very-very-low").color,
+        activeTintColor: style.flatten([
+          "color-blue-400",
+          "dark:color-platinum-50",
+        ]).color,
+        inactiveTintColor: style.flatten([
+          "color-gray-200",
+          "dark:color-platinum-300",
+        ]).color,
         style: {
           borderTopWidth: 0.5,
-          borderTopColor: style.get("border-color-border-white").borderColor,
+          borderTopColor: style.get("header-tabbar-border"),
           backgroundColor: style.get("color-blurred-tabbar-background").color,
           shadowColor: style.get("color-transparent").color,
           elevation: 0,
@@ -1004,12 +1046,21 @@ export const AppNavigation: FunctionComponent = observer(() => {
   const navigationRef = useRef<NavigationContainerRef | null>(null);
   const routeNameRef = useRef<string | null>(null);
 
+  const style = useStyle();
+
   return (
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
           <BugsnagNavigationContainer
             ref={navigationRef}
+            theme={{
+              dark: style.theme === "dark",
+              colors: {
+                ...DefaultTheme.colors,
+                background: style.theme === "dark" ? "black" : "white",
+              },
+            }}
             onReady={() => {
               const routerName = navigationRef.current?.getCurrentRoute();
               if (routerName) {
