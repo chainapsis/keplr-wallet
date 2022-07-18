@@ -22,6 +22,7 @@ import { ChainUpdaterService } from "@keplr-wallet/background";
 import { IBCTransferView } from "./ibc-transfer";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
+import bellIcon from "../../public/assets/icon/bell.png";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -97,12 +98,10 @@ export const MainPage: FunctionComponent = observer(() => {
             paddingRight: "20px",
           }}
         >
-          <i
-            className="fas fa-user"
-            style={{
-              cursor: "pointer",
-              padding: "4px",
-            }}
+          <img
+            src={bellIcon}
+            alt="notification"
+            style={{ width: "16px", cursor: "pointer" }}
             onClick={(e) => {
               e.preventDefault();
 
