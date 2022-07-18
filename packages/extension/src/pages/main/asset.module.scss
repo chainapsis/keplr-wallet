@@ -45,12 +45,10 @@
   position: relative;
 
   .center-text {
-    position: absolute;
     z-index: 1;
     text-align: center;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
 
     .big {
       font-size: 13px;
@@ -74,21 +72,38 @@
   }
 }
 
-.legend {
-  display: flex;
+.legendContainer {
+  margin: 12px;
   width: 100%;
 
-  .label {
-    letter-spacing: -0.3px;
-    flex: 1;
+  .legend {
     display: flex;
-    justify-content: flex-end;
-  }
+    width: 100%;
 
-  .value {
-    letter-spacing: -0.3px;
-    flex: 1;
-    display: flex;
-    font-weight: bold;
+    .label {
+      letter-spacing: -0.3px;
+      flex: 1;
+      display: flex;
+    }
+
+    .value {
+      letter-spacing: -0.3px;
+      flex: 1;
+      display: flex;
+      font-weight: bold;
+    }
   }
+}
+
+.progressDiv {
+  background-color: #11cdef;
+  border-radius: 2px;
+}
+
+.progress {
+  background-color: #5e72e4;
+  height: 20px;
+  border-radius: 2px;
+  transition: 1s ease;
+  transition-delay: 0.5s;
 }

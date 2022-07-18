@@ -1,0 +1,48 @@
+import React from "react";
+
+import { Tab } from "./tab";
+
+import style from "./style.module.scss";
+import homeTabBlueIcon from "../../public/assets/icon/home-blue.png";
+import homeTabGreyIcon from "../../public/assets/icon/home-grey.png";
+import clockTabBlueIcon from "../../public/assets/icon/clock-blue.png";
+import clockTabGreyIcon from "../../public/assets/icon/clock-grey.png";
+import moreTabBlueIcon from "../../public/assets/icon/more-blue.png";
+import moreTabGreyIcon from "../../public/assets/icon/more-grey.png";
+
+export const BottomNav = () => {
+  const bottomNav = [
+    {
+      title: "Home",
+      icon: homeTabGreyIcon,
+      activeTabIcon: homeTabBlueIcon,
+      path: "/",
+    },
+    {
+      title: "Activity",
+      icon: clockTabGreyIcon,
+      activeTabIcon: clockTabBlueIcon,
+      path: "/activity",
+    },
+    {
+      title: "More",
+      icon: moreTabGreyIcon,
+      activeTabIcon: moreTabBlueIcon,
+      path: "/more",
+    },
+  ];
+
+  return (
+    <div className={style.bottomNavContainer}>
+      {bottomNav.map((nav, index) => (
+        <Tab
+          key={index}
+          title={nav.title}
+          icon={nav.icon}
+          activeTabIcon={nav.activeTabIcon}
+          path={nav.path}
+        />
+      ))}
+    </div>
+  );
+};

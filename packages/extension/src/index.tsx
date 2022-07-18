@@ -7,6 +7,8 @@ import "./styles/global.scss";
 import { HashRouter, Route } from "react-router-dom";
 
 import { AccessPage, Secret20ViewingKeyAccessPage } from "./pages/access";
+import { ActivityPage } from "./pages/activity";
+import { MorePage } from "./pages/more";
 import { RegisterPage } from "./pages/register";
 import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
@@ -143,6 +145,8 @@ const Application: FunctionComponent = () => {
                     <Route exact path="/" component={StateRenderer} />
                     <Route exact path="/unlock" component={LockPage} />
                     <Route exact path="/access" component={AccessPage} />
+                    <Route exact path="/activity" component={ActivityPage} />
+                    <Route exact path="/more" component={MorePage} />
                     <Route
                       exact
                       path="/access/viewing-key"
