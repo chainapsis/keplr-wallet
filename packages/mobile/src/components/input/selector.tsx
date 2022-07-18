@@ -283,7 +283,7 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
             "padding-y-12",
             "border-radius-4",
             "border-width-1",
-            "border-color-gray-100@50%",
+            "border-color-gray-100@20%",
             "dark:border-color-platinum-400@50%",
           ]),
           selectorContainerStyle,

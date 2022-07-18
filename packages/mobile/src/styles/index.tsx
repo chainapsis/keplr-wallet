@@ -22,7 +22,7 @@ export const ColorPalette = {
   "platinum-300": "#596E8D",
   "platinum-400": "#3B4E6A",
   "platinum-500": "#22324F",
-  "platinum-600": "#0F1C32",
+  "platinum-600": "#13233E",
   "platinum-700": "#09101C",
 
   "green-50": "#ECFDF6",
@@ -58,7 +58,7 @@ export const ColorPalette = {
 
   white: "#FFFFFF",
 
-  "gray-10": "#FAFBFD",
+  "gray-10": "#F8F9FC",
   "gray-50": "#F2F2F7",
   "gray-100": "#DCDCE3",
   "gray-200": "#C6C6CD",
@@ -87,15 +87,23 @@ export const DarkThemeTextColors = {
   "text-label": ColorPalette["platinum-100"],
 };
 
-export const Colors = {
-  primary: ColorPalette["blue-400"],
-
+export const BackgroundColors = {
   card: "rgba(255, 255, 255, 0.95)",
   // "background secondary" is not used as the background of the screen itself.
   // This is used when the component needs to be separated from the background behind
   // while occupying a partial size such as the background of the drawer or the background of the modal.
   "background-secondary": ColorPalette["white"],
-  "background-tertiary": ColorPalette["platinum-50"],
+  "background-tertiary": ColorPalette["gray-10"],
+};
+
+export const DarkThemeBackgroundColors = {
+  card: "rgba(15, 28, 50, 0.95)",
+  "background-secondary": ColorPalette["platinum-500"],
+  "background-tertiary": ColorPalette["platinum-600"],
+};
+
+export const Colors = {
+  primary: ColorPalette["blue-400"],
 
   "primary-10": "#F1F3FC",
   "primary-50": "#E2E8FF",
@@ -164,10 +172,6 @@ export const Colors = {
 
 export const DarkColors = {
   primary: ColorPalette["blue-300"],
-
-  card: "rgba(15, 28, 50, 0.95)",
-  "background-secondary": ColorPalette["platinum-600"],
-  "background-tertiary": ColorPalette["platinum-700"],
 
   "primary-10": "#494F6A",
   "primary-50": "#505877",
@@ -357,11 +361,12 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       ...ColorPalette,
       ...Colors,
       ...TextColors,
+      ...BackgroundColors,
       ...{
         "splash-background": "#FBF8FF",
 
-        "blurred-header-background": Colors["card"],
-        "blurred-tabbar-background": Colors["card"],
+        "blurred-header-background": BackgroundColors["card"],
+        "blurred-tabbar-background": BackgroundColors["card"],
 
         // Belows are for the button props and may not be used as styles.
         "rect-button-default-ripple": "#CCCCCC",
@@ -614,8 +619,9 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       colors: {
         ...DarkColors,
         ...DarkThemeTextColors,
-        "blurred-header-background": DarkColors["card"],
-        "blurred-tabbar-background": DarkColors["card"],
+        ...DarkThemeBackgroundColors,
+        "blurred-header-background": DarkThemeBackgroundColors["card"],
+        "blurred-tabbar-background": DarkThemeBackgroundColors["card"],
 
         "rect-button-default-ripple": "#333333",
         "rect-button-default-underlay": ColorPalette["gray-500"],
