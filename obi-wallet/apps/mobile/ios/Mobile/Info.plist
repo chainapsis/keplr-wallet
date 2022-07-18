@@ -72,5 +72,7 @@
 		<string>Poppins-Thin.ttf</string>
 		<string>Poppins-ThinItalic.ttf</string>
 	</array>
+    <key>NSFaceIDUsageDescription</key>
+    <string>We need your permission to access FaceID</string>
 </dict>
 </plist>
