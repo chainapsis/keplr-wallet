@@ -29,9 +29,26 @@ export const TextInput = React.forwardRef<
 
     inputLeft?: React.ReactNode;
     inputRight?: React.ReactNode;
+
+    inModal?: boolean;
   }
 >((props, ref) => {
-  const { style: propsStyle, ...restProps } = props;
+  const {
+    style: propsStyle,
+    labelStyle,
+    containerStyle,
+    inputContainerStyle,
+    errorLabelStyle,
+    label,
+    error,
+    paragraph,
+    topInInputContainer,
+    bottomInInputContainer,
+    inputLeft,
+    inputRight,
+    inModal,
+    ...restProps
+  } = props;
 
   const style = useStyle();
 
@@ -39,17 +56,17 @@ export const TextInput = React.forwardRef<
     <View
       style={StyleSheet.flatten([
         style.flatten(["padding-bottom-28"]),
-        props.containerStyle,
+        containerStyle,
       ])}
     >
-      {props.label ? (
+      {label ? (
         <Text
           style={StyleSheet.flatten([
             style.flatten(["subtitle3", "color-text-label", "margin-bottom-3"]),
-            props.labelStyle,
+            labelStyle,
           ])}
         >
-          {props.label}
+          {label}
         </Text>
       ) : null}
       <View
@@ -57,33 +74,33 @@ export const TextInput = React.forwardRef<
           style.flatten(
             [
               "background-color-white",
-              "dark:background-color-platinum-600",
+              "dark:background-color-platinum-500",
               "padding-x-11",
               "padding-y-12",
               "border-radius-4",
               "border-width-1",
               "border-color-gray-100@50%",
-              "dark:border-color-platinum-500@50%",
+              "dark:border-color-platinum-400@50%",
             ],
             [
-              props.error ? "border-color-red-200" : undefined,
-              props.error ? "dark:border-color-red-400" : undefined,
+              error ? "border-color-red-200" : undefined,
+              error ? "dark:border-color-red-400" : undefined,
               !(props.editable ?? true) && "background-color-gray-50",
-              !(props.editable ?? true) && "dark:background-color-platinum-500",
+              !(props.editable ?? true) && "dark:background-color-platinum-400",
             ]
           ),
-          props.inputContainerStyle,
+          inputContainerStyle,
         ])}
       >
-        {props.topInInputContainer}
+        {topInInputContainer}
         <View style={style.flatten(["flex-row", "items-center"])}>
-          {props.inputLeft}
+          {inputLeft}
           <NativeTextInput
             placeholderTextColor={
               props.placeholderTextColor ??
               style.flatten(
-                ["color-gray-300"],
-                [!(props.editable ?? true) && "dark:color-platinum-300"]
+                ["color-gray-300", "dark:color-platinum-300"],
+                [!(props.editable ?? true) && "dark:color-platinum-200"]
               ).color
             }
             style={StyleSheet.flatten([
@@ -97,7 +114,7 @@ export const TextInput = React.forwardRef<
                 ],
                 [
                   !(props.editable ?? true) && "color-gray-300",
-                  !(props.editable ?? true) && "dark:color-platinum-300",
+                  !(props.editable ?? true) && "dark:color-platinum-200",
                 ]
               ),
               Platform.select({
@@ -113,12 +130,12 @@ export const TextInput = React.forwardRef<
             {...restProps}
             ref={ref}
           />
-          {props.inputRight}
+          {inputRight}
         </View>
-        {props.bottomInInputContainer}
+        {bottomInInputContainer}
       </View>
-      {props.paragraph && !props.error ? (
-        typeof props.paragraph === "string" ? (
+      {paragraph && !error ? (
+        typeof paragraph === "string" ? (
           <View>
             <Text
               style={StyleSheet.flatten([
@@ -130,17 +147,17 @@ export const TextInput = React.forwardRef<
                   "margin-top-2",
                   "margin-left-4",
                 ]),
-                props.errorLabelStyle,
+                errorLabelStyle,
               ])}
             >
-              {props.paragraph}
+              {paragraph}
             </Text>
           </View>
         ) : (
-          props.paragraph
+          paragraph
         )
       ) : null}
-      {props.error ? (
+      {error ? (
         <View>
           <Text
             style={StyleSheet.flatten([
@@ -151,10 +168,10 @@ export const TextInput = React.forwardRef<
                 "margin-top-2",
                 "margin-left-4",
               ]),
-              props.errorLabelStyle,
+              errorLabelStyle,
             ])}
           >
-            {props.error}
+            {error}
           </Text>
         </View>
       ) : null}

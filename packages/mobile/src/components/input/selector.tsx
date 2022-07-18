@@ -65,10 +65,10 @@ export const SelectorModal: FunctionComponent<{
               "height-24",
               "border-radius-32",
               "background-color-white",
-              "dark:background-color-gray-400",
+              "dark:background-color-platinum-600",
               "border-width-1",
               "border-color-gray-100",
-              "dark:border-color-gray-50",
+              "dark:border-color-platinum-300",
             ])}
           />
         );
@@ -150,7 +150,8 @@ export const SelectorModal: FunctionComponent<{
                   <Text
                     style={style.flatten([
                       "subtitle1",
-                      "color-text-black-medium",
+                      "color-platinum-400",
+                      "dark:color-platinum-10",
                     ])}
                   >
                     {item.label}
@@ -277,13 +278,13 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
         style={StyleSheet.flatten([
           style.flatten([
             "background-color-white",
-            "dark:background-color-platinum-600",
+            "dark:background-color-platinum-500",
             "padding-x-11",
             "padding-y-12",
             "border-radius-4",
             "border-width-1",
             "border-color-gray-100@50%",
-            "dark:border-color-platinum-500@50%",
+            "dark:border-color-platinum-400@50%",
           ]),
           selectorContainerStyle,
         ])}
@@ -292,8 +293,13 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
         <Text
           style={StyleSheet.flatten([
             style.flatten(
-              ["body2", "color-text-black-medium", "padding-0"],
-              [!selected && "color-text-black-low"]
+              [
+                "body2",
+                "color-gray-600",
+                "dark:color-platinum-50",
+                "padding-0",
+              ],
+              [!selected && "color-gray-400", !selected && "color-platinum-200"]
             ),
             textStyle,
           ])}

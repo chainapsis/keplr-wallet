@@ -15,6 +15,7 @@ export const ColorPalette = {
   "blue-700": "#0D1749",
   "blue-800": "#051124",
 
+  "platinum-10": "#F4F9FF",
   "platinum-50": "#F8F9FC",
   "platinum-100": "#D0DCEF",
   "platinum-200": "#8EA5C6",
@@ -83,7 +84,7 @@ export const DarkThemeTextColors = {
   "text-high": ColorPalette["platinum-50"],
   "text-middle": ColorPalette["platinum-100"],
   "text-low": ColorPalette["platinum-300"],
-  "text-label": ColorPalette["platinum-200"],
+  "text-label": ColorPalette["platinum-100"],
 };
 
 export const Colors = {
