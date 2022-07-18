@@ -85,6 +85,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
           </div>
         }
         right={rightRenderer}
+        fixed
       >
         {showChainName || alternativeTitle ? (
           <ToolTip

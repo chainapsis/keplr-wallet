@@ -1,20 +1,40 @@
 import React, { FunctionComponent } from "react";
-import { useIntl } from "react-intl";
 import { useHistory } from "react-router";
 import { HeaderLayout } from "../../layouts";
+import bellIcon from "../../public/assets/icon/bell.png";
 
 export const MorePage: FunctionComponent = () => {
   const history = useHistory();
-  const intl = useIntl();
 
   return (
     <HeaderLayout
-      showChainName={false}
-      canChangeChainInfo={false}
-      alternativeTitle={intl.formatMessage({ id: "setting.keyring" })}
+      showChainName={true}
+      canChangeChainInfo={true}
       onBackButton={() => {
         history.goBack();
       }}
+      rightRenderer={
+        <div
+          style={{
+            height: "64px",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            paddingRight: "20px",
+          }}
+        >
+          <img
+            src={bellIcon}
+            alt="notification"
+            style={{ width: "16px", cursor: "pointer" }}
+            onClick={(e) => {
+              e.preventDefault();
+
+              history.push("/setting/set-keyring");
+            }}
+          />
+        </div>
+      }
     >
       <h3>More Page</h3>
     </HeaderLayout>
