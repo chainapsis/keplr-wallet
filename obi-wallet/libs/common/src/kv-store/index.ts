@@ -1,17 +1,26 @@
 import { KVStore as AbstractKVStore } from "@keplr-wallet/common";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export class KVStore implements AbstractKVStore {
   constructor(private readonly _prefix: string) {}
 
-  get<T = unknown>(_key: string): Promise<T | undefined> {
-    return Promise.resolve(undefined);
+  public async get<T = unknown>(key: string): Promise<T | undefined> {
+    const data = await AsyncStorage.getItem(this.getKey(key));
+    return data === null ? undefined : JSON.parse(data);
   }
 
-  prefix(): string {
+  public async set<T = unknown>(key: string, data: T | null) {
+    // Passing `null` means we want to delete the existing data item.
+    return data === null
+      ? AsyncStorage.removeItem(this.getKey(key))
+      : AsyncStorage.setItem(this.getKey(key), JSON.stringify(data));
+  }
+
+  public prefix() {
     return this._prefix;
   }
 
-  set<T = unknown>(_key: string, _data: T | null): Promise<void> {
-    return Promise.resolve(undefined);
+  protected getKey(key: string) {
+    return this.prefix() + "/" + key;
   }
 }
