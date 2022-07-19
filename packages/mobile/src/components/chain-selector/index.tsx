@@ -78,7 +78,7 @@ export const ChainSelectorModal: FunctionComponent<{
                     />
                   )}
                 </View>
-                <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+                <Text style={style.flatten(["h5", "color-text-middle"])}>
                   {chainName}
                 </Text>
               </RectButton>

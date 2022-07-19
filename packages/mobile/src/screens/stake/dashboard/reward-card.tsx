@@ -35,7 +35,7 @@ export const MyRewardCard: FunctionComponent<{
         <Text
           style={style.flatten([
             "body3",
-            "color-text-black-medium",
+            "color-text-middle",
             "margin-bottom-12",
           ])}
         >
@@ -46,7 +46,7 @@ export const MyRewardCard: FunctionComponent<{
             <Text
               style={style.flatten([
                 "h3",
-                "color-text-black-medium",
+                "color-text-middle",
                 "margin-bottom-20",
               ])}
             >

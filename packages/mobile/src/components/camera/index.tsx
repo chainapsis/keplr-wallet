@@ -106,7 +106,7 @@ export const FullScreenCameraView: FunctionComponent<
                 <Text
                   style={style.flatten([
                     "subtitle1",
-                    "color-text-black-low",
+                    "color-text-low",
                     "margin-top-34",
                   ])}
                 >

@@ -196,7 +196,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                 </View>
               }
               style={StyleSheet.flatten([
-                style.flatten(["h6", "color-text-black-medium"]),
+                style.flatten(["h6", "color-text-middle"]),
                 {
                   minHeight: 20 * 4,
                   textAlignVertical: "top",

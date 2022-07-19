@@ -185,7 +185,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                         <Text
                           style={style.flatten([
                             "text-overline",
-                            "color-text-black-low",
+                            "color-text-low",
                             "margin-right-4",
                             "uppercase",
                           ])}
@@ -195,11 +195,11 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                         <Svg
                           width="6"
                           height="12"
-                          fill={style.get("color-text-black-low").color}
+                          fill={style.get("color-text-low").color}
                           viewBox="0 0 6 12"
                         >
                           <Path
-                            fill={style.get("color-text-black-low").color}
+                            fill={style.get("color-text-low").color}
                             d="M2.625 0l2.273 4.5H.352L2.625 0zM2.625 12L.352 7.5h4.546L2.625 12z"
                           />
                         </Svg>
@@ -259,7 +259,7 @@ const ValidatorItem: FunctionComponent<{
       <View
         style={style.flatten(["items-center", "width-40", "margin-left-4"])}
       >
-        <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+        <Text style={style.flatten(["body3", "color-text-middle"])}>
           {index + 1}
         </Text>
       </View>
@@ -269,11 +269,7 @@ const ValidatorItem: FunctionComponent<{
         url={bondedValidators.getValidatorThumbnail(validator.operator_address)}
       />
       <Text
-        style={style.flatten([
-          "h6",
-          "color-text-black-medium",
-          "max-width-160",
-        ])}
+        style={style.flatten(["h6", "color-text-middle", "max-width-160"])}
         numberOfLines={1}
         ellipsizeMode="tail"
       >
@@ -281,7 +277,7 @@ const ValidatorItem: FunctionComponent<{
       </Text>
       <View style={style.flatten(["flex-1"])} />
       {sort === "APY" ? (
-        <Text style={style.flatten(["body3", "color-text-black-low"])}>
+        <Text style={style.flatten(["body3", "color-text-low"])}>
           {queries.cosmos.queryInflation.inflation
             .mul(
               new Dec(1).sub(
@@ -294,7 +290,7 @@ const ValidatorItem: FunctionComponent<{
         </Text>
       ) : null}
       {sort === "Voting Power" ? (
-        <Text style={style.flatten(["body2", "color-text-black-low"])}>
+        <Text style={style.flatten(["body2", "color-text-low"])}>
           {new CoinPretty(
             chainStore.current.stakeCurrency,
             new Dec(validator.tokens)
@@ -305,10 +301,7 @@ const ValidatorItem: FunctionComponent<{
         </Text>
       ) : null}
       <View style={style.flatten(["margin-left-12", "margin-right-20"])}>
-        <RightArrowIcon
-          height={14}
-          color={style.get("color-text-black-low").color}
-        />
+        <RightArrowIcon height={14} color={style.get("color-text-low").color} />
       </View>
     </RectButton>
   ) : null;

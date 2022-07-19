@@ -62,14 +62,14 @@ export const TallyVoteInfoView: FunctionComponent<{
           <Text
             style={style.flatten([
               "text-caption1",
-              "color-text-black-low",
+              "color-text-low",
               "margin-bottom-2",
             ])}
           >
             {text}
           </Text>
           <Text
-            style={style.flatten(["text-button3", "color-text-black-medium"])}
+            style={style.flatten(["text-button3", "color-text-middle"])}
           >{`${percentage.trim(true).maxDecimals(1).toString()}%`}</Text>
         </View>
       </View>
@@ -111,17 +111,13 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
             ])}
           >
             <Text
-              style={style.flatten(["h6", "color-text-black-high"])}
+              style={style.flatten(["h6", "color-text-high"])}
             >{`#${proposal.id}`}</Text>
             <View style={style.flatten(["flex-1"])} />
             <GovernanceProposalStatusChip status={proposal.proposalStatus} />
           </View>
           <Text
-            style={style.flatten([
-              "h6",
-              "color-text-black-high",
-              "margin-bottom-16",
-            ])}
+            style={style.flatten(["h6", "color-text-high", "margin-bottom-16"])}
             // Text selection is only supported well in android.
             // In IOS, the whole text would be selected, this process is somewhat strange, so it is disabled in IOS.
             selectable={Platform.OS === "android"}
@@ -136,12 +132,12 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
                 "margin-bottom-6",
               ])}
             >
-              <Text style={style.flatten(["h7", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h7", "color-text-middle"])}>
                 Turnout
               </Text>
               <View style={style.flatten(["flex-1"])} />
               <Text
-                style={style.flatten(["body3", "color-text-black-medium"])}
+                style={style.flatten(["body3", "color-text-middle"])}
               >{`${proposal.turnout
                 .trim(true)
                 .maxDecimals(1)
@@ -210,18 +206,18 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
           <CardDivider style={style.flatten(["margin-x-0", "margin-y-16"])} />
           <View style={style.flatten(["flex-row", "margin-bottom-12"])}>
             <View style={style.flatten(["flex-1"])}>
-              <Text style={style.flatten(["h7", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h7", "color-text-middle"])}>
                 Voting Start
               </Text>
-              <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+              <Text style={style.flatten(["body3", "color-text-middle"])}>
                 {dateToLocalString(intl, proposal.raw.voting_start_time)}
               </Text>
             </View>
             <View style={style.flatten(["flex-1"])}>
-              <Text style={style.flatten(["h7", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h7", "color-text-middle"])}>
                 Voting End
               </Text>
-              <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+              <Text style={style.flatten(["body3", "color-text-middle"])}>
                 {dateToLocalString(intl, proposal.raw.voting_end_time)}
               </Text>
             </View>
@@ -229,14 +225,14 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
           <Text
             style={style.flatten([
               "h7",
-              "color-text-black-medium",
+              "color-text-middle",
               "margin-bottom-4",
             ])}
           >
             Description
           </Text>
           <Text
-            style={style.flatten(["body3", "color-text-black-medium"])}
+            style={style.flatten(["body3", "color-text-middle"])}
             // Text selection is only supported well in android.
             // In IOS, the whole text would be selected, this process is somewhat strange, so it is disabled in IOS.
             selectable={Platform.OS === "android"}
@@ -344,9 +340,7 @@ export const GovernanceVoteModal: FunctionComponent<{
             )}
             onPress={() => setVote("Yes")}
           >
-            <Text
-              style={style.flatten(["subtitle1", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
               Yes
             </Text>
             {renderBall(vote === "Yes")}
@@ -368,9 +362,7 @@ export const GovernanceVoteModal: FunctionComponent<{
             )}
             onPress={() => setVote("No")}
           >
-            <Text
-              style={style.flatten(["subtitle1", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
               No
             </Text>
             {renderBall(vote === "No")}
@@ -392,9 +384,7 @@ export const GovernanceVoteModal: FunctionComponent<{
             )}
             onPress={() => setVote("NoWithVeto")}
           >
-            <Text
-              style={style.flatten(["subtitle1", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
               No with veto
             </Text>
             {renderBall(vote === "NoWithVeto")}
@@ -416,9 +406,7 @@ export const GovernanceVoteModal: FunctionComponent<{
             )}
             onPress={() => setVote("Abstain")}
           >
-            <Text
-              style={style.flatten(["subtitle1", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
               Abstain
             </Text>
             {renderBall(vote === "Abstain")}

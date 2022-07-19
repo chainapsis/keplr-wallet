@@ -16,11 +16,7 @@ export const Msg: FunctionComponent<{
       ])}
     >
       <Text
-        style={style.flatten([
-          "h6",
-          "color-text-black-medium",
-          "margin-bottom-2",
-        ])}
+        style={style.flatten(["h6", "color-text-middle", "margin-bottom-2"])}
       >
         {title}
       </Text>

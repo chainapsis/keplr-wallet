@@ -75,7 +75,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h5",
-          "color-text-black-medium",
+          "color-text-middle",
           "margin-bottom-4",
           "text-center",
         ])}

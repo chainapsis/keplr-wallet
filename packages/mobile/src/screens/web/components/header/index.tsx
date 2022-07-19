@@ -125,11 +125,7 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
           }}
         >
           <Text
-            style={style.flatten([
-              "h4",
-              "color-text-black-medium",
-              "margin-right-8",
-            ])}
+            style={style.flatten(["h4", "color-text-middle", "margin-right-8"])}
           >
             {webViewState.name}
           </Text>

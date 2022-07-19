@@ -34,7 +34,7 @@ export const WebScreen: FunctionComponent = () => {
       <Text
         style={style.flatten([
           "h3",
-          "color-text-black-high",
+          "color-text-high",
           "margin-top-44",
           "margin-bottom-20",
         ])}

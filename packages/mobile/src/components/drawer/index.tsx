@@ -50,11 +50,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
             style={style.flatten(["items-center", "height-50", "flex-row"])}
           >
             <Text
-              style={style.flatten([
-                "h3",
-                "color-text-black-high",
-                "margin-left-24",
-              ])}
+              style={style.flatten(["h3", "color-text-high", "margin-left-24"])}
             >
               Networks
             </Text>
@@ -151,7 +147,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                     />
                   )}
                 </View>
-                <Text style={style.flatten(["h4", "color-text-black-medium"])}>
+                <Text style={style.flatten(["h4", "color-text-middle"])}>
                   {chainInfo.chainName}
                 </Text>
               </RectButton>

@@ -95,7 +95,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         style={style.flatten([
           "margin-bottom-20",
           "text-center",
-          "color-text-black-low",
+          "color-text-low",
         ])}
       >
         Powered by Torus

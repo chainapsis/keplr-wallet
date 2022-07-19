@@ -64,11 +64,7 @@ export const AccountCard: FunctionComponent<{
       <CardBody style={style.flatten(["padding-bottom-0"])}>
         <View style={style.flatten(["flex", "items-center"])}>
           <Text
-            style={style.flatten([
-              "h4",
-              "color-text-black-high",
-              "margin-bottom-8",
-            ])}
+            style={style.flatten(["h4", "color-text-high", "margin-bottom-8"])}
           >
             {account.name || "..."}
           </Text>
@@ -85,13 +81,13 @@ export const AccountCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "subtitle2",
-                  "color-text-black-medium",
+                  "color-text-middle",
                   "margin-bottom-4",
                 ])}
               >
                 Total Balance
               </Text>
-              <Text style={style.flatten(["h3", "color-text-black-high"])}>
+              <Text style={style.flatten(["h3", "color-text-high"])}>
                 {totalPrice
                   ? totalPrice.toString()
                   : total.shrink(true).maxDecimals(6).toString()}
@@ -140,7 +136,7 @@ export const AccountCard: FunctionComponent<{
               >
                 Available
               </Text>
-              <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h5", "color-text-middle"])}>
                 {stakable.maxDecimals(6).trim(true).shrink(true).toString()}
               </Text>
             </View>
@@ -175,7 +171,7 @@ export const AccountCard: FunctionComponent<{
               >
                 Staking
               </Text>
-              <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h5", "color-text-middle"])}>
                 {stakedSum.maxDecimals(6).trim(true).shrink(true).toString()}
               </Text>
             </View>

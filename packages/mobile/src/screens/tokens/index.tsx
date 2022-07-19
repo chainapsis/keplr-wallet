@@ -144,7 +144,7 @@ export const TokenItem: FunctionComponent<{
         <Text
           style={style.flatten([
             "subtitle3",
-            "color-text-black-low",
+            "color-text-low",
             "margin-bottom-4",
             "uppercase",
           ])}
@@ -152,11 +152,7 @@ export const TokenItem: FunctionComponent<{
           {balance.currency.coinDenom}
         </Text>
         <Text
-          style={style.flatten([
-            "h5",
-            "color-text-black-medium",
-            "max-width-240",
-          ])}
+          style={style.flatten(["h5", "color-text-middle", "max-width-240"])}
           numberOfLines={1}
           ellipsizeMode="tail"
         >

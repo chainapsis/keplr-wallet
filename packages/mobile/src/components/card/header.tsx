@@ -51,11 +51,7 @@ export const CardHeaderWithButton: FunctionComponent<{
         </Text>
         {paragraph ? (
           <Text
-            style={style.flatten([
-              "body2",
-              "color-text-black-low",
-              "margin-top-4",
-            ])}
+            style={style.flatten(["body2", "color-text-low", "margin-top-4"])}
           >
             {paragraph}
           </Text>

@@ -100,7 +100,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
               size={36}
               url={validatorThumbnail}
             />
-            <Text style={style.flatten(["h6", "color-text-black-high"])}>
+            <Text style={style.flatten(["h6", "color-text-high"])}>
               {validator ? validator.description.moniker : "..."}
             </Text>
           </View>
@@ -112,13 +112,11 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
             ])}
           />
           <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text
-              style={style.flatten(["subtitle2", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
               Staked
             </Text>
             <View style={style.get("flex-1")} />
-            <Text style={style.flatten(["body2", "color-text-black-medium"])}>
+            <Text style={style.flatten(["body2", "color-text-middle"])}>
               {staked.trim(true).shrink(true).maxDecimals(6).toString()}
             </Text>
           </View>

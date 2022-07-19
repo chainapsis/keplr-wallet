@@ -85,7 +85,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-black-medium",
+          "color-text-middle",
           "margin-top-82",
           "margin-bottom-32",
         ])}
@@ -104,13 +104,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           },
         ])}
       >
-        <Text
-          style={style.flatten([
-            "body2",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
+        <Text style={style.flatten(["body2", "text-center", "color-text-low"])}>
           Transaction unsuccessful. Please check the block explorer for more
           information.
         </Text>

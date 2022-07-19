@@ -51,18 +51,14 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
         <WelcomeRocket width={358} height={254} />
 
         <Text
-          style={style.flatten([
-            "h2",
-            "color-text-black-medium",
-            "margin-top-18",
-          ])}
+          style={style.flatten(["h2", "color-text-middle", "margin-top-18"])}
         >
           You’re all set!
         </Text>
         <Text
           style={style.flatten([
             "subtitle1",
-            "color-text-black-low",
+            "color-text-low",
             "text-center",
             "margin-top-10",
           ])}
@@ -74,7 +70,7 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
         <View
           style={style.flatten(["flex-row", "margin-top-58", "items-center"])}
         >
-          <Text style={style.flatten(["subtitle1", "color-text-black-medium"])}>
+          <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
             Enable Biometric
           </Text>
           <View style={style.get("flex-1")} />

@@ -75,7 +75,7 @@ export const UndelegationsCard: FunctionComponent<{
                     style={style.flatten([
                       "margin-left-16",
                       "h6",
-                      "color-text-black-medium",
+                      "color-text-middle",
                     ])}
                   >
                     {validator?.description.moniker ?? "..."}
@@ -144,7 +144,7 @@ export const UndelegationsCard: FunctionComponent<{
                         <Text
                           style={style.flatten([
                             "subtitle2",
-                            "color-text-black-medium",
+                            "color-text-middle",
                           ])}
                         >
                           {entry.balance
@@ -155,10 +155,7 @@ export const UndelegationsCard: FunctionComponent<{
                         </Text>
                         <View style={style.get("flex-1")} />
                         <Text
-                          style={style.flatten([
-                            "body2",
-                            "color-text-black-low",
-                          ])}
+                          style={style.flatten(["body2", "color-text-low"])}
                         >
                           {remainingText}
                         </Text>

@@ -65,7 +65,7 @@ export const SettingItem: FunctionComponent<{
         <View>
           <Text
             style={StyleSheet.flatten([
-              style.flatten(["body1", "color-text-black-medium"]),
+              style.flatten(["body1", "color-text-middle"]),
               labelStyle,
             ])}
           >
@@ -74,7 +74,7 @@ export const SettingItem: FunctionComponent<{
           {paragraph ? (
             <Text
               style={StyleSheet.flatten([
-                style.flatten(["subtitle3", "color-text-black-low"]),
+                style.flatten(["subtitle3", "color-text-low"]),
                 paragraphStyle,
               ])}
             >
@@ -148,19 +148,12 @@ export const RightArrow: FunctionComponent<{
     <React.Fragment>
       {paragraph ? (
         <Text
-          style={style.flatten([
-            "body1",
-            "color-text-black-low",
-            "margin-right-16",
-          ])}
+          style={style.flatten(["body1", "color-text-low", "margin-right-16"])}
         >
           {paragraph}
         </Text>
       ) : null}
-      <RightArrowIcon
-        color={style.get("color-text-black-low").color}
-        height={15}
-      />
+      <RightArrowIcon color={style.get("color-text-low").color} height={15} />
     </React.Fragment>
   );
 };

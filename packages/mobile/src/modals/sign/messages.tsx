@@ -699,9 +699,7 @@ export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {
   }, [msg]);
 
   return (
-    <Text style={style.flatten(["body3", "color-text-black-low"])}>
-      {prettyMsg}
-    </Text>
+    <Text style={style.flatten(["body3", "color-text-low"])}>{prettyMsg}</Text>
   );
 };
 

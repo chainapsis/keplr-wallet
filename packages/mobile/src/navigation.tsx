@@ -358,13 +358,7 @@ const HomeScreenHeaderLeft: FunctionComponent = observer(() => {
     >
       <View style={style.flatten(["flex-row", "items-center"])}>
         <OpenDrawerIcon size={28} color={style.get("color-primary").color} />
-        <Text
-          style={style.flatten([
-            "h4",
-            "color-text-black-high",
-            "margin-left-4",
-          ])}
-        >
+        <Text style={style.flatten(["h4", "color-text-high", "margin-left-4"])}>
           {chainStore.current.chainName}
         </Text>
       </View>
@@ -437,7 +431,7 @@ export const RegisterNavigation: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...PlainHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       initialRouteName="Register.Intro"
       headerMode="screen"
@@ -534,7 +528,7 @@ export const OtherNavigation: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
@@ -703,7 +697,7 @@ export const SettingStackScreen: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...PlainHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
@@ -711,7 +705,7 @@ export const SettingStackScreen: FunctionComponent = () => {
         options={{
           title: "Settings",
           ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
-          headerTitleStyle: style.flatten(["h3", "color-text-black-high"]),
+          headerTitleStyle: style.flatten(["h3", "color-text-high"]),
         }}
         name="Setting"
         component={SettingScreen}
@@ -758,7 +752,7 @@ export const AddressBookStackScreen: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
@@ -787,7 +781,7 @@ export const ChainListStackScreen: FunctionComponent = () => {
     <Stack.Navigator
       screenOptions={{
         ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >

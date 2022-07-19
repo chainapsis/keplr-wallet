@@ -126,7 +126,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                   <Text
                     style={style.flatten([
                       "subtitle2",
-                      "color-text-black-medium",
+                      "color-text-middle",
                       "margin-bottom-4",
                     ])}
                   >
@@ -136,7 +136,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                     <Text
                       style={style.flatten([
                         "body3",
-                        "color-text-black-low",
+                        "color-text-low",
                         "margin-bottom-4",
                       ])}
                     >

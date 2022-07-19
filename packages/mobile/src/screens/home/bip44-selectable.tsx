@@ -168,7 +168,7 @@ export const BIP44SelectableModal: FunctionComponent<{
               <View style={style.flatten(["flex-row", "items-center"])}>
                 <View style={style.flatten(["margin-right-16"])}>
                   <WalletIcon
-                    color={style.get("color-text-black-medium").color}
+                    color={style.get("color-text-middle").color}
                     height={44}
                   />
                 </View>
@@ -176,13 +176,11 @@ export const BIP44SelectableModal: FunctionComponent<{
                   <Text
                     style={style.flatten([
                       "subtitle3",
-                      "color-text-black-low",
+                      "color-text-low",
                       "margin-bottom-4",
                     ])}
                   >{`m/44'/${selectable.path.coinType}'`}</Text>
-                  <Text
-                    style={style.flatten(["body2", "color-text-black-high"])}
-                  >
+                  <Text style={style.flatten(["body2", "color-text-high"])}>
                     {Bech32Address.shortenAddress(selectable.bech32Address, 26)}
                   </Text>
                 </View>
@@ -201,18 +199,11 @@ export const BIP44SelectableModal: FunctionComponent<{
                   "margin-bottom-4",
                 ])}
               >
-                <Text
-                  style={style.flatten([
-                    "subtitle2",
-                    "color-text-black-medium",
-                  ])}
-                >
+                <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
                   Balance
                 </Text>
                 <View style={style.get("flex-1")} />
-                <Text
-                  style={style.flatten(["body2", "color-text-black-medium"])}
-                >
+                <Text style={style.flatten(["body2", "color-text-middle"])}>
                   {queries.queryBalances
                     .getQueryBech32Address(selectable.bech32Address)
                     .stakable.balance.shrink(true)
@@ -222,18 +213,11 @@ export const BIP44SelectableModal: FunctionComponent<{
                 </Text>
               </View>
               <View style={style.flatten(["flex-row", "items-center"])}>
-                <Text
-                  style={style.flatten([
-                    "subtitle2",
-                    "color-text-black-medium",
-                  ])}
-                >
+                <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
                   Previous txs
                 </Text>
                 <View style={style.get("flex-1")} />
-                <Text
-                  style={style.flatten(["body2", "color-text-black-medium"])}
-                >
+                <Text style={style.flatten(["body2", "color-text-middle"])}>
                   {
                     queries.cosmos.queryAccount.getQueryBech32Address(
                       selectable.bech32Address

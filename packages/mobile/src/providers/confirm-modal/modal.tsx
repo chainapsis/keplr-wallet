@@ -43,7 +43,7 @@ export const ConfirmModal: FunctionComponent<{
           <Text
             style={style.flatten([
               "h3",
-              "color-text-black-medium",
+              "color-text-middle",
               "margin-bottom-8",
             ])}
           >
@@ -53,7 +53,7 @@ export const ConfirmModal: FunctionComponent<{
             <Text
               style={style.flatten([
                 "body2",
-                "color-text-black-low",
+                "color-text-low",
                 "margin-bottom-16",
                 "text-center",
               ])}

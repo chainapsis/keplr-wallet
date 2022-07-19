@@ -220,7 +220,7 @@ export const SettingChainListScreenElement: FunctionComponent<{
           )}
         </View>
         <View style={style.flatten(["justify-center", "margin-left-10"])}>
-          <Text style={style.flatten(["h6", "color-text-black-high"])}>
+          <Text style={style.flatten(["h6", "color-text-high"])}>
             {chainName}
           </Text>
         </View>

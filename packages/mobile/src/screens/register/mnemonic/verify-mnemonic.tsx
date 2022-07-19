@@ -82,7 +82,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h5",
-          "color-text-black-medium",
+          "color-text-middle",
           "margin-top-32",
           "margin-bottom-4",
           "text-center",

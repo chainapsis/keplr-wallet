@@ -42,12 +42,7 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
                 peerMeta={session.peerMeta}
               />
               <View style={style.flatten(["flex-1", "margin-left-16"])}>
-                <Text
-                  style={style.flatten([
-                    "subtitle2",
-                    "color-text-black-medium",
-                  ])}
-                >
+                <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
                   {appName}
                 </Text>
               </View>

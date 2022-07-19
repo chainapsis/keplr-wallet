@@ -90,10 +90,7 @@ export const UnbondingCard: FunctionComponent<{
                   ])}
                 >
                   <Text
-                    style={style.flatten([
-                      "subtitle2",
-                      "color-text-black-medium",
-                    ])}
+                    style={style.flatten(["subtitle2", "color-text-middle"])}
                   >
                     {entry.balance
                       .shrink(true)
@@ -102,9 +99,7 @@ export const UnbondingCard: FunctionComponent<{
                       .toString()}
                   </Text>
                   <View style={style.get("flex-1")} />
-                  <Text
-                    style={style.flatten(["body2", "color-text-black-low"])}
-                  >
+                  <Text style={style.flatten(["body2", "color-text-low"])}>
                     {remainingText}
                   </Text>
                 </View>

@@ -112,7 +112,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-black-medium",
+          "color-text-middle",
           "margin-top-82",
           "margin-bottom-32",
         ])}
@@ -131,22 +131,10 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
           },
         ])}
       >
-        <Text
-          style={style.flatten([
-            "body2",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
+        <Text style={style.flatten(["body2", "text-center", "color-text-low"])}>
           Congratulations!
         </Text>
-        <Text
-          style={style.flatten([
-            "body2",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
+        <Text style={style.flatten(["body2", "text-center", "color-text-low"])}>
           Your transaction has been completed and confirmed by the blockchain.
         </Text>
       </View>

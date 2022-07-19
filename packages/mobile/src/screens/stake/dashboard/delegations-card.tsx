@@ -87,7 +87,7 @@ export const DelegationsCard: FunctionComponent<{
             >
               Staked
             </Text>
-            <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+            <Text style={style.flatten(["h5", "color-text-middle"])}>
               {staked.maxDecimals(6).trim(true).shrink(true).toString()}
             </Text>
           </View>
@@ -143,7 +143,7 @@ export const DelegationsCard: FunctionComponent<{
                 <Text
                   style={style.flatten([
                     "h6",
-                    "color-text-black-medium",
+                    "color-text-middle",
                     "max-width-160",
                   ])}
                   numberOfLines={1}
@@ -155,7 +155,7 @@ export const DelegationsCard: FunctionComponent<{
                 <Text
                   style={style.flatten([
                     "body1",
-                    "color-text-black-low",
+                    "color-text-low",
                     "margin-right-12",
                   ])}
                 >
@@ -163,7 +163,7 @@ export const DelegationsCard: FunctionComponent<{
                 </Text>
                 <RightArrowIcon
                   height={12}
-                  color={style.get("color-text-black-low").color}
+                  color={style.get("color-text-low").color}
                 />
               </RectButton>
             );

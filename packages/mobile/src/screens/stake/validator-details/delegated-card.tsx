@@ -44,11 +44,11 @@ export const DelegatedCard: FunctionComponent<{
         <View
           style={style.flatten(["flex-row", "items-center", "margin-bottom-4"])}
         >
-          <Text style={style.flatten(["subtitle2", "color-text-black-medium"])}>
+          <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
             Staked
           </Text>
           <View style={style.get("flex-1")} />
-          <Text style={style.flatten(["body2", "color-text-black-medium"])}>
+          <Text style={style.flatten(["body2", "color-text-middle"])}>
             {staked.trim(true).shrink(true).maxDecimals(6).toString()}
           </Text>
         </View>
@@ -59,11 +59,11 @@ export const DelegatedCard: FunctionComponent<{
             "margin-bottom-12",
           ])}
         >
-          <Text style={style.flatten(["subtitle2", "color-text-black-medium"])}>
+          <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
             Rewards
           </Text>
           <View style={style.get("flex-1")} />
-          <Text style={style.flatten(["body2", "color-text-black-medium"])}>
+          <Text style={style.flatten(["body2", "color-text-middle"])}>
             {rewards.trim(true).shrink(true).maxDecimals(6).toString()}
           </Text>
         </View>

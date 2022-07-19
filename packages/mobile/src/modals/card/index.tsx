@@ -422,7 +422,7 @@ export const CardModal: FunctionComponent<{
                   "margin-bottom-16",
                 ])}
               >
-                <Text style={style.flatten(["h4", "color-text-black-high"])}>
+                <Text style={style.flatten(["h4", "color-text-high"])}>
                   {title}
                 </Text>
                 {right}

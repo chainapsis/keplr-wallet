@@ -80,10 +80,10 @@ export const TextColors = {
 };
 
 export const DarkThemeTextColors = {
-  "text-emphasis": ColorPalette["blue-300"],
+  "text-emphasis": ColorPalette["white"],
   "text-high": ColorPalette["platinum-50"],
   "text-middle": ColorPalette["platinum-100"],
-  "text-low": ColorPalette["platinum-300"],
+  "text-low": ColorPalette["platinum-200"],
   "text-label": ColorPalette["platinum-100"],
 };
 
@@ -151,9 +151,6 @@ export const Colors = {
   success: "#2DCE89",
   error: "#F5365C",
   "text-black-very-high": "#030C1D",
-  "text-black-high": "#132340",
-  "text-black-medium": "#2C4163",
-  "text-black-low": "#83838F",
   "text-black-very-low": "#899BB6",
   "text-black-very-very-low": "#C6C6CD",
   "text-black-very-very-very-low": "#DCDCE3",
@@ -180,9 +177,6 @@ export const DarkColors = {
   "primary-300": "#5366C7",
   "primary-400": "#6882FF",
   "text-black-very-high": "#FFFFFF",
-  "text-black-high": "#F3F5F8",
-  "text-black-medium": "#E3E6EB",
-  "text-black-low": "#BABAC1",
   "text-black-very-low": "#7E8794",
   "text-black-very-very-low": "#71707C",
   "text-black-very-very-very-low": "#5D5D68",
@@ -371,7 +365,7 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         // Belows are for the button props and may not be used as styles.
         "rect-button-default-ripple": "#CCCCCC",
         // Active opacity is 0.055 by default.
-        "rect-button-default-underlay": Colors["text-black-medium"],
+        "rect-button-default-underlay": "#2C4163",
 
         "drawer-rect-button-underlay": "#F1F3FC",
 
@@ -381,7 +375,7 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         "chip-light-danger": Colors["danger-100"],
 
         // Belows are for the loading spinner props and may not be used as styles.
-        "loading-spinner": Colors["text-black-low"],
+        "loading-spinner": "#BABAC1",
       },
     },
     widths: {

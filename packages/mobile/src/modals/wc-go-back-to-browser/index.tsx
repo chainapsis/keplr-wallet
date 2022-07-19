@@ -38,7 +38,7 @@ export const WCGoBackToBrowserModal: FunctionComponent<{
               />
             </Svg>
           </View>
-          <Text style={style.flatten(["subtitle1", "color-text-black-medium"])}>
+          <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
             Go back to your browser
           </Text>
         </View>
