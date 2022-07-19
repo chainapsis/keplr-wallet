@@ -326,7 +326,7 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         "blurred-tabbar-background": BackgroundColors["card"],
 
         // Belows are for the button props and may not be used as styles.
-        "rect-button-default-ripple": ColorPalette["gray-200"],
+        "rect-button-default-ripple": ColorPalette["gray-100"],
         // Active opacity is 0.2 by default.
         "rect-button-default-underlay": ColorPalette["gray-300"],
 

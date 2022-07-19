@@ -160,17 +160,31 @@ export const Button: FunctionComponent<{
       return propRippleColor;
     }
 
-    // TODO
-    return "#FFFFFF";
+    const baseColor = color === "primary" ? "blue" : "red";
 
-    // switch (mode) {
-    //   case "fill":
-    //     return style.get(`color-button-${color}-fill-ripple` as any).color;
-    //   case "light":
-    //     return style.get(`color-button-${color}-light-ripple` as any).color;
-    //   default:
-    //     return style.get(`color-button-${color}-outline-ripple` as any).color;
-    // }
+    switch (mode) {
+      case "fill":
+        return style.get(`color-${baseColor}-500` as any).color;
+      case "light":
+        if (color === "primary") {
+          return (style.flatten([
+            `color-${baseColor}-200`,
+            "dark:color-platinum-600",
+          ] as any) as any).color;
+        }
+        return style.get(`color-${baseColor}-200` as any).color;
+      default:
+        if (color === "primary") {
+          return (style.flatten([
+            `color-${baseColor}-100`,
+            "dark:color-platinum-300",
+          ] as any) as any).color;
+        }
+        return (style.flatten([
+          `color-${baseColor}-100`,
+          `dark:color-${baseColor}-600`,
+        ] as any) as any).color;
+    }
   })();
 
   const underlayColor = (() => {
@@ -178,17 +192,11 @@ export const Button: FunctionComponent<{
       return propUnderlayColor;
     }
 
-    // TODO
-    return "#FFFFFF";
-
-    // switch (mode) {
-    //   case "fill":
-    //     return style.get(`color-button-${color}-fill-underlay` as any).color;
-    //   case "light":
-    //     return style.get(`color-button-${color}-light-underlay` as any).color;
-    //   default:
-    //     return style.get(`color-button-${color}-outline-underlay` as any).color;
-    // }
+    if (color === "primary") {
+      return style.get("color-platinum-600").color;
+    } else {
+      return style.get("color-platinum-500").color;
+    }
   })();
 
   const outlineBorderDefinition: string[] = (() => {
@@ -241,7 +249,7 @@ export const Button: FunctionComponent<{
         enabled={!loading && !disabled}
         rippleColor={rippleColor}
         underlayColor={underlayColor}
-        activeOpacity={1}
+        activeOpacity={propUnderlayColor ? 1 : color === "primary" ? 0.3 : 0.2}
       >
         <View
           style={style.flatten(

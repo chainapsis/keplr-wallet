@@ -35,10 +35,13 @@ export const AddressCopyable: FunctionComponent<{
         Clipboard.setString(address);
         setTimer(2000);
       }}
-      // TODO
-      rippleColor={"#FFFFFF"}
-      underlayColor={"#FFFFFF"}
-      activeOpacity={1}
+      rippleColor={
+        style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
+      }
+      underlayColor={
+        style.flatten(["color-gray-300", "dark:color-platinum-200"]).color
+      }
+      activeOpacity={0.2}
     >
       <Text
         style={style.flatten([
