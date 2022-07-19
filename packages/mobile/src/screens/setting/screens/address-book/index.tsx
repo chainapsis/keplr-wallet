@@ -104,6 +104,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
             <AddressBookItem
               style={style.flatten([
                 "background-color-white",
+                "dark:background-color-platinum-600",
                 "padding-x-18",
                 "padding-y-14",
               ])}
@@ -170,7 +171,12 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                   }}
                 >
                   <TrashCanIcon
-                    color={style.get("color-text-black-very-very-low").color}
+                    color={
+                      style.flatten([
+                        "color-gray-100",
+                        "dark:color-platinum-300",
+                      ]).color
+                    }
                     size={24}
                   />
                 </TouchableOpacity>
@@ -180,7 +186,8 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
               <View
                 style={style.flatten([
                   "height-1",
-                  "background-color-border-white",
+                  "background-color-gray-50",
+                  "dark:background-color-platinum-500",
                 ])}
               />
             ) : null}
@@ -202,7 +209,11 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
           />
         </View>
         <Text
-          style={style.flatten(["subtitle2", "color-text-black-very-very-low"])}
+          style={style.flatten([
+            "subtitle2",
+            "color-gray-100",
+            "dark:color-platinum-300",
+          ])}
         >
           Address book is empty
         </Text>
