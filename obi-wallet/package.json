@@ -135,6 +135,7 @@
     "react-native-config": "1.4.6",
     "react-native-svg": "12.3.0",
     "react-native-svg-transformer": "1.0.0",
+    "react-native-webview": "^11.22.7",
     "react-test-renderer": "18.2.0",
     "ts-jest": "27.1.4",
     "ts-node": "~10.8.0",
