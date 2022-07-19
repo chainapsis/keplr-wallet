@@ -29,7 +29,14 @@ export function App() {
     >
       <SafeAreaProvider>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="state-renderer">
+          <Stack.Navigator
+            initialRouteName="state-renderer"
+            screenOptions={{
+              headerTitleStyle: {
+                fontFamily: "Poppins",
+              },
+            }}
+          >
             <Stack.Screen
               name="state-renderer"
               component={StateRendererScreen}
