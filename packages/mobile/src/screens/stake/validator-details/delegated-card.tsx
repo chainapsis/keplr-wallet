@@ -70,7 +70,7 @@ export const DelegatedCard: FunctionComponent<{
         <View style={style.flatten(["flex-row", "items-center"])}>
           <Button
             containerStyle={style.flatten(["flex-1"])}
-            mode="outline"
+            mode="light"
             text="Switch Validator"
             onPress={() => {
               smartNavigation.navigateSmart("Redelegate", { validatorAddress });

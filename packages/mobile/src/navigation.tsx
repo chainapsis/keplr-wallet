@@ -70,7 +70,6 @@ import { NewLedgerScreen } from "./screens/register/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
   BlurredHeaderScreenOptionsPreset,
-  getPlainHeaderScreenOptionsPresetWithBackgroundColor,
   HeaderLeftButton,
   HeaderRightButton,
   PlainHeaderScreenOptionsPreset,
@@ -620,6 +619,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Stake",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Delegate"
         component={DelegateScreen}
@@ -627,6 +627,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Unstake",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Undelegate"
         component={UndelegateScreen}
@@ -634,6 +635,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Switch Validator",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Redelegate"
         component={RedelegateScreen}
@@ -665,6 +667,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Add Token",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Setting.AddToken"
         component={SettingAddTokenScreen}
@@ -707,9 +710,7 @@ export const SettingStackScreen: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Settings",
-          ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
-            style.get("color-background-tertiary").color
-          ),
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
           headerTitleStyle: style.flatten(["h3", "color-text-black-high"]),
         }}
         name="Setting"
