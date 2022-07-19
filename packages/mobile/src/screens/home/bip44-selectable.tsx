@@ -156,7 +156,7 @@ export const BIP44SelectableModal: FunctionComponent<{
                   "padding-20",
                   "border-radius-8",
                   "border-width-2",
-                  "border-color-primary-10",
+                  "border-color-blue-50",
                   "margin-bottom-12",
                 ],
                 [selectedIndex === i && "border-color-primary"]
