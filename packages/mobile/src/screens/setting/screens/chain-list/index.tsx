@@ -201,11 +201,11 @@ export const SettingChainListScreenElement: FunctionComponent<{
               "border-radius-64",
               "items-center",
               "justify-center",
+              "background-color-blue-400",
             ],
             [
-              disabled
-                ? "background-color-text-black-very-very-very-low"
-                : "background-color-primary",
+              disabled && "background-color-blue-400@40%",
+              disabled && "dark:background-color-platinum-200@40%",
             ]
           )}
         >
