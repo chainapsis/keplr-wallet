@@ -29,8 +29,6 @@ export const TextInput = React.forwardRef<
 
     inputLeft?: React.ReactNode;
     inputRight?: React.ReactNode;
-
-    inModal?: boolean;
   }
 >((props, ref) => {
   const {
@@ -46,7 +44,6 @@ export const TextInput = React.forwardRef<
     bottomInInputContainer,
     inputLeft,
     inputRight,
-    inModal,
     ...restProps
   } = props;
 
@@ -74,19 +71,19 @@ export const TextInput = React.forwardRef<
           style.flatten(
             [
               "background-color-white",
-              "dark:background-color-platinum-500",
+              "dark:background-color-platinum-700",
               "padding-x-11",
               "padding-y-12",
               "border-radius-6",
               "border-width-1",
               "border-color-gray-100@20%",
-              "dark:border-color-platinum-400@50%",
+              "dark:border-color-platinum-600@50%",
             ],
             [
               error ? "border-color-red-200" : undefined,
               error ? "dark:border-color-red-400" : undefined,
               !(props.editable ?? true) && "background-color-gray-50",
-              !(props.editable ?? true) && "dark:background-color-platinum-400",
+              !(props.editable ?? true) && "dark:background-color-platinum-500",
             ]
           ),
           inputContainerStyle,
@@ -99,7 +96,7 @@ export const TextInput = React.forwardRef<
             placeholderTextColor={
               props.placeholderTextColor ??
               style.flatten(
-                ["color-gray-300", "dark:color-platinum-300"],
+                ["color-gray-300", "dark:color-platinum-500"],
                 [!(props.editable ?? true) && "dark:color-platinum-200"]
               ).color
             }

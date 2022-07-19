@@ -74,6 +74,7 @@ import {
   HeaderLeftButton,
   HeaderRightButton,
   PlainHeaderScreenOptionsPreset,
+  TertiaryBackgroundPlainHeaderScreenOptionsPreset,
 } from "./components/header";
 import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/undelegate";
@@ -541,6 +542,7 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Send",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Send"
         component={SendScreen}

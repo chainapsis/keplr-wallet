@@ -22,7 +22,7 @@ export const ColorPalette = {
   "platinum-300": "#596E8D",
   "platinum-400": "#3B4E6A",
   "platinum-500": "#22324F",
-  "platinum-600": "#13233E",
+  "platinum-600": "#112038",
   "platinum-700": "#09101C",
 
   "green-50": "#ECFDF6",
