@@ -11,6 +11,7 @@ export const PlainHeaderScreenOptionsPreset = {
     backgroundColor: "transparent",
     elevation: 0,
     shadowOpacity: 0,
+    borderBottomWidth: 0,
   },
   // eslint-disable-next-line react/display-name
   headerBackground: () => <GradientBackground />,
