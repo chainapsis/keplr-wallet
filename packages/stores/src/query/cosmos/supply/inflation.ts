@@ -99,7 +99,7 @@ export class ObservableQueryInflation {
               const yearMintingProvision = mintingEpochProvision.mul(
                 new Dec(((365 * 24 * 3600) / epochDuration).toString())
               );
-              const total = DecUtils.getPrecisionDec(8).mul(new Dec("1.5"));
+              const total = DecUtils.getPrecisionDec(8);
               dec = yearMintingProvision
                 .quo(total)
                 .mul(DecUtils.getPrecisionDec(2));

@@ -7,7 +7,7 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { DenomHelper } from "@keplr-wallet/common";
+import { DenomHelper, escapeHTML } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import {
@@ -420,7 +420,7 @@ export class CosmosAccountImpl {
       aminoMsgs,
       fee,
       this.chainId,
-      memo,
+      escapeHTML(memo),
       account.getAccountNumber().toString(),
       account.getSequence().toString()
     );

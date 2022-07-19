@@ -117,7 +117,6 @@ await window.keplr.experimentalSuggestChain({
         coinDecimals: 6,
         coinGeckoId: "cosmos",
     },
-    coinType: 118,
     gasPriceStep: {
         low: 0.01,
         average: 0.025,
