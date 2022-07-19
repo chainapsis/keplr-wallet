@@ -102,19 +102,6 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
       </Text>
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
-        text="Import from Keplr Extension"
-        size="large"
-        mode="light"
-        onPress={() => {
-          analyticsStore.logEvent("Import account started", {
-            registerType: "qr",
-          });
-          smartNavigation.navigateSmart("Register.ImportFromExtension.Intro", {
-            registerConfig,
-          });
-        }}
-      />
-      <Button
         text="Import existing wallet"
         size="large"
         mode="light"
@@ -123,6 +110,18 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
             registerType: "seed",
           });
           smartNavigation.navigateSmart("Register.RecoverMnemonic", {
+            registerConfig,
+          });
+        }}
+      />
+      <Button
+        text="Import from Keplr Extension"
+        size="large"
+        onPress={() => {
+          analyticsStore.logEvent("Import account started", {
+            registerType: "qr",
+          });
+          smartNavigation.navigateSmart("Register.ImportFromExtension.Intro", {
             registerConfig,
           });
         }}

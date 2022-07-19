@@ -113,7 +113,7 @@ export const Button: FunctionComponent<{
         }
 
         if (color === "primary") {
-          return ["color-white", "dark:color-blue-100"];
+          return ["color-white", "dark:color-blue-50"];
         } else {
           return ["color-white"];
         }
@@ -147,7 +147,11 @@ export const Button: FunctionComponent<{
           }
         }
 
-        return [`color-${baseColor}-400`, `dark:color-${baseColor}-300`];
+        if (color === "primary") {
+          return [`color-${baseColor}-400`, "dark:color-platinum-50"];
+        } else {
+          return [`color-${baseColor}-400`, `dark:color-${baseColor}-300`];
+        }
     }
   })();
 

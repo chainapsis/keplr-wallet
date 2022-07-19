@@ -460,6 +460,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Create New Mnemonic",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.NewMnemonic"
         component={NewMnemonicScreen}
@@ -467,6 +468,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Verify Mnemonic",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
@@ -474,6 +476,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Import Existing Wallet",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
@@ -481,11 +484,18 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Import Hardware Wallet",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.NewLedger"
         component={NewLedgerScreen}
       />
-      <Stack.Screen name="Register.TorusSignIn" component={TorusSignInScreen} />
+      <Stack.Screen
+        options={{
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
+        }}
+        name="Register.TorusSignIn"
+        component={TorusSignInScreen}
+      />
       <Stack.Screen
         options={{
           // Only show the back button.
@@ -504,6 +514,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Import Extension",
+          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.ImportFromExtension.SetPassword"
         component={ImportFromExtensionSetPasswordScreen}

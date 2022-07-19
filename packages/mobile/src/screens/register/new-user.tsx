@@ -103,7 +103,6 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
       <Button
         text="Create new mnemonic"
         size="large"
-        mode="light"
         onPress={() => {
           analyticsStore.logEvent("Create account started", {
             registerType: "seed",

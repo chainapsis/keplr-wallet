@@ -122,10 +122,11 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                       "border-radius-64",
                       "items-center",
                       "justify-center",
-                      "background-color-primary-100",
+                      "background-color-blue-400@40%",
+                      "dark:background-color-platinum-200@40%",
                       "margin-right-16",
                     ],
-                    [selected && "background-color-primary"]
+                    [selected && "background-color-blue-400"]
                   )}
                 >
                   {chainInfo.raw.chainSymbolImageUrl ? (

@@ -146,7 +146,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
             ],
             [selected && "background-color-blue-100"]
           )}
-          rippleColor={style.get("color-primary-100").color}
+          rippleColor={style.get("color-blue-100").color}
           onPress={onPress}
         >
           <Text
