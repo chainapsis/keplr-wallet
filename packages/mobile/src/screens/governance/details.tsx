@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../components/page";
 import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
-import { Card, CardBody, CardDivider } from "../../components/card";
+import { Card, CardBody } from "../../components/card";
 import { useStyle } from "../../styles";
 import { Button } from "../../components/button";
 import { useStore } from "../../stores";
@@ -311,7 +311,8 @@ export const GovernanceVoteModal: FunctionComponent<{
               "width-24",
               "height-24",
               "border-radius-32",
-              "background-color-primary",
+              "background-color-blue-400",
+              "dark:background-color-blue-300",
               "items-center",
               "justify-center",
             ])}
@@ -334,8 +335,10 @@ export const GovernanceVoteModal: FunctionComponent<{
               "height-24",
               "border-radius-32",
               "background-color-white",
+              "dark:background-color-platinum-600",
               "border-width-1",
-              "border-color-text-black-very-low",
+              "border-color-gray-100",
+              "dark:border-color-platinum-300",
             ])}
           />
         );
@@ -349,6 +352,7 @@ export const GovernanceVoteModal: FunctionComponent<{
             "border-radius-8",
             "overflow-hidden",
             "background-color-white",
+            "dark:background-color-platinum-600",
           ])}
         >
           <RectButton
@@ -361,7 +365,10 @@ export const GovernanceVoteModal: FunctionComponent<{
                 "items-center",
                 "justify-between",
               ],
-              [vote === "Yes" && "background-color-primary-10"]
+              [
+                vote === "Yes" && "background-color-blue-50",
+                vote === "Yes" && "background-color-platinum-500",
+              ]
             )}
             onPress={() => setVote("Yes")}
           >
@@ -370,9 +377,6 @@ export const GovernanceVoteModal: FunctionComponent<{
             </Text>
             {renderBall(vote === "Yes")}
           </RectButton>
-          <View
-            style={style.flatten(["height-1", "background-color-divider"])}
-          />
           <RectButton
             style={style.flatten(
               [
@@ -383,7 +387,10 @@ export const GovernanceVoteModal: FunctionComponent<{
                 "items-center",
                 "justify-between",
               ],
-              [vote === "No" && "background-color-primary-10"]
+              [
+                vote === "No" && "background-color-blue-50",
+                vote === "No" && "background-color-platinum-500",
+              ]
             )}
             onPress={() => setVote("No")}
           >
@@ -392,9 +399,6 @@ export const GovernanceVoteModal: FunctionComponent<{
             </Text>
             {renderBall(vote === "No")}
           </RectButton>
-          <View
-            style={style.flatten(["height-1", "background-color-divider"])}
-          />
           <RectButton
             style={style.flatten(
               [
@@ -405,7 +409,10 @@ export const GovernanceVoteModal: FunctionComponent<{
                 "items-center",
                 "justify-between",
               ],
-              [vote === "NoWithVeto" && "background-color-primary-10"]
+              [
+                vote === "NoWithVeto" && "background-color-blue-50",
+                vote === "NoWithVeto" && "background-color-platinum-500",
+              ]
             )}
             onPress={() => setVote("NoWithVeto")}
           >
@@ -414,9 +421,6 @@ export const GovernanceVoteModal: FunctionComponent<{
             </Text>
             {renderBall(vote === "NoWithVeto")}
           </RectButton>
-          <View
-            style={style.flatten(["height-1", "background-color-divider"])}
-          />
           <RectButton
             style={style.flatten(
               [
@@ -427,7 +431,10 @@ export const GovernanceVoteModal: FunctionComponent<{
                 "items-center",
                 "justify-between",
               ],
-              [vote === "Abstain" && "background-color-primary-10"]
+              [
+                vote === "Abstain" && "background-color-blue-50",
+                vote === "Abstain" && "background-color-platinum-500",
+              ]
             )}
             onPress={() => setVote("Abstain")}
           >
