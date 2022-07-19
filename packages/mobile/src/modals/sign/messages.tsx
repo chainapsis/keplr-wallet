@@ -535,7 +535,7 @@ export const WasmExecutionMsgView: FunctionComponent<{
     <Text style={style.flatten(["margin-top-8"])}>
       <Text>{`\n${detailsMsg}`}</Text>
       {warningMsg ? (
-        <Text style={style.flatten(["color-danger-200"])}>{warningMsg}</Text>
+        <Text style={style.flatten(["color-red-200"])}>{warningMsg}</Text>
       ) : null}
     </Text>
   );

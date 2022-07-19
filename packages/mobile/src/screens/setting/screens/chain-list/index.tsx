@@ -152,12 +152,17 @@ export const SettingChainListScreenElement: FunctionComponent<{
       >
         <Animated.View
           style={StyleSheet.flatten([
-            style.flatten(["absolute-fill", "background-color-theme-white"]),
+            style.flatten([
+              "absolute-fill",
+              "background-color-white",
+              "dark:background-color-platinum-600",
+            ]),
             {
               backgroundColor: Animated.interpolateColors(animIsDragging, {
                 inputRange: [0, 1],
                 outputColorRange: [
-                  style.get("color-theme-white").color,
+                  style.flatten(["color-white", "dark:color-platinum-600"])
+                    .color,
                   style.get("color-chain-list-element-dragging").color,
                 ],
               }) as Animated.Node<string>,
