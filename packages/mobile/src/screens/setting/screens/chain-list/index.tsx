@@ -164,7 +164,8 @@ export const SettingChainListScreenElement: FunctionComponent<{
                 outputColorRange: [
                   style.flatten(["color-white", "dark:color-platinum-600"])
                     .color,
-                  style.get("color-chain-list-element-dragging").color,
+                  style.flatten(["color-gray-50", "dark:color-platinum-400"])
+                    .color,
                 ],
               }) as Animated.Node<string>,
             },

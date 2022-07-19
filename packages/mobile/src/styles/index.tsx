@@ -123,14 +123,12 @@ export const Colors = {
   "text-black-very-very-very-low": "#DCDCE3",
   "border-gray": "#C6C6CD",
   "border-white": "#F5F5F5",
-  "theme-white": "#fff",
   disabled: "#EEEEF3",
   divider: "#F5F5F5",
   transparent: "rgba(255,255,255,0)",
   "modal-backdrop": "rgba(9,18,50,0.6)",
   "card-modal-handle": "#DCDCE3",
   "camera-loading-background": "rgba(255,255,255,0.95)",
-  "chain-list-element-dragging": "rgba(242, 242, 247, 0.8)",
 };
 
 export const DarkColors = {
@@ -145,7 +143,6 @@ export const DarkColors = {
   "text-black-very-very-low": "#71707C",
   "text-black-very-very-very-low": "#5D5D68",
   "border-white": "#71707C",
-  "theme-white": "#1C243D",
   divider: "#71707C",
 };
 

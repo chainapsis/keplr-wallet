@@ -16,6 +16,7 @@ import {
   Use,
 } from "react-native-svg";
 import Animated, { Easing } from "react-native-reanimated";
+import { useStyle } from "../../styles";
 
 // Convert to cartesian coordinates from polar coordinates.
 const polarToCartesian = (
@@ -438,6 +439,8 @@ const DoubleDoughnutChartInnerSVG: FunctionComponent<{
     secondArcStartAngleInDegree,
     secondArcEndAngleInDegree,
   }) => {
+    const style = useStyle();
+
     const centerLocation = 90;
     const radius = 83;
     const capRadius = centerLocation - radius;
@@ -519,8 +522,14 @@ const DoubleDoughnutChartInnerSVG: FunctionComponent<{
             <Stop offset="100%" stopColor="#D378FE" />
           </LinearGradient>
           <LinearGradient id="grad2" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0%" stopColor="#F0C9FF" />
-            <Stop offset="100%" stopColor="#D4EEFF" />
+            <Stop
+              offset="0%"
+              stopColor={style.theme === "dark" ? "#3B4A77" : "#F0C9FF"}
+            />
+            <Stop
+              offset="100%"
+              stopColor={style.theme === "dark" ? "#315277" : "#D4EEFF"}
+            />
           </LinearGradient>
           <ClipPath id="first-arc-clip">
             <AnimatedPath
