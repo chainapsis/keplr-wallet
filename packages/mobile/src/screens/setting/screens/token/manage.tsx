@@ -157,7 +157,9 @@ export const ManageTokenItem: FunctionComponent<{
         >
           <TrashCanIcon
             size={28}
-            color={style.get("color-text-black-very-very-low").color}
+            color={
+              style.flatten(["color-gray-100", "dark:color-platinum-300"]).color
+            }
           />
         </BorderlessButton>
       </View>

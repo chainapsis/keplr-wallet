@@ -40,6 +40,7 @@ export const SettingItem: FunctionComponent<{
   onPress?: () => void;
 
   topBorder?: boolean;
+  borderColor?: string;
 }> = ({
   containerStyle,
   style: propStyle,
@@ -51,6 +52,7 @@ export const SettingItem: FunctionComponent<{
   right,
   onPress,
   topBorder,
+  borderColor,
 }) => {
   const style = useStyle();
 
@@ -92,10 +94,13 @@ export const SettingItem: FunctionComponent<{
     <View style={containerStyle}>
       {topBorder ? (
         <View
-          style={style.flatten([
-            "height-1",
-            "background-color-gray-50",
-            "dark:background-color-platinum-500",
+          style={StyleSheet.flatten([
+            style.flatten([
+              "height-1",
+              "background-color-gray-50",
+              "dark:background-color-platinum-500",
+            ]),
+            borderColor ? { backgroundColor: borderColor } : {},
           ])}
         />
       ) : null}
@@ -133,12 +138,14 @@ export const SettingItem: FunctionComponent<{
           {renderChildren()}
         </View>
       )}
-
       <View
-        style={style.flatten([
-          "height-1",
-          "background-color-gray-50",
-          "dark:background-color-platinum-500",
+        style={StyleSheet.flatten([
+          style.flatten([
+            "height-1",
+            "background-color-gray-50",
+            "dark:background-color-platinum-500",
+          ]),
+          borderColor ? { backgroundColor: borderColor } : {},
         ])}
       />
     </View>

@@ -23,7 +23,7 @@ export const ColorPalette = {
   "platinum-400": "#3B4E6A",
   "platinum-500": "#22324F",
   "platinum-600": "#112038",
-  "platinum-700": "#09101C",
+  "platinum-700": "#0E1829",
 
   "green-50": "#ECFDF6",
   "green-100": "#DBF9EC",
@@ -322,8 +322,6 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       ...TextColors,
       ...BackgroundColors,
       ...{
-        "splash-background": "#FBF8FF",
-
         "blurred-header-background": BackgroundColors["card"],
         "blurred-tabbar-background": BackgroundColors["card"],
 

@@ -229,11 +229,14 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       <View
         style={style.flatten([
           "absolute-fill",
-          "background-color-splash-background",
+          "background-color-background-tertiary",
         ])}
       />
       <View
-        style={style.flatten(["flex-1", "background-color-splash-background"])}
+        style={style.flatten([
+          "flex-1",
+          "background-color-background-tertiary",
+        ])}
       >
         <KeyboardAwareScrollView
           contentContainerStyle={style.flatten(["flex-grow-1"])}
@@ -243,7 +246,11 @@ export const UnlockScreen: FunctionComponent = observer(() => {
             style={StyleSheet.flatten([style.flatten(["width-full"])])}
             fadeDuration={0}
             resizeMode="contain"
-            source={require("../../assets/logo/splash-image.png")}
+            source={
+              style.theme === "dark"
+                ? require("../../assets/logo/splash-image-dark-mode.png")
+                : require("../../assets/logo/splash-image.png")
+            }
           />
           <View style={style.get("flex-3")} />
           <View style={style.flatten(["padding-x-page"])}>
@@ -508,7 +515,7 @@ export const SplashContinuityEffectView: FunctionComponent<{
       <View
         style={style.flatten([
           "absolute-fill",
-          "background-color-splash-background",
+          "background-color-background-tertiary",
         ])}
       />
       <View
