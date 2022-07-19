@@ -20,7 +20,7 @@ export interface HomeProps {
   onAppStorePress: () => void;
 }
 
-export const Home: FunctionComponent<HomeProps> = observer(
+export const Home = observer<HomeProps>(
   ({ appsStore, onAppPress, onAppStorePress }) => {
     const [editMode, setEditMode] = React.useState(false);
     const intl = useIntl();

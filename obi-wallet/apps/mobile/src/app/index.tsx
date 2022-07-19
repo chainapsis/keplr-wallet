@@ -1,13 +1,12 @@
 import { messages } from "@obi-wallet/common";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { IntlProvider } from "react-intl";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { StateRendererScreen } from "./screens/state-renderer";
-
-const Stack = createNativeStackNavigator();
+import { WebViewScreen } from "./screens/web-view";
+import { Stack } from "./stack";
 
 export function App() {
   return (
@@ -40,6 +39,13 @@ export function App() {
             <Stack.Screen
               name="state-renderer"
               component={StateRendererScreen}
+            />
+            <Stack.Screen
+              name="web-view"
+              component={WebViewScreen}
+              options={({ route }) => ({
+                title: route.params.app.label,
+              })}
             />
           </Stack.Navigator>
         </NavigationContainer>
