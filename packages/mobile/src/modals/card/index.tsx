@@ -408,7 +408,8 @@ export const CardModal: FunctionComponent<{
                   "width-58",
                   "height-5",
                   "border-radius-16",
-                  "background-color-card-modal-handle",
+                  "background-color-gray-100",
+                  "dark:background-color-platinum-400",
                 ])}
               />
             ) : null}
@@ -430,7 +431,8 @@ export const CardModal: FunctionComponent<{
               <View
                 style={style.flatten([
                   "height-1",
-                  "background-color-border-white",
+                  "background-color-gray-50",
+                  "dark:background-color-platinum-500",
                 ])}
               />
             </React.Fragment>

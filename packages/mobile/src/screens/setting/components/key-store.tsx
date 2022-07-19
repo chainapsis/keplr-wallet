@@ -17,6 +17,7 @@ export const KeyStoreSectionTitle: FunctionComponent<{
         "padding-bottom-12",
         "margin-top-16",
         "background-color-white",
+        "dark:background-color-platinum-600",
       ])}
     >
       <Text
@@ -126,13 +127,19 @@ export const KeyStoreItem: FunctionComponent<{
   };
 
   return (
-    <View style={style.flatten(["background-color-white"])}>
+    <View
+      style={style.flatten([
+        "background-color-white",
+        "dark:background-color-platinum-600",
+      ])}
+    >
       {topBorder ? (
         <View
           style={style.flatten([
             "height-1",
             "margin-x-20",
-            "background-color-border-white",
+            "background-color-gray-50",
+            "dark:background-color-platinum-500",
           ])}
         />
       ) : null}
@@ -171,7 +178,8 @@ export const KeyStoreItem: FunctionComponent<{
           style={style.flatten([
             "height-1",
             "margin-x-20",
-            "background-color-border-white",
+            "background-color-gray-50",
+            "dark:background-color-platinum-500",
           ])}
         />
       ) : null}

@@ -6,8 +6,6 @@ import { Text, View } from "react-native";
 import { Staking } from "@keplr-wallet/stores";
 import { useStyle } from "../../../styles";
 import { SelectorModal, TextInput } from "../../../components/input";
-import { GradientBackground } from "../../../components/svg";
-import { CardDivider } from "../../../components/card";
 import { useSmartNavigation } from "../../../navigation";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { RightArrowIcon } from "../../../components/icon";
@@ -121,6 +119,12 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         setSelectedKey={(key) => setSort(key as Sort)}
       />
       <PageWithSectionList
+        backgroundColor={
+          style.flatten([
+            "color-background-tertiary",
+            "dark:color-platinum-700",
+          ]).color
+        }
         sections={[
           {
             data,
@@ -144,14 +148,29 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
             />
           );
         }}
-        ItemSeparatorComponent={() => <CardDivider />}
+        ItemSeparatorComponent={() => (
+          <View
+            style={style.flatten([
+              "height-1",
+              "background-color-gray-50",
+              "dark:background-color-platinum-500",
+            ])}
+          />
+        )}
         renderSectionHeader={() => {
           return (
             <View>
               <View
                 style={style.flatten(["absolute", "width-full", "height-full"])}
               >
-                <GradientBackground />
+                <View
+                  style={style.flatten([
+                    "width-full",
+                    "height-full",
+                    "background-color-background-tertiary",
+                    "dark:background-color-platinum-700",
+                  ])}
+                />
               </View>
               <View
                 style={style.flatten([
@@ -242,6 +261,7 @@ const ValidatorItem: FunctionComponent<{
       style={style.flatten([
         "flex-row",
         "background-color-white",
+        "dark:background-color-platinum-600",
         "height-72",
         "items-center",
       ])}

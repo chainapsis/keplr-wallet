@@ -13,6 +13,7 @@ export const Msg: FunctionComponent<{
         "padding-x-16",
         "padding-y-24",
         "background-color-white",
+        "dark:background-color-platinum-500",
       ])}
     >
       <Text

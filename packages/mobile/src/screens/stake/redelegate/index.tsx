@@ -110,7 +110,13 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
       backgroundColor={style.get("color-background-tertiary").color}
     >
       <View style={style.flatten(["height-page-pad"])} />
-      <Card style={style.flatten(["margin-bottom-12", "border-radius-8"])}>
+      <Card
+        style={style.flatten([
+          "margin-bottom-12",
+          "border-radius-8",
+          "dark:background-color-platinum-500",
+        ])}
+      >
         <CardBody>
           <View style={style.flatten(["flex-row", "items-center"])}>
             <ValidatorThumbnail

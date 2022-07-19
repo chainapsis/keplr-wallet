@@ -146,7 +146,8 @@ export const SettingChainListScreenElement: FunctionComponent<{
           [
             !isLast && "border-solid",
             !isLast && "border-width-bottom-1",
-            !isLast && "border-color-divider",
+            !isLast && "border-color-gray-50",
+            !isLast && "dark:border-color-platinum-500",
           ]
         )}
       >

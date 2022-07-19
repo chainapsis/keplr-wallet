@@ -18,11 +18,7 @@ export const SettingSectionTitle: FunctionComponent<{
       ])}
     >
       <Text
-        style={style.flatten([
-          "text-caption1",
-          "color-text-black-very-low",
-          "uppercase",
-        ])}
+        style={style.flatten(["text-caption1", "color-text-low", "uppercase"])}
       >
         {title}
       </Text>
@@ -96,7 +92,11 @@ export const SettingItem: FunctionComponent<{
     <View style={containerStyle}>
       {topBorder ? (
         <View
-          style={style.flatten(["height-1", "background-color-border-white"])}
+          style={style.flatten([
+            "height-1",
+            "background-color-gray-50",
+            "dark:background-color-platinum-500",
+          ])}
         />
       ) : null}
       {onPress ? (
@@ -104,6 +104,7 @@ export const SettingItem: FunctionComponent<{
           style={StyleSheet.flatten([
             style.flatten([
               "background-color-white",
+              "dark:background-color-platinum-600",
               "height-62",
               "padding-x-20",
               "flex-row",
@@ -120,6 +121,7 @@ export const SettingItem: FunctionComponent<{
           style={StyleSheet.flatten([
             style.flatten([
               "background-color-white",
+              "dark:background-color-platinum-600",
               "height-62",
               "padding-x-20",
               "flex-row",
@@ -133,7 +135,11 @@ export const SettingItem: FunctionComponent<{
       )}
 
       <View
-        style={style.flatten(["height-1", "background-color-border-white"])}
+        style={style.flatten([
+          "height-1",
+          "background-color-gray-50",
+          "dark:background-color-platinum-500",
+        ])}
       />
     </View>
   );

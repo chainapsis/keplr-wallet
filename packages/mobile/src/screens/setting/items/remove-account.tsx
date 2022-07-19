@@ -25,7 +25,7 @@ export const SettingRemoveAccountItem: FunctionComponent<{
           setIsOpenModal(true);
         }}
         containerStyle={style.flatten(["margin-top-16"])}
-        labelStyle={style.flatten(["subtitle1", "color-danger"])}
+        labelStyle={style.flatten(["subtitle1", "color-red-400"])}
         style={style.flatten(["justify-center"])}
         topBorder={topBorder}
       />

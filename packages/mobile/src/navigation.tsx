@@ -73,6 +73,7 @@ import {
   HeaderLeftButton,
   HeaderRightButton,
   PlainHeaderScreenOptionsPreset,
+  getPlainHeaderScreenOptionsPresetWithBackgroundColor,
   TertiaryBackgroundPlainHeaderScreenOptionsPreset,
 } from "./components/header";
 import { TokensScreen } from "./screens/tokens";
@@ -617,6 +618,12 @@ export const OtherNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "All Active Validators",
+          ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
+            style.flatten([
+              "color-background-tertiary",
+              "dark:color-platinum-700",
+            ]).color
+          ),
         }}
         name="Validator.List"
         component={ValidatorListScreen}
@@ -715,7 +722,12 @@ export const SettingStackScreen: FunctionComponent = () => {
       <Stack.Screen
         options={{
           title: "Settings",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
+          ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
+            style.flatten([
+              "color-background-tertiary",
+              "dark:color-platinum-700",
+            ]).color
+          ),
           headerTitleStyle: style.flatten(["h3", "color-text-high"]),
         }}
         name="Setting"

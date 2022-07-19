@@ -367,7 +367,7 @@ export const GovernanceVoteModal: FunctionComponent<{
               ],
               [
                 vote === "Yes" && "background-color-blue-50",
-                vote === "Yes" && "background-color-platinum-500",
+                vote === "Yes" && "dark:background-color-platinum-500",
               ]
             )}
             onPress={() => setVote("Yes")}
@@ -389,7 +389,7 @@ export const GovernanceVoteModal: FunctionComponent<{
               ],
               [
                 vote === "No" && "background-color-blue-50",
-                vote === "No" && "background-color-platinum-500",
+                vote === "No" && "dark:background-color-platinum-500",
               ]
             )}
             onPress={() => setVote("No")}
@@ -411,7 +411,7 @@ export const GovernanceVoteModal: FunctionComponent<{
               ],
               [
                 vote === "NoWithVeto" && "background-color-blue-50",
-                vote === "NoWithVeto" && "background-color-platinum-500",
+                vote === "NoWithVeto" && "dark:background-color-platinum-500",
               ]
             )}
             onPress={() => setVote("NoWithVeto")}
@@ -433,7 +433,7 @@ export const GovernanceVoteModal: FunctionComponent<{
               ],
               [
                 vote === "Abstain" && "background-color-blue-50",
-                vote === "Abstain" && "background-color-platinum-500",
+                vote === "Abstain" && "dark:background-color-platinum-500",
               ]
             )}
             onPress={() => setVote("Abstain")}

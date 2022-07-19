@@ -165,7 +165,8 @@ export const SignModal: FunctionComponent<{
                 <View
                   style={style.flatten([
                     "height-1",
-                    "background-color-border-white",
+                    "background-color-gray-50",
+                    "dark:background-color-platinum-400",
                     "margin-x-16",
                   ])}
                 />
@@ -192,7 +193,8 @@ export const SignModal: FunctionComponent<{
                 <View
                   style={style.flatten([
                     "height-1",
-                    "background-color-border-white",
+                    "background-color-gray-50",
+                    "dark:background-color-platinum-400",
                     "margin-x-16",
                   ])}
                 />
@@ -226,12 +228,17 @@ export const SignModal: FunctionComponent<{
             style={style.flatten([
               "border-radius-8",
               "border-width-1",
-              "border-color-border-white",
+              "border-color-gray-50",
+              "dark:border-color-platinum-400",
               "overflow-hidden",
             ])}
           >
             <ScrollView
-              style={style.flatten(["max-height-214"])}
+              style={style.flatten([
+                "max-height-214",
+                "background-color-white",
+                "dark:background-color-platinum-500",
+              ])}
               persistentScrollbar={true}
             >
               {renderedMsgs}
