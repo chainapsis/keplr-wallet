@@ -326,16 +326,11 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         "blurred-tabbar-background": BackgroundColors["card"],
 
         // Belows are for the button props and may not be used as styles.
-        "rect-button-default-ripple": "#CCCCCC",
-        // Active opacity is 0.055 by default.
-        "rect-button-default-underlay": "#2C4163",
+        "rect-button-default-ripple": ColorPalette["gray-200"],
+        // Active opacity is 0.2 by default.
+        "rect-button-default-underlay": ColorPalette["gray-300"],
 
         "drawer-rect-button-underlay": "#F1F3FC",
-
-        // Belows are for the chip props and may not be used as styles.
-        "chip-light-primary": "#F1F3FC",
-        "chip-light-secondary": "#FCD1F4",
-        "chip-light-danger": "#FFBCC9",
 
         // Belows are for the loading spinner props and may not be used as styles.
         "loading-spinner": "#BABAC1",
@@ -581,8 +576,8 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         "blurred-header-background": DarkThemeBackgroundColors["card"],
         "blurred-tabbar-background": DarkThemeBackgroundColors["card"],
 
-        "rect-button-default-ripple": "#333333",
-        "rect-button-default-underlay": ColorPalette["gray-500"],
+        "rect-button-default-ripple": ColorPalette["platinum-400"],
+        "rect-button-default-underlay": ColorPalette["platinum-400"],
 
         "drawer-rect-button-underlay": "#F1F3FC",
       },
