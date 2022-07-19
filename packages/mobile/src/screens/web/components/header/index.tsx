@@ -97,7 +97,12 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
             safeAreaInsets.top -
             (Platform.OS === "ios" && safeAreaInsets.top > 44 ? 6 : 0),
         },
-        style.flatten(["background-color-white", "flex-row", "items-center"]),
+        style.flatten([
+          "background-color-white",
+          "dark:background-color-platinum-600",
+          "flex-row",
+          "items-center",
+        ]),
       ])}
     >
       <View
@@ -157,9 +162,9 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
               "padding-4",
               "margin-left-20",
             ])}
-            rippleColor={style.get("color-primary-50").color}
-            activeOpacity={1}
-            underlayColor={style.get("color-primary-10").color}
+            rippleColor={
+              style.flatten(["color-blue-50", "dark:color-platinum-300"]).color
+            }
             onPress={() => {
               if (!webViewState.canGoBack) {
                 smartNavigation.goBack();
@@ -168,7 +173,13 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
               }
             }}
           >
-            <ArrowLeftIcon size={32} color={style.get("color-primary").color} />
+            <ArrowLeftIcon
+              size={32}
+              color={
+                style.flatten(["color-blue-400", "dark:color-platinum-50"])
+                  .color
+              }
+            />
           </RectButton>
           <RectButton
             style={style.flatten([
@@ -176,9 +187,9 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
               "padding-4",
               "margin-left-8",
             ])}
-            rippleColor={style.get("color-primary-50").color}
-            activeOpacity={1}
-            underlayColor={style.get("color-primary-10").color}
+            rippleColor={
+              style.flatten(["color-blue-50", "dark:color-platinum-300"]).color
+            }
             onPress={() => {
               if (webViewState.webView) {
                 webViewState.webView.goForward();
@@ -187,7 +198,10 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
           >
             <ArrowRightIcon
               size={32}
-              color={style.get("color-primary").color}
+              color={
+                style.flatten(["color-blue-400", "dark:color-platinum-50"])
+                  .color
+              }
             />
           </RectButton>
           <View style={style.get("flex-1")} />
@@ -197,14 +211,20 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
               "padding-4",
               "margin-right-20",
             ])}
-            rippleColor={style.get("color-primary-50").color}
-            activeOpacity={1}
-            underlayColor={style.get("color-primary-10").color}
+            rippleColor={
+              style.flatten(["color-blue-50", "dark:color-platinum-300"]).color
+            }
             onPress={() => {
               smartNavigation.navigateSmart("Web.Intro", {});
             }}
           >
-            <HomeIcon size={32} color={style.get("color-primary").color} />
+            <HomeIcon
+              size={32}
+              color={
+                style.flatten(["color-blue-400", "dark:color-platinum-50"])
+                  .color
+              }
+            />
           </RectButton>
         </View>
       </View>

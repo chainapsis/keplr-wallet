@@ -153,7 +153,8 @@ export const WebpageImageButton: FunctionComponent<{
           "items-center",
           "overflow-hidden",
           "border-radius-8",
-          "background-color-big-image-placeholder",
+          "background-color-white",
+          "dark:background-color-black",
           "margin-bottom-16",
         ]),
         {
