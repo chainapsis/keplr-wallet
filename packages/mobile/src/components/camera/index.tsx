@@ -54,7 +54,8 @@ export const FullScreenCameraView: FunctionComponent<
                   "width-38",
                   "height-38",
                   "border-radius-64",
-                  "background-color-blue-50",
+                  "background-color-blue-100",
+                  "dark:background-color-platinum-500",
                   "opacity-90",
                   "margin-top-8",
                   "margin-right-16",
@@ -64,7 +65,10 @@ export const FullScreenCameraView: FunctionComponent<
               >
                 <CloseIcon
                   size={28}
-                  color={style.get("color-blue-300").color}
+                  color={
+                    style.flatten(["color-blue-400", "dark:color-platinum-50"])
+                      .color
+                  }
                 />
               </View>
             </TouchableOpacity>
