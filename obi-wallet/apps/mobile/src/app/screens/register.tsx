@@ -9,24 +9,24 @@ import { useStore } from "../stores";
 export const RegisterScreen = observer(() => {
   const { keyRingStore } = useStore();
 
-  const registerConfig = useRegisterConfig(keyRingStore, [
-    ...(AdditionalSignInPrepend ?? []),
-    // {
-    //   type: TypeNewMnemonic,
-    //   intro: NewMnemonicIntro,
-    //   page: NewMnemonicPage,
-    // },
-    // {
-    //   type: TypeRecoverMnemonic,
-    //   intro: RecoverMnemonicIntro,
-    //   page: RecoverMnemonicPage,
-    // },
-    // {
-    //   type: TypeImportLedger,
-    //   intro: ImportLedgerIntro,
-    //   page: ImportLedgerPage,
-    // },
-  ]);
+  // const registerConfig = useRegisterConfig(keyRingStore, [
+  //   ...(AdditionalSignInPrepend ?? []),
+  //   // {
+  //   //   type: TypeNewMnemonic,
+  //   //   intro: NewMnemonicIntro,
+  //   //   page: NewMnemonicPage,
+  //   // },
+  //   // {
+  //   //   type: TypeRecoverMnemonic,
+  //   //   intro: RecoverMnemonicIntro,
+  //   //   page: RecoverMnemonicPage,
+  //   // },
+  //   // {
+  //   //   type: TypeImportLedger,
+  //   //   intro: ImportLedgerIntro,
+  //   //   page: ImportLedgerPage,
+  //   // },
+  // ]);
 
   return (
     <SafeAreaView>

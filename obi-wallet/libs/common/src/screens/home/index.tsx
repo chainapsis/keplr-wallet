@@ -1,10 +1,10 @@
-import { App, AppsStore } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import { useIntl } from "react-intl";
 import { Button, StyleSheet, TouchableWithoutFeedback } from "react-native";
 
 import { Card } from "../../card";
+import { App, AppsStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 
 const styles = StyleSheet.create({

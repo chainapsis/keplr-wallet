@@ -33,6 +33,7 @@ export class Router extends AbstractRouter {
     message,
     sender,
   }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     message: any;
     sender: MessageSender & { resolver: (result: Result) => void };
   }) {
@@ -41,6 +42,7 @@ export class Router extends AbstractRouter {
   }
 
   protected async onMessageHandler(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     message: any,
     sender: MessageSender
   ): Promise<Result> {

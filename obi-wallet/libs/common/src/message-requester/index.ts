@@ -1,4 +1,3 @@
-import { RouterBackground, RouterUi } from "@obi-wallet/common";
 import {
   JSONUint8Array,
   KeplrError,
@@ -7,6 +6,8 @@ import {
   Result,
 } from "@keplr-wallet/router";
 import EventEmitter from "eventemitter3";
+
+import { RouterBackground, RouterUi } from "../router";
 
 export class MessageRequester implements AbstractMessageRequester {
   constructor(
