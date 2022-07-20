@@ -136,7 +136,9 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
           </Text>
           <RefreshIcon
             size={20}
-            color={style.get("color-text-black-very-very-low").color}
+            color={
+              style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
+            }
           />
         </RectButton>
 

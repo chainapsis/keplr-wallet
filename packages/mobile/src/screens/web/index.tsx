@@ -89,7 +89,11 @@ export const WebScreen: FunctionComponent = () => {
         overrideInner={
           <View style={style.flatten(["flex-1", "items-center"])}>
             <Text
-              style={style.flatten(["h4", "color-text-black-very-very-low"])}
+              style={style.flatten([
+                "h4",
+                "color-gray-200",
+                "dark:color-platinum-300",
+              ])}
             >
               Coming soon
             </Text>
@@ -153,8 +157,8 @@ export const WebpageImageButton: FunctionComponent<{
           "items-center",
           "overflow-hidden",
           "border-radius-8",
-          "background-color-white",
-          "dark:background-color-black",
+          "background-color-gray-100@50%",
+          "dark:background-color-platinum-500@50%",
           "margin-bottom-16",
         ]),
         {
