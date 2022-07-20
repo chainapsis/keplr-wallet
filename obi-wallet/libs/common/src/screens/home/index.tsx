@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import React from "react";
 import { useIntl } from "react-intl";
 import { Button, StyleSheet, TouchableWithoutFeedback } from "react-native";
 
