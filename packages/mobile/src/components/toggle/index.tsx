@@ -24,7 +24,7 @@ export const Toggle: FunctionComponent<{
   const onColor = style.flatten(["color-blue-400", "dark:color-blue-50"]).color;
   const onBackgroundColor = style.flatten([
     "color-blue-50",
-    "dark:color-blue-300",
+    "dark:color-blue-400",
   ]).color;
 
   const [animatedOnValue] = useState(() => new Animated.Value(on ? 1 : 0));
