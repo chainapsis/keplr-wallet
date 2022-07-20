@@ -70,6 +70,26 @@ export const AddressCopyable: FunctionComponent<{
                 <LottieView
                   // TODO: Change color of animated check button according to theme.
                   source={require("../../assets/lottie/check.json")}
+                  colorFilters={[
+                    {
+                      keypath: "Shape Layer 2",
+                      color: style.flatten([
+                        "color-gray-300",
+                        "dark:color-platinum-300",
+                      ]).color,
+                    },
+                    {
+                      keypath: "Shape Layer 1",
+                      color: style.flatten([
+                        "color-gray-300",
+                        "dark:color-platinum-300",
+                      ]).color,
+                    },
+                    {
+                      keypath: "Layer 1 Outlines",
+                      color: style.flatten(["color-white"]).color,
+                    },
+                  ]}
                   autoPlay
                   speed={2}
                   loop={false}
