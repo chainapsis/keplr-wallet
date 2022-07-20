@@ -192,6 +192,21 @@ export const Button: FunctionComponent<{
       return propUnderlayColor;
     }
 
+    if (mode === "text" || mode === "outline") {
+      const baseColor = color === "primary" ? "blue" : "red";
+
+      if (color === "primary") {
+        return (style.flatten([
+          `color-${baseColor}-200`,
+          "dark:color-platinum-300",
+        ] as any) as any).color;
+      }
+      return (style.flatten([
+        `color-${baseColor}-200`,
+        `dark:color-${baseColor}-600`,
+      ] as any) as any).color;
+    }
+
     if (color === "primary") {
       return style.get("color-platinum-600").color;
     } else {
