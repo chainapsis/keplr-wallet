@@ -13,8 +13,8 @@ export const CardDivider: FunctionComponent<{
         style.flatten([
           "height-1",
           "margin-x-card-horizontal",
-          "background-color-gray-200",
-          "dark:background-color-platinum-400",
+          "background-color-gray-200@40%",
+          "dark:background-color-platinum-400@40%",
         ]),
         propStyle,
       ])}
