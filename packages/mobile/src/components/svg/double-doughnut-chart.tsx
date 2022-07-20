@@ -511,7 +511,9 @@ const DoubleDoughnutChartInnerSVG: FunctionComponent<{
           cx={centerLocation}
           cy={centerLocation}
           r={radius}
-          stroke="#F2F2F7"
+          stroke={
+            style.flatten(["color-gray-50", "dark:color-platinum-500"]).color
+          }
           strokeWidth="14"
           fill="transparent"
           opacity={backRingOpacity ? backRingOpacity : 0}
