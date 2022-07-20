@@ -337,8 +337,7 @@ const ModalBackdrop: FunctionComponent = () => {
                 ["absolute-fill"],
                 [
                   !blurBackdropOnIOS && "background-color-gray-700@50%",
-                  !blurBackdropOnIOS &&
-                    "dark:background-color-platinum-700@65%",
+                  !blurBackdropOnIOS && "dark:background-color-gray-700@75%",
                 ]
               ),
               {
@@ -350,6 +349,7 @@ const ModalBackdrop: FunctionComponent = () => {
               <BlurView
                 style={style.flatten(["absolute-fill"])}
                 blurType="dark"
+                blurAmount={style.theme === "dark" ? 25 : 10}
                 reducedTransparencyFallbackColor="black"
               />
             ) : null}
