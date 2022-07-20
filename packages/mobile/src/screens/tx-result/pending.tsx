@@ -11,6 +11,7 @@ import { RightArrowIcon } from "../../components/icon";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import LottieView from "lottie-react-native";
+import { SimpleGradient } from "../../components/svg";
 
 export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -75,13 +76,18 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
   return (
     <PageWithView
       disableSafeArea
-      style={style.flatten([
-        "flex-grow-1",
-        "items-center",
-        "background-color-white",
-        "dark:background-color-platinum-700",
-      ])}
+      style={style.flatten(["flex-grow-1", "items-center"])}
     >
+      <View style={style.flatten(["absolute-fill"])}>
+        <SimpleGradient
+          degree={
+            style.get("tx-result-screen-pending-gradient-background").degree
+          }
+          stops={
+            style.get("tx-result-screen-pending-gradient-background").stops
+          }
+        />
+      </View>
       <View style={style.flatten(["flex-3"])} />
       <View
         style={style.flatten([
