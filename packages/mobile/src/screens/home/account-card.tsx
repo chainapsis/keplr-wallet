@@ -131,6 +131,7 @@ export const AccountCard: FunctionComponent<{
                 style={style.flatten([
                   "subtitle3",
                   "color-blue-400",
+                  "dark:color-platinum-200",
                   "margin-bottom-4",
                 ])}
               >
@@ -166,6 +167,7 @@ export const AccountCard: FunctionComponent<{
                 style={style.flatten([
                   "subtitle3",
                   "color-blue-400",
+                  "dark:color-platinum-200",
                   "margin-bottom-4",
                 ])}
               >
