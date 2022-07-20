@@ -47,9 +47,12 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
 
   const data = useMemo(() => {
     let data = bondedValidators.validators;
-    if (search) {
+    const searchTrim = search.trim();
+    if (searchTrim) {
       data = data.filter((val) =>
-        val.description.moniker?.toLowerCase().includes(search.toLowerCase())
+        val.description.moniker
+          ?.toLowerCase()
+          .includes(searchTrim.toLowerCase())
       );
     }
     switch (sort) {
