@@ -32,6 +32,8 @@ export const SettingRemoveAccountItem: FunctionComponent<{
         ])}
         topBorder={topBorder}
         borderColor={style.flatten(["dark:color-red-500"]).color}
+        rippleColor={style.flatten(["dark:color-red-600"]).color}
+        underlayColor={style.flatten(["dark:color-red-600"]).color}
       />
       <PasswordInputModal
         isOpen={isOpenModal}

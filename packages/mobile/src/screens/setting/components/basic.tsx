@@ -41,6 +41,10 @@ export const SettingItem: FunctionComponent<{
 
   topBorder?: boolean;
   borderColor?: string;
+
+  rippleColor?: string;
+  underlayColor?: string;
+  activeOpacity?: number;
 }> = ({
   containerStyle,
   style: propStyle,
@@ -53,6 +57,9 @@ export const SettingItem: FunctionComponent<{
   onPress,
   topBorder,
   borderColor,
+  rippleColor,
+  underlayColor,
+  activeOpacity,
 }) => {
   const style = useStyle();
 
@@ -118,6 +125,9 @@ export const SettingItem: FunctionComponent<{
             propStyle,
           ])}
           onPress={onPress}
+          rippleColor={rippleColor}
+          underlayColor={underlayColor}
+          activeOpacity={activeOpacity}
         >
           {renderChildren()}
         </RectButton>
