@@ -105,7 +105,10 @@ export const FullScreenCameraView: FunctionComponent<
               >
                 <LoadingSpinner
                   size={42}
-                  color={style.get("color-blue-400").color}
+                  color={
+                    style.flatten(["color-blue-400", "dark:color-platinum-100"])
+                      .color
+                  }
                 />
                 <Text
                   style={style.flatten([
