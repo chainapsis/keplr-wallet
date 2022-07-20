@@ -102,8 +102,8 @@ const AndroidAlternativeBlurredHeader: FunctionComponent<StackHeaderProps> = (
             right: 0,
             backgroundColor: style.get("color-blurred-header-background").color,
             borderBottomWidth: 0.5,
+            borderColor: style.get("header-tabbar-border"),
           },
-          style.flatten(["border-color-border-white"]),
         ])}
       />
       <Header {...props} />

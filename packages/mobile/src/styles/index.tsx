@@ -104,7 +104,7 @@ export const DarkThemeBackgroundColors = {
   "background-tertiary": ColorPalette["platinum-600"],
 };
 
-export const Colors = {
+export const ProfileColors = {
   "profile-sky-blue": "#80CAFF",
   "profile-mint": "#47DDE7",
   "profile-green": "#78F0C5",
@@ -113,12 +113,6 @@ export const Colors = {
   "profile-red": "#FF6D88",
   "profile-orange": "#FEC078",
   "profile-yellow": "#F2ED64",
-  "border-gray": "#C6C6CD",
-  "border-white": "#F5F5F5",
-};
-
-export const DarkColors = {
-  "border-white": "#71707C",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider(
@@ -286,10 +280,12 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       "blurred-tabbar-blur-type": "light" as BlurViewProperties["blurType"],
       "blurred-tabbar-blur-amount": 80,
       "blurred-tabbar-reducedTransparencyFallbackColor": "white",
+
+      "header-tabbar-border": ColorPalette["gray-50"],
     },
     colors: {
       ...ColorPalette,
-      ...Colors,
+      ...ProfileColors,
       ...TextColors,
       ...BackgroundColors,
       ...{
@@ -538,9 +534,10 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         "blurred-tabbar-blur-type": "dark" as BlurViewProperties["blurType"],
         "blurred-tabbar-blur-amount": 70,
         "blurred-tabbar-reducedTransparencyFallbackColor": "black",
+
+        "header-tabbar-border": ColorPalette["platinum-500"],
       },
       colors: {
-        ...DarkColors,
         ...DarkThemeTextColors,
         ...DarkThemeBackgroundColors,
 
