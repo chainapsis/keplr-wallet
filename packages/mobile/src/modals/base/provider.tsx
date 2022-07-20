@@ -350,6 +350,7 @@ const ModalBackdrop: FunctionComponent = () => {
               <BlurView
                 style={style.flatten(["absolute-fill"])}
                 blurType="dark"
+                reducedTransparencyFallbackColor="black"
               />
             ) : null}
           </Animated.View>
