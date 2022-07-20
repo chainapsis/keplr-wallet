@@ -271,6 +271,18 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         ],
       },
 
+      "status-bar-style": "dark-content" as StatusBarStyle,
+
+      "blurred-header-blur-type": "light" as BlurViewProperties["blurType"],
+      "blurred-header-blur-amount": 60,
+      "blurred-header-reducedTransparencyFallbackColor": "white",
+
+      "blurred-tabbar-blur-type": "light" as BlurViewProperties["blurType"],
+      "blurred-tabbar-blur-amount": 80,
+      "blurred-tabbar-reducedTransparencyFallbackColor": "white",
+
+      "header-tabbar-border": ColorPalette["gray-50"],
+
       "unlock-screen-gradient-background": {
         degree: 168,
         stops: [
@@ -285,17 +297,47 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         ],
       },
 
-      "status-bar-style": "dark-content" as StatusBarStyle,
+      "tx-result-screen-pending-gradient-background": {
+        degree: 168,
+        stops: [
+          {
+            offset: "0%",
+            color: "#E3E4FF",
+          },
+          {
+            offset: "60%",
+            color: "#FFFFFF",
+          },
+        ],
+      },
 
-      "blurred-header-blur-type": "light" as BlurViewProperties["blurType"],
-      "blurred-header-blur-amount": 60,
-      "blurred-header-reducedTransparencyFallbackColor": "white",
+      "tx-result-screen-success-gradient-background": {
+        degree: 168,
+        stops: [
+          {
+            offset: "0%",
+            color: "#F4FFFB",
+          },
+          {
+            offset: "60%",
+            color: "#FFFFFF",
+          },
+        ],
+      },
 
-      "blurred-tabbar-blur-type": "light" as BlurViewProperties["blurType"],
-      "blurred-tabbar-blur-amount": 80,
-      "blurred-tabbar-reducedTransparencyFallbackColor": "white",
-
-      "header-tabbar-border": ColorPalette["gray-50"],
+      "tx-result-screen-failed-gradient-background": {
+        degree: 168,
+        stops: [
+          {
+            offset: "0%",
+            color: "#FFF4F4",
+          },
+          {
+            offset: "60%",
+            color: "#FFFFFF",
+          },
+        ],
+      },
     },
     colors: {
       ...ColorPalette,
@@ -537,6 +579,18 @@ export const { StyleProvider, useStyle } = createStyleProvider(
           ],
         },
 
+        "status-bar-style": "light-content" as StatusBarStyle,
+
+        "blurred-header-blur-type": "dark" as BlurViewProperties["blurType"],
+        "blurred-header-blur-amount": 40,
+        "blurred-header-reducedTransparencyFallbackColor": "black",
+
+        "blurred-tabbar-blur-type": "dark" as BlurViewProperties["blurType"],
+        "blurred-tabbar-blur-amount": 70,
+        "blurred-tabbar-reducedTransparencyFallbackColor": "black",
+
+        "header-tabbar-border": ColorPalette["platinum-500"],
+
         "unlock-screen-gradient-background": {
           degree: 168,
           stops: [
@@ -551,17 +605,47 @@ export const { StyleProvider, useStyle } = createStyleProvider(
           ],
         },
 
-        "status-bar-style": "light-content" as StatusBarStyle,
+        "tx-result-screen-pending-gradient-background": {
+          degree: 168,
+          stops: [
+            {
+              offset: "0%",
+              color: "#2B4267",
+            },
+            {
+              offset: "53%",
+              color: "#030E21",
+            },
+          ],
+        },
 
-        "blurred-header-blur-type": "dark" as BlurViewProperties["blurType"],
-        "blurred-header-blur-amount": 40,
-        "blurred-header-reducedTransparencyFallbackColor": "black",
+        "tx-result-screen-success-gradient-background": {
+          degree: 168,
+          stops: [
+            {
+              offset: "0%",
+              color: "#174045",
+            },
+            {
+              offset: "60%",
+              color: "#021213",
+            },
+          ],
+        },
 
-        "blurred-tabbar-blur-type": "dark" as BlurViewProperties["blurType"],
-        "blurred-tabbar-blur-amount": 70,
-        "blurred-tabbar-reducedTransparencyFallbackColor": "black",
-
-        "header-tabbar-border": ColorPalette["platinum-500"],
+        "tx-result-screen-failed-gradient-background": {
+          degree: 168,
+          stops: [
+            {
+              offset: "0%",
+              color: "#381111",
+            },
+            {
+              offset: "60%",
+              color: "#110303",
+            },
+          ],
+        },
       },
       colors: {
         ...DarkThemeTextColors,
