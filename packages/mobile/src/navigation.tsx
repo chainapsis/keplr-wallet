@@ -358,7 +358,12 @@ const HomeScreenHeaderLeft: FunctionComponent = observer(() => {
       }}
     >
       <View style={style.flatten(["flex-row", "items-center"])}>
-        <OpenDrawerIcon size={28} color={style.get("color-primary").color} />
+        <OpenDrawerIcon
+          size={28}
+          color={
+            style.flatten(["color-blue-400", "dark:color-platinum-200"]).color
+          }
+        />
         <Text style={style.flatten(["h4", "color-text-high", "margin-left-4"])}>
           {chainStore.current.chainName}
         </Text>
@@ -383,7 +388,12 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
           });
         }}
       >
-        <ScanIcon size={28} color={style.get("color-primary").color} />
+        <ScanIcon
+          size={28}
+          color={
+            style.flatten(["color-blue-400", "dark:color-platinum-50"]).color
+          }
+        />
       </HeaderRightButton>
       {walletConnectStore.sessions.length > 0 ? (
         <HeaderRightButton
@@ -396,7 +406,11 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
             });
           }}
         >
-          <HeaderWalletConnectIcon />
+          <HeaderWalletConnectIcon
+            color={
+              style.flatten(["color-blue-400", "dark:color-platinum-50"]).color
+            }
+          />
         </HeaderRightButton>
       ) : null}
     </React.Fragment>
@@ -939,6 +953,7 @@ export const MainTabNavigation: FunctionComponent = () => {
             <BorderlessButton
               {...props}
               activeOpacity={1}
+              rippleColor={style.get("color-rect-button-default-ripple").color}
               style={{
                 height: "100%",
                 aspectRatio: 1.9,
@@ -949,8 +964,14 @@ export const MainTabNavigation: FunctionComponent = () => {
         ),
       })}
       tabBarOptions={{
-        activeTintColor: style.get("color-primary").color,
-        inactiveTintColor: style.get("color-text-black-very-very-low").color,
+        activeTintColor: style.flatten([
+          "color-blue-400",
+          "dark:color-platinum-50",
+        ]).color,
+        inactiveTintColor: style.flatten([
+          "color-gray-200",
+          "dark:color-platinum-300",
+        ]).color,
         style: {
           borderTopWidth: 0.5,
           borderTopColor: style.get("border-color-border-white").borderColor,
