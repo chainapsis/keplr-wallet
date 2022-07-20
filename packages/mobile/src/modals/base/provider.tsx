@@ -335,7 +335,11 @@ const ModalBackdrop: FunctionComponent = () => {
             style={StyleSheet.flatten([
               style.flatten(
                 ["absolute-fill"],
-                [!blurBackdropOnIOS && "background-color-modal-backdrop"]
+                [
+                  !blurBackdropOnIOS && "background-color-gray-700@50%",
+                  !blurBackdropOnIOS &&
+                    "dark:background-color-platinum-700@65%",
+                ]
               ),
               {
                 opacity,

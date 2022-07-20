@@ -170,7 +170,11 @@ export const UndelegationsCard: FunctionComponent<{
               {!isLastUnbondingIndex && (
                 <View
                   style={StyleSheet.flatten([
-                    style.flatten(["height-1", "background-color-divider"]),
+                    style.flatten([
+                      "height-1",
+                      "background-color-gray-200",
+                      "dark:background-color-platinum-400",
+                    ]),
                   ])}
                 />
               )}

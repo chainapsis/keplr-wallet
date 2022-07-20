@@ -159,7 +159,7 @@ export const BIP44SelectableModal: FunctionComponent<{
                   "border-color-blue-50",
                   "margin-bottom-12",
                 ],
-                [selectedIndex === i && "border-color-primary"]
+                [selectedIndex === i && "border-color-blue-400"]
               )}
               onPress={() => {
                 setSelectedIndex(i);
@@ -188,7 +188,8 @@ export const BIP44SelectableModal: FunctionComponent<{
               <View
                 style={style.flatten([
                   "height-1",
-                  "background-color-divider",
+                  "background-color-gray-200",
+                  "dark:background-color-platinum-400",
                   "margin-y-16",
                 ])}
               />

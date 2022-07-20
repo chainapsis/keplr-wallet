@@ -148,7 +148,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                     style={style.flatten([
                       "text-caption1",
                       "font-medium",
-                      "color-primary",
+                      "color-blue-400",
                     ])}
                   >
                     {Bech32Address.shortenAddress(data.address, 30)}

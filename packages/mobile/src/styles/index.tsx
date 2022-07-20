@@ -69,6 +69,8 @@ export const ColorPalette = {
   "gray-700": "#09090A",
 
   black: "#000000",
+
+  transparent: "rgba(255,255,255,0)",
 };
 
 export const TextColors = {
@@ -103,9 +105,6 @@ export const DarkThemeBackgroundColors = {
 };
 
 export const Colors = {
-  primary: ColorPalette["blue-400"],
-  secondary: "#FF63B4",
-  danger: "#F5365C",
   "profile-sky-blue": "#80CAFF",
   "profile-mint": "#47DDE7",
   "profile-green": "#78F0C5",
@@ -114,36 +113,20 @@ export const Colors = {
   "profile-red": "#FF6D88",
   "profile-orange": "#FEC078",
   "profile-yellow": "#F2ED64",
-  icon: "#2C4163",
-  success: "#2DCE89",
-  error: "#F5365C",
   "text-black-very-high": "#030C1D",
   "text-black-very-low": "#899BB6",
   "text-black-very-very-low": "#C6C6CD",
   "text-black-very-very-very-low": "#DCDCE3",
   "border-gray": "#C6C6CD",
   "border-white": "#F5F5F5",
-  disabled: "#EEEEF3",
-  divider: "#F5F5F5",
-  transparent: "rgba(255,255,255,0)",
-  "modal-backdrop": "rgba(9,18,50,0.6)",
-  "card-modal-handle": "#DCDCE3",
-  "camera-loading-background": "rgba(255,255,255,0.95)",
 };
 
 export const DarkColors = {
-  "primary-10": "#494F6A",
-  "primary-50": "#505877",
-  "primary-100": "#576089",
-  "primary-200": "#606CA9",
-  "primary-300": "#5366C7",
-  "primary-400": "#6882FF",
   "text-black-very-high": "#FFFFFF",
   "text-black-very-low": "#7E8794",
   "text-black-very-very-low": "#71707C",
   "text-black-very-very-very-low": "#5D5D68",
   "border-white": "#71707C",
-  divider: "#71707C",
 };
 
 export const { StyleProvider, useStyle } = createStyleProvider(

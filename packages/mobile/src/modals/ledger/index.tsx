@@ -261,7 +261,7 @@ export const LedgerGranterModal: FunctionComponent<{
               >
                 <LoadingSpinner
                   size={20}
-                  color={style.get("color-primary").color}
+                  color={style.get("color-blue-400").color}
                 />
               </View>
             </View>
@@ -331,8 +331,8 @@ const LedgerErrorView: FunctionComponent<{
 
   return (
     <View style={style.flatten(["items-center"])}>
-      <AlertIcon size={100} color={style.get("color-danger").color} />
-      <Text style={style.flatten(["h4", "color-danger"])}>Error</Text>
+      <AlertIcon size={100} color={style.get("color-red-400").color} />
+      <Text style={style.flatten(["h4", "color-red-400"])}>Error</Text>
       <Text
         style={style.flatten([
           "subtitle3",

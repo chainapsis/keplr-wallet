@@ -159,7 +159,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
                   right={
                     keyStore.selected ? (
                       <CheckIcon
-                        color={style.get("color-primary").color}
+                        color={style.get("color-blue-400").color}
                         height={16}
                       />
                     ) : undefined

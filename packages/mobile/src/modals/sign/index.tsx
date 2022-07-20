@@ -217,7 +217,7 @@ export const SignModal: FunctionComponent<{
         ) : null}
         <View style={style.flatten(["margin-bottom-16"])}>
           <Text style={style.flatten(["margin-bottom-3"])}>
-            <Text style={style.flatten(["subtitle3", "color-primary"])}>
+            <Text style={style.flatten(["subtitle3", "color-blue-400"])}>
               {`${msgs.length.toString()} `}
             </Text>
             <Text style={style.flatten(["subtitle3", "color-text-middle"])}>

@@ -65,7 +65,8 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
           containerStyle={style.flatten([
             "margin-bottom-20",
             "border-width-1",
-            "border-color-divider",
+            "border-color-gray-200",
+            "dark:border-color-platinum-400",
           ])}
           text="Sign in with Apple"
           leftIcon={

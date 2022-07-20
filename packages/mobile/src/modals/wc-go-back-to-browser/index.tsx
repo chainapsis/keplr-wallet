@@ -27,7 +27,7 @@ export const WCGoBackToBrowserModal: FunctionComponent<{
                 cx="21"
                 cy="21"
                 r="21"
-                fill={style.get("color-primary").color}
+                fill={style.get("color-blue-400").color}
               />
               <Path
                 stroke="#fff"

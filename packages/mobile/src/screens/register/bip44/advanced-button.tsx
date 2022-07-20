@@ -138,7 +138,7 @@ export const BIP44SelectModal: FunctionComponent<{
           <Text
             style={style.flatten([
               "text-caption2",
-              "color-danger",
+              "color-red-400",
               "margin-bottom-8",
             ])}
           >

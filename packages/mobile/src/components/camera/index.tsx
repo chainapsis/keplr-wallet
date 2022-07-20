@@ -78,7 +78,7 @@ export const FullScreenCameraView: FunctionComponent<
         <View>
           <Svg width="217" height="217" fill="none" viewBox="0 0 217 217">
             <Path
-              stroke={style.get("color-primary").color}
+              stroke={style.get("color-blue-400").color}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="6"
@@ -98,14 +98,14 @@ export const FullScreenCameraView: FunctionComponent<
                   "padding-x-32",
                   "padding-top-48",
                   "padding-bottom-31",
-                  "background-color-camera-loading-background",
+                  "background-color-card",
                   "border-radius-8",
                   "items-center",
                 ])}
               >
                 <LoadingSpinner
                   size={42}
-                  color={style.get("color-primary").color}
+                  color={style.get("color-blue-400").color}
                 />
                 <Text
                   style={style.flatten([

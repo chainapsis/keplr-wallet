@@ -81,7 +81,7 @@ export const DelegationsCard: FunctionComponent<{
             <Text
               style={style.flatten([
                 "subtitle3",
-                "color-primary",
+                "color-blue-400",
                 "margin-bottom-4",
               ])}
             >

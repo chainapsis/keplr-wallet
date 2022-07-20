@@ -120,7 +120,7 @@ export const FeeInSign: FunctionComponent<{
             <Text
               style={style.flatten(
                 ["subtitle1", "color-text-middle"],
-                [canFeeEditable && "color-primary"]
+                [canFeeEditable && "color-blue-400"]
               )}
             >
               {fee.trim(true).toString()}
@@ -128,7 +128,7 @@ export const FeeInSign: FunctionComponent<{
             {canFeeEditable ? (
               <View style={style.flatten(["margin-left-6"])}>
                 <RightArrowIcon
-                  color={style.get("color-primary").color}
+                  color={style.get("color-blue-400").color}
                   height={12}
                 />
               </View>
@@ -159,7 +159,7 @@ export const FeeInSign: FunctionComponent<{
               style={style.flatten([
                 "absolute",
                 "text-caption1",
-                "color-error",
+                "color-red-400",
                 "margin-top-2",
                 "margin-left-4",
               ])}

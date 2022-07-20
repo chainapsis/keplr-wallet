@@ -187,7 +187,10 @@ export const SettingChainListScreenElement: FunctionComponent<{
           >
             <Svg width="17" height="10" fill="none" viewBox="0 0 17 10">
               <Path
-                stroke={style.get("color-card-modal-handle").color}
+                stroke={
+                  style.flatten(["color-gray-100", "dark:color-platinum-100"])
+                    .color
+                }
                 strokeLinecap="round"
                 strokeWidth="3"
                 d="M2 1.5h13M2 8.5h13"

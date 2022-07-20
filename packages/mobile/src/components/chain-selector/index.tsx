@@ -55,7 +55,7 @@ export const ChainSelectorModal: FunctionComponent<{
                     "border-radius-64",
                     "items-center",
                     "justify-center",
-                    "background-color-primary",
+                    "background-color-blue-400",
                     "margin-right-12",
                   ])}
                 >
