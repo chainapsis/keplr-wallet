@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactElement } from "react";
+import React, { FunctionComponent, ReactElement, isValidElement } from "react";
 import { useStyle } from "../../styles";
 import { Text, StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import { LoadingSpinner } from "../spinner";
@@ -9,8 +9,8 @@ export const Button: FunctionComponent<{
   mode?: "fill" | "light" | "outline" | "text";
   size?: "default" | "small" | "large";
   text: string;
-  leftIcon?: ReactElement;
-  rightIcon?: ReactElement;
+  leftIcon?: ReactElement | ((color: string) => ReactElement);
+  rightIcon?: ReactElement | ((color: string) => ReactElement);
   loading?: boolean;
   disabled?: boolean;
 
@@ -257,7 +257,13 @@ export const Button: FunctionComponent<{
             [loading && "opacity-transparent"]
           )}
         >
-          <View>{leftIcon}</View>
+          <View>
+            {isValidElement(leftIcon) || !leftIcon
+              ? leftIcon
+              : leftIcon(
+                  (style.flatten(textColorDefinition as any) as any).color
+                )}
+          </View>
         </View>
         <Text
           style={StyleSheet.flatten([
@@ -276,7 +282,13 @@ export const Button: FunctionComponent<{
             [loading && "opacity-transparent"]
           )}
         >
-          <View>{rightIcon}</View>
+          <View>
+            {isValidElement(rightIcon) || !rightIcon
+              ? rightIcon
+              : rightIcon(
+                  (style.flatten(textColorDefinition as any) as any).color
+                )}
+          </View>
         </View>
         {loading ? (
           <View

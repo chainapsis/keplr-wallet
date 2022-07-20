@@ -67,6 +67,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
         "flex-grow-1",
         "items-center",
         "background-color-white",
+        "dark:background-color-platinum-700",
       ])}
     >
       <View style={style.flatten(["flex-3"])} />
@@ -158,14 +159,11 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             size="default"
             text={`View on ${chainInfo.raw.txExplorer.name}`}
             mode="text"
-            rightIcon={
+            rightIcon={(color) => (
               <View style={style.flatten(["margin-left-8"])}>
-                <RightArrowIcon
-                  color={style.get("color-primary").color}
-                  height={12}
-                />
+                <RightArrowIcon color={color} height={12} />
               </View>
-            }
+            )}
             onPress={() => {
               if (chainInfo.raw.txExplorer) {
                 WebBrowser.openBrowserAsync(
