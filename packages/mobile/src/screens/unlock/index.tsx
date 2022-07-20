@@ -20,6 +20,7 @@ import { KeyRingStatus } from "@keplr-wallet/background";
 import { KeychainStore } from "../../stores/keychain";
 import { IAccountStore } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
+import { SimpleGradient } from "../../components/svg";
 
 let splashScreenHided = false;
 async function hideSplashScreen() {
@@ -226,18 +227,8 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <View
-        style={style.flatten([
-          "absolute-fill",
-          "background-color-background-tertiary",
-        ])}
-      />
-      <View
-        style={style.flatten([
-          "flex-1",
-          "background-color-background-tertiary",
-        ])}
-      >
+      <UnlockScreenGradientBackground />
+      <View style={style.flatten(["flex-1"])}>
         <KeyboardAwareScrollView
           contentContainerStyle={style.flatten(["flex-grow-1"])}
         >
@@ -512,12 +503,7 @@ export const SplashContinuityEffectView: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <View
-        style={style.flatten([
-          "absolute-fill",
-          "background-color-background-tertiary",
-        ])}
-      />
+      <UnlockScreenGradientBackground />
       <View
         style={style.flatten([
           "absolute-fill",
@@ -602,5 +588,18 @@ export const SplashContinuityEffectView: FunctionComponent<{
         />
       </View>
     </React.Fragment>
+  );
+};
+
+const UnlockScreenGradientBackground: FunctionComponent = () => {
+  const style = useStyle();
+
+  return (
+    <View style={style.flatten(["absolute-fill"])}>
+      <SimpleGradient
+        degree={style.get("unlock-screen-gradient-background").degree}
+        stops={style.get("unlock-screen-gradient-background").stops}
+      />
+    </View>
   );
 };

@@ -271,6 +271,20 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         ],
       },
 
+      "unlock-screen-gradient-background": {
+        degree: 168,
+        stops: [
+          {
+            offset: "0%",
+            color: "#CCD1FF",
+          },
+          {
+            offset: "35%",
+            color: "#ECEEFC",
+          },
+        ],
+      },
+
       "status-bar-style": "dark-content" as StatusBarStyle,
 
       "blurred-header-blur-type": "light" as BlurViewProperties["blurType"],
@@ -519,6 +533,20 @@ export const { StyleProvider, useStyle } = createStyleProvider(
             {
               offset: "100%",
               color: ColorPalette["blue-800"],
+            },
+          ],
+        },
+
+        "unlock-screen-gradient-background": {
+          degree: 168,
+          stops: [
+            {
+              offset: "0%",
+              color: "#060F3C",
+            },
+            {
+              offset: "85%",
+              color: "#020913",
             },
           ],
         },
