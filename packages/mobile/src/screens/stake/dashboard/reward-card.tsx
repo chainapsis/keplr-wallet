@@ -57,7 +57,13 @@ export const MyRewardCard: FunctionComponent<{
                 .upperCase(true)
                 .toString()}
             </Text>
-            <Text style={style.flatten(["h7", "color-blue-400"])}>
+            <Text
+              style={style.flatten([
+                "h7",
+                "color-blue-400",
+                "dark:color-platinum-300",
+              ])}
+            >
               {apy.toDec().gt(new Dec(0))
                 ? `${apy.maxDecimals(2).trim(true).toString()}% per year`
                 : " "}
