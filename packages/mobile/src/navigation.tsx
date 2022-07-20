@@ -11,6 +11,7 @@ import {
   NavigationContainer,
   NavigationContainerRef,
   useNavigation,
+  DefaultTheme,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
@@ -1045,12 +1046,21 @@ export const AppNavigation: FunctionComponent = observer(() => {
   const navigationRef = useRef<NavigationContainerRef | null>(null);
   const routeNameRef = useRef<string | null>(null);
 
+  const style = useStyle();
+
   return (
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
           <BugsnagNavigationContainer
             ref={navigationRef}
+            theme={{
+              dark: style.theme === "dark",
+              colors: {
+                ...DefaultTheme.colors,
+                background: style.theme === "dark" ? "black" : "white",
+              },
+            }}
             onReady={() => {
               const routerName = navigationRef.current?.getCurrentRoute();
               if (routerName) {
