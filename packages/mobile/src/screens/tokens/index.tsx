@@ -168,7 +168,9 @@ export const TokenItem: FunctionComponent<{
       <View style={style.get("flex-1")} />
       <RightArrowIcon
         height={16}
-        color={style.get("color-text-black-very-very-low").color}
+        color={
+          style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
+        }
       />
     </RectButton>
   );

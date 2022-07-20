@@ -39,7 +39,7 @@ export const UndelegationsCard: FunctionComponent<{
   return (
     <Card style={containerStyle}>
       <CardBody>
-        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+        <Text style={style.flatten(["h4", "color-text-highest"])}>
           My Unstaking
         </Text>
         {unbondings.map((unbonding, unbondingIndex) => {

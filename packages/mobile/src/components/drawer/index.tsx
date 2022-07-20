@@ -79,7 +79,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
               >
                 <Svg width="28" height="28" fill="none" viewBox="0 0 28 28">
                   <Path
-                    fill={style.get("color-text-black-very-low").color}
+                    fill={style.get("color-text-low").color}
                     d="M3.5 7.875h12.4a2.624 2.624 0 004.95 0h3.65a.875.875 0 100-1.75h-3.65a2.624 2.624 0 00-4.95 0H3.5a.875.875 0 000 1.75zm21 12.25h-3.65a2.625 2.625 0 00-4.95 0H3.5a.875.875 0 000 1.75h12.4a2.625 2.625 0 004.95 0h3.65a.875.875 0 100-1.75zm0-7H12.1a2.625 2.625 0 00-4.95 0H3.5a.875.875 0 000 1.75h3.65a2.625 2.625 0 004.95 0h12.4a.875.875 0 100-1.75z"
                   />
                 </Svg>

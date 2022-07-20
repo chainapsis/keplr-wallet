@@ -74,7 +74,7 @@ export const ColorPalette = {
 };
 
 export const TextColors = {
-  "text-emphasis": ColorPalette["blue-400"],
+  "text-highest": ColorPalette["black"],
   "text-high": ColorPalette["platinum-700"],
   "text-middle": ColorPalette["platinum-400"],
   "text-low": ColorPalette["gray-300"],
@@ -82,7 +82,7 @@ export const TextColors = {
 };
 
 export const DarkThemeTextColors = {
-  "text-emphasis": ColorPalette["white"],
+  "text-highest": ColorPalette["white"],
   "text-high": ColorPalette["platinum-50"],
   "text-middle": ColorPalette["platinum-100"],
   "text-low": ColorPalette["platinum-200"],
@@ -113,19 +113,11 @@ export const Colors = {
   "profile-red": "#FF6D88",
   "profile-orange": "#FEC078",
   "profile-yellow": "#F2ED64",
-  "text-black-very-high": "#030C1D",
-  "text-black-very-low": "#899BB6",
-  "text-black-very-very-low": "#C6C6CD",
-  "text-black-very-very-very-low": "#DCDCE3",
   "border-gray": "#C6C6CD",
   "border-white": "#F5F5F5",
 };
 
 export const DarkColors = {
-  "text-black-very-high": "#FFFFFF",
-  "text-black-very-low": "#7E8794",
-  "text-black-very-very-low": "#71707C",
-  "text-black-very-very-very-low": "#5D5D68",
   "border-white": "#71707C",
 };
 

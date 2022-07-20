@@ -35,7 +35,7 @@ export const DelegatedCard: FunctionComponent<{
         <Text
           style={style.flatten([
             "h4",
-            "color-text-black-very-high",
+            "color-text-highest",
             "margin-bottom-12",
           ])}
         >

@@ -31,7 +31,7 @@ export const UnbondingCard: FunctionComponent<{
   return unbonding ? (
     <Card style={containerStyle}>
       <CardBody>
-        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+        <Text style={style.flatten(["h4", "color-text-highest"])}>
           My Unstaking
         </Text>
         <View style={style.flatten(["padding-top-4", "padding-bottom-8"])}>

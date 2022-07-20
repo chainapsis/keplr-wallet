@@ -204,7 +204,9 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
       <View style={style.flatten(["justify-center", "items-center"])}>
         <View style={style.flatten(["margin-bottom-21"])}>
           <AddressBookIcon
-            color={style.get("color-text-black-very-very-low").color}
+            color={
+              style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
+            }
             height={56}
           />
         </View>
