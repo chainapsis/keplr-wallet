@@ -37,7 +37,10 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
       <DrawerContentScrollView
         style={StyleSheet.flatten([
           propStyle,
-          style.flatten(["background-color-background-secondary"]),
+          style.flatten([
+            "background-color-white",
+            "dark:background-color-platinum-600",
+          ]),
         ])}
         {...rest}
       >
@@ -109,9 +112,10 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                   "items-center",
                   "padding-x-20",
                 ])}
-                activeOpacity={1}
+                activeOpacity={style.theme === "dark" ? 0.5 : 1}
                 underlayColor={
-                  style.get("color-drawer-rect-button-underlay").color
+                  style.flatten(["color-gray-50", "dark:color-platinum-500"])
+                    .color
                 }
               >
                 <View
@@ -122,8 +126,8 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                       "border-radius-64",
                       "items-center",
                       "justify-center",
-                      "background-color-blue-400@40%",
-                      "dark:background-color-platinum-200@40%",
+                      "background-color-gray-100",
+                      "dark:background-color-platinum-500",
                       "margin-right-16",
                     ],
                     [selected && "background-color-blue-400"]

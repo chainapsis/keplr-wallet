@@ -297,8 +297,6 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         // Active opacity is 0.2 by default.
         "rect-button-default-underlay": ColorPalette["gray-300"],
 
-        "drawer-rect-button-underlay": "#F1F3FC",
-
         // Belows are for the loading spinner props and may not be used as styles.
         "loading-spinner": "#BABAC1",
       },
@@ -546,8 +544,6 @@ export const { StyleProvider, useStyle } = createStyleProvider(
 
         "rect-button-default-ripple": ColorPalette["platinum-400"],
         "rect-button-default-underlay": ColorPalette["platinum-400"],
-
-        "drawer-rect-button-underlay": "#F1F3FC",
       },
     },
   }

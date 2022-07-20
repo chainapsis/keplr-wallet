@@ -209,8 +209,8 @@ export const SettingChainListScreenElement: FunctionComponent<{
               "background-color-blue-400",
             ],
             [
-              disabled && "background-color-blue-400@40%",
-              disabled && "dark:background-color-platinum-200@40%",
+              disabled && "background-color-gray-100",
+              disabled && "dark:background-color-platinum-500",
             ]
           )}
         >
