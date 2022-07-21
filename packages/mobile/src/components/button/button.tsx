@@ -208,8 +208,7 @@ export const Button: FunctionComponent<{
     }
 
     if (mode === "light" && color === "primary") {
-      return style.flatten(["color-platinum-200", "dark:color-platinum-600"])
-        .color;
+      return style.flatten(["color-gray-200", "dark:color-platinum-600"]).color;
     }
 
     if (color === "primary") {
