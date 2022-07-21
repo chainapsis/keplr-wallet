@@ -24,7 +24,7 @@ export const WordChip: FunctionComponent<{
           "dark:background-color-platinum-700",
           "border-width-2",
           "border-color-blue-400",
-          "border-color-platinum-500",
+          "dark:border-color-platinum-500",
           "margin-right-12",
           "margin-bottom-16",
         ],
