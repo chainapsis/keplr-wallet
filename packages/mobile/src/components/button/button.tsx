@@ -48,13 +48,13 @@ export const Button: FunctionComponent<{
         if (disabled) {
           if (color === "primary") {
             return [
-              "background-color-gray-50",
-              "dark:background-color-platinum-400",
+              `background-color-${baseColor}-200`,
+              "dark:background-color-platinum-500",
             ];
           } else {
             return [
-              "background-color-red-100",
-              "dark:background-color-red-700",
+              `background-color-${baseColor}-100`,
+              `dark:background-color-${baseColor}-700`,
             ];
           }
         } else {
@@ -64,13 +64,13 @@ export const Button: FunctionComponent<{
         if (disabled) {
           if (color === "primary") {
             return [
-              "background-color-gray-50",
+              `background-color-${baseColor}-100`,
               "dark:background-color-platinum-500",
             ];
           } else {
             return [
-              "background-color-red-100",
-              "dark:background-color-red-700",
+              `background-color-${baseColor}-100`,
+              `dark:background-color-${baseColor}-700`,
             ];
           }
         } else {
@@ -106,21 +106,21 @@ export const Button: FunctionComponent<{
       case "fill":
         if (disabled) {
           if (color === "primary") {
-            return ["color-gray-300", "dark:color-platinum-200"];
+            return ["color-white", "dark:color-platinum-300"];
           } else {
             return [`color-${baseColor}-200`, `dark:color-${baseColor}-500`];
           }
         }
 
         if (color === "primary") {
-          return ["color-white", "dark:color-blue-50"];
+          return ["color-white", `dark:color-${baseColor}-50`];
         } else {
           return ["color-white"];
         }
       case "light":
         if (disabled) {
           if (color === "primary") {
-            return ["color-gray-300", "dark:color-platinum-300"];
+            return [`color-${baseColor}-200`, "dark:color-platinum-300"];
           } else {
             return [`color-${baseColor}-200`, `dark:color-${baseColor}-500`];
           }
