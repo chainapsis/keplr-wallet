@@ -77,7 +77,7 @@ export const AmountInput: FunctionComponent<{
               text="MAX"
               mode={(() => {
                 if (style.theme === "dark") {
-                  return "fill";
+                  return "light";
                 } else {
                   return amountConfig.fraction === 1 ? "light" : "fill";
                 }
@@ -86,11 +86,18 @@ export const AmountInput: FunctionComponent<{
               style={style.flatten(["padding-x-5", "padding-y-3"])}
               containerStyle={style.flatten(
                 ["height-24", "border-radius-4"],
-                [!amountConfig.fraction && "dark:background-color-blue-100"]
+                [
+                  !amountConfig.fraction && "dark:background-color-blue-100",
+                  amountConfig.fraction === 1 &&
+                    "dark:background-color-platinum-600",
+                ]
               )}
               textStyle={style.flatten(
                 ["normal-case", "text-caption2"],
-                [!amountConfig.fraction && "dark:color-blue-400"]
+                [
+                  !amountConfig.fraction && "dark:color-platinum-700",
+                  amountConfig.fraction === 1 && "dark:color-platinum-100",
+                ]
               )}
               onPress={() => {
                 amountConfig.setFraction(
