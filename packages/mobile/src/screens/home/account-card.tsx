@@ -137,7 +137,7 @@ export const AccountCard: FunctionComponent<{
               >
                 Available
               </Text>
-              <Text style={style.flatten(["h5", "color-text-middle"])}>
+              <Text style={style.flatten(["h5", "color-text-high"])}>
                 {stakable.maxDecimals(6).trim(true).shrink(true).toString()}
               </Text>
             </View>
@@ -173,7 +173,7 @@ export const AccountCard: FunctionComponent<{
               >
                 Staking
               </Text>
-              <Text style={style.flatten(["h5", "color-text-middle"])}>
+              <Text style={style.flatten(["h5", "color-text-high"])}>
                 {stakedSum.maxDecimals(6).trim(true).shrink(true).toString()}
               </Text>
             </View>
