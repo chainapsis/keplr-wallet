@@ -8,7 +8,7 @@ import React, {
 import { Dimensions, Image, StatusBar, StyleSheet, View } from "react-native";
 import Animated, { Easing } from "react-native-reanimated";
 import { observer } from "mobx-react-lite";
-import { useStyle } from "../../styles";
+import { useStyle, useStyleThemeController } from "../../styles";
 import * as SplashScreen from "expo-splash-screen";
 import { TextInput } from "../../components/input";
 import { Button } from "../../components/button";
@@ -307,6 +307,7 @@ const useAnimationState = () => {
 export const SplashContinuityEffectView: FunctionComponent<{
   onAnimationEnd: () => void;
 }> = ({ onAnimationEnd }) => {
+  const themeController = useStyleThemeController();
   const style = useStyle();
 
   const onAnimationEndRef = useRef(onAnimationEnd);
@@ -341,14 +342,21 @@ export const SplashContinuityEffectView: FunctionComponent<{
   const backgroundHeight = useAnimationState();
 
   useEffect(() => {
-    if (isBackgroundLoaded && logoSize) {
+    // When the splash screen disappears and the transition starts, the color should change according to the theme.
+    // In most cases, there is no problem because the theme is loaded very quickly, but it waits for an asynchronous load just in case.
+    if (!themeController.isInitializing && isBackgroundLoaded && logoSize) {
       (async () => {
         await hideSplashScreen();
 
         animation.isStarted.setValue(1);
       })();
     }
-  }, [animation.isStarted, isBackgroundLoaded, logoSize]);
+  }, [
+    themeController.isInitializing,
+    animation.isStarted,
+    isBackgroundLoaded,
+    logoSize,
+  ]);
 
   const backgroundClippingAnimationDuration = 700;
   const backgroundAnimationDuration = 900;

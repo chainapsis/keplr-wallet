@@ -1,6 +1,7 @@
 import React, {
   createContext,
   FunctionComponent,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,6 +10,7 @@ import React, {
 import { StyleBuilder } from "./builder";
 import { Appearance, AppState, Platform } from "react-native";
 import { DeepPartial } from "utility-types";
+import { AsyncKVStore } from "../../common";
 
 const createStyleContext = <
   Themes extends ReadonlyArray<string>,
@@ -36,6 +38,10 @@ const createStyleContext = <
           BorderRadiuses,
           Opacities
         >;
+        isInitializing: boolean;
+        isAutomatic: boolean;
+        theme: "light" | "dark";
+        setTheme: (theme: "light" | "dark" | null) => void;
       }
     | undefined
   >(undefined);
@@ -91,6 +97,12 @@ export const createStyleProvider = <
     BorderRadiuses,
     Opacities
   >;
+  useStyleThemeController: () => {
+    isInitializing: boolean;
+    isAutomatic: boolean;
+    theme: "light" | "dark";
+    setTheme: (theme: "light" | "dark" | null) => void;
+  };
 } => {
   const context = createStyleContext<
     Themes,
@@ -112,7 +124,38 @@ export const createStyleProvider = <
         Appearance.getColorScheme() === "dark"
       );
 
+      const [kvStore] = useState(
+        () => new AsyncKVStore("__app-theme-setting__")
+      );
+      const [isInitializing, setIsInitializing] = useState(false);
+      const [isAutomatic, setIsAutomatic] = useState(true);
+
       useEffect(() => {
+        kvStore.get("theme").then((theme) => {
+          setIsInitializing(false);
+
+          switch (theme) {
+            case "light":
+              setIsAutomatic(false);
+              setIsDarkMode(false);
+              break;
+            case "dark":
+              setIsAutomatic(false);
+              setIsDarkMode(true);
+              break;
+            default:
+              setIsAutomatic(true);
+              setIsDarkMode(Appearance.getColorScheme() === "dark");
+              break;
+          }
+        });
+      }, [kvStore]);
+
+      useEffect(() => {
+        if (isInitializing || !isAutomatic) {
+          return;
+        }
+
         const listener = () => {
           setIsDarkMode(Appearance.getColorScheme() === "dark");
         };
@@ -130,7 +173,34 @@ export const createStyleProvider = <
             AppState.removeEventListener("focus", listener);
           }
         };
-      }, []);
+      }, [isInitializing, isAutomatic]);
+
+      const setTheme = useCallback(
+        (theme: "light" | "dark" | null) => {
+          if (isInitializing) {
+            return;
+          }
+
+          switch (theme) {
+            case "light":
+              setIsAutomatic(false);
+              setIsDarkMode(false);
+              kvStore.set("theme", "light");
+              break;
+            case "dark":
+              setIsAutomatic(false);
+              setIsDarkMode(true);
+              kvStore.set("theme", "dark");
+              break;
+            default:
+              setIsAutomatic(true);
+              setIsDarkMode(Appearance.getColorScheme() === "dark");
+              kvStore.set("theme", null);
+              break;
+          }
+        },
+        [isInitializing, kvStore]
+      );
 
       const builder = useMemo(() => {
         const builder = new StyleBuilder(config, themeConfigs);
@@ -146,6 +216,10 @@ export const createStyleProvider = <
         <context.Provider
           value={{
             builder,
+            isInitializing,
+            isAutomatic,
+            theme: builder.theme === "dark" ? "dark" : "light",
+            setTheme,
           }}
         >
           {children}
@@ -156,6 +230,11 @@ export const createStyleProvider = <
       const state = useContext(context);
       if (!state) throw new Error("You probably forgot to use StyleProvider");
       return state.builder;
+    },
+    useStyleThemeController: () => {
+      const state = useContext(context);
+      if (!state) throw new Error("You probably forgot to use StyleProvider");
+      return state;
     },
   };
 };
