@@ -87,9 +87,9 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       style={style.flatten(["padding-x-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
-      backgroundColor={style.get("color-background-tertiary").color}
     >
       <View style={style.flatten(["height-page-pad"])} />
       <Card

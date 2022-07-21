@@ -61,7 +61,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
   );
 
   return (
-    <PageWithView disableSafeArea={true}>
+    <PageWithView disableSafeArea={true} backgroundMode={null}>
       <FullScreenCameraView
         type={RNCamera.Constants.Type.back}
         barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}

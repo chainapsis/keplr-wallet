@@ -75,6 +75,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
+      backgroundMode={null}
       disableSafeArea
       style={style.flatten(["flex-grow-1", "items-center"])}
     >

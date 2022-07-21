@@ -5,6 +5,7 @@ import { getPlatformFontWeight } from "./builder/utils";
 import { BlurViewProperties } from "@react-native-community/blur";
 
 export const ColorPalette = {
+  "blue-10": "#F6F8FF",
   "blue-50": "#F0F3FF",
   "blue-100": "#E4E9FF",
   "blue-200": "#9DACF4",
@@ -91,16 +92,15 @@ export const DarkThemeTextColors = {
 
 export const BackgroundColors = {
   card: "rgba(255, 255, 255, 0.95)",
-  // "background secondary" is not used as the background of the screen itself.
-  // This is used when the component needs to be separated from the background behind
-  // while occupying a partial size such as the background of the drawer or the background of the modal.
   "background-secondary": ColorPalette["white"],
+  // The background tertiary has a color that is distinct with the inputs.
+  // Used in card modal or screen where input exists.
   "background-tertiary": ColorPalette["gray-10"],
 };
 
 export const DarkThemeBackgroundColors = {
   card: "rgba(17, 32, 56, 0.95)",
-  "background-secondary": ColorPalette["platinum-500"],
+  "background-secondary": ColorPalette["platinum-700"],
   "background-tertiary": ColorPalette["platinum-600"],
 };
 
@@ -267,6 +267,20 @@ export const { StyleProvider, useStyle } = createStyleProvider(
           {
             offset: "100%",
             color: ColorPalette["blue-50"],
+          },
+        ],
+      },
+
+      "background-gradient": {
+        degree: 90,
+        stops: [
+          {
+            offset: "0%",
+            color: ColorPalette["purple-50"],
+          },
+          {
+            offset: "100%",
+            color: ColorPalette["blue-10"],
           },
         ],
       },
@@ -567,6 +581,20 @@ export const { StyleProvider, useStyle } = createStyleProvider(
           y1: 0,
           x2: 1,
           y2: 0,
+          stops: [
+            {
+              offset: "0%",
+              color: ColorPalette["purple-800"],
+            },
+            {
+              offset: "100%",
+              color: ColorPalette["purple-800"],
+            },
+          ],
+        },
+
+        "background-gradient": {
+          degree: 90,
           stops: [
             {
               offset: "0%",

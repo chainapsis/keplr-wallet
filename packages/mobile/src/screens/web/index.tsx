@@ -23,6 +23,7 @@ export const WebScreen: FunctionComponent = () => {
 
   return (
     <PageWithScrollViewInBottomTabView
+      backgroundMode="gradient"
       contentContainerStyle={style.get("flex-grow-1")}
       style={StyleSheet.flatten([
         style.flatten(["padding-x-20"]),

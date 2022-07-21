@@ -28,7 +28,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
   const style = useStyle();
 
   return (
-    <PageWithView>
+    <PageWithView backgroundMode="secondary">
       <View style={style.flatten(["padding-page", "flex-grow-1"])}>
         <View style={style.get("flex-2")} />
         <View style={style.flatten(["items-center"])}>

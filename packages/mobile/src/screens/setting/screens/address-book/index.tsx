@@ -96,7 +96,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
     addressBookItemComponent[isInTransaction ? "inTransaction" : "inSetting"];
 
   return addressBookConfig.addressBookDatas.length > 0 ? (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="secondary">
       <View style={style.flatten(["height-card-gap"])} />
       {addressBookConfig.addressBookDatas.map((data, i) => {
         return (
@@ -197,6 +197,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
     </PageWithScrollView>
   ) : (
     <PageWithScrollView
+      backgroundMode="secondary"
       contentContainerStyle={style.flatten(["flex-grow-1"])}
       scrollEnabled={false}
     >

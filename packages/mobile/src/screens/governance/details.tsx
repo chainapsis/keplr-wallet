@@ -535,6 +535,7 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="gradient"
       fixed={
         <View
           style={style.flatten(["flex-1", "padding-page"])}
