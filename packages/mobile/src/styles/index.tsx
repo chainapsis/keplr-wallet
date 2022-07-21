@@ -287,15 +287,63 @@ export const { StyleProvider, useStyle } = createStyleProvider(
 
       "status-bar-style": "dark-content" as StatusBarStyle,
 
-      "blurred-header-blur-type": "light" as BlurViewProperties["blurType"],
-      "blurred-header-blur-amount": 60,
-      "blurred-header-reducedTransparencyFallbackColor": "white",
+      "header-on-gradient-screen": {
+        blurOnIOS: {
+          type: "light" as BlurViewProperties["blurType"],
+          amount: 60,
+          reducedTransparencyFallbackColor: "white",
+          minOpacity: 0.65,
+        },
+        bottomBorderOnAndroid: {
+          color: ColorPalette["gray-50"],
+          width: 0.5,
+        },
+        background: BackgroundColors["card"],
+      },
+      "header-on-secondary-screen": {
+        blurOnIOS: {
+          type: "light" as BlurViewProperties["blurType"],
+          amount: 60,
+          reducedTransparencyFallbackColor: "white",
+          minOpacity: 0.65,
+        },
+        bottomBorderOnAndroid: {
+          color: "white",
+          width: 0,
+        },
+        background: "white",
+      },
+      "header-at-secondary-screen": {
+        blurOnIOS: {
+          type: "light" as BlurViewProperties["blurType"],
+          amount: 60,
+          reducedTransparencyFallbackColor: "white",
+          minOpacity: 0.65,
+        },
+        bottomBorderOnAndroid: {
+          color: "white",
+          width: 0,
+        },
+        background: BackgroundColors["background-secondary"],
+      },
+      "header-on-tertiary-screen": {
+        blurOnIOS: {
+          type: "light" as BlurViewProperties["blurType"],
+          amount: 60,
+          reducedTransparencyFallbackColor: "white",
+          minOpacity: 0.65,
+        },
+        bottomBorderOnAndroid: {
+          color: "white",
+          width: 0,
+        },
+        background: BackgroundColors["background-tertiary"],
+      },
 
       "blurred-tabbar-blur-type": "light" as BlurViewProperties["blurType"],
       "blurred-tabbar-blur-amount": 80,
       "blurred-tabbar-reducedTransparencyFallbackColor": "white",
-
-      "header-tabbar-border": ColorPalette["gray-50"],
+      "blurred-tabbar-top-border": ColorPalette["gray-50"],
 
       "unlock-screen-gradient-background": {
         degree: 168,
@@ -359,7 +407,6 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       ...TextColors,
       ...BackgroundColors,
       ...{
-        "blurred-header-background": BackgroundColors["card"],
         "blurred-tabbar-background": BackgroundColors["card"],
 
         // Belows are for the button props and may not be used as styles.
@@ -569,7 +616,6 @@ export const { StyleProvider, useStyle } = createStyleProvider(
       "90": 0.9,
       "100": 1,
 
-      "blurred-header": 0.65,
       "blurred-tabbar": 0.75,
     },
   },
@@ -609,15 +655,63 @@ export const { StyleProvider, useStyle } = createStyleProvider(
 
         "status-bar-style": "light-content" as StatusBarStyle,
 
-        "blurred-header-blur-type": "dark" as BlurViewProperties["blurType"],
-        "blurred-header-blur-amount": 40,
-        "blurred-header-reducedTransparencyFallbackColor": "black",
+        "header-on-gradient-screen": {
+          blurOnIOS: {
+            type: "dark" as BlurViewProperties["blurType"],
+            amount: 40,
+            reducedTransparencyFallbackColor: "black",
+            minOpacity: 0.65,
+          },
+          bottomBorderOnAndroid: {
+            color: ColorPalette["platinum-500"],
+            width: 0.5,
+          },
+          background: DarkThemeBackgroundColors["card"],
+        },
+        "header-on-secondary-screen": {
+          blurOnIOS: {
+            type: "dark" as BlurViewProperties["blurType"],
+            amount: 40,
+            reducedTransparencyFallbackColor: "black",
+            minOpacity: 0.65,
+          },
+          bottomBorderOnAndroid: {
+            color: "black",
+            width: 0,
+          },
+          background: ColorPalette["platinum-600"],
+        },
+        "header-at-secondary-screen": {
+          blurOnIOS: {
+            type: "dark" as BlurViewProperties["blurType"],
+            amount: 40,
+            reducedTransparencyFallbackColor: "black",
+            minOpacity: 0.65,
+          },
+          bottomBorderOnAndroid: {
+            color: "black",
+            width: 0,
+          },
+          background: DarkThemeBackgroundColors["background-secondary"],
+        },
+        "header-on-tertiary-screen": {
+          blurOnIOS: {
+            type: "dark" as BlurViewProperties["blurType"],
+            amount: 40,
+            reducedTransparencyFallbackColor: "black",
+            minOpacity: 0.65,
+          },
+          bottomBorderOnAndroid: {
+            color: "black",
+            width: 0,
+          },
+          background: DarkThemeBackgroundColors["background-tertiary"],
+        },
 
         "blurred-tabbar-blur-type": "dark" as BlurViewProperties["blurType"],
         "blurred-tabbar-blur-amount": 70,
         "blurred-tabbar-reducedTransparencyFallbackColor": "black",
-
-        "header-tabbar-border": ColorPalette["platinum-500"],
+        "blurred-tabbar-top-border": ColorPalette["platinum-500"],
 
         "unlock-screen-gradient-background": {
           degree: 168,
@@ -679,7 +773,6 @@ export const { StyleProvider, useStyle } = createStyleProvider(
         ...DarkThemeTextColors,
         ...DarkThemeBackgroundColors,
 
-        "blurred-header-background": DarkThemeBackgroundColors["card"],
         "blurred-tabbar-background": DarkThemeBackgroundColors["card"],
 
         "rect-button-default-ripple": ColorPalette["platinum-400"],

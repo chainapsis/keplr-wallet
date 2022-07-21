@@ -11,39 +11,85 @@ import { useRoute } from "@react-navigation/native";
 import { HeaderLeftBackButton } from "./button";
 import { useStyle } from "../../styles";
 
-export const BlurredHeaderScreenOptionsPreset = {
-  headerTitleAlign: "center" as "left" | "center",
-  headerStyle: {
-    backgroundColor: "transparent",
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  headerBackground: undefined,
-  headerBackTitleVisible: false,
-  // eslint-disable-next-line react/display-name
-  header: (props: any) => {
-    return <BlurredHeader {...props} />;
-  },
-  headerLeftContainerStyle: {
-    marginLeft: 10,
-  },
-  headerRightContainerStyle: {
-    marginRight: 10,
-  },
-  // eslint-disable-next-line react/display-name
-  headerLeft: (props: any) => <HeaderLeftBackButton {...props} />,
-  ...TransitionPresets.SlideFromRightIOS,
+type HeaderBackgroundMode =
+  | "gradient"
+  | "secondary"
+  | "at-secondary"
+  | "tertiary";
+
+const getBlurredHeaderScreenOptionsPreset = (
+  backgroundMode: HeaderBackgroundMode
+) => {
+  return {
+    headerTitleAlign: "center" as "left" | "center",
+    headerStyle: {
+      backgroundColor: "transparent",
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerBackground: undefined,
+    headerBackTitleVisible: false,
+    // eslint-disable-next-line react/display-name
+    header: (props: any) => {
+      return <BlurredHeader {...props} backgroundMode={backgroundMode} />;
+    },
+    headerLeftContainerStyle: {
+      marginLeft: 10,
+    },
+    headerRightContainerStyle: {
+      marginRight: 10,
+    },
+    // eslint-disable-next-line react/display-name
+    headerLeft: (props: any) => <HeaderLeftBackButton {...props} />,
+    ...TransitionPresets.SlideFromRightIOS,
+  };
 };
+
+export const HeaderOnGradientScreenOptionsPreset = getBlurredHeaderScreenOptionsPreset(
+  "gradient"
+);
+
+export const HeaderOnSecondaryScreenOptionsPreset = getBlurredHeaderScreenOptionsPreset(
+  "secondary"
+);
+
+export const HeaderAtSecondaryScreenOptionsPreset = getBlurredHeaderScreenOptionsPreset(
+  "at-secondary"
+);
+
+export const HeaderOnTertiaryScreenOptionsPreset = getBlurredHeaderScreenOptionsPreset(
+  "tertiary"
+);
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
-export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
+const useStyleInfo = (backgroundMode: HeaderBackgroundMode) => {
+  const style = useStyle();
+
+  return (() => {
+    switch (backgroundMode) {
+      case "gradient":
+        return style.get("header-on-gradient-screen");
+      case "secondary":
+        return style.get("header-on-secondary-screen");
+      case "at-secondary":
+        return style.get("header-at-secondary-screen");
+      case "tertiary":
+        return style.get("header-on-tertiary-screen");
+      default:
+        throw new Error(`Unknown header background mode: ${backgroundMode}`);
+    }
+  })();
+};
+
+export const BlurredHeader: FunctionComponent<
+  StackHeaderProps & {
+    backgroundMode: HeaderBackgroundMode;
+  }
+> = (props) => {
   if (Platform.OS !== "ios") {
     return <AndroidAlternativeBlurredHeader {...props} />;
   }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const style = useStyle();
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const route = useRoute();
@@ -53,17 +99,22 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
   const scrollY =
     pageScrollPosition.getScrollYValueOf(route.key) ?? new Animated.Value(0);
 
+  const { backgroundMode, ...restProps } = props;
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const styleInfo = useStyleInfo(backgroundMode);
+
   return (
     <AnimatedBlurView
-      blurType={style.get("blurred-header-blur-type")}
+      blurType={styleInfo.blurOnIOS.type}
       blurAmount={scrollY.interpolate({
         inputRange: [0, 35],
-        outputRange: [0, style.get("blurred-header-blur-amount")],
+        outputRange: [0, styleInfo.blurOnIOS.amount],
         extrapolate: "clamp",
       })}
-      reducedTransparencyFallbackColor={style.get(
-        "blurred-header-reducedTransparencyFallbackColor"
-      )}
+      reducedTransparencyFallbackColor={
+        styleInfo.blurOnIOS.reducedTransparencyFallbackColor
+      }
     >
       <Animated.View
         style={{
@@ -72,23 +123,27 @@ export const BlurredHeader: FunctionComponent<StackHeaderProps> = (props) => {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: style.get("color-blurred-header-background").color,
+          backgroundColor: styleInfo.background,
           opacity: scrollY.interpolate({
             inputRange: [0, 35],
-            outputRange: [1, style.get("opacity-blurred-header").opacity],
+            outputRange: [1, styleInfo.blurOnIOS.minOpacity],
             extrapolate: "clamp",
           }),
         }}
       />
-      <Header {...props} />
+      <Header {...restProps} />
     </AnimatedBlurView>
   );
 };
 
-const AndroidAlternativeBlurredHeader: FunctionComponent<StackHeaderProps> = (
-  props
-) => {
-  const style = useStyle();
+const AndroidAlternativeBlurredHeader: FunctionComponent<
+  StackHeaderProps & {
+    backgroundMode: HeaderBackgroundMode;
+  }
+> = (props) => {
+  const { backgroundMode, ...restProps } = props;
+
+  const styleInfo = useStyleInfo(backgroundMode);
 
   return (
     <View>
@@ -100,13 +155,13 @@ const AndroidAlternativeBlurredHeader: FunctionComponent<StackHeaderProps> = (
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: style.get("color-blurred-header-background").color,
-            borderBottomWidth: 0.5,
-            borderColor: style.get("header-tabbar-border"),
+            backgroundColor: styleInfo.background,
+            borderBottomWidth: styleInfo.bottomBorderOnAndroid.width,
+            borderColor: styleInfo.bottomBorderOnAndroid.color,
           },
         ])}
       />
-      <Header {...props} />
+      <Header {...restProps} />
     </View>
   );
 };

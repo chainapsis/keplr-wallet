@@ -71,12 +71,12 @@ import {
 import { NewLedgerScreen } from "./screens/register/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
-  BlurredHeaderScreenOptionsPreset,
   HeaderLeftButton,
   HeaderRightButton,
-  PlainHeaderScreenOptionsPreset,
-  getPlainHeaderScreenOptionsPresetWithBackgroundColor,
-  TertiaryBackgroundPlainHeaderScreenOptionsPreset,
+  HeaderOnGradientScreenOptionsPreset,
+  HeaderOnSecondaryScreenOptionsPreset,
+  HeaderAtSecondaryScreenOptionsPreset,
+  HeaderOnTertiaryScreenOptionsPreset,
 } from "./components/header";
 import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/undelegate";
@@ -421,16 +421,12 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
 
 export const MainNavigation: FunctionComponent = () => {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        ...BlurredHeaderScreenOptionsPreset,
-        headerTitle: "",
-      }}
-      initialRouteName="Home"
-      headerMode="screen"
-    >
+    <Stack.Navigator initialRouteName="Home" headerMode="screen">
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
+
+          headerTitle: "",
           headerLeft: () => <HomeScreenHeaderLeft />,
           headerRight: () => <HomeScreenHeaderRight />,
         }}
@@ -447,7 +443,6 @@ export const RegisterNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...PlainHeaderScreenOptionsPreset,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       initialRouteName="Register.Intro"
@@ -455,6 +450,7 @@ export const RegisterNavigation: FunctionComponent = () => {
     >
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "",
         }}
         name="Register.Intro"
@@ -462,6 +458,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Create a New Wallet",
         }}
         name="Register.NewUser"
@@ -469,6 +466,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Import Existing Wallet",
         }}
         name="Register.NotNewUser"
@@ -476,45 +474,46 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Create New Mnemonic",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.NewMnemonic"
         component={NewMnemonicScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Verify Mnemonic",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Import Existing Wallet",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Import Hardware Wallet",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.NewLedger"
         component={NewLedgerScreen}
       />
       <Stack.Screen
         options={{
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
+          ...HeaderOnTertiaryScreenOptionsPreset,
         }}
         name="Register.TorusSignIn"
         component={TorusSignInScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           // Only show the back button.
           title: "",
         }}
@@ -530,8 +529,8 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Import Extension",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Register.ImportFromExtension.SetPassword"
         component={ImportFromExtensionSetPasswordScreen}
@@ -555,21 +554,21 @@ export const OtherNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...BlurredHeaderScreenOptionsPreset,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Send",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Send"
         component={SendScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Tokens",
         }}
         name="Tokens"
@@ -584,6 +583,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "WalletConnect",
         }}
         name="ManageWalletConnect"
@@ -591,13 +591,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          title: "Validator List",
-        }}
-        name="Validator List"
-        component={ValidatorListScreen}
-      />
-      <Stack.Screen
-        options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Validator Details",
         }}
         name="Validator Details"
@@ -605,6 +599,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Governance",
         }}
         name="Governance"
@@ -612,6 +607,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Proposal",
         }}
         name="Governance Details"
@@ -619,6 +615,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Staking Dashboard",
         }}
         name="Staking.Dashboard"
@@ -626,6 +623,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Validator Details",
         }}
         name="Validator.Details"
@@ -633,37 +631,32 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderAtSecondaryScreenOptionsPreset,
           title: "All Active Validators",
-          ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
-            style.flatten([
-              "color-background-tertiary",
-              "dark:color-platinum-700",
-            ]).color
-          ),
         }}
         name="Validator.List"
         component={ValidatorListScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Stake",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Delegate"
         component={DelegateScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Unstake",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Undelegate"
         component={UndelegateScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Switch Validator",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Redelegate"
         component={RedelegateScreen}
@@ -694,14 +687,15 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Add Token",
-          ...TertiaryBackgroundPlainHeaderScreenOptionsPreset,
         }}
         name="Setting.AddToken"
         component={SettingAddTokenScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Manage Tokens",
           headerRight: () => (
             <HeaderRightButton
@@ -730,20 +724,14 @@ export const SettingStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...PlainHeaderScreenOptionsPreset,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderAtSecondaryScreenOptionsPreset,
           title: "Settings",
-          ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
-            style.flatten([
-              "color-background-tertiary",
-              "dark:color-platinum-700",
-            ]).color
-          ),
           headerTitleStyle: style.flatten(["h3", "color-text-high"]),
         }}
         name="Setting"
@@ -752,6 +740,7 @@ export const SettingStackScreen: FunctionComponent = () => {
       <Stack.Screen
         name="SettingSelectAccount"
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Select Account",
           headerRight: () => (
             <HeaderRightButton
@@ -765,16 +754,19 @@ export const SettingStackScreen: FunctionComponent = () => {
               <HeaderAddIcon />
             </HeaderRightButton>
           ),
-          ...BlurredHeaderScreenOptionsPreset,
         }}
         component={SettingSelectAccountScreen}
       />
       <Stack.Screen
         name="Setting.ViewPrivateData"
+        options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
+        }}
         component={ViewPrivateDataScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Version",
         }}
         name="Setting.Version"
@@ -790,13 +782,13 @@ export const AddressBookStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...BlurredHeaderScreenOptionsPreset,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Address Book",
         }}
         name="AddressBook"
@@ -804,6 +796,7 @@ export const AddressBookStackScreen: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "New Address Book",
         }}
         name="AddAddressBook"
@@ -819,13 +812,13 @@ export const ChainListStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...BlurredHeaderScreenOptionsPreset,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Chain List",
         }}
         name="Setting.ChainList"
@@ -976,7 +969,7 @@ export const MainTabNavigation: FunctionComponent = () => {
         ]).color,
         style: {
           borderTopWidth: 0.5,
-          borderTopColor: style.get("header-tabbar-border"),
+          borderTopColor: style.get("blurred-tabbar-top-border"),
           backgroundColor: style.get("color-blurred-tabbar-background").color,
           shadowColor: style.get("color-transparent").color,
           elevation: 0,
