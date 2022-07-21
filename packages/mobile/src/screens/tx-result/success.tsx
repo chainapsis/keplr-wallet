@@ -86,15 +86,15 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
           "items-center",
         ])}
       >
-        <LottieView
-          source={require("../../assets/lottie/pangpare.json")}
-          progress={pangpareAnimProgress}
-          style={style.flatten([
-            "width-full",
-            "height-400",
-            "margin-bottom-24",
-          ])}
-        />
+        {/*<LottieView*/}
+        {/*  source={require("../../assets/lottie/pangpare.json")}*/}
+        {/*  progress={pangpareAnimProgress}*/}
+        {/*  style={style.flatten([*/}
+        {/*    "width-full",*/}
+        {/*    "height-400",*/}
+        {/*    "margin-bottom-24",*/}
+        {/*  ])}*/}
+        {/*/>*/}
         <View
           style={{
             left: 0,
