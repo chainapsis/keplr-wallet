@@ -66,7 +66,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
           containerStyle={style.flatten([
             "margin-bottom-20",
             "border-width-1",
-            "border-color-gray-200",
+            "border-color-gray-50",
             "dark:border-color-platinum-400",
           ])}
           text="Sign in with Apple"
@@ -77,7 +77,9 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
           }
           style={style.flatten(["background-color-white"])}
           textStyle={style.flatten(["color-black"])}
-          underlayColor="#00000020"
+          underlayColor={
+            style.flatten(["color-gray-50", "dark:color-gray-100"]).color
+          }
           size="large"
           mode="light"
           onPress={() => {
