@@ -115,7 +115,11 @@ export const ProfileColors = {
   "profile-yellow": "#F2ED64",
 };
 
-export const { StyleProvider, useStyle } = createStyleProvider(
+export const {
+  StyleProvider,
+  useStyle,
+  useStyleThemeController,
+} = createStyleProvider(
   {
     themes: ["dark"] as const,
     custom: {
