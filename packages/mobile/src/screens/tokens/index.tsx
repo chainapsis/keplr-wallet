@@ -75,7 +75,7 @@ export const TokensScreen: FunctionComponent = observer(() => {
   }, [showAddTokenButton, smartNavigation]);
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="gradient">
       {tokens.length > 0 ? (
         <Card style={style.flatten(["padding-bottom-14"])}>
           {tokens.map((token) => {

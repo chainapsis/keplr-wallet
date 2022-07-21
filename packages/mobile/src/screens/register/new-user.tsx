@@ -33,6 +33,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="gradient"
       contentContainerStyle={style.get("flex-grow-1")}
       style={StyleSheet.flatten([
         style.flatten(["padding-x-42"]),

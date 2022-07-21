@@ -32,10 +32,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollViewInBottomTabView
-      backgroundColor={
-        style.flatten(["color-background-tertiary", "dark:color-platinum-700"])
-          .color
-      }
+      backgroundMode={style.theme === "dark" ? "secondary" : "tertiary"}
     >
       <SettingSelectAccountItem />
       <SettingSectionTitle title="General" />

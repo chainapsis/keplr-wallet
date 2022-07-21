@@ -256,7 +256,10 @@ export const WebpageScreen: FunctionComponent<
   const { name, forceDarkOn, ...restProps } = props;
 
   return (
-    <PageWithViewInBottomTabView style={style.flatten(["padding-0"])}>
+    <PageWithViewInBottomTabView
+      backgroundMode={null}
+      style={style.flatten(["padding-0"])}
+    >
       <WebViewStateContext.Provider
         value={{
           webView: webviewRef.current,

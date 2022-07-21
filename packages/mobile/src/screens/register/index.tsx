@@ -25,6 +25,7 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="gradient"
       contentContainerStyle={style.get("flex-grow-1")}
       style={{
         ...style.flatten(["padding-x-42"]),

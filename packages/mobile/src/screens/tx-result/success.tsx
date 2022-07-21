@@ -63,6 +63,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
+      backgroundMode={null}
       disableSafeArea
       style={style.flatten(["flex-grow-1", "items-center"])}
     >
@@ -100,12 +101,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             right: 0,
             top: 0,
             bottom: 0,
-            ...style.flatten([
-              "absolute",
-              "justify-center",
-              "items-center",
-              "background-color-white",
-            ]),
+            ...style.flatten(["absolute", "justify-center", "items-center"]),
           }}
         >
           <LottieView

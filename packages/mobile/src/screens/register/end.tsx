@@ -45,7 +45,10 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <PageWithView style={style.flatten(["padding-x-42"])}>
+    <PageWithView
+      backgroundMode="gradient"
+      style={style.flatten(["padding-x-42"])}
+    >
       <View style={style.get("flex-1")} />
       <View style={style.flatten(["items-center"])}>
         <WelcomeRocket width={358} height={254} />

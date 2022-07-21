@@ -58,6 +58,7 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
 
   return (
     <PageWithScrollViewInBottomTabView
+      backgroundMode="secondary"
       style={style.flatten(["padding-x-page"])}
     >
       <View
@@ -68,7 +69,7 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
           "padding-x-24",
           "border-radius-8",
           "background-color-card",
-          "dark:background-color-platinum-700",
+          "dark:background-color-platinum-600",
         ])}
       >
         <View style={style.flatten(["flex-row", "flex-wrap"])}>

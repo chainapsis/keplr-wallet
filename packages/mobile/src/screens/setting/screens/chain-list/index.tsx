@@ -18,6 +18,7 @@ export const SettingChainListScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithFixedHeightSortableList
+      backgroundMode="secondary"
       contentContainerStyle={style.get("flex-grow-1")}
       itemHeight={84}
       data={chainStore.chainInfosWithUIConfig.map(

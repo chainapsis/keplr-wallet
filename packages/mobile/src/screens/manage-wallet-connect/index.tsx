@@ -17,7 +17,7 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
   const confirmModal = useConfirmModal();
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="secondary">
       <View style={style.get("height-card-gap")} />
       {walletConnectStore.sessions.map((session, i) => {
         const appName =

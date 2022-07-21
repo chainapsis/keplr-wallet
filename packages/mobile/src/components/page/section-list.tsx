@@ -5,13 +5,12 @@ import {
   SafeAreaView,
   SectionListProps,
   StyleSheet,
-  View,
   ViewStyle,
 } from "react-native";
 import { useStyle } from "../../styles";
-import { GradientBackground } from "../svg";
 import { KeyboardAwareSectionList } from "react-native-keyboard-aware-scroll-view";
 import { usePageRegisterScrollYValue, useSetFocusedScreen } from "./utils";
+import { BackgroundMode, ScreenBackground } from "./background";
 
 const AnimatedKeyboardAwareSectionList = Animated.createAnimatedComponent(
   KeyboardAwareSectionList
@@ -20,7 +19,7 @@ const AnimatedKeyboardAwareSectionList = Animated.createAnimatedComponent(
 export const PageWithSectionList: FunctionComponent<
   SectionListProps<any, any> & {
     containerStyle?: ViewStyle;
-    backgroundColor?: string;
+    backgroundMode: BackgroundMode;
   }
 > = (props) => {
   const style = useStyle();
@@ -32,33 +31,13 @@ export const PageWithSectionList: FunctionComponent<
     style: propStyle,
     onScroll,
     containerStyle,
-    backgroundColor,
+    backgroundMode,
     ...restProps
   } = props;
 
   return (
     <React.Fragment>
-      <View
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: -100,
-          bottom: -100,
-        }}
-      >
-        {backgroundColor ? (
-          <View
-            style={{
-              width: "100%",
-              height: "100%",
-              backgroundColor,
-            }}
-          />
-        ) : (
-          <GradientBackground />
-        )}
-      </View>
+      <ScreenBackground backgroundMode={backgroundMode} />
       <SafeAreaView
         style={StyleSheet.flatten([
           style.flatten(

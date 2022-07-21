@@ -69,7 +69,7 @@ export const KeplrVersionScreen: FunctionComponent = () => {
   }
 
   return (
-    <PageWithScrollViewInBottomTabView>
+    <PageWithScrollViewInBottomTabView backgroundMode="secondary">
       <SettingSectionTitle title="App" />
       <TouchableWithoutFeedback
         onPress={() => {

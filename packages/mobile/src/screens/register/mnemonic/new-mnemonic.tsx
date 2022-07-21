@@ -67,9 +67,9 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"])}
-      backgroundColor={style.get("color-background-tertiary").color}
     >
       {/* Mock for flexible margin top */}
       <View style={style.flatten(["max-height-32", "flex-1"])} />

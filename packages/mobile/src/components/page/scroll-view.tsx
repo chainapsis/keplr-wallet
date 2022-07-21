@@ -10,9 +10,9 @@ import {
   Platform,
 } from "react-native";
 import { useStyle } from "../../styles";
-import { GradientBackground } from "../svg";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { usePageRegisterScrollYValue, useSetFocusedScreen } from "./utils";
+import { BackgroundMode, ScreenBackground } from "./background";
 
 const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
   KeyboardAwareScrollView
@@ -25,8 +25,9 @@ export const PageWithScrollView = forwardRef<
     ScrollViewProps & {
       fixed?: React.ReactNode;
       disableSafeArea?: boolean;
-      backgroundColor?: string;
       containerStyle?: ViewStyle;
+
+      backgroundMode: BackgroundMode;
     }
   >
 >((props, ref) => {
@@ -40,8 +41,8 @@ export const PageWithScrollView = forwardRef<
     fixed,
     onScroll,
     disableSafeArea,
-    backgroundColor,
     containerStyle,
+    backgroundMode,
     ...restProps
   } = props;
 
@@ -49,27 +50,7 @@ export const PageWithScrollView = forwardRef<
 
   return (
     <React.Fragment>
-      <View
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: -100,
-          bottom: -100,
-        }}
-      >
-        {backgroundColor ? (
-          <View
-            style={{
-              width: "100%",
-              height: "100%",
-              backgroundColor,
-            }}
-          />
-        ) : (
-          <GradientBackground />
-        )}
-      </View>
+      <ScreenBackground backgroundMode={backgroundMode} />
       <ContainerElement
         style={StyleSheet.flatten([
           style.flatten(

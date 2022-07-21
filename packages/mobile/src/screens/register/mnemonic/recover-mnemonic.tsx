@@ -127,9 +127,9 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"])}
-      backgroundColor={style.get("color-background-tertiary").color}
     >
       <Controller
         control={control}
