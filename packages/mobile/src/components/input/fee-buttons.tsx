@@ -142,17 +142,25 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
               "items-center",
               "padding-y-14",
               "background-color-white",
-              "dark:background-color-platinum-500",
+              "dark:background-color-platinum-700",
             ],
-            [selected && "background-color-blue-100"]
+            [
+              selected && "background-color-blue-100",
+              selected && "dark:background-color-platinum-400",
+            ]
           )}
-          rippleColor={style.get("color-blue-100").color}
+          rippleColor={
+            style.flatten(["color-blue-100", "dark:color-platinum-300"]).color
+          }
           onPress={onPress}
         >
           <Text
             style={style.flatten(
-              ["h5", "color-platinum-400", "dark:color-platinum-100"],
-              [selected && "color-blue-400"]
+              ["h5", "color-platinum-400", "dark:color-platinum-200"],
+              [
+                selected && "color-blue-400",
+                selected && "dark:color-platinum-10",
+              ]
             )}
           >
             {label}
@@ -164,9 +172,12 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
                   "padding-top-2",
                   "h7",
                   "color-gray-300",
-                  "dark:color-platinum-300",
+                  "dark:color-platinum-400",
                 ],
-                [selected && "color-blue-300"]
+                [
+                  selected && "color-blue-300",
+                  selected && "dark:color-platinum-100",
+                ]
               )}
             >
               {price.toString()}
@@ -178,9 +189,12 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
                 "padding-top-2",
                 "text-caption1",
                 "color-gray-200",
-                "dark:color-platinum-400",
+                "dark:color-platinum-500",
               ],
-              [selected && "color-blue-200"]
+              [
+                selected && "color-blue-200",
+                selected && "dark:color-platinum-200",
+              ]
             )}
           >
             {amount.maxDecimals(6).trim(true).separator("").toString()}
@@ -208,12 +222,10 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
           style={StyleSheet.flatten([
             style.flatten([
               "flex-row",
-              "background-color-white",
-              "dark:background-color-platinum-500",
               "border-radius-6",
               "border-width-1",
               "border-color-gray-100@20%",
-              "dark:border-color-platinum-400@50%",
+              "dark:border-color-platinum-600@50%",
               "overflow-hidden",
             ]),
             buttonsContainerStyle,
@@ -232,7 +244,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
             style={style.flatten([
               "width-1",
               "background-color-gray-100@20%",
-              "dark:background-color-platinum-400@50%",
+              "dark:background-color-platinum-600@50%",
             ])}
           />
           {renderButton(
@@ -248,7 +260,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
             style={style.flatten([
               "width-1",
               "background-color-gray-100@20%",
-              "dark:background-color-platinum-400@50%",
+              "dark:background-color-platinum-600@50%",
             ])}
           />
           {renderButton(
