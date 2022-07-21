@@ -119,7 +119,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         setSelectedKey={(key) => setSort(key as Sort)}
       />
       <PageWithSectionList
-        backgroundMode={style.theme === "dark" ? "secondary" : "tertiary"}
+        backgroundMode="secondary"
         sections={[
           {
             data,
@@ -162,8 +162,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                   style={style.flatten([
                     "width-full",
                     "height-full",
-                    "background-color-background-tertiary",
-                    "dark:background-color-platinum-700",
+                    "background-color-background-secondary",
                   ])}
                 />
               </View>
@@ -175,10 +174,15 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                 ])}
               >
                 <TextInput
-                  label="Search"
                   placeholder="Search"
-                  labelStyle={style.flatten(["display-none"])}
                   containerStyle={style.flatten(["padding-0"])}
+                  inputContainerStyle={style.flatten([
+                    "dark:background-color-platinum-500",
+                    "dark:border-width-0",
+                  ])}
+                  placeholderTextColor={
+                    style.flatten(["dark:color-platinum-300"]).color
+                  }
                   value={search}
                   onChangeText={(text) => {
                     setSearch(text);
