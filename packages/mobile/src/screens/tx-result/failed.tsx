@@ -82,6 +82,12 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
         >
           <LottieView
             source={require("../../assets/lottie/failed.json")}
+            colorFilters={[
+              {
+                keypath: "Error Icon",
+                color: style.flatten(["color-red-400"]).color,
+              },
+            ]}
             progress={failedAnimProgress}
             style={style.flatten(["width-160"])}
           />
@@ -91,7 +97,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-middle",
+          "color-text-high",
           "margin-top-82",
           "margin-bottom-32",
         ])}

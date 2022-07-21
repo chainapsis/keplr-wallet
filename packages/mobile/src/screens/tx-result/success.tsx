@@ -106,6 +106,12 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
         >
           <LottieView
             source={require("../../assets/lottie/success.json")}
+            colorFilters={[
+              {
+                keypath: "Success Icon",
+                color: style.flatten(["color-green-400"]).color,
+              },
+            ]}
             progress={successAnimProgress}
             style={style.flatten(["width-160"])}
           />
@@ -115,7 +121,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-middle",
+          "color-text-high",
           "margin-top-82",
           "margin-bottom-32",
         ])}

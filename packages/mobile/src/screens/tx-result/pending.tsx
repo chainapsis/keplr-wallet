@@ -96,6 +96,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           "height-122",
           "border-width-8",
           "border-color-blue-400",
+          "dark:border-color-blue-300",
           "border-radius-64",
         ])}
       >
@@ -113,15 +114,18 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
             colorFilters={[
               {
                 keypath: "#dot01",
-                color: style.get("color-blue-400").color,
+                color: style.flatten(["color-blue-400", "dark:color-blue-300"])
+                  .color,
               },
               {
                 keypath: "#dot02",
-                color: style.get("color-blue-400").color,
+                color: style.flatten(["color-blue-400", "dark:color-blue-300"])
+                  .color,
               },
               {
                 keypath: "#dot03",
-                color: style.get("color-blue-400").color,
+                color: style.flatten(["color-blue-400", "dark:color-blue-300"])
+                  .color,
               },
             ]}
             autoPlay
@@ -134,7 +138,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-middle",
+          "color-text-high",
           "margin-top-82",
           "margin-bottom-32",
         ])}
