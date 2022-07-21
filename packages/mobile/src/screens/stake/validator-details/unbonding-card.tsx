@@ -22,8 +22,6 @@ export const UnbondingCard: FunctionComponent<{
       (unbonding) => unbonding.validatorAddress === validatorAddress
     );
 
-  const stakingParams = queries.cosmos.queryStakingParams.response;
-
   const style = useStyle();
 
   const intl = useIntl();
@@ -70,11 +68,14 @@ export const UnbondingCard: FunctionComponent<{
               const currentTime = new Date().getTime();
               const endTime = new Date(entry.completionTime).getTime();
               const remainingTime = Math.floor((endTime - currentTime) / 1000);
-              const unbondingTime = stakingParams
-                ? parseFloat(stakingParams.data.params.unbonding_time) / 10 ** 9
+              const unbondingTime = queries.cosmos.queryStakingParams.response
+                ? queries.cosmos.queryStakingParams.unbondingTimeSec
                 : 3600 * 24 * 21;
 
-              return 100 - (remainingTime / unbondingTime) * 100;
+              return Math.max(
+                0,
+                Math.min(100 - (remainingTime / unbondingTime) * 100, 100)
+              );
             })();
 
             return (
