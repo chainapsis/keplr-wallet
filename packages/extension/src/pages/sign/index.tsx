@@ -24,6 +24,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { ADR36SignDocDetailsTab } from "./adr-36";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { unescapeHTML } from "@keplr-wallet/common";
 
 enum Tab {
   Details,
@@ -92,7 +93,15 @@ export const SignPage: FunctionComponent = observer(() => {
       }
       signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
       gasConfig.setGas(data.data.signDocWrapper.gas);
-      memoConfig.setMemo(data.data.signDocWrapper.memo);
+      let memo = data.data.signDocWrapper.memo;
+      if (data.data.signDocWrapper.mode === "amino") {
+        // For amino-json sign doc, the memo is escaped by default behavior of golang's json marshaller.
+        // For normal users, show the escaped characters with unescaped form.
+        // Make sure that the actual sign doc's memo should be escaped.
+        // In this logic, memo should be escaped from account store or background's request signing function.
+        memo = unescapeHTML(memo);
+      }
+      memoConfig.setMemo(memo);
       if (
         data.data.signOptions.preferNoSetFee &&
         data.data.signDocWrapper.fees[0]

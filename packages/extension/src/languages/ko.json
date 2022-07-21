@@ -125,6 +125,7 @@
   "register.intro.sub-content": "모든 정보는 기기에 저장됩니다.{br}이 과정은 인터넷 접속을 필요로하지 않습니다.",
 
   "register.recover.title": "시드를 입력하세요",
+  "register.recover.alt.private-key.title": "개인키를 입력하세요",
 
   "register.create.title": "니모닉 단어",
   "register.create.toggle.word12": "12 단어",

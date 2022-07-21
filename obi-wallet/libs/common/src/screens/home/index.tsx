@@ -1,10 +1,10 @@
-import { App, AppsStore } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import React from "react";
 import { useIntl } from "react-intl";
 import { Button, StyleSheet, TouchableWithoutFeedback } from "react-native";
 
 import { Card } from "../../card";
+import { App, AppsStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 
 const styles = StyleSheet.create({
@@ -20,7 +20,7 @@ export interface HomeProps {
   onAppStorePress: () => void;
 }
 
-export const Home: FunctionComponent<HomeProps> = observer(
+export const Home = observer<HomeProps>(
   ({ appsStore, onAppPress, onAppStorePress }) => {
     const [editMode, setEditMode] = React.useState(false);
     const intl = useIntl();

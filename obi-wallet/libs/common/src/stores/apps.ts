@@ -1,5 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
-import { action, makeObservable, observable, toJS } from "mobx";
+import { action, makeObservable, observable, runInAction, toJS } from "mobx";
 
 export interface App {
   label: string;
@@ -19,8 +19,7 @@ const knownApps: App[] = [
   {
     label: "Osmosis",
     url: "https://app.osmosis.zone",
-    icon:
-      "https://uploads-ssl.webflow.com/623a0c9828949e55356286f9/625480558574551ef368eef4_icon-256.png",
+    icon: "https://uploads-ssl.webflow.com/623a0c9828949e55356286f9/625480558574551ef368eef4_icon-256.png",
   },
 ];
 
@@ -33,9 +32,12 @@ export class AppsStore {
     void this.init();
   }
 
+  @action
   protected async init() {
     const favorites = await this.kvStore.get<App[] | undefined>("favorites");
-    this.favorites = favorites ?? knownApps;
+    runInAction(() => {
+      this.favorites = favorites ?? knownApps;
+    });
   }
 
   protected async save() {

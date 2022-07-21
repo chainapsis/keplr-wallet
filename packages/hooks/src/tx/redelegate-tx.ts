@@ -5,12 +5,11 @@ import {
   IAccountStore,
   MsgOpt,
 } from "@keplr-wallet/stores";
-import {
-  GasConfig,
-  useFeeConfig,
-  useMemoConfig,
-  useRecipientConfig,
-} from "./index";
+
+import { useFeeConfig } from "./fee";
+import { GasConfig } from "./gas";
+import { useMemoConfig } from "./memo";
+import { useRecipientConfig } from "./recipient";
 import { useStakedAmountConfig } from "./staked-amount";
 import { makeObservable, override } from "mobx";
 import { useState } from "react";

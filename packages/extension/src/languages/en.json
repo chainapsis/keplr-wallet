@@ -140,6 +140,7 @@
   "register.intro.sub-content": "All sensitive information is stored only on your device.{br}This process does not require an internet connection.",
 
   "register.recover.title": "Input your seed",
+  "register.recover.alt.private-key.title": "Input your private key",
 
   "register.create.title": "Mnemonic Seed",
   "register.create.toggle.word12": "12 words",

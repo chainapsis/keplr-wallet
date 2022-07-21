@@ -1,4 +1,3 @@
-import { AppsStore } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import {
@@ -10,6 +9,7 @@ import {
 } from "react-native";
 import { useDebounce } from "rooks";
 
+import { AppsStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 import { fetchMeta } from "./fetch-meta";
