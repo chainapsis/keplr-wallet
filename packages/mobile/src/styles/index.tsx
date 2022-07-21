@@ -308,8 +308,8 @@ export const { StyleProvider, useStyle } = createStyleProvider(
           minOpacity: 0.65,
         },
         bottomBorderOnAndroid: {
-          color: "white",
-          width: 0,
+          color: ColorPalette["gray-50"],
+          width: 0.5,
         },
         background: "white",
       },
@@ -676,8 +676,8 @@ export const { StyleProvider, useStyle } = createStyleProvider(
             minOpacity: 0.65,
           },
           bottomBorderOnAndroid: {
-            color: "black",
-            width: 0,
+            color: ColorPalette["platinum-500"],
+            width: 0.5,
           },
           background: ColorPalette["platinum-600"],
         },

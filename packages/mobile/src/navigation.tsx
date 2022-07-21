@@ -663,6 +663,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...TransitionPresets.SlideFromRightIOS,
           gestureEnabled: false,
           headerShown: false,
         }}
@@ -671,6 +672,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...TransitionPresets.ScaleFromCenterAndroid,
           gestureEnabled: false,
           headerShown: false,
         }}
@@ -679,6 +681,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...TransitionPresets.ScaleFromCenterAndroid,
           gestureEnabled: false,
           headerShown: false,
         }}
