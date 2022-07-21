@@ -61,6 +61,30 @@ export const HeaderOnTertiaryScreenOptionsPreset = getBlurredHeaderScreenOptions
   "tertiary"
 );
 
+export const TransparentHeaderOptionsPreset = {
+  headerTitleAlign: "center" as "left" | "center",
+  headerStyle: {
+    backgroundColor: "transparent",
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  headerBackground: undefined,
+  headerBackTitleVisible: false,
+  // eslint-disable-next-line react/display-name
+  header: (props: any) => {
+    return <TransparentHeader {...props} />;
+  },
+  headerLeftContainerStyle: {
+    marginLeft: 10,
+  },
+  headerRightContainerStyle: {
+    marginRight: 10,
+  },
+  // eslint-disable-next-line react/display-name
+  headerLeft: (props: any) => <HeaderLeftBackButton {...props} />,
+  ...TransitionPresets.SlideFromRightIOS,
+};
+
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 const useStyleInfo = (backgroundMode: HeaderBackgroundMode) => {
@@ -158,6 +182,29 @@ const AndroidAlternativeBlurredHeader: FunctionComponent<
             backgroundColor: styleInfo.background,
             borderBottomWidth: styleInfo.bottomBorderOnAndroid.width,
             borderColor: styleInfo.bottomBorderOnAndroid.color,
+          },
+        ])}
+      />
+      <Header {...restProps} />
+    </View>
+  );
+};
+
+const TransparentHeader: FunctionComponent<StackHeaderProps> = (props) => {
+  const { ...restProps } = props;
+
+  return (
+    <View>
+      <View
+        style={StyleSheet.flatten([
+          {
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: "rgba(255,255,255,0)",
+            borderWidth: 0,
           },
         ])}
       />

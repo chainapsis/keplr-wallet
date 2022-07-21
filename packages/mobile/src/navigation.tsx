@@ -77,6 +77,7 @@ import {
   HeaderOnSecondaryScreenOptionsPreset,
   HeaderAtSecondaryScreenOptionsPreset,
   HeaderOnTertiaryScreenOptionsPreset,
+  TransparentHeaderOptionsPreset,
 } from "./components/header";
 import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/undelegate";
@@ -457,7 +458,7 @@ export const RegisterNavigation: FunctionComponent = () => {
     >
       <Stack.Screen
         options={{
-          ...HeaderOnGradientScreenOptionsPreset,
+          ...TransparentHeaderOptionsPreset,
           title: "",
         }}
         name="Register.Intro"
@@ -465,7 +466,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          ...HeaderOnGradientScreenOptionsPreset,
+          ...TransparentHeaderOptionsPreset,
           title: "Create a New Wallet",
         }}
         name="Register.NewUser"
@@ -473,7 +474,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          ...HeaderOnGradientScreenOptionsPreset,
+          ...TransparentHeaderOptionsPreset,
           title: "Import Existing Wallet",
         }}
         name="Register.NotNewUser"
@@ -520,7 +521,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          ...HeaderOnSecondaryScreenOptionsPreset,
+          ...TransparentHeaderOptionsPreset,
           // Only show the back button.
           title: "",
         }}
@@ -544,6 +545,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...TransparentHeaderOptionsPreset,
           headerShown: false,
         }}
         name="Register.End"
