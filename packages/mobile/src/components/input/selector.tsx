@@ -120,6 +120,7 @@ export const SelectorModal: FunctionComponent<{
             ref={scrollViewRef}
             persistentScrollbar={true}
             onLayout={onInit}
+            indicatorStyle={style.theme === "dark" ? "white" : "black"}
           >
             {items.map((item) => {
               return (

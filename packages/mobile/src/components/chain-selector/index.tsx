@@ -25,7 +25,10 @@ export const ChainSelectorModal: FunctionComponent<{
         title="Select Chain"
         childrenContainerStyle={style.flatten(["padding-0"])}
       >
-        <ScrollView style={style.flatten(["max-height-600"])}>
+        <ScrollView
+          style={style.flatten(["max-height-600"])}
+          indicatorStyle={style.theme === "dark" ? "white" : "black"}
+        >
           {chainIds.map((chainId) => {
             const chainName = chainStore.hasChain(chainId)
               ? chainStore.getChain(chainId).chainName

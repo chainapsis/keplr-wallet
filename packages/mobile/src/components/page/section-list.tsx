@@ -32,6 +32,7 @@ export const PageWithSectionList: FunctionComponent<
     onScroll,
     containerStyle,
     backgroundMode,
+    indicatorStyle,
     ...restProps
   } = props;
 
@@ -69,6 +70,9 @@ export const PageWithSectionList: FunctionComponent<
             ],
             { useNativeDriver: true, listener: onScroll }
           )}
+          indicatorStyle={
+            indicatorStyle ?? style.theme === "dark" ? "white" : "black"
+          }
           {...restProps}
         />
       </SafeAreaView>

@@ -150,7 +150,10 @@ export const SignModal: FunctionComponent<{
             <View key={i.toString()}>
               <Msg title={title}>
                 {scrollViewHorizontal ? (
-                  <ScrollView horizontal={true}>
+                  <ScrollView
+                    horizontal={true}
+                    indicatorStyle={style.theme === "dark" ? "white" : "black"}
+                  >
                     <Text style={style.flatten(["body3", "color-text-low"])}>
                       {content}
                     </Text>
@@ -240,6 +243,7 @@ export const SignModal: FunctionComponent<{
                 "dark:background-color-platinum-500",
               ])}
               persistentScrollbar={true}
+              indicatorStyle={style.theme === "dark" ? "white" : "black"}
             >
               {renderedMsgs}
             </ScrollView>

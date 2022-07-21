@@ -43,6 +43,7 @@ export const PageWithScrollView = forwardRef<
     disableSafeArea,
     containerStyle,
     backgroundMode,
+    indicatorStyle,
     ...restProps
   } = props;
 
@@ -92,6 +93,9 @@ export const PageWithScrollView = forwardRef<
             ],
             { useNativeDriver: true, listener: onScroll }
           )}
+          indicatorStyle={
+            indicatorStyle ?? style.theme === "dark" ? "white" : "black"
+          }
           {...restProps}
         />
         <View

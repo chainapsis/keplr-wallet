@@ -231,6 +231,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       <View style={style.flatten(["flex-1"])}>
         <KeyboardAwareScrollView
           contentContainerStyle={style.flatten(["flex-grow-1"])}
+          indicatorStyle={style.theme === "dark" ? "white" : "black"}
         >
           <View style={style.get("flex-5")} />
           <Image
