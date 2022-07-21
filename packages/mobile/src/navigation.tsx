@@ -1012,6 +1012,8 @@ export const MainTabNavigation: FunctionComponent = () => {
 };
 
 export const MainTabNavigationWithDrawer: FunctionComponent = () => {
+  const style = useStyle();
+
   const focused = useFocusedScreen();
 
   return (
@@ -1024,6 +1026,9 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
         swipeEnabled: focused.name === "Home",
         gestureEnabled: focused.name === "Home",
       }}
+      overlayColor={
+        style.flatten(["color-gray-700@50%", "dark:color-gray-700@75%"]).color
+      }
       gestureHandlerProps={{
         hitSlop: {},
       }}
