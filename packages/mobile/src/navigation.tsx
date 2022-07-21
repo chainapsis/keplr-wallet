@@ -778,7 +778,7 @@ export const SettingStackScreen: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          ...HeaderOnSecondaryScreenOptionsPreset,
+          ...HeaderAtSecondaryScreenOptionsPreset,
           title: "Version",
         }}
         name="Setting.Version"
