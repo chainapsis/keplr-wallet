@@ -421,7 +421,13 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
 
 export const MainNavigation: FunctionComponent = () => {
   return (
-    <Stack.Navigator initialRouteName="Home" headerMode="screen">
+    <Stack.Navigator
+      screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
+      }}
+      initialRouteName="Home"
+      headerMode="screen"
+    >
       <Stack.Screen
         options={{
           ...HeaderOnGradientScreenOptionsPreset,
@@ -443,6 +449,7 @@ export const RegisterNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       initialRouteName="Register.Intro"
@@ -554,6 +561,7 @@ export const OtherNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
@@ -727,6 +735,7 @@ export const SettingStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
@@ -785,6 +794,7 @@ export const AddressBookStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
@@ -815,6 +825,7 @@ export const ChainListStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
         headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
