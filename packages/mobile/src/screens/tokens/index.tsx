@@ -152,7 +152,7 @@ export const TokenItem: FunctionComponent<{
           {balance.currency.coinDenom}
         </Text>
         <Text
-          style={style.flatten(["h5", "color-text-middle", "max-width-240"])}
+          style={style.flatten(["h5", "color-text-high", "max-width-240"])}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
