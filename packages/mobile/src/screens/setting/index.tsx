@@ -31,9 +31,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
   })();
 
   return (
-    <PageWithScrollViewInBottomTabView
-      backgroundMode={style.theme === "dark" ? "secondary" : "tertiary"}
-    >
+    <PageWithScrollViewInBottomTabView backgroundMode="secondary">
       <SettingSelectAccountItem />
       <SettingSectionTitle title="General" />
       <SettingFiatCurrencyItem topBorder={true} />

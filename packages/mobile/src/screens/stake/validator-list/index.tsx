@@ -119,7 +119,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         setSelectedKey={(key) => setSort(key as Sort)}
       />
       <PageWithSectionList
-        backgroundMode={style.theme === "dark" ? "secondary" : "tertiary"}
+        backgroundMode="secondary"
         sections={[
           {
             data,
@@ -162,8 +162,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                   style={style.flatten([
                     "width-full",
                     "height-full",
-                    "background-color-background-tertiary",
-                    "dark:background-color-platinum-700",
+                    "background-color-background-secondary",
                   ])}
                 />
               </View>
