@@ -33,7 +33,7 @@ export const SimpleGradient: FunctionComponent<{
       width="100%"
       height="100%"
       preserveAspectRatio="none"
-      viewBox="0 0 100 100"
+      viewBox="0 0 600 600"
     >
       <Defs>
         <LinearGradient
@@ -48,7 +48,7 @@ export const SimpleGradient: FunctionComponent<{
           })}
         </LinearGradient>
       </Defs>
-      <Rect width="100" height="100" fill="url(#grad)" />
+      <Rect width="600" height="600" fill="url(#grad)" />
     </Svg>
   );
 };
