@@ -31,7 +31,7 @@ export const SettingRemoveAccountItem: FunctionComponent<{
           "dark:background-color-red-700@30%",
         ])}
         topBorder={topBorder}
-        borderColor={style.flatten(["dark:color-red-600"]).color}
+        borderColor={style.flatten(["dark:color-red-600@50%"]).color}
         rippleColor={style.flatten(["dark:color-red-700"]).color}
         underlayColor={style.flatten(["dark:color-red-700"]).color}
       />
