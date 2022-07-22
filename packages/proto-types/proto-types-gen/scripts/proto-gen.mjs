@@ -164,7 +164,7 @@ function setOutputHash(root, hash) {
     const outputHash = await calculateOutputHash(packageRoot);
     console.log("Output hash is", outputHash);
     if (lastOutputHash && lastOutputHash !== outputHash) {
-      console.log("Output is different");
+      throw new Error("Output is different");
     }
 
     setOutputHash(packageRoot, outputHash);
