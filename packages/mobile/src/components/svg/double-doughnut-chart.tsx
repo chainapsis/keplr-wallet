@@ -526,11 +526,11 @@ const DoubleDoughnutChartInnerSVG: FunctionComponent<{
           <LinearGradient id="grad2" x1="0" y1="0" x2="1" y2="0">
             <Stop
               offset="0%"
-              stopColor={style.theme === "dark" ? "#3B4A77" : "#F0C9FF"}
+              stopColor={style.theme === "dark" ? "#394365" : "#F0C9FF"}
             />
             <Stop
               offset="100%"
-              stopColor={style.theme === "dark" ? "#315277" : "#D4EEFF"}
+              stopColor={style.theme === "dark" ? "#2F4C65" : "#D4EEFF"}
             />
           </LinearGradient>
           <ClipPath id="first-arc-clip">
