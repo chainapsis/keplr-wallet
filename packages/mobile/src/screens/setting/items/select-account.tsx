@@ -24,7 +24,7 @@ export const SettingSelectAccountItem: FunctionComponent = observer(() => {
         style={style.flatten([
           "height-1",
           "background-color-gray-50",
-          "dark:background-color-platinum-500",
+          "dark:background-color-platinum-500@75%",
         ])}
       />
       <KeyStoreItem
@@ -43,7 +43,7 @@ export const SettingSelectAccountItem: FunctionComponent = observer(() => {
         style={style.flatten([
           "height-1",
           "background-color-gray-50",
-          "dark:background-color-platinum-500",
+          "dark:background-color-platinum-500@75%",
         ])}
       />
     </React.Fragment>

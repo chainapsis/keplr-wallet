@@ -105,7 +105,7 @@ export const SettingItem: FunctionComponent<{
             style.flatten([
               "height-1",
               "background-color-gray-50",
-              "dark:background-color-platinum-500",
+              "dark:background-color-platinum-500@75%",
             ]),
             borderColor ? { backgroundColor: borderColor } : {},
           ])}
@@ -153,7 +153,7 @@ export const SettingItem: FunctionComponent<{
           style.flatten([
             "height-1",
             "background-color-gray-50",
-            "dark:background-color-platinum-500",
+            "dark:background-color-platinum-500@75%",
           ]),
           borderColor ? { backgroundColor: borderColor } : {},
         ])}

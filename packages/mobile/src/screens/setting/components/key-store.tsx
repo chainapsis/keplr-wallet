@@ -127,19 +127,14 @@ export const KeyStoreItem: FunctionComponent<{
   };
 
   return (
-    <View
-      style={style.flatten([
-        "background-color-white",
-        "dark:background-color-platinum-600",
-      ])}
-    >
+    <React.Fragment>
       {topBorder ? (
         <View
           style={style.flatten([
             "height-1",
             "margin-x-20",
             "background-color-gray-50",
-            "dark:background-color-platinum-500",
+            "dark:background-color-platinum-500@75%",
           ])}
         />
       ) : null}
@@ -151,6 +146,8 @@ export const KeyStoreItem: FunctionComponent<{
               "flex-row",
               "items-center",
               "padding-x-20",
+              "background-color-white",
+              "dark:background-color-platinum-600",
             ]),
             containerStyle,
           ])}
@@ -166,6 +163,8 @@ export const KeyStoreItem: FunctionComponent<{
               "flex-row",
               "items-center",
               "padding-x-20",
+              "background-color-white",
+              "dark:background-color-platinum-600",
             ]),
             containerStyle,
           ])}
@@ -179,10 +178,10 @@ export const KeyStoreItem: FunctionComponent<{
             "height-1",
             "margin-x-20",
             "background-color-gray-50",
-            "dark:background-color-platinum-500",
+            "dark:background-color-platinum-500@75%",
           ])}
         />
       ) : null}
-    </View>
+    </React.Fragment>
   );
 };
