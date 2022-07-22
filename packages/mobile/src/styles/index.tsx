@@ -329,7 +329,7 @@ export const {
       },
 
       "blurred-tabbar-blur-type": "light" as BlurViewProperties["blurType"],
-      "blurred-tabbar-blur-amount": 80,
+      "blurred-tabbar-blur-amount": 40,
       "blurred-tabbar-reducedTransparencyFallbackColor": "white",
       "blurred-tabbar-top-border": ColorPalette["gray-50"],
 
@@ -608,7 +608,7 @@ export const {
       "90": 0.9,
       "100": 1,
 
-      "blurred-tabbar": 0.75,
+      "blurred-tabbar": 0.6,
     },
   },
   {
@@ -684,7 +684,7 @@ export const {
         },
 
         "blurred-tabbar-blur-type": "dark" as BlurViewProperties["blurType"],
-        "blurred-tabbar-blur-amount": 70,
+        "blurred-tabbar-blur-amount": 50,
         "blurred-tabbar-reducedTransparencyFallbackColor": "black",
         "blurred-tabbar-top-border": ColorPalette["platinum-500"],
 
@@ -756,6 +756,9 @@ export const {
 
         "rect-button-default-ripple": ColorPalette["platinum-400"],
         "rect-button-default-underlay": ColorPalette["platinum-400"],
+      },
+      opacities: {
+        "blurred-tabbar": 0.5,
       },
     },
   }
