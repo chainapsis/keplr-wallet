@@ -278,9 +278,9 @@ export const {
       "header-on-gradient-screen": {
         blurOnIOS: {
           type: "light" as BlurViewProperties["blurType"],
-          amount: 60,
+          amount: 30,
           reducedTransparencyFallbackColor: "white",
-          minOpacity: 0.65,
+          minOpacity: 0.4,
         },
         bottomBorderOnAndroid: {
           color: ColorPalette["gray-50"],
@@ -291,9 +291,9 @@ export const {
       "header-on-secondary-screen": {
         blurOnIOS: {
           type: "light" as BlurViewProperties["blurType"],
-          amount: 60,
+          amount: 30,
           reducedTransparencyFallbackColor: "white",
-          minOpacity: 0.65,
+          minOpacity: 0.4,
         },
         bottomBorderOnAndroid: {
           color: ColorPalette["gray-50"],
@@ -304,9 +304,9 @@ export const {
       "header-at-secondary-screen": {
         blurOnIOS: {
           type: "light" as BlurViewProperties["blurType"],
-          amount: 60,
+          amount: 30,
           reducedTransparencyFallbackColor: "white",
-          minOpacity: 0.65,
+          minOpacity: 0.4,
         },
         bottomBorderOnAndroid: {
           color: "white",
@@ -317,9 +317,9 @@ export const {
       "header-on-tertiary-screen": {
         blurOnIOS: {
           type: "light" as BlurViewProperties["blurType"],
-          amount: 60,
+          amount: 30,
           reducedTransparencyFallbackColor: "white",
-          minOpacity: 0.65,
+          minOpacity: 0.4,
         },
         bottomBorderOnAndroid: {
           color: "white",
@@ -635,7 +635,7 @@ export const {
             type: "dark" as BlurViewProperties["blurType"],
             amount: 40,
             reducedTransparencyFallbackColor: "black",
-            minOpacity: 0.65,
+            minOpacity: 0.2,
           },
           bottomBorderOnAndroid: {
             color: ColorPalette["platinum-500"],
@@ -648,7 +648,7 @@ export const {
             type: "dark" as BlurViewProperties["blurType"],
             amount: 40,
             reducedTransparencyFallbackColor: "black",
-            minOpacity: 0.65,
+            minOpacity: 0.2,
           },
           bottomBorderOnAndroid: {
             color: ColorPalette["platinum-500"],
@@ -661,7 +661,7 @@ export const {
             type: "dark" as BlurViewProperties["blurType"],
             amount: 40,
             reducedTransparencyFallbackColor: "black",
-            minOpacity: 0.65,
+            minOpacity: 0.2,
           },
           bottomBorderOnAndroid: {
             color: "black",
@@ -674,7 +674,7 @@ export const {
             type: "dark" as BlurViewProperties["blurType"],
             amount: 40,
             reducedTransparencyFallbackColor: "black",
-            minOpacity: 0.65,
+            minOpacity: 0.2,
           },
           bottomBorderOnAndroid: {
             color: "black",
