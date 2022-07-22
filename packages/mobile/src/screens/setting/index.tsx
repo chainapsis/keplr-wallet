@@ -12,6 +12,7 @@ import { canShowPrivateData } from "./screens/view-private-data";
 import { SettingViewPrivateDataItem } from "./items/view-private-data";
 import { useStyle } from "../../styles";
 import { View } from "react-native";
+import { SettingThemeItem } from "./items/theme";
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const { chainStore, keychainStore, keyRingStore, tokensStore } = useStore();
@@ -31,9 +32,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
   })();
 
   return (
-    <PageWithScrollViewInBottomTabView
-      backgroundColor={style.get("color-setting-screen-background").color}
-    >
+    <PageWithScrollViewInBottomTabView backgroundMode="secondary">
       <SettingSelectAccountItem />
       <SettingSectionTitle title="General" />
       <SettingFiatCurrencyItem topBorder={true} />
@@ -59,6 +58,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
           }}
         />
       ) : null}
+      <SettingThemeItem />
       <SettingSectionTitle title="Security" />
       {canShowPrivateData(keyRingStore.keyRingType) && (
         <SettingViewPrivateDataItem topBorder={true} />

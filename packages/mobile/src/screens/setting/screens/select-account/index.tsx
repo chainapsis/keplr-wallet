@@ -159,7 +159,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
                   right={
                     keyStore.selected ? (
                       <CheckIcon
-                        color={style.get("color-primary").color}
+                        color={style.get("color-blue-400").color}
                         height={16}
                       />
                     ) : undefined
@@ -178,7 +178,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
   };
 
   return (
-    <PageWithScrollViewInBottomTabView>
+    <PageWithScrollViewInBottomTabView backgroundMode="secondary">
       {renderKeyStores("apple id", appleTorusKeyStores)}
       {renderKeyStores("google account", googleTorusKeyStores)}
       {renderKeyStores("mnemonic seed", mnemonicKeyStores)}

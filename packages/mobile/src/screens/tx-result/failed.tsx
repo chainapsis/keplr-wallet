@@ -10,6 +10,7 @@ import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/icon";
 import LottieView from "lottie-react-native";
 import * as WebBrowser from "expo-web-browser";
+import { SimpleGradient } from "../../components/svg";
 
 export const TxFailedResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -56,13 +57,18 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
+      backgroundMode={null}
       disableSafeArea
-      style={style.flatten([
-        "flex-grow-1",
-        "items-center",
-        "background-color-white",
-      ])}
+      style={style.flatten(["flex-grow-1", "items-center"])}
     >
+      <View style={style.flatten(["absolute-fill"])}>
+        <SimpleGradient
+          degree={
+            style.get("tx-result-screen-failed-gradient-background").degree
+          }
+          stops={style.get("tx-result-screen-failed-gradient-background").stops}
+        />
+      </View>
       <View style={style.flatten(["flex-3"])} />
       <View style={style.flatten(["width-122", "height-122"])}>
         <View
@@ -76,6 +82,12 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
         >
           <LottieView
             source={require("../../assets/lottie/failed.json")}
+            colorFilters={[
+              {
+                keypath: "Error Icon",
+                color: style.flatten(["color-red-400"]).color,
+              },
+            ]}
             progress={failedAnimProgress}
             style={style.flatten(["width-160"])}
           />
@@ -85,7 +97,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-black-medium",
+          "color-text-high",
           "margin-top-82",
           "margin-bottom-32",
         ])}
@@ -104,13 +116,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           },
         ])}
       >
-        <Text
-          style={style.flatten([
-            "body2",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
+        <Text style={style.flatten(["body2", "text-center", "color-text-low"])}>
           Transaction unsuccessful. Please check the block explorer for more
           information.
         </Text>
@@ -135,14 +141,11 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
             size="default"
             text={`View on ${chainInfo.raw.txExplorer.name}`}
             mode="text"
-            rightIcon={
+            rightIcon={(color) => (
               <View style={style.flatten(["margin-left-8"])}>
-                <RightArrowIcon
-                  color={style.get("color-primary").color}
-                  height={12}
-                />
+                <RightArrowIcon color={color} height={12} />
               </View>
-            }
+            )}
             onPress={() => {
               if (chainInfo.raw.txExplorer) {
                 WebBrowser.openBrowserAsync(

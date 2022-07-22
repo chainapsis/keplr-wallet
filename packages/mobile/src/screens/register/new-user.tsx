@@ -1,10 +1,16 @@
 import React, { FunctionComponent } from "react";
 import { useHeaderHeight } from "@react-navigation/stack";
 import { PageWithScrollView } from "../../components/page";
-import { KeplrLogo } from "../../components/svg";
 import { GoogleIcon, AppleIcon } from "../../components/icon";
 import { useStyle } from "../../styles";
-import { View, Text, Dimensions, Platform, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  Platform,
+  StyleSheet,
+  Image,
+} from "react-native";
 import { Button } from "../../components/button";
 import { useSmartNavigation } from "../../navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
@@ -27,6 +33,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="gradient"
       contentContainerStyle={style.get("flex-grow-1")}
       style={StyleSheet.flatten([
         style.flatten(["padding-x-42"]),
@@ -40,14 +47,27 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
       <View
         style={style.flatten(["flex-grow-1", "items-center", "padding-x-18"])}
       >
-        <KeplrLogo width="100%" />
+        <Image
+          source={
+            style.theme === "dark"
+              ? require("../../assets/logo/keplr-logo-dark-mode.png")
+              : require("../../assets/logo/keplr-logo.png")
+          }
+          style={{
+            height: 90,
+            aspectRatio: 2.977,
+          }}
+          resizeMode="contain"
+          fadeDuration={0}
+        />
       </View>
       {Platform.OS === "ios" ? (
         <Button
           containerStyle={style.flatten([
             "margin-bottom-20",
             "border-width-1",
-            "border-color-divider",
+            "border-color-gray-50",
+            "dark:border-color-platinum-400",
           ])}
           text="Sign in with Apple"
           leftIcon={
@@ -57,7 +77,9 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
           }
           style={style.flatten(["background-color-white"])}
           textStyle={style.flatten(["color-black"])}
-          underlayColor="#00000020"
+          underlayColor={
+            style.flatten(["color-gray-50", "dark:color-gray-100"]).color
+          }
           size="large"
           mode="light"
           onPress={() => {
@@ -95,7 +117,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         style={style.flatten([
           "margin-bottom-20",
           "text-center",
-          "color-text-black-low",
+          "color-text-low",
         ])}
       >
         Powered by Torus
@@ -103,7 +125,6 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
       <Button
         text="Create new mnemonic"
         size="large"
-        mode="light"
         onPress={() => {
           analyticsStore.logEvent("Create account started", {
             registerType: "seed",

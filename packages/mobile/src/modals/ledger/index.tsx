@@ -261,7 +261,7 @@ export const LedgerGranterModal: FunctionComponent<{
               >
                 <LoadingSpinner
                   size={20}
-                  color={style.get("color-primary").color}
+                  color={style.get("color-blue-400").color}
                 />
               </View>
             </View>
@@ -275,14 +275,10 @@ export const LedgerGranterModal: FunctionComponent<{
               <LedgerErrorView text={errorOnListen} />
             ) : (
               <React.Fragment>
-                <Text
-                  style={style.flatten(["subtitle3", "color-text-black-high"])}
-                >
+                <Text style={style.flatten(["subtitle3", "color-text-high"])}>
                   1. Open the Cosmos app on your Ledger device
                 </Text>
-                <Text
-                  style={style.flatten(["subtitle3", "color-text-black-high"])}
-                >
+                <Text style={style.flatten(["subtitle3", "color-text-high"])}>
                   2. Select the hardware wallet you’d like to pair
                 </Text>
               </React.Fragment>
@@ -316,7 +312,7 @@ export const LedgerGranterModal: FunctionComponent<{
             />
           </LedgerErrorView>
         ) : (
-          <Text style={style.flatten(["subtitle3", "color-text-black-high"])}>
+          <Text style={style.flatten(["subtitle3", "color-text-high"])}>
             Please turn on Bluetooth
           </Text>
         )}
@@ -335,12 +331,12 @@ const LedgerErrorView: FunctionComponent<{
 
   return (
     <View style={style.flatten(["items-center"])}>
-      <AlertIcon size={100} color={style.get("color-danger").color} />
-      <Text style={style.flatten(["h4", "color-danger"])}>Error</Text>
+      <AlertIcon size={100} color={style.get("color-red-400").color} />
+      <Text style={style.flatten(["h4", "color-red-400"])}>Error</Text>
       <Text
         style={style.flatten([
           "subtitle3",
-          "color-text-black-medium",
+          "color-text-middle",
           "margin-top-16",
         ])}
       >
@@ -400,26 +396,24 @@ const LedgerNanoBLESelector: FunctionComponent<{
       }}
     >
       <View style={style.flatten(["min-height-44"])}>
-        <Text style={style.flatten(["h5", "color-text-black-medium"])}>
-          {name}
-        </Text>
+        <Text style={style.flatten(["h5", "color-text-middle"])}>{name}</Text>
         {isConnecting ? (
-          <Text style={style.flatten(["subtitle3", "color-text-black-low"])}>
+          <Text style={style.flatten(["subtitle3", "color-text-low"])}>
             Connecting...
           </Text>
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.Transport ? (
-          <Text style={style.flatten(["subtitle3", "color-text-black-low"])}>
+          <Text style={style.flatten(["subtitle3", "color-text-low"])}>
             Please unlock ledger nano X
           </Text>
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.App ? (
-          <Text style={style.flatten(["subtitle3", "color-text-black-low"])}>
+          <Text style={style.flatten(["subtitle3", "color-text-low"])}>
             Please open Cosmos App
           </Text>
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.Unknown ? (
-          <Text style={style.flatten(["subtitle3", "color-text-black-low"])}>
+          <Text style={style.flatten(["subtitle3", "color-text-low"])}>
             Unknown error
           </Text>
         ) : null}

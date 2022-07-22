@@ -87,11 +87,18 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       style={style.flatten(["padding-x-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >
       <View style={style.flatten(["height-page-pad"])} />
-      <Card style={style.flatten(["margin-bottom-12", "border-radius-8"])}>
+      <Card
+        style={style.flatten([
+          "margin-bottom-12",
+          "border-radius-8",
+          "dark:background-color-platinum-500",
+        ])}
+      >
         <CardBody>
           <View style={style.flatten(["flex-row", "items-center"])}>
             <ValidatorThumbnail
@@ -99,7 +106,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
               size={36}
               url={validatorThumbnail}
             />
-            <Text style={style.flatten(["h6", "color-text-black-high"])}>
+            <Text style={style.flatten(["h6", "color-text-high"])}>
               {validator ? validator.description.moniker : "..."}
             </Text>
           </View>
@@ -111,13 +118,11 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
             ])}
           />
           <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text
-              style={style.flatten(["subtitle2", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
               Staked
             </Text>
             <View style={style.get("flex-1")} />
-            <Text style={style.flatten(["body2", "color-text-black-medium"])}>
+            <Text style={style.flatten(["body2", "color-text-middle"])}>
               {staked.trim(true).shrink(true).maxDecimals(6).toString()}
             </Text>
           </View>

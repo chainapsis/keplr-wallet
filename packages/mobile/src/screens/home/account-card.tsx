@@ -63,7 +63,9 @@ export const AccountCard: FunctionComponent<{
     <Card style={containerStyle}>
       <CardBody style={style.flatten(["padding-bottom-0"])}>
         <View style={style.flatten(["flex", "items-center"])}>
-          <Text style={style.flatten(["h4", "margin-bottom-8"])}>
+          <Text
+            style={style.flatten(["h4", "color-text-high", "margin-bottom-8"])}
+          >
             {account.name || "..."}
           </Text>
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
@@ -79,13 +81,13 @@ export const AccountCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "subtitle2",
-                  "color-text-black-medium",
+                  "color-text-middle",
                   "margin-bottom-4",
                 ])}
               >
                 Total Balance
               </Text>
-              <Text style={style.flatten(["h3", "color-text-black-high"])}>
+              <Text style={style.flatten(["h3", "color-text-high"])}>
                 {totalPrice
                   ? totalPrice.toString()
                   : total.shrink(true).maxDecimals(6).toString()}
@@ -128,13 +130,14 @@ export const AccountCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "subtitle3",
-                  "color-primary",
+                  "color-blue-400",
+                  "dark:color-platinum-200",
                   "margin-bottom-4",
                 ])}
               >
                 Available
               </Text>
-              <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h5", "color-text-high"])}>
                 {stakable.maxDecimals(6).trim(true).shrink(true).toString()}
               </Text>
             </View>
@@ -163,13 +166,14 @@ export const AccountCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "subtitle3",
-                  "color-primary",
+                  "color-blue-400",
+                  "dark:color-platinum-200",
                   "margin-bottom-4",
                 ])}
               >
                 Staking
               </Text>
-              <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h5", "color-text-high"])}>
                 {stakedSum.maxDecimals(6).trim(true).shrink(true).toString()}
               </Text>
             </View>

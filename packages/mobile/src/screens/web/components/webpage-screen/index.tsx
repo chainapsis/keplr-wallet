@@ -253,12 +253,17 @@ export const WebpageScreen: FunctionComponent<
 
   const sourceCode = useInjectedSourceCode();
 
+  const { name, forceDarkOn, ...restProps } = props;
+
   return (
-    <PageWithViewInBottomTabView style={style.flatten(["padding-0"])}>
+    <PageWithViewInBottomTabView
+      backgroundMode={null}
+      style={style.flatten(["padding-0"])}
+    >
       <WebViewStateContext.Provider
         value={{
           webView: webviewRef.current,
-          name: props.name,
+          name: name,
           url: currentURL,
           canGoBack,
           canGoForward,
@@ -269,6 +274,10 @@ export const WebpageScreen: FunctionComponent<
       {sourceCode ? (
         <WebView
           ref={webviewRef}
+          style={style.flatten([
+            "background-color-white",
+            "dark:background-color-black",
+          ])}
           injectedJavaScriptBeforeContentLoaded={sourceCode}
           onMessage={onMessage}
           onNavigationStateChange={(e) => {
@@ -291,7 +300,13 @@ export const WebpageScreen: FunctionComponent<
           automaticallyAdjustContentInsets={false}
           decelerationRate="normal"
           allowsBackForwardNavigationGestures={true}
-          {...props}
+          forceDarkOn={(() => {
+            if (Platform.OS === "android") {
+              return style.theme === "dark" || forceDarkOn;
+            }
+            return forceDarkOn;
+          })()}
+          {...restProps}
         />
       ) : null}
     </PageWithViewInBottomTabView>

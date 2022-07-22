@@ -15,11 +15,17 @@ export const Toggle: FunctionComponent<{
 }> = ({ on, onChange }) => {
   const style = useStyle();
 
-  const offColor = style.get("color-white").color;
-  const offBackgroundColor = style.get("color-text-black-very-very-very-low")
+  const offColor = style.flatten(["color-white", "dark:color-platinum-50"])
     .color;
-  const onColor = style.get("color-primary").color;
-  const onBackgroundColor = style.get("color-primary-50").color;
+  const offBackgroundColor = style.flatten([
+    "color-gray-100",
+    "dark:color-platinum-500",
+  ]).color;
+  const onColor = style.flatten(["color-blue-400", "dark:color-blue-50"]).color;
+  const onBackgroundColor = style.flatten([
+    "color-blue-50",
+    "dark:color-blue-400",
+  ]).color;
 
   const [animatedOnValue] = useState(() => new Animated.Value(on ? 1 : 0));
 

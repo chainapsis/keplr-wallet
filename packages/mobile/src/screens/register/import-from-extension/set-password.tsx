@@ -98,6 +98,7 @@ export const ImportFromExtensionSetPasswordScreen: FunctionComponent = observer(
 
     return (
       <PageWithScrollView
+        backgroundMode="tertiary"
         contentContainerStyle={style.get("flex-grow-1")}
         style={style.flatten(["padding-x-page"])}
       >

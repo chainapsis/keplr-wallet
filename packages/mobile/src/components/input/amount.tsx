@@ -75,13 +75,35 @@ export const AmountInput: FunctionComponent<{
           >
             <Button
               text="MAX"
-              mode={amountConfig.isMax ? "light" : "fill"}
+              mode={(() => {
+                if (style.theme === "dark") {
+                  return "light";
+                } else {
+                  return amountConfig.fraction === 1 ? "light" : "fill";
+                }
+              })()}
               size="small"
               style={style.flatten(["padding-x-5", "padding-y-3"])}
-              containerStyle={style.flatten(["height-24", "border-radius-4"])}
-              textStyle={style.flatten(["normal-case", "text-caption2"])}
+              containerStyle={style.flatten(
+                ["height-24", "border-radius-4"],
+                [
+                  !amountConfig.fraction &&
+                    "dark:background-color-platinum-500",
+                  amountConfig.fraction === 1 &&
+                    "dark:background-color-platinum-600",
+                ]
+              )}
+              textStyle={style.flatten(
+                ["normal-case", "text-caption2"],
+                [
+                  !amountConfig.fraction && "dark:color-platinum-50",
+                  amountConfig.fraction === 1 && "dark:color-platinum-200",
+                ]
+              )}
               onPress={() => {
-                amountConfig.setIsMax(!amountConfig.isMax);
+                amountConfig.setFraction(
+                  !amountConfig.fraction ? 1 : undefined
+                );
               }}
             />
           </View>
