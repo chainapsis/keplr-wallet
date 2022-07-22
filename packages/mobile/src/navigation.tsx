@@ -364,7 +364,7 @@ const HomeScreenHeaderLeft: FunctionComponent = observer(() => {
         <OpenDrawerIcon
           size={28}
           color={
-            style.flatten(["color-blue-400", "dark:color-platinum-200"]).color
+            style.flatten(["color-blue-400", "dark:color-platinum-300"]).color
           }
         />
         <Text style={style.flatten(["h4", "color-text-high", "margin-left-4"])}>
