@@ -49,7 +49,7 @@ export const Button: FunctionComponent<{
           if (color === "primary") {
             return [
               `background-color-${baseColor}-200`,
-              "dark:background-color-platinum-500",
+              `dark:background-color-${baseColor}-600`,
             ];
           } else {
             return [
@@ -64,7 +64,7 @@ export const Button: FunctionComponent<{
         if (disabled) {
           if (color === "primary") {
             return [
-              `background-color-${baseColor}-100`,
+              `background-color-${baseColor}-50`,
               "dark:background-color-platinum-500",
             ];
           } else {
@@ -77,7 +77,7 @@ export const Button: FunctionComponent<{
           return [
             `background-color-${baseColor}-100`,
             color === "primary"
-              ? "dark:background-color-platinum-500"
+              ? "dark:background-color-platinum-400"
               : `dark:background-color-${baseColor}-600`,
           ];
         }
@@ -106,7 +106,7 @@ export const Button: FunctionComponent<{
       case "fill":
         if (disabled) {
           if (color === "primary") {
-            return ["color-white", "dark:color-platinum-300"];
+            return ["color-white", "dark:color-platinum-200"];
           } else {
             return [`color-${baseColor}-200`, `dark:color-${baseColor}-500`];
           }
@@ -120,7 +120,7 @@ export const Button: FunctionComponent<{
       case "light":
         if (disabled) {
           if (color === "primary") {
-            return [`color-${baseColor}-200`, "dark:color-platinum-300"];
+            return [`color-${baseColor}-200`, "dark:color-platinum-200"];
           } else {
             return [`color-${baseColor}-200`, `dark:color-${baseColor}-500`];
           }
@@ -129,7 +129,7 @@ export const Button: FunctionComponent<{
         return [
           `color-${baseColor}-400`,
           color === "primary"
-            ? "dark:color-platinum-50"
+            ? "dark:color-platinum-10"
             : `dark:color-${baseColor}-50`,
         ];
       case "outline":
