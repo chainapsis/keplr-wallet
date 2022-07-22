@@ -47,7 +47,7 @@ export const AddressCopyable: FunctionComponent<{
         style={style.flatten([
           "subtitle3",
           "color-gray-300",
-          "dark:color-platinum-300",
+          "dark:color-platinum-200",
         ])}
       >
         {Bech32Address.shortenAddress(address, maxCharacters)}
@@ -75,14 +75,14 @@ export const AddressCopyable: FunctionComponent<{
                       keypath: "Shape Layer 2",
                       color: style.flatten([
                         "color-gray-300",
-                        "dark:color-platinum-300",
+                        "dark:color-platinum-200",
                       ]).color,
                     },
                     {
                       keypath: "Shape Layer 1",
                       color: style.flatten([
                         "color-gray-300",
-                        "dark:color-platinum-300",
+                        "dark:color-platinum-200",
                       ]).color,
                     },
                     {
@@ -101,7 +101,7 @@ export const AddressCopyable: FunctionComponent<{
         ) : (
           <CopyIcon
             color={
-              style.flatten(["color-gray-300", "dark:color-platinum-300"]).color
+              style.flatten(["color-gray-300", "dark:color-platinum-200"]).color
             }
             size={19}
           />
