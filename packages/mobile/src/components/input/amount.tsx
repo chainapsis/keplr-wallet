@@ -87,7 +87,8 @@ export const AmountInput: FunctionComponent<{
               containerStyle={style.flatten(
                 ["height-24", "border-radius-4"],
                 [
-                  !amountConfig.fraction && "dark:background-color-blue-100",
+                  !amountConfig.fraction &&
+                    "dark:background-color-platinum-500",
                   amountConfig.fraction === 1 &&
                     "dark:background-color-platinum-600",
                 ]
@@ -95,8 +96,8 @@ export const AmountInput: FunctionComponent<{
               textStyle={style.flatten(
                 ["normal-case", "text-caption2"],
                 [
-                  !amountConfig.fraction && "dark:color-platinum-700",
-                  amountConfig.fraction === 1 && "dark:color-platinum-100",
+                  !amountConfig.fraction && "dark:color-platinum-50",
+                  amountConfig.fraction === 1 && "dark:color-platinum-200",
                 ]
               )}
               onPress={() => {

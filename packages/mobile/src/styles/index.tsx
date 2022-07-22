@@ -693,15 +693,15 @@ export const {
           stops: [
             {
               offset: "0%",
-              color: "#171D42",
+              color: "#1E2C5E",
             },
             {
-              offset: "50%",
-              color: "#070F28",
+              offset: "51%",
+              color: "#10213D",
             },
             {
               offset: "100%",
-              color: "#000000",
+              color: "#050B14",
             },
           ],
         },
