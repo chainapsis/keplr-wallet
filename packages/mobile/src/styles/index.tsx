@@ -16,15 +16,15 @@ export const ColorPalette = {
   "blue-700": "#0D1749",
   "blue-800": "#051124",
 
-  "platinum-10": "#F4F9FF",
-  "platinum-50": "#F8F9FC",
-  "platinum-100": "#D0DCEF",
-  "platinum-200": "#8EA5C6",
-  "platinum-300": "#596E8D",
-  "platinum-400": "#3B4E6A",
-  "platinum-500": "#22324F",
-  "platinum-600": "#112038",
-  "platinum-700": "#0E1829",
+  "platinum-10": "#F7F9FC",
+  "platinum-50": "#EFF3FA",
+  "platinum-100": "#CBD3DF",
+  "platinum-200": "#95A1B4",
+  "platinum-300": "#566172",
+  "platinum-400": "#323C4A",
+  "platinum-500": "#252E3D",
+  "platinum-600": "#121924",
+  "platinum-700": "#0A101C",
 
   "green-50": "#ECFDF6",
   "green-100": "#DBF9EC",
@@ -99,7 +99,8 @@ export const BackgroundColors = {
 };
 
 export const DarkThemeBackgroundColors = {
-  card: "rgba(17, 32, 56, 0.95)",
+  // Platinum600 95%
+  card: "rgba(18, 25, 36, 0.95)",
   "background-secondary": ColorPalette["platinum-700"],
   "background-tertiary": ColorPalette["platinum-600"],
 };
@@ -258,23 +259,6 @@ export const {
           ...getPlatformFontWeight("400"),
         },
       }),
-      "gradient-background": {
-        x1: 0,
-        y1: 0,
-        x2: 1,
-        y2: 0,
-        stops: [
-          {
-            offset: "0%",
-            color: ColorPalette["purple-50"],
-          },
-          {
-            offset: "100%",
-            color: ColorPalette["blue-50"],
-          },
-        ],
-      },
-
       "background-gradient": {
         degree: 90,
         stops: [
@@ -354,11 +338,15 @@ export const {
         stops: [
           {
             offset: "0%",
-            color: "#CCD1FF",
+            color: "#F8F8FF",
           },
           {
-            offset: "35%",
+            offset: "60%",
             color: "#ECEEFC",
+          },
+          {
+            offset: "100%",
+            color: "#E3E4FF",
           },
         ],
       },
@@ -371,7 +359,7 @@ export const {
             color: "#E3E4FF",
           },
           {
-            offset: "60%",
+            offset: "50%",
             color: "#FFFFFF",
           },
         ],
@@ -385,7 +373,7 @@ export const {
             color: "#F4FFFB",
           },
           {
-            offset: "60%",
+            offset: "46%",
             color: "#FFFFFF",
           },
         ],
@@ -399,7 +387,7 @@ export const {
             color: "#FFF4F4",
           },
           {
-            offset: "60%",
+            offset: "50%",
             color: "#FFFFFF",
           },
         ],
@@ -626,33 +614,16 @@ export const {
   {
     dark: {
       custom: {
-        "gradient-background": {
-          x1: 0,
-          y1: 0,
-          x2: 1,
-          y2: 0,
-          stops: [
-            {
-              offset: "0%",
-              color: ColorPalette["purple-800"],
-            },
-            {
-              offset: "100%",
-              color: ColorPalette["purple-800"],
-            },
-          ],
-        },
-
         "background-gradient": {
           degree: 90,
           stops: [
             {
               offset: "0%",
-              color: ColorPalette["purple-800"],
+              color: "#07020E",
             },
             {
               offset: "100%",
-              color: ColorPalette["blue-800"],
+              color: "#020915",
             },
           ],
         },
@@ -722,11 +693,15 @@ export const {
           stops: [
             {
               offset: "0%",
-              color: "#060F3C",
+              color: "#171D42",
             },
             {
-              offset: "85%",
-              color: "#020913",
+              offset: "50%",
+              color: "#070F28",
+            },
+            {
+              offset: "100%",
+              color: "#000000",
             },
           ],
         },
@@ -739,7 +714,7 @@ export const {
               color: "#2B4267",
             },
             {
-              offset: "53%",
+              offset: "46%",
               color: "#030E21",
             },
           ],
@@ -753,7 +728,7 @@ export const {
               color: "#174045",
             },
             {
-              offset: "60%",
+              offset: "48%",
               color: "#021213",
             },
           ],
@@ -767,8 +742,8 @@ export const {
               color: "#381111",
             },
             {
-              offset: "60%",
-              color: "#110303",
+              offset: "45%",
+              color: "#0C0101",
             },
           ],
         },
