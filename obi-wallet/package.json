@@ -7,6 +7,7 @@
     "build": "nx build",
     "format": "prettier --write .",
     "postinstall": "patch-package",
+    "setup": "yarn && (cd ..; yarn && yarn build)",
     "start": "nx serve",
     "test": "nx test"
   },
