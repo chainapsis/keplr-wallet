@@ -61,11 +61,11 @@ function setOutputHash(root, hash) {
 
     // When executed in CI, the proto output should not be different with ones built locally.
     let lastOutputHash = undefined;
-    if (process.env.CI === "true") {
-      console.log("You are ci runner");
-      lastOutputHash = getOutputHash(packageRoot);
-      console.log("Expected output hash is", lastOutputHash);
-    }
+    // if (process.env.CI === "true") {
+    //   console.log("You are ci runner");
+    //   lastOutputHash = getOutputHash(packageRoot);
+    //   console.log("Expected output hash is", lastOutputHash);
+    // }
 
     const protoTsBinPath = (() => {
       try {
