@@ -24,7 +24,7 @@ In `obi-wallet` directory:
 - `yarn format` (to reformat code using prettier)
 - `yarn lint` (to lint code)
 - `yarn test` (to run unit tests)
-- `yarn ci` (to run all checks, i.e. lint & test)
+- `yarn checks` (to run all checks, i.e. lint & test)
 
 ## Development workflow: browser extension
 
