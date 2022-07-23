@@ -1,0 +1,20 @@
+name: JavaScript
+on:
+  - push
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: obi-wallet
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - run: sudo apt-get update
+      - run: sudo apt-get install curl libusb-1.0-0-dev
+      - run: curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+      - run: unzip protoc-3.19.4-linux-x86_64.zip -d $HOME/protoc && echo $HOME/protoc/bin >> $GITHUB_PATH
+      - run: yarn setup
+      - run: yarn checks

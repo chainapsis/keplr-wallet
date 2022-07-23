@@ -4,11 +4,15 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "nx build",
+    "_runAll": "nx run-many --projects=mobile,common --output-style=static",
+    "checks": "yarn lint && yarn test",
     "format": "prettier --write .",
     "postinstall": "patch-package",
-    "start": "nx serve",
-    "test": "nx test"
+    "lint": "yarn lint:prettier && yarn lint:eslint",
+    "lint:eslint": " yarn _runAll --target=lint",
+    "lint:prettier": "prettier --check .",
+    "setup": "yarn && (cd ..; yarn && yarn build)",
+    "test": " yarn _runAll --target=test"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.1",
