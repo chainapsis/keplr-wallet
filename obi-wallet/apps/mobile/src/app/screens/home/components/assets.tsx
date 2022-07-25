@@ -10,7 +10,6 @@ import { faSortAsc } from "@fortawesome/free-solid-svg-icons/faSortAsc";
 import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import Background from "./background";
-import SvgUri from "react-native-svg-uri";
 import Send from "../assets/send.svg";
 import Receive from "../assets/receive.svg";
 import Pay from "../assets/pay.svg";
@@ -261,12 +260,92 @@ const AssetsList = () => {
             />
           </View>
         </View>
+      </View>
+      <View>
         <FlatList
-          data={[{ key: "1" }, { key: "2" }]}
-          renderItem={() => <Text>Item</Text>}
+          data={[
+            { key: "1" },
+            { key: "21" },
+            { key: "22" },
+            { key: "23" },
+            { key: "24" },
+            { key: "25" },
+            { key: "28" },
+            { key: "27" },
+            { key: "12" },
+            { key: "62" },
+            { key: "32" },
+            { key: "42" },
+          ]}
+          renderItem={() => <AssetsListItem />}
         />
       </View>
-      <View></View>
+    </View>
+  );
+};
+
+const AssetsListItem = () => {
+  return (
+    <View
+      style={{
+        height: 40,
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
+      }}
+    >
+      <Image
+        source={require("../assets/backgroundblue.png")}
+        style={{ width: 36, height: 36, borderRadius: 12 }}
+      />
+      <View
+        style={{
+          flex: 1,
+          height: "100%",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          paddingLeft: 5,
+        }}
+      >
+        <View>
+          <Text style={{ color: "#F6F5FF", fontSize: 14, fontWeight: "500" }}>
+            Bitcoin
+          </Text>
+          <Text
+            style={{
+              color: "rgba(246, 245, 255, 0.6)",
+              fontSize: 12,
+              fontWeight: "400",
+            }}
+          >
+            BTC
+          </Text>
+        </View>
+        <View>
+          <Text
+            style={{
+              color: "#F6F5FF",
+              fontSize: 14,
+              fontWeight: "500",
+              textAlign: "right",
+            }}
+          >
+            $575,727,276
+          </Text>
+          <Text
+            style={{
+              color: "rgba(246, 245, 255, 0.6);",
+              fontSize: 12,
+              fontWeight: "400",
+              textAlign: "right",
+            }}
+          >
+            0.0034 BTC
+          </Text>
+        </View>
+      </View>
     </View>
   );
 };
