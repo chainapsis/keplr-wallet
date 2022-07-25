@@ -15,6 +15,7 @@ import {
   TxRaw,
   TxBody,
   Fee,
+  SignerInfo,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
@@ -476,6 +477,217 @@ export class CosmosAccountImpl {
     };
   }
 
+  /**
+   * Simulate tx without making state transition on chain or not waiting the tx committed.
+   * Mainly used to estimate the gas needed to process tx.
+   * You should multiply arbitrary number (gas adjustment) for gas before sending tx.
+   *
+   * NOTE: "/cosmos/tx/v1beta1/simulate" returns 400, 500 or (more?) status and error code as a response when tx fails on stimulate.
+   *       Currently, non 200~300 status is handled as error, thus error would be thrown.
+   *
+   * XXX: Uses the simulate request format for cosmos-sdk@0.43+
+   *      Thus, may throw an error if the chain is below cosmos-sdk@0.43
+   *      And, for simplicity, doesn't set the public key to tx bytes.
+   *      Thus, the gas estimated doesn't include the tx bytes size of public key.
+   *
+   * @param msgs
+   * @param fee
+   * @param memo
+   */
+  async simulateTx(
+    msgs: Any[],
+    fee: Omit<StdFee, "gas">,
+    memo: string = ""
+  ): Promise<{
+    gasUsed: number;
+  }> {
+    const account = await BaseAccount.fetchFromRest(
+      this.instance,
+      this.base.bech32Address,
+      true
+    );
+
+    const unsignedTx = TxRaw.encode({
+      bodyBytes: TxBody.encode(
+        TxBody.fromPartial({
+          messages: msgs,
+          memo: memo,
+        })
+      ).finish(),
+      authInfoBytes: AuthInfo.encode({
+        signerInfos: [
+          SignerInfo.fromPartial({
+            // Pub key is ignored.
+            // It is fine to ignore the pub key when simulating tx.
+            // However, the estimated gas would be slightly smaller because tx size doesn't include pub key.
+            modeInfo: {
+              single: {
+                mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+              },
+              multi: undefined,
+            },
+            sequence: account.getSequence().toString(),
+          }),
+        ],
+        fee: Fee.fromPartial({
+          amount: fee.amount.map((amount) => {
+            return { amount: amount.amount, denom: amount.denom };
+          }),
+        }),
+      }).finish(),
+      // Because of the validation of tx itself, the signature must exist.
+      // However, since they do not actually verify the signature, it is okay to use any value.
+      signatures: [new Uint8Array(64)],
+    }).finish();
+
+    const result = await this.instance.post("/cosmos/tx/v1beta1/simulate", {
+      tx_bytes: Buffer.from(unsignedTx).toString("base64"),
+    });
+
+    const gasUsed = parseInt(result.data.gas_info.gas_used);
+    if (Number.isNaN(gasUsed)) {
+      throw new Error(`Invalid integer gas: ${result.data.gas_info.gas_used}`);
+    }
+
+    return {
+      gasUsed,
+    };
+  }
+
+  makeTx(
+    type: string | "unknown",
+    msgs:
+      | ProtoMsgsOrWithAminoMsgs
+      | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs)
+  ) {
+    const simulate = async (
+      fee: Partial<Omit<StdFee, "gas">> = {},
+      memo: string = ""
+    ): Promise<{
+      gasUsed: number;
+    }> => {
+      if (typeof msgs === "function") {
+        msgs = await msgs();
+      }
+
+      return this.simulateTx(
+        msgs.protoMsgs,
+        {
+          amount: fee.amount ?? [],
+        },
+        memo
+      );
+    };
+
+    const sendWithGasPrice = async (
+      gasInfo: {
+        gas: number;
+        gasPrice?: {
+          denom: string;
+          amount: Dec;
+        };
+      },
+      memo: string = "",
+      signOptions?: KeplrSignOptions,
+      onTxEvents?:
+        | ((tx: any) => void)
+        | {
+            onBroadcastFailed?: (e?: Error) => void;
+            onBroadcasted?: (txHash: Uint8Array) => void;
+            onFulfill?: (tx: any) => void;
+          }
+    ): Promise<void> => {
+      if (gasInfo.gas < 0) {
+        throw new Error("Gas is zero or negative");
+      }
+
+      const fee = {
+        gas: gasInfo.gas.toString(),
+        amount: gasInfo.gasPrice
+          ? [
+              {
+                denom: gasInfo.gasPrice.denom,
+                amount: gasInfo.gasPrice.amount
+                  .mul(new Dec(gasInfo.gas))
+                  .truncate()
+                  .toString(),
+              },
+            ]
+          : [],
+      };
+
+      return this.sendMsgs(type, msgs, memo, fee, signOptions, onTxEvents);
+    };
+
+    return {
+      msgs: async (): Promise<DeepReadonly<ProtoMsgsOrWithAminoMsgs>> => {
+        if (typeof msgs === "function") {
+          msgs = await msgs();
+        }
+        return msgs;
+      },
+      simulate,
+      simulateAndSend: async (
+        feeOptions: {
+          gasAdjustment: number;
+          gasPrice?: {
+            denom: string;
+            amount: Dec;
+          };
+        },
+        memo: string = "",
+        signOptions?: KeplrSignOptions,
+        onTxEvents?:
+          | ((tx: any) => void)
+          | {
+              onBroadcastFailed?: (e?: Error) => void;
+              onBroadcasted?: (txHash: Uint8Array) => void;
+              onFulfill?: (tx: any) => void;
+            }
+      ): Promise<void> => {
+        this.base.setTxTypeInProgress(type);
+
+        try {
+          const { gasUsed } = await simulate({}, memo);
+
+          if (gasUsed < 0) {
+            throw new Error("Gas estimated is zero or negative");
+          }
+
+          const gasAdjusted = feeOptions.gasAdjustment * gasUsed;
+
+          return sendWithGasPrice(
+            {
+              gas: gasAdjusted,
+              gasPrice: feeOptions.gasPrice,
+            },
+            memo,
+            signOptions,
+            onTxEvents
+          );
+        } catch (e) {
+          this.base.setTxTypeInProgress("");
+          throw e;
+        }
+      },
+      send: async (
+        fee: StdFee,
+        memo: string = "",
+        signOptions?: KeplrSignOptions,
+        onTxEvents?:
+          | ((tx: any) => void)
+          | {
+              onBroadcastFailed?: (e?: Error) => void;
+              onBroadcasted?: (txHash: Uint8Array) => void;
+              onFulfill?: (tx: any) => void;
+            }
+      ): Promise<void> => {
+        return this.sendMsgs(type, msgs, memo, fee, signOptions, onTxEvents);
+      },
+      sendWithGasPrice,
+    };
+  }
+
   get instance(): AxiosInstance {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     return Axios.create({
@@ -857,6 +1069,37 @@ export class CosmosAccountImpl {
         }
       })
     );
+  }
+
+  makeWithdrawDelegationRewardTx(validatorAddresses: string[]) {
+    return {
+      defaultGas: this.msgOpts.withdrawRewards.gas * validatorAddresses.length,
+      ...this.makeTx("withdrawRewards", () => {
+        const msgs = validatorAddresses.map((validatorAddress) => {
+          return {
+            type: this.msgOpts.withdrawRewards.type,
+            value: {
+              delegator_address: this.base.bech32Address,
+              validator_address: validatorAddress,
+            },
+          };
+        });
+
+        return {
+          aminoMsgs: msgs,
+          protoMsgs: msgs.map((msg) => {
+            return {
+              typeUrl:
+                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+              value: MsgWithdrawDelegatorReward.encode({
+                delegatorAddress: msg.value.delegator_address,
+                validatorAddress: msg.value.validator_address,
+              }).finish(),
+            };
+          }),
+        };
+      }),
+    };
   }
 
   async sendWithdrawDelegationRewardMsgs(

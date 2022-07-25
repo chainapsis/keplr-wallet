@@ -39,16 +39,36 @@ export const StakeView: FunctionComponent = observer(() => {
     return stakable.balance.toDec().gt(new Dec(0));
   }, [stakable.balance]);
 
+  const [isWithdrawingRewards, setIsWithdrawingRewards] = useState(false);
+
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
+        setIsWithdrawingRewards(true);
+
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
-        await accountInfo.cosmos.sendWithdrawDelegationRewardMsgs(
-          rewards.getDescendingPendingRewardValidatorAddresses(8),
+        const tx = accountInfo.cosmos.makeWithdrawDelegationRewardTx(
+          rewards.getDescendingPendingRewardValidatorAddresses(8)
+        );
+
+        let gas: number;
+        try {
+          // Gas adjustment is 1.3
+          gas = (await tx.simulate()).gasUsed * 1.3;
+        } catch (e) {
+          console.log(e);
+
+          gas = tx.defaultGas;
+        }
+
+        await tx.send(
+          {
+            amount: [],
+            gas: gas.toString(),
+          },
           "",
-          undefined,
           undefined,
           {
             onBroadcasted: () => {
@@ -73,6 +93,8 @@ export const StakeView: FunctionComponent = observer(() => {
             duration: 0.25,
           },
         });
+      } finally {
+        setIsWithdrawingRewards(false);
       }
     }
   };
@@ -124,7 +146,10 @@ export const StakeView: FunctionComponent = observer(() => {
                 size="sm"
                 disabled={!accountInfo.isReadyToSendMsgs}
                 onClick={withdrawAllRewards}
-                data-loading={accountInfo.isSendingMsg === "withdrawRewards"}
+                data-loading={
+                  accountInfo.isSendingMsg === "withdrawRewards" ||
+                  isWithdrawingRewards
+                }
               >
                 <FormattedMessage id="main.stake.button.claim-rewards" />
               </Button>
