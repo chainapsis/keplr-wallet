@@ -1,9 +1,11 @@
 import React from "react";
 import { Text } from "@obi-wallet/common";
-import { TextInput, TouchableHighlight, View } from "react-native";
+import { TextInput, TouchableHighlight, View, Image } from "react-native";
 import FaceScaner from "./assets/face-scanner.svg";
+
 import Scan from "./assets/scan.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import Background from "./components/background";
 //TODO: chevron back
 //TODO: add background svgs
 //TODO: sheild check icon
@@ -11,8 +13,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 export default function onboarding4() {
   return (
     <View
-      style={{ backgroundColor: "#1E1E1E", flex: 1, paddingHorizontal: 20 }}
+      style={{
+        backgroundColor: "##090817",
+        flex: 1,
+        paddingHorizontal: 20,
+        position: "relative",
+      }}
     >
+      <Background />
       <View style={{ flex: 5, justifyContent: "center", alignItems: "center" }}>
         <View
           style={{

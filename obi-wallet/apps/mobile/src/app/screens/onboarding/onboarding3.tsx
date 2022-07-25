@@ -4,15 +4,15 @@ import { Button, TextInput, TouchableHighlight, View } from "react-native";
 import InsuranceLogo from "./assets/insuranceLogo.svg";
 import ShieldCheck from "./assets/shield-check.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import Background from "./components/background";
 //TODO: add background svgs
 //TODO: chevron back
 export default function onboarding3() {
   return (
-    <View
-      style={{ backgroundColor: "#1E1E1E", flex: 1, paddingHorizontal: 20 }}
-    >
+    <View style={{ flex: 1, paddingHorizontal: 20 }}>
+      <Background />
       <View style={{ flex: 4, justifyContent: "flex-end" }}>
-        <View style={{ backgroundColor: "#1E1E1E" }}>
+        <View style={{}}>
           <InsuranceLogo style={{ marginBottom: 41 }} />
           <View>
             <Text

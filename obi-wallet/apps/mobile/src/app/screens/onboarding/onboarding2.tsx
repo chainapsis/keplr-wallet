@@ -7,6 +7,7 @@ import MessageDots from "./assets/messageDots.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faMessage } from "@fortawesome/free-solid-svg-icons/faMessage";
+import Background from "./components/background";
 //TODO: chevron back
 //TODO: add background svgs
 //TODO: change phone logo for opaque one
@@ -14,11 +15,10 @@ import { faMessage } from "@fortawesome/free-solid-svg-icons/faMessage";
 
 export default function onboarding2() {
   return (
-    <View
-      style={{ backgroundColor: "#1E1E1E", flex: 1, paddingHorizontal: 20 }}
-    >
+    <View style={{ flex: 1, paddingHorizontal: 20 }}>
+      <Background />
       <View style={{ flex: 4, justifyContent: "flex-end" }}>
-        <View style={{ backgroundColor: "#1E1E1E" }}>
+        <View>
           <PhoneLogo style={{ marginBottom: 41 }} />
           <View>
             <Text

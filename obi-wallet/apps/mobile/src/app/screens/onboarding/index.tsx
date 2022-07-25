@@ -12,7 +12,7 @@ import {
 import { useNavigation } from "../../stack";
 import { useStore } from "../../stores";
 
-export function Onboarding() {
+export default function Onboarding() {
   const { appsStore } = useStore();
   const navigation = useNavigation();
 
@@ -20,12 +20,16 @@ export function Onboarding() {
     <SafeAreaView
       style={{
         justifyContent: "space-between",
-        backgroundColor: "#1E1E1E",
+        backgroundColor: "#090817",
         height: "100%",
+        position: "relative",
       }}
     >
       <View style={{ flex: 6, position: "relative" }}>
-        <Image source={require("./assets/backgroundblue.png")} />
+        <Image
+          source={require("./assets/backgroundblue.png")}
+          style={{ position: "absolute", right: 0 }}
+        />
         <Image
           source={require("./assets/backgroundpink.png")}
           style={{ position: "absolute", zIndex: -1 }}
