@@ -3,7 +3,7 @@ import { StyleSheet, Text as T, TextProps } from "react-native";
 
 const styles = StyleSheet.create({
   font: {
-    fontFamily: "Poppins",
+    fontFamily: "Inter",
   },
 });
 

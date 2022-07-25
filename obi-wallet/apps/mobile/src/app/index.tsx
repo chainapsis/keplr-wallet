@@ -33,7 +33,7 @@ export function App() {
             screenOptions={{
               headerShown: false,
               headerTitleStyle: {
-                fontFamily: "Poppins",
+                fontFamily: "Inter",
               },
             }}
           >
