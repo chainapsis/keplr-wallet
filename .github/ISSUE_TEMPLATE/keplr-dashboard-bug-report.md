@@ -1,9 +1,9 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: Keplr Dashboard Bug report
+about: Create a report to help us improve the keplr dashboard (wallet.keplr.app)
 title: ''
 labels: bug, keplr-dashboard
-assignees: ''
+assignees: delivan
 
 ---
 
