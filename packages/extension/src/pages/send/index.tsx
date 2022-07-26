@@ -185,15 +185,18 @@ export const SendPage: FunctionComponent = observer(() => {
 
           if (accountInfo.isReadyToSendMsgs && txStateIsValid) {
             try {
-              const stdFee = sendConfigs.feeConfig.toStdFee();
-
-              await accountInfo.sendToken(
+              const tx = accountInfo.makeSendTokenTx(
                 sendConfigs.amountConfig.amount,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 sendConfigs.amountConfig.sendCurrency!,
-                sendConfigs.recipientConfig.recipient,
+                sendConfigs.recipientConfig.recipient
+              );
+
+              await tx.simulateAndSend(
+                {
+                  gasAdjustment: 1.3,
+                },
                 sendConfigs.memoConfig.memo,
-                stdFee,
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
@@ -208,6 +211,7 @@ export const SendPage: FunctionComponent = observer(() => {
                   },
                 }
               );
+
               if (!isDetachedPage) {
                 history.replace("/");
               }

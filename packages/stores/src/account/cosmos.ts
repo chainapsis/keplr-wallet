@@ -44,6 +44,7 @@ import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
 import { isAddress } from "@ethersproject/address";
 import { Buffer } from "buffer/";
+import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -135,13 +136,6 @@ export const defaultCosmosMsgOpts: CosmosMsgOpts = {
   },
 };
 
-type ProtoMsgsOrWithAminoMsgs = {
-  // TODO: Make `aminoMsgs` nullable
-  //       And, make proto sign doc if `aminoMsgs` is null
-  aminoMsgs: Msg[];
-  protoMsgs: Any[];
-};
-
 export class CosmosAccountImpl {
   public broadcastMode: "sync" | "async" | "block" = "sync";
 
@@ -160,11 +154,73 @@ export class CosmosAccountImpl {
       };
     }
   ) {
+    this.base.registerMakeSendTokenFn(this.processMakeSendTokenTx.bind(this));
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
   get msgOpts(): CosmosMsgOpts {
     return this._msgOpts;
+  }
+
+  protected processMakeSendTokenTx(
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) {
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+
+    const hexAdjustedRecipient = (recipient: string) => {
+      const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
+        .bech32PrefixAccAddr;
+      if (bech32prefix === "evmos" && recipient.startsWith("0x")) {
+        // Validate hex address
+        if (!isAddress(recipient)) {
+          throw new Error("Invalid hex address");
+        }
+        const buf = Buffer.from(
+          recipient.replace("0x", "").toLowerCase(),
+          "hex"
+        );
+        return new Bech32Address(buf).toBech32(bech32prefix);
+      }
+      return recipient;
+    };
+
+    if (denomHelper.type === "native") {
+      const actualAmount = (() => {
+        let dec = new Dec(amount);
+        dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+        return dec.truncate().toString();
+      })();
+
+      const msg = {
+        type: this.msgOpts.send.native.type,
+        value: {
+          from_address: this.base.bech32Address,
+          to_address: hexAdjustedRecipient(recipient),
+          amount: [
+            {
+              denom: currency.coinMinimalDenom,
+              amount: actualAmount,
+            },
+          ],
+        },
+      };
+
+      return this.makeTx("send", {
+        aminoMsgs: [msg],
+        protoMsgs: [
+          {
+            typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+            value: MsgSend.encode({
+              fromAddress: msg.value.from_address,
+              toAddress: msg.value.to_address,
+              amount: msg.value.amount,
+            }).finish(),
+          },
+        ],
+      });
+    }
   }
 
   protected async processSendToken(
@@ -559,7 +615,7 @@ export class CosmosAccountImpl {
     msgs:
       | ProtoMsgsOrWithAminoMsgs
       | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs)
-  ) {
+  ): MakeTxResponse {
     const simulate = async (
       fee: Partial<Omit<StdFee, "gas">> = {},
       memo: string = ""
@@ -620,7 +676,7 @@ export class CosmosAccountImpl {
     };
 
     return {
-      msgs: async (): Promise<DeepReadonly<ProtoMsgsOrWithAminoMsgs>> => {
+      msgs: async (): Promise<ProtoMsgsOrWithAminoMsgs> => {
         if (typeof msgs === "function") {
           msgs = await msgs();
         }
