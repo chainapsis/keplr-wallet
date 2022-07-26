@@ -15,6 +15,7 @@ import { useNotification } from "../../components/notification";
 import { useHistory } from "react-router";
 
 import { FormattedMessage } from "react-intl";
+import { DefaultGasMsgWithdrawRewards } from "../../config.ui";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -49,8 +50,11 @@ export const StakeView: FunctionComponent = observer(() => {
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
+        const validatorAddresses = rewards.getDescendingPendingRewardValidatorAddresses(
+          8
+        );
         const tx = accountInfo.cosmos.makeWithdrawDelegationRewardTx(
-          rewards.getDescendingPendingRewardValidatorAddresses(8)
+          validatorAddresses
         );
 
         let gas: number;
@@ -60,7 +64,7 @@ export const StakeView: FunctionComponent = observer(() => {
         } catch (e) {
           console.log(e);
 
-          gas = tx.defaultGas;
+          gas = DefaultGasMsgWithdrawRewards * validatorAddresses.length;
         }
 
         await tx.send(

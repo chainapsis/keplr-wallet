@@ -72,7 +72,7 @@ export class AccountSetBase {
     amount: string,
     currency: AppCurrency,
     recipient: string
-  ) => (MakeTxResponse & { defaultGas?: number }) | undefined)[] = [];
+  ) => MakeTxResponse | undefined)[] = [];
 
   constructor(
     protected readonly eventListener: {
@@ -120,7 +120,7 @@ export class AccountSetBase {
       amount: string,
       currency: AppCurrency,
       recipient: string
-    ) => (MakeTxResponse & { defaultGas?: number }) | undefined
+    ) => MakeTxResponse | undefined
   ) {
     this.makeSendTokenTxFns.push(fn);
   }
@@ -248,7 +248,7 @@ export class AccountSetBase {
     amount: string,
     currency: AppCurrency,
     recipient: string
-  ): MakeTxResponse & { defaultGas?: number } {
+  ): MakeTxResponse {
     for (let i = 0; i < this.makeSendTokenTxFns.length; i++) {
       const fn = this.makeSendTokenTxFns[i];
 

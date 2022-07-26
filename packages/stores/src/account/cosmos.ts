@@ -1137,34 +1137,30 @@ export class CosmosAccountImpl {
   }
 
   makeWithdrawDelegationRewardTx(validatorAddresses: string[]) {
-    return {
-      defaultGas: this.msgOpts.withdrawRewards.gas * validatorAddresses.length,
-      ...this.makeTx("withdrawRewards", () => {
-        const msgs = validatorAddresses.map((validatorAddress) => {
-          return {
-            type: this.msgOpts.withdrawRewards.type,
-            value: {
-              delegator_address: this.base.bech32Address,
-              validator_address: validatorAddress,
-            },
-          };
-        });
-
+    return this.makeTx("withdrawRewards", () => {
+      const msgs = validatorAddresses.map((validatorAddress) => {
         return {
-          aminoMsgs: msgs,
-          protoMsgs: msgs.map((msg) => {
-            return {
-              typeUrl:
-                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-              value: MsgWithdrawDelegatorReward.encode({
-                delegatorAddress: msg.value.delegator_address,
-                validatorAddress: msg.value.validator_address,
-              }).finish(),
-            };
-          }),
+          type: this.msgOpts.withdrawRewards.type,
+          value: {
+            delegator_address: this.base.bech32Address,
+            validator_address: validatorAddress,
+          },
         };
-      }),
-    };
+      });
+
+      return {
+        aminoMsgs: msgs,
+        protoMsgs: msgs.map((msg) => {
+          return {
+            typeUrl: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+            value: MsgWithdrawDelegatorReward.encode({
+              delegatorAddress: msg.value.delegator_address,
+              validatorAddress: msg.value.validator_address,
+            }).finish(),
+          };
+        }),
+      };
+    });
   }
 
   async sendWithdrawDelegationRewardMsgs(
