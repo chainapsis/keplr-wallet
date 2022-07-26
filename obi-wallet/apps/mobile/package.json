@@ -3,9 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "*",
+    "@fortawesome/react-native-fontawesome": "*",
     "@keplr-wallet/common": "*",
     "@keplr-wallet/stores": "*",
     "@react-native-async-storage/async-storage": "*",
+    "@react-navigation/bottom-tabs": "*",
     "@react-navigation/native": "*",
     "@react-navigation/native-stack": "*",
     "@testing-library/jest-native": "*",
@@ -27,6 +30,7 @@
     "react-native-safe-area-context": "*",
     "react-native-screens": "*",
     "react-native-svg": "*",
+    "react-native-svg-uri": "*",
     "react-native-webview": "*",
     "rooks": "*"
   }

@@ -1,0 +1,12 @@
+diff --git a/node_modules/@fortawesome/free-solid-svg-icons/package.json b/node_modules/@fortawesome/free-solid-svg-icons/package.json
+index 9839472..53e150e 100644
+--- a/node_modules/@fortawesome/free-solid-svg-icons/package.json
++++ b/node_modules/@fortawesome/free-solid-svg-icons/package.json
+@@ -47,6 +47,7 @@
+       "require": "./index.js",
+       "default": "./index.js"
+     },
++    "./package.json": "./package.json",
+     "./*": "./*.js"
+   },
+   "scripts": {

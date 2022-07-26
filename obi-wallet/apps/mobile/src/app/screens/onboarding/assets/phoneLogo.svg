@@ -1,0 +1,22 @@
+<svg width="66" height="79" viewBox="0 0 66 79" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="33" cy="46" r="33" fill="#242348"/>
+<mask id="mask0_185_282" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="-5" y="-22" width="71" height="101">
+<path d="M65.5514 46.5181C65.5514 64.4574 51.0389 79 33.137 79C15.235 79 0.72258 64.4574 0.72258 46.5181C0.72258 28.5788 -21.2728 -20.0648 20.9816 -21.9259C73.655 -24.2459 65.5514 28.5788 65.5514 46.5181Z" fill="#242348"/>
+</mask>
+<g mask="url(#mask0_185_282)">
+<rect x="5" y="8.63574" width="42" height="74.7703" rx="5.34074" transform="rotate(-11.8653 5 8.63574)" fill="#413F72"/>
+<rect opacity="0.5" x="16.8877" y="34.7893" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 16.8877 34.7893)" fill="#8987CD"/>
+<rect opacity="0.5" x="19.084" y="45.2424" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 19.084 45.2424)" fill="#8987CD"/>
+<rect opacity="0.5" x="21.2803" y="55.6958" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 21.2803 55.6958)" fill="#8987CD"/>
+<rect opacity="0.5" x="27.3411" y="32.5928" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 27.3411 32.5928)" fill="#8987CD"/>
+<rect opacity="0.5" x="29.5374" y="43.0461" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 29.5374 43.0461)" fill="#8987CD"/>
+<rect opacity="0.5" x="31.7336" y="53.4995" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 31.7336 53.4995)" fill="#8987CD"/>
+<rect opacity="0.5" x="33.9299" y="63.9526" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 33.9299 63.9526)" fill="#8987CD"/>
+<rect opacity="0.5" x="37.7944" y="30.3965" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 37.7944 30.3965)" fill="#8987CD"/>
+<rect opacity="0.5" x="39.9907" y="40.8499" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 39.9907 40.8499)" fill="#8987CD"/>
+<rect opacity="0.5" x="42.187" y="51.303" width="8.01111" height="8.01111" rx="1.33518" transform="rotate(-11.8653 42.187 51.303)" fill="#8987CD"/>
+<rect x="20.5498" y="9.6936" width="12" height="1" rx="0.5" transform="rotate(-11.8653 20.5498 9.6936)" fill="#706DAD"/>
+<circle cx="11.3555" cy="12.1363" r="1.5" transform="rotate(-11.8653 11.3555 12.1363)" fill="#706DAD"/>
+<circle cx="11.3555" cy="12.1363" r="0.5" transform="rotate(-11.8653 11.3555 12.1363)" fill="#908DBE"/>
+</g>
+</svg>

@@ -31,6 +31,7 @@ export function App() {
           <Stack.Navigator
             initialRouteName="state-renderer"
             screenOptions={{
+              headerShown: false,
               headerTitleStyle: {
                 fontFamily: "Poppins",
               },
