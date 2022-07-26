@@ -89,6 +89,9 @@ export const CosmosAccount = {
   },
 };
 
+/**
+ * @deprecated Predict gas through simulation rather than using a fixed gas.
+ */
 export interface CosmosMsgOpts {
   readonly send: {
     readonly native: MsgOpt;
@@ -102,6 +105,9 @@ export interface CosmosMsgOpts {
   readonly govVote: MsgOpt;
 }
 
+/**
+ * @deprecated Predict gas through simulation rather than using a fixed gas.
+ */
 export const defaultCosmosMsgOpts: CosmosMsgOpts = {
   send: {
     native: {
@@ -158,6 +164,9 @@ export class CosmosAccountImpl {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
+  /**
+   * @deprecated Predict gas through simulation rather than using a fixed gas.
+   */
   get msgOpts(): CosmosMsgOpts {
     return this._msgOpts;
   }

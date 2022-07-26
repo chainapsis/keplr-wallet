@@ -47,6 +47,9 @@ export const CosmwasmAccount = {
   },
 };
 
+/**
+ * @deprecated Predict gas through simulation rather than using a fixed gas.
+ */
 export interface CosmwasmMsgOpts {
   readonly send: {
     readonly cw20: Pick<MsgOpt, "gas">;
@@ -55,6 +58,9 @@ export interface CosmwasmMsgOpts {
   readonly executeWasm: Pick<MsgOpt, "type">;
 }
 
+/**
+ * @deprecated Predict gas through simulation rather than using a fixed gas.
+ */
 export const defaultCosmwasmMsgOpts: CosmwasmMsgOpts = {
   send: {
     cw20: {
@@ -78,6 +84,9 @@ export class CosmwasmAccountImpl {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
+  /**
+   * @deprecated Predict gas through simulation rather than using a fixed gas.
+   */
   get msgOpts(): CosmwasmMsgOpts {
     return this._msgOpts;
   }

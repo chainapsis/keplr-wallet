@@ -48,6 +48,9 @@ export const SecretAccount = {
   },
 };
 
+/**
+ * @deprecated Predict gas through simulation rather than using a fixed gas.
+ */
 export interface SecretMsgOpts {
   readonly send: {
     readonly secret20: Pick<MsgOpt, "gas">;
@@ -57,6 +60,9 @@ export interface SecretMsgOpts {
   readonly executeSecretWasm: Pick<MsgOpt, "type">;
 }
 
+/**
+ * @deprecated Predict gas through simulation rather than using a fixed gas.
+ */
 export const defaultSecretMsgOpts: SecretMsgOpts = {
   send: {
     secret20: {
@@ -84,6 +90,9 @@ export class SecretAccountImpl {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
+  /**
+   * @deprecated Predict gas through simulation rather than using a fixed gas.
+   */
   get msgOpts(): SecretMsgOpts {
     return this._msgOpts;
   }
