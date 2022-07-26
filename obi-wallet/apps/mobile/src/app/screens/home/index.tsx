@@ -1,27 +1,22 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
-
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import React from "react";
 
-import { useNavigation } from "../../stack";
-import { useStore } from "../../stores";
-import { Assets } from "./components/assets";
-import AssetsIcon from "./assets/assetsIcon.svg";
 import AppsIcon from "./assets/appsIcon.svg";
+import AssetsIcon from "./assets/assetsIcon.svg";
 import NFTsIcon from "./assets/nftsIcon.svg";
-import TradeIcon from "./assets/tradeIcon.svg";
 import SettingsIcon from "./assets/settingsIcon.svg";
+import TradeIcon from "./assets/tradeIcon.svg";
+import { Assets } from "./components/assets";
 import Background from "./components/background";
 
 export function HomeScreen() {
-  const { appsStore } = useStore();
-  const navigation = useNavigation();
-  const tab = createBottomTabNavigator();
+  const Tab = createBottomTabNavigator();
 
   return (
-    <tab.Navigator
+    <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let icon;
@@ -56,17 +51,17 @@ export function HomeScreen() {
         tabBarInactiveTintColor: "#4D5070",
       })}
     >
-      <tab.Screen
+      <Tab.Screen
         name="Assets"
         component={Assets}
         options={{
           headerShown: false,
         }}
       />
-      <tab.Screen name="NFTs" component={Background} />
-      <tab.Screen name="Apps" component={Background} />
-      <tab.Screen name="Trade" component={Background} />
-      <tab.Screen name="Settings" component={Background} />
-    </tab.Navigator>
+      <Tab.Screen name="NFTs" component={Background} />
+      <Tab.Screen name="Apps" component={Background} />
+      <Tab.Screen name="Trade" component={Background} />
+      <Tab.Screen name="Settings" component={Background} />
+    </Tab.Navigator>
   );
 }

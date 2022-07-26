@@ -150,7 +150,7 @@ export default function onboarding2() {
               <Text
                 style={{ color: "#040317", fontSize: 16, fontWeight: "700" }}
               >
-                Send on Whatsapp
+                Send on WhatsApp
               </Text>
             </>
           </TouchableHighlight>
