@@ -216,19 +216,38 @@ export class CosmosAccountImpl {
         },
       };
 
-      return this.makeTx("send", {
-        aminoMsgs: [msg],
-        protoMsgs: [
-          {
-            typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-            value: MsgSend.encode({
-              fromAddress: msg.value.from_address,
-              toAddress: msg.value.to_address,
-              amount: msg.value.amount,
-            }).finish(),
-          },
-        ],
-      });
+      return this.makeTx(
+        "send",
+        {
+          aminoMsgs: [msg],
+          protoMsgs: [
+            {
+              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+              value: MsgSend.encode({
+                fromAddress: msg.value.from_address,
+                toAddress: msg.value.to_address,
+                amount: msg.value.amount,
+              }).finish(),
+            },
+          ],
+        },
+        (tx) => {
+          if (tx.code == null || tx.code === 0) {
+            // After succeeding to send token, refresh the balance.
+            const queryBalance = this.queries.queryBalances
+              .getQueryBech32Address(this.base.bech32Address)
+              .balances.find((bal) => {
+                return (
+                  bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+                );
+              });
+
+            if (queryBalance) {
+              queryBalance.fetch();
+            }
+          }
+        }
+      );
     }
   }
 
@@ -623,7 +642,8 @@ export class CosmosAccountImpl {
     type: string | "unknown",
     msgs:
       | ProtoMsgsOrWithAminoMsgs
-      | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs)
+      | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
+    preOnFulfill?: (tx: any) => void
   ): MakeTxResponse {
     const simulate = async (
       fee: Partial<Omit<StdFee, "gas">> = {},
@@ -681,7 +701,14 @@ export class CosmosAccountImpl {
           : [],
       };
 
-      return this.sendMsgs(type, msgs, memo, fee, signOptions, onTxEvents);
+      return this.sendMsgs(
+        type,
+        msgs,
+        memo,
+        fee,
+        signOptions,
+        this.txEventsWithPreOnFulfill(onTxEvents, preOnFulfill)
+      );
     };
 
     return {
@@ -747,7 +774,14 @@ export class CosmosAccountImpl {
               onFulfill?: (tx: any) => void;
             }
       ): Promise<void> => {
-        return this.sendMsgs(type, msgs, memo, fee, signOptions, onTxEvents);
+        return this.sendMsgs(
+          type,
+          msgs,
+          memo,
+          fee,
+          signOptions,
+          this.txEventsWithPreOnFulfill(onTxEvents, preOnFulfill)
+        );
       },
       sendWithGasPrice,
     };
@@ -1137,30 +1171,42 @@ export class CosmosAccountImpl {
   }
 
   makeWithdrawDelegationRewardTx(validatorAddresses: string[]) {
-    return this.makeTx("withdrawRewards", () => {
-      const msgs = validatorAddresses.map((validatorAddress) => {
-        return {
-          type: this.msgOpts.withdrawRewards.type,
-          value: {
-            delegator_address: this.base.bech32Address,
-            validator_address: validatorAddress,
-          },
-        };
-      });
-
-      return {
-        aminoMsgs: msgs,
-        protoMsgs: msgs.map((msg) => {
+    return this.makeTx(
+      "withdrawRewards",
+      () => {
+        const msgs = validatorAddresses.map((validatorAddress) => {
           return {
-            typeUrl: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-            value: MsgWithdrawDelegatorReward.encode({
-              delegatorAddress: msg.value.delegator_address,
-              validatorAddress: msg.value.validator_address,
-            }).finish(),
+            type: this.msgOpts.withdrawRewards.type,
+            value: {
+              delegator_address: this.base.bech32Address,
+              validator_address: validatorAddress,
+            },
           };
-        }),
-      };
-    });
+        });
+
+        return {
+          aminoMsgs: msgs,
+          protoMsgs: msgs.map((msg) => {
+            return {
+              typeUrl:
+                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+              value: MsgWithdrawDelegatorReward.encode({
+                delegatorAddress: msg.value.delegator_address,
+                validatorAddress: msg.value.validator_address,
+              }).finish(),
+            };
+          }),
+        };
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to withdraw rewards, refresh rewards.
+          this.queries.cosmos.queryRewards
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+        }
+      }
+    );
   }
 
   async sendWithdrawDelegationRewardMsgs(
