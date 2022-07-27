@@ -1,25 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text } from "@obi-wallet/common";
-import { Button, TextInput, TouchableHighlight, View } from "react-native";
+import { Image, TextInput, TouchableHighlight, View } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import PhoneLogo from "./assets/phoneLogo.svg";
 import Whatsapp from "./assets/whatsapp.svg";
 import MessageDots from "./assets/messageDots.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
-import { faMessage } from "@fortawesome/free-solid-svg-icons/faMessage";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import Background from "./components/background";
-//TODO: chevron back
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 //TODO: add background svgs
-//TODO: change phone logo for opaque one
 //TODO: add select for security question
 
 export default function onboarding2() {
+  const safeArea = useSafeAreaInsets();
+  const [selectedLanguage, setSelectedLanguage] = useState();
+
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />
+      <TouchableHighlight>
+        <FontAwesomeIcon
+          icon={faChevronLeft}
+          style={{ color: "#7B87A8", top: safeArea.top }}
+        />
+      </TouchableHighlight>
       <View style={{ flex: 4, justifyContent: "flex-end" }}>
         <View>
-          <PhoneLogo style={{ marginBottom: 41 }} />
+          {/* <PhoneLogo style={{ marginBottom: 41 }} /> */}
+          <Image
+            source={require("./assets/phoneLogo.png")}
+            style={{ width: 66, height: 79, marginBottom: 41 }}
+          />
           <View>
             <Text
               style={{
@@ -55,21 +69,32 @@ export default function onboarding2() {
         >
           SECURITY QUESTION
         </Text>
-        <TextInput
-          value="IT HAS TO BE A SELECT"
-          placeholder="type your answer here"
-          style={{
-            width: "100%",
-            height: 56,
-            borderWidth: 1,
-            borderColor: "#2F2B4C",
-            paddingLeft: 20,
-            fontSize: 17,
-            fontWeight: "400",
-            color: "#F6F5FF",
-            borderRadius: 12,
-          }}
-        />
+        <Picker
+          selectedValue={selectedLanguage}
+          style={{ backgroundColor: "white", height: 50, width: "100%" }}
+          onValueChange={(itemValue, itemIndex) =>
+            setSelectedLanguage(itemValue)
+          }
+        >
+          <Picker.Item label="Java" value="java" />
+          <Picker.Item label="JavaScript" value="js" />
+        </Picker>
+
+        {/* <TextInput
+                    value="IT HAS TO BE A SELECT"
+                    placeholder="type your answer here"
+                    style={{
+                        width: "100%",
+                        height: 56,
+                        borderWidth: 1,
+                        borderColor: "#2F2B4C",
+                        paddingLeft: 20,
+                        fontSize: 17,
+                        fontWeight: "400",
+                        color: "#F6F5FF",
+                        borderRadius: 12,
+                    }}
+                /> */}
 
         <Text
           style={{

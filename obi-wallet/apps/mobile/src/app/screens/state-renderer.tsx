@@ -9,7 +9,7 @@ import { useStore } from "../stores";
 import { HomeScreen } from "./home";
 import { LockScreen } from "./lock";
 import { RegisterScreen } from "./register";
-import Onboarding from "./onboarding/onboarding2";
+import Onboarding from "./account";
 
 export type StateRendererScreenProps = NativeStackScreenProps<
   StackParamList,
