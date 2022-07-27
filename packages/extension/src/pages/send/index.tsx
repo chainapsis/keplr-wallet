@@ -20,7 +20,7 @@ import { Button } from "reactstrap";
 import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
-import { useSendTxConfig } from "@keplr-wallet/hooks";
+import { useGasSimulator, useSendTxConfig } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../config.ui";
 import {
   fitPopupWindow,
@@ -72,6 +72,27 @@ export const SendPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     EthereumEndpoint
   );
+
+  const gasSimulator = useGasSimulator(sendConfigs.gasConfig, async () => {
+    if (!sendConfigs.amountConfig.sendCurrency) {
+      throw new Error("Send currency not set");
+    }
+
+    console.log(
+      sendConfigs.amountConfig.amount,
+      sendConfigs.amountConfig.sendCurrency,
+      sendConfigs.recipientConfig.recipient
+    );
+
+    const tx = accountInfo.makeSendTokenTx(
+      sendConfigs.amountConfig.amount,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      sendConfigs.amountConfig.sendCurrency!,
+      sendConfigs.recipientConfig.recipient
+    );
+
+    return (await tx.simulate()).gasUsed;
+  });
 
   useEffect(() => {
     if (query.defaultDenom) {
@@ -185,6 +206,8 @@ export const SendPage: FunctionComponent = observer(() => {
 
           if (accountInfo.isReadyToSendMsgs && txStateIsValid) {
             try {
+              const stdFee = sendConfigs.feeConfig.toStdFee();
+
               const tx = accountInfo.makeSendTokenTx(
                 sendConfigs.amountConfig.amount,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -192,10 +215,8 @@ export const SendPage: FunctionComponent = observer(() => {
                 sendConfigs.recipientConfig.recipient
               );
 
-              await tx.simulateAndSend(
-                {
-                  gasAdjustment: 1.3,
-                },
+              await tx.send(
+                stdFee,
                 sendConfigs.memoConfig.memo,
                 {
                   preferNoSetFee: true,
@@ -270,6 +291,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 high: intl.formatMessage({ id: "fee-buttons.select.high" }),
               }}
               gasLabel={intl.formatMessage({ id: "send.input.gas" })}
+              gasSimulator={gasSimulator}
             />
           </div>
           <div style={{ flex: 1 }} />

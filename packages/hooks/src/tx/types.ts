@@ -90,3 +90,13 @@ export const DefaultGasPriceStep: {
 };
 
 export type FeeType = "high" | "average" | "low";
+
+export interface IGasSimulator {
+  enabled: boolean;
+  setEnabled(value: boolean): void;
+
+  gasEstimated: number | undefined;
+  gasAdjustment: number;
+  gasAdjustmentRaw: string;
+  setGasAdjustment(gasAdjustment: string | number): void;
+}

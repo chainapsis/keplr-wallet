@@ -1,15 +1,17 @@
-import { IGasConfig } from "./types";
+import { IGasConfig, IGasSimulator } from "./types";
 import {
   action,
   autorun,
   IReactionDisposer,
   makeObservable,
   observable,
+  runInAction,
 } from "mobx";
+import { useEffect, useState } from "react";
 
 export type SimulateGasFn = () => Promise<number>;
 
-export class GasSimulator {
+export class GasSimulator implements IGasSimulator {
   @observable
   protected _gasEstimated: number | undefined = undefined;
 
@@ -18,43 +20,21 @@ export class GasSimulator {
 
   @observable
   protected _enabled: boolean = false;
-  @observable
-  protected _simulateGasFnIsProvided: boolean;
 
   protected _disposers: IReactionDisposer[] = [];
 
   constructor(
     protected readonly gasConfig: IGasConfig,
-    protected simulateGasFn?: SimulateGasFn
+    // TODO: Add comment about the reason why simulateGasFn field is not observable.
+    protected simulateGasFn: SimulateGasFn
   ) {
-    this._simulateGasFnIsProvided = simulateGasFn != null;
-
     makeObservable(this);
 
     this.init();
   }
 
-  get canEnabled(): boolean {
-    return this._simulateGasFnIsProvided;
-  }
-
-  /*
-   * Set `simulateGasFn` and `simulateGasFnIsProvided` and turn off `enabled` if simulateGasFn is null.
-   * But `simulateGasFn` is not observable.
-   * It is intended that `simulateGasFn` is not observable.
-   * See other comments for why `simulateGasFn` is not observable...
-   */
-  @action
-  setSimulateGasFn(simulateGasFn?: SimulateGasFn) {
+  setSimulateGasFn(simulateGasFn: SimulateGasFn) {
     this.simulateGasFn = simulateGasFn;
-    this._simulateGasFnIsProvided = simulateGasFn != null;
-
-    if (!simulateGasFn && this.enabled) {
-      console.log(
-        "Turn off gas simulator because the simulateGasFn becomes null"
-      );
-      this.setEnabled(false);
-    }
   }
 
   get enabled(): boolean {
@@ -63,13 +43,6 @@ export class GasSimulator {
 
   @action
   setEnabled(value: boolean) {
-    if (value && !this.canEnabled) {
-      console.log(
-        "You can't enable gas simulator because no simulateGasFn is provided"
-      );
-      this._enabled = false;
-      return;
-    }
     this._enabled = value;
   }
 
@@ -125,34 +98,42 @@ export class GasSimulator {
   protected init() {
     this._disposers.push(
       autorun(() => {
-        if (!this.enabled || !this.simulateGasFn) {
+        if (!this.enabled) {
           return;
         }
 
-        const promise = this.simulateGasFn();
-
-        promise
-          .then((gasEstimated) => {
-            if (this.enabled) {
-              this._gasEstimated = gasEstimated;
-            }
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+        // The lines below look a bit odd...
+        // But did this intentionally because we have to catch the error in both cases,
+        // the error from the function returning the promise and the error from the returned promise.
+        try {
+          this.simulateGasFn()
+            .then((gasEstimated) => {
+              if (this.enabled) {
+                runInAction(() => {
+                  this._gasEstimated = gasEstimated;
+                });
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+        } catch (e) {
+          console.log(e);
+          return;
+        }
       })
     );
 
     this._disposers.push(
       autorun(() => {
-        if (this.gasEstimated != null) {
+        if (this.enabled && this.gasEstimated != null) {
           this.gasConfig.setGas(this.gasEstimated * this.gasAdjustment);
         }
       })
     );
   }
 
-  protected dispose() {
+  dispose() {
     for (const disposer of this._disposers) {
       disposer();
     }
@@ -160,4 +141,28 @@ export class GasSimulator {
 }
 
 // CONTRACT: Use with `observer`
-export const useGasSimulator: (gasConfig: IGasConfig, enabled: boolean) => {};
+export const useGasSimulator = (
+  gasConfig: IGasConfig,
+  simulateGasFn: SimulateGasFn,
+  initialDisabled?: boolean
+) => {
+  const [gasSimulator] = useState(() => {
+    const gasSimulator = new GasSimulator(gasConfig, simulateGasFn);
+    if (initialDisabled) {
+      gasSimulator.setEnabled(false);
+    } else {
+      gasSimulator.setEnabled(true);
+    }
+
+    return gasSimulator;
+  });
+  gasSimulator.setSimulateGasFn(simulateGasFn);
+
+  useEffect(() => {
+    return () => {
+      gasSimulator.dispose();
+    };
+  }, [gasSimulator]);
+
+  return gasSimulator;
+};
