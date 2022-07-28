@@ -90,6 +90,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             label={label}
             feeSelectLabels={feeSelectLabels}
             feeButtonState={feeButtonState}
+            gasSimulator={gasSimulator}
           />
         ) : null}
         {feeButtonState.isGasInputOpen || !feeConfig.feeCurrency ? (
@@ -111,7 +112,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
 export const FeeButtonsInner: FunctionComponent<
   Pick<
     FeeButtonsProps,
-    "feeConfig" | "priceStore" | "label" | "feeSelectLabels"
+    "feeConfig" | "priceStore" | "label" | "feeSelectLabels" | "gasSimulator"
   > & { feeButtonState: FeeButtonState }
 > = observer(
   ({
@@ -120,6 +121,7 @@ export const FeeButtonsInner: FunctionComponent<
     label,
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
     feeButtonState,
+    gasSimulator,
   }) => {
     useEffect(() => {
       if (feeConfig.feeCurrency && !feeConfig.fee) {
@@ -181,6 +183,10 @@ export const FeeButtonsInner: FunctionComponent<
         }
       }
     })();
+
+    if (gasSimulator && gasSimulator.isSimulating) {
+      isFeeLoading = true;
+    }
 
     return (
       <FormGroup style={{ position: "relative" }}>

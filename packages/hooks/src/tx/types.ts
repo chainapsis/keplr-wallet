@@ -95,6 +95,8 @@ export interface IGasSimulator {
   enabled: boolean;
   setEnabled(value: boolean): void;
 
+  isSimulating: boolean;
+
   gasEstimated: number | undefined;
   gasAdjustment: number;
   gasAdjustmentRaw: string;

@@ -27,6 +27,9 @@ export class GasSimulator implements IGasSimulator {
   @observable
   protected _enabled: boolean = false;
 
+  @observable
+  protected _isSimulating: boolean = false;
+
   // Key is the store key (probably, ${chainIdentifier}/${key})
   // Value is the last stored value.
   // If the value is null, it means that there is no value stored or being loaded.
@@ -75,6 +78,10 @@ export class GasSimulator implements IGasSimulator {
   @action
   setKey(value: string) {
     this._key = value;
+  }
+
+  get isSimulating(): boolean {
+    return this._isSimulating;
   }
 
   setSimulateGasFn(simulateGasFn: SimulateGasFn) {
@@ -182,19 +189,30 @@ export class GasSimulator implements IGasSimulator {
         // But did this intentionally because we have to catch the error in both cases,
         // the error from the function returning the promise and the error from the returned promise.
         try {
-          this.simulateGasFn()
+          const promise = this.simulateGasFn();
+
+          // TODO: Add debounce logic?
+
+          runInAction(() => {
+            this._isSimulating = true;
+          });
+
+          promise
             .then((gasEstimated) => {
-              if (this.enabled) {
-                runInAction(() => {
-                  this._recentGasEstimatedMap.set(key, gasEstimated);
-                });
-                this.kvStore.set(key, gasEstimated).catch((e) => {
-                  console.log(e);
-                });
-              }
+              runInAction(() => {
+                this._recentGasEstimatedMap.set(key, gasEstimated);
+              });
+              this.kvStore.set(key, gasEstimated).catch((e) => {
+                console.log(e);
+              });
             })
             .catch((e) => {
               console.log(e);
+            })
+            .finally(() => {
+              runInAction(() => {
+                this._isSimulating = false;
+              });
             });
         } catch (e) {
           console.log(e);
