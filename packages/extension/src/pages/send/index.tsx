@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import {
   AddressInput,
   FeeButtons,
@@ -27,7 +27,7 @@ import {
   openPopupWindow,
   PopupSize,
 } from "@keplr-wallet/popup";
-import { ExtensionKVStore } from "@keplr-wallet/common";
+import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -74,14 +74,36 @@ export const SendPage: FunctionComponent = observer(() => {
     EthereumEndpoint
   );
 
+  const gasSimulatorKey = useMemo(() => {
+    if (sendConfigs.amountConfig.sendCurrency) {
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+
+      if (denomHelper.type !== "native") {
+        return denomHelper.type;
+      }
+    }
+
+    return "native";
+  }, [sendConfigs.amountConfig.sendCurrency]);
+
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.main.send"),
     current.chainId,
     sendConfigs.gasConfig,
-    "send",
+    gasSimulatorKey,
     async () => {
       if (!sendConfigs.amountConfig.sendCurrency) {
         throw new Error("Send currency not set");
+      }
+
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+      // I don't know why, but simulation does not work for secret20
+      if (denomHelper.type === "secret20") {
+        return accountInfo.secret.msgOpts.send.secret20.gas;
       }
 
       const tx = accountInfo.makeSendTokenTx(

@@ -87,6 +87,7 @@ export class SecretAccountImpl {
     protected readonly queriesStore: IQueriesStore<SecretQueries>,
     protected readonly _msgOpts: SecretMsgOpts
   ) {
+    this.base.registerMakeSendTokenFn(this.processMakeSendTokenTx.bind(this));
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
@@ -95,6 +96,53 @@ export class SecretAccountImpl {
    */
   get msgOpts(): SecretMsgOpts {
     return this._msgOpts;
+  }
+
+  protected processMakeSendTokenTx(
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) {
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+
+    if (denomHelper.type === "secret20") {
+      const actualAmount = (() => {
+        let dec = new Dec(amount);
+        dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+        return dec.truncate().toString();
+      })();
+
+      if (!("type" in currency) || currency.type !== "secret20") {
+        throw new Error("Currency is not secret20");
+      }
+      return this.makeExecuteSecretContractTx(
+        "send",
+        currency.contractAddress,
+        {
+          transfer: {
+            recipient: recipient,
+            amount: actualAmount,
+          },
+        },
+        [],
+        (tx) => {
+          if (tx.code == null || tx.code === 0) {
+            // After succeeding to send token, refresh the balance.
+            const queryBalance = this.queries.queryBalances
+              .getQueryBech32Address(this.base.bech32Address)
+              .balances.find((bal) => {
+                return (
+                  bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+                );
+              });
+
+            if (queryBalance) {
+              queryBalance.fetch();
+            }
+          }
+        }
+      );
+    }
   }
 
   protected async processSendToken(
@@ -199,6 +247,59 @@ export class SecretAccountImpl {
       }
     );
     return;
+  }
+
+  makeExecuteSecretContractTx(
+    // This arg can be used to override the type of sending tx if needed.
+    type: keyof SecretMsgOpts | "unknown" = "executeSecretWasm",
+    contractAddress: string,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    obj: object,
+    sentFunds: CoinPrimitive[],
+    preOnFulfill?: (tx: any) => void
+  ) {
+    let encryptedMsg: Uint8Array;
+
+    return this.base.cosmos.makeTx(
+      type,
+      async () => {
+        encryptedMsg = await this.encryptSecretContractMsg(
+          contractAddress,
+          obj
+        );
+
+        const msg = {
+          type: this.msgOpts.executeSecretWasm.type,
+          value: {
+            sender: this.base.bech32Address,
+            contract: contractAddress,
+            // callback_code_hash: "",
+            msg: Buffer.from(encryptedMsg).toString("base64"),
+            sent_funds: sentFunds,
+            // callback_sig: null,
+          },
+        };
+
+        return {
+          aminoMsgs: [msg],
+          protoMsgs: [
+            {
+              typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
+              value: MsgExecuteContract.encode(
+                MsgExecuteContract.fromPartial({
+                  sender: Bech32Address.fromBech32(msg.value.sender).address,
+                  contract: Bech32Address.fromBech32(msg.value.contract)
+                    .address,
+                  msg: Buffer.from(msg.value.msg, "base64"),
+                  sentFunds: msg.value.sent_funds,
+                })
+              ).finish(),
+            },
+          ],
+        };
+      },
+      preOnFulfill
+    );
   }
 
   async sendExecuteSecretContractMsg(

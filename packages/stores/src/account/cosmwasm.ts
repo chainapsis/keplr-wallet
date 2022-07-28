@@ -81,6 +81,7 @@ export class CosmwasmAccountImpl {
     protected readonly queriesStore: IQueriesStore<CosmwasmQueries>,
     protected readonly _msgOpts: CosmwasmMsgOpts
   ) {
+    this.base.registerMakeSendTokenFn(this.processMakeSendTokenTx.bind(this));
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
@@ -89,6 +90,54 @@ export class CosmwasmAccountImpl {
    */
   get msgOpts(): CosmwasmMsgOpts {
     return this._msgOpts;
+  }
+
+  protected processMakeSendTokenTx(
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) {
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+
+    if (denomHelper.type === "cw20") {
+      const actualAmount = (() => {
+        let dec = new Dec(amount);
+        dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+        return dec.truncate().toString();
+      })();
+
+      if (!("type" in currency) || currency.type !== "cw20") {
+        throw new Error("Currency is not cw20");
+      }
+
+      return this.makeExecuteContractTx(
+        "send",
+        currency.contractAddress,
+        {
+          transfer: {
+            recipient: recipient,
+            amount: actualAmount,
+          },
+        },
+        [],
+        (tx) => {
+          if (tx.code == null || tx.code === 0) {
+            // After succeeding to send token, refresh the balance.
+            const queryBalance = this.queries.queryBalances
+              .getQueryBech32Address(this.base.bech32Address)
+              .balances.find((bal) => {
+                return (
+                  bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+                );
+              });
+
+            if (queryBalance) {
+              queryBalance.fetch();
+            }
+          }
+        }
+      );
+    }
   }
 
   protected async processSendToken(
@@ -155,6 +204,45 @@ export class CosmwasmAccountImpl {
     }
 
     return false;
+  }
+
+  makeExecuteContractTx(
+    // This arg can be used to override the type of sending tx if needed.
+    type: keyof CosmwasmMsgOpts | "unknown" = "executeWasm",
+    contractAddress: string,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    obj: object,
+    funds: CoinPrimitive[],
+    preOnFulfill?: (tx: any) => void
+  ) {
+    const msg = {
+      type: this.msgOpts.executeWasm.type,
+      value: {
+        sender: this.base.bech32Address,
+        contract: contractAddress,
+        msg: obj,
+        funds,
+      },
+    };
+
+    return this.base.cosmos.makeTx(
+      type,
+      {
+        aminoMsgs: [msg],
+        protoMsgs: [
+          {
+            typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+            value: MsgExecuteContract.encode({
+              sender: msg.value.sender,
+              contract: msg.value.contract,
+              msg: Buffer.from(JSON.stringify(msg.value.msg)),
+              funds: msg.value.funds,
+            }).finish(),
+          },
+        ],
+      },
+      preOnFulfill
+    );
   }
 
   async sendExecuteContractMsg(
