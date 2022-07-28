@@ -27,6 +27,7 @@ import {
   openPopupWindow,
   PopupSize,
 } from "@keplr-wallet/popup";
+import { ExtensionKVStore } from "@keplr-wallet/common";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -73,26 +74,26 @@ export const SendPage: FunctionComponent = observer(() => {
     EthereumEndpoint
   );
 
-  const gasSimulator = useGasSimulator(sendConfigs.gasConfig, async () => {
-    if (!sendConfigs.amountConfig.sendCurrency) {
-      throw new Error("Send currency not set");
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.main.send"),
+    current.chainId,
+    sendConfigs.gasConfig,
+    "send",
+    async () => {
+      if (!sendConfigs.amountConfig.sendCurrency) {
+        throw new Error("Send currency not set");
+      }
+
+      const tx = accountInfo.makeSendTokenTx(
+        sendConfigs.amountConfig.amount,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        sendConfigs.amountConfig.sendCurrency!,
+        sendConfigs.recipientConfig.recipient
+      );
+
+      return (await tx.simulate()).gasUsed;
     }
-
-    console.log(
-      sendConfigs.amountConfig.amount,
-      sendConfigs.amountConfig.sendCurrency,
-      sendConfigs.recipientConfig.recipient
-    );
-
-    const tx = accountInfo.makeSendTokenTx(
-      sendConfigs.amountConfig.amount,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      sendConfigs.amountConfig.sendCurrency!,
-      sendConfigs.recipientConfig.recipient
-    );
-
-    return (await tx.simulate()).gasUsed;
-  });
+  );
 
   useEffect(() => {
     if (query.defaultDenom) {
