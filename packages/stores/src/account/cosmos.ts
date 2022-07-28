@@ -803,6 +803,129 @@ export class CosmosAccountImpl {
     });
   }
 
+  makeIBCTransferTx(
+    channel: {
+      portId: string;
+      channelId: string;
+      counterpartyChainId: string;
+    },
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) {
+    if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
+      throw new Error("Only native token can be sent via IBC");
+    }
+
+    const actualAmount = (() => {
+      let dec = new Dec(amount);
+      dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+      return dec.truncate().toString();
+    })();
+
+    const destinationInfo = this.queriesStore.get(channel.counterpartyChainId)
+      .cosmos.queryRPCStatus;
+
+    return this.makeTx(
+      "ibcTransfer",
+      async () => {
+        // Wait until fetching complete.
+        await destinationInfo.waitFreshResponse();
+
+        if (!destinationInfo.network) {
+          throw new Error(
+            `Failed to fetch the network chain id of ${channel.counterpartyChainId}`
+          );
+        }
+
+        if (
+          ChainIdHelper.parse(destinationInfo.network).identifier !==
+          ChainIdHelper.parse(channel.counterpartyChainId).identifier
+        ) {
+          throw new Error(
+            `Fetched the network chain id is different with counterparty chain id (${destinationInfo.network}, ${channel.counterpartyChainId})`
+          );
+        }
+
+        if (
+          !destinationInfo.latestBlockHeight ||
+          destinationInfo.latestBlockHeight.equals(new Int("0"))
+        ) {
+          throw new Error(
+            `Failed to fetch the latest block of ${channel.counterpartyChainId}`
+          );
+        }
+
+        const msg = {
+          type: this.msgOpts.ibcTransfer.type,
+          value: {
+            source_port: channel.portId,
+            source_channel: channel.channelId,
+            token: {
+              denom: currency.coinMinimalDenom,
+              amount: actualAmount,
+            },
+            sender: this.base.bech32Address,
+            receiver: recipient,
+            timeout_height: {
+              revision_number: ChainIdHelper.parse(
+                destinationInfo.network
+              ).version.toString() as string | undefined,
+              // Set the timeout height as the current height + 150.
+              revision_height: destinationInfo.latestBlockHeight
+                .add(new Int("150"))
+                .toString(),
+            },
+          },
+        };
+
+        if (msg.value.timeout_height.revision_number === "0") {
+          delete msg.value.timeout_height.revision_number;
+        }
+
+        return {
+          aminoMsgs: [msg],
+          protoMsgs: [
+            {
+              typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+              value: MsgTransfer.encode(
+                MsgTransfer.fromPartial({
+                  sourcePort: msg.value.source_port,
+                  sourceChannel: msg.value.source_channel,
+                  token: msg.value.token,
+                  sender: msg.value.sender,
+                  receiver: msg.value.receiver,
+                  timeoutHeight: {
+                    revisionNumber: msg.value.timeout_height.revision_number
+                      ? msg.value.timeout_height.revision_number
+                      : "0",
+                    revisionHeight: msg.value.timeout_height.revision_height,
+                  },
+                })
+              ).finish(),
+            },
+          ],
+        };
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to send token, refresh the balance.
+          const queryBalance = this.queries.queryBalances
+            .getQueryBech32Address(this.base.bech32Address)
+            .balances.find((bal) => {
+              return (
+                bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+              );
+            });
+
+          if (queryBalance) {
+            queryBalance.fetch();
+          }
+        }
+      }
+    );
+  }
+
   async sendIBCTransferMsg(
     channel: {
       portId: string;
