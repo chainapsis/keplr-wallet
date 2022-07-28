@@ -10,6 +10,7 @@ import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/t
 import { Buffer } from "buffer/";
 import deepmerge from "deepmerge";
 import { CosmosAccount } from "./cosmos";
+import { txEventsWithPreOnFulfill } from "./utils";
 
 export interface CosmwasmAccount {
   cosmwasm: CosmwasmAccountImpl;
@@ -183,7 +184,7 @@ export class CosmwasmAccountImpl {
             gas: stdFee.gas ?? this.msgOpts.send.cw20.gas.toString(),
           },
           signOptions,
-          this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+          txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
               const queryBalance = this.queries.queryBalances
@@ -213,7 +214,12 @@ export class CosmwasmAccountImpl {
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object,
     funds: CoinPrimitive[],
-    preOnFulfill?: (tx: any) => void
+    preOnTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     const msg = {
       type: this.msgOpts.executeWasm.type,
@@ -241,7 +247,7 @@ export class CosmwasmAccountImpl {
           },
         ],
       },
-      preOnFulfill
+      preOnTxEvents
     );
   }
 
@@ -294,46 +300,8 @@ export class CosmwasmAccountImpl {
         gas: stdFee.gas,
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents)
+      onTxEvents
     );
-  }
-
-  protected txEventsWithPreOnFulfill(
-    onTxEvents:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-      | undefined,
-    preOnFulfill?: (tx: any) => void
-  ):
-    | {
-        onBroadcasted?: (txHash: Uint8Array) => void;
-        onFulfill?: (tx: any) => void;
-      }
-    | undefined {
-    if (!onTxEvents) {
-      return;
-    }
-
-    const onBroadcasted =
-      typeof onTxEvents === "function" ? undefined : onTxEvents.onBroadcasted;
-    const onFulfill =
-      typeof onTxEvents === "function" ? onTxEvents : onTxEvents.onFulfill;
-
-    return {
-      onBroadcasted,
-      onFulfill: onFulfill
-        ? (tx: any) => {
-            if (preOnFulfill) {
-              preOnFulfill(tx);
-            }
-
-            onFulfill(tx);
-          }
-        : undefined,
-    };
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmwasmQueries> {

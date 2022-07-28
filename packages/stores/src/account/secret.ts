@@ -11,6 +11,7 @@ import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly, Optional } from "utility-types";
 import { CosmosAccount } from "./cosmos";
 import deepmerge from "deepmerge";
+import { txEventsWithPreOnFulfill } from "./utils";
 
 export interface SecretAccount {
   secret: SecretAccountImpl;
@@ -188,7 +189,7 @@ export class SecretAccountImpl {
             gas: stdFee.gas ?? this.msgOpts.send.secret20.gas.toString(),
           },
           signOptions,
-          this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+          txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
               const queryBalance = this.queries.queryBalances
@@ -256,7 +257,12 @@ export class SecretAccountImpl {
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object,
     sentFunds: CoinPrimitive[],
-    preOnFulfill?: (tx: any) => void
+    preOnTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ) {
     let encryptedMsg: Uint8Array;
 
@@ -298,7 +304,7 @@ export class SecretAccountImpl {
           ],
         };
       },
-      preOnFulfill
+      preOnTxEvents
     );
   }
 
@@ -365,7 +371,7 @@ export class SecretAccountImpl {
         gas: stdFee.gas,
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents)
+      onTxEvents
     );
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -396,44 +402,6 @@ export class SecretAccountImpl {
 
     const enigmaUtils = keplr.getEnigmaUtils(this.chainId);
     return await enigmaUtils.encrypt(contractCodeHash, obj);
-  }
-
-  protected txEventsWithPreOnFulfill(
-    onTxEvents:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-      | undefined,
-    preOnFulfill?: (tx: any) => void
-  ):
-    | {
-        onBroadcasted?: (txHash: Uint8Array) => void;
-        onFulfill?: (tx: any) => void;
-      }
-    | undefined {
-    if (!onTxEvents) {
-      return;
-    }
-
-    const onBroadcasted =
-      typeof onTxEvents === "function" ? undefined : onTxEvents.onBroadcasted;
-    const onFulfill =
-      typeof onTxEvents === "function" ? onTxEvents : onTxEvents.onFulfill;
-
-    return {
-      onBroadcasted,
-      onFulfill: onFulfill
-        ? (tx: any) => {
-            if (preOnFulfill) {
-              preOnFulfill(tx);
-            }
-
-            onFulfill(tx);
-          }
-        : undefined,
-    };
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & SecretQueries> {

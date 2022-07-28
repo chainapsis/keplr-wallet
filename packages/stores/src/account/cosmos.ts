@@ -45,6 +45,7 @@ import deepmerge from "deepmerge";
 import { isAddress } from "@ethersproject/address";
 import { Buffer } from "buffer/";
 import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
+import { txEventsWithPreOnFulfill } from "./utils";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -327,7 +328,7 @@ export class CosmosAccountImpl {
             gas: stdFee.gas ?? this.msgOpts.send.native.gas.toString(),
           },
           signOptions,
-          this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+          txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
               const queryBalance = this.queries.queryBalances
@@ -643,7 +644,12 @@ export class CosmosAccountImpl {
     msgs:
       | ProtoMsgsOrWithAminoMsgs
       | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
-    preOnFulfill?: (tx: any) => void
+    preOnTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
   ): MakeTxResponse {
     const simulate = async (
       fee: Partial<Omit<StdFee, "gas">> = {},
@@ -707,7 +713,7 @@ export class CosmosAccountImpl {
         memo,
         fee,
         signOptions,
-        this.txEventsWithPreOnFulfill(onTxEvents, preOnFulfill)
+        txEventsWithPreOnFulfill(onTxEvents, preOnTxEvents)
       );
     };
 
@@ -780,7 +786,7 @@ export class CosmosAccountImpl {
           memo,
           fee,
           signOptions,
-          this.txEventsWithPreOnFulfill(onTxEvents, preOnFulfill)
+          txEventsWithPreOnFulfill(onTxEvents, preOnTxEvents)
         );
       },
       sendWithGasPrice,
@@ -916,7 +922,7 @@ export class CosmosAccountImpl {
         gas: stdFee.gas ?? this.msgOpts.ibcTransfer.gas.toString(),
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+      txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to send token, refresh the balance.
           const queryBalance = this.queries.queryBalances
@@ -994,7 +1000,7 @@ export class CosmosAccountImpl {
         gas: stdFee.gas ?? this.msgOpts.delegate.gas.toString(),
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+      txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to delegate, refresh the validators and delegations, rewards.
           this.queries.cosmos.queryValidators
@@ -1070,7 +1076,7 @@ export class CosmosAccountImpl {
         gas: stdFee.gas ?? this.msgOpts.undelegate.gas.toString(),
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+      txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to unbond, refresh the validators and delegations, unbonding delegations, rewards.
           this.queries.cosmos.queryValidators
@@ -1153,7 +1159,7 @@ export class CosmosAccountImpl {
         gas: stdFee.gas ?? this.msgOpts.redelegate.gas.toString(),
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+      txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to redelegate, refresh the validators and delegations, rewards.
           this.queries.cosmos.queryValidators
@@ -1255,7 +1261,7 @@ export class CosmosAccountImpl {
           ).toString(),
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+      txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to withdraw rewards, refresh rewards.
           this.queries.cosmos.queryRewards
@@ -1335,7 +1341,7 @@ export class CosmosAccountImpl {
         gas: stdFee.gas ?? this.msgOpts.govVote.gas.toString(),
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+      txEventsWithPreOnFulfill(onTxEvents, (tx) => {
         if (tx.code == null || tx.code === 0) {
           // After succeeding to vote, refresh the proposal.
           const proposal = this.queries.cosmos.queryGovernance.proposals.find(
@@ -1353,47 +1359,6 @@ export class CosmosAccountImpl {
         }
       })
     );
-  }
-
-  protected txEventsWithPreOnFulfill(
-    onTxEvents:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-      | undefined,
-    preOnFulfill?: (tx: any) => void
-  ):
-    | {
-        onBroadcasted?: (txHash: Uint8Array) => void;
-        onFulfill?: (tx: any) => void;
-      }
-    | undefined {
-    if (!onTxEvents) {
-      return;
-    }
-
-    const onBroadcasted =
-      typeof onTxEvents === "function" ? undefined : onTxEvents.onBroadcasted;
-    const onFulfill =
-      typeof onTxEvents === "function" ? onTxEvents : onTxEvents.onFulfill;
-
-    return {
-      onBroadcasted,
-      onFulfill:
-        onFulfill || preOnFulfill
-          ? (tx: any) => {
-              if (preOnFulfill) {
-                preOnFulfill(tx);
-              }
-
-              if (onFulfill) {
-                onFulfill(tx);
-              }
-            }
-          : undefined,
-    };
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
