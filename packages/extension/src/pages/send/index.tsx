@@ -113,7 +113,12 @@ export const SendPage: FunctionComponent = observer(() => {
         sendConfigs.recipientConfig.recipient
       );
 
-      return (await tx.simulate()).gasUsed;
+      return (
+        await tx.simulate(
+          sendConfigs.feeConfig.toStdFee(),
+          sendConfigs.memoConfig.memo
+        )
+      ).gasUsed;
     }
   );
 

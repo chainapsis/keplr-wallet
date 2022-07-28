@@ -201,9 +201,24 @@ export class GasSimulator implements IGasSimulator {
 
           promise
             .then((gasEstimated) => {
-              runInAction(() => {
-                this._recentGasEstimatedMap.set(key, gasEstimated);
-              });
+              // The fee affects the gas consumption of tx.
+              // Especially in osmosis, this difference is even bigger because fees can be swapped.
+              // In conclusion, better results are obtained when a fee is added during simulation.
+              // However, in the current structure that logic performs reactively,
+              // as the fee put into the simulation changes again after the simulation, it may fall into an infinite loop.
+              // Also, the first attempt or gas change can make two simulations.
+              // It's not a big problem to run the simulation twice. We ignored the latter problem because we can't think of an efficient way to solve it.
+              // However, since the former problem is a big problem, to prevent this problem, the gas is corrected only when there is a gas difference of 2% or more.
+              if (
+                !this.gasEstimated ||
+                Math.abs(this.gasEstimated - gasEstimated) / this.gasEstimated >
+                  0.02
+              ) {
+                runInAction(() => {
+                  this._recentGasEstimatedMap.set(key, gasEstimated);
+                });
+              }
+
               this.kvStore.set(key, gasEstimated).catch((e) => {
                 console.log(e);
               });
