@@ -435,8 +435,8 @@ export class CosmosAccountImpl {
       signOptions
     );
 
-    const getPublicKeyTypeUrl = (coinType: number, chainId: string): string => {
-      if (coinType === 60) {
+    const getPublicKeyTypeUrl = (chainId: string): string => {
+      if (useEthereumSign) {
         if (chainId.startsWith("injective")) {
           return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
         }
@@ -460,7 +460,7 @@ export class CosmosAccountImpl {
         signerInfos: [
           {
             publicKey: {
-              typeUrl: getPublicKeyTypeUrl(coinType, this.chainId),
+              typeUrl: getPublicKeyTypeUrl(this.chainId),
               value: PubKey.encode({
                 key: Buffer.from(
                   signResponse.signature.pub_key.value,
