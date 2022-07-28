@@ -165,7 +165,9 @@ export class GasSimulator implements IGasSimulator {
 
         const key = this.storeKey;
         if (!this._initialGasEstimatedMap.has(key)) {
-          this._initialGasEstimatedMap.set(key, null);
+          runInAction(() => {
+            this._initialGasEstimatedMap.set(key, null);
+          });
           this.kvStore.get<number>(key).then((saved) => {
             if (saved) {
               runInAction(() => {
