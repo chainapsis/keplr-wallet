@@ -11,13 +11,12 @@ import {
 import { useEffect, useState } from "react";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { TxChainSetter } from "./chain";
+import { ChainGetter } from "@keplr-wallet/stores";
 
 export type SimulateGasFn = () => Promise<number>;
 
-export class GasSimulator implements IGasSimulator {
-  @observable
-  protected _chainId: string;
-
+export class GasSimulator extends TxChainSetter implements IGasSimulator {
   @observable
   protected _key: string;
 
@@ -44,12 +43,15 @@ export class GasSimulator implements IGasSimulator {
   constructor(
     // TODO: Add comment about the reason why kvStore field is not observable.
     protected kvStore: KVStore,
-    protected readonly initialChainId: string,
+    chainGetter: ChainGetter,
+    initialChainId: string,
     protected readonly gasConfig: IGasConfig,
     protected readonly initialKey: string,
     // TODO: Add comment about the reason why simulateGasFn field is not observable.
     protected simulateGasFn: SimulateGasFn
   ) {
+    super(chainGetter, initialChainId);
+
     this._chainId = initialChainId;
     this._key = initialKey;
 
@@ -60,15 +62,6 @@ export class GasSimulator implements IGasSimulator {
 
   setKVStore(kvStore: KVStore) {
     this.kvStore = kvStore;
-  }
-
-  get chainId(): string {
-    return this._chainId;
-  }
-
-  @action
-  setChainId(value: string) {
-    this._chainId = value;
   }
 
   get key(): string {
@@ -263,6 +256,7 @@ export class GasSimulator implements IGasSimulator {
 // CONTRACT: Use with `observer`
 export const useGasSimulator = (
   kvStore: KVStore,
+  chainGetter: ChainGetter,
   chainId: string,
   gasConfig: IGasConfig,
   key: string,
@@ -272,6 +266,7 @@ export const useGasSimulator = (
   const [gasSimulator] = useState(() => {
     const gasSimulator = new GasSimulator(
       kvStore,
+      chainGetter,
       chainId,
       gasConfig,
       key,
@@ -286,7 +281,7 @@ export const useGasSimulator = (
     return gasSimulator;
   });
   gasSimulator.setKVStore(kvStore);
-  gasSimulator.setChainId(chainId);
+  gasSimulator.setChain(chainId);
   gasSimulator.setKey(key);
   gasSimulator.setSimulateGasFn(simulateGasFn);
 
