@@ -16,6 +16,37 @@ import { ChainGetter } from "@keplr-wallet/stores";
 
 export type SimulateGasFn = () => Promise<number>;
 
+class GasSimulatorState {
+  // If the initialGasEstimated is null, it means that there is no value stored or being loaded.
+  @observable
+  protected _initialGasEstimated: number | null = null;
+
+  @observable
+  protected _recentGasEstimated: number | undefined = undefined;
+
+  constructor() {
+    makeObservable(this);
+  }
+
+  get initialGasEstimated(): number | null {
+    return this._initialGasEstimated;
+  }
+
+  @action
+  setInitialGasEstimated(value: number) {
+    this._initialGasEstimated = value;
+  }
+
+  get recentGasEstimated(): number | undefined {
+    return this._recentGasEstimated;
+  }
+
+  @action
+  setRecentGasEstimated(value: number) {
+    this._recentGasEstimated = value;
+  }
+}
+
 export class GasSimulator extends TxChainSetter implements IGasSimulator {
   @observable
   protected _key: string;
@@ -30,13 +61,8 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   protected _isSimulating: boolean = false;
 
   // Key is the store key (probably, ${chainIdentifier}/${key})
-  // Value is the last stored value.
-  // If the value is null, it means that there is no value stored or being loaded.
   @observable.shallow
-  protected _initialGasEstimatedMap: Map<string, number | null> = new Map();
-
-  @observable.shallow
-  protected _recentGasEstimatedMap: Map<string, number> = new Map();
+  protected _stateMap: Map<string, GasSimulatorState> = new Map();
 
   protected _disposers: IReactionDisposer[] = [];
 
@@ -92,13 +118,13 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
   get gasEstimated(): number | undefined {
     const key = this.storeKey;
-    if (this._recentGasEstimatedMap.has(key)) {
-      return this._recentGasEstimatedMap.get(key);
+    const state = this.getState(key);
+    if (state.recentGasEstimated != null) {
+      return state.recentGasEstimated;
     }
 
-    const saved = this._initialGasEstimatedMap.get(key);
-    if (saved != null) {
-      return saved;
+    if (state.initialGasEstimated != null) {
+      return state.initialGasEstimated;
     }
 
     return undefined;
@@ -157,18 +183,13 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
         }
 
         const key = this.storeKey;
-        if (!this._initialGasEstimatedMap.has(key)) {
-          runInAction(() => {
-            this._initialGasEstimatedMap.set(key, null);
-          });
-          this.kvStore.get<number>(key).then((saved) => {
-            if (saved) {
-              runInAction(() => {
-                this._initialGasEstimatedMap.set(key, saved);
-              });
-            }
-          });
-        }
+        const state = this.getState(key);
+
+        this.kvStore.get<number>(key).then((saved) => {
+          if (saved) {
+            state.setInitialGasEstimated(saved);
+          }
+        });
       })
     );
 
@@ -178,13 +199,14 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
           return;
         }
 
-        const key = this.storeKey;
-
         // The lines below look a bit odd...
         // But did this intentionally because we have to catch the error in both cases,
         // the error from the function returning the promise and the error from the returned promise.
         try {
           const promise = this.simulateGasFn();
+
+          const key = this.storeKey;
+          const state = this.getState(key);
 
           // TODO: Add debounce logic?
 
@@ -207,9 +229,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
                 Math.abs(this.gasEstimated - gasEstimated) / this.gasEstimated >
                   0.02
               ) {
-                runInAction(() => {
-                  this._recentGasEstimatedMap.set(key, gasEstimated);
-                });
+                state.setRecentGasEstimated(gasEstimated);
               }
 
               this.kvStore.set(key, gasEstimated).catch((e) => {
@@ -244,6 +264,16 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     for (const disposer of this._disposers) {
       disposer();
     }
+  }
+
+  protected getState(key: string): GasSimulatorState {
+    if (!this._stateMap.has(key)) {
+      runInAction(() => {
+        this._stateMap.set(key, new GasSimulatorState());
+      });
+    }
+
+    return this._stateMap.get(key)!;
   }
 
   @computed
