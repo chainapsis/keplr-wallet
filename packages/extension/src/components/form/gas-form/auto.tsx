@@ -4,6 +4,29 @@ import styleAuto from "./auto.module.scss";
 import { Input } from "../input";
 import { IGasConfig, IGasSimulator } from "@keplr-wallet/hooks";
 
+const MultiplyIcon: FunctionComponent<{
+  size: number;
+  color: string;
+}> = ({ size, color }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      fill="none"
+      viewBox="0 0 14 14"
+    >
+      <path
+        stroke={color}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M12.657 12.686L1.343 1.373m11.314 0L1.343 12.686 12.657 1.373z"
+      />
+    </svg>
+  );
+};
+
 export const GasAutoContainer: FunctionComponent<{
   gasConfig: IGasConfig;
 
@@ -28,6 +51,9 @@ export const GasAutoContainer: FunctionComponent<{
             gasSimulator.setGasAdjustment(e.target.value);
           }}
         />
+        <div className={styleAuto.multiplyIcon}>
+          <MultiplyIcon size={16} color="#C6C6CD" />
+        </div>
         <Input
           label="Estimated"
           readOnly={true}
