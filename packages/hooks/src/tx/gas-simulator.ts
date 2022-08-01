@@ -1,4 +1,4 @@
-import { IGasConfig, IGasSimulator } from "./types";
+import { IFeeConfig, IGasConfig, IGasSimulator, IMemoConfig } from "./types";
 import {
   action,
   autorun,
@@ -12,9 +12,11 @@ import { useEffect, useState } from "react";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
-import { ChainGetter } from "@keplr-wallet/stores";
+import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
+import { StdFee } from "@cosmjs/launchpad";
 
-export type SimulateGasFn = () => Promise<number>;
+type TxSimulate = Pick<MakeTxResponse, "simulate">;
+export type SimulateGasFn = () => TxSimulate;
 
 class GasSimulatorState {
   // If the initialGasEstimated is null, it means that there is no value stored or being loaded.
@@ -23,6 +25,12 @@ class GasSimulatorState {
 
   @observable
   protected _recentGasEstimated: number | undefined = undefined;
+
+  @observable.ref
+  protected _lastTx: TxSimulate | undefined = undefined;
+  @observable.ref
+  protected _fee: StdFee | undefined = undefined;
+  protected _nonObservableMemo: string = "";
 
   constructor() {
     makeObservable(this);
@@ -44,6 +52,15 @@ class GasSimulatorState {
   @action
   setRecentGasEstimated(value: number) {
     this._recentGasEstimated = value;
+  }
+
+  get lastTx(): TxSimulate | undefined {
+    return this._lastTx;
+  }
+
+  @action
+  setLastTx(tx: TxSimulate | undefined) {
+    this._lastTx = tx;
   }
 }
 
@@ -71,7 +88,9 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     protected kvStore: KVStore,
     chainGetter: ChainGetter,
     initialChainId: string,
+    protected readonly memoConfig: IMemoConfig,
     protected readonly gasConfig: IGasConfig,
+    protected readonly feeConfig: IFeeConfig,
     protected readonly initialKey: string,
     // TODO: Add comment about the reason why simulateGasFn field is not observable.
     protected simulateGasFn: SimulateGasFn
@@ -203,19 +222,24 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
         // But did this intentionally because we have to catch the error in both cases,
         // the error from the function returning the promise and the error from the returned promise.
         try {
-          const promise = this.simulateGasFn();
+          const tx = this.simulateGasFn();
 
           const key = this.storeKey;
           const state = this.getState(key);
 
           // TODO: Add debounce logic?
 
+          const promise = tx.simulate(
+            this.feeConfig.toStdFee(),
+            this.memoConfig.memo
+          );
+
           runInAction(() => {
             this._isSimulating = true;
           });
 
           promise
-            .then((gasEstimated) => {
+            .then(({ gasUsed }) => {
               // The fee affects the gas consumption of tx.
               // Especially in osmosis, this difference is even bigger because fees can be swapped.
               // In conclusion, better results are obtained when a fee is added during simulation.
@@ -226,13 +250,12 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
               // However, since the former problem is a big problem, to prevent this problem, the gas is corrected only when there is a gas difference of 2% or more.
               if (
                 !this.gasEstimated ||
-                Math.abs(this.gasEstimated - gasEstimated) / this.gasEstimated >
-                  0.02
+                Math.abs(this.gasEstimated - gasUsed) / this.gasEstimated > 0.02
               ) {
-                state.setRecentGasEstimated(gasEstimated);
+                state.setRecentGasEstimated(gasUsed);
               }
 
-              this.kvStore.set(key, gasEstimated).catch((e) => {
+              this.kvStore.set(key, gasUsed).catch((e) => {
                 console.log(e);
               });
             })
@@ -288,7 +311,9 @@ export const useGasSimulator = (
   kvStore: KVStore,
   chainGetter: ChainGetter,
   chainId: string,
+  memoConfig: IMemoConfig,
   gasConfig: IGasConfig,
+  feeConfig: IFeeConfig,
   key: string,
   simulateGasFn: SimulateGasFn,
   initialDisabled?: boolean
@@ -298,7 +323,9 @@ export const useGasSimulator = (
       kvStore,
       chainGetter,
       chainId,
+      memoConfig,
       gasConfig,
+      feeConfig,
       key,
       simulateGasFn
     );

@@ -92,9 +92,11 @@ export const SendPage: FunctionComponent = observer(() => {
     new ExtensionKVStore("gas-simulator.main.send"),
     chainStore,
     current.chainId,
+    sendConfigs.memoConfig,
     sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
     gasSimulatorKey,
-    async () => {
+    () => {
       if (!sendConfigs.amountConfig.sendCurrency) {
         throw new Error("Send currency not set");
       }
@@ -104,22 +106,15 @@ export const SendPage: FunctionComponent = observer(() => {
       );
       // I don't know why, but simulation does not work for secret20
       if (denomHelper.type === "secret20") {
-        return accountInfo.secret.msgOpts.send.secret20.gas;
+        throw new Error("Simulating secret wasm not supported");
       }
 
-      const tx = accountInfo.makeSendTokenTx(
+      return accountInfo.makeSendTokenTx(
         sendConfigs.amountConfig.amount,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         sendConfigs.amountConfig.sendCurrency!,
         sendConfigs.recipientConfig.recipient
       );
-
-      return (
-        await tx.simulate(
-          sendConfigs.feeConfig.toStdFee(),
-          sendConfigs.memoConfig.memo
-        )
-      ).gasUsed;
     }
   );
 

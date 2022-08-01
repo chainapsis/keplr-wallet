@@ -51,26 +51,21 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     new ExtensionKVStore("gas-simulator.ibc.transfer"),
     chainStore,
     chainStore.current.chainId,
+    ibcTransferConfigs.memoConfig,
     ibcTransferConfigs.gasConfig,
+    ibcTransferConfigs.feeConfig,
     "native",
-    async () => {
+    () => {
       if (!ibcTransferConfigs.channelConfig.channel) {
         throw new Error("Channel not set yet");
       }
 
-      const tx = accountInfo.cosmos.makeIBCTransferTx(
+      return accountInfo.cosmos.makeIBCTransferTx(
         ibcTransferConfigs.channelConfig.channel,
         ibcTransferConfigs.amountConfig.amount,
         ibcTransferConfigs.amountConfig.sendCurrency,
         ibcTransferConfigs.recipientConfig.recipient
       );
-
-      return (
-        await tx.simulate(
-          ibcTransferConfigs.feeConfig.toStdFee(),
-          ibcTransferConfigs.memoConfig.memo
-        )
-      ).gasUsed;
     }
   );
 
