@@ -4,12 +4,17 @@ import { observer } from "mobx-react-lite";
 import { GasAutoContainer } from "./auto";
 import { GasInput } from "../gas-input";
 import styleContainer from "./container.module.scss";
+import { Alert } from "reactstrap";
 
 export const GasContainer: FunctionComponent<{
   label?: string;
   gasConfig: IGasConfig;
 
-  gasSimulator: IGasSimulator;
+  gasSimulator: IGasSimulator & {
+    outdatedCosmosSdk?: boolean;
+    forceDisabled?: boolean;
+    forceDisableReason?: Error | undefined;
+  };
 }> = observer(({ label, gasConfig, gasSimulator }) => {
   return (
     <div className={styleContainer.container}>
@@ -25,12 +30,23 @@ export const GasContainer: FunctionComponent<{
             type="checkbox"
             checked={gasSimulator.enabled}
             onChange={() => {
-              gasSimulator.setEnabled(!gasSimulator.enabled);
+              if (!gasSimulator.forceDisabled) {
+                gasSimulator.setEnabled(!gasSimulator.enabled);
+              }
             }}
           />
           <span className="custom-toggle-slider rounded-circle" />
         </label>
       </div>
+      {gasSimulator.outdatedCosmosSdk ? (
+        <Alert color="warning">
+          Gas estimation is not supported, because this chain uses outdated
+          cosmos-sdk
+        </Alert>
+      ) : null}
+      {gasSimulator.forceDisabled && gasSimulator.forceDisableReason ? (
+        <Alert color="warning">{gasSimulator.forceDisableReason.message}</Alert>
+      ) : null}
       {gasSimulator.enabled ? (
         <GasAutoContainer gasConfig={gasConfig} gasSimulator={gasSimulator} />
       ) : (

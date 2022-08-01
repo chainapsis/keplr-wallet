@@ -110,6 +110,11 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   protected _enabled: boolean = false;
 
   @observable
+  protected _forceDisabled: boolean = false;
+  @observable
+  protected _forceDisableReason: Error | undefined = undefined;
+
+  @observable
   protected _isSimulating: boolean = false;
 
   // Key is the store key (probably, ${chainIdentifier}/${key})
@@ -161,12 +166,47 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   }
 
   get enabled(): boolean {
+    if (this._forceDisabled) {
+      return false;
+    }
+
     return this._enabled;
   }
 
   @action
   setEnabled(value: boolean) {
+    if (this._forceDisabled && value) {
+      console.log(
+        "Gas simulator is disabled by force. You can not enable the gas simulator"
+      );
+      return;
+    }
+
     this._enabled = value;
+  }
+
+  get forceDisabled(): boolean {
+    return this._forceDisabled;
+  }
+
+  get forceDisableReason(): Error | undefined {
+    return this._forceDisableReason;
+  }
+
+  @action
+  forceDisable(valueOrReason: boolean | Error) {
+    if (!valueOrReason) {
+      this._forceDisabled = false;
+      this._forceDisableReason = undefined;
+    } else {
+      if (this.enabled) {
+        this.setEnabled(false);
+      }
+      this._forceDisabled = true;
+      if (typeof valueOrReason !== "boolean") {
+        this._forceDisableReason = valueOrReason;
+      }
+    }
   }
 
   get outdatedCosmosSdk(): boolean {
