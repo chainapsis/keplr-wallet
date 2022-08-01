@@ -11,6 +11,7 @@ import { Buffer } from "buffer/";
 import deepmerge from "deepmerge";
 import { CosmosAccount } from "./cosmos";
 import { txEventsWithPreOnFulfill } from "./utils";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export interface CosmwasmAccount {
   cosmwasm: CosmwasmAccountImpl;
@@ -110,6 +111,11 @@ export class CosmwasmAccountImpl {
       if (!("type" in currency) || currency.type !== "cw20") {
         throw new Error("Currency is not cw20");
       }
+
+      Bech32Address.validate(
+        recipient,
+        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      );
 
       return this.makeExecuteContractTx(
         "send",

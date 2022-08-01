@@ -203,11 +203,17 @@ export class CosmosAccountImpl {
         return dec.truncate().toString();
       })();
 
+      recipient = hexAdjustedRecipient(recipient);
+      Bech32Address.validate(
+        recipient,
+        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      );
+
       const msg = {
         type: this.msgOpts.send.native.type,
         value: {
           from_address: this.base.bech32Address,
-          to_address: hexAdjustedRecipient(recipient),
+          to_address: recipient,
           amount: [
             {
               denom: currency.coinMinimalDenom,

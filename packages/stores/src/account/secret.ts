@@ -116,6 +116,12 @@ export class SecretAccountImpl {
       if (!("type" in currency) || currency.type !== "secret20") {
         throw new Error("Currency is not secret20");
       }
+
+      Bech32Address.validate(
+        recipient,
+        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      );
+
       return this.makeExecuteSecretContractTx(
         "send",
         currency.contractAddress,
