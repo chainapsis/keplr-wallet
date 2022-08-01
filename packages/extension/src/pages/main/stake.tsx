@@ -1,6 +1,6 @@
-import React, { FunctionComponent, useMemo, useRef, useState } from "react";
+import React, { FunctionComponent, useRef } from "react";
 
-import { Button, Tooltip } from "reactstrap";
+import { Button } from "reactstrap";
 
 import { useStore } from "../../stores";
 
@@ -29,15 +29,8 @@ export const StakeView: FunctionComponent = observer(() => {
     accountInfo.bech32Address
   );
   const stakableReward = rewards.stakableReward;
-  const stakable = queries.queryBalances.getQueryBech32Address(
-    accountInfo.bech32Address
-  ).stakable;
 
   const isRewardExist = rewards.rewards.length > 0;
-
-  const isStakableExist = useMemo(() => {
-    return stakable.balance.toDec().gt(new Dec(0));
-  }, [stakable.balance]);
 
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
@@ -76,9 +69,6 @@ export const StakeView: FunctionComponent = observer(() => {
       }
     }
   };
-
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  const toogleTooltip = () => setTooltipOpen((value) => !value);
 
   const stakeBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -178,44 +168,22 @@ export const StakeView: FunctionComponent = observer(() => {
           href={chainStore.current.walletUrlForStaking}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => {
-            if (!isStakableExist) {
-              e.preventDefault();
-            } else {
-              analyticsStore.logEvent("Stake button clicked", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-              });
-            }
+          onClick={() => {
+            analyticsStore.logEvent("Stake button clicked", {
+              chainId: chainStore.current.chainId,
+              chainName: chainStore.current.chainName,
+            });
           }}
         >
-          {/*
-            "Disabled" property in button tag will block the mouse enter/leave events.
-            So, tooltip will not work as expected.
-            To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
-          */}
           <Button
             innerRef={stakeBtnRef}
-            className={classnames(styleStake.button, {
-              disabled: !isStakableExist,
-            })}
+            className={styleStake.button}
             color="primary"
             size="sm"
             outline={isRewardExist}
           >
             <FormattedMessage id="main.stake.button.stake" />
           </Button>
-          {!isStakableExist ? (
-            <Tooltip
-              placement="bottom"
-              isOpen={tooltipOpen}
-              target={stakeBtnRef}
-              toggle={toogleTooltip}
-              fade
-            >
-              <FormattedMessage id="main.stake.tooltip.no-asset" />
-            </Tooltip>
-          ) : null}
         </a>
       </div>
     </div>
