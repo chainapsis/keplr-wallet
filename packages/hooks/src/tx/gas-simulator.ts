@@ -1,4 +1,4 @@
-import { IFeeConfig, IGasConfig, IGasSimulator, IMemoConfig } from "./types";
+import { IFeeConfig, IGasConfig, IGasSimulator } from "./types";
 import {
   action,
   autorun,
@@ -13,7 +13,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
 import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
-import { StdFee } from "@cosmjs/launchpad";
+import { Coin, StdFee } from "@cosmjs/launchpad";
 
 type TxSimulate = Pick<MakeTxResponse, "simulate">;
 export type SimulateGasFn = () => TxSimulate;
@@ -27,10 +27,9 @@ class GasSimulatorState {
   protected _recentGasEstimated: number | undefined = undefined;
 
   @observable.ref
-  protected _lastTx: TxSimulate | undefined = undefined;
+  protected _tx: TxSimulate | undefined = undefined;
   @observable.ref
-  protected _fee: StdFee | undefined = undefined;
-  protected _nonObservableMemo: string = "";
+  protected _stdFee: StdFee | undefined = undefined;
 
   constructor() {
     makeObservable(this);
@@ -54,13 +53,36 @@ class GasSimulatorState {
     this._recentGasEstimated = value;
   }
 
-  get lastTx(): TxSimulate | undefined {
-    return this._lastTx;
+  get tx(): TxSimulate | undefined {
+    return this._tx;
   }
 
   @action
-  setLastTx(tx: TxSimulate | undefined) {
-    this._lastTx = tx;
+  refreshTx(tx: TxSimulate | undefined) {
+    this._tx = tx;
+  }
+
+  get stdFee(): StdFee | undefined {
+    return this._stdFee;
+  }
+
+  @action
+  refreshStdFee(fee: StdFee | undefined) {
+    this._stdFee = fee;
+  }
+
+  static isZeroFee(amount: readonly Coin[] | undefined): boolean {
+    if (!amount) {
+      return true;
+    }
+
+    for (const coin of amount) {
+      if (coin.amount !== "0") {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
 
@@ -88,7 +110,6 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     protected kvStore: KVStore,
     chainGetter: ChainGetter,
     initialChainId: string,
-    protected readonly memoConfig: IMemoConfig,
     protected readonly gasConfig: IGasConfig,
     protected readonly feeConfig: IFeeConfig,
     protected readonly initialKey: string,
@@ -212,65 +233,86 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
       })
     );
 
+    // autorun is intentionally split.
+    // The main reason for this implementation is that the gas when paying the fee is somewhat different from when there is a zero fee.
+    // In order to calculate the gas more accurately, the fee should be included in the simulation,
+    // but in the current reactive logic, the gas change by the simulation changes the fee and causes the simulation again.
+    // Even though the implementation is not intuitive, the goals are
+    // - Every time the observable used in simulateGasFn is updated, the simulation is refreshed.
+    // - The simulation is refreshed only when changing from zero fee to paying fee or vice versa.
     this._disposers.push(
       autorun(() => {
         if (!this.enabled) {
           return;
         }
 
-        // The lines below look a bit odd...
-        // But did this intentionally because we have to catch the error in both cases,
-        // the error from the function returning the promise and the error from the returned promise.
         try {
           const tx = this.simulateGasFn();
 
           const key = this.storeKey;
           const state = this.getState(key);
 
-          // TODO: Add debounce logic?
-
-          const promise = tx.simulate(
-            this.feeConfig.toStdFee(),
-            this.memoConfig.memo
-          );
-
-          runInAction(() => {
-            this._isSimulating = true;
-          });
-
-          promise
-            .then(({ gasUsed }) => {
-              // The fee affects the gas consumption of tx.
-              // Especially in osmosis, this difference is even bigger because fees can be swapped.
-              // In conclusion, better results are obtained when a fee is added during simulation.
-              // However, in the current structure that logic performs reactively,
-              // as the fee put into the simulation changes again after the simulation, it may fall into an infinite loop.
-              // Also, the first attempt or gas change can make two simulations.
-              // It's not a big problem to run the simulation twice. We ignored the latter problem because we can't think of an efficient way to solve it.
-              // However, since the former problem is a big problem, to prevent this problem, the gas is corrected only when there is a gas difference of 2% or more.
-              if (
-                !this.gasEstimated ||
-                Math.abs(this.gasEstimated - gasUsed) / this.gasEstimated > 0.02
-              ) {
-                state.setRecentGasEstimated(gasUsed);
-              }
-
-              this.kvStore.set(key, gasUsed).catch((e) => {
-                console.log(e);
-              });
-            })
-            .catch((e) => {
-              console.log(e);
-            })
-            .finally(() => {
-              runInAction(() => {
-                this._isSimulating = false;
-              });
-            });
+          state.refreshTx(tx);
         } catch (e) {
           console.log(e);
           return;
         }
+      })
+    );
+
+    this._disposers.push(
+      autorun(() => {
+        if (!this.enabled) {
+          return;
+        }
+
+        const fee = this.feeConfig.toStdFee();
+
+        const key = this.storeKey;
+        const state = this.getState(key);
+
+        if (
+          GasSimulatorState.isZeroFee(state.stdFee?.amount) !==
+          GasSimulatorState.isZeroFee(fee.amount)
+        ) {
+          state.refreshStdFee(fee);
+        }
+      })
+    );
+
+    this._disposers.push(
+      autorun(() => {
+        // TODO: Add debounce logic?
+
+        const key = this.storeKey;
+        const state = this.getState(key);
+
+        if (!state.tx) {
+          return;
+        }
+
+        const promise = state.tx.simulate(state.stdFee);
+
+        runInAction(() => {
+          this._isSimulating = true;
+        });
+
+        promise
+          .then(({ gasUsed }) => {
+            state.setRecentGasEstimated(gasUsed);
+
+            this.kvStore.set(key, gasUsed).catch((e) => {
+              console.log(e);
+            });
+          })
+          .catch((e) => {
+            console.log(e);
+          })
+          .finally(() => {
+            runInAction(() => {
+              this._isSimulating = false;
+            });
+          });
       })
     );
 
@@ -311,7 +353,6 @@ export const useGasSimulator = (
   kvStore: KVStore,
   chainGetter: ChainGetter,
   chainId: string,
-  memoConfig: IMemoConfig,
   gasConfig: IGasConfig,
   feeConfig: IFeeConfig,
   key: string,
@@ -323,7 +364,6 @@ export const useGasSimulator = (
       kvStore,
       chainGetter,
       chainId,
-      memoConfig,
       gasConfig,
       feeConfig,
       key,

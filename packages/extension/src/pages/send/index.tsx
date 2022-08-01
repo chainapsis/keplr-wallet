@@ -92,7 +92,6 @@ export const SendPage: FunctionComponent = observer(() => {
     new ExtensionKVStore("gas-simulator.main.send"),
     chainStore,
     current.chainId,
-    sendConfigs.memoConfig,
     sendConfigs.gasConfig,
     sendConfigs.feeConfig,
     gasSimulatorKey,

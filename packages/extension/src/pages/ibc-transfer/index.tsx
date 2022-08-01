@@ -51,7 +51,6 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     new ExtensionKVStore("gas-simulator.ibc.transfer"),
     chainStore,
     chainStore.current.chainId,
-    ibcTransferConfigs.memoConfig,
     ibcTransferConfigs.gasConfig,
     ibcTransferConfigs.feeConfig,
     "native",
