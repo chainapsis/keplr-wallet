@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text } from "@obi-wallet/common";
 import { Image, TextInput, TouchableHighlight, View } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+
 import PhoneLogo from "./assets/phoneLogo.svg";
 import Whatsapp from "./assets/whatsapp.svg";
 import MessageDots from "./assets/messageDots.svg";
@@ -69,16 +69,6 @@ export default function onboarding2() {
         >
           SECURITY QUESTION
         </Text>
-        <Picker
-          selectedValue={selectedLanguage}
-          style={{ backgroundColor: "white", height: 50, width: "100%" }}
-          onValueChange={(itemValue, itemIndex) =>
-            setSelectedLanguage(itemValue)
-          }
-        >
-          <Picker.Item label="Java" value="java" />
-          <Picker.Item label="JavaScript" value="js" />
-        </Picker>
 
         {/* <TextInput
                     value="IT HAS TO BE A SELECT"

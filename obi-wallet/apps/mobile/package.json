@@ -8,7 +8,6 @@
     "@keplr-wallet/common": "*",
     "@keplr-wallet/stores": "*",
     "@react-native-async-storage/async-storage": "*",
-    "@react-native-picker/picker": "*",
     "@react-navigation/bottom-tabs": "*",
     "@react-navigation/native": "*",
     "@react-navigation/native-stack": "*",
@@ -28,12 +27,15 @@
     "react-native-biometrics": "*",
     "react-native-config": "*",
     "react-native-fast-crypto": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-linear-gradient": "2.6.2",
+    "react-native-reanimated": "*",
     "react-native-safe-area-context": "*",
-    "react-native-linear-gradient":"2.6.2",
     "react-native-screens": "*",
     "react-native-svg": "*",
     "react-native-svg-uri": "*",
     "react-native-webview": "*",
-    "rooks": "*"
+    "rooks": "*",
+    "@react-navigation/drawer": "*"
   }
 }

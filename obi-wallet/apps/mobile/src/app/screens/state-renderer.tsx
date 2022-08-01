@@ -18,7 +18,7 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
   const { keyRingStore } = useStore();
-  return <Onboarding />;
+  return <HomeScreen />;
   switch (keyRingStore.status) {
     case KeyRingStatus.NOTLOADED:
       return <Text>Not Loaded</Text>;

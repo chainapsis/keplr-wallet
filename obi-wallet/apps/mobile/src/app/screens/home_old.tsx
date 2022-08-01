@@ -10,7 +10,7 @@ export function HomeScreen() {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ backgroundColor: '#090817' }}>
       <Home
         appsStore={appsStore}
         onAppPress={(app) => {
