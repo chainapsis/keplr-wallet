@@ -1806,7 +1806,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 25000000000,
       high: 40000000000,
     },
-    features: ["ibc-transfer", "stargate", "no-legacy-stdTx", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    features: [
+      "ibc-transfer",
+      "stargate",
+      "no-legacy-stdTx",
+      "ibc-go",
+      "eth-address-gen",
+      "eth-key-sign",
+    ],
     beta: true,
   },
   {
@@ -1849,7 +1856,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 5000000000,
       high: 10000000000,
     },
-    features: ["stargate", "ibc-transfer", "no-legacy-stdTx", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    features: [
+      "stargate",
+      "ibc-transfer",
+      "no-legacy-stdTx",
+      "ibc-go",
+      "eth-address-gen",
+      "eth-key-sign",
+    ],
     beta: true,
   },
 ];
