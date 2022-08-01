@@ -2,7 +2,8 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import styleAuto from "./auto.module.scss";
 import { Input } from "../input";
-import { IGasConfig, IGasSimulator } from "@keplr-wallet/hooks";
+import { IGasConfig, IGasSimulator, GasSimulator } from "@keplr-wallet/hooks";
+import { Alert } from "reactstrap";
 
 const MultiplyIcon: FunctionComponent<{
   size: number;
@@ -34,6 +35,13 @@ export const GasAutoContainer: FunctionComponent<{
 }> = observer(({ gasConfig, gasSimulator }) => {
   return (
     <div className={styleAuto.container}>
+      {gasSimulator instanceof GasSimulator &&
+      gasSimulator.outdatedCosmosSdk ? (
+        <Alert color="warning">
+          Gas estimation is not supported, because this chain uses outdated
+          cosmos-sdk
+        </Alert>
+      ) : null}
       <div className={styleAuto.gasAdjustmentContainer}>
         <Input
           label="Gas Adjustment"

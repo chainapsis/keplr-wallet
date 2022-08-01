@@ -14,11 +14,15 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
 import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
 import { Coin, StdFee } from "@cosmjs/launchpad";
+import Axios from "axios";
 
 type TxSimulate = Pick<MakeTxResponse, "simulate">;
 export type SimulateGasFn = () => TxSimulate;
 
 class GasSimulatorState {
+  @observable
+  protected _outdatedCosmosSdk: boolean = false;
+
   // If the initialGasEstimated is null, it means that there is no value stored or being loaded.
   @observable
   protected _initialGasEstimated: number | null = null;
@@ -33,6 +37,15 @@ class GasSimulatorState {
 
   constructor() {
     makeObservable(this);
+  }
+
+  get outdatedCosmosSdk(): boolean {
+    return this._outdatedCosmosSdk;
+  }
+
+  @action
+  setOutdatedCosmosSdk(value: boolean) {
+    this._outdatedCosmosSdk = value;
   }
 
   get initialGasEstimated(): number | null {
@@ -154,6 +167,12 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   @action
   setEnabled(value: boolean) {
     this._enabled = value;
+  }
+
+  get outdatedCosmosSdk(): boolean {
+    const key = this.storeKey;
+    const state = this.getState(key);
+    return state.outdatedCosmosSdk;
   }
 
   get gasEstimated(): number | undefined {
@@ -300,12 +319,24 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
         promise
           .then(({ gasUsed }) => {
             state.setRecentGasEstimated(gasUsed);
+            state.setOutdatedCosmosSdk(false);
 
             this.kvStore.set(key, gasUsed).catch((e) => {
               console.log(e);
             });
           })
           .catch((e) => {
+            if (Axios.isAxiosError(e) && e.response) {
+              if (
+                e.response.status === 400 &&
+                e.response.data?.message &&
+                typeof e.response.data.message === "string" &&
+                e.response.data.message.includes("invalid empty tx")
+              ) {
+                state.setOutdatedCosmosSdk(true);
+              }
+            }
+
             console.log(e);
           })
           .finally(() => {
