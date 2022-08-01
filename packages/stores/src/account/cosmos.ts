@@ -650,9 +650,7 @@ export class CosmosAccountImpl {
 
   makeTx(
     type: string | "unknown",
-    msgs:
-      | ProtoMsgsOrWithAminoMsgs
-      | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
+    msgs: ProtoMsgsOrWithAminoMsgs | (() => Promise<ProtoMsgsOrWithAminoMsgs>),
     preOnTxEvents?:
       | ((tx: any) => void)
       | {
