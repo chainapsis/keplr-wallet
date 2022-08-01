@@ -147,6 +147,9 @@ export class CosmwasmAccountImpl {
     }
   }
 
+  /**
+   * @deprecated
+   */
   protected async processSendToken(
     amount: string,
     currency: AppCurrency,
@@ -227,6 +230,11 @@ export class CosmwasmAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ) {
+    Bech32Address.validate(
+      contractAddress,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    );
+
     const msg = {
       type: this.msgOpts.executeWasm.type,
       value: {
@@ -257,6 +265,9 @@ export class CosmwasmAccountImpl {
     );
   }
 
+  /**
+   * @deprecated
+   */
   async sendExecuteContractMsg(
     // This arg can be used to override the type of sending tx if needed.
     type: keyof CosmwasmMsgOpts | "unknown" = "executeWasm",

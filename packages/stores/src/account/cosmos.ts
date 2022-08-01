@@ -258,6 +258,9 @@ export class CosmosAccountImpl {
     }
   }
 
+  /**
+   * @deprecated
+   */
   protected async processSendToken(
     amount: string,
     currency: AppCurrency,
@@ -1070,6 +1073,61 @@ export class CosmosAccountImpl {
     );
   }
 
+  makeDelegateTx(amount: string, validatorAddress: string) {
+    Bech32Address.validate(
+      validatorAddress,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+    );
+
+    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    let dec = new Dec(amount);
+    dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
+
+    const msg = {
+      type: this.msgOpts.delegate.type,
+      value: {
+        delegator_address: this.base.bech32Address,
+        validator_address: validatorAddress,
+        amount: {
+          denom: currency.coinMinimalDenom,
+          amount: dec.truncate().toString(),
+        },
+      },
+    };
+
+    return this.makeTx(
+      "delegate",
+      {
+        aminoMsgs: [msg],
+        protoMsgs: [
+          {
+            typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
+            value: MsgDelegate.encode({
+              delegatorAddress: msg.value.delegator_address,
+              validatorAddress: msg.value.validator_address,
+              amount: msg.value.amount,
+            }).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to delegate, refresh the validators and delegations, rewards.
+          this.queries.cosmos.queryValidators
+            .getQueryStatus(BondStatus.Bonded)
+            .fetch();
+          this.queries.cosmos.queryDelegations
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+          this.queries.cosmos.queryRewards
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+        }
+      }
+    );
+  }
+
   /**
    * Send `MsgDelegate` msg to the chain.
    * @param amount Decimal number used by humans.
@@ -1146,7 +1204,66 @@ export class CosmosAccountImpl {
     );
   }
 
+  makeUndelegateTx(amount: string, validatorAddress: string) {
+    Bech32Address.validate(
+      validatorAddress,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+    );
+
+    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    let dec = new Dec(amount);
+    dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
+
+    const msg = {
+      type: this.msgOpts.undelegate.type,
+      value: {
+        delegator_address: this.base.bech32Address,
+        validator_address: validatorAddress,
+        amount: {
+          denom: currency.coinMinimalDenom,
+          amount: dec.truncate().toString(),
+        },
+      },
+    };
+
+    return this.makeTx(
+      "undelegate",
+      {
+        aminoMsgs: [msg],
+        protoMsgs: [
+          {
+            typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate",
+            value: MsgUndelegate.encode({
+              delegatorAddress: msg.value.delegator_address,
+              validatorAddress: msg.value.validator_address,
+              amount: msg.value.amount,
+            }).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to unbond, refresh the validators and delegations, unbonding delegations, rewards.
+          this.queries.cosmos.queryValidators
+            .getQueryStatus(BondStatus.Bonded)
+            .fetch();
+          this.queries.cosmos.queryDelegations
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+          this.queries.cosmos.queryUnbondingDelegations
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+          this.queries.cosmos.queryRewards
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+        }
+      }
+    );
+  }
+
   /**
+   * @deprecated
    * Send `MsgUndelegate` msg to the chain.
    * @param amount Decimal number used by humans.
    *               If amount is 0.1 and the stake currenct is uatom, actual amount will be changed to the 100000uatom.
@@ -1225,7 +1342,73 @@ export class CosmosAccountImpl {
     );
   }
 
+  makeBeginRedelegateTx(
+    amount: string,
+    srcValidatorAddress: string,
+    dstValidatorAddress: string
+  ) {
+    Bech32Address.validate(
+      srcValidatorAddress,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+    );
+    Bech32Address.validate(
+      dstValidatorAddress,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+    );
+
+    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    let dec = new Dec(amount);
+    dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
+
+    const msg = {
+      type: this.msgOpts.redelegate.type,
+      value: {
+        delegator_address: this.base.bech32Address,
+        validator_src_address: srcValidatorAddress,
+        validator_dst_address: dstValidatorAddress,
+        amount: {
+          denom: currency.coinMinimalDenom,
+          amount: dec.truncate().toString(),
+        },
+      },
+    };
+
+    return this.makeTx(
+      "redelegate",
+      {
+        aminoMsgs: [msg],
+        protoMsgs: [
+          {
+            typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+            value: MsgBeginRedelegate.encode({
+              delegatorAddress: msg.value.delegator_address,
+              validatorSrcAddress: msg.value.validator_src_address,
+              validatorDstAddress: msg.value.validator_dst_address,
+              amount: msg.value.amount,
+            }).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to redelegate, refresh the validators and delegations, rewards.
+          this.queries.cosmos.queryValidators
+            .getQueryStatus(BondStatus.Bonded)
+            .fetch();
+          this.queries.cosmos.queryDelegations
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+          this.queries.cosmos.queryRewards
+            .getQueryBech32Address(this.base.bech32Address)
+            .fetch();
+        }
+      }
+    );
+  }
+
   /**
+   * @deprecated
    * Send `MsgBeginRedelegate` msg to the chain.
    * @param amount Decimal number used by humans.
    *               If amount is 0.1 and the stake currenct is uatom, actual amount will be changed to the 100000uatom.
@@ -1306,32 +1489,36 @@ export class CosmosAccountImpl {
   }
 
   makeWithdrawDelegationRewardTx(validatorAddresses: string[]) {
+    for (const validatorAddress of validatorAddresses) {
+      Bech32Address.validate(
+        validatorAddress,
+        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+      );
+    }
+
+    const msgs = validatorAddresses.map((validatorAddress) => {
+      return {
+        type: this.msgOpts.withdrawRewards.type,
+        value: {
+          delegator_address: this.base.bech32Address,
+          validator_address: validatorAddress,
+        },
+      };
+    });
+
     return this.makeTx(
       "withdrawRewards",
-      () => {
-        const msgs = validatorAddresses.map((validatorAddress) => {
+      {
+        aminoMsgs: msgs,
+        protoMsgs: msgs.map((msg) => {
           return {
-            type: this.msgOpts.withdrawRewards.type,
-            value: {
-              delegator_address: this.base.bech32Address,
-              validator_address: validatorAddress,
-            },
+            typeUrl: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+            value: MsgWithdrawDelegatorReward.encode({
+              delegatorAddress: msg.value.delegator_address,
+              validatorAddress: msg.value.validator_address,
+            }).finish(),
           };
-        });
-
-        return {
-          aminoMsgs: msgs,
-          protoMsgs: msgs.map((msg) => {
-            return {
-              typeUrl:
-                "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-              value: MsgWithdrawDelegatorReward.encode({
-                delegatorAddress: msg.value.delegator_address,
-                validatorAddress: msg.value.validator_address,
-              }).finish(),
-            };
-          }),
-        };
+        }),
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1344,6 +1531,9 @@ export class CosmosAccountImpl {
     );
   }
 
+  /**
+   * @deprecated
+   */
   async sendWithdrawDelegationRewardMsgs(
     validatorAddresses: string[],
     memo: string = "",
@@ -1401,6 +1591,83 @@ export class CosmosAccountImpl {
     );
   }
 
+  makeGovVoteTx(
+    proposalId: string,
+    option: "Yes" | "No" | "Abstain" | "NoWithVeto"
+  ) {
+    const voteOption = (() => {
+      switch (option) {
+        case "Yes":
+          return 1;
+        case "Abstain":
+          return 2;
+        case "No":
+          return 3;
+        case "NoWithVeto":
+          return 4;
+      }
+    })();
+
+    const msg = {
+      type: this.msgOpts.govVote.type,
+      value: {
+        option: voteOption,
+        proposal_id: proposalId,
+        voter: this.base.bech32Address,
+      },
+    };
+
+    return this.makeTx(
+      "govVote",
+      {
+        aminoMsgs: [msg],
+        protoMsgs: [
+          {
+            typeUrl: "/cosmos.gov.v1beta1.MsgVote",
+            value: MsgVote.encode({
+              proposalId: msg.value.proposal_id,
+              voter: msg.value.voter,
+              option: (() => {
+                switch (msg.value.option) {
+                  case 1:
+                    return VoteOption.VOTE_OPTION_YES;
+                  case 2:
+                    return VoteOption.VOTE_OPTION_ABSTAIN;
+                  case 3:
+                    return VoteOption.VOTE_OPTION_NO;
+                  case 4:
+                    return VoteOption.VOTE_OPTION_NO_WITH_VETO;
+                  default:
+                    return VoteOption.VOTE_OPTION_UNSPECIFIED;
+                }
+              })(),
+            }).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          // After succeeding to vote, refresh the proposal.
+          const proposal = this.queries.cosmos.queryGovernance.proposals.find(
+            (proposal) => proposal.id === proposalId
+          );
+          if (proposal) {
+            proposal.fetch();
+          }
+
+          const vote = this.queries.cosmos.queryProposalVote.getVote(
+            proposalId,
+            this.base.bech32Address
+          );
+          vote.fetch();
+        }
+      }
+    );
+  }
+
+  /**
+   * @deprecated
+   */
   async sendGovVoteMsg(
     proposalId: string,
     option: "Yes" | "No" | "Abstain" | "NoWithVeto",

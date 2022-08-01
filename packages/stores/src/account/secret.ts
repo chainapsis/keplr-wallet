@@ -152,6 +152,9 @@ export class SecretAccountImpl {
     }
   }
 
+  /**
+   * @deprecated
+   */
   protected async processSendToken(
     amount: string,
     currency: AppCurrency,
@@ -229,20 +232,21 @@ export class SecretAccountImpl {
     crypto.getRandomValues(random);
     const key = Buffer.from(random).toString("hex");
 
-    await this.sendExecuteSecretContractMsg(
+    await this.makeExecuteSecretContractTx(
       "createSecret20ViewingKey",
       contractAddress,
       {
         set_viewing_key: { key },
       },
-      [],
-      memo,
+      []
+    ).send(
       {
         amount: stdFee.amount ?? [],
         gas: stdFee.gas ?? this.msgOpts.createSecret20ViewingKey.gas.toString(),
       },
+      memo,
       signOptions,
-      async (tx) => {
+      (tx) => {
         let viewingKey = "";
         if (tx.code == null || tx.code === 0) {
           viewingKey = key;
@@ -270,6 +274,11 @@ export class SecretAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ) {
+    Bech32Address.validate(
+      contractAddress,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    );
+
     let encryptedMsg: Uint8Array;
 
     return this.base.cosmos.makeTx(
@@ -314,6 +323,9 @@ export class SecretAccountImpl {
     );
   }
 
+  /**
+   * @deprecated
+   */
   async sendExecuteSecretContractMsg(
     // This arg can be used to override the type of sending tx if needed.
     type: keyof SecretMsgOpts | "unknown" = "executeSecretWasm",
