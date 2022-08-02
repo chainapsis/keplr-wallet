@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/cosmos",
-  "version": "0.10.13",
+  "version": "0.10.14",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -18,10 +18,10 @@
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@keplr-wallet/crypto": "0.10.13",
-    "@keplr-wallet/proto-types": "0.10.13",
-    "@keplr-wallet/types": "0.10.13",
-    "@keplr-wallet/unit": "0.10.13",
+    "@keplr-wallet/crypto": "0.10.14",
+    "@keplr-wallet/proto-types": "0.10.14",
+    "@keplr-wallet/types": "0.10.14",
+    "@keplr-wallet/unit": "0.10.14",
     "axios": "^0.21.4",
     "bech32": "^1.1.4",
     "buffer": "^6.0.3",

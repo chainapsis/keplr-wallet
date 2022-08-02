@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/wc-client",
-  "version": "0.10.13",
+  "version": "0.10.14",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -19,9 +19,9 @@
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/proto-signing": "^0.24.0-alpha.25",
-    "@keplr-wallet/common": "0.10.13",
-    "@keplr-wallet/provider": "0.10.13",
-    "@keplr-wallet/types": "0.10.13",
+    "@keplr-wallet/common": "0.10.14",
+    "@keplr-wallet/provider": "0.10.14",
+    "@keplr-wallet/types": "0.10.14",
     "@walletconnect/types": "^1.6.4",
     "@walletconnect/utils": "^1.6.4",
     "buffer": "^6.0.3",

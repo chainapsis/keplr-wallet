@@ -123,6 +123,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollViewInBottomTabView
+      backgroundMode="gradient"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }

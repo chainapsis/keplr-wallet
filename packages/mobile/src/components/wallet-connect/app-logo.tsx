@@ -43,7 +43,8 @@ export const WCAppLogo: FunctionComponent<{
           "border-radius-64",
           "justify-center",
           "items-center",
-          "background-color-text-black-very-very-low",
+          "background-color-gray-200",
+          "dark:background-color-platinum-300",
         ]),
         altLogoStyle,
       ])}

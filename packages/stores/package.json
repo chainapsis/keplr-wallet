@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores",
-  "version": "0.10.13",
+  "version": "0.10.14",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -17,21 +17,21 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
-    "@keplr-wallet/provider-mock": "0.10.13"
+    "@keplr-wallet/provider-mock": "0.10.14"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@cosmjs/tendermint-rpc": "^0.24.1",
     "@ethersproject/address": "^5.6.0",
-    "@keplr-wallet/background": "0.10.13",
-    "@keplr-wallet/common": "0.10.13",
-    "@keplr-wallet/cosmos": "0.10.13",
-    "@keplr-wallet/crypto": "0.10.13",
-    "@keplr-wallet/proto-types": "0.10.13",
-    "@keplr-wallet/router": "0.10.13",
-    "@keplr-wallet/types": "0.10.13",
-    "@keplr-wallet/unit": "0.10.13",
+    "@keplr-wallet/background": "0.10.14",
+    "@keplr-wallet/common": "0.10.14",
+    "@keplr-wallet/cosmos": "0.10.14",
+    "@keplr-wallet/crypto": "0.10.14",
+    "@keplr-wallet/proto-types": "0.10.14",
+    "@keplr-wallet/router": "0.10.14",
+    "@keplr-wallet/types": "0.10.14",
+    "@keplr-wallet/unit": "0.10.14",
     "@tharsis/address-converter": "^0.1.5",
     "axios": "^0.21.4",
     "buffer": "^6.0.3",

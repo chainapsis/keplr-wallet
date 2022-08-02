@@ -10,6 +10,7 @@ import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/icon";
 import LottieView from "lottie-react-native";
 import * as WebBrowser from "expo-web-browser";
+import { SimpleGradient } from "../../components/svg";
 
 export const TxSuccessResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -62,13 +63,20 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
+      backgroundMode={null}
       disableSafeArea
-      style={style.flatten([
-        "flex-grow-1",
-        "items-center",
-        "background-color-white",
-      ])}
+      style={style.flatten(["flex-grow-1", "items-center"])}
     >
+      <View style={style.flatten(["absolute-fill"])}>
+        <SimpleGradient
+          degree={
+            style.get("tx-result-screen-success-gradient-background").degree
+          }
+          stops={
+            style.get("tx-result-screen-success-gradient-background").stops
+          }
+        />
+      </View>
       <View style={style.flatten(["flex-3"])} />
       <View
         style={style.flatten([
@@ -78,31 +86,32 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
           "items-center",
         ])}
       >
-        <LottieView
-          source={require("../../assets/lottie/pangpare.json")}
-          progress={pangpareAnimProgress}
-          style={style.flatten([
-            "width-full",
-            "height-400",
-            "margin-bottom-24",
-          ])}
-        />
+        {/*<LottieView*/}
+        {/*  source={require("../../assets/lottie/pangpare.json")}*/}
+        {/*  progress={pangpareAnimProgress}*/}
+        {/*  style={style.flatten([*/}
+        {/*    "width-full",*/}
+        {/*    "height-400",*/}
+        {/*    "margin-bottom-24",*/}
+        {/*  ])}*/}
+        {/*/>*/}
         <View
           style={{
             left: 0,
             right: 0,
             top: 0,
             bottom: 0,
-            ...style.flatten([
-              "absolute",
-              "justify-center",
-              "items-center",
-              "background-color-white",
-            ]),
+            ...style.flatten(["absolute", "justify-center", "items-center"]),
           }}
         >
           <LottieView
             source={require("../../assets/lottie/success.json")}
+            colorFilters={[
+              {
+                keypath: "Success Icon",
+                color: style.flatten(["color-green-400"]).color,
+              },
+            ]}
             progress={successAnimProgress}
             style={style.flatten(["width-160"])}
           />
@@ -112,7 +121,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-black-medium",
+          "color-text-high",
           "margin-top-82",
           "margin-bottom-32",
         ])}
@@ -131,22 +140,10 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
           },
         ])}
       >
-        <Text
-          style={style.flatten([
-            "body2",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
+        <Text style={style.flatten(["body2", "text-center", "color-text-low"])}>
           Congratulations!
         </Text>
-        <Text
-          style={style.flatten([
-            "body2",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
+        <Text style={style.flatten(["body2", "text-center", "color-text-low"])}>
           Your transaction has been completed and confirmed by the blockchain.
         </Text>
       </View>
@@ -170,14 +167,11 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             size="default"
             text={`View on ${chainInfo.raw.txExplorer.name}`}
             mode="text"
-            rightIcon={
+            rightIcon={(color) => (
               <View style={style.flatten(["margin-left-8"])}>
-                <RightArrowIcon
-                  color={style.get("color-primary").color}
-                  height={12}
-                />
+                <RightArrowIcon color={color} height={12} />
               </View>
-            }
+            )}
             onPress={() => {
               if (chainInfo.raw.txExplorer) {
                 WebBrowser.openBrowserAsync(

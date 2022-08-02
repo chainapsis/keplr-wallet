@@ -22,8 +22,6 @@ export const UnbondingCard: FunctionComponent<{
       (unbonding) => unbonding.validatorAddress === validatorAddress
     );
 
-  const stakingParams = queries.cosmos.queryStakingParams.response;
-
   const style = useStyle();
 
   const intl = useIntl();
@@ -31,7 +29,7 @@ export const UnbondingCard: FunctionComponent<{
   return unbonding ? (
     <Card style={containerStyle}>
       <CardBody>
-        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+        <Text style={style.flatten(["h4", "color-text-highest"])}>
           My Unstaking
         </Text>
         <View style={style.flatten(["padding-top-4", "padding-bottom-8"])}>
@@ -70,11 +68,14 @@ export const UnbondingCard: FunctionComponent<{
               const currentTime = new Date().getTime();
               const endTime = new Date(entry.completionTime).getTime();
               const remainingTime = Math.floor((endTime - currentTime) / 1000);
-              const unbondingTime = stakingParams
-                ? parseFloat(stakingParams.data.params.unbonding_time) / 10 ** 9
+              const unbondingTime = queries.cosmos.queryStakingParams.response
+                ? queries.cosmos.queryStakingParams.unbondingTimeSec
                 : 3600 * 24 * 21;
 
-              return 100 - (remainingTime / unbondingTime) * 100;
+              return Math.max(
+                0,
+                Math.min(100 - (remainingTime / unbondingTime) * 100, 100)
+              );
             })();
 
             return (
@@ -90,10 +91,7 @@ export const UnbondingCard: FunctionComponent<{
                   ])}
                 >
                   <Text
-                    style={style.flatten([
-                      "subtitle2",
-                      "color-text-black-medium",
-                    ])}
+                    style={style.flatten(["subtitle2", "color-text-middle"])}
                   >
                     {entry.balance
                       .shrink(true)
@@ -102,9 +100,7 @@ export const UnbondingCard: FunctionComponent<{
                       .toString()}
                   </Text>
                   <View style={style.get("flex-1")} />
-                  <Text
-                    style={style.flatten(["body2", "color-text-black-low"])}
-                  >
+                  <Text style={style.flatten(["body2", "color-text-low"])}>
                     {remainingText}
                   </Text>
                 </View>

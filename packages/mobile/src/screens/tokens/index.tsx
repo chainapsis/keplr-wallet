@@ -75,7 +75,7 @@ export const TokensScreen: FunctionComponent = observer(() => {
   }, [showAddTokenButton, smartNavigation]);
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="gradient">
       {tokens.length > 0 ? (
         <Card style={style.flatten(["padding-bottom-14"])}>
           {tokens.map((token) => {
@@ -144,7 +144,7 @@ export const TokenItem: FunctionComponent<{
         <Text
           style={style.flatten([
             "subtitle3",
-            "color-text-black-low",
+            "color-text-low",
             "margin-bottom-4",
             "uppercase",
           ])}
@@ -152,11 +152,7 @@ export const TokenItem: FunctionComponent<{
           {balance.currency.coinDenom}
         </Text>
         <Text
-          style={style.flatten([
-            "h5",
-            "color-text-black-medium",
-            "max-width-240",
-          ])}
+          style={style.flatten(["h5", "color-text-high", "max-width-240"])}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -172,7 +168,9 @@ export const TokenItem: FunctionComponent<{
       <View style={style.get("flex-1")} />
       <RightArrowIcon
         height={16}
-        color={style.get("color-text-black-very-very-low").color}
+        color={
+          style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
+        }
       />
     </RectButton>
   );
