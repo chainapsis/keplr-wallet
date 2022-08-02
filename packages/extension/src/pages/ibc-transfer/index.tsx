@@ -59,6 +59,16 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
         throw new Error("Channel not set yet");
       }
 
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        ibcTransferConfigs.amountConfig.error != null ||
+        ibcTransferConfigs.recipientConfig.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
       return accountInfo.cosmos.makeIBCTransferTx(
         ibcTransferConfigs.channelConfig.channel,
         ibcTransferConfigs.amountConfig.amount,

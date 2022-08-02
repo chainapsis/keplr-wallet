@@ -100,6 +100,16 @@ export const SendPage: FunctionComponent = observer(() => {
         throw new Error("Send currency not set");
       }
 
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        sendConfigs.amountConfig.error != null ||
+        sendConfigs.recipientConfig.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
       const denomHelper = new DenomHelper(
         sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
       );
