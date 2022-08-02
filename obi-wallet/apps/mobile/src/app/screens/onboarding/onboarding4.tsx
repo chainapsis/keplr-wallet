@@ -59,7 +59,7 @@ export default function Onboarding4() {
             Authenticate your keys
           </Text>
           <Text style={{ color: "#999CB6", fontSize: 14, fontWeight: "400" }}>
-            With Obi, your face ID, icloud, and phone number work as a
+            With Obi, your Face ID, iCloud, and phone number work as a
             multi-factor authtnticator
           </Text>
         </View>
