@@ -53,26 +53,27 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Poppins-Black.ttf</string>
-		<string>Poppins-BlackItalic.ttf</string>
-		<string>Poppins-Bold.ttf</string>
-		<string>Poppins-BoldItalic.ttf</string>
-		<string>Poppins-ExtraBold.ttf</string>
-		<string>Poppins-ExtraBoldItalic.ttf</string>
-		<string>Poppins-ExtraLight.ttf</string>
-		<string>Poppins-ExtraLightItalic.ttf</string>
-		<string>Poppins-Italic.ttf</string>
-		<string>Poppins-Light.ttf</string>
-		<string>Poppins-LightItalic.ttf</string>
-		<string>Poppins-Medium.ttf</string>
-		<string>Poppins-MediumItalic.ttf</string>
-		<string>Poppins-Regular.ttf</string>
-		<string>Poppins-SemiBold.ttf</string>
-		<string>Poppins-SemiBoldItalic.ttf</string>
-		<string>Poppins-Thin.ttf</string>
-		<string>Poppins-ThinItalic.ttf</string>
+		<string>Inter-Black.otf</string>
+		<string>Inter-BlackItalic.otf</string>
+		<string>Inter-Bold.otf</string>
+		<string>Inter-BoldItalic.otf</string>
+		<string>Inter-ExtraBold.otf</string>
+		<string>Inter-ExtraBoldItalic.otf</string>
+		<string>Inter-ExtraLight.otf</string>
+		<string>Inter-ExtraLightItalic.otf</string>
+		<string>Inter-Italic.otf</string>
+		<string>Inter-Light.otf</string>
+		<string>Inter-LightItalic.otf</string>
+		<string>Inter-Medium.otf</string>
+		<string>Inter-MediumItalic.otf</string>
+		<string>Inter-Regular.otf</string>
+		<string>Inter-SemiBold.otf</string>
+		<string>Inter-SemiBoldItalic.otf</string>
+		<string>Inter-Thin.otf</string>
+		<string>Inter-ThinItalic.otf</string>
+		<string>Inter-V.ttf</string>
 	</array>
-    <key>NSFaceIDUsageDescription</key>
-    <string>We need your permission to access FaceID</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>We need your permission to access FaceID</string>
 </dict>
 </plist>

@@ -2,80 +2,80 @@
   "migIndex": 1,
   "data": [
     {
-      "path": "src/assets/fonts/poppins/OFL.txt",
-      "sha1": "8d6c34b70e3d638c82d7b5aba3f847f7d6d2c831"
+      "path": "src/assets/fonts/Inter/Inter-Black.otf",
+      "sha1": "5df89a5ca8b710fac50ccde5539bc2aececb184c"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-Black.ttf",
-      "sha1": "645e04c53c6b5b35bce654a811ebce16af8aa721"
+      "path": "src/assets/fonts/Inter/Inter-BlackItalic.otf",
+      "sha1": "a2988d597f61e19ee05a4b7404086b8ca43d0731"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-BlackItalic.ttf",
-      "sha1": "be4ef2aac7775a4b0179c0ecfce6cea8f7783f63"
+      "path": "src/assets/fonts/Inter/Inter-Bold.otf",
+      "sha1": "892e9a770a5340e46c9c7d9f25fa2699d9275923"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-Bold.ttf",
-      "sha1": "875cf0cecd647bcf22e79d633d868c1b1ec98dfa"
+      "path": "src/assets/fonts/Inter/Inter-BoldItalic.otf",
+      "sha1": "8774206d7703bfe27f6d5302e5385983c26e13a1"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-BoldItalic.ttf",
-      "sha1": "6de8952ca08d27ee77f57347d2cef4b4e26aa78f"
+      "path": "src/assets/fonts/Inter/Inter-ExtraBold.otf",
+      "sha1": "d458dab978fd1894de0eed6adacacb4853596473"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-ExtraBold.ttf",
-      "sha1": "4b5c0750f073abd576413a0898d3b95adaf199c8"
+      "path": "src/assets/fonts/Inter/Inter-ExtraBoldItalic.otf",
+      "sha1": "e63778737330052f9015dbd76ba904fcf05b87d7"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-ExtraBoldItalic.ttf",
-      "sha1": "94d3ee3acdbd00e37a715a25f2b5237666b5b8a3"
+      "path": "src/assets/fonts/Inter/Inter-ExtraLight.otf",
+      "sha1": "2c396705e77547af57076584bdd5895c2c81141a"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-ExtraLight.ttf",
-      "sha1": "85af6582a7e6155917c605f9d3fed68c02b23b06"
+      "path": "src/assets/fonts/Inter/Inter-ExtraLightItalic.otf",
+      "sha1": "d367b8910d04480c7cf0be5bb87126170e676c2b"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-ExtraLightItalic.ttf",
-      "sha1": "6fa0418f91032680d2d8fe4843009f2c80faa61d"
+      "path": "src/assets/fonts/Inter/Inter-Italic.otf",
+      "sha1": "1d8db12a427db7418be418b77bafb9a916ac0534"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-Italic.ttf",
-      "sha1": "e2bfcd56016c3c915221ef1c5fc1a17b0776eb91"
+      "path": "src/assets/fonts/Inter/Inter-Light.otf",
+      "sha1": "c89f3036b53490be4b25d15e9a3cd4caf3e67d0c"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-Light.ttf",
-      "sha1": "e247a92158e112f8bf7b638c8d95381d66b00dbb"
+      "path": "src/assets/fonts/Inter/Inter-LightItalic.otf",
+      "sha1": "6716c0590ef33f9ca0155cd5c5d99f8ca90b5834"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-LightItalic.ttf",
-      "sha1": "f76102b361e705751a83b7b22fe954daf1f27dd4"
+      "path": "src/assets/fonts/Inter/Inter-Medium.otf",
+      "sha1": "279fa3c60d682531d549d0ec9ed91f1b83402d40"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-Medium.ttf",
-      "sha1": "283f21b44efbdbf276ba802be2d949a36bbc4233"
+      "path": "src/assets/fonts/Inter/Inter-MediumItalic.otf",
+      "sha1": "89d0a6cca45c1ac1cb30c1957b9520b703c42933"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-MediumItalic.ttf",
-      "sha1": "b592c62fdf88c40cfd0f031bba6423b1d4430472"
+      "path": "src/assets/fonts/Inter/Inter-Regular.otf",
+      "sha1": "4786a0feb4c853189782709a5ac5b5dfb696942b"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-Regular.ttf",
-      "sha1": "fdd3002e7d814ee47c1c1b8487c72c6bbb3a2d00"
+      "path": "src/assets/fonts/Inter/Inter-SemiBold.otf",
+      "sha1": "ce2ccd0b91ffb1f8c894b6d60f21443e0769217c"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-SemiBold.ttf",
-      "sha1": "8a4ace9392d06bcb7f8ea2f5169b07e4c383a90d"
+      "path": "src/assets/fonts/Inter/Inter-SemiBoldItalic.otf",
+      "sha1": "8cf127ce6e16f95dccdae0eb553493d625bd0756"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-SemiBoldItalic.ttf",
-      "sha1": "0c8bed0a5942b2388d36b11c115685d9f01700b0"
+      "path": "src/assets/fonts/Inter/Inter-Thin.otf",
+      "sha1": "b9a1ad08b8f1724544ae075d66c98b7fb507b80d"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-Thin.ttf",
-      "sha1": "09ba4dcd5509c8085bf88c665dcc51cbdfced27b"
+      "path": "src/assets/fonts/Inter/Inter-ThinItalic.otf",
+      "sha1": "cf2dcfd6aa812f641e3d2c81af69a6c553539083"
     },
     {
-      "path": "src/assets/fonts/poppins/Poppins-ThinItalic.ttf",
-      "sha1": "fb8fccca21550e71135f92bbaf8a2e8a12c90465"
+      "path": "src/assets/fonts/Inter/Inter-V.ttf",
+      "sha1": "03f5c0ff412bc0aac7ef2c1e19edcbdd9b06a609"
     }
   ]
 }
