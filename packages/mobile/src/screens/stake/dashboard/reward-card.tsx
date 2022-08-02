@@ -35,7 +35,7 @@ export const MyRewardCard: FunctionComponent<{
         <Text
           style={style.flatten([
             "body3",
-            "color-text-black-medium",
+            "color-text-middle",
             "margin-bottom-12",
           ])}
         >
@@ -46,7 +46,7 @@ export const MyRewardCard: FunctionComponent<{
             <Text
               style={style.flatten([
                 "h3",
-                "color-text-black-medium",
+                "color-text-high",
                 "margin-bottom-20",
               ])}
             >
@@ -57,7 +57,13 @@ export const MyRewardCard: FunctionComponent<{
                 .upperCase(true)
                 .toString()}
             </Text>
-            <Text style={style.flatten(["h7", "color-primary"])}>
+            <Text
+              style={style.flatten([
+                "h7",
+                "color-blue-400",
+                "dark:color-platinum-300",
+              ])}
+            >
               {apy.toDec().gt(new Dec(0))
                 ? `${apy.maxDecimals(2).trim(true).toString()}% per year`
                 : " "}

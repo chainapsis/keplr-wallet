@@ -11,7 +11,7 @@ import {
   StackActions,
   useNavigation,
 } from "@react-navigation/native";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { RectButton } from "../rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -29,10 +29,21 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
 
     const safeAreaInsets = useSafeAreaInsets();
 
+    const { style: propStyle, ...rest } = props;
+
     const style = useStyle();
 
     return (
-      <DrawerContentScrollView {...props}>
+      <DrawerContentScrollView
+        style={StyleSheet.flatten([
+          propStyle,
+          style.flatten([
+            "background-color-white",
+            "dark:background-color-platinum-600",
+          ]),
+        ])}
+        {...rest}
+      >
         <View
           style={{
             marginBottom: safeAreaInsets.bottom,
@@ -42,11 +53,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
             style={style.flatten(["items-center", "height-50", "flex-row"])}
           >
             <Text
-              style={style.flatten([
-                "h3",
-                "color-text-black-high",
-                "margin-left-24",
-              ])}
+              style={style.flatten(["h3", "color-text-high", "margin-left-24"])}
             >
               Networks
             </Text>
@@ -75,7 +82,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
               >
                 <Svg width="28" height="28" fill="none" viewBox="0 0 28 28">
                   <Path
-                    fill={style.get("color-text-black-very-low").color}
+                    fill={style.get("color-text-low").color}
                     d="M3.5 7.875h12.4a2.624 2.624 0 004.95 0h3.65a.875.875 0 100-1.75h-3.65a2.624 2.624 0 00-4.95 0H3.5a.875.875 0 000 1.75zm21 12.25h-3.65a2.625 2.625 0 00-4.95 0H3.5a.875.875 0 000 1.75h12.4a2.625 2.625 0 004.95 0h3.65a.875.875 0 100-1.75zm0-7H12.1a2.625 2.625 0 00-4.95 0H3.5a.875.875 0 000 1.75h3.65a2.625 2.625 0 004.95 0h12.4a.875.875 0 100-1.75z"
                   />
                 </Svg>
@@ -105,9 +112,10 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                   "items-center",
                   "padding-x-20",
                 ])}
-                activeOpacity={1}
+                activeOpacity={style.theme === "dark" ? 0.5 : 1}
                 underlayColor={
-                  style.get("color-drawer-rect-button-underlay").color
+                  style.flatten(["color-gray-50", "dark:color-platinum-500"])
+                    .color
                 }
               >
                 <View
@@ -118,10 +126,11 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                       "border-radius-64",
                       "items-center",
                       "justify-center",
-                      "background-color-primary-100",
+                      "background-color-gray-100",
+                      "dark:background-color-platinum-500",
                       "margin-right-16",
                     ],
-                    [selected && "background-color-primary"]
+                    [selected && "background-color-blue-400"]
                   )}
                 >
                   {chainInfo.raw.chainSymbolImageUrl ? (
@@ -143,7 +152,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                     />
                   )}
                 </View>
-                <Text style={style.flatten(["h4", "color-text-black-medium"])}>
+                <Text style={style.flatten(["h4", "color-text-middle"])}>
                   {chainInfo.chainName}
                 </Text>
               </RectButton>

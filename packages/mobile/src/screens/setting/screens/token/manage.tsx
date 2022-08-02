@@ -27,7 +27,7 @@ export const SettingManageTokensScreen: FunctionComponent = observer(() => {
     );
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="secondary">
       {tokensOf.tokens.length > 0 ? (
         <Card style={style.flatten(["padding-bottom-14"])}>
           {tokensOf.tokens.map((token) => {
@@ -99,7 +99,7 @@ export const ManageTokenItem: FunctionComponent<{
         <Text
           style={style.flatten([
             "subtitle3",
-            "color-text-black-low",
+            "color-text-low",
             "margin-bottom-4",
             "uppercase",
           ])}
@@ -107,11 +107,7 @@ export const ManageTokenItem: FunctionComponent<{
           {balance.currency.coinDenom}
         </Text>
         <Text
-          style={style.flatten([
-            "h5",
-            "color-text-black-medium",
-            "max-width-240",
-          ])}
+          style={style.flatten(["h5", "color-text-middle", "max-width-240"])}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -161,7 +157,9 @@ export const ManageTokenItem: FunctionComponent<{
         >
           <TrashCanIcon
             size={28}
-            color={style.get("color-text-black-very-very-low").color}
+            color={
+              style.flatten(["color-gray-100", "dark:color-platinum-300"]).color
+            }
           />
         </BorderlessButton>
       </View>

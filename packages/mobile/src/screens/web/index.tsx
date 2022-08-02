@@ -23,6 +23,7 @@ export const WebScreen: FunctionComponent = () => {
 
   return (
     <PageWithScrollViewInBottomTabView
+      backgroundMode="gradient"
       contentContainerStyle={style.get("flex-grow-1")}
       style={StyleSheet.flatten([
         style.flatten(["padding-x-20"]),
@@ -34,7 +35,7 @@ export const WebScreen: FunctionComponent = () => {
       <Text
         style={style.flatten([
           "h3",
-          "color-text-black-high",
+          "color-text-high",
           "margin-top-44",
           "margin-bottom-20",
         ])}
@@ -89,7 +90,11 @@ export const WebScreen: FunctionComponent = () => {
         overrideInner={
           <View style={style.flatten(["flex-1", "items-center"])}>
             <Text
-              style={style.flatten(["h4", "color-text-black-very-very-low"])}
+              style={style.flatten([
+                "h4",
+                "color-gray-200",
+                "dark:color-platinum-300",
+              ])}
             >
               Coming soon
             </Text>
@@ -153,7 +158,8 @@ export const WebpageImageButton: FunctionComponent<{
           "items-center",
           "overflow-hidden",
           "border-radius-8",
-          "background-color-big-image-placeholder",
+          "background-color-gray-100@50%",
+          "dark:background-color-platinum-500@50%",
           "margin-bottom-16",
         ]),
         {

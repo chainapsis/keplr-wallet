@@ -65,7 +65,7 @@ export const ValidatorDetailsCard: FunctionComponent<{
               size={44}
               url={thumbnail}
             />
-            <Text style={style.flatten(["h4", "color-text-black-medium"])}>
+            <Text style={style.flatten(["h4", "color-text-middle"])}>
               {validator.description.moniker}
             </Text>
           </View>
@@ -74,13 +74,13 @@ export const ValidatorDetailsCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "h6",
-                  "color-text-black-medium",
+                  "color-text-middle",
                   "margin-bottom-4",
                 ])}
               >
                 Commission
               </Text>
-              <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+              <Text style={style.flatten(["body3", "color-text-middle"])}>
                 {new IntPretty(
                   new Dec(validator.commission.commission_rates.rate)
                 )
@@ -94,13 +94,13 @@ export const ValidatorDetailsCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "h6",
-                  "color-text-black-medium",
+                  "color-text-middle",
                   "margin-bottom-4",
                 ])}
               >
                 Voting Power
               </Text>
-              <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+              <Text style={style.flatten(["body3", "color-text-middle"])}>
                 {new CoinPretty(
                   chainStore.current.stakeCurrency,
                   new Dec(validator.tokens)
@@ -114,14 +114,14 @@ export const ValidatorDetailsCard: FunctionComponent<{
             <Text
               style={style.flatten([
                 "h6",
-                "color-text-black-medium",
+                "color-text-middle",
                 "margin-bottom-4",
               ])}
             >
               Description
             </Text>
             <Text
-              style={style.flatten(["body3", "color-text-black-medium"])}
+              style={style.flatten(["body3", "color-text-middle"])}
               selectable={true}
             >
               {validator.description.details}

@@ -21,6 +21,7 @@ import { observer } from "mobx-react-lite";
 import {
   IFeeConfig,
   IGasConfig,
+  IGasSimulator,
   InsufficientFeeError,
   NotLoadedFeeError,
 } from "@keplr-wallet/hooks";
@@ -29,6 +30,7 @@ import { useLanguage } from "../../../languages";
 import { useIntl } from "react-intl";
 import { GasInput } from "../gas-input";
 import { action, makeObservable, observable } from "mobx";
+import { GasContainer } from "../gas-form";
 
 export interface FeeButtonsProps {
   feeConfig: IFeeConfig;
@@ -44,6 +46,7 @@ export interface FeeButtonsProps {
   };
 
   gasLabel?: string;
+  gasSimulator?: IGasSimulator;
 }
 
 class FeeButtonState {
@@ -72,6 +75,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     label,
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
     gasLabel,
+    gasSimulator,
   }) => {
     // This may be not the good way to handle the states across the components.
     // But, rather than using the context API with boilerplate code, just use the mobx state to simplify the logic.
@@ -86,10 +90,19 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
             label={label}
             feeSelectLabels={feeSelectLabels}
             feeButtonState={feeButtonState}
+            gasSimulator={gasSimulator}
           />
         ) : null}
         {feeButtonState.isGasInputOpen || !feeConfig.feeCurrency ? (
-          <GasInput label={gasLabel} gasConfig={gasConfig} />
+          gasSimulator ? (
+            <GasContainer
+              label={gasLabel}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulator}
+            />
+          ) : (
+            <GasInput label={gasLabel} gasConfig={gasConfig} />
+          )
         ) : null}
       </React.Fragment>
     );
@@ -99,7 +112,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
 export const FeeButtonsInner: FunctionComponent<
   Pick<
     FeeButtonsProps,
-    "feeConfig" | "priceStore" | "label" | "feeSelectLabels"
+    "feeConfig" | "priceStore" | "label" | "feeSelectLabels" | "gasSimulator"
   > & { feeButtonState: FeeButtonState }
 > = observer(
   ({
@@ -108,6 +121,7 @@ export const FeeButtonsInner: FunctionComponent<
     label,
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
     feeButtonState,
+    gasSimulator,
   }) => {
     useEffect(() => {
       if (feeConfig.feeCurrency && !feeConfig.fee) {
@@ -169,6 +183,10 @@ export const FeeButtonsInner: FunctionComponent<
         }
       }
     })();
+
+    if (gasSimulator && gasSimulator.isSimulating) {
+      isFeeLoading = true;
+    }
 
     return (
       <FormGroup style={{ position: "relative" }}>
