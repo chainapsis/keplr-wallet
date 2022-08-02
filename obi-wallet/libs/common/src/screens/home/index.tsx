@@ -1,19 +1,28 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { useIntl } from "react-intl";
-import { Button, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableHighlight, TouchableWithoutFeedback, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  Button,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { Card } from "../../card";
+import { FontAwesomeIcon } from "../../font-awesome-icon";
 import { App, AppsStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 
 const styles = StyleSheet.create({
   card: {
     height: "100%",
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
 });
 
@@ -21,12 +30,12 @@ export interface HomeProps {
   appsStore: AppsStore;
   onAppPress: (app: App) => void;
   onAppStorePress: () => void;
+  marginBottom?: number;
 }
 
 export const Home = observer<HomeProps>(
-  ({ appsStore, onAppPress, onAppStorePress }) => {
+  ({ appsStore, onAppPress, onAppStorePress, marginBottom }) => {
     const [editMode, setEditMode] = React.useState(false);
-    const safeArea = useSafeAreaInsets()
     const intl = useIntl();
 
     return (
@@ -38,7 +47,6 @@ export const Home = observer<HomeProps>(
             setEditMode(true);
           }}
         >
-
           <Card style={styles.card}>
             {editMode ? (
               <Button
@@ -58,8 +66,8 @@ export const Home = observer<HomeProps>(
                     onRemove={
                       editMode
                         ? () => {
-                          appsStore.removeFavoriteByUrl(app.url);
-                        }
+                            appsStore.removeFavoriteByUrl(app.url);
+                          }
                         : undefined
                     }
                     onPress={() => {
@@ -78,39 +86,100 @@ export const Home = observer<HomeProps>(
             </Tiles>
             <View
               style={{
-                marginBottom: safeArea.bottom, height: 50, marginHorizontal: 20,
-
-
-              }}>
-              <View style={{ flexDirection: 'row', marginBottom: 28, alignItems: 'center', position: 'relative' }}>
-                <View style={{ flex: 1, height: 1, backgroundColor: '#16152B' }} />
-                <View style={{ position: 'absolute', margin: 'auto', width: '100%' }}>
-                  <View style={{ flexDirection: 'row', backgroundColor: '#090817', alignSelf: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
-                    <FontAwesomeIcon icon={faPaperclip} size={24} style={{ color: '#393853', marginRight: 6 }} />
-                    <Text style={{ color: '#787B9C' }}>GO TO SPECIFIC LINK</Text>
+                marginBottom,
+                height: 50,
+                marginHorizontal: 20,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  marginBottom: 28,
+                  alignItems: "center",
+                  position: "relative",
+                }}
+              >
+                <View
+                  style={{ flex: 1, height: 1, backgroundColor: "#16152B" }}
+                />
+                <View
+                  style={{
+                    position: "absolute",
+                    margin: "auto",
+                    width: "100%",
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      backgroundColor: "#090817",
+                      alignSelf: "center",
+                      alignItems: "center",
+                      paddingHorizontal: 20,
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPaperclip}
+                      // @ts-expect-error
+                      size={Platform.OS === "web" ? "1x" : 24}
+                      style={{ color: "#393853", marginRight: 6 }}
+                    />
+                    <Text style={{ color: "#787B9C" }}>
+                      GO TO SPECIFIC LINK
+                    </Text>
                   </View>
                 </View>
-                <View style={{ flex: 1, height: 1, backgroundColor: '#16152B', zIndex: -1 }} />
+                <View
+                  style={{
+                    flex: 1,
+                    height: 1,
+                    backgroundColor: "#16152B",
+                    zIndex: -1,
+                  }}
+                />
               </View>
-              <View style={{
-                backgroundColor: '#6959E6',
-                padding: 1,
-                borderRadius: 12,
-                flexDirection: 'row'
-              }}
-
+              <View
+                style={{
+                  backgroundColor: "#6959E6",
+                  padding: 1,
+                  borderRadius: 12,
+                  flexDirection: "row",
+                }}
               >
-                <TextInput defaultValue="www.keplr_wallet.com" style={{ flex: 1, backgroundColor: '#090817', fontSize: 14, fontWeight: '500', borderRadius: 12, paddingLeft: 20, color: '#F6F5FF' }} placeholder="Search" />
-                <TouchableHighlight style={{ width: 56, height: 56, justifyContent: 'center', alignItems: 'center' }}>
+                <TextInput
+                  defaultValue="www.keplr_wallet.com"
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#090817",
+                    fontSize: 14,
+                    fontWeight: "500",
+                    borderRadius: 12,
+                    paddingLeft: 20,
+                    color: "#F6F5FF",
+                  }}
+                  placeholder="Search"
+                />
+                <TouchableHighlight
+                  style={{
+                    width: 56,
+                    height: 56,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
                   <Text>
-                    <FontAwesomeIcon icon={faChevronRight} size={24} color="#fff" />
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      // @ts-expect-error
+                      size={Platform.OS === "web" ? "1x" : 24}
+                      color="#fff"
+                    />
                   </Text>
                 </TouchableHighlight>
               </View>
             </View>
           </Card>
-
-        </TouchableWithoutFeedback >
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     );
   }

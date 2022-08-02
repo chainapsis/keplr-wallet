@@ -1,22 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { Text } from "@obi-wallet/common";
 import { Image, TextInput, TouchableHighlight, View } from "react-native";
-
-import PhoneLogo from "./assets/phoneLogo.svg";
 import Whatsapp from "./assets/whatsapp.svg";
 import MessageDots from "./assets/messageDots.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
-import Background from "./components/background";
+import Background from "../components/background";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 //TODO: add background svgs
 //TODO: add select for security question
 
-export default function onboarding2() {
+export default function Onboarding2() {
   const safeArea = useSafeAreaInsets();
-  const [selectedLanguage, setSelectedLanguage] = useState();
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>

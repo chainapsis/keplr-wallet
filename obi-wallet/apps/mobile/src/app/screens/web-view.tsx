@@ -28,18 +28,32 @@ export const WebViewScreen = observer<WebViewScreenProps>(
     }, [app, navigation]);
 
     return (
-      <View style={{ flex: 1, backgroundColor: '#090817' }}>
-        <View style={{ marginTop: safeArea.top, height: 40, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-          <TouchableOpacity onPress={() => navigation.navigate("state-renderer")
-          } style={{ position: 'absolute', left: 10, }}>
-            <FontAwesomeIcon icon={faTimes} style={{ color: 'white' }} />
+      <View style={{ flex: 1, backgroundColor: "#090817" }}>
+        <View
+          style={{
+            marginTop: safeArea.top,
+            height: 40,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "relative",
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => navigation.navigate("state-renderer")}
+            style={{ position: "absolute", left: 10 }}
+          >
+            <FontAwesomeIcon icon={faTimes} style={{ color: "white" }} />
           </TouchableOpacity>
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>
+          <Text style={{ color: "white", fontWeight: "bold" }}>
             {app.label}
           </Text>
         </View>
-        <WebView source={{ uri: app.url }} originWhitelist={[`${app.url}*`]} style={{ flex: 1, width: '100%', height: '100%' }} />
-
+        <WebView
+          source={{ uri: app.url }}
+          originWhitelist={[`${app.url}*`]}
+          style={{ flex: 1, width: "100%", height: "100%" }}
+        />
       </View>
     );
   }

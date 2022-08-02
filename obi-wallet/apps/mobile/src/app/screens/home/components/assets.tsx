@@ -44,8 +44,8 @@ export function Assets() {
 }
 
 export function AssetsHeader() {
-  const navigation = useNavigation()
-  console.log({ navigation })
+  const navigation = useNavigation();
+  console.log({ navigation });
   return (
     <View
       style={{
@@ -66,8 +66,8 @@ export function AssetsHeader() {
           paddingVertical: 10,
           borderRadius: 8,
         }}
-        onPress={() => navigation.openDrawer()}>
-
+        onPress={() => navigation.openDrawer()}
+      >
         <>
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <FontAwesomeIcon

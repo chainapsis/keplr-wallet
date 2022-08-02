@@ -4,11 +4,13 @@
   "private": true,
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "*",
+    "@fortawesome/react-fontawesome": "*",
     "@fortawesome/react-native-fontawesome": "*",
     "@keplr-wallet/common": "*",
     "@keplr-wallet/stores": "*",
     "@react-native-async-storage/async-storage": "*",
     "@react-navigation/bottom-tabs": "*",
+    "@react-navigation/drawer": "*",
     "@react-navigation/native": "*",
     "@react-navigation/native-stack": "*",
     "@testing-library/jest-native": "*",
@@ -35,7 +37,6 @@
     "react-native-svg": "*",
     "react-native-svg-uri": "*",
     "react-native-webview": "*",
-    "rooks": "*",
-    "@react-navigation/drawer": "*"
+    "rooks": "*"
   }
 }
