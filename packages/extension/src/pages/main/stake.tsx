@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent, useState } from "react";
 
 import { Button } from "reactstrap";
 
@@ -15,6 +15,7 @@ import { useNotification } from "../../components/notification";
 import { useHistory } from "react-router";
 
 import { FormattedMessage } from "react-intl";
+import { DefaultGasMsgWithdrawRewards } from "../../config.ui";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -32,16 +33,41 @@ export const StakeView: FunctionComponent = observer(() => {
 
   const isRewardExist = rewards.rewards.length > 0;
 
+  const [isWithdrawingRewards, setIsWithdrawingRewards] = useState(false);
+
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
+        setIsWithdrawingRewards(true);
+
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
-        await accountInfo.cosmos.sendWithdrawDelegationRewardMsgs(
-          rewards.getDescendingPendingRewardValidatorAddresses(8),
+        const validatorAddresses = rewards.getDescendingPendingRewardValidatorAddresses(
+          8
+        );
+        const tx = accountInfo.cosmos.makeWithdrawDelegationRewardTx(
+          validatorAddresses
+        );
+
+        let gas: number;
+        try {
+          // Gas adjustment is 1.5
+          // Since there is currently no convenient way to adjust the gas adjustment on the UI,
+          // Use high gas adjustment to prevent failure.
+          gas = (await tx.simulate()).gasUsed * 1.5;
+        } catch (e) {
+          console.log(e);
+
+          gas = DefaultGasMsgWithdrawRewards * validatorAddresses.length;
+        }
+
+        await tx.send(
+          {
+            amount: [],
+            gas: gas.toString(),
+          },
           "",
-          undefined,
           undefined,
           {
             onBroadcasted: () => {
@@ -66,11 +92,11 @@ export const StakeView: FunctionComponent = observer(() => {
             duration: 0.25,
           },
         });
+      } finally {
+        setIsWithdrawingRewards(false);
       }
     }
   };
-
-  const stakeBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div>
@@ -114,7 +140,10 @@ export const StakeView: FunctionComponent = observer(() => {
                 size="sm"
                 disabled={!accountInfo.isReadyToSendMsgs}
                 onClick={withdrawAllRewards}
-                data-loading={accountInfo.isSendingMsg === "withdrawRewards"}
+                data-loading={
+                  accountInfo.isSendingMsg === "withdrawRewards" ||
+                  isWithdrawingRewards
+                }
               >
                 <FormattedMessage id="main.stake.button.claim-rewards" />
               </Button>
@@ -176,7 +205,6 @@ export const StakeView: FunctionComponent = observer(() => {
           }}
         >
           <Button
-            innerRef={stakeBtnRef}
             className={styleStake.button}
             color="primary"
             size="sm"
