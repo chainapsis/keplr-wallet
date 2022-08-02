@@ -30,7 +30,7 @@
     "react-native-config": "*",
     "react-native-fast-crypto": "*",
     "react-native-gesture-handler": "*",
-    "react-native-linear-gradient": "2.6.2",
+    "react-native-linear-gradient": "*",
     "react-native-reanimated": "*",
     "react-native-safe-area-context": "*",
     "react-native-screens": "*",
