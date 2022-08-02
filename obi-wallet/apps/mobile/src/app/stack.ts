@@ -1,7 +1,7 @@
 import { App } from "@obi-wallet/common";
 import {
-  useNavigation as useNavigationOriginal,
   NavigationProp,
+  useNavigation as useNavigationOriginal,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 

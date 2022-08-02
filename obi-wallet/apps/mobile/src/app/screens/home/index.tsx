@@ -2,6 +2,7 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import React from "react";
 
 import AppsIcon from "./assets/appsIcon.svg";
@@ -9,10 +10,22 @@ import AssetsIcon from "./assets/assetsIcon.svg";
 import NFTsIcon from "./assets/nftsIcon.svg";
 import SettingsIcon from "./assets/settingsIcon.svg";
 import TradeIcon from "./assets/tradeIcon.svg";
+import AppsIconActive from "./assets/ic_apps_active.svg";
+import AssetsIconActive from "./assets/ic_assets_active.svg";
+import NFTsIconActive from "./assets/ic_nfts_active.svg";
+import SettingsIconActive from "./assets/ic_settings_active.svg";
+import TradeIconActive from "./assets/ic_trade_active.svg";
 import { Assets } from "./components/assets";
 import Background from "./components/background";
-
-export function HomeScreen() {
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItem,
+  DrawerItemList,
+} from "@react-navigation/drawer";
+import { Text } from "react-native";
+import { TouchableHighlight } from "react-native-gesture-handler";
+export function TabNavigation() {
   const Tab = createBottomTabNavigator();
 
   return (
@@ -26,15 +39,15 @@ export function HomeScreen() {
           }
           switch (route.name) {
             case "Assets":
-              return <AssetsIcon />;
+              return !focused ? <AssetsIcon /> : <AssetsIconActive />;
             case "Apps":
-              return <AppsIcon />;
+              return !focused ? <AppsIcon /> : <AppsIconActive />;
             case "NFTs":
-              return <NFTsIcon />;
+              return !focused ? <NFTsIcon /> : <NFTsIconActive />;
             case "Trade":
-              return <TradeIcon />;
+              return !focused ? <TradeIcon /> : <TradeIconActive />;
             case "Settings":
-              return <SettingsIcon />;
+              return !focused ? <SettingsIcon /> : <SettingsIconActive />;
             default:
               icon = faChevronLeft;
               break;
@@ -63,5 +76,51 @@ export function HomeScreen() {
       <Tab.Screen name="Trade" component={Background} />
       <Tab.Screen name="Settings" component={Background} />
     </Tab.Navigator>
+  );
+}
+
+export function HomeScreen() {
+  const Drawer = createDrawerNavigator();
+
+  return (
+    <Drawer.Navigator
+      useLegacyImplementation={true}
+      initialRouteName="Home"
+      screenOptions={{
+        headerShown: false,
+        drawerActiveTintColor: "#F6F5FF",
+        drawerActiveBackgroundColor: "#27253E",
+        drawerInactiveTintColor: "#787B9C",
+      }}
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    >
+      <Drawer.Screen name="Juno" component={TabNavigation} />
+      <Drawer.Screen name="Cosmos" component={TabNavigation} />
+    </Drawer.Navigator>
+  );
+}
+
+function CustomDrawerContent(props) {
+  const { navigation } = props;
+  return (
+    <DrawerContentScrollView {...props} style={{ backgroundColor: "#100F1E" }}>
+      <TouchableHighlight
+        style={{
+          alignSelf: "flex-start",
+          padding: 5,
+          marginLeft: 16,
+          marginBottom: 30,
+        }}
+        onPress={() => navigation.closeDrawer()}
+      >
+        <FontAwesomeIcon
+          icon={faTimes}
+          style={{ color: "#4d5070" }}
+        ></FontAwesomeIcon>
+      </TouchableHighlight>
+      <Text style={{ color: "#787B9C", marginLeft: 16 }}>Networks</Text>
+      {/* <DrawerItem label="Help" onPress={() => alert('Link to help')} /> */}
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
   );
 }

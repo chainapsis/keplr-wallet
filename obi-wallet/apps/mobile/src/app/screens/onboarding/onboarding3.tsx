@@ -1,16 +1,26 @@
 import React from "react";
 import { Text } from "@obi-wallet/common";
-import { Button, TextInput, TouchableHighlight, View } from "react-native";
+import { TextInput, TouchableHighlight, View } from "react-native";
 import InsuranceLogo from "./assets/insuranceLogo.svg";
 import ShieldCheck from "./assets/shield-check.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Background from "./components/background";
+import Background from "../components/background";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 //TODO: add background svgs
-//TODO: chevron back
-export default function onboarding3() {
+
+export default function Onboarding3() {
+  const safeArea = useSafeAreaInsets();
+
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />
+      <TouchableHighlight>
+        <FontAwesomeIcon
+          icon={faChevronLeft}
+          style={{ color: "#7B87A8", top: safeArea.top }}
+        />
+      </TouchableHighlight>
       <View style={{ flex: 4, justifyContent: "flex-end" }}>
         <View style={{}}>
           <InsuranceLogo style={{ marginBottom: 41 }} />
@@ -41,6 +51,7 @@ export default function onboarding3() {
       <View style={{ flex: 3 }}>
         <TextInput
           placeholder="juno43293rd943f394d294d34qd9r83f"
+          placeholderTextColor={"#4B4E6E"}
           style={{
             width: "100%",
             height: 56,

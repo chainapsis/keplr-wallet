@@ -13,6 +13,7 @@ import Background from "./background";
 import Send from "../assets/send.svg";
 import Receive from "../assets/receive.svg";
 import Pay from "../assets/pay.svg";
+import { useNavigation } from "@react-navigation/native";
 
 export function Assets() {
   const insets = useSafeAreaInsets();
@@ -43,6 +44,8 @@ export function Assets() {
 }
 
 export function AssetsHeader() {
+  const navigation = useNavigation();
+  console.log({ navigation });
   return (
     <View
       style={{
@@ -63,6 +66,7 @@ export function AssetsHeader() {
           paddingVertical: 10,
           borderRadius: 8,
         }}
+        onPress={() => navigation.openDrawer()}
       >
         <>
           <View style={{ alignItems: "center", justifyContent: "center" }}>

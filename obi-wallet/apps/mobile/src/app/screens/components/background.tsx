@@ -15,11 +15,11 @@ export default function background() {
       }}
     >
       <Image
-        source={require("../assets/bgEllipseblue.png")}
+        source={require("../onboarding/assets/bgEllipseblue.png")}
         style={{ top: 200, left: 0, position: "absolute" }}
       />
       <Image
-        source={require("../assets/bgEllipsepurple.png")}
+        source={require("../onboarding/assets/bgEllipsepurple.png")}
         style={{ position: "absolute", top: 0, right: 0 }}
       />
     </View>

@@ -1,16 +1,17 @@
 import React from "react";
 import { Text } from "@obi-wallet/common";
-import { TextInput, TouchableHighlight, View, Image } from "react-native";
+import { TouchableHighlight, View } from "react-native";
 import FaceScaner from "./assets/face-scanner.svg";
 
 import Scan from "./assets/scan.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Background from "./components/background";
-//TODO: chevron back
+import Background from "../components/background";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 //TODO: add background svgs
-//TODO: sheild check icon
 
-export default function onboarding4() {
+export default function Onboarding4() {
+  const safeArea = useSafeAreaInsets();
   return (
     <View
       style={{
@@ -21,6 +22,12 @@ export default function onboarding4() {
       }}
     >
       <Background />
+      <TouchableHighlight>
+        <FontAwesomeIcon
+          icon={faChevronLeft}
+          style={{ color: "#7B87A8", top: safeArea.top }}
+        />
+      </TouchableHighlight>
       <View style={{ flex: 5, justifyContent: "center", alignItems: "center" }}>
         <View
           style={{

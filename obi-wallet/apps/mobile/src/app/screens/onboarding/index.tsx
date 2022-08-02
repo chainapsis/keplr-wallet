@@ -1,21 +1,7 @@
-import { Home } from "@obi-wallet/common";
 import React from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  Image,
-  Button,
-  Pressable,
-} from "react-native";
-
-import { useNavigation } from "../../stack";
-import { useStore } from "../../stores";
+import { Image, Pressable, SafeAreaView, Text, View } from "react-native";
 
 export default function Onboarding() {
-  const { appsStore } = useStore();
-  const navigation = useNavigation();
-
   return (
     <SafeAreaView
       style={{

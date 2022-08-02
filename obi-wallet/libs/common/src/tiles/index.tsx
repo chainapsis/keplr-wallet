@@ -19,8 +19,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconContainer: {
-    width: 90,
-    height: 90,
+    width: 84,
+    height: 84,
     borderRadius: 7,
     ...createShadow(10),
   },
@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     marginTop: 4,
+    color: "#9C9BAB",
   },
 });
 
