@@ -19,6 +19,7 @@ import { useLanguage } from "../../languages";
 import { Badge, Button, Label } from "reactstrap";
 import { renderDirectMessage } from "./direct";
 import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 export const DetailsTab: FunctionComponent<{
   signDocHelper: SignDocHelper;
@@ -135,27 +136,53 @@ export const DetailsTab: FunctionComponent<{
             label={intl.formatMessage({ id: "sign.info.fee" })}
             gasLabel={intl.formatMessage({ id: "sign.info.gas" })}
           />
-        ) : feeConfig.fee ? (
+        ) : (
           <React.Fragment>
             <Label for="fee-price" className="form-control-label">
               <FormattedMessage id="sign.info.fee" />
             </Label>
             <div id="fee-price">
               <div>
-                {feeConfig.fee.maxDecimals(6).trim(true).toString()}
-                {priceStore.calculatePrice(
-                  feeConfig.fee,
-                  language.fiatCurrency
-                ) ? (
-                  <div
-                    className="ml-2"
-                    style={{ display: "inline-block", fontSize: "12px" }}
-                  >
-                    {priceStore
-                      .calculatePrice(feeConfig.fee, language.fiatCurrency)
-                      ?.toString()}
-                  </div>
-                ) : null}
+                {(() => {
+                  // To modify the gas in the current component composition,
+                  // the fee buttons component should be shown.
+                  // However, if the fee amount is an empty array, the UI to show is ambiguous.
+                  // Therefore, if the fee amount is an empty array, it is displayed as 0 fee in some asset.
+                  const feeOrZero =
+                    feeConfig.fee ??
+                    (() => {
+                      if (chainStore.current.feeCurrencies.length === 0) {
+                        return new CoinPretty(
+                          chainStore.current.stakeCurrency,
+                          "0"
+                        );
+                      }
+
+                      return new CoinPretty(
+                        chainStore.current.feeCurrencies[0],
+                        "0"
+                      );
+                    })();
+
+                  return (
+                    <React.Fragment>
+                      {feeOrZero.maxDecimals(6).trim(true).toString()}
+                      {priceStore.calculatePrice(
+                        feeOrZero,
+                        language.fiatCurrency
+                      ) ? (
+                        <div
+                          className="ml-2"
+                          style={{ display: "inline-block", fontSize: "12px" }}
+                        >
+                          {priceStore
+                            .calculatePrice(feeOrZero, language.fiatCurrency)
+                            ?.toString()}
+                        </div>
+                      ) : null}
+                    </React.Fragment>
+                  );
+                })()}
               </div>
             </div>
             {
@@ -183,7 +210,7 @@ export const DetailsTab: FunctionComponent<{
               ) : null
             }
           </React.Fragment>
-        ) : null}
+        )}
       </div>
     );
   }

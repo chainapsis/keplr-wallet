@@ -13,6 +13,7 @@ import {
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, { Easing } from "react-native-reanimated";
 import { stableSort } from "../../utils/stable-sort";
+import { useStyle } from "../../styles";
 
 interface MemoizedItem<Item extends { key: string }> {
   item: Item;
@@ -83,8 +84,11 @@ export function FixedHeightSortableList<Item extends { key: string }>(
     delegateOnGestureEventToItemView = false,
     gapTop = 0,
     gapBottom = 0,
+    indicatorStyle,
     ...scrollViewProps
   } = props;
+
+  const style = useStyle();
 
   // It is hard to handle multi touch.
   // So, prevent multi touch by using this.
@@ -279,7 +283,12 @@ export function FixedHeightSortableList<Item extends { key: string }>(
   }, [memoizedItems]);
 
   return (
-    <NativeAnimated.ScrollView {...scrollViewProps}>
+    <NativeAnimated.ScrollView
+      indicatorStyle={
+        indicatorStyle ?? style.theme === "dark" ? "white" : "black"
+      }
+      {...scrollViewProps}
+    >
       <View
         style={{
           height: itemHeight * memoizedItems.length + gapTop + gapBottom,

@@ -11,6 +11,9 @@ import { Toggle } from "../../components/toggle";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import WelcomeRocket from "../../assets/svg/welcome-rocket.svg";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import WelcomeRocketDarkMode from "../../assets/svg/welcome-rocket-dark-mode.svg";
 import delay from "delay";
 
 export const RegisterEndScreen: FunctionComponent = observer(() => {
@@ -45,24 +48,27 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <PageWithView style={style.flatten(["padding-x-42"])}>
-      <View style={style.get("flex-1")} />
+    <PageWithView
+      backgroundMode="gradient"
+      style={style.flatten(["padding-x-42"])}
+    >
+      <View style={style.get("flex-8")} />
       <View style={style.flatten(["items-center"])}>
-        <WelcomeRocket width={358} height={254} />
+        {style.theme === "dark" ? (
+          <WelcomeRocketDarkMode width={400} height={360} />
+        ) : (
+          <WelcomeRocket width={400} height={360} />
+        )}
 
         <Text
-          style={style.flatten([
-            "h2",
-            "color-text-black-medium",
-            "margin-top-18",
-          ])}
+          style={style.flatten(["h2", "color-text-middle", "margin-top-8"])}
         >
           You’re all set!
         </Text>
         <Text
           style={style.flatten([
             "subtitle1",
-            "color-text-black-low",
+            "color-text-low",
             "text-center",
             "margin-top-10",
           ])}
@@ -74,7 +80,7 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
         <View
           style={style.flatten(["flex-row", "margin-top-58", "items-center"])}
         >
-          <Text style={style.flatten(["subtitle1", "color-text-black-medium"])}>
+          <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
             Enable Biometric
           </Text>
           <View style={style.get("flex-1")} />
@@ -121,7 +127,7 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
           }
         }}
       />
-      <View style={style.get("flex-1")} />
+      <View style={style.get("flex-10")} />
     </PageWithView>
   );
 });

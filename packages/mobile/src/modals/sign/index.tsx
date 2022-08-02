@@ -150,17 +150,16 @@ export const SignModal: FunctionComponent<{
             <View key={i.toString()}>
               <Msg title={title}>
                 {scrollViewHorizontal ? (
-                  <ScrollView horizontal={true}>
-                    <Text
-                      style={style.flatten(["body3", "color-text-black-low"])}
-                    >
+                  <ScrollView
+                    horizontal={true}
+                    indicatorStyle={style.theme === "dark" ? "white" : "black"}
+                  >
+                    <Text style={style.flatten(["body3", "color-text-low"])}>
                       {content}
                     </Text>
                   </ScrollView>
                 ) : (
-                  <Text
-                    style={style.flatten(["body3", "color-text-black-low"])}
-                  >
+                  <Text style={style.flatten(["body3", "color-text-low"])}>
                     {content}
                   </Text>
                 )}
@@ -169,7 +168,8 @@ export const SignModal: FunctionComponent<{
                 <View
                   style={style.flatten([
                     "height-1",
-                    "background-color-border-white",
+                    "background-color-gray-50",
+                    "dark:background-color-platinum-400",
                     "margin-x-16",
                   ])}
                 />
@@ -188,7 +188,7 @@ export const SignModal: FunctionComponent<{
           return (
             <View key={i.toString()}>
               <Msg title={title}>
-                <Text style={style.flatten(["body3", "color-text-black-low"])}>
+                <Text style={style.flatten(["body3", "color-text-low"])}>
                   {content}
                 </Text>
               </Msg>
@@ -196,7 +196,8 @@ export const SignModal: FunctionComponent<{
                 <View
                   style={style.flatten([
                     "height-1",
-                    "background-color-border-white",
+                    "background-color-gray-50",
+                    "dark:background-color-platinum-400",
                     "margin-x-16",
                   ])}
                 />
@@ -219,12 +220,10 @@ export const SignModal: FunctionComponent<{
         ) : null}
         <View style={style.flatten(["margin-bottom-16"])}>
           <Text style={style.flatten(["margin-bottom-3"])}>
-            <Text style={style.flatten(["subtitle3", "color-primary"])}>
+            <Text style={style.flatten(["subtitle3", "color-blue-400"])}>
               {`${msgs.length.toString()} `}
             </Text>
-            <Text
-              style={style.flatten(["subtitle3", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle3", "color-text-middle"])}>
               Messages
             </Text>
           </Text>
@@ -232,13 +231,19 @@ export const SignModal: FunctionComponent<{
             style={style.flatten([
               "border-radius-8",
               "border-width-1",
-              "border-color-border-white",
+              "border-color-gray-50",
+              "dark:border-color-platinum-400",
               "overflow-hidden",
             ])}
           >
             <ScrollView
-              style={style.flatten(["max-height-214"])}
+              style={style.flatten([
+                "max-height-214",
+                "background-color-white",
+                "dark:background-color-platinum-500",
+              ])}
               persistentScrollbar={true}
+              indicatorStyle={style.theme === "dark" ? "white" : "black"}
             >
               {renderedMsgs}
             </ScrollView>

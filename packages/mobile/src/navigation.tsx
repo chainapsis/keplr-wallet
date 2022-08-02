@@ -11,6 +11,8 @@ import {
   NavigationContainer,
   NavigationContainerRef,
   useNavigation,
+  DefaultTheme,
+  DarkTheme,
 } from "@react-navigation/native";
 import { useStore } from "./stores";
 import { observer } from "mobx-react-lite";
@@ -69,11 +71,13 @@ import {
 import { NewLedgerScreen } from "./screens/register/ledger";
 import { PageScrollPositionProvider } from "./providers/page-scroll-position";
 import {
-  BlurredHeaderScreenOptionsPreset,
-  getPlainHeaderScreenOptionsPresetWithBackgroundColor,
   HeaderLeftButton,
   HeaderRightButton,
-  PlainHeaderScreenOptionsPreset,
+  HeaderOnGradientScreenOptionsPreset,
+  HeaderOnSecondaryScreenOptionsPreset,
+  HeaderAtSecondaryScreenOptionsPreset,
+  HeaderOnTertiaryScreenOptionsPreset,
+  TransparentHeaderOptionsPreset,
 } from "./components/header";
 import { TokensScreen } from "./screens/tokens";
 import { UndelegateScreen } from "./screens/stake/undelegate";
@@ -357,14 +361,13 @@ const HomeScreenHeaderLeft: FunctionComponent = observer(() => {
       }}
     >
       <View style={style.flatten(["flex-row", "items-center"])}>
-        <OpenDrawerIcon size={28} color={style.get("color-primary").color} />
-        <Text
-          style={style.flatten([
-            "h4",
-            "color-text-black-high",
-            "margin-left-4",
-          ])}
-        >
+        <OpenDrawerIcon
+          size={28}
+          color={
+            style.flatten(["color-blue-400", "dark:color-platinum-300"]).color
+          }
+        />
+        <Text style={style.flatten(["h4", "color-text-high", "margin-left-4"])}>
           {chainStore.current.chainName}
         </Text>
       </View>
@@ -388,7 +391,12 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
           });
         }}
       >
-        <ScanIcon size={28} color={style.get("color-primary").color} />
+        <ScanIcon
+          size={28}
+          color={
+            style.flatten(["color-blue-400", "dark:color-platinum-50"]).color
+          }
+        />
       </HeaderRightButton>
       {walletConnectStore.sessions.length > 0 ? (
         <HeaderRightButton
@@ -401,7 +409,11 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
             });
           }}
         >
-          <HeaderWalletConnectIcon />
+          <HeaderWalletConnectIcon
+            color={
+              style.flatten(["color-blue-400", "dark:color-platinum-50"]).color
+            }
+          />
         </HeaderRightButton>
       ) : null}
     </React.Fragment>
@@ -412,14 +424,16 @@ export const MainNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...BlurredHeaderScreenOptionsPreset,
-        headerTitle: "",
+        ...TransitionPresets.SlideFromRightIOS,
       }}
       initialRouteName="Home"
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
+
+          headerTitle: "",
           headerLeft: () => <HomeScreenHeaderLeft />,
           headerRight: () => <HomeScreenHeaderRight />,
         }}
@@ -436,14 +450,15 @@ export const RegisterNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...PlainHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        ...TransitionPresets.SlideFromRightIOS,
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       initialRouteName="Register.Intro"
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...TransparentHeaderOptionsPreset,
           title: "",
         }}
         name="Register.Intro"
@@ -451,6 +466,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...TransparentHeaderOptionsPreset,
           title: "Create a New Wallet",
         }}
         name="Register.NewUser"
@@ -458,6 +474,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...TransparentHeaderOptionsPreset,
           title: "Import Existing Wallet",
         }}
         name="Register.NotNewUser"
@@ -465,6 +482,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Create New Mnemonic",
         }}
         name="Register.NewMnemonic"
@@ -472,6 +490,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Verify Mnemonic",
         }}
         name="Register.VerifyMnemonic"
@@ -479,6 +498,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Import Existing Wallet",
         }}
         name="Register.RecoverMnemonic"
@@ -486,14 +506,22 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Import Hardware Wallet",
         }}
         name="Register.NewLedger"
         component={NewLedgerScreen}
       />
-      <Stack.Screen name="Register.TorusSignIn" component={TorusSignInScreen} />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
+        }}
+        name="Register.TorusSignIn"
+        component={TorusSignInScreen}
+      />
+      <Stack.Screen
+        options={{
+          ...TransparentHeaderOptionsPreset,
           // Only show the back button.
           title: "",
         }}
@@ -509,6 +537,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Import Extension",
         }}
         name="Register.ImportFromExtension.SetPassword"
@@ -516,6 +545,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...TransparentHeaderOptionsPreset,
           headerShown: false,
         }}
         name="Register.End"
@@ -533,13 +563,14 @@ export const OtherNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        ...TransitionPresets.SlideFromRightIOS,
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Send",
         }}
         name="Send"
@@ -547,6 +578,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Tokens",
         }}
         name="Tokens"
@@ -561,6 +593,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "WalletConnect",
         }}
         name="ManageWalletConnect"
@@ -568,13 +601,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          title: "Validator List",
-        }}
-        name="Validator List"
-        component={ValidatorListScreen}
-      />
-      <Stack.Screen
-        options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Validator Details",
         }}
         name="Validator Details"
@@ -582,6 +609,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Governance",
         }}
         name="Governance"
@@ -589,6 +617,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Proposal",
         }}
         name="Governance Details"
@@ -596,6 +625,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Staking Dashboard",
         }}
         name="Staking.Dashboard"
@@ -603,6 +633,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnGradientScreenOptionsPreset,
           title: "Validator Details",
         }}
         name="Validator.Details"
@@ -610,6 +641,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderAtSecondaryScreenOptionsPreset,
           title: "All Active Validators",
         }}
         name="Validator.List"
@@ -617,6 +649,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Stake",
         }}
         name="Delegate"
@@ -624,6 +657,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Unstake",
         }}
         name="Undelegate"
@@ -631,6 +665,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Switch Validator",
         }}
         name="Redelegate"
@@ -662,6 +697,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "Add Token",
         }}
         name="Setting.AddToken"
@@ -669,6 +705,7 @@ export const OtherNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Manage Tokens",
           headerRight: () => (
             <HeaderRightButton
@@ -697,18 +734,16 @@ export const SettingStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...PlainHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        ...TransitionPresets.SlideFromRightIOS,
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderAtSecondaryScreenOptionsPreset,
           title: "Settings",
-          ...getPlainHeaderScreenOptionsPresetWithBackgroundColor(
-            style.get("color-setting-screen-background").color
-          ),
-          headerTitleStyle: style.flatten(["h3", "color-text-black-high"]),
+          headerTitleStyle: style.flatten(["h3", "color-text-high"]),
         }}
         name="Setting"
         component={SettingScreen}
@@ -716,6 +751,7 @@ export const SettingStackScreen: FunctionComponent = () => {
       <Stack.Screen
         name="SettingSelectAccount"
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Select Account",
           headerRight: () => (
             <HeaderRightButton
@@ -729,16 +765,19 @@ export const SettingStackScreen: FunctionComponent = () => {
               <HeaderAddIcon />
             </HeaderRightButton>
           ),
-          ...BlurredHeaderScreenOptionsPreset,
         }}
         component={SettingSelectAccountScreen}
       />
       <Stack.Screen
         name="Setting.ViewPrivateData"
+        options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
+        }}
         component={ViewPrivateDataScreen}
       />
       <Stack.Screen
         options={{
+          ...HeaderAtSecondaryScreenOptionsPreset,
           title: "Version",
         }}
         name="Setting.Version"
@@ -754,13 +793,14 @@ export const AddressBookStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        ...TransitionPresets.SlideFromRightIOS,
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Address Book",
         }}
         name="AddressBook"
@@ -768,6 +808,7 @@ export const AddressBookStackScreen: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
+          ...HeaderOnTertiaryScreenOptionsPreset,
           title: "New Address Book",
         }}
         name="AddAddressBook"
@@ -783,13 +824,14 @@ export const ChainListStackScreen: FunctionComponent = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...BlurredHeaderScreenOptionsPreset,
-        headerTitleStyle: style.flatten(["h5", "color-text-black-high"]),
+        ...TransitionPresets.SlideFromRightIOS,
+        headerTitleStyle: style.flatten(["h5", "color-text-high"]),
       }}
       headerMode="screen"
     >
       <Stack.Screen
         options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
           title: "Chain List",
         }}
         name="Setting.ChainList"
@@ -919,6 +961,7 @@ export const MainTabNavigation: FunctionComponent = () => {
             <BorderlessButton
               {...props}
               activeOpacity={1}
+              rippleColor={style.get("color-rect-button-default-ripple").color}
               style={{
                 height: "100%",
                 aspectRatio: 1.9,
@@ -929,11 +972,18 @@ export const MainTabNavigation: FunctionComponent = () => {
         ),
       })}
       tabBarOptions={{
-        activeTintColor: style.get("color-primary").color,
-        inactiveTintColor: style.get("color-text-black-very-very-low").color,
+        activeTintColor: style.flatten([
+          "color-blue-400",
+          "dark:color-platinum-50",
+        ]).color,
+        inactiveTintColor: style.flatten([
+          "color-gray-200",
+          "dark:color-platinum-300",
+        ]).color,
         style: {
           borderTopWidth: 0.5,
-          borderTopColor: style.get("border-color-border-white").borderColor,
+          borderTopColor: style.get("blurred-tabbar-top-border"),
+          backgroundColor: style.get("color-blurred-tabbar-background").color,
           shadowColor: style.get("color-transparent").color,
           elevation: 0,
           paddingLeft: 30,
@@ -959,6 +1009,8 @@ export const MainTabNavigation: FunctionComponent = () => {
 };
 
 export const MainTabNavigationWithDrawer: FunctionComponent = () => {
+  const style = useStyle();
+
   const focused = useFocusedScreen();
 
   return (
@@ -971,6 +1023,9 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
         swipeEnabled: focused.name === "Home",
         gestureEnabled: focused.name === "Home",
       }}
+      overlayColor={
+        style.flatten(["color-gray-700@50%", "dark:color-gray-700@75%"]).color
+      }
       gestureHandlerProps={{
         hitSlop: {},
       }}
@@ -1003,12 +1058,15 @@ export const AppNavigation: FunctionComponent = observer(() => {
   const navigationRef = useRef<NavigationContainerRef | null>(null);
   const routeNameRef = useRef<string | null>(null);
 
+  const style = useStyle();
+
   return (
     <PageScrollPositionProvider>
       <FocusedScreenProvider>
         <SmartNavigatorProvider>
           <BugsnagNavigationContainer
             ref={navigationRef}
+            theme={style.theme === "dark" ? DarkTheme : DefaultTheme}
             onReady={() => {
               const routerName = navigationRef.current?.getCurrentRoute();
               if (routerName) {

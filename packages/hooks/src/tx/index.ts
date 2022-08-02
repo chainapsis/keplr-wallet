@@ -12,3 +12,4 @@ export * from "./chain";
 export * from "./delegate-tx";
 export * from "./undelegate-tx";
 export * from "./redelegate-tx";
+export * from "./gas-simulator";
