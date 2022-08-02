@@ -44,8 +44,8 @@ export class Mnemonic {
     };
   }
 
-  static validateMnemonic(mnemonic: string) {
-    bip39.validateMnemonic(mnemonic);
+  static validateMnemonic(mnemonic: string): boolean {
+    return bip39.validateMnemonic(mnemonic);
   }
 
   static async generateSeed(rng: RNG, strength: number = 128): Promise<string> {

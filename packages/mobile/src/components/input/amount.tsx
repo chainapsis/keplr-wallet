@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { TextInput } from "./input";
-import { TextStyle, View, ViewStyle } from "react-native";
+import { Platform, TextStyle, View, ViewStyle } from "react-native";
 import {
   EmptyAmountError,
   IAmountConfig,
@@ -12,6 +12,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { Button } from "../button";
 import { useStyle } from "../../styles";
+import * as RNLocalize from "react-native-localize";
 
 export const AmountInput: FunctionComponent<{
   labelStyle?: TextStyle;
@@ -75,19 +76,56 @@ export const AmountInput: FunctionComponent<{
           >
             <Button
               text="MAX"
-              mode={amountConfig.isMax ? "light" : "fill"}
+              mode={(() => {
+                if (style.theme === "dark") {
+                  return "light";
+                } else {
+                  return amountConfig.fraction === 1 ? "light" : "fill";
+                }
+              })()}
               size="small"
               style={style.flatten(["padding-x-5", "padding-y-3"])}
-              containerStyle={style.flatten(["height-24", "border-radius-4"])}
-              textStyle={style.flatten(["normal-case", "text-caption2"])}
+              containerStyle={style.flatten(
+                ["height-24", "border-radius-4"],
+                [
+                  !amountConfig.fraction &&
+                    "dark:background-color-platinum-500",
+                  amountConfig.fraction === 1 &&
+                    "dark:background-color-platinum-600",
+                ]
+              )}
+              textStyle={style.flatten(
+                ["normal-case", "text-caption2"],
+                [
+                  !amountConfig.fraction && "dark:color-platinum-50",
+                  amountConfig.fraction === 1 && "dark:color-platinum-200",
+                ]
+              )}
               onPress={() => {
-                amountConfig.setIsMax(!amountConfig.isMax);
+                amountConfig.setFraction(
+                  !amountConfig.fraction ? 1 : undefined
+                );
               }}
             />
           </View>
         }
         error={errorText}
-        keyboardType="numeric"
+        keyboardType={(() => {
+          if (Platform.OS === "ios") {
+            // In IOS, the numeric type keyboard has a decimal separator "." or "," depending on the language and region of the user device.
+            // However, asset input in keplr unconditionally follows the US standard, so it must be ".".
+            // However, if only "," appears on the keyboard, "." cannot be entered.
+            // In this case, it is inevitable to use a different type of keyboard.
+            if (RNLocalize.getNumberFormatSettings().decimalSeparator !== ".") {
+              return "numbers-and-punctuation";
+            }
+            return "numeric";
+          } else {
+            // In Android, the numeric type keyboard has both "." and ",".
+            // So, there is no need to use other keyboard type on any case.
+            return "numeric";
+          }
+        })()}
       />
     );
   }

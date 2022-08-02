@@ -41,7 +41,8 @@ export const SelectorModal: FunctionComponent<{
               "width-24",
               "height-24",
               "border-radius-32",
-              "background-color-primary",
+              "background-color-blue-400",
+              "dark:background-color-blue-300",
               "items-center",
               "justify-center",
             ])}
@@ -64,8 +65,10 @@ export const SelectorModal: FunctionComponent<{
               "height-24",
               "border-radius-32",
               "background-color-white",
+              "dark:background-color-platinum-600",
               "border-width-1",
-              "border-color-text-black-very-low",
+              "border-color-gray-100",
+              "dark:border-color-platinum-300",
             ])}
           />
         );
@@ -107,6 +110,7 @@ export const SelectorModal: FunctionComponent<{
             "border-radius-8",
             "overflow-hidden",
             "background-color-white",
+            "dark:background-color-platinum-600",
           ])}
         >
           <ScrollView
@@ -116,6 +120,7 @@ export const SelectorModal: FunctionComponent<{
             ref={scrollViewRef}
             persistentScrollbar={true}
             onLayout={onInit}
+            indicatorStyle={style.theme === "dark" ? "white" : "black"}
           >
             {items.map((item) => {
               return (
@@ -130,7 +135,11 @@ export const SelectorModal: FunctionComponent<{
                       "items-center",
                       "justify-between",
                     ],
-                    [item.key === selectedKey && "background-color-primary-10"]
+                    [
+                      item.key === selectedKey && "background-color-blue-50",
+                      item.key === selectedKey &&
+                        "dark:background-color-platinum-500",
+                    ]
                   )}
                   onPress={() => {
                     setSelectedKey(item.key);
@@ -142,7 +151,8 @@ export const SelectorModal: FunctionComponent<{
                   <Text
                     style={style.flatten([
                       "subtitle1",
-                      "color-text-black-medium",
+                      "color-platinum-400",
+                      "dark:color-platinum-10",
                     ])}
                   >
                     {item.label}
@@ -259,11 +269,7 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
     >
       <Text
         style={StyleSheet.flatten([
-          style.flatten([
-            "subtitle3",
-            "color-text-black-medium",
-            "margin-bottom-3",
-          ]),
+          style.flatten(["subtitle3", "color-text-label", "margin-bottom-3"]),
           labelStyle,
         ])}
       >
@@ -273,11 +279,13 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
         style={StyleSheet.flatten([
           style.flatten([
             "background-color-white",
+            "dark:background-color-platinum-700",
             "padding-x-11",
             "padding-y-12",
-            "border-radius-4",
+            "border-radius-6",
             "border-width-1",
-            "border-color-border-white",
+            "border-color-gray-100@20%",
+            "dark:border-color-platinum-600@50%",
           ]),
           selectorContainerStyle,
         ])}
@@ -286,8 +294,13 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
         <Text
           style={StyleSheet.flatten([
             style.flatten(
-              ["body2", "color-text-black-medium", "padding-0"],
-              [!selected && "color-text-black-low"]
+              [
+                "body2",
+                "color-gray-600",
+                "dark:color-platinum-50",
+                "padding-0",
+              ],
+              [!selected && "color-gray-400", !selected && "color-platinum-200"]
             ),
             textStyle,
           ])}

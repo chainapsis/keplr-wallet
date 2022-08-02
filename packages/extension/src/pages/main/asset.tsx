@@ -146,14 +146,24 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
 
   // If fiat value is fetched, show the value that is multiplied with amount and fiat value.
   // If not, just show the amount of asset.
-  const data: number[] = [
-    stakablePrice
-      ? parseFloat(stakablePrice.toDec().toString())
-      : parseFloat(stakable.toDec().toString()),
-    stakedSumPrice
-      ? parseFloat(stakedSumPrice.toDec().toString())
-      : parseFloat(stakedSum.toDec().toString()),
-  ];
+  const data: number[] = (() => {
+    if (
+      stakablePrice &&
+      stakablePrice.toDec().gt(new Dec(0)) &&
+      stakedSumPrice &&
+      stakedSumPrice.toDec().gt(new Dec(0))
+    ) {
+      return [
+        parseFloat(stakablePrice.toDec().toString()),
+        parseFloat(stakedSumPrice.toDec().toString()),
+      ];
+    } else {
+      return [
+        parseFloat(stakable.toDec().toString()),
+        parseFloat(stakedSum.toDec().toString()),
+      ];
+    }
+  })();
 
   return (
     <React.Fragment>

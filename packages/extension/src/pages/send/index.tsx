@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import {
   AddressInput,
   FeeButtons,
@@ -20,13 +20,14 @@ import { Button } from "reactstrap";
 import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
-import { useSendTxConfig } from "@keplr-wallet/hooks";
+import { useGasSimulator, useSendTxConfig } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../config.ui";
 import {
   fitPopupWindow,
   openPopupWindow,
   PopupSize,
 } from "@keplr-wallet/popup";
+import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -72,6 +73,89 @@ export const SendPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     EthereumEndpoint
   );
+
+  const gasSimulatorKey = useMemo(() => {
+    if (sendConfigs.amountConfig.sendCurrency) {
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+
+      if (denomHelper.type !== "native") {
+        if (denomHelper.type === "cw20") {
+          // Probably, the gas can be different per cw20 according to how the contract implemented.
+          return `${denomHelper.type}/${denomHelper.contractAddress}`;
+        }
+
+        return denomHelper.type;
+      }
+    }
+
+    return "native";
+  }, [sendConfigs.amountConfig.sendCurrency]);
+
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.main.send"),
+    chainStore,
+    current.chainId,
+    sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
+    gasSimulatorKey,
+    () => {
+      if (!sendConfigs.amountConfig.sendCurrency) {
+        throw new Error("Send currency not set");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        sendConfigs.amountConfig.error != null ||
+        sendConfigs.recipientConfig.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+      // I don't know why, but simulation does not work for secret20
+      if (denomHelper.type === "secret20") {
+        throw new Error("Simulating secret wasm not supported");
+      }
+
+      return accountInfo.makeSendTokenTx(
+        sendConfigs.amountConfig.amount,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        sendConfigs.amountConfig.sendCurrency!,
+        sendConfigs.recipientConfig.recipient
+      );
+    }
+  );
+
+  useEffect(() => {
+    // To simulate secretwasm, we need to include the signature in the tx.
+    // With the current structure, this approach is not possible.
+    if (
+      sendConfigs.amountConfig.sendCurrency &&
+      new DenomHelper(sendConfigs.amountConfig.sendCurrency.coinMinimalDenom)
+        .type === "secret20"
+    ) {
+      gasSimulator.forceDisable(
+        new Error("Simulating secret20 is not supported")
+      );
+      sendConfigs.gasConfig.setGas(
+        accountInfo.secret.msgOpts.send.secret20.gas
+      );
+    } else {
+      gasSimulator.forceDisable(false);
+      gasSimulator.setEnabled(true);
+    }
+  }, [
+    accountInfo.secret.msgOpts.send.secret20.gas,
+    gasSimulator,
+    sendConfigs.amountConfig.sendCurrency,
+    sendConfigs.gasConfig,
+  ]);
 
   useEffect(() => {
     if (query.defaultDenom) {
@@ -187,13 +271,16 @@ export const SendPage: FunctionComponent = observer(() => {
             try {
               const stdFee = sendConfigs.feeConfig.toStdFee();
 
-              await accountInfo.sendToken(
+              const tx = accountInfo.makeSendTokenTx(
                 sendConfigs.amountConfig.amount,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 sendConfigs.amountConfig.sendCurrency!,
-                sendConfigs.recipientConfig.recipient,
-                sendConfigs.memoConfig.memo,
+                sendConfigs.recipientConfig.recipient
+              );
+
+              await tx.send(
                 stdFee,
+                sendConfigs.memoConfig.memo,
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
@@ -208,6 +295,7 @@ export const SendPage: FunctionComponent = observer(() => {
                   },
                 }
               );
+
               if (!isDetachedPage) {
                 history.replace("/");
               }
@@ -266,6 +354,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 high: intl.formatMessage({ id: "fee-buttons.select.high" }),
               }}
               gasLabel={intl.formatMessage({ id: "send.input.gas" })}
+              gasSimulator={gasSimulator}
             />
           </div>
           <div style={{ flex: 1 }} />

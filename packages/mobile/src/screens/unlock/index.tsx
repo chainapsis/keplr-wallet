@@ -8,7 +8,7 @@ import React, {
 import { Dimensions, Image, StatusBar, StyleSheet, View } from "react-native";
 import Animated, { Easing } from "react-native-reanimated";
 import { observer } from "mobx-react-lite";
-import { useStyle } from "../../styles";
+import { useStyle, useStyleThemeController } from "../../styles";
 import * as SplashScreen from "expo-splash-screen";
 import { TextInput } from "../../components/input";
 import { Button } from "../../components/button";
@@ -20,6 +20,7 @@ import { KeyRingStatus } from "@keplr-wallet/background";
 import { KeychainStore } from "../../stores/keychain";
 import { IAccountStore } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
+import { SimpleGradient } from "../../components/svg";
 
 let splashScreenHided = false;
 async function hideSplashScreen() {
@@ -226,24 +227,22 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <View
-        style={style.flatten([
-          "absolute-fill",
-          "background-color-splash-background",
-        ])}
-      />
-      <View
-        style={style.flatten(["flex-1", "background-color-splash-background"])}
-      >
+      <UnlockScreenGradientBackground />
+      <View style={style.flatten(["flex-1"])}>
         <KeyboardAwareScrollView
           contentContainerStyle={style.flatten(["flex-grow-1"])}
+          indicatorStyle={style.theme === "dark" ? "white" : "black"}
         >
           <View style={style.get("flex-5")} />
           <Image
             style={StyleSheet.flatten([style.flatten(["width-full"])])}
             fadeDuration={0}
             resizeMode="contain"
-            source={require("../../assets/logo/splash-image.png")}
+            source={
+              style.theme === "dark"
+                ? require("../../assets/logo/splash-image-dark-mode.png")
+                : require("../../assets/logo/splash-image.png")
+            }
           />
           <View style={style.get("flex-3")} />
           <View style={style.flatten(["padding-x-page"])}>
@@ -309,6 +308,7 @@ const useAnimationState = () => {
 export const SplashContinuityEffectView: FunctionComponent<{
   onAnimationEnd: () => void;
 }> = ({ onAnimationEnd }) => {
+  const themeController = useStyleThemeController();
   const style = useStyle();
 
   const onAnimationEndRef = useRef(onAnimationEnd);
@@ -343,14 +343,21 @@ export const SplashContinuityEffectView: FunctionComponent<{
   const backgroundHeight = useAnimationState();
 
   useEffect(() => {
-    if (isBackgroundLoaded && logoSize) {
+    // When the splash screen disappears and the transition starts, the color should change according to the theme.
+    // In most cases, there is no problem because the theme is loaded very quickly, but it waits for an asynchronous load just in case.
+    if (!themeController.isInitializing && isBackgroundLoaded && logoSize) {
       (async () => {
         await hideSplashScreen();
 
         animation.isStarted.setValue(1);
       })();
     }
-  }, [animation.isStarted, isBackgroundLoaded, logoSize]);
+  }, [
+    themeController.isInitializing,
+    animation.isStarted,
+    isBackgroundLoaded,
+    logoSize,
+  ]);
 
   const backgroundClippingAnimationDuration = 700;
   const backgroundAnimationDuration = 900;
@@ -505,12 +512,7 @@ export const SplashContinuityEffectView: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <View
-        style={style.flatten([
-          "absolute-fill",
-          "background-color-splash-background",
-        ])}
-      />
+      <UnlockScreenGradientBackground />
       <View
         style={style.flatten([
           "absolute-fill",
@@ -595,5 +597,18 @@ export const SplashContinuityEffectView: FunctionComponent<{
         />
       </View>
     </React.Fragment>
+  );
+};
+
+const UnlockScreenGradientBackground: FunctionComponent = () => {
+  const style = useStyle();
+
+  return (
+    <View style={style.flatten(["absolute-fill"])}>
+      <SimpleGradient
+        degree={style.get("unlock-screen-gradient-background").degree}
+        stops={style.get("unlock-screen-gradient-background").stops}
+      />
+    </View>
   );
 };

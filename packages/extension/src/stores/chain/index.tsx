@@ -3,6 +3,8 @@ import { observable, action, computed, makeObservable, flow } from "mobx";
 import {
   ChainInfoInner,
   ChainStore as BaseChainStore,
+  DeferInitialQueryController,
+  ObservableQuery,
 } from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
@@ -13,6 +15,8 @@ import {
   GetChainInfosMsg,
   RemoveSuggestedChainInfoMsg,
   TryUpdateChainMsg,
+  SetChainEndpointsMsg,
+  ResetChainEndpointsMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
@@ -29,7 +33,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
 
   constructor(
     embedChainInfos: ChainInfo[],
-    protected readonly requester: MessageRequester
+    protected readonly requester: MessageRequester,
+    protected readonly deferInitialQueryController: DeferInitialQueryController
   ) {
     super(
       embedChainInfos.map((chainInfo) => {
@@ -88,6 +93,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
     this._isInitializing = true;
     yield this.getChainInfosFromBackground();
 
+    this.deferInitialQueryController.ready();
+
     // Get last view chain id to persistent background
     const msg = new GetPersistentMemoryMsg();
     const result = yield* toGenerator(
@@ -131,5 +138,33 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
     const msg = new TryUpdateChainMsg(chainId);
     yield this.requester.sendMessage(BACKGROUND_PORT, msg);
     yield this.getChainInfosFromBackground();
+  }
+
+  @flow
+  *setChainEndpoints(
+    chainId: string,
+    rpc: string | undefined,
+    rest: string | undefined
+  ) {
+    const msg = new SetChainEndpointsMsg(chainId, rpc, rest);
+    const newChainInfos = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+
+    this.setChainInfos(newChainInfos);
+
+    ObservableQuery.refreshAllObserved();
+  }
+
+  @flow
+  *resetChainEndpoints(chainId: string) {
+    const msg = new ResetChainEndpointsMsg(chainId);
+    const newChainInfos = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+
+    this.setChainInfos(newChainInfos);
+
+    ObservableQuery.refreshAllObserved();
   }
 }

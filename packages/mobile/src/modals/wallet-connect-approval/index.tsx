@@ -41,23 +41,15 @@ export const WalletConnectApprovalModal: FunctionComponent<{
         />
         <Text style={style.flatten(["margin-bottom-40", "text-center"])}>
           <Text
-            style={style.flatten([
-              "body1",
-              "color-text-black-low",
-              "font-semibold",
-            ])}
+            style={style.flatten(["body1", "color-text-low", "font-semibold"])}
           >
             {appName}
           </Text>
-          <Text style={style.flatten(["body1", "color-text-black-low"])}>
+          <Text style={style.flatten(["body1", "color-text-low"])}>
             {" is requesting to connect to your Keplr account on "}
           </Text>
           <Text
-            style={style.flatten([
-              "body1",
-              "color-text-black-low",
-              "font-semibold",
-            ])}
+            style={style.flatten(["body1", "color-text-low", "font-semibold"])}
           >
             {data.chainIds.join(", ") + "."}
           </Text>

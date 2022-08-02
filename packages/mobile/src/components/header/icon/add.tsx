@@ -9,7 +9,7 @@ export const HeaderAddIcon: FunctionComponent<{
   const style = useStyle();
 
   if (!color) {
-    color = style.get("color-text-black-high").color;
+    color = style.get("color-text-high").color;
   }
 
   return (

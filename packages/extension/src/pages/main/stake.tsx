@@ -1,6 +1,6 @@
-import React, { FunctionComponent, useMemo, useRef, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 
-import { Button, Tooltip } from "reactstrap";
+import { Button } from "reactstrap";
 
 import { useStore } from "../../stores";
 
@@ -15,6 +15,7 @@ import { useNotification } from "../../components/notification";
 import { useHistory } from "react-router";
 
 import { FormattedMessage } from "react-intl";
+import { DefaultGasMsgWithdrawRewards } from "../../config.ui";
 
 export const StakeView: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -29,26 +30,44 @@ export const StakeView: FunctionComponent = observer(() => {
     accountInfo.bech32Address
   );
   const stakableReward = rewards.stakableReward;
-  const stakable = queries.queryBalances.getQueryBech32Address(
-    accountInfo.bech32Address
-  ).stakable;
 
   const isRewardExist = rewards.rewards.length > 0;
 
-  const isStakableExist = useMemo(() => {
-    return stakable.balance.toDec().gt(new Dec(0));
-  }, [stakable.balance]);
+  const [isWithdrawingRewards, setIsWithdrawingRewards] = useState(false);
 
   const withdrawAllRewards = async () => {
     if (accountInfo.isReadyToSendMsgs) {
       try {
+        setIsWithdrawingRewards(true);
+
         // When the user delegated too many validators,
         // it can't be sent to withdraw rewards from all validators due to the block gas limit.
         // So, to prevent this problem, just send the msgs up to 8.
-        await accountInfo.cosmos.sendWithdrawDelegationRewardMsgs(
-          rewards.getDescendingPendingRewardValidatorAddresses(8),
+        const validatorAddresses = rewards.getDescendingPendingRewardValidatorAddresses(
+          8
+        );
+        const tx = accountInfo.cosmos.makeWithdrawDelegationRewardTx(
+          validatorAddresses
+        );
+
+        let gas: number;
+        try {
+          // Gas adjustment is 1.5
+          // Since there is currently no convenient way to adjust the gas adjustment on the UI,
+          // Use high gas adjustment to prevent failure.
+          gas = (await tx.simulate()).gasUsed * 1.5;
+        } catch (e) {
+          console.log(e);
+
+          gas = DefaultGasMsgWithdrawRewards * validatorAddresses.length;
+        }
+
+        await tx.send(
+          {
+            amount: [],
+            gas: gas.toString(),
+          },
           "",
-          undefined,
           undefined,
           {
             onBroadcasted: () => {
@@ -73,14 +92,11 @@ export const StakeView: FunctionComponent = observer(() => {
             duration: 0.25,
           },
         });
+      } finally {
+        setIsWithdrawingRewards(false);
       }
     }
   };
-
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  const toogleTooltip = () => setTooltipOpen((value) => !value);
-
-  const stakeBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div>
@@ -124,7 +140,10 @@ export const StakeView: FunctionComponent = observer(() => {
                 size="sm"
                 disabled={!accountInfo.isReadyToSendMsgs}
                 onClick={withdrawAllRewards}
-                data-loading={accountInfo.isSendingMsg === "withdrawRewards"}
+                data-loading={
+                  accountInfo.isSendingMsg === "withdrawRewards" ||
+                  isWithdrawingRewards
+                }
               >
                 <FormattedMessage id="main.stake.button.claim-rewards" />
               </Button>
@@ -178,44 +197,21 @@ export const StakeView: FunctionComponent = observer(() => {
           href={chainStore.current.walletUrlForStaking}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => {
-            if (!isStakableExist) {
-              e.preventDefault();
-            } else {
-              analyticsStore.logEvent("Stake button clicked", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-              });
-            }
+          onClick={() => {
+            analyticsStore.logEvent("Stake button clicked", {
+              chainId: chainStore.current.chainId,
+              chainName: chainStore.current.chainName,
+            });
           }}
         >
-          {/*
-            "Disabled" property in button tag will block the mouse enter/leave events.
-            So, tooltip will not work as expected.
-            To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
-          */}
           <Button
-            innerRef={stakeBtnRef}
-            className={classnames(styleStake.button, {
-              disabled: !isStakableExist,
-            })}
+            className={styleStake.button}
             color="primary"
             size="sm"
             outline={isRewardExist}
           >
             <FormattedMessage id="main.stake.button.stake" />
           </Button>
-          {!isStakableExist ? (
-            <Tooltip
-              placement="bottom"
-              isOpen={tooltipOpen}
-              target={stakeBtnRef}
-              toggle={toogleTooltip}
-              fade
-            >
-              <FormattedMessage id="main.stake.tooltip.no-asset" />
-            </Tooltip>
-          ) : null}
         </a>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { StdFee } from "@cosmjs/launchpad";
 import { evmosToEth } from "@tharsis/address-converter";
 import { bech32 } from "bech32";
+import { MakeTxResponse } from "./types";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -68,6 +69,12 @@ export class AccountSetBase {
         }
   ) => Promise<boolean>)[] = [];
 
+  protected makeSendTokenTxFns: ((
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) => MakeTxResponse | undefined)[] = [];
+
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
@@ -107,6 +114,16 @@ export class AccountSetBase {
     ) => Promise<boolean>
   ) {
     this.sendTokenFns.push(fn);
+  }
+
+  registerMakeSendTokenFn(
+    fn: (
+      amount: string,
+      currency: AppCurrency,
+      recipient: string
+    ) => MakeTxResponse | undefined
+  ) {
+    this.makeSendTokenTxFns.push(fn);
   }
 
   protected async enable(keplr: Keplr, chainId: string): Promise<void> {
@@ -226,6 +243,25 @@ export class AccountSetBase {
     return (
       this.walletStatus === WalletStatus.Loaded && this.bech32Address !== ""
     );
+  }
+
+  makeSendTokenTx(
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ): MakeTxResponse {
+    for (let i = 0; i < this.makeSendTokenTxFns.length; i++) {
+      const fn = this.makeSendTokenTxFns[i];
+
+      const res = fn(amount, currency, recipient);
+      if (res) {
+        return res;
+      }
+    }
+
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+
+    throw new Error(`Unsupported type of currency (${denomHelper.type})`);
   }
 
   async sendToken(

@@ -42,7 +42,7 @@ export const ValidatorDetailsScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="gradient">
       <ValidatorDetailsCard
         containerStyle={style.flatten(["margin-y-card-gap"])}
         validatorAddress={validatorAddress}

@@ -17,7 +17,7 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
   const confirmModal = useConfirmModal();
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="secondary">
       <View style={style.get("height-card-gap")} />
       {walletConnectStore.sessions.map((session, i) => {
         const appName =
@@ -26,13 +26,18 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
         return (
           <React.Fragment key={session.key}>
             <View
-              style={style.flatten(["height-0.5", "background-color-divider"])}
+              style={style.flatten([
+                "height-1",
+                "background-color-gray-50",
+                "dark:background-color-platinum-500",
+              ])}
             />
             <View
               style={style.flatten([
                 "flex-row",
                 "items-center",
                 "background-color-white",
+                "dark:background-color-platinum-600",
                 "padding-y-25.5",
               ])}
             >
@@ -42,12 +47,7 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
                 peerMeta={session.peerMeta}
               />
               <View style={style.flatten(["flex-1", "margin-left-16"])}>
-                <Text
-                  style={style.flatten([
-                    "subtitle2",
-                    "color-text-black-medium",
-                  ])}
-                >
+                <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
                   {appName}
                 </Text>
               </View>
@@ -75,7 +75,12 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
                   }}
                 >
                   <UnconnectIcon
-                    color={style.get("color-text-black-very-very-low").color}
+                    color={
+                      style.flatten([
+                        "color-gray-100",
+                        "dark:color-platinum-300",
+                      ]).color
+                    }
                     height={28}
                   />
                 </TouchableOpacity>
@@ -84,8 +89,9 @@ export const ManageWalletConnectScreen: FunctionComponent = observer(() => {
             {walletConnectStore.sessions.length - 1 === i ? (
               <View
                 style={style.flatten([
-                  "height-0.5",
-                  "background-color-divider",
+                  "height-1",
+                  "background-color-gray-50",
+                  "dark:background-color-platinum-500",
                 ])}
               />
             ) : null}

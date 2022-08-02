@@ -105,6 +105,11 @@
   "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",
   "setting.token.manage.notification.viewing-key.copy": "뷰잉키가 복사되었습니다",
 
+  "setting.endpoints": "노드 주소",
+  "setting.endpoints.paragraph": "원하는 풀노드를 사용하도록 설정하세요",
+  "setting.endpoints.button.reset": "초기화",
+  "setting.endpoints.button.confirm": "확인",
+
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
   "register.button.back": "뒤로",
@@ -120,6 +125,7 @@
   "register.intro.sub-content": "모든 정보는 기기에 저장됩니다.{br}이 과정은 인터넷 접속을 필요로하지 않습니다.",
 
   "register.recover.title": "시드를 입력하세요",
+  "register.recover.alt.private-key.title": "개인키를 입력하세요",
 
   "register.create.title": "니모닉 단어",
   "register.create.toggle.word12": "12 단어",
@@ -150,8 +156,6 @@
 
   "chain.suggested.title": "체인 추가 요청",
   "chain.suggested.paragraph": "<b>{host}</b>가 <b>{chainId}</b> 블록체인을 케플러에 추가하길 원합니다.",
-  "chain.suggested.waring.experiment.title": "실험적 기능",
-  "chain.suggested.waring.experiment.paragraph": "용감한 우주 여행자를 위한 기능입니다",
   "chain.suggested.button.approve": "허락",
   "chain.suggested.button.reject": "거부",
 
@@ -284,5 +288,8 @@
   "component.ibc.channel-registrar.chain-selector.button.add": "IBC 전송 채널 추가",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "채널 ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "채널 ID를 입력하세요",
-  "component.ibc.channel-registrar.chain-selector.add.channel.button": "저장"
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "저장",
+
+  "component.waring.experimental-feature.title": "실험적 기능",
+  "component.waring.experimental-feature.paragraph": "용감한 우주 여행자를 위한 기능입니다"
 }

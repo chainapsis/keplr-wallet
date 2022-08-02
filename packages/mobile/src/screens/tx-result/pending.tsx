@@ -11,6 +11,7 @@ import { RightArrowIcon } from "../../components/icon";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import LottieView from "lottie-react-native";
+import { SimpleGradient } from "../../components/svg";
 
 export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -74,20 +75,28 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
+      backgroundMode={null}
       disableSafeArea
-      style={style.flatten([
-        "flex-grow-1",
-        "items-center",
-        "background-color-white",
-      ])}
+      style={style.flatten(["flex-grow-1", "items-center"])}
     >
+      <View style={style.flatten(["absolute-fill"])}>
+        <SimpleGradient
+          degree={
+            style.get("tx-result-screen-pending-gradient-background").degree
+          }
+          stops={
+            style.get("tx-result-screen-pending-gradient-background").stops
+          }
+        />
+      </View>
       <View style={style.flatten(["flex-3"])} />
       <View
         style={style.flatten([
           "width-122",
           "height-122",
           "border-width-8",
-          "border-color-primary",
+          "border-color-blue-400",
+          "dark:border-color-blue-300",
           "border-radius-64",
         ])}
       >
@@ -105,15 +114,18 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
             colorFilters={[
               {
                 keypath: "#dot01",
-                color: style.get("color-primary").color,
+                color: style.flatten(["color-blue-400", "dark:color-blue-300"])
+                  .color,
               },
               {
                 keypath: "#dot02",
-                color: style.get("color-primary").color,
+                color: style.flatten(["color-blue-400", "dark:color-blue-300"])
+                  .color,
               },
               {
                 keypath: "#dot03",
-                color: style.get("color-primary").color,
+                color: style.flatten(["color-blue-400", "dark:color-blue-300"])
+                  .color,
               },
             ]}
             autoPlay
@@ -126,7 +138,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h2",
-          "color-text-black-medium",
+          "color-text-high",
           "margin-top-82",
           "margin-bottom-32",
         ])}
@@ -145,13 +157,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           },
         ])}
       >
-        <Text
-          style={style.flatten([
-            "body2",
-            "text-center",
-            "color-text-black-low",
-          ])}
-        >
+        <Text style={style.flatten(["body2", "text-center", "color-text-low"])}>
           Transaction has been broadcasted to the blockchain and pending
           confirmation.
         </Text>
@@ -171,14 +177,11 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
             size="default"
             text="Go to homescreen"
             mode="text"
-            rightIcon={
+            rightIcon={(color) => (
               <View style={style.flatten(["margin-left-8"])}>
-                <RightArrowIcon
-                  color={style.get("color-primary").color}
-                  height={12}
-                />
+                <RightArrowIcon color={color} height={12} />
               </View>
-            }
+            )}
             onPress={() => {
               smartNavigation.navigateSmart("Home", {});
             }}

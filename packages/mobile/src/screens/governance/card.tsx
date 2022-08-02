@@ -161,29 +161,24 @@ export const GovernanceCardBody: FunctionComponent<{
             ])}
           >
             <Text
-              style={style.flatten(["h5", "color-text-black-high"])}
+              style={style.flatten(["h5", "color-text-high"])}
             >{`#${proposal.id}`}</Text>
             <View style={style.flatten(["flex-1"])} />
             <GovernanceProposalStatusChip status={proposal.proposalStatus} />
           </View>
           <View style={style.flatten(["margin-bottom-8"])}>
-            <Text style={style.flatten(["h6", "color-text-black-high"])}>
+            <Text style={style.flatten(["h6", "color-text-high"])}>
               {proposal.title}
             </Text>
           </View>
           <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text
-              style={style.flatten(["text-caption1", "color-text-black-low"])}
-            >
+            <Text style={style.flatten(["text-caption1", "color-text-low"])}>
               {renderProposalDateString(proposal)}
             </Text>
             <View style={style.flatten(["flex-1"])} />
             {proposalRelativeEndTimeString ? (
               <Text
-                style={style.flatten([
-                  "text-caption1",
-                  "color-text-black-medium",
-                ])}
+                style={style.flatten(["text-caption1", "color-text-middle"])}
               >
                 {proposalRelativeEndTimeString}
               </Text>
