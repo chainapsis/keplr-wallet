@@ -81,6 +81,11 @@ export const SendPage: FunctionComponent = observer(() => {
       );
 
       if (denomHelper.type !== "native") {
+        if (denomHelper.type === "cw20") {
+          // Probably, the gas can be different per cw20 according to how the contract implemented.
+          return `${denomHelper.type}/${denomHelper.contractAddress}`;
+        }
+
         return denomHelper.type;
       }
     }
