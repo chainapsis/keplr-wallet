@@ -1,73 +1,22 @@
 import React from "react";
-import { Image, Pressable, SafeAreaView, Text, View } from "react-native";
 
-export default function Onboarding() {
+import { Onboarding1 } from "./onboarding1";
+import { Onboarding2 } from "./onboarding2";
+import { Onboarding3 } from "./onboarding3";
+import { Onboarding4 } from "./onboarding4";
+import { Stack } from "./stack";
+
+export function OnboardingScreen() {
   return (
-    <SafeAreaView
-      style={{
-        justifyContent: "space-between",
-        backgroundColor: "#090817",
-        height: "100%",
-        position: "relative",
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
       }}
     >
-      <View style={{ flex: 6, position: "relative" }}>
-        <Image
-          source={require("./assets/backgroundblue.png")}
-          style={{ position: "absolute", right: 0 }}
-        />
-        <Image
-          source={require("./assets/backgroundpink.png")}
-          style={{ position: "absolute", zIndex: -1 }}
-        />
-      </View>
-      <View
-        style={{
-          flex: 4,
-          paddingRight: 20,
-          paddingLeft: 20,
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Image source={require("./assets/loop.png")} />
-          <Text
-            style={{
-              color: "#F6F5FF",
-              fontSize: 32,
-              fontWeight: "600",
-              marginTop: 32,
-            }}
-          >
-            Welcome to Loop
-          </Text>
-          <Text
-            style={{
-              color: "#999CB6",
-              fontSize: 16,
-              fontWeight: "400",
-              marginTop: 12,
-            }}
-          >
-            Loop, powered by Obi, is the world’s most powerful wallet for web3{" "}
-          </Text>
-        </View>
-        <Pressable
-          style={{
-            backgroundColor: "#59D6E6",
-            width: 335,
-            height: 56,
-            borderRadius: 12,
-            justifyContent: "center",
-            alignItems: "center",
-            marginBottom: 48,
-          }}
-        >
-          <Text style={{ color: "#040317", fontWeight: "bold", fontSize: 16 }}>
-            Get Started {">>"}
-          </Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+      <Stack.Screen name="onboarding1" component={Onboarding1} />
+      <Stack.Screen name="onboarding2" component={Onboarding2} />
+      <Stack.Screen name="onboarding3" component={Onboarding3} />
+      <Stack.Screen name="onboarding4" component={Onboarding4} />
+    </Stack.Navigator>
   );
 }

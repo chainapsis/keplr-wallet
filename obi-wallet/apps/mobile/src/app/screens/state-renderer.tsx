@@ -8,8 +8,7 @@ import { StackParamList } from "../stack";
 import { useStore } from "../stores";
 import { HomeScreen } from "./home";
 import { LockScreen } from "./lock";
-import { RegisterScreen } from "./register";
-import Onboarding from "./account";
+import { OnboardingScreen } from "./onboarding";
 
 export type StateRendererScreenProps = NativeStackScreenProps<
   StackParamList,
@@ -18,12 +17,12 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
   const { keyRingStore } = useStore();
-  return <HomeScreen />;
+
   switch (keyRingStore.status) {
     case KeyRingStatus.NOTLOADED:
       return <Text>Not Loaded</Text>;
     case KeyRingStatus.EMPTY:
-      return <RegisterScreen />;
+      return <OnboardingScreen />;
     case KeyRingStatus.LOCKED:
       return <LockScreen />;
     case KeyRingStatus.UNLOCKED:
