@@ -1005,7 +1005,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025,
       high: 0.04,
     },
-    features: ["ibc-go", "ibc-transfer", "ibc-go"],
+    features: ["ibc-go", "ibc-transfer"],
   },
   {
     rpc: PERSISTENCE_RPC_ENDPOINT,
