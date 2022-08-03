@@ -1,28 +1,38 @@
-import React from "react";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import React from "react";
 import { Image, TextInput, TouchableHighlight, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import Background from "../components/background";
 import Whatsapp from "./assets/whatsapp.svg";
 import MessageDots from "./assets/messageDots.svg";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
-import Background from "../components/background";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StackParamList } from "./stack";
 
 //TODO: add background svgs
 //TODO: add select for security question
 
-export default function Onboarding2() {
+export type Onboarding2Props = NativeStackScreenProps<
+  StackParamList,
+  "onboarding2"
+>;
+
+export function Onboarding2({ navigation }: Onboarding2Props) {
   const safeArea = useSafeAreaInsets();
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />
-      <TouchableHighlight>
-        <FontAwesomeIcon
-          icon={faChevronLeft}
-          style={{ color: "#7B87A8", top: safeArea.top }}
-        />
+      <TouchableHighlight
+        style={{ marginTop: safeArea.top }}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      >
+        <FontAwesomeIcon icon={faChevronLeft} style={{ color: "#7B87A8" }} />
       </TouchableHighlight>
       <View style={{ flex: 4, justifyContent: "flex-end" }}>
         <View>
@@ -136,6 +146,9 @@ export default function Onboarding2() {
               marginVertical: 20,
               borderRadius: 12,
             }}
+            onPress={() => {
+              navigation.navigate("onboarding3");
+            }}
           >
             <>
               <MessageDots style={{ marginRight: 10 }} />
@@ -155,6 +168,9 @@ export default function Onboarding2() {
               alignItems: "center",
               flexDirection: "row",
               borderRadius: 12,
+            }}
+            onPress={() => {
+              navigation.navigate("onboarding3");
             }}
           >
             <>

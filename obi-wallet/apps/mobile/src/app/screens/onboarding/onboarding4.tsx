@@ -1,17 +1,26 @@
-import React from "react";
-import { Text } from "@obi-wallet/common";
-import { TouchableHighlight, View } from "react-native";
-import FaceScaner from "./assets/face-scanner.svg";
-
-import Scan from "./assets/scan.svg";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Background from "../components/background";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Text } from "@obi-wallet/common";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import React from "react";
+import { TouchableHighlight, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import Background from "../components/background";
+import FaceScanner from "./assets/face-scanner.svg";
+import Scan from "./assets/scan.svg";
+import { StackParamList } from "./stack";
+
 //TODO: add background svgs
 
-export default function Onboarding4() {
+export type Onboarding4Props = NativeStackScreenProps<
+  StackParamList,
+  "onboarding4"
+>;
+
+export function Onboarding4({ navigation }: Onboarding4Props) {
   const safeArea = useSafeAreaInsets();
+
   return (
     <View
       style={{
@@ -22,11 +31,13 @@ export default function Onboarding4() {
       }}
     >
       <Background />
-      <TouchableHighlight>
-        <FontAwesomeIcon
-          icon={faChevronLeft}
-          style={{ color: "#7B87A8", top: safeArea.top }}
-        />
+      <TouchableHighlight
+        style={{ marginTop: safeArea.top }}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      >
+        <FontAwesomeIcon icon={faChevronLeft} style={{ color: "#7B87A8" }} />
       </TouchableHighlight>
       <View style={{ flex: 5, justifyContent: "center", alignItems: "center" }}>
         <View
@@ -49,7 +60,7 @@ export default function Onboarding4() {
               borderRadius: 224,
             }}
           >
-            <FaceScaner />
+            <FaceScanner />
           </View>
         </View>
       </View>
