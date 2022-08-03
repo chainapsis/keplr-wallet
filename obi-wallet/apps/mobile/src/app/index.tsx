@@ -2,6 +2,7 @@ import { messages } from "@obi-wallet/common";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
 import { IntlProvider } from "react-intl";
+import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { StateRendererScreen } from "./screens/state-renderer";
@@ -28,6 +29,7 @@ export function App() {
     >
       <SafeAreaProvider>
         <NavigationContainer>
+          <StatusBar barStyle="light-content" />
           <Stack.Navigator
             initialRouteName="state-renderer"
             screenOptions={{
