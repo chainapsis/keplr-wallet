@@ -6,7 +6,7 @@ import React from "react";
 import { TextInput, TouchableHighlight, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Background from "../components/background";
+import { Background } from "../components/background";
 import InsuranceLogo from "./assets/insuranceLogo.svg";
 import ShieldCheck from "./assets/shield-check.svg";
 import { StackParamList } from "./stack";

@@ -7,7 +7,7 @@ import React from "react";
 import { Image, TextInput, TouchableHighlight, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Background from "../../components/background";
+import { Background } from "../../components/background";
 import { StackParamList } from "../stack";
 import SMS from "./assets/sms.svg";
 import WhatsApp from "./assets/whatsapp.svg";

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Image } from "react-native";
 
-export default function background() {
+export function Background() {
   return (
     <View
       style={{
@@ -15,11 +15,11 @@ export default function background() {
       }}
     >
       <Image
-        source={require("../onboarding/assets/bgEllipseblue.png")}
+        source={require("./assets/background-blue.png")}
         style={{ top: 200, left: 0, position: "absolute" }}
       />
       <Image
-        source={require("../onboarding/assets/bgEllipsepurple.png")}
+        source={require("./assets/background-purple.png")}
         style={{ position: "absolute", top: 0, right: 0 }}
       />
     </View>

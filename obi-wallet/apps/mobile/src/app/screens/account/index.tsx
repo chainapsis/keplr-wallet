@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Background from "../components/background";
+import { Background } from "../components/background";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
