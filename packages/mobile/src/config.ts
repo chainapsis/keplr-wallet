@@ -216,7 +216,14 @@ export const EmbedChainInfos: AppChainInfo[] = [
     bip44: {
       coinType: 394,
     },
-    bech32Config: Bech32Address.defaultBech32Config("cro"),
+    bech32Config: {
+      bech32PrefixAccAddr: "cro",
+      bech32PrefixAccPub: "cropub",
+      bech32PrefixValAddr: "crocncl",
+      bech32PrefixValPub: "crocnclpub",
+      bech32PrefixConsAddr: "crocnclcons",
+      bech32PrefixConsPub: "crocnclconspub",
+    },
     currencies: [
       {
         coinDenom: "CRO",
