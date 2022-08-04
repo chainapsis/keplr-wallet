@@ -7,12 +7,12 @@ import React from "react";
 import { Image, TextInput, TouchableHighlight, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Background from "../components/background";
-import Whatsapp from "./assets/whatsapp.svg";
-import MessageDots from "./assets/messageDots.svg";
-import { StackParamList } from "./stack";
+import Background from "../../components/background";
+import { StackParamList } from "../stack";
+import SMS from "./assets/sms.svg";
+import WhatsApp from "./assets/whatsapp.svg";
+import { Button } from "../../../button";
 
-//TODO: add background svgs
 //TODO: add select for security question
 
 export type Onboarding2Props = NativeStackScreenProps<
@@ -36,9 +36,8 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
       </TouchableHighlight>
       <View style={{ flex: 4, justifyContent: "flex-end" }}>
         <View>
-          {/* <PhoneLogo style={{ marginBottom: 41 }} /> */}
           <Image
-            source={require("./assets/phoneLogo.png")}
+            source={require("./assets/phone.png")}
             style={{ width: 66, height: 79, marginBottom: 41 }}
           />
           <View>
@@ -135,53 +134,25 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
               Now send your encrypted answer to activate your message key
             </Text>
           </View>
-          <TouchableHighlight
+          <Button
+            label="Send Magic SMS"
+            LeftIcon={SMS}
+            flavor="blue"
             style={{
-              backgroundColor: "#59D6E6",
-              width: "100%",
-              height: 56,
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "row",
               marginVertical: 20,
-              borderRadius: 12,
             }}
             onPress={() => {
               navigation.navigate("onboarding3");
             }}
-          >
-            <>
-              <MessageDots style={{ marginRight: 10 }} />
-              <Text
-                style={{ color: "#040317", fontSize: 16, fontWeight: "700" }}
-              >
-                Send Magic SMS
-              </Text>
-            </>
-          </TouchableHighlight>
-          <TouchableHighlight
-            style={{
-              backgroundColor: "#48C95F",
-              width: "100%",
-              height: 56,
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "row",
-              borderRadius: 12,
-            }}
+          />
+          <Button
+            label="Send on WhatsApp"
+            LeftIcon={WhatsApp}
+            flavor="green"
             onPress={() => {
               navigation.navigate("onboarding3");
             }}
-          >
-            <>
-              <Whatsapp style={{ marginRight: 10 }} />
-              <Text
-                style={{ color: "#040317", fontSize: 16, fontWeight: "700" }}
-              >
-                Send on WhatsApp
-              </Text>
-            </>
-          </TouchableHighlight>
+          />
         </View>
       </View>
     </View>
