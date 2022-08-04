@@ -1,19 +1,19 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { Text, TextInput } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React from "react";
-import { Image, TextInput, View } from "react-native";
+import React, { useState } from "react";
+import { Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { SECURITY_QUESTIONS } from "../../../../config";
 import { Button, IconButton } from "../../../button";
+import { DropDownPicker } from "../../../drop-down-picker";
 import { Background } from "../../components/background";
 import { StackParamList } from "../stack";
 import SMS from "./assets/sms.svg";
 import WhatsApp from "./assets/whatsapp.svg";
-
-//TODO: add select for security question
 
 export type Onboarding2Props = NativeStackScreenProps<
   StackParamList,
@@ -22,6 +22,10 @@ export type Onboarding2Props = NativeStackScreenProps<
 
 export function Onboarding2({ navigation }: Onboarding2Props) {
   const safeArea = useSafeAreaInsets();
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(SECURITY_QUESTIONS[0].value);
+  const [items, setItems] = useState(SECURITY_QUESTIONS);
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
@@ -60,7 +64,6 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
               style={{
                 color: "#999CB6",
                 fontSize: 14,
-                fontWeight: "400",
                 marginBottom: 36,
               }}
             >
@@ -74,39 +77,31 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
           style={{
             color: "#787B9C",
             fontSize: 10,
-            fontWeight: "400",
             marginBottom: 12,
+            textTransform: "uppercase",
           }}
         >
-          SECURITY QUESTION
+          Security Question
         </Text>
 
-        {/* <TextInput
-                    value="IT HAS TO BE A SELECT"
-                    placeholder="type your answer here"
-                    style={{
-                        width: "100%",
-                        height: 56,
-                        borderWidth: 1,
-                        borderColor: "#2F2B4C",
-                        paddingLeft: 20,
-                        fontSize: 17,
-                        fontWeight: "400",
-                        color: "#F6F5FF",
-                        borderRadius: 12,
-                    }}
-                /> */}
-
+        <DropDownPicker
+          open={open}
+          value={value}
+          items={items}
+          setOpen={setOpen}
+          setValue={setValue}
+          setItems={setItems}
+        />
         <Text
           style={{
             color: "#787B9C",
             fontSize: 10,
-            fontWeight: "400",
             marginBottom: 12,
             marginTop: 25,
+            textTransform: "uppercase",
           }}
         >
-          ANSWER
+          Answer
         </Text>
         <TextInput
           placeholder="type your answer here"
@@ -116,8 +111,8 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
             borderWidth: 1,
             borderColor: "#2F2B4C",
             paddingLeft: 20,
-            fontSize: 17,
-            fontWeight: "400",
+            fontSize: 14,
+            fontWeight: "500",
             color: "#F6F5FF",
             borderRadius: 12,
           }}
@@ -135,8 +130,15 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
                 margin: 5,
               }}
             />
-            <Text style={{ color: "#F6F5FF", marginLeft: 30, opacity: 0.7 }}>
-              Now send your encrypted answer to activate your message key
+            <Text
+              style={{
+                color: "#F6F5FF",
+                marginLeft: 30,
+                opacity: 0.7,
+                fontSize: 12,
+              }}
+            >
+              Now send your encrypted answer to activate your messaging key.
             </Text>
           </View>
           <Button
