@@ -170,8 +170,18 @@ export class Keplr implements IKeplr {
     _data: string | Uint8Array,
     type: EthSignType
   ): Promise<Uint8Array> {
+    if (type !== EthSignType.MESSAGE && type !== EthSignType.TRANSACTION) {
+      throw new Error(
+        "Unsupported Ethereum signing type: expected 'message' or 'transaction.'"
+      );
+    }
+
     const [data, isADR36WithString] = this.getDataForADR36(_data);
     const signDoc = this.getBlankSignDoc(signer, data);
+
+    if (data === "") {
+      throw new Error("Signing empty data is not supported.");
+    }
 
     const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
       isADR36WithString,
