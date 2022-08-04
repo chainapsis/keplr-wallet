@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, Text as T, TextProps } from "react-native";
+import {
+  StyleSheet,
+  Text as OriginalText,
+  TextInput as OriginalTextInput,
+  TextInputProps,
+  TextProps,
+} from "react-native";
 
 const styles = StyleSheet.create({
   font: {
@@ -13,8 +19,12 @@ export function Text({
   ...props
 }: TextProps & { children: React.ReactNode }) {
   return (
-    <T style={[styles.font, style]} {...props}>
+    <OriginalText style={[styles.font, style]} {...props}>
       {children}
-    </T>
+    </OriginalText>
   );
+}
+
+export function TextInput({ style, ...props }: TextInputProps) {
+  return <OriginalTextInput style={[styles.font, style]} {...props} />;
 }

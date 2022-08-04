@@ -12137,6 +12137,11 @@ react-native-device-crypto@^0.1.7:
   resolved "https://registry.yarnpkg.com/react-native-device-crypto/-/react-native-device-crypto-0.1.7.tgz#4d7fd50952766d9337fdea6d52cea00163f9521a"
   integrity sha512-dE8hBni8Lddj/NlC6ChTnfzWHXnmIdnIDVDihJv32i9yVPm3FLbYekQCscTFMbNwAp3p96/kmfk0w0QNwgoFng==
 
+react-native-dropdown-picker@^5.4.2:
+  version "5.4.2"
+  resolved "https://registry.yarnpkg.com/react-native-dropdown-picker/-/react-native-dropdown-picker-5.4.2.tgz#3d17de3d8a84cb8e74a2ffda6be417d287245b81"
+  integrity sha512-cZBPyN+k52jA9XguFnKoF5tLf31z6gjZ8GijO/pfVNSSEtPwZ14UTUrr87JiiOnMh5K/O2kRzZ/jZN8D0MmUMA==
+
 react-native-fast-crypto@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/react-native-fast-crypto/-/react-native-fast-crypto-2.2.0.tgz#062014a563ef34af30e1969ae4ae4b5cd6ab9e44"

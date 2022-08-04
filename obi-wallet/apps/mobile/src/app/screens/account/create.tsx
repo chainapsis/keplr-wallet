@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Background from "../components/background";
+import { Background } from "../components/background";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

@@ -6,7 +6,7 @@ import React from "react";
 import { TouchableHighlight, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Background from "../components/background";
+import { Background } from "../components/background";
 import FaceScanner from "./assets/face-scanner.svg";
 import Scan from "./assets/scan.svg";
 import { StackParamList } from "./stack";
