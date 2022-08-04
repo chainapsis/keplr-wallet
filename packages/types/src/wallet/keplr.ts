@@ -1,4 +1,5 @@
 import { ChainInfo } from "../chain-info";
+import { EthSignType } from "../ethereum";
 import {
   BroadcastMode,
   AminoSignResponse,
@@ -90,6 +91,13 @@ export interface Keplr {
     data: string | Uint8Array,
     signature: StdSignature
   ): Promise<boolean>;
+
+  signEthereum(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    type: EthSignType
+  ): Promise<Uint8Array>;
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
   getOfflineSignerOnlyAmino(chainId: string): OfflineSigner;

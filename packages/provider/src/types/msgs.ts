@@ -1,5 +1,10 @@
 import { Message } from "@keplr-wallet/router";
-import { ChainInfo, KeplrSignOptions, Key } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  EthSignType,
+  KeplrSignOptions,
+  Key,
+} from "@keplr-wallet/types";
 import { AminoSignResponse, StdSignature, StdSignDoc } from "@cosmjs/launchpad";
 
 export class EnableAccessMsg extends Message<void> {
@@ -189,6 +194,7 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     public readonly signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
+      ethSignType?: EthSignType;
     } = {}
   ) {
     super();

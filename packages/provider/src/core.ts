@@ -1,5 +1,6 @@
 import {
   ChainInfo,
+  EthSignType,
   Keplr as IKeplr,
   KeplrIntereactionOptions,
   KeplrMode,
@@ -136,35 +137,10 @@ export class Keplr implements IKeplr {
   async signArbitrary(
     chainId: string,
     signer: string,
-    data: string | Uint8Array
+    _data: string | Uint8Array
   ): Promise<StdSignature> {
-    let isADR36WithString = false;
-    if (typeof data === "string") {
-      data = Buffer.from(data).toString("base64");
-      isADR36WithString = true;
-    } else {
-      data = Buffer.from(data).toString("base64");
-    }
-
-    const signDoc = {
-      chain_id: "",
-      account_number: "0",
-      sequence: "0",
-      fee: {
-        gas: "0",
-        amount: [],
-      },
-      msgs: [
-        {
-          type: "sign/MsgSignData",
-          value: {
-            signer,
-            data,
-          },
-        },
-      ],
-      memo: "",
-    };
+    const [data, isADR36WithString] = this.getDataForADR36(_data);
+    const signDoc = this.getBlankSignDoc(signer, data);
 
     const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
       isADR36WithString,
@@ -186,6 +162,24 @@ export class Keplr implements IKeplr {
       BACKGROUND_PORT,
       new RequestVerifyADR36AminoSignDoc(chainId, signer, data, signature)
     );
+  }
+
+  async signEthereum(
+    chainId: string,
+    signer: string,
+    _data: string | Uint8Array,
+    type: EthSignType
+  ): Promise<Uint8Array> {
+    const [data, isADR36WithString] = this.getDataForADR36(_data);
+    const signDoc = this.getBlankSignDoc(signer, data);
+
+    const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
+      isADR36WithString,
+      ethSignType: type,
+    });
+    const signature = (await this.requester.sendMessage(BACKGROUND_PORT, msg))
+      .signature;
+    return Buffer.from(signature.signature, "base64");
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
@@ -276,5 +270,38 @@ export class Keplr implements IKeplr {
     const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
+  }
+
+  protected getDataForADR36(data: string | Uint8Array): [string, boolean] {
+    let isADR36WithString = false;
+    if (typeof data === "string") {
+      data = Buffer.from(data).toString("base64");
+      isADR36WithString = true;
+    } else {
+      data = Buffer.from(data).toString("base64");
+    }
+    return [data, isADR36WithString];
+  }
+
+  protected getBlankSignDoc(signer: string, data: string): StdSignDoc {
+    return {
+      chain_id: "",
+      account_number: "0",
+      sequence: "0",
+      fee: {
+        gas: "0",
+        amount: [],
+      },
+      msgs: [
+        {
+          type: "sign/MsgSignData",
+          value: {
+            signer,
+            data,
+          },
+        },
+      ],
+      memo: "",
+    };
   }
 }

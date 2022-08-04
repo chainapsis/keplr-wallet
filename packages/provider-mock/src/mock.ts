@@ -1,4 +1,5 @@
 import {
+  EthSignType,
   Keplr,
   KeplrIntereactionOptions,
   KeplrMode,
@@ -118,6 +119,15 @@ export class MockKeplr implements Keplr {
     _data: string | Uint8Array,
     _signature: StdSignature
   ): Promise<boolean> {
+    throw new Error("Not implemented");
+  }
+
+  signEthereum(
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array,
+    _type: EthSignType
+  ): Promise<Uint8Array> {
     throw new Error("Not implemented");
   }
 
