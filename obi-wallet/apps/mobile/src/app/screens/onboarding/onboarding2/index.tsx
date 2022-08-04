@@ -4,14 +4,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
-import { Image, TextInput, TouchableHighlight, View } from "react-native";
+import { Image, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Button, IconButton } from "../../../button";
 import { Background } from "../../components/background";
 import { StackParamList } from "../stack";
 import SMS from "./assets/sms.svg";
 import WhatsApp from "./assets/whatsapp.svg";
-import { Button } from "../../../button";
 
 //TODO: add select for security question
 
@@ -26,14 +26,19 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />
-      <TouchableHighlight
-        style={{ marginTop: safeArea.top }}
+      <IconButton
+        style={{
+          marginTop: safeArea.top,
+          marginLeft: -5,
+          padding: 5,
+          width: 25,
+        }}
         onPress={() => {
           navigation.goBack();
         }}
       >
         <FontAwesomeIcon icon={faChevronLeft} style={{ color: "#7B87A8" }} />
-      </TouchableHighlight>
+      </IconButton>
       <View style={{ flex: 4, justifyContent: "flex-end" }}>
         <View>
           <Image
