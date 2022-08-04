@@ -1,7 +1,7 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text, TextInput } from "@obi-wallet/common";
+import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import { Image, View } from "react-native";
@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SECURITY_QUESTIONS } from "../../../../config";
 import { Button, IconButton } from "../../../button";
 import { DropDownPicker } from "../../../drop-down-picker";
+import { TextInput } from "../../../text-input";
 import { Background } from "../../components/background";
 import { StackParamList } from "../stack";
 import SMS from "./assets/sms.svg";
@@ -92,31 +93,7 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
           setValue={setValue}
           setItems={setItems}
         />
-        <Text
-          style={{
-            color: "#787B9C",
-            fontSize: 10,
-            marginBottom: 12,
-            marginTop: 25,
-            textTransform: "uppercase",
-          }}
-        >
-          Answer
-        </Text>
-        <TextInput
-          placeholder="type your answer here"
-          style={{
-            width: "100%",
-            height: 56,
-            borderWidth: 1,
-            borderColor: "#2F2B4C",
-            paddingLeft: 20,
-            fontSize: 14,
-            fontWeight: "500",
-            color: "#F6F5FF",
-            borderRadius: 12,
-          }}
-        />
+        <TextInput label="Answer" placeholder="Type your answer here" />
       </View>
       <View style={{ flex: 3 }}>
         <View style={{ flexDirection: "row", flexGrow: 1, flexWrap: "wrap" }}>
