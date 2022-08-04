@@ -1,13 +1,19 @@
 import { Text, TextInput as OriginalTextInput } from "@obi-wallet/common";
 import React from "react";
-import { StyleSheet, TextInputProps } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  TextInputProps,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native";
 
 const styles = StyleSheet.create({
   label: {
     color: "#787B9C",
     fontSize: 10,
     marginBottom: 12,
-    marginTop: 25,
     textTransform: "uppercase",
   },
   input: {
@@ -26,12 +32,21 @@ const styles = StyleSheet.create({
 export function TextInput({
   label,
   style,
+  inputStyle,
   ...props
-}: TextInputProps & { label?: string }) {
+}: TextInputProps & {
+  label?: string;
+  style?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
+}) {
   return (
-    <>
+    <View style={style}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
-      <OriginalTextInput style={[styles.input, style]} {...props} />
-    </>
+      <OriginalTextInput
+        style={[styles.input, inputStyle]}
+        placeholderTextColor="#4B4E6E"
+        {...props}
+      />
+    </View>
   );
 }

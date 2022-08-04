@@ -5,7 +5,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import { Image, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SECURITY_QUESTIONS } from "../../../../config";
 import { Button, IconButton } from "../../../button";
@@ -22,81 +22,90 @@ export type Onboarding2Props = NativeStackScreenProps<
 >;
 
 export function Onboarding2({ navigation }: Onboarding2Props) {
-  const safeArea = useSafeAreaInsets();
-
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(SECURITY_QUESTIONS[0].value);
   const [items, setItems] = useState(SECURITY_QUESTIONS);
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 20 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Background />
-      <IconButton
+      <View
         style={{
-          marginTop: safeArea.top,
-          marginLeft: -5,
-          padding: 5,
-          width: 25,
-        }}
-        onPress={() => {
-          navigation.goBack();
+          flex: 1,
+          paddingHorizontal: 20,
+          justifyContent: "space-between",
         }}
       >
-        <FontAwesomeIcon icon={faChevronLeft} style={{ color: "#7B87A8" }} />
-      </IconButton>
-      <View style={{ flex: 4, justifyContent: "flex-end" }}>
         <View>
-          <Image
-            source={require("./assets/phone.png")}
-            style={{ width: 66, height: 79, marginBottom: 41 }}
-          />
-          <View>
-            <Text
-              style={{
-                color: "#F6F5FF",
-                fontSize: 24,
-                fontWeight: "600",
-                marginBottom: 10,
-              }}
-            >
-              Authenticate Your Keys
-            </Text>
-            <Text
-              style={{
-                color: "#999CB6",
-                fontSize: 14,
-                marginBottom: 36,
-              }}
-            >
-              Please answer a security question.
-            </Text>
+          <IconButton
+            style={{
+              marginLeft: -5,
+              padding: 5,
+              width: 25,
+            }}
+            onPress={() => {
+              navigation.goBack();
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faChevronLeft}
+              style={{ color: "#7B87A8" }}
+            />
+          </IconButton>
+          <View style={{ justifyContent: "flex-end", marginTop: 43 }}>
+            <View>
+              <Image source={require("./assets/phone.png")} />
+              <Text
+                style={{
+                  color: "#F6F5FF",
+                  fontSize: 24,
+                  fontWeight: "600",
+                  marginTop: 32,
+                }}
+              >
+                Authenticate Your Keys
+              </Text>
+              <Text
+                style={{
+                  color: "#999CB6",
+                  fontSize: 14,
+                  marginTop: 10,
+                }}
+              >
+                Please answer a security question.
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-      <View style={{ flex: 3 }}>
-        <Text
-          style={{
-            color: "#787B9C",
-            fontSize: 10,
-            marginBottom: 12,
-            textTransform: "uppercase",
-          }}
-        >
-          Security Question
-        </Text>
 
-        <DropDownPicker
-          open={open}
-          value={value}
-          items={items}
-          setOpen={setOpen}
-          setValue={setValue}
-          setItems={setItems}
-        />
-        <TextInput label="Answer" placeholder="Type your answer here" />
-      </View>
-      <View style={{ flex: 3 }}>
-        <View style={{ flexDirection: "row", flexGrow: 1, flexWrap: "wrap" }}>
+        <View>
+          <Text
+            style={{
+              color: "#787B9C",
+              fontSize: 10,
+              textTransform: "uppercase",
+              marginBottom: 12,
+            }}
+          >
+            Security Question
+          </Text>
+          <DropDownPicker
+            open={open}
+            value={value}
+            items={items}
+            setOpen={setOpen}
+            setValue={setValue}
+            setItems={setItems}
+          />
+
+          <TextInput
+            label="Answer"
+            placeholder="Type your answer here"
+            style={{ marginTop: 25 }}
+          />
+        </View>
+
+        <View>
           <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
             <FontAwesomeIcon
               icon={faInfoCircle}
@@ -139,6 +148,6 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
           />
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
