@@ -54,7 +54,7 @@ export function Onboarding1({ navigation }: Onboarding1Props) {
               marginTop: 12,
             }}
           >
-            Loop, powered by Obi, is the world’s most powerful wallet for web3{" "}
+            Loop, powered by Obi, is the world’s most powerful wallet for Web3.
           </Text>
           <Button
             label="Get Started"
