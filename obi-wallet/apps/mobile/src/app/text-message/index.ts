@@ -1,4 +1,4 @@
-import { AES } from "crypto-js";
+import { AES, enc } from "crypto-js";
 import { totp } from "otplib";
 import { Linking } from "react-native";
 
@@ -68,7 +68,7 @@ export async function getPublicKey(key: string) {
       // - "Invalid input - it is not base32 encoded string"
       console.error(err);
     }
-    const decrypted = AES.decrypt(message, token).toString();
+    const decrypted = AES.decrypt(message, token).toString(enc.Utf8);
     console.log({ decrypted });
     // TODO: check that this is actually a valid public key
   } catch (e) {
