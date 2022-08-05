@@ -292,8 +292,8 @@ PODS:
     - React-Core
   - react-native-device-crypto (0.1.7):
     - React-Core
-  - react-native-fast-crypto (2.2.0):
-    - React
+  - react-native-randombytes (3.6.1):
+    - React-Core
   - react-native-safe-area-context (4.3.1):
     - RCT-Folly
     - RCTRequired
@@ -456,7 +456,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-config (from `../node_modules/react-native-config`)
   - react-native-device-crypto (from `../node_modules/react-native-device-crypto`)
-  - react-native-fast-crypto (from `../node_modules/react-native-fast-crypto`)
+  - react-native-randombytes (from `../node_modules/react-native-randombytes`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -541,8 +541,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-config"
   react-native-device-crypto:
     :path: "../node_modules/react-native-device-crypto"
-  react-native-fast-crypto:
-    :path: "../node_modules/react-native-fast-crypto"
+  react-native-randombytes:
+    :path: "../node_modules/react-native-randombytes"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-webview:
@@ -620,7 +620,7 @@ SPEC CHECKSUMS:
   React-logger: 23a50ef4c18bf9adbb51e2c979318e6b3a2e44a1
   react-native-config: 7cd105e71d903104e8919261480858940a6b9c0e
   react-native-device-crypto: decd7475ec9f48eb66eafcbabfaa5dde01be37f9
-  react-native-fast-crypto: 5943c42466b86ad70be60d3a5f64bd22251e5d9e
+  react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
   react-native-safe-area-context: 6c12e3859b6f27b25de4fee8201cfb858432d8de
   react-native-webview: e771bc375f789ebfa02a26939a57dbc6fa897336
   React-perflogger: 39d2ba8cbcac54d1bb1d9a980dab348e96aef467

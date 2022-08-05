@@ -25,10 +25,11 @@ module.exports = (async () => {
         blockList: exclusionList([/\.\/dist\/.*/, /\/packages\/mobile\/.*/]),
         extraNodeModules: {
           buffer: require.resolve("buffer/"),
-          crypto: require.resolve("react-native-fast-crypto"),
+          crypto: require.resolve("react-native-crypto"),
           fs: require.resolve("react-native-level-fs"),
           os: require.resolve("os-browserify"),
           path: require.resolve("path-browserify"),
+          process: require.resolve("process"),
           stream: require.resolve("stream-browserify"),
         },
       },

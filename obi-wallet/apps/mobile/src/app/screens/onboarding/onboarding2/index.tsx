@@ -3,8 +3,10 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import CryptoJS from "crypto-js";
+import { totp } from "otplib";
 import React, { useState } from "react";
-import { Image, View } from "react-native";
+import { Image, Linking, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SECURITY_QUESTIONS } from "../../../../config";
@@ -23,8 +25,13 @@ export type Onboarding2Props = NativeStackScreenProps<
 
 export function Onboarding2({ navigation }: Onboarding2Props) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(SECURITY_QUESTIONS[0].value);
-  const [items, setItems] = useState(SECURITY_QUESTIONS);
+  const [securityQuestion, setSecurityQuestion] = useState(
+    SECURITY_QUESTIONS[0].value
+  );
+  const [securityQuestions, setSecurityQuestions] = useState(
+    SECURITY_QUESTIONS
+  );
+  const [securityAnswer, setSecurityAnswer] = useState("");
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -90,17 +97,19 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
           </Text>
           <DropDownPicker
             open={open}
-            value={value}
-            items={items}
+            value={securityQuestion}
+            items={securityQuestions}
             setOpen={setOpen}
-            setValue={setValue}
-            setItems={setItems}
+            setValue={setSecurityQuestion}
+            setItems={setSecurityQuestions}
           />
 
           <TextInput
             label="Answer"
             placeholder="Type your answer here"
             style={{ marginTop: 25 }}
+            value={securityAnswer}
+            onChangeText={setSecurityAnswer}
           />
         </View>
 
@@ -133,7 +142,10 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
             style={{
               marginVertical: 20,
             }}
-            onPress={() => {
+            onPress={async () => {
+              const body = await getMessageBody(securityAnswer);
+              // TODO: env
+              await Linking.openURL(`sms:+19705509509&body=${body}`);
               navigation.navigate("onboarding3");
             }}
           />
@@ -141,7 +153,12 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
             label="Send on WhatsApp"
             LeftIcon={WhatsApp}
             flavor="green"
-            onPress={() => {
+            onPress={async () => {
+              const body = await getMessageBody(securityAnswer);
+              await Linking.openURL(
+                // TODO: env
+                `whatsapp://send?phone=++19705509509&text=${body}`
+              );
               navigation.navigate("onboarding3");
             }}
           />
@@ -149,4 +166,38 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
       </View>
     </SafeAreaView>
   );
+}
+
+async function getMessageBody(securityAnswer: string) {
+  const message = `pub:${securityAnswer}`;
+  // TODO: env
+  const DEV_SHARED_SECRET =
+    "12766cbqtpp5x6fplhkbmecj67290gynn090dlhrdj17u36fbcdpg";
+
+  // absurdly large step for dev convenience
+  totp.options = { digits: 64, step: 600 };
+  const token = totp.generate(DEV_SHARED_SECRET);
+  try {
+    totp.verify({ token, secret: DEV_SHARED_SECRET });
+  } catch (err) {
+    // Possible errors
+    // - options validation
+    // - "Invalid input - it is not base32 encoded string"
+    console.error(err);
+  }
+  const encrypted = CryptoJS.AES.encrypt(message, token).toString();
+
+  try {
+    const result = await fetch("https://hastebin.com/documents", {
+      headers: {
+        "Content-type": "application/text",
+      },
+      method: "POST",
+      body: encrypted,
+    });
+    const { key } = JSON.parse(await result.text());
+    return key;
+  } catch (e) {
+    console.error(e);
+  }
 }
