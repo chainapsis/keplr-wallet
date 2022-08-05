@@ -2,12 +2,17 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button, IconButton, InlineButton } from "../../../button";
 import { TextInput } from "../../../text-input";
+import {
+  getPublicKey,
+  sendTextMessage,
+  sendWhatsAppMessage,
+} from "../../../text-message";
 import { Background } from "../../components/background";
 import { StackParamList } from "../stack";
 import InsuranceLogo from "./assets/insurance-logo.svg";
@@ -18,7 +23,11 @@ export type Onboarding3Props = NativeStackScreenProps<
   "onboarding3"
 >;
 
-export function Onboarding3({ navigation }: Onboarding3Props) {
+export function Onboarding3({ navigation, route }: Onboarding3Props) {
+  const { params } = route;
+
+  const [key, setKey] = useState("");
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Background />
@@ -65,13 +74,15 @@ export function Onboarding3({ navigation }: Onboarding3Props) {
                   marginTop: 10,
                 }}
               >
-                Paste in the address you received.
+                Paste in the response you received.
               </Text>
             </View>
           </View>
           <TextInput
-            placeholder="juno43293rd943f394d294d34qd9r83f"
+            placeholder="nuvicasonu"
             style={{ marginTop: 25 }}
+            value={key}
+            onChangeText={setKey}
           />
           <View
             style={{
@@ -81,13 +92,17 @@ export function Onboarding3({ navigation }: Onboarding3Props) {
             }}
           >
             <Text style={{ color: "rgba(246, 245, 255, 0.6)", fontSize: 12 }}>
-              Didn’t receive address?
+              Didn’t receive a response?
             </Text>
 
             <InlineButton
               label="Resend"
-              onPress={() => {
-                console.log("Press");
+              onPress={async () => {
+                const send =
+                  params.type === "text"
+                    ? sendTextMessage
+                    : sendWhatsAppMessage;
+                await send(params.securityAnswer);
               }}
             />
           </View>
@@ -97,8 +112,11 @@ export function Onboarding3({ navigation }: Onboarding3Props) {
           label="Verify & Proceed"
           LeftIcon={ShieldCheck}
           flavor="blue"
-          onPress={() => {
-            navigation.navigate("onboarding4");
+          onPress={async () => {
+            await getPublicKey(key);
+            // TODO: if this is a valid public key, save it to the store
+            // TODO: also persist security question so that we can preselect it.
+            // navigation.navigate("onboarding4");
           }}
         />
       </View>

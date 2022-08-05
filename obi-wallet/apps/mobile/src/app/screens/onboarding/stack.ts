@@ -4,7 +4,12 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-export type StackParamList = Record<string, object>;
+export interface StackParamList extends Record<string, object> {
+  onboarding3: {
+    securityAnswer: string;
+    type: "text" | "whatsApp";
+  };
+}
 
 export const Stack = createNativeStackNavigator<StackParamList>();
 
