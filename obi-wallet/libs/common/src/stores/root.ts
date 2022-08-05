@@ -4,21 +4,23 @@ import {
   KeyRingStore,
   ObservableQueryBase,
 } from "@keplr-wallet/stores";
+import EventEmitter from "eventemitter3";
 
-import { AppsStore } from "./apps";
-import { ChainStore } from "./chain";
 import { EmbedChainInfos } from "../config";
+import { produceEnv } from "../env";
 import { KVStore } from "../kv-store";
 import { MessageRequesterInternal } from "../message-requester";
-import { produceEnv } from "../env";
 import { RouterUi } from "../router";
-import EventEmitter from "eventemitter3";
+import { AppsStore } from "./apps";
+import { ChainStore } from "./chain";
+import { MultisigStore } from "./multisig";
 
 export class RootStore {
   public readonly appsStore: AppsStore;
   public readonly chainStore: ChainStore;
   public readonly interactionStore: InteractionStore;
   public readonly keyRingStore: KeyRingStore;
+  public readonly multisigStore: MultisigStore;
 
   constructor() {
     const router = new RouterUi(produceEnv);
@@ -51,5 +53,6 @@ export class RootStore {
       new MessageRequesterInternal(),
       this.interactionStore
     );
+    this.multisigStore = new MultisigStore(new KVStore("multisig-store"));
   }
 }

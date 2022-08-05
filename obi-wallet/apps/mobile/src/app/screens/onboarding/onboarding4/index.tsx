@@ -2,11 +2,14 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { observer } from "mobx-react-lite";
 import React from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { createBiometricSignature, getPublicKey } from "../../../biometrics";
 import { Button, IconButton } from "../../../button";
+import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import { StackParamList } from "../stack";
 import FaceScanner from "./assets/face-scanner.svg";
@@ -17,7 +20,9 @@ export type Onboarding4Props = NativeStackScreenProps<
   "onboarding4"
 >;
 
-export function Onboarding4({ navigation }: Onboarding4Props) {
+export const Onboarding4 = observer<Onboarding4Props>(({ navigation }) => {
+  const { multisigStore } = useStore();
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Background />
@@ -100,8 +105,27 @@ export function Onboarding4({ navigation }: Onboarding4Props) {
           </Text>
         </View>
 
-        <Button label="Scan My Face" flavor="blue" LeftIcon={Scan} />
+        <Button
+          label="Scan My Face"
+          flavor="blue"
+          LeftIcon={Scan}
+          onPress={async () => {
+            // This is a hack to always trigger the Face ID prompt even
+            // if the user already has a public key.
+            await createBiometricSignature({
+              payload: "test",
+              biometryParams: {
+                biometryTitle: "Title",
+                biometrySubTitle: "Subtitle",
+                biometryDescription: "Description",
+              },
+            });
+            const publicKey = await getPublicKey();
+            multisigStore.setBiometricsPublicKey(publicKey);
+            navigation.navigate("onboarding5");
+          }}
+        />
       </View>
     </SafeAreaView>
   );
-}
+});
