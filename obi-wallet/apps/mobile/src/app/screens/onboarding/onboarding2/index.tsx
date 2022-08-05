@@ -76,14 +76,13 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
               </Text>
             </View>
           </View>
-        </View>
 
-        <View>
           <Text
             style={{
               color: "#787B9C",
               fontSize: 10,
               textTransform: "uppercase",
+              marginTop: 36,
               marginBottom: 12,
             }}
           >
