@@ -27,9 +27,8 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
   const [securityQuestion, setSecurityQuestion] = useState(
     SECURITY_QUESTIONS[0].value
   );
-  const [securityQuestions, setSecurityQuestions] = useState(
-    SECURITY_QUESTIONS
-  );
+  const [securityQuestions, setSecurityQuestions] =
+    useState(SECURITY_QUESTIONS);
   const [securityAnswer, setSecurityAnswer] = useState("");
 
   return (
