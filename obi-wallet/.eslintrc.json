@@ -43,6 +43,7 @@
           "namedComponents": "function-declaration",
           "unnamedComponents": "arrow-function"
         }],
+        "react/jsx-pascal-case": "error",
 
         "unicorn/filename-case": [
           "error",
