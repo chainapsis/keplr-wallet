@@ -43,6 +43,7 @@
           "namedComponents": "function-declaration",
           "unnamedComponents": "arrow-function"
         }],
+        "react/jsx-curly-brace-presence": ["error", "never"],
         "react/jsx-pascal-case": "error",
 
         "unicorn/filename-case": [

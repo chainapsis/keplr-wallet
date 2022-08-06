@@ -88,7 +88,7 @@ export function Create() {
         </Text>
         <TextInput
           placeholder="my_wallet"
-          placeholderTextColor={"#4B4E6E"}
+          placeholderTextColor="#4B4E6E"
           style={{
             width: "100%",
             height: 56,

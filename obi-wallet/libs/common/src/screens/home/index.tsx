@@ -78,7 +78,7 @@ export const Home = observer<HomeProps>(
                 );
               })}
               <Tile
-                img={"https://place-hold.it/180x180"}
+                img="https://place-hold.it/180x180"
                 label={intl.formatMessage({ id: "home.appStoreLabel" })}
                 onPress={() => {
                   onAppStorePress();
