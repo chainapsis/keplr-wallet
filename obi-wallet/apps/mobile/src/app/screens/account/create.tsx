@@ -1,19 +1,12 @@
-import React from "react";
-import { Text } from "@obi-wallet/common";
-import {
-  Button,
-  TextInput,
-  TouchableHighlight,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Background } from "../components/background";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Text, TextInput } from "@obi-wallet/common";
+import React from "react";
+import { TouchableHighlight, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-//TODO: add background svgs
+
+import { Background } from "../components/background";
 
 export default function Create() {
   const safeArea = useSafeAreaInsets();
@@ -121,11 +114,9 @@ export default function Create() {
             borderRadius: 12,
           }}
         >
-          <>
-            <Text style={{ color: "#040317", fontSize: 16, fontWeight: "700" }}>
-              Create Wallet
-            </Text>
-          </>
+          <Text style={{ color: "#040317", fontSize: 16, fontWeight: "700" }}>
+            Create Wallet
+          </Text>
         </TouchableHighlight>
       </View>
     </View>

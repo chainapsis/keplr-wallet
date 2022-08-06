@@ -20,11 +20,11 @@ import Background from "./components/background";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
-  DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { Text } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
+
 export function TabNavigation() {
   const Tab = createBottomTabNavigator();
 

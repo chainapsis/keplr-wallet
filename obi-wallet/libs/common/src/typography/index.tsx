@@ -1,7 +1,9 @@
 import React from "react";
 import {
   StyleSheet,
+  // eslint-disable-next-line no-restricted-imports
   Text as OriginalText,
+  // eslint-disable-next-line no-restricted-imports
   TextInput as OriginalTextInput,
   TextInputProps,
   TextProps,

@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  Image,
-  Button,
-  Pressable,
-} from "react-native";
+import { Image, View } from "react-native";
 
 const Background = ({ style }) => {
   return (

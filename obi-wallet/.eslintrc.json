@@ -18,6 +18,29 @@
               }
             ]
           }
+        ],
+
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react-native",
+                "importNames": ["SafeAreaView"],
+                "message": "Please use SafeAreaView from `react-native-safe-area-context` instead."
+              },
+              {
+                "name": "react-native",
+                "importNames": ["Text"],
+                "message": "Please use Text from `@obi-wallet/common` instead."
+              },
+              {
+                "name": "react-native",
+                "importNames": ["TextInput"],
+                "message": "Please use TextInput from `@obi-wallet/common` instead."
+              }
+            ]
+          }
         ]
       }
     },

@@ -1,19 +1,17 @@
-import { Text } from "@obi-wallet/common";
-import React from "react";
-import { FlatList, Image, TouchableHighlight, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
 import { faAngleDoubleLeft } from "@fortawesome/free-solid-svg-icons/faAngleDoubleLeft";
 import { faSortAsc } from "@fortawesome/free-solid-svg-icons/faSortAsc";
 import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Background from "./background";
+import { Text } from "@obi-wallet/common";
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import { FlatList, Image, TouchableHighlight, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import Send from "../assets/send.svg";
 import Receive from "../assets/receive.svg";
 import Pay from "../assets/pay.svg";
-import { useNavigation } from "@react-navigation/native";
+import Background from "./background";
 
 export function Assets() {
   const insets = useSafeAreaInsets();

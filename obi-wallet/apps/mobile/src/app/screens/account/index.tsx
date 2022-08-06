@@ -1,14 +1,11 @@
 import React from "react";
 import { Text } from "@obi-wallet/common";
 import {
-  Button,
-  TextInput,
-  TouchableHighlight,
-  TouchableOpacity,
-  Image,
-  View,
-  ImageBackground,
   FlatList,
+  Image,
+  ImageBackground,
+  TouchableHighlight,
+  View,
 } from "react-native";
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
