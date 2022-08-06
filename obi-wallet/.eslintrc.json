@@ -1,7 +1,7 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nrwl/nx"],
+  "plugins": ["@nrwl/nx", "unicorn"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -18,7 +18,63 @@
               }
             ]
           }
-        ]
+        ],
+
+        "import/no-default-export": "error",
+        "import/order": [
+          "error",
+          {
+            "alphabetize": {
+              "order": "asc"
+            },
+            "groups": [
+              ["builtin", "external", "internal"],
+              ["parent", "sibling", "index", "unknown"]
+            ],
+            "newlines-between": "always"
+          }
+        ],
+
+        "react/function-component-definition": [
+          "error",
+          {
+            "namedComponents": "function-declaration",
+            "unnamedComponents": "arrow-function"
+          }
+        ],
+        "react/jsx-curly-brace-presence": ["error", "never"],
+        "react/jsx-pascal-case": "error",
+
+        "unicorn/filename-case": [
+          "error",
+          {
+            "case": "kebabCase"
+          }
+        ],
+
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react-native",
+                "importNames": ["SafeAreaView"],
+                "message": "Please use SafeAreaView from `react-native-safe-area-context` instead."
+              },
+              {
+                "name": "react-native",
+                "importNames": ["Text"],
+                "message": "Please use Text from `@obi-wallet/common` instead."
+              },
+              {
+                "name": "react-native",
+                "importNames": ["TextInput"],
+                "message": "Please use TextInput from `@obi-wallet/common` instead."
+              }
+            ]
+          }
+        ],
+        "no-warning-comments": "warn"
       }
     },
     {

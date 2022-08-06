@@ -5,7 +5,19 @@
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-        "@typescript-eslint/ban-ts-comment": "off"
+        "@typescript-eslint/ban-ts-comment": "off",
+
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@obi-wallet/common",
+                "message": "Please use a relative path instead."
+              }
+            ]
+          }
+        ]
       }
     },
     {

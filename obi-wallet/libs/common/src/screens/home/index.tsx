@@ -1,3 +1,5 @@
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
+import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { useIntl } from "react-intl";
@@ -6,18 +8,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TextInput,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
-import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
+
 import { Card } from "../../card";
 import { FontAwesomeIcon } from "../../font-awesome-icon";
 import { App, AppsStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
+import { Text } from "../../typography";
 
 const styles = StyleSheet.create({
   card: {
@@ -77,7 +78,7 @@ export const Home = observer<HomeProps>(
                 );
               })}
               <Tile
-                img={"https://place-hold.it/180x180"}
+                img="https://place-hold.it/180x180"
                 label={intl.formatMessage({ id: "home.appStoreLabel" })}
                 onPress={() => {
                   onAppStorePress();

@@ -1,19 +1,18 @@
-import { Text } from "@obi-wallet/common";
-import React from "react";
-import { FlatList, Image, TouchableHighlight, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
 import { faAngleDoubleLeft } from "@fortawesome/free-solid-svg-icons/faAngleDoubleLeft";
 import { faSortAsc } from "@fortawesome/free-solid-svg-icons/faSortAsc";
 import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Background from "./background";
-import Send from "../assets/send.svg";
-import Receive from "../assets/receive.svg";
-import Pay from "../assets/pay.svg";
+import { Text } from "@obi-wallet/common";
+import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import { FlatList, Image, TouchableHighlight, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import Pay from "../assets/pay.svg";
+import Receive from "../assets/receive.svg";
+import Send from "../assets/send.svg";
+import { Background } from "./background";
 
 export function Assets() {
   const insets = useSafeAreaInsets();
@@ -44,7 +43,8 @@ export function Assets() {
 }
 
 export function AssetsHeader() {
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<DrawerNavigationProp<Record<string, object>>>();
   console.log({ navigation });
   return (
     <View
@@ -134,7 +134,7 @@ export function AssetsHeader() {
   );
 }
 
-const BalanceAndActions = () => {
+function BalanceAndActions() {
   return (
     <View style={{ justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: "#787B9C", fontSize: 11, fontWeight: "500" }}>
@@ -227,9 +227,9 @@ const BalanceAndActions = () => {
       </View>
     </View>
   );
-};
+}
 
-const AssetsList = () => {
+function AssetsList() {
   return (
     <View
       style={{
@@ -286,9 +286,9 @@ const AssetsList = () => {
       </View>
     </View>
   );
-};
+}
 
-const AssetsListItem = () => {
+function AssetsListItem() {
   return (
     <View
       style={{
@@ -352,4 +352,4 @@ const AssetsListItem = () => {
       </View>
     </View>
   );
-};
+}
