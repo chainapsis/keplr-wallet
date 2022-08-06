@@ -6,7 +6,7 @@
   "scripts": {
     "_runAll": "nx run-many --projects=mobile,common --output-style=static",
     "checks": "yarn lint && yarn test",
-    "format": "prettier --write .",
+    "format": "prettier --write . && yarn lint:eslint --fix",
     "postinstall": "patch-package",
     "lint": "yarn lint:prettier && yarn lint:eslint",
     "lint:eslint": " yarn _runAll --target=lint",

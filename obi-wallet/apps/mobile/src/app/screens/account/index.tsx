@@ -1,5 +1,9 @@
-import React from "react";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
+import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
+import React from "react";
 import {
   FlatList,
   Image,
@@ -7,18 +11,14 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Background } from "../components/background";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
-import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
-import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import LinearGradient from "react-native-linear-gradient";
-//TODO: add background svgs
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function Account() {
+import { Background } from "../components/background";
+
+export function Account() {
   const safeArea = useSafeAreaInsets();
+
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />

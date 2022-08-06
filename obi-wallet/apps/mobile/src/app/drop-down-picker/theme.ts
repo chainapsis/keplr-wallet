@@ -3,6 +3,7 @@ import Colors from "react-native-dropdown-picker/src/constants/colors";
 
 export { ICONS } from "react-native-dropdown-picker/src/themes/dark";
 
+// eslint-disable-next-line import/no-default-export
 export default StyleSheet.create({
   container: {
     width: "100%",

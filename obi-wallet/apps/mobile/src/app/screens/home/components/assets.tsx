@@ -8,10 +8,10 @@ import React from "react";
 import { FlatList, Image, TouchableHighlight, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Send from "../assets/send.svg";
-import Receive from "../assets/receive.svg";
 import Pay from "../assets/pay.svg";
-import Background from "./background";
+import Receive from "../assets/receive.svg";
+import Send from "../assets/send.svg";
+import { Background } from "./background";
 
 export function Assets() {
   const insets = useSafeAreaInsets();

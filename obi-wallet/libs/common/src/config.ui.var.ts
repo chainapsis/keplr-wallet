@@ -1,5 +1,6 @@
-import { IntlMessages } from "./languages";
 import { RegisterOption } from "@keplr-wallet/hooks";
+
+import { IntlMessages } from "./languages";
 
 export const ETHEREUM_ENDPOINT =
   "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";

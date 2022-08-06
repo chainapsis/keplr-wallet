@@ -1,18 +1,23 @@
 import React from "react";
-import { Image, View } from "react-native";
+import { Image, StyleProp, View, ViewStyle } from "react-native";
 
-const Background = ({ style }) => {
+export interface BackgroundProps {
+  style: StyleProp<ViewStyle>;
+}
+
+export function Background({ style }: BackgroundProps) {
   return (
     <View
-      style={{
-        justifyContent: "space-between",
-        backgroundColor: "#1E1E1E",
-        height: "100%",
-        ...style,
-      }}
+      style={[
+        {
+          justifyContent: "space-between",
+          backgroundColor: "#1E1E1E",
+          height: "100%",
+        },
+        style,
+      ]}
     >
       <View style={{ flex: 1, position: "relative" }}>
-        {/* <FontAwesomeIcon icon={faChevronLeft} style={{ color: '#7B87A8', marginLeft: 5, marginTop: 5 }} /> */}
         <Image
           source={require("../assets/backgroundblue.png")}
           style={{ alignSelf: "flex-end" }}
@@ -24,5 +29,4 @@ const Background = ({ style }) => {
       </View>
     </View>
   );
-};
-export default Background;
+}

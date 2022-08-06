@@ -8,8 +8,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Background } from "../components/background";
 
-export default function Create() {
+export function Create() {
   const safeArea = useSafeAreaInsets();
+
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />

@@ -20,6 +20,25 @@
           }
         ],
 
+        "import/no-default-export": "error",
+        "import/order": [
+          "error",
+          {
+            "alphabetize": {
+              "order": "asc"
+            },
+            "groups": [
+              [
+                "builtin", "external", "internal"
+              ],
+              [
+                "parent", "sibling", "index", "unknown"
+              ]
+            ],
+            "newlines-between": "always"
+          }
+        ],
+
         "no-restricted-imports": [
           "error",
           {

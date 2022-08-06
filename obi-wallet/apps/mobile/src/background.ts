@@ -1,3 +1,5 @@
+import { init, ScryptParams } from "@keplr-wallet/background";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   EmbedChainInfos,
   KVStore,
@@ -6,8 +8,6 @@ import {
   produceEnv,
   RouterBackground,
 } from "@obi-wallet/common";
-import { init, ScryptParams } from "@keplr-wallet/background";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { Buffer } from "buffer";
 import scrypt from "scrypt-js";
 

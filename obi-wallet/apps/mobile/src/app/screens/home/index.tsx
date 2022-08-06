@@ -1,29 +1,29 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import React from "react";
-
-import AppsIcon from "./assets/appsIcon.svg";
-import AssetsIcon from "./assets/assetsIcon.svg";
-import NFTsIcon from "./assets/nftsIcon.svg";
-import SettingsIcon from "./assets/settingsIcon.svg";
-import TradeIcon from "./assets/tradeIcon.svg";
-import AppsIconActive from "./assets/ic_apps_active.svg";
-import AssetsIconActive from "./assets/ic_assets_active.svg";
-import NFTsIconActive from "./assets/ic_nfts_active.svg";
-import SettingsIconActive from "./assets/ic_settings_active.svg";
-import TradeIconActive from "./assets/ic_trade_active.svg";
-import { Assets } from "./components/assets";
-import Background from "./components/background";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
+import React from "react";
 import { Text } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
+
+import AppsIcon from "./assets/appsIcon.svg";
+import AssetsIcon from "./assets/assetsIcon.svg";
+import AppsIconActive from "./assets/ic_apps_active.svg";
+import AssetsIconActive from "./assets/ic_assets_active.svg";
+import NFTsIconActive from "./assets/ic_nfts_active.svg";
+import SettingsIconActive from "./assets/ic_settings_active.svg";
+import TradeIconActive from "./assets/ic_trade_active.svg";
+import NFTsIcon from "./assets/nftsIcon.svg";
+import SettingsIcon from "./assets/settingsIcon.svg";
+import TradeIcon from "./assets/tradeIcon.svg";
+import { Assets } from "./components/assets";
+import { Background } from "./components/background";
 
 export function TabNavigation() {
   const Tab = createBottomTabNavigator();
