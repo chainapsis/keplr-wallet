@@ -21,7 +21,7 @@ In `obi-wallet` directory:
 - `nx run-ios mobile` (to run ios version)
 - `nx run-android mobile` (to run android version)
 - `nx start mobile` (to only start metro packager)
-- `yarn format` (to reformat code using prettier)
+- `yarn format` (to reformat code using prettier & eslint fixers)
 - `yarn lint` (to lint code)
 - `yarn test` (to run unit tests)
 - `yarn checks` (to run all checks, i.e. lint & test)

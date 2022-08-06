@@ -8,9 +8,10 @@
     "checks": "yarn lint && yarn test",
     "format": "prettier --write . && yarn lint:eslint --fix",
     "postinstall": "patch-package",
-    "lint": "yarn lint:prettier && yarn lint:eslint",
+    "lint": "yarn lint:tsc && yarn lint:prettier && yarn lint:eslint",
     "lint:eslint": " yarn _runAll --target=lint",
     "lint:prettier": "prettier --check .",
+    "lint:tsc": "yarn _runAll --target=tsc",
     "setup": "yarn && (cd ..; yarn && yarn build) && (cd apps/mobile; uri-scheme add obi --android --ios)",
     "test": " yarn _runAll --target=test"
   },

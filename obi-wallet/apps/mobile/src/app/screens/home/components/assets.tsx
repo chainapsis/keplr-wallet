@@ -3,6 +3,7 @@ import { faSortAsc } from "@fortawesome/free-solid-svg-icons/faSortAsc";
 import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
+import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { FlatList, Image, TouchableHighlight, View } from "react-native";
@@ -42,7 +43,8 @@ export function Assets() {
 }
 
 export function AssetsHeader() {
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<DrawerNavigationProp<Record<string, object>>>();
   console.log({ navigation });
   return (
     <View

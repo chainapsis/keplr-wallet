@@ -28,21 +28,20 @@
               "order": "asc"
             },
             "groups": [
-              [
-                "builtin", "external", "internal"
-              ],
-              [
-                "parent", "sibling", "index", "unknown"
-              ]
+              ["builtin", "external", "internal"],
+              ["parent", "sibling", "index", "unknown"]
             ],
             "newlines-between": "always"
           }
         ],
 
-        "react/function-component-definition": ["error", {
-          "namedComponents": "function-declaration",
-          "unnamedComponents": "arrow-function"
-        }],
+        "react/function-component-definition": [
+          "error",
+          {
+            "namedComponents": "function-declaration",
+            "unnamedComponents": "arrow-function"
+          }
+        ],
         "react/jsx-curly-brace-presence": ["error", "never"],
         "react/jsx-pascal-case": "error",
 

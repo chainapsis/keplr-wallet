@@ -82,6 +82,12 @@
         "command": "react-native-asset",
         "cwd": "apps/mobile"
       }
+    },
+    "tsc": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "tsc -b apps/mobile/tsconfig.app.json"
+      }
     }
   },
   "tags": []

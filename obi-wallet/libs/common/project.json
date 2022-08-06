@@ -18,6 +18,12 @@
         "jestConfig": "libs/common/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "tsc": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "tsc -b libs/common/tsconfig.lib.json"
+      }
     }
   }
 }

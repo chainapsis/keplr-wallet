@@ -52,20 +52,23 @@ export class Router extends AbstractRouter {
         return: result,
       };
     } catch (e) {
+      const error = e as Error | null;
       console.log(
-        `Failed to process msg ${message.type}: ${e?.message || e?.toString()}`
+        `Failed to process msg ${message.type}: ${
+          error?.message || error?.toString()
+        }`
       );
-      if (e instanceof KeplrError) {
+      if (error instanceof KeplrError) {
         return Promise.resolve({
           error: {
-            code: e.code,
-            module: e.module,
-            message: e.message || e.toString(),
+            code: error.code,
+            module: error.module,
+            message: error.message || error.toString(),
           },
         });
-      } else if (e) {
+      } else if (error) {
         return Promise.resolve({
-          error: e.message || e.toString(),
+          error: error.message || error.toString(),
         });
       } else {
         return Promise.resolve({
