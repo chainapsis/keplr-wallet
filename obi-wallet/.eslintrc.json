@@ -1,7 +1,7 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nrwl/nx"],
+  "plugins": ["@nrwl/nx", "unicorn"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -36,6 +36,13 @@
               ]
             ],
             "newlines-between": "always"
+          }
+        ],
+
+        "unicorn/filename-case": [
+          "error",
+          {
+            "case": "kebabCase"
           }
         ],
 
