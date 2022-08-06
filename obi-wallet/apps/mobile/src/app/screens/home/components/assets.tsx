@@ -132,7 +132,7 @@ export function AssetsHeader() {
   );
 }
 
-const BalanceAndActions = () => {
+function BalanceAndActions() {
   return (
     <View style={{ justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: "#787B9C", fontSize: 11, fontWeight: "500" }}>
@@ -225,9 +225,9 @@ const BalanceAndActions = () => {
       </View>
     </View>
   );
-};
+}
 
-const AssetsList = () => {
+function AssetsList() {
   return (
     <View
       style={{
@@ -284,9 +284,9 @@ const AssetsList = () => {
       </View>
     </View>
   );
-};
+}
 
-const AssetsListItem = () => {
+function AssetsListItem() {
   return (
     <View
       style={{
@@ -350,4 +350,4 @@ const AssetsListItem = () => {
       </View>
     </View>
   );
-};
+}
