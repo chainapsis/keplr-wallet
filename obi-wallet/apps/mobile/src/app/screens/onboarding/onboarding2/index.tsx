@@ -11,6 +11,7 @@ import { SECURITY_QUESTIONS } from "../../../../config";
 import { Button, IconButton } from "../../../button";
 import { DropDownPicker } from "../../../drop-down-picker";
 import { TextInput } from "../../../text-input";
+import { sendTextMessage, sendWhatsAppMessage } from "../../../text-message";
 import { Background } from "../../components/background";
 import { StackParamList } from "../stack";
 import SMS from "./assets/sms.svg";
@@ -23,8 +24,12 @@ export type Onboarding2Props = NativeStackScreenProps<
 
 export function Onboarding2({ navigation }: Onboarding2Props) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(SECURITY_QUESTIONS[0].value);
-  const [items, setItems] = useState(SECURITY_QUESTIONS);
+  const [securityQuestion, setSecurityQuestion] = useState(
+    SECURITY_QUESTIONS[0].value
+  );
+  const [securityQuestions, setSecurityQuestions] =
+    useState(SECURITY_QUESTIONS);
+  const [securityAnswer, setSecurityAnswer] = useState("");
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -90,17 +95,19 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
           </Text>
           <DropDownPicker
             open={open}
-            value={value}
-            items={items}
+            value={securityQuestion}
+            items={securityQuestions}
             setOpen={setOpen}
-            setValue={setValue}
-            setItems={setItems}
+            setValue={setSecurityQuestion}
+            setItems={setSecurityQuestions}
           />
 
           <TextInput
             label="Answer"
             placeholder="Type your answer here"
             style={{ marginTop: 25 }}
+            value={securityAnswer}
+            onChangeText={setSecurityAnswer}
           />
         </View>
 
@@ -133,16 +140,24 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
             style={{
               marginVertical: 20,
             }}
-            onPress={() => {
-              navigation.navigate("onboarding3");
+            onPress={async () => {
+              await sendTextMessage(securityAnswer);
+              navigation.navigate("onboarding3", {
+                securityAnswer,
+                type: "text",
+              });
             }}
           />
           <Button
             label="Send on WhatsApp"
             LeftIcon={WhatsApp}
             flavor="green"
-            onPress={() => {
-              navigation.navigate("onboarding3");
+            onPress={async () => {
+              await sendWhatsAppMessage(securityAnswer);
+              navigation.navigate("onboarding3", {
+                securityAnswer,
+                type: "whatsApp",
+              });
             }}
           />
         </View>
