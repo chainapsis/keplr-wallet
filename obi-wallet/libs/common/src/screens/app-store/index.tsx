@@ -36,6 +36,7 @@ export const AppStore: FunctionComponent<AppStoreProps> = observer(
       setUrl(`https://${url}`);
     }
 
+    // @ts-ignore Some type issues with rooks
     const setUrlDebounce = useDebounce(setUrlWithProtocol, 500);
 
     const [title, setTitle] = React.useState("");
