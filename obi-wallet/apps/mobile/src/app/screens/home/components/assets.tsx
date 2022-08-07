@@ -45,9 +45,8 @@ export function Assets() {
 }
 
 export function AssetsHeader() {
-  const navigation = useNavigation<
-    DrawerNavigationProp<Record<string, object>>
-  >();
+  const navigation =
+    useNavigation<DrawerNavigationProp<Record<string, object>>>();
   return (
     <View
       style={{
