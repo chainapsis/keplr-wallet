@@ -6,46 +6,47 @@ import { Text } from "@obi-wallet/common";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { FlatList, Image, TouchableHighlight, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  FlatList,
+  Image,
+  ImageBackground,
+  TouchableHighlight,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import Pay from "../assets/pay.svg";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
-import { Background } from "./background";
 
 export function Assets() {
-  const insets = useSafeAreaInsets();
   return (
-    <View
+    <ImageBackground
+      source={require("../assets/background.png")}
+      resizeMode="cover"
+      imageStyle={{ height: 403 }}
       style={{
+        backgroundColor: "#090817",
         flex: 1,
-        flexGrow: 1,
-        height: "100%",
-        paddingTop: insets.top,
-        backgroundColor: "#1E1E1E",
       }}
     >
-      <AssetsHeader />
-      <BalanceAndActions />
-      <AssetsList />
-      <Background
+      <SafeAreaView
         style={{
-          position: "absolute",
-          top: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: -1,
+          flex: 1,
+          flexGrow: 1,
         }}
-      />
-    </View>
+      >
+        <AssetsHeader />
+        <BalanceAndActions />
+        <AssetsList />
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 export function AssetsHeader() {
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
-  console.log({ navigation });
   return (
     <View
       style={{
