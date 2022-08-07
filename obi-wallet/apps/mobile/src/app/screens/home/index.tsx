@@ -2,6 +2,7 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Text } from "@obi-wallet/common";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createDrawerNavigator,
@@ -9,7 +10,6 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import React from "react";
-import { Text } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import AppsIcon from "./assets/appsIcon.svg";
@@ -62,6 +62,12 @@ export function TabNavigation() {
         },
         tabBarActiveTintColor: "#F6F5FF",
         tabBarInactiveTintColor: "#4D5070",
+        tabBarLabelStyle: {
+          fontFamily: "Inter",
+          fontSize: 10,
+          fontWeight: "500",
+          textTransform: "uppercase",
+        },
       })}
     >
       <Tab.Screen
@@ -91,6 +97,11 @@ export function HomeScreen() {
         drawerActiveTintColor: "#F6F5FF",
         drawerActiveBackgroundColor: "#27253E",
         drawerInactiveTintColor: "#787B9C",
+        drawerLabelStyle: {
+          fontFamily: "Inter",
+          fontSize: 16,
+          fontWeight: "500",
+        },
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
@@ -118,8 +129,17 @@ function CustomDrawerContent(props) {
           style={{ color: "#4d5070" }}
         ></FontAwesomeIcon>
       </TouchableHighlight>
-      <Text style={{ color: "#787B9C", marginLeft: 16 }}>Networks</Text>
-      {/* <DrawerItem label="Help" onPress={() => alert('Link to help')} /> */}
+      <Text
+        style={{
+          color: "#787B9C",
+          marginLeft: 16,
+          marginBottom: 17,
+          fontSize: 11,
+          textTransform: "uppercase",
+        }}
+      >
+        Networks
+      </Text>
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
   );
