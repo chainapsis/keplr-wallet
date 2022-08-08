@@ -7,6 +7,7 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button, IconButton, InlineButton } from "../../../button";
+import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import {
   getPublicKey,
@@ -26,6 +27,7 @@ export type Onboarding3Props = NativeStackScreenProps<
 export function Onboarding3({ navigation, route }: Onboarding3Props) {
   const { params } = route;
 
+  const { multisigStore } = useStore();
   const [key, setKey] = useState("");
 
   return (
@@ -113,10 +115,14 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
           LeftIcon={ShieldCheck}
           flavor="blue"
           onPress={async () => {
-            await getPublicKey(key);
-            // TODO: if this is a valid public key, save it to the store
-            // TODO: also persist security question so that we can preselect it.
-            // navigation.navigate("onboarding4");
+            const publicKey = await getPublicKey(key);
+            if (publicKey) {
+              multisigStore.setPhoneNumberKey({
+                publicKey,
+                securityQuestion: params.securityQuestion,
+              });
+              navigation.navigate("onboarding4");
+            }
           }}
         />
       </View>

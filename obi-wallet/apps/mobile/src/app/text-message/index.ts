@@ -38,7 +38,7 @@ export async function getMessageBody(securityAnswer: string) {
   const encrypted = AES.encrypt(message, token).toString();
 
   try {
-    const result = await fetch("https://hastebin.com/documents", {
+    const result = await fetch("https://obi-hastebin.herokuapp.com/documents", {
       headers: {
         "Content-type": "application/text",
       },
@@ -46,7 +46,7 @@ export async function getMessageBody(securityAnswer: string) {
       body: encrypted,
     });
     const { key } = JSON.parse(await result.text());
-    return key;
+    return `My Obi magic message word is: ${key}`;
   } catch (e) {
     console.error(e);
   }
@@ -54,10 +54,8 @@ export async function getMessageBody(securityAnswer: string) {
 
 export async function getPublicKey(key: string) {
   try {
-    const result = await fetch(`https://hastebin.com/raw/${key}`);
+    const result = await fetch(`https://obi-hastebin.herokuapp.com/raw/${key}`);
     const message = await result.text();
-
-    console.log({ message });
 
     const token = totp.generate(DEV_SHARED_SECRET);
     try {
@@ -68,9 +66,20 @@ export async function getPublicKey(key: string) {
       // - "Invalid input - it is not base32 encoded string"
       console.error(err);
     }
-    const decrypted = AES.decrypt(message, token).toString(enc.Utf8);
-    console.log({ decrypted });
-    // TODO: check that this is actually a valid public key
+
+    let decrypted = AES.decrypt(message, token).toString(enc.Utf8);
+    // TODO: this is only needed as long as we don't have encryption on Twilio side
+    if (decrypted.length === 0) {
+      decrypted = message;
+    }
+
+    // TODO: better check that this is actually a valid public key
+    if (!decrypted.startsWith("pubkey:")) {
+      console.error("This doesn't seem to be a public key");
+      return null;
+    }
+
+    return decrypted.replace("pubkey:", "");
   } catch (e) {
     console.error(e);
   }

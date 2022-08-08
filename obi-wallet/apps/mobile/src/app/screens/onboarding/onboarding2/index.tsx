@@ -143,6 +143,7 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
             onPress={async () => {
               await sendTextMessage(securityAnswer);
               navigation.navigate("onboarding3", {
+                securityQuestion,
                 securityAnswer,
                 type: "text",
               });

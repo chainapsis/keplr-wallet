@@ -3,7 +3,7 @@ import { action, makeObservable, observable, runInAction, toJS } from "mobx";
 
 export interface MultisigPayload {
   biometrics: string | null;
-  phoneNumber: null;
+  phoneNumber: { publicKey: string; securityQuestion: string } | null;
   cloud: null;
 }
 
@@ -42,7 +42,14 @@ export class MultisigStore {
   }
 
   @action
-  public setBiometricsPublicKey(publicKey: string) {
-    this.multisig.biometrics = publicKey;
+  public setPhoneNumberKey(payload: MultisigPayload["phoneNumber"]) {
+    this.multisig.phoneNumber = payload;
+    void this.save();
+  }
+
+  @action
+  public setBiometricsPublicKey(payload: MultisigPayload["biometrics"]) {
+    this.multisig.biometrics = payload;
+    void this.save();
   }
 }
