@@ -127,6 +127,7 @@
     "@babel/runtime": "^7.8.4",
     "@bugsnag/source-maps": "^2.3.0",
     "@types/react-native": "^0.63.2",
+    "@types/react-native-dotenv": "^0.2.0",
     "@types/react-test-renderer": "^16.9.2",
     "@types/sha.js": "^2.4.0",
     "browserify": "^17.0.0",

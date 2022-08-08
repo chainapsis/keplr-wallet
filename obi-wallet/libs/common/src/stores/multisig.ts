@@ -3,7 +3,11 @@ import { action, makeObservable, observable, runInAction, toJS } from "mobx";
 
 export interface MultisigPayload {
   biometrics: string | null;
-  phoneNumber: { publicKey: string; securityQuestion: string } | null;
+  phoneNumber: {
+    publicKey: string;
+    phoneNumber: string;
+    securityQuestion: string;
+  } | null;
   cloud: null;
 }
 

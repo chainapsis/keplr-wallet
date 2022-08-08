@@ -6,9 +6,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 export interface StackParamList extends Record<string, object> {
   onboarding3: {
+    phoneNumber: string;
     securityQuestion: string;
     securityAnswer: string;
-    type: "text" | "whatsApp";
   };
 }
 

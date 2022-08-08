@@ -58,6 +58,11 @@
             "paths": [
               {
                 "name": "react-native",
+                "importNames": ["KeyboardAvoidingView"],
+                "message": "Please use KeyboardAvoidingView from `src/app/screens/components/keyboard-avoding-view` instead."
+              },
+              {
+                "name": "react-native",
                 "importNames": ["SafeAreaView"],
                 "message": "Please use SafeAreaView from `react-native-safe-area-context` instead."
               },

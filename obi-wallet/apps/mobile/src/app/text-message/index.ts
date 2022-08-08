@@ -1,28 +1,45 @@
 import { AES, enc } from "crypto-js";
 import { totp } from "otplib";
-import { Linking } from "react-native";
+import {
+  PHONE_NUMBER_KEY_SECRET,
+  PHONE_NUMBER_TWILIO_PHONE_NUMBER,
+  PHONE_NUMBER_TWILIO_BASIC_AUTH_USER,
+  PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD,
+} from "react-native-dotenv";
 
-// TODO: env
-const DEV_SHARED_SECRET =
-  "12766cbqtpp5x6fplhkbmecj67290gynn090dlhrdj17u36fbcdpg";
-// TODO: env
-const TWILIO_NUMBER = "+19705509509";
+const DEV_SHARED_SECRET = PHONE_NUMBER_KEY_SECRET;
+const TWILIO_NUMBER = PHONE_NUMBER_TWILIO_PHONE_NUMBER;
+const TWILIO_BASIC_AUTH = `Basic ${Buffer.from(
+  `${PHONE_NUMBER_TWILIO_BASIC_AUTH_USER}:${PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD}`
+).toString("base64")}`;
 
-export async function sendTextMessage(securityAnswer: string) {
+export async function sendTextMessage({
+  phoneNumber,
+  securityAnswer,
+}: {
+  phoneNumber: string;
+  securityAnswer: string;
+}) {
   const body = await getMessageBody(securityAnswer);
-  // TODO: env
-  await Linking.openURL(`sms:${TWILIO_NUMBER}&body=${body}`);
-}
+  const formData = new FormData();
+  formData.append("To", TWILIO_NUMBER);
+  formData.append("From", phoneNumber);
+  formData.append("Parameters", JSON.stringify({ trigger_body: body }));
 
-export async function sendWhatsAppMessage(securityAnswer: string) {
-  const body = await getMessageBody(securityAnswer);
-  // TODO: env
-  await Linking.openURL(`sms:${TWILIO_NUMBER}&body=${body}`);
+  await fetch(
+    "https://studio.twilio.com/v2/Flows/FW2de98dc924361e35906dad1ed6125dc6/Executions",
+    {
+      body: formData,
+      method: "post",
+      headers: {
+        Authorization: TWILIO_BASIC_AUTH,
+      },
+    }
+  );
 }
 
 export async function getMessageBody(securityAnswer: string) {
   const message = `pub:${securityAnswer}`;
-  // TODO: env
 
   // absurdly large step for dev convenience
   totp.options = { digits: 64, step: 600 };
@@ -46,7 +63,7 @@ export async function getMessageBody(securityAnswer: string) {
       body: encrypted,
     });
     const { key } = JSON.parse(await result.text());
-    return `My Obi magic message word is: ${key}`;
+    return key;
   } catch (e) {
     console.error(e);
   }
@@ -73,7 +90,6 @@ export async function getPublicKey(key: string) {
       decrypted = message;
     }
 
-    // TODO: better check that this is actually a valid public key
     if (!decrypted.startsWith("pubkey:")) {
       console.error("This doesn't seem to be a public key");
       return null;

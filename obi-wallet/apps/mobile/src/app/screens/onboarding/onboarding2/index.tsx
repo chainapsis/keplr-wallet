@@ -5,17 +5,17 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import { Image, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SECURITY_QUESTIONS } from "../../../../config";
 import { Button, IconButton } from "../../../button";
 import { DropDownPicker } from "../../../drop-down-picker";
 import { TextInput } from "../../../text-input";
-import { sendTextMessage, sendWhatsAppMessage } from "../../../text-message";
+import { sendTextMessage } from "../../../text-message";
 import { Background } from "../../components/background";
 import { StackParamList } from "../stack";
 import SMS from "./assets/sms.svg";
-import WhatsApp from "./assets/whatsapp.svg";
 
 export type Onboarding2Props = NativeStackScreenProps<
   StackParamList,
@@ -30,139 +30,146 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
   const [securityQuestions, setSecurityQuestions] =
     useState(SECURITY_QUESTIONS);
   const [securityAnswer, setSecurityAnswer] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Background />
-      <View
+      <KeyboardAwareScrollView
         style={{
           flex: 1,
-          paddingHorizontal: 20,
-          justifyContent: "space-between",
         }}
+        contentContainerStyle={{ flexGrow: 1 }}
       >
-        <View>
-          <IconButton
-            style={{
-              marginLeft: -5,
-              padding: 5,
-              width: 25,
-            }}
-            onPress={() => {
-              navigation.goBack();
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faChevronLeft}
-              style={{ color: "#7B87A8" }}
+        <View
+          style={{
+            flexGrow: 1,
+            flex: 1,
+            paddingHorizontal: 20,
+            justifyContent: "space-between",
+          }}
+        >
+          <View>
+            <IconButton
+              style={{
+                marginLeft: -5,
+                padding: 5,
+                width: 25,
+              }}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faChevronLeft}
+                style={{ color: "#7B87A8" }}
+              />
+            </IconButton>
+            <View style={{ justifyContent: "flex-end", marginTop: 43 }}>
+              <View>
+                <Image source={require("./assets/phone.png")} />
+                <Text
+                  style={{
+                    color: "#F6F5FF",
+                    fontSize: 24,
+                    fontWeight: "600",
+                    marginTop: 32,
+                  }}
+                >
+                  Authenticate Your Keys
+                </Text>
+                <Text
+                  style={{
+                    color: "#999CB6",
+                    fontSize: 14,
+                    marginTop: 10,
+                  }}
+                >
+                  Please answer a security question.
+                </Text>
+              </View>
+            </View>
+
+            <Text
+              style={{
+                color: "#787B9C",
+                fontSize: 10,
+                textTransform: "uppercase",
+                marginTop: 36,
+                marginBottom: 12,
+              }}
+            >
+              Security Question
+            </Text>
+            <DropDownPicker
+              open={open}
+              value={securityQuestion}
+              items={securityQuestions}
+              setOpen={setOpen}
+              setValue={setSecurityQuestion}
+              setItems={setSecurityQuestions}
             />
-          </IconButton>
-          <View style={{ justifyContent: "flex-end", marginTop: 43 }}>
-            <View>
-              <Image source={require("./assets/phone.png")} />
+
+            <TextInput
+              label="Answer"
+              placeholder="Type your answer here"
+              style={{ marginTop: 25 }}
+              value={securityAnswer}
+              onChangeText={setSecurityAnswer}
+            />
+
+            <TextInput
+              label="Phone number"
+              keyboardType="phone-pad"
+              textContentType="telephoneNumber"
+              placeholder="Type your phone number here"
+              style={{ marginTop: 25 }}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+            />
+          </View>
+
+          <View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              <FontAwesomeIcon
+                icon={faInfoCircle}
+                style={{
+                  color: "#7B87A8",
+                  marginHorizontal: 5,
+                  position: "absolute",
+                  margin: 5,
+                }}
+              />
               <Text
                 style={{
                   color: "#F6F5FF",
-                  fontSize: 24,
-                  fontWeight: "600",
-                  marginTop: 32,
+                  marginLeft: 30,
+                  opacity: 0.7,
+                  fontSize: 12,
                 }}
               >
-                Authenticate Your Keys
-              </Text>
-              <Text
-                style={{
-                  color: "#999CB6",
-                  fontSize: 14,
-                  marginTop: 10,
-                }}
-              >
-                Please answer a security question.
+                Now send your encrypted answer to activate your messaging key.
               </Text>
             </View>
-          </View>
-
-          <Text
-            style={{
-              color: "#787B9C",
-              fontSize: 10,
-              textTransform: "uppercase",
-              marginTop: 36,
-              marginBottom: 12,
-            }}
-          >
-            Security Question
-          </Text>
-          <DropDownPicker
-            open={open}
-            value={securityQuestion}
-            items={securityQuestions}
-            setOpen={setOpen}
-            setValue={setSecurityQuestion}
-            setItems={setSecurityQuestions}
-          />
-
-          <TextInput
-            label="Answer"
-            placeholder="Type your answer here"
-            style={{ marginTop: 25 }}
-            value={securityAnswer}
-            onChangeText={setSecurityAnswer}
-          />
-        </View>
-
-        <View>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            <FontAwesomeIcon
-              icon={faInfoCircle}
+            <Button
+              label="Send Magic SMS"
+              LeftIcon={SMS}
+              flavor="blue"
               style={{
-                color: "#7B87A8",
-                marginHorizontal: 5,
-                position: "absolute",
-                margin: 5,
+                marginVertical: 20,
+              }}
+              onPress={async () => {
+                await sendTextMessage({ phoneNumber, securityAnswer });
+                navigation.navigate("onboarding3", {
+                  phoneNumber,
+                  securityQuestion,
+                  securityAnswer,
+                });
               }}
             />
-            <Text
-              style={{
-                color: "#F6F5FF",
-                marginLeft: 30,
-                opacity: 0.7,
-                fontSize: 12,
-              }}
-            >
-              Now send your encrypted answer to activate your messaging key.
-            </Text>
           </View>
-          <Button
-            label="Send Magic SMS"
-            LeftIcon={SMS}
-            flavor="blue"
-            style={{
-              marginVertical: 20,
-            }}
-            onPress={async () => {
-              await sendTextMessage(securityAnswer);
-              navigation.navigate("onboarding3", {
-                securityQuestion,
-                securityAnswer,
-                type: "text",
-              });
-            }}
-          />
-          <Button
-            label="Send on WhatsApp"
-            LeftIcon={WhatsApp}
-            flavor="green"
-            onPress={async () => {
-              await sendWhatsAppMessage(securityAnswer);
-              navigation.navigate("onboarding3", {
-                securityAnswer,
-                type: "whatsApp",
-              });
-            }}
-          />
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

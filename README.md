@@ -12,7 +12,10 @@
 
 ### Setup
 
-In `obi-wallet` directory: `yarn setup`
+In `obi-wallet` directory:
+
+- `yarn setup`
+- Add `.env` to `apps/mobile/.env` as described in Notion.
 
 ### Workflow
 
