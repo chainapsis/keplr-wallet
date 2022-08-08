@@ -22,6 +22,14 @@ import { useHistory } from "react-router";
 import { Dec } from "@keplr-wallet/unit";
 import classnames from "classnames";
 
+import send from "../../public/assets/icon/send.png";
+import swap from "../../public/assets/icon/swap.png";
+import stake from "../../public/assets/icon/stake.png";
+
+import activeSend from "../../public/assets/icon/activeSend.png";
+import activeSwap from "../../public/assets/icon/activeSwap.png";
+import activeStake from "../../public/assets/icon/activeStake.png";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");
 
@@ -46,6 +54,10 @@ const DepositModal: FunctionComponent<{
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
+
+  const [isActiveSend, setIsActiveSend] = useState(false);
+  const [isActiveStake, setIsActiveStake] = useState(false);
+  const [isActiveSwap, setIsActiveSwap] = useState(false);
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -97,23 +109,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
       >
         <DepositModal bech32Address={accountInfo.bech32Address} />
       </Modal>
-      <Button
-        className={styleTxButton.button}
-        color="primary"
-        outline
-        onClick={(e) => {
-          e.preventDefault();
 
-          setIsDepositOpen(true);
-        }}
-      >
-        <FormattedMessage id="main.account.button.deposit" />
-      </Button>
-      {/*
-        "Disabled" property in button tag will block the mouse enter/leave events.
-        So, tooltip will not work as expected.
-        To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
-       */}
       <Button
         innerRef={sendBtnRef}
         className={classnames(styleTxButton.button, {
@@ -129,9 +125,56 @@ export const TxButtonView: FunctionComponent = observer(() => {
             history.push("/send");
           }
         }}
+        onMouseEnter={() => {
+          setIsActiveSend(true);
+        }}
+        onMouseLeave={() => {
+          setIsActiveSend(false);
+        }}
       >
+        <img
+          src={isActiveSend ? activeSend : send}
+          alt=""
+          style={{
+            marginRight: "5px",
+            height: "15px",
+          }}
+        />
         <FormattedMessage id="main.account.button.send" />
       </Button>
+
+      <Button
+        className={styleTxButton.button}
+        color="primary"
+        outline
+        onClick={(e) => {
+          e.preventDefault();
+          setIsDepositOpen(true);
+        }}
+        onMouseEnter={() => {
+          setIsActiveSwap(true);
+        }}
+        onMouseLeave={() => {
+          setIsActiveSwap(false);
+        }}
+      >
+        <img
+          src={isActiveSwap ? activeSwap : swap}
+          alt=""
+          style={{
+            marginRight: "5px",
+
+            height: "15px",
+          }}
+        />
+        Swap
+      </Button>
+      {/*
+        "Disabled" property in button tag will block the mouse enter/leave events.
+        So, tooltip will not work as expected.
+        To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
+       */}
+
       {!hasAssets ? (
         <Tooltip
           placement="bottom"
@@ -170,7 +213,21 @@ export const TxButtonView: FunctionComponent = observer(() => {
           })}
           color="primary"
           outline={isRewardExist}
+          onMouseEnter={() => {
+            setIsActiveStake(true);
+          }}
+          onMouseLeave={() => {
+            setIsActiveStake(false);
+          }}
         >
+          <img
+            src={isActiveStake ? activeStake : stake}
+            alt=""
+            style={{
+              marginRight: "5px",
+              height: "15px",
+            }}
+          />
           <FormattedMessage id="main.stake.button.stake" />
         </Button>
         {!isStakableExist ? (

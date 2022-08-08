@@ -111,7 +111,12 @@ export const AssetView: FunctionComponent = observer(() => {
             <div className={styleAsset.big}>
               <FormattedMessage id="main.account.chart.total-balance" />
             </div>
-            <div className={styleAsset.small}>
+            <div
+              className={styleAsset.small}
+              style={{
+                marginBottom: "20px",
+              }}
+            >
               {totalPrice
                 ? totalPrice.toString()
                 : total.shrink(true).trim(true).maxDecimals(6).toString()}

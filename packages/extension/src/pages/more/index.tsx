@@ -2,6 +2,10 @@ import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router";
 import { HeaderLayout } from "../../layouts";
 import bellIcon from "../../public/assets/icon/bell.png";
+import { Card, CardBody } from "reactstrap";
+import { IBCTransferView } from "../main/ibc-transfer";
+import classnames from "classnames";
+import style from "./style.module.scss";
 
 export const MorePage: FunctionComponent = () => {
   const history = useHistory();
@@ -36,7 +40,11 @@ export const MorePage: FunctionComponent = () => {
         </div>
       }
     >
-      <h3>More Page</h3>
+      <Card className={classnames(style.card, "shadow")}>
+        <CardBody>
+          <IBCTransferView />
+        </CardBody>
+      </Card>
     </HeaderLayout>
   );
 };
