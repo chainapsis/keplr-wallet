@@ -41,6 +41,26 @@ html {
   overflow: auto;
 }
 
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0%);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #dae2ed;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #d0def5;
+}
+
 body {
   width: $popup-size-width;
   height: $popup-size-height;
