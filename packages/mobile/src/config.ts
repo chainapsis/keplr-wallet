@@ -671,7 +671,14 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinType: 566,
       },
     ],
-    bech32Config: Bech32Address.defaultBech32Config("iaa"),
+    bech32Config: {
+      bech32PrefixAccAddr: "iaa",
+      bech32PrefixAccPub: "iap",
+      bech32PrefixValAddr: "iva",
+      bech32PrefixValPub: "ivp",
+      bech32PrefixConsAddr: "ica",
+      bech32PrefixConsPub: "icp",
+    },
     currencies: [
       {
         coinDenom: "IRIS",
