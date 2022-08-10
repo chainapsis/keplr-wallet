@@ -93,6 +93,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return this.chainInfo.feeCurrencies;
   }
 
+  @computed
   get feeCurrency(): Currency | undefined {
     if (this._manualFee) {
       for (const currency of this.chainInfo.feeCurrencies) {
