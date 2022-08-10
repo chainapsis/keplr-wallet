@@ -185,20 +185,24 @@ export class CosmosAccountImpl {
     const hexAdjustedRecipient = (recipient: string) => {
       const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
         .bech32PrefixAccAddr;
-      if (
-        (bech32prefix === "evmos" || bech32prefix === "inj") &&
-        recipient.startsWith("0x")
-      ) {
+      const useEthereumSign = this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-key-sign");
+
+      if (useEthereumSign && recipient.startsWith("0x")) {
         // Validate hex address
         if (!isAddress(recipient)) {
           throw new Error("Invalid hex address");
         }
+
         const buf = Buffer.from(
           recipient.replace("0x", "").toLowerCase(),
           "hex"
         );
+
         return new Bech32Address(buf).toBech32(bech32prefix);
       }
+
       return recipient;
     };
 
@@ -436,17 +440,20 @@ export class CosmosAccountImpl {
     );
 
     const getPublicKeyTypeUrl = (chainId: string): string => {
-      if (useEthereumSign) {
-        if (chainId.startsWith("injective")) {
-          return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
-        }
-
-        if (chainId.startsWith("evmos")) {
-          return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
-        }
+      if (!useEthereumSign) {
+        return "/cosmos.crypto.secp256k1.PubKey";
       }
 
-      return "/cosmos.crypto.secp256k1.PubKey";
+      switch (true) {
+        case chainId.startsWith("injective"):
+          return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+
+        case chainId.startsWith("evmos"):
+          return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+
+        default:
+          return "/cosmos.crypto.secp256k1.PubKey";
+      }
     };
 
     const signedTx = TxRaw.encode({

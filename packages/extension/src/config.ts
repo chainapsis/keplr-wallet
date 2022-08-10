@@ -103,10 +103,6 @@ import {
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
   EVMOS_REST_CONFIG,
-  INJECTIVE_RPC_ENDPOINT,
-  INJECTIVE_RPC_CONFIG,
-  INJECTIVE_REST_ENDPOINT,
-  INJECTIVE_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1809,56 +1805,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: [
       "ibc-transfer",
       "stargate",
-      "no-legacy-stdTx",
-      "ibc-go",
-      "eth-address-gen",
-      "eth-key-sign",
-    ],
-    beta: true,
-  },
-  {
-    rpc: INJECTIVE_RPC_ENDPOINT,
-    rpcConfig: INJECTIVE_RPC_CONFIG,
-    rest: INJECTIVE_REST_ENDPOINT,
-    restConfig: INJECTIVE_REST_CONFIG,
-    chainId: "injective-1",
-    chainName: "Injective (Beta)",
-    stakeCurrency: {
-      coinDenom: "INJ",
-      coinMinimalDenom: "inj",
-      coinDecimals: 18,
-      coinGeckoId: "injective-protocol",
-    },
-    walletUrl: "https://hub.injective.network/",
-    walletUrlForStaking: "https://hub.injective.network/staking",
-    bip44: {
-      coinType: 60,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("inj"),
-    currencies: [
-      {
-        coinDenom: "INJ",
-        coinMinimalDenom: "inj",
-        coinDecimals: 18,
-        coinGeckoId: "injective-protocol",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "INJ",
-        coinMinimalDenom: "inj",
-        coinDecimals: 18,
-        coinGeckoId: "injective-protocol",
-      },
-    ],
-    gasPriceStep: {
-      low: 2500000000,
-      average: 5000000000,
-      high: 10000000000,
-    },
-    features: [
-      "stargate",
-      "ibc-transfer",
       "no-legacy-stdTx",
       "ibc-go",
       "eth-address-gen",
