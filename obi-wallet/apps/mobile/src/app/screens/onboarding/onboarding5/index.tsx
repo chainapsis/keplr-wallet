@@ -1,9 +1,14 @@
+import {
+  createMultisigThresholdPubkey,
+  pubkeyToAddress,
+  pubkeyType,
+} from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useEffect } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,6 +24,11 @@ export type Onboarding5Props = NativeStackScreenProps<
 
 export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
   const { multisigStore } = useStore();
+
+  useEffect(() => {
+    multisigStore.generateMultisigThresholdPublicKey();
+    console.log(multisigStore.getMultisigThresholdPublicKey());
+  }, [multisigStore]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
