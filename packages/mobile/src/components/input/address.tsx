@@ -107,7 +107,10 @@ export const AddressInput: FunctionComponent<
                 >
                   <LoadingSpinner
                     size={14}
-                    color={style.get("color-loading-spinner").color}
+                    color={
+                      style.flatten(["color-blue-400", "dark:color-blue-300"])
+                        .color
+                    }
                   />
                 </View>
               </View>
@@ -135,7 +138,10 @@ export const AddressInput: FunctionComponent<
                 }}
               >
                 <AddressBookIcon
-                  color={style.get("color-primary").color}
+                  color={
+                    style.flatten(["color-blue-400", "dark:color-blue-100"])
+                      .color
+                  }
                   height={18}
                 />
               </TouchableOpacity>

@@ -6,8 +6,6 @@ import { Text, View } from "react-native";
 import { Staking } from "@keplr-wallet/stores";
 import { useStyle } from "../../../styles";
 import { SelectorModal, TextInput } from "../../../components/input";
-import { GradientBackground } from "../../../components/svg";
-import { CardDivider } from "../../../components/card";
 import { useSmartNavigation } from "../../../navigation";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { RightArrowIcon } from "../../../components/icon";
@@ -47,9 +45,12 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
 
   const data = useMemo(() => {
     let data = bondedValidators.validators;
-    if (search) {
+    const searchTrim = search.trim();
+    if (searchTrim) {
       data = data.filter((val) =>
-        val.description.moniker?.toLowerCase().includes(search.toLowerCase())
+        val.description.moniker
+          ?.toLowerCase()
+          .includes(searchTrim.toLowerCase())
       );
     }
     switch (sort) {
@@ -121,6 +122,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         setSelectedKey={(key) => setSort(key as Sort)}
       />
       <PageWithSectionList
+        backgroundMode="secondary"
         sections={[
           {
             data,
@@ -144,14 +146,28 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
             />
           );
         }}
-        ItemSeparatorComponent={() => <CardDivider />}
+        ItemSeparatorComponent={() => (
+          <View
+            style={style.flatten([
+              "height-1",
+              "background-color-gray-50",
+              "dark:background-color-platinum-500",
+            ])}
+          />
+        )}
         renderSectionHeader={() => {
           return (
             <View>
               <View
                 style={style.flatten(["absolute", "width-full", "height-full"])}
               >
-                <GradientBackground />
+                <View
+                  style={style.flatten([
+                    "width-full",
+                    "height-full",
+                    "background-color-background-secondary",
+                  ])}
+                />
               </View>
               <View
                 style={style.flatten([
@@ -161,10 +177,15 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                 ])}
               >
                 <TextInput
-                  label="Search"
                   placeholder="Search"
-                  labelStyle={style.flatten(["display-none"])}
                   containerStyle={style.flatten(["padding-0"])}
+                  inputContainerStyle={style.flatten([
+                    "dark:background-color-platinum-500",
+                    "dark:border-width-0",
+                  ])}
+                  placeholderTextColor={
+                    style.flatten(["dark:color-platinum-300"]).color
+                  }
                   value={search}
                   onChangeText={(text) => {
                     setSearch(text);
@@ -185,7 +206,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                         <Text
                           style={style.flatten([
                             "text-overline",
-                            "color-text-black-low",
+                            "color-text-low",
                             "margin-right-4",
                             "uppercase",
                           ])}
@@ -195,11 +216,11 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                         <Svg
                           width="6"
                           height="12"
-                          fill={style.get("color-text-black-low").color}
+                          fill={style.get("color-text-low").color}
                           viewBox="0 0 6 12"
                         >
                           <Path
-                            fill={style.get("color-text-black-low").color}
+                            fill={style.get("color-text-low").color}
                             d="M2.625 0l2.273 4.5H.352L2.625 0zM2.625 12L.352 7.5h4.546L2.625 12z"
                           />
                         </Svg>
@@ -242,6 +263,7 @@ const ValidatorItem: FunctionComponent<{
       style={style.flatten([
         "flex-row",
         "background-color-white",
+        "dark:background-color-platinum-600",
         "height-72",
         "items-center",
       ])}
@@ -259,7 +281,7 @@ const ValidatorItem: FunctionComponent<{
       <View
         style={style.flatten(["items-center", "width-40", "margin-left-4"])}
       >
-        <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+        <Text style={style.flatten(["body3", "color-text-middle"])}>
           {index + 1}
         </Text>
       </View>
@@ -269,11 +291,7 @@ const ValidatorItem: FunctionComponent<{
         url={bondedValidators.getValidatorThumbnail(validator.operator_address)}
       />
       <Text
-        style={style.flatten([
-          "h6",
-          "color-text-black-medium",
-          "max-width-160",
-        ])}
+        style={style.flatten(["h6", "color-text-middle", "max-width-160"])}
         numberOfLines={1}
         ellipsizeMode="tail"
       >
@@ -281,7 +299,7 @@ const ValidatorItem: FunctionComponent<{
       </Text>
       <View style={style.flatten(["flex-1"])} />
       {sort === "APY" ? (
-        <Text style={style.flatten(["body3", "color-text-black-low"])}>
+        <Text style={style.flatten(["body3", "color-text-low"])}>
           {queries.cosmos.queryInflation.inflation
             .mul(
               new Dec(1).sub(
@@ -294,7 +312,7 @@ const ValidatorItem: FunctionComponent<{
         </Text>
       ) : null}
       {sort === "Voting Power" ? (
-        <Text style={style.flatten(["body2", "color-text-black-low"])}>
+        <Text style={style.flatten(["body2", "color-text-low"])}>
           {new CoinPretty(
             chainStore.current.stakeCurrency,
             new Dec(validator.tokens)
@@ -305,10 +323,7 @@ const ValidatorItem: FunctionComponent<{
         </Text>
       ) : null}
       <View style={style.flatten(["margin-left-12", "margin-right-20"])}>
-        <RightArrowIcon
-          height={14}
-          color={style.get("color-text-black-low").color}
-        />
+        <RightArrowIcon height={14} color={style.get("color-text-low").color} />
       </View>
     </RectButton>
   ) : null;

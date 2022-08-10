@@ -22,7 +22,14 @@ export const RectButton: FunctionComponent<
 > = (props) => {
   const style = useStyle();
 
-  const { children, style: propStyle, rippleColor, ...rest } = props;
+  const {
+    children,
+    style: propStyle,
+    rippleColor,
+    underlayColor,
+    activeOpacity,
+    ...rest
+  } = props;
 
   const {
     borderRadius,
@@ -93,8 +100,10 @@ export const RectButton: FunctionComponent<
         rippleColor={
           rippleColor || style.get("color-rect-button-default-ripple").color
         }
-        underlayColor={style.get("color-rect-button-default-underlay").color}
-        activeOpacity={0.055}
+        underlayColor={
+          underlayColor || style.get("color-rect-button-default-underlay").color
+        }
+        activeOpacity={activeOpacity ?? 0.2}
         {...rest}
       >
         {children}

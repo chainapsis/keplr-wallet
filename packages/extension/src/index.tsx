@@ -57,6 +57,7 @@ import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { LogPageViewWrapper } from "./components/analytics";
+import { SettingEndpointsPage } from "./pages/setting/endpoints";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -223,6 +224,11 @@ ReactDOM.render(
                     exact
                     path="/setting/token/manage"
                     component={ManageTokenPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/endpoints"
+                    component={SettingEndpointsPage}
                   />
                   <Route path="/sign" component={SignPage} />
                   <Route path="/suggest-chain" component={ChainSuggestedPage} />

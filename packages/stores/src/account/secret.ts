@@ -11,6 +11,7 @@ import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly, Optional } from "utility-types";
 import { CosmosAccount } from "./cosmos";
 import deepmerge from "deepmerge";
+import { txEventsWithPreOnFulfill } from "./utils";
 
 export interface SecretAccount {
   secret: SecretAccountImpl;
@@ -48,6 +49,9 @@ export const SecretAccount = {
   },
 };
 
+/**
+ * @deprecated Predict gas through simulation rather than using a fixed gas.
+ */
 export interface SecretMsgOpts {
   readonly send: {
     readonly secret20: Pick<MsgOpt, "gas">;
@@ -57,6 +61,9 @@ export interface SecretMsgOpts {
   readonly executeSecretWasm: Pick<MsgOpt, "type">;
 }
 
+/**
+ * @deprecated Predict gas through simulation rather than using a fixed gas.
+ */
 export const defaultSecretMsgOpts: SecretMsgOpts = {
   send: {
     secret20: {
@@ -81,13 +88,73 @@ export class SecretAccountImpl {
     protected readonly queriesStore: IQueriesStore<SecretQueries>,
     protected readonly _msgOpts: SecretMsgOpts
   ) {
+    this.base.registerMakeSendTokenFn(this.processMakeSendTokenTx.bind(this));
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
+  /**
+   * @deprecated Predict gas through simulation rather than using a fixed gas.
+   */
   get msgOpts(): SecretMsgOpts {
     return this._msgOpts;
   }
 
+  protected processMakeSendTokenTx(
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) {
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+
+    if (denomHelper.type === "secret20") {
+      const actualAmount = (() => {
+        let dec = new Dec(amount);
+        dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+        return dec.truncate().toString();
+      })();
+
+      if (!("type" in currency) || currency.type !== "secret20") {
+        throw new Error("Currency is not secret20");
+      }
+
+      Bech32Address.validate(
+        recipient,
+        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      );
+
+      return this.makeExecuteSecretContractTx(
+        "send",
+        currency.contractAddress,
+        {
+          transfer: {
+            recipient: recipient,
+            amount: actualAmount,
+          },
+        },
+        [],
+        (tx) => {
+          if (tx.code == null || tx.code === 0) {
+            // After succeeding to send token, refresh the balance.
+            const queryBalance = this.queries.queryBalances
+              .getQueryBech32Address(this.base.bech32Address)
+              .balances.find((bal) => {
+                return (
+                  bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+                );
+              });
+
+            if (queryBalance) {
+              queryBalance.fetch();
+            }
+          }
+        }
+      );
+    }
+  }
+
+  /**
+   * @deprecated
+   */
   protected async processSendToken(
     amount: string,
     currency: AppCurrency,
@@ -131,7 +198,7 @@ export class SecretAccountImpl {
             gas: stdFee.gas ?? this.msgOpts.send.secret20.gas.toString(),
           },
           signOptions,
-          this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+          txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
               const queryBalance = this.queries.queryBalances
@@ -165,20 +232,21 @@ export class SecretAccountImpl {
     crypto.getRandomValues(random);
     const key = Buffer.from(random).toString("hex");
 
-    await this.sendExecuteSecretContractMsg(
+    await this.makeExecuteSecretContractTx(
       "createSecret20ViewingKey",
       contractAddress,
       {
         set_viewing_key: { key },
       },
-      [],
-      memo,
+      []
+    ).send(
       {
         amount: stdFee.amount ?? [],
         gas: stdFee.gas ?? this.msgOpts.createSecret20ViewingKey.gas.toString(),
       },
+      memo,
       signOptions,
-      async (tx) => {
+      (tx) => {
         let viewingKey = "";
         if (tx.code == null || tx.code === 0) {
           viewingKey = key;
@@ -192,6 +260,72 @@ export class SecretAccountImpl {
     return;
   }
 
+  makeExecuteSecretContractTx(
+    // This arg can be used to override the type of sending tx if needed.
+    type: keyof SecretMsgOpts | "unknown" = "executeSecretWasm",
+    contractAddress: string,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    obj: object,
+    sentFunds: CoinPrimitive[],
+    preOnTxEvents?:
+      | ((tx: any) => void)
+      | {
+          onBroadcasted?: (txHash: Uint8Array) => void;
+          onFulfill?: (tx: any) => void;
+        }
+  ) {
+    Bech32Address.validate(
+      contractAddress,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    );
+
+    let encryptedMsg: Uint8Array;
+
+    return this.base.cosmos.makeTx(
+      type,
+      async () => {
+        encryptedMsg = await this.encryptSecretContractMsg(
+          contractAddress,
+          obj
+        );
+
+        const msg = {
+          type: this.msgOpts.executeSecretWasm.type,
+          value: {
+            sender: this.base.bech32Address,
+            contract: contractAddress,
+            // callback_code_hash: "",
+            msg: Buffer.from(encryptedMsg).toString("base64"),
+            sent_funds: sentFunds,
+            // callback_sig: null,
+          },
+        };
+
+        return {
+          aminoMsgs: [msg],
+          protoMsgs: [
+            {
+              typeUrl: "/secret.compute.v1beta1.MsgExecuteContract",
+              value: MsgExecuteContract.encode(
+                MsgExecuteContract.fromPartial({
+                  sender: Bech32Address.fromBech32(msg.value.sender).address,
+                  contract: Bech32Address.fromBech32(msg.value.contract)
+                    .address,
+                  msg: Buffer.from(msg.value.msg, "base64"),
+                  sentFunds: msg.value.sent_funds,
+                })
+              ).finish(),
+            },
+          ],
+        };
+      },
+      preOnTxEvents
+    );
+  }
+
+  /**
+   * @deprecated
+   */
   async sendExecuteSecretContractMsg(
     // This arg can be used to override the type of sending tx if needed.
     type: keyof SecretMsgOpts | "unknown" = "executeSecretWasm",
@@ -255,7 +389,7 @@ export class SecretAccountImpl {
         gas: stdFee.gas,
       },
       signOptions,
-      this.txEventsWithPreOnFulfill(onTxEvents)
+      onTxEvents
     );
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -286,44 +420,6 @@ export class SecretAccountImpl {
 
     const enigmaUtils = keplr.getEnigmaUtils(this.chainId);
     return await enigmaUtils.encrypt(contractCodeHash, obj);
-  }
-
-  protected txEventsWithPreOnFulfill(
-    onTxEvents:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-      | undefined,
-    preOnFulfill?: (tx: any) => void
-  ):
-    | {
-        onBroadcasted?: (txHash: Uint8Array) => void;
-        onFulfill?: (tx: any) => void;
-      }
-    | undefined {
-    if (!onTxEvents) {
-      return;
-    }
-
-    const onBroadcasted =
-      typeof onTxEvents === "function" ? undefined : onTxEvents.onBroadcasted;
-    const onFulfill =
-      typeof onTxEvents === "function" ? onTxEvents : onTxEvents.onFulfill;
-
-    return {
-      onBroadcasted,
-      onFulfill: onFulfill
-        ? (tx: any) => {
-            if (preOnFulfill) {
-              preOnFulfill(tx);
-            }
-
-            onFulfill(tx);
-          }
-        : undefined,
-    };
   }
 
   protected get queries(): DeepReadonly<QueriesSetBase & SecretQueries> {

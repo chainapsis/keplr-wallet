@@ -2,6 +2,7 @@ import { StyleBuilder, DefinitionKebabCase } from "./builder";
 
 describe("Test style builder", () => {
   const builder = new StyleBuilder({
+    themes: [] as const,
     custom: {
       test: {
         fontSize: 20,
@@ -72,6 +73,7 @@ describe("Test style builder", () => {
   test("Throw an error if config has the reserved word", () => {
     expect(() => {
       new StyleBuilder({
+        themes: [] as const,
         custom: {},
         colors: {
           primary: "#FFFFFF",
@@ -113,6 +115,7 @@ describe("Test style builder", () => {
 
     expect(() => {
       new StyleBuilder({
+        themes: [] as const,
         custom: {},
         colors: {
           primary: "#FFFFFF",
@@ -350,15 +353,27 @@ describe("Test style builder", () => {
     expect(builder.get("color-primary")).toStrictEqual({
       color: "#FFFFFF",
     });
+    expect(builder.get("color-primary@50%")).toStrictEqual({
+      color: "rgba(255,255,255,0.5)",
+    });
+    expect(builder.get("color-primary@0%")).toStrictEqual({
+      color: "rgba(255,255,255,0)",
+    });
     expect(builder.get("color-secondary")).toStrictEqual({
       color: "#AAAAAA",
     });
     expect(builder.get("color-secondary-200")).toStrictEqual({
       color: "#222222",
     });
+    expect(builder.get("color-secondary-200@15%")).toStrictEqual({
+      color: "rgba(34,34,34,0.15)",
+    });
 
     expect(builder.get("background-color-primary")).toStrictEqual({
       backgroundColor: "#FFFFFF",
+    });
+    expect(builder.get("background-color-primary@50%")).toStrictEqual({
+      backgroundColor: "rgba(255,255,255,0.5)",
     });
     expect(builder.get("background-color-secondary")).toStrictEqual({
       backgroundColor: "#AAAAAA",
@@ -366,15 +381,24 @@ describe("Test style builder", () => {
     expect(builder.get("background-color-secondary-200")).toStrictEqual({
       backgroundColor: "#222222",
     });
+    expect(builder.get("background-color-secondary-200@15%")).toStrictEqual({
+      backgroundColor: "rgba(34,34,34,0.15)",
+    });
 
     expect(builder.get("border-color-primary")).toStrictEqual({
       borderColor: "#FFFFFF",
+    });
+    expect(builder.get("border-color-primary@50%")).toStrictEqual({
+      borderColor: "rgba(255,255,255,0.5)",
     });
     expect(builder.get("border-color-secondary")).toStrictEqual({
       borderColor: "#AAAAAA",
     });
     expect(builder.get("border-color-secondary-200")).toStrictEqual({
       borderColor: "#222222",
+    });
+    expect(builder.get("border-color-secondary-200@15%")).toStrictEqual({
+      borderColor: "rgba(34,34,34,0.15)",
     });
   });
 
@@ -465,10 +489,16 @@ describe("Test style builder", () => {
 
   test("Test Border Radius", () => {
     expect(builder.get("border-radius-123")).toStrictEqual({
-      borderRadius: 123,
+      borderBottomLeftRadius: 123,
+      borderBottomRightRadius: 123,
+      borderTopLeftRadius: 123,
+      borderTopRightRadius: 123,
     });
     expect(builder.get("border-radius-big")).toStrictEqual({
-      borderRadius: 1000,
+      borderBottomLeftRadius: 1000,
+      borderBottomRightRadius: 1000,
+      borderTopLeftRadius: 1000,
+      borderTopRightRadius: 1000,
     });
     expect(builder.get("border-radius-top-left-123")).toStrictEqual({
       borderTopLeftRadius: 123,
@@ -688,5 +718,259 @@ describe("Test style builder", () => {
     expect(builder.get("text-justify")).toStrictEqual({
       textAlign: "justify",
     });
+  });
+
+  test("Test style builder with themes", () => {
+    const builderWithThemes = new StyleBuilder(
+      {
+        themes: ["dark", "unicorn"] as const,
+        custom: {
+          test: {
+            fontSize: 20,
+          },
+          test2: {
+            fontSize: 22,
+          },
+        },
+        colors: {
+          primary: "#FFFFFF",
+          secondary: "#AAAAAA",
+          "secondary-200": "#222222",
+        },
+        widths: {
+          "10": 10,
+          full: "100%",
+        },
+        heights: {
+          "50": 50,
+          full: "100%",
+        },
+        paddingSizes: {
+          "10": 1,
+          small: "2",
+        },
+        marginSizes: {
+          "1": 3,
+          medium: "4",
+        },
+        borderWidths: {
+          "1": 1,
+          small: 10,
+        },
+        borderRadiuses: {
+          "123": 123,
+          big: 1000,
+        },
+        opacities: {
+          "10": 0.1,
+          "100": 1,
+        },
+      },
+      {
+        unicorn: {
+          custom: {
+            test: {
+              fontSize: 9999,
+            },
+          },
+          colors: {
+            secondary: "#ABCDEF",
+            "secondary-200": "#000000",
+          },
+          borderRadiuses: {
+            big: 9999,
+          },
+        },
+      }
+    );
+
+    // Test before setting theme.
+    const testBuilderNonTheme = () => {
+      expect(builderWithThemes.get("color-primary")).toStrictEqual({
+        color: "#FFFFFF",
+      });
+      expect(builderWithThemes.get("color-primary@50%")).toStrictEqual({
+        color: "rgba(255,255,255,0.5)",
+      });
+      expect(builderWithThemes.get("color-primary@0%")).toStrictEqual({
+        color: "rgba(255,255,255,0)",
+      });
+      expect(builderWithThemes.get("color-secondary")).toStrictEqual({
+        color: "#AAAAAA",
+      });
+      expect(builderWithThemes.get("color-secondary-200")).toStrictEqual({
+        color: "#222222",
+      });
+      expect(builderWithThemes.get("color-secondary-200@15%")).toStrictEqual({
+        color: "rgba(34,34,34,0.15)",
+      });
+      expect(builderWithThemes.get("test")).toStrictEqual({
+        fontSize: 20,
+      });
+      expect(builderWithThemes.get("test2")).toStrictEqual({
+        fontSize: 22,
+      });
+      expect(builderWithThemes.get("border-radius-big")).toStrictEqual({
+        borderBottomLeftRadius: 1000,
+        borderBottomRightRadius: 1000,
+        borderTopLeftRadius: 1000,
+        borderTopRightRadius: 1000,
+      });
+      expect(builderWithThemes.get("max-width-10")).toStrictEqual({
+        maxWidth: 10,
+      });
+      expect(builderWithThemes.get("opacity-100")).toStrictEqual({
+        opacity: 1,
+      });
+      expect(builderWithThemes.get("text-left")).toStrictEqual({
+        textAlign: "left",
+      });
+      expect(builderWithThemes.get("text-justify")).toStrictEqual({
+        textAlign: "justify",
+      });
+    };
+    testBuilderNonTheme();
+
+    // Test with theme prefixing definition before setting theme.
+    const testBuilderWhenNonSetTheme = () => {
+      expect(builderWithThemes.get("dark:color-primary")).toStrictEqual({});
+      expect(builderWithThemes.get("dark:color-primary@50%")).toStrictEqual({});
+      expect(builderWithThemes.get("unicorn:color-secondary")).toStrictEqual(
+        {}
+      );
+      expect(builderWithThemes.get("dark:color-secondary-200")).toStrictEqual(
+        {}
+      );
+      expect(
+        builderWithThemes.get("dark:color-secondary-200@15%")
+      ).toStrictEqual({});
+      expect(builderWithThemes.get("unicorn:test")).toStrictEqual({});
+      expect(builderWithThemes.get("dark:test2")).toStrictEqual({});
+      expect(builderWithThemes.get("unicorn:border-radius-big")).toStrictEqual(
+        {}
+      );
+      expect(builderWithThemes.get("dark:max-width-10")).toStrictEqual({});
+      expect(builderWithThemes.get("unicorn:opacity-100")).toStrictEqual({});
+      expect(builderWithThemes.get("dark:text-left")).toStrictEqual({});
+      expect(builderWithThemes.get("unicorn:text-justify")).toStrictEqual({});
+    };
+    testBuilderWhenNonSetTheme();
+
+    // Test with theme prefixing definition after setting theme.
+    builderWithThemes.setTheme("dark");
+    testBuilderNonTheme();
+    expect(builderWithThemes.get("dark:color-primary")).toStrictEqual({
+      color: "#FFFFFF",
+    });
+    expect(builderWithThemes.get("dark:color-primary@50%")).toStrictEqual({
+      color: "rgba(255,255,255,0.5)",
+    });
+    expect(builderWithThemes.get("unicorn:color-secondary")).toStrictEqual({});
+    expect(builderWithThemes.get("dark:color-secondary-200")).toStrictEqual({
+      color: "#222222",
+    });
+    expect(builderWithThemes.get("dark:color-secondary-200@15%")).toStrictEqual(
+      {
+        color: "rgba(34,34,34,0.15)",
+      }
+    );
+    expect(builderWithThemes.get("unicorn:test")).toStrictEqual({});
+    expect(builderWithThemes.get("dark:test2")).toStrictEqual({
+      fontSize: 22,
+    });
+    expect(builderWithThemes.get("unicorn:border-radius-big")).toStrictEqual(
+      {}
+    );
+    expect(builderWithThemes.get("dark:max-width-10")).toStrictEqual({
+      maxWidth: 10,
+    });
+    expect(builderWithThemes.get("unicorn:opacity-100")).toStrictEqual({});
+    expect(builderWithThemes.get("dark:text-left")).toStrictEqual({
+      textAlign: "left",
+    });
+    expect(builderWithThemes.get("unicorn:text-justify")).toStrictEqual({});
+
+    // Test clearing theme after setting theme.
+    builderWithThemes.setTheme(undefined);
+    testBuilderNonTheme();
+    testBuilderWhenNonSetTheme();
+
+    // Test with theme configs overrider after setting theme.
+    builderWithThemes.setTheme("unicorn");
+    expect(builderWithThemes.get("color-primary")).toStrictEqual({
+      color: "#FFFFFF",
+    });
+    expect(builderWithThemes.get("color-primary@50%")).toStrictEqual({
+      color: "rgba(255,255,255,0.5)",
+    });
+    expect(builderWithThemes.get("color-secondary")).toStrictEqual({
+      color: "#ABCDEF",
+    });
+    expect(builderWithThemes.get("color-secondary@15%")).toStrictEqual({
+      color: "rgba(171,205,239,0.15)",
+    });
+    expect(builderWithThemes.get("color-secondary-200")).toStrictEqual({
+      color: "#000000",
+    });
+    expect(builderWithThemes.get("color-secondary-200@15%")).toStrictEqual({
+      color: "rgba(0,0,0,0.15)",
+    });
+    expect(builderWithThemes.get("test")).toStrictEqual({
+      fontSize: 9999,
+    });
+    expect(builderWithThemes.get("test2")).toStrictEqual({
+      fontSize: 22,
+    });
+    expect(builderWithThemes.get("border-radius-big")).toStrictEqual({
+      borderBottomLeftRadius: 9999,
+      borderBottomRightRadius: 9999,
+      borderTopLeftRadius: 9999,
+      borderTopRightRadius: 9999,
+    });
+    expect(builderWithThemes.get("max-width-10")).toStrictEqual({
+      maxWidth: 10,
+    });
+    expect(builderWithThemes.get("opacity-100")).toStrictEqual({
+      opacity: 1,
+    });
+    expect(builderWithThemes.get("text-left")).toStrictEqual({
+      textAlign: "left",
+    });
+    expect(builderWithThemes.get("text-justify")).toStrictEqual({
+      textAlign: "justify",
+    });
+
+    expect(builderWithThemes.get("dark:color-primary")).toStrictEqual({});
+    expect(builderWithThemes.get("dark:color-primary@50%")).toStrictEqual({});
+    expect(builderWithThemes.get("unicorn:color-secondary")).toStrictEqual({
+      color: "#ABCDEF",
+    });
+    expect(builderWithThemes.get("dark:color-secondary-200")).toStrictEqual({});
+    expect(builderWithThemes.get("dark:color-secondary-200@15%")).toStrictEqual(
+      {}
+    );
+    expect(builderWithThemes.get("unicorn:test")).toStrictEqual({
+      fontSize: 9999,
+    });
+    expect(builderWithThemes.get("dark:test2")).toStrictEqual({});
+    expect(builderWithThemes.get("unicorn:border-radius-big")).toStrictEqual({
+      borderBottomLeftRadius: 9999,
+      borderBottomRightRadius: 9999,
+      borderTopLeftRadius: 9999,
+      borderTopRightRadius: 9999,
+    });
+    expect(builderWithThemes.get("dark:max-width-10")).toStrictEqual({});
+    expect(builderWithThemes.get("unicorn:opacity-100")).toStrictEqual({
+      opacity: 1,
+    });
+    expect(builderWithThemes.get("dark:text-left")).toStrictEqual({});
+    expect(builderWithThemes.get("unicorn:text-justify")).toStrictEqual({
+      textAlign: "justify",
+    });
+
+    // Test clearing theme after setting theme.
+    builderWithThemes.setTheme(undefined);
+    testBuilderNonTheme();
+    testBuilderWhenNonSetTheme();
   });
 });

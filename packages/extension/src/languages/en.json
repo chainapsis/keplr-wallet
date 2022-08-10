@@ -110,8 +110,13 @@
   "setting.token.add.secret20.checkbox.use-suggested-viewing-key": "Use webpage suggested viewing key",
   "setting.token.add.secret20.viewing-key": "Viewing Key",
 
-  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
+  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register again.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
+
+  "setting.endpoints": "Endpoints",
+  "setting.endpoints.paragraph": "Change into the node you wish to connect",
+  "setting.endpoints.button.reset": "Reset",
+  "setting.endpoints.button.confirm": "Confirm",
 
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
@@ -128,6 +133,7 @@
   "register.intro.sub-content": "All sensitive information is stored only on your device.{br}This process does not require an internet connection.",
 
   "register.recover.title": "Input your seed",
+  "register.recover.alt.private-key.title": "Input your private key",
 
   "register.create.title": "Mnemonic Seed",
   "register.create.toggle.word12": "12 words",
@@ -158,8 +164,6 @@
 
   "chain.suggested.title": "Chain Add Request",
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
-  "chain.suggested.waring.experiment.title": "Experimental Feature",
-  "chain.suggested.waring.experiment.paragraph": "For the brave-hearted cosmonauts",
   "chain.suggested.button.approve": "Approve",
   "chain.suggested.button.reject": "Reject",
 
@@ -300,5 +304,8 @@
   "component.ibc.channel-registrar.chain-selector.button.add": "New IBC Transfer Channel",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
-  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save"
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save",
+
+  "component.waring.experimental-feature.title": "Experimental Feature",
+  "component.waring.experimental-feature.paragraph": "For the brave-hearted cosmonauts"
 }

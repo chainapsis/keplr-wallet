@@ -62,7 +62,7 @@ export const MyRewardCard: FunctionComponent<{
           }
         }}
         icon={
-          <RewardIcon size={44} color={style.get("color-secondary").color} />
+          <RewardIcon size={44} color={style.get("color-pink-400").color} />
         }
         buttonText="Claim"
         buttonMode="light"

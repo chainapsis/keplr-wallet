@@ -270,9 +270,13 @@ export const RecoverMnemonicPage: FunctionComponent<{
     <React.Fragment>
       <div className={styleRecoverMnemonic.container}>
         <div className={classnames(style.title, styleRecoverMnemonic.title)}>
-          {intl.formatMessage({
-            id: "register.recover.title",
-          })}
+          {seedType === SeedType.PRIVATE_KEY
+            ? intl.formatMessage({
+                id: "register.recover.alt.private-key.title",
+              })
+            : intl.formatMessage({
+                id: "register.recover.title",
+              })}
           <div style={{ flex: 1 }} />
           <div>
             <ButtonDropdown

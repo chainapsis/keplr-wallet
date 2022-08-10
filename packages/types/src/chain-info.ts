@@ -30,6 +30,10 @@ export interface ChainInfo {
   /**
    * This is the coin type in slip-044.
    * This is used for fetching address from ENS if this field is set.
+   *
+   * ** Use the `bip44.coinType` field to set the coin type to generate the address. **
+   *
+   * @deprecated This field is likely to be changed. ENS will continue to be supported, but will change in the future to use other methods than this field. Because of the low usage of the ENS feature, the change is a low priority and it is not yet clear how it will change.
    */
   readonly coinType?: number;
 

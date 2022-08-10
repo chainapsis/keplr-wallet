@@ -244,6 +244,8 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
           );
           if (contractInfo.response) {
             cw20Currency = {
+              type: "cw20",
+              contractAddress,
               coinDecimals: contractInfo.response.data.decimals,
               coinDenom: contractInfo.response.data.symbol,
               coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
