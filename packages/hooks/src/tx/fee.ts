@@ -94,6 +94,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   get feeCurrency(): Currency | undefined {
+    if (this._manualFee) {
+      for (const currency of this.chainInfo.feeCurrencies) {
+        if (currency.coinMinimalDenom === this._manualFee.denom) {
+          return currency;
+        }
+      }
+
+      return {
+        coinMinimalDenom: this._manualFee.denom,
+        coinDenom: this._manualFee.denom,
+        coinDecimals: 0,
+      };
+    }
+
     return this.chainInfo.feeCurrencies[0];
   }
 
