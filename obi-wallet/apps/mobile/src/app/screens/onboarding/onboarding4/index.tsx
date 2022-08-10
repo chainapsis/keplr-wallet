@@ -1,13 +1,16 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import {
+  createBiometricSignature,
+  getBiometricsPublicKey,
+  Text,
+} from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
-import React from "react";
-import { View } from "react-native";
+import React, { useEffect } from "react";
+import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { createBiometricSignature, getPublicKey } from "../../../biometrics";
 import { Button, IconButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
@@ -22,6 +25,28 @@ export type Onboarding4Props = NativeStackScreenProps<
 
 export const Onboarding4 = observer<Onboarding4Props>(({ navigation }) => {
   const { multisigStore } = useStore();
+  const multisigPayload = multisigStore.getMultisig();
+
+  useEffect(() => {
+    if (multisigPayload && multisigPayload.biometrics) {
+      Alert.alert(
+        "You already have a biometrics key",
+        `Do you want to reuse your existing biometrics key?`,
+        [
+          {
+            text: "Generate a new key",
+            style: "cancel",
+          },
+          {
+            text: "Yes",
+            onPress: () => {
+              navigation.navigate("onboarding5");
+            },
+          },
+        ]
+      );
+    }
+  }, [multisigPayload, navigation]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -120,7 +145,7 @@ export const Onboarding4 = observer<Onboarding4Props>(({ navigation }) => {
                 biometryDescription: "Description",
               },
             });
-            const publicKey = await getPublicKey();
+            const publicKey = await getBiometricsPublicKey();
             multisigStore.setBiometricsPublicKey(publicKey);
             navigation.navigate("onboarding5");
           }}

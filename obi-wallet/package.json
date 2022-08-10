@@ -16,6 +16,7 @@
     "test": " yarn _runAll --target=test"
   },
   "dependencies": {
+    "@cosmjs/amino": "^0.28.11",
     "@cosmjs/encoding": "^0.24.1",
     "@cosmjs/launchpad": "^0.24.1",
     "@cosmjs/proto-signing": "^0.24.1",
@@ -83,6 +84,7 @@
     "react-native-dropdown-picker": "^5.4.2",
     "react-native-gesture-handler": "^2.5.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-keychain": "^8.1.1",
     "react-native-level-fs": "^3.0.1",
     "react-native-linear-gradient": "^2.6.2",
     "react-native-randombytes": "^3.6.1",

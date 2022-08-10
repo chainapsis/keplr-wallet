@@ -3,14 +3,16 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useState } from "react";
-import { Image, View } from "react-native";
+import { observer } from "mobx-react-lite";
+import React, { useEffect, useState } from "react";
+import { Alert, Image, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SECURITY_QUESTIONS } from "../../../../config";
 import { Button, IconButton } from "../../../button";
 import { DropDownPicker } from "../../../drop-down-picker";
+import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import { sendTextMessage } from "../../../text-message";
 import { Background } from "../../components/background";
@@ -22,7 +24,31 @@ export type Onboarding2Props = NativeStackScreenProps<
   "onboarding2"
 >;
 
-export function Onboarding2({ navigation }: Onboarding2Props) {
+export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
+  const { multisigStore } = useStore();
+  const multisigPayload = multisigStore.getMultisig();
+
+  useEffect(() => {
+    if (multisigPayload && multisigPayload.phoneNumber) {
+      Alert.alert(
+        "You already have a phone number key",
+        `Do you want to reuse your existing phone number key for phone number ${multisigPayload.phoneNumber.phoneNumber}?`,
+        [
+          {
+            text: "Generate a new key",
+            style: "cancel",
+          },
+          {
+            text: "Yes",
+            onPress: () => {
+              navigation.navigate("onboarding4");
+            },
+          },
+        ]
+      );
+    }
+  }, [multisigPayload, navigation]);
+
   const [open, setOpen] = useState(false);
   const [securityQuestion, setSecurityQuestion] = useState(
     SECURITY_QUESTIONS[0].value
@@ -172,4 +198,4 @@ export function Onboarding2({ navigation }: Onboarding2Props) {
       </KeyboardAwareScrollView>
     </SafeAreaView>
   );
-}
+});
