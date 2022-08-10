@@ -3,7 +3,7 @@
 
 [Fetch.ai](https://fetch.ai)'s fork of the Keplr wallet by [chainapsis](https://github.com/chainapsis), which is designed to act as a generic wallet software for blockchains built using the [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk) and to support the inter-blockchain communication (IBC) protocol. 
 
-The wallet is configured for the Fetch.ai Stargate network with a planned launch date of the 29th of July, 2021. 
+The wallet is configured for the Fetch.ai Stargate network. 
 
 Further information on the Keplr wallet can be found at the base [repo](https://github.com/chainapsis/keplr-extension).  
 
