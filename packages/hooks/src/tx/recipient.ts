@@ -114,15 +114,15 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @computed
   get error(): Error | undefined {
     const rawRecipient = this.rawRecipient.trim();
+    const useEthereumSign = this.chainGetter
+      .getChain(this.chainId)
+      .features?.includes("eth-key-sign");
 
     if (!rawRecipient) {
       return new EmptyAddressError("Address is empty");
     }
 
-    if (
-      (this.bech32Prefix === "evmos" || this.bech32Prefix === "inj") &&
-      rawRecipient.startsWith("0x")
-    ) {
+    if (useEthereumSign && rawRecipient.startsWith("0x")) {
       if (isAddress(rawRecipient)) {
         return;
       }
