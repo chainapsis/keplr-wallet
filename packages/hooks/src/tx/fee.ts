@@ -160,6 +160,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected getFeeTypePrimitive(feeType: FeeType): CoinPrimitive {
+    if (this._manualFee) {
+      throw new Error(
+        "Can't calculate fee from fee type. Because fee config uses the manual fee now"
+      );
+    }
+
     if (!this.feeCurrency) {
       throw new Error("Fee currency not set");
     }
@@ -178,6 +184,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   readonly getFeeTypePretty = computedFn((feeType: FeeType) => {
+    if (this._manualFee) {
+      throw new Error(
+        "Can't calculate fee from fee type. Because fee config uses the manual fee now"
+      );
+    }
+
     if (!this.feeCurrency) {
       throw new Error("Fee currency not set");
     }
