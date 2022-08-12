@@ -87,6 +87,7 @@
     "react-native-dotenv": "^3.3.1",
     "react-native-dropdown-picker": "^5.4.2",
     "react-native-gesture-handler": "^2.5.0",
+    "react-native-html-parser": "^0.1.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-keychain": "^8.1.1",
     "react-native-level-fs": "^3.0.1",

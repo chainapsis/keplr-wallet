@@ -1,5 +1,6 @@
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import SvgUri from 'react-native-svg-uri';
 
 import { createShadow } from "../styles";
 import { Text } from "../typography";
@@ -52,12 +53,21 @@ export function Tile({ img, label, disabled, onRemove, onPress }: TileProps) {
   const children = (
     <>
       <View style={styles.iconContainer}>
-        <Image
-          style={styles.icon}
-          source={{
-            uri: img || "https://place-hold.it/180x180",
-          }}
-        />
+        {
+          //if img is svg, use it as is
+          img?.includes(".svg") ? (
+            <SvgUri width="100%" height="100%"
+              source={{ uri: img }}
+
+            />
+          ) : (
+
+            <Image
+              style={styles.icon}
+              source={{
+                uri: img || "https://place-hold.it/180x180",
+              }}
+            />)}
         {onRemove ? <RemoveButton onPress={onRemove} /> : null}
       </View>
       <Text style={styles.label} numberOfLines={1}>
