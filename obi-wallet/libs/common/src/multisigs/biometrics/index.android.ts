@@ -1,5 +1,4 @@
 import { randomBytes } from "crypto";
-import type { BiometryParams } from "react-native-device-crypto";
 import * as Keychain from "react-native-keychain";
 import secp256k1 from "secp256k1";
 
@@ -37,6 +36,12 @@ export async function getBiometricsPublicKey() {
   }
 }
 
+interface BiometryParams {
+  biometryTitle: string;
+  biometrySubTitle: string;
+  biometryDescription: string;
+}
+
 export async function createBiometricSignature({
   payload,
   biometryParams,
@@ -44,5 +49,5 @@ export async function createBiometricSignature({
   payload: string;
   biometryParams: BiometryParams;
 }) {
-  throw new Error("Not implemented yet");
+  console.error("Not implemented yet");
 }
