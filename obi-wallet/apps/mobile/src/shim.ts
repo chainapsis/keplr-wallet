@@ -1,5 +1,6 @@
 import "fastestsmallesttextencoderdecoder";
 
+global.BigInt = global.BigInt ?? require("big-integer");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 global.Buffer = global.Buffer ?? require("buffer/").Buffer;
 
