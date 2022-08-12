@@ -137,10 +137,11 @@ export class Keplr implements IKeplr {
   async signArbitrary(
     chainId: string,
     signer: string,
-    _data: string | Uint8Array
+    data: string | Uint8Array
   ): Promise<StdSignature> {
-    const [data, isADR36WithString] = this.getDataForADR36(_data);
-    const signDoc = this.getBlankSignDoc(signer, data);
+    let isADR36WithString: boolean;
+    [data, isADR36WithString] = this.getDataForADR36(data);
+    const signDoc = this.getADR36SignDoc(signer, data);
 
     const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
       isADR36WithString,
@@ -167,7 +168,7 @@ export class Keplr implements IKeplr {
   async signEthereum(
     chainId: string,
     signer: string,
-    _data: string | Uint8Array,
+    data: string | Uint8Array,
     type: EthSignType
   ): Promise<Uint8Array> {
     if (type !== EthSignType.MESSAGE && type !== EthSignType.TRANSACTION) {
@@ -176,8 +177,9 @@ export class Keplr implements IKeplr {
       );
     }
 
-    const [data, isADR36WithString] = this.getDataForADR36(_data);
-    const signDoc = this.getBlankSignDoc(signer, data);
+    let isADR36WithString: boolean;
+    [data, isADR36WithString] = this.getDataForADR36(data);
+    const signDoc = this.getADR36SignDoc(signer, data);
 
     if (data === "") {
       throw new Error("Signing empty data is not supported.");
@@ -293,7 +295,7 @@ export class Keplr implements IKeplr {
     return [data, isADR36WithString];
   }
 
-  protected getBlankSignDoc(signer: string, data: string): StdSignDoc {
+  protected getADR36SignDoc(signer: string, data: string): StdSignDoc {
     return {
       chain_id: "",
       account_number: "0",
