@@ -283,6 +283,12 @@ export class KeyRingService {
       );
     }
 
+    if (signOptions.ethSignType && !isADR36SignDoc) {
+      throw new Error(
+        "Eth sign type can be requested with only ADR-36 amino sign doc"
+      );
+    }
+
     let newSignDoc = (await this.interactionService.waitApprove(
       env,
       "/sign",
