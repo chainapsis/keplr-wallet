@@ -86,7 +86,7 @@ const extensionConfig = (env, args) => {
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
     },
     output: {
-      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "prod"),
+      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
       filename: "[name].bundle.js",
     },
     resolve: commonResolve("src/public/assets"),

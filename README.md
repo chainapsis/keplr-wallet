@@ -26,7 +26,7 @@ yarn bootstrap
 yarn build
 ```
 
-Browser extension's build output is placed in `packages/extension/prod`, and you can check out [this page](https://developer.chrome.com/extensions/getstarted) for installing the developing version.
+Browser extension's build output is placed in `packages/extension/build/chrome`, and you can check out [this page](https://developer.chrome.com/extensions/getstarted) for installing the developing version.
 
 This repo contains submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Browser Extension release. However, all primary features of the extension will work without the closed sourced submodules.
 
