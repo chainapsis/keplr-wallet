@@ -22,7 +22,7 @@ In `obi-wallet` directory:
 In `obi-wallet` directory:
 
 - `nx run-ios mobile` (to run ios version)
-- `nx run-android mobile` (to run android version)
+- `nx run-android mobile` (to run android version. Specify --device-id if using a physical device)
 - `nx start mobile` (to only start metro packager)
 - `yarn format` (to reformat code using prettier & eslint fixers)
 - `yarn lint` (to lint code)
