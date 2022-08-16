@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useRef } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
 
 import { HeaderLayout } from "../../layouts";
 
@@ -24,6 +24,7 @@ import { IBCTransferView } from "./ibc-transfer";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { VestingInfo } from "./vesting-info";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -68,6 +69,22 @@ export const MainPage: FunctionComponent = observer(() => {
   }, [chainStore, confirm, chainStore.isInitializing, currentChainId, intl]);
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+
+  const queryAccount = queriesStore
+    .get(chainStore.current.chainId)
+    .cosmos.queryAccount.getQueryBech32Address(accountInfo.bech32Address);
+  // Show the spendable balances if the account is vesting account.
+  const showVestingInfo = useMemo(() => {
+    return !!(
+      !queryAccount.error &&
+      queryAccount.response &&
+      queryAccount.isVestingAccount
+    );
+  }, [
+    queryAccount.error,
+    queryAccount.isVestingAccount,
+    queryAccount.response,
+  ]);
 
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
@@ -126,6 +143,7 @@ export const MainPage: FunctionComponent = observer(() => {
           </div>
         </CardBody>
       </Card>
+      {showVestingInfo ? <VestingInfo /> : null}
       {chainStore.current.walletUrlForStaking ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>
