@@ -1,7 +1,7 @@
 {
   "applications": {
     "gecko": {
-      "id": "keplr@chainapsis.com",
+      "id": "keplr-extension@keplr.app",
       "strict_min_version": "89.0"
     }
   },
