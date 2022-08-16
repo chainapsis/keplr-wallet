@@ -19,7 +19,7 @@ import { PubKeySecp256k1 } from "@keplr-wallet/proto-types/gnoland/tm/keys";
 
 import { Buffer } from "buffer/";
 import deepmerge from "deepmerge";
-import { BaseAccount } from "@keplr-wallet/cosmos";
+import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { CosmosAccount, ProtoMsgsOrWithAminoMsgs } from "./cosmos";
 
 export interface GnoAccount {
@@ -30,6 +30,12 @@ export const GnoAccount = {
   use(options: {
     msgOptsCreator?: (chainId: string) => DeepPartial<GnoMsgOpts> | undefined;
     queriesStore: IQueriesStore<CosmosQueries>;
+    wsObject?: new (url: string, protocols?: string | string[]) => WebSocket;
+    preTxEvents?: {
+      onBroadcastFailed?: (chainId: string, e?: Error) => void;
+      onBroadcasted?: (chainId: string, txHash: Uint8Array) => void;
+      onFulfill?: (chainId: string, tx: any) => void;
+    };
   }): (
     base: AccountSetBaseSuper & CosmosAccount,
     chainGetter: ChainGetter,
@@ -49,7 +55,8 @@ export const GnoAccount = {
           deepmerge<GnoMsgOpts, DeepPartial<GnoMsgOpts>>(
             defaultGnoMsgOpts,
             msgOptsFromCreator ? msgOptsFromCreator : {}
-          )
+          ),
+          options
         ),
       };
     };
@@ -77,7 +84,15 @@ export class GnoAccountImpl {
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
-    protected readonly _msgOpts: GnoMsgOpts
+    protected readonly _msgOpts: GnoMsgOpts,
+    protected readonly txOpts: {
+      wsObject?: new (url: string, protocols?: string | string[]) => WebSocket;
+      preTxEvents?: {
+        onBroadcastFailed?: (chainId: string, e?: Error) => void;
+        onBroadcasted?: (chainId: string, txHash: Uint8Array) => void;
+        onFulfill?: (chainId: string, tx: any) => void;
+      };
+    }
   ) {
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
@@ -181,6 +196,7 @@ export class GnoAccountImpl {
     this.base.setTxTypeInProgress(type);
 
     let txHash: Uint8Array;
+    let signDoc: StdSignDoc;
     try {
       const result = await this.broadcastMsgs(
         msgs,
@@ -190,6 +206,7 @@ export class GnoAccountImpl {
         this.base.cosmos.broadcastMode
       );
       txHash = result.txHash;
+      signDoc = result.signDoc;
     } catch (e) {
       this.base.setTxTypeInProgress("");
 
@@ -220,16 +237,44 @@ export class GnoAccountImpl {
       onBroadcasted(txHash);
     }
 
-    // TODO: Gno tx-index
-    this.base.setTxTypeInProgress("");
-    const tx = {
-      mode: this.base.cosmos.broadcastMode,
-      hash: Buffer.from(txHash).toString("hex"),
-    };
+    const txTracer = new TendermintTxTracer(
+      this.chainGetter.getChain(this.chainId).rpc,
+      "/websocket",
+      {
+        wsObject: this.txOpts.wsObject,
+      }
+    );
+    txTracer.traceTx(txHash).then((tx) => {
+      txTracer.close();
 
-    if (onFulfill) {
-      onFulfill(tx);
-    }
+      this.base.setTxTypeInProgress("");
+
+      // After sending tx, the balances is probably changed due to the fee.
+      for (const feeAmount of signDoc.fee.amount) {
+        const bal = this.queries.queryBalances
+          .getQueryBech32Address(this.base.bech32Address)
+          .balances.find(
+            (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
+          );
+
+        if (bal) {
+          bal.fetch();
+        }
+      }
+
+      // Always add the tx hash data.
+      if (tx && !tx.hash) {
+        tx.hash = Buffer.from(txHash).toString("hex");
+      }
+
+      if (this.txOpts.preTxEvents?.onFulfill) {
+        this.txOpts.preTxEvents.onFulfill(this.chainId, tx);
+      }
+
+      if (onFulfill) {
+        onFulfill(tx);
+      }
+    });
   }
 
   protected async broadcastMsgs(
