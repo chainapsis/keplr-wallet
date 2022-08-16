@@ -19,7 +19,11 @@ import { PubKeySecp256k1 } from "@keplr-wallet/proto-types/gnoland/tm/keys";
 
 import { Buffer } from "buffer/";
 import deepmerge from "deepmerge";
-import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
+import {
+  BaseAccount,
+  Bech32Address,
+  TendermintTxTracer,
+} from "@keplr-wallet/cosmos";
 import { CosmosAccount } from "./cosmos";
 import { ProtoMsgsOrWithAminoMsgs } from "./types";
 
@@ -125,6 +129,12 @@ export class GnoAccountImpl {
           dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
           return dec.truncate().toString();
         })();
+
+        Bech32Address.validate(
+          recipient,
+          this.chainGetter.getChain(this.chainId).bech32Config
+            .bech32PrefixAccAddr
+        );
 
         const msg = {
           type: this.msgOpts.send.native.type,
@@ -333,7 +343,9 @@ export class GnoAccountImpl {
       messages: protoMsgs,
       fee: Fee.fromPartial({
         gasWanted: signResponse.signed.fee.gas,
-        gasFee: signResponse.signed.fee.amount.map((val) => `${val.amount}${val.denom}`).join(","),
+        gasFee: signResponse.signed.fee.amount
+          .map((val) => `${val.amount}${val.denom}`)
+          .join(","),
       }),
       signatures: [
         Signature.fromPartial({
