@@ -7,10 +7,10 @@ import { useStore } from "../../stores";
 import { MemoInput } from "../../components/input";
 import {
   useFeeConfig,
-  useGasConfig,
   useMemoConfig,
   useSignDocAmountConfig,
   useSignDocHelper,
+  useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { Button } from "../../components/button";
 import { Msg as AminoMsg } from "@cosmjs/launchpad";
@@ -24,6 +24,7 @@ import WalletConnect from "@walletconnect/client";
 import { renderAminoMessage } from "./amino";
 import { renderDirectMessage } from "./direct";
 import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
+import { unescapeHTML } from "@keplr-wallet/common";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
@@ -53,8 +54,9 @@ export const SignModal: FunctionComponent<{
 
     const [chainId, setChainId] = useState(chainStore.current.chainId);
 
-    // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
-    const gasConfig = useGasConfig(chainStore, chainId, 1);
+    // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
+    // In this case, there is no obligation to deal with it, but 0 gas is favorably allowed.
+    const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
     const amountConfig = useSignDocAmountConfig(
       chainStore,
       accountStore,
@@ -84,7 +86,15 @@ export const SignModal: FunctionComponent<{
         signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
         setChainId(data.data.signDocWrapper.chainId);
         gasConfig.setGas(data.data.signDocWrapper.gas);
-        memoConfig.setMemo(data.data.signDocWrapper.memo);
+        let memo = data.data.signDocWrapper.memo;
+        if (data.data.signDocWrapper.mode === "amino") {
+          // For amino-json sign doc, the memo is escaped by default behavior of golang's json marshaller.
+          // For normal users, show the escaped characters with unescaped form.
+          // Make sure that the actual sign doc's memo should be escaped.
+          // In this logic, memo should be escaped from account store or background's request signing function.
+          memo = unescapeHTML(memo);
+        }
+        memoConfig.setMemo(memo);
         if (
           data.data.signOptions.preferNoSetFee &&
           data.data.signDocWrapper.fees[0]
@@ -140,17 +150,16 @@ export const SignModal: FunctionComponent<{
             <View key={i.toString()}>
               <Msg title={title}>
                 {scrollViewHorizontal ? (
-                  <ScrollView horizontal={true}>
-                    <Text
-                      style={style.flatten(["body3", "color-text-black-low"])}
-                    >
+                  <ScrollView
+                    horizontal={true}
+                    indicatorStyle={style.theme === "dark" ? "white" : "black"}
+                  >
+                    <Text style={style.flatten(["body3", "color-text-low"])}>
                       {content}
                     </Text>
                   </ScrollView>
                 ) : (
-                  <Text
-                    style={style.flatten(["body3", "color-text-black-low"])}
-                  >
+                  <Text style={style.flatten(["body3", "color-text-low"])}>
                     {content}
                   </Text>
                 )}
@@ -159,7 +168,8 @@ export const SignModal: FunctionComponent<{
                 <View
                   style={style.flatten([
                     "height-1",
-                    "background-color-border-white",
+                    "background-color-gray-50",
+                    "dark:background-color-platinum-400",
                     "margin-x-16",
                   ])}
                 />
@@ -178,7 +188,7 @@ export const SignModal: FunctionComponent<{
           return (
             <View key={i.toString()}>
               <Msg title={title}>
-                <Text style={style.flatten(["body3", "color-text-black-low"])}>
+                <Text style={style.flatten(["body3", "color-text-low"])}>
                   {content}
                 </Text>
               </Msg>
@@ -186,7 +196,8 @@ export const SignModal: FunctionComponent<{
                 <View
                   style={style.flatten([
                     "height-1",
-                    "background-color-border-white",
+                    "background-color-gray-50",
+                    "dark:background-color-platinum-400",
                     "margin-x-16",
                   ])}
                 />
@@ -209,12 +220,10 @@ export const SignModal: FunctionComponent<{
         ) : null}
         <View style={style.flatten(["margin-bottom-16"])}>
           <Text style={style.flatten(["margin-bottom-3"])}>
-            <Text style={style.flatten(["subtitle3", "color-primary"])}>
+            <Text style={style.flatten(["subtitle3", "color-blue-400"])}>
               {`${msgs.length.toString()} `}
             </Text>
-            <Text
-              style={style.flatten(["subtitle3", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle3", "color-text-middle"])}>
               Messages
             </Text>
           </Text>
@@ -222,13 +231,19 @@ export const SignModal: FunctionComponent<{
             style={style.flatten([
               "border-radius-8",
               "border-width-1",
-              "border-color-border-white",
+              "border-color-gray-50",
+              "dark:border-color-platinum-400",
               "overflow-hidden",
             ])}
           >
             <ScrollView
-              style={style.flatten(["max-height-214"])}
+              style={style.flatten([
+                "max-height-214",
+                "background-color-white",
+                "dark:background-color-platinum-500",
+              ])}
               persistentScrollbar={true}
+              indicatorStyle={style.theme === "dark" ? "white" : "black"}
             >
               {renderedMsgs}
             </ScrollView>

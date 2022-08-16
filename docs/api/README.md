@@ -90,6 +90,10 @@ The `@keplr-wallet/types` package has the type definition related to Keplr.
 If you're using TypeScript, run `npm install --save-dev @keplr-wallet/types` or `yarn add -D @keplr-wallet/types` to install `@keplr-wallet/types`.  
 Then, you can add the `@keplr-wallet/types` window to a global window object and register the Keplr related types.
 
+> Usage of any other packages besides @keplr-wallet/types is not recommended.
+> - Any other packages besides @keplr-wallet/types are actively being developed, backward compatibility is not in the scope of support.
+> - Since there are active changes being made, documentation is not being updated to the most recent version of the package as of right now. Documentations would be updated as packages get stable.
+
 ### Enable Connection
 
 ```javascript
@@ -211,6 +215,24 @@ Using `verifyArbitrary`, you can verify the results requested by `signArbitrary`
 `verifyArbitrary` has been only implemented for simple usage. `verifyArbitrary` returns the result of the verification of the current selected account's sign doc. If the account is not the currently selected account, it would throw an error.  
   
 It is recommended to use `verifyADR36Amino` function in the `@keplr-wallet/cosmos` package or your own implementation instead of using `verifyArbitrary` API.  
+
+### Request Ethereum Signature
+```javascript
+signEthereum(
+  chainId: string,
+  signer: string, // Bech32 address, not hex
+  data: string | Uint8Array,
+  type: 'message' | 'transaction'
+)
+```
+
+This is an experimental implementation of native Ethereum signing in Keplr to be used by dApps on EVM-compatible chains such as Evmos. 
+
+It supports signing either [Personal Messages](https://eips.ethereum.org/EIPS/eip-191) or [Transactions](https://ethereum.org/en/developers/docs/transactions/), with plans to support [Typed Data](https://eips.ethereum.org/EIPS/eip-712) in the future.
+
+Notes on Usage:
+- The `signer` field must be a Bech32 address, not an Ethereum hex address
+- The data should be either stringified JSON (for transactions) or a string message (for messages). Byte arrays are accepted as alternatives for either.
   
 ### Interaction Options
 

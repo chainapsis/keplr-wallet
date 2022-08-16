@@ -105,6 +105,11 @@
   "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",
   "setting.token.manage.notification.viewing-key.copy": "뷰잉키가 복사되었습니다",
 
+  "setting.endpoints": "노드 주소",
+  "setting.endpoints.paragraph": "원하는 풀노드를 사용하도록 설정하세요",
+  "setting.endpoints.button.reset": "초기화",
+  "setting.endpoints.button.confirm": "확인",
+
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
   "register.button.back": "뒤로",
@@ -120,6 +125,7 @@
   "register.intro.sub-content": "모든 정보는 기기에 저장됩니다.{br}이 과정은 인터넷 접속을 필요로하지 않습니다.",
 
   "register.recover.title": "시드를 입력하세요",
+  "register.recover.alt.private-key.title": "개인키를 입력하세요",
 
   "register.create.title": "니모닉 단어",
   "register.create.toggle.word12": "12 단어",
@@ -150,8 +156,6 @@
 
   "chain.suggested.title": "체인 추가 요청",
   "chain.suggested.paragraph": "<b>{host}</b>가 <b>{chainId}</b> 블록체인을 케플러에 추가하길 원합니다.",
-  "chain.suggested.waring.experiment.title": "실험적 기능",
-  "chain.suggested.waring.experiment.paragraph": "용감한 우주 여행자를 위한 기능입니다",
   "chain.suggested.button.approve": "허락",
   "chain.suggested.button.reject": "거부",
 
@@ -230,6 +234,17 @@
   "sign.list.message.wasm/MsgExecuteContract.content": "<only-sent-exist><b>{sent}</b>를 전송하며 </only-sent-exist><b>{address}</b> 컨트랙트를 실행합니다",
   "sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm": "암호화됨",
   "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "메세지를 복호화하지 못 했습니다. 케플러를 통하지 않고 암호화되었을 수 있습니다.",
+  "sign.list.message.cosmos-sdk/MsgGrant.title": "승인",
+  "sign.list.message.cosmos-sdk/MsgGrant.unspecified": "정확하지 않음",
+  "sign.list.message.cosmos-sdk/MsgGrant.unrecognized": "인식되지 않음",
+  "sign.list.message.cosmos-sdk/MsgGrant.generic.content": "<b>{expirationDate}</b>까지 Grant <b>{grantType}</b>을 <b>{grantee}</b>에 허용합니다",
+  "sign.list.message.cosmos-sdk/MsgGrant.sending.content": "<b>{expirationDate}</b>까지 Grant <b>보내기</b>를 <b>{grantee}</b>에게 허용합니다{br}최고가: <b>{maxAmount}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.unlimited": "무제한",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.content": "<b>{expirationDate}</b>까지 Grant <b>{grantType}</b>을 <b>{grantee}</b>에 허용합니다</b>{br}{validatorListType} Validators: <b>{validators}</b>{br}최고가: <b>{maxAmount}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorAllowedLabel": "허가된",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorDeniedLabel": "거절당한",
+  "sign.list.message.cosmos-sdk/MsgRevoke.title": "취소",
+  "sign.list.message.cosmos-sdk/MsgRevoke.content": "<b>{revokeType}</b>이 <b>{grantee}</b> 허가를 취소합니다",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{neuron}</b>가 링크<b>{link}</b>를 생성합니다",
@@ -273,5 +288,8 @@
   "component.ibc.channel-registrar.chain-selector.button.add": "IBC 전송 채널 추가",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "채널 ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "채널 ID를 입력하세요",
-  "component.ibc.channel-registrar.chain-selector.add.channel.button": "저장"
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "저장",
+
+  "component.waring.experimental-feature.title": "실험적 기능",
+  "component.waring.experimental-feature.paragraph": "용감한 우주 여행자를 위한 기능입니다"
 }

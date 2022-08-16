@@ -5,7 +5,10 @@ import {
   MsgDelegate,
   MsgUndelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
+import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
+import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import {
   renderMsgBeginRedelegate,
@@ -13,6 +16,9 @@ import {
   renderMsgExecuteContract,
   renderMsgSend,
   renderMsgUndelegate,
+  renderMsgTransfer,
+  renderMsgVote,
+  renderMsgWithdrawDelegatorReward,
   renderUnknownMessage,
 } from "./messages";
 import { Buffer } from "buffer/";
@@ -80,6 +86,25 @@ export function renderDirectMessage(
               ).toString()
             )
           );
+        }
+        case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward": {
+          const withdrawMsg = msg.unpacked as MsgWithdrawDelegatorReward;
+          return renderMsgWithdrawDelegatorReward(withdrawMsg.validatorAddress);
+        }
+        case "/cosmos.gov.v1beta1.MsgVote": {
+          const voteMsg = msg.unpacked as MsgVote;
+          return renderMsgVote(voteMsg.proposalId, voteMsg.option);
+        }
+        case "/ibc.applications.transfer.v1.MsgTransfer": {
+          const transferMsg = msg.unpacked as MsgTransfer;
+          if (transferMsg.token) {
+            return renderMsgTransfer(
+              currencies,
+              transferMsg.token,
+              transferMsg.receiver,
+              transferMsg.sourceChannel
+            );
+          }
           break;
         }
       }

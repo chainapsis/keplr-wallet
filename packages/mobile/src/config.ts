@@ -116,7 +116,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
   {
     rpc: "https://rpc-secret.keplr.app",
     rest: "https://lcd-secret.keplr.app",
-    chainId: "secret-3",
+    chainId: "secret-4",
     chainName: "Secret Network",
     stakeCurrency: {
       coinDenom: "SCRT",
@@ -216,7 +216,14 @@ export const EmbedChainInfos: AppChainInfo[] = [
     bip44: {
       coinType: 394,
     },
-    bech32Config: Bech32Address.defaultBech32Config("cro"),
+    bech32Config: {
+      bech32PrefixAccAddr: "cro",
+      bech32PrefixAccPub: "cropub",
+      bech32PrefixValAddr: "crocncl",
+      bech32PrefixValPub: "crocnclpub",
+      bech32PrefixConsAddr: "crocnclcons",
+      bech32PrefixConsPub: "crocnclconspub",
+    },
     currencies: [
       {
         coinDenom: "CRO",
@@ -664,7 +671,14 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinType: 566,
       },
     ],
-    bech32Config: Bech32Address.defaultBech32Config("iaa"),
+    bech32Config: {
+      bech32PrefixAccAddr: "iaa",
+      bech32PrefixAccPub: "iap",
+      bech32PrefixValAddr: "iva",
+      bech32PrefixValPub: "ivp",
+      bech32PrefixConsAddr: "ica",
+      bech32PrefixConsPub: "icp",
+    },
     currencies: [
       {
         coinDenom: "IRIS",
@@ -886,6 +900,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
       {
+        coinDenom: "WETH",
+        coinMinimalDenom: "weth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "weth",
+      },
+      {
         coinDenom: "USDC",
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,
@@ -1026,15 +1046,15 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
       },
       {
-        coinDenom: "RUN",
-        coinMinimalDenom: "urun",
+        coinDenom: "IST",
+        coinMinimalDenom: "uist",
         coinDecimals: 6,
       },
     ],
     feeCurrencies: [
       {
-        coinDenom: "RUN",
-        coinMinimalDenom: "urun",
+        coinDenom: "IST",
+        coinMinimalDenom: "uist",
         coinDecimals: 6,
       },
     ],
@@ -1095,12 +1115,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/sentinel/stake"
-        : "http://localhost:8081/#/sentinel/stake",
+        ? "https://wallet.keplr.app/chains/sentinel"
+        : "http://localhost:8081/chains/sentinel",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/sentinel/stake"
-        : "http://localhost:8081/#/sentinel/stake",
+        ? "https://wallet.keplr.app/chains/sentinel"
+        : "http://localhost:8081/chains/sentinel",
     bip44: {
       coinType: 118,
     },
@@ -1146,12 +1166,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/ixo/stake"
-        : "http://localhost:8081/#/ixo/stake",
+        ? "https://wallet.keplr.app/chains/ixo"
+        : "http://localhost:8081/chains/ixo",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/ixo/stake"
-        : "http://localhost:8081/#/ixo/stake",
+        ? "https://wallet.keplr.app/chains/ixo"
+        : "http://localhost:8081/chains/ixo",
     bip44: {
       coinType: 118,
     },
@@ -1190,12 +1210,12 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/emoney/stake"
-        : "http://localhost:8080/#/emoney/stake",
+        ? "https://wallet.keplr.app/chains/e-money"
+        : "http://localhost:8080/chains/e-money",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/emoney/stake"
-        : "http://localhost:8080/#/emoney/stake",
+        ? "https://wallet.keplr.app/chains/e-money"
+        : "http://localhost:8080/chains/e-money",
     bip44: {
       coinType: 118,
     },
@@ -1335,7 +1355,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     bip44: {
       coinType: 118,
     },
-    bech32Config: Bech32Address.defaultBech32Config("cosmos"),
+    bech32Config: Bech32Address.defaultBech32Config("like"),
     currencies: [
       {
         coinDenom: "LIKE",
@@ -1352,38 +1372,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinGeckoId: "likecoin",
       },
     ],
-    features: ["ibc-transfer"],
-    hideInUI: true,
-  },
-  {
-    rpc: "https://rpc-impacthub.keplr.app",
-    rest: "https://lcd-impacthub.keplr.app",
-    chainId: "impacthub-3",
-    chainName: "IXO",
-    stakeCurrency: {
-      coinDenom: "IXO",
-      coinMinimalDenom: "uixo",
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("ixo"),
-    currencies: [
-      {
-        coinDenom: "IXO",
-        coinMinimalDenom: "uixo",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "IXO",
-        coinMinimalDenom: "uixo",
-        coinDecimals: 6,
-      },
-    ],
-    features: ["ibc-transfer"],
+    features: ["ibc-transfer", "ibc-go"],
     hideInUI: true,
   },
   {

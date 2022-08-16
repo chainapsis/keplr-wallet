@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/background",
-  "version": "0.10.2",
+  "version": "0.10.17",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -30,14 +30,14 @@
     "@ethersproject/bytes": "^5.5.0",
     "@ethersproject/keccak256": "^5.5.0",
     "@ethersproject/wallet": "^5.5.0",
-    "@keplr-wallet/common": "0.10.2",
-    "@keplr-wallet/cosmos": "0.10.2",
-    "@keplr-wallet/crypto": "0.10.2",
-    "@keplr-wallet/popup": "0.10.2",
-    "@keplr-wallet/proto-types": "0.10.2",
-    "@keplr-wallet/router": "0.10.2",
-    "@keplr-wallet/types": "0.10.2",
-    "@keplr-wallet/unit": "0.10.2",
+    "@keplr-wallet/common": "0.10.17",
+    "@keplr-wallet/cosmos": "0.10.17",
+    "@keplr-wallet/crypto": "0.10.17",
+    "@keplr-wallet/popup": "0.10.17",
+    "@keplr-wallet/proto-types": "0.10.17",
+    "@keplr-wallet/router": "0.10.17",
+    "@keplr-wallet/types": "0.10.17",
+    "@keplr-wallet/unit": "0.10.17",
     "@ledgerhq/hw-transport": "^6.20.0",
     "@ledgerhq/hw-transport-webhid": "^6.20.0",
     "@ledgerhq/hw-transport-webusb": "^6.20.0",
@@ -52,9 +52,8 @@
     "ledger-cosmos-js": "^2.1.8",
     "long": "^4.0.0",
     "pbkdf2": "^3.1.2",
-    "reflect-metadata": "^0.1.13",
     "secp256k1": "^4.0.2",
     "secretjs": "^0.17.0",
-    "tsyringe": "^4.5.0"
+    "utility-types": "^3.10.0"
   }
 }

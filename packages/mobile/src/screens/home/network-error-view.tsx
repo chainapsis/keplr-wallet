@@ -158,7 +158,8 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
         style={style.flatten([
           "flex-row",
           "items-center",
-          "background-color-danger-10",
+          "background-color-red-50@95%",
+          "dark:background-color-red-500@40%",
           "padding-left-26",
           "padding-right-24",
           "height-80",
@@ -168,13 +169,17 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
         }}
       >
         <View style={style.flatten(["margin-right-16"])}>
-          <AlertIcon color={style.get("color-danger").color} size={24} />
+          <AlertIcon
+            color={style.flatten(["color-red-400", "dark:color-red-300"]).color}
+            size={24}
+          />
         </View>
         <View style={style.flatten(["flex-1", "overflow-visible"])}>
           <Text
             style={style.flatten([
               "subtitle2",
-              "color-danger",
+              "color-red-400",
+              "dark:color-red-300",
               "overflow-visible",
             ])}
           >
@@ -189,7 +194,7 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
               ObservableQuery.refreshAllObservedIfError();
             }}
             style={style.flatten([
-              "background-color-danger-50",
+              "background-color-red-100",
               "justify-center",
               "items-center",
               "width-32",
@@ -207,7 +212,7 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
                 ],
               }}
             >
-              <RefreshIcon color={style.get("color-danger").color} size={24} />
+              <RefreshIcon color={style.get("color-red-300").color} size={24} />
             </Animated.View>
           </TouchableOpacity>
         ) : null}

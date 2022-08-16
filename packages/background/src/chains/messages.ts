@@ -1,4 +1,4 @@
-import { Message } from "@keplr-wallet/router";
+import { KeplrError, Message } from "@keplr-wallet/router";
 import { ChainInfoWithEmbed } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
@@ -34,7 +34,7 @@ export class SuggestChainInfoMsg extends Message<void> {
 
   validateBasic(): void {
     if (!this.chainInfo) {
-      throw new Error("chain info not set");
+      throw new KeplrError("chains", 100, "Chain info not set");
     }
   }
 
@@ -62,7 +62,7 @@ export class RemoveSuggestedChainInfoMsg extends Message<ChainInfoWithEmbed[]> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("Chain id not set");
+      throw new KeplrError("chains", 101, "Chain id not set");
     }
   }
 

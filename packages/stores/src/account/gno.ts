@@ -20,7 +20,8 @@ import { PubKeySecp256k1 } from "@keplr-wallet/proto-types/gnoland/tm/keys";
 import { Buffer } from "buffer/";
 import deepmerge from "deepmerge";
 import { BaseAccount, TendermintTxTracer } from "@keplr-wallet/cosmos";
-import { CosmosAccount, ProtoMsgsOrWithAminoMsgs } from "./cosmos";
+import { CosmosAccount } from "./cosmos";
+import { ProtoMsgsOrWithAminoMsgs } from "./types";
 
 export interface GnoAccount {
   gno: GnoAccountImpl;

@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { useHistory } from "react-router";
-import { Button, Alert } from "reactstrap";
+import { Button } from "reactstrap";
 
 import style from "./style.module.scss";
 import { EmptyLayout } from "../../../layouts/empty-layout";
@@ -8,6 +8,7 @@ import { FormattedMessage } from "react-intl";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore } = useStore();
@@ -32,9 +33,9 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
       <div className={style.container}>
         <img
-          src={require("../../../public/assets/temp-icon.svg")}
+          src={require("../../../public/assets/logo-256.png")}
           alt="logo"
-          style={{ height: "92px" }}
+          style={{ width: "92px", height: "92px", margin: "0 auto" }}
         />
         <h1 className={style.header}>
           <FormattedMessage id="chain.suggested.title" />
@@ -52,22 +53,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
           />
         </p>
         <div style={{ flex: 1 }} />
-        <Alert className={style.warning} color="warning">
-          <div className={style.imgContainer}>
-            <img
-              src={require("../../../public/assets/img/icons8-test-tube.svg")}
-              alt="experiment"
-            />
-          </div>
-          <div className={style.content}>
-            <div className={style.title}>
-              <FormattedMessage id="chain.suggested.waring.experiment.title" />
-            </div>
-            <div>
-              <FormattedMessage id="chain.suggested.waring.experiment.paragraph" />
-            </div>
-          </div>
-        </Alert>
+        <AlertExperimentalFeature />
         <div className={style.buttons}>
           <Button
             className={style.button}

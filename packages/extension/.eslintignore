@@ -8,9 +8,12 @@
 **/*.md
 .DS_Store
 
+.gitignore
+
 node_modules
 
 dist/*
 prod/*
+build/*
 
 yarn.lock

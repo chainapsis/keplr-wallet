@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { PageWithScrollView } from "../../components/page";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -11,6 +11,8 @@ import { Card } from "../../components/card";
 import { RectButton } from "../../components/rect-button";
 import { Currency } from "@keplr-wallet/types";
 import { TokenSymbol } from "../../components/token-symbol";
+import { HeaderRightButton } from "../../components/header";
+import { HeaderAddIcon } from "../../components/header/icon";
 
 export const TokensScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();
@@ -39,19 +41,54 @@ export const TokensScreen: FunctionComponent = observer(() => {
       return a.currency.coinDenom < b.currency.coinDenom ? -1 : 1;
     });
 
+  const smartNavigation = useSmartNavigation();
+
+  const showAddTokenButton = (() => {
+    if (!chainStore.current.features) {
+      return false;
+    }
+
+    if (chainStore.current.features.includes("cosmwasm")) {
+      return true;
+    }
+  })();
+
+  useEffect(() => {
+    if (showAddTokenButton) {
+      smartNavigation.setOptions({
+        // eslint-disable-next-line react/display-name
+        headerRight: () => (
+          <HeaderRightButton
+            onPress={() => {
+              smartNavigation.navigateSmart("Setting.AddToken", {});
+            }}
+          >
+            <HeaderAddIcon />
+          </HeaderRightButton>
+        ),
+      });
+    } else {
+      smartNavigation.setOptions({
+        headerRight: undefined,
+      });
+    }
+  }, [showAddTokenButton, smartNavigation]);
+
   return (
-    <PageWithScrollView>
-      <Card style={style.flatten(["padding-bottom-14"])}>
-        {tokens.map((token) => {
-          return (
-            <TokenItem
-              key={token.currency.coinMinimalDenom}
-              chainInfo={chainStore.current}
-              balance={token.balance}
-            />
-          );
-        })}
-      </Card>
+    <PageWithScrollView backgroundMode="gradient">
+      {tokens.length > 0 ? (
+        <Card style={style.flatten(["padding-bottom-14"])}>
+          {tokens.map((token) => {
+            return (
+              <TokenItem
+                key={token.currency.coinMinimalDenom}
+                chainInfo={chainStore.current}
+                balance={token.balance}
+              />
+            );
+          })}
+        </Card>
+      ) : null}
     </PageWithScrollView>
   );
 });
@@ -107,7 +144,7 @@ export const TokenItem: FunctionComponent<{
         <Text
           style={style.flatten([
             "subtitle3",
-            "color-text-black-low",
+            "color-text-low",
             "margin-bottom-4",
             "uppercase",
           ])}
@@ -115,11 +152,7 @@ export const TokenItem: FunctionComponent<{
           {balance.currency.coinDenom}
         </Text>
         <Text
-          style={style.flatten([
-            "h5",
-            "color-text-black-medium",
-            "max-width-240",
-          ])}
+          style={style.flatten(["h5", "color-text-high", "max-width-240"])}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -135,7 +168,9 @@ export const TokenItem: FunctionComponent<{
       <View style={style.get("flex-1")} />
       <RightArrowIcon
         height={16}
-        color={style.get("color-text-black-very-very-low").color}
+        color={
+          style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
+        }
       />
     </RectButton>
   );

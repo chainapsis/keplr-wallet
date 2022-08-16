@@ -1,29 +1,23 @@
-import { delay as diDelay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import { Ledger, LedgerWebHIDIniter, LedgerWebUSBIniter } from "./ledger";
 
 import delay from "delay";
 
-import { APP_PORT, Env } from "@keplr-wallet/router";
+import { APP_PORT, Env, KeplrError } from "@keplr-wallet/router";
 import { BIP44HDPath } from "../keyring";
 import { KVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
 import { LedgerOptions } from "./options";
 import { Buffer } from "buffer/";
 
-@singleton()
 export class LedgerService {
   private previousInitAborter: ((e: Error) => void) | undefined;
 
   protected options: LedgerOptions;
 
+  protected interactionService!: InteractionService;
+
   constructor(
-    @inject(TYPES.LedgerStore)
     protected readonly kvStore: KVStore,
-    @inject(diDelay(() => InteractionService))
-    protected readonly interactionService: InteractionService,
-    @inject(TYPES.LedgerOptions)
     options: Partial<LedgerOptions>
   ) {
     this.options = {
@@ -37,6 +31,10 @@ export class LedgerService {
     if (!this.options.transportIniters["webhid"]) {
       this.options.transportIniters["webhid"] = LedgerWebHIDIniter;
     }
+  }
+
+  init(interactionService: InteractionService) {
+    this.interactionService = interactionService;
   }
 
   async getPublicKey(env: Env, bip44HDPath: BIP44HDPath): Promise<Uint8Array> {
@@ -81,7 +79,7 @@ export class LedgerService {
           Buffer.from(expectedPubKey).toString("hex") !==
           Buffer.from(pubKey).toString("hex")
         ) {
-          throw new Error("Unmatched public key");
+          throw new KeplrError("ledger", 110, "Unmatched public key");
         }
         // Cosmos App on Ledger doesn't support the coin type other than 118.
         const signature = await ledger.sign(
@@ -167,7 +165,7 @@ export class LedgerService {
       try {
         const transportIniter = this.options.transportIniters[mode];
         if (!transportIniter) {
-          throw new Error(`Unknown mode: ${mode}`);
+          throw new KeplrError("ledger", 112, `Unknown mode: ${mode}`);
         }
 
         const ledger = await Ledger.init(transportIniter, initArgs);
@@ -204,7 +202,7 @@ export class LedgerService {
                 | undefined;
 
               if (response?.abort) {
-                throw new Error("Ledger init aborted");
+                throw new KeplrError("ledger", 120, "Ledger init aborted");
               }
 
               if (response?.initArgs) {
@@ -233,7 +231,7 @@ export class LedgerService {
                   event: "init-aborted",
                   mode,
                 });
-                throw new Error("Ledger init timeout");
+                throw new KeplrError("ledger", 121, "Ledger init timeout");
               }
             })()
           );
@@ -274,7 +272,7 @@ export class LedgerService {
       }
 
       if (!find) {
-        throw new Error("Ledger init aborted");
+        throw new KeplrError("ledger", 120, "Ledger init aborted");
       }
 
       await delay(1000);

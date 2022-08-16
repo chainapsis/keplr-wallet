@@ -12,18 +12,27 @@ import { canShowPrivateData } from "./screens/view-private-data";
 import { SettingViewPrivateDataItem } from "./items/view-private-data";
 import { useStyle } from "../../styles";
 import { View } from "react-native";
+import { SettingThemeItem } from "./items/theme";
 
 export const SettingScreen: FunctionComponent = observer(() => {
-  const { keychainStore, keyRingStore } = useStore();
+  const { chainStore, keychainStore, keyRingStore, tokensStore } = useStore();
 
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
 
+  const showManageTokenButton = (() => {
+    if (!chainStore.current.features) {
+      return false;
+    }
+
+    if (chainStore.current.features.includes("cosmwasm")) {
+      return true;
+    }
+  })();
+
   return (
-    <PageWithScrollViewInBottomTabView
-      backgroundColor={style.get("color-setting-screen-background").color}
-    >
+    <PageWithScrollViewInBottomTabView backgroundMode="secondary">
       <SettingSelectAccountItem />
       <SettingSectionTitle title="General" />
       <SettingFiatCurrencyItem topBorder={true} />
@@ -34,6 +43,22 @@ export const SettingScreen: FunctionComponent = observer(() => {
           smartNavigation.navigateSmart("AddressBook", {});
         }}
       />
+      {showManageTokenButton ? (
+        <SettingItem
+          label="Manage tokens"
+          right={
+            <RightArrow
+              paragraph={tokensStore
+                .getTokensOf(chainStore.current.chainId)
+                .tokens.length.toString()}
+            />
+          }
+          onPress={() => {
+            smartNavigation.navigateSmart("Setting.ManageTokens", {});
+          }}
+        />
+      ) : null}
+      <SettingThemeItem />
       <SettingSectionTitle title="Security" />
       {canShowPrivateData(keyRingStore.keyRingType) && (
         <SettingViewPrivateDataItem topBorder={true} />

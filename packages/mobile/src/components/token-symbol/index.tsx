@@ -94,7 +94,7 @@ export const TokenSymbol: FunctionComponent<{
             "overflow-hidden",
             `background-color-profile-${profileColor}` as any,
           ],
-          [isStakeCurrency && "background-color-primary"]
+          [isStakeCurrency && "background-color-blue-400"]
         ),
         propStyle,
       ])}

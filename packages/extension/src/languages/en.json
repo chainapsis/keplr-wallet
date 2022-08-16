@@ -110,8 +110,13 @@
   "setting.token.add.secret20.checkbox.use-suggested-viewing-key": "Use webpage suggested viewing key",
   "setting.token.add.secret20.viewing-key": "Viewing Key",
 
-  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
+  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register again.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
+
+  "setting.endpoints": "Endpoints",
+  "setting.endpoints.paragraph": "Change into the node you wish to connect",
+  "setting.endpoints.button.reset": "Reset",
+  "setting.endpoints.button.confirm": "Confirm",
 
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
@@ -128,6 +133,7 @@
   "register.intro.sub-content": "All sensitive information is stored only on your device.{br}This process does not require an internet connection.",
 
   "register.recover.title": "Input your seed",
+  "register.recover.alt.private-key.title": "Input your private key",
 
   "register.create.title": "Mnemonic Seed",
   "register.create.toggle.word12": "12 words",
@@ -158,8 +164,6 @@
 
   "chain.suggested.title": "Chain Add Request",
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
-  "chain.suggested.waring.experiment.title": "Experimental Feature",
-  "chain.suggested.waring.experiment.paragraph": "For the brave-hearted cosmonauts",
   "chain.suggested.button.approve": "Approve",
   "chain.suggested.button.reject": "Reject",
 
@@ -236,6 +240,17 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
   "sign.list.message.cosmos-sdk/MsgVote.title": "Vote",
   "sign.list.message.cosmos-sdk/MsgVote.content": "Vote <b>{option}</b> on <b>Proposal {id}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.title": "Grant",
+  "sign.list.message.cosmos-sdk/MsgGrant.unspecified": "Unspecified",
+  "sign.list.message.cosmos-sdk/MsgGrant.unrecognized": "Unrecognized",
+  "sign.list.message.cosmos-sdk/MsgGrant.generic.content": "Grant <b>{grantType}</b> permission to <b>{grantee}</b> until <b>{expirationDate}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.sending.content": "Grant <b>Send</b> permission to <b>{grantee}</b> until <b>{expirationDate}</b>{br}Max Amount: <b>{maxAmount}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.unlimited": "Unlimited",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.content": "Grant <b>{grantType}</b> permission to <b>{grantee}</b> until <b>{expirationDate}</b>{br}{validatorListType} Validators: <b>{validators}</b>{br}Max Amount: <b>{maxAmount}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorAllowedLabel": "Allowed",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorDeniedLabel": "Denied",
+  "sign.list.message.cosmos-sdk/MsgRevoke.title": "Revoke",
+  "sign.list.message.cosmos-sdk/MsgRevoke.content": "Revoke <b>{revokeType}</b> permission from <b>{grantee}</b>",
 
   "sign.list.message.wasm.button.details": "Details",
   "sign.list.message.wasm.button.close": "Close",
@@ -273,6 +288,7 @@
   "input.recipient.error.invalid-bech32": "Invalid address",
   "input.recipient.error.ens-not-supported": "ENS not supported for this chain",
   "input.recipient.error.ens-failed-to-fetch": "Failed to get address from ENS",
+  "input.recipient.error.invalid-hex": "Invalid hex address",
   "input.amount.error.invalid-number": "Invalid number",
   "input.amount.error.is-zero": "Amount should not be zero",
   "input.amount.error.is-negative": "Amount should be positive",
@@ -291,5 +307,8 @@
   "component.ibc.channel-registrar.chain-selector.button.add": "New IBC Transfer Channel",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
-  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save"
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save",
+
+  "component.waring.experimental-feature.title": "Experimental Feature",
+  "component.waring.experimental-feature.paragraph": "For the brave-hearted cosmonauts"
 }

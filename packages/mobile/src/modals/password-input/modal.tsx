@@ -44,7 +44,7 @@ export const PasswordInputModal: FunctionComponent<{
         <Text
           style={style.flatten([
             "body2",
-            "color-text-black-medium",
+            "color-text-middle",
             "margin-bottom-32",
           ])}
         >

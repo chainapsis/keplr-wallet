@@ -14,10 +14,12 @@ import {
   ENSIsFetchingError,
   ENSNotSupportedError,
   InvalidBech32Error,
+  InvalidHexError,
 } from "./errors";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useState } from "react";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
+import { isAddress } from "@ethersproject/address";
 
 export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @observable
@@ -53,8 +55,10 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   }
 
   get recipient(): string {
-    if (ObservableEnsFetcher.isValidENS(this.rawRecipient)) {
-      const ensFetcher = this.getENSFetcher(this.rawRecipient);
+    const rawRecipient = this.rawRecipient.trim();
+
+    if (ObservableEnsFetcher.isValidENS(rawRecipient)) {
+      const ensFetcher = this.getENSFetcher(rawRecipient);
       if (ensFetcher) {
         if (ensFetcher.isFetching) {
           return "";
@@ -77,7 +81,7 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
       }
     }
 
-    return this._rawRecipient;
+    return rawRecipient;
   }
 
   protected getENSFetcher(name: string): ObservableEnsFetcher | undefined {
@@ -109,12 +113,21 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
 
   @computed
   get error(): Error | undefined {
-    if (!this.rawRecipient) {
+    const rawRecipient = this.rawRecipient.trim();
+
+    if (!rawRecipient) {
       return new EmptyAddressError("Address is empty");
     }
 
-    if (ObservableEnsFetcher.isValidENS(this.rawRecipient)) {
-      const ensFetcher = this.getENSFetcher(this.rawRecipient);
+    if (this.bech32Prefix === "evmos" && rawRecipient.startsWith("0x")) {
+      if (isAddress(rawRecipient)) {
+        return;
+      }
+      return new InvalidHexError("Invalid hex address for chain");
+    }
+
+    if (ObservableEnsFetcher.isValidENS(rawRecipient)) {
+      const ensFetcher = this.getENSFetcher(rawRecipient);
       if (!ensFetcher) {
         return new ENSNotSupportedError("ENS not supported for this chain");
       }

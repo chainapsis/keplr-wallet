@@ -18,6 +18,8 @@ export const AutoFetchingFiatValueInterval = 300 * 1000; // 5min
 
 export const AutoFetchingAssetsInterval = 15 * 1000; // 15sec
 
+export const DefaultGasMsgWithdrawRewards = 140000; // Gas per messages.
+
 // Endpoint for Ethereum node.
 // This is used for ENS.
 export const EthereumEndpoint = ETHEREUM_ENDPOINT;

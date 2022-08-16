@@ -57,6 +57,7 @@ import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { LogPageViewWrapper } from "./components/analytics";
+import { SettingEndpointsPage } from "./pages/setting/endpoints";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -65,10 +66,14 @@ window.keplr = new Keplr(
 );
 
 // Make sure that icon file will be included in bundle
-require("./public/assets/temp-icon.svg");
+require("./public/assets/logo-256.png");
 require("./public/assets/icon/icon-16.png");
 require("./public/assets/icon/icon-48.png");
 require("./public/assets/icon/icon-128.png");
+require("./public/assets/logo-beta-256.png");
+require("./public/assets/icon/icon-beta-16.png");
+require("./public/assets/icon/icon-beta-48.png");
+require("./public/assets/icon/icon-beta-128.png");
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -109,8 +114,8 @@ const StateRenderer: FunctionComponent = observer(() => {
     return (
       <div style={{ height: "100%" }}>
         <Banner
-          icon={require("./public/assets/temp-icon.svg")}
-          logo={require("./public/assets/logo-temp.png")}
+          icon={require("./public/assets/logo-256.png")}
+          logo={require("./public/assets/brand-text.png")}
           subtitle="Wallet for the Interchain"
         />
       </div>
@@ -119,8 +124,8 @@ const StateRenderer: FunctionComponent = observer(() => {
     return (
       <div style={{ height: "100%" }}>
         <Banner
-          icon={require("./public/assets/temp-icon.svg")}
-          logo={require("./public/assets/logo-temp.png")}
+          icon={require("./public/assets/logo-256.png")}
+          logo={require("./public/assets/brand-text.png")}
           subtitle="Wallet for the Interchain"
         />
       </div>
@@ -223,6 +228,11 @@ ReactDOM.render(
                     exact
                     path="/setting/token/manage"
                     component={ManageTokenPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/endpoints"
+                    component={SettingEndpointsPage}
                   />
                   <Route path="/sign" component={SignPage} />
                   <Route path="/suggest-chain" component={ChainSuggestedPage} />

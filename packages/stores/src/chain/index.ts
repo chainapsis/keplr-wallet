@@ -179,6 +179,12 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
       return this.currencyMap.get(coinMinimalDenom);
     }
     this.addUnknownCurrencies(coinMinimalDenom);
+
+    // Unknown denom can be registered synchronously in some cases.
+    // For this case, re-try to get currency.
+    if (this.currencyMap.has(coinMinimalDenom)) {
+      return this.currencyMap.get(coinMinimalDenom);
+    }
   }
 
   /**

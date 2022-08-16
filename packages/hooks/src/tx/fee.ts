@@ -93,7 +93,22 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return this.chainInfo.feeCurrencies;
   }
 
+  @computed
   get feeCurrency(): Currency | undefined {
+    if (this._manualFee) {
+      for (const currency of this.chainInfo.feeCurrencies) {
+        if (currency.coinMinimalDenom === this._manualFee.denom) {
+          return currency;
+        }
+      }
+
+      return {
+        coinMinimalDenom: this._manualFee.denom,
+        coinDenom: this._manualFee.denom,
+        coinDecimals: 0,
+      };
+    }
+
     return this.chainInfo.feeCurrencies[0];
   }
 
@@ -145,6 +160,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected getFeeTypePrimitive(feeType: FeeType): CoinPrimitive {
+    if (this._manualFee) {
+      throw new Error(
+        "Can't calculate fee from fee type. Because fee config uses the manual fee now"
+      );
+    }
+
     if (!this.feeCurrency) {
       throw new Error("Fee currency not set");
     }
@@ -163,6 +184,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   readonly getFeeTypePretty = computedFn((feeType: FeeType) => {
+    if (this._manualFee) {
+      throw new Error(
+        "Can't calculate fee from fee type. Because fee config uses the manual fee now"
+      );
+    }
+
     if (!this.feeCurrency) {
       throw new Error("Fee currency not set");
     }

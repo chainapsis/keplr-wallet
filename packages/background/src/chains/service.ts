@@ -1,33 +1,45 @@
-import { delay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import { ChainInfoSchema, ChainInfoWithEmbed } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
-import { KVStore, Debouncer } from "@keplr-wallet/common";
+import { KVStore, Debouncer, MemoryKVStore } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
-import { Env } from "@keplr-wallet/router";
+import { Env, KeplrError } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 
-@singleton()
 export class ChainsService {
   protected onChainRemovedHandlers: ChainRemovedHandler[] = [];
 
   protected cachedChainInfos: ChainInfoWithEmbed[] | undefined;
 
+  protected chainUpdaterKeeper!: ChainUpdaterService;
+  protected interactionKeeper!: InteractionService;
+
+  protected readonly kvStoreForSuggestChain: KVStore;
+
   constructor(
-    @inject(TYPES.ChainsStore)
     protected readonly kvStore: KVStore,
-    @inject(TYPES.ChainsEmbedChainInfos)
     protected readonly embedChainInfos: ChainInfo[],
-    @inject(delay(() => ChainUpdaterService))
-    protected readonly chainUpdaterKeeper: ChainUpdaterService,
-    @inject(delay(() => InteractionService))
-    protected readonly interactionKeeper: InteractionService
-  ) {}
+    protected readonly experimentalOptions: Partial<{
+      useMemoryKVStoreForSuggestChain: boolean;
+    }> = {}
+  ) {
+    if (experimentalOptions?.useMemoryKVStoreForSuggestChain) {
+      this.kvStoreForSuggestChain = new MemoryKVStore("suggest-chain");
+    } else {
+      this.kvStoreForSuggestChain = kvStore;
+    }
+  }
+
+  init(
+    chainUpdaterKeeper: ChainUpdaterService,
+    interactionKeeper: InteractionService
+  ) {
+    this.chainUpdaterKeeper = chainUpdaterKeeper;
+    this.interactionKeeper = interactionKeeper;
+  }
 
   readonly getChainInfos: () => Promise<
     ChainInfoWithEmbed[]
@@ -53,8 +65,8 @@ export class ChainsService {
       );
     }
 
-    const savedChainInfos: ChainInfoWithEmbed[] = (
-      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? []
+    const suggestedChainInfos: ChainInfoWithEmbed[] = (
+      await this.getSuggestedChainInfos()
     )
       .filter((chainInfo) => {
         // Filter the overlaped chain info with the embeded chain infos.
@@ -69,7 +81,7 @@ export class ChainsService {
         };
       });
 
-    let result: ChainInfoWithEmbed[] = chainInfos.concat(savedChainInfos);
+    let result: ChainInfoWithEmbed[] = chainInfos.concat(suggestedChainInfos);
 
     // Set the updated property of the chain.
     result = await Promise.all(
@@ -103,7 +115,11 @@ export class ChainsService {
     });
 
     if (!chainInfo) {
-      throw new Error(`There is no chain info for ${chainId}`);
+      throw new KeplrError(
+        "chains",
+        411,
+        `There is no chain info for ${chainId}`
+      );
     }
     return chainInfo;
   }
@@ -112,7 +128,11 @@ export class ChainsService {
     const chainInfo = await this.getChainInfo(chainId);
 
     if (!chainInfo) {
-      throw new Error(`There is no chain info for ${chainId}`);
+      throw new KeplrError(
+        "chains",
+        411,
+        `There is no chain info for ${chainId}`
+      );
     }
 
     return chainInfo.bip44.coinType;
@@ -151,32 +171,41 @@ export class ChainsService {
     await this.addChainInfo(chainInfo);
   }
 
+  async getSuggestedChainInfos(): Promise<ChainInfo[]> {
+    return (
+      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? []
+    );
+  }
+
   async addChainInfo(chainInfo: ChainInfo): Promise<void> {
     if (await this.hasChainInfo(chainInfo.chainId)) {
-      throw new Error("Same chain is already registered");
+      throw new KeplrError("chains", 121, "Same chain is already registered");
     }
 
     const savedChainInfos =
-      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? [];
+      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? [];
 
     savedChainInfos.push(chainInfo);
 
-    await this.kvStore.set<ChainInfo[]>("chain-infos", savedChainInfos);
+    await this.kvStoreForSuggestChain.set<ChainInfo[]>(
+      "chain-infos",
+      savedChainInfos
+    );
 
     this.clearCachedChainInfos();
   }
 
   async removeChainInfo(chainId: string): Promise<void> {
     if (!(await this.hasChainInfo(chainId))) {
-      throw new Error("Chain is not registered");
+      throw new KeplrError("chains", 120, "Chain is not registered");
     }
 
     if ((await this.getChainInfo(chainId)).embeded) {
-      throw new Error("Can't remove the embedded chain");
+      throw new KeplrError("chains", 122, "Can't remove the embedded chain");
     }
 
     const savedChainInfos =
-      (await this.kvStore.get<ChainInfo[]>("chain-infos")) ?? [];
+      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? [];
 
     const resultChainInfo = savedChainInfos.filter((chainInfo) => {
       return (
@@ -185,7 +214,10 @@ export class ChainsService {
       );
     });
 
-    await this.kvStore.set<ChainInfo[]>("chain-infos", resultChainInfo);
+    await this.kvStoreForSuggestChain.set<ChainInfo[]>(
+      "chain-infos",
+      resultChainInfo
+    );
 
     // Clear the updated chain info.
     await this.chainUpdaterKeeper.clearUpdatedProperty(chainId);
@@ -195,6 +227,16 @@ export class ChainsService {
     }
 
     this.clearCachedChainInfos();
+  }
+
+  async getChainEthereumKeyFeatures(
+    chainId: string
+  ): Promise<{ address: boolean; signing: boolean }> {
+    const chainInfo = await this.getChainInfo(chainId);
+    return {
+      address: chainInfo.features?.includes("eth-address-gen") ?? false,
+      signing: chainInfo.features?.includes("eth-key-sign") ?? false,
+    };
   }
 
   addChainRemovedHandler(handler: ChainRemovedHandler) {

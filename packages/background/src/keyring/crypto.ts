@@ -5,10 +5,11 @@ import {
   ScryptParams,
   CommonCrypto,
 } from "./types";
-import { Hash, RNG } from "@keplr-wallet/crypto";
+import { Hash } from "@keplr-wallet/crypto";
 import pbkdf2 from "pbkdf2";
 
 import { Buffer } from "buffer/";
+import { KeplrError } from "@keplr-wallet/router";
 
 /**
  * This is similar to ethereum's key store.
@@ -41,7 +42,6 @@ export interface KeyStore {
 
 export class Crypto {
   public static async encrypt(
-    rng: RNG,
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     type: "mnemonic" | "privateKey" | "ledger",
@@ -51,7 +51,7 @@ export class Crypto {
     bip44HDPath?: BIP44HDPath
   ): Promise<KeyStore> {
     let random = new Uint8Array(32);
-    const salt = Buffer.from(await rng(random)).toString("hex");
+    const salt = Buffer.from(await crypto.rng(random)).toString("hex");
 
     const scryptParams: ScryptParams = {
       salt,
@@ -84,13 +84,13 @@ export class Crypto {
             );
           });
         default:
-          throw new Error("Unknown kdf");
+          throw new KeplrError("keyring", 220, "Unknown kdf");
       }
     })();
     const buf = Buffer.from(text);
 
     random = new Uint8Array(16);
-    const iv = Buffer.from(await rng(random));
+    const iv = Buffer.from(await crypto.rng(random));
 
     const counter = new Counter(0);
     counter.setBytes(iv);
@@ -153,7 +153,7 @@ export class Crypto {
             );
           });
         default:
-          throw new Error("Unknown kdf");
+          throw new KeplrError("keyring", 220, "Unknown kdf");
       }
     })();
 
@@ -168,7 +168,7 @@ export class Crypto {
       ])
     );
     if (!Buffer.from(mac).equals(Buffer.from(keyStore.crypto.mac, "hex"))) {
-      throw new Error("Unmatched mac");
+      throw new KeplrError("keyring", 222, "Unmatched mac");
     }
 
     return Buffer.from(

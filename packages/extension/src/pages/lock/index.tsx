@@ -34,7 +34,7 @@ export const LockPage: FunctionComponent = observer(() => {
     },
   });
 
-  const { keyRingStore } = useStore();
+  const { keyRingStore, uiConfigStore } = useStore();
   const [loading, setLoading] = useState(false);
 
   const interactionInfo = useInteractionInfo(() => {
@@ -86,8 +86,12 @@ export const LockPage: FunctionComponent = observer(() => {
         })}
       >
         <Banner
-          icon={require("../../public/assets/temp-icon.svg")}
-          logo={require("../../public/assets/logo-temp.png")}
+          icon={
+            uiConfigStore.isBeta
+              ? require("../../public/assets/logo-beta-256.png")
+              : require("../../public/assets/logo-256.png")
+          }
+          logo={require("../../public/assets/brand-text.png")}
           subtitle="Wallet for the Interchain"
         />
         <PasswordInput

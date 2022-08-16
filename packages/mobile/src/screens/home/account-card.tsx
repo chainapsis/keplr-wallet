@@ -11,6 +11,7 @@ import { LoadingSpinner } from "../../components/spinner";
 import { StakedTokenSymbol, TokenSymbol } from "../../components/token-symbol";
 import { useSmartNavigation } from "../../navigation";
 import { NetworkErrorView } from "./network-error-view";
+import { Dec } from "@keplr-wallet/unit";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -45,16 +46,26 @@ export const AccountCard: FunctionComponent<{
 
   const totalPrice = priceStore.calculatePrice(total);
 
-  const data: [number, number] = [
-    parseFloat(stakable.toDec().toString()),
-    parseFloat(stakedSum.toDec().toString()),
-  ];
+  // In the `Double Doughnut Chart` component, if data is undefined, nothing is displayed.
+  // And,  if the data is [0, 0], a gray ring is displayed behind it.
+  // However, data should be [0, 0] initially because no data is loaded at first.
+  // But as a design decision, we should start with no gray ring behind it.
+  // Therefore, in order not to display the gray ring behind it initially (from unloaded data),
+  // when the balance response is not loaded, it is treated as undefined.
+  const data: [number, number] | undefined = queryStakable.response
+    ? [
+        parseFloat(stakable.toDec().toString()),
+        parseFloat(stakedSum.toDec().toString()),
+      ]
+    : undefined;
 
   return (
     <Card style={containerStyle}>
       <CardBody style={style.flatten(["padding-bottom-0"])}>
         <View style={style.flatten(["flex", "items-center"])}>
-          <Text style={style.flatten(["h4", "margin-bottom-8"])}>
+          <Text
+            style={style.flatten(["h4", "color-text-high", "margin-bottom-8"])}
+          >
             {account.name || "..."}
           </Text>
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
@@ -70,13 +81,13 @@ export const AccountCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "subtitle2",
-                  "color-text-black-medium",
+                  "color-text-middle",
                   "margin-bottom-4",
                 ])}
               >
                 Total Balance
               </Text>
-              <Text style={style.flatten(["h3", "color-text-black-high"])}>
+              <Text style={style.flatten(["h3", "color-text-high"])}>
                 {totalPrice
                   ? totalPrice.toString()
                   : total.shrink(true).maxDecimals(6).toString()}
@@ -119,13 +130,14 @@ export const AccountCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "subtitle3",
-                  "color-primary",
+                  "color-blue-400",
+                  "dark:color-platinum-200",
                   "margin-bottom-4",
                 ])}
               >
                 Available
               </Text>
-              <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h5", "color-text-high"])}>
                 {stakable.maxDecimals(6).trim(true).shrink(true).toString()}
               </Text>
             </View>
@@ -134,6 +146,7 @@ export const AccountCard: FunctionComponent<{
               text="Send"
               size="small"
               containerStyle={style.flatten(["min-width-72"])}
+              disabled={stakable.toDec().lte(new Dec(0))}
               onPress={() => {
                 smartNavigation.navigateSmart("Send", {
                   currency: chainStore.current.stakeCurrency.coinMinimalDenom,
@@ -153,13 +166,14 @@ export const AccountCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "subtitle3",
-                  "color-primary",
+                  "color-blue-400",
+                  "dark:color-platinum-200",
                   "margin-bottom-4",
                 ])}
               >
                 Staking
               </Text>
-              <Text style={style.flatten(["h5", "color-text-black-medium"])}>
+              <Text style={style.flatten(["h5", "color-text-high"])}>
                 {stakedSum.maxDecimals(6).trim(true).shrink(true).toString()}
               </Text>
             </View>
@@ -169,6 +183,7 @@ export const AccountCard: FunctionComponent<{
               mode="light"
               size="small"
               containerStyle={style.flatten(["min-width-72"])}
+              disabled={stakable.toDec().lte(new Dec(0))}
               onPress={() => {
                 smartNavigation.navigateSmart("Validator.List", {});
               }}
