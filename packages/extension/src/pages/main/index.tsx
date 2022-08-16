@@ -34,7 +34,8 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const confirm = useConfirm();
 
-  const currentChainId = chainStore.current.chainId;
+  const current = chainStore.current;
+  const currentChainId = current.chainId;
   const prevChainId = useRef<string | undefined>();
   useEffect(() => {
     if (!chainStore.isInitializing && prevChainId.current !== currentChainId) {
@@ -75,12 +76,24 @@ export const MainPage: FunctionComponent = observer(() => {
     .cosmos.queryAccount.getQueryBech32Address(accountInfo.bech32Address);
   // Show the spendable balances if the account is vesting account.
   const showVestingInfo = useMemo(() => {
+    // If the chain can't query /cosmos/bank/v1beta1/spendable_balances/{account},
+    // no need to show the vesting info because its query always fails.
+    if (
+      !current.features ||
+      !current.features.includes(
+        "query:/cosmos/bank/v1beta1/spendable_balances"
+      )
+    ) {
+      return false;
+    }
+
     return !!(
       !queryAccount.error &&
       queryAccount.response &&
       queryAccount.isVestingAccount
     );
   }, [
+    current.features,
     queryAccount.error,
     queryAccount.isVestingAccount,
     queryAccount.response,
