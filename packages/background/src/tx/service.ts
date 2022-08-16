@@ -84,26 +84,12 @@ export class BackgroundTxService {
       }
 
       const txHash = Buffer.from(txResponse.txhash, "hex");
-      const chainInfo = await this.chainsService.getChainInfo(chainId);
-      const isGnoChain =
-        chainInfo.features && chainInfo.features.includes("gno");
 
-      if (isGnoChain) {
-        // TODO: Gno tx-index
-        BackgroundTxService.processTxResultNotification(this.notification, {
-          mode: mode,
-          ...txResponse,
-        });
-      } else {
-        const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
-        txTracer.traceTx(txHash).then((tx) => {
-          txTracer.close();
-          BackgroundTxService.processTxResultNotification(
-            this.notification,
-            tx
-          );
-        });
-      }
+      const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+      txTracer.traceTx(txHash).then((tx) => {
+        txTracer.close();
+        BackgroundTxService.processTxResultNotification(this.notification, tx);
+      });
 
       return txHash;
     } catch (e) {
