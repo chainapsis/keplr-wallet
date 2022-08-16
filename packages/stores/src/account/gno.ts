@@ -8,7 +8,7 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { DenomHelper } from "@keplr-wallet/common";
+import { DenomHelper, escapeHTML } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly } from "utility-types";
@@ -25,7 +25,8 @@ import {
   TendermintTxTracer,
 } from "@keplr-wallet/cosmos";
 import { CosmosAccount } from "./cosmos";
-import { ProtoMsgsOrWithAminoMsgs } from "./types";
+import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
+import { txEventsWithPreOnFulfill } from "./utils";
 
 export interface GnoAccount {
   gno: GnoAccountImpl;
@@ -99,11 +100,75 @@ export class GnoAccountImpl {
       };
     }
   ) {
+    this.base.registerMakeSendTokenFn(this.processMakeSendTokenTx.bind(this));
     this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
   get msgOpts(): GnoMsgOpts {
     return this._msgOpts;
+  }
+
+  protected processMakeSendTokenTx(
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) {
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+
+    if (denomHelper.type === "native") {
+      const actualAmount = (() => {
+        let dec = new Dec(amount);
+        dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
+        return dec.truncate().toString();
+      })();
+
+      Bech32Address.validate(
+        recipient,
+        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      );
+
+      const msg = {
+        type: this.msgOpts.send.native.type,
+        value: {
+          from_address: this.base.bech32Address,
+          to_address: recipient,
+          amount: `${actualAmount}${currency.coinMinimalDenom}`,
+        },
+      };
+
+      return this.makeTx(
+        "send",
+        {
+          aminoMsgs: [msg],
+          protoMsgs: [
+            {
+              typeUrl: "/bank.MsgSend",
+              value: MsgSend.encode({
+                fromAddress: msg.value.from_address,
+                toAddress: msg.value.to_address,
+                amount: msg.value.amount,
+              }).finish(),
+            },
+          ],
+        },
+        (tx) => {
+          if (tx.code == null || tx.code === 0) {
+            // After succeeding to send token, refresh the balance.
+            const queryBalance = this.queries.queryBalances
+              .getQueryBech32Address(this.base.bech32Address)
+              .balances.find((bal) => {
+                return (
+                  bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+                );
+              });
+
+            if (queryBalance) {
+              queryBalance.fetch();
+            }
+          }
+        }
+      );
+    }
   }
 
   protected async processSendToken(
@@ -166,7 +231,7 @@ export class GnoAccountImpl {
             gas: stdFee.gas ?? this.msgOpts.send.native.gas.toString(),
           },
           signOptions,
-          this.txEventsWithPreOnFulfill(onTxEvents, (tx) => {
+          txEventsWithPreOnFulfill(onTxEvents, (tx) => {
             if (tx.code == null || tx.code === 0) {
               // After succeeding to send token, refresh the balance.
               const queryBalance = this.queries.queryBalances
@@ -192,7 +257,9 @@ export class GnoAccountImpl {
 
   async sendMsgs(
     type: string | "unknown",
-    msgs: ProtoMsgsOrWithAminoMsgs,
+    msgs:
+      | ProtoMsgsOrWithAminoMsgs
+      | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
     memo: string = "",
     fee: StdFee,
     signOptions?: KeplrSignOptions,
@@ -209,6 +276,10 @@ export class GnoAccountImpl {
     let txHash: Uint8Array;
     let signDoc: StdSignDoc;
     try {
+      if (typeof msgs === "function") {
+        msgs = await msgs();
+      }
+
       const result = await this.broadcastMsgs(
         msgs,
         fee,
@@ -327,7 +398,7 @@ export class GnoAccountImpl {
       aminoMsgs,
       fee,
       this.chainId,
-      memo,
+      escapeHTML(memo),
       account.getAccountNumber().toString(),
       account.getSequence().toString()
     );
@@ -367,41 +438,147 @@ export class GnoAccountImpl {
     };
   }
 
-  protected txEventsWithPreOnFulfill(
-    onTxEvents:
+  makeTx(
+    type: string | "unknown",
+    msgs: ProtoMsgsOrWithAminoMsgs | (() => Promise<ProtoMsgsOrWithAminoMsgs>),
+    preOnTxEvents?:
       | ((tx: any) => void)
       | {
           onBroadcasted?: (txHash: Uint8Array) => void;
           onFulfill?: (tx: any) => void;
         }
-      | undefined,
-    preOnFulfill?: (tx: any) => void
-  ):
-    | {
-        onBroadcasted?: (txHash: Uint8Array) => void;
-        onFulfill?: (tx: any) => void;
-      }
-    | undefined {
-    if (!onTxEvents) {
-      return;
-    }
+  ): MakeTxResponse {
+    const simulate = async (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      fee: Partial<Omit<StdFee, "gas">> = {},
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      memo: string = ""
+    ): Promise<{
+      gasUsed: number;
+    }> => {
+      return Promise.resolve({ gasUsed: 0 });
+    };
 
-    const onBroadcasted =
-      typeof onTxEvents === "function" ? undefined : onTxEvents.onBroadcasted;
-    const onFulfill =
-      typeof onTxEvents === "function" ? onTxEvents : onTxEvents.onFulfill;
+    const sendWithGasPrice = async (
+      gasInfo: {
+        gas: number;
+        gasPrice?: {
+          denom: string;
+          amount: Dec;
+        };
+      },
+      memo: string = "",
+      signOptions?: KeplrSignOptions,
+      onTxEvents?:
+        | ((tx: any) => void)
+        | {
+            onBroadcastFailed?: (e?: Error) => void;
+            onBroadcasted?: (txHash: Uint8Array) => void;
+            onFulfill?: (tx: any) => void;
+          }
+    ): Promise<void> => {
+      if (gasInfo.gas < 0) {
+        throw new Error("Gas is zero or negative");
+      }
+
+      const fee = {
+        gas: gasInfo.gas.toString(),
+        amount: gasInfo.gasPrice
+          ? [
+              {
+                denom: gasInfo.gasPrice.denom,
+                amount: gasInfo.gasPrice.amount
+                  .mul(new Dec(gasInfo.gas))
+                  .truncate()
+                  .toString(),
+              },
+            ]
+          : [],
+      };
+
+      return this.sendMsgs(
+        type,
+        msgs,
+        memo,
+        fee,
+        signOptions,
+        txEventsWithPreOnFulfill(onTxEvents, preOnTxEvents)
+      );
+    };
 
     return {
-      onBroadcasted,
-      onFulfill: onFulfill
-        ? (tx: any) => {
-            if (preOnFulfill) {
-              preOnFulfill(tx);
+      msgs: async (): Promise<ProtoMsgsOrWithAminoMsgs> => {
+        if (typeof msgs === "function") {
+          msgs = await msgs();
+        }
+        return msgs;
+      },
+      simulate,
+      simulateAndSend: async (
+        feeOptions: {
+          gasAdjustment: number;
+          gasPrice?: {
+            denom: string;
+            amount: Dec;
+          };
+        },
+        memo: string = "",
+        signOptions?: KeplrSignOptions,
+        onTxEvents?:
+          | ((tx: any) => void)
+          | {
+              onBroadcastFailed?: (e?: Error) => void;
+              onBroadcasted?: (txHash: Uint8Array) => void;
+              onFulfill?: (tx: any) => void;
             }
+      ): Promise<void> => {
+        this.base.setTxTypeInProgress(type);
 
-            onFulfill(tx);
+        try {
+          const { gasUsed } = await simulate({}, memo);
+
+          if (gasUsed < 0) {
+            throw new Error("Gas estimated is zero or negative");
           }
-        : undefined,
+
+          const gasAdjusted = feeOptions.gasAdjustment * gasUsed;
+
+          return sendWithGasPrice(
+            {
+              gas: gasAdjusted,
+              gasPrice: feeOptions.gasPrice,
+            },
+            memo,
+            signOptions,
+            onTxEvents
+          );
+        } catch (e) {
+          this.base.setTxTypeInProgress("");
+          throw e;
+        }
+      },
+      send: async (
+        fee: StdFee,
+        memo: string = "",
+        signOptions?: KeplrSignOptions,
+        onTxEvents?:
+          | ((tx: any) => void)
+          | {
+              onBroadcastFailed?: (e?: Error) => void;
+              onBroadcasted?: (txHash: Uint8Array) => void;
+              onFulfill?: (tx: any) => void;
+            }
+      ): Promise<void> => {
+        return this.sendMsgs(
+          type,
+          msgs,
+          memo,
+          fee,
+          signOptions,
+          txEventsWithPreOnFulfill(onTxEvents, preOnTxEvents)
+        );
+      },
+      sendWithGasPrice,
     };
   }
 

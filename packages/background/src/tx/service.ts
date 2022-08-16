@@ -77,6 +77,7 @@ export class BackgroundTxService {
         isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
         params
       );
+
       const txResponse = isProtoTx ? result.data["tx_response"] : result.data;
 
       if (txResponse.code != null && txResponse.code !== 0) {
