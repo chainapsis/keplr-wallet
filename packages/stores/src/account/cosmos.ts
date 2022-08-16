@@ -199,7 +199,7 @@ export class CosmosAccountImpl {
     if (denomHelper.type === "native") {
       const chainInfo = this.chainGetter.getChain(this.chainId);
       if (chainInfo.features?.includes("gno")) {
-        return false;
+        return undefined;
       }
 
       const actualAmount = (() => {

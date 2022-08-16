@@ -450,9 +450,9 @@ export class GnoAccountImpl {
   ): MakeTxResponse {
     const simulate = async (
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      fee: Partial<Omit<StdFee, "gas">> = {},
+      _fee: Partial<Omit<StdFee, "gas">> = {},
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      memo: string = ""
+      _memo: string = ""
     ): Promise<{
       gasUsed: number;
     }> => {
