@@ -46,7 +46,7 @@ export const VestingInfo: FunctionComponent = observer(() => {
             marginBottom: "8px",
           }}
         >
-          <h3 style={{ marginBottom: "0" }}>Vesting Amount</h3>
+          <h3 style={{ marginBottom: "0" }}>Spendable Amount</h3>
           {spendableBalances.isFetching ? (
             <div
               style={{
