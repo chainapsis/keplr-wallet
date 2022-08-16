@@ -14,6 +14,7 @@ import { WebView } from "react-native-webview";
 import { StackParamList } from "../stack";
 import { useStore } from "../stores";
 import axios from "axios";
+import BottomSheet from "./components/bottom-sheet";
 
 export type WebViewScreenProps = NativeStackScreenProps<
   StackParamList,
@@ -27,6 +28,8 @@ export const WebViewScreen = observer<WebViewScreenProps>(
     const [currentUrl, setCurrentUrl] = React.useState<string>(app.url);
     const [loaded, setLoaded] = React.useState<boolean>(false);
     const [title, setTitle] = React.useState<string>(app.label);
+    const [visible, setVisible] = React.useState<boolean>(false);
+
     const safeArea = useSafeAreaInsets();
 
     useLayoutEffect(() => {
@@ -40,24 +43,28 @@ export const WebViewScreen = observer<WebViewScreenProps>(
     useEffect(() => {
       const fetchMetadata = async () => {
         //fetch title from app url html
-        const res = await axios.get(app.url)
-        const html = res.data
-        const root = await parse(html)
-        // get the page manifest
-        const manifest = root.querySelector('link[rel="manifest"]')
-        const manifestUrl = manifest?.attributes.href
-        console.log({ manifestUrl })
-        //get host from currentUrl
-        const host = currentUrl.split('/')[2]
-        console.log({ host }, host + manifestUrl)
-        const manifestRes = await axios.get('https://' + host + manifestUrl)
-        console.log(manifestRes.data.icons)
-        //get the largest icon from manifestres.data.icons
-        const largestIcon = manifestRes.data.icons.sort((a, b) => b.sizes.length - a.sizes.length)[0]
-        // if largestIcon is a url keep it else compose it from host and largestIcon.src
-        const icon = largestIcon.src.startsWith('http') ? largestIcon.src : 'https://' + host + largestIcon.src
+        try {
+          const res = await axios.get(app.url)
+          const html = res.data
+          const root = await parse(html)
+          // get the page manifest
+          const manifest = root.querySelector('link[rel="manifest"]')
+          const manifestUrl = manifest?.attributes.href
+          console.log({ manifestUrl })
+          //get host from currentUrl
+          const host = currentUrl.split('/')[2]
+          console.log({ host }, host + manifestUrl)
+          const manifestRes = await axios.get('https://' + host + manifestUrl)
+          console.log(manifestRes.data.icons)
+          //get the largest icon from manifestres.data.icons
+          const largestIcon = manifestRes.data.icons.sort((a, b) => b.sizes.length - a.sizes.length)[0]
+          // if largestIcon is a url keep it else compose it from host and largestIcon.src
+          const icon = largestIcon.src.startsWith('http') ? largestIcon.src : 'https://' + host + largestIcon.src
 
-        setCurrentAppMetadata({ ...app, icon, label: manifestRes.data.name })
+          setCurrentAppMetadata({ ...app, icon, label: manifestRes.data.name })
+        } catch (e) {
+          console.log(e)
+        }
 
       }
       if (loaded) {
@@ -90,6 +97,11 @@ export const WebViewScreen = observer<WebViewScreenProps>(
             {title}
           </Text>
           <FavButton app={currentAppMetadata} />
+          <TouchableOpacity onPress={() => setVisible(true)}>
+            <Text style={{ color: 'blue' }}>
+              open
+            </Text>
+          </TouchableOpacity>
         </View>
         <WebView
           source={{ uri: currentUrl }}
@@ -109,6 +121,41 @@ export const WebViewScreen = observer<WebViewScreenProps>(
           }
           }
         />
+        <BottomSheet visible={visible} onClose={() => setVisible(false)} >
+          <View style={{ backgroundColor: "blue" }}>
+
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                margin: 10,
+
+              }}
+            >
+              aaa
+            </Text>
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                margin: 10,
+              }}
+            >
+              aaa
+            </Text>
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                margin: 10,
+              }}
+            >
+              aaa
+            </Text>
+          </View>
+
+        </BottomSheet>
+
       </View>
     );
   }
