@@ -113,7 +113,8 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         "no-legacy-stdTx",
         "ibc-go",
         "eth-address-gen",
-        "eth-key-sign"
+        "eth-key-sign",
+        "query:/cosmos/bank/v1beta1/spendable_balances"
       )
     )
     .unique()

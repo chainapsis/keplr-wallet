@@ -25,7 +25,10 @@ import {
   ObservableQueryIBCClientState,
 } from "./ibc";
 import { ObservableQuerySifchainLiquidityAPY } from "./supply/sifchain";
-import { ObservableQueryCosmosBalanceRegistry } from "./balance";
+import {
+  ObservableQueryCosmosBalanceRegistry,
+  ObservableQuerySpendableBalances,
+} from "./balance";
 import { ObservableQueryIrisMintingInfation } from "./supply/iris-minting";
 import { DeepReadonly } from "utility-types";
 import {
@@ -69,6 +72,7 @@ export class CosmosQueriesImpl {
   public readonly queryRPCStatus: DeepReadonly<ObservableQueryRPCStatus>;
 
   public readonly queryAccount: DeepReadonly<ObservableQueryAccount>;
+  public readonly querySpendableBalances: DeepReadonly<ObservableQuerySpendableBalances>;
   public readonly queryMint: DeepReadonly<ObservableQueryMintingInfation>;
   public readonly queryPool: DeepReadonly<ObservableQueryStakingPool>;
   public readonly queryStakingParams: DeepReadonly<ObservableQueryStakingParams>;
@@ -110,6 +114,11 @@ export class CosmosQueriesImpl {
     );
 
     this.queryAccount = new ObservableQueryAccount(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this.querySpendableBalances = new ObservableQuerySpendableBalances(
       kvStore,
       chainId,
       chainGetter

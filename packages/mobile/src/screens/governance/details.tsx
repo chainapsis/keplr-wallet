@@ -345,6 +345,8 @@ export const GovernanceVoteModal: FunctionComponent<{
       }
     };
 
+    const [isSendingTx, setIsSendingTx] = useState(false);
+
     return (
       <View style={style.flatten(["padding-page"])}>
         <View
@@ -449,15 +451,30 @@ export const GovernanceVoteModal: FunctionComponent<{
           text="Vote"
           size="large"
           disabled={vote === "Unspecified" || !account.isReadyToSendMsgs}
-          loading={account.isSendingMsg === "govVote"}
+          loading={isSendingTx || account.isSendingMsg === "govVote"}
           onPress={async () => {
             if (vote !== "Unspecified" && account.isReadyToSendMsgs) {
+              const tx = account.cosmos.makeGovVoteTx(proposalId, vote);
+
+              setIsSendingTx(true);
+
               try {
-                await account.cosmos.sendGovVoteMsg(
-                  proposalId,
-                  vote,
+                let gas = account.cosmos.msgOpts.govVote.gas;
+
+                // Gas adjustment is 1.5
+                // Since there is currently no convenient way to adjust the gas adjustment on the UI,
+                // Use high gas adjustment to prevent failure.
+                try {
+                  gas = (await tx.simulate()).gasUsed * 1.5;
+                } catch (e) {
+                  // Some chain with older version of cosmos sdk (below @0.43 version) can't handle the simulation.
+                  // Therefore, the failure is expected. If the simulation fails, simply use the default value.
+                  console.log(e);
+                }
+
+                await tx.send(
+                  { amount: [], gas: gas.toString() },
                   "",
-                  {},
                   {},
                   {
                     onBroadcasted: (txHash) => {
@@ -480,6 +497,8 @@ export const GovernanceVoteModal: FunctionComponent<{
                 }
                 console.log(e);
                 smartNavigation.navigateSmart("Home", {});
+              } finally {
+                setIsSendingTx(false);
               }
             }
           }}

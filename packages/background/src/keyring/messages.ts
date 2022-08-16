@@ -11,7 +11,7 @@ import {
   Bech32Address,
   checkAndValidateADR36AminoSignDoc,
 } from "@keplr-wallet/cosmos";
-import { BIP44, KeplrSignOptions, Key } from "@keplr-wallet/types";
+import { BIP44, EthSignType, KeplrSignOptions, Key } from "@keplr-wallet/types";
 
 import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 
@@ -496,6 +496,7 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     public readonly signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
+      ethSignType?: EthSignType;
     } = {}
   ) {
     super();
@@ -516,6 +517,12 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     // Check and validate the ADR-36 sign doc.
     // ADR-36 sign doc doesn't have the chain id
     if (!checkAndValidateADR36AminoSignDoc(this.signDoc)) {
+      if (this.signOptions.ethSignType) {
+        throw new Error(
+          "Eth sign type can be requested with only ADR-36 amino sign doc"
+        );
+      }
+
       if (this.signDoc.chain_id !== this.chainId) {
         throw new KeplrError(
           "keyring",

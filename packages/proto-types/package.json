@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/proto-types",
-  "version": "0.10.16",
+  "version": "0.10.17-rc.2",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": false,
