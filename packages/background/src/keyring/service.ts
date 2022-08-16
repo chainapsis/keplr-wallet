@@ -372,7 +372,8 @@ export class KeyRingService {
         coinType,
         isGnoChain
           ? this.serializeSignToGnoDoc(newSignDoc)
-          : serializeSignDoc(newSignDoc),?		ethereumKeyFeatures.signing
+          : serializeSignDoc(newSignDoc),
+          ethereumKeyFeatures.signing
       );
 
       const signatureEncoded = encodeSecp256k1Signature(key.pubKey, signature);
