@@ -146,6 +146,9 @@ export const SendPage: FunctionComponent = observer(() => {
       sendConfigs.gasConfig.setGas(
         accountInfo.secret.msgOpts.send.secret20.gas
       );
+    } else if (current.features?.includes("gno")) {
+      gasSimulator.forceDisable(new Error("Simulating GNO is not supported"));
+      sendConfigs.gasConfig.setGas(accountInfo.gno.msgOpts.send.native.gas);
     } else {
       gasSimulator.forceDisable(false);
       gasSimulator.setEnabled(true);
@@ -155,6 +158,8 @@ export const SendPage: FunctionComponent = observer(() => {
     gasSimulator,
     sendConfigs.amountConfig.sendCurrency,
     sendConfigs.gasConfig,
+    current.features,
+    accountInfo.gno.msgOpts.send.native.gas,
   ]);
 
   useEffect(() => {
