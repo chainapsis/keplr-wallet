@@ -81,6 +81,7 @@
     "zx": "^4.2.0"
   },
   "resolutions": {
+    "react": "^16.14.0",
     "@cosmjs/crypto": "^0.24.0-alpha.25",
     "@iov/crypto": "2.1.0",
     "libsodium": "file:./etc/noop",
