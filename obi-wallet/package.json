@@ -35,6 +35,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.1.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@fortawesome/react-native-fontawesome": "^0.3.0",
+    "@gorhom/bottom-sheet": "^4",
     "@ledgerhq/hw-transport": "^6.27.2",
     "@ledgerhq/hw-transport-webhid": "^6.27.2",
     "@ledgerhq/hw-transport-webusb": "^6.27.2",
