@@ -19,6 +19,8 @@
     "@walletconnect/qrcode-modal": "^1.6.5",
     "axios": "^0.21.4",
     "buffer": "^6.0.3",
+    "mobx": "^6.1.7",
+    "mobx-utils": "^6.0.3",
     "mobx-react-lite": "^3.2.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0"

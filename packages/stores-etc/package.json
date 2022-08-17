@@ -22,7 +22,9 @@
     "@keplr-wallet/stores": "0.10.18-rc.1",
     "@keplr-wallet/types": "0.10.18-rc.1",
     "axios": "^0.21.4",
-    "mobx": "^6.1.7",
     "utility-types": "^3.10.0"
+  },
+  "peerDependencies": {
+    "mobx": "^6"
   }
 }

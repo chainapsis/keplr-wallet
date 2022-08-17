@@ -21,7 +21,9 @@
     "@ethersproject/abi": "^5.6.0",
     "@keplr-wallet/common": "0.10.18-rc.1",
     "axios": "^0.21.4",
-    "buffer": "^6.0.3",
-    "mobx": "^6.1.7"
+    "buffer": "^6.0.3"
+  },
+  "peerDependencies": {
+    "mobx": "^6"
   }
 }
