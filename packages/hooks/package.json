@@ -16,9 +16,6 @@
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
-  "devDependencies": {
-    "@types/react": "^16.14.4"
-  },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
     "@ethersproject/address": "^5.6.0",
@@ -36,8 +33,10 @@
     "long": "^4.0.0",
     "mobx": "^6.1.7",
     "mobx-utils": "^6.0.3",
-    "react": "^16.14.0",
     "react-router": "^5.1.2",
     "utility-types": "^3.10.0"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17 || ^18"
   }
 }
