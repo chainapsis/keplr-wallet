@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
 import {
   FlatList,
   Image,

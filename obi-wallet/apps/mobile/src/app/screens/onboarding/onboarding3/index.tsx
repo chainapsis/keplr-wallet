@@ -2,7 +2,7 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useState } from "react";
+import { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 

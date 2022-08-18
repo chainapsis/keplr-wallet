@@ -1,6 +1,5 @@
 import { messages } from "@obi-wallet/common";
 import { NavigationContainer } from "@react-navigation/native";
-import React from "react";
 import { IntlProvider } from "react-intl";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";

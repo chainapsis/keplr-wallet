@@ -1,5 +1,4 @@
 import { Text, TextInput as OriginalTextInput } from "@obi-wallet/common";
-import React from "react";
 import {
   StyleProp,
   StyleSheet,

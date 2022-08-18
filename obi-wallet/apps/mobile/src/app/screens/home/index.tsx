@@ -9,7 +9,6 @@ import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
-import React from "react";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import AppsIcon from "./assets/appsIcon.svg";

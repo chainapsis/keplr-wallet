@@ -1,5 +1,5 @@
 import { Text } from "@obi-wallet/common";
-import React from "react";
+import { FC } from "react";
 import { StyleSheet, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -104,7 +104,7 @@ interface KeyListItem {
   key: string;
   title: string;
   activated: boolean;
-  Icon: React.FC<SvgProps>;
+  Icon: FC<SvgProps>;
 }
 
 interface KeyListItemProps {

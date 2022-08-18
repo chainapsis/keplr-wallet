@@ -1,6 +1,5 @@
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React from "react";
 import { Image, ImageBackground, SafeAreaView, View } from "react-native";
 
 import { Button } from "../../../button";

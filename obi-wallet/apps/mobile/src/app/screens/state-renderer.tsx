@@ -2,7 +2,6 @@ import { KeyRingStatus } from "@keplr-wallet/background";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
-import React from "react";
 
 import { StackParamList } from "../stack";
 import { useStore } from "../stores";
