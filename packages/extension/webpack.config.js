@@ -70,87 +70,83 @@ const fileRule = {
   ],
 };
 
-const extensionConfig = (env, args) => {
-  return {
-    name: "extension",
-    mode: isEnvDevelopment ? "development" : "production",
-    // In development environment, turn on source map.
-    devtool: isEnvDevelopment ? "cheap-source-map" : false,
-    // In development environment, webpack watch the file changes, and recompile
-    watch: isEnvDevelopment,
-    entry: {
-      popup: ["./src/index.tsx"],
-      background: ["./src/background/background.ts"],
-      contentScripts: ["./src/content-scripts/content-scripts.ts"],
-      injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
-    },
-    output: {
-      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
-      filename: "[name].bundle.js",
-    },
-    optimization: {
-      splitChunks: {
-        chunks(chunk) {
-          if (isDisableSplitChunks) {
-            return false;
-          }
+module.exports = {
+  name: "extension",
+  mode: isEnvDevelopment ? "development" : "production",
+  // In development environment, turn on source map.
+  devtool: isEnvDevelopment ? "cheap-source-map" : false,
+  // In development environment, webpack watch the file changes, and recompile
+  watch: isEnvDevelopment,
+  entry: {
+    popup: ["./src/index.tsx"],
+    background: ["./src/background/background.ts"],
+    contentScripts: ["./src/content-scripts/content-scripts.ts"],
+    injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
+  },
+  output: {
+    path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
+    filename: "[name].bundle.js",
+  },
+  optimization: {
+    splitChunks: {
+      chunks(chunk) {
+        if (isDisableSplitChunks) {
+          return false;
+        }
 
-          return chunk.name === "popup";
-        },
-        cacheGroups: {
-          popup: {
-            maxSize: 3_000_000,
-          },
+        return chunk.name === "popup";
+      },
+      cacheGroups: {
+        popup: {
+          maxSize: 3_000_000,
         },
       },
     },
-    resolve: {
-      ...commonResolve("src/public/assets"),
-      fallback: {
-        os: require.resolve("os-browserify/browser"),
-        buffer: require.resolve("buffer/"),
-        http: require.resolve("stream-http"),
-        https: require.resolve("https-browserify"),
-        crypto: require.resolve("crypto-browserify"),
-        stream: require.resolve("stream-browserify"),
-        process: require.resolve("process/browser"),
-      },
+  },
+  resolve: {
+    ...commonResolve("src/public/assets"),
+    fallback: {
+      os: require.resolve("os-browserify/browser"),
+      buffer: require.resolve("buffer/"),
+      http: require.resolve("stream-http"),
+      https: require.resolve("https-browserify"),
+      crypto: require.resolve("crypto-browserify"),
+      stream: require.resolve("stream-browserify"),
+      process: require.resolve("process/browser"),
     },
-    module: {
-      rules: [sassRule, tsRule, fileRule],
-    },
-    plugins: [
-      new webpack.ProvidePlugin({
-        process: "process/browser",
-        Buffer: ["buffer", "Buffer"],
-      }),
-      new webpack.EnvironmentPlugin({
-        NODE_ENV: isEnvDevelopment ? "development" : "production",
-      }),
-      new ForkTsCheckerWebpackPlugin(),
-      new CopyWebpackPlugin({
-        patterns: [
-          {
-            from: "./src/manifest.json",
-            to: "./",
-          },
-          {
-            from:
-              "../../node_modules/webextension-polyfill/dist/browser-polyfill.js",
-            to: "./",
-          },
-        ],
-      }),
-      new HtmlWebpackPlugin({
-        template: "./src/index.html",
-        filename: "popup.html",
-        excludeChunks: ["background", "contentScripts", "injectedScript"],
-      }),
-      new BundleAnalyzerPlugin({
-        analyzerMode: isEnvAnalyzer ? "server" : "disabled",
-      }),
-    ],
-  };
+  },
+  module: {
+    rules: [sassRule, tsRule, fileRule],
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: "process/browser",
+      Buffer: ["buffer", "Buffer"],
+    }),
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: isEnvDevelopment ? "development" : "production",
+    }),
+    new ForkTsCheckerWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: "./src/manifest.json",
+          to: "./",
+        },
+        {
+          from:
+            "../../node_modules/webextension-polyfill/dist/browser-polyfill.js",
+          to: "./",
+        },
+      ],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "popup.html",
+      excludeChunks: ["background", "contentScripts", "injectedScript"],
+    }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: isEnvAnalyzer ? "server" : "disabled",
+    }),
+  ],
 };
-
-module.exports = extensionConfig;
