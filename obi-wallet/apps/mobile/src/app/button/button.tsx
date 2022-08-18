@@ -1,5 +1,5 @@
 import { Text } from "@obi-wallet/common";
-import React from "react";
+import { FC } from "react";
 import {
   Platform,
   StyleSheet,
@@ -59,8 +59,8 @@ export interface ButtonProps
   extends Omit<TouchableWithoutFeedbackProps, "children"> {
   flavor: keyof typeof flavors;
   label: string;
-  LeftIcon?: React.FC<SvgProps>;
-  RightIcon?: React.FC<SvgProps>;
+  LeftIcon?: FC<SvgProps>;
+  RightIcon?: FC<SvgProps>;
 }
 
 export function Button({

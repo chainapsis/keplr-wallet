@@ -1,4 +1,3 @@
-import React from "react";
 import { Image, StyleProp, View, ViewStyle } from "react-native";
 
 export interface BackgroundProps {

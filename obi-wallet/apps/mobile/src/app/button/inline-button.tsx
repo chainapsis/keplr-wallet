@@ -1,5 +1,4 @@
 import { Text } from "@obi-wallet/common";
-import React from "react";
 import {
   Platform,
   StyleSheet,
