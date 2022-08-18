@@ -29,8 +29,8 @@ const sassRule = {
           options: {
             modules: {
               localIdentName: "[local]-[hash:base64]",
+              exportLocalsConvention: "camelCase",
             },
-            localsConvention: "camelCase",
           },
         },
         {
