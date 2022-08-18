@@ -18,26 +18,31 @@ import Whatsapp from "./assets/whatsapp-icon.svg";
 export function KeysConfigScreen() {
   const data: KeyListItem[] = [
     {
+      key: "phone-number",
       title: "Phone Number Key",
       activated: true,
       Icon: Whatsapp,
     },
     {
+      key: "email",
       title: "E-Mail Key",
       activated: false,
       Icon: Email,
     },
     {
+      key: "face-id",
       title: "Face ID Key",
       activated: false,
       Icon: FaceId,
     },
     {
+      key: "cloud",
       title: "Cloud Backup Key",
       activated: false,
       Icon: Cloud,
     },
     {
+      key: "share",
       title: "Share Key",
       activated: false,
       Icon: Share,
@@ -96,6 +101,7 @@ const styles = StyleSheet.create({
 });
 
 interface KeyListItem {
+  key: string;
   title: string;
   activated: boolean;
   Icon: React.FC<SvgProps>;
