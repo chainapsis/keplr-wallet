@@ -4,11 +4,11 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const WriteFilePlugin = require("write-file-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
+const isDisableSplitChunks = process.env.DISABLE_SPLIT_CHUNKS === "true";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
 const commonResolve = (dir) => ({
   extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
@@ -91,6 +91,10 @@ const extensionConfig = (env, args) => {
     optimization: {
       splitChunks: {
         chunks(chunk) {
+          if (isDisableSplitChunks) {
+            return false;
+          }
+
           return chunk.name === "popup";
         },
         cacheGroups: {
@@ -124,8 +128,8 @@ const extensionConfig = (env, args) => {
         NODE_ENV: isEnvDevelopment ? "development" : "production",
       }),
       new ForkTsCheckerWebpackPlugin(),
-      new CopyWebpackPlugin(
-        [
+      new CopyWebpackPlugin({
+        patterns: [
           {
             from: "./src/manifest.json",
             to: "./",
@@ -133,16 +137,15 @@ const extensionConfig = (env, args) => {
           {
             from:
               "../../node_modules/webextension-polyfill/dist/browser-polyfill.js",
+            to: "./",
           },
         ],
-        { copyUnmodified: true }
-      ),
+      }),
       new HtmlWebpackPlugin({
         template: "./src/index.html",
         filename: "popup.html",
         excludeChunks: ["background", "contentScripts", "injectedScript"],
       }),
-      new WriteFilePlugin(),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
       }),

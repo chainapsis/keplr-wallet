@@ -10,6 +10,8 @@
     "postbuild": "zx ./scripts/post-build.mjs",
     "dev": "cross-env NODE_ENV=development webpack",
     "dev:analyzer": "cross-env NODE_ENV=development ANALYZER=true webpack",
+    "analyzer": "cross-env NODE_ENV=production ANALYZER=true DISABLE_SPLIT_CHUNKS=true webpack",
+    "analyzer:chunks": "cross-env NODE_ENV=production ANALYZER=true webpack",
     "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" webpack.config.js && prettier --check \"src/**/*\" webpack.config.js",
     "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js",
@@ -90,7 +92,7 @@
     "@types/react-router-dom": "^5.1.2",
     "@types/reactstrap": "^8.4.2",
     "@types/sha.js": "^2.4.0",
-    "copy-webpack-plugin": "^5.0.4",
+    "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "deepmerge": "^4.2.2",
     "file-loader": "^4.2.0",
@@ -102,8 +104,7 @@
     "serialize-javascript": ">=3.1.0",
     "style-loader": "^3.3.1",
     "webpack": "^5.74.0",
-    "webpack-bundle-analyzer": "^3.9.0",
-    "webpack-cli": "^4.10.0",
-    "write-file-webpack-plugin": "^4.5.1"
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-cli": "^4.10.0"
   }
 }
