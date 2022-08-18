@@ -3,11 +3,12 @@ import { Sha256 } from "@cosmjs/crypto/build/sha";
 import { coins } from "@cosmjs/launchpad";
 import { EncodeObject } from "@cosmjs/proto-signing";
 import { SigningStargateClient } from "@cosmjs/stargate";
-import { createBiometricSignature, Multisig, Text } from "@obi-wallet/common";
+import { Multisig, Text } from "@obi-wallet/common";
 import { useState } from "react";
 import { Modal, ModalProps, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { createBiometricSignature } from "../../../biometrics";
 import { Button } from "../../../button";
 import { Background } from "../background";
 

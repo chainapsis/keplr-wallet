@@ -1,12 +1,13 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { getBiometricsPublicKey, Text } from "@obi-wallet/common";
+import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { getBiometricsPublicKey } from "../../../biometrics";
 import { Button, IconButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";

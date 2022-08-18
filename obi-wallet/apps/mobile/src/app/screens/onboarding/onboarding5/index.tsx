@@ -28,7 +28,6 @@ import {
 import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { getBiometricsKeyPair } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
@@ -38,6 +37,7 @@ import { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { getBiometricsKeyPair } from "../../../biometrics";
 import { Button, IconButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
