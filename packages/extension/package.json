@@ -73,6 +73,7 @@
     "reactstrap": "^8.4.1",
     "scrypt-js": "^3.0.1",
     "secretjs": "^0.17.0",
+    "setimmediate": "^1.0.5",
     "sha.js": "^2.4.11",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",

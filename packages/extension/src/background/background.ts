@@ -1,3 +1,7 @@
+// Shim ------------
+require("setimmediate");
+// Shim ------------
+
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   ExtensionRouter,
