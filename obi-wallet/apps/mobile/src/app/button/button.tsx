@@ -53,6 +53,9 @@ const baseStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
 });
 
 export interface ButtonProps
@@ -83,7 +86,12 @@ export function Button({
   const buttonProps = {
     ...props,
     children,
-    style: [baseStyles.button, flavorStyles.button, props.style],
+    style: [
+      baseStyles.button,
+      flavorStyles.button,
+      props.disabled ? baseStyles.disabledButton : undefined,
+      props.style,
+    ],
   };
 
   if (Platform.OS === "ios") {

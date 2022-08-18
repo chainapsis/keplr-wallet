@@ -26,13 +26,13 @@ export type Onboarding2Props = NativeStackScreenProps<
 
 export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
   const { multisigStore } = useStore();
-  const multisigPayload = multisigStore.getMultisig();
 
   useEffect(() => {
-    if (multisigPayload && multisigPayload.phoneNumber) {
+    const { phoneNumber } = multisigStore.getNextAdmin("");
+    if (phoneNumber) {
       Alert.alert(
         "You already have a phone number key",
-        `Do you want to reuse your existing phone number key for phone number ${multisigPayload.phoneNumber.phoneNumber}?`,
+        `Do you want to reuse your existing phone number key for phone number ${phoneNumber.phoneNumber}?`,
         [
           {
             text: "Generate a new key",
@@ -47,7 +47,7 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
         ]
       );
     }
-  }, [multisigPayload, navigation]);
+  }, [multisigStore, navigation]);
 
   const [open, setOpen] = useState(false);
   const [securityQuestion, setSecurityQuestion] = useState(

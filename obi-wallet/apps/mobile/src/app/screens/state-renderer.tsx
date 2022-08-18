@@ -1,12 +1,10 @@
-import { KeyRingStatus } from "@keplr-wallet/background";
-import { Text } from "@obi-wallet/common";
+import { MultisigState } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 
 import { StackParamList } from "../stack";
 import { useStore } from "../stores";
 import { HomeScreen } from "./home";
-import { LockScreen } from "./lock";
 import { OnboardingScreen } from "./onboarding";
 
 export type StateRendererScreenProps = NativeStackScreenProps<
@@ -15,16 +13,15 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 >;
 
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
-  const { keyRingStore } = useStore();
+  const { multisigStore } = useStore();
 
-  switch (keyRingStore.status) {
-    case KeyRingStatus.NOTLOADED:
-      return <Text>Not Loaded</Text>;
-    case KeyRingStatus.EMPTY:
+  switch (multisigStore.getState()) {
+    case MultisigState.LOADING:
+      // TODO: show splash screen
+      return null;
+    case MultisigState.EMPTY:
       return <OnboardingScreen />;
-    case KeyRingStatus.LOCKED:
-      return <LockScreen />;
-    case KeyRingStatus.UNLOCKED:
+    case MultisigState.INITIALIZED:
       return <HomeScreen />;
   }
 });

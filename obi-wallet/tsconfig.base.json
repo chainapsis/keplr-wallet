@@ -16,7 +16,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@obi-wallet/common": ["libs/common/src/index.ts"]
+      "@obi-wallet/common": ["libs/common/src/index.ts"],
+      "@obi-wallet/proxy": ["libs/proxy/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
