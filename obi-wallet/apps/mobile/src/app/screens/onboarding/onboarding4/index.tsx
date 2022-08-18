@@ -1,10 +1,6 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  createBiometricSignature,
-  getBiometricsPublicKey,
-  Text,
-} from "@obi-wallet/common";
+import { getBiometricsPublicKey, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
@@ -25,10 +21,10 @@ export type Onboarding4Props = NativeStackScreenProps<
 
 export const Onboarding4 = observer<Onboarding4Props>(({ navigation }) => {
   const { multisigStore } = useStore();
-  const multisigPayload = multisigStore.getMultisig();
 
   useEffect(() => {
-    if (multisigPayload && multisigPayload.biometrics) {
+    const { biometrics } = multisigStore.getNextAdmin("");
+    if (biometrics) {
       Alert.alert(
         "You already have a biometrics key",
         `Do you want to reuse your existing biometrics key?`,
@@ -46,7 +42,7 @@ export const Onboarding4 = observer<Onboarding4Props>(({ navigation }) => {
         ]
       );
     }
-  }, [multisigPayload, navigation]);
+  }, [multisigStore, navigation]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -135,18 +131,8 @@ export const Onboarding4 = observer<Onboarding4Props>(({ navigation }) => {
           flavor="blue"
           LeftIcon={Scan}
           onPress={async () => {
-            // This is a hack to always trigger the Face ID prompt even
-            // if the user already has a public key.
-            await createBiometricSignature({
-              payload: "test",
-              biometryParams: {
-                biometryTitle: "Title",
-                biometrySubTitle: "Subtitle",
-                biometryDescription: "Description",
-              },
-            });
             const publicKey = await getBiometricsPublicKey();
-            multisigStore.setBiometricsPublicKey(publicKey);
+            multisigStore.setBiometricsPublicKey({ publicKey });
             navigation.navigate("onboarding5");
           }}
         />

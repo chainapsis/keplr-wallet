@@ -4,6 +4,9 @@
   "private": true,
   "dependencies": {
     "@cosmjs/amino": "*",
+    "@cosmjs/launchpad": "*",
+    "@cosmjs/proto-signing": "*",
+    "@cosmjs/stargate": "*",
     "@fortawesome/free-solid-svg-icons": "*",
     "@fortawesome/react-fontawesome": "*",
     "@fortawesome/react-native-fontawesome": "*",
@@ -21,6 +24,8 @@
     "crypto-js": "*",
     "eventemitter3": "*",
     "fastestsmallesttextencoderdecoder": "*",
+    "fp-ts": "*",
+    "io-ts": "*",
     "isomorphic-unfetch": "*",
     "mobx": "*",
     "mobx-react-lite": "*",

@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "common": "libs/common",
-    "mobile": "apps/mobile"
+    "mobile": "apps/mobile",
+    "proxy": "libs/proxy"
   }
 }
