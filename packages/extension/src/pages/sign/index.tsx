@@ -25,6 +25,7 @@ import {
 import { ADR36SignDocDetailsTab } from "./adr-36";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { unescapeHTML } from "@keplr-wallet/common";
+import { EthSignType } from "@keplr-wallet/types";
 
 enum Tab {
   Details,
@@ -51,6 +52,7 @@ export const SignPage: FunctionComponent = observer(() => {
   const [isADR36WithString, setIsADR36WithString] = useState<
     boolean | undefined
   >();
+  const [ethSignType, setEthSignType] = useState<EthSignType | undefined>();
 
   const current = chainStore.current;
   // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
@@ -81,6 +83,9 @@ export const SignPage: FunctionComponent = observer(() => {
       chainStore.selectChain(data.data.chainId);
       if (data.data.signDocWrapper.isADR36SignDoc) {
         setIsADR36WithString(data.data.isADR36WithString);
+      }
+      if (data.data.ethSignType) {
+        setEthSignType(data.data.ethSignType);
       }
       setOrigin(data.data.msgOrigin);
       if (
@@ -183,7 +188,8 @@ export const SignPage: FunctionComponent = observer(() => {
 
     if (
       signDocHelper.signDocWrapper &&
-      signDocHelper.signDocWrapper.isADR36SignDoc
+      signDocHelper.signDocWrapper.isADR36SignDoc &&
+      !ethSignType
     ) {
       return "Prove Ownership";
     }
@@ -271,6 +277,7 @@ export const SignPage: FunctionComponent = observer(() => {
                   <ADR36SignDocDetailsTab
                     signDocWrapper={signDocHelper.signDocWrapper}
                     isADR36WithString={isADR36WithString}
+                    ethSignType={ethSignType}
                     origin={origin}
                   />
                 ) : (

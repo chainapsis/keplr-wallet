@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { Rect, Svg, LinearGradient, Stop, Defs } from "react-native-svg";
+import { Image, Platform, ImageSourcePropType } from "react-native";
 
 export const SimpleGradient: FunctionComponent<{
   degree: number;
@@ -7,7 +8,23 @@ export const SimpleGradient: FunctionComponent<{
     offset: string;
     color: string;
   }[];
-}> = ({ degree, stops }) => {
+
+  fallbackAndroidImage?: ImageSourcePropType;
+}> = ({ degree, stops, fallbackAndroidImage }) => {
+  // On android, the gradient rendered without dithering.
+  // Since there is no effective way to solve this problem,
+  // provides an option to stretch the bitmap image and show it.
+  if (Platform.OS === "android" && fallbackAndroidImage) {
+    return (
+      <Image
+        style={{ width: "100%", height: "100%" }}
+        source={fallbackAndroidImage}
+        fadeDuration={0}
+        resizeMode="stretch"
+      />
+    );
+  }
+
   const normD = degree < 0 ? 360 + (degree % 360) : degree % 360;
 
   let dx =

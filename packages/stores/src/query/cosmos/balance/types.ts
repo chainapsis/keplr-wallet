@@ -5,3 +5,9 @@ export type Balances = {
   // TODO: Handle pagination?
   // pagination: {};
 };
+
+export type SpendableBalances = {
+  balances: CoinPrimitive[];
+  // TODO: Handle pagination?
+  // pagination: {};
+};

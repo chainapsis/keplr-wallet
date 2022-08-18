@@ -49,7 +49,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
     };
   }, []);
 
-  const { keyRingStore } = useStore();
+  const { keyRingStore, uiConfigStore } = useStore();
 
   const registerConfig = useRegisterConfig(keyRingStore, [
     ...(AdditionalSignInPrepend ?? []),
@@ -88,7 +88,11 @@ export const RegisterPage: FunctionComponent = observer(() => {
         >
           <img
             className={style.icon}
-            src={require("../../public/assets/logo-256.png")}
+            src={
+              uiConfigStore.isBeta
+                ? require("../../public/assets/logo-beta-256.png")
+                : require("../../public/assets/logo-256.png")
+            }
             alt="logo"
           />
           <img

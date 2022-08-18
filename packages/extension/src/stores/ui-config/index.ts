@@ -14,7 +14,11 @@ export class UIConfigStore {
     showAdvancedIBCTransfer: false,
   };
 
+  protected _isBeta: boolean;
+
   constructor(protected readonly kvStore: KVStore) {
+    this._isBeta = navigator.userAgent.includes("Firefox");
+
     makeObservable(this);
 
     this.init();
@@ -39,6 +43,10 @@ export class UIConfigStore {
    */
   get showAdvancedIBCTransfer(): boolean {
     return this.options.showAdvancedIBCTransfer;
+  }
+
+  get isBeta(): boolean {
+    return this._isBeta;
   }
 
   @action

@@ -17,7 +17,12 @@ import { escapeHTML, KVStore } from "@keplr-wallet/common";
 
 import { ChainsService } from "../chains";
 import { LedgerService } from "../ledger";
-import { BIP44, ChainInfo, KeplrSignOptions } from "@keplr-wallet/types";
+import {
+  BIP44,
+  ChainInfo,
+  EthSignType,
+  KeplrSignOptions,
+} from "@keplr-wallet/types";
 import { APP_PORT, Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
@@ -28,6 +33,7 @@ import {
   AminoSignResponse,
   StdSignDoc,
   StdSignature,
+  encodeSecp256k1Pubkey,
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
@@ -234,6 +240,7 @@ export class KeyRingService {
     signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
+      ethSignType?: EthSignType;
     }
   ): Promise<AminoSignResponse> {
     signDoc = {
@@ -276,6 +283,12 @@ export class KeyRingService {
       );
     }
 
+    if (signOptions.ethSignType && !isADR36SignDoc) {
+      throw new Error(
+        "Eth sign type can be requested with only ADR-36 amino sign doc"
+      );
+    }
+
     let newSignDoc = (await this.interactionService.waitApprove(
       env,
       "/sign",
@@ -289,6 +302,7 @@ export class KeyRingService {
         signOptions,
         isADR36SignDoc,
         isADR36WithString: signOptions.isADR36WithString,
+        ethSignType: signOptions.ethSignType,
       }
     )) as StdSignDoc;
 
@@ -313,6 +327,35 @@ export class KeyRingService {
           237,
           "Signing request was for ADR-36. But, accidentally, new sign doc is not for ADR-36"
         );
+      }
+    }
+
+    // Handle Ethereum signing
+    if (signOptions.ethSignType) {
+      if (newSignDoc.msgs.length !== 1) {
+        // Validate number of messages
+        throw new Error("Invalid number of messages for Ethereum sign request");
+      }
+
+      const signBytes = Buffer.from(newSignDoc.msgs[0].value.data, "base64");
+
+      try {
+        const signatureBytes = await this.keyRing.signEthereum(
+          chainId,
+          coinType,
+          signBytes,
+          signOptions.ethSignType
+        );
+
+        return {
+          signed: newSignDoc, // Included to match return type
+          signature: {
+            pub_key: encodeSecp256k1Pubkey(key.pubKey), // Included to match return type
+            signature: Buffer.from(signatureBytes).toString("base64"), // No byte limit
+          },
+        };
+      } finally {
+        this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
       }
     }
 

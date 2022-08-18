@@ -67,6 +67,10 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
             style.get("tx-result-screen-failed-gradient-background").degree
           }
           stops={style.get("tx-result-screen-failed-gradient-background").stops}
+          fallbackAndroidImage={
+            style.get("tx-result-screen-failed-gradient-background")
+              .fallbackAndroidImage
+          }
         />
       </View>
       <View style={style.flatten(["flex-3"])} />
