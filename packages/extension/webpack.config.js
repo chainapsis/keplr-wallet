@@ -58,16 +58,10 @@ const sassRule = {
 const tsRule = { test: /\.tsx?$/, loader: "ts-loader" };
 const fileRule = {
   test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
-  use: [
-    {
-      loader: "file-loader",
-      options: {
-        name: "[name].[ext]",
-        publicPath: "assets",
-        outputPath: "assets",
-      },
-    },
-  ],
+  type: "asset/resource",
+  generator: {
+    filename: "assets/[name][ext]",
+  },
 };
 
 module.exports = {
