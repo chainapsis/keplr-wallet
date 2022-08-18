@@ -24,6 +24,9 @@ export const ScreenBackground: FunctionComponent<{
         <SimpleGradient
           degree={style.get("background-gradient").degree}
           stops={style.get("background-gradient").stops}
+          fallbackAndroidImage={
+            style.get("background-gradient").fallbackAndroidImage
+          }
         />
       ) : backgroundMode === "secondary" ? (
         <View

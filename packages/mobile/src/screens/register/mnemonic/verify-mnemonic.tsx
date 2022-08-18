@@ -61,9 +61,16 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
       })
     );
 
+    const candidateWordsCopy = candidateWords.slice();
     setWordSet(
       newMnemonicConfig.mnemonic.split(" ").map((word) => {
-        return candidateWords.includes(word) ? undefined : word;
+        const i = candidateWordsCopy.indexOf(word);
+        if (i >= 0) {
+          // Mnemonic words can have the same word. Therefore, used words should be deleted.
+          candidateWordsCopy.splice(i, 1);
+          return undefined;
+        }
+        return word;
       })
     );
   }, [newMnemonicConfig.mnemonic]);

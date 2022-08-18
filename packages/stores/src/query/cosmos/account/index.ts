@@ -46,6 +46,15 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
       return "0";
     }
   }
+
+  @computed
+  get isVestingAccount(): boolean {
+    if (!this.response) {
+      return false;
+    }
+
+    return !!this.response.data?.account.base_vesting_account;
+  }
 }
 
 export class ObservableQueryAccount extends ObservableChainQueryMap<AuthAccount> {

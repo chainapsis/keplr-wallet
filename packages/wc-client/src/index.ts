@@ -5,6 +5,7 @@ import {
 } from "@walletconnect/types";
 import {
   ChainInfo,
+  EthSignType,
   Keplr,
   KeplrIntereactionOptions,
   KeplrMode,
@@ -382,6 +383,15 @@ export class KeplrWalletConnectV1 implements Keplr {
     _data: string | Uint8Array,
     _signature: StdSignature
   ): Promise<boolean> {
+    throw new Error("Not yet implemented");
+  }
+
+  signEthereum(
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array,
+    _mode: EthSignType
+  ): Promise<Uint8Array> {
     throw new Error("Not yet implemented");
   }
 

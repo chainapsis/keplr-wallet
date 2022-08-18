@@ -6,13 +6,21 @@ import { Buffer } from "buffer/";
 import { MsgRender } from "./details-tab";
 import styleDetailsTab from "./details-tab.module.scss";
 import { Label } from "reactstrap";
+import { EthSignType } from "@keplr-wallet/types";
 
 export const ADR36SignDocDetailsTab: FunctionComponent<{
   signDocWrapper: SignDocWrapper;
   isADR36WithString?: boolean;
+  ethSignType?: EthSignType;
   origin?: string;
-}> = observer(({ signDocWrapper, isADR36WithString, origin }) => {
+}> = observer(({ signDocWrapper, isADR36WithString, ethSignType, origin }) => {
   const { chainStore } = useStore();
+  const renderTitleText = () => {
+    if (ethSignType && ethSignType === EthSignType.TRANSACTION) {
+      return "Sign transaction for";
+    }
+    return "Prove account ownership to";
+  };
 
   const signValue = useMemo(() => {
     if (signDocWrapper.aminoSignDoc.msgs.length !== 1) {
@@ -41,7 +49,7 @@ export const ADR36SignDocDetailsTab: FunctionComponent<{
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className={styleDetailsTab.msgContainer} style={{ flex: "none" }}>
-        <MsgRender icon="fas fa-pen-nib" title="Prove account ownership to">
+        <MsgRender icon="fas fa-pen-nib" title={renderTitleText()}>
           {origin ?? "Unknown"}
         </MsgRender>
       </div>

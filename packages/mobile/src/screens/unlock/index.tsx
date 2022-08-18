@@ -608,6 +608,9 @@ const UnlockScreenGradientBackground: FunctionComponent = () => {
       <SimpleGradient
         degree={style.get("unlock-screen-gradient-background").degree}
         stops={style.get("unlock-screen-gradient-background").stops}
+        fallbackAndroidImage={
+          style.get("unlock-screen-gradient-background").fallbackAndroidImage
+        }
       />
     </View>
   );

@@ -7,7 +7,7 @@ import {
 import { KVStore } from "@keplr-wallet/common";
 import { LedgerService } from "../ledger";
 import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, EthSignType } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 
 import { Buffer } from "buffer/";
@@ -769,10 +769,11 @@ export class KeyRing {
     }
   }
 
-  private async signEthereum(
+  public async signEthereum(
     chainId: string,
     defaultCoinType: number,
-    message: Uint8Array
+    message: Uint8Array,
+    type: EthSignType = EthSignType.BYTE64 // Default to Ethereum signing for Evmos
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
@@ -789,14 +790,16 @@ export class KeyRing {
         112,
         "Ethereum signing with Ledger is not yet supported"
       );
-    } else {
-      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
-      // Allow signing with Ethereum for chains with coinType !== 60
-      const privKey = this.loadPrivKey(coinType);
+    }
 
-      // Use ether js to sign Ethereum tx
-      const ethWallet = new Wallet(privKey.toBytes());
+    const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+    // Allow signing with Ethereum for chains with coinType !== 60
+    const privKey = this.loadPrivKey(coinType);
 
+    const ethWallet = new Wallet(privKey.toBytes());
+
+    if (type === EthSignType.BYTE64) {
+      // ECDSA Sign Keccak256 and discard parity byte
       const signature = await ethWallet
         ._signingKey()
         .signDigest(keccak256(message));
@@ -804,6 +807,16 @@ export class KeyRing {
       return BytesUtils.arrayify(
         BytesUtils.concat([splitSignature.r, splitSignature.s])
       );
+    } else if (type === EthSignType.MESSAGE) {
+      // Sign bytes with prefixed Ethereum magic
+      const signature = await ethWallet.signMessage(message);
+      return BytesUtils.arrayify(signature);
+    } else {
+      // Sign Ethereum transaction
+      const signature = await ethWallet.signTransaction(
+        JSON.parse(Buffer.from(message).toString())
+      );
+      return BytesUtils.arrayify(signature);
     }
   }
 

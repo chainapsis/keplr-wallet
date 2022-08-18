@@ -16,6 +16,7 @@
     "@react-navigation/native-stack": "*",
     "@testing-library/jest-native": "*",
     "axios": "*",
+    "big-integer": "*",
     "buffer": "*",
     "crypto-js": "*",
     "eventemitter3": "*",

@@ -1,0 +1,13 @@
+{
+  "applications": {
+    "gecko": {
+      "id": "keplr-extension@keplr.app",
+      "strict_min_version": "89.0"
+    }
+  },
+  "icons": {
+    "16": "assets/icon-beta-16.png",
+    "48": "assets/icon-beta-48.png",
+    "128": "assets/icon-beta-128.png"
+  }
+}
