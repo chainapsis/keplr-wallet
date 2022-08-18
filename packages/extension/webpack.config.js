@@ -2,7 +2,6 @@
 const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WriteFilePlugin = require("write-file-webpack-plugin");
@@ -101,14 +100,29 @@ const extensionConfig = (env, args) => {
         },
       },
     },
-    resolve: commonResolve("src/public/assets"),
+    resolve: {
+      ...commonResolve("src/public/assets"),
+      fallback: {
+        os: require.resolve("os-browserify/browser"),
+        buffer: require.resolve("buffer/"),
+        http: require.resolve("stream-http"),
+        https: require.resolve("https-browserify"),
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        process: require.resolve("process/browser"),
+      },
+    },
     module: {
       rules: [sassRule, tsRule, fileRule],
     },
     plugins: [
-      // Remove all and write anyway
-      // TODO: Optimizing build process
-      new CleanWebpackPlugin(),
+      new webpack.ProvidePlugin({
+        process: "process/browser",
+        Buffer: ["buffer", "Buffer"],
+      }),
+      new webpack.EnvironmentPlugin({
+        NODE_ENV: isEnvDevelopment ? "development" : "production",
+      }),
       new ForkTsCheckerWebpackPlugin(),
       new CopyWebpackPlugin(
         [
@@ -129,7 +143,6 @@ const extensionConfig = (env, args) => {
         excludeChunks: ["background", "contentScripts", "injectedScript"],
       }),
       new WriteFilePlugin(),
-      new webpack.EnvironmentPlugin(["NODE_ENV"]),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
       }),
