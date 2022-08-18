@@ -1,19 +1,49 @@
+import { Text } from "@obi-wallet/common";
 import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SvgProps } from "react-native-svg";
 
 import { Back } from "../../components/back";
-import Keys1 from "./assets/Keys1.svg";
-import Check from "./assets/checkIcon.svg";
-import Cloud from "./assets/cloudIcon.svg";
-import Email from "./assets/emailIcon.svg";
-import FaceId from "./assets/faceIdIcon.svg";
-import Share from "./assets/shareIcon.svg";
-import Warning from "./assets/warningIcon.svg";
-import Whatsapp from "./assets/whatsappIcon.svg";
+import Check from "./assets/check-icon.svg";
+import Cloud from "./assets/cloud-icon.svg";
+import Email from "./assets/email-icon.svg";
+import FaceId from "./assets/face-id-icon.svg";
+import Keys1 from "./assets/keys1.svg";
+import Share from "./assets/share-icon.svg";
+import Warning from "./assets/warning-icon.svg";
+import Whatsapp from "./assets/whatsapp-icon.svg";
 
-export function Keys() {
+export function KeysConfigScreen() {
+  const data: KeyListItem[] = [
+    {
+      title: "Phone Number Key",
+      activated: true,
+      Icon: Whatsapp,
+    },
+    {
+      title: "E-Mail Key",
+      activated: false,
+      Icon: Email,
+    },
+    {
+      title: "Face ID Key",
+      activated: false,
+      Icon: FaceId,
+    },
+    {
+      title: "Cloud Backup Key",
+      activated: false,
+      Icon: Cloud,
+    },
+    {
+      title: "Share Key",
+      activated: false,
+      Icon: Share,
+    },
+  ];
+
   return (
     <SafeAreaView
       style={{ backgroundColor: "#090817", flex: 1, paddingHorizontal: 16 }}
@@ -22,7 +52,7 @@ export function Keys() {
         <Back />
         <Text style={styles.heading}>Manage Multisig</Text>
         <Text style={styles.subHeading}>
-          Add/ Edit keys to improve security. Tap on any of the following
+          Add/edit keys to improve security. Tap on any of the following
         </Text>
       </View>
       <View style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>
@@ -41,38 +71,7 @@ export function Keys() {
       </View>
       <View style={{ flex: 6 }}>
         <FlatList
-          data={[
-            {
-              key: "1",
-              title: "telephone/whatsapp key",
-              activated: true,
-              icon: Whatsapp,
-            },
-            {
-              key: "2",
-              title: "Email key",
-              activated: false,
-              icon: Email,
-            },
-            {
-              key: "3",
-              title: "FaceId key",
-              activated: false,
-              icon: FaceId,
-            },
-            {
-              key: "4",
-              title: "Cloud Backup key",
-              activated: false,
-              icon: Cloud,
-            },
-            {
-              key: "5",
-              title: "Share key",
-              activated: false,
-              icon: Share,
-            },
-          ]}
+          data={data}
           renderItem={({ item }) => <KeyListItem item={item} />}
           style={{ flex: 1, marginTop: 40 }}
         />
@@ -81,28 +80,33 @@ export function Keys() {
   );
 }
 
-// styleSheet
 const styles = StyleSheet.create({
   heading: {
     color: "#F6F5FF",
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 10,
-    fontFamily: "Inter",
     marginTop: 47,
   },
   subHeading: {
     color: "#999CB6",
     fontSize: 14,
-    fontWeight: "400",
     marginBottom: 31,
-    fontFamily: "Inter",
   },
 });
 
-function KeyListItem({ item: { title, icon, activated }, ...rest }: any) {
-  const Icon = icon;
-  console.log({ title, rest });
+interface KeyListItem {
+  title: string;
+  activated: boolean;
+  Icon: React.FC<SvgProps>;
+}
+
+interface KeyListItemProps {
+  item: KeyListItem;
+}
+
+function KeyListItem({ item }: KeyListItemProps) {
+  const { title, Icon, activated } = item;
   return (
     <View
       style={{
@@ -134,7 +138,6 @@ function KeyListItem({ item: { title, icon, activated }, ...rest }: any) {
             color: "#F6F5FF",
             fontSize: 14,
             fontWeight: "600",
-            fontFamily: "Inter",
           }}
         >
           {title}
@@ -143,8 +146,6 @@ function KeyListItem({ item: { title, icon, activated }, ...rest }: any) {
           style={{
             color: "#F6F5FF",
             fontSize: 12,
-            fontWeight: "400",
-            fontFamily: "Inter",
             opacity: 0.6,
             marginTop: 4,
           }}
