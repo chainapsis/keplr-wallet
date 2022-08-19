@@ -10,6 +10,8 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { TouchableHighlight } from "react-native-gesture-handler";
+import { DappExplorer } from "../dapp-explorer";
+import { SettingsScreen, SettingsStack } from "../settings";
 
 import AppsIcon from "./assets/appsIcon.svg";
 import AssetsIcon from "./assets/assetsIcon.svg";
@@ -59,6 +61,9 @@ export function TabNavigation() {
           borderTopColor: "#1E1D33",
           borderTopWidth: 1,
         },
+
+        headerShown: false,
+
         tabBarActiveTintColor: "#F6F5FF",
         tabBarInactiveTintColor: "#4D5070",
         tabBarLabelStyle: {
@@ -72,14 +77,12 @@ export function TabNavigation() {
       <Tab.Screen
         name="Assets"
         component={Assets}
-        options={{
-          headerShown: false,
-        }}
+
       />
       <Tab.Screen name="NFTs" component={Background} />
-      <Tab.Screen name="Apps" component={Background} />
+      <Tab.Screen name="Apps" component={DappExplorer} />
       <Tab.Screen name="Trade" component={Background} />
-      <Tab.Screen name="Settings" component={Background} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }

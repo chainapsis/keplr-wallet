@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { IntlProvider } from "react-intl";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
+import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
@@ -49,6 +49,8 @@ export function App() {
                 title: route.params.app.label,
               })}
             />
+            {settingsScreens()}
+
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

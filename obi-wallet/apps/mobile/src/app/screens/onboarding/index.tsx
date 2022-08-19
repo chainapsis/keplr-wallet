@@ -1,3 +1,4 @@
+import React from "react";
 import { Onboarding1 } from "./onboarding1";
 import { Onboarding2 } from "./onboarding2";
 import { Onboarding3 } from "./onboarding3";

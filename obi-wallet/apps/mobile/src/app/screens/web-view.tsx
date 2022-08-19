@@ -31,7 +31,6 @@ export const WebViewScreen = observer<WebViewScreenProps>(
     const [currentUrl, setCurrentUrl] = React.useState<string>(app.url);
     const [loaded, setLoaded] = React.useState<boolean>(false);
     const [title, setTitle] = React.useState<string>(app.label);
-    const [visible, setVisible] = React.useState<boolean>(false);
 
     const safeArea = useSafeAreaInsets();
 

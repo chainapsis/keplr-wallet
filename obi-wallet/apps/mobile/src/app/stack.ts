@@ -1,4 +1,5 @@
 import { App } from "@obi-wallet/common";
+import { KeysConfigScreen } from "./screens/settings/keys-config";
 import {
   NavigationProp,
   useNavigation as useNavigationOriginal,
