@@ -1,6 +1,8 @@
 docker
+.dockerignore
 
 .DS_Store
+yarn-error.log
 .idea
 .vscode
 
