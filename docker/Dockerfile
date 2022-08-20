@@ -14,8 +14,8 @@ RUN npm install --global yarn
 RUN yarn global add lerna
 
 # Install protobuf v21.3
-RUN curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-aarch_64.zip
-RUN unzip protoc-21.3-linux-aarch_64.zip -d $HOME/protoc
+RUN curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-$(if [ $(uname -m) = "aarch64" ]; then echo aarch_64; else echo x86_64; fi).zip
+RUN unzip protoc-21.3-linux-$(if [ $(uname -m) = "aarch64" ]; then echo aarch_64; else echo x86_64; fi).zip -d $HOME/protoc
 RUN cp -r $HOME/protoc/include /usr
 RUN cp $HOME/protoc/bin/protoc /bin/protoc
 
