@@ -1,7 +1,7 @@
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import { useState } from "react";
 import { useIntl } from "react-intl";
 import {
   Button,
@@ -36,7 +36,8 @@ export interface HomeProps {
 
 export const Home = observer<HomeProps>(
   ({ appsStore, onAppPress, onAppStorePress, marginBottom }) => {
-    const [editMode, setEditMode] = React.useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [url, setUrl] = useState("www.keplr_wallet.com");
     const intl = useIntl();
 
     return (
@@ -159,6 +160,13 @@ export const Home = observer<HomeProps>(
                     color: "#F6F5FF",
                   }}
                   placeholder="Search"
+                  onChangeText={(text) => {
+                    const newText = text.includes("https://")
+                      ? text
+                      : `https://${text}`;
+                    setUrl(newText.toLocaleLowerCase());
+                  }}
+                  autoCapitalize="none"
                 />
                 <TouchableHighlight
                   style={{
@@ -166,6 +174,43 @@ export const Home = observer<HomeProps>(
                     height: 56,
                     justifyContent: "center",
                     alignItems: "center",
+                  }}
+                  onPress={() => {
+                    //check if url is a valid url with protocol and domain
+                    try {
+                      const validURL = new URL(url.trim());
+                      //if validURL text has space
+                      console.log(validURL, "validURL");
+                      if (
+                        validURL.toString().includes(" ") ||
+                        !validURL.toString().includes(".")
+                      ) {
+                        throw new Error("Invalid URL");
+                      }
+
+                      onAppPress({
+                        url: validURL.href,
+                        icon: "https://place-hold.it/180x180",
+                        label: url,
+                      });
+                    } catch (error) {
+                      console.log(error);
+                      //check if it has http:// or https:// and if so remove it
+                      const newUrl = url.includes("https://")
+                        ? url.replace("https://", "")
+                        : url.includes("http://")
+                        ? url.replace("http://", "")
+                        : url;
+
+                      const searchParam = newUrl.split(" ").join("+");
+                      const newSearchUrl = `https://www.google.com/search?q=${searchParam}`;
+                      console.log({ newUrl });
+                      onAppPress({
+                        url: newSearchUrl,
+                        label: newUrl,
+                        icon: "https://place-hold.it/180x180",
+                      });
+                    }
                   }}
                 >
                   <Text>

@@ -1,4 +1,3 @@
-import React from "react";
 import { StyleSheet, View, ViewProps } from "react-native";
 
 import { createShadow } from "../styles";

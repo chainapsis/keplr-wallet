@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "../stack";
 import { useStore } from "../stores";
 
-export function HomeScreen() {
+export function DappExplorer() {
   const { appsStore } = useStore();
   const navigation = useNavigation();
   const safeArea = useSafeAreaInsets();
