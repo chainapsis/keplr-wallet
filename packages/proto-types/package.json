@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/proto-types",
-  "version": "0.10.18-rc.1",
+  "version": "0.10.18-rc.4",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": false,
@@ -19,7 +19,6 @@
     "protobufjs": "^6.11.2"
   },
   "devDependencies": {
-    "folder-hash": "^4.0.2",
     "glob": "^7.2.0",
     "ts-proto": "^1.106.2"
   }
