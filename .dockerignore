@@ -1,6 +1,3 @@
-docker
-.dockerignore
-
 .DS_Store
 yarn-error.log
 .idea
@@ -14,8 +11,6 @@ yarn-error.log
 **/.git
 **/.cache
 **/coverage
-
-packages/mobile
 
 packages/proto-types/**/*.ts
 packages/proto-types/**/*.js

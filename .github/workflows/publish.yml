@@ -43,3 +43,60 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  check-firefox-archive:
+    name: Test that docker can produce the same result for firefox
+    needs: [publish]
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        token: ${{ secrets.TOKEN }}
+    - name: Setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - run: sudo apt-get update && sudo apt-get install apt-transport-https ca-certificates
+    - run: sudo sh -c "echo 'deb https://gitsecret.jfrog.io/artifactory/git-secret-deb git-secret main' >> /etc/apt/sources.list"
+    - run: wget -qO - 'https://gitsecret.jfrog.io/artifactory/api/gpg/key/public' | sudo apt-key add -
+    - run: sudo apt-get install git-secret
+    - run: printf $GPG_KEY | base64 --decode > private.key
+      env:
+        GPG_KEY: ${{ secrets.GPG_KEY }}
+    - run: gpg --import --no-tty --batch --yes ./private.key
+    - run: git-secret reveal -f -p $GPG_PASSPHRASE
+      env:
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    - run: docker build -f ./docker/create-firefox-archive/Dockerfile -t archiver .
+    - run: docker run -v $(pwd):/data archiver
+    - run: cp ./build/firefox-archive.tar.gz ../firefox-archive.tar.gz
+    - run: mkdir temp && tar xvzf firefox-archive.tar.gz -C temp
+      working-directory: ..
+    - run: docker build -f ./docker/Dockerfile -t builder .
+      working-directory: ../temp
+    - run: docker run -v $(pwd):/data builder
+      working-directory: ../temp
+    - run: sudo apt-get install gh awscli
+    - run: mkdir release && cd release && gh release download $GITHUB_REF_NAME --pattern '*.firefox.zip' --repo https://github.com/chainapsis/keplr-wallet
+      working-directory: ../temp
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - run: unzip keplr-extension-$GITHUB_REF_NAME.firefox.zip -d build
+      working-directory: ../temp/release
+    - run: ls
+      working-directory: ../temp/build/firefox
+    - run: ls
+      working-directory: ../temp/release/build
+    - run: find . -type f -exec openssl dgst -sha256 {} \; | awk '{print $NF}' > ../../output_hashes1.txt
+      working-directory: ../temp/build/firefox
+    - run: find . -type f -exec openssl dgst -sha256 {} \; | awk '{print $NF}' > ../../output_hashes2.txt
+      working-directory: ../temp/release/build
+    - run: if [ $(openssl dgst -sha256 output_hashes1.txt | awk '{print $NF}') != $(openssl dgst -sha256 output_hashes2.txt | awk '{print $NF}') ]; then exit 1; fi
+      working-directory: ../temp
+    - run: aws s3 cp firefox-archive.tar.gz s3://$S3_BUCKET/keplr-extension-$GITHUB_REF_NAME-firefox-archive.tar.gz --region us-west-2
+      working-directory: ..
+      env:
+        S3_BUCKET: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_BUCKET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_FIREFOX_ARCHIVE_SECRET_KEY }}

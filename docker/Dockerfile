@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 # Install dependencies for build
-RUN apt-get update && apt -y install build-essential libusb-1.0-0-dev curl unzip watchman
+RUN apt-get update && apt -y install build-essential libusb-1.0-0-dev curl unzip
 
 # Install node 14
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
@@ -25,14 +25,11 @@ COPY ./ /app
 
 WORKDIR /app
 
-# Remove all .DS_Store fils which exist only in OSX
-RUN find . -name .DS_Store -exec rm {} \;
-
 # Clean before installing to ensure the same environment
-RUN yarn clean
+RUN yarn clean:except-mobile
 
-RUN yarn install --frozen-lockfile
 RUN cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile
 
 RUN yarn build
 
