@@ -67,8 +67,8 @@ export const Home = observer<HomeProps>(
                     onRemove={
                       editMode
                         ? () => {
-                          appsStore.removeFavoriteByUrl(app.url);
-                        }
+                            appsStore.removeFavoriteByUrl(app.url);
+                          }
                         : undefined
                     }
                     onPress={() => {
@@ -198,8 +198,8 @@ export const Home = observer<HomeProps>(
                       const newUrl = url.includes("https://")
                         ? url.replace("https://", "")
                         : url.includes("http://")
-                          ? url.replace("http://", "")
-                          : url;
+                        ? url.replace("http://", "")
+                        : url;
 
                       const searchParam = newUrl.split(" ").join("+");
                       const newSearchUrl = `https://www.google.com/search?q=${searchParam}`;

@@ -12,7 +12,7 @@
     "lint:eslint": " yarn _runAll --target=lint",
     "lint:prettier": "prettier --check .",
     "lint:tsc": "yarn _runAll --target=tsc",
-    "setup": "yarn && (cd ..; yarn && yarn build) && (cd apps/mobile; uri-scheme add obi --android --ios)",
+    "setup": "yarn && (cd ..; yarn && yarn build:libs) && (cd apps/mobile; uri-scheme add obi --android --ios)",
     "test": " yarn _runAll --target=test"
   },
   "dependencies": {

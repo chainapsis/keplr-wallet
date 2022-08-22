@@ -25,10 +25,10 @@ export type WebViewScreenProps = NativeStackScreenProps<
 export const WebViewScreen = observer<WebViewScreenProps>(
   ({ navigation, route }) => {
     const { app } = route.params;
-    const [currentAppMetadata, setCurrentAppMetadata] = useState<App>(app);
-    const [currentUrl, setCurrentUrl] = useState<string>(app.url);
-    const [loaded, setLoaded] = useState<boolean>(false);
-    const [title, setTitle] = useState<string>(app.label);
+    const [currentAppMetadata, setCurrentAppMetadata] = useState(app);
+    const [currentUrl, setCurrentUrl] = useState(app.url);
+    const [loaded, setLoaded] = useState(false);
+    const [title, setTitle] = useState(app.label);
 
     const safeArea = useSafeAreaInsets();
 

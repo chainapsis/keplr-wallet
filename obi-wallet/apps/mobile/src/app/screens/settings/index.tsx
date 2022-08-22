@@ -1,6 +1,7 @@
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { FC } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
@@ -82,13 +83,15 @@ export function SettingsScreen() {
     </SafeAreaView>
   );
 }
-interface SettingsProps {
-  Icon: React.FC<SvgProps>;
+
+interface SettingProps {
+  Icon: FC<SvgProps>;
   title: string;
   subtitle: string;
   onPress?: () => void;
-};
-function Setting({ Icon, title, subtitle, onPress }: SettingsProps) {
+}
+
+function Setting({ Icon, title, subtitle, onPress }: SettingProps) {
   return (
     <TouchableOpacity
       style={[styles.flex1, styles.setting]}
