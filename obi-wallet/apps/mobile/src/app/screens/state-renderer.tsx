@@ -15,12 +15,18 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
   const { multisigStore } = useStore();
 
+  return <OnboardingScreen />;
+
   switch (multisigStore.getState()) {
     case MultisigState.LOADING:
       // TODO: show splash screen
       return null;
     case MultisigState.EMPTY:
       return <OnboardingScreen />;
+    case MultisigState.OUTDATED:
+      // TODO: show a migration screen
+      console.log("Outdated proxy");
+      return null;
     case MultisigState.INITIALIZED:
       return <HomeScreen />;
   }
