@@ -1,10 +1,10 @@
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text, TextInput } from "@obi-wallet/common";
 import { TouchableHighlight, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Back } from "../components/back";
 import { Background } from "../components/background";
 
 export function Create() {
@@ -13,12 +13,6 @@ export function Create() {
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />
-      <TouchableHighlight>
-        <FontAwesomeIcon
-          icon={faChevronLeft}
-          style={{ color: "#7B87A8", top: safeArea.top }}
-        />
-      </TouchableHighlight>
       <View
         style={{
           flex: 4,
@@ -26,6 +20,7 @@ export function Create() {
           marginTop: safeArea.top,
         }}
       >
+        <Back style={{ alignSelf: "flex-start" }} />
         <View style={{ marginTop: 56 }}>
           <Text
             style={{

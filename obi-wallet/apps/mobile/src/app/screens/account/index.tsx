@@ -1,5 +1,4 @@
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -13,21 +12,19 @@ import {
 import LinearGradient from "react-native-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Back } from "../components/back";
 import { Background } from "../components/background";
+import { useNavigation } from "../settings/stack";
 
 export function Account() {
   const safeArea = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />
       <View style={{ flexDirection: "row", top: safeArea.top }}>
-        <TouchableHighlight>
-          <FontAwesomeIcon
-            icon={faChevronLeft}
-            style={{ color: "#7B87A8", alignSelf: "flex-start" }}
-          />
-        </TouchableHighlight>
+        <Back style={{ zIndex: 2 }} />
         <Text
           style={{
             fontSize: 14,
@@ -96,6 +93,9 @@ export function Account() {
               paddingHorizontal: 20,
               borderRadius: 40,
               marginTop: 40,
+            }}
+            onPress={() => {
+              navigation.navigate("AddSubAccount");
             }}
           >
             <Text style={{ fontSize: 12, fontWeight: "500", color: "white" }}>

@@ -11,6 +11,7 @@ import {
   ImageBackground,
   TouchableHighlight,
   View,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -96,12 +97,13 @@ export function AssetsHeader() {
         </>
       </TouchableHighlight>
 
-      <View
+      <TouchableOpacity
         style={{
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
         }}
+        onPress={() => navigation.navigate("AccountsSettings")}
       >
         <View style={{ margin: 10 }}>
           <Text
@@ -129,7 +131,7 @@ export function AssetsHeader() {
           source={require("../assets/backgroundblue.png")}
           style={{ width: 35, height: 35, borderRadius: 35 }}
         />
-      </View>
+      </TouchableOpacity>
     </View>
   );
 }
