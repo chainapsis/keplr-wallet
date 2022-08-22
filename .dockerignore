@@ -15,8 +15,6 @@ yarn-error.log
 **/.cache
 **/coverage
 
-packages/mobile
-
 packages/proto-types/**/*.ts
 packages/proto-types/**/*.js
 packages/proto-types/**/*.mjs
