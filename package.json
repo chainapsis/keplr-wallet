@@ -27,7 +27,6 @@
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
     "clean": "lerna run clean && rm -rf node_modules && rm -rf build && yarn clean:watchman",
-    "clean:except-mobile": "lerna run clean --ignore mobile && rm -rf node_modules && rm -rf build",
     "clean:watchman": "watchman watch-del-all",
     "build": "lerna run build",
     "build:libs": "lerna run build --ignore @keplr-wallet/extension",

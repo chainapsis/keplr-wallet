@@ -25,9 +25,6 @@ COPY ./ /app
 
 WORKDIR /app
 
-# Clean before installing to ensure the same environment
-RUN yarn clean:except-mobile
-
 RUN cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
 RUN yarn install --frozen-lockfile
 
