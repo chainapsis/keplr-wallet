@@ -11,9 +11,9 @@ export class KVStore implements AbstractKVStore {
 
   public async set<T = unknown>(key: string, data: T | null) {
     // Passing `null` means we want to delete the existing data item.
-    return data === null
-      ? AsyncStorage.removeItem(this.getKey(key))
-      : AsyncStorage.setItem(this.getKey(key), JSON.stringify(data));
+    return data
+      ? AsyncStorage.setItem(this.getKey(key), JSON.stringify(data))
+      : AsyncStorage.removeItem(this.getKey(key));
   }
 
   public prefix() {
