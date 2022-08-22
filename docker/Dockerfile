@@ -37,10 +37,12 @@ RUN find . -name .DS_Store -exec rm {} \;
 # Clean before installing to ensure the same environment
 RUN yarn clean
 
-RUN yarn install --frozen-lockfile
 RUN cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile
 
 RUN yarn build
+
+USER root
 
 VOLUME /data
 
