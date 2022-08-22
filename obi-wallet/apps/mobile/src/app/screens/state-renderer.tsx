@@ -21,6 +21,10 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
       return null;
     case MultisigState.EMPTY:
       return <OnboardingScreen />;
+    case MultisigState.OUTDATED:
+      // TODO: show a migration screen
+      console.log("Outdated proxy");
+      return null;
     case MultisigState.INITIALIZED:
       return <HomeScreen />;
   }

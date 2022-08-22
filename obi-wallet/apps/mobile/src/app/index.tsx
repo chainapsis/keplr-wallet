@@ -4,7 +4,7 @@ import { IntlProvider } from "react-intl";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { SettingsScreens } from "./screens/settings";
+import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
@@ -50,7 +50,7 @@ export function App() {
                 title: route.params.app.label,
               })}
             />
-            <SettingsScreens />
+            {settingsScreens()}
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
