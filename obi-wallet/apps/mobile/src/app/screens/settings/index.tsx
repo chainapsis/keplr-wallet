@@ -165,11 +165,13 @@ const styles = StyleSheet.create({
 
 export const SettingsNavigator = createNativeStackNavigator();
 
-export const settingsScreens = () => [
-  < Stack.Screen
-    name="MultiSigSettings"
-    key="MultiSigSettings"
-    component={KeysConfigScreen}
-    options={{ headerShown: false }}
-  />,
-];
+export function SettingsScreens() {
+  return (
+    <Stack.Screen
+      name="MultiSigSettings"
+      key="MultiSigSettings"
+      component={KeysConfigScreen}
+      options={{ headerShown: false }}
+    />
+  );
+}
