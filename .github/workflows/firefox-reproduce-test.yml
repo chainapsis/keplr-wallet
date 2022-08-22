@@ -28,7 +28,6 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io
       - run: docker build -f ./docker/Dockerfile -t builder .
       - run: docker run -v $(pwd):/data builder
-      - run: ls ./build/firefox
       - name: Setup node
         uses: actions/setup-node@v2
         with:
@@ -42,3 +41,4 @@ jobs:
       - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
       - run: yarn install --frozen-lockfile
       - run: yarn build
+      - run: npx zx ./scripts/firefox-distribution-diff-check.mjs
