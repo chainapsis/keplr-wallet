@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import { FunctionComponent } from "react";
 import {
   Image,
   StyleSheet,

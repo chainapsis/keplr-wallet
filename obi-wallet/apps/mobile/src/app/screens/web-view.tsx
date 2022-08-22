@@ -9,7 +9,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { observer } from "mobx-react-lite";
 import { parse } from "node-html-parser";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";

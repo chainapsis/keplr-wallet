@@ -1,4 +1,3 @@
-import React from "react";
 import {
   StyleSheet,
   // eslint-disable-next-line no-restricted-imports
