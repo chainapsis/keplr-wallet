@@ -35,4 +35,6 @@ RUN yarn build
 
 VOLUME /data
 
-CMD cp -r /app/packages/extension/build /data
+WORKDIR /data
+
+CMD find . -type f -delete && cp -r /app/packages/extension/build /data
