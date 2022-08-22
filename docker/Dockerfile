@@ -19,11 +19,17 @@ RUN unzip protoc-21.3-linux-$(if [ $(uname -m) = "aarch64" ]; then echo aarch_64
 RUN cp -r $HOME/protoc/include /usr/local
 RUN cp -r $HOME/protoc/bin /usr/local
 
-RUN mkdir app
+RUN useradd user
+RUN mkdir /home/user
+RUN usermod -d /home/user user
+RUN chown -Rh user:user /home/user
 
-COPY ./ /app
+COPY ./ /home/user/app
+RUN chown -Rh user:user /home/user/app
 
-WORKDIR /app
+USER user
+
+WORKDIR /home/user/app
 
 # Remove all .DS_Store fils which exist only in OSX
 RUN find . -name .DS_Store -exec rm {} \;
@@ -40,4 +46,4 @@ VOLUME /data
 
 WORKDIR /data
 
-CMD mkdir -p ./build && cd ./build && find . -type f -delete && cp -r /app/packages/extension/build /data
+CMD mkdir -p ./build && cd ./build && find . -type f -delete && cp -r /home/user/app/packages/extension/build /data
