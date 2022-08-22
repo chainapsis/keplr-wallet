@@ -2,7 +2,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { Text } from "@obi-wallet/common";
-import { FC } from "react";
+import { useRef, useState, FC } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import {
@@ -42,10 +42,8 @@ const getSVG = (number: number) => {
   }
 };
 export function KeysConfigScreen() {
-  const refBottomSheet = React.useRef<BottomSheet>();
-  const [selectedItem, setSelectedItem] = React.useState<KeyListItem | null>(
-    null
-  );
+  const refBottomSheet = useRef<BottomSheet>();
+  const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
   const data: KeyListItem[] = [
     {
       key: "phone-number",

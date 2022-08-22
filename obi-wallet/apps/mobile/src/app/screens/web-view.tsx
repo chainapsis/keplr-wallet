@@ -9,7 +9,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { observer } from "mobx-react-lite";
 import { parse } from "node-html-parser";
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
@@ -25,10 +25,10 @@ export type WebViewScreenProps = NativeStackScreenProps<
 export const WebViewScreen = observer<WebViewScreenProps>(
   ({ navigation, route }) => {
     const { app } = route.params;
-    const [currentAppMetadata, setCurrentAppMetadata] = React.useState(app);
-    const [currentUrl, setCurrentUrl] = React.useState(app.url);
-    const [loaded, setLoaded] = React.useState(false);
-    const [title, setTitle] = React.useState(app.label);
+    const [currentAppMetadata, setCurrentAppMetadata] = useState<App>(app);
+    const [currentUrl, setCurrentUrl] = useState<string>(app.url);
+    const [loaded, setLoaded] = useState<boolean>(false);
+    const [title, setTitle] = useState<string>(app.label);
 
     const safeArea = useSafeAreaInsets();
 

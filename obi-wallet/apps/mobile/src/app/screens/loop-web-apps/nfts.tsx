@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import WebView from "react-native-webview";
 
 export function NFTs() {
   const safeArea = useSafeAreaInsets();
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = useState(true);
   return (
     <View style={{ flex: 1, backgroundColor: "#17162C" }}>
       <WebView
