@@ -1,5 +1,4 @@
 import { Home } from "@obi-wallet/common";
-import React from "react";
 import { SafeAreaView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

@@ -83,13 +83,13 @@ export function SettingsScreen() {
     </SafeAreaView>
   );
 }
-type settingsProps = {
+interface SettingsProps {
   Icon: React.FC<SvgProps>;
   title: string;
   subtitle: string;
   onPress?: () => void;
 };
-function Setting({ Icon, title, subtitle, onPress }: settingsProps) {
+function Setting({ Icon, title, subtitle, onPress }: SettingsProps) {
   return (
     <TouchableOpacity
       style={[styles.flex1, styles.setting]}
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
 export const SettingsNavigator = createNativeStackNavigator();
 
 export const settingsScreens = () => [
-  <Stack.Screen
+  < Stack.Screen
     name="MultiSigSettings"
     key="MultiSigSettings"
     component={KeysConfigScreen}
