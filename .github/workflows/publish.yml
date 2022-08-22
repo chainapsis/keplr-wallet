@@ -31,7 +31,7 @@ jobs:
       - run: printf $GPG_KEY | base64 --decode > private.key
         env:
           GPG_KEY: ${{ secrets.GPG_KEY }}
-      - run: gpg --import --no-tty --batch --yes ./private.key
+      - run: gpg --import --no-tty --batch --yes ./private.key && rm ./private.key
       - run: git-secret reveal -f -p $GPG_PASSPHRASE
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -63,7 +63,7 @@ jobs:
     - run: printf $GPG_KEY | base64 --decode > private.key
       env:
         GPG_KEY: ${{ secrets.GPG_KEY }}
-    - run: gpg --import --no-tty --batch --yes ./private.key
+    - run: gpg --import --no-tty --batch --yes ./private.key && rm ./private.key
     - run: git-secret reveal -f -p $GPG_PASSPHRASE
       env:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
