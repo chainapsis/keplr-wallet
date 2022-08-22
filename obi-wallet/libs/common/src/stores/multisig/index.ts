@@ -123,12 +123,6 @@ export class MultisigStore {
     return this.proxyAddress !== null;
   }
 
-  public doesProxyNeedMigration() {
-    return (
-      this.proxyAddress !== null && this.proxyAddress.codeId !== CURRENT_CODE_ID
-    );
-  }
-
   @action
   public setPhoneNumberKey(payload: SerializedPhoneNumberPayload) {
     this.nextAdmin.phoneNumber = payload;
@@ -194,9 +188,8 @@ export class MultisigStore {
     prefix: string
   ): Multisig {
     const { biometrics, phoneNumber } = multisig;
-    const multisigThresholdPublicKey = this.createMultisigThresholdPublicKey(
-      multisig
-    );
+    const multisigThresholdPublicKey =
+      this.createMultisigThresholdPublicKey(multisig);
 
     return {
       multisig: multisigThresholdPublicKey && {

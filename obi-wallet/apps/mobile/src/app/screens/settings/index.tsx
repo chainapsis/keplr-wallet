@@ -168,7 +168,8 @@ const styles = StyleSheet.create({
 
 export const SettingsNavigator = createNativeStackNavigator();
 
-export function SettingsScreens() {
+// This can't be a React component because `Stack.Navigator` doesn't want that.
+export function settingsScreens() {
   return (
     <Stack.Screen
       name="MultiSigSettings"
