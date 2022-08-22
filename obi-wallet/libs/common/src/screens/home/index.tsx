@@ -68,8 +68,8 @@ export const Home = observer<HomeProps>(
                     onRemove={
                       editMode
                         ? () => {
-                          appsStore.removeFavoriteByUrl(app.url);
-                        }
+                            appsStore.removeFavoriteByUrl(app.url);
+                          }
                         : undefined
                     }
                     onPress={() => {
@@ -150,7 +150,6 @@ export const Home = observer<HomeProps>(
               >
                 <TextInput
                   defaultValue="www.keplr_wallet.com"
-
                   style={{
                     flex: 1,
                     backgroundColor: "#090817",
@@ -159,16 +158,14 @@ export const Home = observer<HomeProps>(
                     borderRadius: 12,
                     paddingLeft: 20,
                     color: "#F6F5FF",
-
                   }}
                   placeholder="Search"
-
                   onChangeText={(text) => {
-                    const newText = text.includes("https://") ? text : `https://${text}`;
+                    const newText = text.includes("https://")
+                      ? text
+                      : `https://${text}`;
                     setUrl(newText.toLocaleLowerCase());
-
-                  }
-                  }
+                  }}
                   autoCapitalize="none"
                 />
                 <TouchableHighlight
@@ -182,9 +179,12 @@ export const Home = observer<HomeProps>(
                     //check if url is a valid url with protocol and domain
                     try {
                       const validURL = new URL(url.trim());
-                      //if validURL text has space 
-                      console.log(validURL, 'validURL');
-                      if (validURL.toString().includes(" ") || !validURL.toString().includes(".")) {
+                      //if validURL text has space
+                      console.log(validURL, "validURL");
+                      if (
+                        validURL.toString().includes(" ") ||
+                        !validURL.toString().includes(".")
+                      ) {
                         throw new Error("Invalid URL");
                       }
 
@@ -199,23 +199,19 @@ export const Home = observer<HomeProps>(
                       const newUrl = url.includes("https://")
                         ? url.replace("https://", "")
                         : url.includes("http://")
-                          ? url.replace("http://", "")
-                          : url;
+                        ? url.replace("http://", "")
+                        : url;
 
                       const searchParam = newUrl.split(" ").join("+");
                       const newSearchUrl = `https://www.google.com/search?q=${searchParam}`;
-                      console.log({ newUrl })
+                      console.log({ newUrl });
                       onAppPress({
                         url: newSearchUrl,
                         label: newUrl,
                         icon: "https://place-hold.it/180x180",
                       });
                     }
-
-                  }
-
-                  }
-
+                  }}
                 >
                   <Text>
                     <FontAwesomeIcon
@@ -230,7 +226,7 @@ export const Home = observer<HomeProps>(
             </View>
           </Card>
         </TouchableWithoutFeedback>
-      </KeyboardAvoidingView >
+      </KeyboardAvoidingView>
     );
   }
 );

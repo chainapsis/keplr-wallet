@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { IntlProvider } from "react-intl";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
 import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
@@ -50,7 +51,6 @@ export function App() {
               })}
             />
             {settingsScreens()}
-
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

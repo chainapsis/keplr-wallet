@@ -11,6 +11,7 @@
     "@fortawesome/free-solid-svg-icons": "*",
     "@fortawesome/react-fontawesome": "*",
     "@fortawesome/react-native-fontawesome": "*",
+    "@gorhom/bottom-sheet": "*",
     "@keplr-wallet/common": "*",
     "@keplr-wallet/stores": "*",
     "@react-native-async-storage/async-storage": "*",
@@ -55,8 +56,6 @@
     "react-native-svg-uri": "*",
     "react-native-webview": "*",
     "rooks": "*",
-    "secp256k1": "*",
-    "big-integer": "*",
-    "@gorhom/bottom-sheet": "*"
+    "secp256k1": "*"
   }
 }

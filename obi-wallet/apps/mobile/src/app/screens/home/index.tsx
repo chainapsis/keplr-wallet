@@ -10,9 +10,11 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { TouchableHighlight } from "react-native-gesture-handler";
-import { DappExplorer } from "../dapp-explorer";
-import { SettingsScreen, SettingsStack } from "../settings";
 
+import { DappExplorer } from "../dapp-explorer";
+import { NFTs } from "../loop-web-apps/nfts";
+import { Trade } from "../loop-web-apps/trade";
+import { SettingsScreen } from "../settings";
 import AppsIcon from "./assets/appsIcon.svg";
 import AssetsIcon from "./assets/assetsIcon.svg";
 import AppsIconActive from "./assets/ic_apps_active.svg";
@@ -24,7 +26,6 @@ import NFTsIcon from "./assets/nftsIcon.svg";
 import SettingsIcon from "./assets/settingsIcon.svg";
 import TradeIcon from "./assets/tradeIcon.svg";
 import { Assets } from "./components/assets";
-import { Background } from "./components/background";
 
 export function TabNavigation() {
   const Tab = createBottomTabNavigator();
@@ -74,14 +75,10 @@ export function TabNavigation() {
         },
       })}
     >
-      <Tab.Screen
-        name="Assets"
-        component={Assets}
-
-      />
-      <Tab.Screen name="NFTs" component={Background} />
+      <Tab.Screen name="Assets" component={Assets} />
+      <Tab.Screen name="NFTs" component={NFTs} />
       <Tab.Screen name="Apps" component={DappExplorer} />
-      <Tab.Screen name="Trade" component={Background} />
+      <Tab.Screen name="Trade" component={Trade} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
