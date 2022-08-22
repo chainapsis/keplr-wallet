@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@cosmjs/amino": "*",
+    "@cosmjs/cosmwasm-stargate": "*",
     "@cosmjs/launchpad": "*",
     "@cosmjs/proto-signing": "*",
     "@cosmjs/stargate": "*",
@@ -27,6 +28,7 @@
     "fp-ts": "*",
     "io-ts": "*",
     "isomorphic-unfetch": "*",
+    "long": "*",
     "mobx": "*",
     "mobx-react-lite": "*",
     "node-html-parser": "*",
