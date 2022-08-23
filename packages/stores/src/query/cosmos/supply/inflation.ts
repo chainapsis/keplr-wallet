@@ -13,6 +13,7 @@ import {
 } from "./osmosis";
 import { ObservableQueryDistributionParams } from "../distribution";
 import { ObservableQueryStakingPool } from "../staking";
+import { ObservableQueryJunoAnnualProvisions } from "./juno/annual-provisions";
 
 export class ObservableQueryInflation {
   constructor(
@@ -26,6 +27,7 @@ export class ObservableQueryInflation {
     protected readonly _queryOsmosisEpochs: ObservableQueryOsmosisEpochs,
     protected readonly _queryOsmosisEpochProvisions: ObservableQueryOsmosisEpochProvisions,
     protected readonly _queryOsmosisMintParams: ObservableQueryOsmosisMintParmas,
+    protected readonly _queryJunoAnnualProvisions: ObservableQueryJunoAnnualProvisions,
     protected readonly _queryDistributionParams: ObservableQueryDistributionParams
   ) {
     makeObservable(this);
@@ -105,6 +107,26 @@ export class ObservableQueryInflation {
                 .mul(DecUtils.getPrecisionDec(2));
             }
           }
+        }
+      } else if (chainInfo.chainId.startsWith("juno")) {
+        // In juno, the actual supply on chain and the supply recognized by the community are different.
+        // I don't know why, but it's annoying to deal with this problem.
+        if (
+          this._queryJunoAnnualProvisions.annualProvisionsRaw &&
+          this._queryPool.response
+        ) {
+          const bondedToken = new Dec(
+            this._queryPool.response.data.pool.bonded_tokens
+          );
+
+          const dec = this._queryJunoAnnualProvisions.annualProvisionsRaw
+            .quo(bondedToken)
+            .mul(
+              new Dec(1).sub(this._queryDistributionParams.communityTax.toDec())
+            )
+            .mul(DecUtils.getTenExponentN(2));
+
+          return new IntPretty(dec);
         }
       } else {
         dec = new Dec(this._queryMint.response?.data.inflation ?? "0").mul(
