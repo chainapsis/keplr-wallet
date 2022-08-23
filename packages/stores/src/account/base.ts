@@ -2,9 +2,9 @@ import { action, computed, flow, makeObservable, observable } from "mobx";
 import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { StdFee } from "@cosmjs/launchpad";
 import { MakeTxResponse } from "./types";
-import { bech32 } from "bech32";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -339,10 +339,16 @@ export class AccountSetBase {
     );
   }
 
+  @computed
   get ethereumHexAddress(): string {
-    return `0x${Buffer.from(
-      bech32.fromWords(bech32.decode(this.bech32Address).words)
-    ).toString("hex")}`;
+    if (this.bech32Address === "") {
+      return "";
+    }
+
+    return Bech32Address.fromBech32(
+      this.bech32Address,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    ).toHex(true);
   }
 }
 

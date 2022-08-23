@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.24.0-alpha.25",
+    "@ethersproject/address": "^5.6.0",
     "@keplr-wallet/crypto": "0.10.18",
     "@keplr-wallet/proto-types": "0.10.18",
     "@keplr-wallet/types": "0.10.18",
