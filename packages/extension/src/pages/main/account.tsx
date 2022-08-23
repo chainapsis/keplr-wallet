@@ -104,7 +104,7 @@ export const AccountView: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
         </div>
       )}
-      {accountInfo.hasEvmosHexAddress && (
+      {accountInfo.hasEthereumHexAddress && (
         <div
           className={styleAccount.containerAccount}
           style={{ marginTop: "2px" }}
@@ -112,17 +112,20 @@ export const AccountView: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
           <div
             className={styleAccount.address}
-            onClick={() => copyAddress(accountInfo.evmosHexAddress)}
+            onClick={() => copyAddress(accountInfo.ethereumHexAddress)}
           >
-            <Address isRaw={true} tooltipAddress={accountInfo.evmosHexAddress}>
+            <Address
+              isRaw={true}
+              tooltipAddress={accountInfo.ethereumHexAddress}
+            >
               {accountInfo.walletStatus === WalletStatus.Loaded &&
-              accountInfo.evmosHexAddress
-                ? accountInfo.evmosHexAddress.length === 42
-                  ? `${accountInfo.evmosHexAddress.slice(
+              accountInfo.ethereumHexAddress
+                ? accountInfo.ethereumHexAddress.length === 42
+                  ? `${accountInfo.ethereumHexAddress.slice(
                       0,
                       10
-                    )}...${accountInfo.evmosHexAddress.slice(-8)}`
-                  : accountInfo.evmosHexAddress
+                    )}...${accountInfo.ethereumHexAddress.slice(-8)}`
+                  : accountInfo.ethereumHexAddress
                 : "..."}
             </Address>
           </div>

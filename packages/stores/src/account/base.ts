@@ -2,8 +2,8 @@ import { action, computed, flow, makeObservable, observable } from "mobx";
 import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { StdFee } from "@cosmjs/launchpad";
-import { evmosToEth } from "@tharsis/address-converter";
 import { MakeTxResponse } from "./types";
 
 export enum WalletStatus {
@@ -331,12 +331,24 @@ export class AccountSetBase {
     return this.txTypeInProgress;
   }
 
-  get hasEvmosHexAddress(): boolean {
-    return this.bech32Address.startsWith("evmos");
+  get hasEthereumHexAddress(): boolean {
+    return (
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-address-gen") ?? false
+    );
   }
 
-  get evmosHexAddress(): string {
-    return evmosToEth(this.bech32Address);
+  @computed
+  get ethereumHexAddress(): string {
+    if (this.bech32Address === "") {
+      return "";
+    }
+
+    return Bech32Address.fromBech32(
+      this.bech32Address,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    ).toHex(true);
   }
 }
 
