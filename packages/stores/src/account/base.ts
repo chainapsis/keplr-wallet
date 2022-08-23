@@ -3,8 +3,8 @@ import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { StdFee } from "@cosmjs/launchpad";
-import { evmosToEth } from "@tharsis/address-converter";
 import { MakeTxResponse } from "./types";
+import { bech32 } from "bech32";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -331,12 +331,18 @@ export class AccountSetBase {
     return this.txTypeInProgress;
   }
 
-  get hasEvmosHexAddress(): boolean {
-    return this.bech32Address.startsWith("evmos");
+  get hasEthereumHexAddress(): boolean {
+    return (
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-address-gen") ?? false
+    );
   }
 
-  get evmosHexAddress(): string {
-    return evmosToEth(this.bech32Address);
+  get ethereumHexAddress(): string {
+    return `0x${Buffer.from(
+      bech32.fromWords(bech32.decode(this.bech32Address).words)
+    ).toString("hex")}`;
   }
 }
 
