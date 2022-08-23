@@ -224,13 +224,11 @@ export const RecoverMnemonicPage: FunctionComponent<{
   const validateSeedWords = (seedWords: string[]) => {
     seedWords = seedWords.map((word) => word.trim());
     if (seedWords.join(" ").trim().length === 0) {
-      return "Mnemonic is required";
+      return "__required__";
     }
     if (seedWords.length === 1 && isPrivateKey(seedWords[0])) {
       if (!validatePrivateKey(seedWords[0])) {
-        return intl.formatMessage({
-          id: "register.import.textarea.private-key.error.invalid",
-        });
+        return "__invalid__";
       }
       return undefined;
     } else {
@@ -245,9 +243,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
       seedWords = seedWords.slice(0, numWords);
       // If an empty word exists in the middle of words, it is treated as an error.
       if (seedWords.find((word) => word.length === 0)) {
-        return intl.formatMessage({
-          id: "register.create.textarea.mnemonic.error.invalid",
-        });
+        return "__invalid__";
       }
 
       if (numWords < 9) {
@@ -257,9 +253,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
       }
 
       if (!bip39.validateMnemonic(seedWords.join(" "))) {
-        return intl.formatMessage({
-          id: "register.create.textarea.mnemonic.error.invalid",
-        });
+        return "__invalid__";
       }
 
       return undefined;
@@ -451,7 +445,35 @@ export const RecoverMnemonicPage: FunctionComponent<{
             })}
           </div>
           {seedWordsError ? (
-            <div className={styleRecoverMnemonic.alert}>{seedWordsError}</div>
+            <div className={styleRecoverMnemonic.alert}>
+              {(() => {
+                if (seedWordsError === "__required__") {
+                  if (seedType === SeedType.PRIVATE_KEY) {
+                    return intl.formatMessage({
+                      id: "register.import.textarea.private-key.error.required",
+                    });
+                  } else {
+                    return intl.formatMessage({
+                      id: "register.import.textarea.mnemonic.error.required",
+                    });
+                  }
+                }
+
+                if (seedWordsError === "__invalid__") {
+                  if (seedType === SeedType.PRIVATE_KEY) {
+                    return intl.formatMessage({
+                      id: "register.import.textarea.private-key.error.invalid",
+                    });
+                  } else {
+                    return intl.formatMessage({
+                      id: "register.import.textarea.mnemonic.error.invalid",
+                    });
+                  }
+                }
+
+                return seedWordsError;
+              })()}
+            </div>
           ) : null}
           <div className={styleRecoverMnemonic.formInnerContainer}>
             <Input
