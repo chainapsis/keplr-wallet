@@ -1,8 +1,23 @@
 import { createStyleProvider } from "./builder";
 import { EnumTextTransform, EnumTextDecorationLine } from "./builder/types";
-import { Platform, StatusBarStyle } from "react-native";
+import { PixelRatio, Platform, StatusBarStyle } from "react-native";
 import { getPlatformFontWeight } from "./builder/utils";
 import { BlurViewProperties } from "@react-native-community/blur";
+
+function handleImageHighRes(image: any, highResImage: any): any {
+  if (PixelRatio.get() >= 2) {
+    // In order to ignore the error of eslint without a comment, it simply accepts a function.
+    if (typeof highResImage === "function") {
+      highResImage = highResImage();
+    }
+    return highResImage;
+  }
+  // In order to ignore the error of eslint without a comment, it simply accepts a function.
+  if (typeof image === "function") {
+    image = image();
+  }
+  return image;
+}
 
 export const ColorPalette = {
   "blue-10": "#F6F8FF",
@@ -274,7 +289,10 @@ export const {
         // On android, the gradient rendered without dithering.
         // Since there is no effective way to solve this problem,
         // provides an option to stretch the bitmap image and show it.
-        fallbackAndroidImage: require("../assets/gradients/gradient-background.png"),
+        fallbackAndroidImage: handleImageHighRes(
+          () => require("../assets/gradients/gradient-background.png"),
+          () => require("../assets/gradients/gradient-background-3x.png")
+        ),
       },
 
       "status-bar-style": "dark-content" as StatusBarStyle,
@@ -353,7 +371,10 @@ export const {
             color: "#E3E4FF",
           },
         ],
-        fallbackAndroidImage: require("../assets/gradients/unlock-screen.png"),
+        fallbackAndroidImage: handleImageHighRes(
+          () => require("../assets/gradients/unlock-screen.png"),
+          () => require("../assets/gradients/unlock-screen-3x.png")
+        ),
       },
 
       "tx-result-screen-pending-gradient-background": {
@@ -368,7 +389,10 @@ export const {
             color: "#FFFFFF",
           },
         ],
-        fallbackAndroidImage: require("../assets/gradients/tx-result-screen-pending.png"),
+        fallbackAndroidImage: handleImageHighRes(
+          () => require("../assets/gradients/tx-result-screen-pending.png"),
+          () => require("../assets/gradients/tx-result-screen-pending-3x.png")
+        ),
       },
 
       "tx-result-screen-success-gradient-background": {
@@ -383,7 +407,10 @@ export const {
             color: "#FFFFFF",
           },
         ],
-        fallbackAndroidImage: require("../assets/gradients/tx-result-screen-success.png"),
+        fallbackAndroidImage: handleImageHighRes(
+          () => require("../assets/gradients/tx-result-screen-success.png"),
+          () => require("../assets/gradients/tx-result-screen-success-3x.png")
+        ),
       },
 
       "tx-result-screen-failed-gradient-background": {
@@ -398,7 +425,10 @@ export const {
             color: "#FFFFFF",
           },
         ],
-        fallbackAndroidImage: require("../assets/gradients/tx-result-screen-failed.png"),
+        fallbackAndroidImage: handleImageHighRes(
+          () => require("../assets/gradients/tx-result-screen-failed.png"),
+          () => require("../assets/gradients/tx-result-screen-failed-3x.png")
+        ),
       },
     },
     colors: {
@@ -634,7 +664,10 @@ export const {
               color: "#020915",
             },
           ],
-          fallbackAndroidImage: require("../assets/gradients/gradient-background-dark.png"),
+          fallbackAndroidImage: handleImageHighRes(
+            () => require("../assets/gradients/gradient-background-dark.png"),
+            () => require("../assets/gradients/gradient-background-dark-3x.png")
+          ),
         },
 
         "status-bar-style": "light-content" as StatusBarStyle,
@@ -713,7 +746,10 @@ export const {
               color: "#050B14",
             },
           ],
-          fallbackAndroidImage: require("../assets/gradients/unlock-screen-dark.png"),
+          fallbackAndroidImage: handleImageHighRes(
+            () => require("../assets/gradients/unlock-screen-dark.png"),
+            () => require("../assets/gradients/unlock-screen-dark-3x.png")
+          ),
         },
 
         "tx-result-screen-pending-gradient-background": {
@@ -728,7 +764,12 @@ export const {
               color: "#030E21",
             },
           ],
-          fallbackAndroidImage: require("../assets/gradients/tx-result-screen-pending-dark.png"),
+          fallbackAndroidImage: handleImageHighRes(
+            () =>
+              require("../assets/gradients/tx-result-screen-pending-dark.png"),
+            () =>
+              require("../assets/gradients/tx-result-screen-pending-dark-3x.png")
+          ),
         },
 
         "tx-result-screen-success-gradient-background": {
@@ -743,7 +784,12 @@ export const {
               color: "#021213",
             },
           ],
-          fallbackAndroidImage: require("../assets/gradients/tx-result-screen-success-dark.png"),
+          fallbackAndroidImage: handleImageHighRes(
+            () =>
+              require("../assets/gradients/tx-result-screen-success-dark.png"),
+            () =>
+              require("../assets/gradients/tx-result-screen-success-dark-3x.png")
+          ),
         },
 
         "tx-result-screen-failed-gradient-background": {
@@ -758,7 +804,12 @@ export const {
               color: "#0C0101",
             },
           ],
-          fallbackAndroidImage: require("../assets/gradients/tx-result-screen-failed-dark.png"),
+          fallbackAndroidImage: handleImageHighRes(
+            () =>
+              require("../assets/gradients/tx-result-screen-failed-dark.png"),
+            () =>
+              require("../assets/gradients/tx-result-screen-failed-dark-3x.png")
+          ),
         },
       },
       colors: {
