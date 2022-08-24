@@ -71,7 +71,7 @@ export function ReceiveScreen() {
 
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <TouchableOpacity style={{ backgroundColor: "#17162C", borderRadius: 12, paddingVertical: 20, paddingHorizontal: 30 }} onPress={() => onShare('juno29793619276319723692763')}>
-          <Text style={{ textAlign: 'center', color: "#F6F5FF", fontSize: 16, fontWeight: '500' }}>Tab to share your address</Text>
+          <Text style={{ textAlign: 'center', color: "#F6F5FF", fontSize: 16, fontWeight: '500' }}>Tap to share your address</Text>
           <Text style={{ textAlign: 'center', color: "#F6F5FF", fontSize: 12, fontWeight: '500', opacity: .6, marginTop: 10 }}>juno29793619276319723692763</Text>
         </TouchableOpacity>
       </View>
