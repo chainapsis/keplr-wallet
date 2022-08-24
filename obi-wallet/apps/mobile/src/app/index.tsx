@@ -4,6 +4,8 @@ import { IntlProvider } from "react-intl";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { ReceiveScreen } from "./screens/receive";
+import { SendScreen } from "./screens/send";
 import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
@@ -50,6 +52,9 @@ export function App() {
                 title: route.params.app.label,
               })}
             />
+            <Stack.Screen name="send" component={SendScreen} />
+            <Stack.Screen name="receive" component={ReceiveScreen} />
+
             {settingsScreens()}
           </Stack.Navigator>
         </NavigationContainer>

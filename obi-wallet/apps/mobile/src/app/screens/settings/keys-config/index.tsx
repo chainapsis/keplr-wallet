@@ -4,6 +4,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MultisigKey, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite/src/observer";
 import { useRef, useState } from "react";
+import { FC } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {
   SafeAreaView,

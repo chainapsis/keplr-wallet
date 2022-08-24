@@ -16,6 +16,7 @@ import {
   ListRenderItemInfo,
   TouchableHighlight,
   View,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -111,12 +112,13 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
         </>
       </TouchableHighlight>
 
-      <View
+      <TouchableOpacity
         style={{
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
         }}
+        onPress={() => navigation.navigate("AccountsSettings")}
       >
         <View style={{ margin: 10 }}>
           <Text
@@ -144,7 +146,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
           source={require("../assets/backgroundblue.png")}
           style={{ width: 35, height: 35, borderRadius: 35 }}
         />
-      </View>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -156,6 +158,8 @@ const BalanceAndActions = observer(() => {
     0
   );
 
+  const navigation =
+    useNavigation<DrawerNavigationProp<Record<string, object>>>();
   return (
     <View style={{ justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: "#787B9C", fontSize: 11, fontWeight: "500" }}>
@@ -183,6 +187,7 @@ const BalanceAndActions = observer(() => {
               justifyContent: "center",
               alignItems: "center",
             }}
+            onPress={() => navigation.navigate("send")}
           >
             <Send width={22} height={22} />
           </TouchableHighlight>
@@ -207,6 +212,7 @@ const BalanceAndActions = observer(() => {
               justifyContent: "center",
               alignItems: "center",
             }}
+            onPress={() => navigation.navigate("receive")}
           >
             <Receive width={22} height={22} />
           </TouchableHighlight>

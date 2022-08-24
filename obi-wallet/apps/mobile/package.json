@@ -15,6 +15,7 @@
     "@keplr-wallet/common": "*",
     "@keplr-wallet/stores": "*",
     "@react-native-async-storage/async-storage": "*",
+    "@react-native-community/blur": "*",
     "@react-navigation/bottom-tabs": "*",
     "@react-navigation/drawer": "*",
     "@react-navigation/native": "*",

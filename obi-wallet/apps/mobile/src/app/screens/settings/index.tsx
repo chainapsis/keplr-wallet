@@ -6,6 +6,8 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
+import { Account } from "../account";
+import { Create } from "../account/create";
 import { useNavigation } from "../onboarding/stack";
 import AccountSettingsIcon from "./assets/banksettings.svg";
 import MultiSigIcon from "./assets/edit.svg";
@@ -49,6 +51,7 @@ export function SettingsScreen() {
         Icon={AccountSettingsIcon}
         title="Account settings"
         subtitle="Manage accounts & sub-accounts "
+        onPress={() => navigation.navigate("AccountsSettings")}
       />
       <Setting
         Icon={MultiSigIcon}
@@ -169,13 +172,23 @@ const styles = StyleSheet.create({
 export const SettingsNavigator = createNativeStackNavigator();
 
 // This can't be a React component because `Stack.Navigator` doesn't want that.
-export function settingsScreens() {
-  return (
-    <Stack.Screen
-      name="MultiSigSettings"
-      key="MultiSigSettings"
-      component={KeysConfigScreen}
-      options={{ headerShown: false }}
-    />
-  );
-}
+export const settingsScreens = () => [
+  <Stack.Screen
+    name="AccountsSettings"
+    key="AccountsSettings"
+    component={Account}
+    options={{ headerShown: false }}
+  />,
+  <Stack.Screen
+    name="AddSubAccount"
+    key="AddSubAccount"
+    component={Create}
+    options={{ headerShown: false }}
+  />,
+  <Stack.Screen
+    name="MultiSigSettings"
+    key="MultiSigSettings"
+    component={KeysConfigScreen}
+    options={{ headerShown: false }}
+  />,
+];

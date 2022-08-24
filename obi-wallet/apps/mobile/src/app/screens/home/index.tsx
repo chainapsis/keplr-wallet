@@ -177,6 +177,17 @@ function CustomDrawerContent(props) {
         Networks
       </Text>
       <DrawerItemList {...props} />
+      <Text
+        style={{
+          color: "#787B9C",
+          marginLeft: 16,
+          marginTop: 17,
+          fontSize: 11,
+          textTransform: "uppercase",
+        }}
+      >
+        More Coming Soon!
+      </Text>
     </DrawerContentScrollView>
   );
 }

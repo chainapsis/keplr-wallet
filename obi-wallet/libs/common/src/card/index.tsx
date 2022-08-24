@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { StyleSheet, View, ViewProps } from "react-native";
 
 import { createShadow } from "../styles";
@@ -14,7 +15,7 @@ export function Card({
   style,
   ...props
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 } & ViewProps) {
   return (
     <View style={[cardStyles.card, style]} {...props}>
