@@ -212,6 +212,7 @@ const BalanceAndActions = observer(() => {
               justifyContent: "center",
               alignItems: "center",
             }}
+            onPress={() => navigation.navigate("receive")}
           >
             <Receive width={22} height={22} />
           </TouchableHighlight>
