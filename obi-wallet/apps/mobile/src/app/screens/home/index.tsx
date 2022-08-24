@@ -8,7 +8,9 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItemList,
+  DrawerScreenProps,
 } from "@react-navigation/drawer";
+import { ParamListBase } from "@react-navigation/native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { DappExplorer } from "../dapp-explorer";
@@ -27,8 +29,20 @@ import SettingsIcon from "./assets/settingsIcon.svg";
 import TradeIcon from "./assets/tradeIcon.svg";
 import { Assets } from "./components/assets";
 
-export function TabNavigation() {
+const networks = [
+  {
+    chainId: "uno-3",
+    label: "Juno Testnet",
+  },
+];
+
+export type TabNavigationProps = DrawerScreenProps<ParamListBase>;
+
+export function TabNavigation({ route }: TabNavigationProps) {
   const Tab = createBottomTabNavigator();
+
+  const currentNetwork = route.name;
+  const initialParams = { currentNetwork };
 
   return (
     <Tab.Navigator
@@ -75,11 +89,27 @@ export function TabNavigation() {
         },
       })}
     >
-      <Tab.Screen name="Assets" component={Assets} />
-      <Tab.Screen name="NFTs" component={NFTs} />
-      <Tab.Screen name="Apps" component={DappExplorer} />
-      <Tab.Screen name="Trade" component={Trade} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen
+        name="Assets"
+        component={Assets}
+        initialParams={initialParams}
+      />
+      <Tab.Screen name="NFTs" component={NFTs} initialParams={initialParams} />
+      <Tab.Screen
+        name="Apps"
+        component={DappExplorer}
+        initialParams={initialParams}
+      />
+      <Tab.Screen
+        name="Trade"
+        component={Trade}
+        initialParams={initialParams}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        initialParams={initialParams}
+      />
     </Tab.Navigator>
   );
 }
@@ -104,8 +134,15 @@ export function HomeScreen() {
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name="Juno" component={TabNavigation} />
-      <Drawer.Screen name="Cosmos" component={TabNavigation} />
+      {networks.map((network) => {
+        return (
+          <Drawer.Screen
+            key={network.chainId}
+            name={network.label}
+            component={TabNavigation}
+          />
+        );
+      })}
     </Drawer.Navigator>
   );
 }
