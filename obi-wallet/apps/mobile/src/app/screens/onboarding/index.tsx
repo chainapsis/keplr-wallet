@@ -11,7 +11,6 @@ export function OnboardingScreen() {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName="onboarding2"
     >
       <Stack.Screen name="onboarding1" component={Onboarding1} />
       <Stack.Screen name="onboarding2" component={Onboarding2} />

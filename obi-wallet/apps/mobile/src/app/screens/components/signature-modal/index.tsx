@@ -13,8 +13,6 @@ import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
 import { TextInput } from "../../../text-input";
 import { getSignature, sendSignMessageText } from "../../../text-message";
-// TODO:
-import ShieldCheck from "../../onboarding/onboarding3/assets/shield-check.svg";
 import { Background } from "../background";
 import { BottomSheet, BottomSheetRef } from "../bottom-sheet";
 import { CheckIcon, Key, KeysList } from "../keys-list";
@@ -23,6 +21,7 @@ import {
   useSecurityQuestionInput,
 } from "../phone-number/security-question-input";
 import { SendMagicSmsButton } from "../phone-number/send-magic-sms-button";
+import { VerifyAndProceedButton } from "../phone-number/verify-and-proceed-button";
 
 export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
@@ -261,10 +260,7 @@ function PhoneNumberBottomSheetContent({
           </View>
         </View>
 
-        <Button
-          label="Verify & Proceed"
-          LeftIcon={ShieldCheck}
-          flavor="blue"
+        <VerifyAndProceedButton
           onPress={async () => {
             onSuccess(await getSignature(key));
           }}
