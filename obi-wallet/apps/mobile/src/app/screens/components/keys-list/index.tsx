@@ -16,7 +16,7 @@ export interface KeyMetaData {
   Icon: FC<SvgProps>;
 }
 
-const keyMetaData: Record<MultisigKey, KeyMetaData> = {
+export const keyMetaData: Record<MultisigKey, KeyMetaData> = {
   biometrics: { Icon: Biometrics },
   cloud: { Icon: Cloud },
   phoneNumber: { Icon: PhoneNumber },
