@@ -1,25 +1,38 @@
+import { Coin, StargateClient } from "@cosmjs/stargate";
 import { faAngleDoubleLeft } from "@fortawesome/free-solid-svg-icons/faAngleDoubleLeft";
 import { faSortAsc } from "@fortawesome/free-solid-svg-icons/faSortAsc";
 import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
+import { observer } from "mobx-react-lite";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
   ImageBackground,
+  ListRenderItemInfo,
   TouchableHighlight,
   View,
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { IconButton } from "../../../button";
+import { useStore } from "../../../stores";
 import Pay from "../assets/pay.svg";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
-export function Assets() {
+export type AssetsProps = BottomTabScreenProps<
+  Record<string, { currentNetwork: string }>
+>;
+
+export function Assets({ route }: AssetsProps) {
+  const { currentNetwork } = route.params;
+
   return (
     <ImageBackground
       source={require("../assets/background.png")}
@@ -35,8 +48,9 @@ export function Assets() {
           flex: 1,
           flexGrow: 1,
         }}
+        edges={["top", "left", "right"]}
       >
-        <AssetsHeader />
+        <AssetsHeader currentNetwork={currentNetwork} />
         <BalanceAndActions />
         <AssetsList />
       </SafeAreaView>
@@ -44,9 +58,10 @@ export function Assets() {
   );
 }
 
-export function AssetsHeader() {
+export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
+
   return (
     <View
       style={{
@@ -92,7 +107,7 @@ export function AssetsHeader() {
             >
               Network
             </Text>
-            <Text style={{ color: "white" }}>Juno</Text>
+            <Text style={{ color: "white" }}>{currentNetwork}</Text>
           </View>
         </>
       </TouchableHighlight>
@@ -136,7 +151,13 @@ export function AssetsHeader() {
   );
 }
 
-function BalanceAndActions() {
+const BalanceAndActions = observer(() => {
+  const balances = useBalances();
+  const balanceInUsd = balances.reduce(
+    (acc, coin) => acc + formatCoin(coin).valueInUsd,
+    0
+  );
+
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
   return (
@@ -145,7 +166,7 @@ function BalanceAndActions() {
         Balance
       </Text>
       <Text style={{ color: "#F6F5FF", fontSize: 20, fontWeight: "500" }}>
-        $38,166.92
+        ${balanceInUsd.toFixed(2)}
       </Text>
       <View
         style={{
@@ -232,9 +253,16 @@ function BalanceAndActions() {
       </View>
     </View>
   );
-}
+});
 
-function AssetsList() {
+const AssetsList = observer(() => {
+  const [sortAscending, setSortAscending] = useState(true);
+  const [...balances] = useBalances();
+  balances.sort((a, b) => {
+    const [first, second] = sortAscending ? [b, a] : [a, b];
+    return formatCoin(first).valueInUsd - formatCoin(second).valueInUsd;
+  });
+
   return (
     <View
       style={{
@@ -258,42 +286,44 @@ function AssetsList() {
         <Text style={{ color: "#787B9C" }}>NAME</Text>
         <View style={{ flexDirection: "row" }}>
           <Text style={{ color: "#787B9C" }}>HOLDINGS</Text>
-          <View style={{ justifyContent: "center" }}>
+          <IconButton
+            style={{ justifyContent: "center" }}
+            onPress={() => {
+              setSortAscending((value) => !value);
+            }}
+          >
             <FontAwesomeIcon
               icon={faSortAsc}
-              style={{ color: "#F6F5FF", marginLeft: 5 }}
+              style={{
+                color: sortAscending ? "#F6F5FF" : "#393853",
+                marginLeft: 5,
+              }}
             />
             <FontAwesomeIcon
               icon={faSortDesc}
-              style={{ color: "#393853", marginLeft: 5, marginTop: -15 }}
+              style={{
+                color: sortAscending ? "#393853" : "#F6F5FF",
+                marginLeft: 5,
+                marginTop: -15,
+              }}
             />
-          </View>
+          </IconButton>
         </View>
       </View>
       <View>
         <FlatList
-          data={[
-            { key: "1" },
-            { key: "21" },
-            { key: "22" },
-            { key: "23" },
-            { key: "24" },
-            { key: "25" },
-            { key: "28" },
-            { key: "27" },
-            { key: "12" },
-            { key: "62" },
-            { key: "32" },
-            { key: "42" },
-          ]}
-          renderItem={() => <AssetsListItem />}
+          keyExtractor={(coin) => coin.denom}
+          data={balances}
+          renderItem={(props) => <AssetsListItem {...props} />}
         />
       </View>
     </View>
   );
-}
+});
 
-function AssetsListItem() {
+function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
+  const { icon, denom, label, amount, valueInUsd } = formatCoin(item);
+
   return (
     <View
       style={{
@@ -305,10 +335,7 @@ function AssetsListItem() {
         marginBottom: 10,
       }}
     >
-      <Image
-        source={require("../assets/backgroundblue.png")}
-        style={{ width: 36, height: 36, borderRadius: 12 }}
-      />
+      {icon}
       <View
         style={{
           flex: 1,
@@ -320,7 +347,7 @@ function AssetsListItem() {
       >
         <View>
           <Text style={{ color: "#F6F5FF", fontSize: 14, fontWeight: "500" }}>
-            Bitcoin
+            {label}
           </Text>
           <Text
             style={{
@@ -329,7 +356,7 @@ function AssetsListItem() {
               fontWeight: "400",
             }}
           >
-            BTC
+            {denom}
           </Text>
         </View>
         <View>
@@ -341,7 +368,7 @@ function AssetsListItem() {
               textAlign: "right",
             }}
           >
-            $575,727,276
+            ${valueInUsd.toFixed(2)}
           </Text>
           <Text
             style={{
@@ -351,10 +378,44 @@ function AssetsListItem() {
               textAlign: "right",
             }}
           >
-            0.0034 BTC
+            {amount} {denom}
           </Text>
         </View>
       </View>
     </View>
   );
+}
+
+function useBalances() {
+  const { multisigStore } = useStore();
+  const address = multisigStore.getProxyAddress();
+
+  const [balances, setBalances] = useState<readonly Coin[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const rcp = "https://rpc.uni.junonetwork.io/";
+      const client = await StargateClient.connect(rcp);
+      setBalances(await client.getAllBalances(address));
+    })();
+  }, [address]);
+
+  return balances;
+}
+
+function formatCoin(coin: Coin) {
+  switch (coin.denom) {
+    case "ujunox": {
+      const amount = parseInt(coin.amount, 10) / 1000000;
+      return {
+        icon: null,
+        denom: "JUNOX",
+        label: "Juno-testnet Staking Coin",
+        amount,
+        valueInUsd: amount * 0,
+      };
+    }
+    default:
+      throw new Error("Unknown coin denom");
+  }
 }

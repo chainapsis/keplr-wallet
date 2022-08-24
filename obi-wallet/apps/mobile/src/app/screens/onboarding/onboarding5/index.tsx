@@ -28,6 +28,7 @@ import {
 import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { CURRENT_CODE_ID } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
@@ -74,9 +75,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
   const [modalKey, setModalKey] = useState(0);
 
-  const multisig = useMemo(() => {
-    return multisigStore.getNextAdmin("juno");
-  }, [multisigStore]);
+  const multisig = multisigStore.getNextAdmin("juno");
 
   useEffect(() => {
     (async () => {
@@ -89,7 +88,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
       }
 
       const balances = {
-        multisig: await hydrateBalances(multisig.multisig.address),
+        multisig: await hydrateBalances(multisig.multisig?.address),
         biometrics: await hydrateBalances(multisig.biometrics?.address),
         phoneNumber: await hydrateBalances(multisig.phoneNumber?.address),
       };
@@ -101,6 +100,8 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
   });
 
   const messages = useMemo(() => {
+    if (!multisig.multisig?.address) return [];
+
     const rawMessage = {
       admin: multisig.multisig.address,
       hot_wallets: [],
@@ -109,7 +110,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
     const value: MsgInstantiateContract = {
       sender: multisig.multisig.address,
       admin: multisig.multisig.address,
-      codeId: Long.fromInt(2603),
+      codeId: Long.fromInt(CURRENT_CODE_ID),
       label: "Obi Proxy",
       msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
       funds: [],
@@ -121,6 +122,8 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
     const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
     return [aminoTypes.toAmino(message)];
   }, [multisig]);
+
+  if (messages.length === 0) return null;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -187,7 +190,10 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
             return a.key === "_contract_address";
           });
 
-          multisigStore.finishProxySetup(contractAddress.value);
+          multisigStore.finishProxySetup({
+            address: contractAddress.value,
+            codeId: CURRENT_CODE_ID,
+          });
 
           setSignatureModalVisible(false);
           setModalKey((value) => value + 1);

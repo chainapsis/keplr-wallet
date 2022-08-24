@@ -86,13 +86,15 @@ export function SettingsScreen() {
     </SafeAreaView>
   );
 }
-interface SettingsProps {
+
+interface SettingProps {
   Icon: FC<SvgProps>;
   title: string;
   subtitle: string;
   onPress?: () => void;
 }
-function Setting({ Icon, title, subtitle, onPress }: SettingsProps) {
+
+function Setting({ Icon, title, subtitle, onPress }: SettingProps) {
   return (
     <TouchableOpacity
       style={[styles.flex1, styles.setting]}
@@ -169,6 +171,7 @@ const styles = StyleSheet.create({
 
 export const SettingsNavigator = createNativeStackNavigator();
 
+// This can't be a React component because `Stack.Navigator` doesn't want that.
 export const settingsScreens = () => [
   <Stack.Screen
     name="AccountsSettings"

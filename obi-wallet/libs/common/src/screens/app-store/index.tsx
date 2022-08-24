@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
-import { FunctionComponent } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import {
   Image,
   StyleSheet,

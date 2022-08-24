@@ -6,7 +6,6 @@ import { StackParamList } from "../stack";
 import { useStore } from "../stores";
 import { DappExplorer } from "./dapp-explorer";
 import { HomeScreen } from "./home";
-import { LockScreen } from "./lock";
 import { OnboardingScreen } from "./onboarding";
 
 export type StateRendererScreenProps = NativeStackScreenProps<
@@ -23,6 +22,10 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
       return null;
     case MultisigState.EMPTY:
       return <OnboardingScreen />;
+    case MultisigState.OUTDATED:
+      // TODO: show a migration screen
+      console.log("Outdated proxy");
+      return null;
     case MultisigState.INITIALIZED:
       return <HomeScreen />;
   }

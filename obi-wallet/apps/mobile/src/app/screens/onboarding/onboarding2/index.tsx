@@ -1,5 +1,4 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -9,15 +8,17 @@ import { Alert, Image, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { SECURITY_QUESTIONS } from "../../../../config";
-import { Button, IconButton } from "../../../button";
-import { DropDownPicker } from "../../../drop-down-picker";
+import { IconButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
-import { sendTextMessage } from "../../../text-message";
+import { sendPublicKeyTextMessage } from "../../../text-message";
 import { Background } from "../../components/background";
+import {
+  SecurityQuestionInput,
+  useSecurityQuestionInput,
+} from "../../components/phone-number/security-question-input";
+import { SendMagicSmsButton } from "../../components/phone-number/send-magic-sms-button";
 import { StackParamList } from "../stack";
-import SMS from "./assets/sms.svg";
 
 export type Onboarding2Props = NativeStackScreenProps<
   StackParamList,
@@ -49,13 +50,12 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
     }
   }, [multisigStore, navigation]);
 
-  const [open, setOpen] = useState(false);
-  const [securityQuestion, setSecurityQuestion] = useState(
-    SECURITY_QUESTIONS[0].value
-  );
-  const [securityQuestions, setSecurityQuestions] =
-    useState(SECURITY_QUESTIONS);
-  const [securityAnswer, setSecurityAnswer] = useState("");
+  const {
+    securityQuestion,
+    setSecurityQuestion,
+    securityAnswer,
+    setSecurityAnswer,
+  } = useSecurityQuestionInput();
   const [phoneNumber, setPhoneNumber] = useState("");
 
   return (
@@ -116,32 +116,11 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
               </View>
             </View>
 
-            <Text
-              style={{
-                color: "#787B9C",
-                fontSize: 10,
-                textTransform: "uppercase",
-                marginTop: 36,
-                marginBottom: 12,
-              }}
-            >
-              Security Question
-            </Text>
-            <DropDownPicker
-              open={open}
-              value={securityQuestion}
-              items={securityQuestions}
-              setOpen={setOpen}
-              setValue={setSecurityQuestion}
-              setItems={setSecurityQuestions}
-            />
-
-            <TextInput
-              label="Answer"
-              placeholder="Type your answer here"
-              style={{ marginTop: 25 }}
-              value={securityAnswer}
-              onChangeText={setSecurityAnswer}
+            <SecurityQuestionInput
+              securityQuestion={securityQuestion}
+              onSecurityQuestionChange={setSecurityQuestion}
+              securityAnswer={securityAnswer}
+              onSecurityAnswerChange={setSecurityAnswer}
             />
 
             <TextInput
@@ -155,45 +134,17 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
             />
           </View>
 
-          <View>
-            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-              <FontAwesomeIcon
-                icon={faInfoCircle}
-                style={{
-                  color: "#7B87A8",
-                  marginHorizontal: 5,
-                  position: "absolute",
-                  margin: 5,
-                }}
-              />
-              <Text
-                style={{
-                  color: "#F6F5FF",
-                  marginLeft: 30,
-                  opacity: 0.7,
-                  fontSize: 12,
-                }}
-              >
-                Now send your encrypted answer to activate your messaging key.
-              </Text>
-            </View>
-            <Button
-              label="Send Magic SMS"
-              LeftIcon={SMS}
-              flavor="blue"
-              style={{
-                marginVertical: 20,
-              }}
-              onPress={async () => {
-                await sendTextMessage({ phoneNumber, securityAnswer });
-                navigation.navigate("onboarding3", {
-                  phoneNumber,
-                  securityQuestion,
-                  securityAnswer,
-                });
-              }}
-            />
-          </View>
+          <SendMagicSmsButton
+            description="Now send your encrypted answer to activate your messaging key."
+            onPress={async () => {
+              await sendPublicKeyTextMessage({ phoneNumber, securityAnswer });
+              navigation.navigate("onboarding3", {
+                phoneNumber,
+                securityQuestion,
+                securityAnswer,
+              });
+            }}
+          />
         </View>
       </KeyboardAwareScrollView>
     </SafeAreaView>

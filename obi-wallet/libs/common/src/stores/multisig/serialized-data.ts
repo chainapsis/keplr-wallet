@@ -36,10 +36,39 @@ export type SerializedMultisigPayload = t.TypeOf<
   typeof SerializedMultisigPayload
 >;
 
+export const SerializedProxyAddressV0 = t.string;
+export const SerializedProxyAddress = t.type({
+  address: t.string,
+  codeId: t.number,
+});
+export type SerializedProxyAddress = t.TypeOf<typeof SerializedProxyAddress>;
+
+export const SerializedProxyAddressAnyVersion = t.union([
+  SerializedProxyAddressV0,
+  SerializedProxyAddress,
+]);
+
+export type SerializedProxyAddressAnyVersion = t.TypeOf<
+  typeof SerializedProxyAddressAnyVersion
+>;
+
+export function migrateSerializedProxyAddress(
+  serializedProxyAddress: SerializedProxyAddressAnyVersion | null
+): SerializedProxyAddress | null {
+  if (SerializedProxyAddressV0.is(serializedProxyAddress)) {
+    return {
+      address: serializedProxyAddress,
+      codeId: 2603,
+    };
+  }
+
+  return serializedProxyAddress;
+}
+
 export const SerializedData = t.type({
   nextAdmin: SerializedMultisigPayload,
   currentAdmin: nullable(SerializedMultisigPayload),
-  proxyAddress: nullable(t.string),
+  proxyAddress: nullable(SerializedProxyAddressAnyVersion),
 });
 
 export type SerializedData = t.TypeOf<typeof SerializedData>;

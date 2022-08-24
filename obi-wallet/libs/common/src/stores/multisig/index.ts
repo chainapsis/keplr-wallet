@@ -10,11 +10,13 @@ import { KVStore } from "@keplr-wallet/common";
 import { action, makeObservable, observable, runInAction, toJS } from "mobx";
 
 import {
+  migrateSerializedProxyAddress,
   SerializedBiometricsPayload,
   SerializedCloudPayload,
   SerializedData,
   SerializedMultisigPayload,
   SerializedPhoneNumberPayload,
+  SerializedProxyAddress,
 } from "./serialized-data";
 
 export type MultisigThresholdPublicKey = MultisigThresholdPubkey;
@@ -24,8 +26,6 @@ const emptyMultisig: SerializedMultisigPayload = {
   phoneNumber: null,
   cloud: null,
 };
-
-// extend a nullable object type
 
 export type WithAddress<T> = T & { address: string };
 
@@ -38,11 +38,16 @@ export interface Multisig {
   cloud: WithAddress<SerializedCloudPayload> | null;
 }
 
+export type MultisigKey = keyof Omit<Multisig, "multisig">;
+
 export enum MultisigState {
   LOADING = 0,
   EMPTY,
+  OUTDATED,
   INITIALIZED,
 }
+
+export const CURRENT_CODE_ID = 2855;
 
 export class MultisigStore {
   @observable
@@ -52,7 +57,7 @@ export class MultisigStore {
   protected currentAdmin: SerializedMultisigPayload | null = null;
 
   @observable
-  protected proxyAddress: string | null = null;
+  protected proxyAddress: SerializedProxyAddress | null = null;
 
   @observable
   protected state: MultisigState = MultisigState.LOADING;
@@ -72,7 +77,7 @@ export class MultisigStore {
       runInAction(() => {
         this.nextAdmin = data.nextAdmin;
         this.currentAdmin = data.currentAdmin;
-        this.setProxyAddress(data.proxyAddress);
+        this.setProxyAddress(migrateSerializedProxyAddress(data.proxyAddress));
       });
       void this.kvStore.set("multisig-backup", null);
     } else {
@@ -120,6 +125,10 @@ export class MultisigStore {
     return this.proxyAddress !== null;
   }
 
+  public getProxyAddress() {
+    return this.proxyAddress?.address;
+  }
+
   @action
   public setPhoneNumberKey(payload: SerializedPhoneNumberPayload) {
     this.nextAdmin.phoneNumber = payload;
@@ -133,15 +142,24 @@ export class MultisigStore {
   }
 
   @action
-  public finishProxySetup(address: string) {
+  public finishProxySetup(address: SerializedProxyAddress) {
     this.currentAdmin = this.nextAdmin;
     this.setProxyAddress(address);
     void this.save();
   }
 
-  protected setProxyAddress(address: string | null) {
+  @action
+  protected setProxyAddress(address: SerializedProxyAddress | null) {
     this.proxyAddress = address;
-    this.state = address ? MultisigState.INITIALIZED : MultisigState.EMPTY;
+
+    if (address) {
+      this.state =
+        address.codeId === CURRENT_CODE_ID
+          ? MultisigState.INITIALIZED
+          : MultisigState.OUTDATED;
+    } else {
+      this.state = MultisigState.EMPTY;
+    }
   }
 
   protected createMultisigThresholdPublicKey(
