@@ -1,6 +1,7 @@
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
 import { useIntl } from "react-intl";
 import {
   Button,
@@ -35,8 +36,8 @@ export interface HomeProps {
 
 export const Home = observer<HomeProps>(
   ({ appsStore, onAppPress, onAppStorePress, marginBottom }) => {
-    const [editMode, setEditMode] = React.useState(false);
-    const [url, setUrl] = React.useState("www.keplr_wallet.com");
+    const [editMode, setEditMode] = useState(false);
+    const [url, setUrl] = useState("www.keplr_wallet.com");
     const intl = useIntl();
 
     return (
@@ -67,8 +68,8 @@ export const Home = observer<HomeProps>(
                     onRemove={
                       editMode
                         ? () => {
-                          appsStore.removeFavoriteByUrl(app.url);
-                        }
+                            appsStore.removeFavoriteByUrl(app.url);
+                          }
                         : undefined
                     }
                     onPress={() => {
@@ -198,8 +199,8 @@ export const Home = observer<HomeProps>(
                       const newUrl = url.includes("https://")
                         ? url.replace("https://", "")
                         : url.includes("http://")
-                          ? url.replace("http://", "")
-                          : url;
+                        ? url.replace("http://", "")
+                        : url;
 
                       const searchParam = newUrl.split(" ").join("+");
                       const newSearchUrl = `https://www.google.com/search?q=${searchParam}`;

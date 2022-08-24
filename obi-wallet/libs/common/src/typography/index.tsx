@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   StyleSheet,
   // eslint-disable-next-line no-restricted-imports
@@ -18,7 +19,7 @@ export function Text({
   children,
   style,
   ...props
-}: TextProps & { children: React.ReactNode }) {
+}: TextProps & { children: ReactNode }) {
   return (
     <OriginalText style={[styles.font, style]} {...props}>
       {children}

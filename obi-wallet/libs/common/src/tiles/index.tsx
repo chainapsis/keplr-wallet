@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import SvgUri from "react-native-svg-uri";
 
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export function Tiles({ children }: { children: React.ReactNode }) {
+export function Tiles({ children }: { children: ReactNode }) {
   return <View style={styles.container}>{children}</View>;
 }
 

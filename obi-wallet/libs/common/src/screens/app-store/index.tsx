@@ -1,4 +1,5 @@
 import { observer } from "mobx-react-lite";
+import { useEffect, useState } from "react";
 import { FunctionComponent } from "react";
 import {
   Image,
@@ -30,7 +31,7 @@ export const AppStore: FunctionComponent<AppStoreProps> = observer(
   ({ appsStore, onAfterAppAdded }) => {
     const knownApps = appsStore.getKnownApps();
 
-    const [url, setUrl] = React.useState("");
+    const [url, setUrl] = useState("");
 
     function setUrlWithProtocol(url: string) {
       setUrl(`https://${url}`);
@@ -39,10 +40,10 @@ export const AppStore: FunctionComponent<AppStoreProps> = observer(
     // @ts-ignore Some type issues with rooks
     const setUrlDebounce = useDebounce(setUrlWithProtocol, 500);
 
-    const [title, setTitle] = React.useState("");
-    const [icon, setIcon] = React.useState("");
+    const [title, setTitle] = useState("");
+    const [icon, setIcon] = useState("");
 
-    React.useEffect(() => {
+    useEffect(() => {
       fetchMeta(url)
         .then((meta) => {
           setTitle(meta.title ?? "");

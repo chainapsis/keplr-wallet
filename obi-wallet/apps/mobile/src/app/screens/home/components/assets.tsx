@@ -92,7 +92,7 @@ export function AssetsHeader() {
             >
               Network
             </Text>
-            <Text style={{ color: "white" }}>hello</Text>
+            <Text style={{ color: "white" }}>Juno</Text>
           </View>
         </>
       </TouchableHighlight>

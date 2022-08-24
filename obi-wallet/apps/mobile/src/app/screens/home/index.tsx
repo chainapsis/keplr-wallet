@@ -105,7 +105,7 @@ export function HomeScreen() {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen name="Juno" component={TabNavigation} />
-      <Drawer.Screen name="Cosmos" component={TabNavigation} />
+      {/* <Drawer.Screen name="More Comming Soon!" component={TabNavigation} /> */}
     </Drawer.Navigator>
   );
 }
@@ -140,6 +140,17 @@ function CustomDrawerContent(props) {
         Networks
       </Text>
       <DrawerItemList {...props} />
+      <Text
+        style={{
+          color: "#787B9C",
+          marginLeft: 16,
+          marginTop: 17,
+          fontSize: 11,
+          textTransform: "uppercase",
+        }}
+      >
+        More Coming Soon!
+      </Text>
     </DrawerContentScrollView>
   );
 }

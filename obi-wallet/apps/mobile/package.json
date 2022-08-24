@@ -15,6 +15,7 @@
     "@keplr-wallet/common": "*",
     "@keplr-wallet/stores": "*",
     "@react-native-async-storage/async-storage": "*",
+    "@react-native-community/blur": "*",
     "@react-navigation/bottom-tabs": "*",
     "@react-navigation/drawer": "*",
     "@react-navigation/native": "*",
@@ -56,7 +57,6 @@
     "react-native-svg-uri": "*",
     "react-native-webview": "*",
     "rooks": "*",
-    "secp256k1": "*",
-    "@react-native-community/blur": "*"
+    "secp256k1": "*"
   }
 }

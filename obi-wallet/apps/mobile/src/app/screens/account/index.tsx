@@ -1,7 +1,7 @@
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import BottomSheet, { BottomSheetView, } from "@gorhom/bottom-sheet/src";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { Text } from "@obi-wallet/common";
 import { useRef, useState } from "react";
 import {
@@ -14,40 +14,39 @@ import {
 import { TouchableOpacity } from "react-native-gesture-handler";
 import LinearGradient from "react-native-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { Back } from "../components/back";
 import { Background } from "../components/background";
-import { useNavigation } from "../settings/stack";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
-import { Spending } from "./spending";
+import { useNavigation } from "../settings/stack";
 import { Inheritance } from "./inheritance";
-
+import { Spending } from "./spending";
 
 export function Account() {
   const safeArea = useSafeAreaInsets();
   const navigation = useNavigation();
   const refBottomSheet = useRef(null);
-  const [SelectedMenu, setSelectedMenu] = useState('')
+  const [SelectedMenu, setSelectedMenu] = useState("");
 
   const triggerBottomSheet = (selection) => {
     if (!selection) {
       refBottomSheet.current.close();
     } else {
-      setSelectedMenu(selection.name)
-
+      setSelectedMenu(selection.name);
       refBottomSheet.current.snapToIndex(0);
     }
   };
   const renderSelectionContent = () => {
     switch (SelectedMenu) {
       case "spending":
-        return <Spending />
+        return <Spending />;
       case "inheritance":
-        return <Inheritance />
+        return <Inheritance />;
     }
-  }
-  console.log({ SelectedMenu })
+  };
+
   return (
-    <View style={{ flex: 1, paddingHorizontal: 20 }}>
+    <View style={{ flex: 1, paddingHorizontal: 20, position: "relative" }}>
       <Background />
       <View style={{ flexDirection: "row", top: safeArea.top }}>
         <Back style={{ zIndex: 2 }} />
@@ -78,7 +77,7 @@ export function Account() {
           resizeMode="cover"
           borderRadius={16}
         >
-          <TouchableHighlight
+          {/* <TouchableHighlight
             style={{
               position: "absolute",
               top: 20,
@@ -89,7 +88,7 @@ export function Account() {
             }}
           >
             <FontAwesomeIcon icon={faGear} style={{ color: "#F6F5FF" }} />
-          </TouchableHighlight>
+          </TouchableHighlight> */}
           <Text
             style={{
               color: "#787B9C",
@@ -98,7 +97,7 @@ export function Account() {
               fontWeight: "500",
             }}
           >
-            PARENT ACCOUNT
+            BALANCE
           </Text>
           <Text
             style={{
@@ -110,7 +109,7 @@ export function Account() {
           >
             $38,166.92
           </Text>
-          <TouchableHighlight
+          {/* <TouchableHighlight
             style={{
               height: 29,
               backgroundColor: "rgba(255,255,255,.12)",
@@ -127,7 +126,7 @@ export function Account() {
             <Text style={{ fontSize: 12, fontWeight: "500", color: "white" }}>
               +Add sub-account
             </Text>
-          </TouchableHighlight>
+          </TouchableHighlight> */}
         </ImageBackground>
       </View>
       <View
@@ -152,10 +151,10 @@ export function Account() {
               >
                 $4,582
               </Text>
-              <FontAwesomeIcon
+              {/* <FontAwesomeIcon
                 icon={faCheckCircle}
                 style={{ width: 16, height: 16, color: "#7AD6AE" }}
-              />
+              /> */}
             </View>
             <Text
               style={{
@@ -216,11 +215,19 @@ export function Account() {
             </View>
           </View>
           <View>
-            <FlatList data={options} horizontal renderItem={(props) => <Option item={props.item} onPress={() => triggerBottomSheet(props.item)} />
-            } style={{ marginTop: 20 }} />
+            <FlatList
+              data={options}
+              horizontal
+              renderItem={(props) => (
+                <Option
+                  item={props.item}
+                  onPress={() => triggerBottomSheet(props.item)}
+                />
+              )}
+              style={{ marginTop: 20 }}
+            />
           </View>
         </View>
-
       </View>
 
       <View
@@ -232,7 +239,7 @@ export function Account() {
           marginTop: 10,
         }}
       >
-        <FlatList
+        {/* <FlatList
           data={[
             { key: "1", amount: 231, name: "My_personal_wallet" },
             { key: "2", amount: 8293, name: "Hot_wallet" },
@@ -296,22 +303,24 @@ export function Account() {
               </View>
             );
           }}
-        />
+        /> */}
       </View>
+      <BottomSheetBackdrop
+        onPress={() => triggerBottomSheet(false)}
+        visible={Boolean(SelectedMenu)}
+      />
       <BottomSheet
         handleIndicatorStyle={{ backgroundColor: "white" }}
         backgroundStyle={{ backgroundColor: "#100F1E" }}
         handleStyle={{ backgroundColor: "transparent" }}
-        snapPoints={SelectedMenu === 'inheritance' ? ["70%"] : ["40"]}
+        snapPoints={SelectedMenu === "inheritance" ? ["70%"] : ["40"]}
         enablePanDownToClose={true}
         ref={refBottomSheet}
         index={-1}
-        backdropComponent={props => SelectedMenu ? renderBackdrop(props) : null}
-        onClose={() => setSelectedMenu('')}
-
+        backdropComponent={(props) => null}
+        onClose={() => setSelectedMenu("")}
       >
         <BottomSheetView
-
           style={{
             flex: 1,
             backgroundColor: "transparent",
@@ -319,47 +328,44 @@ export function Account() {
           }}
         >
           {renderSelectionContent()}
-
         </BottomSheetView>
       </BottomSheet>
-      <BottomSheetBackdrop
-        style={{ position: 'absolute', top: 0, right: 0, down: 0, left: 0, flex: 1, height: '100%', marginHorizontal: 'auto', zIndex: -1, backgroundColor: 'red' }}
-        onPressed={() => { triggerBottomSheet(false) }}
-        visible={Boolean(SelectedMenu)}
-      />
     </View>
   );
 }
 const options = [
   {
     key: 0,
-    name: 'spending',
-    icon: null
+    name: "spending",
+    icon: null,
   },
   {
     key: 1,
-    name: 'inheritance',
-    icon: null
+    name: "inheritance",
+    icon: null,
   },
-]
-const renderBackdrop = (props) => {
-  return <BottomSheetBackdrop
-    {...props}
-    appearsOnIndex={1}
-    animatedIndex={{
-      value: 1,
-    }}
+];
 
-  />
-}
-
-const Option = ({ item, onPress }) => {
-  console.log({ item })
-  return <TouchableOpacity style={{ height: 60, justifyContent: 'center', alignItems: 'center' }} onPress={onPress}>
-    <>
-      <View style={{ width: 40, height: 40, backgroundColor: 'red', marginHorizontal: 10, marginBottom: 10 }}>
-      </View>
-      <Text style={{ fontSize: 12, color: 'white', opacity: .6 }}>{item.name}</Text>
-    </>
-  </TouchableOpacity>
+function Option({ item, onPress }) {
+  return (
+    <TouchableOpacity
+      style={{ height: 60, justifyContent: "center", alignItems: "center" }}
+      onPress={onPress}
+    >
+      <>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            backgroundColor: "red",
+            marginHorizontal: 10,
+            marginBottom: 10,
+          }}
+        ></View>
+        <Text style={{ fontSize: 12, color: "white", opacity: 0.6 }}>
+          {item.name}
+        </Text>
+      </>
+    </TouchableOpacity>
+  );
 }
