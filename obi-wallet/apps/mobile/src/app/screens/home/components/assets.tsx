@@ -59,8 +59,9 @@ export function Assets({ route }: AssetsProps) {
 }
 
 export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
-  const navigation =
-    useNavigation<DrawerNavigationProp<Record<string, object>>>();
+  const navigation = useNavigation<
+    DrawerNavigationProp<Record<string, object>>
+  >();
 
   return (
     <View
@@ -158,8 +159,9 @@ const BalanceAndActions = observer(() => {
     0
   );
 
-  const navigation =
-    useNavigation<DrawerNavigationProp<Record<string, object>>>();
+  const navigation = useNavigation<
+    DrawerNavigationProp<Record<string, object>>
+  >();
   return (
     <View style={{ justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: "#787B9C", fontSize: 11, fontWeight: "500" }}>
@@ -173,7 +175,7 @@ const BalanceAndActions = observer(() => {
           flexDirection: "row",
           justifyContent: "space-around",
           alignItems: "center",
-          width: "70%",
+          width: 200,
           marginTop: 36,
         }}
       >
@@ -227,30 +229,30 @@ const BalanceAndActions = observer(() => {
             RECEIVE
           </Text>
         </View>
-        <View style={{ alignItems: "center" }}>
-          <TouchableHighlight
-            style={{
-              width: 56,
-              height: 56,
-              backgroundColor: "#100F1E",
-              borderRadius: 16,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Pay width={22} height={22} />
-          </TouchableHighlight>
-          <Text
-            style={{
-              color: "#F6F5FF",
-              fontSize: 9,
-              fontWeight: "500",
-              marginTop: 10,
-            }}
-          >
-            PAY
-          </Text>
-        </View>
+        {/*<View style={{ alignItems: "center" }}>*/}
+        {/*  <TouchableHighlight*/}
+        {/*    style={{*/}
+        {/*      width: 56,*/}
+        {/*      height: 56,*/}
+        {/*      backgroundColor: "#100F1E",*/}
+        {/*      borderRadius: 16,*/}
+        {/*      justifyContent: "center",*/}
+        {/*      alignItems: "center",*/}
+        {/*    }}*/}
+        {/*  >*/}
+        {/*    <Pay width={22} height={22} />*/}
+        {/*  </TouchableHighlight>*/}
+        {/*  <Text*/}
+        {/*    style={{*/}
+        {/*      color: "#F6F5FF",*/}
+        {/*      fontSize: 9,*/}
+        {/*      fontWeight: "500",*/}
+        {/*      marginTop: 10,*/}
+        {/*    }}*/}
+        {/*  >*/}
+        {/*    PAY*/}
+        {/*  </Text>*/}
+        {/*</View>*/}
       </View>
     </View>
   );
