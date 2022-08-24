@@ -1,5 +1,4 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -9,7 +8,7 @@ import { Alert, Image, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, IconButton } from "../../../button";
+import { IconButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import { sendTextMessage } from "../../../text-message";
@@ -18,8 +17,8 @@ import {
   SecurityQuestionInput,
   useSecurityQuestionInput,
 } from "../../components/phone-number/security-question-input";
+import { SendMagicSmsButton } from "../../components/phone-number/send-magic-sms-button";
 import { StackParamList } from "../stack";
-import SMS from "./assets/sms.svg";
 
 export type Onboarding2Props = NativeStackScreenProps<
   StackParamList,
@@ -135,45 +134,17 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
             />
           </View>
 
-          <View>
-            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-              <FontAwesomeIcon
-                icon={faInfoCircle}
-                style={{
-                  color: "#7B87A8",
-                  marginHorizontal: 5,
-                  position: "absolute",
-                  margin: 5,
-                }}
-              />
-              <Text
-                style={{
-                  color: "#F6F5FF",
-                  marginLeft: 30,
-                  opacity: 0.7,
-                  fontSize: 12,
-                }}
-              >
-                Now send your encrypted answer to activate your messaging key.
-              </Text>
-            </View>
-            <Button
-              label="Send Magic SMS"
-              LeftIcon={SMS}
-              flavor="blue"
-              style={{
-                marginVertical: 20,
-              }}
-              onPress={async () => {
-                await sendTextMessage({ phoneNumber, securityAnswer });
-                navigation.navigate("onboarding3", {
-                  phoneNumber,
-                  securityQuestion,
-                  securityAnswer,
-                });
-              }}
-            />
-          </View>
+          <SendMagicSmsButton
+            description="Now send your encrypted answer to activate your messaging key."
+            onPress={async () => {
+              await sendTextMessage({ phoneNumber, securityAnswer });
+              navigation.navigate("onboarding3", {
+                phoneNumber,
+                securityQuestion,
+                securityAnswer,
+              });
+            }}
+          />
         </View>
       </KeyboardAwareScrollView>
     </SafeAreaView>

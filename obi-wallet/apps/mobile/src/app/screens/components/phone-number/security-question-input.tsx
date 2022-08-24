@@ -1,5 +1,6 @@
 import { Text } from "@obi-wallet/common";
 import { Dispatch, useState } from "react";
+import { View } from "react-native";
 
 import { SECURITY_QUESTIONS } from "../../../../config";
 import { DropDownPicker } from "../../../drop-down-picker";
@@ -35,12 +36,11 @@ export function SecurityQuestionInput({
   onSecurityAnswerChange,
 }: SecurityQuestionInputProps) {
   const [dropdownPickerOpen, setDropdownPickerOpen] = useState(false);
-  const [securityQuestions, setSecurityQuestions] = useState(
-    SECURITY_QUESTIONS
-  );
+  const [securityQuestions, setSecurityQuestions] =
+    useState(SECURITY_QUESTIONS);
 
   return (
-    <>
+    <View>
       <Text
         style={{
           color: "#787B9C",
@@ -69,7 +69,7 @@ export function SecurityQuestionInput({
         value={securityAnswer}
         onChangeText={onSecurityAnswerChange}
       />
-    </>
+    </View>
   );
 }
 

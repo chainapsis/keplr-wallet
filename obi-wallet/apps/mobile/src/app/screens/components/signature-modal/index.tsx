@@ -14,8 +14,6 @@ import { Button, InlineButton } from "../../../button";
 import { TextInput } from "../../../text-input";
 import { getSignature, sendSignMessageText } from "../../../text-message";
 // TODO:
-import SMS from "../../onboarding/onboarding2/assets/sms.svg";
-// TODO:
 import ShieldCheck from "../../onboarding/onboarding3/assets/shield-check.svg";
 import { Background } from "../background";
 import { BottomSheet, BottomSheetRef } from "../bottom-sheet";
@@ -24,6 +22,7 @@ import {
   SecurityQuestionInput,
   useSecurityQuestionInput,
 } from "../phone-number/security-question-input";
+import { SendMagicSmsButton } from "../phone-number/send-magic-sms-button";
 
 export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
@@ -290,25 +289,17 @@ function PhoneNumberBottomSheetContent({
         onSecurityAnswerChange={setSecurityAnswer}
       />
 
-      <View>
-        <Button
-          label="Send Magic SMS"
-          LeftIcon={SMS}
-          flavor="blue"
-          style={{
-            marginVertical: 20,
-          }}
-          onPress={async () => {
-            const message = await getMessage();
-            await sendSignMessageText({
-              phoneNumber: payload.phoneNumber,
-              securityAnswer,
-              message,
-            });
-            setSentMessage(true);
-          }}
-        />
-      </View>
+      <SendMagicSmsButton
+        onPress={async () => {
+          const message = await getMessage();
+          await sendSignMessageText({
+            phoneNumber: payload.phoneNumber,
+            securityAnswer,
+            message,
+          });
+          setSentMessage(true);
+        }}
+      />
     </View>
   );
 }
