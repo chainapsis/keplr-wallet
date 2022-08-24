@@ -2,6 +2,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { Text } from "@obi-wallet/common";
+import { observer } from "mobx-react-lite/src/observer";
 import { useRef, useState, FC } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
@@ -11,6 +12,7 @@ import {
 } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
+import { useStore } from "../../../stores";
 import { Back } from "../../components/back";
 import Check from "./assets/check-icon.svg";
 import Cloud from "./assets/cloud-icon.svg";
@@ -41,40 +43,44 @@ const getSVG = (number: number) => {
       return <Keys1 />;
   }
 };
-export function KeysConfigScreen() {
+
+export const KeysConfigScreen = observer(() => {
+  const { multisigStore } = useStore();
+  const currentAdmin = multisigStore.getCurrentAdmin("juno");
+
   const refBottomSheet = useRef<BottomSheet>();
   const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
   const data: KeyListItem[] = [
     {
       key: "phone-number",
       title: "Phone Number Key",
-      activated: true,
+      activated: currentAdmin.phoneNumber !== null,
       Icon: Whatsapp,
     },
+    // {
+    //   key: "email",
+    //   title: "E-Mail Key",
+    //   activated: true,
+    //   Icon: Email,
+    // },
     {
-      key: "email",
-      title: "E-Mail Key",
-      activated: true,
-      Icon: Email,
-    },
-    {
-      key: "face-id",
-      title: "Face ID Key",
-      activated: true,
+      key: "biometrics",
+      title: "Biometrics Key",
+      activated: currentAdmin.biometrics !== null,
       Icon: FaceId,
     },
-    {
-      key: "cloud",
-      title: "Cloud Backup Key",
-      activated: true,
-      Icon: Cloud,
-    },
-    {
-      key: "share",
-      title: "Share Key",
-      activated: true,
-      Icon: Share,
-    },
+    // {
+    //   key: "cloud",
+    //   title: "Cloud Backup Key",
+    //   activated: true,
+    //   Icon: Cloud,
+    // },
+    // {
+    //   key: "share",
+    //   title: "Share Key",
+    //   activated: true,
+    //   Icon: Share,
+    // },
   ];
 
   const triggerBottomSheet = (index) => {
@@ -113,7 +119,7 @@ export function KeysConfigScreen() {
           High Security Risk
         </Text>
         <Text style={[styles.subHeading, { marginBottom: 0 }]}>
-          4 steps remaining
+          {data.length - activatedKeys} steps remaining
         </Text>
       </View>
       <View style={{ flex: 6 }}>
@@ -156,7 +162,7 @@ export function KeysConfigScreen() {
       </BottomSheet>
     </SafeAreaView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   heading: {
@@ -311,7 +317,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           style={{ color: "rgba(246, 245, 255, 0.6)", marginRight: 10 }}
         />
         <Text style={{ fontSize: 12, color: "rgba(246, 245, 255, 0.6)" }}>
-          In case of stolen/ lost or any other reason, you can replace this key
+          In case of stolen/lost or any other reason, you can replace this key
           with a new one
         </Text>
       </View>
