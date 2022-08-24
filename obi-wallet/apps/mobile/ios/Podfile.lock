@@ -286,6 +286,8 @@ PODS:
   - React-jsinspector (0.69.4)
   - React-logger (0.69.4):
     - glog
+  - react-native-blur (4.2.0):
+    - React-Core
   - react-native-config (1.4.6):
     - react-native-config/App (= 1.4.6)
   - react-native-config/App (1.4.6):
@@ -456,6 +458,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
+  - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - react-native-config (from `../node_modules/react-native-config`)
   - react-native-device-crypto (from `../node_modules/react-native-device-crypto`)
   - react-native-randombytes (from `../node_modules/react-native-randombytes`)
@@ -540,6 +543,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   React-logger:
     :path: "../node_modules/react-native/ReactCommon/logger"
+  react-native-blur:
+    :path: "../node_modules/@react-native-community/blur"
   react-native-config:
     :path: "../node_modules/react-native-config"
   react-native-device-crypto:
@@ -623,6 +628,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: a27badbbdbc0ff781813370736a2d1c7261181d4
   React-jsinspector: 8a3d3f5dcd23a91e8c80b1bf0e96902cd1dca999
   React-logger: 1088859f145b8f6dd0d3ed051a647ef0e3e80fad
+  react-native-blur: 3e9c8e8e9f7d17fa1b94e1a0ae9fd816675f5382
   react-native-config: 7cd105e71d903104e8919261480858940a6b9c0e
   react-native-device-crypto: decd7475ec9f48eb66eafcbabfaa5dde01be37f9
   react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846

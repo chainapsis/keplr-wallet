@@ -56,6 +56,7 @@
     "react-native-svg-uri": "*",
     "react-native-webview": "*",
     "rooks": "*",
-    "secp256k1": "*"
+    "secp256k1": "*",
+    "@react-native-community/blur": "*"
   }
 }

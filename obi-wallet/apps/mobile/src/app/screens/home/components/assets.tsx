@@ -137,6 +137,8 @@ export function AssetsHeader() {
 }
 
 function BalanceAndActions() {
+  const navigation =
+    useNavigation<DrawerNavigationProp<Record<string, object>>>();
   return (
     <View style={{ justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: "#787B9C", fontSize: 11, fontWeight: "500" }}>
@@ -164,6 +166,7 @@ function BalanceAndActions() {
               justifyContent: "center",
               alignItems: "center",
             }}
+            onPress={() => navigation.navigate("send")}
           >
             <Send width={22} height={22} />
           </TouchableHighlight>

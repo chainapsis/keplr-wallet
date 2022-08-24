@@ -1,7 +1,9 @@
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import BottomSheet, { BottomSheetView, } from "@gorhom/bottom-sheet/src";
 import { Text } from "@obi-wallet/common";
+import { useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -9,17 +11,41 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import LinearGradient from "react-native-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { Back } from "../components/back";
 import { Background } from "../components/background";
 import { useNavigation } from "../settings/stack";
+import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
+import { Spending } from "./spending";
+import { Inheritance } from "./inheritance";
+
 
 export function Account() {
   const safeArea = useSafeAreaInsets();
   const navigation = useNavigation();
+  const refBottomSheet = useRef(null);
+  const [SelectedMenu, setSelectedMenu] = useState('')
 
+  const triggerBottomSheet = (selection) => {
+    if (!selection) {
+      refBottomSheet.current.close();
+    } else {
+      setSelectedMenu(selection.name)
+
+      refBottomSheet.current.snapToIndex(0);
+    }
+  };
+  const renderSelectionContent = () => {
+    switch (SelectedMenu) {
+      case "spending":
+        return <Spending />
+      case "inheritance":
+        return <Inheritance />
+    }
+  }
+  console.log({ SelectedMenu })
   return (
     <View style={{ flex: 1, paddingHorizontal: 20 }}>
       <Background />
@@ -189,7 +215,12 @@ export function Account() {
               </Text>
             </View>
           </View>
+          <View>
+            <FlatList data={options} horizontal renderItem={(props) => <Option item={props.item} onPress={() => triggerBottomSheet(props.item)} />
+            } style={{ marginTop: 20 }} />
+          </View>
         </View>
+
       </View>
 
       <View
@@ -267,6 +298,68 @@ export function Account() {
           }}
         />
       </View>
+      <BottomSheet
+        handleIndicatorStyle={{ backgroundColor: "white" }}
+        backgroundStyle={{ backgroundColor: "#100F1E" }}
+        handleStyle={{ backgroundColor: "transparent" }}
+        snapPoints={SelectedMenu === 'inheritance' ? ["70%"] : ["40"]}
+        enablePanDownToClose={true}
+        ref={refBottomSheet}
+        index={-1}
+        backdropComponent={props => SelectedMenu ? renderBackdrop(props) : null}
+        onClose={() => setSelectedMenu('')}
+
+      >
+        <BottomSheetView
+
+          style={{
+            flex: 1,
+            backgroundColor: "transparent",
+            position: "relative",
+          }}
+        >
+          {renderSelectionContent()}
+
+        </BottomSheetView>
+      </BottomSheet>
+      <BottomSheetBackdrop
+        style={{ position: 'absolute', top: 0, right: 0, down: 0, left: 0, flex: 1, height: '100%', marginHorizontal: 'auto', zIndex: -1, backgroundColor: 'red' }}
+        onPressed={() => { triggerBottomSheet(false) }}
+        visible={Boolean(SelectedMenu)}
+      />
     </View>
   );
+}
+const options = [
+  {
+    key: 0,
+    name: 'spending',
+    icon: null
+  },
+  {
+    key: 1,
+    name: 'inheritance',
+    icon: null
+  },
+]
+const renderBackdrop = (props) => {
+  return <BottomSheetBackdrop
+    {...props}
+    appearsOnIndex={1}
+    animatedIndex={{
+      value: 1,
+    }}
+
+  />
+}
+
+const Option = ({ item, onPress }) => {
+  console.log({ item })
+  return <TouchableOpacity style={{ height: 60, justifyContent: 'center', alignItems: 'center' }} onPress={onPress}>
+    <>
+      <View style={{ width: 40, height: 40, backgroundColor: 'red', marginHorizontal: 10, marginBottom: 10 }}>
+      </View>
+      <Text style={{ fontSize: 12, color: 'white', opacity: .6 }}>{item.name}</Text>
+    </>
+  </TouchableOpacity>
 }
