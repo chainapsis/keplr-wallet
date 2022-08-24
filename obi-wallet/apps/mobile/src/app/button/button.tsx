@@ -62,8 +62,8 @@ export interface ButtonProps
   extends Omit<TouchableWithoutFeedbackProps, "children"> {
   flavor: keyof typeof flavors;
   label: string;
-  LeftIcon?: FC | JSX.Element;
-  RightIcon?: FC | JSX.Element;
+  LeftIcon?: FC<SvgProps>;
+  RightIcon?: FC<SvgProps>;
 }
 
 export function Button({
