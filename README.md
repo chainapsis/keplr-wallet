@@ -8,6 +8,7 @@
 
 - [Install protobuf](https://grpc.io/docs/protoc-installation/)
 - [Setup up React Native development environment (React Native CLI Quickstart)](https://reactnative.dev/docs/environment-setup).
+Note: on m1 Mac, use `brew install cocoapods` instead of `sudo gem install cocoapods`. Otherwise `pod install` will fail.
 - `npm i -g nx` (or use `npx nx` instead of `nx` for the commands in the Workflow section)
 
 ### Setup
