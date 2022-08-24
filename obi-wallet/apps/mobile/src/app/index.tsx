@@ -3,8 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { IntlProvider } from "react-intl";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ReceiveScreen } from "./screens/receive";
 
+import { ReceiveScreen } from "./screens/receive";
 import { SendScreen } from "./screens/send";
 import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
