@@ -86,8 +86,20 @@ const extensionConfig = (env, args) => {
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
     },
     output: {
-      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "prod"),
+      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
       filename: "[name].bundle.js",
+    },
+    optimization: {
+      splitChunks: {
+        chunks(chunk) {
+          return chunk.name === "popup";
+        },
+        cacheGroups: {
+          popup: {
+            maxSize: 3_000_000,
+          },
+        },
+      },
     },
     resolve: commonResolve("src/public/assets"),
     module: {

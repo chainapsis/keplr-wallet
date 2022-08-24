@@ -69,34 +69,27 @@ describe("Test account parse", () => {
       "/cosmos.vesting.v1beta1.DelayedVestingAccount"
     );
 
-    /*
-    TODO: Recover test case for ethermint.
     // Custom account that embeds the base account (ethermint)
-    account = BaseAccount.fromAminoJSON({
-      height: "449",
-      result: {
+    account = BaseAccount.fromProtoJSON({
+      account: {
+        "@type": "/ethermint.types.v1.EthAccount",
         base_account: {
           address: "evmos1w3ygakvq5snf30pca5g8pnyvvfr7x28djnj34m",
-          public_key: {
-            type: "tendermint/PubKeySecp256k1",
-            value: "AulWtcPTIZWd/CnkFkQOMqDOwU7e+U/Iq8Tli1nhBq6j",
+          pub_key: {
+            "@type": "/ethermint.crypto.v1.ethsecp256k1.PubKey",
+            key: "AulWtcPTIZWd/CnkFkQOMqDOwU7e+U/Iq8Tli1nhBq6j",
           },
           account_number: "11",
           sequence: "1",
         },
-        code_hash:
-          "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
       },
-      // Above makes the type error.
-      // But, just test that it can be parsed with ignoring the type error.
-    } as any);
+    });
 
     expect(account.getAddress()).toBe(
       "evmos1w3ygakvq5snf30pca5g8pnyvvfr7x28djnj34m"
     );
     expect(account.getSequence().toString()).toBe("1");
     expect(account.getAccountNumber().toString()).toBe("11");
-    expect(account.getType()).toBe("");
-     */
+    expect(account.getType()).toBe("/ethermint.types.v1.EthAccount");
   });
 });

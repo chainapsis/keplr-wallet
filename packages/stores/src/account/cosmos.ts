@@ -182,7 +182,7 @@ export class CosmosAccountImpl {
     const hexAdjustedRecipient = (recipient: string) => {
       const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
         .bech32PrefixAccAddr;
-      if (bech32prefix === "evmos" && recipient.startsWith("0x")) {
+      if (this.hasEthereumAddress && recipient.startsWith("0x")) {
         // Validate hex address
         if (!isAddress(recipient)) {
           throw new Error("Invalid hex address");
@@ -280,11 +280,8 @@ export class CosmosAccountImpl {
     const hexAdjustedRecipient = (recipient: string) => {
       const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
         .bech32PrefixAccAddr;
-      const useEthereumSign = this.chainGetter
-        .getChain(this.chainId)
-        .features?.includes("eth-key-sign");
-
-      if (useEthereumSign && recipient.startsWith("0x")) {
+      
+      if (this.hasEthereumAddress && recipient.startsWith("0x")) {
         // Validate hex address
         if (!isAddress(recipient)) {
           throw new Error("Invalid hex address");
@@ -1779,5 +1776,13 @@ export class CosmosAccountImpl {
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  protected get hasEthereumAddress(): boolean {
+    return (
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-address-gen") ?? false
+    );
   }
 }

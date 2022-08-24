@@ -2,9 +2,8 @@ import { action, computed, flow, makeObservable, observable } from "mobx";
 import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { StdFee } from "@cosmjs/launchpad";
-import { evmosToEth } from "@tharsis/address-converter";
-import { bech32 } from "bech32";
 import { MakeTxResponse } from "./types";
 
 export enum WalletStatus {
@@ -334,23 +333,22 @@ export class AccountSetBase {
 
   get hasEthereumHexAddress(): boolean {
     return (
-      this.bech32Address.startsWith("evmos") ||
-      this.bech32Address.startsWith("inj")
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-address-gen") ?? false
     );
   }
 
+  @computed
   get ethereumHexAddress(): string {
-    if (this.bech32Address.startsWith("evmos")) {
-      return evmosToEth(this.bech32Address);
+    if (this.bech32Address === "") {
+      return "";
     }
 
-    if (this.bech32Address.startsWith("inj")) {
-      return `0x${Buffer.from(
-        bech32.fromWords(bech32.decode(this.bech32Address).words)
-      ).toString("hex")}`;
-    }
-
-    return "";
+    return Bech32Address.fromBech32(
+      this.bech32Address,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    ).toHex(true);
   }
 }
 

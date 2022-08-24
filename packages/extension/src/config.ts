@@ -323,7 +323,14 @@ export const EmbedChainInfos: ChainInfo[] = [
     bip44: {
       coinType: 394,
     },
-    bech32Config: Bech32Address.defaultBech32Config("cro"),
+    bech32Config: {
+      bech32PrefixAccAddr: "cro",
+      bech32PrefixAccPub: "cropub",
+      bech32PrefixValAddr: "crocncl",
+      bech32PrefixValPub: "crocnclpub",
+      bech32PrefixConsAddr: "crocnclcons",
+      bech32PrefixConsPub: "crocnclconspub",
+    },
     currencies: [
       {
         coinDenom: "CRO",
@@ -935,7 +942,14 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinType: 566,
       },
     ],
-    bech32Config: Bech32Address.defaultBech32Config("iaa"),
+    bech32Config: {
+      bech32PrefixAccAddr: "iaa",
+      bech32PrefixAccPub: "iap",
+      bech32PrefixValAddr: "iva",
+      bech32PrefixValPub: "ivp",
+      bech32PrefixConsAddr: "ica",
+      bech32PrefixConsPub: "icp",
+    },
     currencies: [
       {
         coinDenom: "IRIS",
@@ -1005,7 +1019,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.025,
       high: 0.04,
     },
-    features: ["ibc-go", "ibc-transfer", "ibc-go"],
+    features: ["ibc-go", "ibc-transfer"],
   },
   {
     rpc: PERSISTENCE_RPC_ENDPOINT,

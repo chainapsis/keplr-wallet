@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { Card, CardBody } from "../../../components/card";
@@ -28,6 +28,8 @@ export const MyRewardCard: FunctionComponent<{
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
+
+  const [isSendingTx, setIsSendingTx] = useState(false);
 
   return (
     <Card style={containerStyle}>
@@ -76,11 +78,34 @@ export const MyRewardCard: FunctionComponent<{
             mode="light"
             containerStyle={style.flatten(["min-width-72"])}
             onPress={async () => {
+              const validatorAddresses = queryReward.getDescendingPendingRewardValidatorAddresses(
+                8
+              );
+              const tx = account.cosmos.makeWithdrawDelegationRewardTx(
+                validatorAddresses
+              );
+
+              setIsSendingTx(true);
+
               try {
-                await account.cosmos.sendWithdrawDelegationRewardMsgs(
-                  queryReward.getDescendingPendingRewardValidatorAddresses(8),
+                let gas =
+                  account.cosmos.msgOpts.withdrawRewards.gas *
+                  validatorAddresses.length;
+
+                // Gas adjustment is 1.5
+                // Since there is currently no convenient way to adjust the gas adjustment on the UI,
+                // Use high gas adjustment to prevent failure.
+                try {
+                  gas = (await tx.simulate()).gasUsed * 1.5;
+                } catch (e) {
+                  // Some chain with older version of cosmos sdk (below @0.43 version) can't handle the simulation.
+                  // Therefore, the failure is expected. If the simulation fails, simply use the default value.
+                  console.log(e);
+                }
+
+                await tx.send(
+                  { amount: [], gas: gas.toString() },
                   "",
-                  {},
                   {},
                   {
                     onBroadcasted: (txHash) => {
@@ -100,6 +125,8 @@ export const MyRewardCard: FunctionComponent<{
                 }
                 console.log(e);
                 smartNavigation.navigateSmart("Home", {});
+              } finally {
+                setIsSendingTx(false);
               }
             }}
             disabled={
@@ -107,7 +134,7 @@ export const MyRewardCard: FunctionComponent<{
               pendingStakableReward.toDec().equals(new Dec(0)) ||
               queryReward.pendingRewardValidatorAddresses.length === 0
             }
-            loading={account.isSendingMsg === "withdrawRewards"}
+            loading={isSendingTx || account.isSendingMsg === "withdrawRewards"}
           />
         </View>
       </CardBody>

@@ -87,6 +87,10 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           stops={
             style.get("tx-result-screen-pending-gradient-background").stops
           }
+          fallbackAndroidImage={
+            style.get("tx-result-screen-pending-gradient-background")
+              .fallbackAndroidImage
+          }
         />
       </View>
       <View style={style.flatten(["flex-3"])} />
