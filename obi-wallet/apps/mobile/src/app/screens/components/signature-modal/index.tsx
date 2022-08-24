@@ -3,18 +3,14 @@ import { Sha256 } from "@cosmjs/crypto/build/sha";
 import { coins } from "@cosmjs/launchpad";
 import { EncodeObject } from "@cosmjs/proto-signing";
 import { SigningStargateClient } from "@cosmjs/stargate";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { useRef, useState } from "react";
 import { Modal, ModalProps, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { SECURITY_QUESTIONS } from "../../../../config";
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
-import { DropDownPicker } from "../../../drop-down-picker";
 import { TextInput } from "../../../text-input";
 import { getSignature, sendSignMessageText } from "../../../text-message";
 // TODO:
@@ -24,6 +20,10 @@ import ShieldCheck from "../../onboarding/onboarding3/assets/shield-check.svg";
 import { Background } from "../background";
 import { BottomSheet, BottomSheetRef } from "../bottom-sheet";
 import { CheckIcon, Key, KeysList } from "../keys-list";
+import {
+  SecurityQuestionInput,
+  useSecurityQuestionInput,
+} from "../phone-number/security-question-input";
 
 export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
@@ -76,50 +76,48 @@ export function SignatureModal({
     return new Sha256(serializeSignDoc(signDoc)).digest();
   }
 
-  const data: Key[] = [
-    ...(multisig.biometrics
-      ? [
-          {
-            id: "biometrics" as MultisigKey,
-            title: "Biometrics Signature",
-            right: signatures.has(multisig.biometrics.address) ? (
-              <CheckIcon />
-            ) : null,
-            async onPress() {
-              if (signatures.has(multisig.biometrics.address)) return;
+  function getKey({ id, title }: { id: MultisigKey; title: string }): Key[] {
+    if (!multisig[id]) return [];
 
+    const alreadySigned = signatures.has(multisig[id].address);
+
+    return [
+      {
+        id,
+        title,
+        right: alreadySigned ? <CheckIcon /> : null,
+        async onPress() {
+          if (alreadySigned) return;
+
+          switch (id) {
+            case "biometrics": {
               const message = await getMessage();
               const { signature } = await createBiometricSignature({
                 payload: message,
               });
-
-              console.log(Buffer.from(signature).toString("base64"));
 
               setSignatures((signatures) => {
                 return new Map(
                   signatures.set(multisig.biometrics.address, signature)
                 );
               });
-            },
-          },
-        ]
-      : []),
-    ...(multisig.phoneNumber
-      ? [
-          {
-            id: "phoneNumber" as MultisigKey,
-            title: "Phone Number Signature",
-            right: signatures.has(multisig.phoneNumber.address) ? (
-              <CheckIcon />
-            ) : null,
-            async onPress() {
-              if (signatures.has(multisig.phoneNumber.address)) return;
-
+              break;
+            }
+            case "phoneNumber":
               phoneNumberBottomSheetRef.current.snapToIndex(0);
-            },
-          },
-        ]
-      : []),
+              break;
+            case "cloud":
+              console.log("Not implemented yet");
+              break;
+          }
+        },
+      },
+    ];
+  }
+
+  const data: Key[] = [
+    ...getKey({ id: "biometrics", title: "Biometrics Signature" }),
+    ...getKey({ id: "phoneNumber", title: "Phone Number Signature" }),
   ];
 
   return (
@@ -194,7 +192,9 @@ export function SignatureModal({
 
 interface PhoneNumberBottomSheetContentProps {
   payload: Multisig["phoneNumber"];
+
   getMessage(): Promise<Uint8Array>;
+
   onSuccess(signature: Uint8Array): void;
 }
 
@@ -203,9 +203,8 @@ function PhoneNumberBottomSheetContent({
   getMessage,
   onSuccess,
 }: PhoneNumberBottomSheetContentProps) {
-  const [securityQuestions, setSecurityQuestions] =
-    useState(SECURITY_QUESTIONS);
-  const [securityAnswer, setSecurityAnswer] = useState("");
+  const { securityAnswer, setSecurityAnswer } = useSecurityQuestionInput();
+
   const [sentMessage, setSentMessage] = useState(false);
   const [key, setKey] = useState("");
 
@@ -284,64 +283,14 @@ function PhoneNumberBottomSheetContent({
         justifyContent: "space-between",
       }}
     >
-      <View>
-        <Text
-          style={{
-            color: "#787B9C",
-            fontSize: 10,
-            textTransform: "uppercase",
-            marginTop: 36,
-            marginBottom: 12,
-          }}
-        >
-          Security Question
-        </Text>
-        <DropDownPicker
-          disabled
-          open={false}
-          setOpen={() => {
-            // disabled
-          }}
-          value={payload.securityQuestion}
-          items={securityQuestions}
-          setItems={setSecurityQuestions}
-          setValue={() => {
-            // disabled
-          }}
-        />
-
-        <TextInput
-          label="Answer"
-          placeholder="Type your answer here"
-          style={{ marginTop: 25 }}
-          value={securityAnswer}
-          CustomTextInput={BottomSheetTextInput}
-          onChangeText={setSecurityAnswer}
-        />
-      </View>
+      <SecurityQuestionInput
+        disabled
+        securityQuestion={payload.securityQuestion}
+        securityAnswer={securityAnswer}
+        onSecurityAnswerChange={setSecurityAnswer}
+      />
 
       <View>
-        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-          <FontAwesomeIcon
-            icon={faInfoCircle}
-            style={{
-              color: "#7B87A8",
-              marginHorizontal: 5,
-              position: "absolute",
-              margin: 5,
-            }}
-          />
-          <Text
-            style={{
-              color: "#F6F5FF",
-              marginLeft: 30,
-              opacity: 0.7,
-              fontSize: 12,
-            }}
-          >
-            Now send your encrypted answer to activate your messaging key.
-          </Text>
-        </View>
         <Button
           label="Send Magic SMS"
           LeftIcon={SMS}

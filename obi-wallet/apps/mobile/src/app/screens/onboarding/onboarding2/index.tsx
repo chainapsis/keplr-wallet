@@ -9,13 +9,15 @@ import { Alert, Image, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { SECURITY_QUESTIONS } from "../../../../config";
 import { Button, IconButton } from "../../../button";
-import { DropDownPicker } from "../../../drop-down-picker";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import { sendTextMessage } from "../../../text-message";
 import { Background } from "../../components/background";
+import {
+  SecurityQuestionInput,
+  useSecurityQuestionInput,
+} from "../../components/phone-number/security-question-input";
 import { StackParamList } from "../stack";
 import SMS from "./assets/sms.svg";
 
@@ -49,13 +51,12 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
     }
   }, [multisigStore, navigation]);
 
-  const [open, setOpen] = useState(false);
-  const [securityQuestion, setSecurityQuestion] = useState(
-    SECURITY_QUESTIONS[0].value
-  );
-  const [securityQuestions, setSecurityQuestions] =
-    useState(SECURITY_QUESTIONS);
-  const [securityAnswer, setSecurityAnswer] = useState("");
+  const {
+    securityQuestion,
+    setSecurityQuestion,
+    securityAnswer,
+    setSecurityAnswer,
+  } = useSecurityQuestionInput();
   const [phoneNumber, setPhoneNumber] = useState("");
 
   return (
@@ -116,32 +117,11 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
               </View>
             </View>
 
-            <Text
-              style={{
-                color: "#787B9C",
-                fontSize: 10,
-                textTransform: "uppercase",
-                marginTop: 36,
-                marginBottom: 12,
-              }}
-            >
-              Security Question
-            </Text>
-            <DropDownPicker
-              open={open}
-              value={securityQuestion}
-              items={securityQuestions}
-              setOpen={setOpen}
-              setValue={setSecurityQuestion}
-              setItems={setSecurityQuestions}
-            />
-
-            <TextInput
-              label="Answer"
-              placeholder="Type your answer here"
-              style={{ marginTop: 25 }}
-              value={securityAnswer}
-              onChangeText={setSecurityAnswer}
+            <SecurityQuestionInput
+              securityQuestion={securityQuestion}
+              onSecurityQuestionChange={setSecurityQuestion}
+              securityAnswer={securityAnswer}
+              onSecurityAnswerChange={setSecurityAnswer}
             />
 
             <TextInput
