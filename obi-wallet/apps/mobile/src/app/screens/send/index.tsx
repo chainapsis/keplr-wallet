@@ -17,7 +17,6 @@ import { TextInput } from "../../text-input";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
 
-
 const coins = [
   {
     key: "bitcoin",
