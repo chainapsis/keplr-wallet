@@ -84,7 +84,6 @@ export const KeysConfigScreen = observer(() => {
   ];
 
   const triggerBottomSheet = (index) => {
-    console.log({ index });
     if (index === -1) {
       refBottomSheet.current.close();
     } else {
@@ -251,6 +250,7 @@ interface KeyConfigProps {
   item: KeyListItem;
   onClose: () => void;
 }
+
 function KeyConfig({ item, onClose }: KeyConfigProps) {
   const { title, Icon, activated } = item;
   const safeArea = useSafeAreaInsets();

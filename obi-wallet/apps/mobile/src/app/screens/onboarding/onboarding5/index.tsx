@@ -75,9 +75,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
   const [modalKey, setModalKey] = useState(0);
 
-  const multisig = useMemo(() => {
-    return multisigStore.getNextAdmin("juno");
-  }, [multisigStore]);
+  const multisig = multisigStore.getNextAdmin("juno");
 
   useEffect(() => {
     (async () => {
@@ -90,7 +88,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
       }
 
       const balances = {
-        multisig: await hydrateBalances(multisig.multisig.address),
+        multisig: await hydrateBalances(multisig.multisig?.address),
         biometrics: await hydrateBalances(multisig.biometrics?.address),
         phoneNumber: await hydrateBalances(multisig.phoneNumber?.address),
       };
@@ -102,6 +100,8 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
   });
 
   const messages = useMemo(() => {
+    if (!multisig.multisig?.address) return [];
+
     const rawMessage = {
       admin: multisig.multisig.address,
       hot_wallets: [],
@@ -122,6 +122,8 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
     const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
     return [aminoTypes.toAmino(message)];
   }, [multisig]);
+
+  if (messages.length === 0) return null;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

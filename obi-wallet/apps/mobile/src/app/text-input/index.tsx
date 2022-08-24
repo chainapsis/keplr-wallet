@@ -1,4 +1,5 @@
 import { Text, TextInput as OriginalTextInput } from "@obi-wallet/common";
+import { ComponentType } from "react";
 import {
   StyleProp,
   StyleSheet,
@@ -32,8 +33,10 @@ export function TextInput({
   label,
   style,
   inputStyle,
+  CustomTextInput = OriginalTextInput,
   ...props
 }: TextInputProps & {
+  CustomTextInput?: ComponentType<TextInputProps>;
   label?: string;
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
@@ -41,7 +44,7 @@ export function TextInput({
   return (
     <View style={style}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
-      <OriginalTextInput
+      <CustomTextInput
         style={[styles.input, inputStyle]}
         placeholderTextColor="#4B4E6E"
         {...props}
