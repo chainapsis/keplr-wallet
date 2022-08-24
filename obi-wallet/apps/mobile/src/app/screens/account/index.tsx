@@ -19,6 +19,8 @@ import { Back } from "../components/back";
 import { Background } from "../components/background";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
 import { useNavigation } from "../settings/stack";
+import InheritanceIcon from "./assets/inheritanceIcon.svg";
+import SpendingIcon from "./assets/spendingIcon.svg";
 import { Inheritance } from "./inheritance";
 import { Spending } from "./spending";
 
@@ -337,31 +339,32 @@ const options = [
   {
     key: 0,
     name: "spending",
-    icon: null,
+    icon: SpendingIcon,
   },
-  {
-    key: 1,
-    name: "inheritance",
-    icon: null,
-  },
+  // {
+  //   key: 1,
+  //   name: "inheritance",
+  //   icon: InheritanceIcon,
+  // },
 ];
 
 function Option({ item, onPress }) {
+  console.log({ item });
   return (
     <TouchableOpacity
       style={{ height: 60, justifyContent: "center", alignItems: "center" }}
       onPress={onPress}
     >
       <>
-        <View
+        <item.icon
           style={{
             width: 40,
             height: 40,
-            backgroundColor: "red",
+
             marginHorizontal: 10,
             marginBottom: 10,
           }}
-        ></View>
+        />
         <Text style={{ fontSize: 12, color: "white", opacity: 0.6 }}>
           {item.name}
         </Text>

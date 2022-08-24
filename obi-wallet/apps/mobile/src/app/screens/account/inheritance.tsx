@@ -8,6 +8,7 @@ import {
 import { Button } from "../../button";
 import { DropDownPicker } from "../../drop-down-picker";
 import { TextInput } from "../../text-input";
+import InheritanceIcon from "./assets/inheritanceIcon.svg";
 const repeatsEvery = [
   { label: "Day", value: "day" },
   { label: "Week", value: "week" },
@@ -29,7 +30,7 @@ export function Inheritance() {
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View style={{ flexDirection: "row" }}>
-          <View style={{ width: 40, height: 40, backgroundColor: "red" }} />
+          <InheritanceIcon style={{ width: 40, height: 40 }} />
           <View style={{ paddingLeft: 10 }}>
             <Text
               style={{
