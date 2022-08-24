@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
-import { sendTextMessage } from "../../../text-message";
+import { sendPublicKeyTextMessage } from "../../../text-message";
 import { Background } from "../../components/background";
 import {
   SecurityQuestionInput,
@@ -137,7 +137,7 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
           <SendMagicSmsButton
             description="Now send your encrypted answer to activate your messaging key."
             onPress={async () => {
-              await sendTextMessage({ phoneNumber, securityAnswer });
+              await sendPublicKeyTextMessage({ phoneNumber, securityAnswer });
               navigation.navigate("onboarding3", {
                 phoneNumber,
                 securityQuestion,

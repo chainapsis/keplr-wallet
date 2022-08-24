@@ -12,7 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
 import { TextInput } from "../../../text-input";
-import { getSignature, sendSignMessageText } from "../../../text-message";
+import {
+  parseSignatureTextMessageResponse,
+  sendSignatureTextMessage,
+} from "../../../text-message";
 import { Background } from "../background";
 import { BottomSheet, BottomSheetRef } from "../bottom-sheet";
 import { CheckIcon, Key, KeysList } from "../keys-list";
@@ -250,7 +253,7 @@ function PhoneNumberBottomSheetContent({
               label="Resend"
               onPress={async () => {
                 const message = await getMessage();
-                await sendSignMessageText({
+                await sendSignatureTextMessage({
                   phoneNumber: payload.phoneNumber,
                   securityAnswer,
                   message,
@@ -262,7 +265,7 @@ function PhoneNumberBottomSheetContent({
 
         <VerifyAndProceedButton
           onPress={async () => {
-            onSuccess(await getSignature(key));
+            onSuccess(await parseSignatureTextMessageResponse(key));
           }}
         />
       </View>
@@ -288,7 +291,7 @@ function PhoneNumberBottomSheetContent({
       <SendMagicSmsButton
         onPress={async () => {
           const message = await getMessage();
-          await sendSignMessageText({
+          await sendSignatureTextMessage({
             phoneNumber: payload.phoneNumber,
             securityAnswer,
             message,
