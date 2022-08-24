@@ -5,9 +5,9 @@ import Http from "http";
 import { autorun } from "mobx";
 
 export class MockObservableQuery extends ObservableQuery<number> {
-  constructor(kvStore: KVStore) {
+  constructor(kvStore: KVStore, port: number) {
     const instance = Axios.create({
-      baseURL: "http://127.0.0.1:9234",
+      baseURL: `http://127.0.0.1:${port}`,
     });
 
     super(kvStore, instance, "/test");
@@ -38,6 +38,7 @@ export class DelayMemoryKVStore extends MemoryKVStore {
 
 describe("Test observable query", () => {
   let server: Http.Server | undefined;
+  let port: number;
   let num = 0;
 
   beforeEach(() => {
@@ -52,7 +53,13 @@ describe("Test observable query", () => {
       }, 200);
     });
 
-    server.listen(9234);
+    server.listen();
+
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("Failed to get address for server");
+    }
+    port = address.port;
   });
 
   afterEach(() => {
@@ -64,7 +71,7 @@ describe("Test observable query", () => {
 
   it("basic test", async () => {
     const basicTestFn = async (store: KVStore) => {
-      const query = new MockObservableQuery(store);
+      const query = new MockObservableQuery(store, port);
 
       // Nothing is being fetched because no value has been observed
       expect(query.isObserved).toBe(false);
@@ -118,5 +125,22 @@ describe("Test observable query", () => {
     // Even if the kvstore performs worse than the query, it should handle it well.
     const delayMemStore = new DelayMemoryKVStore("test", 50000);
     await basicTestFn(delayMemStore);
+  });
+
+  it("test waitResponse()/waitFreshResponse()", async () => {
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port);
+
+    let res = await query.waitResponse();
+    expect(res?.data).toBe(0);
+
+    res = await query.waitFreshResponse();
+    expect(res?.data).toBe(1);
+
+    res = await query.waitResponse();
+    expect(res?.data).toBe(1);
+
+    res = await query.waitFreshResponse();
+    expect(res?.data).toBe(2);
   });
 });

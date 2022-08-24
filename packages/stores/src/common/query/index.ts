@@ -413,14 +413,34 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
    * Wait the response and return the response without considering it is staled or fresh.
    */
   waitResponse(): Promise<Readonly<QueryResponse<T>> | undefined> {
-    if (!this.isFetching) {
+    if (this.response) {
       return Promise.resolve(this.response);
     }
+
+    let onceCoerce = false;
+    // Make sure that the fetching is tracked to force to be fetched.
+    const reactionDisposer = reaction(
+      () => this.isFetching,
+      () => {
+        if (!onceCoerce) {
+          if (!this.isFetching) {
+            this.fetch();
+          }
+          onceCoerce = true;
+        }
+      },
+      {
+        fireImmediately: true,
+      }
+    );
 
     return new Promise((resolve) => {
       const disposer = autorun(() => {
         if (!this.isFetching) {
           resolve(this.response);
+          if (reactionDisposer) {
+            reactionDisposer();
+          }
           if (disposer) {
             disposer();
           }
