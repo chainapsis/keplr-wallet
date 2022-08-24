@@ -1,3 +1,10 @@
+import {
+  coins,
+  pubkeyToAddress,
+  pubkeyType,
+  Secp256k1Wallet,
+} from "@cosmjs/amino";
+import { SigningStargateClient } from "@cosmjs/stargate";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -6,6 +13,8 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
+import { getBiometricsKeyPair } from "../../biometrics";
+import { useStore } from "../../stores";
 import { Account } from "../account";
 import { Create } from "../account/create";
 import { useNavigation } from "../onboarding/stack";
@@ -19,6 +28,8 @@ import { Stack } from "./stack";
 
 export function SettingsScreen() {
   const navigation = useNavigation();
+  const { multisigStore } = useStore();
+
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -81,6 +92,46 @@ export function SettingsScreen() {
         title="Log out"
         subtitle="Save your keys before logging out"
       />
+
+      <Setting
+        Icon={HelpAndSupport}
+        title="Fund proxy wallet"
+        subtitle="Send some funds from your biometrics wallet"
+        onPress={async () => {
+          const rcp = "https://rpc.uni.junonetwork.io/";
+          const { publicKey, privateKey } = await getBiometricsKeyPair();
+          const wallet = await Secp256k1Wallet.fromKey(
+            new Uint8Array(Buffer.from(privateKey, "base64")),
+            "juno"
+          );
+          const biometricsAddress = pubkeyToAddress(
+            {
+              type: pubkeyType.secp256k1,
+              value: publicKey,
+            },
+            "juno"
+          );
+          const client = await SigningStargateClient.connectWithSigner(
+            rcp,
+            wallet
+          );
+
+          const fee = {
+            amount: coins(6000, "ujunox"),
+            gas: "200000",
+          };
+
+          const result = await client.sendTokens(
+            biometricsAddress,
+            multisigStore.getProxyAddress(),
+            coins(10000, "ujunox"),
+            fee,
+            ""
+          );
+          console.log({ result });
+        }}
+      />
+
       <View style={[styles.flex1]}></View>
       <View style={[styles.flex1]}></View>
     </SafeAreaView>

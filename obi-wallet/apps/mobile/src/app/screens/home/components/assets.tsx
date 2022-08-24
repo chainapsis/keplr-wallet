@@ -399,7 +399,7 @@ function useBalances() {
       const client = await StargateClient.connect(rcp);
       setBalances(await client.getAllBalances(address));
     })();
-  }, [address]);
+  });
 
   return balances;
 }
