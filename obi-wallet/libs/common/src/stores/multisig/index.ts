@@ -123,6 +123,10 @@ export class MultisigStore {
     return this.proxyAddress !== null;
   }
 
+  public getProxyAddress() {
+    return this.proxyAddress?.address;
+  }
+
   @action
   public setPhoneNumberKey(payload: SerializedPhoneNumberPayload) {
     this.nextAdmin.phoneNumber = payload;
