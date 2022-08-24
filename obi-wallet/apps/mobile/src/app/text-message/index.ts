@@ -13,14 +13,75 @@ const TWILIO_BASIC_AUTH = `Basic ${Buffer.from(
   `${PHONE_NUMBER_TWILIO_BASIC_AUTH_USER}:${PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD}`
 ).toString("base64")}`;
 
-export async function sendTextMessage({
+export async function sendPublicKeyTextMessage({
   phoneNumber,
   securityAnswer,
 }: {
   phoneNumber: string;
   securityAnswer: string;
 }) {
-  const body = await getMessageBody(securityAnswer);
+  await encryptAndSendMessage({
+    message: `pub:${securityAnswer}`,
+    phoneNumber,
+  });
+}
+
+export async function parsePublicKeyTextMessageResponse(key: string) {
+  try {
+    const decrypted = await fetchAndDecryptResponse(key);
+
+    if (!decrypted.startsWith("pubkey:")) {
+      console.error("This doesn't seem to be a public key");
+      return null;
+    }
+
+    return decrypted.replace("pubkey:", "");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function sendSignatureTextMessage({
+  phoneNumber,
+  securityAnswer,
+  message,
+}: {
+  phoneNumber: string;
+  securityAnswer: string;
+  message: Uint8Array;
+}) {
+  await encryptAndSendMessage({
+    message: `sign:${securityAnswer},${Buffer.from(message.buffer).toString(
+      "base64"
+    )}`,
+    phoneNumber,
+  });
+}
+
+export async function parseSignatureTextMessageResponse(key: string) {
+  try {
+    const decrypted = await fetchAndDecryptResponse(key);
+
+    if (!decrypted.startsWith("signature::")) {
+      console.error("This doesn't seem to be a signature");
+      return null;
+    }
+
+    const signature = decrypted.replace("signature::", "");
+    return new Uint8Array(Buffer.from(signature, "base64"));
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function encryptAndSendMessage({
+  message,
+  phoneNumber,
+}: {
+  message: string;
+  phoneNumber: string;
+}) {
+  const body = await getMessageBody(message);
   const formData = new FormData();
   formData.append("To", TWILIO_NUMBER);
   formData.append("From", phoneNumber);
@@ -38,9 +99,26 @@ export async function sendTextMessage({
   );
 }
 
-export async function getMessageBody(securityAnswer: string) {
-  const message = `pub:${securityAnswer}`;
+async function fetchAndDecryptResponse(key: string) {
+  const result = await fetch(`https://obi-hastebin.herokuapp.com/raw/${key}`);
+  const message = await result.text();
 
+  // Decryption hasn't been implemented on Twilio yet
+  // const token = totp.generate(DEV_SHARED_SECRET);
+  // try {
+  //   totp.verify({ token, secret: DEV_SHARED_SECRET });
+  // } catch (err) {
+  //   // Possible errors
+  //   // - options validation
+  //   // - "Invalid input - it is not base32 encoded string"
+  //   console.error(err);
+  // }
+  // const decrypted = AES.decrypt(message, token).toString(enc.Utf8);
+
+  return message;
+}
+
+export async function getMessageBody(message: string) {
   // absurdly large step for dev convenience
   totp.options = { digits: 64, step: 600 };
   const token = totp.generate(DEV_SHARED_SECRET);
@@ -64,38 +142,6 @@ export async function getMessageBody(securityAnswer: string) {
     });
     const { key } = JSON.parse(await result.text());
     return key;
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-export async function getPublicKey(key: string) {
-  try {
-    const result = await fetch(`https://obi-hastebin.herokuapp.com/raw/${key}`);
-    const message = await result.text();
-
-    const token = totp.generate(DEV_SHARED_SECRET);
-    try {
-      totp.verify({ token, secret: DEV_SHARED_SECRET });
-    } catch (err) {
-      // Possible errors
-      // - options validation
-      // - "Invalid input - it is not base32 encoded string"
-      console.error(err);
-    }
-
-    let decrypted = AES.decrypt(message, token).toString(enc.Utf8);
-    // TODO: this is only needed as long as we don't have encryption on Twilio side
-    if (decrypted.length === 0) {
-      decrypted = message;
-    }
-
-    if (!decrypted.startsWith("pubkey:")) {
-      console.error("This doesn't seem to be a public key");
-      return null;
-    }
-
-    return decrypted.replace("pubkey:", "");
   } catch (e) {
     console.error(e);
   }

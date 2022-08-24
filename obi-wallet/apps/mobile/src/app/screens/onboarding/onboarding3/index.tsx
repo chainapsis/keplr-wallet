@@ -6,15 +6,18 @@ import { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, IconButton, InlineButton } from "../../../button";
+import { IconButton, InlineButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
-import { getPublicKey, sendTextMessage } from "../../../text-message";
+import {
+  parsePublicKeyTextMessageResponse,
+  sendPublicKeyTextMessage,
+} from "../../../text-message";
 import { Background } from "../../components/background";
 import { KeyboardAvoidingView } from "../../components/keyboard-avoiding-view";
+import { VerifyAndProceedButton } from "../../components/phone-number/verify-and-proceed-button";
 import { StackParamList } from "../stack";
 import InsuranceLogo from "./assets/insurance-logo.svg";
-import ShieldCheck from "./assets/shield-check.svg";
 
 export type Onboarding3Props = NativeStackScreenProps<
   StackParamList,
@@ -104,7 +107,7 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
               <InlineButton
                 label="Resend"
                 onPress={async () => {
-                  await sendTextMessage({
+                  await sendPublicKeyTextMessage({
                     phoneNumber: params.phoneNumber,
                     securityAnswer: params.securityAnswer,
                   });
@@ -113,12 +116,9 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
             </View>
           </View>
 
-          <Button
-            label="Verify & Proceed"
-            LeftIcon={ShieldCheck}
-            flavor="blue"
+          <VerifyAndProceedButton
             onPress={async () => {
-              const publicKey = await getPublicKey(key);
+              const publicKey = await parsePublicKeyTextMessageResponse(key);
               if (publicKey) {
                 multisigStore.setPhoneNumberKey({
                   publicKey,

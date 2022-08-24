@@ -38,6 +38,8 @@ export interface Multisig {
   cloud: WithAddress<SerializedCloudPayload> | null;
 }
 
+export type MultisigKey = keyof Omit<Multisig, "multisig">;
+
 export enum MultisigState {
   LOADING = 0,
   EMPTY,

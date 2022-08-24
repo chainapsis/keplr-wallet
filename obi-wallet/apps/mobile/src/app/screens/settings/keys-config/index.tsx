@@ -1,31 +1,29 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { Text } from "@obi-wallet/common";
+import { MultisigKey, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite/src/observer";
-import { useRef, useState, FC } from "react";
+import { useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { SvgProps } from "react-native-svg";
 
 import { useStore } from "../../../stores";
 import { Back } from "../../components/back";
-import Check from "./assets/check-icon.svg";
-import Cloud from "./assets/cloud-icon.svg";
-import Email from "./assets/email-icon.svg";
-import FaceId from "./assets/face-id-icon.svg";
+import {
+  CheckIcon,
+  Key,
+  keyMetaData,
+  KeysList,
+  WarningIcon,
+} from "../../components/keys-list";
 import Keys1 from "./assets/keys1.svg";
 import Keys2 from "./assets/keys2.svg";
 import Keys3 from "./assets/keys3.svg";
 import Keys4 from "./assets/keys4.svg";
 import Keys5 from "./assets/keys5.svg";
-import Share from "./assets/share-icon.svg";
-import Warning from "./assets/warning-icon.svg";
-import Whatsapp from "./assets/whatsapp-icon.svg";
 
 const getSVG = (number: number) => {
   switch (number) {
@@ -50,51 +48,47 @@ export const KeysConfigScreen = observer(() => {
 
   const refBottomSheet = useRef<BottomSheet>();
   const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
-  const data: KeyListItem[] = [
-    {
-      key: "phone-number",
-      title: "Phone Number Key",
-      activated: currentAdmin.phoneNumber !== null,
-      Icon: Whatsapp,
-    },
-    // {
-    //   key: "email",
-    //   title: "E-Mail Key",
-    //   activated: true,
-    //   Icon: Email,
-    // },
-    {
-      key: "biometrics",
-      title: "Biometrics Key",
-      activated: currentAdmin.biometrics !== null,
-      Icon: FaceId,
-    },
-    // {
-    //   key: "cloud",
-    //   title: "Cloud Backup Key",
-    //   activated: true,
-    //   Icon: Cloud,
-    // },
-    // {
-    //   key: "share",
-    //   title: "Share Key",
-    //   activated: true,
-    //   Icon: Share,
-    // },
-  ];
 
   const triggerBottomSheet = (index) => {
-    console.log({ index });
     if (index === -1) {
       refBottomSheet.current.close();
     } else {
       refBottomSheet.current.snapToIndex(index);
     }
   };
-  const openKeyConfig = (item) => {
-    triggerBottomSheet(0);
-    setSelectedItem(item);
-  };
+
+  function getKey({
+    id,
+    title,
+  }: {
+    id: MultisigKey;
+    title: string;
+  }): Key & { activated: boolean } {
+    const activated = currentAdmin[id] !== null;
+    return {
+      id,
+      title,
+      activated,
+      right: activated ? <CheckIcon /> : <WarningIcon />,
+      onPress: () => {
+        triggerBottomSheet(0);
+        setSelectedItem({
+          id,
+          title,
+          activated,
+        });
+      },
+    };
+  }
+
+  const data: (Key & { activated: boolean })[] = [
+    getKey({
+      id: "phoneNumber",
+      title: "Phone Number Key",
+    }),
+    getKey({ id: "biometrics", title: "Biometrics Key" }),
+    getKey({ id: "cloud", title: "Cloud Key" }),
+  ];
   const activatedKeys = data.filter((item) => item.activated).length;
 
   return (
@@ -123,18 +117,9 @@ export const KeysConfigScreen = observer(() => {
         </Text>
       </View>
       <View style={{ flex: 6 }}>
-        <FlatList
-          data={data}
-          renderItem={({ item }) => (
-            <KeyListItem
-              item={item}
-              onPress={() => {
-                openKeyConfig(item);
-              }}
-            />
-          )}
-          style={{ flex: 1, marginTop: 40 }}
-        />
+        <View style={{ marginTop: 40 }}>
+          <KeysList data={data} />
+        </View>
       </View>
       <BottomSheet
         handleIndicatorStyle={{ backgroundColor: "white" }}
@@ -180,80 +165,22 @@ const styles = StyleSheet.create({
 });
 
 interface KeyListItem {
-  key: string;
+  id: MultisigKey;
   title: string;
   activated: boolean;
-  Icon: FC<SvgProps>;
-}
-
-interface KeyListItemProps {
-  item: KeyListItem;
-  onPress: () => void;
-}
-
-function KeyListItem({ item, onPress }: KeyListItemProps) {
-  const { title, Icon, activated } = item;
-  return (
-    <TouchableOpacity
-      style={{
-        height: 79,
-        width: "100%",
-        backgroundColor: "#111023",
-        marginBottom: 20,
-        flexDirection: "row",
-        borderRadius: 12,
-      }}
-      onPress={() => onPress()}
-    >
-      <View style={{ flex: 2, justifyContent: "center", alignItems: "center" }}>
-        <View
-          style={{
-            backgroundColor: "#1D1C37",
-            width: 36,
-            height: 36,
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 12,
-          }}
-        >
-          <Icon />
-        </View>
-      </View>
-      <View style={{ flex: 6, justifyContent: "center" }}>
-        <Text
-          style={{
-            color: "#F6F5FF",
-            fontSize: 14,
-            fontWeight: "600",
-          }}
-        >
-          {title}
-        </Text>
-        <Text
-          style={{
-            color: "#F6F5FF",
-            fontSize: 12,
-            opacity: 0.6,
-            marginTop: 4,
-          }}
-        >
-          Now send your encrypted answer to
-        </Text>
-      </View>
-      <View style={{ flex: 2, justifyContent: "center", alignItems: "center" }}>
-        {activated ? <Check /> : <Warning />}
-      </View>
-    </TouchableOpacity>
-  );
 }
 
 interface KeyConfigProps {
   item: KeyListItem;
   onClose: () => void;
 }
+
 function KeyConfig({ item, onClose }: KeyConfigProps) {
-  const { title, Icon, activated } = item;
+  const { id, title, activated } = item;
+  const { Icon } = keyMetaData[id];
+
   const safeArea = useSafeAreaInsets();
+
   return (
     <View
       style={{
