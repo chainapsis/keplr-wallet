@@ -20,6 +20,7 @@ import { ChainUpdaterService } from "@keplr-wallet/background";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
 import bellIcon from "../../public/assets/icon/bell.png";
+import { DepositView } from "./deposit";
 // import { IBCTransferView } from "./ibc-transfer";
 
 export const MainPage: FunctionComponent = observer(() => {
@@ -118,12 +119,14 @@ export const MainPage: FunctionComponent = observer(() => {
           </div>
         </CardBody>
       </Card>
-      {chainStore.current.walletUrlForStaking ? "" : null}
       {hasTokens ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>{<TokensView />}</CardBody>
         </Card>
       ) : null}
+      <Card className={classnames(style.card, "shadow")}>
+        <CardBody>{<DepositView />}</CardBody>
+      </Card>
       {/* {uiConfigStore.showAdvancedIBCTransfer &&
       chainStore.current.features?.includes("ibc-transfer") ? (
         <Card className={classnames(style.card, "shadow")}>

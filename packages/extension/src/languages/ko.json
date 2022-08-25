@@ -5,6 +5,7 @@
   "main.account.button.deposit": "입금",
   "main.account.button.send": "보내기",
   "main.account.tooltip.no-asset": "계정에 자산이 없습니다. 자산을 입금해주세요.",
+  "main.account.deposit.paragraph": "지갑에 토큰 추가",
 
   "main.modal.select-account.title": "계정을 선택하세요",
   "main.modal.select-account.button.select": "계정 선택",
