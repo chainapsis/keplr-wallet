@@ -108,6 +108,10 @@
   transition-delay: 0.5s;
 }
 
+.hr {
+  margin: $main-card-padding 0;
+}
+
 .emptyState {
   display: flex;
   flex-direction: column;
@@ -119,6 +123,11 @@
     color: #525f7f;
     font-weight: 700;
     font-size: 20px;
+  }
+
+  .buyButton {
+    margin-top: 8px;
+    width: 100%;
   }
 
   img {

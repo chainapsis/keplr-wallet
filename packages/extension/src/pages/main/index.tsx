@@ -124,9 +124,6 @@ export const MainPage: FunctionComponent = observer(() => {
           <CardBody>{<TokensView />}</CardBody>
         </Card>
       ) : null}
-      <Card className={classnames(style.card, "shadow")}>
-        <CardBody>{<DepositView />}</CardBody>
-      </Card>
       {/* {uiConfigStore.showAdvancedIBCTransfer &&
       chainStore.current.features?.includes("ibc-transfer") ? (
         <Card className={classnames(style.card, "shadow")}>

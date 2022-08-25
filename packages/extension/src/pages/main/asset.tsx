@@ -8,6 +8,7 @@ import styleAsset from "./asset.module.scss";
 import { TxButtonView } from "./tx-button";
 import walletIcon from "../../public/assets/icon/wallet.png";
 import buyIcon from "../../public/assets/icon/buy.png";
+import { DepositView } from "./deposit";
 
 export const ProgressBar = ({
   width,
@@ -33,7 +34,7 @@ export const ProgressBar = ({
   );
 };
 
-const EmptyState: FunctionComponent = () => {
+const EmptyState = ({ denom, chainId }: { denom: string; chainId: string }) => {
   return (
     <div className={styleAsset.emptyState}>
       <h1 className={styleAsset.title}>No funds added</h1>
@@ -41,9 +42,19 @@ const EmptyState: FunctionComponent = () => {
       <p className={styleAsset.desc}>
         That’s okay, you can deposit tokens to your address or buy some.
       </p>
-      <button>
-        <img src={buyIcon} alt="buy tokens" /> Buy Tokens
-      </button>
+      <button>Deposit {denom}</button>
+      {chainId == "fetchhub-4" && (
+        <a
+          href={"https://indacoin.io/buy-fetch.ai-with-card"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styleAsset.buyButton}
+        >
+          <button>
+            <img src={buyIcon} alt="buy tokens" /> Buy Tokens
+          </button>
+        </a>
+      )}
     </div>
   );
 };
@@ -100,7 +111,12 @@ export const AssetView: FunctionComponent = observer(() => {
     : !total.toDec().isZero();
 
   if (!hasBalance) {
-    return <EmptyState />;
+    return (
+      <EmptyState
+        denom={chainStore.current.stakeCurrency.coinDenom}
+        chainId={chainStore.current.chainId}
+      />
+    );
   }
 
   return (
@@ -177,6 +193,8 @@ export const AssetView: FunctionComponent = observer(() => {
         </div>
       </div>
       <TxButtonView />
+      <hr className={styleAsset.hr} />
+      <DepositView />
     </React.Fragment>
   );
 });
