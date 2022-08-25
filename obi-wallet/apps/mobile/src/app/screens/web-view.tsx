@@ -57,7 +57,11 @@ export const WebViewScreen = observer<WebViewScreenProps>(
           //   ? largestIcon.src
           //   : "https://" + host + largestIcon.src;
 
-          setCurrentAppMetadata({ ...app, icon, label: title });
+          const normalizedIcon = icon.endsWith("/")
+            ? icon.substr(0, icon.length - 1)
+            : icon;
+
+          setCurrentAppMetadata({ ...app, icon: normalizedIcon, label: title });
         } catch (e) {
           console.log(e);
         }
