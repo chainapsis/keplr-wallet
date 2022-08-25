@@ -212,7 +212,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   }
 
   protected onStop() {
-    this.cancel();
+    if (this.isFetching && this.cancelToken) {
+      this.cancel();
+    }
 
     if (this.intervalId != null) {
       clearInterval(this.intervalId as NodeJS.Timeout);
@@ -256,8 +258,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
 
     // If response is fetching, cancel the previous query.
-    if (this.isFetching) {
-      this.cancel();
+    if (this.isFetching && this.cancelToken) {
+      // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues. Use an error message to identify this.
+      this.cancel("__fetching__proceed__next__");
     }
 
     this._isFetching = true;
@@ -286,6 +289,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
 
     this.cancelToken = Axios.CancelToken.source();
+
+    let fetchingProceedNext = false;
 
     try {
       let { response, headers } = yield* toGenerator(
@@ -347,6 +352,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     } catch (e) {
       // If canceld, do nothing.
       if (Axios.isCancel(e)) {
+        if (e.message === "__fetching__proceed__next__") {
+          fetchingProceedNext = true;
+        }
         return;
       }
 
@@ -380,7 +388,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         this.setError(error);
       }
     } finally {
-      this._isFetching = false;
+      if (!fetchingProceedNext) {
+        this._isFetching = false;
+      }
       this.cancelToken = undefined;
     }
   }
@@ -403,9 +413,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this._error = error;
   }
 
-  public cancel(): void {
+  public cancel(message?: string): void {
     if (this.cancelToken) {
-      this.cancelToken.cancel();
+      this.cancelToken.cancel(message);
     }
   }
 
