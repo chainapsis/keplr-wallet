@@ -4,13 +4,11 @@ import { faHeart } from "@fortawesome/free-solid-svg-icons/faHeart";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { App, Text } from "@obi-wallet/common";
+import { App, Text, fetchMeta } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import axios from "axios";
 import { observer } from "mobx-react-lite";
-import { parse } from "node-html-parser";
 import { useEffect, useRef, useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
@@ -36,28 +34,30 @@ export const WebViewScreen = observer<WebViewScreenProps>(
       const fetchMetadata = async () => {
         //fetch title from app url html
         try {
-          const res = await axios.get(app.url);
-          const html = res.data;
-          const root = await parse(html);
-          // get the page manifest
-          const manifest = root.querySelector('link[rel="manifest"]');
-          const manifestUrl = manifest?.attributes.href;
-          console.log({ manifestUrl });
-          //get host from currentUrl
-          const host = currentUrl.split("/")[2];
-          console.log({ host }, host + manifestUrl);
-          const manifestRes = await axios.get("https://" + host + manifestUrl);
-          console.log(manifestRes.data.icons);
-          //get the largest icon from manifestres.data.icons
-          const largestIcon = manifestRes.data.icons.sort(
-            (a, b) => b.sizes.length - a.sizes.length
-          )[0];
-          // if largestIcon is a url keep it else compose it from host and largestIcon.src
-          const icon = largestIcon.src.startsWith("http")
-            ? largestIcon.src
-            : "https://" + host + largestIcon.src;
+          const { title, icon } = await fetchMeta(app.url);
+          //
+          // const res = await axios.get(app.url);
+          // const html = res.data;
+          // const root = await parse(html);
+          // // get the page manifest
+          // const manifest = root.querySelector('link[rel="manifest"]');
+          // const manifestUrl = manifest?.attributes.href;
+          // console.log({ manifestUrl });
+          // //get host from currentUrl
+          // const host = currentUrl.split("/")[2];
+          // console.log({ host }, host + manifestUrl);
+          // const manifestRes = await axios.get("https://" + host + manifestUrl);
+          // console.log(manifestRes.data.icons);
+          // //get the largest icon from manifestres.data.icons
+          // const largestIcon = manifestRes.data.icons.sort(
+          //   (a, b) => b.sizes.length - a.sizes.length
+          // )[0];
+          // // if largestIcon is a url keep it else compose it from host and largestIcon.src
+          // const icon = largestIcon.src.startsWith("http")
+          //   ? largestIcon.src
+          //   : "https://" + host + largestIcon.src;
 
-          setCurrentAppMetadata({ ...app, icon, label: manifestRes.data.name });
+          setCurrentAppMetadata({ ...app, icon, label: title });
         } catch (e) {
           console.log(e);
         }

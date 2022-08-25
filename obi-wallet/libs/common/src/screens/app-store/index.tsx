@@ -14,6 +14,8 @@ import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 import { fetchMeta } from "./fetch-meta";
 
+export { fetchMeta };
+
 const appStoreStyles = StyleSheet.create({
   appIcon: {
     width: 90,
