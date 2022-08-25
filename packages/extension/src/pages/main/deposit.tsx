@@ -37,59 +37,103 @@ export const DepositView: FunctionComponent = observer(() => {
   const [isDepositOpen, setIsDepositOpen] = useState(false);
 
   return (
-    <div className={styleDeposit.containerInner}>
-      <Modal
-        style={{
-          content: {
-            width: "330px",
-            minWidth: "330px",
-            minHeight: "unset",
-            maxHeight: "unset",
-          },
-        }}
-        isOpen={isDepositOpen}
-        onRequestClose={() => {
-          setIsDepositOpen(false);
-        }}
-      >
-        <DepositModal bech32Address={accountInfo.bech32Address} />
-      </Modal>
+    <div>
+      <div className={styleDeposit.containerInner}>
+        <Modal
+          style={{
+            content: {
+              width: "330px",
+              minWidth: "330px",
+              minHeight: "unset",
+              maxHeight: "unset",
+            },
+          }}
+          isOpen={isDepositOpen}
+          onRequestClose={() => {
+            setIsDepositOpen(false);
+          }}
+        >
+          <DepositModal bech32Address={accountInfo.bech32Address} />
+        </Modal>
 
-      <div className={styleDeposit.vertical}>
-        <p
-          className={classnames(
-            "h3",
-            "my-0",
-            "font-weight-normal",
-            styleDeposit.paragraphMain
-          )}
+        <div className={styleDeposit.vertical}>
+          <p
+            className={classnames(
+              "h4",
+              "my-0",
+              "font-weight-normal",
+              styleDeposit.paragraphMain
+            )}
+          >
+            <FormattedMessage id="main.account.button.deposit" />{" "}
+            {chainStore.current.stakeCurrency.coinDenom.toUpperCase()}
+          </p>
+          <p
+            className={classnames(
+              "h5",
+              "my-0",
+              "font-weight-normal",
+              styleDeposit.paragraphSub
+            )}
+          >
+            <FormattedMessage id="main.account.deposit.paragraph" />
+          </p>
+        </div>
+        <div style={{ flex: 1 }} />
+        <Button
+          className={styleDeposit.button}
+          color="primary"
+          size="sm"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsDepositOpen(true);
+          }}
         >
-          <FormattedMessage id="main.account.button.deposit" />{" "}
-          {chainStore.current.stakeCurrency.coinDenom.toUpperCase()}
-        </p>
-        <p
-          className={classnames(
-            "h4",
-            "my-0",
-            "font-weight-normal",
-            styleDeposit.paragraphSub
-          )}
-        >
-          <FormattedMessage id="main.account.deposit.paragraph" />
-        </p>
+          <FormattedMessage id="main.account.button.deposit" />
+        </Button>
       </div>
-      <div style={{ flex: 1 }} />
-      <Button
-        className={styleDeposit.button}
-        color="primary"
-        size="sm"
-        onClick={(e) => {
-          e.preventDefault();
-          setIsDepositOpen(true);
-        }}
-      >
-        <FormattedMessage id="main.account.button.deposit" />
-      </Button>
+
+      {chainStore.current.chainId == "fetchhub-4" && (
+        <div>
+          <hr className={styleDeposit.hr} />
+
+          <div className={styleDeposit.containerInner}>
+            <div className={styleDeposit.vertical}>
+              <p
+                className={classnames(
+                  "h4",
+                  "my-0",
+                  "font-weight-normal",
+                  styleDeposit.paragraphMain
+                )}
+              >
+                <FormattedMessage id="main.account.button.buy" />{" "}
+                {chainStore.current.stakeCurrency.coinDenom.toUpperCase()}
+              </p>
+              <p
+                className={classnames(
+                  "h5",
+                  "my-0",
+                  "font-weight-normal",
+                  styleDeposit.paragraphSub
+                )}
+              >
+                <FormattedMessage id="main.account.buy.paragraph" />
+              </p>
+            </div>
+            <div style={{ flex: 1 }} />
+            <a
+              href={"https://indacoin.io/buy-fetch.ai-with-card"}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button className={styleDeposit.button} color="primary" size="sm">
+                <FormattedMessage id="main.account.button.buy" />
+              </Button>
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

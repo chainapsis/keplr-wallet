@@ -6,6 +6,8 @@
   "main.account.deposit.paragraph": "Add tokens to your wallet",
   "main.account.button.send": "Send",
   "main.account.tooltip.no-asset": "No token in your account. Deposit some tokens to send.",
+  "main.account.button.buy": "Buy",
+  "main.account.buy.paragraph": "Buy and add native tokens to your wallet",
 
   "main.modal.select-account.title": "Select your account",
   "main.modal.select-account.button.select": "Select Account",
