@@ -1,23 +1,15 @@
-import { faAngleDoubleRight } from "@fortawesome/free-solid-svg-icons/faAngleDoubleRight";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import BottomSheet, {
-  BottomSheetView,
-  TouchableOpacity,
-} from "@gorhom/bottom-sheet/src";
-import { FC, useRef } from "react";
-import { useState } from "react";
+import { TouchableOpacity } from "@gorhom/bottom-sheet/src";
+import { observer } from "mobx-react-lite/src/observer";
 import { Share, Text, View } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from "../../button";
-import { TextInput } from "../../text-input";
+import { useStore } from "../../stores";
 import { Back } from "../components/back";
-import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
 
-export function ReceiveScreen() {
+export const ReceiveScreen = observer(() => {
+  const { multisigStore } = useStore();
+  const address = multisigStore.getProxyAddress();
+
   const onShare = async (text) => {
     try {
       const result = await Share.share({
@@ -71,7 +63,7 @@ export function ReceiveScreen() {
             paddingVertical: 20,
             paddingHorizontal: 30,
           }}
-          onPress={() => onShare("juno29793619276319723692763")}
+          onPress={() => onShare(address)}
         >
           <Text
             style={{
@@ -93,10 +85,10 @@ export function ReceiveScreen() {
               marginTop: 10,
             }}
           >
-            juno29793619276319723692763
+            {address}
           </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { Coin, StargateClient } from "@cosmjs/stargate";
+import { Coin } from "@cosmjs/stargate";
 import { faAngleDoubleLeft } from "@fortawesome/free-solid-svg-icons/faAngleDoubleLeft";
 import { faSortAsc } from "@fortawesome/free-solid-svg-icons/faSortAsc";
 import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
@@ -8,21 +8,20 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FlatList,
   Image,
   ImageBackground,
   ListRenderItemInfo,
   TouchableHighlight,
-  View,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
-import { useStore } from "../../../stores";
-import Pay from "../assets/pay.svg";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
@@ -173,7 +172,7 @@ const BalanceAndActions = observer(() => {
           flexDirection: "row",
           justifyContent: "space-around",
           alignItems: "center",
-          width: "70%",
+          width: 200,
           marginTop: 36,
         }}
       >
@@ -227,30 +226,30 @@ const BalanceAndActions = observer(() => {
             RECEIVE
           </Text>
         </View>
-        <View style={{ alignItems: "center" }}>
-          <TouchableHighlight
-            style={{
-              width: 56,
-              height: 56,
-              backgroundColor: "#100F1E",
-              borderRadius: 16,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Pay width={22} height={22} />
-          </TouchableHighlight>
-          <Text
-            style={{
-              color: "#F6F5FF",
-              fontSize: 9,
-              fontWeight: "500",
-              marginTop: 10,
-            }}
-          >
-            PAY
-          </Text>
-        </View>
+        {/*<View style={{ alignItems: "center" }}>*/}
+        {/*  <TouchableHighlight*/}
+        {/*    style={{*/}
+        {/*      width: 56,*/}
+        {/*      height: 56,*/}
+        {/*      backgroundColor: "#100F1E",*/}
+        {/*      borderRadius: 16,*/}
+        {/*      justifyContent: "center",*/}
+        {/*      alignItems: "center",*/}
+        {/*    }}*/}
+        {/*  >*/}
+        {/*    <Pay width={22} height={22} />*/}
+        {/*  </TouchableHighlight>*/}
+        {/*  <Text*/}
+        {/*    style={{*/}
+        {/*      color: "#F6F5FF",*/}
+        {/*      fontSize: 9,*/}
+        {/*      fontWeight: "500",*/}
+        {/*      marginTop: 10,*/}
+        {/*    }}*/}
+        {/*  >*/}
+        {/*    PAY*/}
+        {/*  </Text>*/}
+        {/*</View>*/}
       </View>
     </View>
   );
@@ -385,38 +384,4 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
       </View>
     </View>
   );
-}
-
-function useBalances() {
-  const { multisigStore } = useStore();
-  const address = multisigStore.getProxyAddress();
-
-  const [balances, setBalances] = useState<readonly Coin[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      const rcp = "https://rpc.uni.junonetwork.io/";
-      const client = await StargateClient.connect(rcp);
-      setBalances(await client.getAllBalances(address));
-    })();
-  }, [address]);
-
-  return balances;
-}
-
-function formatCoin(coin: Coin) {
-  switch (coin.denom) {
-    case "ujunox": {
-      const amount = parseInt(coin.amount, 10) / 1000000;
-      return {
-        icon: null,
-        denom: "JUNOX",
-        label: "Juno-testnet Staking Coin",
-        amount,
-        valueInUsd: amount * 0,
-      };
-    }
-    default:
-      throw new Error("Unknown coin denom");
-  }
 }

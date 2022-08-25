@@ -1,12 +1,33 @@
-import { AminoMsg, serializeSignDoc, StdSignDoc } from "@cosmjs/amino";
+import { AminoMsg, coins, serializeSignDoc, StdSignDoc } from "@cosmjs/amino";
+import { createWasmAminoConverters } from "@cosmjs/cosmwasm-stargate";
+import { wasmTypes } from "@cosmjs/cosmwasm-stargate/build/modules";
 import { Sha256 } from "@cosmjs/crypto/build/sha";
-import { coins } from "@cosmjs/launchpad";
-import { EncodeObject } from "@cosmjs/proto-signing";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import {
+  EncodeObject,
+  Registry,
+  TxBodyEncodeObject,
+} from "@cosmjs/proto-signing";
+import {
+  AminoConverters,
+  AminoTypes,
+  createAuthzAminoConverters,
+  createBankAminoConverters,
+  createDistributionAminoConverters,
+  createFreegrantAminoConverters,
+  createGovAminoConverters,
+  createIbcAminoConverters,
+  createStakingAminoConverters,
+  defaultRegistryTypes,
+  DeliverTxResponse,
+  makeMultisignedTx,
+  SigningStargateClient,
+} from "@cosmjs/stargate";
+import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
-import { useRef, useState } from "react";
-import { Modal, ModalProps, View } from "react-native";
+import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { useMemo, useRef, useState } from "react";
+import { Modal, ModalProps, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createBiometricSignature } from "../../../biometrics";
@@ -141,9 +162,15 @@ export function SignatureModal({
             <Text style={{ color: "#ffffff" }}>
               Do you want to sign the following messages?
             </Text>
-            <Text style={{ color: "#ffffff" }}>
-              {JSON.stringify(messages, null, 2)}
-            </Text>
+            <ScrollView
+              style={{
+                height: 300,
+              }}
+            >
+              <Text style={{ color: "#ffffff" }}>
+                {JSON.stringify(messages, null, 2)}
+              </Text>
+            </ScrollView>
             <Text style={{ color: "#ffffff" }}>
               Signatures: {numberOfSignatures} /{" "}
               {multisig.multisig.publicKey.value.threshold}
@@ -189,6 +216,98 @@ export function SignatureModal({
       </SafeAreaView>
     </Modal>
   );
+}
+
+function createDefaultTypes(prefix: string): AminoConverters {
+  return {
+    ...createAuthzAminoConverters(),
+    ...createBankAminoConverters(),
+    ...createDistributionAminoConverters(),
+    ...createGovAminoConverters(),
+    ...createStakingAminoConverters(prefix),
+    ...createIbcAminoConverters(),
+    ...createFreegrantAminoConverters(),
+    ...createVestingAminoConverters(),
+    ...createWasmAminoConverters(),
+  };
+}
+
+const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
+const registry = new Registry([...defaultRegistryTypes, ...wasmTypes]);
+
+export function useSignatureModalProps({
+  multisig,
+  encodeObjects,
+  onConfirm,
+}: {
+  multisig?: Multisig;
+  encodeObjects: EncodeObject[];
+  onConfirm(response: DeliverTxResponse): Promise<void>;
+}) {
+  const [signatureModalVisible, setSignatureModalVisible] = useState(false);
+  const [modalKey, setModalKey] = useState(0);
+
+  const signatureModalProps = useMemo(() => {
+    const aminoMessages = encodeObjects.map((encodeObject) => {
+      return aminoTypes.toAmino(encodeObject);
+    });
+    const messages = aminoMessages.map((message) => {
+      return aminoTypes.fromAmino(message);
+    });
+
+    return {
+      key: modalKey.toString(),
+      visible: signatureModalVisible,
+      messages: aminoMessages,
+      rawMessages: messages,
+      multisig,
+      onCancel() {
+        setSignatureModalVisible(false);
+        setModalKey((value) => value + 1);
+      },
+      async onConfirm(signatures: Map<string, Uint8Array>) {
+        const body: TxBodyEncodeObject = {
+          typeUrl: "/cosmos.tx.v1beta1.TxBody",
+          value: {
+            messages,
+            memo: "",
+          },
+        };
+        const bodyBytes = registry.encode(body);
+
+        const rcp = "https://rpc.uni.junonetwork.io/";
+        const client = await SigningStargateClient.connect(rcp);
+        const account = await client.getAccount(multisig.multisig.address);
+
+        const fee = {
+          amount: coins(6000, "ujunox"),
+          gas: "200000",
+        };
+        const tx = makeMultisignedTx(
+          multisig.multisig.publicKey,
+          account.sequence,
+          fee,
+          bodyBytes,
+          signatures
+        );
+
+        const result = await client.broadcastTx(
+          Uint8Array.from(TxRaw.encode(tx).finish())
+        );
+        await onConfirm(result);
+
+        setSignatureModalVisible(false);
+        setModalKey((value) => value + 1);
+      },
+    };
+  }, [encodeObjects, modalKey, multisig, onConfirm, signatureModalVisible]);
+
+  return {
+    signatureModalProps,
+    openSignatureModal() {
+      setSignatureModalVisible(true);
+    },
+  };
 }
 
 interface PhoneNumberBottomSheetContentProps {
