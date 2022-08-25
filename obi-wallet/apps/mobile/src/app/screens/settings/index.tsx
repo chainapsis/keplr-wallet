@@ -124,11 +124,20 @@ export function SettingsScreen() {
           const result = await client.sendTokens(
             biometricsAddress,
             multisigStore.getProxyAddress(),
-            coins(10000, "ujunox"),
+            coins(100000, "ujunox"),
             fee,
             ""
           );
           console.log({ result });
+
+          const result2 = await client.sendTokens(
+            biometricsAddress,
+            multisigStore.getCurrentAdmin("juno").multisig.address,
+            coins(100000, "ujunox"),
+            fee,
+            ""
+          );
+          console.log({ result2 });
         }}
       />
 

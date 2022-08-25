@@ -1,4 +1,4 @@
-import { Coin, StargateClient } from "@cosmjs/stargate";
+import { Coin } from "@cosmjs/stargate";
 import { faAngleDoubleLeft } from "@fortawesome/free-solid-svg-icons/faAngleDoubleLeft";
 import { faSortAsc } from "@fortawesome/free-solid-svg-icons/faSortAsc";
 import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
@@ -8,21 +8,20 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FlatList,
   Image,
   ImageBackground,
   ListRenderItemInfo,
   TouchableHighlight,
-  View,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
-import { useStore } from "../../../stores";
-import Pay from "../assets/pay.svg";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
@@ -59,9 +58,8 @@ export function Assets({ route }: AssetsProps) {
 }
 
 export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
-  const navigation = useNavigation<
-    DrawerNavigationProp<Record<string, object>>
-  >();
+  const navigation =
+    useNavigation<DrawerNavigationProp<Record<string, object>>>();
 
   return (
     <View
@@ -159,9 +157,8 @@ const BalanceAndActions = observer(() => {
     0
   );
 
-  const navigation = useNavigation<
-    DrawerNavigationProp<Record<string, object>>
-  >();
+  const navigation =
+    useNavigation<DrawerNavigationProp<Record<string, object>>>();
   return (
     <View style={{ justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: "#787B9C", fontSize: 11, fontWeight: "500" }}>
@@ -387,38 +384,4 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
       </View>
     </View>
   );
-}
-
-function useBalances() {
-  const { multisigStore } = useStore();
-  const address = multisigStore.getProxyAddress();
-
-  const [balances, setBalances] = useState<readonly Coin[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      const rcp = "https://rpc.uni.junonetwork.io/";
-      const client = await StargateClient.connect(rcp);
-      setBalances(await client.getAllBalances(address));
-    })();
-  });
-
-  return balances;
-}
-
-function formatCoin(coin: Coin) {
-  switch (coin.denom) {
-    case "ujunox": {
-      const amount = parseInt(coin.amount, 10) / 1000000;
-      return {
-        icon: null,
-        denom: "JUNOX",
-        label: "Juno-testnet Staking Coin",
-        amount,
-        valueInUsd: amount * 0,
-      };
-    }
-    default:
-      throw new Error("Unknown coin denom");
-  }
 }

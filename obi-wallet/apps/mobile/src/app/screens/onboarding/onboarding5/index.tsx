@@ -4,37 +4,16 @@ import {
   pubkeyType,
   Secp256k1Wallet,
 } from "@cosmjs/amino";
-import {
-  createWasmAminoConverters,
-  MsgInstantiateContractEncodeObject,
-} from "@cosmjs/cosmwasm-stargate";
-import { wasmTypes } from "@cosmjs/cosmwasm-stargate/build/modules";
-import { Registry, TxBodyEncodeObject } from "@cosmjs/proto-signing";
-import {
-  AminoConverters,
-  AminoTypes,
-  createAuthzAminoConverters,
-  createBankAminoConverters,
-  createDistributionAminoConverters,
-  createFreegrantAminoConverters,
-  createGovAminoConverters,
-  createIbcAminoConverters,
-  createStakingAminoConverters,
-  defaultRegistryTypes,
-  makeMultisignedTx,
-  SigningStargateClient,
-  StargateClient,
-} from "@cosmjs/stargate";
-import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
+import { MsgInstantiateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
+import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { CURRENT_CODE_ID } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -42,27 +21,16 @@ import { getBiometricsKeyPair } from "../../../biometrics";
 import { Button, IconButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
-import { SignatureModal } from "../../components/signature-modal";
+import {
+  SignatureModal,
+  useSignatureModalProps,
+} from "../../components/signature-modal";
 import { StackParamList } from "../stack";
 
 export type Onboarding5Props = NativeStackScreenProps<
   StackParamList,
   "onboarding4"
 >;
-
-function createDefaultTypes(prefix: string): AminoConverters {
-  return {
-    ...createAuthzAminoConverters(),
-    ...createBankAminoConverters(),
-    ...createDistributionAminoConverters(),
-    ...createGovAminoConverters(),
-    ...createStakingAminoConverters(prefix),
-    ...createIbcAminoConverters(),
-    ...createFreegrantAminoConverters(),
-    ...createVestingAminoConverters(),
-    ...createWasmAminoConverters(),
-  };
-}
 
 async function getBalances(address: string) {
   const rcp = "https://rpc.uni.junonetwork.io/";
@@ -72,9 +40,6 @@ async function getBalances(address: string) {
 
 export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
   const { multisigStore } = useStore();
-  const [signatureModalVisible, setSignatureModalVisible] = useState(false);
-  const [modalKey, setModalKey] = useState(0);
-
   const multisig = multisigStore.getNextAdmin("juno");
 
   useEffect(() => {
@@ -99,7 +64,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
     })();
   });
 
-  const messages = useMemo(() => {
+  const encodeObjects = useMemo(() => {
     if (!multisig.multisig?.address) return [];
 
     const rawMessage = {
@@ -119,86 +84,42 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
       typeUrl: "/cosmwasm.wasm.v1.MsgInstantiateContract",
       value,
     };
-    const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
-    return [aminoTypes.toAmino(message)];
+    return [message];
   }, [multisig]);
 
-  if (messages.length === 0) return null;
+  const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
+    multisig,
+    encodeObjects,
+    async onConfirm(response) {
+      const rawLog = JSON.parse(response.rawLog) as [
+        {
+          events: [
+            {
+              type: string;
+              attributes: { key: string; value: string }[];
+            }
+          ];
+        }
+      ];
+      const instantiateEvent = rawLog[0].events.find((e) => {
+        return e.type === "instantiate";
+      });
+      const contractAddress = instantiateEvent.attributes.find((a) => {
+        return a.key === "_contract_address";
+      });
+
+      multisigStore.finishProxySetup({
+        address: contractAddress.value,
+        codeId: CURRENT_CODE_ID,
+      });
+    },
+  });
+
+  if (encodeObjects.length === 0) return null;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <SignatureModal
-        key={modalKey}
-        visible={signatureModalVisible}
-        messages={messages}
-        rawMessages={messages.map((msg) => {
-          const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
-          return aminoTypes.fromAmino(msg);
-        })}
-        multisig={multisig}
-        onCancel={() => {
-          setSignatureModalVisible(false);
-          setModalKey((value) => value + 1);
-        }}
-        onConfirm={async (signatures) => {
-          const body: TxBodyEncodeObject = {
-            typeUrl: "/cosmos.tx.v1beta1.TxBody",
-            value: {
-              messages: messages.map((msg) => {
-                const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
-                return aminoTypes.fromAmino(msg);
-              }),
-              memo: "",
-            },
-          };
-          const reg = new Registry([...defaultRegistryTypes, ...wasmTypes]);
-          const bodyBytes = reg.encode(body);
-
-          const rcp = "https://rpc.uni.junonetwork.io/";
-          const client = await SigningStargateClient.connect(rcp);
-          const account = await client.getAccount(multisig.multisig.address);
-
-          const fee = {
-            amount: coins(6000, "ujunox"),
-            gas: "200000",
-          };
-          const tx = makeMultisignedTx(
-            multisig.multisig.publicKey,
-            account.sequence,
-            fee,
-            bodyBytes,
-            signatures
-          );
-
-          const result = await client.broadcastTx(
-            Uint8Array.from(TxRaw.encode(tx).finish())
-          );
-          const rawLog = JSON.parse(result.rawLog) as [
-            {
-              events: [
-                {
-                  type: string;
-                  attributes: { key: string; value: string }[];
-                }
-              ];
-            }
-          ];
-          const instantiateEvent = rawLog[0].events.find((e) => {
-            return e.type === "instantiate";
-          });
-          const contractAddress = instantiateEvent.attributes.find((a) => {
-            return a.key === "_contract_address";
-          });
-
-          multisigStore.finishProxySetup({
-            address: contractAddress.value,
-            codeId: CURRENT_CODE_ID,
-          });
-
-          setSignatureModalVisible(false);
-          setModalKey((value) => value + 1);
-        }}
-      />
+      <SignatureModal {...signatureModalProps} />
       <Background />
       <View
         style={{
@@ -269,7 +190,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
               marginVertical: 20,
             }}
             onPress={() => {
-              setSignatureModalVisible(true);
+              openSignatureModal();
             }}
           />
         </View>

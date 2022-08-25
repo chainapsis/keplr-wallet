@@ -1,4 +1,20 @@
-import { faAngleDoubleRight } from "@fortawesome/free-solid-svg-icons/faAngleDoubleRight";
+import {
+  createWasmAminoConverters,
+  MsgExecuteContractEncodeObject,
+} from "@cosmjs/cosmwasm-stargate";
+import {
+  AminoConverters,
+  AminoTypes,
+  Coin,
+  createAuthzAminoConverters,
+  createBankAminoConverters,
+  createDistributionAminoConverters,
+  createFreegrantAminoConverters,
+  createGovAminoConverters,
+  createIbcAminoConverters,
+  createStakingAminoConverters,
+} from "@cosmjs/stargate";
+import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -6,70 +22,29 @@ import BottomSheet, {
   BottomSheetView,
   TouchableOpacity,
 } from "@gorhom/bottom-sheet/src";
-import { FC, useRef } from "react";
-import { useState } from "react";
+import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
+import { observer } from "mobx-react-lite";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { formatCoin, useBalances } from "../../balances";
 import { Button } from "../../button";
+import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
+import {
+  SignatureModal,
+  useSignatureModalProps,
+} from "../components/signature-modal";
 
-const coins = [
-  {
-    key: "bitcoin",
-    name: "Bitcoin",
-    value: "BTC",
-    balance: "100",
-  },
-  {
-    key: "ethereum",
-    name: "Ethereum",
-    value: "ETH",
-    balance: "100",
-  },
-  {
-    key: "juno",
-    name: "Juno",
-    value: "JUNO",
-    balance: "100",
-  },
-  {
-    key: "atom",
-    name: "Atom",
-    value: "ATOM",
-    balance: "100",
-  },
-  {
-    key: "luna",
-    name: "Luna",
-    value: "LUNA",
-    balance: "100",
-  },
-  {
-    key: "usdc",
-    name: "USDC",
-    value: "USDC",
-    balance: "100",
-  },
-  {
-    key: "ust",
-    name: "UST",
-    value: "UST",
-    balance: "100",
-  },
-  {
-    key: "kuji",
-    name: "Kuji",
-    value: "KUJI",
-    balance: "100",
-  },
-];
-
-export function SendScreen() {
-  const [selectedCoin, setSelectedCoin] = useState(coins[0]);
+export const SendScreen = observer(() => {
+  const balances = useBalances();
+  const [selectedCoin, setSelectedCoin] = useState<Coin | undefined>(
+    balances[0]
+  );
   const [denominationOpened, setDenominationOpened] = useState(false);
   const refBottomSheet = useRef(null);
   const triggerBottomSheet = (open) => {
@@ -81,6 +56,70 @@ export function SendScreen() {
     }
   };
 
+  useEffect(() => {
+    if (!selectedCoin) {
+      setSelectedCoin(balances[0]);
+    }
+  }, [balances, selectedCoin]);
+
+  const hydratedSelectedCoin = selectedCoin ? formatCoin(selectedCoin) : null;
+
+  const [address, setAddress] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const { multisigStore } = useStore();
+  const multisig = multisigStore.getCurrentAdmin("juno");
+
+  console.log(multisigStore.getCurrentAdmin("juno"));
+
+  const encodeObjects = useMemo(() => {
+    if (!selectedCoin) return [];
+
+    const { digits } = formatCoin(selectedCoin);
+    const normalizedAmount =
+      parseFloat(amount.replace(",", ".")) * Math.pow(10, digits);
+    const rawMessage = {
+      execute: {
+        msgs: [
+          {
+            bank: {
+              send: {
+                amount: [
+                  {
+                    denom: selectedCoin.denom,
+                    amount: normalizedAmount.toFixed(0).toString(),
+                  },
+                ],
+                to_address: address,
+              },
+            },
+          },
+        ],
+      },
+    };
+
+    const value: MsgExecuteContract = {
+      sender: multisig.multisig.address,
+      contract: multisigStore.getProxyAddress(),
+      msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
+      funds: [],
+    };
+
+    const message: MsgExecuteContractEncodeObject = {
+      typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+      value,
+    };
+    return [message];
+  }, [address, amount, multisig.multisig.address, multisigStore, selectedCoin]);
+
+  const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
+    multisig,
+    encodeObjects,
+    async onConfirm(response) {
+      console.log(response);
+    },
+  });
+
   return (
     <SafeAreaView
       style={{
@@ -90,6 +129,7 @@ export function SendScreen() {
         justifyContent: "space-between",
       }}
     >
+      <SignatureModal {...signatureModalProps} />
       <View>
         <View style={{ flexDirection: "row" }}>
           <Back style={{ alignSelf: "flex-start", zIndex: 2 }} />
@@ -116,6 +156,8 @@ export function SendScreen() {
             label="to"
             placeholder="Wallet Address"
             style={{ flex: 1 }}
+            value={address}
+            onChangeText={setAddress}
           />
           {/* <View style={{ width: 64, height: 64, backgroundColor: 'red' }} /> */}
         </View>
@@ -169,9 +211,11 @@ export function SendScreen() {
                       fontSize: 14,
                     }}
                   >
-                    {selectedCoin.name}
+                    {hydratedSelectedCoin?.denom}
                   </Text>
-                  <Text style={{ color: "#999CB6" }}>{selectedCoin.value}</Text>
+                  <Text style={{ color: "#999CB6" }}>
+                    {hydratedSelectedCoin?.amount}
+                  </Text>
                 </View>
               </View>
               <View style={{ flex: 1, alignItems: "center" }}>
@@ -182,6 +226,7 @@ export function SendScreen() {
               </View>
             </TouchableOpacity>
             <TextInput
+              keyboardType="numeric"
               style={{
                 alignSelf: "center",
                 borderColor: "transparent",
@@ -196,11 +241,20 @@ export function SendScreen() {
                 fontWeight: "500",
               }}
               placeholder="0"
+              value={amount}
+              onChangeText={setAmount}
             />
           </View>
         </View>
       </View>
-      <Button flavor="blue" label="Next" />
+      <Button
+        flavor="blue"
+        label="Next"
+        disabled={!address || !amount || !selectedCoin}
+        onPress={() => {
+          openSignatureModal();
+        }}
+      />
       <BottomSheetBackdrop
         onPress={() => triggerBottomSheet(false)}
         visible={denominationOpened}
@@ -258,11 +312,12 @@ export function SendScreen() {
             </Text>
           </View>
           <FlatList
-            data={coins}
+            data={balances}
+            keyExtractor={(item) => item.denom}
             renderItem={(props) => (
-              <Coin
+              <CoinRenderer
                 {...props}
-                selected={props.item.value === selectedCoin.value}
+                selected={props.item.denom === selectedCoin?.denom}
                 onPress={() => {
                   triggerBottomSheet(false);
                   setSelectedCoin(props.item);
@@ -274,9 +329,17 @@ export function SendScreen() {
       </BottomSheet>
     </SafeAreaView>
   );
+});
+
+interface CoinRendererProps {
+  item: Coin;
+  selected: boolean;
+  onPress: () => void;
 }
 
-function Coin({ item, selected, onPress }) {
+function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
+  const { denom, label, amount, valueInUsd } = formatCoin(item);
+
   return (
     <TouchableOpacity
       style={{
@@ -299,9 +362,7 @@ function Coin({ item, selected, onPress }) {
           }}
         />
         <View>
-          <Text style={{ color: "#f6f5ff", fontWeight: "500" }}>
-            {item.name}
-          </Text>
+          <Text style={{ color: "#f6f5ff", fontWeight: "500" }}>{label}</Text>
           <Text
             style={{
               color: "#f6f5ff",
@@ -310,13 +371,13 @@ function Coin({ item, selected, onPress }) {
               opacity: 0.6,
             }}
           >
-            {item.value}
+            {denom}
           </Text>
         </View>
       </View>
       <View style={{ alignItems: "flex-end" }}>
         <Text style={{ color: "#f6f5ff", fontWeight: "500" }}>
-          ${item.balance * 100}
+          ${valueInUsd.toFixed(2)}
         </Text>
         <Text
           style={{
@@ -326,7 +387,7 @@ function Coin({ item, selected, onPress }) {
             opacity: 0.6,
           }}
         >
-          {item.balance} {item.value}
+          {amount} {denom}
         </Text>
       </View>
     </TouchableOpacity>
