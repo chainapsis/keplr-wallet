@@ -1,10 +1,10 @@
-import { AES, enc } from "crypto-js";
+import { AES } from "crypto-js";
 import { totp } from "otplib";
 import {
   PHONE_NUMBER_KEY_SECRET,
-  PHONE_NUMBER_TWILIO_PHONE_NUMBER,
-  PHONE_NUMBER_TWILIO_BASIC_AUTH_USER,
   PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD,
+  PHONE_NUMBER_TWILIO_BASIC_AUTH_USER,
+  PHONE_NUMBER_TWILIO_PHONE_NUMBER,
 } from "react-native-dotenv";
 
 const DEV_SHARED_SECRET = PHONE_NUMBER_KEY_SECRET;

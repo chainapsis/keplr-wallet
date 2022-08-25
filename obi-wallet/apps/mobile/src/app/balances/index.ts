@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 
 import { useStore } from "../stores";
 
-async function fetchCurrentBalance() {}
-
 export function useBalances() {
   const { multisigStore } = useStore();
   const address = multisigStore.getProxyAddress();
