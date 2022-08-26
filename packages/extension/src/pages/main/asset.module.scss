@@ -96,16 +96,29 @@
 }
 
 .progressDiv {
-  background-color: #11cdef;
+  background-color: #d43bf6;
   border-radius: 2px;
+  position: relative;
 }
 
-.progress {
+.progressAvailable {
   background-color: #5e72e4;
   height: 20px;
   border-radius: 2px;
   transition: 1s ease;
   transition-delay: 0.5s;
+  z-index: 2;
+  position: absolute;
+}
+
+.progressStake {
+  background-color: #11cdef;
+  height: 20px;
+  border-radius: 2px;
+  transition: 1.5s ease;
+  transition-delay: 0.5s;
+  position: static;
+  z-index: 1;
 }
 
 .hr {

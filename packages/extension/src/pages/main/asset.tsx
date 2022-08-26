@@ -17,18 +17,26 @@ export const ProgressBar = ({
   width: number;
   data: number[];
 }) => {
-  const [value, setValue] = useState(0);
+  const [values, setValues] = useState([0, 0]);
 
   useEffect(() => {
-    const total = data[0] + data[1];
-    const percentage = data[0] / total;
-    setValue(percentage * width);
-  }, [width, data[0], data[1]]);
+    const total = data[0] + data[1] + data[2];
+    const percentageAvailable = data[0] / total;
+    const percentageStake = data[1] / total;
+    setValues([percentageAvailable * width, percentageStake * width]);
+  }, [width, data[0], data[1], data[2]]);
 
   return (
     <div>
       <div className={styleAsset.progressDiv} style={{ width }}>
-        <div style={{ width: `${value}px` }} className={styleAsset.progress} />
+        <div
+          style={{ width: `${values[0]}px` }}
+          className={styleAsset.progressAvailable}
+        />
+        <div
+          style={{ width: `${values[0] + values[1]}px` }}
+          className={styleAsset.progressStake}
+        />
       </div>
     </div>
   );
@@ -94,10 +102,14 @@ export const AssetView: FunctionComponent = observer(() => {
 
   const stakedSum = delegated.add(unbonding);
 
-  const total = stakable.add(stakedSum);
+  const total = stakable.add(stakedSum).add(stakableReward);
 
   const stakablePrice = priceStore.calculatePrice(stakable, fiatCurrency);
   const stakedSumPrice = priceStore.calculatePrice(stakedSum, fiatCurrency);
+  const stakableRewardPrice = priceStore.calculatePrice(
+    stakableReward,
+    fiatCurrency
+  );
 
   const totalPrice = priceStore.calculatePrice(total, fiatCurrency);
 
@@ -110,6 +122,9 @@ export const AssetView: FunctionComponent = observer(() => {
     stakedSumPrice
       ? parseFloat(stakedSumPrice.toDec().toString())
       : parseFloat(stakedSum.toDec().toString()),
+    stakableRewardPrice
+      ? parseFloat(stakableRewardPrice.toDec().toString())
+      : parseFloat(stakableReward.toDec().toString()),
   ];
 
   const hasBalance = totalPrice
