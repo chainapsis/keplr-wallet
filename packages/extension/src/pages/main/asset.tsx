@@ -86,6 +86,12 @@ export const AssetView: FunctionComponent = observer(() => {
     .getQueryBech32Address(accountInfo.bech32Address)
     .total.upperCase(true);
 
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
+
+  const stakableReward = rewards.stakableReward;
+
   const stakedSum = delegated.add(unbonding);
 
   const total = stakable.add(stakedSum);
@@ -188,6 +194,20 @@ export const AssetView: FunctionComponent = observer(() => {
               }}
             >
               {stakedSum.shrink(true).maxDecimals(6).toString()}
+            </div>
+          </div>
+          <div className={styleAsset.legend}>
+            <div className={styleAsset.label} style={{ color: "#D43BF6" }}>
+              <FormattedMessage id="main.account.chart.reward-balance" />
+            </div>
+            <div style={{ minWidth: "16px" }} />
+            <div
+              className={styleAsset.value}
+              style={{
+                color: "#525f7f",
+              }}
+            >
+              {stakableReward.shrink(true).maxDecimals(6).toString()}
             </div>
           </div>
         </div>

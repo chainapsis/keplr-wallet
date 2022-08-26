@@ -2,6 +2,7 @@
   "main.account.chart.total-balance": "Total Balance",
   "main.account.chart.available-balance": "Available",
   "main.account.chart.staked-balance": "Staked",
+  "main.account.chart.reward-balance": "Rewards",
   "main.account.button.deposit": "Deposit",
   "main.account.deposit.paragraph": "Add tokens to your wallet",
   "main.account.button.send": "Send",
