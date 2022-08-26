@@ -3,16 +3,23 @@ import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import WebView from "react-native-webview";
 
+import { useInjectedProvider } from "../../injected-provider";
+
 export function NFTs() {
   const safeArea = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
+  const code = useInjectedProvider();
+
   return (
     <View style={{ flex: 1, backgroundColor: "#17162C" }}>
-      <WebView
-        onLoadEnd={() => setLoading(false)}
-        source={{ uri: "https://nft-juno.loop.markets/myNft" }}
-        style={{ flex: 1, marginTop: safeArea.top }}
-      />
+      {code ? (
+        <WebView
+          onLoadEnd={() => setLoading(false)}
+          source={{ uri: "https://nft-juno.loop.markets/myNft" }}
+          style={{ flex: 1, marginTop: safeArea.top }}
+          injectedJavaScriptBeforeContentLoaded={code}
+        />
+      ) : null}
       {loading && (
         <View
           style={{
