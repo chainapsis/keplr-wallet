@@ -943,7 +943,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       average: 0.075,
       high: 0.1,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "axelar-evm-bridge"],
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
   },

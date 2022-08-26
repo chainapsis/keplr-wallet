@@ -1595,7 +1595,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.075,
       high: 0.1,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "axelar-evm-bridge"],
   },
   {
     rpc: SOMMELIER_RPC_ENDPOINT,
