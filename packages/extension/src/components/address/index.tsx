@@ -1,9 +1,4 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
+import React, { FunctionComponent } from "react";
 
 import { ToolTip } from "../tooltip";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -30,27 +25,6 @@ export const Address: FunctionComponent<
   const { tooltipFontSize, children } = props;
   const tooltipAddress = props.tooltipAddress ? props.tooltipAddress : children;
 
-  const copyRef = useRef<HTMLDivElement>(null);
-
-  const onCopy = useCallback(async (e: ClipboardEvent) => {
-    if (e.clipboardData) {
-      // Remove line breaks.
-      const pre = await navigator.clipboard.readText();
-      await navigator.clipboard.writeText(pre.replace(/(\r\n|\n|\r)/gm, ""));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (copyRef.current) {
-      copyRef.current.addEventListener("copy", onCopy);
-    }
-    return () => {
-      if (copyRef.current) {
-        copyRef.current.removeEventListener("copy", onCopy);
-      }
-    };
-  }, [copyRef, onCopy]);
-
   if ("maxCharacters" in props) {
     const { lineBreakBeforePrefix } = props;
 
@@ -60,7 +34,6 @@ export const Address: FunctionComponent<
         options={{ placement: "top" }}
         tooltip={
           <div
-            ref={copyRef}
             className="address-tooltip"
             style={{ fontSize: tooltipFontSize }}
           >
@@ -85,11 +58,7 @@ export const Address: FunctionComponent<
       trigger="hover"
       options={{ placement: "top" }}
       tooltip={
-        <div
-          ref={copyRef}
-          className="address-tooltip"
-          style={{ fontSize: tooltipFontSize }}
-        >
+        <div className="address-tooltip" style={{ fontSize: tooltipFontSize }}>
           {tooltipAddress}
         </div>
       }
