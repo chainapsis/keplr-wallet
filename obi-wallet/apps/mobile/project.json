@@ -83,6 +83,12 @@
         "cwd": "apps/mobile"
       }
     },
+    "injected-provider": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "commands": ["tsc -b libs/injected-provider"]
+      }
+    },
     "tsc": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
