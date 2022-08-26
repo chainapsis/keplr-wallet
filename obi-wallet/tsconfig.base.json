@@ -17,6 +17,7 @@
     "baseUrl": ".",
     "paths": {
       "@obi-wallet/common": ["libs/common/src/index.ts"],
+      "@obi-wallet/injected-provider": ["libs/injected-provider/src/index.ts"],
       "@obi-wallet/proxy": ["libs/proxy/src/index.ts"]
     }
   },
