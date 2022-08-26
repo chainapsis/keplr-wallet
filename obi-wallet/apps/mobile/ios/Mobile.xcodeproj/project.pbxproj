@@ -27,6 +27,7 @@
 		7699B88040F8A987B510C191 /* libPods-Mobile-MobileTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-Mobile-MobileTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		8FE96A11947D485787F824E3 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 5920A3AA794B43428A46E15A /* Inter-Italic.otf */; };
+		9409576ECAEA499A97357299 /* index.js in Resources */ = {isa = PBXBuildFile; fileRef = CEEE080512B84062A6661E1E /* index.js */; };
 		A04C948A9C5945D181D9717E /* Inter-ThinItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2E6B03DF32BB4E399D5DBEC7 /* Inter-ThinItalic.otf */; };
 		BA195583D823470198964972 /* Inter-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 23BF4C395842443C9CF60A93 /* Inter-MediumItalic.otf */; };
 		CD11990277E6429497A65C13 /* Inter-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 898B3B7B78564C059A069276 /* Inter-Light.otf */; };
@@ -80,6 +81,7 @@
 		B5320292580A489EA662A82B /* Inter-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Regular.otf"; path = "../src/assets/fonts/Inter/Inter-Regular.otf"; sourceTree = "<group>"; };
 		B7770FF7980441BDB51C2467 /* Inter-Black.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Black.otf"; path = "../src/assets/fonts/Inter/Inter-Black.otf"; sourceTree = "<group>"; };
 		CC5C08772CB34A178E0CC060 /* Inter-SemiBoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBoldItalic.otf"; path = "../src/assets/fonts/Inter/Inter-SemiBoldItalic.otf"; sourceTree = "<group>"; };
+		CEEE080512B84062A6661E1E /* index.js */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = index.js; path = "../../../libs/injected-provider/dist/index.js"; sourceTree = "<group>"; };
 		D8AB8CF3B8CE4AFBB67A9A75 /* Inter-BoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-BoldItalic.otf"; path = "../src/assets/fonts/Inter/Inter-BoldItalic.otf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -199,6 +201,7 @@
 				12C016D9ED4E48D682FA4254 /* Inter-Thin.otf */,
 				2E6B03DF32BB4E399D5DBEC7 /* Inter-ThinItalic.otf */,
 				5A28D3B1B1EE40CE8A014383 /* Inter-V.ttf */,
+				CEEE080512B84062A6661E1E /* index.js */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -329,6 +332,7 @@
 				59450C9CC0D0454F96FE8E7B /* Inter-Thin.otf in Resources */,
 				A04C948A9C5945D181D9717E /* Inter-ThinItalic.otf in Resources */,
 				13C45F4EF0D142F8AC3F680C /* Inter-V.ttf in Resources */,
+				9409576ECAEA499A97357299 /* index.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
