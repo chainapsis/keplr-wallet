@@ -93,6 +93,7 @@
     "react-native-device-crypto": "^0.1.7",
     "react-native-dotenv": "^3.3.1",
     "react-native-dropdown-picker": "^5.4.2",
+    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.5.0",
     "react-native-html-parser": "^0.1.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
