@@ -9,9 +9,12 @@ export interface HeaderProps {
   right?: React.ReactNode;
 }
 
-export const Header: FunctionComponent<HeaderProps> = (props) => {
-  const { fixed, left, right, children } = props;
-
+export const Header: FunctionComponent<HeaderProps> = ({
+  fixed,
+  left,
+  right,
+  children,
+}) => {
   return (
     <div className={classnames(["header", { fixed }])}>
       <div className="header-menu-left">{left}</div>
