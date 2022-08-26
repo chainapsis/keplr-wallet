@@ -17,11 +17,11 @@ import { Dec } from "@keplr-wallet/unit";
 import classnames from "classnames";
 
 import send from "../../public/assets/icon/send.png";
-import swap from "../../public/assets/icon/swap.png";
+import reward from "../../public/assets/icon/reward.png";
 import stake from "../../public/assets/icon/stake.png";
 
 import activeSend from "../../public/assets/icon/activeSend.png";
-import activeSwap from "../../public/assets/icon/activeSwap.png";
+import activeReward from "../../public/assets/icon/activeReward.png";
 import activeStake from "../../public/assets/icon/activeStake.png";
 
 export const TxButtonView: FunctionComponent = observer(() => {
@@ -145,11 +145,11 @@ export const TxButtonView: FunctionComponent = observer(() => {
         }}
       >
         <img
-          src={isActiveReward ? activeStake : stake}
+          src={isActiveReward ? activeReward : reward}
           alt=""
           style={{
             marginRight: "5px",
-            height: "15px",
+            height: "18px",
           }}
         />
         <FormattedMessage id="main.stake.button.claim-rewards" />
