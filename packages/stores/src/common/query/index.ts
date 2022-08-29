@@ -462,7 +462,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this._error = error;
   }
 
-  public cancel(message?: string): void {
+  private cancel(message?: string): void {
     if (this.canceler) {
       this.canceler.cancel(message);
     }

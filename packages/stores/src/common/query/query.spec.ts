@@ -5,21 +5,12 @@ import Http from "http";
 import { autorun } from "mobx";
 
 export class MockObservableQuery extends ObservableQuery<number> {
-  public cancelCount: number;
-
   constructor(kvStore: KVStore, port: number) {
     const instance = Axios.create({
       baseURL: `http://127.0.0.1:${port}`,
     });
 
     super(kvStore, instance, "/test");
-
-    this.cancelCount = 0;
-  }
-
-  cancel(message?: string) {
-    this.cancelCount++;
-    super.cancel(message);
   }
 }
 
@@ -89,7 +80,7 @@ describe("Test observable query", () => {
 
   it("basic test", async () => {
     const basicTestFn = async (store: KVStore) => {
-      const { port, closeServer } = createTestServer();
+      const { port, closeServer, getServerCancelCount } = createTestServer();
 
       const query = new MockObservableQuery(store, port);
 
@@ -147,7 +138,7 @@ describe("Test observable query", () => {
       await query.waitFreshResponse();
       expect(query.response?.data).toBe(1);
 
-      expect(query.cancelCount).toBe(0);
+      expect(getServerCancelCount()).toBe(0);
 
       closeServer();
     };
@@ -163,7 +154,7 @@ describe("Test observable query", () => {
   });
 
   it("test waitResponse() can ignore other component unobserved", async () => {
-    const { port, closeServer } = createTestServer(500);
+    const { port, closeServer, getServerCancelCount } = createTestServer(500);
 
     const memStore = new MemoryKVStore("test");
     const query = new MockObservableQuery(memStore, port);
@@ -187,7 +178,8 @@ describe("Test observable query", () => {
 
     const res = await query.waitResponse();
     expect(res?.data).toBe(0);
-    expect(query.cancelCount).toBe(0);
+
+    expect(getServerCancelCount()).toBe(0);
 
     closeServer();
   });
@@ -219,7 +211,6 @@ describe("Test observable query", () => {
 
     const res = await query.waitResponse();
     expect(res?.data).toBe(0);
-    expect(query.cancelCount).toBe(1);
 
     expect(getServerCancelCount()).toBe(1);
 
@@ -229,7 +220,7 @@ describe("Test observable query", () => {
   });
 
   it("test waitFreshResponse() can ignore other component unobserved", async () => {
-    const { port, closeServer } = createTestServer(500);
+    const { port, closeServer, getServerCancelCount } = createTestServer(500);
 
     const memStore = new MemoryKVStore("test");
     const query = new MockObservableQuery(memStore, port);
@@ -255,7 +246,8 @@ describe("Test observable query", () => {
 
     const res = await query.waitFreshResponse();
     expect(res?.data).toBe(1);
-    expect(query.cancelCount).toBe(0);
+
+    expect(getServerCancelCount()).toBe(0);
 
     closeServer();
   });
@@ -289,7 +281,6 @@ describe("Test observable query", () => {
 
     const res = await query.waitFreshResponse();
     expect(res?.data).toBe(1);
-    expect(query.cancelCount).toBe(1);
 
     expect(getServerCancelCount()).toBe(1);
 
@@ -299,7 +290,7 @@ describe("Test observable query", () => {
   });
 
   it("test waitFreshResponse()/waitFreshResponse()", async () => {
-    const { port, closeServer } = createTestServer();
+    const { port, closeServer, getServerCancelCount } = createTestServer();
 
     const memStore = new MemoryKVStore("test");
     const query = new MockObservableQuery(memStore, port);
@@ -316,13 +307,13 @@ describe("Test observable query", () => {
     res = await query.waitFreshResponse();
     expect(res?.data).toBe(2);
 
-    expect(query.cancelCount).toBe(0);
+    expect(getServerCancelCount()).toBe(0);
 
     closeServer();
   });
 
   it("test basic cancellation", async () => {
-    const { port, closeServer } = createTestServer(500);
+    const { port, closeServer, getServerCancelCount } = createTestServer(500);
 
     const memStore = new MemoryKVStore("test");
     const query = new MockObservableQuery(memStore, port);
@@ -361,6 +352,11 @@ describe("Test observable query", () => {
       }, 100);
     });
 
+    // Wait to close request.
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
+
     // In this case, query should be canceled.
     expect(query.isObserved).toBe(false);
     expect(query.isFetching).toBe(false);
@@ -368,7 +364,8 @@ describe("Test observable query", () => {
     // Cancellation should not make the error.
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
-    expect(query.cancelCount).toBe(1);
+
+    expect(getServerCancelCount()).toBe(1);
 
     closeServer();
   });
