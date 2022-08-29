@@ -10,6 +10,7 @@ import * as Updater from "./updater/internal";
 import * as Tokens from "./tokens/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
+import * as AutoLocker from "./auto-lock-account/internal";
 
 export * from "./persistent-memory";
 export * from "./chains";
@@ -21,6 +22,7 @@ export * from "./updater";
 export * from "./tokens";
 export * from "./interaction";
 export * from "./permission";
+export * from "./auto-lock-account";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -94,6 +96,10 @@ export function init(
     notification
   );
 
+  const autoLockAccountService = new AutoLocker.AutoLockAccountService(
+    storeCreator("auto-lock-account")
+  );
+
   interactionService.init();
   persistentMemoryService.init();
   permissionService.init(interactionService, chainsService, keyRingService);
@@ -114,6 +120,7 @@ export function init(
   );
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);
+  autoLockAccountService.init(keyRingService);
 
   Interaction.init(router, interactionService);
   PersistentMemory.init(router, persistentMemoryService);
@@ -125,4 +132,5 @@ export function init(
   KeyRing.init(router, keyRingService);
   SecretWasm.init(router, secretWasmService);
   BackgroundTx.init(router, backgroundTxService);
+  AutoLocker.init(router, autoLockAccountService);
 }
