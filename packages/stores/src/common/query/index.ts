@@ -41,6 +41,45 @@ export type QueryResponse<T> = {
   timestamp: number;
 };
 
+export class ImmediateCancelerError extends Error {
+  constructor(m?: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, ImmediateCancelerError.prototype);
+  }
+}
+
+class ImmediateCanceler {
+  protected _isCanceled: boolean = false;
+
+  protected rejector: ((e: Error) => void) | undefined;
+
+  constructor(protected readonly cancelToken: CancelTokenSource) {}
+
+  get isCanceled(): boolean {
+    return this._isCanceled;
+  }
+
+  cancel(message?: string) {
+    this._isCanceled = true;
+    this.cancelToken.cancel(message);
+    if (this.rejector) {
+      this.rejector(new ImmediateCancelerError(message));
+    }
+  }
+
+  callOrCanceled<R>(fn: PromiseLike<R>): Promise<R> {
+    if (this.isCanceled) {
+      throw new ImmediateCancelerError();
+    }
+
+    return new Promise<R>((resolve, reject) => {
+      this.rejector = reject;
+      fn.then(resolve, reject);
+    });
+  }
+}
+
 export class DeferInitialQueryController {
   @observable
   protected _isReady: boolean = false;
@@ -122,7 +161,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
-  private cancelToken?: CancelTokenSource;
+  private canceler?: ImmediateCanceler;
 
   private observedCount: number = 0;
 
@@ -212,7 +251,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   }
 
   protected onStop() {
-    if (this.isFetching && this.cancelToken) {
+    if (this.isFetching && this.canceler) {
       this.cancel();
     }
 
@@ -258,8 +297,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
 
     // If response is fetching, cancel the previous query.
-    if (this.isFetching && this.cancelToken) {
-      // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues. Use an error message to identify this.
+    if (this.isFetching && this.canceler) {
       this.cancel("__fetching__proceed__next__");
     }
 
@@ -288,13 +326,16 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       });
     }
 
-    this.cancelToken = Axios.CancelToken.source();
+    const cancelToken = Axios.CancelToken.source();
+    const canceler = new ImmediateCanceler(cancelToken);
+    this.canceler = canceler;
 
     let fetchingProceedNext = false;
+    let skipAxiosCancelError = false;
 
     try {
       let { response, headers } = yield* toGenerator(
-        this.fetchResponse(this.cancelToken.token)
+        canceler.callOrCanceled(this.fetchResponse(cancelToken.token))
       );
       if (
         response.data &&
@@ -312,7 +353,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         // https://github.com/chainapsis/keplr-wallet/issues/275
         // https://github.com/chainapsis/keplr-wallet/issues/278
         // https://github.com/chainapsis/keplr-wallet/issues/318
-        if (this.cancelToken && this.cancelToken.token.reason) {
+        if (canceler.isCanceled) {
           // In this case, it is assumed that it is caused by cancel() and do nothing.
           return;
         }
@@ -323,7 +364,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
         // Try to query again.
         const refetched = yield* toGenerator(
-          this.fetchResponse(this.cancelToken.token)
+          canceler.callOrCanceled(this.fetchResponse(cancelToken.token))
         );
         response = refetched.response;
         headers = refetched.headers;
@@ -350,8 +391,14 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       // Should not wait.
       this.saveResponse(response);
     } catch (e) {
-      // If canceld, do nothing.
+      // If axios canceled, do nothing.
       if (Axios.isCancel(e)) {
+        skipAxiosCancelError = true;
+        return;
+      }
+
+      if (e instanceof ImmediateCancelerError) {
+        // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues.
         if (e.message === "__fetching__proceed__next__") {
           fetchingProceedNext = true;
         }
@@ -388,10 +435,12 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         this.setError(error);
       }
     } finally {
-      if (!fetchingProceedNext) {
-        this._isFetching = false;
+      if (!skipAxiosCancelError) {
+        if (!fetchingProceedNext) {
+          this._isFetching = false;
+          this.canceler = undefined;
+        }
       }
-      this.cancelToken = undefined;
     }
   }
 
@@ -414,8 +463,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   }
 
   public cancel(message?: string): void {
-    if (this.cancelToken) {
-      this.cancelToken.cancel(message);
+    if (this.canceler) {
+      this.canceler.cancel(message);
     }
   }
 

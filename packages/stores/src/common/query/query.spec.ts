@@ -320,4 +320,56 @@ describe("Test observable query", () => {
 
     closeServer();
   });
+
+  it("test basic cancellation", async () => {
+    const { port, closeServer } = createTestServer(500);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port);
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response) {
+          throw new Error("not canceled");
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    // Dispose the observer before the fetch completes.
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        disposer();
+        resolve();
+      }, 100);
+    });
+
+    // In this case, query should be canceled.
+    expect(query.isObserved).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(false);
+    // Cancellation should not make the error.
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+    expect(query.cancelCount).toBe(1);
+
+    closeServer();
+  });
 });
