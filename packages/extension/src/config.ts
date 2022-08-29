@@ -1582,6 +1582,84 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "tether",
       },
+      {
+        coinDenom: "WBTC",
+        coinMinimalDenom: "wbtc-satoshi",
+        coinDecimals: 8,
+        coinGeckoId: "wrapped-bitcoin",
+      },
+      {
+        coinDenom: "LINK",
+        coinMinimalDenom: "link-wei",
+        coinDecimals: 18,
+        coinGeckoId: "chainlink",
+      },
+      {
+        coinDenom: "AAVE",
+        coinMinimalDenom: "aave-wei",
+        coinDecimals: 18,
+        coinGeckoId: "aave",
+      },
+      {
+        coinDenom: "APE",
+        coinMinimalDenom: "ape-wei",
+        coinDecimals: 18,
+        coinGeckoId: "apecoin",
+      },
+      {
+        coinDenom: "AXS",
+        coinMinimalDenom: "axs-wei",
+        coinDecimals: 18,
+        coinGeckoId: "axie-infinity",
+      },
+      {
+        coinDenom: "MKR",
+        coinMinimalDenom: "mkr-wei",
+        coinDecimals: 18,
+        coinGeckoId: "maker",
+      },
+      {
+        coinDenom: "RAI",
+        coinMinimalDenom: "rai-wei",
+        coinDecimals: 18,
+        coinGeckoId: "rai",
+      },
+      {
+        coinDenom: "SHIB",
+        coinMinimalDenom: "shib-wei",
+        coinDecimals: 18,
+        coinGeckoId: "shiba-inu",
+      },
+      {
+        coinDenom: "stETH",
+        coinMinimalDenom: "steth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "staked-ether",
+      },
+      {
+        coinDenom: "UNI",
+        coinMinimalDenom: "uni-wei",
+        coinDecimals: 18,
+        coinGeckoId: "uniswap",
+      },
+      {
+        coinDenom: "XCN",
+        coinMinimalDenom: "xcn-wei",
+        coinDecimals: 18,
+        coinGeckoId: "chain-2",
+      },
+      {
+        coinDenom: "WGLMR",
+        coinMinimalDenom: "wglmr-wei",
+        coinDecimals: 18,
+        coinGeckoId: "wrapped-moonbeam",
+      },
+      {
+        coinDenom: "DOT",
+        coinMinimalDenom: "dot-planck",
+        coinDecimals: 10,
+        coinGeckoId: "polkadot",
+      },
     ],
     feeCurrencies: [
       {
@@ -1595,7 +1673,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       average: 0.075,
       high: 0.1,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "axelar-evm-bridge"],
   },
   {
     rpc: SOMMELIER_RPC_ENDPOINT,

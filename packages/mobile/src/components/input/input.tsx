@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -31,6 +31,8 @@ export const TextInput = React.forwardRef<
     inputRight?: React.ReactNode;
   }
 >((props, ref) => {
+  const [isFocused, setIsFocused] = useState(false);
+
   const {
     style: propsStyle,
     labelStyle,
@@ -44,6 +46,9 @@ export const TextInput = React.forwardRef<
     bottomInInputContainer,
     inputLeft,
     inputRight,
+
+    onBlur,
+    onFocus,
     ...restProps
   } = props;
 
@@ -80,6 +85,11 @@ export const TextInput = React.forwardRef<
               "dark:border-color-platinum-600@50%",
             ],
             [
+              // The order is important.
+              // The border color has different priority according to state.
+              // The more in front, the lower the priority.
+              isFocused ? "border-color-blue-400" : undefined,
+              isFocused ? "dark:border-color-platinum-100" : undefined,
               error ? "border-color-red-200" : undefined,
               error ? "dark:border-color-red-400" : undefined,
               !(props.editable ?? true) && "background-color-gray-50",
@@ -124,6 +134,20 @@ export const TextInput = React.forwardRef<
               }),
               propsStyle,
             ])}
+            onFocus={(e) => {
+              setIsFocused(true);
+
+              if (onFocus) {
+                onFocus(e);
+              }
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+
+              if (onBlur) {
+                onBlur(e);
+              }
+            }}
             {...restProps}
             ref={ref}
           />

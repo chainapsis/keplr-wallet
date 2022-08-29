@@ -538,9 +538,17 @@ export class CosmosAccountImpl {
         signerInfos: [
           {
             publicKey: {
-              typeUrl: useEthereumSign
-                ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
-                : "/cosmos.crypto.secp256k1.PubKey",
+              typeUrl: (() => {
+                if (!useEthereumSign) {
+                  return "/cosmos.crypto.secp256k1.PubKey";
+                }
+
+                if (this.chainId.startsWith("injective")) {
+                  return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+                }
+
+                return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+              })(),
               value: PubKey.encode({
                 key: Buffer.from(
                   signResponse.signature.pub_key.value,
