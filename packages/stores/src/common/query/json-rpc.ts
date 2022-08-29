@@ -1,4 +1,4 @@
-import { ObservableQuery, QueryOptions, QueryResponse } from "./index";
+import { ObservableQuery, QueryOptions, QueryResponse } from "./query";
 import { KVStore } from "@keplr-wallet/common";
 import { AxiosInstance, CancelToken } from "axios";
 import { action, makeObservable, observable } from "mobx";

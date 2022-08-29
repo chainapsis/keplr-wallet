@@ -1,4 +1,4 @@
-import { ObservableQuery } from "./index";
+import { ObservableQuery } from "./query";
 import { KVStore, MemoryKVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import Http from "http";
