@@ -1,16 +1,20 @@
-import { ObservableQuery } from "./query";
+import { ObservableQuery, QueryOptions } from "./query";
 import { KVStore, MemoryKVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import Http from "http";
 import { autorun } from "mobx";
 
 export class MockObservableQuery extends ObservableQuery<number> {
-  constructor(kvStore: KVStore, port: number) {
+  constructor(
+    kvStore: KVStore,
+    port: number,
+    options: Partial<QueryOptions> = {}
+  ) {
     const instance = Axios.create({
       baseURL: `http://127.0.0.1:${port}`,
     });
 
-    super(kvStore, instance, "/test");
+    super(kvStore, instance, "/test", options);
   }
 }
 
@@ -366,6 +370,515 @@ describe("Test observable query", () => {
     expect(query.response).toBeUndefined();
 
     expect(getServerCancelCount()).toBe(1);
+
+    closeServer();
+  });
+
+  it("test restore from cache/query occurs at the same time if cache age not set", async () => {
+    const { port, closeServer } = createTestServer(500);
+
+    const memStore = new DelayMemoryKVStore("test", 300);
+    await (async () => {
+      // Make cache
+      const query = new MockObservableQuery(memStore, port);
+      await query.waitFreshResponse();
+    })();
+
+    const query = new MockObservableQuery(memStore, port);
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data >= 2) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+
+    // Not yet cache restored due to delayed kv store.
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 210);
+    });
+
+    // Now, the cache should be restored.
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+    expect(query.response?.staled).toBe(true);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 200);
+    });
+
+    // Now, total 510ms passed. If restoring from cache and querying occurs at the same time, query should be revalidated.
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(1);
+    expect(query.response?.staled).toBe(false);
+
+    disposer();
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(1);
+    expect(query.response?.staled).toBe(false);
+
+    closeServer();
+  });
+
+  it("test basic cache (valid)", async () => {
+    const { port, closeServer } = createTestServer(200);
+
+    const memStore = new MemoryKVStore("test");
+    await (async () => {
+      // Make cache
+      const query = new MockObservableQuery(memStore, port);
+      await query.waitFreshResponse();
+    })();
+
+    const query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 300,
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 150);
+    });
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    let disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data >= 1) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+    expect(query.response?.staled).toBe(true);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 200);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+    expect(query.response?.staled).toBe(true);
+
+    disposer();
+
+    disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data >= 2) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+    expect(query.response?.staled).toBe(true);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 250);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(1);
+    expect(query.response?.staled).toBe(false);
+
+    disposer();
+
+    closeServer();
+  });
+
+  it("test basic cache (invalidated)", async () => {
+    const { port, closeServer } = createTestServer(200);
+
+    const memStore = new MemoryKVStore("test");
+    await (async () => {
+      // Make cache
+      const query = new MockObservableQuery(memStore, port);
+      await query.waitFreshResponse();
+    })();
+
+    const query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 300,
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 350);
+    });
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data != 1) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 30);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 200);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(1);
+    expect(query.response?.staled).toBe(false);
+
+    disposer();
+
+    closeServer();
+  });
+
+  it("test cache in age not make query", async () => {
+    const { port, closeServer, getServerCancelCount } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 300,
+    });
+
+    const tests: {
+      first?: boolean;
+      postDelay: number;
+      inCache: boolean;
+      expect: number;
+    }[] = [
+      {
+        first: true,
+        postDelay: 100,
+        inCache: false,
+        expect: 0,
+      },
+      {
+        postDelay: 100,
+        inCache: true,
+        expect: 0,
+      },
+      {
+        postDelay: 100,
+        inCache: true,
+        expect: 0,
+      },
+      {
+        postDelay: 100,
+        inCache: false,
+        expect: 1,
+      },
+      {
+        postDelay: 200,
+        inCache: true,
+        expect: 1,
+      },
+      {
+        postDelay: 300,
+        inCache: false,
+        expect: 2,
+      },
+      {
+        postDelay: 300,
+        inCache: false,
+        expect: 3,
+      },
+    ];
+
+    for (const test of tests) {
+      const disposer = autorun(
+        () => {
+          // This makes the response observed. Thus, fetching starts.
+          if (query.response && query.response.data >= 4) {
+            throw new Error();
+          }
+        },
+        {
+          onError: (e) => {
+            throw e;
+          },
+        }
+      );
+
+      expect(query.isObserved).toBe(true);
+      if (!test.inCache) {
+        expect(query.isFetching).toBe(true);
+      } else {
+        expect(query.isFetching).toBe(false);
+      }
+      expect(query.isStarted).toBe(true);
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1);
+      });
+
+      const cached = query.response?.data;
+
+      expect(query.isObserved).toBe(true);
+      if (!test.inCache) {
+        expect(query.isFetching).toBe(true);
+      } else {
+        expect(query.isFetching).toBe(false);
+      }
+      expect(query.isStarted).toBe(true);
+
+      if (!test.first) {
+        if (!test.inCache) {
+          expect(query.response?.staled).toBe(true);
+        } else {
+          expect(query.response?.staled).toBe(false);
+        }
+      }
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 20);
+      });
+
+      expect(query.isObserved).toBe(true);
+      expect(query.isFetching).toBe(false);
+      expect(query.isStarted).toBe(true);
+      expect(query.response?.staled).toBe(false);
+
+      expect(query.response?.data).toBe(test.expect);
+
+      if (test.inCache) {
+        expect(query.response?.data).toBe(cached);
+      }
+
+      disposer();
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, test.postDelay);
+      });
+    }
+
+    expect(getServerCancelCount()).toBe(0);
+
+    closeServer();
+  });
+
+  it("test cache in age not make query (via waitFreshResponse())", async () => {
+    const { port, closeServer, getServerCancelCount } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 300,
+    });
+
+    const tests: {
+      postDelay: number;
+      expect: number;
+    }[] = [
+      {
+        postDelay: 100,
+        expect: 0,
+      },
+      {
+        postDelay: 100,
+        expect: 0,
+      },
+      {
+        postDelay: 100,
+        expect: 0,
+      },
+      {
+        postDelay: 100,
+        expect: 1,
+      },
+      {
+        postDelay: 200,
+        expect: 1,
+      },
+      {
+        postDelay: 300,
+        expect: 2,
+      },
+      {
+        postDelay: 300,
+        expect: 3,
+      },
+    ];
+
+    for (const test of tests) {
+      await query.waitFreshResponse();
+
+      expect(query.response?.data).toBe(test.expect);
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, test.postDelay);
+      });
+    }
+
+    expect(getServerCancelCount()).toBe(0);
+
+    closeServer();
+  });
+
+  it("test cache in age not make query (via waitResponse())", async () => {
+    const { port, closeServer, getServerCancelCount } = createTestServer(1);
+
+    const memStore = new MemoryKVStore("test");
+    let query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 100,
+    });
+
+    await query.waitResponse();
+    expect(query.response?.data).toBe(0);
+
+    // Create new query
+    query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 100,
+    });
+    expect(query.response).toBeUndefined();
+    // Cache is still valid.
+    await query.waitResponse();
+    expect(query.response?.data).toBe(0);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    // Cache is still valid.
+    await query.waitResponse();
+    expect(query.response?.data).toBe(0);
+
+    // Create new query
+    query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 100,
+    });
+    expect(query.response).toBeUndefined();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 55);
+    });
+    // Cache is now invalidated.
+    await query.waitResponse();
+    expect(query.response?.data).toBe(1);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    // Create new query
+    query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 100,
+    });
+    // Cache is still valid.
+    await query.waitResponse();
+    expect(query.response?.data).toBe(1);
+
+    // Create new query
+    query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 100,
+    });
+    expect(query.response).toBeUndefined();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 55);
+    });
+    // Cache is now invalidated. (Prior cache should not change cache's timestamp)
+    await query.waitResponse();
+    expect(query.response?.data).toBe(2);
+
+    expect(getServerCancelCount()).toBe(0);
 
     closeServer();
   });
