@@ -131,6 +131,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
         <View>
           <IconButton
             style={{
+              marginTop: 20,
               marginLeft: -5,
               padding: 5,
               width: 25,

@@ -48,6 +48,7 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
           <View>
             <IconButton
               style={{
+                marginTop: 20,
                 marginLeft: -5,
                 padding: 5,
                 width: 25,

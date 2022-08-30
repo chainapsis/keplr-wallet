@@ -78,6 +78,7 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
           <View>
             <IconButton
               style={{
+                marginTop: 20,
                 marginLeft: -5,
                 padding: 5,
                 width: 25,
