@@ -54,15 +54,12 @@ class ImmediateCanceler {
 
   protected rejector: ((e: Error) => void) | undefined;
 
-  constructor(protected readonly cancelToken: CancelTokenSource) {}
-
   get isCanceled(): boolean {
     return this._isCanceled;
   }
 
   cancel(message?: string) {
     this._isCanceled = true;
-    this.cancelToken.cancel(message);
     if (this.rejector) {
       this.rejector(new ImmediateCancelerError(message));
     }
@@ -80,9 +77,24 @@ class ImmediateCanceler {
   }
 }
 
+class AxiosImmediateCanceler extends ImmediateCanceler {
+  constructor(protected readonly cancelToken: CancelTokenSource) {
+    super();
+  }
+
+  cancel(message?: string) {
+    this.cancelToken.cancel(message);
+    super.cancel(message);
+  }
+}
+
 export class DeferInitialQueryController {
   @observable
   protected _isReady: boolean = false;
+
+  constructor() {
+    makeObservable(this);
+  }
 
   @action
   ready() {
@@ -161,7 +173,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
-  private canceler?: ImmediateCanceler;
+  private canceler?: AxiosImmediateCanceler;
+  private queryControllerConceler?: ImmediateCanceler;
 
   private observedCount: number = 0;
 
@@ -289,7 +302,29 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       !ObservableQueryBase.experimentalDeferInitialQueryController.isReady
     ) {
       this._isFetching = true;
-      yield ObservableQueryBase.experimentalDeferInitialQueryController.wait();
+
+      if (this.queryControllerConceler) {
+        this.queryControllerConceler.cancel();
+      }
+
+      const canceler = new ImmediateCanceler();
+      this.queryControllerConceler = canceler;
+      try {
+        yield canceler.callOrCanceled(
+          ObservableQueryBase.experimentalDeferInitialQueryController.wait()
+        );
+      } catch (e) {
+        if (e instanceof ImmediateCancelerError) {
+          return;
+        }
+        throw e;
+      }
+
+      // Recheck
+      if (!this.isStarted) {
+        return;
+      }
+      this.queryControllerConceler = undefined;
     }
 
     if (!this.canFetch()) {
@@ -356,7 +391,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
 
     const cancelToken = Axios.CancelToken.source();
-    const canceler = new ImmediateCanceler(cancelToken);
+    const canceler = new AxiosImmediateCanceler(cancelToken);
     this.canceler = canceler;
 
     let fetchingProceedNext = false;
