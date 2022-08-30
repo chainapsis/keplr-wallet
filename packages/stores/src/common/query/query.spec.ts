@@ -8,13 +8,18 @@ export class MockObservableQuery extends ObservableQuery<number> {
   constructor(
     kvStore: KVStore,
     port: number,
-    options: Partial<QueryOptions> = {}
+    options: Partial<QueryOptions> = {},
+    withInvalidURL?: boolean
   ) {
     const instance = Axios.create({
       baseURL: `http://127.0.0.1:${port}`,
     });
 
-    super(kvStore, instance, "/test", options);
+    super(kvStore, instance, !withInvalidURL ? "/test" : "/invalid", options);
+  }
+
+  changeURL() {
+    this.setUrl("/test");
   }
 }
 
@@ -46,6 +51,10 @@ describe("Test observable query", () => {
     let cancelCount = 0;
 
     const server = Http.createServer((req, resp) => {
+      if (req.url === "/invalid") {
+        throw new Error();
+      }
+
       let fulfilled = false;
       let closed = false;
       req.once("close", () => {
@@ -78,6 +87,7 @@ describe("Test observable query", () => {
       closeServer: () => {
         server.close();
       },
+      getNum: () => num,
       getServerCancelCount: () => cancelCount,
     };
   };
@@ -990,6 +1000,50 @@ describe("Test observable query", () => {
     });
 
     expect(query.response?.data).toBe(2);
+
+    disposer();
+
+    expect(getServerCancelCount()).toBe(0);
+
+    closeServer();
+  });
+
+  it("test set url before start not make query", async () => {
+    // Setting url before `start` should not make a query.
+    // This permits to determine the url conditionally before starting.
+
+    const { port, closeServer, getServerCancelCount } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port, {}, true);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    query.changeURL();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data !== 0) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(query.response?.data).toBe(0);
 
     disposer();
 
