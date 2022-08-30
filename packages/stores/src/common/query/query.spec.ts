@@ -14,21 +14,17 @@ export class MockObservableQuery extends ObservableQuery<number> {
     kvStore: KVStore,
     port: number,
     options: Partial<QueryOptions> = {},
-    withInvalidURL?: boolean
+    url: string = "/test"
   ) {
     const instance = Axios.create({
       baseURL: `http://127.0.0.1:${port}`,
     });
 
-    super(kvStore, instance, !withInvalidURL ? "/test" : "/invalid", options);
+    super(kvStore, instance, url, options);
   }
 
-  changeURL(invalid: boolean = false) {
-    if (!invalid) {
-      this.setUrl("/test");
-    } else {
-      this.setUrl("/invalid");
-    }
+  changeURL(url: string) {
+    this.setUrl(url);
   }
 }
 
@@ -62,6 +58,28 @@ describe("Test observable query", () => {
     const server = Http.createServer((req, resp) => {
       if (req.url === "/invalid") {
         throw new Error();
+      }
+
+      if (req.url === "/error1") {
+        resp.writeHead(503);
+        resp.end();
+        return;
+      }
+
+      if (req.url === "/error2") {
+        resp.writeHead(400, {
+          "content-type": "text/plain",
+        });
+        resp.end("message text");
+        return;
+      }
+
+      if (req.url === "/error3") {
+        resp.writeHead(400, {
+          "content-type": "application/json",
+        });
+        resp.end(JSON.stringify({ message: "message text" }));
+        return;
       }
 
       let fulfilled = false;
@@ -1024,7 +1042,7 @@ describe("Test observable query", () => {
     const { port, closeServer, getServerCancelCount } = createTestServer(10);
 
     const memStore = new MemoryKVStore("test");
-    const query = new MockObservableQuery(memStore, port, {}, true);
+    const query = new MockObservableQuery(memStore, port, {}, "/invalid");
 
     await new Promise((resolve) => {
       setTimeout(resolve, 50);
@@ -1032,7 +1050,7 @@ describe("Test observable query", () => {
     // Should not fetch until starting observed.
     expect(query.response).toBeUndefined();
 
-    query.changeURL();
+    query.changeURL("/test");
 
     const disposer = autorun(
       () => {
@@ -1073,7 +1091,7 @@ describe("Test observable query", () => {
     } = createTestServer(10);
 
     const memStore = new MemoryKVStore("test");
-    const query = new MockObservableQuery(memStore, port, {}, true);
+    const query = new MockObservableQuery(memStore, port, {}, "/invalid");
 
     const queryController = new DeferInitialQueryController();
     ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
@@ -1107,15 +1125,15 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    query.changeURL(false);
+    query.changeURL("/test");
     await new Promise((resolve) => {
       setTimeout(resolve, 50);
     });
-    query.changeURL(true);
+    query.changeURL("/invalid");
     await new Promise((resolve) => {
       setTimeout(resolve, 50);
     });
-    query.changeURL(false);
+    query.changeURL("/test");
     await new Promise((resolve) => {
       setTimeout(resolve, 50);
     });
@@ -1174,7 +1192,7 @@ describe("Test observable query", () => {
       {
         cacheMaxAge: 100,
       },
-      true
+      "/invalid"
     );
 
     const queryController = new DeferInitialQueryController();
@@ -1209,15 +1227,15 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    query.changeURL(false);
+    query.changeURL("/test");
     await new Promise((resolve) => {
       setTimeout(resolve, 50);
     });
-    query.changeURL(true);
+    query.changeURL("/invalid");
     await new Promise((resolve) => {
       setTimeout(resolve, 50);
     });
-    query.changeURL(false);
+    query.changeURL("/test");
     await new Promise((resolve) => {
       setTimeout(resolve, 50);
     });
@@ -1254,6 +1272,74 @@ describe("Test observable query", () => {
     expect(getNum()).toBe(1);
 
     ObservableQuery.experimentalDeferInitialQueryController = undefined;
+
+    closeServer();
+  });
+
+  it("test error message", async () => {
+    const { port, closeServer } = createTestServer(1);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port, {}, "/error1");
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 20);
+    });
+
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isObserved).toBe(true);
+    expect(query.response).toBeUndefined();
+    expect(query.error?.status).toBe(503);
+    expect(query.error?.statusText).toBe("Service Unavailable");
+    expect(query.error?.message).toBe("Service Unavailable");
+    expect(query.error?.data).toBe("");
+
+    query.changeURL("/error2");
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 20);
+    });
+
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isObserved).toBe(true);
+    expect(query.response).toBeUndefined();
+    expect(query.error?.status).toBe(400);
+    expect(query.error?.statusText).toBe("Bad Request");
+    expect(query.error?.message).toBe("message text");
+    expect(query.error?.data).toBe("message text");
+
+    query.changeURL("/error3");
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 20);
+    });
+
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isObserved).toBe(true);
+    expect(query.response).toBeUndefined();
+    expect(query.error?.status).toBe(400);
+    expect(query.error?.statusText).toBe("Bad Request");
+    expect(query.error?.message).toBe("message text");
+    expect(query.error?.data).toStrictEqual({ message: "message text" });
+
+    disposer();
 
     closeServer();
   });
