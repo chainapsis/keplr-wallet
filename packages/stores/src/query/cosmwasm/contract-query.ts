@@ -9,6 +9,8 @@ import { autorun } from "mobx";
 export class ObservableCosmwasmContractChainQuery<
   T
 > extends ObservableChainQuery<T> {
+  protected disposer?: () => void;
+
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -23,18 +25,35 @@ export class ObservableCosmwasmContractChainQuery<
       chainGetter,
       ObservableCosmwasmContractChainQuery.getUrlFromObj(contractAddress, obj)
     );
+  }
 
-    autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (
-        chainInfo.features?.includes("cosmwasm") &&
-        chainInfo.features.includes("wasmd_0.24+")
-      ) {
-        if (this.url.startsWith("/wasm/v1/")) {
-          this.setUrl(`/cosmwasm${this.url}`);
+  protected onStart() {
+    super.onStart();
+
+    return new Promise<void>((resolve) => {
+      this.disposer = autorun(() => {
+        const chainInfo = this.chainGetter.getChain(this.chainId);
+        if (chainInfo.features && chainInfo.features.includes("wasmd_0.24+")) {
+          if (this.url.startsWith("/wasm/v1/")) {
+            this.setUrl(`/cosmwasm${this.url}`);
+          }
+        } else {
+          if (this.url.startsWith("/cosmwasm/")) {
+            this.setUrl(`${this.url.replace("/cosmwasm", "")}`);
+          }
         }
-      }
+
+        resolve();
+      });
     });
+  }
+
+  protected onStop() {
+    if (this.disposer) {
+      this.disposer();
+      this.disposer = undefined;
+    }
+    super.onStop();
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -49,12 +68,20 @@ export class ObservableCosmwasmContractChainQuery<
   protected setObj(obj: object) {
     this.obj = obj;
 
-    this.setUrl(
-      ObservableCosmwasmContractChainQuery.getUrlFromObj(
-        this.contractAddress,
-        this.obj
-      )
+    const url = ObservableCosmwasmContractChainQuery.getUrlFromObj(
+      this.contractAddress,
+      this.obj
     );
+
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    if (
+      chainInfo.features?.includes("cosmwasm") &&
+      chainInfo.features.includes("wasmd_0.24+")
+    ) {
+      this.setUrl(`/cosmwasm${url}`);
+    } else {
+      this.setUrl(url);
+    }
   }
 
   protected canFetch(): boolean {
