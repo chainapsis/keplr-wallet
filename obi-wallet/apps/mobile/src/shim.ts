@@ -1,4 +1,5 @@
 import "fastestsmallesttextencoderdecoder";
+import "react-native-url-polyfill/auto";
 
 global.BigInt = global.BigInt ?? require("big-integer");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
