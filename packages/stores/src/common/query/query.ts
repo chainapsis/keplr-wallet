@@ -288,6 +288,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         this.cancel();
       }
 
+      this._isFetching = false;
+
       if (this.intervalId != null) {
         clearInterval(this.intervalId as NodeJS.Timeout);
       }
