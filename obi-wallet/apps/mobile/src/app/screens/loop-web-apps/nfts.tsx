@@ -1,14 +1,50 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import WebView from "react-native-webview";
+import WebView, { WebViewMessageEvent } from "react-native-webview";
 
-import { useInjectedProvider } from "../../injected-provider";
+import { useInjectedProvider, useKeplr } from "../../injected-provider";
+import { RNInjectedKeplr } from "../../injected-provider/injected-keplr";
+import EventEmitter from "eventemitter3";
 
 export function NFTs() {
   const safeArea = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
+
+  const keplr = useKeplr({ url: "https://nft-juno.loop.markets/myNft" });
   const code = useInjectedProvider();
+
+  const eventEmitter = useMemo(() => new EventEmitter(), []);
+  const onMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      eventEmitter.emit("message", event.nativeEvent);
+    },
+    [eventEmitter]
+  );
+
+  const webviewRef = useRef<WebView>();
+
+  useEffect(() => {
+    RNInjectedKeplr.startProxy(
+      keplr,
+      {
+        addMessageListener: (fn) => {
+          eventEmitter.addListener("message", fn);
+        },
+        postMessage: (message) => {
+          webviewRef.current?.injectJavaScript(
+            `
+                window.postMessage(${JSON.stringify(
+                  message
+                )}, window.location.origin);
+                true; // note: this is required, or you'll sometimes get silent failures
+              `
+          );
+        },
+      },
+      RNInjectedKeplr.parseWebviewMessage
+    );
+  }, [eventEmitter, keplr]);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#17162C" }}>
@@ -18,9 +54,8 @@ export function NFTs() {
           source={{ uri: "https://nft-juno.loop.markets/myNft" }}
           style={{ flex: 1, marginTop: safeArea.top }}
           injectedJavaScriptBeforeContentLoaded={code}
-          onMessage={(msg) => {
-            console.log({ msg });
-          }}
+          onMessage={onMessage}
+          ref={webviewRef}
         />
       ) : null}
       {loading && (

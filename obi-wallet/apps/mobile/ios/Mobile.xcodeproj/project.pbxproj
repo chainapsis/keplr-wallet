@@ -14,6 +14,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		13C45F4EF0D142F8AC3F680C /* Inter-V.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A28D3B1B1EE40CE8A014383 /* Inter-V.ttf */; };
+		1E1F9E43D3F44B2BAEC7B8A5 /* injected-provider.js in Resources */ = {isa = PBXBuildFile; fileRef = 7A4108B0E6F74187919CD53F /* injected-provider.js */; };
 		1F307662623B426DA08ECF6E /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2504730789F84B3AA9AC712C /* Inter-ExtraBold.otf */; };
 		24F5AD8274B34C09881487A9 /* Inter-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 5C1982B52A0B407DA1027C58 /* Inter-ExtraLight.otf */; };
 		3172E4EBFFF0464CAAA52A75 /* Inter-SemiBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC5C08772CB34A178E0CC060 /* Inter-SemiBoldItalic.otf */; };
@@ -29,7 +30,6 @@
 		8FE96A11947D485787F824E3 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 5920A3AA794B43428A46E15A /* Inter-Italic.otf */; };
 		A04C948A9C5945D181D9717E /* Inter-ThinItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2E6B03DF32BB4E399D5DBEC7 /* Inter-ThinItalic.otf */; };
 		BA195583D823470198964972 /* Inter-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 23BF4C395842443C9CF60A93 /* Inter-MediumItalic.otf */; };
-		C01180935C0148A583F2A1B2 /* injected-provider.js in Resources */ = {isa = PBXBuildFile; fileRef = 18A9471EADAC4FBBB7C74AEE /* injected-provider.js */; };
 		CD11990277E6429497A65C13 /* Inter-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 898B3B7B78564C059A069276 /* Inter-Light.otf */; };
 		D4C478400AF74B068594E4EA /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = B5320292580A489EA662A82B /* Inter-Regular.otf */; };
 		D8A1D42C331F41B48711FE1D /* Inter-ExtraLightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 56CE9CEBEC3D4063B1D8A558 /* Inter-ExtraLightItalic.otf */; };
@@ -57,7 +57,6 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Mobile/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Mobile/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Mobile/main.m; sourceTree = "<group>"; };
-		18A9471EADAC4FBBB7C74AEE /* injected-provider.js */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "injected-provider.js"; path = "../../../libs/injected-provider/dist/injected-provider.js"; sourceTree = "<group>"; };
 		19F6CBCC0A4E27FBF8BF4A61 /* libPods-Mobile-MobileTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Mobile-MobileTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		23BF4C395842443C9CF60A93 /* Inter-MediumItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-MediumItalic.otf"; path = "../src/assets/fonts/Inter/Inter-MediumItalic.otf"; sourceTree = "<group>"; };
 		2504730789F84B3AA9AC712C /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.otf"; path = "../src/assets/fonts/Inter/Inter-ExtraBold.otf"; sourceTree = "<group>"; };
@@ -74,6 +73,7 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-Mobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Mobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6044A1B7873C4546AA246BA7 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBold.otf"; path = "../src/assets/fonts/Inter/Inter-SemiBold.otf"; sourceTree = "<group>"; };
 		60BEFF9C833B41D0A0DED232 /* Inter-Medium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Medium.otf"; path = "../src/assets/fonts/Inter/Inter-Medium.otf"; sourceTree = "<group>"; };
+		7A4108B0E6F74187919CD53F /* injected-provider.js */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "injected-provider.js"; path = "../../../libs/injected-provider/dist/injected-provider.js"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Mobile/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		898B3B7B78564C059A069276 /* Inter-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Light.otf"; path = "../src/assets/fonts/Inter/Inter-Light.otf"; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-Mobile-MobileTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mobile-MobileTests.release.xcconfig"; path = "Target Support Files/Pods-Mobile-MobileTests/Pods-Mobile-MobileTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -201,7 +201,7 @@
 				12C016D9ED4E48D682FA4254 /* Inter-Thin.otf */,
 				2E6B03DF32BB4E399D5DBEC7 /* Inter-ThinItalic.otf */,
 				5A28D3B1B1EE40CE8A014383 /* Inter-V.ttf */,
-				18A9471EADAC4FBBB7C74AEE /* injected-provider.js */,
+				7A4108B0E6F74187919CD53F /* injected-provider.js */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -332,7 +332,7 @@
 				59450C9CC0D0454F96FE8E7B /* Inter-Thin.otf in Resources */,
 				A04C948A9C5945D181D9717E /* Inter-ThinItalic.otf in Resources */,
 				13C45F4EF0D142F8AC3F680C /* Inter-V.ttf in Resources */,
-				C01180935C0148A583F2A1B2 /* injected-provider.js in Resources */,
+				1E1F9E43D3F44B2BAEC7B8A5 /* injected-provider.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
