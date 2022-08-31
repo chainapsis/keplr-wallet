@@ -28,6 +28,54 @@ export class MockObservableQuery extends ObservableQuery<number> {
   }
 }
 
+export class MockOnStartObservableQuery extends ObservableQuery<number> {
+  protected readonly onStartOptions: {
+    readonly onStartDelay?: number;
+    readonly onStartUrl?: string;
+  };
+
+  constructor(
+    kvStore: KVStore,
+    port: number,
+    options: Partial<QueryOptions> = {},
+    url: string = "/test",
+    onStartOptions: {
+      readonly onStartDelay?: number;
+      readonly onStartUrl?: string;
+    } = {}
+  ) {
+    const instance = Axios.create({
+      baseURL: `http://127.0.0.1:${port}`,
+    });
+
+    super(kvStore, instance, url, options);
+
+    this.onStartOptions = onStartOptions;
+  }
+
+  protected onStart() {
+    super.onStart();
+
+    if (this.onStartOptions.onStartDelay == null) {
+      if (this.onStartOptions.onStartUrl) {
+        this.setUrl(this.onStartOptions.onStartUrl);
+      }
+    } else {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          if (this.onStartOptions.onStartUrl) {
+            this.setUrl(this.onStartOptions.onStartUrl);
+          }
+
+          setTimeout(() => {
+            resolve();
+          }, this.onStartOptions.onStartDelay! / 2);
+        }, this.onStartOptions.onStartDelay! / 2);
+      });
+    }
+  }
+}
+
 export class DelayMemoryKVStore extends MemoryKVStore {
   constructor(prefix: string, public readonly delay: number) {
     super(prefix);
@@ -1170,6 +1218,274 @@ describe("Test observable query", () => {
     expect(getNum()).toBe(1);
 
     ObservableQuery.experimentalDeferInitialQueryController = undefined;
+
+    closeServer();
+  });
+
+  it("test set url on start not make query", async () => {
+    // Setting url on `onStart()` method should not make a query.
+    // This permits to determine the url conditionally on `onStart()`.
+
+    const {
+      port,
+      closeServer,
+      getServerCancelCount,
+      getNum,
+    } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockOnStartObservableQuery(
+      memStore,
+      port,
+      {},
+      "/invalid",
+      {
+        onStartUrl: "/test",
+        onStartDelay: 100,
+      }
+    );
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.isFetching).toBe(false);
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data !== 0) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
+
+    // Not yet onStart() finished due to delay.
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    expect(getServerCancelCount()).toBe(0);
+    expect(getNum()).toBe(0);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 150);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(getServerCancelCount()).toBe(0);
+    expect(getNum()).toBe(1);
+
+    disposer();
+
+    closeServer();
+  });
+
+  it("test set url on start not make query (cancellation before onStart() complete)", async () => {
+    // Setting url on `onStart()` method should not make a query.
+    // This permits to determine the url conditionally on `onStart()`.
+
+    const {
+      port,
+      closeServer,
+      getServerCancelCount,
+      getNum,
+    } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockOnStartObservableQuery(
+      memStore,
+      port,
+      {},
+      "/invalid",
+      {
+        onStartUrl: "/test",
+        onStartDelay: 200,
+      }
+    );
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.isFetching).toBe(false);
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    let disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data !== 0) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    // Dispose the observer before the fetch completes.
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        disposer();
+        resolve();
+      }, 50);
+    });
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    expect(getServerCancelCount()).toBe(0);
+    expect(getNum()).toBe(0);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data !== 0) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 300);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 500);
+    });
+
+    expect(getServerCancelCount()).toBe(0);
+    expect(getNum()).toBe(1);
+
+    disposer();
+
+    closeServer();
+  });
+
+  it("test cancel not make query before onStart() complete", async () => {
+    const {
+      port,
+      closeServer,
+      getServerCancelCount,
+      getNum,
+    } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockOnStartObservableQuery(memStore, port, {}, "/test", {
+      onStartDelay: 200,
+    });
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.isFetching).toBe(false);
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
+
+    // Not yet onStart() finished due to delay.
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    expect(getServerCancelCount()).toBe(0);
+    expect(getNum()).toBe(0);
+
+    disposer();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    expect(getServerCancelCount()).toBe(0);
+    expect(getNum()).toBe(0);
 
     closeServer();
   });
