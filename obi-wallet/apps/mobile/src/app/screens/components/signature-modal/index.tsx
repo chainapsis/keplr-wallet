@@ -27,7 +27,7 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { useMemo, useRef, useState } from "react";
-import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
+import { Modal, ModalProps, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createBiometricSignature } from "../../../biometrics";
@@ -78,7 +78,6 @@ export function SignatureModal({
   );
 
   async function getMessage() {
-    console.log("before SigningStargateClient");
     const rcp = "https://rpc.uni.junonetwork.io/";
     const client = await SigningStargateClient.connect(rcp);
 
@@ -109,14 +108,12 @@ export function SignatureModal({
         id,
         title,
         right: alreadySigned ? <CheckIcon /> : null,
-
         async onPress() {
           if (alreadySigned) return;
 
           switch (id) {
             case "biometrics": {
               const message = await getMessage();
-
               const { signature } = await createBiometricSignature({
                 payload: message,
               });
@@ -196,11 +193,7 @@ export function SignatureModal({
                 marginVertical: 20,
               }}
               onPress={async () => {
-                try {
-                  onConfirm(signatures);
-                } catch (e) {
-                  Alert.alert("Error onConfirm", e.message);
-                }
+                onConfirm(signatures);
               }}
             />
           </View>
@@ -272,7 +265,6 @@ export function useSignatureModalProps({
         setSignatureModalVisible(false);
         setModalKey((value) => value + 1);
       },
-
       async onConfirm(signatures: Map<string, Uint8Array>) {
         const body: TxBodyEncodeObject = {
           typeUrl: "/cosmos.tx.v1beta1.TxBody",
@@ -281,20 +273,16 @@ export function useSignatureModalProps({
             memo: "",
           },
         };
-
         const bodyBytes = registry.encode(body);
 
         const rcp = "https://rpc.uni.junonetwork.io/";
-
         const client = await SigningStargateClient.connect(rcp);
-
         const account = await client.getAccount(multisig.multisig.address);
 
         const fee = {
           amount: coins(6000, "ujunox"),
           gas: "200000",
         };
-
         const tx = makeMultisignedTx(
           multisig.multisig.publicKey,
           account.sequence,
@@ -306,13 +294,7 @@ export function useSignatureModalProps({
         const result = await client.broadcastTx(
           Uint8Array.from(TxRaw.encode(tx).finish())
         );
-
-        try {
-          // getting stuck here in debug mode
-          await onConfirm(result);
-        } catch (e) {
-          Alert.alert("Error onConfirm1", e.message);
-        }
+        await onConfirm(result);
 
         setSignatureModalVisible(false);
         setModalKey((value) => value + 1);
