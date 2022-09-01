@@ -1,9 +1,9 @@
+import { Keplr } from "@keplr-wallet/provider";
+import { MessageRequesterExternal } from "@obi-wallet/common";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Platform } from "react-native";
 import { INJECTED_PROVIDER_HOST } from "react-native-dotenv";
 import RNFS from "react-native-fs";
-import { Keplr } from "@keplr-wallet/provider";
-import { MessageRequesterExternal } from "@obi-wallet/common";
 
 let code: string | null = null;
 

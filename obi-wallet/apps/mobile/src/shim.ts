@@ -1,6 +1,6 @@
 import "fastestsmallesttextencoderdecoder";
 import "react-native-url-polyfill/auto";
-import { randomBytes as getRandomBytes } from 'crypto'
+import { randomBytes as getRandomBytes } from "crypto";
 
 global.BigInt = global.BigInt ?? require("big-integer");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -41,5 +41,4 @@ global.crypto.getRandomValues = (values) => {
   // Copy the data into the given TypedArray, letting the VM optimize the copy if possible
   values.set(randomValues);
   return values;
-}
-
+};

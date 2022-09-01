@@ -7,7 +7,7 @@ import {
 } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
-import { KeyRingService } from "../keyring";
+import { AbstractKeyRingService } from "../keyring";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class PermissionService {
@@ -27,7 +27,7 @@ export class PermissionService {
 
   protected interactionService!: InteractionService;
   protected chainsService!: ChainsService;
-  protected keyRingService!: KeyRingService;
+  protected keyRingService!: AbstractKeyRingService;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -43,7 +43,7 @@ export class PermissionService {
   init(
     interactionService: InteractionService,
     chainsService: ChainsService,
-    keyRingService: KeyRingService
+    keyRingService: AbstractKeyRingService
   ) {
     this.interactionService = interactionService;
     this.chainsService = chainsService;

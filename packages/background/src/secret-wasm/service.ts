@@ -1,5 +1,5 @@
 import { EnigmaUtils } from "secretjs";
-import { KeyRingService } from "../keyring";
+import { AbstractKeyRingService } from "../keyring";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
 import { Hash } from "@keplr-wallet/crypto";
@@ -22,14 +22,14 @@ export class SecretWasmService {
   protected cacheEnigmaUtils: Map<string, EnigmaUtils> = new Map();
 
   protected chainsService!: ChainsService;
-  protected keyRingService!: KeyRingService;
+  protected keyRingService!: AbstractKeyRingService;
   public permissionService!: PermissionService;
 
   constructor(protected readonly kvStore: KVStore) {}
 
   init(
     chainsService: ChainsService,
-    keyRingService: KeyRingService,
+    keyRingService: AbstractKeyRingService,
     permissionService: PermissionService
   ) {
     this.chainsService = chainsService;
