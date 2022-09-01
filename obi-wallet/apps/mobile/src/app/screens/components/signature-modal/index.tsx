@@ -106,7 +106,7 @@ export function SignatureModal({
     console.log("before alreadySigned");
 
     const alreadySigned = signatures.has(multisig[id].address);
-
+console.log('########### multisig[id].address: ', multisig[id].address)
     return [
       {
         id,
@@ -206,7 +206,7 @@ export function SignatureModal({
                 try {
                   onConfirm(signatures);
                 } catch (e) {
-                  Alert.alert("Error", e.message);
+                  Alert.alert("Error onConfirm", e.message);
                 }
               }}
             />
@@ -308,7 +308,6 @@ export function useSignatureModalProps({
           gas: "200000",
         };
         console.log("before makeMultisignedTx");
-
         const tx = makeMultisignedTx(
           multisig.multisig.publicKey,
           account.sequence,
@@ -316,6 +315,8 @@ export function useSignatureModalProps({
           bodyBytes,
           signatures
         );
+        console.log('const tx:', tx)
+
         console.log("before await client.broadcastTx");
 
         const result = await client.broadcastTx(
@@ -327,7 +328,7 @@ export function useSignatureModalProps({
           // getting stuck here in debug mode
           await onConfirm(result);
         } catch (e) {
-          Alert.alert("Error", e.message);
+          Alert.alert("Error onConfirm1", e.message);
         }
 
         setSignatureModalVisible(false);

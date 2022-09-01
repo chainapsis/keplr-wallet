@@ -173,6 +173,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
                   new Uint8Array(Buffer.from(privateKey, "base64")),
                   "juno"
                 );
+                console.log("########### const Wallet: ", wallet);
                 console.log("after Secp256k1Wallet");
                 const biometricsAddress = pubkeyToAddress(
                   {
@@ -181,11 +182,21 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
                   },
                   "juno"
                 );
+                console.log(
+                  "########### const biometricsAddress: ",
+                  biometricsAddress
+                );
+
                 console.log("after biometricsAddress");
+
+
+
                 const client = await SigningStargateClient.connectWithSigner(
                   rcp,
-                  wallet
+                  wallet,
+                  { prefix: 'juno' }
                 );
+                console.log('########### const client: ', client)
                 console.log("after SigningStargateClient");
 
                 const fee = {
@@ -194,6 +205,14 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
                 };
 
                 console.log("before client.sendTokens");
+                console.log(
+                  "######### multisig.multisig.address",
+                  multisig.multisig.address
+                );
+                console.log("######### biometricsAddress", biometricsAddress);
+
+                // ######### multisig.multisig.address  juno16t8kqgsdl49z2sxt4an2u9vx5g89zr0x3ps5xp
+                // ######### biometricsAddress          juno1sf8gzpuxrunwyldw68wxc7jdrp67crrfq779ff
 
                 const result = await client.sendTokens(
                   biometricsAddress,
@@ -207,7 +226,8 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
                 setLoading(false);
               } catch (e) {
                 setLoading(false);
-                Alert.alert("Error", e.message);
+                console.log(e);
+                Alert.alert("Error PrepareWallet", e.message);
               }
             }}
           />
@@ -222,7 +242,7 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
               try {
                 openSignatureModal();
               } catch (e) {
-                Alert.alert("Error", e.message);
+                Alert.alert("Error Multisig", e.message);
               }
             }}
           />
