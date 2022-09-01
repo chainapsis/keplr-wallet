@@ -9,7 +9,7 @@ export function OnboardingScreen() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: true,
+        headerShown: false,
       }}
     >
       <Stack.Screen name="onboarding1" component={Onboarding1} />
