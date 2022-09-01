@@ -24,7 +24,7 @@ export class MessageRequester implements AbstractMessageRequester {
     msg["origin"] = this.sender.origin;
 
     if (this.eventEmitter.listenerCount("message") === 0) {
-      throw new Error("There is no router to send");
+      throw new Error(`There is no router to send for message ${msg.type()}`);
     }
 
     const result: Result = JSONUint8Array.unwrap(

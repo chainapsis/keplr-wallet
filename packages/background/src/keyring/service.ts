@@ -41,18 +41,179 @@ import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 
-export class KeyRingService {
-  private keyRing!: KeyRing;
-
-  protected interactionService!: InteractionService;
-  public chainsService!: ChainsService;
+export abstract class AbstractKeyRingService {
   public permissionService!: PermissionService;
+  public chainsService!: ChainsService;
 
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly embedChainInfos: ChainInfo[],
     protected readonly crypto: CommonCrypto
   ) {}
+
+  abstract init(
+    interactionService: InteractionService,
+    chainsService: ChainsService,
+    permissionService: PermissionService,
+    ledgerService: LedgerService
+  ): void;
+
+  abstract enable(env: Env): Promise<KeyRingStatus>;
+
+  abstract restore(): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract get keyRingStatus(): KeyRingStatus;
+
+  abstract getKey(chainId: string): Promise<Key>;
+
+  abstract getKeyRingType(): string;
+
+  abstract sign(
+    env: Env,
+    chainId: string,
+    message: Uint8Array
+  ): Promise<Uint8Array>;
+
+  abstract deleteKeyRing(
+    index: number,
+    password: string
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+    status: KeyRingStatus;
+  }>;
+
+  abstract updateNameKeyRing(
+    index: number,
+    name: string
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract showKeyRing(index: number, password: string): Promise<string>;
+
+  abstract createMnemonicKey(
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    mnemonic: string,
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract addMnemonicKey(
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    mnemonic: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract createPrivateKey(
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    privateKey: Uint8Array,
+    password: string,
+    meta: Record<string, string>
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract addPrivateKey(
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    privateKey: Uint8Array,
+    meta: Record<string, string>
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract createLedgerKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract addLedgerKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract lock(): KeyRingStatus;
+
+  abstract unlock(password: string): Promise<KeyRingStatus>;
+
+  abstract getKeyStoreMeta(key: string): string;
+
+  abstract requestSignAmino(
+    env: Env,
+    msgOrigin: string,
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions & {
+      // Hack option field to detect the sign arbitrary for string
+      isADR36WithString?: boolean;
+      ethSignType?: EthSignType;
+    }
+  ): Promise<AminoSignResponse>;
+
+  abstract verifyADR36AminoSignDoc(
+    chainId: string,
+    signer: string,
+    data: Uint8Array,
+    signature: StdSignature
+  ): Promise<boolean>;
+
+  abstract getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected;
+
+  abstract changeKeyStoreFromMultiKeyStore(
+    index: number
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }>;
+
+  abstract requestSignDirect(
+    env: Env,
+    msgOrigin: string,
+    chainId: string,
+    signer: string,
+    signDoc: SignDoc,
+    signOptions: KeplrSignOptions
+  ): Promise<DirectSignResponse>;
+
+  abstract getKeyStoreBIP44Selectables(
+    chainId: string,
+    paths: BIP44[]
+  ): Promise<{ readonly path: BIP44; readonly bech32Address: string }[]>;
+
+  abstract setKeyStoreCoinType(
+    chainId: string,
+    coinType: number
+  ): Promise<void>;
+
+  abstract checkPassword(password: string): boolean;
+
+  abstract exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]>;
+}
+
+export class KeyRingService extends AbstractKeyRingService {
+  private keyRing!: KeyRing;
+
+  protected interactionService!: InteractionService;
 
   init(
     interactionService: InteractionService,
