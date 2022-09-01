@@ -1,8 +1,7 @@
-import { faBookmark } from "@fortawesome/free-solid-svg-icons/faBookmark";
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons/faEllipsis";
 import { faRotateRight } from "@fortawesome/free-solid-svg-icons/faRotateRight";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faShare } from "@fortawesome/free-solid-svg-icons/faShare";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { App, Text, fetchMeta } from "@obi-wallet/common";
@@ -11,16 +10,13 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { Share, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { ConnectedWebView } from "./components/connected-web-view";
 import { WebView } from "react-native-webview";
-import Fav from './webview-assets/favorite-24px.svg'
-import UnFav from './webview-assets/unfavorite-24px.svg'
-
 
 import { StackParamList } from "../stack";
 import { useStore } from "../stores";
-import { ConnectedWebView } from "./components/connected-web-view";
-
+import Fav from "./webview-assets/favorite-24px.svg";
+import UnFav from "./webview-assets/unfavorite-24px.svg";
 
 export type WebViewScreenProps = NativeStackScreenProps<
   StackParamList,
@@ -34,7 +30,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
     const [currentUrl, setCurrentUrl] = useState(app.url);
     const [loaded, setLoaded] = useState(false);
     const [title, setTitle] = useState(app.label);
-    const WebViewRef = useRef<WebView>(null)
+    const WebViewRef = useRef<WebView>(null);
 
     const safeArea = useSafeAreaInsets();
 
@@ -151,13 +147,20 @@ export const WebViewScreen = observer<WebViewScreenProps>(
           handleIndicatorStyle={{ backgroundColor: "white" }}
           backgroundStyle={{ backgroundColor: "#24243C" }}
           handleStyle={{ backgroundColor: "transparent" }}
-          snapPoints={["25%",]}
+          snapPoints={["25%"]}
           enablePanDownToClose={true}
           ref={refBottomSheet}
           index={-1}
         >
           <BottomSheetView style={{ flex: 1, backgroundColor: "transparent" }}>
-            <TouchableOpacity onPress={() => triggerBottomSheet(-1)} style={{ alignSelf: 'flex-end', marginRight: 10, marginBottom: 10 }}>
+            <TouchableOpacity
+              onPress={() => triggerBottomSheet(-1)}
+              style={{
+                alignSelf: "flex-end",
+                marginRight: 10,
+                marginBottom: 10,
+              }}
+            >
               <FontAwesomeIcon icon={faTimes} style={{ color: "white" }} />
             </TouchableOpacity>
             <View
@@ -171,7 +174,6 @@ export const WebViewScreen = observer<WebViewScreenProps>(
               <FavButton app={currentAppMetadata} />
               <RefreshButton onPress={() => WebViewRef.current.reload()} />
               <ShareButton url={currentUrl} />
-
             </View>
           </BottomSheetView>
         </BottomSheet>
@@ -194,7 +196,11 @@ const FavButton = observer<{ app: App }>(({ app }) => {
         }
       }}
       IconComponent={
-        isFavorite ? <UnFav width={24} height={24} fill="black" /> : <Fav width={24} height={24} fill="black" />
+        isFavorite ? (
+          <UnFav width={24} height={24} fill="black" />
+        ) : (
+          <Fav width={24} height={24} fill="black" />
+        )
         // <FontAwesomeIcon
         //   icon={isFavorite ? faHeart : faBookmark}
         //   style={{ color: "black" }}
@@ -210,15 +216,11 @@ export function RefreshButton({ onPress }: { onPress: () => void }) {
     <SheetButton
       onPress={() => onPress()}
       IconComponent={
-        <FontAwesomeIcon
-          icon={faRotateRight}
-          style={{ color: "black" }}
-        />
+        <FontAwesomeIcon icon={faRotateRight} style={{ color: "black" }} />
       }
       label="Refresh"
     />
   );
-
 }
 export function ShareButton({ url }: { url: string }) {
   const onShare = async () => {
@@ -244,35 +246,40 @@ export function ShareButton({ url }: { url: string }) {
     <SheetButton
       onPress={() => onShare()}
       IconComponent={
-        <FontAwesomeIcon
-          icon={faShare}
-          style={{ color: "black" }}
-        />
+        <FontAwesomeIcon icon={faShare} style={{ color: "black" }} />
       }
       label="Share"
     />
   );
-
 }
 
-export function SheetButton({ onPress, IconComponent, label }: { onPress: Function, IconComponent: JSX.Element, label: string }) {
-  return <View style={{ justifyContent: 'center', alignItems: 'center', width: 60 }}>
-    <TouchableOpacity
-      onPress={() => onPress()}
-      style={{
-        height: 50,
-        width: 50,
-        backgroundColor: "gray",
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 12,
-
-      }}
-    >
-      {IconComponent}
-    </TouchableOpacity>
-    <Text style={{ marginTop: 5, color: 'white', opacity: .6 }}>
-      {label}
-    </Text>
-  </View>
+export function SheetButton({
+  onPress,
+  IconComponent,
+  label,
+}: {
+  onPress: () => void;
+  IconComponent: JSX.Element;
+  label: string;
+}) {
+  return (
+    <View style={{ justifyContent: "center", alignItems: "center", width: 60 }}>
+      <TouchableOpacity
+        onPress={() => onPress()}
+        style={{
+          height: 50,
+          width: 50,
+          backgroundColor: "gray",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 12,
+        }}
+      >
+        {IconComponent}
+      </TouchableOpacity>
+      <Text style={{ marginTop: 5, color: "white", opacity: 0.6 }}>
+        {label}
+      </Text>
+    </View>
+  );
 }
