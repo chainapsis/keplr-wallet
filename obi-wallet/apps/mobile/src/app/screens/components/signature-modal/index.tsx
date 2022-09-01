@@ -81,14 +81,12 @@ export function SignatureModal({
     console.log("before SigningStargateClient");
     const rcp = "https://rpc.uni.junonetwork.io/";
     const client = await SigningStargateClient.connect(rcp);
-    console.log("before client.getAccount");
 
     const account = await client.getAccount(multisig.multisig.address);
     const fee = {
       amount: coins(6000, "ujunox"),
       gas: "200000",
     };
-    console.log("before StdSignDoc");
 
     const signDoc: StdSignDoc = {
       memo: "",
@@ -103,10 +101,9 @@ export function SignatureModal({
 
   function getKey({ id, title }: { id: MultisigKey; title: string }): Key[] {
     if (!multisig[id]) return [];
-    console.log("before alreadySigned");
 
     const alreadySigned = signatures.has(multisig[id].address);
-console.log('########### multisig[id].address: ', multisig[id].address)
+
     return [
       {
         id,
@@ -114,19 +111,15 @@ console.log('########### multisig[id].address: ', multisig[id].address)
         right: alreadySigned ? <CheckIcon /> : null,
 
         async onPress() {
-          console.log("before if (alreadySigned)");
-
           if (alreadySigned) return;
 
           switch (id) {
             case "biometrics": {
               const message = await getMessage();
-              console.log("before createBiometricSignature");
 
               const { signature } = await createBiometricSignature({
                 payload: message,
               });
-              console.log("before setSignatures");
 
               setSignatures((signatures) => {
                 return new Map(
@@ -268,7 +261,6 @@ export function useSignatureModalProps({
     const messages = aminoMessages.map((message) => {
       return aminoTypes.fromAmino(message);
     });
-    console.log("before onConfirm(signatures:");
 
     return {
       key: modalKey.toString(),
@@ -282,8 +274,6 @@ export function useSignatureModalProps({
       },
 
       async onConfirm(signatures: Map<string, Uint8Array>) {
-        console.log("before TxBodyEncodeObject");
-
         const body: TxBodyEncodeObject = {
           typeUrl: "/cosmos.tx.v1beta1.TxBody",
           value: {
@@ -291,15 +281,12 @@ export function useSignatureModalProps({
             memo: "",
           },
         };
-        console.log("before bodyBytes");
 
         const bodyBytes = registry.encode(body);
-        console.log("before SigningStargateClient.connect");
 
         const rcp = "https://rpc.uni.junonetwork.io/";
 
         const client = await SigningStargateClient.connect(rcp);
-        console.log("before await client.getAccount.connect");
 
         const account = await client.getAccount(multisig.multisig.address);
 
@@ -307,7 +294,7 @@ export function useSignatureModalProps({
           amount: coins(6000, "ujunox"),
           gas: "200000",
         };
-        console.log("before makeMultisignedTx");
+
         const tx = makeMultisignedTx(
           multisig.multisig.publicKey,
           account.sequence,
@@ -315,14 +302,10 @@ export function useSignatureModalProps({
           bodyBytes,
           signatures
         );
-        console.log('const tx:', tx)
-
-        console.log("before await client.broadcastTx");
 
         const result = await client.broadcastTx(
           Uint8Array.from(TxRaw.encode(tx).finish())
         );
-        console.log("before await onConfirm(result);");
 
         try {
           // getting stuck here in debug mode

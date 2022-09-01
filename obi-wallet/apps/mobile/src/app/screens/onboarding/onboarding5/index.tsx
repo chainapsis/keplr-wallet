@@ -164,17 +164,13 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
               try {
                 const rcp = "https://rpc.uni.junonetwork.io/";
 
-                console.log("before getBiometricsKeyPair");
                 const { publicKey, privateKey } = await getBiometricsKeyPair();
-                console.log("pubkey:", publicKey);
-                console.log("privateKey:", privateKey);
 
                 const wallet = await Secp256k1Wallet.fromKey(
                   new Uint8Array(Buffer.from(privateKey, "base64")),
                   "juno"
                 );
-                console.log("########### const Wallet: ", wallet);
-                console.log("after Secp256k1Wallet");
+
                 const biometricsAddress = pubkeyToAddress(
                   {
                     type: pubkeyType.secp256k1,
@@ -182,37 +178,17 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
                   },
                   "juno"
                 );
-                console.log(
-                  "########### const biometricsAddress: ",
-                  biometricsAddress
-                );
-
-                console.log("after biometricsAddress");
-
-
 
                 const client = await SigningStargateClient.connectWithSigner(
                   rcp,
                   wallet,
-                  { prefix: 'juno' }
+                  { prefix: "juno" }
                 );
-                console.log('########### const client: ', client)
-                console.log("after SigningStargateClient");
 
                 const fee = {
                   amount: coins(6000, "ujunox"),
                   gas: "200000",
                 };
-
-                console.log("before client.sendTokens");
-                console.log(
-                  "######### multisig.multisig.address",
-                  multisig.multisig.address
-                );
-                console.log("######### biometricsAddress", biometricsAddress);
-
-                // ######### multisig.multisig.address  juno16t8kqgsdl49z2sxt4an2u9vx5g89zr0x3ps5xp
-                // ######### biometricsAddress          juno1sf8gzpuxrunwyldw68wxc7jdrp67crrfq779ff
 
                 const result = await client.sendTokens(
                   biometricsAddress,
@@ -221,7 +197,6 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
                   fee,
                   ""
                 );
-                console.log("after client.sendTokens");
                 console.log({ result });
                 setLoading(false);
               } catch (e) {
