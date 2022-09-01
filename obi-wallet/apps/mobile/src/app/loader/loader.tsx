@@ -10,19 +10,6 @@ export function Loader({ loadingText }) {
         alignItems: "center",
       }}
     >
-      <View
-        style={{
-          flex: 1,
-          position: "absolute",
-          opacity: 0.3,
-          backgroundColor: "#000",
-          width: "200%",
-          height: "200%",
-          zIndex: 0,
-          overflow: "visible",
-        }}
-      ></View>
-
       <ActivityIndicator size="large" color="#fff" />
 
       {loadingText ? (
