@@ -124,7 +124,7 @@ describe("Test observable query", () => {
 
       if (req.url === "/error3") {
         resp.writeHead(400, {
-          "content-type": "application/json",
+          "content-type": "application/json; charset=utf-8",
         });
         resp.end(JSON.stringify({ message: "message text" }));
         return;
