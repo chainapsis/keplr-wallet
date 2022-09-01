@@ -8,9 +8,109 @@ import { DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
 import { action, flow, makeObservable, observable } from "mobx";
 
+class ArrayBucket {
+  protected array: string[] = [];
+  protected map: Record<string, boolean | undefined> = {};
+
+  protected restored: Record<string, boolean | undefined> = {};
+  protected isRestored: boolean = false;
+
+  protected kvStore: KVStore;
+  protected storeKey: string = "";
+
+  constructor(kvStore: KVStore, storeKey: string) {
+    if (!storeKey) {
+      throw new Error("Empty store key");
+    }
+
+    this.kvStore = kvStore;
+    this.storeKey = storeKey;
+  }
+
+  has(value: string): boolean {
+    return this.map[value] === true;
+  }
+
+  add(...values: string[]): boolean {
+    let forceSave = false;
+    let unknowns: string[] = [];
+    for (const value of values) {
+      if (this.isRestored) {
+        if (this.restored[value]) {
+          forceSave = true;
+          delete this.restored[value];
+        }
+      }
+
+      if (!this.has(value)) {
+        unknowns.push(value);
+      }
+    }
+    if (unknowns.length === 0) {
+      if (this.isRestored && forceSave) {
+        // No need to wait
+        this.save();
+      }
+
+      return false;
+    }
+    // Remove duplicated.
+    unknowns = [...new Set(unknowns)];
+
+    for (const unknown of unknowns) {
+      this.map[unknown] = true;
+    }
+
+    let newArray = this.array.slice().concat(unknowns);
+    newArray = newArray.sort((id1, id2) => {
+      return id1 < id2 ? -1 : 1;
+    });
+
+    this.array = newArray;
+
+    if (this.isRestored) {
+      // No need to wait
+      this.save();
+    }
+
+    return true;
+  }
+
+  get values(): string[] {
+    return this.array.slice();
+  }
+
+  async save(): Promise<void> {
+    await this.kvStore.set(
+      this.storeKey,
+      this.array.filter((value) => !this.restored[value])
+    );
+  }
+
+  async restore(): Promise<void> {
+    const saved = await this.kvStore.get<string[]>(this.storeKey);
+    if (saved) {
+      for (const value of saved) {
+        this.restored[value] = true;
+      }
+      for (const value of this.array) {
+        if (this.restored[value]) {
+          delete this.restored[value];
+        }
+      }
+
+      this.add(...saved);
+    }
+
+    this.isRestored = true;
+  }
+}
+
 export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
-  protected coinIds: string[];
-  protected vsCurrencies: string[];
+  protected isInitialized: boolean;
+
+  private _coinIds: ArrayBucket;
+  private _vsCurrencies: ArrayBucket;
 
   @observable
   protected _defaultVsCurrency: string;
@@ -24,16 +124,21 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     supportedVsCurrencies: {
       [vsCurrency: string]: FiatCurrency;
     },
-    defaultVsCurrency: string
+    defaultVsCurrency: string,
+    urlOptions: {
+      readonly baseURL?: string;
+    } = {}
   ) {
     const instance = Axios.create({
-      baseURL: "https://api.coingecko.com/api/v3",
+      baseURL: urlOptions.baseURL || "https://api.coingecko.com/api/v3",
     });
 
     super(kvStore, instance, "/simple/price");
 
-    this.coinIds = [];
-    this.vsCurrencies = [];
+    this.isInitialized = false;
+
+    this._coinIds = new ArrayBucket(kvStore, "__coin_ids");
+    this._vsCurrencies = new ArrayBucket(kvStore, "__vs_currencies");
     this._defaultVsCurrency = defaultVsCurrency;
 
     this._supportedVsCurrencies = supportedVsCurrencies;
@@ -41,6 +146,28 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     makeObservable(this);
 
     this.restoreDefaultVsCurrency();
+  }
+
+  protected onStart() {
+    super.onStart();
+
+    return this.init();
+  }
+
+  async init() {
+    if (this.isInitialized) {
+      return;
+    }
+
+    await Promise.all([this._coinIds.restore(), this._vsCurrencies.restore()]);
+
+    // No need to wait
+    this._coinIds.save();
+    this._vsCurrencies.save();
+
+    this.updateURL([], [], true);
+
+    this.isInitialized = true;
   }
 
   get defaultVsCurrency(): string {
@@ -78,7 +205,9 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   }
 
   protected canFetch(): boolean {
-    return this.coinIds.length > 0 && this.vsCurrencies.length > 0;
+    return (
+      this._coinIds.values.length > 0 && this._vsCurrencies.values.length > 0
+    );
   }
 
   protected async fetchResponse(
@@ -102,12 +231,21 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     };
   }
 
-  protected refetch() {
-    const url = `/simple/price?ids=${this.coinIds.join(
-      ","
-    )}&vs_currencies=${this.vsCurrencies.join(",")}`;
+  protected updateURL(
+    coinIds: string[],
+    vsCurrencies: string[],
+    forceSetUrl: boolean = false
+  ) {
+    const coinIdsUpdated = this._coinIds.add(...coinIds);
+    const vsCurrenciesUpdated = this._vsCurrencies.add(...vsCurrencies);
 
-    this.setUrl(url);
+    if (coinIdsUpdated || vsCurrenciesUpdated || forceSetUrl) {
+      const url = `/simple/price?ids=${this._coinIds.values.join(
+        ","
+      )}&vs_currencies=${this._vsCurrencies.values.join(",")}`;
+
+      this.setUrl(url);
+    }
   }
 
   protected getCacheKey(): string {
@@ -129,20 +267,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
       return undefined;
     }
 
-    if (
-      !this.coinIds.includes(coinId) ||
-      !this.vsCurrencies.includes(vsCurrency)
-    ) {
-      if (!this.coinIds.includes(coinId)) {
-        this.coinIds.push(coinId);
-      }
-
-      if (!this.vsCurrencies.includes(vsCurrency)) {
-        this.vsCurrencies.push(vsCurrency);
-      }
-
-      this.refetch();
-    }
+    this.updateURL([coinId], [vsCurrency]);
 
     if (!this.response) {
       return undefined;
