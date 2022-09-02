@@ -183,7 +183,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   private canceler?: AxiosImmediateCanceler;
   private onStartCanceler?: ImmediateCanceler;
-  private queryControllerConceler?: ImmediateCanceler;
+  private queryControllerCanceler?: ImmediateCanceler;
 
   private observedCount: number = 0;
 
@@ -367,12 +367,12 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     ) {
       this._isFetching = true;
 
-      if (this.queryControllerConceler) {
-        this.queryControllerConceler.cancel();
+      if (this.queryControllerCanceler) {
+        this.queryControllerCanceler.cancel();
       }
 
       const canceler = new ImmediateCanceler();
-      this.queryControllerConceler = canceler;
+      this.queryControllerCanceler = canceler;
       try {
         yield canceler.callOrCanceled(
           ObservableQueryBase.experimentalDeferInitialQueryController.wait()
@@ -388,7 +388,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       if (!this.isStarted) {
         return;
       }
-      this.queryControllerConceler = undefined;
+      this.queryControllerCanceler = undefined;
     }
 
     if (!this.canFetch()) {
