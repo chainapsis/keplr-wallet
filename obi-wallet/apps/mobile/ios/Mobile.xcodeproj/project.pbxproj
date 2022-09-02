@@ -8,13 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* MobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* MobileTests.m */; };
+		020C1EAF58824C7DBF331525 /* injected-provider.js in Resources */ = {isa = PBXBuildFile; fileRef = 3652B463754F4AB29E51F375 /* injected-provider.js */; };
 		02412B1A05B64A848829B57D /* Inter-LightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9CACAB6C147D443BBF2E7533 /* Inter-LightItalic.otf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-Mobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-Mobile.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		13C45F4EF0D142F8AC3F680C /* Inter-V.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A28D3B1B1EE40CE8A014383 /* Inter-V.ttf */; };
-		1E1F9E43D3F44B2BAEC7B8A5 /* injected-provider.js in Resources */ = {isa = PBXBuildFile; fileRef = 7A4108B0E6F74187919CD53F /* injected-provider.js */; };
 		1F307662623B426DA08ECF6E /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2504730789F84B3AA9AC712C /* Inter-ExtraBold.otf */; };
 		24F5AD8274B34C09881487A9 /* Inter-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 5C1982B52A0B407DA1027C58 /* Inter-ExtraLight.otf */; };
 		3172E4EBFFF0464CAAA52A75 /* Inter-SemiBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC5C08772CB34A178E0CC060 /* Inter-SemiBoldItalic.otf */; };
@@ -62,6 +62,7 @@
 		2504730789F84B3AA9AC712C /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.otf"; path = "../src/assets/fonts/Inter/Inter-ExtraBold.otf"; sourceTree = "<group>"; };
 		2E6B03DF32BB4E399D5DBEC7 /* Inter-ThinItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ThinItalic.otf"; path = "../src/assets/fonts/Inter/Inter-ThinItalic.otf"; sourceTree = "<group>"; };
 		30EABA9A32F74A62B3AB7975 /* Inter-Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Bold.otf"; path = "../src/assets/fonts/Inter/Inter-Bold.otf"; sourceTree = "<group>"; };
+		3652B463754F4AB29E51F375 /* injected-provider.js */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "injected-provider.js"; path = "../../../libs/injected-provider/dist/injected-provider.js"; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-Mobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mobile.debug.xcconfig"; path = "Target Support Files/Pods-Mobile/Pods-Mobile.debug.xcconfig"; sourceTree = "<group>"; };
 		4C9D1EAA22C4426883D712E5 /* Inter-ExtraBoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBoldItalic.otf"; path = "../src/assets/fonts/Inter/Inter-ExtraBoldItalic.otf"; sourceTree = "<group>"; };
 		56CE9CEBEC3D4063B1D8A558 /* Inter-ExtraLightItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraLightItalic.otf"; path = "../src/assets/fonts/Inter/Inter-ExtraLightItalic.otf"; sourceTree = "<group>"; };
@@ -73,7 +74,6 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-Mobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Mobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6044A1B7873C4546AA246BA7 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBold.otf"; path = "../src/assets/fonts/Inter/Inter-SemiBold.otf"; sourceTree = "<group>"; };
 		60BEFF9C833B41D0A0DED232 /* Inter-Medium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Medium.otf"; path = "../src/assets/fonts/Inter/Inter-Medium.otf"; sourceTree = "<group>"; };
-		7A4108B0E6F74187919CD53F /* injected-provider.js */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "injected-provider.js"; path = "../../../libs/injected-provider/dist/injected-provider.js"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Mobile/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		898B3B7B78564C059A069276 /* Inter-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Light.otf"; path = "../src/assets/fonts/Inter/Inter-Light.otf"; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-Mobile-MobileTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mobile-MobileTests.release.xcconfig"; path = "Target Support Files/Pods-Mobile-MobileTests/Pods-Mobile-MobileTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -201,7 +201,7 @@
 				12C016D9ED4E48D682FA4254 /* Inter-Thin.otf */,
 				2E6B03DF32BB4E399D5DBEC7 /* Inter-ThinItalic.otf */,
 				5A28D3B1B1EE40CE8A014383 /* Inter-V.ttf */,
-				7A4108B0E6F74187919CD53F /* injected-provider.js */,
+				3652B463754F4AB29E51F375 /* injected-provider.js */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -332,7 +332,7 @@
 				59450C9CC0D0454F96FE8E7B /* Inter-Thin.otf in Resources */,
 				A04C948A9C5945D181D9717E /* Inter-ThinItalic.otf in Resources */,
 				13C45F4EF0D142F8AC3F680C /* Inter-V.ttf in Resources */,
-				1E1F9E43D3F44B2BAEC7B8A5 /* injected-provider.js in Resources */,
+				020C1EAF58824C7DBF331525 /* injected-provider.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

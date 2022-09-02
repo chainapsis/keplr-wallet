@@ -6,6 +6,7 @@ export function produceEnv(sender: MessageSender): Env {
   return {
     isInternalMsg: isInternalMessage(sender),
     requestInteraction: async (_url, message) => {
+      console.log('requesting interaction', message);
       return await new MessageRequesterInternalToUi().sendMessage(
         APP_PORT,
         message

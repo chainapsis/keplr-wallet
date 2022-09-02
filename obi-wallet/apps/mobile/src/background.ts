@@ -9,9 +9,10 @@ import {
   InteractionService,
   Key,
   KeyRingStatus,
+  LedgerService,
   MultiKeyStoreInfoWithSelected,
   PermissionService,
-  ScryptParams,
+  ScryptParams
 } from "@keplr-wallet/background";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { BACKGROUND_PORT, Env } from "@keplr-wallet/router";
@@ -20,14 +21,19 @@ import {
   EmbedChainInfos,
   KVStore,
   MessageRequesterInternalToUi,
+  migrateSerializedProxyAddress,
   PrivilegedOrigins,
   produceEnv,
   RouterBackground,
+  SerializedData
 } from "@obi-wallet/common";
 import { Buffer } from "buffer";
 import scrypt from "scrypt-js";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 class KeyRingService extends AbstractKeyRingService {
+  protected kvStore: KVStore;
+
   addLedgerKey(
     env: Env,
     kdf: "scrypt" | "sha256" | "pbkdf2",
@@ -121,9 +127,9 @@ class KeyRingService extends AbstractKeyRingService {
     return Promise.resolve({ multiKeyStoreInfo: undefined, status: undefined });
   }
 
-  enable(env: Env): Promise<KeyRingStatus> {
-    console.log("Not implemented, enable");
-    return Promise.resolve(undefined);
+  async enable(env: Env): Promise<KeyRingStatus> {
+    // TODO: do something with multisig store?
+    return KeyRingStatus.UNLOCKED
   }
 
   exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
@@ -131,9 +137,23 @@ class KeyRingService extends AbstractKeyRingService {
     return Promise.resolve([]);
   }
 
-  getKey(chainId: string): Promise<Key> {
-    console.log("Not implemented, getKey");
-    return Promise.resolve(undefined);
+  async getKey(chainId: string): Promise<Key> {
+    const data = await this.kvStore.get<unknown | undefined>("multisig");
+
+    if (!SerializedData.is(data)) {
+      throw new Error('Invalid data');
+    }
+
+    const proxyAddress = migrateSerializedProxyAddress(data.proxyAddress)
+
+    return {
+      // TODO:
+      algo: "multisig",
+      // TODO:
+      pubKey: new Uint8Array(),
+      address: Bech32Address.fromBech32(proxyAddress.address, 'juno').address,
+      isNanoLedger: false
+    }
   }
 
   getKeyRingType(): string {
@@ -165,7 +185,12 @@ class KeyRingService extends AbstractKeyRingService {
     permissionService: PermissionService,
     ledgerService: LedgerService
   ): void {
-    console.log("Not implemented, init");
+    this.chainsService = chainsService;
+    this.permissionService = permissionService;
+    this.kvStore = new KVStore("multisig-store");
+
+    // TODO: permissionService
+    // TODO: key ring
   }
 
   get keyRingStatus(): KeyRingStatus {
@@ -251,6 +276,26 @@ class KeyRingService extends AbstractKeyRingService {
     return Promise.resolve(false);
   }
 }
+
+// export class AddMultisigKeyMsg extends Message<{}> {
+//   public static type() {
+//     return "add-multisig-key"
+//   }
+//
+//   constructor(public readonly admin: SerializedMultisigPayload) {
+//     super();
+//   }
+//
+//   route(): string {
+//     return "keyring";
+//   }
+//
+//   type(): string {
+//     return AddMultisigKeyMsg.type();
+//   }
+//
+//   validateBasic(): void {}
+// }
 
 export function initBackground() {
   const router = new RouterBackground(produceEnv);

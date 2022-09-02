@@ -75,6 +75,7 @@ export class PermissionService {
       }
     }
 
+    console.log({ ungrantedChainIds });
     if (ungrantedChainIds.length > 0) {
       await this.grantBasicAccessPermission(env, ungrantedChainIds, [origin]);
     }
@@ -99,6 +100,8 @@ export class PermissionService {
       origins,
     };
 
+    console.log('wait approve')
+
     await this.interactionService.waitApprove(
       env,
       url,
@@ -106,7 +109,11 @@ export class PermissionService {
       permissionData
     );
 
+    console.log('done approve, adding permission')
+
     await this.addPermission(chainIds, type, origins);
+
+    console.log('added permission')
   }
 
   async grantBasicAccessPermission(
@@ -119,6 +126,8 @@ export class PermissionService {
       await this.chainsService.getChainInfo(chainId);
     }
 
+    console.log('granting basic access permission');
+
     await this.grantPermission(
       env,
       "/access",
@@ -126,6 +135,8 @@ export class PermissionService {
       getBasicAccessPermissionType(),
       origins
     );
+
+    console.log('granted basic access permission');
   }
 
   checkPermission(env: Env, chainId: string, type: string, origin: string) {

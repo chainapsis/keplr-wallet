@@ -37,6 +37,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     makeObservable(this);
 
     const service = new InteractionForegroundService(this);
+    console.log('hey ho')
     interactionForegroundInit(router, service);
   }
 
@@ -59,6 +60,7 @@ export class InteractionStore implements InteractionForegroundHandler {
 
   @action
   onInteractionDataReceived(data: InteractionWaitingData) {
+    console.log('Interaction data', data)
     if (!this.datas.has(data.type)) {
       this.datas.set(
         data.type,

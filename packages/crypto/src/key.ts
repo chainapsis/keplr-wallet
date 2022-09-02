@@ -54,10 +54,13 @@ export class PubKeySecp256k1 {
   }
 
   getAddress(): Uint8Array {
+    console.log('word-array', CryptoJS.lib.WordArray.create(this.pubKey as any))
     let hash = CryptoJS.SHA256(
       CryptoJS.lib.WordArray.create(this.pubKey as any)
     ).toString();
+    console.log('hash', hash);
     hash = CryptoJS.RIPEMD160(CryptoJS.enc.Hex.parse(hash)).toString();
+    console.log('hash, after', hash)
 
     return new Uint8Array(Buffer.from(hash, "hex"));
   }

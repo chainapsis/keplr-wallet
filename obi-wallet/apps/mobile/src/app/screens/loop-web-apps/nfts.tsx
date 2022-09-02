@@ -1,3 +1,4 @@
+import EventEmitter from "eventemitter3";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -5,9 +6,10 @@ import WebView, { WebViewMessageEvent } from "react-native-webview";
 
 import { useInjectedProvider, useKeplr } from "../../injected-provider";
 import { RNInjectedKeplr } from "../../injected-provider/injected-keplr";
-import EventEmitter from "eventemitter3";
+import { useStore } from "../../stores";
+import { observer } from "mobx-react-lite/src/observer";
 
-export function NFTs() {
+export const NFTs = observer(() => {
   const safeArea = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
 
@@ -23,6 +25,22 @@ export function NFTs() {
   );
 
   const webviewRef = useRef<WebView>();
+
+  // TODO: use store has to be called once so that the stores are actually initialized
+  // Maybe do that in init background, too
+  const { permissionStore } = useStore();
+
+  console.log(permissionStore.waitingDatas)
+
+  useEffect(() => {
+    console.log(permissionStore.waitingDatas)
+    for (const data of permissionStore.waitingDatas) {
+      // TODO: show modal or something
+      console.log('trying to approve')
+      permissionStore.approve(data.id)
+      console.log('approved')
+    }
+  }, [permissionStore, permissionStore.waitingDatas])
 
   useEffect(() => {
     RNInjectedKeplr.startProxy(
@@ -86,4 +104,4 @@ export function NFTs() {
       )}
     </View>
   );
-}
+})
