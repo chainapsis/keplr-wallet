@@ -1,5 +1,14 @@
-import { AminoSignResponse, StdSignature, StdSignDoc } from "@cosmjs/amino";
+import {
+  AminoSignResponse,
+  createMultisigThresholdPubkey,
+  pubkeyToAddress,
+  pubkeyType,
+  SinglePubkey,
+  StdSignature,
+  StdSignDoc
+} from "@cosmjs/amino";
 import { DirectSignResponse } from "@cosmjs/proto-signing";
+import { SigningStargateClient } from "@cosmjs/stargate";
 import {
   AbstractKeyRingService,
   BIP44HDPath,
@@ -9,9 +18,10 @@ import {
   InteractionService,
   Key,
   KeyRingStatus,
+  LedgerService,
   MultiKeyStoreInfoWithSelected,
   PermissionService,
-  ScryptParams,
+  ScryptParams
 } from "@keplr-wallet/background";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { BACKGROUND_PORT, Env } from "@keplr-wallet/router";
@@ -20,14 +30,19 @@ import {
   EmbedChainInfos,
   KVStore,
   MessageRequesterInternalToUi,
+  migrateSerializedProxyAddress,
   PrivilegedOrigins,
   produceEnv,
-  RouterBackground,
+  RouterBackground, SerializedData
 } from "@obi-wallet/common";
 import { Buffer } from "buffer";
 import scrypt from "scrypt-js";
+import { getBiometricsPublicKey } from "./app/biometrics";
+import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 
 class KeyRingService extends AbstractKeyRingService {
+  protected kvStore: KVStore;
+
   addLedgerKey(
     env: Env,
     kdf: "scrypt" | "sha256" | "pbkdf2",
@@ -121,9 +136,9 @@ class KeyRingService extends AbstractKeyRingService {
     return Promise.resolve({ multiKeyStoreInfo: undefined, status: undefined });
   }
 
-  enable(env: Env): Promise<KeyRingStatus> {
-    console.log("Not implemented, enable");
-    return Promise.resolve(undefined);
+  async enable(env: Env): Promise<KeyRingStatus> {
+    // TODO: do something with multisig store?
+    return KeyRingStatus.UNLOCKED
   }
 
   exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
@@ -131,9 +146,65 @@ class KeyRingService extends AbstractKeyRingService {
     return Promise.resolve([]);
   }
 
-  getKey(chainId: string): Promise<Key> {
-    console.log("Not implemented, getKey");
-    return Promise.resolve(undefined);
+  async getKey(chainId: string): Promise<Key> {
+    const data = await this.kvStore.get<unknown | undefined>("multisig");
+
+    if (!SerializedData.is(data)) {
+      throw new Error('Invalid data');
+    }
+    //
+    // console.log('hey')
+    // const key = await getBiometricsPublicKey()
+    // console.log(key)
+
+
+    const proxyAddress = migrateSerializedProxyAddress(data.proxyAddress)
+    // // @ts-ignore
+    // console.log("Not implemented, getKey", proxyAddress);
+    //
+    // const multisig = data.currentAdmin
+    // const publicKeys: SinglePubkey[] = [];
+    // if (multisig.biometrics) {
+    //   publicKeys.push({
+    //     type: pubkeyType.secp256k1,
+    //     value: multisig.biometrics.publicKey,
+    //   });
+    // }
+    //
+    // if (multisig.phoneNumber) {
+    //   publicKeys.push({
+    //     type: pubkeyType.secp256k1,
+    //     value: multisig.phoneNumber.publicKey,
+    //   });
+    // }
+    // const threshold = publicKeys.length >= 3 ? 2 : 1;
+    // const thresholdKey = createMultisigThresholdPubkey(publicKeys, threshold);
+    //
+    const rcp = "https://rpc.uni.junonetwork.io/";
+    const client = await SigningStargateClient.connect(rcp);
+    const account = await client.getAccount(proxyAddress.address)
+    console.log(account)
+    //
+
+    // const address = "1h65rtxf9ydcqupvkgu7sl74yvc490mh8h7ehs8"
+
+    // const pubKey = new Uint8Array(Buffer.from(key, "base64"))
+    // const address = new PubKeySecp256k1(pubKey)
+
+    // console.log(Buffer.from(address.getAddress().buffer).toString("base64"))
+    // console.log(pubkeyToAddress( {
+    //   type: pubkeyType.secp256k1,
+    //   value: key,
+    // }, 'juno'))
+
+    return {
+      // TODO:
+      algo: "multisig",
+      // TODO:
+      pubKey: new Uint8Array(),
+      address: new Uint8Array(Buffer.from(proxyAddress.address, "base64")),
+      isNanoLedger: false
+    }
   }
 
   getKeyRingType(): string {
@@ -165,7 +236,12 @@ class KeyRingService extends AbstractKeyRingService {
     permissionService: PermissionService,
     ledgerService: LedgerService
   ): void {
-    console.log("Not implemented, init");
+    this.chainsService = chainsService;
+    this.permissionService = permissionService;
+    this.kvStore = new KVStore("multisig-store");
+
+    // TODO: permissionService
+    // TODO: key ring
   }
 
   get keyRingStatus(): KeyRingStatus {
@@ -251,6 +327,26 @@ class KeyRingService extends AbstractKeyRingService {
     return Promise.resolve(false);
   }
 }
+
+// export class AddMultisigKeyMsg extends Message<{}> {
+//   public static type() {
+//     return "add-multisig-key"
+//   }
+//
+//   constructor(public readonly admin: SerializedMultisigPayload) {
+//     super();
+//   }
+//
+//   route(): string {
+//     return "keyring";
+//   }
+//
+//   type(): string {
+//     return AddMultisigKeyMsg.type();
+//   }
+//
+//   validateBasic(): void {}
+// }
 
 export function initBackground() {
   const router = new RouterBackground(produceEnv);

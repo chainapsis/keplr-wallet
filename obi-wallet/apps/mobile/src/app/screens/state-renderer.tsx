@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import { StackParamList } from "../stack";
 import { useStore } from "../stores";
 import { HomeScreen } from "./home";
+import { NFTs } from "./loop-web-apps/nfts";
 import { OnboardingScreen } from "./onboarding";
 
 export type StateRendererScreenProps = NativeStackScreenProps<
@@ -14,6 +15,8 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
   const { multisigStore } = useStore();
+
+  return <NFTs />;
 
   switch (multisigStore.getState()) {
     case MultisigState.LOADING:

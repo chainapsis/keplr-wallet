@@ -38,7 +38,9 @@ export class Router extends AbstractRouter {
     sender: MessageSender & { resolver: (result: Result) => void };
   }) {
     if (message.port !== this.port) return;
+    console.log("message", message);
     sender.resolver(await this.onMessageHandler(message, sender));
+    console.log("DONE message", message.type);
   }
 
   protected async onMessageHandler(
