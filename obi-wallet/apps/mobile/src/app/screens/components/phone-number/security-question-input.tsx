@@ -40,7 +40,7 @@ export function SecurityQuestionInput({
     useState(SECURITY_QUESTIONS);
 
   return (
-    <View>
+    <View style={{ zIndex: 999 }}>
       <Text
         style={{
           color: "#787B9C",
@@ -52,6 +52,7 @@ export function SecurityQuestionInput({
       >
         Security Question
       </Text>
+
       <DropDownPicker
         disabled={disabled}
         open={dropdownPickerOpen}

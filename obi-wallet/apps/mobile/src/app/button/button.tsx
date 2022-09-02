@@ -35,6 +35,14 @@ const flavors = {
       backgroundColor: "#8877EA",
     },
   },
+  gray: {
+    text: {
+      color: "#00000082",
+    },
+    button: {
+      backgroundColor: "#949494cc",
+    },
+  },
 };
 
 const baseStyles = StyleSheet.create({

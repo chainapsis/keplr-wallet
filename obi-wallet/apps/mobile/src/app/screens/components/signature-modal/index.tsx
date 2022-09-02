@@ -27,7 +27,7 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { useMemo, useRef, useState } from "react";
-import { Modal, ModalProps, ScrollView, View } from "react-native";
+import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createBiometricSignature } from "../../../biometrics";
@@ -349,7 +349,7 @@ function PhoneNumberBottomSheetContent({
             Paste in the response you received.
           </Text>
           <TextInput
-            placeholder="nuvicasonu"
+            placeholder="8-Digits SMS-Code"
             textContentType="oneTimeCode"
             keyboardType="number-pad"
             style={{ marginTop: 25 }}
@@ -384,7 +384,12 @@ function PhoneNumberBottomSheetContent({
 
         <VerifyAndProceedButton
           onPress={async () => {
-            onSuccess(await parseSignatureTextMessageResponse(key));
+            try {
+              onSuccess(await parseSignatureTextMessageResponse(key));
+            } catch (e) {
+              console.error(e);
+              Alert.alert("Error VerifyAndProceedButton (1)", e.message);
+            }
           }}
         />
       </View>

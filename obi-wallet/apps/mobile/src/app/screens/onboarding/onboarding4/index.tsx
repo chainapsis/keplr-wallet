@@ -123,19 +123,24 @@ export const Onboarding4 = observer<Onboarding4Props>(({ navigation }) => {
               marginTop: 10,
             }}
           >
-            With Obi, your Face ID, iCloud, and phone number work as a
+            With Obi, your Biometrics, iCloud, and phone number work as a
             multi-factor authenticator.
           </Text>
         </View>
 
         <Button
-          label="Scan My Face"
+          label="Scan My Biometrics"
           flavor="blue"
           LeftIcon={Scan}
           onPress={async () => {
-            const publicKey = await getBiometricsPublicKey();
-            multisigStore.setBiometricsPublicKey({ publicKey });
-            navigation.navigate("onboarding5");
+            try {
+              const publicKey = await getBiometricsPublicKey();
+              multisigStore.setBiometricsPublicKey({ publicKey });
+              navigation.navigate("onboarding5");
+            } catch (e) {
+              console.error(e);
+              Alert.alert("Error ScanMyBiometrics", e.message);
+            }
           }}
         />
       </View>

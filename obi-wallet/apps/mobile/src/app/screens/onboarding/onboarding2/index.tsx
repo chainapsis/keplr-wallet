@@ -58,6 +58,29 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
   } = useSecurityQuestionInput();
   const [phoneNumber, setPhoneNumber] = useState("");
 
+  const [magicButtonDisabled, setMagicButtonDisabled] = useState(true); // Magic Button disabled by default
+  const [magicButtonDisabledDoubleclick, setMagicButtonDisabledDoubleclick] =
+    useState(false); // Magic Button disable on button-click
+
+  const minInputCharsSecurityAnswer = 3;
+  const minInputCharsPhoneNumber = 6;
+
+  useEffect(() => {
+    if (
+      securityAnswer.length >= minInputCharsSecurityAnswer &&
+      phoneNumber.length >= minInputCharsPhoneNumber
+    ) {
+      setMagicButtonDisabled(false); // Enable Magic Button if checks are okay
+    } else {
+      setMagicButtonDisabled(true);
+    }
+  }, [
+    magicButtonDisabled,
+    setMagicButtonDisabled,
+    securityAnswer,
+    phoneNumber,
+  ]);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Background />
@@ -138,13 +161,104 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
           <SendMagicSmsButton
             description="Now send your encrypted answer to activate your messaging key."
             onPress={async () => {
-              await sendPublicKeyTextMessage({ phoneNumber, securityAnswer });
-              navigation.navigate("onboarding3", {
-                phoneNumber,
-                securityQuestion,
-                securityAnswer,
-              });
+              setMagicButtonDisabledDoubleclick(true);
+
+              // Forbidden Characters
+              const forbiddenSpecialCharsPhone =
+                // eslint-disable-next-line
+                /[ !@#$%^&*()_\-=\[\]{};':"\\|,.<>\/?]/; // excluding "+" character
+
+              const forbiddenSpecialCharsAnswer =
+                // eslint-disable-next-line
+                /[+!@#$%^&*()_\-=\[\]{};':"\\|,<>\/?]/; // including " " character, excluding SPACE & DOT
+
+              // Check if phone number has "+" OR "00" at the beginning
+              const phoneNumberStartsWith = ["+"].some((phonenr) =>
+                phoneNumber.startsWith(phonenr)
+              );
+
+              // PhoneNumberCheck
+              if (
+                // Check lenght
+                phoneNumber.length === 0 ||
+                phoneNumber === undefined ||
+                phoneNumber === null
+              ) {
+                Alert.alert(
+                  "Phone number missing",
+                  `Please enter a valid phone number.`
+                );
+                setMagicButtonDisabledDoubleclick(false);
+              } else if (
+                // Check Special Chars and if phone number has "+" at the beginning
+                forbiddenSpecialCharsPhone.test(phoneNumber) ||
+                !phoneNumberStartsWith
+              ) {
+                Alert.alert(
+                  "Phone number error",
+                  `Please use international phone number format. Example: +17362736423`
+                );
+                setMagicButtonDisabledDoubleclick(false);
+              }
+              // securityAnswerCheck
+              else if (
+                // Check lenght
+                securityAnswer.length === 0 ||
+                securityAnswer === undefined ||
+                securityAnswer === null
+              ) {
+                Alert.alert(
+                  "Security answer missing",
+                  `Please enter your security answer.`
+                );
+                setMagicButtonDisabledDoubleclick(false);
+              } else if (
+                // Check lenght
+                securityAnswer.length < minInputCharsSecurityAnswer
+              ) {
+                Alert.alert(
+                  "Security answer too short",
+                  `Your security answer needs to have at least ${minInputCharsSecurityAnswer} characters.`
+                );
+                setMagicButtonDisabledDoubleclick(false);
+              } else if (
+                // Check Special Chars
+                forbiddenSpecialCharsAnswer.test(securityAnswer)
+              ) {
+                Alert.alert(
+                  "Security answer error",
+                  `Please don't use any special characters.`
+                );
+                setMagicButtonDisabledDoubleclick(false);
+              } else {
+                try {
+                  // Trim whitespace for securityAnswer
+                  securityAnswer.trim();
+
+                  await sendPublicKeyTextMessage({
+                    phoneNumber,
+                    securityAnswer,
+                  });
+
+                  navigation.navigate("onboarding3", {
+                    phoneNumber,
+                    securityQuestion,
+                    securityAnswer,
+                  });
+
+                  setMagicButtonDisabledDoubleclick(false);
+                } catch (e) {
+                  setMagicButtonDisabledDoubleclick(false);
+                  console.error(e);
+                  Alert.alert("Sending SMS failed.", e.message);
+                }
+              }
             }}
+            disabled={
+              magicButtonDisabledDoubleclick
+                ? magicButtonDisabledDoubleclick
+                : magicButtonDisabled
+            }
           />
         </View>
       </KeyboardAwareScrollView>
