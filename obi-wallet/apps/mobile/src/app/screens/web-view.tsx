@@ -10,11 +10,11 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { Share, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ConnectedWebView } from "./components/connected-web-view";
 import { WebView } from "react-native-webview";
 
 import { StackParamList } from "../stack";
 import { useStore } from "../stores";
+import { ConnectedWebView } from "./components/connected-web-view";
 import Fav from "./webview-assets/favorite-24px.svg";
 import UnFav from "./webview-assets/unfavorite-24px.svg";
 

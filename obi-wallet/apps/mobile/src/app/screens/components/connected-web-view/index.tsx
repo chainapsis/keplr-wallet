@@ -39,8 +39,8 @@ export const ConnectedWebView = observer(
             webViewRef.current?.injectJavaScript(
               `
                 window.postMessage(${JSON.stringify(
-                message
-              )}, window.location.origin);
+                  message
+                )}, window.location.origin);
                 true; // note: this is required, or you'll sometimes get silent failures
               `
             );
@@ -49,7 +49,6 @@ export const ConnectedWebView = observer(
         RNInjectedKeplr.parseWebviewMessage
       );
     }, [eventEmitter, keplr]);
-
 
     const { permissionStore } = useStore();
 
