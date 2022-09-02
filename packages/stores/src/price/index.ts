@@ -8,6 +8,43 @@ import { DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
 import { action, flow, makeObservable, observable } from "mobx";
 
+class Throttler {
+  protected fns: (() => void)[] = [];
+
+  private timeoutId?: NodeJS.Timeout;
+
+  constructor(public readonly duration: number) {}
+
+  call(fn: () => void) {
+    if (this.duration <= 0) {
+      fn();
+      return;
+    }
+
+    this.fns.push(fn);
+
+    if (this.timeoutId != null) {
+      clearTimeout(this.timeoutId);
+    }
+
+    this.timeoutId = setTimeout(this.callback, this.duration);
+  }
+
+  protected callback = () => {
+    if (this.timeoutId != null) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = undefined;
+    }
+
+    if (this.fns.length > 0) {
+      const fn = this.fns[this.fns.length - 1];
+      fn();
+
+      this.fns = [];
+    }
+  };
+}
+
 class ArrayBucket {
   protected array: string[] = [];
   protected map: Record<string, boolean | undefined> = {};
@@ -18,13 +55,21 @@ class ArrayBucket {
   protected kvStore: KVStore;
   protected storeKey: string = "";
 
-  constructor(kvStore: KVStore, storeKey: string) {
+  protected throttler: Throttler;
+
+  constructor(
+    kvStore: KVStore,
+    storeKey: string,
+    throttleDuration: number = 0
+  ) {
     if (!storeKey) {
       throw new Error("Empty store key");
     }
 
     this.kvStore = kvStore;
     this.storeKey = storeKey;
+
+    this.throttler = new Throttler(throttleDuration);
   }
 
   has(value: string): boolean {
@@ -49,7 +94,7 @@ class ArrayBucket {
     if (unknowns.length === 0) {
       if (this.isRestored && forceSave) {
         // No need to wait
-        this.save();
+        this.throttler.call(() => this.save());
       }
 
       return false;
@@ -70,7 +115,7 @@ class ArrayBucket {
 
     if (this.isRestored) {
       // No need to wait
-      this.save();
+      this.throttler.call(() => this.save());
     }
 
     return true;
@@ -119,29 +164,42 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     [vsCurrency: string]: FiatCurrency | undefined;
   };
 
+  protected _throttler: Throttler;
+
   constructor(
     kvStore: KVStore,
     supportedVsCurrencies: {
       [vsCurrency: string]: FiatCurrency;
     },
     defaultVsCurrency: string,
-    urlOptions: {
+    options: {
       readonly baseURL?: string;
+
+      // Default is 250ms
+      readonly throttleDuration?: number;
     } = {}
   ) {
     const instance = Axios.create({
-      baseURL: urlOptions.baseURL || "https://api.coingecko.com/api/v3",
+      baseURL: options.baseURL || "https://api.coingecko.com/api/v3",
     });
 
     super(kvStore, instance, "/simple/price");
 
     this.isInitialized = false;
 
-    this._coinIds = new ArrayBucket(kvStore, "__coin_ids");
-    this._vsCurrencies = new ArrayBucket(kvStore, "__vs_currencies");
+    const throttleDuration = options.throttleDuration ?? 250;
+
+    this._coinIds = new ArrayBucket(kvStore, "__coin_ids", throttleDuration);
+    this._vsCurrencies = new ArrayBucket(
+      kvStore,
+      "__vs_currencies",
+      throttleDuration
+    );
     this._defaultVsCurrency = defaultVsCurrency;
 
     this._supportedVsCurrencies = supportedVsCurrencies;
+
+    this._throttler = new Throttler(throttleDuration);
 
     makeObservable(this);
 
@@ -244,7 +302,11 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
         ","
       )}&vs_currencies=${this._vsCurrencies.values.join(",")}`;
 
-      this.setUrl(url);
+      if (!this.isInitialized) {
+        this.setUrl(url);
+      } else {
+        this._throttler.call(() => this.setUrl(url));
+      }
     }
   }
 
