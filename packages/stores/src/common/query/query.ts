@@ -51,6 +51,7 @@ class ImmediateCancelerError extends Error {
 
 class ImmediateCanceler {
   protected _isCanceled: boolean = false;
+  protected _cancelMessage?: string;
 
   protected rejector: ((e: Error) => void) | undefined;
 
@@ -59,7 +60,12 @@ class ImmediateCanceler {
   }
 
   cancel(message?: string) {
+    if (this._isCanceled) {
+      return;
+    }
+
     this._isCanceled = true;
+    this._cancelMessage = message;
     if (this.rejector) {
       this.rejector(new ImmediateCancelerError(message));
     }
@@ -67,7 +73,7 @@ class ImmediateCanceler {
 
   callOrCanceled<R>(fn: PromiseLike<R>): Promise<R> {
     if (this.isCanceled) {
-      throw new ImmediateCancelerError();
+      throw new ImmediateCancelerError(this._cancelMessage);
     }
 
     return new Promise<R>((resolve, reject) => {
