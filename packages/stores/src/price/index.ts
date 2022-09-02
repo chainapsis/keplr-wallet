@@ -45,7 +45,7 @@ class Throttler {
   };
 }
 
-class ArrayBucket {
+class StoreIdSet {
   protected array: string[] = [];
   protected map: Record<string, boolean | undefined> = {};
 
@@ -154,8 +154,8 @@ class ArrayBucket {
 export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   protected isInitialized: boolean;
 
-  private _coinIds: ArrayBucket;
-  private _vsCurrencies: ArrayBucket;
+  private _coinIds: StoreIdSet;
+  private _vsCurrencies: StoreIdSet;
 
   @observable
   protected _defaultVsCurrency: string;
@@ -189,8 +189,8 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
 
     const throttleDuration = options.throttleDuration ?? 250;
 
-    this._coinIds = new ArrayBucket(kvStore, "__coin_ids", throttleDuration);
-    this._vsCurrencies = new ArrayBucket(
+    this._coinIds = new StoreIdSet(kvStore, "__coin_ids", throttleDuration);
+    this._vsCurrencies = new StoreIdSet(
       kvStore,
       "__vs_currencies",
       throttleDuration

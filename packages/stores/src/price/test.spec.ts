@@ -129,6 +129,7 @@ describe("Test coin gecko price store", () => {
       "usd",
       {
         baseURL: `http://localhost:${port}`,
+        throttleDuration: 10,
       }
     );
 
@@ -192,6 +193,7 @@ describe("Test coin gecko price store", () => {
         "usd",
         {
           baseURL: `http://localhost:${port}`,
+          throttleDuration: 10,
         }
       );
 
@@ -253,6 +255,7 @@ describe("Test coin gecko price store", () => {
         "usd",
         {
           baseURL: `http://localhost:${port}`,
+          throttleDuration: 10,
         }
       );
 
@@ -314,6 +317,7 @@ describe("Test coin gecko price store", () => {
         "usd",
         {
           baseURL: `http://localhost:${port}`,
+          throttleDuration: 10,
         }
       );
 
@@ -375,6 +379,7 @@ describe("Test coin gecko price store", () => {
       "usd",
       {
         baseURL: `http://localhost:${port}`,
+        throttleDuration: 10,
       }
     );
 
