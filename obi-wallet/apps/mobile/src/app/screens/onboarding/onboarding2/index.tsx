@@ -9,6 +9,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton } from "../../../button";
+import { PhoneInput } from "../../../phone-input";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import { sendPublicKeyTextMessage } from "../../../text-message";
@@ -19,6 +20,9 @@ import {
 } from "../../components/phone-number/security-question-input";
 import { SendMagicSmsButton } from "../../components/phone-number/send-magic-sms-button";
 import { StackParamList } from "../stack";
+
+
+
 
 export type Onboarding2Props = NativeStackScreenProps<
   StackParamList,
@@ -81,6 +85,12 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
     phoneNumber,
   ]);
 
+
+ 
+
+
+
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Background />
@@ -90,6 +100,9 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
         }}
         contentContainerStyle={{ flexGrow: 1 }}
       >
+
+
+
         <View
           style={{
             flexGrow: 1,
@@ -147,7 +160,10 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
               onSecurityAnswerChange={setSecurityAnswer}
             />
 
-            <TextInput
+
+
+    
+            <PhoneInput
               label="Phone number"
               keyboardType="phone-pad"
               textContentType="telephoneNumber"
