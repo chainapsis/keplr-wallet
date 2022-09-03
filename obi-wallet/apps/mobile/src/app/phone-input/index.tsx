@@ -1,6 +1,6 @@
 import { Text, TextInput as OriginalTextInput } from "@obi-wallet/common";
 import { reduce } from "fp-ts/lib/ReadonlyRecord";
-import { ComponentType, useState } from "react";
+import { ComponentType, useEffect, useState } from "react";
 import {
   StyleProp,
   StyleSheet,
@@ -27,59 +27,52 @@ const styles = StyleSheet.create({
   },
 
   wholeview: {
-    flex: 1,
+
     flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    width: "100%",
     height: 56,
     borderWidth: 1,
     borderColor: "#2F2B4C",
-    borderRadius: 12,
-    //paddingLeft: 20,
     fontSize: 14,
     fontWeight: "500",
     color: "#F6F5FF",
+    borderRadius: 12,
+    //backgroundColor: "lightgray",
+    alignItems: "center",
   },
 
   buttonview: {
     flex: 1,
-    
-    height: 56,
-    color: "white",
-    backgroundColor: "lightblue",
-    //paddingLeft: 20,
-    //paddingRight: 20,
-  },
-  callingcode: {
-    flex: 1,
-    flexDirection: "row",
     justifyContent: "center",
-    //width: 50,
-    height: 56,
-    color: "white",
-    backgroundColor: "red",
+    //backgroundColor: "lightblue",
+    paddingLeft: 20,
+    paddingRight: 20
   },
 
   inputview: {
-    width: "70%",
+    flex: 1,
+    flexDirection: "row",
     height: 56,
     borderColor: "#2F2B4C",
     borderLeftWidth: 1,
-    paddingLeft: 20,
+ 
     fontSize: 14,
     fontWeight: "500",
     color: "#F6F5FF",
   },
   input: {
-    height: 56,
-    paddingLeft: 10,
+    flex: 1,
+    paddingLeft: 20,
+    color: "#F6F5FF",
+    //backgroundColor: "lightblue",
+
   },
 
   // Country-Styles
   container: {
     //paddingVertical: 10,
-    justifyContent: "center",
-    alignItems: "center",
+    //justifyContent: "center",
+    //alignItems: "center",
   },
   welcome: {
     fontSize: 17,
@@ -114,8 +107,16 @@ export function PhoneInput({
   inputStyle?: StyleProp<TextStyle>;
 }) {
   // COUNTRY
-  const [countryCode, setCountryCode] = useState<CountryCode | undefined>();
-  const [country, setCountry] = useState<Country>(null);
+  const [countryCode, setCountryCode] = useState<CountryCode | undefined>("US");
+  const [country, setCountry] = useState<Country>({
+    callingCode: ["1"],
+    cca2: "US",
+    currency: ["USD"],
+    flag: "flag-us",
+    name: "United States",
+    region: "Americas",
+    subregion: "North America",
+  });
   const [withCountryNameButton, setWithCountryNameButton] =
     useState<boolean>(false);
   const [withCurrencyButton, setWithCurrencyButton] = useState<boolean>(false);
@@ -123,14 +124,14 @@ export function PhoneInput({
   const [withCallingCodeButton, setWithCallingCodeButton] =
     useState<boolean>(false);
   const [withFlag, setWithFlag] = useState<boolean>(true);
-  const [withEmoji, setWithEmoji] = useState<boolean>(false);
+  const [withEmoji, setWithEmoji] = useState<boolean>(true);
   const [withFilter, setWithFilter] = useState<boolean>(true);
   const [withAlphaFilter, setWithAlphaFilter] = useState<boolean>(false);
   const [withCallingCode, setWithCallingCode] = useState<boolean>(true);
   const [withCurrency, setWithCurrency] = useState<boolean>(false);
   const [withModal, setWithModal] = useState<boolean>(true);
   const [visible, setVisible] = useState<boolean>(false);
-  const [dark, setDark] = useState<boolean>(false);
+  const [dark, setDark] = useState<boolean>(true);
   const [fontScaling, setFontScaling] = useState<boolean>(true);
   const [disableNativeModal, setDisableNativeModal] = useState<boolean>(false);
   const onSelect = (country: Country) => {
@@ -139,6 +140,7 @@ export function PhoneInput({
   };
   const switchVisible = () => setVisible(!visible);
 
+
   return (
     <View style={style}>
       <CountryModalProvider>
@@ -146,11 +148,10 @@ export function PhoneInput({
           {label ? <Text style={styles.label}>{label}</Text> : null}
 
           {/*country !== null && (
-        <Text style={styles.data}>{JSON.stringify(country, null, 0)}</Text>
-      )*/}
+            <Text style={styles.data}>{JSON.stringify(country, null, 0)}</Text>
+          )*/}
 
-          <View style={styles.wholeview}>
-            <CountryPicker
+<CountryPicker
               theme={dark ? DARK_THEME : {}}
               {...{
                 allowFontScaling: fontScaling,
@@ -179,13 +180,16 @@ export function PhoneInput({
             />
 
 
+          <View style={styles.wholeview}>
+
+            
             <TouchableOpacity style={styles.buttonview} onPress={switchVisible}>
 
-              {country !== null && (
-                <Text style={styles.callingcode}>+{country.callingCode}</Text>
-              )}
+              <Text style={{color: "#F6F5FF"}}>+{country.callingCode}</Text>
 
             </TouchableOpacity>
+
+
 
             <View style={styles.inputview}>
               <CustomTextInput
@@ -194,7 +198,13 @@ export function PhoneInput({
                 {...props}
               />
             </View>
+
+
           </View>
+
+
+
+
         </ScrollView>
       </CountryModalProvider>
     </View>
