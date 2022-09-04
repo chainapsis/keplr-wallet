@@ -85,6 +85,80 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
     phoneNumber,
   ]);
 
+  const handleSecurityAnswer = () => {
+    if (
+      // Check lenght
+      securityAnswer.length === 0 ||
+      securityAnswer === undefined ||
+      securityAnswer === null
+    ) {
+      Alert.alert(
+        "Security answer missing",
+        `Please enter your security answer.`
+      );
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    } else if (
+      // Check lenght
+      securityAnswer.length < minInputCharsSecurityAnswer
+    ) {
+      Alert.alert(
+        "Security answer too short",
+        `Your security answer needs to have at least ${minInputCharsSecurityAnswer} characters.`
+      );
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    } else if (
+      // Check for whitespaces in begging and end of string
+      securityAnswer.startsWith(" ") ||
+      securityAnswer.endsWith(" ")
+    ) {
+      Alert.alert(
+        "Security answer error",
+        `Please remove the whitespaces in the beggining and end of your security answer.`
+      );
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const handlePhoneNumber = () => {
+    const onlyDigitsInPhoneNumber = /^[0-9]+$/.test(
+      phoneNumberWithoutCountryCode
+    );
+
+    if (
+      // Check lenght
+      phoneNumberWithoutCountryCode.length === 0 ||
+      phoneNumberWithoutCountryCode === undefined ||
+      phoneNumberWithoutCountryCode === null ||
+      phoneCountryCode.length === 0 ||
+      phoneCountryCode === undefined ||
+      phoneCountryCode === null ||
+      phoneNumber.length === 0 ||
+      phoneNumber === undefined ||
+      phoneNumber === null
+    ) {
+      Alert.alert("Phone number missing", `Please enter a valid phone number.`);
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    } else if (
+      // Check if phoneNumber has digits only
+      !onlyDigitsInPhoneNumber
+    ) {
+      Alert.alert(
+        "Phone number error",
+        `Please enter a valid phone number (international format).`
+      );
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    } else {
+      return true;
+    }
+  };
+
   // Function passed down to child component "PhoneInput" as property
   const handlePhoneNumberCountryCode = (countryCode) => {
     setPhoneCountryCode(countryCode);
@@ -173,87 +247,17 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
               handlePhoneNumberCountryCode={handlePhoneNumberCountryCode}
             />
           </View>
-          <Text style={{ color: "white" }}>{phoneCountryCode}</Text>
-          <Text style={{ color: "white" }}>{phoneNumber}</Text>
+
           <SendMagicSmsButton
             description="Now send your encrypted answer to activate your messaging key."
             onPress={async () => {
               setMagicButtonDisabledDoubleclick(true);
 
-              // Forbidden Characters
-              const forbiddenSpecialCharsPhone =
-                // eslint-disable-next-line
-                /[ +!@#$%^&*()_\-=\[\]{};':"\\|,.<>\/?]/;
+              const checkSecurityAnswer = await handleSecurityAnswer();
+              const checkPhoneNumber = await handlePhoneNumber();
 
-              const forbiddenSpecialCharsAnswer =
-                // eslint-disable-next-line
-                /[+!@#$%^&*()_\-=\[\]{};':"\\|,<>\/?]/; // including "+" character, excluding " " and "."
-
-              // sanitized_answer = event.security_answer.replace(/([^a-z0-9áéíóúñü_-\s\.,]|[\s\t\n\f\r\v\0])/gim,"").trim().toLowerCase();
-
-              // PhoneNumberCheck
-              if (
-                // Check lenght
-                phoneNumberWithoutCountryCode.length === 0 ||
-                phoneNumberWithoutCountryCode === undefined ||
-                phoneNumberWithoutCountryCode === null ||
-                phoneCountryCode.length === 0 ||
-                phoneCountryCode === undefined ||
-                phoneCountryCode === null ||
-                phoneNumber.length === 0 ||
-                phoneNumber === undefined ||
-                phoneNumber === null
-              ) {
-                Alert.alert(
-                  "Phone number missing",
-                  `Please enter a valid phone number.`
-                );
-                setMagicButtonDisabledDoubleclick(false);
-              } else if (
-                // Check Special Chars phone number (for example"+" at the beginning)
-                forbiddenSpecialCharsPhone.test(phoneNumberWithoutCountryCode)
-              ) {
-                Alert.alert(
-                  "Phone number error",
-                  `Please enter a valid phone number (international format).`
-                );
-                setMagicButtonDisabledDoubleclick(false);
-              }
-              // securityAnswerCheck
-              else if (
-                // Check lenght
-                securityAnswer.length === 0 ||
-                securityAnswer === undefined ||
-                securityAnswer === null
-              ) {
-                Alert.alert(
-                  "Security answer missing",
-                  `Please enter your security answer.`
-                );
-                setMagicButtonDisabledDoubleclick(false);
-              } else if (
-                // Check lenght
-                securityAnswer.length < minInputCharsSecurityAnswer
-              ) {
-                Alert.alert(
-                  "Security answer too short",
-                  `Your security answer needs to have at least ${minInputCharsSecurityAnswer} characters.`
-                );
-                setMagicButtonDisabledDoubleclick(false);
-              } else if (
-                // Check Special Chars
-                forbiddenSpecialCharsAnswer.test(securityAnswer)
-              ) {
-                Alert.alert(
-                  "Security answer error",
-                  `Please don't use any special characters.`
-                );
-                setMagicButtonDisabledDoubleclick(false);
-              } else {
+              if (checkSecurityAnswer && checkPhoneNumber) {
                 try {
-                  // Trim whitespace for securityAnswer
-                  securityAnswer.trim();
-
                   await sendPublicKeyTextMessage({
                     phoneNumber,
                     securityAnswer,
@@ -271,6 +275,8 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
                   console.error(e);
                   Alert.alert("Sending SMS failed.", e.message);
                 }
+              } else {
+                setMagicButtonDisabledDoubleclick(false);
               }
             }}
             disabled={

@@ -1,5 +1,5 @@
 import { Text, TextInput as OriginalTextInput } from "@obi-wallet/common";
-import { ComponentType, useState } from "react";
+import { ComponentType, useEffect, useState } from "react";
 import {
   StyleProp,
   StyleSheet,
@@ -11,9 +11,9 @@ import {
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-import CountryPicker, { CountryModalProvider } from "../../app/country_src";
-import { DARK_THEME } from "../../app/country_src";
-import { CountryCode, Country } from "../../app/country_src/types";
+import CountryPicker, { CountryModalProvider } from "./src";
+import { DARK_THEME } from "./src";
+import { CountryCode, Country } from "./src/types";
 
 const styles = StyleSheet.create({
   label: {
@@ -113,7 +113,9 @@ export function PhoneInput({
   };
   const switchVisible = () => setVisible(!visible);
 
-  handlePhoneNumberCountryCode("+" + country.callingCode); // Pass country.callingcode back to parent component "onboarding2"
+  useEffect(() => {
+    handlePhoneNumberCountryCode("+" + country.callingCode); // Pass country.callingcode back to parent component "onboarding2"
+  }, [country.callingCode, handlePhoneNumberCountryCode]);
 
   return (
     <View style={style}>
