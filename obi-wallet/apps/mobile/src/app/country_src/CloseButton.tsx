@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   Image,
   TouchableNativeFeedback,
@@ -9,39 +9,39 @@ import {
   ViewStyle,
   ImageSourcePropType,
   ImageStyle,
-  StyleSheet
-} from 'react-native'
-import PropTypes from 'prop-types'
-import { useTheme } from './CountryTheme'
+  StyleSheet,
+} from "react-native";
+import PropTypes from "prop-types";
+import { useTheme } from "./CountryTheme";
 
 const styles = StyleSheet.create({
   container: {
     height: 48,
-    width: '15%',
-    alignItems: 'center',
-    justifyContent: 'center'
+    width: "15%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   imageStyle: {
     height: 25,
     width: 25,
-    resizeMode: 'contain'
-  }
-})
+    resizeMode: "contain",
+  },
+});
 
 interface CloseButtonProps {
-  style?: StyleProp<ViewStyle>
-  imageStyle?: StyleProp<ImageStyle>
-  image?: ImageSourcePropType
-  onPress?(): void
+  style?: StyleProp<ViewStyle>;
+  imageStyle?: StyleProp<ImageStyle>;
+  image?: ImageSourcePropType;
+  onPress?(): void;
 }
 
 const CloseButtonAndroid = (props: CloseButtonProps) => {
-  let closeImage = require('./assets/images/close.android.png')
+  let closeImage = require("./assets/images/close.android.png");
 
   if (props.image) {
-    closeImage = props.image
+    closeImage = props.image;
   }
-  const { onBackgroundTextColor } = useTheme()
+  const { onBackgroundTextColor } = useTheme();
   return (
     <View style={[styles.container, props.style]}>
       <TouchableNativeFeedback
@@ -58,22 +58,22 @@ const CloseButtonAndroid = (props: CloseButtonProps) => {
             style={[
               styles.imageStyle,
               props.imageStyle,
-              { tintColor: onBackgroundTextColor }
+              { tintColor: onBackgroundTextColor },
             ]}
           />
         </View>
       </TouchableNativeFeedback>
     </View>
-  )
-}
+  );
+};
 
 const CloseButtonIOS = (props: CloseButtonProps) => {
-  let closeImage = require('./assets/images/close.ios.png')
+  let closeImage = require("./assets/images/close.ios.png");
 
   if (props.image) {
-    closeImage = props.image
+    closeImage = props.image;
   }
-  const { onBackgroundTextColor } = useTheme()
+  const { onBackgroundTextColor } = useTheme();
   return (
     <View style={[styles.container, props.style]}>
       <TouchableOpacity onPress={props.onPress}>
@@ -82,23 +82,23 @@ const CloseButtonIOS = (props: CloseButtonProps) => {
           style={[
             styles.imageStyle,
             props.imageStyle,
-            { tintColor: onBackgroundTextColor }
+            { tintColor: onBackgroundTextColor },
           ]}
         />
       </TouchableOpacity>
     </View>
-  )
-}
+  );
+};
 
 const propTypes = {
   onPress: PropTypes.func,
-  image: PropTypes.any
-}
-CloseButtonIOS.prototype = propTypes
-CloseButtonAndroid.prototype = propTypes
+  image: PropTypes.any,
+};
+CloseButtonIOS.prototype = propTypes;
+CloseButtonAndroid.prototype = propTypes;
 
 export default Platform.select({
   ios: CloseButtonIOS,
   android: CloseButtonAndroid,
-  web: CloseButtonIOS
-})
+  web: CloseButtonIOS,
+});

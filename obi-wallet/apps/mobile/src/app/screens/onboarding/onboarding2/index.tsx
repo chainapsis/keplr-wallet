@@ -11,7 +11,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton } from "../../../button";
 import { PhoneInput } from "../../../phone-input";
 import { useStore } from "../../../stores";
-import { TextInput } from "../../../text-input";
 import { sendPublicKeyTextMessage } from "../../../text-message";
 import { Background } from "../../components/background";
 import {
@@ -20,9 +19,6 @@ import {
 } from "../../components/phone-number/security-question-input";
 import { SendMagicSmsButton } from "../../components/phone-number/send-magic-sms-button";
 import { StackParamList } from "../stack";
-
-
-
 
 export type Onboarding2Props = NativeStackScreenProps<
   StackParamList,
@@ -60,11 +56,15 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
     securityAnswer,
     setSecurityAnswer,
   } = useSecurityQuestionInput();
-  const [phoneNumber, setPhoneNumber] = useState("");
-
+  const [phoneCountryCode, setPhoneCountryCode] = useState("");
+  const [phoneNumberWithoutCountryCode, setPhoneNumberWithoutCountryCode] =
+    useState("");
+  const [phoneNumber, setPhoneNumber] = useState(
+    phoneCountryCode + phoneNumberWithoutCountryCode
+  );
   const [magicButtonDisabled, setMagicButtonDisabled] = useState(true); // Magic Button disabled by default
   const [magicButtonDisabledDoubleclick, setMagicButtonDisabledDoubleclick] =
-    useState(false); // Magic Button disable on button-click
+    useState(false); // Magic Button disabled on button-click to prevent double-click
 
   const minInputCharsSecurityAnswer = 3;
   const minInputCharsPhoneNumber = 6;
@@ -85,11 +85,11 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
     phoneNumber,
   ]);
 
-
- 
-
-
-
+  // Function passed down to child component "PhoneInput" as property
+  const handlePhoneNumberCountryCode = (countryCode) => {
+    setPhoneCountryCode(countryCode);
+    setPhoneNumber(phoneCountryCode + phoneNumberWithoutCountryCode);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -100,9 +100,6 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
         }}
         contentContainerStyle={{ flexGrow: 1 }}
       >
-
-
-
         <View
           style={{
             flexGrow: 1,
@@ -160,20 +157,24 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
               onSecurityAnswerChange={setSecurityAnswer}
             />
 
-
-
-    
             <PhoneInput
               label="Phone number"
               keyboardType="phone-pad"
               textContentType="telephoneNumber"
               placeholder="Type your phone number here"
               style={{ marginTop: 25 }}
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              value={phoneNumberWithoutCountryCode}
+              onChangeText={(e) => {
+                setPhoneNumberWithoutCountryCode(e);
+                setPhoneNumber(
+                  phoneCountryCode + phoneNumberWithoutCountryCode
+                );
+              }}
+              handlePhoneNumberCountryCode={handlePhoneNumberCountryCode}
             />
           </View>
-
+          <Text style={{ color: "white" }}>{phoneCountryCode}</Text>
+          <Text style={{ color: "white" }}>{phoneNumber}</Text>
           <SendMagicSmsButton
             description="Now send your encrypted answer to activate your messaging key."
             onPress={async () => {
@@ -182,20 +183,23 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
               // Forbidden Characters
               const forbiddenSpecialCharsPhone =
                 // eslint-disable-next-line
-                /[ !@#$%^&*()_\-=\[\]{};':"\\|,.<>\/?]/; // excluding "+" character
+                /[ +!@#$%^&*()_\-=\[\]{};':"\\|,.<>\/?]/;
 
               const forbiddenSpecialCharsAnswer =
                 // eslint-disable-next-line
-                /[+!@#$%^&*()_\-=\[\]{};':"\\|,<>\/?]/; // including " " character, excluding SPACE & DOT
+                /[+!@#$%^&*()_\-=\[\]{};':"\\|,<>\/?]/; // including "+" character, excluding " " and "."
 
-              // Check if phone number has "+" OR "00" at the beginning
-              const phoneNumberStartsWith = ["+"].some((phonenr) =>
-                phoneNumber.startsWith(phonenr)
-              );
+              // sanitized_answer = event.security_answer.replace(/([^a-z0-9áéíóúñü_-\s\.,]|[\s\t\n\f\r\v\0])/gim,"").trim().toLowerCase();
 
               // PhoneNumberCheck
               if (
                 // Check lenght
+                phoneNumberWithoutCountryCode.length === 0 ||
+                phoneNumberWithoutCountryCode === undefined ||
+                phoneNumberWithoutCountryCode === null ||
+                phoneCountryCode.length === 0 ||
+                phoneCountryCode === undefined ||
+                phoneCountryCode === null ||
                 phoneNumber.length === 0 ||
                 phoneNumber === undefined ||
                 phoneNumber === null
@@ -206,13 +210,12 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
                 );
                 setMagicButtonDisabledDoubleclick(false);
               } else if (
-                // Check Special Chars and if phone number has "+" at the beginning
-                forbiddenSpecialCharsPhone.test(phoneNumber) ||
-                !phoneNumberStartsWith
+                // Check Special Chars phone number (for example"+" at the beginning)
+                forbiddenSpecialCharsPhone.test(phoneNumberWithoutCountryCode)
               ) {
                 Alert.alert(
                   "Phone number error",
-                  `Please use international phone number format. Example: +17362736423`
+                  `Please enter a valid phone number (international format).`
                 );
                 setMagicButtonDisabledDoubleclick(false);
               }

@@ -1,4 +1,4 @@
-import React, { useRef, memo, useState, useEffect } from 'react'
+import React, { useRef, memo, useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -9,60 +9,62 @@ import {
   PixelRatio,
   FlatListProps,
   Dimensions,
-} from 'react-native'
-import { useTheme } from './CountryTheme'
-import { Country, Omit } from './types'
-import { Flag } from './Flag'
-import { useContext } from './CountryContext'
-import { CountryText } from './CountryText'
+} from "react-native";
 
-const borderBottomWidth = 2 / PixelRatio.get()
+import { useContext } from "./CountryContext";
+import { CountryText } from "./CountryText";
+import { useTheme } from "./CountryTheme";
+import { Flag } from "./Flag";
+import { Country, Omit } from "./types";
+
+const borderBottomWidth = 2 / PixelRatio.get();
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingStart: 20,
   },
   letters: {
     marginRight: 10,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
   },
   letter: {
     height: 23,
     width: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   letterText: {
-    textAlign: 'center',
+    textAlign: "center",
   },
   itemCountry: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     paddingHorizontal: 5,
   },
   itemCountryName: {
-    width: '90%',
+    width: "90%",
   },
   list: {
     flex: 1,
   },
   sep: {
-    borderBottomWidth,
-    width: '100%',
+    borderBottomWidth: 0,
+    width: "100%",
   },
-})
+});
 
 interface LetterProps {
-  letter: string
-  scrollTo(letter: string): void
+  letter: string;
+  scrollTo(letter: string): void;
 }
 const Letter = ({ letter, scrollTo }: LetterProps) => {
-  const { fontSize, activeOpacity } = useTheme()
+  const { fontSize, activeOpacity } = useTheme();
 
   return (
     <TouchableOpacity
@@ -77,19 +79,19 @@ const Letter = ({ letter, scrollTo }: LetterProps) => {
         </CountryText>
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 interface CountryItemProps {
-  country: Country
-  withFlag?: boolean
-  withEmoji?: boolean
-  withCallingCode?: boolean
-  withCurrency?: boolean
-  onSelect(country: Country): void
+  country: Country;
+  withFlag?: boolean;
+  withEmoji?: boolean;
+  withCallingCode?: boolean;
+  withCurrency?: boolean;
+  onSelect(country: Country): void;
 }
 const CountryItem = (props: CountryItemProps) => {
-  const { activeOpacity, itemHeight, flagSize } = useTheme()
+  const { activeOpacity, itemHeight, flagSize } = useTheme();
   const {
     country,
     onSelect,
@@ -97,17 +99,17 @@ const CountryItem = (props: CountryItemProps) => {
     withEmoji,
     withCallingCode,
     withCurrency,
-  } = props
-  const extraContent: string[] = []
+  } = props;
+  const extraContent: string[] = [];
   if (
     withCallingCode &&
     country.callingCode &&
     country.callingCode.length > 0
   ) {
-    extraContent.push(`+${country.callingCode.join('|')}`)
+    extraContent.push(`+${country.callingCode.join("|")}`);
   }
   if (withCurrency && country.currency && country.currency.length > 0) {
-    extraContent.push(country.currency.join('|'))
+    extraContent.push(country.currency.join("|"));
   }
   return (
     <TouchableOpacity
@@ -123,50 +125,49 @@ const CountryItem = (props: CountryItemProps) => {
           />
         )}
         <View style={styles.itemCountryName}>
-          <CountryText numberOfLines={2} ellipsizeMode='tail'>
+          <CountryText numberOfLines={2} ellipsizeMode="tail">
             {country.name}
-            {extraContent.length > 0 && ` (${extraContent.join(', ')})`}
+            {extraContent.length > 0 && ` (${extraContent.join(", ")})`}
           </CountryText>
         </View>
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};
 CountryItem.defaultProps = {
   withFlag: true,
   withCallingCode: false,
-}
-const MemoCountryItem = memo<CountryItemProps>(CountryItem)
+};
+const MemoCountryItem = memo<CountryItemProps>(CountryItem);
 
-const renderItem = (props: Omit<CountryItemProps, 'country'>) => ({
-  item: country,
-}: ListRenderItemInfo<Country>) => (
-  <MemoCountryItem {...{ country, ...props }} />
-)
+const renderItem =
+  (props: Omit<CountryItemProps, "country">) =>
+  ({ item: country }: ListRenderItemInfo<Country>) =>
+    <MemoCountryItem {...{ country, ...props }} />;
 
 interface CountryListProps {
-  data: Country[]
-  filter?: string
-  filterFocus?: boolean
-  withFlag?: boolean
-  withEmoji?: boolean
-  withAlphaFilter?: boolean
-  withCallingCode?: boolean
-  withCurrency?: boolean
-  flatListProps?: FlatListProps<Country>
-  onSelect(country: Country): void
+  data: Country[];
+  filter?: string;
+  filterFocus?: boolean;
+  withFlag?: boolean;
+  withEmoji?: boolean;
+  withAlphaFilter?: boolean;
+  withCallingCode?: boolean;
+  withCurrency?: boolean;
+  flatListProps?: FlatListProps<Country>;
+  onSelect(country: Country): void;
 }
 
-const keyExtractor = (item: Country) => item.cca2
+const keyExtractor = (item: Country) => item.cca2;
 
 const ItemSeparatorComponent = () => {
-  const { primaryColorVariant } = useTheme()
+  const { primaryColorVariant } = useTheme();
   return (
     <View style={[styles.sep, { borderBottomColor: primaryColorVariant }]} />
-  )
-}
+  );
+};
 
-const { height } = Dimensions.get('window')
+const { height } = Dimensions.get("window");
 
 export const CountryList = (props: CountryListProps) => {
   const {
@@ -180,48 +181,48 @@ export const CountryList = (props: CountryListProps) => {
     filter,
     flatListProps,
     filterFocus,
-  } = props
+  } = props;
 
-  const flatListRef = useRef<FlatList<Country>>(null)
-  const [letter, setLetter] = useState<string>('')
-  const { itemHeight, backgroundColor } = useTheme()
+  const flatListRef = useRef<FlatList<Country>>(null);
+  const [letter, setLetter] = useState<string>("");
+  const { itemHeight, backgroundColor } = useTheme();
   const indexLetter = data
     .map((country: Country) => (country.name as string).substr(0, 1))
-    .join('')
+    .join("");
 
   const scrollTo = (letter: string, animated: boolean = true) => {
-    const index = indexLetter.indexOf(letter)
-    setLetter(letter)
+    const index = indexLetter.indexOf(letter);
+    setLetter(letter);
     if (flatListRef.current) {
-      flatListRef.current!.scrollToIndex({ animated, index })
+      flatListRef.current!.scrollToIndex({ animated, index });
     }
-  }
+  };
   const onScrollToIndexFailed = (_info: {
-    index: number
-    highestMeasuredFrameIndex: number
-    averageItemLength: number
+    index: number;
+    highestMeasuredFrameIndex: number;
+    averageItemLength: number;
   }) => {
     if (flatListRef.current) {
-      flatListRef.current!.scrollToEnd()
-      scrollTo(letter)
+      flatListRef.current!.scrollToEnd();
+      scrollTo(letter);
     }
-  }
-  const { search, getLetters } = useContext()
-  const letters = getLetters(data)
+  };
+  const { search, getLetters } = useContext();
+  const letters = getLetters(data);
   useEffect(() => {
     if (data && data.length > 0 && filterFocus && !filter) {
-      scrollTo(letters[0], false)
+      scrollTo(letters[0], false);
     }
-  }, [filterFocus])
+  }, [filterFocus]);
 
-  const initialNumToRender = Math.round(height / (itemHeight || 1))
+  const initialNumToRender = Math.round(height / (itemHeight || 1));
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <FlatList
         onScrollToIndexFailed
         ref={flatListRef}
-        testID='list-countries'
-        keyboardShouldPersistTaps='handled'
+        testID="list-countries"
+        keyboardShouldPersistTaps="handled"
         automaticallyAdjustContentInsets={false}
         scrollEventThrottle={1}
         getItemLayout={(_data: any, index) => ({
@@ -248,7 +249,7 @@ export const CountryList = (props: CountryListProps) => {
       {withAlphaFilter && (
         <ScrollView
           contentContainerStyle={styles.letters}
-          keyboardShouldPersistTaps='always'
+          keyboardShouldPersistTaps="always"
         >
           {letters.map((letter) => (
             <Letter key={letter} {...{ letter, scrollTo }} />
@@ -256,9 +257,9 @@ export const CountryList = (props: CountryListProps) => {
         </ScrollView>
       )}
     </View>
-  )
-}
+  );
+};
 
 CountryList.defaultProps = {
   filterFocus: undefined,
-}
+};

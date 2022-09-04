@@ -4,10 +4,10 @@ import { getHeightPercent } from './ratio'
 
 export const DEFAULT_THEME = {
   primaryColor: '#ccc',
-  primaryColorVariant: '#eee',
+  primaryColorVariant: '#4B4E6E',
   backgroundColor: '#ffffff',
   onBackgroundTextColor: '#000000',
-  fontSize: 16,
+  fontSize: 14,
   fontFamily: Platform.select({
     ios: 'System',
     android: 'Roboto',
@@ -15,16 +15,27 @@ export const DEFAULT_THEME = {
   }),
   filterPlaceholderTextColor: '#aaa',
   activeOpacity: 0.5,
-  itemHeight: getHeightPercent(7),
+  itemHeight: getHeightPercent(6),
   flagSize: Platform.select({ android: 20, default: 30 }),
   flagSizeButton: Platform.select({ android: 20, default: 30 })
 }
 export const DARK_THEME = {
   ...DEFAULT_THEME,
-  primaryColor: '#222',
-  primaryColorVariant: '#444',
-  backgroundColor: '#000',
-  onBackgroundTextColor: '#fff'
+  primaryColor: '#000',
+  primaryColorVariant: '#000',
+  backgroundColor: '#090816',
+  onBackgroundTextColor: '#F6F5FF',
+  fontSize: 14,
+  fontFamily: Platform.select({
+    ios: 'System',
+    android: 'Roboto',
+    web: 'Arial'
+  }),
+  filterPlaceholderTextColor: '#4B4E6E',
+  activeOpacity: 0.5,
+  flagSize: Platform.select({ android: 20, default: 30 }),
+  flagSizeButton: Platform.select({ android: 20, default: 30 })
+  
 }
 export type Theme = Partial<typeof DEFAULT_THEME>
 

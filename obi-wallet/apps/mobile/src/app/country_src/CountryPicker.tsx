@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, useEffect } from 'react'
+import React, { ReactNode, useState, useEffect } from "react";
 import {
   ModalProps,
   FlatListProps,
@@ -6,75 +6,75 @@ import {
   ViewStyle,
   ImageSourcePropType,
   ImageStyle,
-} from 'react-native'
-import { CountryModal } from './CountryModal'
-import { HeaderModal } from './HeaderModal'
-import { Country, CountryCode, FlagType, Region, Subregion } from './types'
-import { CountryFilter, CountryFilterProps } from './CountryFilter'
-import { FlagButton } from './FlagButton'
-import { useContext } from './CountryContext'
-import { CountryList } from './CountryList'
+} from "react-native";
+import { CountryModal } from "./CountryModal";
+import { HeaderModal } from "./HeaderModal";
+import { Country, CountryCode, FlagType, Region, Subregion } from "./types";
+import { CountryFilter, CountryFilterProps } from "./CountryFilter";
+import { FlagButton } from "./FlagButton";
+import { useContext } from "./CountryContext";
+import { CountryList } from "./CountryList";
 
 interface State {
-  visible: boolean
-  countries: Country[]
-  filter?: string
-  filterFocus?: boolean
+  visible: boolean;
+  countries: Country[];
+  filter?: string;
+  filterFocus?: boolean;
 }
 
 const renderFlagButton = (
-  props: FlagButton['props'] & CountryPickerProps['renderFlagButton'],
+  props: FlagButton["props"] & CountryPickerProps["renderFlagButton"]
 ): ReactNode =>
   props.renderFlagButton ? (
     props.renderFlagButton(props)
   ) : (
     <FlagButton {...props} />
-  )
+  );
 
 const renderFilter = (
-  props: CountryFilter['props'] & CountryPickerProps['renderCountryFilter'],
+  props: CountryFilter["props"] & CountryPickerProps["renderCountryFilter"]
 ): ReactNode =>
   props.renderCountryFilter ? (
     props.renderCountryFilter(props)
   ) : (
     <CountryFilter {...props} />
-  )
+  );
 
 interface CountryPickerProps {
-  allowFontScaling?: boolean
-  countryCode?: CountryCode
-  region?: Region
-  subregion?: Subregion
-  countryCodes?: CountryCode[]
-  excludeCountries?: CountryCode[]
-  preferredCountries?: CountryCode[]
-  modalProps?: ModalProps
-  filterProps?: CountryFilterProps
-  flatListProps?: FlatListProps<Country>
-  withEmoji?: boolean
-  withCountryNameButton?: boolean
-  withCurrencyButton?: boolean
-  withCallingCodeButton?: boolean
-  withFlagButton?: boolean
-  withCloseButton?: boolean
-  withFilter?: boolean
-  withAlphaFilter?: boolean
-  withCallingCode?: boolean
-  withCurrency?: boolean
-  withFlag?: boolean
-  withModal?: boolean
-  disableNativeModal?: boolean
-  visible?: boolean
-  placeholder?: string
-  containerButtonStyle?: StyleProp<ViewStyle>
-  closeButtonImage?: ImageSourcePropType
-  closeButtonStyle?: StyleProp<ViewStyle>
-  closeButtonImageStyle?: StyleProp<ImageStyle>
-  renderFlagButton?(props: FlagButton['props']): ReactNode
-  renderCountryFilter?(props: CountryFilter['props']): ReactNode
-  onSelect(country: Country): void
-  onOpen?(): void
-  onClose?(): void
+  allowFontScaling?: boolean;
+  countryCode?: CountryCode;
+  region?: Region;
+  subregion?: Subregion;
+  countryCodes?: CountryCode[];
+  excludeCountries?: CountryCode[];
+  preferredCountries?: CountryCode[];
+  modalProps?: ModalProps;
+  filterProps?: CountryFilterProps;
+  flatListProps?: FlatListProps<Country>;
+  withEmoji?: boolean;
+  withCountryNameButton?: boolean;
+  withCurrencyButton?: boolean;
+  withCallingCodeButton?: boolean;
+  withFlagButton?: boolean;
+  withCloseButton?: boolean;
+  withFilter?: boolean;
+  withAlphaFilter?: boolean;
+  withCallingCode?: boolean;
+  withCurrency?: boolean;
+  withFlag?: boolean;
+  withModal?: boolean;
+  disableNativeModal?: boolean;
+  visible?: boolean;
+  placeholder?: string;
+  containerButtonStyle?: StyleProp<ViewStyle>;
+  closeButtonImage?: ImageSourcePropType;
+  closeButtonStyle?: StyleProp<ViewStyle>;
+  closeButtonImageStyle?: StyleProp<ImageStyle>;
+  renderFlagButton?(props: FlagButton["props"]): ReactNode;
+  renderCountryFilter?(props: CountryFilter["props"]): ReactNode;
+  onSelect(country: Country): void;
+  onOpen?(): void;
+  onClose?(): void;
 }
 
 export const CountryPicker = (props: CountryPickerProps) => {
@@ -112,44 +112,44 @@ export const CountryPicker = (props: CountryPickerProps) => {
     excludeCountries,
     placeholder,
     preferredCountries,
-  } = props
+  } = props;
   const [state, setState] = useState<State>({
     visible: props.visible || false,
     countries: [],
-    filter: '',
+    filter: "",
     filterFocus: false,
-  })
-  const { translation, getCountriesAsync } = useContext()
-  const { visible, filter, countries, filterFocus } = state
+  });
+  const { translation, getCountriesAsync } = useContext();
+  const { visible, filter, countries, filterFocus } = state;
 
   useEffect(() => {
     if (state.visible !== props.visible) {
-      setState({ ...state, visible: props.visible || false })
+      setState({ ...state, visible: props.visible || false });
     }
-  }, [props.visible])
+  }, [props.visible]);
 
   const onOpen = () => {
-    setState({ ...state, visible: true })
+    setState({ ...state, visible: true });
     if (handleOpen) {
-      handleOpen()
+      handleOpen();
     }
-  }
+  };
   const onClose = () => {
-    setState({ ...state, filter: '', visible: false })
+    setState({ ...state, filter: "", visible: false });
     if (handleClose) {
-      handleClose()
+      handleClose();
     }
-  }
+  };
 
-  const setFilter = (filter: string) => setState({ ...state, filter })
+  const setFilter = (filter: string) => setState({ ...state, filter });
   const setCountries = (countries: Country[]) =>
-    setState({ ...state, countries })
+    setState({ ...state, countries });
   const onSelectClose = (country: Country) => {
-    onSelect(country)
-    onClose()
-  }
-  const onFocus = () => setState({ ...state, filterFocus: true })
-  const onBlur = () => setState({ ...state, filterFocus: false })
+    onSelect(country);
+    onClose();
+  };
+  const onFocus = () => setState({ ...state, filterFocus: true });
+  const onBlur = () => setState({ ...state, filterFocus: false });
   const flagProp = {
     allowFontScaling,
     countryCode,
@@ -162,10 +162,10 @@ export const CountryPicker = (props: CountryPickerProps) => {
     onOpen,
     containerButtonStyle,
     placeholder,
-  }
+  };
 
   useEffect(() => {
-    let cancel = false
+    let cancel = false;
     getCountriesAsync(
       withEmoji ? FlagType.EMOJI : FlagType.FLAT,
       translation,
@@ -174,13 +174,13 @@ export const CountryPicker = (props: CountryPickerProps) => {
       countryCodes,
       excludeCountries,
       preferredCountries,
-      withAlphaFilter,
+      withAlphaFilter
     )
-      .then(countries => cancel ? null : setCountries(countries))
-      .catch(console.warn)
-    
-    return () => cancel = true
-  }, [translation, withEmoji])
+      .then((countries) => (cancel ? null : setCountries(countries)))
+      .catch(console.warn);
+
+    return () => (cancel = true);
+  }, [translation, withEmoji]);
 
   return (
     <>
@@ -199,7 +199,7 @@ export const CountryPicker = (props: CountryPickerProps) => {
             closeButtonStyle,
             withCloseButton,
           }}
-          renderFilter={(props: CountryFilter['props']) =>
+          renderFilter={(props: CountryFilter["props"]) =>
             renderFilter({
               ...props,
               allowFontScaling,
@@ -217,7 +217,7 @@ export const CountryPicker = (props: CountryPickerProps) => {
             onSelect: onSelectClose,
             data: countries,
             letters: [],
-            withAlphaFilter: withAlphaFilter && filter === '',
+            withAlphaFilter: withAlphaFilter && filter === "",
             withCallingCode,
             withCurrency,
             withFlag,
@@ -229,13 +229,13 @@ export const CountryPicker = (props: CountryPickerProps) => {
         />
       </CountryModal>
     </>
-  )
-}
+  );
+};
 
 CountryPicker.defaultProps = {
   withModal: true,
   withAlphaFilter: false,
   withCallingCode: false,
-  placeholder: 'Select Country',
+  placeholder: "Select Country",
   allowFontScaling: true,
-}
+};
