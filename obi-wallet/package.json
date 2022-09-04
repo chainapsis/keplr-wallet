@@ -88,6 +88,7 @@
     "react-dom": "18.2.0",
     "react-intl": "^6.0.5",
     "react-native": "0.69.4",
+    "react-native-country-picker-modal": "https://github.com/BlockJayn/react-native-country-picker-modal-obi.git",
     "react-native-crypto": "^2.2.0",
     "react-native-device-crypto": "^0.1.7",
     "react-native-dotenv": "^3.3.1",

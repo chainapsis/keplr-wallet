@@ -9,11 +9,15 @@ import {
   ViewStyle,
   ScrollView,
 } from "react-native";
+import CountryPicker, {
+  CountryModalProvider,
+} from "react-native-country-picker-modal/src";
+import { DARK_THEME } from "react-native-country-picker-modal/src";
+import {
+  CountryCode,
+  Country,
+} from "react-native-country-picker-modal/src/types";
 import { TouchableOpacity } from "react-native-gesture-handler";
-
-import CountryPicker, { CountryModalProvider } from "./src";
-import { DARK_THEME } from "./src";
-import { CountryCode, Country } from "./src/types";
 
 const styles = StyleSheet.create({
   label: {
@@ -77,7 +81,7 @@ export function PhoneInput({
   label?: string;
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
-  handlePhoneNumberCountryCode?: any;
+  handlePhoneNumberCountryCode?: (param: string) => void;
 }) {
   const [countryCode, setCountryCode] = useState<CountryCode | undefined>("US");
   const [country, setCountry] = useState<Country>({
@@ -90,23 +94,21 @@ export function PhoneInput({
     region: "Americas",
     subregion: "North America",
   });
-  const [withCountryNameButton, setWithCountryNameButton] =
-    useState<boolean>(false);
-  const [withCurrencyButton, setWithCurrencyButton] = useState<boolean>(false);
-  const [withFlagButton, setWithFlagButton] = useState<boolean>(true);
-  const [withCallingCodeButton, setWithCallingCodeButton] =
-    useState<boolean>(true);
-  const [withFlag, setWithFlag] = useState<boolean>(true);
-  const [withEmoji, setWithEmoji] = useState<boolean>(false);
-  const [withFilter, setWithFilter] = useState<boolean>(true);
-  const [withAlphaFilter, setWithAlphaFilter] = useState<boolean>(false);
-  const [withCallingCode, setWithCallingCode] = useState<boolean>(true);
-  const [withCurrency, setWithCurrency] = useState<boolean>(false);
-  const [withModal, setWithModal] = useState<boolean>(true);
+  const [withCountryNameButton] = useState<boolean>(false);
+  const [withCurrencyButton] = useState<boolean>(false);
+  const [withFlagButton] = useState<boolean>(true);
+  const [withCallingCodeButton] = useState<boolean>(true);
+  const [withFlag] = useState<boolean>(true);
+  const [withEmoji] = useState<boolean>(false);
+  const [withFilter] = useState<boolean>(true);
+  const [withAlphaFilter] = useState<boolean>(false);
+  const [withCallingCode] = useState<boolean>(true);
+  const [withCurrency] = useState<boolean>(false);
+  const [withModal] = useState<boolean>(true);
   const [visible, setVisible] = useState<boolean>(false);
-  const [dark, setDark] = useState<boolean>(true);
-  const [fontScaling, setFontScaling] = useState<boolean>(true);
-  const [disableNativeModal, setDisableNativeModal] = useState<boolean>(false);
+  const [dark] = useState<boolean>(true);
+  const [fontScaling] = useState<boolean>(true);
+  const [disableNativeModal] = useState<boolean>(false);
   const onSelect = (country: Country) => {
     setCountryCode(country.cca2);
     setCountry(country);
