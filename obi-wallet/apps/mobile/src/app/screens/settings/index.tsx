@@ -9,7 +9,13 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { FC } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Linking } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
@@ -33,14 +39,12 @@ export function SettingsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View
-        style={
-          {
-            marginTop: 61,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginBottom: 10
-          }
-        }
+        style={{
+          marginTop: 61,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
       >
         <UserImage />
         <View style={{ flex: 1, paddingLeft: 10, justifyContent: "center" }}>
