@@ -151,7 +151,7 @@ export async function getMessageBody(message: string) {
     // Possible errors
     // - options validation
     // - "Invalid input - it is not base32 encoded string"
-    console.error(e)
+    console.error(e);
     Alert.alert("Error getMessageBody (1)", e.message);
   }
   const encrypted = AES.encrypt(message, token).toString();

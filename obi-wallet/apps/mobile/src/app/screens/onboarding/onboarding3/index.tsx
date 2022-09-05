@@ -34,23 +34,16 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
   const [verifyButtonDisabledDoubleclick, setVerifyButtonDisabledDoubleclick] =
     useState(false); // Magic Button disable on button-click
 
-
   const minInputCharsSMSCode = 8;
 
   useEffect(() => {
-    if (
-      key.length >= minInputCharsSMSCode
-    ) {
+    if (key.length >= minInputCharsSMSCode) {
       setVerifyButtonDisabled(false); // Enable Magic Button if checks are okay
     } else {
       setVerifyButtonDisabled(true);
       setVerifyButtonDisabledDoubleclick(false);
     }
-  }, [
-    verifyButtonDisabled,
-    setVerifyButtonDisabled,
-    key,
-  ]);
+  }, [verifyButtonDisabled, setVerifyButtonDisabled, key]);
 
   return (
     <KeyboardAvoidingView
@@ -130,7 +123,7 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
               <InlineButton
                 label="Resend"
                 onPress={async () => {
-                   setKey('')
+                  setKey("");
                   await sendPublicKeyTextMessage({
                     phoneNumber: params.phoneNumber,
                     securityAnswer: params.securityAnswer,
@@ -153,8 +146,7 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
                   });
                   setVerifyButtonDisabledDoubleclick(false);
                   navigation.navigate("onboarding4");
-                }
-                else {
+                } else {
                   setVerifyButtonDisabledDoubleclick(false);
                 }
               } catch (e) {
