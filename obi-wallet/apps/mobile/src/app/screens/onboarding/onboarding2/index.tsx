@@ -86,20 +86,17 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
   ]);
 
   const handleSecurityAnswer = () => {
-    if (
-      // Check lenght
-      securityAnswer.length === 0 ||
-      securityAnswer === undefined ||
-      securityAnswer === null
-    ) {
+    if (!securityAnswer) {
       Alert.alert(
         "Security answer missing",
         `Please enter your security answer.`
       );
       setMagicButtonDisabledDoubleclick(false);
       return false;
-    } else if (
-      // Check lenght
+    }
+
+    if (
+      // Check length
       securityAnswer.length < minInputCharsSecurityAnswer
     ) {
       Alert.alert(
@@ -108,55 +105,45 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
       );
       setMagicButtonDisabledDoubleclick(false);
       return false;
-    } else if (
-      // Check for whitespaces in begging and end of string
+    }
+
+    if (
+      // Check for whitespaces in beginning and end of string
       securityAnswer.startsWith(" ") ||
       securityAnswer.endsWith(" ")
     ) {
       Alert.alert(
         "Security answer error",
-        `Please remove the whitespaces in the beggining and end of your security answer.`
+        `Please remove the whitespaces in the beginning and end of your security answer.`
       );
       setMagicButtonDisabledDoubleclick(false);
       return false;
-    } else {
-      return true;
     }
+
+    return true;
   };
 
   const handlePhoneNumber = () => {
-    const onlyDigitsInPhoneNumber = /^[0-9]+$/.test(
-      phoneNumberWithoutCountryCode
-    );
-
-    if (
-      // Check lenght
-      phoneNumberWithoutCountryCode.length === 0 ||
-      phoneNumberWithoutCountryCode === undefined ||
-      phoneNumberWithoutCountryCode === null ||
-      phoneCountryCode.length === 0 ||
-      phoneCountryCode === undefined ||
-      phoneCountryCode === null ||
-      phoneNumber.length === 0 ||
-      phoneNumber === undefined ||
-      phoneNumber === null
-    ) {
+    if (!phoneNumberWithoutCountryCode || !phoneCountryCode || !phoneNumber) {
       Alert.alert("Phone number missing", `Please enter a valid phone number.`);
       setMagicButtonDisabledDoubleclick(false);
       return false;
-    } else if (
-      // Check if phoneNumber has digits only
-      !onlyDigitsInPhoneNumber
-    ) {
+    }
+
+    // Check if phoneNumber has digits only
+    const onlyDigitsInPhoneNumber = /^[0-9]+$/.test(
+      phoneNumberWithoutCountryCode
+    );
+    if (!onlyDigitsInPhoneNumber) {
       Alert.alert(
         "Phone number error",
         `Please enter a valid phone number (international format).`
       );
       setMagicButtonDisabledDoubleclick(false);
       return false;
-    } else {
-      return true;
     }
+
+    return true;
   };
 
   // Function passed down to child component "PhoneInput" as property

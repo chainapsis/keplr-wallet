@@ -11,12 +11,9 @@ import {
 } from "react-native";
 import CountryPicker, {
   CountryModalProvider,
-} from "react-native-country-picker-modal/src";
-import { DARK_THEME } from "react-native-country-picker-modal/src";
-import {
-  CountryCode,
-  Country,
-} from "react-native-country-picker-modal/src/types";
+} from "react-native-country-picker-modal";
+import { DARK_THEME } from "react-native-country-picker-modal";
+import { CountryCode, Country } from "react-native-country-picker-modal";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 const styles = StyleSheet.create({
@@ -94,21 +91,21 @@ export function PhoneInput({
     region: "Americas",
     subregion: "North America",
   });
-  const [withCountryNameButton] = useState<boolean>(false);
-  const [withCurrencyButton] = useState<boolean>(false);
-  const [withFlagButton] = useState<boolean>(true);
-  const [withCallingCodeButton] = useState<boolean>(true);
-  const [withFlag] = useState<boolean>(true);
-  const [withEmoji] = useState<boolean>(false);
-  const [withFilter] = useState<boolean>(true);
-  const [withAlphaFilter] = useState<boolean>(false);
-  const [withCallingCode] = useState<boolean>(true);
-  const [withCurrency] = useState<boolean>(false);
-  const [withModal] = useState<boolean>(true);
-  const [visible, setVisible] = useState<boolean>(false);
-  const [dark] = useState<boolean>(true);
-  const [fontScaling] = useState<boolean>(true);
-  const [disableNativeModal] = useState<boolean>(false);
+  const [withCountryNameButton] = useState(false);
+  const [withCurrencyButton] = useState(false);
+  const [withFlagButton] = useState(true);
+  const [withCallingCodeButton] = useState(true);
+  const [withFlag] = useState(true);
+  const [withEmoji] = useState(false);
+  const [withFilter] = useState(true);
+  const [withAlphaFilter] = useState(false);
+  const [withCallingCode] = useState(true);
+  const [withCurrency] = useState(false);
+  const [withModal] = useState(true);
+  const [visible, setVisible] = useState(false);
+  const [dark] = useState(false);
+  const [fontScaling] = useState(true);
+  const [disableNativeModal] = useState(false);
   const onSelect = (country: Country) => {
     setCountryCode(country.cca2);
     setCountry(country);
@@ -125,17 +122,25 @@ export function PhoneInput({
         <ScrollView>
           {label ? <Text style={styles.label}>{label}</Text> : null}
 
-          {/*country !== null && (
-            <Text style={styles.data}>{JSON.stringify(country, null, 0)}</Text>
-          )*/}
-
           <View style={styles.wholeview}>
             <TouchableOpacity style={styles.buttonview} onPress={switchVisible}>
               <View
                 style={{ backgroundColor: "none", padding: 0, marginBottom: 5 }}
               >
                 <CountryPicker
-                  theme={dark ? DARK_THEME : {}}
+                  theme={
+                    dark
+                      ? DARK_THEME
+                      : {
+                          primaryColor: "blue",
+                          primaryColorVariant: "#090816",
+                          backgroundColor: "#090816",
+                          onBackgroundTextColor: "#F6F5FF",
+                          fontSize: 14,
+                          filterPlaceholderTextColor: "#4B4E6E",
+                          activeOpacity: 0.7,
+                        }
+                  }
                   {...{
                     allowFontScaling: fontScaling,
                     countryCode,

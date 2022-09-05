@@ -46,7 +46,7 @@ export function SendMagicSmsButton({
       <Button
         label="Send Magic SMS"
         LeftIcon={SMS}
-        flavor={disabled ? "gray" : "blue"}
+        flavor="blue"
         disabled={disabled}
         style={{
           marginVertical: 20,
