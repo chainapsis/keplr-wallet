@@ -13,12 +13,13 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo } from "react";
-import { View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getBiometricsKeyPair } from "../../../biometrics";
 import { Button, IconButton } from "../../../button";
+import { Loader } from "../../../loader";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
@@ -117,10 +118,13 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
 
   if (encodeObjects.length === 0) return null;
 
+  const [loading, setLoading] = useState(false);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <SignatureModal {...signatureModalProps} />
       <Background />
+
       <View
         style={{
           flex: 1,
@@ -146,42 +150,60 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
             />
           </IconButton>
         </View>
+
+        {loading ? <Loader loadingText="Preparing Wallet..." /> : null}
+
         <View>
           <Button
             flavor="green"
             label="Prepare Multisig Wallet"
+            disabled={loading}
             onPress={async () => {
-              const rcp = "https://rpc.uni.junonetwork.io/";
-              const { publicKey, privateKey } = await getBiometricsKeyPair();
-              const wallet = await Secp256k1Wallet.fromKey(
-                new Uint8Array(Buffer.from(privateKey, "base64")),
-                "juno"
-              );
-              const biometricsAddress = pubkeyToAddress(
-                {
-                  type: pubkeyType.secp256k1,
-                  value: publicKey,
-                },
-                "juno"
-              );
-              const client = await SigningStargateClient.connectWithSigner(
-                rcp,
-                wallet
-              );
+              setLoading(true);
 
-              const fee = {
-                amount: coins(6000, "ujunox"),
-                gas: "200000",
-              };
+              try {
+                const rcp = "https://rpc.uni.junonetwork.io/";
 
-              const result = await client.sendTokens(
-                biometricsAddress,
-                multisig.multisig.address,
-                coins(10000, "ujunox"),
-                fee,
-                ""
-              );
-              console.log({ result });
+                const { publicKey, privateKey } = await getBiometricsKeyPair();
+
+                const wallet = await Secp256k1Wallet.fromKey(
+                  new Uint8Array(Buffer.from(privateKey, "base64")),
+                  "juno"
+                );
+
+                const biometricsAddress = pubkeyToAddress(
+                  {
+                    type: pubkeyType.secp256k1,
+                    value: publicKey,
+                  },
+                  "juno"
+                );
+
+                const client = await SigningStargateClient.connectWithSigner(
+                  rcp,
+                  wallet,
+                  { prefix: "juno" }
+                );
+
+                const fee = {
+                  amount: coins(6000, "ujunox"),
+                  gas: "200000",
+                };
+
+                const result = await client.sendTokens(
+                  biometricsAddress,
+                  multisig.multisig.address,
+                  coins(10000, "ujunox"),
+                  fee,
+                  ""
+                );
+                console.log({ result });
+                setLoading(false);
+              } catch (e) {
+                setLoading(false);
+                console.log(e);
+                Alert.alert("Error PrepareWallet", e.message);
+              }
             }}
           />
           <Button
@@ -190,8 +212,13 @@ export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
             style={{
               marginVertical: 20,
             }}
+            disabled={loading}
             onPress={() => {
-              openSignatureModal();
+              try {
+                openSignatureModal();
+              } catch (e) {
+                Alert.alert("Error Multisig", e.message);
+              }
             }}
           />
         </View>
