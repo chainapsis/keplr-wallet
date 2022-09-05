@@ -9,8 +9,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton } from "../../../button";
+import { PhoneInput } from "../../../phone-input";
 import { useStore } from "../../../stores";
-import { TextInput } from "../../../text-input";
 import { sendPublicKeyTextMessage } from "../../../text-message";
 import { Background } from "../../components/background";
 import {
@@ -56,7 +56,101 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
     securityAnswer,
     setSecurityAnswer,
   } = useSecurityQuestionInput();
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("");
+  const [phoneNumberWithoutCountryCode, setPhoneNumberWithoutCountryCode] =
+    useState("");
+  const [phoneNumber, setPhoneNumber] = useState(
+    phoneCountryCode + phoneNumberWithoutCountryCode
+  );
+  const [magicButtonDisabled, setMagicButtonDisabled] = useState(true); // Magic Button disabled by default
+  const [magicButtonDisabledDoubleclick, setMagicButtonDisabledDoubleclick] =
+    useState(false); // Magic Button disabled on button-click to prevent double-click
+
+  const minInputCharsSecurityAnswer = 3;
+  const minInputCharsPhoneNumber = 6;
+
+  useEffect(() => {
+    if (
+      securityAnswer.length >= minInputCharsSecurityAnswer &&
+      phoneNumber.length >= minInputCharsPhoneNumber
+    ) {
+      setMagicButtonDisabled(false); // Enable Magic Button if checks are okay
+    } else {
+      setMagicButtonDisabled(true);
+    }
+  }, [
+    magicButtonDisabled,
+    setMagicButtonDisabled,
+    securityAnswer,
+    phoneNumber,
+  ]);
+
+  const handleSecurityAnswer = () => {
+    if (!securityAnswer) {
+      Alert.alert(
+        "Security answer missing",
+        `Please enter your security answer.`
+      );
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    }
+
+    if (
+      // Check length
+      securityAnswer.length < minInputCharsSecurityAnswer
+    ) {
+      Alert.alert(
+        "Security answer too short",
+        `Your security answer needs to have at least ${minInputCharsSecurityAnswer} characters.`
+      );
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    }
+
+    if (
+      // Check for whitespaces in beginning and end of string
+      securityAnswer.startsWith(" ") ||
+      securityAnswer.endsWith(" ")
+    ) {
+      Alert.alert(
+        "Security answer error",
+        `Please remove the whitespaces in the beginning and end of your security answer.`
+      );
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handlePhoneNumber = () => {
+    if (!phoneNumberWithoutCountryCode || !phoneCountryCode || !phoneNumber) {
+      Alert.alert("Phone number missing", `Please enter a valid phone number.`);
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    }
+
+    // Check if phoneNumber has digits only
+    const onlyDigitsInPhoneNumber = /^[0-9]+$/.test(
+      phoneNumberWithoutCountryCode
+    );
+    if (!onlyDigitsInPhoneNumber) {
+      Alert.alert(
+        "Phone number error",
+        `Please enter a valid phone number (international format).`
+      );
+      setMagicButtonDisabledDoubleclick(false);
+      return false;
+    }
+
+    return true;
+  };
+
+  // Function passed down to child component "PhoneInput" as property
+  const handlePhoneNumberCountryCode = (countryCode) => {
+    setPhoneCountryCode(countryCode);
+    setPhoneNumber(phoneCountryCode + phoneNumberWithoutCountryCode);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -124,27 +218,59 @@ export const Onboarding2 = observer<Onboarding2Props>(({ navigation }) => {
               onSecurityAnswerChange={setSecurityAnswer}
             />
 
-            <TextInput
+            <PhoneInput
               label="Phone number"
               keyboardType="phone-pad"
               textContentType="telephoneNumber"
               placeholder="Type your phone number here"
               style={{ marginTop: 25 }}
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              value={phoneNumberWithoutCountryCode}
+              onChangeText={(e) => {
+                setPhoneNumberWithoutCountryCode(e);
+                setPhoneNumber(
+                  phoneCountryCode + phoneNumberWithoutCountryCode
+                );
+              }}
+              handlePhoneNumberCountryCode={handlePhoneNumberCountryCode}
             />
           </View>
 
           <SendMagicSmsButton
             description="Now send your encrypted answer to activate your messaging key."
             onPress={async () => {
-              await sendPublicKeyTextMessage({ phoneNumber, securityAnswer });
-              navigation.navigate("onboarding3", {
-                phoneNumber,
-                securityQuestion,
-                securityAnswer,
-              });
+              setMagicButtonDisabledDoubleclick(true);
+
+              const checkSecurityAnswer = await handleSecurityAnswer();
+              const checkPhoneNumber = await handlePhoneNumber();
+
+              if (checkSecurityAnswer && checkPhoneNumber) {
+                try {
+                  await sendPublicKeyTextMessage({
+                    phoneNumber,
+                    securityAnswer,
+                  });
+
+                  navigation.navigate("onboarding3", {
+                    phoneNumber,
+                    securityQuestion,
+                    securityAnswer,
+                  });
+
+                  setMagicButtonDisabledDoubleclick(false);
+                } catch (e) {
+                  setMagicButtonDisabledDoubleclick(false);
+                  console.error(e);
+                  Alert.alert("Sending SMS failed.", e.message);
+                }
+              } else {
+                setMagicButtonDisabledDoubleclick(false);
+              }
             }}
+            disabled={
+              magicButtonDisabledDoubleclick
+                ? magicButtonDisabledDoubleclick
+                : magicButtonDisabled
+            }
           />
         </View>
       </KeyboardAwareScrollView>

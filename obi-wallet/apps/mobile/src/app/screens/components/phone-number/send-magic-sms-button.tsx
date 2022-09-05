@@ -8,12 +8,15 @@ import SMS from "./assets/sms.svg";
 
 export interface SendMagicSmsButtonProps {
   description?: string;
+  disabled?: boolean;
   onPress: () => void;
 }
 
 export function SendMagicSmsButton({
   description,
+
   onPress,
+  disabled,
 }: SendMagicSmsButtonProps) {
   return (
     <View>
@@ -44,6 +47,7 @@ export function SendMagicSmsButton({
         label="Send Magic SMS"
         LeftIcon={SMS}
         flavor="blue"
+        disabled={disabled}
         style={{
           marginVertical: 20,
         }}

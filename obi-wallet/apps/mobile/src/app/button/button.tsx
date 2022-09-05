@@ -35,6 +35,14 @@ const flavors = {
       backgroundColor: "#8877EA",
     },
   },
+  gray: {
+    text: {
+      color: "#00000082",
+    },
+    button: {
+      backgroundColor: "#949494cc",
+    },
+  },
 };
 
 const baseStyles = StyleSheet.create({
@@ -62,6 +70,7 @@ export interface ButtonProps
   extends Omit<TouchableWithoutFeedbackProps, "children"> {
   flavor: keyof typeof flavors;
   label: string;
+  disabled?: boolean;
   LeftIcon?: FC<SvgProps>;
   RightIcon?: FC<SvgProps>;
 }
@@ -69,11 +78,12 @@ export interface ButtonProps
 export function Button({
   flavor,
   label,
+  disabled,
   LeftIcon,
   RightIcon,
   ...props
 }: ButtonProps) {
-  const flavorStyles = flavors[flavor];
+  const flavorStyles = flavors[disabled ? "gray" : flavor];
   const children = (
     <View style={[baseStyles.button, flavorStyles.button]}>
       {LeftIcon ? (
@@ -89,7 +99,7 @@ export function Button({
     style: [
       baseStyles.button,
       flavorStyles.button,
-      props.disabled ? baseStyles.disabledButton : undefined,
+      disabled ? baseStyles.disabledButton : undefined,
       props.style,
     ],
   };

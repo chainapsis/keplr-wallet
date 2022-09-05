@@ -2,8 +2,8 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
-import { View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../button";
@@ -29,6 +29,28 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
 
   const { multisigStore } = useStore();
   const [key, setKey] = useState("");
+
+  const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
+  const [verifyButtonDisabledDoubleclick, setVerifyButtonDisabledDoubleclick] =
+    useState(false); // Magic Button disable on button-click
+
+
+  const minInputCharsSMSCode = 8;
+
+  useEffect(() => {
+    if (
+      key.length >= minInputCharsSMSCode
+    ) {
+      setVerifyButtonDisabled(false); // Enable Magic Button if checks are okay
+    } else {
+      setVerifyButtonDisabled(true);
+      setVerifyButtonDisabledDoubleclick(false);
+    }
+  }, [
+    verifyButtonDisabled,
+    setVerifyButtonDisabled,
+    key,
+  ]);
 
   return (
     <KeyboardAvoidingView
@@ -87,7 +109,7 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
               </View>
             </View>
             <TextInput
-              placeholder="nuvicasonu"
+              placeholder="8-Digits SMS-Code"
               textContentType="oneTimeCode"
               keyboardType="number-pad"
               style={{ marginTop: 25 }}
@@ -108,6 +130,7 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
               <InlineButton
                 label="Resend"
                 onPress={async () => {
+                   setKey('')
                   await sendPublicKeyTextMessage({
                     phoneNumber: params.phoneNumber,
                     securityAnswer: params.securityAnswer,
@@ -119,16 +142,32 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
 
           <VerifyAndProceedButton
             onPress={async () => {
-              const publicKey = await parsePublicKeyTextMessageResponse(key);
-              if (publicKey) {
-                multisigStore.setPhoneNumberKey({
-                  publicKey,
-                  phoneNumber: params.phoneNumber,
-                  securityQuestion: params.securityQuestion,
-                });
-                navigation.navigate("onboarding4");
+              try {
+                setVerifyButtonDisabledDoubleclick(true);
+                const publicKey = await parsePublicKeyTextMessageResponse(key);
+                if (publicKey) {
+                  multisigStore.setPhoneNumberKey({
+                    publicKey,
+                    phoneNumber: params.phoneNumber,
+                    securityQuestion: params.securityQuestion,
+                  });
+                  setVerifyButtonDisabledDoubleclick(false);
+                  navigation.navigate("onboarding4");
+                }
+                else {
+                  setVerifyButtonDisabledDoubleclick(false);
+                }
+              } catch (e) {
+                setVerifyButtonDisabledDoubleclick(false);
+                console.error(e);
+                Alert.alert("Error VerifyAndProceedButton (2)", e.message);
               }
             }}
+            disabled={
+              verifyButtonDisabledDoubleclick
+                ? verifyButtonDisabledDoubleclick
+                : verifyButtonDisabled
+            }
           />
         </View>
       </SafeAreaView>
