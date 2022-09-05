@@ -99,6 +99,10 @@ import {
   TGRADE_RPC_CONFIG,
   TGRADE_REST_ENDPOINT,
   TGRADE_REST_CONFIG,
+  STRIDE_RPC_ENDPOINT,
+  STRIDE_RPC_CONFIG,
+  STRIDE_REST_ENDPOINT,
+  STRIDE_REST_CONFIG,
   EVMOS_RPC_ENDPOINT,
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
@@ -1834,6 +1838,51 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.075,
     },
     features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
+  },
+  {
+    rpc: STRIDE_RPC_ENDPOINT,
+    rpcConfig: STRIDE_RPC_CONFIG,
+    rest: STRIDE_REST_ENDPOINT,
+    restConfig: STRIDE_REST_CONFIG,
+    chainId: "stride-1",
+    chainName: "Stride",
+    stakeCurrency: {
+      coinDenom: "STRD",
+      coinMinimalDenom: "ustrd",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/stride"
+        : "http://localhost:8080/chains/stride",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/stride"
+        : "http://localhost:8080/chains/stride",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stride"),
+    currencies: [
+      {
+        coinDenom: "STRD",
+        coinMinimalDenom: "ustrd",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STRD",
+        coinMinimalDenom: "ustrd",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0.025,
+      high: 0.04,
+    },
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: EVMOS_RPC_ENDPOINT,
