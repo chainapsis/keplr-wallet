@@ -8,6 +8,7 @@ import styleAsset from "./asset.module.scss";
 import { TxButtonView } from "./tx-button";
 import walletIcon from "../../public/assets/icon/wallet.png";
 import buyIcon from "../../public/assets/icon/buy.png";
+import { DepositView } from "./deposit";
 
 export const ProgressBar = ({
   width,
@@ -16,24 +17,32 @@ export const ProgressBar = ({
   width: number;
   data: number[];
 }) => {
-  const [value, setValue] = useState(0);
+  const [values, setValues] = useState([0, 0]);
 
   useEffect(() => {
-    const total = data[0] + data[1];
-    const percentage = data[0] / total;
-    setValue(percentage * width);
-  }, [width, data[0], data[1]]);
+    const total = data[0] + data[1] + data[2];
+    const percentageAvailable = data[0] / total;
+    const percentageStake = data[1] / total;
+    setValues([percentageAvailable * width, percentageStake * width]);
+  }, [width, data[0], data[1], data[2]]);
 
   return (
     <div>
       <div className={styleAsset.progressDiv} style={{ width }}>
-        <div style={{ width: `${value}px` }} className={styleAsset.progress} />
+        <div
+          style={{ width: `${values[0]}px` }}
+          className={styleAsset.progressAvailable}
+        />
+        <div
+          style={{ width: `${values[0] + values[1]}px` }}
+          className={styleAsset.progressStake}
+        />
       </div>
     </div>
   );
 };
 
-const EmptyState: FunctionComponent = () => {
+const EmptyState = ({ denom, chainId }: { denom: string; chainId: string }) => {
   return (
     <div className={styleAsset.emptyState}>
       <h1 className={styleAsset.title}>No funds added</h1>
@@ -41,9 +50,19 @@ const EmptyState: FunctionComponent = () => {
       <p className={styleAsset.desc}>
         That’s okay, you can deposit tokens to your address or buy some.
       </p>
-      <button>
-        <img src={buyIcon} alt="buy tokens" /> Buy Tokens
-      </button>
+      <button>Deposit {denom}</button>
+      {chainId == "fetchhub-4" && (
+        <a
+          href={"https://indacoin.io/buy-fetch.ai-with-card"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styleAsset.buyButton}
+        >
+          <button>
+            <img src={buyIcon} alt="buy tokens" /> Buy Tokens
+          </button>
+        </a>
+      )}
     </div>
   );
 };
@@ -75,12 +94,22 @@ export const AssetView: FunctionComponent = observer(() => {
     .getQueryBech32Address(accountInfo.bech32Address)
     .total.upperCase(true);
 
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
+
+  const stakableReward = rewards.stakableReward;
+
   const stakedSum = delegated.add(unbonding);
 
-  const total = stakable.add(stakedSum);
+  const total = stakable.add(stakedSum).add(stakableReward);
 
   const stakablePrice = priceStore.calculatePrice(stakable, fiatCurrency);
   const stakedSumPrice = priceStore.calculatePrice(stakedSum, fiatCurrency);
+  const stakableRewardPrice = priceStore.calculatePrice(
+    stakableReward,
+    fiatCurrency
+  );
 
   const totalPrice = priceStore.calculatePrice(total, fiatCurrency);
 
@@ -93,6 +122,9 @@ export const AssetView: FunctionComponent = observer(() => {
     stakedSumPrice
       ? parseFloat(stakedSumPrice.toDec().toString())
       : parseFloat(stakedSum.toDec().toString()),
+    stakableRewardPrice
+      ? parseFloat(stakableRewardPrice.toDec().toString())
+      : parseFloat(stakableReward.toDec().toString()),
   ];
 
   const hasBalance = totalPrice
@@ -100,7 +132,12 @@ export const AssetView: FunctionComponent = observer(() => {
     : !total.toDec().isZero();
 
   if (!hasBalance) {
-    return <EmptyState />;
+    return (
+      <EmptyState
+        denom={chainStore.current.stakeCurrency.coinDenom}
+        chainId={chainStore.current.chainId}
+      />
+    );
   }
 
   return (
@@ -174,9 +211,25 @@ export const AssetView: FunctionComponent = observer(() => {
               {stakedSum.shrink(true).maxDecimals(6).toString()}
             </div>
           </div>
+          <div className={styleAsset.legend}>
+            <div className={styleAsset.label} style={{ color: "#D43BF6" }}>
+              <FormattedMessage id="main.account.chart.reward-balance" />
+            </div>
+            <div style={{ minWidth: "16px" }} />
+            <div
+              className={styleAsset.value}
+              style={{
+                color: "#525f7f",
+              }}
+            >
+              {stakableReward.shrink(true).maxDecimals(6).toString()}
+            </div>
+          </div>
         </div>
       </div>
       <TxButtonView />
+      <hr className={styleAsset.hr} />
+      <DepositView />
     </React.Fragment>
   );
 });
