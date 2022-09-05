@@ -80,9 +80,15 @@ export function PhoneInput({
   inputStyle?: StyleProp<TextStyle>;
   handlePhoneNumberCountryCode?: (param: string) => void;
 }) {
+  const [visible, setVisible] = useState(false);
+  const switchVisible = () => setVisible(!visible);
+  const onSelect = (country: Country) => {
+    setCountryCode(country.cca2);
+    setCountry(country);
+  };
+  // Default Selection
   const [countryCode, setCountryCode] = useState<CountryCode | undefined>("US");
   const [country, setCountry] = useState<Country>({
-    // Default Selection
     callingCode: ["1"],
     cca2: "US",
     currency: ["USD"],
@@ -91,26 +97,20 @@ export function PhoneInput({
     region: "Americas",
     subregion: "North America",
   });
-  const [withCountryNameButton] = useState(false);
-  const [withCurrencyButton] = useState(false);
-  const [withFlagButton] = useState(true);
-  const [withCallingCodeButton] = useState(true);
-  const [withFlag] = useState(true);
-  const [withEmoji] = useState(false);
-  const [withFilter] = useState(true);
-  const [withAlphaFilter] = useState(false);
-  const [withCallingCode] = useState(true);
-  const [withCurrency] = useState(false);
-  const [withModal] = useState(true);
-  const [visible, setVisible] = useState(false);
-  const [dark] = useState(false);
-  const [fontScaling] = useState(true);
-  const [disableNativeModal] = useState(false);
-  const onSelect = (country: Country) => {
-    setCountryCode(country.cca2);
-    setCountry(country);
-  };
-  const switchVisible = () => setVisible(!visible);
+  const withCountryNameButton = false;
+  const withCurrencyButton = false;
+  const withFlagButton = true;
+  const withCallingCodeButton = true;
+  const withFlag = true;
+  const withEmoji = false;
+  const withFilter = true;
+  const withAlphaFilter = false;
+  const withCallingCode = true;
+  const withCurrency = false;
+  const withModal = true;
+  const dark = false;
+  const fontScaling = true;
+  const disableNativeModal = false;
 
   useEffect(() => {
     handlePhoneNumberCountryCode("+" + country.callingCode); // Pass country.callingcode back to parent component "onboarding2"
