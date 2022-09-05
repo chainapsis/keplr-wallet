@@ -12,8 +12,9 @@ import {
   LedgerService,
   MultiKeyStoreInfoWithSelected,
   PermissionService,
-  ScryptParams
+  ScryptParams,
 } from "@keplr-wallet/background";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { BACKGROUND_PORT, Env } from "@keplr-wallet/router";
 import { BIP44, EthSignType, KeplrSignOptions } from "@keplr-wallet/types";
@@ -25,11 +26,10 @@ import {
   PrivilegedOrigins,
   produceEnv,
   RouterBackground,
-  SerializedData
+  SerializedData,
 } from "@obi-wallet/common";
 import { Buffer } from "buffer";
 import scrypt from "scrypt-js";
-import { Bech32Address } from "@keplr-wallet/cosmos";
 
 class KeyRingService extends AbstractKeyRingService {
   protected kvStore: KVStore;
@@ -129,7 +129,7 @@ class KeyRingService extends AbstractKeyRingService {
 
   async enable(env: Env): Promise<KeyRingStatus> {
     // TODO: do something with multisig store?
-    return KeyRingStatus.UNLOCKED
+    return KeyRingStatus.UNLOCKED;
   }
 
   exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
@@ -141,19 +141,19 @@ class KeyRingService extends AbstractKeyRingService {
     const data = await this.kvStore.get<unknown | undefined>("multisig");
 
     if (!SerializedData.is(data)) {
-      throw new Error('Invalid data');
+      throw new Error("Invalid data");
     }
 
-    const proxyAddress = migrateSerializedProxyAddress(data.proxyAddress)
+    const proxyAddress = migrateSerializedProxyAddress(data.proxyAddress);
 
     return {
       // TODO:
       algo: "multisig",
       // TODO:
       pubKey: new Uint8Array(),
-      address: Bech32Address.fromBech32(proxyAddress.address, 'juno').address,
-      isNanoLedger: false
-    }
+      address: Bech32Address.fromBech32(proxyAddress.address, "juno").address,
+      isNanoLedger: false,
+    };
   }
 
   getKeyRingType(): string {

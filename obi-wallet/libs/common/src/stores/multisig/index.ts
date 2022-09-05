@@ -51,7 +51,7 @@ export enum MultisigState {
 
 export const CURRENT_CODE_ID = 2855;
 
-export * from './serialized-data'
+export * from "./serialized-data";
 
 export class MultisigStore {
   @observable

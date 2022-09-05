@@ -1,3 +1,4 @@
+import { APP_PORT } from "@keplr-wallet/router";
 import {
   DeferInitialQueryController,
   InteractionStore,
@@ -11,7 +12,6 @@ import { MessageRequesterInternal } from "../message-requester";
 import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
 import { MultisigStore } from "./multisig";
-import { APP_PORT } from "@keplr-wallet/router";
 
 export class RootStore {
   public readonly appsStore: AppsStore;
