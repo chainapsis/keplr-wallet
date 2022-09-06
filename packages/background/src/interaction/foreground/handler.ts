@@ -12,7 +12,6 @@ export const getHandler: (service: InteractionForegroundService) => Handler = (
   service: InteractionForegroundService
 ) => {
   return (env: Env, msg: Message<unknown>) => {
-    console.log("interaction foreground handler", msg);
     switch (msg.constructor) {
       case PushInteractionDataMsg:
         return handlePushInteractionDataMsg(service)(
@@ -31,7 +30,6 @@ const handlePushInteractionDataMsg: (
   service: InteractionForegroundService
 ) => InternalHandler<PushInteractionDataMsg> = (service) => {
   return (_, msg) => {
-    console.log('push interaction data', msg.data)
     return service.pushData(msg.data);
   };
 };

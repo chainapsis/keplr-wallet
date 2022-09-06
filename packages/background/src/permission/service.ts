@@ -75,7 +75,6 @@ export class PermissionService {
       }
     }
 
-    console.log({ ungrantedChainIds });
     if (ungrantedChainIds.length > 0) {
       await this.grantBasicAccessPermission(env, ungrantedChainIds, [origin]);
     }
@@ -100,8 +99,6 @@ export class PermissionService {
       origins,
     };
 
-    console.log('wait approve')
-
     await this.interactionService.waitApprove(
       env,
       url,
@@ -109,11 +106,7 @@ export class PermissionService {
       permissionData
     );
 
-    console.log('done approve, adding permission')
-
     await this.addPermission(chainIds, type, origins);
-
-    console.log('added permission')
   }
 
   async grantBasicAccessPermission(
@@ -126,8 +119,6 @@ export class PermissionService {
       await this.chainsService.getChainInfo(chainId);
     }
 
-    console.log('granting basic access permission');
-
     await this.grantPermission(
       env,
       "/access",
@@ -135,8 +126,6 @@ export class PermissionService {
       getBasicAccessPermissionType(),
       origins
     );
-
-    console.log('granted basic access permission');
   }
 
   checkPermission(env: Env, chainId: string, type: string, origin: string) {
@@ -173,9 +162,8 @@ export class PermissionService {
       return true;
     }
 
-    const permissionsInChain = this.permissionMap[
-      ChainIdHelper.parse(chainId).identifier
-    ];
+    const permissionsInChain =
+      this.permissionMap[ChainIdHelper.parse(chainId).identifier];
     if (!permissionsInChain) {
       return false;
     }
@@ -187,9 +175,8 @@ export class PermissionService {
   getPermissionOrigins(chainId: string, type: string): string[] {
     const origins = [];
 
-    const permissionsInChain = this.permissionMap[
-      ChainIdHelper.parse(chainId).identifier
-    ];
+    const permissionsInChain =
+      this.permissionMap[ChainIdHelper.parse(chainId).identifier];
     if (!permissionsInChain) {
       return [];
     }
@@ -229,14 +216,12 @@ export class PermissionService {
 
   async addPermission(chainIds: string[], type: string, origins: string[]) {
     for (const chainId of chainIds) {
-      let permissionsInChain = this.permissionMap[
-        ChainIdHelper.parse(chainId).identifier
-      ];
+      let permissionsInChain =
+        this.permissionMap[ChainIdHelper.parse(chainId).identifier];
       if (!permissionsInChain) {
         permissionsInChain = {};
-        this.permissionMap[
-          ChainIdHelper.parse(chainId).identifier
-        ] = permissionsInChain;
+        this.permissionMap[ChainIdHelper.parse(chainId).identifier] =
+          permissionsInChain;
       }
 
       let innerMap = permissionsInChain[type];
@@ -254,9 +239,8 @@ export class PermissionService {
   }
 
   async removePermission(chainId: string, type: string, origins: string[]) {
-    const permissionsInChain = this.permissionMap[
-      ChainIdHelper.parse(chainId).identifier
-    ];
+    const permissionsInChain =
+      this.permissionMap[ChainIdHelper.parse(chainId).identifier];
     if (!permissionsInChain) {
       return;
     }

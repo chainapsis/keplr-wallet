@@ -1,11 +1,10 @@
-import { observer } from "mobx-react-lite/src/observer";
 import { useState } from "react";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ConnectedWebView } from "../components/connected-web-view";
 
-export const NFTs = observer(() => {
+export function NFTs() {
   const safeArea = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
 
@@ -44,4 +43,4 @@ export const NFTs = observer(() => {
       )}
     </View>
   );
-});
+}

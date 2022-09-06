@@ -48,8 +48,6 @@ export class InteractionService {
     data: unknown,
     options?: FnRequestInteractionOptions
   ): Promise<unknown> {
-    console.log("Wait Approve", type);
-
     if (!type) {
       throw new KeplrError("interaction", 101, "Type should not be empty");
     }
@@ -62,10 +60,8 @@ export class InteractionService {
     );
 
     const msg = new PushInteractionDataMsg(interactionWaitingData);
-    console.log("foobar");
 
     return await this.wait(msg.data.id, () => {
-      console.log("waaaaiting");
       env.requestInteraction(url, msg, options);
     });
   }
