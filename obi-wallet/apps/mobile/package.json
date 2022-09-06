@@ -46,6 +46,7 @@
     "react-native-device-crypto": "*",
     "react-native-dotenv": "*",
     "react-native-dropdown-picker": "*",
+    "react-native-fs": "*",
     "react-native-gesture-handler": "*",
     "react-native-keyboard-aware-scroll-view": "*",
     "react-native-keychain": "*",
@@ -56,6 +57,7 @@
     "react-native-screens": "*",
     "react-native-svg": "*",
     "react-native-svg-uri": "*",
+    "react-native-url-polyfill": "*",
     "react-native-webview": "*",
     "rooks": "*",
     "secp256k1": "*"

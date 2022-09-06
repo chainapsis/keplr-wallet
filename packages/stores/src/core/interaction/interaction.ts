@@ -136,9 +136,9 @@ export class InteractionStore implements InteractionForegroundHandler {
         return data.id === id;
       });
       if (find) {
-        (this.datas.get(
-          type
-        ) as IObservableArray<InteractionWaitingData>).remove(find);
+        (
+          this.datas.get(type) as IObservableArray<InteractionWaitingData>
+        ).remove(find);
       }
     }
   }

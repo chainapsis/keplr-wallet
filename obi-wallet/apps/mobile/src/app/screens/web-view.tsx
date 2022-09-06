@@ -10,10 +10,10 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { WebView } from "react-native-webview";
 
 import { StackParamList } from "../stack";
 import { useStore } from "../stores";
+import { ConnectedWebView } from "./components/connected-web-view";
 
 export type WebViewScreenProps = NativeStackScreenProps<
   StackParamList,
@@ -126,8 +126,8 @@ export const WebViewScreen = observer<WebViewScreenProps>(
             </TouchableOpacity>
           </View>
         </View>
-        <WebView
-          source={{ uri: currentUrl }}
+        <ConnectedWebView
+          url={currentUrl}
           onLoadEnd={() => {
             setLoaded(true);
           }}
