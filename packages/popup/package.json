@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/popup",
-  "version": "0.10.23-rc.0",
+  "version": "0.10.23",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
