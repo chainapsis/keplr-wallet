@@ -161,7 +161,14 @@ const BalanceAndActions = observer(() => {
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
   return (
     <View style={{ justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ color: "#787B9C", fontSize: 11, fontWeight: "500" }}>
+      <Text
+        style={{
+          color: "#787B9C",
+          fontSize: 11,
+          fontWeight: "600",
+          marginBottom: 5,
+        }}
+      >
         Balance
       </Text>
       <Text style={{ color: "#F6F5FF", fontSize: 20, fontWeight: "500" }}>
@@ -193,9 +200,10 @@ const BalanceAndActions = observer(() => {
           <Text
             style={{
               color: "#F6F5FF",
-              fontSize: 9,
-              fontWeight: "500",
+              fontSize: 11,
+              fontWeight: "700",
               marginTop: 10,
+              letterSpacing: 0.5,
             }}
           >
             SEND
@@ -218,9 +226,10 @@ const BalanceAndActions = observer(() => {
           <Text
             style={{
               color: "#F6F5FF",
-              fontSize: 9,
-              fontWeight: "500",
+              fontSize: 11,
+              fontWeight: "600",
               marginTop: 10,
+              letterSpacing: 0.5,
             }}
           >
             RECEIVE
@@ -267,8 +276,10 @@ const AssetsList = observer(() => {
     <View
       style={{
         flexGrow: 1,
+        flexDirection: "row",
+        justifyContent: "center",
         marginTop: 20,
-        backgroundColor: "#100F1E",
+        backgroundColor: "#100F1E", //////////////////////////////////
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingHorizontal: 16,
@@ -276,46 +287,59 @@ const AssetsList = observer(() => {
     >
       <View
         style={{
-          height: 20,
-          width: "100%",
-          marginTop: 30,
-          flexDirection: "row",
-          justifyContent: "space-between",
+          width: "97%",
+          //backgroundColor: "red", //////////////////////////////////////////
         }}
       >
-        <Text style={{ color: "#787B9C" }}>NAME</Text>
-        <View style={{ flexDirection: "row" }}>
-          <Text style={{ color: "#787B9C" }}>HOLDINGS</Text>
-          <IconButton
-            style={{ justifyContent: "center" }}
-            onPress={() => {
-              setSortAscending((value) => !value);
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faSortAsc}
-              style={{
-                color: sortAscending ? "#F6F5FF" : "#393853",
-                marginLeft: 5,
+        <View
+          style={{
+            height: 20,
+            width: "100%",
+            marginTop: 30,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            //backgroundColor: "pink" //////////////////////////////////////////
+          }}
+        >
+          <Text style={{ color: "#787B9C" }}>NAME</Text>
+          <View style={{ flexDirection: "row" }}>
+            <IconButton
+              style={{ justifyContent: "center" }}
+              onPress={() => {
+                setSortAscending((value) => !value);
               }}
-            />
-            <FontAwesomeIcon
-              icon={faSortDesc}
-              style={{
-                color: sortAscending ? "#393853" : "#F6F5FF",
-                marginLeft: 5,
-                marginTop: -15,
-              }}
-            />
-          </IconButton>
+            >
+              <FontAwesomeIcon
+                icon={faSortAsc}
+                style={{
+                  color: sortAscending ? "#F6F5FF" : "#393853",
+                  marginRight: 5,
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faSortDesc}
+                style={{
+                  color: sortAscending ? "#393853" : "#F6F5FF",
+                  marginRight: 5,
+                  marginTop: -15,
+                }}
+              />
+            </IconButton>
+            <Text style={{ color: "#787B9C" }}>HOLDINGS</Text>
+          </View>
         </View>
-      </View>
-      <View>
-        <FlatList
-          keyExtractor={(coin) => coin.denom}
-          data={balances}
-          renderItem={(props) => <AssetsListItem {...props} />}
-        />
+
+        <View>
+          <FlatList
+            keyExtractor={(coin) => coin.denom}
+            data={balances}
+            renderItem={(props) => <AssetsListItem {...props} />}
+            style={{
+              marginTop: 15,
+              //backgroundColor: "red", ///////////////////////////////////////////////
+            }}
+          />
+        </View>
       </View>
     </View>
   );
@@ -328,11 +352,12 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
     <View
       style={{
         height: 40,
-        width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 10,
+        marginHorizontal: 0,
+        //backgroundColor: "blue",  ////////////////////////////
       }}
     >
       {icon}
@@ -342,7 +367,8 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
           height: "100%",
           flexDirection: "row",
           justifyContent: "space-between",
-          paddingLeft: 5,
+          //paddingLeft: 0,
+          //backgroundColor: "green" //////////////////////////////////////////
         }}
       >
         <View>
