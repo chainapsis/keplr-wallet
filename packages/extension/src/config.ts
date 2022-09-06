@@ -99,6 +99,10 @@ import {
   TGRADE_RPC_CONFIG,
   TGRADE_REST_ENDPOINT,
   TGRADE_REST_CONFIG,
+  STRIDE_RPC_ENDPOINT,
+  STRIDE_RPC_CONFIG,
+  STRIDE_REST_ENDPOINT,
+  STRIDE_REST_CONFIG,
   EVMOS_RPC_ENDPOINT,
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
@@ -1327,6 +1331,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "BLD",
       coinMinimalDenom: "ubld",
       coinDecimals: 6,
+      coinGeckoId: "agoric",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1345,6 +1350,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "BLD",
         coinMinimalDenom: "ubld",
         coinDecimals: 6,
+        coinGeckoId: "agoric",
       },
       {
         coinDenom: "IST",
@@ -1582,6 +1588,84 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "tether",
       },
+      {
+        coinDenom: "WBTC",
+        coinMinimalDenom: "wbtc-satoshi",
+        coinDecimals: 8,
+        coinGeckoId: "wrapped-bitcoin",
+      },
+      {
+        coinDenom: "LINK",
+        coinMinimalDenom: "link-wei",
+        coinDecimals: 18,
+        coinGeckoId: "chainlink",
+      },
+      {
+        coinDenom: "AAVE",
+        coinMinimalDenom: "aave-wei",
+        coinDecimals: 18,
+        coinGeckoId: "aave",
+      },
+      {
+        coinDenom: "APE",
+        coinMinimalDenom: "ape-wei",
+        coinDecimals: 18,
+        coinGeckoId: "apecoin",
+      },
+      {
+        coinDenom: "AXS",
+        coinMinimalDenom: "axs-wei",
+        coinDecimals: 18,
+        coinGeckoId: "axie-infinity",
+      },
+      {
+        coinDenom: "MKR",
+        coinMinimalDenom: "mkr-wei",
+        coinDecimals: 18,
+        coinGeckoId: "maker",
+      },
+      {
+        coinDenom: "RAI",
+        coinMinimalDenom: "rai-wei",
+        coinDecimals: 18,
+        coinGeckoId: "rai",
+      },
+      {
+        coinDenom: "SHIB",
+        coinMinimalDenom: "shib-wei",
+        coinDecimals: 18,
+        coinGeckoId: "shiba-inu",
+      },
+      {
+        coinDenom: "stETH",
+        coinMinimalDenom: "steth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "staked-ether",
+      },
+      {
+        coinDenom: "UNI",
+        coinMinimalDenom: "uni-wei",
+        coinDecimals: 18,
+        coinGeckoId: "uniswap",
+      },
+      {
+        coinDenom: "XCN",
+        coinMinimalDenom: "xcn-wei",
+        coinDecimals: 18,
+        coinGeckoId: "chain-2",
+      },
+      {
+        coinDenom: "WGLMR",
+        coinMinimalDenom: "wglmr-wei",
+        coinDecimals: 18,
+        coinGeckoId: "wrapped-moonbeam",
+      },
+      {
+        coinDenom: "DOT",
+        coinMinimalDenom: "dot-planck",
+        coinDecimals: 10,
+        coinGeckoId: "polkadot",
+      },
     ],
     feeCurrencies: [
       {
@@ -1591,11 +1675,11 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0.05,
-      average: 0.075,
-      high: 0.1,
+      low: 0.007,
+      average: 0.007,
+      high: 0.01,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "axelar-evm-bridge"],
   },
   {
     rpc: SOMMELIER_RPC_ENDPOINT,
@@ -1756,6 +1840,51 @@ export const EmbedChainInfos: ChainInfo[] = [
       high: 0.075,
     },
     features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
+  },
+  {
+    rpc: STRIDE_RPC_ENDPOINT,
+    rpcConfig: STRIDE_RPC_CONFIG,
+    rest: STRIDE_REST_ENDPOINT,
+    restConfig: STRIDE_REST_CONFIG,
+    chainId: "stride-1",
+    chainName: "Stride",
+    stakeCurrency: {
+      coinDenom: "STRD",
+      coinMinimalDenom: "ustrd",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/stride"
+        : "http://localhost:8080/chains/stride",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/stride"
+        : "http://localhost:8080/chains/stride",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stride"),
+    currencies: [
+      {
+        coinDenom: "STRD",
+        coinMinimalDenom: "ustrd",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STRD",
+        coinMinimalDenom: "ustrd",
+        coinDecimals: 6,
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0,
+      high: 0.04,
+    },
+    features: ["ibc-transfer", "ibc-go"],
   },
   {
     rpc: EVMOS_RPC_ENDPOINT,

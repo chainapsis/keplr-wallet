@@ -89,6 +89,18 @@ const extensionConfig = (env, args) => {
       path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
       filename: "[name].bundle.js",
     },
+    optimization: {
+      splitChunks: {
+        chunks(chunk) {
+          return chunk.name === "popup";
+        },
+        cacheGroups: {
+          popup: {
+            maxSize: 3_000_000,
+          },
+        },
+      },
+    },
     resolve: commonResolve("src/public/assets"),
     module: {
       rules: [sassRule, tsRule, fileRule],

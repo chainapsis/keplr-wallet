@@ -34,6 +34,7 @@ import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import { Amplitude } from "@amplitude/react-native";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
+  AxelarEVMBridgeCurrencyRegistrar,
   GravityBridgeCurrencyRegsitrar,
   KeplrETCQueries,
 } from "@keplr-wallet/stores-etc";
@@ -59,6 +60,7 @@ export class RootStore {
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
   protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>;
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
@@ -298,6 +300,12 @@ export class RootStore {
       new AsyncKVStore("store_gravity_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore
+    );
+    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>(
+      new AsyncKVStore("store_axelar_evm_bridge_currency_registrar"),
+      this.chainStore,
+      this.queriesStore,
+      "ethereum"
     );
 
     router.listen(APP_PORT);

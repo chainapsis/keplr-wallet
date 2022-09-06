@@ -929,6 +929,84 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "tether",
       },
+      {
+        coinDenom: "WBTC",
+        coinMinimalDenom: "wbtc-satoshi",
+        coinDecimals: 8,
+        coinGeckoId: "wrapped-bitcoin",
+      },
+      {
+        coinDenom: "LINK",
+        coinMinimalDenom: "link-wei",
+        coinDecimals: 18,
+        coinGeckoId: "chainlink",
+      },
+      {
+        coinDenom: "AAVE",
+        coinMinimalDenom: "aave-wei",
+        coinDecimals: 18,
+        coinGeckoId: "aave",
+      },
+      {
+        coinDenom: "APE",
+        coinMinimalDenom: "ape-wei",
+        coinDecimals: 18,
+        coinGeckoId: "apecoin",
+      },
+      {
+        coinDenom: "AXS",
+        coinMinimalDenom: "axs-wei",
+        coinDecimals: 18,
+        coinGeckoId: "axie-infinity",
+      },
+      {
+        coinDenom: "MKR",
+        coinMinimalDenom: "mkr-wei",
+        coinDecimals: 18,
+        coinGeckoId: "maker",
+      },
+      {
+        coinDenom: "RAI",
+        coinMinimalDenom: "rai-wei",
+        coinDecimals: 18,
+        coinGeckoId: "rai",
+      },
+      {
+        coinDenom: "SHIB",
+        coinMinimalDenom: "shib-wei",
+        coinDecimals: 18,
+        coinGeckoId: "shiba-inu",
+      },
+      {
+        coinDenom: "stETH",
+        coinMinimalDenom: "steth-wei",
+        coinDecimals: 18,
+        coinGeckoId: "staked-ether",
+      },
+      {
+        coinDenom: "UNI",
+        coinMinimalDenom: "uni-wei",
+        coinDecimals: 18,
+        coinGeckoId: "uniswap",
+      },
+      {
+        coinDenom: "XCN",
+        coinMinimalDenom: "xcn-wei",
+        coinDecimals: 18,
+        coinGeckoId: "chain-2",
+      },
+      {
+        coinDenom: "WGLMR",
+        coinMinimalDenom: "wglmr-wei",
+        coinDecimals: 18,
+        coinGeckoId: "wrapped-moonbeam",
+      },
+      {
+        coinDenom: "DOT",
+        coinMinimalDenom: "dot-planck",
+        coinDecimals: 10,
+        coinGeckoId: "polkadot",
+      },
     ],
     feeCurrencies: [
       {
@@ -939,11 +1017,11 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0.05,
-      average: 0.075,
-      high: 0.1,
+      low: 0.007,
+      average: 0.007,
+      high: 0.01,
     },
-    features: ["ibc-transfer", "ibc-go"],
+    features: ["ibc-transfer", "ibc-go", "axelar-evm-bridge"],
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
   },
@@ -1032,6 +1110,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "BLD",
       coinMinimalDenom: "ubld",
       coinDecimals: 6,
+      coinGeckoId: "agoric",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
     },
     bip44: {
@@ -1043,6 +1122,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "BLD",
         coinMinimalDenom: "ubld",
         coinDecimals: 6,
+        coinGeckoId: "agoric",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
       },
       {

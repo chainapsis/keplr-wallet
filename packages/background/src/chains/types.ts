@@ -115,6 +115,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         "eth-address-gen",
         "eth-key-sign",
         "query:/cosmos/bank/v1beta1/spendable_balances",
+        "axelar-evm-bridge",
         "gno"
       )
     )

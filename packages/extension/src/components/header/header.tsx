@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import classnames from "classnames";
 
 import "./style";
@@ -9,16 +9,17 @@ export interface HeaderProps {
   right?: React.ReactNode;
 }
 
-export class Header extends React.Component<HeaderProps> {
-  render() {
-    const { fixed, left, right, children } = this.props;
-
-    return (
-      <div className={classnames(["header", { fixed }])}>
-        <div className="header-menu-left">{left}</div>
-        <div className="header-section">{children}</div>
-        <div className="header-menu-right">{right}</div>
-      </div>
-    );
-  }
-}
+export const Header: FunctionComponent<HeaderProps> = ({
+  fixed,
+  left,
+  right,
+  children,
+}) => {
+  return (
+    <div className={classnames(["header", { fixed }])}>
+      <div className="header-menu-left">{left}</div>
+      <div className="header-section">{children}</div>
+      <div className="header-menu-right">{right}</div>
+    </div>
+  );
+};

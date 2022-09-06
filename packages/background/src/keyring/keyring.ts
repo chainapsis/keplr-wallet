@@ -15,7 +15,6 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 import { Wallet } from "@ethersproject/wallet";
 import * as BytesUtils from "@ethersproject/bytes";
-import { ETH } from "@tharsis/address-converter";
 import { keccak256 } from "@ethersproject/keccak256";
 
 export enum KeyRingStatus {
@@ -646,12 +645,11 @@ export class KeyRing {
       if (useEthereumAddress) {
         // For Ethereum Key-Gen Only:
         const wallet = new Wallet(privKey.toBytes());
-        const ethereumAddress = ETH.decoder(wallet.address);
 
         return {
           algo: "ethsecp256k1",
           pubKey: pubKey.toBytes(),
-          address: ethereumAddress,
+          address: Buffer.from(wallet.address.replace("0x", ""), "hex"),
           isNanoLedger: false,
         };
       }
