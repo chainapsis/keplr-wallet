@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # react-native-ble-plx requires only one instance of BLEManager exists.
 # But, react-native-hw-transport-ble uses their instance without exporting that.
