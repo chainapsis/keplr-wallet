@@ -45,7 +45,6 @@ const getSVG = (number: number) => {
 export const KeysConfigScreen = observer(() => {
   const { multisigStore } = useStore();
   const currentAdmin = multisigStore.getCurrentAdmin("juno");
-
   const refBottomSheet = useRef<BottomSheet>();
   const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
 
@@ -87,8 +86,10 @@ export const KeysConfigScreen = observer(() => {
       title: "Phone Number Key",
     }),
     getKey({ id: "biometrics", title: "Biometrics Key" }),
+    getKey({ id: "socialKey", title: "Social Key" }),
     // getKey({ id: "cloud", title: "Cloud Key" }),
   ];
+
   const activatedKeys = data.filter((item) => item.activated).length;
 
   return (

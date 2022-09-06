@@ -28,9 +28,9 @@ import {
 } from "../../components/signature-modal";
 import { StackParamList } from "../stack";
 
-export type Onboarding5Props = NativeStackScreenProps<
+export type Onboarding6Props = NativeStackScreenProps<
   StackParamList,
-  "onboarding4"
+  "onboarding5"
 >;
 
 async function getBalances(address: string) {
@@ -39,7 +39,7 @@ async function getBalances(address: string) {
   return await client.getAllBalances(address);
 }
 
-export const Onboarding5 = observer<Onboarding5Props>(({ navigation }) => {
+export const Onboarding6 = observer<Onboarding6Props>(({ navigation }) => {
   const { multisigStore } = useStore();
   const multisig = multisigStore.getNextAdmin("juno");
 

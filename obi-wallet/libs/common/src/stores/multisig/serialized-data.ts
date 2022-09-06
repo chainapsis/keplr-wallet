@@ -18,8 +18,16 @@ export const SerializedPhoneNumberPayload = t.type({
   securityQuestion: t.string,
 });
 
+export const SerializedSocialKeyPayload = t.type({
+  publicKey: t.string,
+  socialKey: t.string,
+});
+
 export type SerializedPhoneNumberPayload = t.TypeOf<
   typeof SerializedPhoneNumberPayload
+>;
+export type SerializedSocialKeyPayload = t.TypeOf<
+  typeof SerializedSocialKeyPayload
 >;
 
 export const SerializedCloudPayload = t.type({});
@@ -30,6 +38,7 @@ export const SerializedMultisigPayload = t.type({
   biometrics: nullable(SerializedBiometricsPayload),
   phoneNumber: nullable(SerializedPhoneNumberPayload),
   cloud: nullable(SerializedCloudPayload),
+  socialKey: nullable(SerializedSocialKeyPayload),
 });
 
 export type SerializedMultisigPayload = t.TypeOf<

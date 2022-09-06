@@ -17,6 +17,7 @@ import {
   SerializedMultisigPayload,
   SerializedPhoneNumberPayload,
   SerializedProxyAddress,
+  SerializedSocialKeyPayload,
 } from "./serialized-data";
 
 export type MultisigThresholdPublicKey = MultisigThresholdPubkey;
@@ -25,6 +26,7 @@ const emptyMultisig: SerializedMultisigPayload = {
   biometrics: null,
   phoneNumber: null,
   cloud: null,
+  socialKey: null,
 };
 
 export type WithAddress<T> = T & { address: string };
@@ -35,6 +37,7 @@ export interface Multisig {
   }> | null;
   biometrics: WithAddress<SerializedBiometricsPayload> | null;
   phoneNumber: WithAddress<SerializedPhoneNumberPayload> | null;
+  socialKey: WithAddress<SerializedSocialKeyPayload> | null;
   // cloud: WithAddress<SerializedCloudPayload> | null;
   cloud: null;
   email: null;
@@ -144,6 +147,11 @@ export class MultisigStore {
     this.nextAdmin.biometrics = payload;
     void this.save();
   }
+  @action
+  public setSocialKeyPublicKey(payload: SerializedSocialKeyPayload) {
+    this.nextAdmin.socialKey = payload;
+    void this.save();
+  }
 
   @action
   public finishProxySetup(address: SerializedProxyAddress) {
@@ -184,6 +192,12 @@ export class MultisigStore {
         value: multisig.phoneNumber.publicKey,
       });
     }
+    if (multisig.socialKey) {
+      publicKeys.push({
+        type: pubkeyType.secp256k1,
+        value: multisig.socialKey.publicKey,
+      });
+    }
 
     if (publicKeys.length === 0) {
       return null;
@@ -197,7 +211,7 @@ export class MultisigStore {
     multisig: SerializedMultisigPayload,
     prefix: string
   ): Multisig {
-    const { biometrics, phoneNumber } = multisig;
+    const { biometrics, phoneNumber, socialKey } = multisig;
     const multisigThresholdPublicKey =
       this.createMultisigThresholdPublicKey(multisig);
 
@@ -213,6 +227,10 @@ export class MultisigStore {
       phoneNumber: phoneNumber && {
         address: this.getAddressOfPublicKey(phoneNumber.publicKey, prefix),
         ...phoneNumber,
+      },
+      socialKey: socialKey && {
+        address: this.getAddressOfPublicKey(socialKey.publicKey, prefix),
+        ...socialKey,
       },
       cloud: null,
       email: null,
