@@ -1017,9 +1017,9 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     gasPriceStep: {
-      low: 0.05,
-      average: 0.075,
-      high: 0.1,
+      low: 0.007,
+      average: 0.007,
+      high: 0.01,
     },
     features: ["ibc-transfer", "ibc-go", "axelar-evm-bridge"],
     chainSymbolImageUrl:
@@ -1110,6 +1110,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "BLD",
       coinMinimalDenom: "ubld",
       coinDecimals: 6,
+      coinGeckoId: "agoric",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
     },
     bip44: {
@@ -1121,6 +1122,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "BLD",
         coinMinimalDenom: "ubld",
         coinDecimals: 6,
+        coinGeckoId: "agoric",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
       },
       {
