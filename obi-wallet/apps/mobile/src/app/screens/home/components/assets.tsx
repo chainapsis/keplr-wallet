@@ -48,7 +48,7 @@ export function Assets({ route }: AssetsProps) {
     <ImageBackground
       source={require("../assets/background.png")}
       resizeMode="cover"
-      imageStyle={{ height: 403 }}
+      imageStyle={{ height: responsive(403) }}
       style={{
         backgroundColor: "#090817",
         flex: 1,
