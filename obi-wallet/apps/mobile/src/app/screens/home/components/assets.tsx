@@ -18,24 +18,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Dimensions, Platform, PixelRatio } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
+import { screenWidth, smallDeviceMaxWidth } from "../../components/screen-size";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const scale = SCREEN_WIDTH / 428; // based on iphone 13 Pro Max's scale
-export function responsive(size: number) {
-  const newSize = size * scale;
-  if (Platform.OS === "ios") {
-    return Math.round(PixelRatio.roundToNearestPixel(newSize));
-  } else {
-    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
-  }
-}
 
 export type AssetsProps = BottomTabScreenProps<
   Record<string, { currentNetwork: string }>
@@ -48,7 +37,10 @@ export function Assets({ route }: AssetsProps) {
     <ImageBackground
       source={require("../assets/background.png")}
       resizeMode="cover"
-      imageStyle={{ height: responsive(403) }}
+      imageStyle={{
+        height: 403,
+        marginTop: screenWidth <= smallDeviceMaxWidth ? 0 : 60,
+      }}
       style={{
         backgroundColor: "#090817",
         flex: 1,
@@ -78,7 +70,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
   return (
     <View
       style={{
-        padding: responsive(20),
+        padding: 16,
         flexDirection: "row",
         justifyContent: "space-between",
       }}
@@ -90,10 +82,10 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
-          minWidth: responsive(100),
-          paddingHorizontal: responsive(20),
-          paddingVertical: responsive(10),
-          borderRadius: responsive(8),
+          minWidth: 100,
+          paddingHorizontal: 13,
+          paddingVertical: 10,
+          borderRadius: 8,
         }}
         onPress={() => navigation.openDrawer()}
       >
@@ -101,12 +93,12 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <FontAwesomeIcon
               icon={faAngleDoubleLeft}
-              style={{ color: "#7B87A8", marginLeft: responsive(5) }}
+              style={{ color: "#7B87A8" }}
             />
           </View>
           <View
             style={{
-              paddingHorizontal: responsive(20),
+              paddingLeft: 10,
               justifyContent: "center",
               alignItems: "flex-start",
             }}
@@ -114,13 +106,21 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
             <Text
               style={{
                 color: "rgba(246, 245, 255, 0.6)",
-                fontSize: responsive(12),
-                fontWeight: "600",
+                fontSize: 9,
+                fontWeight: "500",
               }}
             >
               Network
             </Text>
-            <Text style={{ color: "white" }}>{currentNetwork}</Text>
+            <Text style={{ color: "#F6F5FF", fontSize: 14 }}>
+              {screenWidth <= smallDeviceMaxWidth
+                ? currentNetwork.length >= 15
+                  ? currentNetwork.substring(0, 12) + "..."
+                  : currentNetwork
+                : currentNetwork.length >= 16
+                ? currentNetwork.substring(0, 13) + "..."
+                : currentNetwork}
+            </Text>
           </View>
         </>
       </TouchableHighlight>
@@ -133,37 +133,37 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
         }}
         onPress={() => navigation.navigate("AccountsSettings")}
       >
-        <View style={{ margin: responsive(10) }}>
+        <View style={{ margin: 10 }}>
           <Text
             style={{
               color: "rgba(246, 245, 255, 0.6)",
-              fontSize: responsive(12),
+              fontSize: 12,
               fontWeight: "600",
               textAlign: "right",
             }}
           >
-            Wallet Name
+            Wallet name
           </Text>
           <Text
             style={{
               color: "#F6F5FF",
-              fontSize: responsive(14),
+              fontSize: 14,
               fontWeight: "500",
               textAlign: "right",
             }}
           >
-            {walletName.length > 14
-              ? walletName.substring(0, 11) + "..."
+            {screenWidth <= smallDeviceMaxWidth
+              ? walletName.length >= 15
+                ? walletName.substring(0, 12) + "..."
+                : walletName
+              : walletName.length >= 18
+              ? walletName.substring(0, 15) + "..."
               : walletName}
           </Text>
         </View>
         <Image
           source={require("../assets/backgroundblue.png")}
-          style={{
-            width: responsive(35),
-            height: responsive(35),
-            borderRadius: responsive(35),
-          }}
+          style={{ width: 35, height: 35, borderRadius: 35 }}
         />
       </TouchableOpacity>
     </View>
@@ -180,57 +180,92 @@ const BalanceAndActions = observer(() => {
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
   return (
-    <View style={{ justifyContent: "center", alignItems: "center" }}>
+    <View
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: screenWidth <= smallDeviceMaxWidth ? 30 : 58,
+      }}
+    >
       <Text
         style={{
           color: "#787B9C",
-          fontSize: responsive(10),
-          fontWeight: "600",
-          marginBottom: responsive(5),
+          fontSize: 11,
+          fontWeight: "500",
+          marginBottom: 10,
+          textTransform: "uppercase",
+          letterSpacing: 0.7,
         }}
       >
         Balance
       </Text>
-      <Text
+
+      <View
         style={{
-          color: "#F6F5FF",
-          fontSize: responsive(20),
-          fontWeight: "500",
+          flexDirection: "row",
         }}
       >
-        $ {balanceInUsd.toFixed(2)}
-      </Text>
+        <Text
+          style={{
+            color: "#F6F5FF",
+            fontSize: 20,
+            fontWeight: "500",
+            alignSelf: "flex-end",
+            marginBottom: 2,
+          }}
+        >
+          $
+        </Text>
+        <Text
+          style={{
+            color: "#F6F5FF",
+            fontSize: 28,
+            fontWeight: "500",
+          }}
+        >
+          {balanceInUsd.toFixed(2).split(".")[0]}.
+        </Text>
+        <Text
+          style={{
+            color: "#F6F5FF",
+            fontSize: 28,
+            fontWeight: "normal",
+          }}
+        >
+          {balanceInUsd.toFixed(2).split(".")[1]}
+        </Text>
+      </View>
+
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-around",
           alignItems: "center",
-          width: responsive(200),
-          marginTop: responsive(36),
+          width: 200,
+          marginTop: 36,
         }}
       >
         <View style={{ alignItems: "center" }}>
           <TouchableHighlight
             style={{
-              width: responsive(56),
-              height: responsive(56),
+              width: 56,
+              height: 56,
               backgroundColor: "#100F1E",
-              borderRadius: responsive(16),
+              borderRadius: 16,
               justifyContent: "center",
               alignItems: "center",
             }}
             onPress={() => navigation.navigate("send")}
           >
-            <Send width={responsive(22)} height={responsive(22)} />
+            <Send width={25} height={25} />
           </TouchableHighlight>
           <Text
             style={{
-              // Different color in comparison to "Recieve" to avoid optical illusion (looks less bold/smaller)
-              color: "#FFFFFF",
-              fontSize: responsive(10),
-              fontWeight: "600",
-              marginTop: responsive(10),
-              letterSpacing: responsive(0.5),
+              color: "#F6F5FF",
+              fontSize: 9,
+              fontWeight: "500",
+              marginTop: 10,
+              letterSpacing: 0.09,
             }}
           >
             SEND
@@ -239,24 +274,24 @@ const BalanceAndActions = observer(() => {
         <View style={{ alignItems: "center" }}>
           <TouchableHighlight
             style={{
-              width: responsive(56),
-              height: responsive(56),
+              width: 56,
+              height: 56,
               backgroundColor: "#100F1E",
-              borderRadius: responsive(16),
+              borderRadius: 16,
               justifyContent: "center",
               alignItems: "center",
             }}
             onPress={() => navigation.navigate("receive")}
           >
-            <Receive width={responsive(22)} height={responsive(22)} />
+            <Receive width={25} height={25} />
           </TouchableHighlight>
           <Text
             style={{
               color: "#F6F5FF",
-              fontSize: responsive(10),
-              fontWeight: "600",
-              marginTop: responsive(10),
-              letterSpacing: responsive(0.5),
+              fontSize: 9,
+              fontWeight: "500",
+              marginTop: 10,
+              letterSpacing: 0.09,
             }}
           >
             RECEIVE
@@ -281,6 +316,7 @@ const BalanceAndActions = observer(() => {
         {/*      fontSize: 9,*/}
         {/*      fontWeight: "500",*/}
         {/*      marginTop: 10,*/}
+        {/*      letterSpacing: 0.09,*/}
         {/*    }}*/}
         {/*  >*/}
         {/*    PAY*/}
@@ -305,33 +341,42 @@ const AssetsList = observer(() => {
         flexGrow: 1,
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: responsive(20),
-        backgroundColor: "#100F1E", //////////////////////////////////
-        borderTopLeftRadius: responsive(30),
-        borderTopRightRadius: responsive(30),
-        paddingHorizontal: responsive(16),
+        marginTop: screenWidth <= smallDeviceMaxWidth ? 30 : 40,
+        backgroundColor: "#100F1E",
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        paddingHorizontal: 16,
       }}
     >
       <View
         style={{
-          width: "97%",
-          //backgroundColor: "red", //////////////////////////////////////////
+          width: "100%",
         }}
       >
         <View
           style={{
-            height: responsive(20),
+            height: 20,
             width: "100%",
-            marginTop: responsive(30),
+            marginTop: 30,
             flexDirection: "row",
             justifyContent: "space-between",
-            //backgroundColor: "pink" //////////////////////////////////////////
           }}
         >
-          <Text style={{ color: "#787B9C" }}>NAME</Text>
-          <View style={{ flexDirection: "row" }}>
+          <Text style={{ color: "#787B9C", fontSize: 11, letterSpacing: 0.7 }}>
+            NAME
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+            }}
+          >
+            <Text
+              style={{ color: "#787B9C", fontSize: 11, letterSpacing: 0.7 }}
+            >
+              HOLDINGS
+            </Text>
             <IconButton
-              style={{ justifyContent: "center" }}
+              style={{ justifyContent: "center", marginBottom: 5 }}
               onPress={() => {
                 setSortAscending((value) => !value);
               }}
@@ -340,19 +385,18 @@ const AssetsList = observer(() => {
                 icon={faSortAsc}
                 style={{
                   color: sortAscending ? "#F6F5FF" : "#393853",
-                  marginRight: responsive(5),
+                  marginLeft: 12,
                 }}
               />
               <FontAwesomeIcon
                 icon={faSortDesc}
                 style={{
                   color: sortAscending ? "#393853" : "#F6F5FF",
-                  marginRight: responsive(5),
-                  marginTop: responsive(-15),
+                  marginLeft: 12,
+                  marginTop: -15,
                 }}
               />
             </IconButton>
-            <Text style={{ color: "#787B9C" }}>HOLDINGS</Text>
           </View>
         </View>
 
@@ -362,8 +406,7 @@ const AssetsList = observer(() => {
             data={balances}
             renderItem={(props) => <AssetsListItem {...props} />}
             style={{
-              marginTop: responsive(15),
-              //backgroundColor: "red", ///////////////////////////////////////////////
+              marginTop: 28,
             }}
           />
         </View>
@@ -378,63 +421,106 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
   return (
     <View
       style={{
-        height: responsive(40),
+        height: 36,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: responsive(10),
-        marginHorizontal: responsive(0),
-        //backgroundColor: "blue",  ////////////////////////////
+        marginBottom: 28,
       }}
     >
-      {icon}
+      <View
+        style={{
+          height: 36,
+          width: 36,
+          backgroundColor: "#E9983D",
+          borderRadius: 10,
+          marginRight: 12,
+        }}
+      >
+        {icon}
+      </View>
+
       <View
         style={{
           flex: 1,
           height: "100%",
           flexDirection: "row",
           justifyContent: "space-between",
-          //paddingLeft: 0,
-          //backgroundColor: "green" //////////////////////////////////////////
         }}
       >
         <View>
-          <Text
-            style={{
-              color: "#F6F5FF",
-              fontSize: responsive(14),
-              fontWeight: "500",
-            }}
-          >
-            {label}
+          <Text style={{ color: "#F6F5FF", fontSize: 14, fontWeight: "500" }}>
+            {screenWidth <= smallDeviceMaxWidth
+              ? label.length >= 25
+                ? label.substring(0, 22) + "..."
+                : label
+              : label.length >= 30
+              ? label.substring(0, 27) + "..."
+              : label}
           </Text>
           <Text
             style={{
               color: "rgba(246, 245, 255, 0.6)",
-              fontSize: responsive(12),
+              fontSize: 12,
               fontWeight: "400",
+              marginTop: 4,
             }}
           >
             {denom}
           </Text>
         </View>
-        <View>
-          <Text
+
+        <View
+          style={{
+            flexDirection: "column",
+            alignItems: "flex-end",
+          }}
+        >
+          <View
             style={{
-              color: "#F6F5FF",
-              fontSize: responsive(14),
-              fontWeight: "500",
-              textAlign: "right",
+              flexDirection: "row",
             }}
           >
-            $ {valueInUsd.toFixed(2)}
-          </Text>
+            <Text
+              style={{
+                color: "#F6F5FF",
+                fontSize: 12,
+                fontWeight: "500",
+                marginTop: 3,
+                textAlign: "right",
+              }}
+            >
+              $
+            </Text>
+            <Text
+              style={{
+                color: "#F6F5FF",
+                fontSize: 14,
+                fontWeight: "500",
+                textAlign: "right",
+              }}
+            >
+              {valueInUsd.toFixed(2).split(".")[0]}.
+            </Text>
+            <Text
+              style={{
+                color: "#F6F5FF",
+                fontSize: 14,
+                fontWeight: "normal",
+                textAlign: "right",
+              }}
+            >
+              {valueInUsd.toFixed(2).split(".")[1]}
+            </Text>
+          </View>
+
           <Text
             style={{
               color: "rgba(246, 245, 255, 0.6);",
-              fontSize: responsive(12),
+              fontSize: 12,
               fontWeight: "400",
               textAlign: "right",
+              marginTop: 4,
             }}
           >
             {amount} {denom}

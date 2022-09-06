@@ -13,6 +13,7 @@ import {
 import { ParamListBase } from "@react-navigation/native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
+import { screenWidth, smallDeviceMaxWidth } from "../components/screen-size";
 import { DappExplorer } from "../dapp-explorer";
 import { NFTs } from "../loop-web-apps/nfts";
 import { Trade } from "../loop-web-apps/trade";
@@ -31,8 +32,8 @@ import { Assets } from "./components/assets";
 
 const networks = [
   {
-    chainId: "uno-3",
-    label: "Juno Testnet",
+    chainId: "uni-3",
+    label: "Juno Mainnet",
   },
 ];
 
@@ -75,6 +76,9 @@ export function TabNavigation({ route }: TabNavigationProps) {
           backgroundColor: "#17162C",
           borderTopColor: "#1E1D33",
           borderTopWidth: 1,
+          paddingTop: screenWidth <= smallDeviceMaxWidth ? 10 : 15,
+          paddingBottom: screenWidth <= smallDeviceMaxWidth ? 10 : 30,
+          height: screenWidth <= smallDeviceMaxWidth ? 65 : 85,
         },
 
         headerShown: false,
@@ -86,6 +90,8 @@ export function TabNavigation({ route }: TabNavigationProps) {
           fontSize: 10,
           fontWeight: "500",
           textTransform: "uppercase",
+          marginTop: screenWidth <= smallDeviceMaxWidth ? 10 : 10,
+          letterSpacing: 0.6,
         },
       })}
     >
