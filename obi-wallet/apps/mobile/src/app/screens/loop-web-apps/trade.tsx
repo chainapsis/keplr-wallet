@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import WebView from "react-native-webview";
+
+import { ConnectedWebView } from "../components/connected-web-view";
 
 export function Trade() {
   const safeArea = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
+
   return (
     <View style={{ flex: 1, backgroundColor: "#17162C" }}>
-      <WebView
+      <ConnectedWebView
+        url="https://juno.loop.markets/#Swap"
         onLoadEnd={() => setLoading(false)}
-        source={{ uri: "https://juno.loop.markets/#Swap" }}
         style={{ flex: 1, marginTop: safeArea.top }}
       />
       {loading && (

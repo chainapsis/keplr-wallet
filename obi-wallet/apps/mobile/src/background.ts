@@ -277,26 +277,6 @@ class KeyRingService extends AbstractKeyRingService {
   }
 }
 
-// export class AddMultisigKeyMsg extends Message<{}> {
-//   public static type() {
-//     return "add-multisig-key"
-//   }
-//
-//   constructor(public readonly admin: SerializedMultisigPayload) {
-//     super();
-//   }
-//
-//   route(): string {
-//     return "keyring";
-//   }
-//
-//   type(): string {
-//     return AddMultisigKeyMsg.type();
-//   }
-//
-//   validateBasic(): void {}
-// }
-
 export function initBackground() {
   const router = new RouterBackground(produceEnv);
 

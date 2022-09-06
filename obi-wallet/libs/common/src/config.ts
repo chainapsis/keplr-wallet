@@ -1422,6 +1422,54 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: JUNO_RPC_CONFIG,
     rest: JUNO_REST_ENDPOINT,
     restConfig: JUNO_REST_CONFIG,
+    chainId: "uni-3",
+    chainName: "Juno",
+    stakeCurrency: {
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+      coinGeckoId: "juno-network",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/juno/stake"
+        : "http://localhost:8080/#/juno/stake",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/#/juno/stake"
+        : "http://localhost:8080/#/juno/stake",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("juno"),
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.001,
+      average: 0.0025,
+      high: 0.004,
+    },
+    features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
+  },
+  {
+    rpc: JUNO_RPC_ENDPOINT,
+    rpcConfig: JUNO_RPC_CONFIG,
+    rest: JUNO_REST_ENDPOINT,
+    restConfig: JUNO_REST_CONFIG,
     chainId: "juno-1",
     chainName: "Juno",
     stakeCurrency: {
