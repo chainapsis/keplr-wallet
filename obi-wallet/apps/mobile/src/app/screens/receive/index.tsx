@@ -1,5 +1,5 @@
 import { TouchableOpacity } from "@gorhom/bottom-sheet/src";
-import { observer } from "mobx-react-lite/src/observer";
+import { observer } from "mobx-react-lite";
 import { Share, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
