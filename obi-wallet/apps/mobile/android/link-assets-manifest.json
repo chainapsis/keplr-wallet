@@ -78,8 +78,8 @@
       "sha1": "03f5c0ff412bc0aac7ef2c1e19edcbdd9b06a609"
     },
     {
-      "path": "../../libs/injected-provider/dist/index.js",
-      "sha1": "4c63b011d5c90296bc7e287c264a2b52f752dca4"
+      "path": "../../libs/injected-provider/dist/injected-provider.js",
+      "sha1": "3d300cf5c2531df4fd894ef5b5475cdfffb3474b"
     }
   ]
 }

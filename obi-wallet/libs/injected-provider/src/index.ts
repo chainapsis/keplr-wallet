@@ -1,1 +1,2 @@
-console.log("Hey ho, I'm the injected provider");
+// @ts-expect-error
+window.ReactNativeWebView.postMessage(JSON.stringify(window.location));

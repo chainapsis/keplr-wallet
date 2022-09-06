@@ -18,6 +18,9 @@ export function NFTs() {
           source={{ uri: "https://nft-juno.loop.markets/myNft" }}
           style={{ flex: 1, marginTop: safeArea.top }}
           injectedJavaScriptBeforeContentLoaded={code}
+          onMessage={(msg) => {
+            console.log({ msg });
+          }}
         />
       ) : null}
       {loading && (
