@@ -34,6 +34,7 @@ import {
 import {
   KeplrETCQueries,
   GravityBridgeCurrencyRegsitrar,
+  AxelarEVMBridgeCurrencyRegistrar,
 } from "@keplr-wallet/stores-etc";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -77,6 +78,7 @@ export class RootStore {
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
   protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -347,6 +349,12 @@ export class RootStore {
       new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore
+    );
+    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>(
+      new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
+      this.chainStore,
+      this.queriesStore,
+      "ethereum"
     );
 
     this.analyticsStore = new AnalyticsStore(

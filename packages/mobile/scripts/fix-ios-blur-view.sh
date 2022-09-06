@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Fix a bug that if blur type is not changed, the blur amount is not applied too.
 # And, if the blur amount is 0 or lesser than 0, disable the blur.
