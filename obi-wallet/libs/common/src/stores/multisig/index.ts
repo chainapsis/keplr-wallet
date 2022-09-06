@@ -35,7 +35,9 @@ export interface Multisig {
   }> | null;
   biometrics: WithAddress<SerializedBiometricsPayload> | null;
   phoneNumber: WithAddress<SerializedPhoneNumberPayload> | null;
-  cloud: WithAddress<SerializedCloudPayload> | null;
+  // cloud: WithAddress<SerializedCloudPayload> | null;
+  cloud: null;
+  email: null;
 }
 
 export type MultisigKey = keyof Omit<Multisig, "multisig">;
@@ -211,6 +213,7 @@ export class MultisigStore {
         ...phoneNumber,
       },
       cloud: null,
+      email: null,
     };
   }
 
