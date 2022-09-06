@@ -18,12 +18,24 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Dimensions, Platform, PixelRatio } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const scale = SCREEN_WIDTH / 428; // based on iphone 13 Pro Max's scale
+export function responsive(size: number) {
+  const newSize = size * scale;
+  if (Platform.OS === "ios") {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
 
 export type AssetsProps = BottomTabScreenProps<
   Record<string, { currentNetwork: string }>
@@ -61,10 +73,12 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
 
+  const walletName = "dungeon_master";
+
   return (
     <View
       style={{
-        padding: 20,
+        padding: responsive(20),
         flexDirection: "row",
         justifyContent: "space-between",
       }}
@@ -76,10 +90,10 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
-          minWidth: 100,
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          borderRadius: 8,
+          minWidth: responsive(100),
+          paddingHorizontal: responsive(20),
+          paddingVertical: responsive(10),
+          borderRadius: responsive(8),
         }}
         onPress={() => navigation.openDrawer()}
       >
@@ -87,12 +101,12 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <FontAwesomeIcon
               icon={faAngleDoubleLeft}
-              style={{ color: "#7B87A8", marginLeft: 5 }}
+              style={{ color: "#7B87A8", marginLeft: responsive(5) }}
             />
           </View>
           <View
             style={{
-              paddingHorizontal: 20,
+              paddingHorizontal: responsive(20),
               justifyContent: "center",
               alignItems: "flex-start",
             }}
@@ -100,7 +114,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
             <Text
               style={{
                 color: "rgba(246, 245, 255, 0.6)",
-                fontSize: 12,
+                fontSize: responsive(12),
                 fontWeight: "600",
               }}
             >
@@ -119,31 +133,37 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
         }}
         onPress={() => navigation.navigate("AccountsSettings")}
       >
-        <View style={{ margin: 10 }}>
+        <View style={{ margin: responsive(10) }}>
           <Text
             style={{
               color: "rgba(246, 245, 255, 0.6)",
-              fontSize: 12,
+              fontSize: responsive(12),
               fontWeight: "600",
               textAlign: "right",
             }}
           >
-            Wallet name
+            Wallet Name
           </Text>
           <Text
             style={{
               color: "#F6F5FF",
-              fontSize: 14,
+              fontSize: responsive(14),
               fontWeight: "500",
               textAlign: "right",
             }}
           >
-            dungeon_master
+            {walletName.length > 14
+              ? walletName.substring(0, 11) + "..."
+              : walletName}
           </Text>
         </View>
         <Image
           source={require("../assets/backgroundblue.png")}
-          style={{ width: 35, height: 35, borderRadius: 35 }}
+          style={{
+            width: responsive(35),
+            height: responsive(35),
+            borderRadius: responsive(35),
+          }}
         />
       </TouchableOpacity>
     </View>
@@ -164,46 +184,53 @@ const BalanceAndActions = observer(() => {
       <Text
         style={{
           color: "#787B9C",
-          fontSize: 11,
+          fontSize: responsive(10),
           fontWeight: "600",
-          marginBottom: 5,
+          marginBottom: responsive(5),
         }}
       >
         Balance
       </Text>
-      <Text style={{ color: "#F6F5FF", fontSize: 20, fontWeight: "500" }}>
-        ${balanceInUsd.toFixed(2)}
+      <Text
+        style={{
+          color: "#F6F5FF",
+          fontSize: responsive(20),
+          fontWeight: "500",
+        }}
+      >
+        $ {balanceInUsd.toFixed(2)}
       </Text>
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-around",
           alignItems: "center",
-          width: 200,
-          marginTop: 36,
+          width: responsive(200),
+          marginTop: responsive(36),
         }}
       >
         <View style={{ alignItems: "center" }}>
           <TouchableHighlight
             style={{
-              width: 56,
-              height: 56,
+              width: responsive(56),
+              height: responsive(56),
               backgroundColor: "#100F1E",
-              borderRadius: 16,
+              borderRadius: responsive(16),
               justifyContent: "center",
               alignItems: "center",
             }}
             onPress={() => navigation.navigate("send")}
           >
-            <Send width={22} height={22} />
+            <Send width={responsive(22)} height={responsive(22)} />
           </TouchableHighlight>
           <Text
             style={{
-              color: "#F6F5FF",
-              fontSize: 11,
-              fontWeight: "700",
-              marginTop: 10,
-              letterSpacing: 0.5,
+              // Different color in comparison to "Recieve" to avoid optical illusion (looks less bold/smaller)
+              color: "#FFFFFF",
+              fontSize: responsive(10),
+              fontWeight: "600",
+              marginTop: responsive(10),
+              letterSpacing: responsive(0.5),
             }}
           >
             SEND
@@ -212,24 +239,24 @@ const BalanceAndActions = observer(() => {
         <View style={{ alignItems: "center" }}>
           <TouchableHighlight
             style={{
-              width: 56,
-              height: 56,
+              width: responsive(56),
+              height: responsive(56),
               backgroundColor: "#100F1E",
-              borderRadius: 16,
+              borderRadius: responsive(16),
               justifyContent: "center",
               alignItems: "center",
             }}
             onPress={() => navigation.navigate("receive")}
           >
-            <Receive width={22} height={22} />
+            <Receive width={responsive(22)} height={responsive(22)} />
           </TouchableHighlight>
           <Text
             style={{
               color: "#F6F5FF",
-              fontSize: 11,
+              fontSize: responsive(10),
               fontWeight: "600",
-              marginTop: 10,
-              letterSpacing: 0.5,
+              marginTop: responsive(10),
+              letterSpacing: responsive(0.5),
             }}
           >
             RECEIVE
@@ -278,11 +305,11 @@ const AssetsList = observer(() => {
         flexGrow: 1,
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: 20,
+        marginTop: responsive(20),
         backgroundColor: "#100F1E", //////////////////////////////////
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingHorizontal: 16,
+        borderTopLeftRadius: responsive(30),
+        borderTopRightRadius: responsive(30),
+        paddingHorizontal: responsive(16),
       }}
     >
       <View
@@ -293,9 +320,9 @@ const AssetsList = observer(() => {
       >
         <View
           style={{
-            height: 20,
+            height: responsive(20),
             width: "100%",
-            marginTop: 30,
+            marginTop: responsive(30),
             flexDirection: "row",
             justifyContent: "space-between",
             //backgroundColor: "pink" //////////////////////////////////////////
@@ -313,15 +340,15 @@ const AssetsList = observer(() => {
                 icon={faSortAsc}
                 style={{
                   color: sortAscending ? "#F6F5FF" : "#393853",
-                  marginRight: 5,
+                  marginRight: responsive(5),
                 }}
               />
               <FontAwesomeIcon
                 icon={faSortDesc}
                 style={{
                   color: sortAscending ? "#393853" : "#F6F5FF",
-                  marginRight: 5,
-                  marginTop: -15,
+                  marginRight: responsive(5),
+                  marginTop: responsive(-15),
                 }}
               />
             </IconButton>
@@ -335,7 +362,7 @@ const AssetsList = observer(() => {
             data={balances}
             renderItem={(props) => <AssetsListItem {...props} />}
             style={{
-              marginTop: 15,
+              marginTop: responsive(15),
               //backgroundColor: "red", ///////////////////////////////////////////////
             }}
           />
@@ -351,12 +378,12 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
   return (
     <View
       style={{
-        height: 40,
+        height: responsive(40),
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 10,
-        marginHorizontal: 0,
+        marginBottom: responsive(10),
+        marginHorizontal: responsive(0),
         //backgroundColor: "blue",  ////////////////////////////
       }}
     >
@@ -372,13 +399,19 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
         }}
       >
         <View>
-          <Text style={{ color: "#F6F5FF", fontSize: 14, fontWeight: "500" }}>
+          <Text
+            style={{
+              color: "#F6F5FF",
+              fontSize: responsive(14),
+              fontWeight: "500",
+            }}
+          >
             {label}
           </Text>
           <Text
             style={{
               color: "rgba(246, 245, 255, 0.6)",
-              fontSize: 12,
+              fontSize: responsive(12),
               fontWeight: "400",
             }}
           >
@@ -389,17 +422,17 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
           <Text
             style={{
               color: "#F6F5FF",
-              fontSize: 14,
+              fontSize: responsive(14),
               fontWeight: "500",
               textAlign: "right",
             }}
           >
-            ${valueInUsd.toFixed(2)}
+            $ {valueInUsd.toFixed(2)}
           </Text>
           <Text
             style={{
               color: "rgba(246, 245, 255, 0.6);",
-              fontSize: 12,
+              fontSize: responsive(12),
               fontWeight: "400",
               textAlign: "right",
             }}
