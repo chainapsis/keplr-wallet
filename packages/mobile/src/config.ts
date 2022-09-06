@@ -1110,6 +1110,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "BLD",
       coinMinimalDenom: "ubld",
       coinDecimals: 6,
+      coinGeckoId: "agoric",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
     },
     bip44: {
@@ -1121,6 +1122,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "BLD",
         coinMinimalDenom: "ubld",
         coinDecimals: 6,
+        coinGeckoId: "agoric",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
       },
       {

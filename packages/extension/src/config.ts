@@ -1331,6 +1331,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "BLD",
       coinMinimalDenom: "ubld",
       coinDecimals: 6,
+      coinGeckoId: "agoric",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1349,6 +1350,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "BLD",
         coinMinimalDenom: "ubld",
         coinDecimals: 6,
+        coinGeckoId: "agoric",
       },
       {
         coinDenom: "IST",
