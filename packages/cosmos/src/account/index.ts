@@ -68,9 +68,8 @@ export class BaseAccount implements Account {
       return new BaseAccount("", defaultBech32Address, new Int(0), new Int(0));
     }
 
-    const type = obj.account["@type"] || "";
-
     let value = obj.account;
+    const type = value["@type"] || "";
 
     // If the chain modifies the account type, handle the case where the account type embeds the base account.
     // (Actually, the only existent case is ethermint, and this is the line for handling ethermint)
@@ -78,6 +77,13 @@ export class BaseAccount implements Account {
       value.BaseAccount || value.baseAccount || value.base_account;
     if (baseAccount) {
       value = baseAccount;
+    }
+
+    // If the chain modifies the account type, handle the case where the account type embeds the account.
+    // (Actually, the only existent case is desmos, and this is the line for handling desmos)
+    const embedAccount = value.account;
+    if (embedAccount) {
+      value = embedAccount;
     }
 
     // If the account is the vesting account that embeds the base vesting account,

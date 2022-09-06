@@ -1,6 +1,21 @@
 import { BaseAccount } from "./index";
 
 describe("Test account parse", () => {
+  test("Test unknown account", () => {
+    expect(() => BaseAccount.fromProtoJSON({})).toThrow();
+
+    const account = BaseAccount.fromProtoJSON(
+      {},
+      "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k"
+    );
+    expect(account.getAddress()).toBe(
+      "cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k"
+    );
+    expect(account.getSequence().toString()).toBe("0");
+    expect(account.getAccountNumber().toString()).toBe("0");
+    expect(account.getType()).toBe("");
+  });
+
   test("Test fromAminoJSON", () => {
     // Base account
     let account = BaseAccount.fromProtoJSON({
@@ -91,5 +106,37 @@ describe("Test account parse", () => {
     expect(account.getSequence().toString()).toBe("1");
     expect(account.getAccountNumber().toString()).toBe("11");
     expect(account.getType()).toBe("/ethermint.types.v1.EthAccount");
+
+    // Custom account that embeds the account (desmos)
+    account = BaseAccount.fromProtoJSON({
+      account: {
+        "@type": "/desmos.profiles.v1beta1.Profile",
+        account: {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          address: "desmos1smwe5mmpnvda8pe5mh6le4agrvg6ts8z4zywy6",
+          pub_key: {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            key: "AltGpatBXsFjO1rX3O7F135ax3zLDMfxQSrVKXZd6kuF",
+          },
+          account_number: "44831",
+          sequence: "6",
+        },
+        dtag: "Test",
+        nickname: "test",
+        bio: "",
+        pictures: {
+          profile: "",
+          cover: "",
+        },
+        creation_date: "2022-08-11T12:23:44.480560677Z",
+      },
+    });
+
+    expect(account.getAddress()).toBe(
+      "desmos1smwe5mmpnvda8pe5mh6le4agrvg6ts8z4zywy6"
+    );
+    expect(account.getSequence().toString()).toBe("6");
+    expect(account.getAccountNumber().toString()).toBe("44831");
+    expect(account.getType()).toBe("/desmos.profiles.v1beta1.Profile");
   });
 });
