@@ -6,6 +6,7 @@ import { SvgProps } from "react-native-svg";
 import Biometrics from "./assets/biometrics-icon.svg";
 import Check from "./assets/check-icon.svg";
 import Cloud from "./assets/cloud-icon.svg";
+import Email from "./assets/email-icon.svg";
 import PhoneNumber from "./assets/phone-number-icon.svg";
 import Warning from "./assets/warning-icon.svg";
 
@@ -20,6 +21,7 @@ export const keyMetaData: Record<MultisigKey, KeyMetaData> = {
   biometrics: { Icon: Biometrics },
   cloud: { Icon: Cloud },
   phoneNumber: { Icon: PhoneNumber },
+  email: { Icon: Email },
 };
 
 export interface Key {
@@ -35,6 +37,24 @@ export type HydratedKeyListItem = Key & KeyMetaData;
 export interface KeysListProps {
   data: Key[];
 }
+const comingSoonKeys: HydratedKeyListItem[] = [
+  {
+    id: "email",
+    title: "Email",
+    description: "Coming Soon",
+    right: <View />,
+    onPress: () => null,
+    Icon: Email,
+  },
+  {
+    id: "cloud",
+    title: "Cloud",
+    description: "Coming Soon",
+    right: <View />,
+    onPress: () => null,
+    Icon: Cloud,
+  },
+];
 
 export function KeysList({ data }: KeysListProps) {
   const hydratedData = data.map((key) => {
@@ -46,7 +66,7 @@ export function KeysList({ data }: KeysListProps) {
 
   return (
     <FlatList
-      data={hydratedData}
+      data={[...hydratedData, ...comingSoonKeys]}
       keyExtractor={(item) => item.id}
       renderItem={(props) => <KeyListItem {...props} />}
     />
@@ -107,7 +127,7 @@ export function KeyListItem({ item }: KeyListItemProps) {
               marginTop: 4,
             }}
           >
-            Now send your encrypted answer to
+            {description}
           </Text>
         ) : null}
       </View>

@@ -87,7 +87,7 @@ export const KeysConfigScreen = observer(() => {
       title: "Phone Number Key",
     }),
     getKey({ id: "biometrics", title: "Biometrics Key" }),
-    getKey({ id: "cloud", title: "Cloud Key" }),
+    // getKey({ id: "cloud", title: "Cloud Key" }),
   ];
   const activatedKeys = data.filter((item) => item.activated).length;
 
