@@ -25,16 +25,16 @@ export type SocialOnboardingProps = NativeStackScreenProps<
 export const SocialOnboarding = observer<SocialOnboardingProps>(
   ({ navigation }) => {
     const { multisigStore } = useStore();
-    const [key, setKey] = useState("");
+    const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
 
     useEffect(() => {
-      const { socialKey } = multisigStore.getNextAdmin("");
+      const { social } = multisigStore.getNextAdmin("");
 
-      if (socialKey) {
+      if (social) {
         Alert.alert(
           "You already have a social key",
-          `Do you want to reuse your existing social key for ${socialKey.socialKey}?`,
+          `Do you want to reuse your existing social key for ${social.address}?`,
           [
             {
               text: "Generate a new key",
@@ -110,11 +110,9 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
               </View>
               <TextInput
                 placeholder="juno1234...."
-                textContentType="oneTimeCode"
-                keyboardType="number-pad"
                 style={{ marginTop: 25 }}
-                value={key}
-                onChangeText={setKey}
+                value={address}
+                onChangeText={setAddress}
               />
               <Text
                 style={{
@@ -123,14 +121,14 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                   marginTop: 10,
                 }}
               >
-                ...or you can use the default obi account if you dont trust any
+                …or you can use the default Obi account if you don't trust any
                 of your friends
               </Text>
               <InlineButton
-                label="Use OBI Account"
+                label="Use Obi Account"
                 style={{ alignSelf: "flex-start", marginTop: 10 }}
                 onPress={() => {
-                  setKey("juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e");
+                  setAddress("juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e");
                 }}
               />
             </View>
@@ -139,12 +137,11 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                 disabled={fetchingPubKey}
                 onPress={async () => {
                   setFetchingPubKey(true);
-                  const publicKey = await getAccountPubkey(key);
+                  const publicKey = await getAccountPubkey(address);
                   setFetchingPubKey(false);
                   if (publicKey) {
-                    multisigStore.setSocialKeyPublicKey({
-                      publicKey: publicKey.value,
-                      socialKey: key,
+                    multisigStore.setSocialPublicKey({
+                      publicKey: publicKey,
                     });
                     navigation.navigate("onboarding6");
                   }

@@ -1,3 +1,4 @@
+import { pubkeyType } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -136,7 +137,12 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
             onPress={async () => {
               try {
                 const publicKey = await getBiometricsPublicKey();
-                multisigStore.setBiometricsPublicKey({ publicKey });
+                multisigStore.setBiometricsPublicKey({
+                  publicKey: {
+                    type: pubkeyType.secp256k1,
+                    value: publicKey,
+                  },
+                });
                 navigation.navigate("onboarding5");
               } catch (e) {
                 console.error(e);

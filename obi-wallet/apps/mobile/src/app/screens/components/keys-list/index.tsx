@@ -23,7 +23,7 @@ export const keyMetaData: Record<MultisigKey, KeyMetaData> = {
   cloud: { Icon: Cloud },
   phoneNumber: { Icon: PhoneNumber },
   email: { Icon: Email },
-  socialKey: { Icon: () => <People width={24} height={24} /> },
+  social: { Icon: () => <People width={24} height={24} /> },
 };
 
 export interface Key {

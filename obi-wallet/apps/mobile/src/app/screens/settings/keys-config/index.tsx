@@ -86,7 +86,7 @@ export const KeysConfigScreen = observer(() => {
       title: "Phone Number Key",
     }),
     getKey({ id: "biometrics", title: "Biometrics Key" }),
-    getKey({ id: "socialKey", title: "Social Key" }),
+    getKey({ id: "social", title: "Social Key" }),
     // getKey({ id: "cloud", title: "Cloud Key" }),
   ];
 

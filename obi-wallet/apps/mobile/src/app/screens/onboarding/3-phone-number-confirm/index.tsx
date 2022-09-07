@@ -1,3 +1,4 @@
+import { pubkeyType } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -143,7 +144,10 @@ export function PhoneNumberConfirmOnboarding({
                 const publicKey = await parsePublicKeyTextMessageResponse(key);
                 if (publicKey) {
                   multisigStore.setPhoneNumberKey({
-                    publicKey,
+                    publicKey: {
+                      type: pubkeyType.secp256k1,
+                      value: publicKey,
+                    },
                     phoneNumber: params.phoneNumber,
                     securityQuestion: params.securityQuestion,
                   });
