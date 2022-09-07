@@ -41,15 +41,15 @@ export type QueryResponse<T> = {
   timestamp: number;
 };
 
-export class ImmediateCancelerError extends Error {
+export class FlowCancelerError extends Error {
   constructor(m?: string) {
     super(m);
     // Set the prototype explicitly.
-    Object.setPrototypeOf(this, ImmediateCancelerError.prototype);
+    Object.setPrototypeOf(this, FlowCancelerError.prototype);
   }
 }
 
-class ImmediateCanceler {
+class FlowCanceler {
   protected rejectors: {
     reject: (e: Error) => void;
     onCancel?: () => void;
@@ -63,7 +63,7 @@ class ImmediateCanceler {
     while (this.rejectors.length > 0) {
       const rejector = this.rejectors.shift();
       if (rejector) {
-        rejector.reject(new ImmediateCancelerError(message));
+        rejector.reject(new FlowCancelerError(message));
         if (rejector.onCancel) {
           rejector.onCancel();
         }
@@ -180,7 +180,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
-  private readonly queryCanceler: ImmediateCanceler;
+  private readonly queryCanceler: FlowCanceler;
 
   private observedCount: number = 0;
 
@@ -203,7 +203,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
     this._instance = instance;
 
-    this.queryCanceler = new ImmediateCanceler();
+    this.queryCanceler = new FlowCanceler();
 
     makeObservable(this);
 
@@ -423,7 +423,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         return;
       }
 
-      if (e instanceof ImmediateCancelerError) {
+      if (e instanceof FlowCancelerError) {
         // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues.
         if (e.message === "__fetching__proceed__next__") {
           fetchingProceedNext = true;
