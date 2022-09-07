@@ -3,6 +3,7 @@
 .container-tx-button {
   display: flex;
   flex-direction: row;
+  justify-content: space-evenly;
 
   .button {
     flex: 1;
