@@ -10,6 +10,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { action, makeObservable, observable, runInAction, toJS } from "mobx";
 
 import {
+  migrateSerializedMultisigPayload,
   migrateSerializedProxyAddress,
   SerializedBiometricsPayload,
   SerializedCloudPayload,
@@ -17,6 +18,7 @@ import {
   SerializedMultisigPayload,
   SerializedPhoneNumberPayload,
   SerializedProxyAddress,
+  SerializedSocialPayload,
 } from "./serialized-data";
 
 export type MultisigThresholdPublicKey = MultisigThresholdPubkey;
@@ -25,6 +27,7 @@ const emptyMultisig: SerializedMultisigPayload = {
   biometrics: null,
   phoneNumber: null,
   cloud: null,
+  social: null,
 };
 
 export type WithAddress<T> = T & { address: string };
@@ -35,8 +38,8 @@ export interface Multisig {
   }> | null;
   biometrics: WithAddress<SerializedBiometricsPayload> | null;
   phoneNumber: WithAddress<SerializedPhoneNumberPayload> | null;
-  // cloud: WithAddress<SerializedCloudPayload> | null;
-  cloud: null;
+  social: WithAddress<SerializedSocialPayload> | null;
+  cloud: WithAddress<SerializedCloudPayload> | null;
   email: null;
 }
 
@@ -79,8 +82,10 @@ export class MultisigStore {
     // Here we'd want to have some kind of migration logic in the future if we save more data
     if (SerializedData.is(data)) {
       runInAction(() => {
-        this.nextAdmin = data.nextAdmin;
-        this.currentAdmin = data.currentAdmin;
+        this.nextAdmin = migrateSerializedMultisigPayload(data.nextAdmin);
+        this.currentAdmin = data.currentAdmin
+          ? migrateSerializedMultisigPayload(data.currentAdmin)
+          : null;
         this.setProxyAddress(migrateSerializedProxyAddress(data.proxyAddress));
       });
       void this.kvStore.set("multisig-backup", null);
@@ -144,6 +149,11 @@ export class MultisigStore {
     this.nextAdmin.biometrics = payload;
     void this.save();
   }
+  @action
+  public setSocialPublicKey(payload: SerializedSocialPayload) {
+    this.nextAdmin.social = payload;
+    void this.save();
+  }
 
   @action
   public finishProxySetup(address: SerializedProxyAddress) {
@@ -172,24 +182,22 @@ export class MultisigStore {
     const publicKeys: SinglePubkey[] = [];
 
     if (multisig.biometrics) {
-      publicKeys.push({
-        type: pubkeyType.secp256k1,
-        value: multisig.biometrics.publicKey,
-      });
+      publicKeys.push(multisig.biometrics.publicKey);
     }
 
     if (multisig.phoneNumber) {
-      publicKeys.push({
-        type: pubkeyType.secp256k1,
-        value: multisig.phoneNumber.publicKey,
-      });
+      publicKeys.push(multisig.phoneNumber.publicKey);
+    }
+
+    if (multisig.social) {
+      publicKeys.push(multisig.social.publicKey);
     }
 
     if (publicKeys.length === 0) {
       return null;
     }
 
-    const threshold = publicKeys.length >= 3 ? 2 : 1;
+    const threshold = publicKeys.length >= 4 ? 2 : 1;
     return createMultisigThresholdPubkey(publicKeys, threshold);
   }
 
@@ -197,7 +205,7 @@ export class MultisigStore {
     multisig: SerializedMultisigPayload,
     prefix: string
   ): Multisig {
-    const { biometrics, phoneNumber } = multisig;
+    const { biometrics, phoneNumber, social } = multisig;
     const multisigThresholdPublicKey =
       this.createMultisigThresholdPublicKey(multisig);
 
@@ -213,6 +221,10 @@ export class MultisigStore {
       phoneNumber: phoneNumber && {
         address: this.getAddressOfPublicKey(phoneNumber.publicKey, prefix),
         ...phoneNumber,
+      },
+      social: social && {
+        address: this.getAddressOfPublicKey(social.publicKey, prefix),
+        ...social,
       },
       cloud: null,
       email: null,

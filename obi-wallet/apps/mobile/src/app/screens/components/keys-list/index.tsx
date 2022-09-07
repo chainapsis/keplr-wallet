@@ -3,6 +3,7 @@ import { FC } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { SvgProps } from "react-native-svg";
 
+import People from "../../onboarding/5-social/assets/people-alt-twotone-24px.svg";
 import Biometrics from "./assets/biometrics-icon.svg";
 import Check from "./assets/check-icon.svg";
 import Cloud from "./assets/cloud-icon.svg";
@@ -22,6 +23,7 @@ export const keyMetaData: Record<MultisigKey, KeyMetaData> = {
   cloud: { Icon: Cloud },
   phoneNumber: { Icon: PhoneNumber },
   email: { Icon: Email },
+  social: { Icon: () => <People width={24} height={24} /> },
 };
 
 export interface Key {

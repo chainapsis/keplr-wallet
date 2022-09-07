@@ -349,7 +349,6 @@ const options = [
 ];
 
 function Option({ item, onPress }) {
-  console.log({ item });
   return (
     <TouchableOpacity
       style={{ height: 60, justifyContent: "center", alignItems: "center" }}

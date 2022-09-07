@@ -33,7 +33,7 @@ export function NFTs() {
           }}
         >
           <Image
-            source={require("../onboarding/onboarding1/assets/loop.png")}
+            source={require("../../../assets/loop.png")}
             style={{ marginBottom: 20 }}
           />
           <Text style={{ color: "white", fontSize: 20, fontWeight: "700" }}>

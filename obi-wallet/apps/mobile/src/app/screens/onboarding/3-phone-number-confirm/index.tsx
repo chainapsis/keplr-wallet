@@ -1,3 +1,4 @@
+import { pubkeyType } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -19,12 +20,15 @@ import { VerifyAndProceedButton } from "../../components/phone-number/verify-and
 import { StackParamList } from "../stack";
 import InsuranceLogo from "./assets/insurance-logo.svg";
 
-export type Onboarding3Props = NativeStackScreenProps<
+export type PhoneNumberConfirmOnboardingProps = NativeStackScreenProps<
   StackParamList,
   "onboarding3"
 >;
 
-export function Onboarding3({ navigation, route }: Onboarding3Props) {
+export function PhoneNumberConfirmOnboarding({
+  navigation,
+  route,
+}: PhoneNumberConfirmOnboardingProps) {
   const { params } = route;
 
   const { multisigStore } = useStore();
@@ -140,7 +144,10 @@ export function Onboarding3({ navigation, route }: Onboarding3Props) {
                 const publicKey = await parsePublicKeyTextMessageResponse(key);
                 if (publicKey) {
                   multisigStore.setPhoneNumberKey({
-                    publicKey,
+                    publicKey: {
+                      type: pubkeyType.secp256k1,
+                      value: publicKey,
+                    },
                     phoneNumber: params.phoneNumber,
                     securityQuestion: params.securityQuestion,
                   });
