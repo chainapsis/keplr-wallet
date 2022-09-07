@@ -81,14 +81,24 @@ class FlowCanceler {
         onCancel,
       });
 
-      promise.then((r) => {
-        const i = this.rejectors.findIndex((r) => r.reject === reject);
-        if (i >= 0) {
-          this.rejectors.splice(i, 1);
-        }
+      promise.then(
+        (r) => {
+          const i = this.rejectors.findIndex((r) => r.reject === reject);
+          if (i >= 0) {
+            this.rejectors.splice(i, 1);
+          }
 
-        resolve(r);
-      }, reject);
+          resolve(r);
+        },
+        (e) => {
+          const i = this.rejectors.findIndex((r) => r.reject === reject);
+          if (i >= 0) {
+            this.rejectors.splice(i, 1);
+          }
+
+          reject(e);
+        }
+      );
     });
   }
 
@@ -107,14 +117,24 @@ class FlowCanceler {
           return;
         }
 
-        fn().then((r) => {
-          const i = this.rejectors.findIndex((r) => r.reject === reject);
-          if (i >= 0) {
-            this.rejectors.splice(i, 1);
-          }
+        fn().then(
+          (r) => {
+            const i = this.rejectors.findIndex((r) => r.reject === reject);
+            if (i >= 0) {
+              this.rejectors.splice(i, 1);
+            }
 
-          resolve(r);
-        }, reject);
+            resolve(r);
+          },
+          (e) => {
+            const i = this.rejectors.findIndex((r) => r.reject === reject);
+            if (i >= 0) {
+              this.rejectors.splice(i, 1);
+            }
+
+            reject(e);
+          }
+        );
       });
     });
   }
@@ -472,10 +492,18 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     let skipAxiosCancelError = false;
 
     try {
+      let hasStarted = false;
       let { response, headers } = yield* toGenerator(
         this.queryCanceler.callOrCanceled(
-          () => this.fetchResponse(abortController),
-          () => abortController.abort()
+          () => {
+            hasStarted = true;
+            return this.fetchResponse(abortController);
+          },
+          () => {
+            if (hasStarted) {
+              abortController.abort();
+            }
+          }
         )
       );
       if (
@@ -504,10 +532,18 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         );
 
         // Try to query again.
+        let hasStarted = false;
         const refetched = yield* toGenerator(
           this.queryCanceler.callOrCanceled(
-            () => this.fetchResponse(abortController),
-            () => abortController.abort()
+            () => {
+              hasStarted = true;
+              return this.fetchResponse(abortController);
+            },
+            () => {
+              if (hasStarted) {
+                abortController.abort();
+              }
+            }
           )
         );
         response = refetched.response;

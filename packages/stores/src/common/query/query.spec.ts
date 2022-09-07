@@ -1657,6 +1657,184 @@ describe("Test observable query", () => {
     closeServer();
   });
 
+  it("test synchronous setUrl not make multiple queries", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer, getNum } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port);
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data >= 2) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    // Wait query starts
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 50);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+
+    query.changeURL("/invalid");
+    query.changeURL("/error1");
+    query.changeURL("/error2");
+    query.changeURL("/error3");
+    query.changeURL("/test");
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+
+    // Wait before close.
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(1);
+
+    disposer();
+
+    expect(getNum()).toBe(2);
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    closeServer();
+  });
+
+  it("test synchronous setUrl not make multiple queries when onStart is async", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer, getNum } = createTestServer(50);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockOnStartObservableQuery(memStore, port, {}, "/test", {
+      onStartDelay: 50,
+      onStartUrl: "/test",
+    });
+
+    query.changeURL("/invalid");
+
+    expect(query.isObserved).toBe(false);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data >= 2) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    query.changeURL("/error1");
+    query.changeURL("/error2");
+
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 20);
+    });
+
+    query.changeURL("/error2");
+    query.changeURL("/error3");
+    query.changeURL("/test");
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    // Wait query starts
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 150);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+
+    query.changeURL("/invalid");
+    query.changeURL("/error1");
+    query.changeURL("/error2");
+    query.changeURL("/error3");
+    query.changeURL("/test");
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+
+    // Wait before close.
+    await new Promise((resolve) => {
+      setTimeout(resolve, 150);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.isStarted).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(1);
+
+    disposer();
+
+    expect(getNum()).toBe(2);
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    closeServer();
+  });
+
   it("test error message", async () => {
     const abortSpy = jest.spyOn(AbortController.prototype, "abort");
 
