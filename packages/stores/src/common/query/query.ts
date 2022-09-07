@@ -486,10 +486,33 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
       // If error is from Axios, and get response.
       if (e.response) {
+        // Default is status text
+        let message: string = e.response.statusText;
+        const contentType: string =
+          typeof e.response.headers?.["content-type"] === "string"
+            ? e.response.headers["content-type"]
+            : "";
+        // Try to figure out the message from the response.
+        // If the contentType in the header is specified, try to use the message from the response.
+        if (
+          contentType.startsWith("text/plain") &&
+          typeof e.response.data === "string"
+        ) {
+          message = e.response.data;
+        }
+        // If the response is an object and "message" field exists, it is used as a message.
+        if (
+          contentType.startsWith("application/json") &&
+          e.response.data?.message &&
+          typeof e.response.data?.message === "string"
+        ) {
+          message = e.response.data.message;
+        }
+
         const error: QueryError<E> = {
           status: e.response.status,
           statusText: e.response.statusText,
-          message: e.response.statusText,
+          message,
           data: e.response.data,
         };
 
