@@ -403,7 +403,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this._error = error;
   }
 
-  public cancel(): void {
+  private cancel(): void {
     if (this.cancelToken) {
       this.cancelToken.cancel();
     }
