@@ -23,6 +23,7 @@ import stake from "../../public/assets/icon/stake.png";
 import activeSend from "../../public/assets/icon/activeSend.png";
 import activeReward from "../../public/assets/icon/activeReward.png";
 import activeStake from "../../public/assets/icon/activeStake.png";
+import { ToolTip } from "../../components/tooltip";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
@@ -99,62 +100,78 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   return (
     <div className={styleTxButton.containerTxButton}>
-      <Button
-        className={styleTxButton.button}
-        disabled={!hasAssets}
-        color="primary"
-        outline
-        data-loading={accountInfo.isSendingMsg === "send"}
-        onClick={(e) => {
-          e.preventDefault();
-
-          if (hasAssets) {
-            history.push("/send");
-          }
-        }}
-        onMouseEnter={() => {
-          setIsActiveSend(true);
-        }}
-        onMouseLeave={() => {
-          setIsActiveSend(false);
+      <ToolTip
+        tooltip={<FormattedMessage id="main.account.button.send" />}
+        theme="dark"
+        trigger="hover"
+        options={{
+          placement: "top",
         }}
       >
-        <img
-          src={isActiveSend ? activeSend : send}
-          alt=""
-          style={{
-            marginRight: "5px",
-            height: "15px",
-          }}
-        />
-        <FormattedMessage id="main.account.button.send" />
-      </Button>
+        <Button
+          className={styleTxButton.button}
+          disabled={!hasAssets}
+          color="primary"
+          outline
+          data-loading={accountInfo.isSendingMsg === "send"}
+          onClick={(e) => {
+            e.preventDefault();
 
-      <Button
-        className={styleTxButton.button}
-        outline
-        color="primary"
-        disabled={!accountInfo.isReadyToSendMsgs || !isRewardExist}
-        onClick={withdrawAllRewards}
-        data-loading={accountInfo.isSendingMsg === "withdrawRewards"}
-        onMouseEnter={() => {
-          setIsActiveReward(true);
-        }}
-        onMouseLeave={() => {
-          setIsActiveReward(false);
+            if (hasAssets) {
+              history.push("/send");
+            }
+          }}
+          onMouseEnter={() => {
+            setIsActiveSend(true);
+          }}
+          onMouseLeave={() => {
+            setIsActiveSend(false);
+          }}
+        >
+          <img
+            src={isActiveSend ? activeSend : send}
+            alt=""
+            style={{
+              marginRight: "5px",
+              height: "15px",
+            }}
+          />
+          <FormattedMessage id="main.account.button.send" />
+        </Button>
+      </ToolTip>
+      <ToolTip
+        tooltip={<FormattedMessage id="main.stake.button.claim-rewards" />}
+        theme="dark"
+        trigger="hover"
+        options={{
+          placement: "top",
         }}
       >
-        <img
-          src={isActiveReward ? activeReward : reward}
-          alt=""
-          style={{
-            marginRight: "5px",
-            height: "18px",
+        <Button
+          className={styleTxButton.button}
+          outline
+          color="primary"
+          disabled={!accountInfo.isReadyToSendMsgs || !isRewardExist}
+          onClick={withdrawAllRewards}
+          data-loading={accountInfo.isSendingMsg === "withdrawRewards"}
+          onMouseEnter={() => {
+            setIsActiveReward(true);
           }}
-        />
-        <FormattedMessage id="main.stake.button.claim-rewards" />
-      </Button>
-
+          onMouseLeave={() => {
+            setIsActiveReward(false);
+          }}
+        >
+          <img
+            src={isActiveReward ? activeReward : reward}
+            alt=""
+            style={{
+              marginRight: "5px",
+              height: "18px",
+            }}
+          />
+          <FormattedMessage id="main.stake.button.claim-rewards" />
+        </Button>
+      </ToolTip>
       <a
         href={chainStore.current.walletUrlForStaking}
         target="_blank"
@@ -170,28 +187,37 @@ export const TxButtonView: FunctionComponent = observer(() => {
           }
         }}
       >
-        <Button
-          className={styleTxButton.button}
-          disabled={!isStakableExist}
-          color="primary"
-          outline
-          onMouseEnter={() => {
-            setIsActiveStake(true);
-          }}
-          onMouseLeave={() => {
-            setIsActiveStake(false);
+        <ToolTip
+          tooltip={<FormattedMessage id="main.stake.button.stake" />}
+          theme="dark"
+          trigger="hover"
+          options={{
+            placement: "top",
           }}
         >
-          <img
-            src={isActiveStake ? activeStake : stake}
-            alt=""
-            style={{
-              marginRight: "5px",
-              height: "15px",
+          <Button
+            className={styleTxButton.button}
+            disabled={!isStakableExist}
+            color="primary"
+            outline
+            onMouseEnter={() => {
+              setIsActiveStake(true);
             }}
-          />
-          <FormattedMessage id="main.stake.button.stake" />
-        </Button>
+            onMouseLeave={() => {
+              setIsActiveStake(false);
+            }}
+          >
+            <img
+              src={isActiveStake ? activeStake : stake}
+              alt=""
+              style={{
+                marginRight: "5px",
+                height: "15px",
+              }}
+            />
+            <FormattedMessage id="main.stake.button.stake" />
+          </Button>
+        </ToolTip>
       </a>
     </div>
   );
