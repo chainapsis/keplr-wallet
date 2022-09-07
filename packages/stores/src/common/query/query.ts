@@ -71,6 +71,27 @@ class FlowCanceler {
     }
   }
 
+  callOrCanceledWithPromise<R>(
+    promise: PromiseLike<R>,
+    onCancel?: () => void
+  ): Promise<R> {
+    return new Promise<R>((resolve, reject) => {
+      this.rejectors.push({
+        reject,
+        onCancel,
+      });
+
+      promise.then((r) => {
+        const i = this.rejectors.findIndex((r) => r.reject === reject);
+        if (i >= 0) {
+          this.rejectors.splice(i, 1);
+        }
+
+        resolve(r);
+      }, reject);
+    });
+  }
+
   callOrCanceled<R>(
     fn: () => PromiseLike<R>,
     onCancel?: () => void
@@ -184,7 +205,10 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
+  private _pendingOnStart: boolean = false;
+
   private readonly queryCanceler: FlowCanceler;
+  private readonly onStartCanceler: FlowCanceler;
   private readonly queryControllerConceler: FlowCanceler;
 
   private observedCount: number = 0;
@@ -209,6 +233,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this._instance = instance;
 
     this.queryCanceler = new FlowCanceler();
+    this.onStartCanceler = new FlowCanceler();
     this.queryControllerConceler = new FlowCanceler();
 
     makeObservable(this);
@@ -244,13 +269,53 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   private start() {
     if (!this._isStarted) {
       this._isStarted = true;
-      this.onStart();
+      const promise = this.onStart();
+      if (promise) {
+        this.handleAsyncOnStart(promise);
+      } else {
+        this.postStart();
+      }
+    }
+  }
+
+  @flow
+  private *handleAsyncOnStart(promise: PromiseLike<void>) {
+    this._pendingOnStart = true;
+    this._isFetching = true;
+
+    try {
+      yield this.onStartCanceler.callOrCanceledWithPromise(promise);
+      if (this._isStarted) {
+        this._pendingOnStart = false;
+        this.postStart();
+      }
+    } catch (e) {
+      if (e instanceof FlowCancelerError) {
+        return;
+      }
+      throw e;
     }
   }
 
   @action
   private stop() {
     if (this._isStarted) {
+      if (this.onStartCanceler.hasCancelable) {
+        this.onStartCanceler.cancel();
+      }
+
+      if (this.isFetching && this.queryCanceler.hasCancelable) {
+        this.cancel();
+      }
+
+      this._pendingOnStart = false;
+      this._isFetching = false;
+
+      if (this.intervalId != null) {
+        clearInterval(this.intervalId as NodeJS.Timeout);
+      }
+      this.intervalId = undefined;
+
       this.onStop();
       this._isStarted = false;
     }
@@ -266,7 +331,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
   };
 
-  protected onStart() {
+  private postStart() {
     this.fetch();
 
     if (this.options.fetchingInterval > 0) {
@@ -277,14 +342,14 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
   }
 
-  protected onStop() {
-    if (this.isFetching && this.queryCanceler.hasCancelable) {
-      this.cancel();
-    }
+  protected onStart(): void | Promise<void> {
+    // noop yet.
+    // Override this if you need something to do whenever starting.
+  }
 
-    if (this.intervalId != null) {
-      clearInterval(this.intervalId as NodeJS.Timeout);
-    }
+  protected onStop() {
+    // noop yet.
+    // Override this if you need something to do whenever starting.
   }
 
   protected canFetch(): boolean {
@@ -307,7 +372,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @flow
   *fetch(): Generator<unknown, any, any> {
     // If not started, do nothing.
-    if (!this.isStarted) {
+    if (!this.isStarted || this._pendingOnStart) {
       return;
     }
 
