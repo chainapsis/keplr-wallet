@@ -1,34 +1,15 @@
-import React, { useEffect, useState, FunctionComponent, useRef } from "react";
+import React, { useState, FunctionComponent, useCallback } from "react";
 import { Button } from "reactstrap";
-import Modal from "react-modal";
 
 import styleDeposit from "./deposit.module.scss";
 import classnames from "classnames";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import { useNotification } from "../../components/notification";
+import { useIntl } from "react-intl";
+import { WalletStatus } from "@keplr-wallet/stores";
 import { FormattedMessage } from "react-intl";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const QrCode = require("qrcode");
-
-const DepositModal: FunctionComponent<{
-  bech32Address: string;
-}> = ({ bech32Address }) => {
-  const qrCodeRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (qrCodeRef.current && bech32Address) {
-      QrCode.toCanvas(qrCodeRef.current, bech32Address);
-    }
-  }, [bech32Address]);
-
-  return (
-    <div className={styleDeposit.depositModal}>
-      <h1 style={{ marginBottom: 0 }}>Scan QR code</h1>
-      <canvas className={styleDeposit.qrcode} id="qrcode" ref={qrCodeRef} />
-    </div>
-  );
-};
+import { DepositModal } from "./qr-code";
 
 export const DepositView: FunctionComponent = observer(() => {
   const { accountStore, chainStore } = useStore();
@@ -36,25 +17,40 @@ export const DepositView: FunctionComponent = observer(() => {
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const [isDepositOpen, setIsDepositOpen] = useState(false);
 
+  const intl = useIntl();
+
+  const notification = useNotification();
+
+  const copyAddress = useCallback(
+    async (address: string) => {
+      if (accountInfo.walletStatus === WalletStatus.Loaded) {
+        await navigator.clipboard.writeText(address);
+        notification.push({
+          placement: "top-center",
+          type: "success",
+          duration: 2,
+          content: intl.formatMessage({
+            id: "main.address.copied",
+          }),
+          canDelete: true,
+          transition: {
+            duration: 0.25,
+          },
+        });
+      }
+    },
+    [accountInfo.walletStatus, accountInfo.bech32Address, notification, intl]
+  );
+
   return (
     <div>
       <div className={styleDeposit.containerInner}>
-        <Modal
-          style={{
-            content: {
-              width: "330px",
-              minWidth: "330px",
-              minHeight: "unset",
-              maxHeight: "unset",
-            },
-          }}
-          isOpen={isDepositOpen}
-          onRequestClose={() => {
-            setIsDepositOpen(false);
-          }}
-        >
-          <DepositModal bech32Address={accountInfo.bech32Address} />
-        </Modal>
+        <DepositModal
+          chainName={chainStore.current.chainName}
+          bech32Address={accountInfo.bech32Address}
+          isDepositOpen={isDepositOpen}
+          setIsDepositOpen={setIsDepositOpen}
+        />
 
         <div className={styleDeposit.vertical}>
           <p
@@ -87,6 +83,7 @@ export const DepositView: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             setIsDepositOpen(true);
+            copyAddress(accountInfo.bech32Address);
           }}
         >
           <FormattedMessage id="main.account.button.deposit" />

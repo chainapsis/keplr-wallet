@@ -1,5 +1,10 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { FormattedMessage } from "react-intl";
 import { ToolTip } from "../../components/tooltip";
 import { useLanguage } from "../../languages";
@@ -9,6 +14,10 @@ import { TxButtonView } from "./tx-button";
 import walletIcon from "../../public/assets/icon/wallet.png";
 import buyIcon from "../../public/assets/icon/buy.png";
 import { DepositView } from "./deposit";
+import { DepositModal } from "./qr-code";
+import { useNotification } from "../../components/notification";
+import { useIntl } from "react-intl";
+import { WalletStatus } from "@keplr-wallet/stores";
 
 export const ProgressBar = ({
   width,
@@ -42,15 +51,69 @@ export const ProgressBar = ({
   );
 };
 
-const EmptyState = ({ denom, chainId }: { denom: string; chainId: string }) => {
+const EmptyState = ({
+  chainName,
+  denom,
+  chainId,
+  bech32Address,
+  walletStatus,
+}: {
+  chainName: string;
+  denom: string;
+  chainId: string;
+  bech32Address: string;
+  walletStatus: WalletStatus;
+}) => {
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
+
+  const intl = useIntl();
+
+  const notification = useNotification();
+
+  const copyAddress = useCallback(
+    async (address: string) => {
+      if (walletStatus === WalletStatus.Loaded) {
+        await navigator.clipboard.writeText(address);
+        notification.push({
+          placement: "top-center",
+          type: "success",
+          duration: 2,
+          content: intl.formatMessage({
+            id: "main.address.copied",
+          }),
+          canDelete: true,
+          transition: {
+            duration: 0.25,
+          },
+        });
+      }
+    },
+    [walletStatus, bech32Address, notification, intl]
+  );
+
   return (
     <div className={styleAsset.emptyState}>
+      <DepositModal
+        chainName={chainName}
+        bech32Address={bech32Address}
+        isDepositOpen={isDepositOpen}
+        setIsDepositOpen={setIsDepositOpen}
+      />
+
       <h1 className={styleAsset.title}>No funds added</h1>
       <img src={walletIcon} alt="no fund" />
       <p className={styleAsset.desc}>
         That’s okay, you can deposit tokens to your address or buy some.
       </p>
-      <button>Deposit {denom}</button>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          copyAddress(bech32Address);
+          setIsDepositOpen(true);
+        }}
+      >
+        Deposit {denom}
+      </button>
       {chainId == "fetchhub-4" && (
         <a
           href={"https://indacoin.io/buy-fetch.ai-with-card"}
@@ -134,8 +197,11 @@ export const AssetView: FunctionComponent = observer(() => {
   if (!hasBalance) {
     return (
       <EmptyState
+        chainName={current.chainName}
         denom={chainStore.current.stakeCurrency.coinDenom}
         chainId={chainStore.current.chainId}
+        bech32Address={accountInfo.bech32Address}
+        walletStatus={accountInfo.walletStatus}
       />
     );
   }
