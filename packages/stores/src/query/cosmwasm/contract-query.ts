@@ -1,7 +1,6 @@
 import { ObservableChainQuery } from "../chain-query";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
-import { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
 
 import { Buffer } from "buffer/";
@@ -63,9 +62,9 @@ export class ObservableCosmwasmContractChainQuery<
   }
 
   protected async fetchResponse(
-    cancelToken: CancelToken
+    abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
-    const { response, headers } = await super.fetchResponse(cancelToken);
+    const { response, headers } = await super.fetchResponse(abortController);
 
     const wasmResult = (response.data as unknown) as
       | {

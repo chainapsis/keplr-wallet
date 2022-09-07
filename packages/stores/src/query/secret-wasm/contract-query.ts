@@ -4,7 +4,7 @@ import { ChainGetter } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
-import Axios, { CancelToken } from "axios";
+import Axios from "axios";
 import { QueryResponse } from "../../common";
 
 import { Buffer } from "buffer/";
@@ -102,12 +102,12 @@ export class ObservableSecretContractChainQuery<
   }
 
   protected async fetchResponse(
-    cancelToken: CancelToken
+    abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
     let response: QueryResponse<T>;
     let headers: any;
     try {
-      const fetched = await super.fetchResponse(cancelToken);
+      const fetched = await super.fetchResponse(abortController);
       response = fetched.response;
       headers = fetched.headers;
     } catch (e) {

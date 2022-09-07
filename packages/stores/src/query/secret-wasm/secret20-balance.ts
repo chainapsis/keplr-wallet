@@ -6,7 +6,6 @@ import { QueryError } from "../../common";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
 import { ObservableSecretContractChainQuery } from "./contract-query";
-import { CancelToken } from "axios";
 import { WrongViewingKeyError } from "./errors";
 import { Keplr } from "@keplr-wallet/types";
 
@@ -67,12 +66,12 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
   }
 
   protected async fetchResponse(
-    cancelToken: CancelToken
+    abortController: AbortController
   ): Promise<{
     response: QueryResponse<{ balance: { amount: string } }>;
     headers: any;
   }> {
-    const { response, headers } = await super.fetchResponse(cancelToken);
+    const { response, headers } = await super.fetchResponse(abortController);
 
     if (response.data["viewing_key_error"]) {
       throw new WrongViewingKeyError(response.data["viewing_key_error"]?.msg);

@@ -9,7 +9,7 @@ import {
   onBecomeUnobserved,
   reaction,
 } from "mobx";
-import Axios, { AxiosInstance, CancelToken, CancelTokenSource } from "axios";
+import Axios, { AxiosInstance } from "axios";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { DeepReadonly } from "utility-types";
 import { HasMapStore } from "../map";
@@ -122,7 +122,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
-  private cancelToken?: CancelTokenSource;
+  private abortController?: AbortController;
 
   private observedCount: number = 0;
 
@@ -285,11 +285,11 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       });
     }
 
-    this.cancelToken = Axios.CancelToken.source();
+    this.abortController = new AbortController();
 
     try {
       let { response, headers } = yield* toGenerator(
-        this.fetchResponse(this.cancelToken.token)
+        this.fetchResponse(this.abortController)
       );
       if (
         response.data &&
@@ -307,7 +307,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         // https://github.com/chainapsis/keplr-wallet/issues/275
         // https://github.com/chainapsis/keplr-wallet/issues/278
         // https://github.com/chainapsis/keplr-wallet/issues/318
-        if (this.cancelToken && this.cancelToken.token.reason) {
+        if (this.abortController && this.abortController.signal.aborted) {
           // In this case, it is assumed that it is caused by cancel() and do nothing.
           return;
         }
@@ -318,7 +318,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
         // Try to query again.
         const refetched = yield* toGenerator(
-          this.fetchResponse(this.cancelToken.token)
+          this.fetchResponse(this.abortController)
         );
         response = refetched.response;
         headers = refetched.headers;
@@ -381,7 +381,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       }
     } finally {
       this._isFetching = false;
-      this.cancelToken = undefined;
+      this.abortController = undefined;
     }
   }
 
@@ -404,8 +404,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   }
 
   private cancel(): void {
-    if (this.cancelToken) {
-      this.cancelToken.cancel();
+    if (this.abortController) {
+      this.abortController.abort();
     }
   }
 
@@ -466,7 +466,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   }
 
   protected abstract fetchResponse(
-    cancelToken: CancelToken
+    abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }>;
 
   /**
@@ -559,10 +559,10 @@ export class ObservableQuery<
   }
 
   protected async fetchResponse(
-    cancelToken: CancelToken
+    abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
     const result = await this.instance.get<T>(this.url, {
-      cancelToken,
+      signal: abortController.signal,
     });
     return {
       headers: result.headers,
