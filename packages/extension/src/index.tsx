@@ -1,3 +1,7 @@
+// Shim ------------
+require("setimmediate");
+// Shim ------------
+
 import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
 
