@@ -8,11 +8,12 @@ export class AutoLockAccountService {
   // Unit: ms
   protected autoLockInterval: number = 0;
 
-  protected autoLockTimer: NodeJS.Timeout | null = null;
   protected monitoringAppIsActiveTimer: NodeJS.Timeout | null = null;
   protected monitoringInterval: number = 10000;
 
   protected appLastUsedTime: number | null = null;
+
+  protected readonly ALARM_NAME_AUTOLOCK = "autolock-alarm";
 
   constructor(protected readonly kvStore: KVStore) {}
 
@@ -20,6 +21,17 @@ export class AutoLockAccountService {
     this.keyringService = keyringService;
     await this.loadInterval();
     this.startMonitoringSchedule();
+
+    browser.alarms.onAlarm.addListener((alarm) => {
+      this.alarmHandler(alarm);
+    });
+    window.addEventListener("beforeunload", () => {
+      this.lock();
+    });
+  }
+
+  private alarmHandler(alarm: browser.alarms.Alarm) {
+    if (alarm.name === this.ALARM_NAME_AUTOLOCK) this.lock();
   }
 
   private startMonitoringSchedule() {
@@ -30,9 +42,7 @@ export class AutoLockAccountService {
         if (isAppActive) {
           this.stopAutoLockAccountSchedule();
         } else {
-          if (this.autoLockTimer == null) {
-            this.startAutoLockAccountSchedule();
-          }
+          this.startAutoLockAccountSchedule();
         }
         this.startMonitoringSchedule();
       }, this.monitoringInterval);
@@ -64,8 +74,6 @@ export class AutoLockAccountService {
   }
 
   private startAutoLockAccountSchedule() {
-    this.stopAutoLockAccountSchedule();
-
     if (
       this.keyringService != null &&
       (this.keyringService.keyRingStatus === KeyRingStatus.LOCKED ||
@@ -73,19 +81,22 @@ export class AutoLockAccountService {
     )
       return;
 
-    if (this.autoLockInterval > 0) {
-      this.autoLockTimer = setTimeout(() => {
-        this.lock();
-        this.startAutoLockAccountSchedule();
-      }, this.autoLockInterval);
-    }
+    browser.alarms.get(this.ALARM_NAME_AUTOLOCK).then((result) => {
+      if (!result) {
+        if (this.autoLockInterval > 0) {
+          const interval = this.autoLockInterval / 60000;
+          browser.alarms.create(this.ALARM_NAME_AUTOLOCK, {
+            periodInMinutes: interval,
+          });
+        }
+      }
+    });
   }
 
   private stopAutoLockAccountSchedule() {
-    if (this.autoLockTimer != null) {
-      clearTimeout(this.autoLockTimer);
-      this.autoLockTimer = null;
-    }
+    browser.alarms.get(this.ALARM_NAME_AUTOLOCK).then((result) => {
+      if (result) browser.alarms.clear(this.ALARM_NAME_AUTOLOCK);
+    });
   }
 
   private lock() {
