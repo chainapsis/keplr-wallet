@@ -10,7 +10,11 @@ export interface BackProps {
 export function Back({ style }: BackProps) {
   const { goBack } = useNavigation();
   return (
-    <TouchableHighlight onPress={goBack} style={style}>
+    <TouchableHighlight
+      onPress={goBack}
+      style={style}
+      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+    >
       <FontAwesomeIcon icon={faChevronLeft} style={{ color: "#7B87A8" }} />
     </TouchableHighlight>
   );
