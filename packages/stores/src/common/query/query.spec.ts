@@ -1019,4 +1019,127 @@ describe("Test observable query", () => {
 
     closeServer();
   });
+
+  it("test basic auto refetching", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port, {
+      fetchingInterval: 100,
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 150);
+    });
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    let disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data >= 5) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 450);
+    });
+
+    expect(query.response?.data).toBe(4);
+
+    disposer();
+
+    // After becoming unobserved, refetching should stop.
+    await new Promise((resolve) => {
+      setTimeout(resolve, 150);
+    });
+    expect(query.response?.data).toBe(4);
+
+    // Now, refetching should be restarted.
+    disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (
+          query.response &&
+          (query.response.data < 4 || query.response.data >= 8)
+        ) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 250);
+    });
+
+    expect(query.response?.data).toBe(7);
+
+    disposer();
+
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    closeServer();
+  });
+
+  it("test auto refetching with cache", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port, {
+      cacheMaxAge: 150,
+      fetchingInterval: 100,
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 150);
+    });
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data >= 3) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 450);
+    });
+
+    expect(query.response?.data).toBe(2);
+
+    disposer();
+
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    closeServer();
+  });
 });
