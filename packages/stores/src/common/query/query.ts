@@ -41,7 +41,7 @@ export type QueryResponse<T> = {
   timestamp: number;
 };
 
-export class FlowCancelerError extends Error {
+class FlowCancelerError extends Error {
   constructor(m?: string) {
     super(m);
     // Set the prototype explicitly.
