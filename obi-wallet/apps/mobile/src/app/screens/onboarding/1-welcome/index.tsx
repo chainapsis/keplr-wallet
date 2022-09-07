@@ -7,12 +7,12 @@ import { StackParamList } from "../stack";
 import GetStarted from "./assets/get-started.svg";
 import RecoverWallet from "./assets/recover-wallet.svg";
 
-export type Onboarding1Props = NativeStackScreenProps<
+export type WelcomeOnboardingProps = NativeStackScreenProps<
   StackParamList,
   "onboarding1"
 >;
 
-export function Onboarding1({ navigation }: Onboarding1Props) {
+export function WelcomeOnboarding({ navigation }: WelcomeOnboardingProps) {
   return (
     <ImageBackground
       source={require("./assets/background.png")}

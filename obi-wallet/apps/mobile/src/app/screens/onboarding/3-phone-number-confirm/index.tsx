@@ -19,12 +19,15 @@ import { VerifyAndProceedButton } from "../../components/phone-number/verify-and
 import { StackParamList } from "../stack";
 import InsuranceLogo from "./assets/insurance-logo.svg";
 
-export type Onboarding3Props = NativeStackScreenProps<
+export type PhoneNumberConfirmOnboardingProps = NativeStackScreenProps<
   StackParamList,
   "onboarding3"
 >;
 
-export function Onboarding3({ navigation, route }: Onboarding3Props) {
+export function PhoneNumberConfirmOnboarding({
+  navigation,
+  route,
+}: PhoneNumberConfirmOnboardingProps) {
   const { params } = route;
 
   const { multisigStore } = useStore();

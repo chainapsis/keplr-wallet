@@ -1,9 +1,9 @@
-import { SocialKey } from "../components/keys/social-key";
-import { Onboarding1 } from "./onboarding1";
-import { Onboarding2 } from "./onboarding2";
-import { Onboarding3 } from "./onboarding3";
-import { Onboarding4 } from "./onboarding4";
-import { Onboarding6 } from "./onboarding6";
+import { WelcomeOnboarding } from "./1-welcome";
+import { PhoneNumberOnboarding } from "./2-phone-number";
+import { PhoneNumberConfirmOnboarding } from "./3-phone-number-confirm";
+import { BiometricsOnboarding } from "./4-biometrics";
+import { SocialOnboarding } from "./5-social";
+import { MultisigOnboarding } from "./6-multisig";
 import { Stack } from "./stack";
 
 export function OnboardingScreen() {
@@ -13,12 +13,15 @@ export function OnboardingScreen() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="onboarding1" component={Onboarding1} />
-      <Stack.Screen name="onboarding2" component={Onboarding2} />
-      <Stack.Screen name="onboarding3" component={Onboarding3} />
-      <Stack.Screen name="onboarding4" component={Onboarding4} />
-      <Stack.Screen name="onboarding5" component={SocialKey} />
-      <Stack.Screen name="onboarding6" component={Onboarding6} />
+      <Stack.Screen name="onboarding1" component={WelcomeOnboarding} />
+      <Stack.Screen name="onboarding2" component={PhoneNumberOnboarding} />
+      <Stack.Screen
+        name="onboarding3"
+        component={PhoneNumberConfirmOnboarding}
+      />
+      <Stack.Screen name="onboarding4" component={BiometricsOnboarding} />
+      <Stack.Screen name="onboarding5" component={SocialOnboarding} />
+      <Stack.Screen name="onboarding6" component={MultisigOnboarding} />
     </Stack.Navigator>
   );
 }
