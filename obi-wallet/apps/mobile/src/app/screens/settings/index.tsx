@@ -91,12 +91,14 @@ export function SettingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment 
       <Setting
         Icon={AccountSettingsIcon}
         title="Account settings"
         subtitle="Manage accounts & sub-accounts "
         onPress={() => navigation.navigate("AccountsSettings")}
       />
+      */}
       <Setting
         Icon={MultiSigIcon}
         title="Multisig settings"
