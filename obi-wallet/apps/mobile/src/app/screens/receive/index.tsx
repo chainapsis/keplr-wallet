@@ -38,7 +38,7 @@ export const ReceiveScreen = observer(() => {
         justifyContent: "space-between",
       }}
     >
-      <View>
+      <View style={{ zIndex: 2 }}>
         <View style={{ flexDirection: "row" }}>
           <Back style={{ alignSelf: "flex-start", zIndex: 2 }} />
           <Text
