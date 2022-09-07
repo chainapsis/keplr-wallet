@@ -17,9 +17,9 @@ import EventEmitter from "eventemitter3";
 
 export type QueryOptions = {
   // millisec
-  cacheMaxAge: number;
+  readonly cacheMaxAge: number;
   // millisec
-  fetchingInterval: number;
+  readonly fetchingInterval: number;
 };
 
 export const defaultOptions: QueryOptions = {
@@ -165,7 +165,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     );
   }
 
-  protected options: QueryOptions;
+  protected readonly options: QueryOptions;
 
   // Just use the oberable ref because the response is immutable and not directly adjusted.
   @observable.ref
