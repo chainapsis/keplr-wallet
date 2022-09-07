@@ -58,6 +58,9 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { LogPageViewWrapper } from "./components/analytics";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
+import { SettingAutoLockPage } from "./pages/setting/autolock";
+import { UpdateAppLastUsedTimeMsg } from "@keplr-wallet/background/src/auto-lock-account/messages";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -129,6 +132,28 @@ const StateRenderer: FunctionComponent = observer(() => {
   } else {
     return <div>Unknown status</div>;
   }
+});
+
+const appLoadedHandler = () => {
+  updateAppLastUsedTime();
+  updateAppLastUsedTimeSchedule();
+};
+
+function updateAppLastUsedTime() {
+  const msg = new UpdateAppLastUsedTimeMsg();
+  const requester = new InExtensionMessageRequester();
+  requester.sendMessage(BACKGROUND_PORT, msg);
+}
+
+function updateAppLastUsedTimeSchedule() {
+  setTimeout(() => {
+    updateAppLastUsedTime();
+    updateAppLastUsedTimeSchedule();
+  }, 5000);
+}
+
+window.addEventListener("load", function () {
+  appLoadedHandler();
 });
 
 ReactDOM.render(
@@ -229,6 +254,11 @@ ReactDOM.render(
                     exact
                     path="/setting/endpoints"
                     component={SettingEndpointsPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/autolock"
+                    component={SettingAutoLockPage}
                   />
                   <Route path="/sign" component={SignPage} />
                   <Route path="/suggest-chain" component={ChainSuggestedPage} />

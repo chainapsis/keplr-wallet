@@ -115,6 +115,23 @@ export const SettingPage: FunctionComponent = observer(() => {
           )}
         />
         <PageButton
+          title={intl.formatMessage({
+            id: "setting.autolock",
+          })}
+          paragraph={intl.formatMessage({
+            id: "setting.autolock.paragraph",
+          })}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/autolock",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
           title="Show Advanced IBC Transfers"
           onClick={() => {
             uiConfigStore.setShowAdvancedIBCTransfer(

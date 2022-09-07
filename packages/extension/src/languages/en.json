@@ -118,6 +118,13 @@
   "setting.endpoints.button.reset": "Reset",
   "setting.endpoints.button.confirm": "Confirm",
 
+  "setting.autolock": "Auto-Lock",
+  "setting.autolock.paragraph": "Your can set to Auto-Lock Account time",
+  "setting.autolock.interval": "Duration (Unit : minute)",
+  "setting.autolock.description": "Auto-Lock settings will be saved by clicking 'Submit'. Inactivity beyond the set duration will activate Auto-Lock.",
+  "setting.autolock.error.required": "Duration is required",
+  "setting.autolock.error.out-of-range": "It cannot be less than 0 or greater than 4320(3days)",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",
