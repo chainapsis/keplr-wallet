@@ -1,4 +1,9 @@
-import { ObservableQuery, QueryOptions } from "./index";
+import {
+  DeferInitialQueryController,
+  ObservableQuery,
+  ObservableQueryBase,
+  QueryOptions,
+} from "./query";
 import { KVStore, MemoryKVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import Http from "http";
@@ -1187,6 +1192,201 @@ describe("Test observable query", () => {
     expect(abortSpy).toBeCalledTimes(0);
 
     abortSpy.mockRestore();
+
+    closeServer();
+  });
+
+  it("test set url before query controller ready not make query", async () => {
+    // Setting url before `DeferInitialQueryController` is ready should not make a query.
+    // This permits to determine the url conditionally before query controller is ready.
+
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer, getNum } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port, {}, "/invalid");
+
+    const queryController = new DeferInitialQueryController();
+    ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(query.isObserved).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.isFetching).toBe(false);
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data !== 0) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    query.changeURL("/test");
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    query.changeURL("/invalid");
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    query.changeURL("/test");
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(abortSpy).toBeCalledTimes(0);
+    expect(getNum()).toBe(0);
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    queryController.ready();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    disposer();
+
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    expect(getNum()).toBe(1);
+
+    ObservableQuery.experimentalDeferInitialQueryController = undefined;
+
+    closeServer();
+  });
+
+  it("test set url before query controller ready not make query (with cache max age option)", async () => {
+    // Setting url before `DeferInitialQueryController` is ready should not make a query.
+    // This permits to determine the url conditionally before query controller is ready.
+
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer, getNum } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(
+      memStore,
+      port,
+      {
+        cacheMaxAge: 100,
+      },
+      "/invalid"
+    );
+
+    const queryController = new DeferInitialQueryController();
+    ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(query.isObserved).toBe(false);
+    expect(query.isStarted).toBe(false);
+    expect(query.isFetching).toBe(false);
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data !== 0) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    query.changeURL("/test");
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    query.changeURL("/invalid");
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    query.changeURL("/test");
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(abortSpy).toBeCalledTimes(0);
+    expect(getNum()).toBe(0);
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(true);
+    expect(query.error).toBeUndefined();
+    expect(query.response).toBeUndefined();
+
+    queryController.ready();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(query.isObserved).toBe(true);
+    expect(query.isStarted).toBe(true);
+    expect(query.isFetching).toBe(false);
+    expect(query.error).toBeUndefined();
+    expect(query.response?.data).toBe(0);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    disposer();
+
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    expect(getNum()).toBe(1);
+
+    ObservableQuery.experimentalDeferInitialQueryController = undefined;
 
     closeServer();
   });

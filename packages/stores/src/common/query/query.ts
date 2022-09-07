@@ -103,6 +103,10 @@ export class DeferInitialQueryController {
   @observable
   protected _isReady: boolean = false;
 
+  constructor() {
+    makeObservable(this);
+  }
+
   @action
   ready() {
     this._isReady = true;
@@ -181,6 +185,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   private _isStarted: boolean = false;
 
   private readonly queryCanceler: FlowCanceler;
+  private readonly queryControllerConceler: FlowCanceler;
 
   private observedCount: number = 0;
 
@@ -204,6 +209,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this._instance = instance;
 
     this.queryCanceler = new FlowCanceler();
+    this.queryControllerConceler = new FlowCanceler();
 
     makeObservable(this);
 
@@ -310,9 +316,29 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       !ObservableQueryBase.experimentalDeferInitialQueryController.isReady
     ) {
       this._isFetching = true;
-      yield ObservableQueryBase.experimentalDeferInitialQueryController.wait();
-    }
 
+      if (this.queryControllerConceler.hasCancelable) {
+        this.queryControllerConceler.cancel();
+      }
+
+      try {
+        yield this.queryControllerConceler.callOrCanceled(
+          () =>
+            ObservableQueryBase.experimentalDeferInitialQueryController?.wait() ??
+            Promise.resolve()
+        );
+      } catch (e) {
+        if (e instanceof FlowCancelerError) {
+          return;
+        }
+        throw e;
+      }
+
+      // Recheck
+      if (!this.isStarted) {
+        return;
+      }
+    }
     if (!this.canFetch()) {
       return;
     }
