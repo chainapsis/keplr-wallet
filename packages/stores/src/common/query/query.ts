@@ -23,7 +23,7 @@ export type QueryOptions = {
 };
 
 export const defaultOptions: QueryOptions = {
-  cacheMaxAge: Number.MAX_VALUE,
+  cacheMaxAge: 0,
   fetchingInterval: 0,
 };
 
@@ -197,8 +197,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     options: Partial<QueryOptions>
   ) {
     this.options = {
-      ...options,
       ...defaultOptions,
+      ...options,
     };
 
     this._instance = instance;
@@ -323,24 +323,51 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       this.cancel("__fetching__proceed__next__");
     }
 
-    this._isFetching = true;
-
     // If there is no existing response, try to load saved reponse.
     if (!this._response) {
-      // When first load, try to load the last response from disk.
-      // To improve performance, don't wait the loading to proceed.
-      // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
-      this.loadStaledResponse().then((staledResponse) => {
+      this._isFetching = true;
+
+      const promise = this.loadStaledResponse();
+
+      const handleStaledResponse = (
+        staledResponse: QueryResponse<T> | undefined
+      ) => {
         if (staledResponse && !this._response) {
           if (
-            staledResponse.timestamp >
-            Date.now() - this.options.cacheMaxAge
+            this.options.cacheMaxAge <= 0 ||
+            staledResponse.timestamp > Date.now() - this.options.cacheMaxAge
           ) {
             this.setResponse(staledResponse);
+            return true;
           }
         }
-      });
+        return false;
+      };
+
+      // When first load, try to load the last response from disk.
+      // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
+      if (this.options.cacheMaxAge <= 0) {
+        // To improve performance, don't wait the loading to proceed if cache age not set.
+        promise.then((staledResponse) => {
+          handleStaledResponse(staledResponse);
+        });
+      } else {
+        const staledResponse = yield* toGenerator(promise);
+        if (handleStaledResponse(staledResponse)) {
+          this._isFetching = false;
+          return;
+        }
+      }
     } else {
+      if (this.options.cacheMaxAge > 0) {
+        if (this._response.timestamp > Date.now() - this.options.cacheMaxAge) {
+          this._isFetching = false;
+          return;
+        }
+      }
+
+      this._isFetching = true;
+
       // Make the existing response as staled.
       this.setResponse({
         ...this._response,
