@@ -41,6 +41,64 @@ export type QueryResponse<T> = {
   timestamp: number;
 };
 
+export class ImmediateCancelerError extends Error {
+  constructor(m?: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, ImmediateCancelerError.prototype);
+  }
+}
+
+class ImmediateCanceler {
+  protected rejectors: {
+    reject: (e: Error) => void;
+    onCancel?: () => void;
+  }[] = [];
+
+  get hasCancelable(): boolean {
+    return this.rejectors.length > 0;
+  }
+
+  cancel(message?: string) {
+    while (this.rejectors.length > 0) {
+      const rejector = this.rejectors.shift();
+      if (rejector) {
+        rejector.reject(new ImmediateCancelerError(message));
+        if (rejector.onCancel) {
+          rejector.onCancel();
+        }
+      }
+    }
+  }
+
+  callOrCanceled<R>(
+    fn: () => PromiseLike<R>,
+    onCancel?: () => void
+  ): Promise<R> {
+    return new Promise<R>((resolve, reject) => {
+      this.rejectors.push({
+        reject,
+        onCancel,
+      });
+
+      Promise.resolve().then(() => {
+        if (!this.rejectors.find((r) => r.reject === reject)) {
+          return;
+        }
+
+        fn().then((r) => {
+          const i = this.rejectors.findIndex((r) => r.reject === reject);
+          if (i >= 0) {
+            this.rejectors.splice(i, 1);
+          }
+
+          resolve(r);
+        }, reject);
+      });
+    });
+  }
+}
+
 export class DeferInitialQueryController {
   @observable
   protected _isReady: boolean = false;
@@ -122,7 +180,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
-  private abortController?: AbortController;
+  private readonly queryCanceler: ImmediateCanceler;
 
   private observedCount: number = 0;
 
@@ -144,6 +202,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     };
 
     this._instance = instance;
+
+    this.queryCanceler = new ImmediateCanceler();
 
     makeObservable(this);
 
@@ -212,7 +272,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   }
 
   protected onStop() {
-    this.cancel();
+    if (this.isFetching && this.queryCanceler.hasCancelable) {
+      this.cancel();
+    }
 
     if (this.intervalId != null) {
       clearInterval(this.intervalId as NodeJS.Timeout);
@@ -256,8 +318,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
 
     // If response is fetching, cancel the previous query.
-    if (this.isFetching) {
-      this.cancel();
+    if (this.isFetching && this.queryCanceler.hasCancelable) {
+      // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues. Use an error message to identify this.
+      this.cancel("__fetching__proceed__next__");
     }
 
     this._isFetching = true;
@@ -285,11 +348,17 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       });
     }
 
-    this.abortController = new AbortController();
+    const abortController = new AbortController();
+
+    let fetchingProceedNext = false;
+    let skipAxiosCancelError = false;
 
     try {
       let { response, headers } = yield* toGenerator(
-        this.fetchResponse(this.abortController)
+        this.queryCanceler.callOrCanceled(
+          () => this.fetchResponse(abortController),
+          () => abortController.abort()
+        )
       );
       if (
         response.data &&
@@ -307,7 +376,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         // https://github.com/chainapsis/keplr-wallet/issues/275
         // https://github.com/chainapsis/keplr-wallet/issues/278
         // https://github.com/chainapsis/keplr-wallet/issues/318
-        if (this.abortController && this.abortController.signal.aborted) {
+        if (abortController.signal.aborted) {
           // In this case, it is assumed that it is caused by cancel() and do nothing.
           return;
         }
@@ -318,7 +387,10 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
         // Try to query again.
         const refetched = yield* toGenerator(
-          this.fetchResponse(this.abortController)
+          this.queryCanceler.callOrCanceled(
+            () => this.fetchResponse(abortController),
+            () => abortController.abort()
+          )
         );
         response = refetched.response;
         headers = refetched.headers;
@@ -345,8 +417,17 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       // Should not wait.
       this.saveResponse(response);
     } catch (e) {
-      // If canceld, do nothing.
+      // If axios canceled, do nothing.
       if (Axios.isCancel(e)) {
+        skipAxiosCancelError = true;
+        return;
+      }
+
+      if (e instanceof ImmediateCancelerError) {
+        // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues.
+        if (e.message === "__fetching__proceed__next__") {
+          fetchingProceedNext = true;
+        }
         return;
       }
 
@@ -380,8 +461,11 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         this.setError(error);
       }
     } finally {
-      this._isFetching = false;
-      this.abortController = undefined;
+      if (!skipAxiosCancelError) {
+        if (!fetchingProceedNext) {
+          this._isFetching = false;
+        }
+      }
     }
   }
 
@@ -403,29 +487,49 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this._error = error;
   }
 
-  private cancel(): void {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
+  private cancel(message?: string): void {
+    this.queryCanceler.cancel(message);
   }
 
   /**
    * Wait the response and return the response without considering it is staled or fresh.
    */
   waitResponse(): Promise<Readonly<QueryResponse<T>> | undefined> {
-    if (!this.isFetching) {
+    if (this.response) {
       return Promise.resolve(this.response);
     }
 
-    return new Promise((resolve) => {
+    const disposers: (() => void)[] = [];
+    let onceCoerce = false;
+    // Make sure that the fetching is tracked to force to be fetched.
+    disposers.push(
+      reaction(
+        () => this.isFetching,
+        () => {
+          if (!onceCoerce) {
+            if (!this.isFetching) {
+              this.fetch();
+            }
+            onceCoerce = true;
+          }
+        },
+        {
+          fireImmediately: true,
+        }
+      )
+    );
+
+    return new Promise<Readonly<QueryResponse<T>> | undefined>((resolve) => {
       const disposer = autorun(() => {
         if (!this.isFetching) {
           resolve(this.response);
-          if (disposer) {
-            disposer();
-          }
         }
       });
+      disposers.push(disposer);
+    }).finally(() => {
+      for (const disposer of disposers) {
+        disposer();
+      }
     });
   }
 
@@ -433,35 +537,37 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
    * Wait the response and return the response until it is fetched.
    */
   waitFreshResponse(): Promise<Readonly<QueryResponse<T>> | undefined> {
+    const disposers: (() => void)[] = [];
     let onceCoerce = false;
     // Make sure that the fetching is tracked to force to be fetched.
-    const reactionDisposer = reaction(
-      () => this.isFetching,
-      () => {
-        if (!onceCoerce) {
-          if (!this.isFetching) {
-            this.fetch();
+    disposers.push(
+      reaction(
+        () => this.isFetching,
+        () => {
+          if (!onceCoerce) {
+            if (!this.isFetching) {
+              this.fetch();
+            }
+            onceCoerce = true;
           }
-          onceCoerce = true;
+        },
+        {
+          fireImmediately: true,
         }
-      },
-      {
-        fireImmediately: true,
-      }
+      )
     );
 
-    return new Promise((resolve) => {
+    return new Promise<Readonly<QueryResponse<T>> | undefined>((resolve) => {
       const disposer = autorun(() => {
         if (!this.isFetching) {
           resolve(this.response);
-          if (reactionDisposer) {
-            reactionDisposer();
-          }
-          if (disposer) {
-            disposer();
-          }
         }
       });
+      disposers.push(disposer);
+    }).finally(() => {
+      for (const disposer of disposers) {
+        disposer();
+      }
     });
   }
 

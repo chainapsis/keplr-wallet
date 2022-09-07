@@ -100,7 +100,6 @@ export class DelayMemoryKVStore extends MemoryKVStore {
 describe("Test observable query", () => {
   const createTestServer = (delay: number = 100) => {
     let num = 0;
-    let cancelCount = 0;
 
     const server = Http.createServer((req, resp) => {
       if (req.url === "/invalid") {
@@ -129,12 +128,8 @@ describe("Test observable query", () => {
         return;
       }
 
-      let fulfilled = false;
       let closed = false;
       req.once("close", () => {
-        if (!fulfilled) {
-          cancelCount++;
-        }
         closed = true;
       });
       setTimeout(() => {
@@ -144,7 +139,6 @@ describe("Test observable query", () => {
 
           num++;
         }
-        fulfilled = true;
       }, delay);
     });
 
@@ -162,13 +156,14 @@ describe("Test observable query", () => {
         server.close();
       },
       getNum: () => num,
-      getServerCancelCount: () => cancelCount,
     };
   };
 
   it("basic test", async () => {
     const basicTestFn = async (store: KVStore) => {
-      const { port, closeServer, getServerCancelCount } = createTestServer();
+      const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+      const { port, closeServer } = createTestServer();
 
       const query = new MockObservableQuery(store, port);
 
@@ -226,7 +221,9 @@ describe("Test observable query", () => {
       await query.waitFreshResponse();
       expect(query.response?.data).toBe(1);
 
-      expect(getServerCancelCount()).toBe(0);
+      expect(abortSpy).toBeCalledTimes(0);
+
+      abortSpy.mockRestore();
 
       closeServer();
     };
@@ -241,10 +238,189 @@ describe("Test observable query", () => {
     await basicTestFn(delayMemStore);
   });
 
+  it("test waitResponse() can ignore other component unobserved", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer } = createTestServer(500);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port);
+
+    const disposer = autorun(
+      () => {
+        if (query.response) {
+          throw new Error("not canceled");
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    setTimeout(() => {
+      disposer();
+    }, 200);
+
+    const res = await query.waitResponse();
+    expect(res?.data).toBe(0);
+
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    closeServer();
+  });
+
+  it("test waitResponse() can ignore fetch requests", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer } = createTestServer(500);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port);
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data !== 0) {
+          throw new Error("not canceled");
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    // Below line makes cancel and refresh
+    setTimeout(() => {
+      query.fetch();
+    }, 10);
+
+    const res = await query.waitResponse();
+    expect(res?.data).toBe(0);
+
+    expect(abortSpy).toBeCalledTimes(1);
+
+    abortSpy.mockRestore();
+
+    disposer();
+
+    closeServer();
+  });
+
+  it("test waitFreshResponse() can ignore other component unobserved", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer } = createTestServer(500);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port);
+
+    await query.waitFreshResponse();
+
+    const disposer = autorun(
+      () => {
+        if (query.response?.data !== 0) {
+          throw new Error("not canceled");
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    setTimeout(() => {
+      disposer();
+    }, 200);
+
+    const res = await query.waitFreshResponse();
+    expect(res?.data).toBe(1);
+
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    closeServer();
+  });
+
+  it("test waitFreshResponse() can ignore fetch requests", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer } = createTestServer(500);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port);
+
+    await query.waitFreshResponse();
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response?.data !== 0 && query.response?.data !== 1) {
+          throw new Error("not canceled");
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    // Below line makes cancel and refresh
+    setTimeout(() => {
+      query.fetch();
+    }, 10);
+
+    const res = await query.waitFreshResponse();
+    expect(res?.data).toBe(1);
+
+    expect(abortSpy).toBeCalledTimes(1);
+
+    abortSpy.mockRestore();
+
+    disposer();
+
+    closeServer();
+  });
+
+  it("test waitFreshResponse()/waitFreshResponse()", async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer } = createTestServer();
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port);
+
+    let res = await query.waitResponse();
+    expect(res?.data).toBe(0);
+
+    res = await query.waitFreshResponse();
+    expect(res?.data).toBe(1);
+
+    res = await query.waitResponse();
+    expect(res?.data).toBe(1);
+
+    res = await query.waitFreshResponse();
+    expect(res?.data).toBe(2);
+
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    closeServer();
+  });
+
   it("test basic cancellation", async () => {
     const abortSpy = jest.spyOn(AbortController.prototype, "abort");
 
-    const { port, closeServer, getServerCancelCount } = createTestServer(500);
+    const { port, closeServer } = createTestServer(500);
 
     const memStore = new MemoryKVStore("test");
     const query = new MockObservableQuery(memStore, port);
@@ -296,7 +472,6 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    expect(getServerCancelCount()).toBe(1);
     expect(abortSpy).toBeCalledTimes(1);
 
     abortSpy.mockRestore();
