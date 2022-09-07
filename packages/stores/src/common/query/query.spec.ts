@@ -1142,4 +1142,52 @@ describe("Test observable query", () => {
 
     closeServer();
   });
+
+  it("test set url before start not make query", async () => {
+    // Setting url before `start` should not make a query.
+    // This permits to determine the url conditionally before starting.
+
+    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+
+    const { port, closeServer } = createTestServer(10);
+
+    const memStore = new MemoryKVStore("test");
+    const query = new MockObservableQuery(memStore, port, {}, "/invalid");
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    // Should not fetch until starting observed.
+    expect(query.response).toBeUndefined();
+
+    query.changeURL("/test");
+
+    const disposer = autorun(
+      () => {
+        // This makes the response observed. Thus, fetching starts.
+        if (query.response && query.response.data !== 0) {
+          throw new Error();
+        }
+      },
+      {
+        onError: (e) => {
+          throw e;
+        },
+      }
+    );
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(query.response?.data).toBe(0);
+
+    disposer();
+
+    expect(abortSpy).toBeCalledTimes(0);
+
+    abortSpy.mockRestore();
+
+    closeServer();
+  });
 });
