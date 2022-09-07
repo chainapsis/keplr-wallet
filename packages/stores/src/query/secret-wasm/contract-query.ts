@@ -4,7 +4,6 @@ import { ChainGetter } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
-import Axios from "axios";
 import { QueryResponse } from "../../common";
 
 import { Buffer } from "buffer/";
@@ -111,7 +110,7 @@ export class ObservableSecretContractChainQuery<
       response = fetched.response;
       headers = fetched.headers;
     } catch (e) {
-      if (!Axios.isCancel(e) && e.response?.data?.error) {
+      if (e.response?.data?.error) {
         const encryptedError = e.response.data.error;
 
         const errorMessageRgx = /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
