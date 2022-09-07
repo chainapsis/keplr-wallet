@@ -67,25 +67,6 @@ export function Account() {
         </Text>
       </View>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       <View
         style={{
           height: 165,
@@ -94,12 +75,6 @@ export function Account() {
           borderRadius: 16,
         }}
       >
-
-
-
-
-
-
         <ImageBackground
           source={require("./assets/accountbg.png")}
           style={{ flex: 1, padding: 20, position: "relative" }}
@@ -119,95 +94,78 @@ export function Account() {
             <FontAwesomeIcon icon={faGear} style={{ color: "#F6F5FF" }} />
           </TouchableHighlight> */}
 
-
-
-
-<View
-          style={{
-            flexDirection: "column",
-            justifyContent: "flex-start"
-          }}
-        >
-
-
-<View
-          style={{
-
-            flexDirection: "row",
-            alignItems: "center",
-            //backgroundColor: "red",
-            height: 50
-          }}
-        >
-          <TouchableOpacity
+          <View
             style={{
-              borderRadius: 32,
-              backgroundColor: "white",
-              marginRight: 17,
+              flexDirection: "column",
+              justifyContent: "flex-start",
             }}
           >
-            <ObiLogo
+            <View
               style={{
-                width: 42,
-                height: 42,
-              }}
-            />
-          </TouchableOpacity>
-
-          <View style={{ flexDirection: "column"}}>
-            <Text
-              style={{
-                color: "#F6F5FF",
-                fontSize: 18,
-                fontWeight: "700",
-                fontFamily: "Inter",
+                flexDirection: "row",
+                alignItems: "center",
+                //backgroundColor: "red",
+                height: 50,
               }}
             >
-              Obi Secure Multisig Account
-            </Text>
+              <TouchableOpacity
+                style={{
+                  borderRadius: 32,
+                  backgroundColor: "white",
+                  marginRight: 17,
+                }}
+              >
+                <ObiLogo
+                  style={{
+                    width: 42,
+                    height: 42,
+                  }}
+                />
+              </TouchableOpacity>
 
+              <View style={{ flexDirection: "column" }}>
+                <Text
+                  style={{
+                    color: "#F6F5FF",
+                    fontSize: 18,
+                    fontWeight: "700",
+                    fontFamily: "Inter",
+                  }}
+                >
+                  Obi Secure Multisig Account
+                </Text>
+              </View>
+            </View>
 
-
-
+            <View
+              style={{
+                marginTop: 10,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#787B9C",
+                  marginTop: 8,
+                  marginLeft: 10,
+                  fontSize: 11,
+                  fontWeight: "500",
+                }}
+              >
+                BALANCE
+              </Text>
+              <Text
+                style={{
+                  color: "#F6F5FF",
+                  marginTop: 10,
+                  marginLeft: 10,
+                  fontSize: 20,
+                  fontWeight: "500",
+                }}
+              >
+                $38,166.92
+              </Text>
+            </View>
           </View>
-
-
-        </View>
-
-
-<View             style={{
-
-              marginTop: 10,
-
-            }}>
-          <Text
-            style={{
-              color: "#787B9C",
-              marginTop: 8,
-              marginLeft: 10,
-              fontSize: 11,
-              fontWeight: "500",
-            }}
-          >
-            BALANCE
-          </Text>
-          <Text
-            style={{
-              color: "#F6F5FF",
-              marginTop: 10,
-              marginLeft: 10,
-              fontSize: 20,
-              fontWeight: "500",
-            }}
-          >
-            $38,166.92
-          </Text>
-</View>
-
-
-        </View>
-
-
 
           {/* <TouchableHighlight
             style={{
@@ -230,8 +188,7 @@ export function Account() {
         </ImageBackground>
       </View>
 
-
-              {/* 
+      {/* 
       <View
         style={{
           backgroundColor: "#16152D",
@@ -283,7 +240,7 @@ export function Account() {
 
 */}
 
-        {/** 
+      {/** 
         <View>
           <View
             style={{
