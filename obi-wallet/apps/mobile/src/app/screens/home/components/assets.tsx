@@ -9,6 +9,7 @@ import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { FormattedMessage } from "react-intl";
 import {
   FlatList,
   Image,
@@ -113,7 +114,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
                 fontWeight: "500",
               }}
             >
-              Network
+              <FormattedMessage id="network" defaultMessage="Network" />
             </Text>
             <Text style={{ color: "#F6F5FF", fontSize: 14 }}>
               {isSmallScreenSubstr(currentNetwork, "...", 15, 16)}
@@ -141,7 +142,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
               textAlign: "right",
             }}
           >
-            Wallet name
+            <FormattedMessage id="walletName" defaultMessage="Wallet name" />
           </Text>
           <Text
             style={{
@@ -190,7 +191,7 @@ const BalanceAndActions = observer(() => {
           letterSpacing: 0.7,
         }}
       >
-        Balance
+        <FormattedMessage id="balance" defaultMessage="Balance" />
       </Text>
 
       <View
@@ -259,9 +260,10 @@ const BalanceAndActions = observer(() => {
               fontWeight: "500",
               marginTop: 10,
               letterSpacing: 0.09,
+              textTransform: "uppercase",
             }}
           >
-            SEND
+            <FormattedMessage id="send" defaultMessage="Send" />
           </Text>
         </View>
         <View style={{ alignItems: "center" }}>
@@ -285,9 +287,10 @@ const BalanceAndActions = observer(() => {
               fontWeight: "500",
               marginTop: 10,
               letterSpacing: 0.09,
+              textTransform: "uppercase",
             }}
           >
-            RECEIVE
+            <FormattedMessage id="receive" defaultMessage="Receive" />
           </Text>
         </View>
         {/*<View style={{ alignItems: "center" }}>*/}
@@ -355,8 +358,15 @@ const AssetsList = observer(() => {
             justifyContent: "space-between",
           }}
         >
-          <Text style={{ color: "#787B9C", fontSize: 11, letterSpacing: 0.7 }}>
-            NAME
+          <Text
+            style={{
+              color: "#787B9C",
+              fontSize: 11,
+              letterSpacing: 0.7,
+              textTransform: "uppercase",
+            }}
+          >
+            <FormattedMessage id="name" defaultMessage="Name" />
           </Text>
           <View
             style={{
@@ -364,9 +374,14 @@ const AssetsList = observer(() => {
             }}
           >
             <Text
-              style={{ color: "#787B9C", fontSize: 11, letterSpacing: 0.7 }}
+              style={{
+                color: "#787B9C",
+                fontSize: 11,
+                letterSpacing: 0.7,
+                textTransform: "uppercase",
+              }}
             >
-              HOLDINGS
+              <FormattedMessage id="holdings" defaultMessage="Holdings" />
             </Text>
             <IconButton
               style={{ justifyContent: "center", marginBottom: 5 }}

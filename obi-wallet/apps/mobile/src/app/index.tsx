@@ -11,11 +11,14 @@ import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
 
+const language = "de";
+
 export function App() {
   return (
     <IntlProvider
-      locale="en"
-      messages={messages["en"]}
+      defaultLocale="en"
+      locale={language}
+      messages={messages[language]}
       formats={{
         date: {
           en: {

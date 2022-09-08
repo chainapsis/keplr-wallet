@@ -1,0 +1,20 @@
+{
+  "home.appStoreLabel": "App Store",
+  "loading": "Lade...",
+  "switchLanguage": "Zu Deutsch wechseln",
+  "network": "Netzwerk",
+  "walletName": "Wallet Name",
+  "balance": "Kontostand",
+  "send": "Senden",
+  "receive": "Empfangen",
+  "name": "Name",
+  "holdings": "Bestände",
+  "assets": "Assets",
+  "nfts": "NFTS",
+  "apps": "Apps",
+  "trade": "Handeln",
+  "settings": "Einstellungen",
+  "networks": "Netzwerke",
+  "morecomingsoon": "Weitere folgen in Kürze",
+  "loadingnfts": "Lade NFTs.."
+}

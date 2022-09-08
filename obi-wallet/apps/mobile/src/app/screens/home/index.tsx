@@ -11,6 +11,7 @@ import {
   DrawerScreenProps,
 } from "@react-navigation/drawer";
 import { ParamListBase } from "@react-navigation/native";
+import { useIntl, FormattedMessage } from "react-intl";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { isSmallScreenNumber } from "../components/screen-size";
@@ -45,6 +46,8 @@ export function TabNavigation({ route }: TabNavigationProps) {
   const currentNetwork = route.name;
   const initialParams = { currentNetwork };
 
+  const intl = useIntl();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -55,15 +58,15 @@ export function TabNavigation({ route }: TabNavigationProps) {
             icon = faHome;
           }
           switch (route.name) {
-            case "Assets":
+            case intl.formatMessage({ id: "assets" }):
               return !focused ? <AssetsIcon /> : <AssetsIconActive />;
-            case "Apps":
+            case intl.formatMessage({ id: "apps" }):
               return !focused ? <AppsIcon /> : <AppsIconActive />;
-            case "NFTs":
+            case intl.formatMessage({ id: "nfts" }):
               return !focused ? <NFTsIcon /> : <NFTsIconActive />;
-            case "Trade":
+            case intl.formatMessage({ id: "trade" }):
               return !focused ? <TradeIcon /> : <TradeIconActive />;
-            case "Settings":
+            case intl.formatMessage({ id: "settings" }):
               return !focused ? <SettingsIcon /> : <SettingsIconActive />;
             default:
               icon = faChevronLeft;
@@ -96,23 +99,27 @@ export function TabNavigation({ route }: TabNavigationProps) {
       })}
     >
       <Tab.Screen
-        name="Assets"
+        name={intl.formatMessage({ id: "assets" })}
         component={Assets}
         initialParams={initialParams}
       />
-      <Tab.Screen name="NFTs" component={NFTs} initialParams={initialParams} />
       <Tab.Screen
-        name="Apps"
+        name={intl.formatMessage({ id: "nfts" })}
+        component={NFTs}
+        initialParams={initialParams}
+      />
+      <Tab.Screen
+        name={intl.formatMessage({ id: "apps" })}
         component={DappExplorer}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name="Trade"
+        name={intl.formatMessage({ id: "trade" })}
         component={Trade}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name="Settings"
+        name={intl.formatMessage({ id: "settings" })}
         component={SettingsScreen}
         initialParams={initialParams}
       />
@@ -180,7 +187,10 @@ function CustomDrawerContent(props) {
           textTransform: "uppercase",
         }}
       >
-        Networks
+        <FormattedMessage
+          id="networks"
+          defaultMessage="Networks"
+        />
       </Text>
       <DrawerItemList {...props} />
       <Text
@@ -192,7 +202,10 @@ function CustomDrawerContent(props) {
           textTransform: "uppercase",
         }}
       >
-        More Coming Soon!
+        <FormattedMessage
+          id="morecomingsoon"
+          defaultMessage="More coming soon"
+        />
       </Text>
     </DrawerContentScrollView>
   );

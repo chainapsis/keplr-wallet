@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -37,7 +38,10 @@ export function NFTs() {
             style={{ marginBottom: 20 }}
           />
           <Text style={{ color: "white", fontSize: 20, fontWeight: "700" }}>
-            Loading NFTs..
+          <FormattedMessage
+          id="loadingnfts"
+          defaultMessage="Loading NFTs.."
+        />
           </Text>
         </View>
       )}
