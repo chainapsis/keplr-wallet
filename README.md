@@ -16,6 +16,7 @@ Note: on m1 Mac, use `brew install cocoapods` instead of `sudo gem install cocoa
 In `obi-wallet` directory:
 
 - `yarn setup`
+- `nx run mobile:injected-provider-dev`
 - Add `.env` to `apps/mobile/.env` as described in Notion.
 
 ### Workflow
