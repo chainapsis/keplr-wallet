@@ -22,6 +22,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
+import {
+  isSmallScreenNumber,
+  isSmallScreenSubstr,
+} from "../../components/screen-size";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
@@ -36,7 +40,10 @@ export function Assets({ route }: AssetsProps) {
     <ImageBackground
       source={require("../assets/background.png")}
       resizeMode="cover"
-      imageStyle={{ height: 403 }}
+      imageStyle={{
+        height: 403,
+        marginTop: isSmallScreenNumber(0, 60),
+      }}
       style={{
         backgroundColor: "#090817",
         flex: 1,
@@ -61,10 +68,12 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
 
+  const walletName = "dungeon_master";
+
   return (
     <View
       style={{
-        padding: 20,
+        padding: 16,
         flexDirection: "row",
         justifyContent: "space-between",
       }}
@@ -77,7 +86,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
           justifyContent: "center",
           alignItems: "center",
           minWidth: 100,
-          paddingHorizontal: 20,
+          paddingHorizontal: 13,
           paddingVertical: 10,
           borderRadius: 8,
         }}
@@ -87,12 +96,12 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <FontAwesomeIcon
               icon={faAngleDoubleLeft}
-              style={{ color: "#7B87A8", marginLeft: 5 }}
+              style={{ color: "#7B87A8" }}
             />
           </View>
           <View
             style={{
-              paddingHorizontal: 20,
+              paddingLeft: 10,
               justifyContent: "center",
               alignItems: "flex-start",
             }}
@@ -100,24 +109,28 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
             <Text
               style={{
                 color: "rgba(246, 245, 255, 0.6)",
-                fontSize: 12,
-                fontWeight: "600",
+                fontSize: 9,
+                fontWeight: "500",
               }}
             >
               Network
             </Text>
-            <Text style={{ color: "white" }}>{currentNetwork}</Text>
+            <Text style={{ color: "#F6F5FF", fontSize: 14 }}>
+              {isSmallScreenSubstr(currentNetwork, "...", 15, 16)}
+            </Text>
           </View>
         </>
       </TouchableHighlight>
 
-      <TouchableOpacity
+      {/** <TouchableOpacity  // Disabled navigation due to decision - account-screen should not be accessable currently */}
+      <View
         style={{
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
         }}
-        onPress={() => navigation.navigate("AccountsSettings")}
+        // Disabled navigation due to decision - account-screen should not be accessable currently
+        //onPress={() => navigation.navigate("AccountsSettings")}
       >
         <View style={{ margin: 10 }}>
           <Text
@@ -138,14 +151,14 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
               textAlign: "right",
             }}
           >
-            dungeon_master
+            {isSmallScreenSubstr(walletName, "...", 15, 18)}
           </Text>
         </View>
         <Image
           source={require("../assets/backgroundblue.png")}
           style={{ width: 35, height: 35, borderRadius: 35 }}
         />
-      </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -160,13 +173,62 @@ const BalanceAndActions = observer(() => {
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
   return (
-    <View style={{ justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ color: "#787B9C", fontSize: 11, fontWeight: "500" }}>
+    <View
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: isSmallScreenNumber(30, 58),
+      }}
+    >
+      <Text
+        style={{
+          color: "#787B9C",
+          fontSize: 11,
+          fontWeight: "500",
+          marginBottom: 10,
+          textTransform: "uppercase",
+          letterSpacing: 0.7,
+        }}
+      >
         Balance
       </Text>
-      <Text style={{ color: "#F6F5FF", fontSize: 20, fontWeight: "500" }}>
-        ${balanceInUsd.toFixed(2)}
-      </Text>
+
+      <View
+        style={{
+          flexDirection: "row",
+        }}
+      >
+        <Text
+          style={{
+            color: "#F6F5FF",
+            fontSize: 20,
+            fontWeight: "500",
+            alignSelf: "flex-end",
+            marginBottom: 2,
+          }}
+        >
+          $
+        </Text>
+        <Text
+          style={{
+            color: "#F6F5FF",
+            fontSize: 28,
+            fontWeight: "500",
+          }}
+        >
+          {balanceInUsd.toFixed(2).split(".")[0]}.
+        </Text>
+        <Text
+          style={{
+            color: "#F6F5FF",
+            fontSize: 28,
+            fontWeight: "normal",
+          }}
+        >
+          {balanceInUsd.toFixed(2).split(".")[1]}
+        </Text>
+      </View>
+
       <View
         style={{
           flexDirection: "row",
@@ -188,7 +250,7 @@ const BalanceAndActions = observer(() => {
             }}
             onPress={() => navigation.navigate("send")}
           >
-            <Send width={22} height={22} />
+            <Send width={25} height={25} />
           </TouchableHighlight>
           <Text
             style={{
@@ -196,6 +258,7 @@ const BalanceAndActions = observer(() => {
               fontSize: 9,
               fontWeight: "500",
               marginTop: 10,
+              letterSpacing: 0.09,
             }}
           >
             SEND
@@ -213,7 +276,7 @@ const BalanceAndActions = observer(() => {
             }}
             onPress={() => navigation.navigate("receive")}
           >
-            <Receive width={22} height={22} />
+            <Receive width={25} height={25} />
           </TouchableHighlight>
           <Text
             style={{
@@ -221,6 +284,7 @@ const BalanceAndActions = observer(() => {
               fontSize: 9,
               fontWeight: "500",
               marginTop: 10,
+              letterSpacing: 0.09,
             }}
           >
             RECEIVE
@@ -245,6 +309,7 @@ const BalanceAndActions = observer(() => {
         {/*      fontSize: 9,*/}
         {/*      fontWeight: "500",*/}
         {/*      marginTop: 10,*/}
+        {/*      letterSpacing: 0.09,*/}
         {/*    }}*/}
         {/*  >*/}
         {/*    PAY*/}
@@ -267,7 +332,9 @@ const AssetsList = observer(() => {
     <View
       style={{
         flexGrow: 1,
-        marginTop: 20,
+        flexDirection: "row",
+        justifyContent: "center",
+        marginTop: isSmallScreenNumber(30, 40),
         backgroundColor: "#100F1E",
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
@@ -276,46 +343,66 @@ const AssetsList = observer(() => {
     >
       <View
         style={{
-          height: 20,
           width: "100%",
-          marginTop: 30,
-          flexDirection: "row",
-          justifyContent: "space-between",
         }}
       >
-        <Text style={{ color: "#787B9C" }}>NAME</Text>
-        <View style={{ flexDirection: "row" }}>
-          <Text style={{ color: "#787B9C" }}>HOLDINGS</Text>
-          <IconButton
-            style={{ justifyContent: "center" }}
-            onPress={() => {
-              setSortAscending((value) => !value);
+        <View
+          style={{
+            height: 20,
+            width: "100%",
+            marginTop: 30,
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text style={{ color: "#787B9C", fontSize: 11, letterSpacing: 0.7 }}>
+            NAME
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
             }}
           >
-            <FontAwesomeIcon
-              icon={faSortAsc}
-              style={{
-                color: sortAscending ? "#F6F5FF" : "#393853",
-                marginLeft: 5,
+            <Text
+              style={{ color: "#787B9C", fontSize: 11, letterSpacing: 0.7 }}
+            >
+              HOLDINGS
+            </Text>
+            <IconButton
+              style={{ justifyContent: "center", marginBottom: 5 }}
+              onPress={() => {
+                setSortAscending((value) => !value);
               }}
-            />
-            <FontAwesomeIcon
-              icon={faSortDesc}
-              style={{
-                color: sortAscending ? "#393853" : "#F6F5FF",
-                marginLeft: 5,
-                marginTop: -15,
-              }}
-            />
-          </IconButton>
+            >
+              <FontAwesomeIcon
+                icon={faSortAsc}
+                style={{
+                  color: sortAscending ? "#F6F5FF" : "#393853",
+                  marginLeft: 12,
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faSortDesc}
+                style={{
+                  color: sortAscending ? "#393853" : "#F6F5FF",
+                  marginLeft: 12,
+                  marginTop: -15,
+                }}
+              />
+            </IconButton>
+          </View>
         </View>
-      </View>
-      <View>
-        <FlatList
-          keyExtractor={(coin) => coin.denom}
-          data={balances}
-          renderItem={(props) => <AssetsListItem {...props} />}
-        />
+
+        <View>
+          <FlatList
+            keyExtractor={(coin) => coin.denom}
+            data={balances}
+            renderItem={(props) => <AssetsListItem {...props} />}
+            style={{
+              marginTop: 28,
+            }}
+          />
+        </View>
       </View>
     </View>
   );
@@ -327,55 +414,100 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
   return (
     <View
       style={{
-        height: 40,
-        width: "100%",
+        height: 36,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 10,
+        marginBottom: 28,
       }}
     >
-      {icon}
+      <View
+        style={{
+          height: 36,
+          width: 36,
+          backgroundColor: "#E9983D",
+          borderRadius: 10,
+          marginRight: 12,
+        }}
+      >
+        {icon}
+      </View>
+
       <View
         style={{
           flex: 1,
           height: "100%",
           flexDirection: "row",
           justifyContent: "space-between",
-          paddingLeft: 5,
         }}
       >
         <View>
           <Text style={{ color: "#F6F5FF", fontSize: 14, fontWeight: "500" }}>
-            {label}
+            {isSmallScreenSubstr(label, "...", 23, 30)}
           </Text>
           <Text
             style={{
               color: "rgba(246, 245, 255, 0.6)",
               fontSize: 12,
               fontWeight: "400",
+              marginTop: 4,
             }}
           >
             {denom}
           </Text>
         </View>
-        <View>
-          <Text
+
+        <View
+          style={{
+            flexDirection: "column",
+            alignItems: "flex-end",
+          }}
+        >
+          <View
             style={{
-              color: "#F6F5FF",
-              fontSize: 14,
-              fontWeight: "500",
-              textAlign: "right",
+              flexDirection: "row",
             }}
           >
-            ${valueInUsd.toFixed(2)}
-          </Text>
+            <Text
+              style={{
+                color: "#F6F5FF",
+                fontSize: 12,
+                fontWeight: "500",
+                marginTop: 3,
+                textAlign: "right",
+              }}
+            >
+              $
+            </Text>
+            <Text
+              style={{
+                color: "#F6F5FF",
+                fontSize: 14,
+                fontWeight: "500",
+                textAlign: "right",
+              }}
+            >
+              {valueInUsd.toFixed(2).split(".")[0]}.
+            </Text>
+            <Text
+              style={{
+                color: "#F6F5FF",
+                fontSize: 14,
+                fontWeight: "normal",
+                textAlign: "right",
+              }}
+            >
+              {valueInUsd.toFixed(2).split(".")[1]}
+            </Text>
+          </View>
+
           <Text
             style={{
               color: "rgba(246, 245, 255, 0.6);",
               fontSize: 12,
               fontWeight: "400",
               textAlign: "right",
+              marginTop: 4,
             }}
           >
             {amount} {denom}
