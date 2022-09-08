@@ -13,7 +13,11 @@ const phishings = [
 ];
 
 const createMockServer = () => {
+  let queryCount = 0;
+
   const server = Http.createServer((req, resp) => {
+    queryCount++;
+
     // Most desired case
     if (req.url === "/list1") {
       resp.writeHead(200);
@@ -62,6 +66,7 @@ const createMockServer = () => {
     }
 
     // Even if an invalid endpoint exists, only that endpoint should be ignored and proceeded.
+    // When second fetch, add other domain to test fetching interval.
     if (req.url === "/list3") {
       resp.writeHead(200);
       let str = "";
@@ -97,7 +102,24 @@ const createMockServer = () => {
         str += phishing;
       }
       str += ";invalid";
+
+      if (queryCount === 2) {
+        str += ";added.domain";
+      }
+
       resp.end(str);
+      return;
+    }
+
+    if (req.url === "/test-retry") {
+      if (queryCount % 3 === 0) {
+        resp.writeHead(400);
+        resp.end();
+        return;
+      }
+
+      resp.writeHead(200);
+      resp.end(phishings.slice(0, queryCount).join("\n"));
       return;
     }
 
@@ -117,6 +139,9 @@ const createMockServer = () => {
     closeServer: () => {
       server.close();
     },
+    getQueryCount: () => {
+      return queryCount;
+    },
   };
 };
 
@@ -124,11 +149,13 @@ describe("Test phishing list service", () => {
   let eachService: PhishingListService | undefined;
   let port: number = -1;
   let closeServer: (() => void) | undefined;
+  let getQueryCount: () => number;
 
   beforeEach(() => {
     const server = createMockServer();
     port = server.port;
     closeServer = server.closeServer;
+    getQueryCount = server.getQueryCount;
   });
 
   afterEach(() => {
@@ -220,5 +247,104 @@ describe("Test phishing list service", () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     testCheckURLIsPhishing(service);
+  });
+
+  test("Test basic PhishingListService fetching interval", async () => {
+    const service = new PhishingListService({
+      blockListUrl: `http://127.0.0.1:${port}/list3`,
+      fetchingIntervalMs: 200,
+      retryIntervalMs: 3600,
+    });
+    eachService = service;
+
+    service.init();
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    testCheckURLIsPhishing(service);
+    expect(service.checkURLIsPhishing("https://added.domain")).toBe(false);
+
+    expect(getQueryCount()).toBe(1);
+
+    // Wait re-fetching
+    await new Promise((resolve) => setTimeout(resolve, 210));
+
+    testCheckURLIsPhishing(service);
+    // See the implementation of /list3
+    expect(service.checkURLIsPhishing("https://added.domain")).toBe(true);
+
+    expect(getQueryCount()).toBe(2);
+
+    // Wait re-fetching
+    await new Promise((resolve) => setTimeout(resolve, 210));
+
+    testCheckURLIsPhishing(service);
+    // See the implementation of /list3
+    expect(service.checkURLIsPhishing("https://added.domain")).toBe(false);
+
+    expect(getQueryCount()).toBe(3);
+  });
+
+  test("Test basic PhishingListService fetching interval with retry interval", async () => {
+    const service = new PhishingListService({
+      blockListUrl: `http://127.0.0.1:${port}/test-retry`,
+      fetchingIntervalMs: 200,
+      retryIntervalMs: 100,
+    });
+    eachService = service;
+
+    service.init();
+
+    const testPhishingUntil = (count: number) => {
+      const tests = phishings.slice(0, count);
+      for (const test of tests) {
+        expect(service.checkURLIsPhishing("https://" + test)).toBe(true);
+      }
+      if (phishings.length > count) {
+        const test = phishings[count];
+        expect(service.checkURLIsPhishing("https://" + test)).toBe(false);
+      }
+    };
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    testPhishingUntil(1);
+    expect(getQueryCount()).toBe(1);
+
+    // Wait re-fetching
+    await new Promise((resolve) => setTimeout(resolve, 210));
+
+    // See the implementation of /test-retry
+    testPhishingUntil(2);
+    expect(getQueryCount()).toBe(2);
+
+    // Wait re-fetching
+    await new Promise((resolve) => setTimeout(resolve, 210));
+
+    // See the implementation of /test-retry
+    // In this case, the fetching should be failed.
+    // So, there is no update on phishing list.
+    testPhishingUntil(2);
+    expect(getQueryCount()).toBe(3);
+
+    // Wait retry for failed query
+    await new Promise((resolve) => setTimeout(resolve, 110));
+
+    // See the implementation of /test-retry
+    testPhishingUntil(4);
+    expect(getQueryCount()).toBe(4);
+
+    // Not yet re-fetching
+    await new Promise((resolve) => setTimeout(resolve, 110));
+
+    // See the implementation of /test-retry
+    testPhishingUntil(4);
+    expect(getQueryCount()).toBe(4);
+
+    // Now re-fetching
+    await new Promise((resolve) => setTimeout(resolve, 110));
+    // See the implementation of /test-retry
+    testPhishingUntil(5);
+    expect(getQueryCount()).toBe(5);
   });
 });
