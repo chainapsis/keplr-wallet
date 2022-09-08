@@ -21,6 +21,8 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
       return null;
     case MultisigState.EMPTY:
       return <OnboardingScreen />;
+    case MultisigState.READY:
+      return <OnboardingScreen initialRouteName="onboarding6" />;
     case MultisigState.OUTDATED:
       // TODO: show a migration screen
       console.log("Outdated proxy");

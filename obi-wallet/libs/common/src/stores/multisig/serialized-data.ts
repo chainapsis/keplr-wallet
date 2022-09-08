@@ -179,10 +179,48 @@ export function migrateSerializedProxyAddress(
   return serializedProxyAddress;
 }
 
-export const SerializedData = t.type({
+export const SerializedProxyAddressPerChain = t.partial({
+  "uni-3": nullable(SerializedProxyAddress),
+  "juno-1": nullable(SerializedProxyAddress),
+});
+export type SerializedProxyAddressPerChain = t.TypeOf<
+  typeof SerializedProxyAddressPerChain
+>;
+
+export const SerializedDataV0 = t.type({
   nextAdmin: SerializedMultisigPayloadAnyVersion,
   currentAdmin: nullable(SerializedMultisigPayloadAnyVersion),
   proxyAddress: nullable(SerializedProxyAddressAnyVersion),
 });
-
+export const SerializedData = t.type({
+  nextAdmin: SerializedMultisigPayload,
+  currentAdmin: nullable(SerializedMultisigPayload),
+  proxyAddresses: SerializedProxyAddressPerChain,
+});
 export type SerializedData = t.TypeOf<typeof SerializedData>;
+
+export const SerializedDataAnyVersion = t.union([
+  SerializedDataV0,
+  SerializedData,
+]);
+export type SerializedDataAnyVersion = t.TypeOf<
+  typeof SerializedDataAnyVersion
+>;
+
+export function migrateSerializedData(
+  serializedData: SerializedDataAnyVersion
+): SerializedData {
+  if (SerializedDataV0.is(serializedData)) {
+    return {
+      nextAdmin: migrateSerializedMultisigPayload(serializedData.nextAdmin),
+      currentAdmin: serializedData.currentAdmin
+        ? migrateSerializedMultisigPayload(serializedData.currentAdmin)
+        : null,
+      proxyAddresses: {
+        "uni-3": migrateSerializedProxyAddress(serializedData.proxyAddress),
+      },
+    };
+  }
+
+  return serializedData;
+}

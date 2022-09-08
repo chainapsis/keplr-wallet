@@ -1,6 +1,17 @@
+import {
+  coins,
+  pubkeyToAddress,
+  pubkeyType,
+  Secp256k1Wallet,
+} from "@cosmjs/amino";
+import { chains } from "@obi-wallet/common";
 import { randomBytes } from "crypto";
 import * as Keychain from "react-native-keychain";
 import secp256k1 from "secp256k1";
+
+import { rootStore } from "../../background/root-store";
+import { createSigningStargateClient, createStargateClient } from "../clients";
+import { lendFees } from "../fee-lender-worker";
 
 const BIOMETRICS_KEY = "obi-wallet-biometrics";
 
@@ -87,12 +98,46 @@ export async function createBiometricSignature({
       Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
   });
 
-  if (credentials) {
-    const privateKey = new Uint8Array(
-      Buffer.from(credentials.password, "base64")
-    );
-    return secp256k1.ecdsaSign(payload, privateKey);
-  } else {
-    throw new Error("No biometrics keypair found");
+  if (!credentials) throw new Error("No biometrics keypair found");
+
+  console.log("Checking if factor ready");
+  const { multisigStore } = rootStore;
+  const chainId = multisigStore.currentChain;
+  const { prefix, denom } = chains[chainId];
+  const client = await createStargateClient(chainId);
+
+  const address = pubkeyToAddress(
+    {
+      type: pubkeyType.secp256k1,
+      value: credentials.username,
+    },
+    prefix
+  );
+
+  if (!(await client.getAccount(address))) {
+    await lendFees({ chainId, address });
   }
+
+  if (!(await client.getAccount(address))?.pubkey) {
+    const signer = await Secp256k1Wallet.fromKey(
+      new Uint8Array(Buffer.from(credentials.password, "base64")),
+      prefix
+    );
+    const signingClient = await createSigningStargateClient({
+      chainId,
+      signer,
+    });
+    await signingClient.sendTokens(
+      address,
+      address,
+      coins(1, denom),
+      "auto",
+      ""
+    );
+  }
+
+  const privateKey = new Uint8Array(
+    Buffer.from(credentials.password, "base64")
+  );
+  return secp256k1.ecdsaSign(payload, privateKey);
 }

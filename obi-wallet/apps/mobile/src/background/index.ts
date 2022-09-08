@@ -22,7 +22,6 @@ import {
   EmbedChainInfos,
   KVStore,
   MessageRequesterInternalToUi,
-  migrateSerializedProxyAddress,
   PrivilegedOrigins,
   produceEnv,
   RouterBackground,
@@ -140,11 +139,13 @@ class KeyRingService extends AbstractKeyRingService {
   async getKey(chainId: string): Promise<Key> {
     const data = await this.kvStore.get<unknown | undefined>("multisig");
 
+    console.log(data);
+
     if (!SerializedData.is(data)) {
       throw new Error("Invalid data");
     }
 
-    const proxyAddress = migrateSerializedProxyAddress(data.proxyAddress);
+    const proxyAddress = data.proxyAddresses[chainId];
 
     return {
       // TODO:

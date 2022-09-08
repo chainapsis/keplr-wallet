@@ -5,11 +5,11 @@ import {
   PHONE_NUMBER_KEY_SECRET,
   PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD,
   PHONE_NUMBER_TWILIO_BASIC_AUTH_USER,
-  PHONE_NUMBER_TWILIO_PHONE_NUMBER,
 } from "react-native-dotenv";
 
+import { rootStore } from "../../background/root-store";
+
 const DEV_SHARED_SECRET = PHONE_NUMBER_KEY_SECRET;
-const TWILIO_NUMBER = PHONE_NUMBER_TWILIO_PHONE_NUMBER;
 const TWILIO_BASIC_AUTH = `Basic ${Buffer.from(
   `${PHONE_NUMBER_TWILIO_BASIC_AUTH_USER}:${PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD}`
 ).toString("base64")}`;
@@ -97,21 +97,20 @@ async function encryptAndSendMessage({
 }) {
   const body = await getMessageBody(message);
   const formData = new FormData();
-  formData.append("To", TWILIO_NUMBER);
+  const { twilioPhoneNumber, twilioUrl } =
+    rootStore.multisigStore.currentChainInformation;
+  formData.append("To", twilioPhoneNumber);
   formData.append("From", phoneNumber);
   formData.append("Parameters", JSON.stringify({ trigger_body: body }));
 
   try {
-    await fetch(
-      "https://studio.twilio.com/v2/Flows/FW2de98dc924361e35906dad1ed6125dc6/Executions",
-      {
-        body: formData,
-        method: "post",
-        headers: {
-          Authorization: TWILIO_BASIC_AUTH,
-        },
-      }
-    );
+    await fetch(twilioUrl, {
+      body: formData,
+      method: "post",
+      headers: {
+        Authorization: TWILIO_BASIC_AUTH,
+      },
+    });
   } catch (e) {
     console.error(e);
     Alert.alert("Error fetchTwilio", e.message);
