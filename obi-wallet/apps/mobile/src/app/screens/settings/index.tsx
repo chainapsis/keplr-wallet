@@ -217,9 +217,6 @@ export function SettingsScreen() {
           </Text>
         </View>
       </View>
-
-      {/*<View style={[styles.flex1]}></View>*/}
-      {/*<View style={[styles.flex1]}></View>*/}
     </SafeAreaView>
   );
 }

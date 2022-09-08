@@ -104,7 +104,6 @@ export function Account() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                //backgroundColor: "red",
                 height: 50,
               }}
             >
@@ -129,7 +128,6 @@ export function Account() {
                     color: "#F6F5FF",
                     fontSize: 18,
                     fontWeight: "700",
-                    fontFamily: "Inter",
                   }}
                 >
                   Obi Secure Multisig Account
@@ -197,21 +195,11 @@ export function Account() {
           padding: 20,
         }}
       >
-        
-        
-        
-
         <View style={{ flexDirection: "row" }}>
           <Image
             source={require("./assets/avatars/avatars-3.png")}
             style={{ height: 42, width: 42, borderRadius: 42 }}
           />
-
-
-
-
-
-
           <View style={{ paddingLeft: 15, flex: 1, justifyContent: "space-around"}}>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
@@ -237,10 +225,6 @@ export function Account() {
             </Text>
           </View>
         </View>
-
-*/}
-
-      {/** 
         <View>
           <View
             style={{
@@ -249,7 +233,6 @@ export function Account() {
               borderRadius: 4,
               marginTop: 20,
               marginBottom: 8,
-              
             }}
           >
             <LinearGradient
@@ -303,7 +286,6 @@ export function Account() {
             />
           </View>
         </View>
-
       </View>
         */}
       <View
