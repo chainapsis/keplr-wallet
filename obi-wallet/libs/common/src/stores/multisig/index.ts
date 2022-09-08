@@ -98,7 +98,6 @@ export class MultisigStore {
         this.nextAdmin = nextAdmin;
         this.currentAdmin = currentAdmin;
         this.proxyAddresses = proxyAddresses;
-        this.loading = false;
       });
       void this.save();
       void this.kvStore.set("multisig-backup", null);
@@ -116,6 +115,8 @@ export class MultisigStore {
         await this.kvStore.set("multisig-backup", data);
       }
     }
+
+    this.loading = false;
   }
 
   @action
