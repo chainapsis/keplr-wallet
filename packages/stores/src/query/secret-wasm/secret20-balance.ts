@@ -22,7 +22,7 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
     protected readonly apiGetter: () => Promise<Keplr | undefined>,
     protected readonly contractAddress: string,
     protected readonly bech32Address: string,
-    protected readonly parent: ObservableQuerySecret20BalanceInner,
+    protected readonly viewingKey: string,
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
     super(
@@ -31,9 +31,12 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
       chainGetter,
       apiGetter,
       contractAddress,
-      {},
+      {
+        balance: { address: bech32Address, key: viewingKey },
+      },
       querySecretContractCodeHash
     );
+
     makeObservable(this);
 
     if (!this.viewingKey) {
@@ -42,21 +45,7 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
         statusText: "Viewing key is empty",
         message: "Viewing key is empty",
       });
-    } else {
-      this.setObj({
-        balance: { address: bech32Address, key: this.viewingKey },
-      });
     }
-  }
-
-  @computed
-  get viewingKey(): string {
-    const currency = this.parent.currency;
-    if ("type" in currency && currency.type === "secret20") {
-      return currency.viewingKey;
-    }
-
-    return "";
   }
 
   protected canFetch(): boolean {
@@ -107,6 +96,15 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
 
     makeObservable(this);
 
+    const viewingKey = (() => {
+      const currency = this.currency;
+      if ("type" in currency && currency.type === "secret20") {
+        return currency.viewingKey;
+      }
+
+      return "";
+    })();
+
     this.querySecret20Balance = new ObservableQuerySecret20Balance(
       kvStore,
       chainId,
@@ -114,7 +112,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
       this.apiGetter,
       denomHelper.contractAddress,
       bech32Address,
-      this,
+      viewingKey,
       this.querySecretContractCodeHash
     );
   }

@@ -64,26 +64,6 @@ export class ObservableCosmwasmContractChainQuery<
     return `/wasm/v1/contract/${contractAddress}/smart/${query}`;
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  protected setObj(obj: object) {
-    this.obj = obj;
-
-    const url = ObservableCosmwasmContractChainQuery.getUrlFromObj(
-      this.contractAddress,
-      this.obj
-    );
-
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    if (
-      chainInfo.features?.includes("cosmwasm") &&
-      chainInfo.features.includes("wasmd_0.24+")
-    ) {
-      this.setUrl(`/cosmwasm${url}`);
-    } else {
-      this.setUrl(url);
-    }
-  }
-
   protected canFetch(): boolean {
     return this.contractAddress.length !== 0;
   }

@@ -2,7 +2,7 @@ import { ObservableChainQuery } from "../chain-query";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
-import { autorun, computed, flow, makeObservable, observable } from "mobx";
+import { computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
 import { QueryResponse } from "../../common";
 
@@ -32,23 +32,24 @@ export class ObservableSecretContractChainQuery<
     // Don't need to set the url initially because it can't request without encyption.
     super(kvStore, chainId, chainGetter, ``);
     makeObservable(this);
-
-    // Try to get the keplr API.
-    this.initKeplr();
-
-    const disposer = autorun(() => {
-      // If the keplr API is ready and the contract code hash is fetched, try to init.
-      if (this.keplr && this.contractCodeHash) {
-        this.init();
-        disposer();
-      }
-    });
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  protected setObj(obj: object) {
-    this.obj = obj;
-    this.init();
+  protected async onStart() {
+    super.onStart();
+
+    if (!this.keplr) {
+      await this.initKeplr();
+    }
+
+    if (!this.keplr) {
+      throw new Error("Failed to get keplr");
+    }
+
+    await this.querySecretContractCodeHash
+      .getQueryContract(this.contractAddress)
+      .waitResponse();
+
+    await this.init();
   }
 
   get isFetching(): boolean {
