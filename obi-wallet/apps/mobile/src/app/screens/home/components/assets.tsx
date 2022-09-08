@@ -22,7 +22,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
-import { screenWidth, smallDeviceMaxWidth } from "../../components/screen-size";
+import {
+  isSmallScreenNumber,
+  isSmallScreenSubstr,
+} from "../../components/screen-size";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
@@ -39,7 +42,7 @@ export function Assets({ route }: AssetsProps) {
       resizeMode="cover"
       imageStyle={{
         height: 403,
-        marginTop: screenWidth <= smallDeviceMaxWidth ? 0 : 60,
+        marginTop: isSmallScreenNumber(0, 60),
       }}
       style={{
         backgroundColor: "#090817",
@@ -113,13 +116,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
               Network
             </Text>
             <Text style={{ color: "#F6F5FF", fontSize: 14 }}>
-              {screenWidth <= smallDeviceMaxWidth
-                ? currentNetwork.length >= 15
-                  ? currentNetwork.substring(0, 12) + "..."
-                  : currentNetwork
-                : currentNetwork.length >= 16
-                ? currentNetwork.substring(0, 13) + "..."
-                : currentNetwork}
+              {isSmallScreenSubstr(currentNetwork, "...", 15, 16)}
             </Text>
           </View>
         </>
@@ -154,13 +151,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
               textAlign: "right",
             }}
           >
-            {screenWidth <= smallDeviceMaxWidth
-              ? walletName.length >= 15
-                ? walletName.substring(0, 12) + "..."
-                : walletName
-              : walletName.length >= 18
-              ? walletName.substring(0, 15) + "..."
-              : walletName}
+            {isSmallScreenSubstr(walletName, "...", 15, 18)}
           </Text>
         </View>
         <Image
@@ -186,7 +177,7 @@ const BalanceAndActions = observer(() => {
       style={{
         justifyContent: "center",
         alignItems: "center",
-        marginTop: screenWidth <= smallDeviceMaxWidth ? 30 : 58,
+        marginTop: isSmallScreenNumber(30, 58),
       }}
     >
       <Text
@@ -343,7 +334,7 @@ const AssetsList = observer(() => {
         flexGrow: 1,
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: screenWidth <= smallDeviceMaxWidth ? 30 : 40,
+        marginTop: isSmallScreenNumber(30, 40),
         backgroundColor: "#100F1E",
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
@@ -452,13 +443,7 @@ function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
       >
         <View>
           <Text style={{ color: "#F6F5FF", fontSize: 14, fontWeight: "500" }}>
-            {screenWidth <= smallDeviceMaxWidth
-              ? label.length >= 25
-                ? label.substring(0, 22) + "..."
-                : label
-              : label.length >= 30
-              ? label.substring(0, 27) + "..."
-              : label}
+            {isSmallScreenSubstr(label, "...", 23, 30)}
           </Text>
           <Text
             style={{
