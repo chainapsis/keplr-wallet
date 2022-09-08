@@ -46,7 +46,12 @@ export function init(
       // General operation should be fine. This is a temporary solution for the mobile app.
       useMemoryKVStore: boolean;
     }>;
-  }> = {}
+  }> = {},
+  createKeyRingService: (
+    store: KVStore,
+    embedChainInfos: ChainInfo[],
+    commonCrypto: CommonCrypto
+  ) => KeyRing.AbstractKeyRingService
 ) {
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester,
@@ -80,7 +85,7 @@ export function init(
     ledgerOptions
   );
 
-  const keyRingService = new KeyRing.KeyRingService(
+  const keyRingService = createKeyRingService(
     storeCreator("keyring"),
     embedChainInfos,
     commonCrypto

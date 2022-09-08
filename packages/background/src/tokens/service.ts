@@ -12,7 +12,7 @@ import {
 } from "../chains";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
-import { KeyRingService } from "../keyring";
+import { AbstractKeyRingService } from "../keyring";
 import { KVStore } from "@keplr-wallet/common";
 import { KeyRingStatus } from "../keyring";
 import { InteractionService } from "../interaction";
@@ -26,7 +26,7 @@ export class TokensService {
   protected interactionService!: InteractionService;
   public permissionService!: PermissionService;
   protected chainsService!: ChainsService;
-  protected keyRingService!: KeyRingService;
+  protected keyRingService!: AbstractKeyRingService;
 
   constructor(protected readonly kvStore: KVStore) {}
 
@@ -34,7 +34,7 @@ export class TokensService {
     interactionService: InteractionService,
     permissionService: PermissionService,
     chainsService: ChainsService,
-    keyRingService: KeyRingService
+    keyRingService: AbstractKeyRingService
   ) {
     this.interactionService = interactionService;
     this.permissionService = permissionService;

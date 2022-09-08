@@ -99,12 +99,21 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
 
   const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
 
-  const voted = proposal
-    ? queries.cosmos.queryProposalVote.getVote(
-        proposal.id,
-        account.bech32Address
-      ).vote
-    : undefined;
+  const voted = (() => {
+    if (!proposal) {
+      return undefined;
+    }
+
+    // Can fetch the vote only if the proposal is in voting period.
+    if (proposal.proposalStatus !== Governance.ProposalStatus.VOTING_PERIOD) {
+      return undefined;
+    }
+
+    return queries.cosmos.queryProposalVote.getVote(
+      proposal.id,
+      account.bech32Address
+    ).vote;
+  })();
 
   const intl = useIntl();
 

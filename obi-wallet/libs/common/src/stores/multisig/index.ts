@@ -35,7 +35,9 @@ export interface Multisig {
   }> | null;
   biometrics: WithAddress<SerializedBiometricsPayload> | null;
   phoneNumber: WithAddress<SerializedPhoneNumberPayload> | null;
-  cloud: WithAddress<SerializedCloudPayload> | null;
+  // cloud: WithAddress<SerializedCloudPayload> | null;
+  cloud: null;
+  email: null;
 }
 
 export type MultisigKey = keyof Omit<Multisig, "multisig">;
@@ -48,6 +50,8 @@ export enum MultisigState {
 }
 
 export const CURRENT_CODE_ID = 2855;
+
+export * from "./serialized-data";
 
 export class MultisigStore {
   @observable
@@ -211,6 +215,7 @@ export class MultisigStore {
         ...phoneNumber,
       },
       cloud: null,
+      email: null,
     };
   }
 

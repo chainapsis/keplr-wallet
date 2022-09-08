@@ -2,7 +2,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MultisigKey, Text } from "@obi-wallet/common";
-import { observer } from "mobx-react-lite/src/observer";
+import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {
@@ -87,7 +87,7 @@ export const KeysConfigScreen = observer(() => {
       title: "Phone Number Key",
     }),
     getKey({ id: "biometrics", title: "Biometrics Key" }),
-    getKey({ id: "cloud", title: "Cloud Key" }),
+    // getKey({ id: "cloud", title: "Cloud Key" }),
   ];
   const activatedKeys = data.filter((item) => item.activated).length;
 

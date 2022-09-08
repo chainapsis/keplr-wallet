@@ -182,7 +182,7 @@ export class CosmosAccountImpl {
     const hexAdjustedRecipient = (recipient: string) => {
       const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
         .bech32PrefixAccAddr;
-      if (bech32prefix === "evmos" && recipient.startsWith("0x")) {
+      if (this.hasEthereumAddress && recipient.startsWith("0x")) {
         // Validate hex address
         if (!isAddress(recipient)) {
           throw new Error("Invalid hex address");
@@ -280,7 +280,7 @@ export class CosmosAccountImpl {
     const hexAdjustedRecipient = (recipient: string) => {
       const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
         .bech32PrefixAccAddr;
-      if (bech32prefix === "evmos" && recipient.startsWith("0x")) {
+      if (this.hasEthereumAddress && recipient.startsWith("0x")) {
         // Validate hex address
         if (!isAddress(recipient)) {
           throw new Error("Invalid hex address");
@@ -538,9 +538,17 @@ export class CosmosAccountImpl {
         signerInfos: [
           {
             publicKey: {
-              typeUrl: useEthereumSign
-                ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
-                : "/cosmos.crypto.secp256k1.PubKey",
+              typeUrl: (() => {
+                if (!useEthereumSign) {
+                  return "/cosmos.crypto.secp256k1.PubKey";
+                }
+
+                if (this.chainId.startsWith("injective")) {
+                  return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+                }
+
+                return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+              })(),
               value: PubKey.encode({
                 key: Buffer.from(
                   signResponse.signature.pub_key.value,
@@ -1757,5 +1765,13 @@ export class CosmosAccountImpl {
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
+  }
+
+  protected get hasEthereumAddress(): boolean {
+    return (
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-address-gen") ?? false
+    );
   }
 }

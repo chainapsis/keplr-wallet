@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "common": "libs/common",
+    "injected-provider": "libs/injected-provider",
     "mobile": "apps/mobile"
   }
 }

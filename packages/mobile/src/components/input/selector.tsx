@@ -226,6 +226,7 @@ export const Selector: FunctionComponent<{
         placeHolder={placeHolder}
         selected={selected}
         onPress={() => setIsModalOpen(true)}
+        isFocused={isModalOpen}
       />
     </React.Fragment>
   );
@@ -248,6 +249,8 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
     | undefined;
 
   onPress: () => void;
+
+  isFocused?: boolean;
 }> = ({
   containerStyle,
   labelStyle,
@@ -257,6 +260,7 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
   placeHolder,
   selected,
   onPress,
+  isFocused,
 }) => {
   const style = useStyle();
 
@@ -277,16 +281,22 @@ export const SelectorButtonWithoutModal: FunctionComponent<{
       </Text>
       <RectButton
         style={StyleSheet.flatten([
-          style.flatten([
-            "background-color-white",
-            "dark:background-color-platinum-700",
-            "padding-x-11",
-            "padding-y-12",
-            "border-radius-6",
-            "border-width-1",
-            "border-color-gray-100@20%",
-            "dark:border-color-platinum-600@50%",
-          ]),
+          style.flatten(
+            [
+              "background-color-white",
+              "dark:background-color-platinum-700",
+              "padding-x-11",
+              "padding-y-12",
+              "border-radius-6",
+              "border-width-1",
+              "border-color-gray-100@20%",
+              "dark:border-color-platinum-600@50%",
+            ],
+            [
+              isFocused ? "border-color-blue-400" : undefined,
+              isFocused ? "dark:border-color-platinum-100" : undefined,
+            ]
+          ),
           selectorContainerStyle,
         ])}
         onPress={onPress}
