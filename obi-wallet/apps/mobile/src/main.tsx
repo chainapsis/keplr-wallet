@@ -7,6 +7,7 @@ import { APP_CENTER_DEPLOYMENT_KEY } from "react-native-dotenv";
 import { App } from "./app";
 import { initBackground } from "./background";
 import { initSentry } from "./background/sentry";
+
 const CodePushOptions = {
   deploymentKey: APP_CENTER_DEPLOYMENT_KEY,
   checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
