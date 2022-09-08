@@ -32,7 +32,7 @@ export function SettingsScreen() {
           marginTop: 61,
           flexDirection: "row",
           justifyContent: "space-between",
-          marginBottom: 10,
+          marginBottom: 40,
         }}
       >
         <View
@@ -65,7 +65,7 @@ export function SettingsScreen() {
               Profile picture, name and mail
             </Text>*/}
           </View>
-
+          {/*
           <TouchableOpacity
             style={{ flex: 1, justifyContent: "center", paddingLeft: 20 }}
           >
@@ -74,16 +74,17 @@ export function SettingsScreen() {
               style={styles.chevronRight}
             />
           </TouchableOpacity>
+          */}
         </View>
       </View>
       {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment
-      <Setting
-        Icon={AccountSettingsIcon}
-        title="Account settings"
-        subtitle="Manage accounts & sub-accounts "
-        onPress={() => navigation.navigate("AccountsSettings")}
-      />
-      */}
+          <Setting
+            Icon={AccountSettingsIcon}
+            title="Account settings"
+            subtitle="Manage accounts & sub-accounts "
+            onPress={() => navigation.navigate("AccountsSettings")}
+          />
+          */}
       <Setting
         Icon={MultiSigIcon}
         title="Multisig settings"
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   flex1: {
-    flex: 1,
+    flex: 0,
     marginBottom: 20,
   },
   text: {

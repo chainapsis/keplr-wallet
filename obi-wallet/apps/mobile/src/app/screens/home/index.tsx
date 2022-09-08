@@ -16,7 +16,10 @@ import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { useStore } from "../../stores";
-import { isSmallScreenNumber } from "../components/screen-size";
+import {
+  isSmallScreenNumber,
+  getScreenDimensions,
+} from "../components/screen-size";
 import { DappExplorer } from "../dapp-explorer";
 import { NFTs } from "../loop-web-apps/nfts";
 import { Trade } from "../loop-web-apps/trade";
@@ -82,9 +85,15 @@ export const TabNavigation = observer<TabNavigationProps>(
             backgroundColor: "#17162C",
             borderTopColor: "#1E1D33",
             borderTopWidth: 1,
-            paddingTop: isSmallScreenNumber(10, 15),
-            paddingBottom: isSmallScreenNumber(10, 30),
-            height: isSmallScreenNumber(65, 85),
+            paddingTop: isSmallScreenNumber(15, 15),
+            paddingBottom: isSmallScreenNumber(
+              getScreenDimensions().SCREEN_HEIGHT <= 667 ? 15 : 25,
+              27
+            ),
+            height: isSmallScreenNumber(
+              getScreenDimensions().SCREEN_HEIGHT <= 667 ? 70 : 82,
+              85
+            ),
           },
 
           headerShown: false,

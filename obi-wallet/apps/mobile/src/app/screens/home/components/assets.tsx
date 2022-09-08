@@ -26,6 +26,7 @@ import {
   isSmallScreenNumber,
   isSmallScreenSubstr,
 } from "../../components/screen-size";
+import ObiLogo from "../../settings/assets/obi-logo.svg";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
@@ -68,7 +69,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
   const navigation =
     useNavigation<DrawerNavigationProp<Record<string, object>>>();
 
-  const walletName = "dungeon_master";
+  const walletName = "My Obi Wallet";
 
   return (
     <View
@@ -154,10 +155,25 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
             {isSmallScreenSubstr(walletName, "...", 15, 18)}
           </Text>
         </View>
+        <TouchableOpacity
+          style={{
+            borderRadius: 17.5,
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <ObiLogo
+            style={{
+              width: 35,
+              height: 35,
+            }}
+          />
+        </TouchableOpacity>
+        {/*
         <Image
           source={require("../assets/backgroundblue.png")}
           style={{ width: 35, height: 35, borderRadius: 35 }}
         />
+        */}
       </View>
     </View>
   );
